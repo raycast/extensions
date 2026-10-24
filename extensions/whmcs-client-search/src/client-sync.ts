@@ -1,4 +1,14 @@
-import { showHUD, getPreferenceValues, environment, LaunchProps } from "@raycast/api";
+import {
+  showHUD,
+  showToast,
+  Toast,
+  Clipboard,
+  getPreferenceValues,
+  environment,
+  LaunchProps,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -35,6 +45,21 @@ type ClientSyncLaunchContext = {
   };
 };
 
+type WhmcsResponse = {
+  result?: string;
+  message?: string;
+  clients?: { client?: ApiClient[] };
+};
+
+// Strip markup and collapse whitespace so WAF/server error pages stay readable in a toast
+function summarizeBody(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 200);
+}
+
 async function whmcsApiRequest(prefs: Preferences, action: string, params: Record<string, string | number> = {}) {
   const body = new URLSearchParams({
     ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
@@ -46,17 +71,40 @@ async function whmcsApiRequest(prefs: Preferences, action: string, params: Recor
 
   const response = await fetch(prefs.whmcsApiUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      "User-Agent": "Raycast-WHMCS-Client-Search",
+    },
     body,
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
+  const text = await response.text();
+
+  let data: WhmcsResponse | undefined;
+  try {
+    data = JSON.parse(text) as WhmcsResponse;
+  } catch {
+    data = undefined;
   }
 
-  const data = await response.json();
+  if (!response.ok) {
+    const detail = data?.message ?? summarizeBody(text);
+    if (response.status === 403) {
+      throw new Error(
+        `403 Forbidden${detail ? ` — ${detail}` : ""}. ` +
+          `This usually means your IP isn't whitelisted in WHMCS (System Settings → General Settings → Security → API IP Access Restriction) ` +
+          `or a firewall/WAF in front of WHMCS blocked the request.`,
+      );
+    }
+    throw new Error(`HTTP error: ${response.status}${detail ? ` — ${detail}` : ""}`);
+  }
 
-  if (data?.result && String(data.result).toLowerCase() === "error") {
+  if (!data) {
+    throw new Error(`WHMCS returned a non-JSON response: ${summarizeBody(text) || "(empty body)"}`);
+  }
+
+  if (data.result && String(data.result).toLowerCase() === "error") {
     throw new Error(`WHMCS API Error: ${data.message ?? "Unknown"}`);
   }
 
@@ -122,6 +170,24 @@ export default async function main(props: LaunchProps<{ launchContext?: ClientSy
     );
   } catch (error) {
     console.error(error);
-    await showHUD(`Sync failed: ${String(error)}`);
+    const message = error instanceof Error ? error.message : String(error);
+    try {
+      // Surface the failure full-window instead of as a corner toast
+      await launchCommand({
+        name: "client-search",
+        type: LaunchType.UserInitiated,
+        context: { syncError: message },
+      });
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Client Sync Failed",
+        message,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => Clipboard.copy(message),
+        },
+      });
+    }
   }
 }

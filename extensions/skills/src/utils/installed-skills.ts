@@ -1,9 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 import { getGithubToken } from "../preferences";
 import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
+import { withSkillsCliLock } from "./skills-cli-runner";
 
 const LOCK_FILE = ".skill-lock.json";
 const AGENTS_DIR = ".agents";
@@ -28,15 +29,38 @@ async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
 }
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
-  const [skills, lockEntries] = await Promise.all([listInstalledSkills(), readSkillLock()]);
+  return (await getInstalledSkillsSnapshot()).skills;
+}
+
+async function getInstalledSkillsSnapshot(): Promise<{
+  skills: InstalledSkill[];
+  lockEntries: Record<string, SkillLockEntry>;
+}> {
+  return withSkillsCliLock(async (runLocked) => {
+    const skills = await listInstalledSkills(runLocked);
+    const lockEntries = await readSkillLock();
+    return { skills: mergeLockEntries(skills, lockEntries), lockEntries };
+  });
+}
+
+function tildifyPath(path: string): string {
+  const fromHome = relative(homedir(), path);
+  if (fromHome === "") return "~";
+  if (fromHome === ".." || fromHome.startsWith(`..${sep}`) || isAbsolute(fromHome)) return path;
+  return join("~", fromHome);
+}
+
+function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
     if (!lock) return skill;
+    // Local installs record the absolute directory path as both source and sourceUrl.
+    const isLocal = lock.sourceType === "local";
     return {
       ...skill,
-      source: lock.source,
+      source: isLocal ? tildifyPath(lock.source) : lock.source,
       sourceType: lock.sourceType,
-      sourceUrl: lock.sourceUrl ? stripGitSuffix(lock.sourceUrl) : undefined,
+      sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
       ref: lock.ref,
       installedAt: lock.installedAt,
       updatedAt: lock.updatedAt,
@@ -77,8 +101,7 @@ async function fetchRepoTree(source: string, token: string | undefined): Promise
  * Implemented against the GitHub Trees API rather than `npx skills check` because
  * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
  */
-export async function checkForUpdates(): Promise<string[]> {
-  const lock = await readSkillLock();
+async function checkForUpdates(lock: Record<string, SkillLockEntry>): Promise<string[]> {
   const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
 
   for (const [name, entry] of Object.entries(lock)) {
@@ -108,4 +131,11 @@ export async function checkForUpdates(): Promise<string[]> {
     }),
   );
   return results.flat();
+}
+
+export async function getInstalledSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
+  const { skills, lockEntries } = await getInstalledSkillsSnapshot();
+  const updatable = await checkForUpdates(lockEntries).catch((): string[] => []);
+  const updatableSet = new Set(updatable);
+  return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
 }

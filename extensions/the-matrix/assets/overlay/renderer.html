@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' 'unsafe-inline'"
+    />
+    <title>The Matrix</title>
+  </head>
+  <body>
+    <script>
+      const queryParams = new URLSearchParams(window.location.search);
+      const audioEnabled = queryParams.get("audio") !== "0";
+      const sessionStartedAt = performance.now();
+      let audioReadyPromise;
+
+      function loadMatrixAudio() {
+        if (!audioEnabled) {
+          return Promise.resolve(undefined);
+        }
+
+        if (window.matrixAudio) {
+          return Promise.resolve(window.matrixAudio);
+        }
+
+        if (!audioReadyPromise) {
+          audioReadyPromise = new Promise((resolve) => {
+            const script = document.createElement("script");
+
+            script.src = "./audio.js";
+            script.onload = () => resolve(window.matrixAudio);
+            script.onerror = () => resolve(undefined);
+            document.head.append(script);
+          });
+        }
+
+        return audioReadyPromise;
+      }
+
+      window.beginMatrixExit = function beginMatrixExit() {
+        if (audioEnabled) {
+          loadMatrixAudio().then((matrixAudio) => {
+            matrixAudio?.playExitSound?.(performance.now() - sessionStartedAt);
+          });
+        }
+      };
+
+      loadMatrixAudio().then((matrixAudio) => {
+        matrixAudio?.playEnterSound?.(audioEnabled);
+      });
+    </script>
+  </body>
+</html>

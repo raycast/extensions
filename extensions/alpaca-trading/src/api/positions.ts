@@ -50,7 +50,7 @@ export async function closePosition(position: Position, query?: string) {
     title: 'Open Orders',
     shortcut: { modifiers: ['ctrl'], key: 'o' },
     onAction: async () => {
-      await open('raycast://extensions/stelo/alpaca-trading/manage-orders');
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/stelo/alpaca-trading/manage-orders`);
       return true;
     },
   };

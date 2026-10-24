@@ -1,10 +1,13 @@
-import { Readability, isProbablyReaderable } from "@mozilla/readability";
+import { isProbablyReaderable, Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
-import { parseLog } from "./logger";
-import { preCleanHtml } from "./html-cleaner";
-import { MetadataExtractor } from "./metadata-extractor";
-import { getExtractor } from "../extractors";
 import { getSiteConfig } from "../config/site-config";
+import { getExtractor } from "../extractors";
+import { findPayloadArticles, PayloadArticle } from "./data-payload";
+import { preCleanHtml } from "./html-cleaner";
+import { parseLog } from "./logger";
+import { MetadataExtractor } from "./metadata-extractor";
+
+type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
 
 export interface ArticleContent {
   title: string;
@@ -20,6 +23,11 @@ export interface ArticleContent {
   image: string | null;
   description: string | null;
   favicon: string | null;
+  /**
+   * The article came from the page's data payload, which held well over what the page shows.
+   * The page's paywall markup then describes the teaser, not this text.
+   */
+  recoveredFromPayload?: boolean;
 }
 
 export interface ReadabilityError {
@@ -33,32 +41,126 @@ export interface ReadabilityOptions {
 }
 
 /**
- * Converts relative URLs in HTML to absolute URLs
+ * Rewrites relative img/a URLs to absolute ones, in place.
+ *
+ * Done on the DOM rather than by regex over the HTML string: linkedom does not
+ * fully resolve <base>, and the regex approach required an entire second copy of
+ * the document as a string just to hold the result.
  */
-function makeUrlsAbsolute(html: string, baseUrl: string): string {
-  const base = new URL(baseUrl);
+function makeUrlsAbsolute(document: LinkedomDocument, baseUrl: string): void {
+  const rewrite = (selector: string, attr: string) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      const value = el.getAttribute(attr);
+      if (!value) return;
 
-  // Convert relative src attributes in img tags
-  html = html.replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (match, prefix, url, suffix) => {
-    try {
-      const absoluteUrl = new URL(url, base).href;
-      return prefix + absoluteUrl + suffix;
-    } catch {
-      return match; // Keep original if URL parsing fails
+      try {
+        el.setAttribute(attr, new URL(value, baseUrl).href);
+      } catch {
+        // Leave unparseable URLs as they are
+      }
+    });
+  };
+
+  rewrite("img[src]", "src");
+  rewrite("a[href]", "href");
+}
+
+/** Generic article containers, tried in order when the site has no configured selector. */
+const FALLBACK_SELECTORS = [
+  ".post-content",
+  ".entry-content",
+  ".article-content",
+  ".content",
+  "article",
+  "main",
+  '[role="main"]',
+];
+
+/**
+ * The page's data payload replaces Readability's result when it holds this many times the text:
+ * the visible page is then a teaser, not the article.
+ */
+const PAYLOAD_PREFERENCE_RATIO = 1.5;
+
+/**
+ * How much of Readability's article a payload article must contain to replace it. A
+ * continuation of a teaser contains the teaser: all of it on The Atlantic's real capture. A
+ * comment quoting the article's opening contains one paragraph of it, which on a short article
+ * is a third.
+ */
+const MIN_CONTINUATION_SHARE = 0.5;
+
+/** Elements whose subtree is never text the page shows. */
+const UNSHOWN_ELEMENTS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "IFRAME"]);
+
+/**
+ * The text the page shows, in one walk over its text nodes, skipping hidden subtrees and the
+ * contents of scripts (which hold the payload itself). Not aria-hidden: a modal, the subscribe
+ * wall itself, marks the whole page behind it so.
+ */
+function shownText(document: LinkedomDocument): string {
+  const parts: string[] = [];
+  const stack: Node[] = document.body ? [document.body as unknown as Node] : [];
+  while (stack.length) {
+    const node = stack.pop()!;
+    if (node.nodeType === 3) {
+      parts.push(node.nodeValue ?? "");
+      continue;
     }
-  });
+    if (node.nodeType !== 1) continue;
+    const el = node as Element;
+    if (UNSHOWN_ELEMENTS.has(el.tagName.toUpperCase()) || el.hasAttribute("hidden")) continue;
+    for (let i = el.childNodes.length - 1; i >= 0; i--) stack.push(el.childNodes[i]);
+  }
+  return parts.join("");
+}
 
-  // Convert relative href attributes in a tags
-  html = html.replace(/(<a[^>]+href=["'])([^"']+)(["'])/gi, (match, prefix, url, suffix) => {
-    try {
-      const absoluteUrl = new URL(url, base).href;
-      return prefix + absoluteUrl + suffix;
-    } catch {
-      return match; // Keep original if URL parsing fails
+/** Minimum text for a generic container to be believable as the article. */
+const MIN_FALLBACK_TEXT_LENGTH = 200;
+
+interface FallbackContent {
+  selector: string;
+  content: string;
+  textContent: string;
+}
+
+/**
+ * Grabs the best direct-extraction candidate, for use if Readability comes back empty.
+ *
+ * Must be called BEFORE `Readability.parse()`, which strips the document it is given —
+ * afterward these selectors match nothing and the fallback can never fire.
+ */
+function captureFallbackContent(document: LinkedomDocument, url: string): FallbackContent | null {
+  // A site-configured selector is the best guess for that site, but it must still hold
+  // real text: the container often renders empty on a paywalled or JS-populated page, and
+  // returning that as a "successful" parse would suppress the browser-tab and Paywall
+  // Hopper recovery paths that could still get the actual article.
+  try {
+    const config = getSiteConfig(new URL(url).hostname);
+
+    if (config?.articleSelector) {
+      const el = document.querySelector(config.articleSelector);
+      const textContent = el?.textContent ?? "";
+
+      if (textContent.trim().length > MIN_FALLBACK_TEXT_LENGTH) {
+        return { selector: config.articleSelector, content: el?.innerHTML ?? "", textContent };
+      }
     }
-  });
+  } catch {
+    // Invalid URL — fall through to the generic containers
+  }
 
-  return html;
+  for (const selector of FALLBACK_SELECTORS) {
+    const el = document.querySelector(selector);
+    if (!el) continue;
+
+    const textContent = el.textContent ?? "";
+    if (textContent.trim().length > MIN_FALLBACK_TEXT_LENGTH) {
+      return { selector, content: el.innerHTML ?? "", textContent };
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -72,24 +174,24 @@ export function parseArticle(
   parseLog.log("parse:start", { url, htmlLength: html.length });
 
   try {
-    // Preprocess HTML to convert relative URLs to absolute URLs
-    // This is necessary because linkedom doesn't fully support base element URL resolution
-    const absoluteHtml = makeUrlsAbsolute(html, url);
+    // One DOM for the whole pipeline.
+    //
+    // This previously built three: one inside preCleanHtml, one by re-parsing its
+    // serialized output, and one by re-parsing the original HTML for metadata — all
+    // alive at once, alongside two full copies of the HTML string. A 1.9MB page cost
+    // ~104MB of heap and tripped Raycast's 100MB limit; a single DOM costs ~33MB.
+    //
+    // The order below is what makes one DOM sufficient: absolutize and read metadata
+    // first, then clean. Metadata lives in <head> (JSON-LD, meta tags, title, canonical),
+    // which the cleaner never touches, so nothing is lost by sharing the document.
+    const { document } = parseHTML(html);
 
-    // Pre-clean HTML to remove sidebars, ads, comments, subscription boxes, etc.
-    // Based on Safari Reader Mode and Reader View patterns
-    const cleaningResult = preCleanHtml(absoluteHtml, url);
+    makeUrlsAbsolute(document, url);
 
-    const { document } = parseHTML(cleaningResult.html);
+    const metadata = MetadataExtractor.extract(document, url);
 
-    // Extract rich metadata from Schema.org JSON-LD, OG tags, etc. BEFORE cleaning
-    // We use the original HTML to preserve metadata that might be removed during cleaning
-    const { document: originalDoc } = parseHTML(absoluteHtml);
-    const metadata = MetadataExtractor.extract(originalDoc, url);
-
-    // Check if we have a site-specific extractor for this URL
-    // Extractors provide custom content extraction for sites that don't work well with Readability
-    const extractor = getExtractor(originalDoc, url, metadata.schemaOrgData);
+    // Site-specific extractors run against the uncleaned document, as they did before.
+    const extractor = getExtractor(document, url, metadata.schemaOrgData);
     if (extractor) {
       parseLog.log("parse:extractor", { url, extractor: extractor.siteName });
 
@@ -130,12 +232,54 @@ export function parseArticle(
       }
     }
 
+    // Some pages show a teaser but ship the whole article in their Nuxt or Next.js data payload. Read it,
+    // and the article text the page shows, before cleaning, which can remove both.
+    const dataPayload = findPayloadArticles(document, url);
+    const pageText = dataPayload ? shownText(document) : "";
+    const fromPayload = (payload: PayloadArticle, reason: string) => {
+      const recoveredFromPayload = payload.textContent.length > payload.shownLength * PAYLOAD_PREFERENCE_RATIO;
+      parseLog.log("parse:data-payload", {
+        url,
+        reason,
+        textLength: payload.textContent.length,
+        recoveredFromPayload,
+        candidates: dataPayload?.candidates,
+      });
+      return {
+        success: true as const,
+        article: {
+          title: metadata.title || "Untitled",
+          content: payload.content,
+          textContent: payload.textContent,
+          excerpt: metadata.description || "",
+          byline: metadata.author || null,
+          siteName: metadata.siteName || null,
+          length: payload.textContent.length,
+          author: metadata.author || null,
+          published: metadata.published || null,
+          image: metadata.image || null,
+          description: metadata.description || null,
+          favicon: metadata.favicon || null,
+          recoveredFromPayload,
+        },
+      };
+    };
+    // When Readability can't read the page, the payload article must still share a paragraph with it.
+    const payloadForPage = () => dataPayload?.pick(pageText) ?? null;
+
+    // Strip sidebars, ads, comments, subscription boxes, and other non-article chrome.
+    // Mutates the document in place; only Readability sees the result, and site
+    // extractors have already returned above without needing it.
+    preCleanHtml(document, url);
+
     // Pre-check if content is likely readable
     if (!options.skipPreCheck) {
       const isReadable = isProbablyReaderable(document);
       parseLog.log("parse:precheck", { url, isReadable });
 
       if (!isReadable) {
+        const payload = payloadForPage();
+        if (payload) return fromPayload(payload, "not-readable");
         parseLog.warn("parse:skip", { url, reason: "content not readable" });
         return {
           success: false,
@@ -148,6 +292,11 @@ export function parseArticle(
       }
     }
 
+    // Readability CONSUMES the document: after parse() the body is stripped bare and
+    // every selector below would miss. Snapshot the fallback's candidate containers
+    // first, while the DOM still has content in it.
+    const fallbackContent = options.forceParse ? captureFallbackContent(document, url) : null;
+
     // Parse with Readability
     const reader = new Readability(document);
     const article = reader.parse();
@@ -155,93 +304,34 @@ export function parseArticle(
     if (!article || !article.content || article.content.trim().length === 0) {
       const reason = !article ? "Readability returned null" : "empty content";
       parseLog.warn("parse:readability-failed", { url, reason });
+      const payload = payloadForPage();
+      if (payload) return fromPayload(payload, "readability-failed");
 
-      // If forceParse is enabled, try direct extraction using site config articleSelector
-      if (options.forceParse) {
-        const hostname = new URL(url).hostname;
-        const config = getSiteConfig(hostname);
+      // Fall back to whatever we snapshotted before Readability emptied the document.
+      if (fallbackContent) {
+        parseLog.log("parse:force-extract:success", {
+          url,
+          selector: fallbackContent.selector,
+          contentLength: fallbackContent.content.length,
+        });
 
-        if (config?.articleSelector) {
-          parseLog.log("parse:force-extract", { url, selector: config.articleSelector });
-          const contentElement = document.querySelector(config.articleSelector);
-
-          if (contentElement) {
-            const content = contentElement.innerHTML || "";
-            const textContent = contentElement.textContent || "";
-
-            if (content.trim().length > 0) {
-              parseLog.log("parse:force-extract:success", {
-                url,
-                selector: config.articleSelector,
-                contentLength: content.length,
-              });
-
-              return {
-                success: true,
-                article: {
-                  title: metadata.title || "Untitled",
-                  content,
-                  textContent,
-                  excerpt: metadata.description || "",
-                  byline: null,
-                  siteName: metadata.siteName || null,
-                  length: textContent.length,
-                  author: metadata.author || null,
-                  published: metadata.published || null,
-                  image: metadata.image || null,
-                  description: metadata.description || null,
-                  favicon: metadata.favicon || null,
-                },
-              };
-            }
-          }
-        }
-
-        // Last resort: try to find any reasonable content container
-        parseLog.log("parse:force-extract:fallback", { url });
-        const fallbackSelectors = [
-          ".post-content",
-          ".entry-content",
-          ".article-content",
-          ".content",
-          "article",
-          "main",
-          '[role="main"]',
-        ];
-
-        for (const selector of fallbackSelectors) {
-          const el = document.querySelector(selector);
-          if (el) {
-            const content = el.innerHTML || "";
-            const textContent = el.textContent || "";
-
-            if (textContent.trim().length > 200) {
-              parseLog.log("parse:force-extract:fallback-success", {
-                url,
-                selector,
-                contentLength: content.length,
-              });
-
-              return {
-                success: true,
-                article: {
-                  title: metadata.title || "Untitled",
-                  content,
-                  textContent,
-                  excerpt: metadata.description || "",
-                  byline: null,
-                  siteName: metadata.siteName || null,
-                  length: textContent.length,
-                  author: metadata.author || null,
-                  published: metadata.published || null,
-                  image: metadata.image || null,
-                  description: metadata.description || null,
-                  favicon: metadata.favicon || null,
-                },
-              };
-            }
-          }
-        }
+        return {
+          success: true,
+          article: {
+            title: metadata.title || "Untitled",
+            content: fallbackContent.content,
+            textContent: fallbackContent.textContent,
+            excerpt: metadata.description || "",
+            byline: null,
+            siteName: metadata.siteName || null,
+            length: fallbackContent.textContent.length,
+            author: metadata.author || null,
+            published: metadata.published || null,
+            image: metadata.image || null,
+            description: metadata.description || null,
+            favicon: metadata.favicon || null,
+          },
+        };
       }
 
       parseLog.error("parse:error", { url, reason });
@@ -255,6 +345,17 @@ export function parseArticle(
     }
 
     const textContent = article.textContent || "";
+    // The payload replaces Readability's article only when it continues it: it contains a real
+    // share of what Readability found, and holds well over that much text.
+    const payload = dataPayload?.pick(textContent) ?? null;
+    const shown = textContent.trim().length;
+    if (
+      payload &&
+      payload.shownLength >= shown * MIN_CONTINUATION_SHARE &&
+      payload.textContent.length > shown * PAYLOAD_PREFERENCE_RATIO
+    ) {
+      return fromPayload(payload, "longer-than-page");
+    }
 
     parseLog.log("parse:success", {
       url,

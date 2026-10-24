@@ -1,215 +1,250 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  Color,
-  confirmAlert,
-  Alert,
-  open,
-  closeMainWindow,
-} from "@raycast/api";
-import { useState, useMemo } from "react";
-
-import { exec } from "child_process";
-import { promisify } from "util";
-import { getBrewPath } from "./utils/brew";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { VessloApp, VessloData } from "./types";
 import { useVessloData } from "./utils/useVessloData";
-import { runBrewUpgrade, runBrewUpgradeInTerminal } from "./utils/actions";
-import { hasValidTargetVersion } from "./utils/update-filter";
+import {
+  homebrewSelectionDriftReason,
+  resolveAppActions,
+  resolveBulkAction,
+} from "./utils/action-policy";
+import { openInVesslo } from "./utils/actions";
+import { countLabel, displayText } from "./utils/display-format";
+import { searchApps } from "./utils/search-filter";
+import { SharedAppListItem } from "./components/SharedAppListItem";
+import {
+  DataStateNotice,
+  ReloadDataAction,
+} from "./components/DataStateNotice";
+import { HomebrewRequestReview } from "./components/HomebrewRequestReview";
+import { TaggedApps } from "./browse-by-tag";
+import HandoffRequests from "./handoff-requests";
 
-const execAsync = promisify(exec);
-
+type Selection = { data: VessloData; apps: VessloApp[] };
 export default function BulkHomebrewUpdate() {
-  const { data, isLoading } = useVessloData();
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const homebrewAppsWithUpdates = useMemo(() => {
-    if (!data) return [];
-    return data.apps.filter(
-      (app) =>
-        app.sources.includes("Brew") &&
-        hasValidTargetVersion(app.targetVersion) &&
-        app.homebrewCask,
-    );
-  }, [data]);
-
-  // Update All via Vesslo deep link (recommended)
-  async function updateAllViaVesslo() {
-    if (homebrewAppsWithUpdates.length === 0) return;
-
-    await closeMainWindow();
-    await open("vesslo://update-all");
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Opening Vesslo",
-      message: "Batch update started in Vesslo",
-    });
-  }
-
-  // Quick Update All directly in Raycast (alternative)
-  async function updateAllDirect() {
-    if (homebrewAppsWithUpdates.length === 0) return;
-
-    const confirmed = await confirmAlert({
-      title: "Update All Homebrew Apps",
-      message: `This will update ${homebrewAppsWithUpdates.length} apps using Homebrew. Continue?`,
-      primaryAction: { title: "Update All", style: Alert.ActionStyle.Default },
-      dismissAction: { title: "Cancel" },
-    });
-
-    if (!confirmed) return;
-
-    setIsUpdating(true);
-
-    try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Updating all Homebrew apps...",
-        message: `${homebrewAppsWithUpdates.length} apps`,
-      });
-
-      const brewPath = getBrewPath();
-      const { stdout } = await execAsync(`${brewPath} upgrade --cask`, {
-        maxBuffer: 1024 * 1024 * 50,
-      });
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "All apps updated!",
-        message: stdout?.slice(0, 100) || "Update complete",
-      });
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message.slice(0, 100) : "Unknown error";
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Update failed",
-        message: errorMessage,
-      });
-    } finally {
-      setIsUpdating(false);
+  const { data, isLoading, state, refresh } = useVessloData();
+  const [searchText, setSearchText] = useState("");
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const bulk = resolveBulkAction(data?.apps ?? [], state);
+  const visible = useMemo(
+    () => searchApps(bulk.candidates, searchText).map((result) => result.app),
+    [data, searchText],
+  );
+  const selected = selection?.apps ?? [];
+  const selectionChanged = selection
+    ? data
+      ? homebrewSelectionDriftReason(
+          selection.data,
+          data,
+          selected,
+          state.pathAvailability,
+        )
+      : "The current Vesslo export is unavailable. Reload before reviewing."
+    : null;
+  const hasReviewableTargets =
+    bulk.canSelect &&
+    !selectionChanged &&
+    (selected.length > 0 ||
+      visible.some(
+        (app) => resolveAppActions(app, state).update.kind === "homebrewReview",
+      ));
+  const toggle = (app: VessloApp) => {
+    setSelectionError(null);
+    if (selected.some((item) => item.id === app.id)) {
+      const remaining = selected.filter((item) => item.id !== app.id);
+      setSelection(
+        remaining.length && selection
+          ? { ...selection, apps: remaining }
+          : null,
+      );
+    } else if (selectionChanged) {
+      setSelectionError(selectionChanged);
+    } else if (selected.length >= 16) {
+      setSelectionError("One review request can contain at most 16 apps.");
+    } else if (
+      data &&
+      resolveAppActions(app, state).update.kind === "homebrewReview"
+    ) {
+      setSelection({ data: selection?.data ?? data, apps: [...selected, app] });
     }
-  }
-
-  // Update single app via Vesslo deep link (default)
-  async function updateSingleViaVesslo(bundleId: string, appName: string) {
-    await closeMainWindow();
-    await open(`vesslo://update/${bundleId}`);
-    await showToast({
-      style: Toast.Style.Success,
-      title: `Opening Vesslo`,
-      message: `Updating ${appName}...`,
-    });
-  }
-
-  return (
-    <List isLoading={isLoading || isUpdating}>
-      {!data ? (
-        <List.EmptyView
-          icon={Icon.Warning}
-          title="Vesslo data not found"
-          description="Please run Vesslo app to export data"
-        />
-      ) : homebrewAppsWithUpdates.length === 0 ? (
-        <List.EmptyView
-          icon={Icon.CheckCircle}
-          title="All Homebrew apps are up to date!"
-          description="No Homebrew updates available"
-        />
-      ) : (
-        <>
-          <List.Section
-            title={`Homebrew Updates (${homebrewAppsWithUpdates.length})`}
-          >
-            {/* Update All item */}
-            <List.Item
-              icon={{ source: Icon.ArrowDown, tintColor: Color.Green }}
-              title="Update All Homebrew Apps"
-              subtitle={`${homebrewAppsWithUpdates.length} apps`}
-              accessories={[{ tag: { value: "BULK", color: Color.Green } }]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section title="Recommended">
-                    <Action
-                      title="Update All in Vesslo"
-                      icon={Icon.Download}
-                      onAction={updateAllViaVesslo}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Alternative">
-                    <Action
-                      title="Quick Update All (Direct)"
-                      icon={Icon.ArrowDown}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                      onAction={updateAllDirect}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
+  };
+  const reviewText = [
+    "Homebrew candidates exported by Vesslo — review list only",
+    ...visible.map(
+      (app) =>
+        `${displayText(app.name)} | ${displayText(app.version)} → ${displayText(app.targetVersion)} | cask: ${displayText(app.homebrewCask)} | Bundle ID: ${displayText(app.bundleId)} | path: ${displayText(app.path)}`,
+    ),
+  ].join("\n");
+  const reviewActions = (
+    <>
+      {selection &&
+        !selectionChanged &&
+        bulk.canSelect &&
+        selected.length > 0 && (
+          <Action.Push
+            title={`Review ${countLabel(selected.length)} in Vesslo`}
+            icon={Icon.CheckList}
+            target={
+              <HomebrewRequestReview data={selection.data} apps={selected} />
+            }
+          />
+        )}
+      {bulk.canSelect &&
+        visible.length > 0 &&
+        visible.length <= 16 &&
+        visible.every(
+          (app) =>
+            resolveAppActions(app, state).update.kind === "homebrewReview",
+        ) && (
+          <Action
+            title="Select Matching Apps"
+            icon={Icon.CheckCircle}
+            onAction={() => {
+              if (data) {
+                setSelection({ data, apps: [...visible] });
+                setSelectionError(null);
               }
-            />
-          </List.Section>
-          <List.Section title="Individual Apps">
-            {homebrewAppsWithUpdates.map((app) => (
-              <List.Item
+            }}
+          />
+        )}
+      {selection && (
+        <Action
+          title="Clear Selection"
+          icon={Icon.XMarkCircle}
+          onAction={() => {
+            setSelection(null);
+            setSelectionError(null);
+          }}
+        />
+      )}
+      <Action.Push
+        title="View Homebrew Requests"
+        icon={Icon.List}
+        target={<HandoffRequests />}
+      />
+      <Action
+        title="Open Vesslo"
+        icon={Icon.AppWindow}
+        onAction={() => openInVesslo()}
+      />
+      {visible.length > 0 && (
+        <Action.CopyToClipboard
+          title="Copy Matching Review List"
+          content={reviewText}
+        />
+      )}
+      <Action
+        title={isShowingDetail ? "Hide Update Details" : "Show Update Details"}
+        icon={isShowingDetail ? Icon.EyeDisabled : Icon.Sidebar}
+        shortcut={{ modifiers: ["cmd"], key: "i" }}
+        onAction={() => setIsShowingDetail((value) => !value)}
+      />
+    </>
+  );
+  return (
+    <List
+      isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Homebrew candidates…"
+    >
+      <DataStateNotice state={state} refresh={refresh} />
+      <List.Section title="Homebrew Review">
+        <List.Item
+          id="vesslo-homebrew-review"
+          icon={Icon.CheckList}
+          title={`${selected.length} selected`}
+          subtitle={displayText(
+            selectionError ??
+              (selectionChanged ? selectionChanged : "Select up to 16 apps"),
+          )}
+          accessories={[
+            {
+              text: hasReviewableTargets ? "Review in Vesslo" : "Review only",
+              icon: {
+                source: hasReviewableTargets ? Icon.CheckList : Icon.Info,
+                tintColor: hasReviewableTargets
+                  ? Color.SecondaryText
+                  : Color.Orange,
+              },
+              tooltip:
+                selectionError ??
+                selectionChanged ??
+                bulk.reason ??
+                "Vesslo asks for confirmation before updating.",
+            },
+          ]}
+          detail={
+            <List.Item.Detail markdown="Select up to 16 exact Homebrew targets, then review your selection. Vesslo asks for confirmation before updating.\n\nSearch filters do not change your selection. Sending rechecks the current export and every selected identity. Changed targets must be selected again.\n\nURL opening is not acceptance or completion. View Homebrew Requests shows the app’s authoritative receipts." />
+          }
+          actions={
+            <ActionPanel>
+              {reviewActions}
+              <ReloadDataAction refresh={refresh} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      {visible.length > 0 ? (
+        <List.Section
+          title="Homebrew candidates"
+          subtitle={
+            visible.length === bulk.candidates.length
+              ? countLabel(visible.length)
+              : `${visible.length} of ${countLabel(bulk.candidates.length)}`
+          }
+        >
+          {visible.map((app) => {
+            const isSelected = selected.some((item) => item.id === app.id);
+            const selectable =
+              resolveAppActions(app, state).update.kind === "homebrewReview";
+            return (
+              <SharedAppListItem
                 key={app.id}
-                icon={
-                  app.icon
-                    ? { source: `data:image/png;base64,${app.icon}` }
-                    : Icon.AppWindow
+                app={app}
+                state={state}
+                showUpdateDetails
+                presentation="homebrew"
+                onRefresh={refresh}
+                selectedForReview={isSelected}
+                leadingActions={
+                  isSelected || selectable ? (
+                    <Action
+                      title={
+                        isSelected
+                          ? "Remove from Selection"
+                          : "Select for Review"
+                      }
+                      icon={isSelected ? Icon.MinusCircle : Icon.PlusCircle}
+                      onAction={() => toggle(app)}
+                    />
+                  ) : undefined
                 }
-                title={app.name}
-                subtitle={app.developer ?? ""}
-                accessories={[
-                  { text: `${app.version} → ${app.targetVersion}` },
-                  { tag: { value: "brew", color: Color.Orange } },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title="Recommended">
-                      {app.bundleId && (
-                        <Action
-                          title="Update in Vesslo"
-                          icon={Icon.Download}
-                          onAction={() =>
-                            updateSingleViaVesslo(app.bundleId!, app.name)
-                          }
-                        />
-                      )}
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Alternative">
-                      <Action
-                        title="Quick Update (Direct)"
-                        icon={Icon.ArrowDown}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                        onAction={() =>
-                          runBrewUpgrade(app.homebrewCask!, app.name)
-                        }
-                      />
-                      <Action
-                        title="Update Via Terminal"
-                        icon={Icon.Terminal}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                        onAction={() =>
-                          runBrewUpgradeInTerminal(app.homebrewCask!)
-                        }
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Bulk">
-                      <Action
-                        title="Update All in Vesslo"
-                        icon={Icon.Download}
-                        onAction={updateAllViaVesslo}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
+                tagNavigation={(tag) => <TaggedApps tag={tag} />}
+                extraActions={reviewActions}
               />
-            ))}
-          </List.Section>
-        </>
+            );
+          })}
+        </List.Section>
+      ) : (
+        <List.Item
+          id="vesslo-homebrew-empty"
+          icon={Icon.MagnifyingGlass}
+          title={
+            searchText
+              ? "No Matching Homebrew Candidates"
+              : "No Homebrew Candidates in This Export"
+          }
+          actions={
+            <ActionPanel>
+              {reviewActions}
+              <ReloadDataAction refresh={refresh} />
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );

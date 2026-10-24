@@ -1,4 +1,3 @@
-import fs from "fs";
 import {
   Action,
   ActionPanel,
@@ -12,34 +11,30 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import {
-  buildWallpaperMarkdown,
-  downloadWallpaper,
-  getThumbnailUrl,
-  setDesktopWallpaper,
-} from "./utils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DownloadWallpaperAction, SetWallpaperAction } from "./actions";
+import { buildWallpaperMarkdown, getThumbnailUrl } from "./utils";
 import {
   clearWallpaperHistory,
   deleteWallpaperHistoryEntry,
   readWallpaperHistory,
+  getExistingHistoryDownloadPath,
   WallpaperHistoryEntry,
+  WallpaperHistoryItem,
 } from "./history-store";
 
 const HISTORY_LIMIT = 500;
 
-type HistoryListEntry = WallpaperHistoryEntry & {
-  downloadFileExists: boolean;
-};
+type HistoryListEntry = WallpaperHistoryItem;
 
 async function loadHistory() {
-  await new Promise<void>((resolve) => setTimeout(resolve, 0));
-  return readWallpaperHistory({ limit: HISTORY_LIMIT }).map((entry) => ({
-    ...entry,
-    downloadFileExists: entry.downloadPath
-      ? fs.existsSync(entry.downloadPath)
-      : false,
-  }));
+  const entries = await readWallpaperHistory({ limit: HISTORY_LIMIT });
+  return Promise.all(
+    entries.map(async (entry) => ({
+      ...entry,
+      downloadPath: await getExistingHistoryDownloadPath(entry),
+    })),
+  );
 }
 
 function formatTimestamp(timestamp: string) {
@@ -69,14 +64,21 @@ function getArtworkUrl(entry: WallpaperHistoryEntry) {
   );
 }
 
-function buildHistoryMarkdown(entry: WallpaperHistoryEntry) {
+function buildHistoryMarkdown(entry: WallpaperHistoryItem) {
   return buildWallpaperMarkdown(
     entry.wallpaper,
     `
 
 ---
 
-**${formatEventType(entry)}** on ${formatTimestamp(entry.timestamp)}
+### History
+
+${entry.events
+  .map(
+    (event) =>
+      `- **${formatEventType(event)}** on ${formatTimestamp(event.timestamp)}`,
+  )
+  .join("\n")}
 `,
   );
 }
@@ -90,49 +92,9 @@ function HistoryActions(props: {
 
   return (
     <ActionPanel>
-      <Action
-        title="Set Desktop Wallpaper"
-        icon={Icon.Desktop}
-        onAction={async () => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Setting wallpaper...",
-          });
-          try {
-            await setDesktopWallpaper(entry.wallpaper);
-            toast.style = Toast.Style.Success;
-            toast.title = "Wallpaper set successfully";
-          } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Failed to set wallpaper";
-            toast.message =
-              error instanceof Error ? error.message : String(error);
-          }
-        }}
-      />
+      <SetWallpaperAction wallpaper={entry.wallpaper} />
       <ActionPanel.Section>
-        <Action
-          title="Download Wallpaper"
-          icon={Icon.Download}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={async () => {
-            const toast = await showToast({
-              style: Toast.Style.Animated,
-              title: "Downloading...",
-            });
-            try {
-              const downloadPath = await downloadWallpaper(entry.wallpaper);
-              toast.style = Toast.Style.Success;
-              toast.title = "Wallpaper downloaded";
-              toast.message = `Saved to ${downloadPath}`;
-            } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Download failed";
-              toast.message =
-                error instanceof Error ? error.message : String(error);
-            }
-          }}
-        />
+        <DownloadWallpaperAction wallpaper={entry.wallpaper} />
         <Action.OpenInBrowser
           title="Open Artwork Page"
           url={getArtworkUrl(entry)}
@@ -143,7 +105,7 @@ function HistoryActions(props: {
           icon={Icon.Folder}
           target={environment.supportPath}
         />
-        {entry.downloadFileExists && entry.downloadPath ? (
+        {entry.downloadPath ? (
           <Action.ShowInFinder
             title="Show Download in Finder"
             path={entry.downloadPath}
@@ -231,34 +193,25 @@ export default function Command() {
   const [history, setHistory] = useState<HistoryListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function refreshHistory() {
+  const loadRequest = useRef(0);
+
+  const refreshHistory = useCallback(async () => {
+    const request = ++loadRequest.current;
     setIsLoading(true);
     try {
       const entries = await loadHistory();
-      setHistory(entries);
+      if (request === loadRequest.current) setHistory(entries);
     } finally {
-      setIsLoading(false);
+      if (request === loadRequest.current) setIsLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function load() {
-      try {
-        const entries = await loadHistory();
-        if (isMounted) setHistory(entries);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
-
-    load();
-
+    refreshHistory();
     return () => {
-      isMounted = false;
+      loadRequest.current++;
     };
-  }, []);
+  }, [refreshHistory]);
 
   return (
     <List
@@ -285,7 +238,7 @@ export default function Command() {
                 entry.wallpaper.name,
                 entry.wallpaper.artist,
                 entry.wallpaper.creationDate,
-                entry.eventType,
+                ...new Set(entry.events.map((event) => event.eventType)),
               ]}
               icon={{
                 source: getThumbnailUrl(entry.wallpaper.url, { width: 100 }),

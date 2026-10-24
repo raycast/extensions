@@ -1,5 +1,22 @@
 # Groq Changelog
 
+## [Fix Crash on Launch] - 2026-10-14
+
+- Fix every command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7, which no longer self-references `_shims`
+
+## [Raycast Model Provider] - 2026-09-24
+
+- Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.
+
+## [Updated Models] - 2026-09-01
+
+- Added `Qwen 3.8 27B 131k`
+
+## [Updated Models] - 2026-07-12
+
+- Added `Qwen 3.6 27B 131k`
+- Removed deprecated `Llama 3.1 8B 128k`, `Llama 3.3 70B 128k`, `Qwen 3 32B 128k`, `Llama 4 Scout 131k`, and `Llama 4 Maverick 131k`
+
 ## [Updated Models] - 2026-04-20
 
 - Removed deprecated `Kimi K2 0905 263k` from model selections and pricing metadata

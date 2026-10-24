@@ -1,7 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function getEnv() {
-  const { environmentPath } = getPreferenceValues<Preferences.CmdConnect>();
+  const { environmentPath } = getPreferenceValues<
+    | Preferences.CmdConnect
+    | Preferences.CmdConnectWindow
+    | Preferences.CmdSearch
+    | Preferences.CmdConnectBrowserWorktree
+  >();
 
   const patchedWithoutDuplicates = new Set([
     ...(process.env.PATH?.split(":") ?? []),
@@ -12,6 +17,8 @@ export function getEnv() {
 
   const env = Object.assign({}, process.env, {
     PATH: pathString,
+    LANG: "en_US.UTF-8",
+    LC_ALL: "en_US.UTF-8",
   });
 
   return env;

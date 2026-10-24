@@ -1,5 +1,9 @@
 # Ghostty Changelog
 
+## [Fix new window opening on the wrong workspace] - 2026-09-10
+
+- Fixed "New Window" activating an existing window before creating the new one, which caused window managers (OmniWM, yabai, aerospace, etc.) to switch to the workspace of the existing window. The new window now opens on the current workspace.
+
 ## [Edit Ghostty Config] - 2026-03-25
 
 - Add new command to view and edit the Ghostty configuration file (`~/.config/ghostty/config`)

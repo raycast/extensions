@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, useNavigation, Alert } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, useNavigation, Alert, Keyboard } from "@raycast/api";
 import { Submodule } from "../../types";
 import { RepositoryContext, NavigationContext } from "../../open-repository";
 import { useState } from "react";
@@ -15,7 +15,7 @@ export function SubmoduleAddAction(context: RepositoryContext & NavigationContex
       title="Add New Submodule"
       icon={Icon.Plus}
       target={<AddSubmoduleForm {...context} />}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
     />
   );
 }

@@ -5,7 +5,7 @@ import { executeReaction } from "./executeReaction";
 // File and Command Constants
 export const SOUND_FILE_NAME = "mixkit-happy-crowd-cheer-975.wav";
 export const COMMAND_PLAY_SOUND = `afplay "${environment.assetsPath}/${SOUND_FILE_NAME}"`;
-export const COMMAND_LAUNCH_CONFFETI = "raycast://confetti";
+export const COMMAND_LAUNCH_CONFFETI = `${process.env.RAYCAST_SCHEME ?? "raycast"}://confetti`;
 
 // Reaction Constants
 export const REACTION_CONFETTI = "Confetti 🎉";

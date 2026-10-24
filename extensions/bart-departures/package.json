@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bart-departures",
+  "version": "1.0.0",
+  "title": "BART Departures",
+  "description": "View real-time BART departures for a selected station",
+  "icon": "bart.png",
+  "author": "drewkiimon",
+  "access": "public",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "BART API Key",
+      "description": "Optional. Uses a shared default key if left blank. Request your own at bart.gov/schedules/developers/api",
+      "placeholder": "Override the default BART API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "BART Departures",
+      "description": "View real-time departures for a BART station",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "lodash": "^4.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^26.2.0",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "react": "19.0.0",
+    "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}

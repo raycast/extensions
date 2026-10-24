@@ -12,10 +12,16 @@
     "aeorge",
     "hayden_barnes",
     "micha_van_eijk",
-    "islamtayeb"
+    "islamtayeb",
+    "janosorcsik",
+    "0xdhrv"
   ],
   "keywords": [
-    "2fa"
+    "2fa",
+    "sms",
+    "imessage",
+    "messages",
+    "chat"
   ],
   "license": "MIT",
   "preferences": [
@@ -94,7 +100,7 @@
     {
       "name": "search-chats",
       "title": "Search Chats",
-      "description": "Search for a chat in your chats list"
+      "description": "Search existing chats and messageable contacts"
     },
     {
       "name": "send-message",
@@ -105,10 +111,15 @@
       "name": "search-latest-messages",
       "title": "Search Latest Messages",
       "description": "Search your latest messages from the Apple Messages app"
+    },
+    {
+      "name": "count-message-activity",
+      "title": "Count Message Activity",
+      "description": "Count sent and received Messages activity over time"
     }
   ],
   "ai": {
-    "instructions": "- Always use the search-chats tool first when sending messages.\\nIMPORTANT: Retrieve the last 5–10 messages using the \"search-latest-messages\" tool for context, then craft your response as a seamless continuation of the conversation, reflecting the user's style and discussion flow.\\n- The user can search for a chat by a group name, so don't actually search for the word \"group\".\\n- If you get an error when accessing the chat database, tell the user he needs to give Raycast the full disk access permission in the system settings in detailed steps. If no contacts were found, simply tell the user you haven't found the contact without mentioning the error.\\n- Use the chat_identifier property when searching for the latest messages in a group, not the guid.",
+    "instructions": "You are a Messages assistant. Help the user read, summarize, search, analyze, and send iMessage, SMS, and RCS messages.\n\nTOOL USAGE:\n- search-chats: find existing conversations and messageable Contacts by name, address, recency, date, or unread state. When a person or group is named, call this first. Prefer chatGuid for an existing chat. A contact result has no chatGuid; use its chatIdentifier and service \"auto\" when sending a new direct conversation. The user can search by group name; do not search for the literal word \"group\".\n- search-latest-messages: read or search message history. Pass chatGuid to scope one conversation. Only pass searchText when the user explicitly requests keywords. Use from/to for date questions and unreadOnly for unread requests. Results are chronological. If nextCursor is present and more context is needed, call the tool again with the same filters and that cursor.\n- count-message-activity: answer questions about message volume, sent/received counts, trends, or most active chats. Use overall for combined totals and chat for ranked conversations. Resolve named chats with search-chats first, then pass chatGuids. Follow nextCursor for additional ranked chat pages.\n- send-message: send a clear message. Resolve existing chats with search-chats first and pass chat_guid. For a contact without an existing chat, pass chat_identifier and service_name \"auto\". The user approves the recipient and text through Raycast before sending. For simple sends with clear wording, do not read message history first.\n\nDATA FORMAT:\n- sender \"You\" means the current user.\n- attachments contains metadata only, never attachment contents.\n- replyingTo is included only when reply context is available.\n\nBEHAVIOR:\n- Present messages in chronological order.\n- Summaries should focus on topics, tone, decisions, and next actions rather than metadata.\n- Fetch additional pages only when the question needs more context.\n- If database access fails, explain how to grant Raycast Full Disk Access in System Settings → Privacy & Security → Full Disk Access.\n- Be concise and do not repeat raw private message data unless explicitly asked.",
     "evals": [
       {
         "input": "@messages Ask John to call me",
@@ -220,81 +231,34 @@
           ],
           "search-latest-messages": [
             {
-              "body": "Are you serious? This is crazy!",
-              "senderName": "Thomas",
-              "is_sent": false,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2025-01-23T09:31:41.000Z",
-              "date": "2025-01-23T09:25:10.000Z",
-              "display_name": "Thomas",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "38989E42-A75D-4013-B067-1405290AC54D",
-              "is_read": true
-            },
-            {
-              "body": "You've got to do something about this.",
-              "senderName": "Emily",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:22:49.000Z",
-              "display_name": "Emily",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "915D6A56-B47C-4CD6-8021-B5421605FCC4",
-              "is_read": true
-            },
-            {
-              "body": "I can't believe it.",
-              "senderName": "Emily",
-              "attachment_filename": null,
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "attachment_name": null,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:21:50.000Z",
-              "display_name": "Mary",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "0251910D-3777-4673-8DE8-6C1EF293F239",
-              "is_read": true
-            },
-            {
-              "body": "I didn't see the first season",
-              "senderName": "John",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
-              "date": "2025-01-23T09:21:49.000Z",
-              "display_name": "John",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "45929EDF-BEC3-4B5D-8F4B-6EB449C1AE1F",
-              "is_read": true
-            },
-            {
-              "body": "Can't wait for next episode of Severance season 2!",
-              "senderName": "Thomas",
-              "is_sent": true,
-              "is_audio_message": false,
-              "is_from_me": false,
-              "group_name": "Friends",
-              "date_read": "2001-01-01T00:00:00.000Z",
+              "sender": "Thomas",
               "date": "2025-01-23T09:21:22.000Z",
-              "display_name": "John",
-              "service": "iMessage",
-              "is_group": 1,
-              "guid": "A03A0263-D677-4684-9885-B44292BD6F64",
-              "is_read": true
+              "text": "Can't wait for next episode of Severance season 2!",
+              "group": "Friends"
+            },
+            {
+              "sender": "John",
+              "date": "2025-01-23T09:21:49.000Z",
+              "text": "I didn't see the first season",
+              "group": "Friends"
+            },
+            {
+              "sender": "Emily",
+              "date": "2025-01-23T09:21:50.000Z",
+              "text": "I can't believe it.",
+              "group": "Friends"
+            },
+            {
+              "sender": "Emily",
+              "date": "2025-01-23T09:22:49.000Z",
+              "text": "You've got to do something about this.",
+              "group": "Friends"
+            },
+            {
+              "sender": "Thomas",
+              "date": "2025-01-23T09:25:10.000Z",
+              "text": "Are you serious? This is crazy!",
+              "group": "Friends"
             }
           ]
         },
@@ -305,7 +269,6 @@
           {
             "callsTool": {
               "arguments": {
-                "searchText": "",
                 "chatIdentifier": "chat778648822228943635"
               },
               "name": "search-latest-messages"
@@ -344,9 +307,9 @@
           ],
           "search-latest-messages": [
             {
-              "sender": "Emili",
-              "senderName": "Emily",
-              "body": "Hey, would you like to join me for dinner tonight?"
+              "sender": "Emily",
+              "date": "2025-01-23T09:00:00.000Z",
+              "text": "Hey, would you like to join me for dinner tonight?"
             }
           ],
           "send-message": "Message sent"
@@ -354,6 +317,14 @@
         "expected": [
           {
             "callsTool": "search-chats"
+          },
+          {
+            "callsTool": {
+              "name": "search-latest-messages",
+              "arguments": {
+                "chatIdentifier": "+1234567890"
+              }
+            }
           },
           {
             "callsTool": {
@@ -369,27 +340,57 @@
             "meetsCriteria": "The answer declines the invitation politely"
           }
         ]
+      },
+      {
+        "input": "@messages How many messages did I send and receive this month?",
+        "mocks": {
+          "count-message-activity": {
+            "breakdown": "overall",
+            "range": {
+              "from": "2026-08-01T00:00:00.000Z",
+              "to": "2026-09-01T00:00:00.000Z"
+            },
+            "interval": "month",
+            "timeZone": "Asia/Kolkata",
+            "buckets": [
+              {
+                "bucket": "2026-08",
+                "total": 42,
+                "sent": 17,
+                "received": 25
+              }
+            ],
+            "totals": {
+              "total": 42,
+              "sent": 17,
+              "received": 25
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "count-message-activity"
+          },
+          {
+            "meetsCriteria": "The answer says 17 messages were sent and 25 were received"
+          }
+        ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.18.0",
-    "date-fns": "^4.1.0",
-    "libphonenumber-js": "^1.11.9"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "date-fns": "^4.4.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.7.4",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.1",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

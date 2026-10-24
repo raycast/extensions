@@ -1,0 +1,1253 @@
+import { execFile } from "node:child_process";
+import { constants } from "node:fs";
+import {
+  access,
+  chmod,
+  copyFile,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  unlink,
+  writeFile,
+} from "node:fs/promises";
+import { homedir } from "node:os";
+import { basename, extname, join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
+
+export const supportDirectory = join(homedir(), ".git-commit-sounds");
+export const hooksDirectory = join(supportDirectory, "hooks");
+export const hookPath = join(hooksDirectory, "post-commit");
+export const configPath = join(supportDirectory, "config");
+const configLockPath = join(supportDirectory, "config.lock");
+const configLockRecoveryPath = join(configLockPath, "recovery");
+const configLockOwnerPath = join(configLockPath, "owner");
+export const soundsDirectory = join(supportDirectory, "sounds");
+const windowsPlayerPath = join(supportDirectory, "play-sound.ps1");
+
+const supportedAudioExtensions = new Set([
+  ".aac",
+  ".aiff",
+  ".m4a",
+  ".mp3",
+  ".wav",
+]);
+const maximumDownloadBytes = 20 * 1024 * 1024;
+const configLockTimeoutMs = 10_000;
+
+export type CommitSoundAccount = {
+  id: string;
+  owner: string;
+  soundPath: string;
+  source: string;
+  volume: number;
+  managed: boolean;
+};
+
+export type CommitSoundAuthor = {
+  id: string;
+  name: string;
+  email: string;
+  soundPath: string;
+  source: string;
+  volume: number;
+  managed: boolean;
+};
+
+export type AuthorPlaybackMode = "anyone" | "selected";
+
+export type ConnectedGitHubAccount = {
+  login: string;
+  tokenSlot: string;
+  /** Failed local-token cleanup remains reachable until it can be retried. */
+  retiredTokenSlots: string[];
+};
+
+export type RemovedGitHubAccount = {
+  account: ConnectedGitHubAccount;
+  wasDefault: boolean;
+};
+
+export type CommitSoundsConfig = {
+  enabled: boolean;
+  /** The selected login used to prefill new sound rules. */
+  connectedGitHubAccount?: string;
+  /** OAuth identities stored by Commit Sounds. Sound rules do not require one. */
+  connectedGitHubAccounts: ConnectedGitHubAccount[];
+  accounts: CommitSoundAccount[];
+  /** Controls which local commit authors can trigger a matching owner rule. */
+  authorPlaybackMode: AuthorPlaybackMode;
+  selectedAuthorEmails: string[];
+  /** Minimum interval between sounds, preventing rapid commit overlap. */
+  playbackCooldownSeconds: number;
+  /** Optional sound overrides for a specific Git author email. */
+  authorSounds: CommitSoundAuthor[];
+};
+
+export type InstallationState = {
+  config: CommitSoundsConfig;
+  hookInstalled: boolean;
+  ownsGlobalHooksPath: boolean;
+  conflictingHookPath?: string;
+  missingSoundIds: string[];
+  defaultAuthorEmail?: string;
+};
+
+const hookContents = `#!/bin/sh
+# Managed by the Commit Sounds Raycast extension.
+config_path="$HOME/.git-commit-sounds/config"
+
+[ -r "$config_path" ] || exit 0
+enabled="$(sed -n 's/^enabled=//p' "$config_path" | head -n 1)"
+[ "$enabled" = "true" ] || exit 0
+
+remote_url="$(git config --get remote.origin.url 2>/dev/null || true)"
+github_owner="$(printf '%s' "$remote_url" | sed -nE 's#.*github\\.com[:/]([^/]+)/.*#\\1#p' | tr '[:upper:]' '[:lower:]')"
+[ -n "$github_owner" ] || exit 0
+
+author_email="$(git log -1 --format=%ae 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+author_mode="$(sed -n 's/^author_playback_mode=//p' "$config_path" | head -n 1)"
+if [ "$author_mode" = "selected" ]; then
+  selected_author_count="$(sed -n 's/^selected_author_count=//p' "$config_path" | head -n 1)"
+  case "$selected_author_count" in ''|*[!0-9]*) exit 0 ;; esac
+  selected=false
+  index=0
+  while [ "$index" -lt "$selected_author_count" ]; do
+    selected_email="$(sed -n "s/^selected_author_\${index}_email=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+    if [ "$selected_email" = "$author_email" ]; then selected=true; break; fi
+    index=$((index + 1))
+  done
+  [ "$selected" = true ] || exit 0
+fi
+
+account_count="$(sed -n 's/^account_count=//p' "$config_path" | head -n 1)"
+case "$account_count" in ''|*[!0-9]*) exit 0 ;; esac
+
+index=0
+while [ "$index" -lt "$account_count" ]; do
+  owner="$(sed -n "s/^account_\${index}_owner=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+  if [ "$owner" = "$github_owner" ]; then
+    sound_file="$(sed -n "s/^account_\${index}_sound=//p" "$config_path" | head -n 1)"
+    volume="$(sed -n "s/^account_\${index}_volume=//p" "$config_path" | head -n 1)"
+    author_sound_count="$(sed -n 's/^author_sound_count=//p' "$config_path" | head -n 1)"
+    case "$author_sound_count" in ''|*[!0-9]*) author_sound_count=0 ;; esac
+    author_index=0
+    while [ "$author_index" -lt "$author_sound_count" ]; do
+      configured_author_email="$(sed -n "s/^author_sound_\${author_index}_email=//p" "$config_path" | head -n 1 | tr '[:upper:]' '[:lower:]')"
+      if [ "$configured_author_email" = "$author_email" ]; then
+        sound_file="$(sed -n "s/^author_sound_\${author_index}_sound=//p" "$config_path" | head -n 1)"
+        volume="$(sed -n "s/^author_sound_\${author_index}_volume=//p" "$config_path" | head -n 1)"
+        break
+      fi
+      author_index=$((author_index + 1))
+    done
+    case "$volume" in ''|*[!0-9.]*|*.*.*) volume=1 ;; esac
+    cooldown_seconds="$(sed -n 's/^playback_cooldown_seconds=//p' "$config_path" | head -n 1)"
+    case "$cooldown_seconds" in ''|*[!0-9]*) cooldown_seconds=5 ;; esac
+    if [ "$cooldown_seconds" -gt 0 ]; then
+      playback_state="$HOME/.git-commit-sounds/last-played-at"
+      playback_lock="$HOME/.git-commit-sounds/playback-state.lock"
+      if ! mkdir "$playback_lock" 2>/dev/null; then
+        lock_pid="$(cat "$playback_lock/pid" 2>/dev/null || true)"
+        if [ -n "$lock_pid" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+          rm -f "$playback_lock/pid"
+          rmdir "$playback_lock" 2>/dev/null || exit 0
+          mkdir "$playback_lock" 2>/dev/null || exit 0
+        else
+          exit 0
+        fi
+      fi
+      printf '%s\n' "$$" > "$playback_lock/pid"
+      trap 'rm -f "$playback_lock/pid"; rmdir "$playback_lock" 2>/dev/null' EXIT
+      now="$(date +%s)"
+      last_played="$(cat "$playback_state" 2>/dev/null || true)"
+      case "$last_played" in ''|*[!0-9]*) last_played=0 ;; esac
+      if [ $((now - last_played)) -lt "$cooldown_seconds" ]; then exit 0; fi
+      temporary_state="$playback_state.$$"
+      (umask 077 && printf '%s\n' "$now" > "$temporary_state") && mv "$temporary_state" "$playback_state"
+    fi
+    case "$(uname -s)" in
+      Darwin)
+        [ -f "$sound_file" ] && afplay -v "$volume" "$sound_file" >/dev/null 2>&1 &
+        ;;
+      MINGW*|MSYS*|CYGWIN*)
+        # Node stores Windows paths (for example C:\\Users\\...), while Git Bash
+        # cannot reliably test those with [ -f ]. Let PowerShell validate and play
+        # the path directly instead.
+        powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$HOME/.git-commit-sounds/play-sound.ps1" -Path "$sound_file" -Volume "$volume" >/dev/null 2>&1 &
+        ;;
+    esac
+    exit 0
+  fi
+  index=$((index + 1))
+done
+`;
+
+const windowsPlayerContents = `param(
+  [Parameter(Mandatory = $true)][string]$Path,
+  [Parameter(Mandatory = $true)][double]$Volume
+)
+
+$ErrorActionPreference = "Stop"
+Add-Type -AssemblyName PresentationCore
+
+$player = [System.Windows.Media.MediaPlayer]::new()
+$player.Open([Uri]::new($Path))
+$player.Volume = [Math]::Max(0, [Math]::Min(1, $Volume))
+$player.Play()
+
+# MediaPlayer is asynchronous, so keep this background PowerShell process
+# alive long enough for the media pipeline to start and finish playback.
+$deadline = [DateTime]::UtcNow.AddSeconds(10)
+while (-not $player.NaturalDuration.HasTimeSpan -and [DateTime]::UtcNow -lt $deadline) {
+  Start-Sleep -Milliseconds 100
+}
+
+if ($player.NaturalDuration.HasTimeSpan) {
+  Start-Sleep -Milliseconds ([Math]::Ceiling($player.NaturalDuration.TimeSpan.TotalMilliseconds))
+} else {
+  Start-Sleep -Seconds 5
+}
+
+$player.Close()
+`;
+
+function parseKeyValueConfig(contents: string): Map<string, string> {
+  return new Map(
+    contents
+      .split("\n")
+      .filter(Boolean)
+      .flatMap((line) => {
+        const separator = line.indexOf("=");
+        return separator > 0
+          ? [[line.slice(0, separator), line.slice(separator + 1)] as const]
+          : [];
+      }),
+  );
+}
+
+function validVolume(value: string | undefined): number {
+  const volume = Number(value);
+  return Number.isFinite(volume) && volume >= 0 && volume <= 1 ? volume : 1;
+}
+
+function validCooldownSeconds(value: string | undefined): number {
+  const cooldown = Number(value);
+  return Number.isInteger(cooldown) && cooldown >= 0 && cooldown <= 60
+    ? cooldown
+    : 5;
+}
+
+function normalizedOwner(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function normalizedEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function validateConfigValue(value: string): string {
+  if (/\r|\n/.test(value)) {
+    throw new Error("Audio paths and URLs cannot contain line breaks.");
+  }
+  return value;
+}
+
+function emptyConfig(): CommitSoundsConfig {
+  return {
+    enabled: false,
+    accounts: [],
+    connectedGitHubAccounts: [],
+    authorPlaybackMode: "anyone",
+    selectedAuthorEmails: [],
+    playbackCooldownSeconds: 5,
+    authorSounds: [],
+  };
+}
+
+function readAuthorSounds(values: Map<string, string>): CommitSoundAuthor[] {
+  const authorSoundCount = Number(values.get("author_sound_count"));
+  if (!Number.isInteger(authorSoundCount) || authorSoundCount < 0) return [];
+
+  return Array.from({ length: authorSoundCount }, (_, index) => {
+    const email = values.get(`author_sound_${index}_email`);
+    const soundPath = values.get(`author_sound_${index}_sound`);
+    if (!email || !soundPath) return undefined;
+    return {
+      id: values.get(`author_sound_${index}_id`) || `${email}-${index}`,
+      name: values.get(`author_sound_${index}_name`) || email,
+      email,
+      soundPath,
+      source: values.get(`author_sound_${index}_source`) || soundPath,
+      volume: validVolume(values.get(`author_sound_${index}_volume`)),
+      managed: values.get(`author_sound_${index}_managed`) === "true",
+    };
+  }).filter((author): author is CommitSoundAuthor => Boolean(author));
+}
+
+export async function readConfig(): Promise<CommitSoundsConfig> {
+  try {
+    const values = parseKeyValueConfig(await readFile(configPath, "utf8"));
+    const accountCount = Number(values.get("account_count"));
+
+    if (!Number.isInteger(accountCount) || accountCount < 0) {
+      const legacyLogin = values.get("connected_github_account");
+      return {
+        enabled: values.get("enabled") === "true",
+        connectedGitHubAccount: legacyLogin || undefined,
+        connectedGitHubAccounts: legacyLogin
+          ? [{ login: legacyLogin, tokenSlot: "legacy", retiredTokenSlots: [] }]
+          : [],
+        accounts: [],
+        authorPlaybackMode: "anyone",
+        selectedAuthorEmails: [],
+        playbackCooldownSeconds: 5,
+        authorSounds: [],
+      };
+    }
+
+    const accounts = Array.from({ length: accountCount }, (_, index) => {
+      const owner = values.get(`account_${index}_owner`);
+      const soundPath = values.get(`account_${index}_sound`);
+      if (!owner || !soundPath) return undefined;
+      return {
+        id: values.get(`account_${index}_id`) || `${owner}-${index}`,
+        owner,
+        soundPath,
+        source: values.get(`account_${index}_source`) || soundPath,
+        volume: validVolume(values.get(`account_${index}_volume`)),
+        managed: values.get(`account_${index}_managed`) === "true",
+      };
+    }).filter((account): account is CommitSoundAccount => Boolean(account));
+
+    const legacyLogin = values.get("connected_github_account");
+    const connectedAccountCount = Number(values.get("github_account_count"));
+    const connectedGitHubAccounts = Number.isInteger(connectedAccountCount)
+      ? Array.from(
+          { length: Math.max(0, connectedAccountCount) },
+          (_, index) => {
+            const login = values.get(`github_account_${index}_login`);
+            const tokenSlot = values.get(`github_account_${index}_token_slot`);
+            const retiredTokenCount = Number(
+              values.get(`github_account_${index}_retired_token_count`),
+            );
+            const retiredTokenSlots = Number.isInteger(retiredTokenCount)
+              ? Array.from(
+                  { length: Math.max(0, retiredTokenCount) },
+                  (_, retiredIndex) =>
+                    values.get(
+                      `github_account_${index}_retired_token_${retiredIndex}`,
+                    ),
+                ).filter((slot): slot is string => Boolean(slot))
+              : [];
+            return login && tokenSlot
+              ? { login, tokenSlot, retiredTokenSlots }
+              : undefined;
+          },
+        ).filter((account): account is ConnectedGitHubAccount =>
+          Boolean(account),
+        )
+      : legacyLogin
+        ? [{ login: legacyLogin, tokenSlot: "legacy", retiredTokenSlots: [] }]
+        : [];
+    const selectedAuthorCount = Number(values.get("selected_author_count"));
+    const selectedAuthorEmails = Number.isInteger(selectedAuthorCount)
+      ? Array.from({ length: Math.max(0, selectedAuthorCount) }, (_, index) =>
+          normalizedEmail(values.get(`selected_author_${index}_email`) || ""),
+        ).filter(Boolean)
+      : [];
+
+    return {
+      enabled: values.get("enabled") === "true",
+      connectedGitHubAccount: legacyLogin || undefined,
+      connectedGitHubAccounts,
+      accounts,
+      authorPlaybackMode:
+        values.get("author_playback_mode") === "selected"
+          ? "selected"
+          : "anyone",
+      selectedAuthorEmails,
+      playbackCooldownSeconds: validCooldownSeconds(
+        values.get("playback_cooldown_seconds"),
+      ),
+      authorSounds: readAuthorSounds(values),
+    };
+  } catch {
+    return emptyConfig();
+  }
+}
+
+export function serializeConfig(config: CommitSoundsConfig): string {
+  const lines = [
+    "version=4",
+    `enabled=${config.enabled}`,
+    `connected_github_account=${config.connectedGitHubAccount || ""}`,
+    `github_account_count=${config.connectedGitHubAccounts.length}`,
+    `account_count=${config.accounts.length}`,
+    `author_playback_mode=${config.authorPlaybackMode}`,
+    `selected_author_count=${config.selectedAuthorEmails.length}`,
+    `author_sound_count=${config.authorSounds.length}`,
+    `playback_cooldown_seconds=${config.playbackCooldownSeconds}`,
+  ];
+
+  config.connectedGitHubAccounts.forEach((account, index) => {
+    lines.push(
+      `github_account_${index}_login=${validateConfigValue(account.login)}`,
+      `github_account_${index}_token_slot=${validateConfigValue(account.tokenSlot)}`,
+      `github_account_${index}_retired_token_count=${account.retiredTokenSlots.length}`,
+    );
+    account.retiredTokenSlots.forEach((slot, retiredIndex) => {
+      lines.push(
+        `github_account_${index}_retired_token_${retiredIndex}=${validateConfigValue(slot)}`,
+      );
+    });
+  });
+
+  config.accounts.forEach((account, index) => {
+    lines.push(
+      `account_${index}_id=${validateConfigValue(account.id)}`,
+      `account_${index}_owner=${validateConfigValue(account.owner)}`,
+      `account_${index}_sound=${validateConfigValue(account.soundPath)}`,
+      `account_${index}_source=${validateConfigValue(account.source)}`,
+      `account_${index}_volume=${account.volume}`,
+      `account_${index}_managed=${account.managed}`,
+    );
+  });
+
+  config.selectedAuthorEmails.forEach((email, index) => {
+    lines.push(`selected_author_${index}_email=${validateConfigValue(email)}`);
+  });
+
+  config.authorSounds.forEach((author, index) => {
+    lines.push(
+      `author_sound_${index}_id=${validateConfigValue(author.id)}`,
+      `author_sound_${index}_name=${validateConfigValue(author.name)}`,
+      `author_sound_${index}_email=${validateConfigValue(author.email)}`,
+      `author_sound_${index}_sound=${validateConfigValue(author.soundPath)}`,
+      `author_sound_${index}_source=${validateConfigValue(author.source)}`,
+      `author_sound_${index}_volume=${author.volume}`,
+      `author_sound_${index}_managed=${author.managed}`,
+    );
+  });
+
+  return `${lines.join("\n")}\n`;
+}
+
+export async function writeConfig(config: CommitSoundsConfig): Promise<void> {
+  await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
+  const temporaryPath = join(supportDirectory, `config-${randomUUID()}.tmp`);
+  try {
+    await writeFile(temporaryPath, serializeConfig(config), { mode: 0o600 });
+    await chmod(temporaryPath, 0o600);
+    await rename(temporaryPath, configPath);
+  } finally {
+    await unlink(temporaryPath).catch(() => undefined);
+  }
+}
+
+type ConfigMutation<T> = {
+  config: CommitSoundsConfig;
+  result: T;
+};
+
+let pendingConfigMutation: Promise<void> = Promise.resolve();
+
+type ConfigLock = {
+  ownerId: string;
+};
+
+function waitForConfigLock(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 50));
+}
+
+type ConfigLockOwner = {
+  id: string;
+  pid: number;
+};
+
+async function readConfigLockOwner(): Promise<ConfigLockOwner | undefined> {
+  try {
+    const owner = JSON.parse(
+      await readFile(configLockOwnerPath, "utf8"),
+    ) as Partial<ConfigLockOwner>;
+    return typeof owner.id === "string" &&
+      typeof owner.pid === "number" &&
+      Number.isInteger(owner.pid)
+      ? { id: owner.id, pid: owner.pid }
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function processIsRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    // Permission errors still mean the process exists. Only an explicitly
+    // missing process is safe to recover from.
+    return (error as NodeJS.ErrnoException).code !== "ESRCH";
+  }
+}
+
+async function releaseConfigLock(lock: ConfigLock): Promise<void> {
+  const currentOwner = await readConfigLockOwner();
+  if (currentOwner?.id === lock.ownerId) {
+    await rm(configLockPath, { recursive: true, force: true });
+  }
+}
+
+async function acquireConfigLock(): Promise<ConfigLock> {
+  await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
+  const deadline = Date.now() + configLockTimeoutMs;
+
+  while (Date.now() < deadline) {
+    try {
+      await mkdir(configLockPath, { mode: 0o700 });
+      const ownerId = randomUUID();
+      try {
+        await writeFile(
+          configLockOwnerPath,
+          JSON.stringify({ id: ownerId, pid: process.pid }),
+          { mode: 0o600 },
+        );
+      } catch (error) {
+        await rm(configLockPath, { recursive: true, force: true });
+        throw error;
+      }
+
+      return { ownerId };
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        (error as NodeJS.ErrnoException).code !== "EEXIST"
+      ) {
+        throw error;
+      }
+    }
+
+    const owner = await readConfigLockOwner();
+    if (owner && !processIsRunning(owner.pid)) {
+      try {
+        // Only one contender may recover a dead owner's lock. A live process
+        // is never evicted, so a read-modify-write operation keeps exclusive
+        // ownership even if it takes longer than expected.
+        await mkdir(configLockRecoveryPath, { mode: 0o700 });
+        const currentOwner = await readConfigLockOwner();
+        if (
+          currentOwner?.id === owner.id &&
+          !processIsRunning(currentOwner.pid)
+        ) {
+          await rm(configLockPath, { recursive: true, force: true });
+          continue;
+        }
+        await rm(configLockRecoveryPath, { recursive: true, force: true });
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          (error as NodeJS.ErrnoException).code !== "EEXIST"
+        ) {
+          // The lock may have been released while recovery was in progress.
+          // Retrying the acquisition is safe in that case.
+          continue;
+        }
+      }
+    }
+
+    await waitForConfigLock();
+  }
+
+  throw new Error(
+    "Commit Sounds is busy updating its configuration. Please try again.",
+  );
+}
+
+/**
+ * Serializes read-modify-write operations across Raycast command processes so
+ * concurrent actions cannot overwrite each other's latest configuration.
+ */
+export async function mutateConfig<T>(
+  mutation: (
+    config: CommitSoundsConfig,
+  ) => ConfigMutation<T> | Promise<ConfigMutation<T>>,
+): Promise<T> {
+  const operation = pendingConfigMutation.then(async () => {
+    const lock = await acquireConfigLock();
+    try {
+      const current = await readConfig();
+      const { config, result } = await mutation(current);
+      await writeConfig(config);
+      return result;
+    } finally {
+      await releaseConfigLock(lock);
+    }
+  });
+  pendingConfigMutation = operation.then(
+    () => undefined,
+    () => undefined,
+  );
+  return operation;
+}
+
+export async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function getGlobalHooksPath(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("git", [
+      "config",
+      "--global",
+      "--get",
+      "core.hooksPath",
+    ]);
+    return stdout.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function getGlobalGitUserEmail(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync("git", [
+      "config",
+      "--global",
+      "--get",
+      "user.email",
+    ]);
+    return normalizedEmail(stdout) || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function getState(): Promise<InstallationState> {
+  const [config, configuredHooksPath, hookExists, defaultAuthorEmail] =
+    await Promise.all([
+      readConfig(),
+      getGlobalHooksPath(),
+      pathExists(hookPath),
+      getGlobalGitUserEmail(),
+    ]);
+  const soundEntries = [...config.accounts, ...config.authorSounds];
+  const soundPresence = await Promise.all(
+    soundEntries.map((sound) => pathExists(sound.soundPath)),
+  );
+
+  return {
+    config,
+    hookInstalled: configuredHooksPath === hooksDirectory && hookExists,
+    ownsGlobalHooksPath: configuredHooksPath === hooksDirectory,
+    conflictingHookPath:
+      configuredHooksPath && configuredHooksPath !== hooksDirectory
+        ? configuredHooksPath
+        : undefined,
+    missingSoundIds: soundEntries.flatMap((account, index) =>
+      soundPresence[index] ? [] : [account.id],
+    ),
+    defaultAuthorEmail,
+  };
+}
+
+async function ensureWindowsPlayer(): Promise<void> {
+  await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
+  await writeFile(windowsPlayerPath, windowsPlayerContents, {
+    mode: 0o600,
+  });
+}
+
+export async function installOrRepairHook(): Promise<void> {
+  const configuredHooksPath = await getGlobalHooksPath();
+  if (configuredHooksPath && configuredHooksPath !== hooksDirectory) {
+    throw new Error(
+      `Git already uses a different global hooks path: ${configuredHooksPath}`,
+    );
+  }
+
+  await mkdir(hooksDirectory, { recursive: true, mode: 0o700 });
+  await writeFile(hookPath, hookContents, { mode: 0o755 });
+  await chmod(hookPath, 0o755);
+  await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
+  if (process.platform === "win32") {
+    await ensureWindowsPlayer();
+  }
+
+  if (!(await pathExists(configPath))) {
+    await mutateConfig(async (config) => ({
+      config: (await pathExists(configPath))
+        ? config
+        : { ...config, enabled: true },
+      result: undefined,
+    }));
+  }
+
+  await execFileAsync("git", [
+    "config",
+    "--global",
+    "core.hooksPath",
+    hooksDirectory,
+  ]);
+}
+
+export async function uninstallGlobalHook(): Promise<void> {
+  const configuredHooksPath = await getGlobalHooksPath();
+  if (configuredHooksPath !== hooksDirectory) {
+    return;
+  }
+
+  await execFileAsync("git", [
+    "config",
+    "--global",
+    "--unset",
+    "core.hooksPath",
+  ]);
+}
+
+function validateOwner(owner: string): string {
+  const normalized = normalizedOwner(owner);
+  if (!/^[a-z\d](?:[a-z\d-]{0,37})$/.test(normalized)) {
+    throw new Error("Enter a valid GitHub owner name, without @ or a URL.");
+  }
+  return normalized;
+}
+
+function validateAuthorEmail(email: string): string {
+  const normalized = normalizedEmail(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    throw new Error("Enter a valid Git author email address.");
+  }
+  return normalized;
+}
+
+function audioExtension(fileName: string): string {
+  const extension = extname(fileName).toLowerCase();
+  if (!supportedAudioExtensions.has(extension)) {
+    throw new Error("Use an .mp3, .m4a, .wav, .aiff, or .aac audio file.");
+  }
+  return extension;
+}
+
+async function copyAudioFile(
+  sourcePath: string,
+  owner: string,
+): Promise<string> {
+  const extension = audioExtension(sourcePath);
+  await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
+  const destination = join(
+    soundsDirectory,
+    `${owner}-${randomUUID()}${extension}`,
+  );
+  await copyFile(sourcePath, destination, constants.COPYFILE_EXCL);
+  await chmod(destination, 0o600);
+  return destination;
+}
+
+async function downloadAudioFile(url: string, owner: string): Promise<string> {
+  const parsedUrl = new URL(url);
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error("Audio links must use https://.");
+  }
+
+  const response = await fetch(parsedUrl, { redirect: "follow" });
+  if (!response.ok) {
+    throw new Error(`Audio download failed (${response.status}).`);
+  }
+
+  const finalUrl = new URL(response.url);
+  if (finalUrl.protocol !== "https:") {
+    throw new Error("Audio links must use https://.");
+  }
+
+  const extension = audioExtension(basename(parsedUrl.pathname));
+  const length = Number(response.headers.get("content-length"));
+  if (Number.isFinite(length) && length > maximumDownloadBytes) {
+    throw new Error("Audio files must be 20 MB or smaller.");
+  }
+
+  const content = Buffer.from(await response.arrayBuffer());
+  if (content.length > maximumDownloadBytes) {
+    throw new Error("Audio files must be 20 MB or smaller.");
+  }
+
+  await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
+  const destination = join(
+    soundsDirectory,
+    `${owner}-${randomUUID()}${extension}`,
+  );
+  await writeFile(destination, content, { mode: 0o600, flag: "wx" });
+  return destination;
+}
+
+export type SaveAccountInput = {
+  id?: string;
+  existingAccount?: CommitSoundAccount;
+  owner: string;
+  audioFile?: string;
+  audioUrl?: string;
+  volume: number;
+};
+
+export type SaveAuthorInput = {
+  id?: string;
+  existingAuthor?: CommitSoundAuthor;
+  name: string;
+  email: string;
+  audioFile?: string;
+  audioUrl?: string;
+  volume: number;
+};
+
+export async function saveAccount(
+  input: SaveAccountInput,
+): Promise<CommitSoundAccount> {
+  const owner = validateOwner(input.owner);
+  const audioFile = input.audioFile?.trim();
+  const audioUrl = input.audioUrl?.trim();
+  if (Boolean(audioFile) && Boolean(audioUrl)) {
+    throw new Error(
+      "Choose one audio source: a local file or an HTTPS link, not both.",
+    );
+  }
+  if (!audioFile && !audioUrl && !input.existingAccount) {
+    throw new Error("Choose an audio source: a local file or an HTTPS link.");
+  }
+
+  const soundPath = audioFile
+    ? await copyAudioFile(audioFile, owner)
+    : audioUrl
+      ? await downloadAudioFile(audioUrl, owner)
+      : input.existingAccount?.soundPath;
+  if (!soundPath) throw new Error("Could not determine an audio source.");
+  return {
+    id: input.id || randomUUID(),
+    owner,
+    soundPath,
+    source: audioFile
+      ? `Uploaded: ${basename(audioFile)}`
+      : audioUrl || input.existingAccount?.source || soundPath,
+    volume: Math.min(1, Math.max(0, input.volume)),
+    managed:
+      audioFile || audioUrl ? true : Boolean(input.existingAccount?.managed),
+  };
+}
+
+export async function saveAuthor(
+  input: SaveAuthorInput,
+): Promise<CommitSoundAuthor> {
+  const email = validateAuthorEmail(input.email);
+  const name = input.name.trim() || email;
+  const audioFile = input.audioFile?.trim();
+  const audioUrl = input.audioUrl?.trim();
+  if (Boolean(audioFile) && Boolean(audioUrl)) {
+    throw new Error(
+      "Choose one audio source: a local file or an HTTPS link, not both.",
+    );
+  }
+  if (!audioFile && !audioUrl && !input.existingAuthor) {
+    throw new Error("Choose an audio source: a local file or an HTTPS link.");
+  }
+
+  const soundPath = audioFile
+    ? await copyAudioFile(audioFile, email)
+    : audioUrl
+      ? await downloadAudioFile(audioUrl, email)
+      : input.existingAuthor?.soundPath;
+  if (!soundPath) throw new Error("Could not determine an audio source.");
+  return {
+    id: input.id || randomUUID(),
+    name,
+    email,
+    soundPath,
+    source: audioFile
+      ? `Uploaded: ${basename(audioFile)}`
+      : audioUrl || input.existingAuthor?.source || soundPath,
+    volume: Math.min(1, Math.max(0, input.volume)),
+    managed:
+      audioFile || audioUrl ? true : Boolean(input.existingAuthor?.managed),
+  };
+}
+
+export async function removeManagedAudio(
+  account: Pick<CommitSoundAccount, "managed" | "soundPath">,
+): Promise<void> {
+  if (
+    !account.managed ||
+    !account.soundPath.startsWith(`${soundsDirectory}/`)
+  ) {
+    return;
+  }
+  await unlink(account.soundPath).catch(() => undefined);
+}
+
+export async function setAuthorPlaybackSettings(
+  authorPlaybackMode: AuthorPlaybackMode,
+  emails: string[],
+  playbackCooldownSeconds: number,
+): Promise<void> {
+  const selectedAuthorEmails = [...new Set(emails.map(validateAuthorEmail))];
+  if (authorPlaybackMode === "selected" && selectedAuthorEmails.length === 0) {
+    throw new Error("Add at least one author email, or choose everyone.");
+  }
+  await mutateConfig((config) => ({
+    config: {
+      ...config,
+      authorPlaybackMode,
+      selectedAuthorEmails,
+      playbackCooldownSeconds: validCooldownSeconds(
+        String(playbackCooldownSeconds),
+      ),
+    },
+    result: undefined,
+  }));
+}
+
+export async function upsertAuthorSound(
+  author: CommitSoundAuthor,
+): Promise<void> {
+  const replaced = await mutateConfig((config) => {
+    const replacedAuthors = config.authorSounds.filter(
+      (item) => item.id === author.id || item.email === author.email,
+    );
+    return {
+      config: {
+        ...config,
+        authorSounds: [
+          ...config.authorSounds.filter(
+            (item) => item.id !== author.id && item.email !== author.email,
+          ),
+          author,
+        ],
+      },
+      result: replacedAuthors,
+    };
+  });
+  await Promise.all(
+    replaced
+      .filter((item) => item.soundPath !== author.soundPath)
+      .map(removeManagedAudio),
+  );
+}
+
+export async function removeAuthorSound(authorId: string): Promise<void> {
+  const removed = await mutateConfig((config) => {
+    const removedAuthors = config.authorSounds.filter(
+      (item) => item.id === authorId,
+    );
+    return {
+      config: {
+        ...config,
+        authorSounds: config.authorSounds.filter(
+          (item) => item.id !== authorId,
+        ),
+      },
+      result: removedAuthors,
+    };
+  });
+  await Promise.all(removed.map(removeManagedAudio));
+}
+
+export async function upsertSoundRule(
+  account: CommitSoundAccount,
+): Promise<void> {
+  const replaced = await mutateConfig((config) => {
+    const replacedAccounts = config.accounts.filter(
+      (item) => item.id === account.id || item.owner === account.owner,
+    );
+    return {
+      config: {
+        ...config,
+        enabled: true,
+        accounts: [
+          ...config.accounts.filter(
+            (item) => item.id !== account.id && item.owner !== account.owner,
+          ),
+          account,
+        ],
+      },
+      result: replacedAccounts,
+    };
+  });
+
+  await Promise.all(
+    replaced
+      .filter((item) => item.soundPath !== account.soundPath)
+      .map(removeManagedAudio),
+  );
+}
+
+export async function removeSoundRule(accountId: string): Promise<void> {
+  const removed = await mutateConfig((config) => {
+    const removedAccounts = config.accounts.filter(
+      (item) => item.id === accountId,
+    );
+    return {
+      config: {
+        ...config,
+        accounts: config.accounts.filter((item) => item.id !== accountId),
+      },
+      result: removedAccounts,
+    };
+  });
+  await Promise.all(removed.map(removeManagedAudio));
+}
+
+export async function playSound(path: string, volume: number): Promise<void> {
+  if (!(await pathExists(path))) {
+    throw new Error(`Could not find ${path}`);
+  }
+  if (process.platform === "win32") {
+    await ensureWindowsPlayer();
+    await execFileAsync("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      windowsPlayerPath,
+      "-Path",
+      path,
+      "-Volume",
+      String(volume),
+    ]);
+    return;
+  }
+  await execFileAsync("afplay", ["-v", String(volume), path]);
+}
+
+export async function setConnectedGitHubAccount(login: string): Promise<void> {
+  const normalizedLogin = validateOwner(login);
+  await mutateConfig((config) => ({
+    config: {
+      ...config,
+      connectedGitHubAccount: normalizedLogin,
+      connectedGitHubAccounts: [
+        ...config.connectedGitHubAccounts.filter(
+          (account) => account.login !== normalizedLogin,
+        ),
+        { login: normalizedLogin, tokenSlot: "legacy", retiredTokenSlots: [] },
+      ],
+    },
+    result: undefined,
+  }));
+}
+
+export async function addConnectedGitHubAccount(
+  login: string,
+  tokenSlot: string,
+): Promise<ConnectedGitHubAccount> {
+  const normalizedLogin = validateOwner(login);
+  return mutateConfig((config) => {
+    const existing = config.connectedGitHubAccounts.find(
+      (account) => account.login === normalizedLogin,
+    );
+    if (existing) {
+      const connectedAccount = {
+        login: normalizedLogin,
+        tokenSlot,
+        retiredTokenSlots: [
+          ...existing.retiredTokenSlots,
+          existing.tokenSlot,
+        ].filter((slot) => slot !== tokenSlot),
+      };
+      return {
+        config: {
+          ...config,
+          connectedGitHubAccount: normalizedLogin,
+          connectedGitHubAccounts: [
+            ...config.connectedGitHubAccounts.filter(
+              (account) => account.login !== normalizedLogin,
+            ),
+            connectedAccount,
+          ],
+        },
+        result: connectedAccount,
+      };
+    }
+    const connectedAccount = {
+      login: normalizedLogin,
+      tokenSlot,
+      retiredTokenSlots: [],
+    };
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount: normalizedLogin,
+        connectedGitHubAccounts: [
+          ...config.connectedGitHubAccounts.filter(
+            (account) => account.tokenSlot !== tokenSlot,
+          ),
+          connectedAccount,
+        ],
+      },
+      result: connectedAccount,
+    };
+  });
+}
+
+export async function clearRetiredGitHubAccountTokens(
+  login: string,
+  tokenSlots: string[],
+): Promise<void> {
+  const normalizedLogin = validateOwner(login);
+  const slotsToClear = new Set(tokenSlots);
+  await mutateConfig((config) => ({
+    config: {
+      ...config,
+      connectedGitHubAccounts: config.connectedGitHubAccounts.map((account) =>
+        account.login === normalizedLogin
+          ? {
+              ...account,
+              retiredTokenSlots: account.retiredTokenSlots.filter(
+                (slot) => !slotsToClear.has(slot),
+              ),
+            }
+          : account,
+      ),
+    },
+    result: undefined,
+  }));
+}
+
+export async function selectConnectedGitHubAccount(
+  login: string,
+): Promise<void> {
+  const normalizedLogin = validateOwner(login);
+  return mutateConfig((config) => {
+    if (
+      !config.connectedGitHubAccounts.some(
+        (account) => account.login === normalizedLogin,
+      )
+    ) {
+      throw new Error("This GitHub account is not connected.");
+    }
+    return {
+      config: { ...config, connectedGitHubAccount: normalizedLogin },
+      result: undefined,
+    };
+  });
+}
+
+export async function removeConnectedGitHubAccount(
+  login: string,
+): Promise<RemovedGitHubAccount | undefined> {
+  const normalizedLogin = validateOwner(login);
+  return mutateConfig((config) => {
+    const account = config.connectedGitHubAccounts.find(
+      (item) => item.login === normalizedLogin,
+    );
+    const remaining = config.connectedGitHubAccounts.filter(
+      (account) => account.login !== normalizedLogin,
+    );
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount:
+          config.connectedGitHubAccount === normalizedLogin
+            ? remaining.at(-1)?.login
+            : config.connectedGitHubAccount,
+        connectedGitHubAccounts: remaining,
+      },
+      result: account
+        ? {
+            account,
+            wasDefault: config.connectedGitHubAccount === normalizedLogin,
+          }
+        : undefined,
+    };
+  });
+}
+
+/**
+ * Completes a disconnect after secure-token deletion has run. If a token could
+ * not be deleted, it remains the account's usable credential; successfully
+ * deleted slots are never restored to the configuration.
+ */
+export async function finalizeGitHubAccountDisconnect(
+  login: string,
+  activeTokenSlot: string,
+  remainingTokenSlots: string[],
+): Promise<boolean> {
+  const normalizedLogin = validateOwner(login);
+  const retainedSlots = [...new Set(remainingTokenSlots)];
+
+  return mutateConfig((config) => {
+    const account = config.connectedGitHubAccounts.find(
+      (item) => item.login === normalizedLogin,
+    );
+
+    // A reconnect that happened while sign-out was in progress owns the newer
+    // configuration. Do not overwrite it with results for an older slot.
+    if (!account || account.tokenSlot !== activeTokenSlot) {
+      return { config, result: false };
+    }
+
+    if (retainedSlots.length > 0) {
+      return {
+        config: {
+          ...config,
+          connectedGitHubAccounts: config.connectedGitHubAccounts.map((item) =>
+            item.login === normalizedLogin
+              ? {
+                  ...item,
+                  tokenSlot: retainedSlots[0],
+                  retiredTokenSlots: retainedSlots.slice(1),
+                }
+              : item,
+          ),
+        },
+        result: true,
+      };
+    }
+
+    const remaining = config.connectedGitHubAccounts.filter(
+      (item) => item.login !== normalizedLogin,
+    );
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount:
+          config.connectedGitHubAccount === normalizedLogin
+            ? remaining.at(-1)?.login
+            : config.connectedGitHubAccount,
+        connectedGitHubAccounts: remaining,
+      },
+      result: true,
+    };
+  });
+}
+
+export async function restoreConnectedGitHubAccount(
+  removed: RemovedGitHubAccount,
+): Promise<void> {
+  await mutateConfig((config) => {
+    if (
+      config.connectedGitHubAccounts.some(
+        (account) => account.login === removed.account.login,
+      )
+    ) {
+      return { config, result: undefined };
+    }
+    return {
+      config: {
+        ...config,
+        connectedGitHubAccount: removed.wasDefault
+          ? removed.account.login
+          : config.connectedGitHubAccount,
+        connectedGitHubAccounts: [
+          ...config.connectedGitHubAccounts,
+          removed.account,
+        ],
+      },
+      result: undefined,
+    };
+  });
+}

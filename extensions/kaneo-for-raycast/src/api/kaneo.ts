@@ -1,5 +1,18 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Project, ProjectDetail, Task, Notification, TaskRelation } from "../types";
+import type {
+  Project,
+  ProjectDetail,
+  Task,
+  Notification,
+  TaskRelation,
+  Column,
+  CustomFieldDefinition,
+  CustomFieldValue,
+  CustomFieldFilterValues,
+  CustomFieldType,
+} from "../types";
+import { normalizeInstanceUrl } from "../lib/url";
+import { getApiUrl } from "../lib/get-api-url";
 
 export class KaneoAPI {
   private instanceUrl: string;
@@ -9,14 +22,14 @@ export class KaneoAPI {
 
   constructor() {
     const prefs = getPreferenceValues();
-    this.instanceUrl = prefs.instanceUrl;
+    this.instanceUrl = normalizeInstanceUrl(prefs.instanceUrl);
     this.apiToken = prefs.apiToken;
     this.workspaceId = prefs.workspaceId;
     this.requestTimeout = Number(prefs.requestTimeout);
   }
 
   private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
-    const url = `${this.instanceUrl.replace(/\/$/, "")}${path}`;
+    const url = getApiUrl(path);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -33,7 +46,9 @@ export class KaneoAPI {
       });
 
       if (!res.ok) {
-        throw new Error(`Kaneo API error: ${res.status} ${res.statusText}`);
+        // Inclure le body de la réponse pour comprendre pourquoi l'API refuse la requête
+        const body = await res.text().catch(() => "");
+        throw new Error(`Kaneo API error: ${res.status} ${res.statusText}${body ? ` - ${body}` : ""}`);
       }
 
       if (res.status === 204) {
@@ -44,6 +59,11 @@ export class KaneoAPI {
     } catch (error) {
       if ((error as Error).name === "AbortError") {
         throw new Error(`Kaneo API error: request to ${path} timed out after ${timeoutMs}ms`);
+      }
+      if (error instanceof SyntaxError) {
+        throw new Error(
+          "Kaneo returned an unexpected response instead of JSON. Please check that your API URL is correct in the extension preferences.",
+        );
       }
       throw error;
     } finally {
@@ -64,6 +84,23 @@ export class KaneoAPI {
 
   async getProjectTasks(projectId: string): Promise<ProjectDetail> {
     return this.request<ProjectDetail>(`/api/task/tasks/${projectId}`);
+  }
+
+  async getWorkspaceBoard(workspaceId: string): Promise<Array<{ project: Project; columns: Column[] }>> {
+    const projects = await this.getProjects(workspaceId);
+    return Promise.all(
+      projects.map(async (project) => {
+        try {
+          const detail = await this.getProjectTasks(project.id.toString());
+          return { project, columns: detail?.data?.columns ?? detail?.columns ?? [] };
+        } catch (error) {
+          // One project failing must not break the whole overview — skip it and
+          // keep the tasks from the other projects.
+          console.error(`Kaneo: skipping project "${project.name}" — failed to load its tasks:`, error);
+          return { project, columns: [] as Column[] };
+        }
+      }),
+    );
   }
 
   async getTask(taskId: string): Promise<Task> {
@@ -91,11 +128,20 @@ export class KaneoAPI {
 
   async createTask(
     projectId: string,
-    body: { title: string; description?: string; status: string; priority: string; dueDate?: string },
+    body: {
+      title: string;
+      description?: string;
+      status: string;
+      priority: string;
+      dueDate?: string;
+      // Les valeurs sont toujours des strings (multiselect = tableau JSON stringifié)
+      customFields?: Array<{ fieldId: string; value: string }>;
+      draftAssetIds?: string[];
+    },
   ): Promise<Task> {
     return this.request<Task>(`/api/task/${projectId}`, {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify({ draftAssetIds: [], ...body }),
     });
   }
 
@@ -139,5 +185,70 @@ export class KaneoAPI {
 
   async clearNotifications(): Promise<void> {
     return this.request<void>("/api/notification/clear-all", { method: "DELETE" });
+  }
+
+  // ---------- Custom fields ----------
+
+  async getCustomFields(projectId: string): Promise<CustomFieldDefinition[]> {
+    return this.request<CustomFieldDefinition[]>(`/api/custom-field/project/${projectId}`);
+  }
+
+  async getProjectCustomFieldValues(projectId: string): Promise<CustomFieldValue[]> {
+    return this.request<CustomFieldValue[]>(`/api/custom-field/project/${projectId}/values`);
+  }
+
+  async getTaskCustomFieldValues(taskId: string): Promise<CustomFieldValue[]> {
+    return this.request<CustomFieldValue[]>(`/api/custom-field/task/${taskId}`);
+  }
+
+  async getCustomFieldFilterValues(projectId: string): Promise<CustomFieldFilterValues[]> {
+    return this.request<CustomFieldFilterValues[]>(`/api/custom-field/project/${projectId}/filter-values`);
+  }
+
+  async createCustomField(body: {
+    projectId: string;
+    name: string;
+    type: CustomFieldType;
+    required?: boolean;
+    defaultValue?: unknown;
+    options?: string[];
+  }): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>("/api/custom-field", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async updateCustomField(
+    fieldId: string,
+    body: { name?: string; required?: boolean; defaultValue?: unknown; options?: string[] },
+  ): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>(`/api/custom-field/${fieldId}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async reorderCustomFields(
+    projectId: string,
+    fields: Array<{ id: string; position: number }>,
+  ): Promise<CustomFieldDefinition[]> {
+    return this.request<CustomFieldDefinition[]>(`/api/custom-field/reorder/${projectId}`, {
+      method: "PUT",
+      body: JSON.stringify({ fields }),
+    });
+  }
+
+  async setCustomFieldValue(taskId: string, fieldId: string, value: unknown): Promise<CustomFieldValue> {
+    return this.request<CustomFieldValue>("/api/custom-field/value", {
+      method: "PUT",
+      body: JSON.stringify({ taskId, fieldId, value }),
+    });
+  }
+
+  async deleteCustomField(fieldId: string): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>(`/api/custom-field/${fieldId}`, {
+      method: "DELETE",
+    });
   }
 }

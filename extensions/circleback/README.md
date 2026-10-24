@@ -16,7 +16,9 @@ To use this extension, ensure the following:
 - **New Meeting**: Record a new meeting in Circleback.
 - **Open Last Meeting**: Open your most recent meeting in Circleback.
 - **Search Meetings**: Search your meetings in Circleback.
+- **Ask Circleback**: Ask Circleback about your meetings and more.
+- **Chats**: Browse and continue your chats.
 
 
 ## Support
-For issues or feedback, go to [support.circleback.ai](https://support.circleback.ai)
+For issues or feedback, go to [circleback.ai/docs/support](https://circleback.ai/docs/support)

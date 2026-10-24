@@ -28,15 +28,37 @@
       "description": "show android emulators",
       "icon": "list-android.png",
       "mode": "view"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Android Docs",
+      "subtitle": "Android",
+      "description": "Search the official Android docs and read them as rendered markdown",
+      "icon": "search-docs.png",
+      "mode": "view"
+    },
+    {
+      "name": "capture-screenshot",
+      "title": "Capture Screenshot",
+      "subtitle": "Android",
+      "description": "Capture a screenshot of a connected device, preview it, and save or copy it",
+      "icon": "capture-screenshot.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Android",
+      "description": "Scaffold a new Android project from an official template and open it in Android Studio",
+      "icon": "create-project.png",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "expand-tilde": "^2.0.2"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/expand-tilde": "^2.0.0",
     "@types/node": "^20.8.10",
     "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
@@ -69,6 +91,22 @@
       "type": "textfield",
       "required": true,
       "default": "~/.android/avd"
+    },
+    {
+      "title": "Android CLI Path",
+      "name": "androidCliPath",
+      "description": "Optional path to the `android` binary. Leave blank to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "title": "Screenshot Folder",
+      "name": "screenshotFolder",
+      "description": "Where captured screenshots are auto-saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
     }
   ],
   "scripts": {
@@ -76,7 +114,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "tsc -p tsconfig.test.json && node --test \"dist/**/*.test.js\""
   },
   "platforms": [
     "macOS"

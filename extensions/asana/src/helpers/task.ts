@@ -1,5 +1,15 @@
 import { Color } from "@raycast/api";
-import { format, isBefore, isThisWeek, isThisYear, isToday, isTomorrow, isYesterday } from "date-fns";
+import {
+  format,
+  isBefore,
+  isThisWeek,
+  isThisYear,
+  isToday,
+  isTomorrow,
+  isYesterday,
+  parseISO,
+  startOfDay,
+} from "date-fns";
 import { Task } from "../api/tasks";
 import { AsanaColors, asanaToRaycastColor } from "./colors";
 
@@ -8,12 +18,7 @@ import { AsanaColors, asanaToRaycastColor } from "./colors";
  * This is needed when sending text content to Asana's html_notes field.
  */
 export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export function getTaskSubtitle(task: Task): { value: string; tooltip: string } | string {
@@ -63,7 +68,8 @@ export function getDueDateText(task: Task) {
   }
 
   if (task.due_on) {
-    return formatDateText(new Date(task.due_on));
+    // Asana's date-only deadlines must retain their local calendar day.
+    return formatDateText(parseISO(task.due_on));
   }
 
   return "No due date";
@@ -84,8 +90,8 @@ export function getDueDateColor(task: Task) {
   }
 
   if (task.due_on) {
-    const date = new Date(task.due_on);
-    const today = new Date(format(Date.now(), "yyyy-MM-dd"));
+    const date = parseISO(task.due_on);
+    const today = startOfDay(new Date());
 
     if (isBefore(date, today)) {
       return asanaToRaycastColor(AsanaColors.red);

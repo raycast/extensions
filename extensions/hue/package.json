@@ -3,7 +3,10 @@
   "name": "hue",
   "title": "Hue",
   "description": "Quickly and easily control Philips Hue lights",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "icon": "command-icon.png",
   "author": "pindab0ter",
   "contributors": [
@@ -29,10 +32,9 @@
       "subtitle": "Hue",
       "keywords": [
         "room",
-        "zone",
-        "entertainment"
+        "zone"
       ],
-      "description": "List, search and control rooms, zones and entertainment areas",
+      "description": "List, search and control rooms and zones",
       "mode": "view"
     },
     {
@@ -51,16 +53,29 @@
       "interval": "5m"
     }
   ],
-  "preferences": [
+  "tools": [
     {
-      "name": "transitionTime",
-      "title": "Transition Time",
-      "description": "The time in milliseconds that transitions will take, rounded to the nearest 100ms.",
-      "placeholder": "400",
-      "type": "textfield",
-      "default": "400",
-      "required": false
+      "name": "get-lights",
+      "title": "Get Lights",
+      "description": "Get the rooms, zones, lights and scenes, with their state"
     },
+    {
+      "name": "control-light",
+      "title": "Control Light",
+      "description": "Turn lights on or off, or change their brightness, color or white temperature"
+    },
+    {
+      "name": "control-group",
+      "title": "Control Group",
+      "description": "Turn rooms, zones or all lights on or off, or change their brightness, color or white temperature"
+    },
+    {
+      "name": "recall-scene",
+      "title": "Recall Scene",
+      "description": "Set a scene in its room or zone"
+    }
+  ],
+  "preferences": [
     {
       "name": "toggleAllLights",
       "title": "“Toggle All Lights” when some lights are on",
@@ -85,7 +100,7 @@
       "description": "The IP address of your Hue bridge. Use this if automatic discovery doesn't work.",
       "placeholder": "x.x.x.x",
       "type": "textfield",
-      "default": "",
+      "default": {},
       "required": false
     },
     {
@@ -94,34 +109,42 @@
       "description": "The username for your Hue bridge. Use this if you have already created a username you want to use. Leave this empty to automatically request a new username.",
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "type": "textfield",
-      "default": "",
+      "default": {},
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
-    "@types/node-localstorage": "^1.3.3",
-    "@types/stream-json": "^1.7.8",
-    "@xstate/react": "^6.0.0",
-    "bonjour-service": "^1.3.0",
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2",
+    "@xstate/react": "^6.1.0",
+    "bonjour-service": "^1.4.0",
     "chroma-js": "^3.2.0",
-    "jimp": "^1.6.0",
-    "stream-json": "^1.9.1",
-    "xstate": "^5.25.0"
+    "xstate": "^5.32.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/chroma-js": "^3.1.2",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "tsc -p test && vitest run"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  },
+  "overrides": {
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12"
   }
 }

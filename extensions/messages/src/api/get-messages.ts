@@ -2,120 +2,120 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { executeSQL } from "@raycast/utils";
-import { fetchContactsForPhoneNumbers } from "swift:../../swift/contacts";
+import { fetchContactsForChatIdentifiers } from "swift:../../swift/contacts";
 
-import { decodeHexString, fuzzySearch } from "../helpers";
-import { createContactMap, getContactOrGroupInfo, ChatOrMessageInfo } from "../helpers";
-import { Message, SQLMessage } from "../hooks/useMessages";
+import { createContactMap } from "../contact-map-persist";
+import {
+  buildMessagesQuery,
+  decodeMessageBody,
+  fuzzySearch,
+  getContactOrGroupInfo,
+  parseMessageAttachments,
+} from "../helpers";
+import type { ChatOrMessageInfo, Message, SQLMessage } from "../types";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export async function getMessages(searchText?: string, chatIdentifier?: string): Promise<Message[]> {
+export async function getMessages(searchText?: string, chatIdentifier?: string, before?: string): Promise<Message[]> {
+  // Sanitize chatIdentifier: escape single quotes
+  const safeChatIdentifier = chatIdentifier?.replace(/'/g, "''") ?? null;
+  // Convert before to an Apple-epoch nanosecond integer
+  const beforeNs =
+    before && !isNaN(Date.parse(before))
+      ? Math.floor((new Date(before).getTime() / 1000 - 978307200) * 1_000_000_000)
+      : null;
+
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
-    `
-    SELECT
-      message.guid,
-      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date / 1000000000 + strftime("%s", "2001-01-01"),
-        "unixepoch"
-      )) AS date,
-      strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date_read / 1000000000 + strftime("%s", "2001-01-01"),
-        "unixepoch"
-      )) AS date_read,
-      message.is_from_me,
-      message.is_audio_message,
-      message.is_sent,
-      message.is_read,
-      chat.chat_identifier,
-      chat.display_name,
-      CASE
-        WHEN chat.chat_identifier LIKE '%chat%' AND chat.display_name IS NOT NULL AND chat.display_name != ''
-        THEN chat.display_name
-        ELSE NULL
-      END as group_name,
-      message.service,
-      hex(message.attributedBody) as body,
-      CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
-      CASE
-        WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
-        ELSE handle.id
-      END as group_participants,
-      attachment.filename as attachment_filename,
-      attachment.transfer_name as attachment_name,
-      attachment.mime_type as attachment_mime_type
-    FROM
-      message
-      JOIN chat_message_join ON message."ROWID" = chat_message_join.message_id
-      JOIN chat ON chat_message_join.chat_id = chat."ROWID"
-      LEFT JOIN chat_handle_join ON chat."ROWID" = chat_handle_join.chat_id
-      LEFT JOIN handle ON chat_handle_join.handle_id = handle."ROWID"
-      LEFT JOIN message_attachment_join ON message."ROWID" = message_attachment_join.message_id
-      LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
-    WHERE
-      message.attributedBody IS NOT NULL
-      ${chatIdentifier ? `AND chat.chat_identifier = '${chatIdentifier}'` : ""}
-    GROUP BY
-      message.guid
-    ORDER BY
-      date DESC
-    LIMIT 100
-    `,
+    buildMessagesQuery({
+      chatIdentifierClause: safeChatIdentifier !== null ? `AND chat.chat_identifier = '${safeChatIdentifier}'` : "",
+      beforeClause: beforeNs !== null ? `AND message.date < ${beforeNs}` : "",
+      limit: searchText ? "1000" : "50",
+    }),
   );
 
   if (!rawData) return [];
 
-  const uniqueChatIdentifiers = [...new Set(rawData.map((m) => m.chat_identifier))];
-  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
+  const mapped = await hydrateMessages(rawData);
+  const messages = deduplicateReplyContext([...mapped].reverse());
+
+  if (!searchText) return messages;
+
+  return messages.filter((message) => messageMatchesSearch(message, searchText));
+}
+
+export async function hydrateMessages(rawData: SQLMessage[]): Promise<Message[]> {
+  const lookupIdentifiers = [...new Set(rawData.flatMap((message) => getLookupIdentifiers(message)))];
+  const contacts = await fetchContactsForChatIdentifiers(lookupIdentifiers);
   const contactMap = createContactMap(contacts);
 
-  const messages = rawData.map((m) => {
-    const decodedBody = decodeHexString(m.body);
+  return rawData.map((message) => {
+    const decodedBody = decodeMessageBody(message.body, message.plain_text);
+    const decodedReply = decodeMessageBody(message.reply_body, message.reply_plain_text) || null;
     const messageInfo: ChatOrMessageInfo = {
-      chat_identifier: m.chat_identifier,
-      is_from_me: Boolean(m.is_from_me),
-      is_group: Boolean(m.is_group),
-      display_name: m.group_name,
-      group_participants: m.group_participants,
+      chat_identifier: message.chat_identifier,
+      is_from_me: Boolean(message.is_from_me),
+      is_group: Boolean(message.is_group),
+      display_name: message.group_name,
+      group_participants: message.group_participants,
     };
 
     const { displayName } = getContactOrGroupInfo(messageInfo, contactMap);
 
     return {
-      ...m,
+      ...message,
       body: decodedBody,
-      sender: m.chat_identifier,
+      sender: message.chat_identifier,
       senderName: displayName,
-      is_from_me: Boolean(m.is_from_me),
-      is_audio_message: Boolean(m.is_audio_message),
-      is_sent: Boolean(m.is_sent),
-      is_read: m.is_sent ? true : Boolean(m.is_read),
+      is_from_me: Boolean(message.is_from_me),
+      is_audio_message: Boolean(message.is_audio_message),
+      is_sent: Boolean(message.is_sent),
+      is_read: message.is_sent ? true : Boolean(message.is_read),
+      attachments: parseMessageAttachments(message.attachments_json),
+      replyingTo: decodedReply || null,
     };
   });
+}
 
-  if (!searchText) return messages.slice(0, 50);
+export function deduplicateReplyContext(messages: Message[]): Message[] {
+  let prevReply: string | null = null;
+  return messages.map((message) => {
+    const originalReply = message.replyingTo ?? null;
+    const replyingTo = originalReply && originalReply === prevReply ? null : message.replyingTo;
+    prevReply = originalReply;
+    return { ...message, replyingTo };
+  });
+}
 
+export function messageMatchesSearch(message: Message, searchText: string): boolean {
   const searchTerms = searchText
     .toLowerCase()
     .split(/\s+/)
     .filter((term) => term.length > 0);
 
-  return messages
-    .filter((m) => {
-      const searchableText = [
-        m.body,
-        m.senderName,
-        m.sender,
-        m.is_from_me ? "me" : "",
-        m.is_read ? "read" : "unread",
-        m.is_audio_message ? "audio" : "",
-        ...[m.attachment_mime_type?.split("/")],
-      ]
-        .join(" ")
-        .toLowerCase();
+  const searchableText = [
+    message.body,
+    message.senderName,
+    message.sender,
+    message.is_from_me ? "me" : "",
+    message.is_read ? "read" : "unread",
+    message.is_audio_message ? "audio" : "",
+    message.attachment_mime_type?.split("/"),
+    ...message.attachments.flatMap((attachment) => [attachment.name, attachment.mimeType]),
+  ]
+    .join(" ")
+    .toLowerCase();
 
-      return fuzzySearch(searchableText, searchTerms);
-    })
-    .slice(0, 50);
+  return fuzzySearch(searchableText, searchTerms);
+}
+
+function getLookupIdentifiers(message: SQLMessage): string[] {
+  if (message.is_group && message.group_participants) {
+    return message.group_participants
+      .split(",")
+      .map((participant) => participant.trim())
+      .filter(Boolean);
+  }
+
+  return [message.chat_identifier];
 }

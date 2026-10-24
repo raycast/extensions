@@ -104,6 +104,20 @@ export class WriteError extends ZshManagerError {
 }
 
 /**
+ * Error thrown when the user explicitly cancels a save from the validation
+ * confirmation dialog. Not an operational failure: callers should abort
+ * quietly instead of reporting a write error.
+ */
+export class SaveCancelledError extends ZshManagerError {
+  readonly code = "SAVE_CANCELLED";
+  readonly userMessage = "Save cancelled — no changes were written.";
+
+  constructor(filePath: string) {
+    super(`Save cancelled by user: ${filePath}`, { filePath });
+  }
+}
+
+/**
  * Type guard to check if an error is a ZshManagerError
  */
 export function isZshManagerError(error: unknown): error is ZshManagerError {

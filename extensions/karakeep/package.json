@@ -8,7 +8,8 @@
   "contributors": [
     "kdurek",
     "edequalsawesome",
-    "chrismessina"
+    "chrismessina",
+    "mitsimi"
   ],
   "categories": [
     "Web"
@@ -31,7 +32,7 @@
     {
       "name": "language",
       "title": "Language",
-      "description": "Select your preferred language",
+      "description": "Language used for the extension's own interface. Your bookmarks are unaffected.",
       "type": "dropdown",
       "required": false,
       "data": [
@@ -50,9 +51,9 @@
       "name": "apiUrl",
       "type": "textfield",
       "required": true,
-      "title": "API Host",
-      "description": "Enter the API host URL",
-      "placeholder": "https://your-karakeep.host.com",
+      "title": "Server URL",
+      "description": "Where your Karakeep instance is reachable, including the port",
+      "placeholder": "http://localhost:3000",
       "default": ""
     },
     {
@@ -60,17 +61,17 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Enter your API key",
-      "placeholder": "Enter your Karakeep API key",
+      "description": "Create one in Karakeep under Settings → API Keys",
+      "placeholder": "Paste your Karakeep API key",
       "default": ""
     },
     {
       "name": "linkMainAction",
       "type": "dropdown",
-      "label": "Default Link Action",
-      "title": "Default Link Action",
+      "label": "Opening a Bookmark",
+      "title": "Opening a Bookmark",
       "required": false,
-      "description": "Select the default action when opening a bookmark link",
+      "description": "What ↵ does on a URL bookmark",
       "data": [
         {
           "title": "Open in Browser",
@@ -89,10 +90,10 @@
     {
       "name": "textMainAction",
       "type": "dropdown",
-      "label": "Default Note Action",
-      "title": "Default Note Action",
+      "label": "Opening a Note",
+      "title": "Opening a Note",
       "required": false,
-      "description": "Select the default action when opening a note",
+      "description": "What ↵ does on a note",
       "data": [
         {
           "title": "View Details",
@@ -111,17 +112,17 @@
     {
       "name": "prefillUrlFromBrowser",
       "type": "checkbox",
-      "label": "Prefill URL from Browser",
-      "title": "Prefill URL from Active Browser Tab",
-      "description": "Automatically prefill the URL field with the active browser tab when creating a bookmark",
+      "label": "Use the Current Browser Tab",
+      "title": "Creating Bookmarks",
+      "description": "Fill in the URL from your frontmost tab when creating a bookmark. Uses the Raycast browser extension when available, and falls back to AppleScript on macOS.",
       "default": true,
       "required": false
     },
     {
-      "label": "Show Website Icon",
+      "label": "Website Icons",
       "name": "showWebsitePreview",
-      "title": "Show Website Icon",
-      "description": "Display website icon in the list",
+      "title": "Bookmark List",
+      "description": "Show each site's favicon in place of a generic icon",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -129,9 +130,8 @@
     {
       "name": "displayBookmarkPreview",
       "type": "checkbox",
-      "label": "Preview Image",
-      "title": "Custom display elements in list view",
-      "description": "Display bookmark preview in the list",
+      "label": "Preview Images",
+      "description": "Show a thumbnail of the page. Each one is fetched and cached, so this can slow a large library.",
       "default": true,
       "required": false
     },
@@ -139,15 +139,15 @@
       "name": "displayTags",
       "type": "checkbox",
       "label": "Tags",
-      "description": "Display tags in the list",
+      "description": "Show the tags attached to each bookmark",
       "default": true,
       "required": false
     },
     {
       "name": "displayCreatedAt",
       "type": "checkbox",
-      "label": "Created At",
-      "description": "Display created at in the list",
+      "label": "Date Saved",
+      "description": "Show when the bookmark was added",
       "default": true,
       "required": false
     },
@@ -155,31 +155,31 @@
       "name": "displayDescription",
       "type": "checkbox",
       "label": "Description",
-      "description": "Display description in the list",
+      "description": "Show the page description beneath the title",
       "default": true,
       "required": false
     },
     {
       "name": "displayNote",
       "type": "checkbox",
-      "label": "Note",
-      "description": "Display note in the list",
+      "label": "Notes",
+      "description": "Show any note you have attached to the bookmark",
       "default": false,
       "required": false
     },
     {
       "name": "displayBookmarkStatus",
       "type": "checkbox",
-      "label": "Status",
-      "description": "Display bookmark status in the list",
+      "label": "Favorite and Archive Status",
+      "description": "Mark bookmarks that are favorited or archived",
       "default": false,
       "required": false
     },
     {
       "name": "displaySummary",
       "type": "checkbox",
-      "label": "Summary",
-      "description": "Display summary in the list",
+      "label": "AI Summary",
+      "description": "Show Karakeep's generated summary when one exists",
       "default": false,
       "required": false
     },
@@ -187,9 +187,9 @@
       "name": "verboseLogging",
       "type": "checkbox",
       "required": false,
-      "title": "Verbose Logging",
-      "label": "Enable detailed logging",
-      "description": "Show detailed logs in the Raycast console for debugging",
+      "title": "Troubleshooting",
+      "label": "Verbose Logging",
+      "description": "Write detailed request and error logs to the Raycast console",
       "default": false
     }
   ],
@@ -270,20 +270,29 @@
       "subtitle": "Karakeep",
       "description": "Quickly bookmark the current browser tab",
       "mode": "no-view"
+    },
+    {
+      "name": "updateKarakeep",
+      "title": "Update Karakeep",
+      "description": "Pull the latest Docker images and restart a local Karakeep instance",
+      "mode": "view",
+      "platforms": [
+        "macOS"
+      ]
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.2.2",
-    "@raycast/api": "^1.104.7",
-    "@raycast/utils": "^2.2.2"
+    "@chrismessina/raycast-logger": "^1.4.0",
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.3.3",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^9.35.0",
-    "prettier": "^3.8.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^25.9.5",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.2"
   },
   "scripts": {

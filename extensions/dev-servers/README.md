@@ -1,48 +1,41 @@
 # Dev Servers
 
-A keyboard-first dashboard for every dev server you have running. See them grouped by project, jump into any one in the browser or your terminal, kill stragglers individually or in bulk, and restart with the right package manager, all without leaving Raycast.
+See every dev server running on your Mac, organized by project rather than by port. Kill, restart, open, or start servers without leaving Raycast, and keep a live count in your menu bar.
 
-## Features
+## Commands
 
-- **Auto-detects** running dev servers including Vite, Next.js, Astro, SvelteKit, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, esbuild, serve, http-server, anything that runs out of `node_modules/`, plus servers running on the Bun runtime
-- **Custom domain aware** so a dev server fronted by [portless](https://github.com/vercel-labs/portless) shows its named URL (e.g. `myapp.localhost`) as the row title, with the `localhost:PORT` pill alongside for when you still need the raw loopback target
-- **Grouped by project** so servers from the same directory appear under one section
-- **Worktree-aware** so multiple git worktrees of the same repo collapse into one section, with a per-row branch tag to tell them apart — also surfaces the current branch on single-worktree projects so you can tell which branch a long-running server is on
-- **Favicons** — PNG, ICO, or SVG — are pulled from each site (with `/favicon.ico` fallback), inlined so they render even when the dev server isn't CORS-friendly, and cached across refreshes
-- **Runtime tag** shows a yellow `bun` badge when the listening process is genuinely running on Bun
-- **Uptime tracking** shows how long each server has been running. Hover for the exact start time
-- **Smart restart** picks the right package manager (npm, pnpm, yarn, bun) from the project's lockfile, polls until the new server binds a port, and surfaces failures with a link to the log
-- **Confirm dialogs on bulk-kill** ensure destructive actions ask first, with a "Don't ask again" option for project-scoped kills
-- **Open in your terminal** uses a configurable terminal app preference (Terminal, iTerm, Warp, Ghostty, etc.)
-- **Search and filter** by typing a project name, branch, or port into the search bar; a framework dropdown appears when you have multiple frameworks running
-- **Stays open** because the window never closes after an action, so you can chain kills and restarts in one session
-- **Auto-refresh** updates the list automatically on a configurable interval, plus manual `⌘R`
+- **Dev Servers**: a live dashboard of everything running, grouped by project.
+- **Start Dev Server**: spin up a server from a Finder selection, a recent project, or any folder.
+- **Dev Servers Menu Bar**: the running count in your menu bar, with quick actions in the dropdown.
 
-## Keyboard Shortcuts
+## Dashboard
 
-| Action | Shortcut |
-|---|---|
-| Open in Browser | `↵` Enter |
-| Open Localhost URL | `⌘` `↵` |
-| Kill Server | `⌃` `X` |
-| Copy URL | `⌘` `C` |
-| Copy Localhost URL | `⌘` `⇧` `C` |
-| Restart Server | `⌘` `⇧` `R` |
-| Open in Terminal | `⌘` `T` |
-| Show in Finder | `⌘` `⇧` `F` |
-| Refresh | `⌘` `R` |
-| Kill All for Project | `⌃` `⇧` `X` |
-| Kill All Servers | `⌃` `⌥` `X` |
+- Auto-detects Vite, Next.js, SvelteKit, Astro, Nuxt, Webpack, Remix, Wrangler, Shopify CLI, Bun, and anything else running out of `node_modules`
+- Groups servers by project; git worktrees collapse into one section with per-row branch tags
+- Kill one server (`⌃X`), a whole project (`⌃⇧X`), or everything (`⌃⌥X`); bulk kills ask first
+- Restart (`⌘⇧R`) with the right package manager, detected from the lockfile (npm, pnpm, yarn, bun)
+- Shows [portless](https://github.com/vercel-labs/portless) custom domains, real favicons, uptime, and framework tags
+- Open in browser, editor (`⌘E`), or terminal (`⌘T`); copy the URL, network URL for phone testing (`⌘⌥C`), or port (`⌘⌥P`)
+- View any server's startup log (`⌘L`), live-tailed while open
+- Auto-refreshes on your interval; search by project, branch, or port, or narrow the list to one framework
+
+## Start Dev Server
+
+- Works from a Finder selection (multi-folder too), a picker of recently seen projects, or the native folder dialog. Run it straight from Finder and the selection starts right away; reach the picker from the dashboard (`⌘N`) and the same selection waits at the top as **Selected in Finder** until you press `↵`
+- Finds the right script automatically: `dev`, `start`, `develop`, then monorepo names like `dev:web`
+- Shopify support: themes start with `shopify theme dev` (with automatic port fallback when 9292 is taken), app roots with `shopify app dev`, and Hydrogen storefronts through their normal scripts
+- A start that never binds a port says so on its row, names the cause when it can, and keeps **View Startup Log** a keystroke away. A restart that doesn't come back does the same
+- First-run note for Shopify: run `shopify theme dev --store <your-store>` once in a terminal so the CLI remembers your store; a background spawn can't answer its login prompt
+- Note for portless users: dev scripts wrapped in `portless run` need the portless proxy already running, since a background spawn has no TTY for its sudo prompt. Run `portless service install` once and the proxy starts at boot, so starts keep working after a reboot
+
+## Menu Bar
+
+- Live count of running servers next to the icon (toggleable)
+- Each server gets a submenu: open, restart, kill, copy URL or port, editor, terminal
+- Projects running several servers get a one-click kill-all item ("Kill Both Servers", "Kill All 3 Servers")
+- A **Start** section lists your recent projects, ranked by how often you start them
+- Starts hand off to the dashboard, so you can watch the server come up
 
 ## Preferences
 
-- **Terminal App** sets which terminal `⌘T` opens. Defaults to macOS Terminal if unset.
-- **Refresh Interval** sets how often to refresh the server list (2s, 5s, 10s, or 30s).
-- **Project Display** shows the full directory path in section headers instead of just the project folder name.
-- **Row Accessories** independently toggle uptime, the git branch tag, the framework tag, and the `localhost:PORT` pill that appears alongside custom domains.
-
-## How it differs from Port Manager
-
-Port Manager is built around ports. Dev Servers is built around projects.
-
-Port Manager shows every listening process the same way (Postgres, Docker, SSH tunnels, dev servers). Dev Servers shows only the dev servers, groups them by project, identifies the framework, and restarts with the right package manager. The two are complementary.
+Pick your terminal and editor apps once (shared by all commands), set the dashboard refresh interval and row accessories, choose whether new servers auto-open in the browser, and toggle the menu bar count.

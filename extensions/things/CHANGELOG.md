@@ -1,5 +1,32 @@
 # Things Changelog
 
+## [Tag Pills] - 2026-10-21
+
+- Show each to-do tag as its own tag pill in list rows instead of a single comma-separated label.
+- Fixed the build failing to extract AI tool schemas for `get-projects` and `get-areas`, whose return types referenced each other recursively.
+
+## [Things 3.23 Compatibility] - 2026-08-29
+
+- Fixed Today and Anytime missing to-dos whose scheduled date had arrived when the Unofficial API preference is enabled. Things 3.23 leaves such a to-do marked as scheduled, so the extension has to decide list membership by date.
+- Fixed Upcoming dropping repeating to-dos while an occurrence was pending. They now appear as dateless entries after the dated ones, matching Things, which computes the next date internally and does not expose it.
+- Fixed to-dos inside trashed projects leaking into every Unofficial API list, into Quick Find, and into search results. Trashing a project leaves its to-dos untouched in the database, so each query has to check the parent.
+- Marking a repeating to-do's template as completed or canceled now shows an error instead of a false success toast. Things silently ignores the write, so complete or cancel the scheduled occurrence instead.
+
+## [Fix Marking To-Dos Completed] - 2026-07-22
+
+- Restore marking to-dos completed or canceled from list rows and the Today menu bar. The previous release's writable-key allowlist in the property setter rejected `status`, so those actions threw an error.
+
+## [Expanded AI Tools and Optional Database Reading] - 2026-07-10
+
+- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, and `add-json` (create projects with headings and nested to-dos in one call).
+- Added an optional "Unofficial API" preference that reads lists directly from the Things database instead of using Apple Events. It requires Full Disk Access and is off by default.
+- When the Unofficial API is enabled, recurring tasks now show the correct upcoming deadline instead of a placeholder value, and a `dueDateIsRecurring` field signals when a due date shifts with each recurrence.
+- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects instead of plain strings.
+
+## [Bug Fixes] - 2026-06-04
+
+- Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
+
 ## [Detail View for To-Dos] - 2026-05-25
 
 - Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).

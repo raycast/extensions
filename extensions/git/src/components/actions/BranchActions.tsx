@@ -10,8 +10,10 @@ import {
   useNavigation,
   clearSearchBar,
   Color,
+  Keyboard,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { useCachedState } from "@raycast/utils";
 import { Branch, MergeMode, Remote } from "../../types";
 import InteractiveRebaseEditorView from "../views/InteractiveRebaseEditorView";
 import { RemoteHostIcon } from "../icons/RemoteHostIcons";
@@ -22,7 +24,15 @@ import { RemoteWebPageAction } from "./RemoteActions";
  * Unified action for checking out a branch (local or remote).
  */
 export function BranchCkeckoutAction(context: RepositoryContext & NavigationContext & { branch: Branch }) {
+  const attachedWorktree = context.worktrees.attachedTo(context.branch.name);
+
   const handleCheckout = async () => {
+    // A branch checked out in another worktree cannot be checked out here, so open that worktree instead
+    if (attachedWorktree) {
+      context.switchTo(attachedWorktree.path);
+      return;
+    }
+
     const isRemote = context.branch.type === "remote";
 
     const confirmed = await confirmAlert({
@@ -346,7 +356,7 @@ export function BranchCreateAction(context: RepositoryContext) {
       title="Create New Branch"
       target={<BranchCreateForm {...context} />}
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
     />
   );
 }
@@ -360,14 +370,14 @@ export function BranchRenameAction(context: RepositoryContext & NavigationContex
       title="Rename"
       target={<BranchRenameForm {...context} />}
       icon={{ source: Icon.Pencil, tintColor: Color.Yellow }}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }
 
 function BranchCreateForm(context: RepositoryContext) {
   const { pop } = useNavigation();
-  const [branchName, setBranchName] = useState("");
+  const [branchName, setBranchName] = useCachedState(`create-branch-draft-${context.gitManager.repoPath}`, "");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: { branchName: string }) => {
@@ -376,6 +386,7 @@ function BranchCreateForm(context: RepositoryContext) {
       await context.gitManager.createBranch(values.branchName);
       context.branches.revalidate();
       context.status.revalidate();
+      setBranchName("");
       pop();
     } catch {
       // Git error is already shown by GitManager
@@ -478,21 +489,27 @@ export function BranchAttachedLinksAction(context: RepositoryContext & { branch:
     if (context.branch.upstream) {
       if (context.branch.isGone) return undefined;
 
+      const remote = context.remotes.data[context.branch.upstream.remote];
+      if (!remote) return undefined;
+
       return {
-        remote: context.remotes.data[context.branch.upstream.remote],
+        remote,
         branch: context.branch.upstream.name,
       };
     }
 
     if (context.branch.remote) {
+      const remote = context.remotes.data[context.branch.remote];
+      if (!remote) return undefined;
+
       return {
-        remote: context.remotes.data[context.branch.remote],
+        remote,
         branch: context.branch.name,
       };
     }
 
     return undefined;
-  }, [context.branch]);
+  }, [context.branch, context.remotes.data]);
 
   if (!branchContext) {
     return undefined;

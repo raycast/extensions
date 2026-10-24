@@ -17,7 +17,10 @@
     "ViGeng",
     "dante",
     "5z99tsb75z",
-    "xilopaint"
+    "xilopaint",
+    "chrahe",
+    "clins1994",
+    "bitforger"
   ],
   "categories": [
     "Applications",
@@ -93,7 +96,7 @@
     },
     {
       "name": "paste-latest-otp-code",
-      "title": "Paste Latest OTP Code",
+      "title": "Paste Latest Otp Code",
       "description": "Paste the latest OTP code from your emails.",
       "mode": "no-view",
       "keywords": [
@@ -174,6 +177,11 @@
       "description": "Search for emails in Apple Mail."
     },
     {
+      "name": "read-inbox-emails",
+      "title": "Read Inbox Emails",
+      "description": "Search and read full email text from the Inbox in pages of up to 10 messages. Continue with nextOffset until hasMore is false; limitReached indicates the 10,000-message pagination ceiling."
+    },
+    {
       "name": "read-email",
       "title": "Read Email",
       "description": "Read the full content of an email."
@@ -189,9 +197,39 @@
       "description": "List all available email addresses from the user's mail accounts."
     },
     {
+      "name": "list-mailboxes",
+      "title": "List Mailboxes",
+      "description": "List mailboxes available in Apple Mail accounts."
+    },
+    {
       "name": "send-email",
       "title": "Send Email",
       "description": "Send an email with Apple Mail."
+    },
+    {
+      "name": "respond-to-email",
+      "title": "Reply or Forward Email",
+      "description": "Reply, reply-all, or forward an email in Apple Mail. Sending requires confirmation."
+    },
+    {
+      "name": "manage-email",
+      "title": "Manage Email",
+      "description": "Mark an email read or unread, archive it, move it to Junk, or move it to a mailbox. Mutations require confirmation."
+    },
+    {
+      "name": "list-email-attachments",
+      "title": "List Email Attachments",
+      "description": "List attachments on an Apple Mail message."
+    },
+    {
+      "name": "save-email-attachment",
+      "title": "Save Email Attachment",
+      "description": "Save an attachment to the configured mail attachment folder. Saving requires confirmation."
+    },
+    {
+      "name": "move-to-trash",
+      "title": "Move to Trash",
+      "description": "Move an email to Trash in Apple Mail."
     },
     {
       "name": "copy-email-link",
@@ -207,7 +245,7 @@
     "javascript-time-ago": "^2.5.10",
     "json2md": "^1.13.0",
     "juice": "^9.1.0",
-    "mailparser": "^3.9.4",
+    "mailparser": "^3.9.31",
     "mime-types": "^2.1.35",
     "plist": "^3.1.0",
     "string-strip-html": "^13.4.12",
@@ -236,5 +274,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12"
+  }
 }

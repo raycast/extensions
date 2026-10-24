@@ -1,7 +1,7 @@
-# Claude Code Usage (ccusage)
+# Claude Usage (ccusage)
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/4ae63a5c-3064-4050-8077-45b508dcc4ff" alt="Claude Code Usage Icon" width="128" height="128">
+  <img src="https://github.com/user-attachments/assets/4ae63a5c-3064-4050-8077-45b508dcc4ff" alt="Claude Usage Icon" width="128" height="128">
   
   A Raycast extension that provides real-time monitoring of Claude Code usage statistics using the [ccusage](https://github.com/ryoppippi/ccusage) CLI tool.
   
@@ -14,20 +14,23 @@
 Monitor your Claude Code usage with comprehensive real-time statistics:
 
 - **Today Usage**: Track input/output tokens and costs for today with visual intensity indicators
+- **This Week and This Month**: View weekly and monthly totals with comparisons to the previous period
 - **Session History**: View recent usage sessions with model-specific breakdown and icons
 - **Cost Analysis**: Detailed cost tracking with monthly projections and spending insights
-- **Model Statistics**: Usage analytics by Claude model (Opus, Sonnet, Haiku) with tier grouping
-- **Usage Limits**: OAuth-backed 5-hour and 7-day Claude usage limits when Claude Code is authenticated with Claude OAuth
+- **Model Statistics**: Usage analytics by Claude model (Fable, Opus, Sonnet, Haiku) with tier grouping
+- **Usage Limits**: OAuth-backed 5-hour, 7-day, and per-model Claude usage limits when Claude Code is authenticated with Claude OAuth
 - **Menu Bar Integration**: Quick access to usage stats directly from your system menu bar
+- **Pie Chart Icon**: Menu bar icon that fills clockwise with a pie chart showing 5-hour usage utilization
 - **AI Extension Support**: Comprehensive integration with Raycast AI Extensions for Claude models
 - **Default View Preference**: Choose which section to display first when opening the extension
+- **Section Preferences**: Show only the sections you need and skip reports that have no visible consumers
 - **Custom npx Path**: Support for custom npx installations and non-standard Node.js setups
 
 ## Screenshots
 
 ### Main Usage View
 
-![Claude Code Usage](metadata/ccusage-2.png)
+![Claude Usage](metadata/ccusage-2.png)
 
 ## Requirements
 
@@ -54,20 +57,21 @@ The Usage Limits feature is only available when Claude Code is authenticated wit
 
 ### Configuration (Optional)
 
-- **Default View**: Set which section appears first (Today Usage, Session History, Cost Analysis, or Model Breakdown)
+- **Default View**: Set which section appears first (Today, This Week, This Month, Sessions, Costs, Models, or Usage Limits). If it is hidden, the first visible section is selected.
+- **Show Sections**: Each section has a checkbox under the **Claude Usage** command. Hidden sections do not load or refresh. Sessions, Costs, and Models share one session report, so disabling Sessions alone still allows Costs and Models to use it. Turning all sections off makes this command run no usage reports or usage-limit requests.
 - **Custom npx Path**: If npx is installed in a non-standard location, specify the full path to npx
 
-Access preferences with **Cmd+Shift+,** when the extension is open.
+Use **Actions → Open Command Preferences** when the extension is open. These section settings apply to the main command; the menu bar has its own settings.
 
 ## Important Notes
 
 - **Unofficial Extension**: This extension is not an official product of Anthropic or the ccusage developers
 - **Data Privacy**: All usage data is processed locally using the ccusage CLI tool
-- **Performance**: The extension uses optimized refresh intervals to balance real-time updates with system performance
+- **Performance**: Required summaries share one scan; session details load independently. Completed summaries appear while session details are still loading. All views share compact cached reports across launches. Fresh cache entries avoid another scan; only missing or expired sections refresh. Model totals still include the full session history. Automatic refresh uses the configured refresh interval.
 
 ## Support
 
-If you encounter any issues or have suggestions, please [create an issue](<https://github.com/raycast/extensions/issues/new?title=%5BClaude+Code+Usage+(ccusage)%5D+...&template=extension_bug_report.yml&labels=extension,bug&extension-url=https://www.raycast.com/nyatinte/ccusage&body=%0A%3C!--%0APlease+update+the+title+above+to+consisely+describe+the+issue%0A--%3E%0A%0A%23%23%23+Extension%0A%0Ahttps://raycast.com/%23%7Bextension_path(extension)%7D%0A%0A%23%23%23+Description%0A%0A%3C!--%0APlease+provide+a+clear+and+concise+description+of+what+the+bug+is.+Include+screenshots+if+needed.+Please+test+using+the+latest+version+of+the+extension,+Raycast+and+API.%0A--%3E%0A%0A%23%23%23+Steps+To+Reproduce%0A%0A%3C!--%0AYour+bug+will+get+fixed+much+faster+if+the+extension+author+can+easily+reproduce+it.+Issues+without+reproduction+steps+may+be+immediately+closed+as+not+actionable.%0A--%3E%0A%0A1.+In+this+environment...%0A2.+With+this+config...%0A3.+Run+'...'%0A4.+See+error...%0A%0A%23%23%23+Current+Behavior%0A%0A%23%23%23+Expected+Behavior%0A%0A>) in the repository.
+If you encounter any issues or have suggestions, please [create an issue](<https://github.com/raycast/extensions/issues/new?title=%5BClaude+Usage+(ccusage)%5D+...&template=extension_bug_report.yml&labels=extension,bug&extension-url=https://www.raycast.com/nyatinte/ccusage&body=%0A%3C!--%0APlease+update+the+title+above+to+consisely+describe+the+issue%0A--%3E%0A%0A%23%23%23+Extension%0A%0Ahttps://raycast.com/%23%7Bextension_path(extension)%7D%0A%0A%23%23%23+Description%0A%0A%3C!--%0APlease+provide+a+clear+and+concise+description+of+what+the+bug+is.+Include+screenshots+if+needed.+Please+test+using+the+latest+version+of+the+extension,+Raycast+and+API.%0A--%3E%0A%0A%23%23%23+Steps+To+Reproduce%0A%0A%3C!--%0AYour+bug+will+get+fixed+much+faster+if+the+extension+author+can+easily+reproduce+it.+Issues+without+reproduction+steps+may+be+immediately+closed+as+not+actionable.%0A--%3E%0A%0A1.+In+this+environment...%0A2.+With+this+config...%0A3.+Run+'...'%0A4.+See+error...%0A%0A%23%23%23+Current+Behavior%0A%0A%23%23%23+Expected+Behavior%0A%0A>) in the repository.
 
 ## Credits
 

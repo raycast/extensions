@@ -9,7 +9,17 @@ const execAsync = promisify(exec);
 type ClaudeCredentials = {
   claudeAiOauth?: {
     accessToken?: string;
+    expiresAt?: number;
   };
+};
+
+const TOKEN_EXPIRY_SKEW_MS = 60 * 1000;
+
+const isUsable = (creds: ClaudeCredentials | null): boolean => {
+  const oauth = creds?.claudeAiOauth;
+  if (!oauth?.accessToken || oauth.accessToken.trim().length === 0) return false;
+  if (oauth.expiresAt === undefined) return true;
+  return oauth.expiresAt - Date.now() > TOKEN_EXPIRY_SKEW_MS;
 };
 
 const readCredentialsFile = async (): Promise<ClaudeCredentials | null> => {
@@ -33,8 +43,12 @@ const readCredentialsKeychain = async (): Promise<ClaudeCredentials | null> => {
 
 export const getClaudeCredentials = async (): Promise<ClaudeCredentials | null> => {
   const fromFile = await readCredentialsFile();
-  if (fromFile?.claudeAiOauth?.accessToken) return fromFile;
-  return readCredentialsKeychain();
+  if (isUsable(fromFile)) return fromFile;
+
+  const fromKeychain = await readCredentialsKeychain();
+  if (isUsable(fromKeychain)) return fromKeychain;
+
+  return fromFile ?? fromKeychain;
 };
 
 export const getClaudeAccessToken = async (): Promise<string | null> => {

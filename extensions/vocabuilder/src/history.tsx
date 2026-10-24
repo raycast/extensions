@@ -11,15 +11,22 @@ import {
   Toast,
 } from "@raycast/api";
 import { posColor } from "./lib/colors";
+import { SHORTCUTS } from "./lib/shortcuts";
 import { useEffect, useState } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
+import LanguagePairDropdown from "./components/LanguagePairDropdown";
 import PronounceAction from "./components/PronounceAction";
+import { TranslationDetail } from "./components/TranslationDetail";
 import { exportToFile, formatAnki, formatJson, formatQuizlet } from "./lib/export";
 import { useLanguagePair } from "./hooks/useLanguagePair";
-import { LanguagePair, storageKeyPrefix, swapLanguagePair } from "./lib/languages";
-import { buildTranslationDetailMarkdown, buildTextTranslationDetailMarkdown } from "./lib/markdown";
+import { LanguagePair, storageKeyPrefix } from "./lib/languages";
+import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
 import { Translation } from "./lib/types";
+
+// The thrown value is a raw fs error carrying the user's absolute Downloads
+// path. See AGENTS.md → Security Guardrails.
+const EXPORT_FAILED_MESSAGE = "Could not write the file to your Downloads folder.";
 
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
@@ -37,21 +44,22 @@ function relativeTime(timestamp: number): string {
   return `${days}d ago`;
 }
 
-export default function History(props: { languagePair?: LanguagePair }) {
-  const langResult = useLanguagePair();
-  const initialPair = props.languagePair ?? langResult.pair;
-  const [languagePair, setLanguagePair] = useState<LanguagePair | null>(initialPair);
+function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
+  return (
+    <Action title="Toggle Languages" icon={Icon.Switch} shortcut={SHORTCUTS.toggleLanguages} onAction={onAction} />
+  );
+}
 
-  // Re-sync when preferences become valid after LanguageConfigError
-  if (!languagePair && langResult.pair) {
-    setLanguagePair(langResult.pair);
-  }
+export default function History(props: { languagePair?: LanguagePair }) {
+  const langResult = useLanguagePair(props.languagePair);
 
   const [history, setHistory] = useState<Translation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
 
+  const languagePair = langResult.pair;
+  const defaultPair = langResult.defaultPair;
   const pairKey = languagePair ? storageKeyPrefix(languagePair) : null;
 
   useEffect(() => {
@@ -70,30 +78,40 @@ export default function History(props: { languagePair?: LanguagePair }) {
     };
   }, [pairKey]);
 
-  if (!languagePair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  if (!languagePair || !defaultPair) {
+    return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  }
 
-  function handleToggleLanguages() {
+  const activePair = languagePair;
+  const activeDefaultPair = defaultPair;
+
+  async function handleLanguagePairChange(value: string) {
+    if (value === pairKey) return;
     setSearchText("");
-    setLanguagePair((prev) => {
-      if (!prev) return prev;
-      const swapped = swapLanguagePair(prev);
-      showToast({
-        style: Toast.Style.Success,
-        title: `${swapped.source.name} → ${swapped.target.name}`,
+    setIsShowingDetail(false);
+    setHistory([]);
+    setIsLoading(true);
+
+    const selected = await langResult.selectPairValue(value);
+    if (!selected) {
+      setIsLoading(false);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid language pair",
+        message: "Choose one of the supported language pairs.",
       });
-      return swapped;
+      return;
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: languagePairTitle(selected),
     });
   }
 
-  function ToggleLanguagesAction() {
-    return (
-      <Action
-        title="Toggle Languages"
-        icon={Icon.Switch}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        onAction={handleToggleLanguages}
-      />
-    );
+  function handleToggleLanguages() {
+    const swapped = swapLanguagePair(activePair);
+    void handleLanguagePairChange(languagePairValue(swapped));
   }
 
   const filtered = searchText
@@ -147,11 +165,14 @@ export default function History(props: { languagePair?: LanguagePair }) {
   return (
     <List
       navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
-      isLoading={isLoading}
+      isLoading={isLoading || langResult.isLoading}
       isShowingDetail={isShowingDetail}
       searchBarPlaceholder="Search translations..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+      }
     >
       {filtered.length === 0 && !isLoading ? (
         <List.EmptyView
@@ -159,7 +180,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
           description="Use Translate to get started"
           actions={
             <ActionPanel>
-              <ToggleLanguagesAction />
+              <ToggleLanguagesAction onAction={handleToggleLanguages} />
             </ActionPanel>
           }
         />
@@ -177,24 +198,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                 : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
               { text: relativeTime(item.timestamp) },
             ]}
-            detail={
-              <List.Item.Detail
-                markdown={
-                  item.type === "text"
-                    ? buildTextTranslationDetailMarkdown(item.word, item.translation)
-                    : buildTranslationDetailMarkdown(item)
-                }
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title=""
-                      text="⌘O to pronounce · ⌘⇧O for translation"
-                      icon={Icon.SpeakerHigh}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            detail={<TranslationDetail item={item} languagePair={languagePair} />}
             actions={
               <ActionPanel>
                 <Action
@@ -205,28 +209,28 @@ export default function History(props: { languagePair?: LanguagePair }) {
                 <Action.CopyToClipboard
                   title="Copy Translation"
                   content={item.translation}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={SHORTCUTS.copyTranslation}
                 />
                 <PronounceAction
                   word={item.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
                 <PronounceAction
                   word={item.translation}
                   languageCode={languagePair.target.code}
                   title="Pronounce Translation"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceTranslation}
                 />
                 <Action
                   title="Delete"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={SHORTCUTS.deleteEntry}
                   onAction={() => handleDelete(item.id)}
                 />
-                <ToggleLanguagesAction />
+                <ToggleLanguagesAction onAction={handleToggleLanguages} />
                 <ActionPanel.Section title="Export">
                   <Action
                     title="Export as JSON"
@@ -238,15 +242,19 @@ export default function History(props: { languagePair?: LanguagePair }) {
                         const filePath = exportToFile(content, "json");
                         await showInFinder(filePath);
                         await showToast({ style: Toast.Style.Success, title: "Exported", message: filePath });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
                   <Action
                     title="Export to Anki"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    shortcut={SHORTCUTS.exportAnki}
                     onAction={async () => {
                       const content = formatAnki(history);
                       if (!content) {
@@ -261,15 +269,19 @@ export default function History(props: { languagePair?: LanguagePair }) {
                         const filePath = exportToFile(content, "anki");
                         await showInFinder(filePath);
                         await showToast({ style: Toast.Style.Success, title: "Exported for Anki", message: filePath });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
                   <Action
                     title="Export to Quizlet"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    shortcut={SHORTCUTS.exportQuizlet}
                     onAction={async () => {
                       const content = formatQuizlet(history);
                       if (!content) {
@@ -288,8 +300,12 @@ export default function History(props: { languagePair?: LanguagePair }) {
                           title: "Exported for Quizlet",
                           message: filePath,
                         });
-                      } catch (err) {
-                        await showToast({ style: Toast.Style.Failure, title: "Export failed", message: String(err) });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Export failed",
+                          message: EXPORT_FAILED_MESSAGE,
+                        });
                       }
                     }}
                   />
@@ -298,7 +314,7 @@ export default function History(props: { languagePair?: LanguagePair }) {
                   title="Clear All History"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  shortcut={SHORTCUTS.clearAllHistory}
                   onAction={handleClearAll}
                 />
               </ActionPanel>

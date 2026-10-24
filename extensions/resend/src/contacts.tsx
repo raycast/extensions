@@ -16,33 +16,36 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { isApiError } from "./utils/api";
 import { CreateContactRequestForm, UpdateContactRequestForm } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
-import { onError, useAudiences, useContacts } from "./lib/hooks";
-import { Audience, Contact } from "resend";
-import { resend } from "./lib/resend";
+import { onError, useContacts, useSegments } from "./lib/hooks";
+import { Segment, Contact } from "resend";
+import { getResend, withResend } from "./lib/oauth";
 
-export default function Audiences() {
-  const [audience, setAudience] = useState<Audience | undefined>();
+export default withResend(Segments);
+function Segments() {
+  const [segment, setSegment] = useState<Segment | undefined>();
 
-  const { isLoading: isLoadingAudience, audiences, error: errorAudiences } = useAudiences();
+  const { isLoading: isLoadingSegments, segments, error: errorSegments } = useSegments();
   const {
     isLoading: isLoadingContacts,
     contacts,
     error: errorContacts,
     mutate: mutateContacts,
-  } = useContacts(audience?.id);
+  } = useContacts(segment?.id);
 
-  async function confirmAndDelete(audienceId: string, contact: Contact) {
+  async function confirmAndRemove(segmentId: string, contact: Contact) {
     if (
       await confirmAlert({
-        title: `Delete '${contact.email}'?`,
+        title: `Remove '${contact.email}' From Segment?`,
         message: `id: ${contact.id}`,
-        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.id);
+      const toast = await showToast(Toast.Style.Animated, "Removing Contact From Segment", contact.id);
       try {
+        const resend = getResend();
+
         await mutateContacts(
-          resend.contacts.remove({ audienceId, id: contact.id }).then(({ error }) => {
+          resend.contacts.segments.remove({ segmentId, contactId: contact.id }).then(({ error }) => {
             if (error) throw new Error(error.message, { cause: error.name });
           }),
           {
@@ -53,27 +56,57 @@ export default function Audiences() {
           },
         );
         toast.style = Toast.Style.Success;
-        toast.title = "Deleted Contact";
+        toast.title = "Removed Contact From Segment";
       } catch (error) {
         onError(error as Error);
       }
     }
   }
 
-  const error = errorAudiences || errorContacts;
+  async function confirmAndDelete(contact: Contact) {
+    const confirmed = await confirmAlert({
+      title: `Delete '${contact.email}'?`,
+      message: "This permanently deletes the contact from your Resend account and all segments. This cannot be undone.",
+      primaryAction: { title: "Delete Contact", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.email);
+    try {
+      await mutateContacts(
+        getResend()
+          .contacts.remove({ id: contact.id })
+          .then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+        {
+          optimisticUpdate(data) {
+            return data.filter((c) => c.id !== contact.id);
+          },
+          shouldRevalidateAfter: false,
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = "Deleted Contact";
+    } catch (error) {
+      await onError(error as Error);
+    }
+  }
+
+  const error = errorSegments || errorContacts;
   return error && isApiError(error) ? (
     <ErrorComponent error={error} />
   ) : (
     <List
-      isLoading={isLoadingAudience || isLoadingContacts}
-      searchBarAccessory={<AudienceDropdown audiences={audiences} setAudience={setAudience} />}
+      isLoading={isLoadingSegments || isLoadingContacts}
+      searchBarAccessory={<SegmentDropdown segments={segments} setSegment={setSegment} />}
       actions={
         <ActionPanel>
-          {audience && (
+          {segment && (
             <Action.Push
               title="Create Contact"
               icon={Icon.Plus}
-              target={<CreateContact audience={audience} onCreated={mutateContacts} />}
+              target={<CreateContact segment={segment} onCreated={mutateContacts} />}
             />
           )}
         </ActionPanel>
@@ -93,33 +126,33 @@ export default function Audiences() {
           }
           actions={
             <ActionPanel>
-              {audience && (
+              {segment && (
                 <Action.Push
                   title="Create Contact"
                   icon={Icon.Plus}
-                  target={<CreateContact audience={audience} onCreated={mutateContacts} />}
+                  target={<CreateContact segment={segment} onCreated={mutateContacts} />}
                 />
               )}
-              {audience && (
+              {segment && (
                 <Action.Push
                   title="Edit Contact"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={<UpdateContact contact={contact} audience={audience} onUpdated={mutateContacts} />}
+                  target={<UpdateContact contact={contact} onUpdated={mutateContacts} />}
                 />
               )}
-              {audience && (
+              {segment && (
                 <Action
-                  title="Delete Contact"
+                  title="Remove From Segment"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={async () => {
-                    await confirmAndDelete(audience.id, contact);
+                    await confirmAndRemove(segment.id, contact);
                   }}
                 />
               )}
-              {audience && (
+              {segment && (
                 <Action
                   title="Refresh Contacts"
                   icon={Icon.Redo}
@@ -127,6 +160,14 @@ export default function Audiences() {
                   onAction={mutateContacts}
                 />
               )}
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Contact"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => confirmAndDelete(contact)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -135,34 +176,34 @@ export default function Audiences() {
   );
 }
 
-export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (audience: Audience) => void }) {
-  const { audiences, setAudience } = props;
+export function SegmentDropdown(props: { segments: Segment[]; setSegment: (segment: Segment) => void }) {
+  const { segments, setSegment } = props;
 
-  const onAudienceChange = (newValue: string) => {
-    const selectedAudience = audiences.find((audience) => audience.id === newValue);
-    if (selectedAudience) {
-      setAudience(selectedAudience);
+  const onSegmentChange = (newValue: string) => {
+    const selectedSegment = segments.find((segment) => segment.id === newValue);
+    if (selectedSegment) {
+      setSegment(selectedSegment);
     }
   };
 
   return (
     <List.Dropdown
-      tooltip="Select Audience"
+      tooltip="Select Segment"
       storeValue={true}
       onChange={(newValue) => {
-        onAudienceChange(newValue);
+        onSegmentChange(newValue);
       }}
     >
-      <List.Dropdown.Section title="Audiences">
-        {audiences.map((audience) => (
-          <List.Dropdown.Item key={audience.id} value={audience.id} title={audience.name} />
+      <List.Dropdown.Section title="Segments">
+        {segments.map((segment) => (
+          <List.Dropdown.Item key={segment.id} value={segment.id} title={segment.name} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
 
-function CreateContact({ audience, onCreated }: { audience: Audience; onCreated: () => void }) {
+function CreateContact({ segment, onCreated }: { segment: Segment; onCreated: () => void }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateContactRequestForm>({
     validation: {
@@ -171,7 +212,8 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Contact", values.email);
       try {
-        const { error } = await resend.contacts.create({ ...values, audienceId: audience.id });
+        const resend = getResend();
+        const { error } = await resend.contacts.create({ ...values, segments: [{ id: segment.id }] });
         if (error) throw new Error(error.message, { cause: error.name });
         toast.style = Toast.Style.Success;
         toast.title = "Created Contact";
@@ -199,24 +241,27 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
   );
 }
 
-function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated: () => void }) {
+function UpdateContact(props: { contact: Contact; onUpdated: () => void }) {
   const { pop } = useNavigation();
-  const { contact, audience, onUpdated } = props;
+  const { contact, onUpdated } = props;
 
-  const { itemProps, handleSubmit } = useForm<UpdateContactRequestForm>({
+  const { itemProps, handleSubmit } = useForm<
+    UpdateContactRequestForm & {
+      firstName: string | undefined;
+      lastName: string | undefined;
+    }
+  >({
     initialValues: {
-      email: contact.email,
-      firstName: contact.first_name,
-      lastName: contact.last_name,
+      firstName: contact.first_name || undefined,
+      lastName: contact.last_name || undefined,
       unsubscribed: contact.unsubscribed,
     },
-    validation: {
-      email: FormValidation.Required,
-    },
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
+      const toast = await showToast(Toast.Style.Animated, "Updating Contact", contact.email);
       try {
-        await resend.contacts.update({ ...values, audienceId: audience.id });
+        const resend = getResend();
+        const { error } = await resend.contacts.update({ ...values, id: contact.id });
+        if (error) throw new Error(error.message, { cause: error.name });
         toast.style = Toast.Style.Success;
         toast.title = "Updated Contact";
         onUpdated();
@@ -235,7 +280,7 @@ function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated:
         </ActionPanel>
       }
     >
-      <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
+      <Form.Description title="Email" text={contact.email} />
       <Form.TextField title="First Name" {...itemProps.firstName} placeholder="John" />
       <Form.TextField title="Last Name" {...itemProps.lastName} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />

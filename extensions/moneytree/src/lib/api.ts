@@ -1,5 +1,12 @@
 import { getAccessToken, ensureValidToken } from "./auth";
-import { DataSnapshot, TransactionsResponse, CredentialWithAccounts } from "./types";
+import {
+  CategoriesResponse,
+  Category,
+  DataSnapshot,
+  Transaction,
+  TransactionsResponse,
+  CredentialWithAccounts,
+} from "./types";
 import { API_BASE_URL, SDK_PLATFORM, SDK_VERSION, CLIENT_ID, API_VERSION, APP_BASE_URL } from "./constants";
 
 /**
@@ -49,38 +56,46 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     // Token might be expired, try to refresh
     try {
       await ensureValidToken();
-      // Retry the request with new token
-      const newHeaders = await getDefaultHeaders();
-      console.debug(`[API] Retrying ${method} ${url} with refreshed token`);
-      const retryResponse = await fetch(url, {
-        ...options,
-        headers: {
-          ...newHeaders,
-          ...options.headers,
-        },
-      });
-
-      if (!retryResponse.ok) {
-        console.debug(`[API] Retry failed: ${retryResponse.status} ${retryResponse.statusText}`);
-        throw new Error(`API request failed: ${retryResponse.status} ${retryResponse.statusText}`);
-      }
-
-      console.debug(`[API] ${method} ${url} - Success (after refresh)`);
-      return retryResponse.json() as Promise<T>;
-    } catch (error) {
-      console.debug(`[API] Authentication failed for ${url}: ${error}`);
+    } catch {
+      console.debug(`[API] Token refresh failed for ${url}`);
       throw new Error("Authentication failed. Please check your credentials.");
     }
+    // Retry the request with the refreshed token; only a second 401 points to credentials.
+    const newHeaders = await getDefaultHeaders();
+    console.debug(`[API] Retrying ${method} ${url} with refreshed token`);
+    const retryResponse = await fetch(url, {
+      ...options,
+      headers: {
+        ...newHeaders,
+        ...options.headers,
+      },
+    });
+
+    if (retryResponse.status === 401) {
+      console.debug(`[API] Retry still unauthorized for ${url}`);
+      throw new Error("Authentication failed. Please check your credentials.");
+    }
+    if (!retryResponse.ok) {
+      console.debug(`[API] Retry failed: ${retryResponse.status}`);
+      throw new Error(`API request failed: ${retryResponse.status}`);
+    }
+
+    console.debug(`[API] ${method} ${url} - Success (after refresh)`);
+    return parseApiResponse<T>(retryResponse);
   }
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.debug(`[API] ${method} ${url} - Error ${response.status}: ${errorText.substring(0, 200)}`);
-    throw new Error(`API request failed: ${response.status} ${errorText}`);
+    console.debug(`[API] ${method} ${url} - Error ${response.status}`);
+    throw new Error(`API request failed: ${response.status}`);
   }
 
   console.debug(`[API] ${method} ${url} - Success (${response.status})`);
-  return response.json() as Promise<T>;
+  return parseApiResponse<T>(response);
+}
+
+async function parseApiResponse<T>(response: Response): Promise<T> {
+  const body = await response.text();
+  return (body ? JSON.parse(body) : undefined) as T;
 }
 
 /**
@@ -119,6 +134,114 @@ export async function getAllAccounts(): Promise<CredentialWithAccounts[]> {
 export async function getCredentials(): Promise<CredentialWithAccounts[]> {
   const snapshot = await getDataSnapshot();
   return snapshot.guest.credentials;
+}
+
+/**
+ * Get Moneytree transaction categories.
+ */
+export async function getCategories(): Promise<Category[]> {
+  const response = await apiRequest<CategoriesResponse>("/presenter/categories.json?locale=en", { method: "GET" });
+  return response.categories;
+}
+
+/**
+ * Read saved category budgets.
+ * The response contains budget definitions, not calculated spending progress.
+ */
+export type Budget = { category_id: number; amount: number };
+
+export async function getBudgets(): Promise<Budget[]> {
+  const response = await apiRequest<{ budgets: Budget[] }>("/budgets.json", { method: "GET" });
+  if (!Array.isArray(response?.budgets)) {
+    throw new Error("Unexpected Moneytree budgets response");
+  }
+  return response.budgets;
+}
+
+/** Monthly spending totals per category for each period. */
+export type SpendingPeriod = {
+  start_date: string;
+  end_date: string;
+  total: number;
+  categories: Record<string, number>;
+};
+
+export async function getMonthlySpending(startDate: string, endDate: string): Promise<SpendingPeriod[]> {
+  const params = new URLSearchParams({
+    group_by: "monthly_period",
+    start_date: startDate,
+    end_date: endDate,
+    end_of_month: "0",
+    include_gap: "true",
+  });
+  const response = await apiRequest<{ category_totals: SpendingPeriod[] }>(
+    `/presenter/spending_historical.json?${params.toString()}`,
+  );
+  if (!Array.isArray(response?.category_totals)) throw new Error("Unexpected Moneytree spending response");
+  return response.category_totals;
+}
+
+/** This PUT route both sets an existing limit and creates a new one. */
+export async function putBudget(categoryId: number, amount: number): Promise<void> {
+  await apiRequest<unknown>(`/budgets/${categoryId}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
+}
+
+export async function removeBudget(categoryId: number): Promise<void> {
+  await apiRequest<void>(`/budgets/${categoryId}.json`, { method: "DELETE" });
+}
+
+/**
+ * Create a custom Moneytree subcategory.
+ */
+export async function createCategory(options: { parentId: number; name: string; iconKey?: string }): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>("/command/categories.json?locale=en", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      category: {
+        parent_id: String(options.parentId),
+        name: options.name,
+        icon_key: options.iconKey || "uncategorized",
+      },
+    }),
+  });
+
+  return response.category;
+}
+
+/**
+ * Update a custom Moneytree category.
+ */
+export async function updateCategory(options: {
+  categoryId: number;
+  parentId: number;
+  name: string;
+  iconKey?: string;
+}): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>(
+    `/command/categories/${options.categoryId}.json?locale=en`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+      body: JSON.stringify({
+        category: {
+          parent_id: String(options.parentId),
+          name: options.name,
+          icon_key: options.iconKey || "uncategorized",
+        },
+      }),
+    },
+  );
+
+  return response.category;
 }
 
 /**
@@ -177,4 +300,43 @@ export async function getTransactionPage(options: {
     `[API] getTransactionPage() - Page ${page}: ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_count})`,
   );
   return response;
+}
+
+/**
+ * Update editable transaction fields.
+ */
+export async function updateTransaction(options: {
+  transaction: Transaction;
+  descriptionGuest: string | null;
+  categoryId: number;
+}): Promise<Transaction> {
+  const { transaction, descriptionGuest, categoryId } = options;
+  const response = await apiRequest<{
+    transaction: Transaction & {
+      account?: { id: number };
+      category?: { id: number };
+    };
+  }>(`/command/transactions/${transaction.id}.json?locale=en`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      transaction: {
+        date: transaction.date,
+        amount: transaction.amount,
+        category_id: categoryId,
+        description_guest: descriptionGuest,
+        claim_id: transaction.claim_id,
+        expense_type: transaction.expense_type,
+      },
+      upload_ids: [],
+    }),
+  });
+
+  return {
+    ...response.transaction,
+    account_id: response.transaction.account_id ?? response.transaction.account?.id ?? transaction.account_id,
+    category_id: response.transaction.category_id ?? response.transaction.category?.id ?? categoryId,
+  };
 }

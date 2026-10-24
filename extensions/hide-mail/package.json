@@ -22,7 +22,15 @@
       "title": "Quick Create Random Email Alias",
       "subtitle": "HideMail",
       "description": "Generate and copy a random private email alias to clipboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "note",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "create",
@@ -40,24 +48,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.18.0",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "~20.5.7",
-    "@types/node-fetch": "^2.6.4",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "@typescript-eslint/parser": "^6.5.0",
-    "eslint": "^8.48.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
@@ -70,8 +73,21 @@
       "type": "password",
       "required": true,
       "title": "HideMail API Key",
-      "description": "Generate from our web-site - https://hidemail.app/user/api-tokens",
+      "description": "Create a token at https://hidemail.app/user/api-tokens and paste it here",
       "placeholder": "API Key"
+    },
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": false,
+      "title": "HideMail Host",
+      "description": "Only change this to use a different HideMail server. Always uses HTTPS",
+      "default": "https://hidemail.app",
+      "placeholder": "https://hidemail.app"
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ]
 }

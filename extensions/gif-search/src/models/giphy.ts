@@ -2,48 +2,42 @@ import { formatRelative } from "date-fns";
 
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
-import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
+import { APIOpt, createGifLookupUrl, IGif, IGifAPI, slugify } from "../models/gif";
 import { getGiphyLocale } from "../preferences";
+import { fetchProviderJson } from "../lib/fetchProviderJson";
 
 const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
+type GiphyResults = { data: GiphyGif[] };
+
+function getGiphyUrl(type: "gifs" | "videos" | undefined, opt?: APIOpt) {
+  const reqUrl = new URL(API_BASE_URL);
+  reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+  reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
+  reqUrl.searchParams.set("lang", getGiphyLocale());
+
+  if (type) {
+    reqUrl.searchParams.set("type", type);
+  }
+
+  return reqUrl;
+}
 
 export default async function giphy(type?: "gifs" | "videos") {
+  const provider = type === "videos" ? "GIPHY Clips" : "GIPHY";
+
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const reqUrl = new URL(API_BASE_URL);
+      const reqUrl = getGiphyUrl(type, opt);
       reqUrl.searchParams.set("q", term);
-      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
-      reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
-      reqUrl.searchParams.set("lang", getGiphyLocale());
 
-      if (type) {
-        reqUrl.searchParams.set("type", type);
-      }
-
-      const response = await fetch(reqUrl.toString());
-      if (!response.ok) {
-        throw new Error("Could not search gifs from Giphy");
-      }
-      const results = (await response.json()) as { data: GiphyGif[] };
+      const results = await fetchProviderJson<GiphyResults>(reqUrl, { provider, request: "search" });
       return { results: results.data.map(mapGiphyResponse) };
     },
 
     async trending(opt?: APIOpt) {
-      const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
-      reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
-      reqUrl.searchParams.set("lang", getGiphyLocale());
+      const reqUrl = getGiphyUrl(type, opt);
 
-      if (type) {
-        reqUrl.searchParams.set("type", type);
-      }
-
-      const response = await fetch(reqUrl.toString());
-      if (!response.ok) {
-        throw new Error("Could not get trending gifs from Giphy");
-      }
-
-      const results = (await response.json()) as { data: GiphyGif[] };
+      const results = await fetchProviderJson<GiphyResults>(reqUrl, { provider, request: "trending" });
       return { results: results.data.map(mapGiphyResponse) };
     },
 
@@ -52,11 +46,8 @@ export default async function giphy(type?: "gifs" | "videos") {
         return [];
       }
 
-      const reqUrl = new URL(API_BASE_URL);
-      reqUrl.searchParams.set("ids", ids.join(","));
-
-      const response = await fetch(reqUrl.toString());
-      const results = (await response.json()) as { data: GiphyGif[] };
+      const reqUrl = createGifLookupUrl(API_BASE_URL, ids);
+      const results = await fetchProviderJson<GiphyResults>(reqUrl, { provider, request: "GIF lookup" });
       return results.data.map(mapGiphyResponse);
     },
   };

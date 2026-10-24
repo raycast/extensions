@@ -1,4 +1,4 @@
-import { createSecret, parseDuration } from "../shared";
+import { createSecret, getDefaults, parseDuration } from "../shared";
 
 type Input = {
   /**
@@ -6,11 +6,11 @@ type Input = {
    */
   secret: string;
   /**
-   * How long the secret link should stay alive. Use a duration string like "30m", "1h", "24h", or "7d". Defaults to "1h".
+   * How long the secret link should stay alive. Use a duration string like "30m", "1h", "24h", or "7d". Defaults to the user's preference (1h unless changed).
    */
   duration?: string;
   /**
-   * Whether the secret should be deleted after the first view. Defaults to true.
+   * Whether the secret should be deleted after the first view. Defaults to the user's preference (true unless changed).
    */
   selfDestruct?: boolean;
 };
@@ -21,8 +21,9 @@ export default async function tool(input: Input) {
   }
 
   try {
-    const durationSeconds = (input.duration ? parseDuration(input.duration) : null) ?? 3600;
-    const selfDestruct = input.selfDestruct ?? true;
+    const defaults = getDefaults();
+    const durationSeconds = (input.duration ? parseDuration(input.duration) : null) ?? defaults.durationSeconds;
+    const selfDestruct = input.selfDestruct ?? defaults.selfDestruct;
     const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
 
     const shareUrl = await createSecret(input.secret, expirationTimestamp, selfDestruct);

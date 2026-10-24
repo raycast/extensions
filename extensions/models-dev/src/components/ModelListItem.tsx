@@ -1,5 +1,4 @@
-import { List, Icon, Action } from "@raycast/api";
-import type { ActionPanel } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { useMemo, memo } from "react";
 import { Model } from "../lib/types";
 import { formatPriceFixed } from "../lib/formatters";
@@ -7,25 +6,11 @@ import { ModelActions } from "./ModelActions";
 import { STATUS_COLORS } from "../lib/constants";
 import { getCapabilityAccessories } from "../lib/accessories";
 
-type ActionPanelChildren = Parameters<typeof ActionPanel>[0]["children"];
-
 interface ModelListItemProps {
   model: Model;
-  onAddToComparison?: (model: Model) => void;
-  canAddToComparison?: boolean;
-  primaryAction?: ActionPanelChildren;
-  extraActions?: ActionPanelChildren;
-  accessories?: List.Item.Accessory[];
 }
 
-export const ModelListItem = memo(function ModelListItem({
-  model,
-  onAddToComparison,
-  canAddToComparison,
-  primaryAction,
-  extraActions,
-  accessories: customAccessories,
-}: ModelListItemProps) {
+export const ModelListItem = memo(function ModelListItem({ model }: ModelListItemProps) {
   const defaultAccessories = useMemo(() => {
     const acc: List.Item.Accessory[] = [];
 
@@ -59,43 +44,13 @@ export const ModelListItem = memo(function ModelListItem({
     return acc;
   }, [model.status, model.reasoning, model.tool_call, model.modalities, model.cost?.input, model.cost?.output]);
 
-  const accessories = customAccessories ?? defaultAccessories;
-
-  // Keywords for search — provider terms only.
-  // Model name is already searchable via the title prop (fuzzy matched by Raycast).
-  const keywords = useMemo(
-    () => [model.providerId, model.providerName, model.family ?? ""].filter(Boolean),
-    [model.providerId, model.providerName, model.family],
-  );
-
-  const defaultPrimaryAction = useMemo(() => {
-    if (!onAddToComparison) return undefined;
-
-    if (canAddToComparison === false) {
-      return <Action.CopyToClipboard title="Copy Model ID" content={model.id} />;
-    }
-
-    return <Action title="Add to Comparison" icon={Icon.PlusCircle} onAction={() => onAddToComparison(model)} />;
-  }, [onAddToComparison, canAddToComparison, model.id]);
-
-  const resolvedPrimaryAction = primaryAction ?? defaultPrimaryAction;
-
   return (
     <List.Item
       title={model.name}
       subtitle={model.providerName}
       icon={{ source: model.providerLogo, fallback: Icon.Globe }}
-      accessories={accessories}
-      keywords={keywords}
-      actions={
-        <ModelActions
-          model={model}
-          onAddToComparison={onAddToComparison}
-          canAddToComparison={canAddToComparison}
-          primaryAction={resolvedPrimaryAction}
-          extraActions={extraActions}
-        />
-      }
+      accessories={defaultAccessories}
+      actions={<ModelActions model={model} />}
     />
   );
 });

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-09
+
+### Added
+
+- Add support for TickTick, Google Calendar, Google Drive and API (web page) notifications
+- Fill notification previews with rich content (metadata sidebar, body and comment/message threads) modeled on the web app
+- Show the notification source type (e.g. Linear Issue, GitHub Pull Request) in the preview metadata
+
+### Changed
+
+- Swap notification list shortcuts: `Enter` shows details, `Cmd+Enter` opens in browser
+
+### Fixed
+
+- Fix "could not open app" error when opening Google Calendar notifications
+
 ## [0.2.0] - 2024-12-16
 
 ### Added

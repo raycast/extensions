@@ -22,10 +22,12 @@ export function useSetupAuth() {
       await doAuth();
       setStatus("ready");
     } catch (error) {
-      const msg = error instanceof Error ? error.message.toLowerCase() : "";
-      if (!msg.includes("cancel") && !msg.includes("abort")) {
-        setConnectError("Authentication failed. Please verify your setup and try again.");
+      const msg = error instanceof Error ? error.message : String(error);
+      const lower = msg.toLowerCase();
+      if (lower.includes("cancel") || lower.includes("abort") || lower.includes("denied")) {
+        return;
       }
+      setConnectError(msg || "Authentication failed. Please verify your setup and try again.");
     }
   }, []);
 

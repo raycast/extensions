@@ -1,5 +1,27 @@
 # Moneytree Changelog
 
+## [Category Budgets] - 2026-10-20
+
+- Add List Budgets: see each category's spending against its limit with color-coded progress, a monthly total, sorting, and over-budget filters.
+- Add budget details with a chart of this month's spending, last month, and a 12-month average, alongside the month's transactions.
+- Create, edit, and delete budgets and edit their custom categories from Raycast or AI. Each budget counts only its own category, matching the Moneytree app.
+- Ask AI how much you've spent in a budget category; it asks for clarification when a name is ambiguous.
+- Add a refresh action when budgets fail to load, clearer error messages, and consistent command titles.
+
+## [Improved Category Management & Metadata Updates] - 2026-06-03
+
+- Add a category browser command with custom/built-in filters and custom category create/edit actions
+- Remake metadata screenshots so that the old logo is replaced with the new extension icon
+
+## [AI Commands & New Features for Transactions & Categories] - 2026-06-03
+
+- Add an action and AI tools to update transaction descriptions/categories and create custom subcategories
+- Improved authentication error handling for auto re-login failures
+- Update extension icon to not use the official Moneytree logo
+- Added AI tools for asking Raycast AI about Moneytree credentials, accounts, and transactions
+- Reused shared Moneytree fetch and cache helpers across AI tools and existing list commands
+- Added AI instructions and evals for account balances, transaction searches, and credential health questions
+
 ## [Various Improvements] - 2026-04-12
 
 - Made displayed content more similar to https://app.getmoneytree.com

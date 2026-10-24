@@ -45,13 +45,16 @@ export type AliasesCreateRequest = {
   local_part?: string;
   domain?: string;
 };
+export type AliasesDeleteRequest = {
+  address: string;
+};
 
 export type ErrorResponseObject = { error: string };
 export type ErrorResponse = string | ErrorResponseObject;
 
 export type BodyRequest = TokenRequest | AliasesCreateRequest;
 
-export type APIMethod = "GET" | "POST";
+export type APIMethod = "GET" | "POST" | "DELETE";
 export type APIHeaders = {
   Accept: "application/json";
   "Content-Type": "application/json";

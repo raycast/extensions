@@ -7,6 +7,8 @@ import type {
   RootConfig,
 } from "./types";
 
+const RAYCAST_PROTOCOL = `${process.env.RAYCAST_SCHEME ?? "raycast"}:`;
+
 export interface GroupDestination {
   label: string;
   path: string[];
@@ -38,6 +40,10 @@ export function buildCapturedAction(input: CapturedActionInput): Action {
       ? { browser: input.browser }
       : {}),
   };
+}
+
+export function normalizeCapturedKey(value: string): string {
+  return value.trim().slice(0, 1);
 }
 
 export function flattenGroupDestinations(
@@ -124,6 +130,7 @@ function isUrl(value: string): boolean {
     return (
       url.protocol === "http:" ||
       url.protocol === "https:" ||
+      url.protocol === RAYCAST_PROTOCOL ||
       url.protocol === "raycast:"
     );
   } catch {
@@ -143,7 +150,7 @@ function looksLikePath(value: string): boolean {
 export function getUrlLabel(value: string): string {
   try {
     const url = new URL(value);
-    if (url.protocol === "raycast:") {
+    if (url.protocol === RAYCAST_PROTOCOL || url.protocol === "raycast:") {
       return "Raycast";
     }
     return url.hostname.replace(/^www\./, "") || value;

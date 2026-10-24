@@ -10,6 +10,7 @@ import {
   Color,
   environment,
   AI,
+  Keyboard,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
@@ -74,10 +75,6 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               name = 'anytime';
             } else if (values.when === 'someday') {
               name = 'someday';
-            } else if (values.when === 'logbook') {
-              name = 'logbook';
-            } else if (values.when === 'trash') {
-              name = 'trash';
             } else {
               name = 'inbox';
             }
@@ -161,7 +158,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               title="Focus When"
               icon={Icon.TextInput}
               onAction={() => focus('when')}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action
               title="Focus List"
@@ -179,7 +176,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
               title="Focus Checklist"
               icon={Icon.TextInput}
               onAction={() => focus('checklist-items')}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Focus Deadline"

@@ -8,12 +8,141 @@ import utf8 from "utf8";
 import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction } from "../types";
 import { constructDate, formatMarkdown, messageLimit, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
-import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { getMailboxType, isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
 import { Validation } from "../utils/validation";
+import { getAccounts } from "./accounts";
 
 // Override plainTextMode preference until HTML formatting issues in prod build are resolved
 const plainTextMode = true;
+
+type MoveMessageOptions = {
+  silent?: boolean;
+};
+
+type MessageLookupOptions = {
+  accountName?: string;
+  mailboxName?: string;
+};
+
+type MessageLookupResult = {
+  account: Account;
+  mailbox: Mailbox;
+  message: Message;
+};
+
+const escapeAppleScriptString = (value: string): string => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+const validateMessageId = (messageId: string | number): string => {
+  const id = String(messageId).trim();
+  if (!/^\d+$/.test(id)) {
+    throw new Error("Message ID must be numeric");
+  }
+
+  return id;
+};
+
+const updateMovedMessageCache = (message: Message, target: Mailbox) => {
+  const account = Cache.getAccount(message.account);
+  const mailboxes = account?.mailboxes || [];
+
+  if (!account || !mailboxes.length) {
+    return;
+  }
+
+  mailboxes.forEach((innerMailbox) => {
+    if (innerMailbox.name === target.name) {
+      Cache.addMessage(message, account.id, innerMailbox.name);
+    } else {
+      Cache.deleteMessage(message.id, account.id, innerMailbox.name);
+    }
+  });
+};
+
+export const getMessageById = async (
+  messageId: string | number,
+  { accountName = "", mailboxName = "" }: MessageLookupOptions = {},
+): Promise<MessageLookupResult> => {
+  const id = validateMessageId(messageId);
+  const accountFilter = escapeAppleScriptString(accountName.trim());
+  const mailboxFilter = escapeAppleScriptString(mailboxName.trim());
+  const delimiter = "@@MAIL_FIELD_SPLIT_9e7c1a@@";
+
+  const script = `
+    set targetId to ${id}
+    set delim to "${delimiter}"
+    tell application "Mail"
+      repeat with mailAccount in every account
+        if "${accountFilter}" is "" or name of mailAccount is "${accountFilter}" then
+          repeat with box in every mailbox of mailAccount
+            if "${mailboxFilter}" is "" or name of box is "${mailboxFilter}" then
+              try
+                set msg to first message of box whose id is targetId
+                set senderName to extract name from sender of msg
+                set senderAddress to extract address from sender of msg
+                set numAttachments to count of mail attachments of msg
+                return (name of mailAccount) & delim & (name of box) & delim & (id of msg as string) & delim & (subject of msg) & delim & senderName & delim & senderAddress & delim & (date sent of msg) & delim & (read status of msg) & delim & numAttachments
+              end try
+            end if
+          end repeat
+        end if
+      end repeat
+    end tell
+
+    return ""
+  `;
+
+  const output = await runAppleScript(script, { humanReadableOutput: true, timeout: 60000 });
+
+  if (!output) {
+    throw new Error(`Message ${id} was not found in Apple Mail`);
+  }
+
+  const [
+    resolvedAccountName,
+    resolvedMailboxName,
+    resolvedMessageId,
+    subject,
+    senderName,
+    senderAddress,
+    date,
+    read,
+    numAttachments,
+  ] = output.split(delimiter);
+
+  const accounts = await getAccounts();
+  const account = accounts?.find(
+    (account) => account.name.trim().toLowerCase() === resolvedAccountName?.trim().toLowerCase(),
+  );
+
+  if (!account) {
+    throw new Error(`Account "${resolvedAccountName}" was not found`);
+  }
+
+  const mailbox = account.mailboxes.find(
+    (mailbox) => mailbox.name.trim().toLowerCase() === resolvedMailboxName?.trim().toLowerCase(),
+  ) ?? {
+    name: resolvedMailboxName,
+    unreadCount: 0,
+    type: getMailboxType(resolvedMailboxName),
+  };
+
+  return {
+    account,
+    mailbox,
+    message: {
+      id: resolvedMessageId,
+      account: account.name,
+      accountAddress: account.emails[0],
+      subject,
+      date: constructDate(date),
+      read: read === "true",
+      numAttachments: parseInt(numAttachments),
+      senderName,
+      senderAddress,
+    },
+  };
+};
 
 export const tellMessage = async (message: Message, mailbox: Mailbox, script: string): Promise<string> => {
   if (!script.includes("msg")) {
@@ -23,8 +152,8 @@ export const tellMessage = async (message: Message, mailbox: Mailbox, script: st
 
   const scriptContainer = `
     tell application "Mail"
-      tell account "${message.account}"
-        set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+      tell account "${escapeAppleScriptString(message.account)}"
+        set msg to (first message of (first mailbox whose name is "${escapeAppleScriptString(mailbox.name)}") whose id is "${message.id}")
         ${script.trim()}
       end tell
     end tell
@@ -76,119 +205,110 @@ export const toggleMessageRead = async (
   }
 };
 
-export const moveMessageTo = async (message: Message, mailbox: Mailbox, target: Mailbox) => {
+export const setMessageReadStatus = async (message: Message, mailbox: Mailbox, read: boolean) => {
+  await tellMessage(message, mailbox, `tell msg to set read status to ${read}`);
+
+  const account = Cache.getAccount(message.account);
+  account?.mailboxes.forEach((innerMailbox) => {
+    Cache.updateMessage(
+      message.id,
+      {
+        ...message,
+        read,
+      },
+      account.id,
+      innerMailbox.name,
+    );
+  });
+};
+
+export const moveMessageTo = async (
+  message: Message,
+  mailbox: Mailbox,
+  target: Mailbox,
+  options: MoveMessageOptions = {},
+) => {
   try {
-    const account = Cache.getAccount(message.account);
-    const mailboxes = account?.mailboxes || [];
+    await tellMessage(
+      message,
+      mailbox,
+      `set mailbox of msg to first mailbox whose name is "${escapeAppleScriptString(target.name)}"`,
+    );
+    updateMovedMessageCache(message, target);
 
-    if (account && mailboxes) {
-      mailboxes.forEach((innerMailbox) => {
-        if (innerMailbox.name === target.name) {
-          Cache.addMessage(message, account.id, innerMailbox.name);
-        } else {
-          Cache.deleteMessage(message.id, account.id, innerMailbox.name);
-        }
-      });
+    if (!options.silent) {
+      await showToast(Toast.Style.Success, `Moved message to ${titleCase(target.name)}`);
     }
-
-    await showToast(Toast.Style.Success, `Moved message to ${titleCase(target.name)}`);
-    await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
   } catch (error) {
-    await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
+    if (!options.silent) {
+      await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
+    }
     console.error(error);
 
     Cache.invalidateMessages();
+    throw error;
   }
 };
 
-export const moveMessageToArchive = async (message: Message, account: Account, mailbox: Mailbox) => {
-  try {
-    const archiveMailbox = account.mailboxes.find(isArchiveMailbox);
-    if (archiveMailbox) {
-      const account = Cache.getAccount(message.account);
-      const mailboxes = account?.mailboxes || [];
-
-      if (account && mailboxes) {
-        mailboxes.forEach((innerMailbox) => {
-          if (innerMailbox.name === archiveMailbox.name) {
-            Cache.addMessage(message, account.id, innerMailbox.name);
-          } else {
-            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
-          }
-        });
-      }
-
-      await showToast(Toast.Style.Success, "Moved message to Archive");
-      await tellMessage(message, mailbox, `move msg to mailbox "Archive"`);
-    } else {
+export const moveMessageToArchive = async (
+  message: Message,
+  account: Account,
+  mailbox: Mailbox,
+  options: MoveMessageOptions = {},
+) => {
+  const archiveMailbox = account.mailboxes.find(isArchiveMailbox);
+  if (!archiveMailbox) {
+    if (!options.silent) {
       await showToast(Toast.Style.Failure, "No Archive mailbox found");
     }
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Error moving message to Archive");
-    console.error(error);
-
-    Cache.invalidateMessages();
+    throw new Error("No Archive mailbox found");
   }
+
+  await moveMessageTo(message, mailbox, archiveMailbox, options);
 };
 
-export const moveMessageToJunk = async (message: Message, account: Account, mailbox: Mailbox) => {
-  try {
-    const junkMailbox = account.mailboxes.find(isJunkMailbox);
-    if (junkMailbox) {
-      const account = Cache.getAccount(message.account);
-      const mailboxes = account?.mailboxes || [];
-
-      if (account && mailboxes) {
-        mailboxes.forEach((innerMailbox) => {
-          if (innerMailbox.name === junkMailbox.name) {
-            Cache.addMessage(message, account.id, innerMailbox.name);
-          } else {
-            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
-          }
-        });
-      }
-
-      await showToast(Toast.Style.Success, "Moved message to Junk");
-      await moveMessageTo(message, mailbox, junkMailbox);
-    } else {
+export const moveMessageToJunk = async (
+  message: Message,
+  account: Account,
+  mailbox: Mailbox,
+  options: MoveMessageOptions = {},
+) => {
+  const junkMailbox = account.mailboxes.find(isJunkMailbox);
+  if (!junkMailbox) {
+    if (!options.silent) {
       await showToast(Toast.Style.Failure, "No Junk mailbox found");
     }
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Error moving message to Junk");
-    console.error(error);
-
-    Cache.invalidateMessages();
+    throw new Error("No Junk mailbox found");
   }
+
+  await moveMessageTo(message, mailbox, junkMailbox, options);
 };
 
-export const moveMessageToTrash = async (message: Message, account: Account, mailbox: Mailbox) => {
-  try {
-    const trashMailbox = account.mailboxes.find(isTrashMailbox);
-    if (trashMailbox) {
-      const account = Cache.getAccount(message.account);
-      const mailboxes = account?.mailboxes || [];
-
-      if (account && mailboxes) {
-        mailboxes.forEach((innerMailbox) => {
-          if (innerMailbox.name === trashMailbox.name) {
-            Cache.addMessage(message, account.id, innerMailbox.name);
-          } else {
-            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
-          }
-        });
-      }
-
-      await showToast(Toast.Style.Success, "Moved message to Trash");
-      await moveMessageTo(message, mailbox, trashMailbox);
-    } else {
+export const moveMessageToTrash = async (
+  message: Message,
+  account: Account,
+  mailbox: Mailbox,
+  options: MoveMessageOptions = {},
+) => {
+  const trashMailbox = account.mailboxes.find(isTrashMailbox);
+  if (!trashMailbox) {
+    if (!options.silent) {
       await showToast(Toast.Style.Failure, "No Trash mailbox found");
     }
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Error moving message to Trash");
-    console.error(error);
-
-    Cache.invalidateMessages();
+    throw new Error("No Trash mailbox found");
   }
+
+  await moveMessageTo(message, mailbox, trashMailbox, options);
+};
+
+export const moveMessageToTrashById = async (
+  messageId: string | number,
+  options: MoveMessageOptions & MessageLookupOptions = {},
+) => {
+  const { account, mailbox, message } = await getMessageById(messageId, options);
+  await moveMessageToTrash(message, account, mailbox, options);
+
+  return { account, mailbox, message };
 };
 
 export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
@@ -221,7 +341,11 @@ export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
   }
 };
 
-export const getRecipients = async (message: Message, mailbox: Mailbox): Promise<string[]> => {
+export const getRecipients = async (
+  message: Message,
+  mailbox: Mailbox,
+  { strict = false }: { strict?: boolean } = {},
+): Promise<string[]> => {
   const script = `
     set output to ""
     repeat with r in recipients of msg
@@ -230,7 +354,12 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
   `;
 
   try {
-    const response: string[] = (await tellMessage(message, mailbox, script)).split("$end");
+    const output = await tellMessage(message, mailbox, script);
+    if (strict && !output.trim()) {
+      throw new Error("No recipient data returned");
+    }
+
+    const response: string[] = output.split("$end");
     response.pop();
     const recipientNames: string[] = [];
     const recipientAddresses: string[] = [];
@@ -246,6 +375,9 @@ export const getRecipients = async (message: Message, mailbox: Mailbox): Promise
     return [message.senderAddress, ...recipientAddresses];
   } catch (error) {
     console.error(error);
+    if (strict) {
+      throw new Error("Unable to resolve reply-all recipients", { cause: error });
+    }
     return [message.senderAddress];
   }
 };
@@ -398,6 +530,56 @@ export const getMessageContent = async (message: Message, mailbox: Mailbox) => {
   }
 };
 
+export const getNativeReplyRecipients = async (
+  message: Message,
+  mailbox: Mailbox,
+  action: OutgoingMessageAction.Reply | OutgoingMessageAction.ReplyAll,
+) => {
+  const messageAccount = escapeAppleScriptString(message.account);
+  const messageMailbox = escapeAppleScriptString(mailbox.name);
+  const messageId = escapeAppleScriptString(String(message.id));
+  const actionScript =
+    action === OutgoingMessageAction.Reply ? "reply msg" : "reply msg with properties {reply to all: true}";
+  const script = `
+    tell application "Mail"
+      tell account "${messageAccount}"
+        set msg to (first message of (first mailbox whose name is "${messageMailbox}") whose id is "${messageId}")
+      end tell
+      set previewMessage to ${actionScript}
+      try
+        set visible of previewMessage to false
+        set output to ""
+        tell previewMessage
+          repeat with theRecipient in to recipients
+            set output to output & address of theRecipient & "$recipient$"
+          end repeat
+          set output to output & "$field$"
+          repeat with theCc in cc recipients
+            set output to output & address of theCc & "$recipient$"
+          end repeat
+          set output to output & "$field$"
+          repeat with theBcc in bcc recipients
+            set output to output & address of theBcc & "$recipient$"
+          end repeat
+        end tell
+        close previewMessage saving no
+      on error errorMessage number errorNumber
+        try
+          close previewMessage saving no
+        end try
+        error errorMessage number errorNumber
+      end try
+      return output
+    end tell
+  `;
+
+  const output = await runAppleScript(script);
+  const [to = "", cc = "", bcc = ""] = output.split("$field$");
+  const parseAddresses = (addresses: string) => addresses.split("$recipient$").filter(Boolean);
+
+  return { to: parseAddresses(to), cc: parseAddresses(cc), bcc: parseAddresses(bcc) };
+};
+
 export const getMessageHtml = async (message: Message, mailbox: Mailbox) => {
   try {
     const source = await tellMessage(message, mailbox, "tell msg to return source");
@@ -459,22 +641,49 @@ export const sendMessage = async (
   action = OutgoingMessageAction.New,
   message?: Message,
   mailbox?: Mailbox,
+  { preserveNativeReplyRecipients = false }: { preserveNativeReplyRecipients?: boolean } = {},
 ) => {
-  if (outgoingMessage.to.length === 0) {
+  const keepNativeReplyRecipients =
+    preserveNativeReplyRecipients &&
+    (action === OutgoingMessageAction.Reply || action === OutgoingMessageAction.ReplyAll);
+
+  if (outgoingMessage.to.length === 0 && !keepNativeReplyRecipients) {
     await showToast(Toast.Style.Failure, "No recipients specified");
-    return;
+    throw new Error("No recipients specified");
   }
 
   for (const recipient of outgoingMessage.to) {
     if (Validation.email(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid email for recipient");
-      return;
+      throw new Error(`Invalid email for recipient: ${recipient}`);
     }
   }
 
   let attachments =
     outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
-  attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
+  attachments = attachments.map(escapeAppleScriptString);
+
+  const messageAccount = message ? escapeAppleScriptString(message.account) : "";
+  const messageMailbox = mailbox ? escapeAppleScriptString(mailbox.name) : "";
+  const recipients = {
+    to: outgoingMessage.to.map(escapeAppleScriptString),
+    cc: outgoingMessage.cc.map(escapeAppleScriptString),
+    bcc: outgoingMessage.bcc.map(escapeAppleScriptString),
+  };
+  const toAppleScriptList = (values: string[]) => (values.length > 0 ? `{"${values.join(`", "`)}"}` : "{}");
+  const toList = toAppleScriptList(recipients.to);
+  const ccList = toAppleScriptList(recipients.cc);
+  const bccList = toAppleScriptList(recipients.bcc);
+  const attachmentList = toAppleScriptList(attachments);
+  const sender = escapeAppleScriptString(outgoingMessage.from);
+  const subject = escapeAppleScriptString(outgoingMessage.subject);
+  const content = escapeAppleScriptString(outgoingMessage.content);
+  const messageId = message ? escapeAppleScriptString(String(message.id)) : "";
+
+  const isReplyOrForward =
+    action === OutgoingMessageAction.Reply ||
+    action === OutgoingMessageAction.ReplyAll ||
+    action === OutgoingMessageAction.Forward;
 
   const actionScript = (() => {
     switch (action) {
@@ -497,21 +706,45 @@ export const sendMessage = async (
     tell application "Mail"
       ${
         message && mailbox
-          ? `tell account "${message.account}"
-          set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+          ? `tell account "${messageAccount}"
+          set msg to (first message of (first mailbox whose name is "${messageMailbox}") whose id is "${messageId}")
         end tell`
           : ""
       }
-      set theTos to {"${outgoingMessage.to.join(`", "`)}"}
-      set theCcs to {"${outgoingMessage.cc.join(`", "`)}"}
-      set theBccs to {"${outgoingMessage.bcc.join(`", "`)}"}
-      set theAttachments to {"${attachments.join(`", "`)}"}
+      set theTos to ${toList}
+      set theCcs to ${ccList}
+      set theBccs to ${bccList}
+      set theAttachments to ${attachmentList}
       set newMessage to ${actionScript}
-      set senderValue to "${outgoingMessage.from}"
-      set properties of newMessage to {sender: senderValue, subject: "${
-        outgoingMessage.subject
-      }", content: "${outgoingMessage.content}", visible: false}
+      set senderValue to "${sender}"
+      ${
+        isReplyOrForward
+          ? `
+      set sender of newMessage to senderValue
+      if "${subject}" is not "" then
+        set subject of newMessage to "${subject}"
+      end if
+      set existingContent to (content of newMessage as string)
+      set content of newMessage to "${content}" & return & return & existingContent
+      `
+          : `
+      set properties of newMessage to {sender: senderValue, subject: "${subject}", content: "${content}", visible: false}
+      `
+      }
       tell newMessage
+        ${
+          action === OutgoingMessageAction.Forward
+            ? `
+        delete every recipient
+        delete every cc recipient
+        delete every bcc recipient
+        `
+            : isReplyOrForward && !keepNativeReplyRecipients
+              ? `
+        delete every recipient
+        `
+              : ""
+        }
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}
         end repeat
@@ -523,7 +756,8 @@ export const sendMessage = async (
         end repeat
         repeat with theAttachment in theAttachments
           try
-            make new attachment with properties {file name:theAttachment as alias} at after last paragraph
+            set attachFile to (POSIX file theAttachment) as alias
+            make new attachment with properties {file name:attachFile} at after last paragraph
             delay 1
           end try
         end repeat

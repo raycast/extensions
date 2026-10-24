@@ -1,9 +1,11 @@
-import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, Keyboard, LaunchProps, List, open } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 
-export default function Command() {
-  const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const initialQuery = props.arguments.query || props.fallbackText || "";
+  const { isLoading, results, search, searchText, addHistory, deleteAllHistory, deleteHistoryItem } =
+    useSearch(initialQuery);
 
   return (
     <List
@@ -33,7 +35,11 @@ export default function Command() {
                   />
 
                   <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
-                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
+                  <Action.CopyToClipboard
+                    title="Copy Suggestion to Clipboard"
+                    content={item.query}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                  />
                   <Action
                     title="Set as Search Text"
                     onAction={() => {
@@ -52,7 +58,8 @@ export default function Command() {
                         await deleteHistoryItem(item);
                       }}
                       icon={{ source: Icon.Trash }}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   )}
 
@@ -62,6 +69,8 @@ export default function Command() {
                       await deleteAllHistory();
                     }}
                     icon={{ source: Icon.ExclamationMark }}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

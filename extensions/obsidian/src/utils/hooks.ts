@@ -104,7 +104,7 @@ export function useMedia(vault: ObsidianVault) {
           );
 
           setMedia({ ready: true, media });
-        } catch (error) {
+        } catch {
           showToast({
             title: "The path set in preferences doesn't exist",
             message: "Please set a valid path in preferences",
@@ -210,12 +210,14 @@ export function useVaultPluginCheck(params: {
     // Cache miss - perform the check
     const result = Vault.checkPlugins(params);
     const resultObject = {
-      vaultsWithPlugin: result[0],
-      vaultsWithoutPlugin: result[1],
+      vaultsWithPlugin: result.vaultsWithPlugin,
+      vaultsWithoutPlugin: result.vaultsWithoutPlugin,
     };
 
-    // Store in cache
-    vaultPluginCheckCache.set(cacheKey, resultObject);
+    // Do not persist transient filesystem failures as plugin absence.
+    if (result.cacheable) {
+      vaultPluginCheckCache.set(cacheKey, resultObject);
+    }
 
     return resultObject;
   }, [params.vaults.map((v) => v.path).join(","), params.communityPlugins?.join(","), params.corePlugins?.join(",")]);

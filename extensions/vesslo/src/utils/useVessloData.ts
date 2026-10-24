@@ -1,54 +1,59 @@
-import { useState, useEffect, useRef } from "react";
-import { loadVessloData, getVessloDataModifiedTime } from "./data";
-import { VessloData } from "../types";
-import { showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { VessloDataReader } from "./data-reader";
+import {
+  hasSameDataPresentation,
+  initialVessloDataState,
+  VessloDataState,
+} from "./data-state";
 
-const REFRESH_INTERVAL = 3000; // 3 seconds
+const REFRESH_INTERVAL = 3000;
 
 export function useVessloData() {
-  const [data, setData] = useState<VessloData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const lastExportedAt = useRef<string | null>(null);
-  const lastModifiedTime = useRef<number | null>(null);
+  const [state, setState] = useState<VessloDataState>(initialVessloDataState);
+  const currentState = useRef(state);
+  const reader = useRef<VessloDataReader | null>(null);
+
+  const acceptSnapshot = useCallback((next: VessloDataState) => {
+    const previous = currentState.current;
+    currentState.current = next;
+    if (!hasSameDataPresentation(previous, next)) setState(next);
+  }, []);
+
+  const refresh = useCallback(async () => {
+    const activeReader = reader.current;
+    if (!activeReader) return currentState.current;
+    const next = await activeReader.read({ force: true });
+    if (reader.current === activeReader) {
+      acceptSnapshot(next);
+    }
+    return next;
+  }, [acceptSnapshot]);
+
+  const getCurrentState = useCallback(() => currentState.current, []);
 
   useEffect(() => {
-    // Initial load
-    const initialData = loadVessloData();
-    setData(initialData);
-    setIsLoading(false);
-    lastExportedAt.current = initialData?.exportedAt ?? null;
-    lastModifiedTime.current = getVessloDataModifiedTime();
+    const activeReader = new VessloDataReader();
+    reader.current = activeReader;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = async () => {
+      const next = await activeReader.read();
+      if (reader.current !== activeReader) return;
+      acceptSnapshot(next);
+      timer = setTimeout(poll, REFRESH_INTERVAL);
+    };
+    void poll();
+    return () => {
+      activeReader.dispose();
+      if (reader.current === activeReader) reader.current = null;
+      clearTimeout(timer);
+    };
+  }, [acceptSnapshot]);
 
-    if (!initialData) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Vesslo data not found",
-        message: "Please run Vesslo app first",
-      });
-    }
-
-    // Polling for updates
-    const interval = setInterval(() => {
-      const newData = loadVessloData();
-      if (!newData) return;
-      const newModifiedTime = getVessloDataModifiedTime();
-      const modifiedTimeChanged =
-        newModifiedTime !== null &&
-        newModifiedTime !== lastModifiedTime.current;
-
-      // Compare exportedAt timestamp to detect changes
-      if (
-        newData.exportedAt !== lastExportedAt.current ||
-        modifiedTimeChanged
-      ) {
-        lastExportedAt.current = newData.exportedAt;
-        lastModifiedTime.current = newModifiedTime;
-        setData(newData);
-      }
-    }, REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, []); // Empty dependency array - run only once
-
-  return { data, isLoading };
+  return {
+    data: state.data,
+    isLoading: state.status === "loading",
+    state,
+    refresh,
+    getCurrentState,
+  };
 }

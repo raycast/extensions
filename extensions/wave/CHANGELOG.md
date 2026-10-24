@@ -1,9 +1,12 @@
 # Wave Changelog
 
+## [Subhead in Invoice] - 2026-07-05
+
+- In **Invoices**, Show "subhead"
+
 ## [Last Sent, Last Viewed in Invoice] - 2026-01-29
 
 - In **Invoices**, Show "Last Sent" and "Last Viewed"
-
 
 ## [More Invoice Enhancements] - 2026-01-21
 

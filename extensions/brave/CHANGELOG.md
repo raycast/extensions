@@ -1,5 +1,14 @@
 # Brave Changelog
 
+## [Fix Missing History Database] - 2026-08-16
+
+- Fixed New Brave Tab crashing when the selected Brave profile has not created a History database yet.
+- Fixed profile discovery for Brave Beta and Brave Nightly.
+
+## [Fix History Search] - 2026-07-19
+
+- Fixed history search failing with a "database is locked" error while Brave is running.
+
 ## [Bookmark Folder Search] - 2026-01-05
 
 - Added support for searching bookmark folders.

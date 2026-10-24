@@ -1,6 +1,21 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
 node_modules/
 
 # build
@@ -13,3 +28,9 @@ raycast-env.d.ts
 # macOS
 .DS_Store
 ../.DS_Store
+
+# Raycast specific files
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust

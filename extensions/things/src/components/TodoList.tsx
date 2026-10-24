@@ -1,14 +1,14 @@
-import { List, Detail, getPreferenceValues, Icon } from '@raycast/api';
+import { List, getPreferenceValues, Icon } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo, useState } from 'react';
 
-import { getListTodos, getCollections, TagWithParent } from '../api';
+import { getListTodos, getCollections } from '../api';
 import { plural } from '../utils';
 
 import TodoListEmptyView from './TodoListEmptyView';
 import TodoListItem from './TodoListItem';
 import ErrorView from './ErrorView';
-import { CommandListName, Todo } from '../types';
+import type { CommandListName, TagWithParent, Todo } from '../types';
 
 type TodoListProps = {
   commandListName: CommandListName;
@@ -62,7 +62,7 @@ function buildTagHierarchy(tags: TagWithParent[]) {
     computeAncestorPath(tag.name);
   }
 
-  return { childrenMap, ancestorPath, getDescendants };
+  return { ancestorPath, getDescendants };
 }
 
 export default function TodoList({ commandListName, displayActivationDates }: TodoListProps) {
@@ -148,12 +148,6 @@ export default function TodoList({ commandListName, displayActivationDates }: To
 
   if (error) {
     return <ErrorView error={error} onRetry={() => mutate()} />;
-  }
-
-  if (!todos && !isLoading) {
-    return (
-      <Detail markdown="## No Data\n\nNo to-dos found and no error occurred. This might indicate an issue with the Things connection." />
-    );
   }
 
   const groupByProjectOrArea = preferences.groupByProjectOrArea !== false;

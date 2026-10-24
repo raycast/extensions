@@ -15,6 +15,7 @@ export type Account = z.infer<typeof Account>;
 type CreateAccount = Omit<Account, 'id'>;
 
 const STORAGE_KEY = 'one-time-password-accounts';
+const LAST_USED_ACCOUNT_KEY = 'one-time-password-last-used-account';
 
 function generateAccountId(account: Pick<Account, 'name' | 'secret'>) {
   const hash = crypto.createHash('sha256');
@@ -55,6 +56,11 @@ export async function removeAccount(id: string) {
   accounts.splice(index, 1);
 
   await save(accounts);
+
+  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
+  if (lastUsedId === id) {
+    await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
+  }
 }
 
 export async function updateAccount(account: Account) {
@@ -87,4 +93,22 @@ function swap<T>(array: T[], a: number, b: number) {
   const draft = [...array];
   [draft[a], draft[b]] = [draft[b], draft[a]];
   return draft;
+}
+
+export async function setLastUsedAccountId(id: string) {
+  await LocalStorage.setItem(LAST_USED_ACCOUNT_KEY, id);
+}
+
+export async function getLastUsedAccount() {
+  const accounts = await getAccounts();
+  if (accounts.length === 0) return undefined;
+
+  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
+  if (!lastUsedId) return undefined;
+
+  const account = accounts.find((acc) => acc.id === lastUsedId);
+  if (account) return account;
+
+  await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
+  return undefined;
 }

@@ -1,0 +1,252 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-voice-studio",
+  "title": "AI Voice Studio",
+  "description": "Read and generate speech from Raycast with Alibaba Cloud Qwen-TTS, Xiaomi MiMo, and OpenAI voices, speed control, and focused provider defaults.",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read",
+      "subtitle": "AI Voice Studio",
+      "description": "Read selected text, or clipboard text if no selection is available, with the default TTS provider. Trigger again to stop.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup-voice-defaults",
+      "title": "Setup Voice Defaults",
+      "subtitle": "AI Voice Studio",
+      "description": "Configure the default provider, model, voice, speed, and provider defaults in a focused Raycast form.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "test-voice-setup",
+      "title": "Test Voice Setup",
+      "subtitle": "AI Voice Studio",
+      "description": "Synthesize and play a short sample with the current default provider to verify API access, latency, and playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "qwen-quick-read",
+      "title": "Quick Read with Qwen-TTS",
+      "subtitle": "Qwen-TTS",
+      "description": "Read selected or clipboard text with your default Qwen-TTS voice. Run again to stop playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "qwen-read-with-voice",
+      "title": "Read with Qwen-TTS Voice",
+      "subtitle": "Qwen-TTS",
+      "description": "Browse Qwen-TTS voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "qwen-select-voice",
+      "title": "Set Qwen-TTS Quick Read Voice",
+      "subtitle": "Qwen-TTS",
+      "description": "Choose and preview the Qwen-TTS voice used by Quick Read when Qwen-TTS is the default provider.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "tts-studio",
+      "title": "TTS Studio",
+      "subtitle": "MiMo",
+      "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice, emotion, and style controls.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "mimo-quick-read",
+      "title": "Quick Read with MiMo",
+      "subtitle": "MiMo",
+      "description": "Read selected or clipboard text with your default MiMo voice. Run again to stop playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "mimo-read-with-voice",
+      "title": "Read with MiMo Voice",
+      "subtitle": "MiMo",
+      "description": "Browse MiMo voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "mimo-select-voice",
+      "title": "Set MiMo Quick Read Voice",
+      "subtitle": "MiMo",
+      "description": "Choose and preview the MiMo voice used by Quick Read when MiMo is the default provider.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "openai-tts-studio",
+      "title": "OpenAI TTS Studio",
+      "subtitle": "OpenAI",
+      "description": "Generate and play OpenAI speech from typed, selected, or pasted text, with voice, tone, delivery, and style controls.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "openai-quick-read",
+      "title": "Quick Read with OpenAI",
+      "subtitle": "OpenAI",
+      "description": "Read selected or clipboard text with your default OpenAI voice. Run again to stop playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "openai-read-with-voice",
+      "title": "Read with OpenAI Voice",
+      "subtitle": "OpenAI",
+      "description": "Browse OpenAI voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "openai-select-voice",
+      "title": "Set OpenAI Quick Read Voice",
+      "subtitle": "OpenAI",
+      "description": "Choose and preview the OpenAI voice used by Quick Read when OpenAI is the default provider.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "AI Voice Studio",
+      "description": "Stop the current TTS playback.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Increase Reading Speed",
+      "subtitle": "AI Voice Studio",
+      "description": "Increase reading speed by 0.25x for the default provider.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Decrease Reading Speed",
+      "subtitle": "AI Voice Studio",
+      "description": "Decrease reading speed by 0.25x for the default provider.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "qwen-status",
+      "title": "Qwen-TTS Reading Status",
+      "subtitle": "Qwen-TTS",
+      "description": "Show Qwen-TTS playback status, speed, and controls in the menu bar.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "mimo-status",
+      "title": "MiMo Reading Status",
+      "subtitle": "MiMo",
+      "description": "Show MiMo playback status, speed, and controls in the menu bar.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "openai-status",
+      "title": "OpenAI Reading Status",
+      "subtitle": "OpenAI",
+      "description": "Show OpenAI playback status, speed, and controls in the menu bar.",
+      "icon": "command-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mimoApiKey",
+      "type": "password",
+      "required": false,
+      "title": "MiMo Token Plan API Key",
+      "description": "MiMo Token Plan key.",
+      "placeholder": "tp-..."
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "OpenAI Speech API key.",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "dashscopeApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Qwen DashScope API Key",
+      "description": "Qwen DashScope API key (Alibaba Cloud Model Studio) for Qwen-TTS.",
+      "placeholder": "sk-..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "verify": "npm run verify:runtime && npm run verify:provider-settings && npm run verify:provider-env && npm run verify:fast-paths && npm run verify:provider-contracts && npm run verify:test-voice-setup && npm run verify:live-smoke-guardrails && npm run verify:pipeline-lookahead && npm run verify:audio-player && npm run build && npm run lint && tsc --noEmit && npm audit && node scripts/write-verification-evidence.mjs local-verify",
+    "verify:audio-player": "node scripts/verify-audio-player.mjs",
+    "verify:fast-paths": "node scripts/verify-fast-paths.mjs",
+    "verify:live-env": "node scripts/verify-live-env.mjs",
+    "verify:goal": "node scripts/verify-goal.mjs",
+    "verify:local-playback": "node scripts/verify-local-playback.mjs",
+    "verify:live-smoke": "node scripts/verify-live-smoke.mjs",
+    "verify:live-smoke-guardrails": "node scripts/verify-live-smoke-guardrails.mjs",
+    "verify:pipeline-lookahead": "node scripts/verify-pipeline-lookahead.mjs",
+    "verify:provider-env": "node scripts/verify-provider-env.mjs",
+    "verify:provider-settings": "node scripts/verify-provider-settings.mjs",
+    "verify:provider-contracts": "node scripts/verify-provider-contracts.mjs",
+    "verify:test-voice-setup": "node scripts/verify-test-voice-setup.mjs",
+    "verify:runtime": "node scripts/verify-runtime.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech",
+    "voice",
+    "qwen",
+    "qwen-tts",
+    "mimo",
+    "openai",
+    "gpt-4o-mini-tts",
+    "dashscope"
+  ]
+}

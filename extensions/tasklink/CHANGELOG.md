@@ -1,5 +1,10 @@
 # TaskLink Changelog
 
+## [New command & updates] - 2026-06-19
+
+- Add new command to open selected issues in your browser
+- Update dependencies to the latest versions
+
 ## [Fixes & updates] - 2026-02-03
 
 - Fix an issue with Windows line breaks

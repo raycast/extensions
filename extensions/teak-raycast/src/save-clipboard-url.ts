@@ -1,30 +1,35 @@
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import {
-  Clipboard,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { extractFirstHttpUrl, saveCardWithFeedback } from "./lib/capture";
-import { getPreferences } from "./lib/preferences";
+  ensureCredentialsForNoViewCommand,
+  extractFirstHttpUrl,
+  saveCardWithFeedback,
+  saveFilesWithFeedback,
+  toLocalPath,
+  uploadRejection,
+} from "./lib/capture";
 
 export default async function SaveClipboardCommand() {
-  const { apiKey } = getPreferences();
-  if (!apiKey?.trim()) {
-    await showToast({
-      message: "Set your Teak API key in extension preferences to continue.",
-      primaryAction: {
-        onAction: () => {
-          void openExtensionPreferences();
-        },
-        title: "Open Preferences",
-      },
-      style: Toast.Style.Failure,
-      title: "Missing API key",
-    });
+  if (!(await ensureCredentialsForNoViewCommand())) {
     return;
   }
 
-  const clipboardText = (await Clipboard.readText())?.trim() ?? "";
+  const clipboard = await Clipboard.read();
+  const copiedFile = clipboard.file ? toLocalPath(clipboard.file) : null;
+  if (copiedFile) {
+    const rejection = uploadRejection(copiedFile);
+    if (rejection) {
+      await showToast({
+        message: rejection,
+        style: Toast.Style.Failure,
+        title: "Couldn't save the copied file",
+      });
+      return;
+    }
+    await saveFilesWithFeedback([copiedFile], "raycast_clipboard");
+    return;
+  }
+
+  const clipboardText = clipboard.text.trim();
 
   if (!clipboardText) {
     await showToast({

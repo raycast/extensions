@@ -1,5 +1,31 @@
 # Mail Changelog
 
+## [Add AI Tools] - 2026-10-22
+
+- Add paginated Inbox reading and Inbox-filtered email search.
+- Add AI tools to list mailboxes, reply or forward messages, manage message status and folders, and list or save attachments.
+- Improve email search and validation, message lookup, and attachment saving.
+
+## [Skip Background Refresh When Mail Is Closed] - 2026-10-13
+
+- The background Refresh Mail command no longer opens Mail when it is closed, so it no longer switches to Mail's assigned desktop ([#32202](https://github.com/raycast/extensions/issues/32202)). Running Refresh Mail manually still opens Mail.
+
+## [Fix] - 2026-10-07
+
+- Refresh mailboxes sequentially to prevent spawning hundreds of concurrent osascript processes
+
+## [Fix] - 2026-06-15
+
+- Fix sending composed messages when the subject or other message fields contain double quotes.
+
+## [Improvement] - 2026-06-10
+
+- Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
+
+## [Add AI Tools] - 2026-06-05
+
+- Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
@@ -49,6 +75,7 @@
 This release turns this extension into an AI extension.
 
 Supported tools:
+
 - Search emails
 - List addresses
 - Send email

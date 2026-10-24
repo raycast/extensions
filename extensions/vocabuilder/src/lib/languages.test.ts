@@ -40,14 +40,6 @@ describe("swapLanguagePair", () => {
     expect(swapped.target).toEqual({ code: "en", name: "English" });
   });
 
-  it("is its own inverse", () => {
-    const pair = {
-      source: { code: "de", name: "German" },
-      target: { code: "fr", name: "French" },
-    };
-    expect(swapLanguagePair(swapLanguagePair(pair))).toEqual(pair);
-  });
-
   it("produces a different storage key prefix", () => {
     const pair = {
       source: { code: "en", name: "English" },

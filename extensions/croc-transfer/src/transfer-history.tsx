@@ -28,7 +28,7 @@ import { cleanStaleInProgressRecords } from "./utils/history";
 const SESSION_ID = Math.random().toString(36).slice(2);
 
 function buildDeepLink(phrase: string): string {
-  return `raycast://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
 }
 
 type DateGroup = "Today" | "Yesterday" | "Earlier";

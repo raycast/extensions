@@ -1,31 +1,12 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { getVSCodeStoragePaths, isWindows, parseFileUri } from "./platform";
 
 /**
  * Shared VS Code storage parsing utilities
  * Consolidates common logic from context-capture.ts and project-discovery.ts
  */
-
-// VS Code storage paths for different editors
-const VSCODE_STORAGE_PATHS = [
-  path.join(
-    os.homedir(),
-    "Library/Application Support/Code/User/globalStorage/storage.json",
-  ),
-  path.join(
-    os.homedir(),
-    "Library/Application Support/Code - Insiders/User/globalStorage/storage.json",
-  ),
-  path.join(
-    os.homedir(),
-    "Library/Application Support/Cursor/User/globalStorage/storage.json",
-  ),
-  path.join(
-    os.homedir(),
-    "Library/Application Support/VSCodium/User/globalStorage/storage.json",
-  ),
-];
 
 interface VSCodeStorageData {
   // Recent workspaces from different VS Code versions
@@ -34,7 +15,7 @@ interface VSCodeStorageData {
     entries?: Array<string | { folderUri?: string }>;
   };
   profileAssociations?: {
-    workspaces?: string[];
+    workspaces?: string[] | Record<string, string>;
   };
   // Backup workspaces (most reliable for current folder)
   backupWorkspaces?: {
@@ -62,17 +43,18 @@ interface VSCodeStorageData {
  * Parse a VS Code file:// URI to a file path
  */
 export function parseVSCodeUri(uri: string): string {
-  if (uri.startsWith("file://")) {
-    return decodeURIComponent(uri.replace("file://", ""));
+  const parsed = parseFileUri(uri);
+  if (isWindows() && /^\/[A-Za-z]:\//.test(parsed)) {
+    return parsed.slice(1).replace(/\//g, "\\");
   }
-  return uri;
+  return parsed;
 }
 
 /**
  * Get all VS Code storage paths to check
  */
 export function getStoragePaths(): string[] {
-  return VSCODE_STORAGE_PATHS;
+  return getVSCodeStoragePaths(os.homedir(), process.env);
 }
 
 /**
@@ -82,23 +64,31 @@ export function getStoragePaths(): string[] {
 export async function parseVSCodeWorkspaces(): Promise<string[]> {
   const workspaces: string[] = [];
 
-  for (const storagePath of VSCODE_STORAGE_PATHS) {
+  for (const storagePath of getStoragePaths()) {
     try {
       const content = await fs.promises.readFile(storagePath, "utf8");
       const data: VSCodeStorageData = JSON.parse(content);
 
       // Method 1: openedPathsList.workspaces3 or entries
-      const recentWorkspaces =
-        data.openedPathsList?.workspaces3 ||
-        data.openedPathsList?.entries ||
-        data.profileAssociations?.workspaces ||
-        [];
+      const associatedWorkspaces = data.profileAssociations?.workspaces;
+      const profileWorkspaces = Array.isArray(associatedWorkspaces)
+        ? associatedWorkspaces
+        : associatedWorkspaces
+          ? Object.keys(associatedWorkspaces)
+          : [];
+      const recentWorkspaces = [
+        ...(data.openedPathsList?.workspaces3 || []),
+        ...(data.openedPathsList?.entries || []),
+        ...profileWorkspaces,
+      ];
 
       for (const workspace of recentWorkspaces) {
         if (typeof workspace === "string") {
-          workspaces.push(parseVSCodeUri(workspace));
+          const workspacePath = parseVSCodeUri(workspace);
+          if (path.isAbsolute(workspacePath)) workspaces.push(workspacePath);
         } else if (workspace?.folderUri) {
-          workspaces.push(parseVSCodeUri(workspace.folderUri));
+          const workspacePath = parseVSCodeUri(workspace.folderUri);
+          if (path.isAbsolute(workspacePath)) workspaces.push(workspacePath);
         }
       }
     } catch {
@@ -116,7 +106,7 @@ export async function parseVSCodeWorkspaces(): Promise<string[]> {
  * then falls back to recent menu items
  */
 export async function getMostRecentGitWorkspace(): Promise<string | undefined> {
-  for (const storagePath of VSCODE_STORAGE_PATHS) {
+  for (const storagePath of getStoragePaths()) {
     try {
       const content = await fs.promises.readFile(storagePath, "utf8");
       const data: VSCodeStorageData = JSON.parse(content);
@@ -145,7 +135,7 @@ export async function getMostRecentGitWorkspace(): Promise<string | undefined> {
         if (recentMenu?.submenu?.items) {
           for (const item of recentMenu.submenu.items) {
             if (item.id === "openRecentFolder" && item.uri?.path) {
-              const folderPath = item.uri.path;
+              const folderPath = parseVSCodeUri(item.uri.path);
               try {
                 await fs.promises.access(folderPath);
                 await fs.promises.access(path.join(folderPath, ".git"));

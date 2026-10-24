@@ -4,6 +4,7 @@ import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMess
 import { Obsidian, ObsidianTargetType } from "@/obsidian";
 import { ShowVaultInFinderAction, CopyVaultPathAction } from "./utils/actions";
 import { useObsidianVaults } from "./utils/hooks";
+import { simplifyHomePath } from "./utils/utils";
 
 export default function Command() {
   const { ready, vaults } = useObsidianVaults();
@@ -30,6 +31,7 @@ export default function Command() {
           <List.Item
             title={vault.name}
             key={vault.key}
+            accessories={[{ text: simplifyHomePath(vault.path) }]}
             actions={
               <ActionPanel>
                 <Action.Open

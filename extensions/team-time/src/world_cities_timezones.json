@@ -387,9 +387,7 @@
           "Nanjing",
           "Wuhan",
           "Xi'an",
-          "Hangzhou",
-          "Hong Kong SAR",
-          "Macau SAR"
+          "Hangzhou"
         ]
       },
       { "zone": "Asia/Urumqi", "cities": ["Ürümqi", "Kashgar"] }
@@ -605,6 +603,11 @@
     "timeZones": [{ "zone": "America/Tegucigalpa", "cities": ["Tegucigalpa", "San Pedro Sula"] }]
   },
   {
+    "country": "Hong Kong SAR",
+    "isoCode": "HK",
+    "timeZones": [{ "zone": "Asia/Hong_Kong", "cities": ["Hong Kong SAR"] }]
+  },
+  {
     "country": "Hungary",
     "isoCode": "HU",
     "timeZones": [{ "zone": "Europe/Budapest", "cities": ["Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs"] }]
@@ -797,6 +800,11 @@
     "country": "Luxembourg",
     "isoCode": "LU",
     "timeZones": [{ "zone": "Europe/Luxembourg", "cities": ["Luxembourg", "Esch-sur-Alzette"] }]
+  },
+  {
+    "country": "Macau SAR",
+    "isoCode": "MO",
+    "timeZones": [{ "zone": "Asia/Macau", "cities": ["Macau SAR"] }]
   },
   {
     "country": "Madagascar",

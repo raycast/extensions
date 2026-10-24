@@ -115,6 +115,13 @@
       "subtitle": "Confluence",
       "description": "Create a new blog.",
       "mode": "no-view"
+    },
+    {
+      "name": "new-whiteboard",
+      "title": "Create Whiteboard",
+      "subtitle": "Confluence",
+      "description": "Create a new whiteboard.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

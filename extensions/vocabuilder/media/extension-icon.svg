@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="greenCard" x1="206" y1="84" x2="390" y2="346" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5EF0B0"/>
+      <stop offset="1" stop-color="#23C875"/>
+    </linearGradient>
+    <linearGradient id="coralCard" x1="162" y1="122" x2="346" y2="384" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF7E8A"/>
+      <stop offset="1" stop-color="#F45B73"/>
+    </linearGradient>
+    <linearGradient id="frontCard" x1="116" y1="150" x2="344" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F7F9FC"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="110" ry="110" fill="#FFFFFF"/>
+
+  <g transform="translate(5 -13)">
+    <g transform="translate(256 256) scale(1.3) translate(-256 -256)">
+      <g transform="rotate(7 300 228)">
+        <rect x="208" y="94" width="188" height="252" rx="42" fill="url(#greenCard)"/>
+      </g>
+
+      <g transform="rotate(2 262 260)">
+        <rect x="162" y="132" width="200" height="258" rx="42" fill="url(#coralCard)"/>
+      </g>
+
+      <g transform="rotate(-5 226 292)">
+        <rect x="108" y="164" width="232" height="270" rx="48" fill="url(#frontCard)"/>
+        <rect x="108" y="164" width="232" height="270" rx="48" fill="none" stroke="#CBD5E1" stroke-width="8"/>
+      </g>
+
+      <g transform="rotate(-5 226 292)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M232 258H168" stroke="#475569" stroke-width="26"/>
+        <path d="M188 229L156 258L188 287" stroke="#475569" stroke-width="26"/>
+
+        <path d="M226 330H292" stroke="#2F6BFF" stroke-width="26"/>
+        <path d="M272 301L304 330L272 359" stroke="#2F6BFF" stroke-width="26"/>
+      </g>
+    </g>
+  </g>
+</svg>

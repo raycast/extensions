@@ -1,7 +1,8 @@
 import { formatRelative, fromUnixTime } from "date-fns";
 
-import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
-import { getKlipyLocale, getKlipyApiKey } from "../preferences";
+import { APIOpt, createGifLookupUrl, IGif, IGifAPI, slugify } from "../models/gif";
+import { getKlipyLocale } from "../preferences";
+import { fetchProviderJson } from "../lib/fetchProviderJson";
 
 export interface KlipyResults {
   results: KlipyGif[];
@@ -32,71 +33,44 @@ interface KlipyMediaFormat {
   size: number;
 }
 
-const API_BASE_URL = "https://api.klipy.com";
+const API_BASE_URL = "https://gif-search.raycast.com/api/klipy";
+
+async function fetchKlipy(url: URL): Promise<KlipyResults> {
+  return fetchProviderJson<KlipyResults>(url, { provider: "Klipy", request: "request" });
+}
+
+function getKlipyUrl(opt?: APIOpt) {
+  const reqUrl = new URL(API_BASE_URL);
+  reqUrl.searchParams.set("locale", getKlipyLocale());
+  reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
+  reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
+
+  if (opt?.next) {
+    reqUrl.searchParams.set("pos", opt.next);
+  }
+
+  return reqUrl;
+}
+
+function mapKlipyResults(results: KlipyResults) {
+  return { results: results.results?.map(mapKlipyResponse) ?? [], next: results.next };
+}
 
 export default async function klipy() {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const apiKey = getKlipyApiKey();
-      if (!apiKey) {
-        throw new Error("Klipy API key is required. Please add it in extension preferences.");
-      }
-
-      const reqUrl = new URL(`${API_BASE_URL}/v2/search`);
-      reqUrl.searchParams.set("locale", getKlipyLocale());
+      const reqUrl = getKlipyUrl(opt);
       reqUrl.searchParams.set("q", term);
-      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
-      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
-      reqUrl.searchParams.set("key", apiKey);
 
-      if (opt?.next) {
-        reqUrl.searchParams.set("pos", opt.next);
-      }
-
-      const response = await fetch(reqUrl.toString());
-      if (!response.ok) {
-        throw new Error(`Could not search gifs from Klipy. Status: ${response.status}`);
-      }
-
-      const responseText = await response.text();
-      if (!responseText) {
-        throw new Error("Empty response from Klipy API");
-      }
-
-      const results = JSON.parse(responseText) as KlipyResults;
-
-      return { results: results.results?.map(mapKlipyResponse) ?? [], next: results.next };
+      const results = await fetchKlipy(reqUrl);
+      return mapKlipyResults(results);
     },
 
     async trending(opt?: APIOpt) {
-      const apiKey = getKlipyApiKey();
-      if (!apiKey) {
-        throw new Error("Klipy API key is required. Please add it in extension preferences.");
-      }
+      const reqUrl = getKlipyUrl(opt);
 
-      const reqUrl = new URL(`${API_BASE_URL}/v2/featured`);
-      reqUrl.searchParams.set("locale", getKlipyLocale());
-      reqUrl.searchParams.set("media_filter", "gif,nanogif,tinygif");
-      reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
-      reqUrl.searchParams.set("key", apiKey);
-
-      if (opt?.next) {
-        reqUrl.searchParams.set("pos", opt.next);
-      }
-
-      const response = await fetch(reqUrl.toString());
-      if (!response.ok) {
-        throw new Error(`Could not get trending gifs from Klipy. Status: ${response.status}`);
-      }
-
-      const responseText = await response.text();
-      if (!responseText) {
-        throw new Error("Empty response from Klipy API");
-      }
-
-      const results = JSON.parse(responseText) as KlipyResults;
-
-      return { results: results.results?.map(mapKlipyResponse) ?? [], next: results.next };
+      const results = await fetchKlipy(reqUrl);
+      return mapKlipyResults(results);
     },
 
     async gifs(ids: string[]) {
@@ -104,14 +78,9 @@ export default async function klipy() {
         return [];
       }
 
-      const apiKey = getKlipyApiKey();
-      if (!apiKey) {
-        throw new Error("Klipy API key is required. Please add it in extension preferences.");
-      }
-
-      // Note: Klipy /v2/gifs endpoint currently returns empty responses
-      // GIFs are saved but individual loading requires production access
-      return [];
+      const reqUrl = createGifLookupUrl(API_BASE_URL, ids);
+      const results = await fetchKlipy(reqUrl);
+      return results.results?.map(mapKlipyResponse) ?? [];
     },
   };
 }

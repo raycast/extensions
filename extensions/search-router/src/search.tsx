@@ -1,14 +1,118 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { useEffect, useMemo, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
-import { builtinSearchEngines } from "./data/builtin-search-engines";
+import { getSearchEngine } from "./data/search-engines";
 import { getCustomSearchEngines } from "./data/custom-search-engines";
-import { isValidUrl, safeOpenUrl } from "./utils";
+import type { SearchEngine } from "./types";
+import { executeSearch } from "./execute-search";
+import { getEngineTriggerPreference } from "./preferences";
 
-export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
+type SearchProps = LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>;
+
+type SearchFormValues = {
+  query: string;
+};
+
+// Form.Description collapses ordinary newlines; Unicode line separators keep examples on separate lines.
+const lineSeparator = "\u2028";
+
+function formatSearchExamples(
+  examples: [string, string][],
+  customSearchEngines: SearchEngine[],
+  triggerPrefix: string,
+) {
+  return examples
+    .map(
+      ([trigger, query]) =>
+        `${triggerPrefix}${trigger} ${query} — ${getSearchEngine(trigger, customSearchEngines)?.s ?? trigger}`,
+    )
+    .join(lineSeparator);
+}
+
+export default function SearchTheWeb(props: SearchProps) {
+  const initialQuery = props.arguments.query || props.fallbackText || "";
+  const { triggerPrefix, warning } = getEngineTriggerPreference();
+  const didRunInitialQuery = useRef(false);
+  const examples = useMemo(() => {
+    if (initialQuery) return undefined;
+    const customSearchEngines = getCustomSearchEngines();
+    return {
+      everyday: formatSearchExamples(
+        [
+          ["g", "cats"],
+          ["yt", "guitar lessons"],
+          ["w", "Bangkok"],
+          ["gm", "coffee Bangkok"],
+          ["gi", "northern lights"],
+        ],
+        customSearchEngines,
+        triggerPrefix,
+      ),
+      forums: formatSearchExamples(
+        [
+          ["gh", "markdown parser"],
+          ["so", "typescript generics"],
+          ["r", "mechanical keyboards"],
+        ],
+        customSearchEngines,
+        triggerPrefix,
+      ),
+      siteName: getSearchEngine("gh", customSearchEngines)?.s ?? "GitHub",
+    };
+  }, [initialQuery, triggerPrefix]);
+
+  useEffect(() => {
+    if (!initialQuery || didRunInitialQuery.current) return;
+
+    didRunInitialQuery.current = true;
+    void runSearch(initialQuery);
+  }, [initialQuery]);
+
+  async function handleSubmit(values: SearchFormValues) {
+    await runSearch(values.query);
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Search the Web" icon={Icon.MagnifyingGlass} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="query"
+        title="Query"
+        placeholder={`Search with ${triggerPrefix}yt`}
+        defaultValue={initialQuery}
+      />
+      {warning && <Form.Description title="Invalid Engine Trigger Prefix" text={warning} />}
+      {examples && (
+        <>
+          <Form.Separator />
+          <Form.Description title="Everyday" text={examples.everyday} />
+          <Form.Description title="Code & forums" text={examples.forums} />
+          <Form.Separator />
+          <Form.Description
+            title="Tips"
+            text={[
+              triggerPrefix
+                ? "Plain text uses your default search engine."
+                : "Bare triggers such as go can redirect plain text away from your default engine.",
+              "Legacy !bangs still work mid-query or at the end: cats !g",
+              `Search within ${examples.siteName}: markdown parser @gh`,
+              `A trigger alone opens its website: ${triggerPrefix}w`,
+            ].join(lineSeparator)}
+          />
+        </>
+      )}
+    </Form>
+  );
+}
+
+async function runSearch(rawQuery: string) {
   try {
-    const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
-
     const { searchEngine, finalQuery, searchEngineKey } = processQuery(rawQuery);
 
     if (!searchEngine) {
@@ -19,73 +123,54 @@ export default async function search(props: LaunchProps<{ arguments: { query: st
       return;
     }
 
-    if (!finalQuery) {
-      const url = new URL(searchEngine.u);
-      await safeOpenUrl(url.origin);
-      return;
-    }
-
-    const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
-
-    for (const urlTemplate of urlsToOpen) {
-      const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
-
-      if (!isValidUrl(searchUrl)) {
-        throw new Error(`Invalid URL: ${searchUrl}`);
-      }
-
-      await safeOpenUrl(searchUrl);
-    }
-
-    if (urlsToOpen.length > 1) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Opened ${urlsToOpen.length} search tabs`,
-        message: finalQuery,
-      });
-    }
+    await executeSearch(searchEngine, finalQuery);
   } catch (error) {
     await showFailureToast(error);
   }
 }
 
-function findSearchEngine(key?: string) {
-  if (!key) return null;
-
-  // First check custom search engines
-  const customEngines = getCustomSearchEngines();
-  const customEngine = customEngines.find((engine) => engine.t === key.toLowerCase());
-  if (customEngine) return customEngine;
-
-  // Then check built-in search engines
-  return builtinSearchEngines.find((engine) => engine.t === key.toLowerCase());
-}
-
 function processQuery(rawQuery: string) {
-  let query = rawQuery.trim();
+  let query = rawQuery?.trim() ?? "";
+  const customSearchEngines = getCustomSearchEngines();
+  const { triggerPrefix } = getEngineTriggerPreference();
 
-  const searchEngineKeyMatch = query.match(/!(\S+)/i);
-  const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = findSearchEngine(searchEngineKey);
+  const firstToken = query.split(/\s+/, 1)[0];
+  let searchEngineKey =
+    triggerPrefix !== "!" && firstToken.startsWith(triggerPrefix)
+      ? firstToken.slice(triggerPrefix.length).toLowerCase()
+      : undefined;
+  let searchEngine = getSearchEngine(searchEngineKey, customSearchEngines);
+  let legacyMatch = query.match(/(?:^|\s)!(\S+)/i);
+  const legacyEngine = getSearchEngine(legacyMatch?.[1], customSearchEngines);
 
-  if (query.includes("@")) {
-    const siteMatch = query.match(/@(\S+)/i);
-    const siteKey = siteMatch?.[1]?.toLowerCase();
-
-    if (siteKey) {
-      const siteEngine = findSearchEngine(siteKey);
-      if (siteEngine) {
-        query = query.replace(/@\S+\s*/i, "").trim();
-        query += ` site:${siteEngine.ad || siteEngine.d}`;
-      }
-    }
+  // Explicit bangs win over inferred bare triggers, not explicit custom prefixes.
+  if (searchEngine && (triggerPrefix !== "" || !legacyEngine)) {
+    query = query.slice(firstToken.length).trim();
+    legacyMatch = null;
+  } else {
+    searchEngineKey = legacyMatch?.[1]?.toLowerCase();
+    searchEngine = legacyEngine;
   }
 
-  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+  // Use the first recognized standalone @token, leaving emails and unknown mentions intact.
+  for (const siteMatch of query.matchAll(/(^|\s)@(\S+)/g)) {
+    const siteEngine = getSearchEngine(siteMatch[2], customSearchEngines);
+    if (!siteEngine) continue;
+
+    query = (
+      query.slice(0, siteMatch.index) +
+      siteMatch[1] +
+      query.slice(siteMatch.index + siteMatch[0].length).trimStart()
+    ).trim();
+    query += ` site:${siteEngine.ad || siteEngine.d}`;
+    break;
+  }
+
+  const cleanQuery = (legacyMatch ? query.replace(/(^|\s)!\S+\s*/i, "$1") : query).trim();
   let finalQuery = cleanQuery;
   if (!searchEngine && searchEngineKey) {
     finalQuery = `${searchEngineKey} ${cleanQuery}`;
   }
 
-  return { searchEngine: searchEngine || getDefaultSearchEngine(), finalQuery, searchEngineKey };
+  return { searchEngine: searchEngine || getDefaultSearchEngine(customSearchEngines), finalQuery, searchEngineKey };
 }

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { RepositoryContext } from "../../open-repository";
 import { useState, useEffect, useMemo } from "react";
 import { showFailureToast } from "@raycast/utils";
@@ -92,7 +92,7 @@ function GitIgnoreForm(context: RepositoryContext & { filePath?: string }) {
             title="Open .gitignore"
             icon={Icon.Document}
             target={context.gitManager.gitignorePath}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
         </ActionPanel>
       }

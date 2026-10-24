@@ -1,14 +1,23 @@
 import { List } from "@raycast/api";
+import React from "react";
+
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
-import { AntigravityError, AntigravityUsage } from "./types";
-import type { Accessory } from "../agents/types";
+} from "../agents/ui.tsx";
+import { effectiveAntigravityPercent } from "./effective-remaining.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
+
+function usageWord(mode: PercentageDisplayMode): string {
+  return mode === "used" ? "Used" : "Remaining";
+}
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
   const fallback = formatErrorOrNoData("Antigravity", usage, error);
@@ -25,9 +34,16 @@ export function formatAntigravityUsageText(usage: AntigravityUsage | null, error
     lines.push(`Plan: ${u.accountPlan}`);
   }
 
-  appendModel(lines, "Primary", u.primaryModel);
-  appendModel(lines, "Secondary", u.secondaryModel);
-  appendModel(lines, "Tertiary", u.tertiaryModel);
+  const mode = getPercentageDisplayMode();
+  const quotaGroups = getQuotaGroups(u);
+  if (quotaGroups.length > 0) {
+    appendQuotaGroups(lines, quotaGroups, mode);
+    return lines.join("\n");
+  }
+
+  appendModel(lines, "Primary", u.primaryModel, mode);
+  appendModel(lines, "Secondary", u.secondaryModel, mode);
+  appendModel(lines, "Tertiary", u.tertiaryModel, mode);
 
   return lines.join("\n");
 }
@@ -39,33 +55,59 @@ export function renderAntigravityDetail(
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as AntigravityUsage;
+  const quotaGroups = getQuotaGroups(u);
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Email" text={u.accountEmail || "Unknown"} />
       <List.Item.Detail.Metadata.Label title="Plan" text={u.accountPlan || "Unknown"} />
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Primary", u.primaryModel)}
-      {u.secondaryModel != null && (
+
+      {quotaGroups.length > 0 ? (
+        quotaGroups.map((group, groupIndex) => (
+          <React.Fragment key={`${group.displayName}-${groupIndex}`}>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label
+              title={group.displayName}
+              text={formatGroupDescription(group.description) ?? ""}
+            />
+            {group.buckets.map((bucket, bucketIndex) => (
+              <React.Fragment key={`${bucket.bucketId}-${bucket.window}-${bucketIndex}`}>
+                <List.Item.Detail.Metadata.Label
+                  title={`  ${bucket.displayName}`}
+                  text={`${generateAsciiBar(toDisplayPercent(bucket.percentLeft, mode), 10)} ${formatPercentDisplay(bucket.percentLeft, mode)}`}
+                />
+                <List.Item.Detail.Metadata.Label title="  Resets In" text={bucket.resetsIn} />
+              </React.Fragment>
+            ))}
+          </React.Fragment>
+        ))
+      ) : (
         <>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
-          <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
-          />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
-        </>
-      )}
-      {u.tertiaryModel != null && (
-        <>
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
-          <List.Item.Detail.Metadata.Label
-            title="Remaining"
-            text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
-          />
-          <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+          {renderModelMetadata("Primary", u.primaryModel, mode)}
+          {u.secondaryModel != null && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
+              <List.Item.Detail.Metadata.Label
+                title={usageWord(mode)}
+                text={`${generateAsciiBar(toDisplayPercent(u.secondaryModel.percentLeft, mode))} ${formatPercentDisplay(u.secondaryModel.percentLeft, mode)}`}
+              />
+              <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
+            </>
+          )}
+          {u.tertiaryModel != null && (
+            <>
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
+              <List.Item.Detail.Metadata.Label
+                title={usageWord(mode)}
+                text={`${generateAsciiBar(toDisplayPercent(u.tertiaryModel.percentLeft, mode))} ${formatPercentDisplay(u.tertiaryModel.percentLeft, mode)}`}
+              />
+              <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+            </>
+          )}
         </>
       )}
     </List.Item.Detail.Metadata>
@@ -101,23 +143,48 @@ export function getAntigravityAccessory(
     return { text: "Error", tooltip: error.message };
   }
 
-  if (!usage || !usage.primaryModel) {
+  const quotaGroups = usage ? getQuotaGroups(usage) : [];
+
+  if (!usage || (!usage.primaryModel && quotaGroups.length === 0)) {
     return getNoDataAccessory();
   }
 
-  const primary = usage.primaryModel;
-  const secondary = usage.secondaryModel;
+  const mode = getPercentageDisplayMode();
+  let percent = 100;
+  let tooltip = "";
+
+  if (quotaGroups.length > 0) {
+    // Badge reflects the first-party (Gemini) binding constraint only; third-party
+    // pools (Claude/GPT) are excluded so their independently-exhausted limits can't
+    // drag a healthy Gemini account to zero. Their per-group numbers still appear in
+    // the tooltip below and in the detail panel.
+    percent = effectiveAntigravityPercent(quotaGroups);
+    tooltip = quotaGroups
+      .map((g) => {
+        const parts = g.buckets.map((b) => `  ${b.displayName}: ${toDisplayPercent(b.percentLeft, mode)}%`);
+        return `${g.displayName}\n${parts.join("\n")}`;
+      })
+      .join("\n");
+  } else if (usage.primaryModel) {
+    percent = usage.primaryModel.percentLeft;
+    const secondary = usage.secondaryModel;
+    tooltip = secondary
+      ? `${usage.primaryModel.label}: ${toDisplayPercent(usage.primaryModel.percentLeft, mode)}%\n${secondary.label}: ${toDisplayPercent(secondary.percentLeft, mode)}%`
+      : `${usage.primaryModel.label}: ${toDisplayPercent(usage.primaryModel.percentLeft, mode)}%`;
+  }
 
   return {
-    icon: generatePieIcon(primary.percentLeft),
-    text: `${primary.percentLeft}%`,
-    tooltip: secondary
-      ? `${primary.label}: ${primary.percentLeft}% | ${secondary.label}: ${secondary.percentLeft}%`
-      : `${primary.label}: ${primary.percentLeft}%`,
+    icon: generatePieIcon(percent),
+    text: `${toDisplayPercent(percent, mode)}%`,
+    tooltip,
   };
 }
 
-function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["primaryModel"]): React.ReactNode {
+function renderModelMetadata(
+  labelPrefix: string,
+  model: AntigravityUsage["primaryModel"],
+  mode: PercentageDisplayMode,
+): React.ReactNode {
   if (!model) {
     return <List.Item.Detail.Metadata.Label title={labelPrefix} text="No quota data" />;
   }
@@ -126,15 +193,53 @@ function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["prima
     <>
       <List.Item.Detail.Metadata.Label title={`${labelPrefix} Model`} text={model.label} />
       <List.Item.Detail.Metadata.Label
-        title="Remaining"
-        text={`${generateAsciiBar(model.percentLeft)} ${model.percentLeft}% remaining`}
+        title={usageWord(mode)}
+        text={`${generateAsciiBar(toDisplayPercent(model.percentLeft, mode))} ${formatPercentDisplay(model.percentLeft, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Resets In" text={model.resetsIn} />
     </>
   );
 }
 
-function appendModel(lines: string[], title: string, model: AntigravityUsage["primaryModel"]): void {
+function getQuotaGroups(usage: AntigravityUsage): NonNullable<AntigravityUsage["quotaGroups"]> {
+  return usage.quotaGroups?.filter((group) => group.buckets.length > 0) ?? [];
+}
+
+function formatGroupDescription(description: string | undefined): string | null {
+  if (!description) return null;
+
+  const cleaned = description.replace(/^Models within this group:\s*/i, "").trim();
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+function appendQuotaGroups(
+  lines: string[],
+  quotaGroups: NonNullable<AntigravityUsage["quotaGroups"]>,
+  mode: PercentageDisplayMode,
+): void {
+  for (const group of quotaGroups) {
+    lines.push("");
+    lines.push(group.displayName);
+
+    const description = formatGroupDescription(group.description);
+    if (description) {
+      lines.push(description);
+    }
+
+    for (const bucket of group.buckets) {
+      lines.push(`${bucket.displayName}: ${formatPercentDisplay(bucket.percentLeft, mode)}`);
+      lines.push(generateAsciiBar(toDisplayPercent(bucket.percentLeft, mode), 10));
+      lines.push(`Resets In: ${bucket.resetsIn}`);
+    }
+  }
+}
+
+function appendModel(
+  lines: string[],
+  title: string,
+  model: AntigravityUsage["primaryModel"],
+  mode: PercentageDisplayMode,
+): void {
   if (!model) {
     lines.push(`${title}: No quota data`);
     return;
@@ -142,7 +247,7 @@ function appendModel(lines: string[], title: string, model: AntigravityUsage["pr
 
   lines.push("");
   lines.push(`${title}: ${model.label}`);
-  lines.push(`Remaining: ${model.percentLeft}% remaining`);
-  lines.push(generateAsciiBar(model.percentLeft));
+  lines.push(`${usageWord(mode)}: ${formatPercentDisplay(model.percentLeft, mode)}`);
+  lines.push(generateAsciiBar(toDisplayPercent(model.percentLeft, mode)));
   lines.push(`Resets In: ${model.resetsIn}`);
 }

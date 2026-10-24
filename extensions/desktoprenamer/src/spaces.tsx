@@ -1,24 +1,52 @@
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { runDesktopRenamerCommand, runDesktopRenamerScript, escapeAppleScriptString } from "./utils";
+import { getSpaceSnapshot, renameSpace, SpaceAPISnapshot } from "./utils";
 
 export interface Space {
   id: string;
   name: string;
   displayID: string;
+  displayName: string;
   num: number;
+  isFullscreen: boolean | undefined;
+  appPath?: string;
+  isLocked: boolean;
+}
+
+export interface DisplayGroup<T> {
+  displayID: string;
+  displayName: string;
+  items: T[];
+}
+
+export function isMoveTarget(space: Pick<Space, "isFullscreen">) {
+  return space.isFullscreen === false;
+}
+
+export function groupByDisplay<T extends Pick<Space, "displayID" | "displayName">>(items: T[]): DisplayGroup<T>[] {
+  const groups = new Map<string, DisplayGroup<T>>();
+
+  for (const item of items) {
+    const group = groups.get(item.displayID) ?? {
+      displayID: item.displayID,
+      displayName: item.displayName,
+      items: [],
+    };
+    group.items.push(item);
+    groups.set(item.displayID, group);
+  }
+
+  return Array.from(groups.values());
+}
+
+export function hasMultipleDisplays<T extends Pick<Space, "displayID">>(items: T[]): boolean {
+  return new Set(items.map((item) => item.displayID)).size > 1;
 }
 
 export function useSpaces() {
-  const { data, isLoading, revalidate } = usePromise<() => Promise<string | null>>(async () => {
+  const { data, isLoading, revalidate } = usePromise<() => Promise<SpaceAPISnapshot | null>>(async () => {
     try {
-      return await runDesktopRenamerScript(`
-        tell application "DesktopRenamer"
-          set allSpaces to get all spaces
-          set currentName to get current space name
-          return allSpaces & "~~~" & currentName
-        end tell
-      `);
+      return await getSpaceSnapshot();
     } catch {
       return null;
     }
@@ -26,39 +54,38 @@ export function useSpaces() {
 
   let spaces: Space[] = [];
   let currentName = "";
+  let currentId = "";
+  let activeSpaceID = "";
+  let movedWindowsCount = 0;
 
   if (data) {
-    const [spacesStr, curName] = data.split("~~~");
-    currentName = curName ? curName.trim() : "";
-    spaces = spacesStr
-      .split("\n")
-      .filter((line) => line.trim().length > 0)
-      .map((line) => {
-        const parts = line.split("~");
-        return {
-          id: parts[0],
-          name: parts[1] || "Unknown",
-          displayID: parts[2] || "Main",
-          num: parseInt(parts[3] || "0", 10),
-        };
-      });
+    const snapshot: SpaceAPISnapshot = data;
+    currentName = snapshot.currentSpaceName;
+    currentId = snapshot.currentSpaceIDs.join(",");
+    activeSpaceID = snapshot.currentSpaceID ?? snapshot.currentSpaceIDs[0] ?? "";
+    movedWindowsCount = snapshot.movedWindowsCount;
+    spaces = snapshot.spaces.map((space) => ({
+      id: space.id,
+      name: space.name || "Unknown",
+      displayID: space.displayID || "Main",
+      displayName: space.displayName || space.displayID || "Main",
+      num: space.number,
+      isFullscreen: space.isFullscreen,
+      appPath: space.appPath ?? undefined,
+      isLocked: space.isLocked,
+    }));
   }
 
-  const groupedSpaces =
-    spaces.reduce(
-      (acc, space) => {
-        const group = acc[space.displayID] || [];
-        group.push(space);
-        acc[space.displayID] = group;
-        return acc;
-      },
-      {} as Record<string, Space[]>,
-    ) || {};
+  const displayGroups = groupByDisplay(spaces);
 
   return {
     spaces,
     currentName,
-    groupedSpaces,
+    currentId,
+    activeSpaceID,
+    displayGroups,
+    hasMultipleDisplays: hasMultipleDisplays(spaces),
+    movedWindowsCount,
     isLoading,
     revalidate,
   };
@@ -69,9 +96,7 @@ export function RenameSpaceForm({ space, onRename }: { space: Space; onRename: (
 
   async function handleRename(values: { name: string }) {
     try {
-      const sanitizedName = escapeAppleScriptString(values.name).replace(/~/g, "");
-      const sanitizedId = escapeAppleScriptString(space.id);
-      await runDesktopRenamerCommand(`rename space "${sanitizedId}" to "${sanitizedName}"`);
+      await renameSpace(space.id, values.name, "Failed to rename space");
       await showToast({ style: Toast.Style.Success, title: "Renamed space" });
       onRename();
       pop();

@@ -46,25 +46,21 @@ export function PageItem({ search, title, language }: { search: string; title: s
           <Action.OpenInBrowser
             title="Search in Browser"
             url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           <ActionPanel.Section>
             {page?.content_urls && (
               <Action.CopyToClipboard
-                shortcut={{ modifiers: ["cmd"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
                 title="Copy URL"
                 content={page?.content_urls.desktop.page || ""}
               />
             )}
             {page?.content_urls && (
-              <Action.CopyToClipboard
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                title="Copy Title"
-                content={title}
-              />
+              <Action.CopyToClipboard shortcut={Keyboard.Shortcut.Common.CopyName} title="Copy Title" content={title} />
             )}
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
               title="Copy Subtitle"
               content={page?.description ?? ""}
             />

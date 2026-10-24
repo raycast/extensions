@@ -1,5 +1,6 @@
 import Cocoa
 import RaycastSwiftMacros
+import ScreenCaptureKit
 import Vision
 
 @raycast
@@ -12,128 +13,96 @@ func recognizeText(
   customWordsList: [String],
   languages: [String],
   playSound: Bool
-) -> String {
-  let mode: VNRequestTextRecognitionLevel = fast ? .fast : .accurate
-  let useLangCorrection: Bool = languageCorrection
-  let languagesList: [String] = languages.isEmpty ? ["en-US"] : languages
-  let customWords: [String] = customWordsList
-
-  let imgRef: CGImage?
-  if fullscreen {
-    imgRef = captureScreen(keepImage: keepImage)
-  } else {
-    imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
-  }
+) async -> String {
+  let imgRef = fullscreen
+    ? await captureScreen(keepImage: keepImage)
+    : captureSelectedArea(keepImage: keepImage, playSound: playSound)
 
   guard let capturedImage = imgRef else {
     return "Error: failed to capture image"
   }
 
-  var recognizedText = ""
-  let request = VNRecognizeTextRequest { request, _ in
-    guard let observations = request.results as? [VNRecognizedTextObservation] else {
-      recognizedText = "No text observations found."
-      return
-    }
-    for observation in observations {
-      guard let candidate = observation.topCandidates(1).first else {
-        continue
-      }
-      if !recognizedText.isEmpty {
-        recognizedText.append(ignoreLineBreaks ? " " : "\n")
-      }
-      recognizedText.append(candidate.string)
-    }
-  }
-  request.recognitionLevel = mode
-  request.usesLanguageCorrection = useLangCorrection
-  request.recognitionLanguages = languagesList
-  request.customWords = customWords
+  var request = RecognizeTextRequest()
+  request.recognitionLevel = fast ? .fast : .accurate
+  request.usesLanguageCorrection = languageCorrection
+  request.customWords = customWordsList
+  request.recognitionLanguages = (languages.isEmpty ? ["en-US"] : languages)
+    .map { Locale.Language(identifier: $0) }
 
   do {
-    try VNImageRequestHandler(cgImage: capturedImage, options: [:]).perform([request])
+    let observations = try await silencingStdout {
+      try await request.perform(on: capturedImage)
+    }
+    let separator = ignoreLineBreaks ? " " : "\n"
+    return observations
+      .compactMap { $0.topCandidates(1).first?.string }
+      .joined(separator: separator)
   } catch {
     return "Error: \(error.localizedDescription)"
   }
-
-  return recognizedText
 }
 
 @raycast
-func detectBarcode(
-  keepImage: Bool,
-  playSound: Bool
-) -> String {
-  let imgRef = captureSelectedArea(keepImage: keepImage, playSound: playSound)
-
-  guard let capturedImage = imgRef else {
+func detectBarcode(keepImage: Bool, playSound: Bool) async -> String {
+  guard let capturedImage = captureSelectedArea(keepImage: keepImage, playSound: playSound) else {
     return "Error: failed to capture image"
   }
 
-  var detectedText = ""
-  let semaphore = DispatchSemaphore(value: 0)
-  
-  let request = VNDetectBarcodesRequest { request, error in
-    defer { semaphore.signal() }
-    
-    if let error = error {
-      detectedText = "Error: \(error.localizedDescription)"
-      return
+  do {
+    let observations = try await silencingStdout {
+      try await DetectBarcodesRequest().perform(on: capturedImage)
     }
-    
-    guard let observations = request.results as? [VNBarcodeObservation] else {
-      detectedText = "No barcodes or QR codes detected"
-      return
+    let values = observations.compactMap(\.payloadString)
+    guard !values.isEmpty else {
+      return "No barcodes or QR codes detected"
     }
-    
-    for observation in observations {
-      let barcodeValue = observation.payloadStringValue ?? "Unknown value"
-      if !detectedText.isEmpty {
-        detectedText += "\n"
-      }
-      detectedText += barcodeValue
-    }
-    
-    if detectedText.isEmpty {
-      detectedText = "No barcodes or QR codes detected"
-    } else {
-      detectedText = detectedText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    return values.joined(separator: "\n")
+  } catch {
+    return "Error: \(error.localizedDescription)"
   }
-
-  DispatchQueue.global(qos: .userInitiated).async {
-    do {
-      try VNImageRequestHandler(cgImage: capturedImage, options: [:]).perform([request])
-    } catch {
-      detectedText = "Error: \(error.localizedDescription)"
-      semaphore.signal()
-    }
-  }
-  
-  semaphore.wait()
-  return detectedText
 }
 
-func captureScreen(keepImage: Bool) -> CGImage? {
-  let screenRect = NSScreen.main?.frame ?? .zero
-  let imageRef = CGWindowListCreateImage(
-    screenRect, .optionOnScreenOnly, kCGNullWindowID, .bestResolution
-  )
-
-  if keepImage, let imageRef = imageRef {
-    let image = NSImage(cgImage: imageRef, size: NSSize.zero)
-    NSPasteboard.general.clearContents()
-    NSPasteboard.general.writeObjects([image])
+func captureScreen(keepImage: Bool) async -> CGImage? {
+  guard let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false) else {
+    return nil
   }
 
-  return imageRef
+  let mainDisplayID = NSScreen.main?.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
+  guard let display = content.displays.first(where: { $0.displayID == mainDisplayID }) ?? content.displays.first else {
+    return nil
+  }
+
+  let configuration = SCStreamConfiguration()
+  if let mode = CGDisplayCopyDisplayMode(display.displayID) {
+    configuration.width = mode.pixelWidth
+    configuration.height = mode.pixelHeight
+  } else {
+    configuration.width = display.width
+    configuration.height = display.height
+  }
+  configuration.showsCursor = false
+
+  let filter = SCContentFilter(display: display, excludingWindows: [])
+  guard let image = try? await SCScreenshotManager.captureImage(
+    contentFilter: filter, configuration: configuration
+  ) else {
+    return nil
+  }
+
+  if keepImage {
+    let pasteboardImage = NSImage(cgImage: image, size: .zero)
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.writeObjects([pasteboardImage])
+  }
+
+  return image
 }
 
 func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CGImage? {
   let filePath = randomPngPath()
   let task = Process()
   task.launchPath = "/usr/sbin/screencapture"
-  var arguments: [String] = ["-i"]
+  var arguments = ["-i"]
   arguments.append(keepImage ? "-c" : filePath)
   if !playSound {
     arguments.append("-x")
@@ -142,38 +111,44 @@ func captureSelectedArea(keepImage: Bool, playSound: Bool) -> CGImage? {
   task.launch()
   task.waitUntilExit()
 
-  var image: NSImage?
+  let image: NSImage?
   if keepImage {
-    guard let pasteboard = NSPasteboard.general.pasteboardItems?.first,
-          let fileType = pasteboard.types.first,
-          let data = pasteboard.data(forType: fileType)
+    guard
+      let pasteboard = NSPasteboard.general.pasteboardItems?.first,
+      let fileType = pasteboard.types.first,
+      let data = pasteboard.data(forType: fileType)
     else {
       return nil
     }
     image = NSImage(data: data)
   } else {
-    guard let imgData = try? Data(contentsOf: URL(fileURLWithPath: filePath)),
-          let img = NSImage(data: imgData)
-    else {
+    defer { try? FileManager.default.removeItem(atPath: filePath) }
+    guard let data = try? Data(contentsOf: URL(fileURLWithPath: filePath)) else {
       return nil
     }
-    image = img
+    image = NSImage(data: data)
   }
 
   var proposedRect = NSRect.zero
-  guard let imgRef = image?.cgImage(forProposedRect: &proposedRect, context: nil, hints: nil) else {
-    return nil
-  }
-
-  if !keepImage {
-    try? FileManager.default.removeItem(atPath: filePath)
-  }
-
-  return imgRef
+  return image?.cgImage(forProposedRect: &proposedRect, context: nil, hints: nil)
 }
 
 func randomPngPath() -> String {
-  let tempDir = NSTemporaryDirectory()
-  let uuid = UUID().uuidString
-  return "\(tempDir)/\(uuid).png"
+  "\(NSTemporaryDirectory())/\(UUID().uuidString).png"
+}
+
+// On macOS 26 the Vision text models log to stdout, which the Raycast bridge
+// uses to read a command's return value. Mute fd 1 while Vision runs.
+func silencingStdout<T>(_ body: () async throws -> T) async rethrows -> T {
+  fflush(stdout)
+  let original = dup(1)
+  let devNull = open("/dev/null", O_WRONLY)
+  dup2(devNull, 1)
+  close(devNull)
+  defer {
+    fflush(stdout)
+    dup2(original, 1)
+    close(original)
+  }
+  return try await body()
 }

@@ -23,6 +23,10 @@ export const Shortcut = {
     macOS: { modifiers: ["cmd"], key: "m" },
     Windows: { modifiers: ["ctrl"], key: "m" },
   } satisfies Keyboard.Shortcut,
+  ChangeReasoning: {
+    macOS: { modifiers: ["cmd"], key: "r" },
+    Windows: { modifiers: ["ctrl"], key: "r" },
+  } satisfies Keyboard.Shortcut,
   UpdateModel: {
     macOS: { modifiers: ["cmd"], key: "u" },
     Windows: { modifiers: ["ctrl"], key: "u" },

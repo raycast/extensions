@@ -1,9 +1,4 @@
-import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
 
-export default tseslint.config(...tseslint.configs.recommended, {
-  rules: {
-    "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
-    "@typescript-eslint/no-explicit-any": "warn",
-  },
-  ignores: ["node_modules/**", "dist/**"],
-});
+export default defineConfig([...raycastConfig]);

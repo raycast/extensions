@@ -7,11 +7,8 @@ type Input = {
   limit?: number;
 };
 
-/**
- * List the user's Teak tags with per-tag card counts.
- */
 export default async function tool(input: Input = {}) {
-  const { items } = await listTags();
+  const { items } = await listTags("silent");
 
   const normalizedFilter = input.filter?.trim().toLowerCase();
   const filtered = normalizedFilter

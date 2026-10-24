@@ -10,7 +10,7 @@ export const DeepLink = {
 export function raycastCommandLink(context: { slug?: string; product?: string; view?: "detail" }) {
   // Use launchContext via the `context` query parameter (JSON, URL-encoded)
   const encodedContext = encodeURIComponent(JSON.stringify(context));
-  return `raycast://extensions/${encodeURIComponent(DeepLink.publisher)}/${encodeURIComponent(
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${encodeURIComponent(DeepLink.publisher)}/${encodeURIComponent(
     DeepLink.extensionName,
   )}/${encodeURIComponent(DeepLink.command)}?context=${encodedContext}`;
 }

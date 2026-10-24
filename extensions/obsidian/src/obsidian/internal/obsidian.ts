@@ -61,7 +61,7 @@ export async function getVaultsFromObsidianJson(): Promise<ObsidianVault[]> {
       key: path,
       path,
     }));
-  } catch (e) {
+  } catch {
     return [];
   }
 }

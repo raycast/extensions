@@ -1,5 +1,14 @@
 # Anna's Archive Changelog
 
+## [Obsolete] - 2026-10-08
+
+- This extension is obsolete, due to Anna's Archive implementing bot protection. Replaced the search function with an empty view that informs the user that the extension is obsolete.
+
+## [Improvements] - 2026-06-03
+
+- Add EPUB slow-download and member fast-download actions.
+- Add an EPUB search filter with persisted selection and improved result ranking.
+
 ## [Bugfix] - 2026-03-06
 
 - Another round of domains taken down... (Fix [#26070](https://github.com/raycast/extensions/issues/26070))

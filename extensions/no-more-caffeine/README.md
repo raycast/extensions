@@ -10,6 +10,8 @@ Instead of just tracking _total daily intake_, this extension estimates the _rem
 - **Bedtime Prediction** - Predicts residual caffeine levels at your bedtime
 - **Status Indicators** - Safe, Warning, or No More Caffeine based on predicted impact
 - **Quick Logging** - Built-in presets (Coffee, Espresso, Tea, Energy Drink, etc.) and custom drinks
+- **Backdated Logging** - Pick the exact date and time when you actually drank something, even hours after the fact
+- **Edit Existing Entries** - Correct the time, amount, or drink type of any logged entry (`⌘ E` in Today's Caffeine)
 - **Menu Bar Integration** - Monitor status directly from the menu bar
 - **Intake History** - View all caffeine intake organized by date
 

@@ -1,7 +1,7 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { Device } from "./lib/types";
+import { Device, DeviceStatusEnum } from "./lib/types";
 import {
   getDeviceIcon,
   getDevices,
@@ -18,20 +18,16 @@ const refreshDevices = async (
   setDevicesFn: (devices: Device[]) => void,
   setIsLoadingFn: (isLoading: boolean) => void,
 ): Promise<void> => {
-  let devices;
-
   try {
-    devices = await getDevices();
+    const devices = await getDevices();
+    const locatedDevices = await locateDevicesOnLocalNetwork(devices);
+    const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
+    setDevicesFn(augmentedLocatedDevices);
   } catch {
+    // silently ignore errors in the menu bar context
+  } finally {
     setIsLoadingFn(false);
-    return;
   }
-
-  const locatedDevices = await locateDevicesOnLocalNetwork(devices);
-  const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
-  setDevicesFn(augmentedLocatedDevices);
-
-  setIsLoadingFn(false);
 };
 
 export default function Command() {
@@ -66,7 +62,11 @@ export default function Command() {
       {unavailableDevices.length && <MenuBarExtra.Item title="Unavailable" />}
       {unavailableDevices.map((device) => (
         <MenuBarExtra.Item
-          title={device.alias}
+          title={
+            device.availabilityStatus === DeviceStatusEnum.SignInFailed
+              ? `${device.alias} (Sign-in failed)`
+              : device.alias
+          }
           key={device.deviceId}
           icon={getDeviceIcon(device)}
           tooltip={device.name}

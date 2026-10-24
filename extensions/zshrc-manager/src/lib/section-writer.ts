@@ -300,9 +300,10 @@ export async function addAliasesToZshrc(
 
     lines.splice(insertLine, 0, ...insertContent);
 
-    // Save to history before writing for undo support
-    await saveToHistory(`Add ${aliases.length} aliases to "${existingSection.marker.name}"`);
     await writeZshrcFile(lines.join("\n"));
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Add ${aliases.length} aliases to "${existingSection.marker.name}"`, content);
 
     return {
       success: true,
@@ -326,9 +327,10 @@ export async function addAliasesToZshrc(
     // Append to content and write
     const newContent = content + newSection.join("\n");
 
-    // Save to history before writing for undo support
-    await saveToHistory(`Create section "${displayName}" with ${aliases.length} aliases`);
     await writeZshrcFile(newContent);
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Create section "${displayName}" with ${aliases.length} aliases`, content);
 
     return {
       success: true,
@@ -375,9 +377,10 @@ export async function addSingleAliasToZshrc(
 
       lines.splice(insertLine, 0, ...insertContent);
 
-      // Save to history before writing for undo support
-      await saveToHistory(`Add alias "${alias.name}" to "${existingSection.marker.name}"`);
       await writeZshrcFile(lines.join("\n"));
+      // Record history after the write, with the pre-change snapshot as
+      // the undo target
+      await saveToHistory(`Add alias "${alias.name}" to "${existingSection.marker.name}"`, content);
 
       return {
         success: true,
@@ -407,9 +410,10 @@ export async function addSingleAliasToZshrc(
 
     const newContent = content + newSection.join("\n");
 
-    // Save to history before writing for undo support
-    await saveToHistory(`Add alias "${alias.name}" (create "${collectionName}" section)`);
     await writeZshrcFile(newContent);
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Add alias "${alias.name}" (create "${collectionName}" section)`, content);
 
     return {
       success: true,
@@ -421,9 +425,10 @@ export async function addSingleAliasToZshrc(
   const appendContent = alias.description ? `\n# ${alias.description}\n${aliasLine}\n` : `\n${aliasLine}\n`;
   const newContent = content + appendContent;
 
-  // Save to history before writing for undo support
-  await saveToHistory(`Add alias "${alias.name}"`);
   await writeZshrcFile(newContent);
+  // Record history after the write, with the pre-change snapshot as
+  // the undo target
+  await saveToHistory(`Add alias "${alias.name}"`, content);
 
   return {
     success: true,

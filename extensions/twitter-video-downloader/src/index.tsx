@@ -143,7 +143,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
               icon={Icon.Folder}
               title="Open Download Folder"
               path={downloadFolder}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+              }}
             />
             <Action
               icon={Icon.Gear}

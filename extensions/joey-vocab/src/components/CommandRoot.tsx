@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Detail, showToast, Toast, openExtensionPreferences, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
@@ -6,21 +6,30 @@ import { useDecks } from "../hooks/useDecks";
 import { useDictionarySearch } from "../hooks/useDictionarySearch";
 import { useUserCardIds } from "../hooks/useUserCardIds";
 import { isProUser } from "../lib/pro-gate";
-import { addCardToDeck } from "../lib/card";
-import { submitRequestCard } from "../lib/request-card";
+import { addCardToDeck, removeCardFromDeck, PLAN_LIMIT_ERROR } from "../lib/card";
 import { pronounceWord } from "../lib/audio";
+import { FREE_CARD_LIMIT, APP_STORE_URL } from "../constants";
 import { EntryDetail } from "./EntryDetail";
+import { RequestCardForm } from "./RequestCardForm";
+import { UpgradeToPro } from "./UpgradeToPro";
+import { SignInView } from "./SignInView";
+import { InstallAppView } from "./InstallAppView";
 import type { DictionaryEntry } from "../types";
 
 /**
  * Shared root component for all commands.
  * Uses a single persistent List to prevent Raycast from resetting the search bar.
+ *
+ * Search is free for everyone — no account required. Authentication and the
+ * Pro/free card limit only come into play when adding a card to a deck.
  */
 export function CommandRoot({ initialSearchText }: { initialSearchText?: string }) {
   const [searchText, setSearchText] = useState(initialSearchText ?? "");
-  const { user, isLoading: isAuthLoading, error: authError, email } = useAuth();
+  const [showInstallNudge, setShowInstallNudge] = useState(false);
+  const { push, pop } = useNavigation();
+  const { user, isLoading: isAuthLoading, error: authError, refresh: refreshAuth, signOut } = useAuth();
 
-  const { data: hasPro, isLoading: isProLoading } = useCachedPromise(() => isProUser(user?.id ?? ""), [], {
+  const { data: hasPro } = useCachedPromise((id: string) => isProUser(id), [user?.id ?? ""], {
     execute: !!user,
   });
 
@@ -29,12 +38,7 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
 
   const { userCardIds, revalidate: revalidateUserCards } = useUserCardIds(user?.id ?? null);
 
-  const isAuthenticated = !!user && hasPro === true;
-  const {
-    results,
-    isLoading: isSearching,
-    error: searchError,
-  } = useDictionarySearch(isAuthenticated ? searchText : "");
+  const { results, isLoading: isSearching, error: searchError } = useDictionarySearch(searchText);
 
   useEffect(() => {
     if (initialSearchText) {
@@ -42,42 +46,71 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
     }
   }, [initialSearchText]);
 
-  // Auth error — show outside the single List
-  if (authError) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Authentication Failed"
-          description={authError.message || "Check your Joey credentials in extension preferences."}
-          icon={Icon.ExclamationMark}
-          actions={
-            <ActionPanel>
-              <Action title="Open Preferences" onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  // Reason: a failed session restore shouldn't block free search — surface the
+  // failure as a toast and let the user keep searching as a logged-out visitor.
+  useEffect(() => {
+    if (authError) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't restore session",
+        message: authError.message || "Sign in again to add cards.",
+      });
+    }
+  }, [authError]);
 
-  // Pro gate — show outside the single List
-  if (user && hasPro === false) {
-    return (
-      <Detail
-        markdown={`# Joey Pro Required\n\nThe Raycast extension requires a Joey Pro subscription.\n\nUpgrade to Pro in the Joey app to use this extension.`}
-      />
-    );
-  }
-
-  const isLoading = isAuthLoading || isProLoading || isDecksLoading || isSearching;
+  const isLoading = isAuthLoading || isDecksLoading || isSearching;
   const hasResults = !!results?.length;
+  const isSignedIn = !!user;
 
-  async function handleAddCard(entry: DictionaryEntry) {
-    if (!selectedDeckId) {
+  // Logged-out users can search freely; adding a card needs an account.
+  function promptSignIn() {
+    push(<SignInView onAuthenticated={handleAuthenticated} />);
+  }
+
+  async function handleSignOut() {
+    try {
+      await signOut();
+      await showToast({ style: Toast.Style.Success, title: "Signed out" });
+    } catch (signOutError) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "No deck selected",
+        title: "Couldn't sign out",
+        message: (signOutError as Error).message,
       });
+    }
+  }
+
+  // Account email + sign-out, shown in the ActionPanel only when signed in.
+  // Reason: keyed off `user` (not `isSignedIn`) so TypeScript narrows away null.
+  const accountActions = user ? (
+    <ActionPanel.Section title="Account">
+      <Action.CopyToClipboard title={user.email ?? "Account"} content={user.email ?? ""} icon={Icon.Person} />
+      <Action title="Sign Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={handleSignOut} />
+    </ActionPanel.Section>
+  ) : null;
+
+  // Reason: the install nudge is shown only after a brand-new sign-up, not for
+  // returning sign-ins. `refreshAuth` loads the session before we continue.
+  // We always pop the sign-in view to return to the search list; for new users
+  // the nudge is rendered as this view's own content (below) rather than pushed
+  // on top of SignInView, so dismissing it lands on the search list — not back
+  // on the sign-in form.
+  async function handleAuthenticated({ didSignUp }: { didSignUp: boolean }) {
+    await refreshAuth();
+    if (didSignUp) {
+      setShowInstallNudge(true);
+    }
+    pop();
+  }
+
+  async function handleAddCard(entry: DictionaryEntry) {
+    if (!isSignedIn) {
+      promptSignIn();
+      return;
+    }
+
+    if (!selectedDeckId) {
+      await showToast({ style: Toast.Style.Failure, title: "No deck selected" });
       return;
     }
 
@@ -90,63 +123,80 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       return;
     }
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Adding card...",
-    });
+    // Free-plan card limit. The server-side trigger is the source of truth; this
+    // client check just avoids a doomed insert and shows the upsell immediately.
+    if (hasPro === false && userCardIds.size >= FREE_CARD_LIMIT) {
+      push(<UpgradeToPro />);
+      return;
+    }
 
-    const result = await addCardToDeck(user!.id, entry, selectedDeckId);
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Adding card..." });
+
+    const result = await addCardToDeck(user.id, entry, selectedDeckId);
 
     if (result.success) {
+      const addedCardId = result.cardId;
       toast.style = Toast.Style.Success;
       toast.title = "Card added";
-      toast.message = entry.word;
+      toast.message = `${entry.word} · press ⌘Z to undo`;
+      toast.primaryAction = {
+        title: "Undo",
+        shortcut: { modifiers: ["cmd"], key: "z" },
+        onAction: async (addedToast) => {
+          addedToast.style = Toast.Style.Animated;
+          addedToast.title = "Undoing...";
+          const undo = await removeCardFromDeck(addedCardId);
+          if (undo.success) {
+            addedToast.style = Toast.Style.Success;
+            addedToast.title = "Card removed";
+            addedToast.message = entry.word;
+            addedToast.primaryAction = undefined;
+            revalidateUserCards();
+          } else {
+            addedToast.style = Toast.Style.Failure;
+            addedToast.title = "Couldn't undo";
+            addedToast.message = undo.error;
+          }
+        },
+      };
       revalidateUserCards();
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to add card";
-      toast.message = result.error;
+      return;
     }
+
+    if (result.error === PLAN_LIMIT_ERROR) {
+      await toast.hide();
+      push(<UpgradeToPro />);
+      return;
+    }
+
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to add card";
+    toast.message = result.error;
   }
 
-  async function handleRequestCard(word: string) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Requesting card...",
-    });
-
-    const result = await submitRequestCard({
-      word,
-      context: "raycast-search",
-      source: "search",
-      user: email,
-    });
-
-    if (result.success) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Card requested";
-      toast.message = `"${word}" has been submitted`;
-    } else {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to request card";
-      toast.message = result.error;
-    }
+  // Brand-new accounts see the install nudge in place of the search list until
+  // they continue; returning sign-ins skip straight back to the list.
+  if (showInstallNudge) {
+    return <InstallAppView onContinue={() => setShowInstallNudge(false)} />;
   }
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={hasResults}
+      navigationTitle={user?.email ? `Joey Vocab · ${user.email}` : undefined}
       searchText={searchText}
       searchBarPlaceholder="Search for a word..."
       onSearchTextChange={setSearchText}
       throttle={true}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Deck" storeValue={true} onChange={setSelectedDeckId}>
-          {decks.map((deck) => (
-            <List.Dropdown.Item key={deck.id} title={deck.name} value={deck.id} />
-          ))}
-        </List.Dropdown>
+        isSignedIn && decks.length > 0 ? (
+          <List.Dropdown tooltip="Select Deck" storeValue={true} onChange={setSelectedDeckId}>
+            {decks.map((deck) => (
+              <List.Dropdown.Item key={deck.id} title={deck.name} value={deck.id} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
       }
     >
       {searchText.length === 0 ? (
@@ -161,13 +211,25 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
           icon={Icon.XMarkCircle}
           actions={
             <ActionPanel>
-              <Action title="Request Card" icon={Icon.PlusCircle} onAction={() => handleRequestCard(searchText)} />
+              {isSignedIn ? (
+                <Action
+                  title="Request Card"
+                  icon={Icon.PlusCircle}
+                  onAction={() => push(<RequestCardForm userId={user.id} initialWord={searchText} />)}
+                />
+              ) : (
+                <>
+                  <Action title="Sign in to Request a Card" icon={Icon.Key} onAction={promptSignIn} />
+                  <Action.OpenInBrowser title="Get the Joey App" icon={Icon.Mobile} url={APP_STORE_URL} />
+                </>
+              )}
+              {accountActions}
             </ActionPanel>
           }
         />
       ) : (
         (results || []).map((entry) => {
-          const isAlreadyInDeck = userCardIds.has(entry.id);
+          const isAlreadyInDeck = isSignedIn && userCardIds.has(entry.id);
 
           return (
             <List.Item
@@ -178,17 +240,21 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
               detail={<EntryDetail entry={entry} isLoading={isSearching} />}
               actions={
                 <ActionPanel>
+                  {isSignedIn ? (
+                    <Action title="Add to Deck" icon={Icon.Plus} onAction={() => handleAddCard(entry)} />
+                  ) : (
+                    <Action title="Sign in to Add Cards" icon={Icon.Key} onAction={promptSignIn} />
+                  )}
                   <Action
                     title="Pronounce"
                     icon={Icon.SpeakerHigh}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={() => pronounceWord(entry.word_audio_path, entry.word)}
                   />
-                  <Action
-                    title="Add to Deck"
-                    icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "return" }}
-                    onAction={() => handleAddCard(entry)}
-                  />
+                  {!isSignedIn && (
+                    <Action.OpenInBrowser title="Get the Joey App" icon={Icon.Mobile} url={APP_STORE_URL} />
+                  )}
+                  {accountActions}
                 </ActionPanel>
               }
             />

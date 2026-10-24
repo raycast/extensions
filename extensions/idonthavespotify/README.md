@@ -8,6 +8,7 @@ Effortlessly convert Spotify links to your preferred streaming service :)
 - **Clipboard Integration**: Automatically reads links from your clipboard, converts them to the selected platform, and copies the new link back to your clipboard.
 - **Streamlined Commands**: Utilize a variety of commands tailored to each streaming service for a seamless user experience.
 - **Audio Previews**: Play audio previews directly from Raycast.
+- **Self-Hosted Instances**: Point the extension at your own I Don't Have Spotify instance via the `Self-Hosted Instance URL` preference.
 
 ## Commands
 

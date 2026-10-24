@@ -18,25 +18,46 @@ Search Router lets you search specific websites from Raycast using shortcuts by 
 
 ### Search the Web 🌐
 
-Type your query with an optional bang prefix/suffix:
+Set an engine trigger prefix in the extension preferences, then type your query.
+The default is `!`; leave the preference blank to use bare triggers.
+Whitespace-only prefixes are also treated as blank.
 
-- With search engine: `!yt funny videos` searches YouTube
-- Without search engine: `funny videos` uses your default search engine
+With a blank prefix, common first words such as `go` or `docs` can redirect plain English queries away from your default engine.
+For example, `go tutorials` searches Gmail for `tutorials` unless you override that trigger.
+Keep a nonblank prefix or use an explicit bang for the default search engine to avoid these accidental matches.
+
+- Default: `!yt funny videos` searches YouTube
+- Custom prefix: `.yt funny videos` searches YouTube when the prefix is `.`
+- No prefix: `yt funny videos` searches YouTube when the preference is blank
+- Without a search engine: `funny videos` uses your default search engine
 - Site-specific search: `funny videos @yt` searches for "funny videos" only within YouTube's domain
+
+Built-in aliases work with both `!` and `@`: `!w` searches Wikipedia, `!gm` searches Google Maps, `!so` searches Stack Overflow, and `!r` searches Reddit. Shortcuts are case-insensitive.
+
+Custom engines take priority over built-in shortcuts. Overriding a primary shortcut also redirects its aliases to the custom engine; a custom engine with an alias as its trigger takes priority for that alias alone.
+
+The query form includes a cheat sheet with everyday searches, code and forum searches, and syntax tips. Examples stay visible while you type, and engine names reflect your custom overrides.
+
+Existing `!bang` and `@site` syntax remains available.
+`@` is reserved and cannot be used as the engine trigger prefix.
+Prefixes cannot contain internal whitespace.
+Invalid prefixes use `!` instead, so plain searches, legacy bangs, and site filters keep working.
 
 ### Browse Search Engines 🧭
 
 View and manage all available search engines with filtering options. You can:
 
 - **Filter by type**: View all engines, only custom engines, or only built-in engines
-- **Search**: Find engines by name or trigger
+- **Search**: Find engines by name, primary trigger, or alias
 - **Set default**: Choose your default search engine
 - **Manage custom engines**: Add, edit, or delete your custom search engines directly
-- **Copy details**: Copy shortcuts or domains to clipboard
+- **Copy details**: View available aliases and copy primary shortcuts, aliases, or domains to clipboard
 
 ### Add Custom Search Engine ➕
 
 Quickly add a new custom search engine with a personalized trigger and URL.
+
+Existing built-in triggers and aliases can be overridden, including those with non-ASCII characters. Deleting a custom default that used an alias restores the Google fallback rather than selecting the alias's built-in engine.
 
 Example custom search engines:
 

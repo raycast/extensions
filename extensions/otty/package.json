@@ -1,0 +1,197 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "otty",
+  "title": "Otty",
+  "description": "Control the Otty terminal from Raycast.",
+  "icon": "command-icon.png",
+  "author": "Ethan_Cao",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Otty Tabs",
+      "description": "Browse Otty windows, tabs, and panes, and switch to one.",
+      "mode": "view"
+    },
+    {
+      "name": "agents-menu-bar",
+      "title": "Otty Agents",
+      "subtitle": "Otty",
+      "description": "Show coding agents that need input in the menu bar, and jump to them.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    },
+    {
+      "name": "jump-to-directory",
+      "title": "Jump to Directory",
+      "description": "Open one of Otty's most-visited folders, or a git repository, in a new tab.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "repositoriesDirectory",
+          "title": "Repositories Folder",
+          "description": "Folder to scan for git repositories.",
+          "type": "directory",
+          "required": false
+        },
+        {
+          "name": "repositoriesScanDepth",
+          "title": "Scan Depth",
+          "description": "How many folder levels to search below it.",
+          "type": "dropdown",
+          "required": false,
+          "default": "2",
+          "data": [
+            {
+              "title": "1 Level",
+              "value": "1"
+            },
+            {
+              "title": "2 Levels",
+              "value": "2"
+            },
+            {
+              "title": "3 Levels",
+              "value": "3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-recipe",
+      "title": "Open Otty Recipe",
+      "description": "Open an exported Otty recipe to rebuild its tabs and panes.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "recipesDirectory",
+          "title": "Recipes Folder",
+          "description": "Folder that holds your exported .ottyrecipe files.",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "otty-settings",
+      "title": "Otty Settings",
+      "description": "Browse Otty's settings, toggle them, and edit values.",
+      "mode": "view"
+    },
+    {
+      "name": "change-theme",
+      "title": "Change Otty Theme",
+      "description": "Pick Otty's light-mode and dark-mode themes from a grid of previews.",
+      "mode": "view"
+    },
+    {
+      "name": "open-in-otty",
+      "title": "Open in Otty",
+      "description": "Open the selected Finder items, or the front Finder window, in Otty.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a new Otty window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open a new Otty tab, falling back to a new window if needed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-directory",
+      "title": "Open Directory",
+      "description": "Open a directory in Otty.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "directory",
+          "type": "text",
+          "placeholder": "/path/to/directory",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "description": "Run a shell command in Otty.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "text",
+          "placeholder": "npm run dev",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ssh",
+      "title": "SSH",
+      "description": "Open an SSH target in Otty.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "text",
+          "placeholder": "user@host or ssh://user@host",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ottyCliPath",
+      "title": "Otty CLI Path",
+      "description": "Path to the Otty control CLI.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Applications/Otty.app/Contents/MacOS/otty-cli"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "update-config-docs": "node --no-warnings scripts/sync-config-docs.mjs --write",
+    "publish": "node --no-warnings scripts/sync-config-docs.mjs && npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.0",
+    "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12"
+  },
+  "contributors": [
+    "chrismessina"
+  ]
+}

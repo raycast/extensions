@@ -4,7 +4,7 @@ import { writeFile } from "fs/promises";
 import { join } from "path";
 import { getAudioUrl } from "./storage";
 
-function speakWithTts(word: string): void {
+function _speakWithTts(word: string): void {
   execFile("say", [word]);
 }
 
@@ -19,13 +19,13 @@ export async function pronounceWord(audioPath: string | null, word: string): Pro
   const audioUrl = getAudioUrl(audioPath);
 
   if (!audioUrl) {
-    speakWithTts(word);
+    _speakWithTts(word);
     return;
   }
 
   const response = await fetch(audioUrl);
   if (!response.ok) {
-    speakWithTts(word);
+    _speakWithTts(word);
     return;
   }
 

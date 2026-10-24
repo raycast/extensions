@@ -1,4 +1,5 @@
-import { HEXtoRGB } from "./conversions";
+import { HEXtoRGB } from "./colorsConversion";
+
 // tailwind colors as of v3.3.2
 const colors: { [key: string]: { [key: string]: string } } = {
   slate: {

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
@@ -11,14 +11,18 @@ import {
   TAG_HUMAN_COLOR,
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
-import { Bookmark, Config } from "../types";
+import { Bookmark, Config, List as BookmarkListType } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
+import { markToastFailed, toErrorMessage } from "../utils/toast";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
 import { NoteEdit } from "./NoteEdit";
+import { AddToListSubmenu } from "./AddToListSubmenu";
 
 const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
+
 interface BookmarkItemProps {
   bookmark: Bookmark;
   config: Config;
@@ -26,6 +30,9 @@ interface BookmarkItemProps {
   onCleanCache?: () => void;
   onVisit?: (bookmark: Bookmark) => void;
   isSelected?: boolean;
+  /** Supplied by BookmarkList so the Add to List submenu costs one request per view, not per row. */
+  lists?: BookmarkListType[];
+  isLoadingLists?: boolean;
 }
 
 function getPreviewAssetIds(bookmark: Bookmark): { screenshotId?: string; imageAssetId?: string } {
@@ -59,7 +66,7 @@ function useAuthenticatedAssetUrl(assetId: string | undefined, enabled: boolean)
           setUrl(imageUrl);
         }
       } catch (error) {
-        log.error("Failed to get authenticated image", { assetId, error });
+        log.error("Failed to get authenticated image", { assetId, error: toErrorMessage(error) });
       }
     })();
 
@@ -118,8 +125,7 @@ function useBookmarkHandlers({
         }
       } catch (error) {
         log.error(`Bookmark action '${action}' failed`, error);
-        toast.style = Toast.Style.Failure;
-        toast.message = String(error);
+        markToastFailed(toast, toast.title, error);
         if (action !== "delete") {
           await fetchLatestBookmark();
         }
@@ -293,6 +299,8 @@ function BookmarkActions({
   images,
   t,
   onVisit,
+  lists,
+  isLoadingLists,
 }: {
   bookmark: Bookmark;
   config: Config;
@@ -302,6 +310,8 @@ function BookmarkActions({
   images: ReturnType<typeof useBookmarkImages>;
   t: (key: string) => string;
   onVisit?: (bookmark: Bookmark) => void;
+  lists?: BookmarkListType[];
+  isLoadingLists?: boolean;
 }) {
   const isNote = bookmark.content.type === "text";
   const editTitle = isNote ? t("notes.actions.edit") : t("bookmark.actions.edit");
@@ -313,7 +323,7 @@ function BookmarkActions({
     const pushDetailAction = (
       <Action.Push
         icon={Icon.Sidebar}
-        target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
+        target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
         title={viewDetailTitle}
       />
     );
@@ -323,7 +333,7 @@ function BookmarkActions({
         icon={Icon.Pencil}
         title={editTitle}
         onAction={handlers.handleEdit}
-        shortcut={{ modifiers: ["ctrl"], key: "e" }}
+        shortcut={Keyboard.Shortcut.Common.Edit}
       />
     );
 
@@ -334,7 +344,7 @@ function BookmarkActions({
             <Action.OpenInBrowser
               url={bookmark.content.url}
               title={t("bookmark.actions.openLink")}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
               onOpen={() => onVisit?.(bookmark)}
             />
           );
@@ -357,7 +367,7 @@ function BookmarkActions({
             <Action.CopyToClipboard
               content={bookmark.content.text}
               title={copyNoteTitle}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               onCopy={() => onVisit?.(bookmark)}
             />
           );
@@ -400,44 +410,33 @@ function BookmarkActions({
     <ActionPanel>
       <ActionPanel.Section>
         {mainAction}
-        {mainAction.props.title !== viewDetailTitle && (
-          <Action.Push
-            icon={Icon.Sidebar}
-            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
-            title={viewDetailTitle}
-          />
-        )}
-        {mainAction.props.title !== editTitle && (
-          <Action
-            icon={Icon.Pencil}
-            title={editTitle}
-            onAction={handlers.handleEdit}
-            shortcut={{ modifiers: ["ctrl"], key: "e" }}
-          />
-        )}
+        {/* Open is skipped when it is ALREADY the main action, or the panel
+            would list it twice. Copy is not a duplicate of anything, so it is
+            gated separately — sharing one guard meant Copy disappeared for
+            everyone on the default "Open in Browser" setting. */}
         {bookmark.content.type === "link" &&
           bookmark.content.url &&
           mainAction.props.title !== t("bookmark.actions.openLink") && (
-            <>
-              <Action.OpenInBrowser
-                url={bookmark.content.url}
-                title={t("bookmark.actions.openLink")}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onOpen={() => onVisit?.(bookmark)}
-              />
-              <Action.CopyToClipboard
-                content={bookmark.content.url}
-                title={t("bookmark.actions.copyLink")}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                onCopy={() => onVisit?.(bookmark)}
-              />
-            </>
+            <Action.OpenInBrowser
+              url={bookmark.content.url}
+              title={t("bookmark.actions.openLink")}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onOpen={() => onVisit?.(bookmark)}
+            />
           )}
+        {bookmark.content.type === "link" && bookmark.content.url && (
+          <Action.CopyToClipboard
+            content={bookmark.content.url}
+            title={t("bookmark.actions.copyLink")}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+            onCopy={() => onVisit?.(bookmark)}
+          />
+        )}
         {bookmark.content.type === "text" && bookmark.content.text && mainAction.props.title !== copyNoteTitle && (
           <Action.CopyToClipboard
             content={bookmark.content.text}
             title={copyNoteTitle}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             onCopy={() => onVisit?.(bookmark)}
           />
         )}
@@ -447,6 +446,25 @@ function BookmarkActions({
           mainAction.props.title !== t("bookmark.actions.viewImage") && (
             <Action.OpenInBrowser url={images.asset} title={t("bookmark.actions.viewImage")} />
           )}
+        {/* Generic actions come after the type-specific ones: what you do with
+            a bookmark's own content (open it, copy it) outranks what you do to
+            the record. Whichever of these is the ↵ action is hoisted above and
+            skipped here. */}
+        {mainAction.props.title !== editTitle && (
+          <Action
+            icon={Icon.Pencil}
+            title={editTitle}
+            onAction={handlers.handleEdit}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+        )}
+        {mainAction.props.title !== viewDetailTitle && (
+          <Action.Push
+            icon={Icon.Sidebar}
+            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
+            title={viewDetailTitle}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {bookmark.content.type === "link" && bookmark.content.url && (
@@ -455,53 +473,67 @@ function BookmarkActions({
               title={t("bookmark.actions.aiSummary")}
               onAction={handlers.handleSummarize}
               icon={Icon.Wand}
-              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+              shortcut={{ macOS: { modifiers: ["ctrl"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
           </>
+        )}
+        {lists && lists.length > 0 && (
+          <AddToListSubmenu bookmarkId={bookmark.id} lists={lists} isLoading={isLoadingLists} />
         )}
         <Action
           title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
           onAction={() => handlers.handleUpdate({ favourited: !bookmark.favourited })}
           icon={bookmark.favourited ? Icon.StarCircle : Icon.Star}
-          shortcut={{ modifiers: ["ctrl"], key: "f" }}
+          shortcut={{ macOS: { modifiers: ["ctrl"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
         />
         <Action
           title={bookmark.archived ? t("bookmark.actions.unarchive") : t("bookmark.actions.archive")}
           onAction={() => handlers.handleUpdate({ archived: !bookmark.archived })}
           icon={bookmark.archived ? Icon.BlankDocument : Icon.SaveDocument}
-          shortcut={{ modifiers: ["ctrl"], key: "a" }}
+          shortcut={{ macOS: { modifiers: ["ctrl"], key: "a" }, Windows: { modifiers: ["ctrl"], key: "a" } }}
         />
         <Action
           icon={Icon.ArrowClockwise}
           title={t("bookmarkItem.actions.refresh")}
           onAction={onRefresh}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
         {onCleanCache && (
           <Action
             icon={Icon.Trash}
             title={t("bookmarkItem.actions.clearCache")}
             onAction={onCleanCache}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            // Clearing every cached preview is a remove-all, not a copy. It sat on
+            // Common.Copy because `ray lint --fix` matches the COMBO (⌘⇧C) rather
+            // than the meaning — and re-applies that match, so writing the combo
+            // out longhand does not survive the next `--fix`. The constant itself
+            // has to be the right one. RemoveAll (⌃⇧D) does not clash with the
+            // Delete action's Remove (⌃D) in this panel.
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
           />
         )}
       </ActionPanel.Section>
-      <ActionPanel.Section title={t("bookmarkItem.actions.getBrowserExtension")}>
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installChromeExtension")}
-          url="https://chromewebstore.google.com/detail/karakeep/kgcjekpmcjjogibpjebkhaanilehneje"
-          icon={Icon.Globe}
-        />
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installFirefoxAddon")}
-          url="https://addons.mozilla.org/en-US/firefox/addon/karakeep/"
-          icon={Icon.Globe}
-        />
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installSafariExtension")}
-          url="https://apps.apple.com/us/app/karakeeper-bookmarker/id6746722790"
-          icon={Icon.Globe}
-        />
+      <ActionPanel.Section>
+        {/* Submenu rather than three top-level actions: these are one-time
+            setup steps, and flattening them pushed Delete off the visible
+            portion of the panel. */}
+        <ActionPanel.Submenu title={t("bookmarkItem.actions.addToBrowser")} icon={Icon.Globe}>
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.chrome")}
+            url="https://chromewebstore.google.com/detail/karakeep/kgcjekpmcjjogibpjebkhaanilehneje"
+            icon={Icon.Globe}
+          />
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.firefox")}
+            url="https://addons.mozilla.org/en-US/firefox/addon/karakeep/"
+            icon={Icon.Globe}
+          />
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.safari")}
+            url="https://apps.apple.com/us/app/karakeep-app/id6479258022"
+            icon={Icon.Globe}
+          />
+        </ActionPanel.Submenu>
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -509,7 +541,7 @@ function BookmarkActions({
           title={deleteTitle}
           style={Action.Style.Destructive}
           onAction={handlers.handleDeleteBookmark}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -523,6 +555,8 @@ export function BookmarkItem({
   onCleanCache,
   onVisit,
   isSelected,
+  lists,
+  isLoadingLists,
 }: BookmarkItemProps) {
   const { t } = useTranslation();
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
@@ -534,6 +568,7 @@ export function BookmarkItem({
     Boolean(isSelected) &&
     ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
       (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+
   const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
 
   const handlers = useBookmarkHandlers({
@@ -592,7 +627,7 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={previewImage ? `<img src="${previewImage}" center width="300" />` : ""}
+          markdown={previewImage ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 300 }) : ""}
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }
@@ -606,6 +641,8 @@ export function BookmarkItem({
           images={images}
           t={t}
           onVisit={onVisit}
+          lists={lists}
+          isLoadingLists={isLoadingLists}
         />
       }
     />

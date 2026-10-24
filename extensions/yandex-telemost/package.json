@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yandex-telemost",
+  "title": "Yandex Telemost",
+  "description": "Create and join Yandex Telemost meetings directly from Raycast. Requires macOS — uses AppleScript to automate your browser.",
+  "icon": "extension-icon.png",
+  "author": "egor_chuzhin",
+  "categories": [
+    "Communication"
+  ],
+  "keywords": [
+    "yandex",
+    "telemost",
+    "meeting",
+    "video",
+    "conference",
+    "yandex telemost"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "raycastVersion": ">=1.79.0",
+  "commands": [
+    {
+      "name": "new-meeting",
+      "title": "New Meeting",
+      "subtitle": "Yandex Telemost",
+      "description": "Create a new Yandex Telemost meeting and copy the link to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-meeting-refocus",
+      "title": "New Meeting and Refocus",
+      "subtitle": "Yandex Telemost",
+      "description": "Create a new Yandex Telemost meeting, copy the link, and return focus to the previous app",
+      "mode": "no-view"
+    },
+    {
+      "name": "join-meeting",
+      "title": "Join Meeting",
+      "subtitle": "Yandex Telemost",
+      "description": "Join a Yandex Telemost meeting by link or code",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "title": "Preferred Browser",
+      "description": "Browser to open Telemost in. If not set, uses the currently active browser.",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

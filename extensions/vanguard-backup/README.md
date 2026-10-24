@@ -4,10 +4,13 @@
 
 # Vanguard Backup
 
-This is a Raycast extension for [Vanguard Backup](https://vanguardbackup.com/). With this extension you can:
+This is a Raycast extension for [Vanguard Backup](https://github.com/vanguardbackup/vanguard). With this extension you can:
 - Manage **Backup Destinations**
 - Manage **Backup Tasks**
 - Manage **Remote Servers**
+
+## ⚠️ Warning
+The repository was archived by the owner on Nov 22, 2025. It is now read-only. Use the service at your own risk.
 
 ## 🚀 Getting Started
 
@@ -15,7 +18,7 @@ This is a Raycast extension for [Vanguard Backup](https://vanguardbackup.com/). 
 
 2. **Enter your Vanguard Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
 
-    a. The URL of your Vanguard instance (default: https://app.vanguardbackup.com/)
+    a. The URL of your Vanguard instance
 
     b. API Token from Vanguard Dashboard
 

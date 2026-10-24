@@ -1,5 +1,14 @@
 # MXroute Changelog
 
+## [View and Update Domain Spam Settings] - 2026-08-24
+
+- Add links for more email clients
+- View and update spam settings
+
+## [Remove Domain] - 2026-06-08
+
+- Add "Remove Domain" `Action`
+
 ## [Toggle Domain Mail Hosting Status] - 2026-02-27
 
 - Enable or Disable mail hosting in "Domains"

@@ -43,8 +43,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
     "ini": "^6.0.0"
   },
   "devDependencies": {

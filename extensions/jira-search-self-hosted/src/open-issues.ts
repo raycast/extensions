@@ -4,6 +4,8 @@ import { ResultItem, SearchCommand } from "./command";
 import { Color, Icon, Image } from "@raycast/api";
 import { ErrorText } from "./exception";
 import { buildIssueSearchJql } from "./issue-search";
+import { buildIssueNumberJql } from "./issue-key";
+import { prefs } from "./preferences";
 
 interface IssueType {
   id: string;
@@ -83,7 +85,8 @@ function buildJql(query: string, assignee: string): string {
 
 function jqlFor(query: string, assignee: string): string {
   const trimmedQuery = query.trim();
-  return isIssueKey(trimmedQuery) ? `key=${trimmedQuery}` : buildJql(query, assignee);
+  if (isIssueKey(trimmedQuery)) return `key=${trimmedQuery}`;
+  return buildIssueNumberJql(trimmedQuery, prefs.defaultIncludeProjects) ?? buildJql(query, assignee);
 }
 
 export async function searchIssues(query: string): Promise<ResultItem[]> {

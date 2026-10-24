@@ -8,6 +8,8 @@ import { useGetAllTags } from "../hooks/useGetAllTags";
 import { TAG_PICKER_NOOP_VALUE, useTagPicker } from "../hooks/useTagPicker";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
+import { markToastFailed } from "../utils/toast";
+import { ensureReachable } from "../utils/submitGuard";
 
 const log = logger.child("[NoteEdit]");
 
@@ -57,6 +59,11 @@ export function NoteEdit({ bookmark, onRefresh }: NoteEditProps) {
     async onSubmit(values) {
       log.info("Updating note", { bookmarkId: bookmark.id });
       const toast = await showToast({ title: t("bookmark.updating"), style: Toast.Style.Animated });
+
+      // Note text is expensive to lose — pre-flight before writing, reusing the
+      // toast already on screen. See the create forms for the same pattern.
+      if ((await ensureReachable(values.content, toast)) !== "ok") return;
+
       try {
         await fetchUpdateBookmark(bookmark.id, {
           title: values.title.trim(),
@@ -72,9 +79,7 @@ export function NoteEdit({ bookmark, onRefresh }: NoteEditProps) {
         await onRefresh?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = t("bookmark.updateFailed");
-        toast.message = String(error);
+        markToastFailed(toast, t("bookmark.updateFailed"), error);
       }
     },
   });

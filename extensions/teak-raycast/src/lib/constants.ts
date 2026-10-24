@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
 
-const DEFAULT_TEAK_DEV_APP_URL = "http://app.teak.localhost:1355";
-const DEFAULT_TEAK_DEV_API_URL = "http://api.teak.localhost:1355";
+const DEFAULT_TEAK_DEV_APP_URL = "http://localhost:3000";
+const DEFAULT_TEAK_DEV_API_URL = "https://reminiscent-kangaroo-59.convex.site";
 
 const normalizeBaseUrl = (label: string, rawUrl: string): string => {
   let parsedUrl: URL;
@@ -36,7 +36,7 @@ const DEV_API_URL = `${resolveDevUrl(
   DEFAULT_TEAK_DEV_API_URL,
   "TEAK_DEV_API_URL",
 )}/v1`;
-const PROD_API_URL = "https://api.teakvault.com/v1";
+const PROD_API_URL = "https://teakvault.com/api/v1";
 
 const normalizeUrl = (url: string): string =>
   url.endsWith("/") ? url.slice(0, -1) : url;

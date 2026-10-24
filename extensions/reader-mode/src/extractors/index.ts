@@ -1,8 +1,9 @@
-import { BaseExtractor, ExtractorResult, ExtractorDocument } from "./_base";
-import { HackerNewsExtractor } from "./hackernews";
+import { BaseExtractor, ExtractorDocument, ExtractorResult } from "./_base";
 import { GitHubExtractor } from "./github";
-import { RedditExtractor } from "./reddit";
+import { HackerNewsExtractor } from "./hackernews";
 import { MediumExtractor } from "./medium";
+import { RedditExtractor } from "./reddit";
+
 export { BaseExtractor };
 export type { ExtractorResult };
 
@@ -13,8 +14,11 @@ export type { ExtractorResult };
 const EXTRACTOR_REGISTRY: Array<{
   pattern: RegExp;
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ExtractorClass: new (doc: ExtractorDocument, url: string, schemaOrgData?: any) => BaseExtractor;
+  ExtractorClass: new (
+    doc: ExtractorDocument,
+    url: string,
+    schemaOrgData?: Record<string, unknown> | null,
+  ) => BaseExtractor;
 }> = [
   {
     pattern: /^news\.ycombinator\.com$/i,

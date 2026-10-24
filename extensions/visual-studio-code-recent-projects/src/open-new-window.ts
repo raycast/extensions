@@ -1,5 +1,8 @@
 import { Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import * as fs from "fs";
+import * as os from "os";
+import path from "path";
 import { build } from "./lib/preferences";
 import { VSCodeBuild } from "./lib/types";
 import { isMac, isWin } from "./lib/utils";
@@ -9,16 +12,18 @@ import { getEditorApplication } from "./utils/editor";
  * The index of the `New Window` menu item in the `File` menu.
  */
 const NewWindowMenuItemIndex: Record<VSCodeBuild, number> = {
-  [VSCodeBuild.Antigravity]: 3,
+  [VSCodeBuild.AntigravityIDE]: 3,
   [VSCodeBuild.Code]: 3,
   [VSCodeBuild.CodeInsiders]: 3,
   [VSCodeBuild.Cursor]: 2,
+  [VSCodeBuild.IBMBob]: 3,
   [VSCodeBuild.Kiro]: 3,
   [VSCodeBuild.Positron]: 3,
   [VSCodeBuild.Trae]: 3,
   [VSCodeBuild.TraeCN]: 3,
   [VSCodeBuild.VSCodium]: 3,
   [VSCodeBuild.VSCodiumInsiders]: 3,
+  [VSCodeBuild.Devin]: 3,
   [VSCodeBuild.Windsurf]: 3,
   [VSCodeBuild.Lingma]: 3,
 };
@@ -68,8 +73,21 @@ export default async function command() {
       await makeNewWindowMacOs();
     }
     if (isWin) {
-      const editorApp = await getEditorApplication(build);
-      open("", editorApp);
+      // Cursor is missing from Raycast's Windows app list, so resolve it by
+      // absolute path instead of getEditorApplication().
+      if (build === VSCodeBuild.Cursor) {
+        const cursorExe = path.join(os.homedir(), "AppData", "Local", "Programs", "cursor", "Cursor.exe");
+        if (!fs.existsSync(cursorExe)) {
+          throw new Error(`Cursor app not found at ${cursorExe}. Is it installed?`);
+        }
+        await open(cursorExe);
+      } else {
+        const editorApp = await getEditorApplication(build);
+        if (!editorApp) {
+          throw new Error(`${build} app not found. Is it installed?`);
+        }
+        await open("", editorApp);
+      }
     }
   } catch (error) {
     await showToast({

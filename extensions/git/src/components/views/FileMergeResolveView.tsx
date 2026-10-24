@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useMemo } from "react";
 import { ConflictSegment } from "../../types";
@@ -187,7 +188,7 @@ function ConflictSegmentOptionItem({
               title="Save Resolved Changes"
               icon={Icon.SaveDocument}
               onAction={onApplyAll}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

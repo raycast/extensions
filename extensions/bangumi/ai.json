@@ -1,0 +1,145 @@
+{
+  "instructions": "You help users manage their Bangumi collections. Use search-subjects or search-characters to find IDs before updating collections or episodes. Subject IDs and episode IDs appear in tool results as `subjectId` and `episodeId`. Collection status: 1 = Wish, 2 = Collect (completed), 3 = Doing (in progress), 4 = On Hold, 5 = Dropped.",
+  "evals": [
+    {
+      "input": "@bangumi What anime am I currently watching?",
+      "mocks": {
+        "get-collections": {
+          "pagination": { "total": 1, "limit": 30, "offset": 0 },
+          "content": "# User Collections\n\n### [Watching] Collection Info\n### [Bangumi] 葬送のフリーレン (`subjectId: 3785`)\n  - Original Name: 葬送のフリーレン\n  - Type: Anime (`subjectType: 2`)\n  - Rating: 8.5 (Rank: #12) (50000 ratings)\n  - Episodes: 28\n  - Air Date: 2023-09-29\n  - URL: https://bgm.tv/subject/3785\n  - Progress: 12 eps watched"
+        }
+      },
+      "expected": [{ "callsTool": "get-collections" }],
+      "usedAsExample": true
+    },
+    {
+      "input": "@bangumi Search for anime called Frieren",
+      "mocks": {
+        "search-subjects": {
+          "pagination": { "total": 1, "limit": 10, "offset": 0 },
+          "content": "# Search Results for \"Frieren\"\n\n### [Bangumi] 葬送のフリーレン (`subjectId: 3785`)\n  - Original Name: 葬送のフリーレン\n  - Type: Anime (`subjectType: 2`)\n  - Rating: 8.5 (Rank: #12) (50000 ratings)\n  - Episodes: 28\n  - Air Date: 2023-09-29\n  - URL: https://bgm.tv/subject/3785"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-subjects",
+            "arguments": {
+              "keyword": { "includes": "Frieren" }
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@bangumi Search for character Rem",
+      "mocks": {
+        "search-characters": {
+          "pagination": { "total": 1, "limit": 10, "offset": 0 },
+          "content": "# Character Search Results for \"Rem\"\n\n### 雷姆 (`characterId: 33967`)\n  - Type: Character"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-characters",
+            "arguments": {
+              "keyword": { "includes": "Rem" }
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    },
+    {
+      "input": "@bangumi What anime airs today?",
+      "mocks": {
+        "get-calendar": "# Bangumi Daily Calendar\n\n## Monday (Today) (1 items)\n\n### [Bangumi] 葬送のフリーレン (`subjectId: 3785`)\n  - Original Name: 葬送のフリーレン\n  - Type: Anime (`subjectType: 2`)\n  - Rating: 8.5\n  - Episodes: 28\n  - Air Date: 2023-09-29\n  - URL: https://bgm.tv/subject/3785"
+      },
+      "expected": [{ "callsTool": "get-calendar" }],
+      "usedAsExample": true
+    },
+    {
+      "input": "@bangumi Get details for subject 3785",
+      "mocks": {
+        "get-subject-details": "# Subject Details\n\n### [Bangumi] 葬送のフリーレン (`subjectId: 3785`)\n  - Original Name: 葬送のフリーレン\n  - Type: Anime (`subjectType: 2`)\n  - Rating: 8.5 (Rank: #12) (50000 ratings)\n  - Episodes: 28\n  - Air Date: 2023-09-29\n  - URL: https://bgm.tv/subject/3785\n  - Total Episodes: 28\n  - Tags: 奇幻, 冒险\n  - My Status: Watching\n  - My Progress: 12 eps watched\n  \n  ### Summary\n  After the party of heroes defeated the Demon King..."
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-subject-details",
+            "arguments": {
+              "subjectId": 3785
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bangumi Show episodes for subject 3785",
+      "mocks": {
+        "get-subject-episodes": {
+          "pagination": { "total": 2, "limit": 100, "offset": 0 },
+          "content": "# Subject Episodes (Subject ID: 3785)\n\n- **#1**: 旅立ちの夜 (`episodeId: 12345`)\n    - Air Date: 2023-09-29\n    - User Status: Watched\n- **#2**: 魔法使い (`episodeId: 12346`)\n    - Air Date: 2023-10-06\n    - User Status: None"
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-subject-episodes",
+            "arguments": {
+              "subjectId": 3785
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bangumi Mark subject 3785 as completed",
+      "mocks": {
+        "get-subject-details": "# Subject Details\n\n### [Bangumi] 葬送のフリーレン (`subjectId: 3785`)\n  - Original Name: 葬送のフリーレン\n  - Type: Anime (`subjectType: 2`)\n  - Rating: 8.5 (Rank: #12) (50000 ratings)\n  - Episodes: 28\n  - Air Date: 2023-09-29\n  - URL: https://bgm.tv/subject/3785\n  - Total Episodes: 28\n  - Tags: 奇幻, 冒险\n  - My Status: Watching\n  - My Progress: 12 eps watched\n  \n  ### Summary\n  After the party of heroes defeated the Demon King...",
+        "get-subject-episodes": {
+          "pagination": { "total": 2, "limit": 100, "offset": 0 },
+          "content": "# Subject Episodes (Subject ID: 3785)\n\n- **#1**: 旅立ちの夜 (`episodeId: 12345`)\n    - Air Date: 2023-09-29\n    - User Status: Watched\n- **#2**: 魔法使い (`episodeId: 12346`)\n    - Air Date: 2023-10-06\n    - User Status: None"
+        },
+        "update-collection": {
+          "success": true,
+          "message": "Successfully updated subject 3785 collection status to \"Collect\""
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "update-collection",
+            "arguments": {
+              "subjectId": 3785,
+              "collectionType": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "input": "@bangumi Mark episode 12345 as watched for subject 3785",
+      "mocks": {
+        "update-episodes": {
+          "success": true,
+          "message": "Successfully updated 1 episode(s) of subject 3785 to \"Watched\""
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "update-episodes",
+            "arguments": {
+              "subjectId": 3785,
+              "episodeIds": [12345],
+              "collectionType": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

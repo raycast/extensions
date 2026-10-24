@@ -28,16 +28,18 @@ export function SessionUsage() {
     [sessions],
   );
 
-  const accessories: List.Item.Accessory[] = error
-    ? STANDARD_ACCESSORIES.ERROR
-    : sessions.length === 0 && isLoading
-      ? STANDARD_ACCESSORIES.LOADING
-      : !sessions || sessions.length === 0
-        ? [{ text: "No sessions", icon: Icon.Circle }]
-        : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
+  const accessories: List.Item.Accessory[] =
+    error && sessions.length === 0
+      ? STANDARD_ACCESSORIES.ERROR
+      : sessions.length === 0 && isLoading
+        ? STANDARD_ACCESSORIES.LOADING
+        : !sessions || sessions.length === 0
+          ? [{ text: "No sessions", icon: Icon.Circle }]
+          : [{ text: `${sessions.length} sessions`, icon: Icon.List }];
   const renderDetailMetadata = (): ReactNode => {
     const errorMetadata = ErrorMetadata({
-      error,
+      error: sessions.length === 0 ? error : undefined,
+      isLoading,
       noDataMessage: !sessions || sessions.length === 0 ? "No recent sessions found" : undefined,
       noDataSubMessage:
         !sessions || sessions.length === 0 ? `Sessions will appear here ${MESSAGES.AFTER_USAGE}` : undefined,
@@ -49,6 +51,7 @@ export function SessionUsage() {
 
     return (
       <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
         <List.Item.Detail.Metadata.Label
           title="Recent Sessions"
           text={`${sessions.length} sessions`}
@@ -80,7 +83,7 @@ export function SessionUsage() {
           <List.Item.Detail.Metadata.Label
             key={`${session.sessionId || "unknown"}-${index}`}
             title={session.sessionId}
-            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true })}`}
+            text={`${formatTokens(session.totalTokens)} • ${formatCost(session.totalCost)} • ${session.lastActivity ? formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true }) : "unknown"}`}
           />
         ))}
       </List.Item.Detail.Metadata>

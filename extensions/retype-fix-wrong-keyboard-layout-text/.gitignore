@@ -1,0 +1,6 @@
+node_modules
+.idea
+swift/.raycast-swift-build
+swift/.swiftpm
+assets/compiled_raycast_swift
+.DS_Store

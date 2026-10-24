@@ -1,41 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import {
-  buildCardsSearchParams,
   getRecoveryHint,
   getUserFacingErrorMessage,
-  normalizeLimit,
   RaycastApiError,
   toErrorCode,
 } from "../lib/apiErrors";
 
 describe("raycast api helpers", () => {
-  test("buildCardsSearchParams trims and encodes query params", () => {
-    expect(
-      buildCardsSearchParams({
-        favorited: true,
-        limit: 50,
-        query: "  design systems  ",
-        sort: "oldest",
-        tag: "research",
-        type: "link",
-      }),
-    ).toBe(
-      "q=design+systems&type=link&tag=research&favorited=true&sort=oldest&limit=50",
-    );
-  });
-
-  test("buildCardsSearchParams omits empty query", () => {
-    expect(buildCardsSearchParams({ query: "   ", limit: 50 })).toBe(
-      "limit=50",
-    );
-  });
-
-  test("normalizeLimit clamps limits to backend contract", () => {
-    expect(normalizeLimit(0)).toBe(1);
-    expect(normalizeLimit(101)).toBe(100);
-    expect(normalizeLimit(Number.NaN)).toBe(50);
-  });
-
   test("toErrorCode falls back for unknown values", () => {
     expect(toErrorCode("INVALID_API_KEY", "REQUEST_FAILED")).toBe(
       "INVALID_API_KEY",
@@ -62,6 +33,32 @@ describe("raycast api helpers", () => {
     const error = new RaycastApiError("NETWORK_ERROR");
     expect(getUserFacingErrorMessage(error)).toContain("Unable to reach Teak");
     expect(getRecoveryHint(error)).toContain("Check network connectivity");
+  });
+
+  test("maps API config errors to local setup guidance", () => {
+    const error = new RaycastApiError("CONFIG_ERROR", 500);
+
+    expect(getUserFacingErrorMessage(error)).toContain(
+      "missing required configuration",
+    );
+    expect(getRecoveryHint(error)).toContain("dev convex");
+  });
+
+  test("maps missing local API errors to dev guidance", () => {
+    const error = new RaycastApiError("DEV_API_UNAVAILABLE", 404);
+
+    expect(getUserFacingErrorMessage(error)).toContain("API");
+    expect(getRecoveryHint(error)).toContain("bun run dev convex");
+  });
+
+  test("maps not found errors without implying a card was deleted", () => {
+    const error = new RaycastApiError("NOT_FOUND", 404);
+
+    expect(getUserFacingErrorMessage(error)).toContain("requested resource");
+    expect(getUserFacingErrorMessage(error)).not.toContain(
+      "card no longer exists",
+    );
+    expect(getRecoveryHint(error)).toContain("API URL");
   });
 
   test("handles unknown error values", () => {

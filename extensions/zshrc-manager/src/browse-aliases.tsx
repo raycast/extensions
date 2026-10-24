@@ -2,7 +2,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Action, ActionPanel, List, Icon, showToast, Toast, Clipboard } from "@raycast/api";
 import { useAliasCollections, type AliasCollection, type CollectionMetadata } from "./hooks/useAliasCollections";
-import { getSectionIcon } from "./lib/section-icons";
+import { getSectionImage } from "./lib/section-icons";
 import { generateAliasSection } from "./lib/parse-alias-file";
 import { getZshrcPath } from "./lib/zsh";
 import { addAliasesToZshrc } from "./lib/section-writer";
@@ -191,14 +191,14 @@ Select this item to load the alias definitions.
           {categoryCollections.map((collection) => {
             const loaded = loadedCollections.get(collection.id);
             const loading = isLoading(collection.id);
-            const icon = getSectionIcon(collection.icon || collection.id);
+            const icon = getSectionImage(collection.icon || collection.id);
 
             return (
               <List.Item
                 key={collection.id}
                 id={collection.id}
                 title={collection.name}
-                icon={{ source: icon.icon, tintColor: icon.color }}
+                icon={icon}
                 accessories={[
                   loading
                     ? { icon: Icon.CircleProgress }

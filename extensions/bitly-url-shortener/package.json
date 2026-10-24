@@ -4,9 +4,14 @@
   "title": "Bitly URL Shortener",
   "description": "Quickly shorten the selected URL or current clipboard URL with Bitly",
   "icon": "command-icon.png",
-  "categories": ["Communication"],
+  "categories": [
+    "Communication"
+  ],
   "author": "blessanm86",
-  "contributors": ["xmok"],
+  "contributors": [
+    "xmok",
+    "0xdhrv"
+  ],
   "license": "MIT",
   "commands": [
     {

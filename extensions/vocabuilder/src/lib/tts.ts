@@ -3,35 +3,13 @@ import { execFile } from "child_process";
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import path from "path";
-import { GeminiTtsResponseSchema } from "./types";
+import { resolveBaseUrl } from "./baseUrl";
+import { createLogger } from "./logger";
+import { resolveTtsConfig, ttsFor, type ProviderPreferences } from "./providers";
+import { PROVIDER_IDS, type TtsConfig } from "./providers/types";
 
-const TTS_MODEL = "gemini-2.5-flash-preview-tts";
-const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_VOICE = "Kore";
-const SAMPLE_RATE = 24000;
-const NUM_CHANNELS = 1;
-const BITS_PER_SAMPLE = 16;
 const MAX_CACHE_FILES = 50;
-
-const GEMINI_SUPPORTED_LANGS = new Set([
-  "en",
-  "uk",
-  "de",
-  "fr",
-  "es",
-  "it",
-  "pt",
-  "nl",
-  "pl",
-  "cs",
-  "sv",
-  "ja",
-  "ko",
-  "zh",
-  "tr",
-  "ru",
-  "be",
-]);
+const log = createLogger("tts");
 
 const MACOS_VOICE_MAP: Record<string, string> = {
   en: "Samantha",
@@ -52,40 +30,45 @@ const MACOS_VOICE_MAP: Record<string, string> = {
   ru: "Milena",
 };
 
-export function isTtsSupported(langCode: string): boolean {
-  return GEMINI_SUPPORTED_LANGS.has(langCode);
-}
-
 export function hasMacOsFallback(langCode: string): boolean {
   return langCode in MACOS_VOICE_MAP;
 }
 
-function macosVoiceForLanguage(langCode: string): string {
-  return MACOS_VOICE_MAP[langCode] ?? "Samantha";
+export type PronunciationPreferences = ProviderPreferences & { pronunciation?: "auto" | "system" };
+
+/**
+ * How a Pronounce action plays this language:
+ * - `unavailable`: nothing can speak it, so the action and its detail-pane row are hidden;
+ * - `system`: the macOS voice directly — "System Voice" was chosen, the provider has no
+ *   speech endpoint, or its endpoint does not cover the language;
+ * - `provider`: the provider's speech endpoint, with the system voice as fallback;
+ * - `misconfigured`: the provider preferences are invalid (an unrecognized key on Auto);
+ *   pressing the action reports `error` through the TTS error router.
+ */
+export type PronunciationPlan =
+  | { kind: "unavailable" }
+  | { kind: "system" }
+  | { kind: "provider"; config: TtsConfig }
+  | { kind: "misconfigured"; error: unknown };
+
+export function planPronunciation(langCode: string, prefs: PronunciationPreferences): PronunciationPlan {
+  const systemOrNothing: PronunciationPlan = hasMacOsFallback(langCode) ? { kind: "system" } : { kind: "unavailable" };
+  if (prefs.pronunciation === "system") return systemOrNothing;
+
+  let config: TtsConfig | null;
+  try {
+    config = resolveTtsConfig(prefs);
+  } catch (error) {
+    const anyVoice = hasMacOsFallback(langCode) || PROVIDER_IDS.some((id) => ttsFor(id)?.supportsLanguage(langCode));
+    return anyVoice ? { kind: "misconfigured", error } : { kind: "unavailable" };
+  }
+
+  if (config && ttsFor(config.provider).supportsLanguage(langCode)) return { kind: "provider", config };
+  return systemOrNothing;
 }
 
-function prependWavHeader(pcm: Buffer, sampleRate: number, numChannels: number, bitsPerSample: number): Buffer {
-  const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
-  const blockAlign = numChannels * (bitsPerSample / 8);
-  const dataSize = pcm.length;
-  const headerSize = 44;
-
-  const header = Buffer.alloc(headerSize);
-  header.write("RIFF", 0);
-  header.writeUInt32LE(dataSize + headerSize - 8, 4);
-  header.write("WAVE", 8);
-  header.write("fmt ", 12);
-  header.writeUInt32LE(16, 16); // fmt chunk size
-  header.writeUInt16LE(1, 20); // PCM format
-  header.writeUInt16LE(numChannels, 22);
-  header.writeUInt32LE(sampleRate, 24);
-  header.writeUInt32LE(byteRate, 28);
-  header.writeUInt16LE(blockAlign, 32);
-  header.writeUInt16LE(bitsPerSample, 34);
-  header.write("data", 36);
-  header.writeUInt32LE(dataSize, 40);
-
-  return Buffer.concat([header, pcm]);
+function macosVoiceForLanguage(langCode: string): string {
+  return MACOS_VOICE_MAP[langCode] ?? "Samantha";
 }
 
 function getCacheDir(): string {
@@ -96,9 +79,17 @@ function getCacheDir(): string {
   return dir;
 }
 
-function cacheKey(word: string, langCode: string): string {
-  const hash = createHash("sha256").update(word.toLowerCase()).digest("hex").slice(0, 32);
-  return `${langCode}-${hash}.wav`;
+// Keyed on everything that decides what the audio sounds like except the word
+// itself — including the provider and endpoint, since a different backend
+// renders the same word differently.
+function cacheKey(word: string, langCode: string, variant: string): string {
+  const variantHash = createHash("sha256").update(variant).digest("hex").slice(0, 8);
+  const wordHash = createHash("sha256").update(word.toLowerCase()).digest("hex").slice(0, 32);
+  return `${langCode}-${variantHash}-${wordHash}.wav`;
+}
+
+function cacheVariant(config: TtsConfig, cacheVersion: string, resolvedBaseUrl: string): string {
+  return [config.provider, config.model.trim(), cacheVersion, resolvedBaseUrl].join(":");
 }
 
 function evictOldestCacheFiles(dir: string, maxFiles: number): void {
@@ -121,73 +112,28 @@ function evictOldestCacheFiles(dir: string, maxFiles: number): void {
   }
 }
 
-function playAudio(filePath: string): Promise<void> {
+function playAudio(filePath: string, signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
-    execFile("/usr/bin/afplay", [filePath], (err) => {
+    execFile("/usr/bin/afplay", [filePath], { signal }, (err) => {
       if (err) reject(err);
       else resolve();
     });
   });
 }
 
-async function generateSpeechGemini(text: string, apiKey: string, signal?: AbortSignal): Promise<Buffer> {
-  const url = `${BASE_URL}/${TTS_MODEL}:generateContent`;
-
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text }] }],
-        generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: DEFAULT_VOICE },
-            },
-          },
-        },
-      }),
-      signal,
-    });
-  } catch (err) {
-    if (err instanceof TypeError) {
-      throw new Error("NETWORK_OFFLINE");
-    }
-    throw err;
-  }
-
-  if (response.status === 401 || response.status === 403) {
-    throw new Error("INVALID_API_KEY");
-  }
-
-  if (!response.ok) {
-    throw new Error("TTS_REQUEST_FAILED");
-  }
-
-  const apiData = GeminiTtsResponseSchema.parse(await response.json());
-  const base64Audio = apiData.candidates[0]?.content.parts[0]?.inlineData.data;
-
-  if (!base64Audio) {
-    throw new Error("TTS_EMPTY_RESPONSE");
-  }
-
-  const pcm = Buffer.from(base64Audio, "base64");
-  return prependWavHeader(pcm, SAMPLE_RATE, NUM_CHANNELS, BITS_PER_SAMPLE);
-}
-
 export async function pronounce(
   word: string,
-  apiKey: string,
   langCode: string,
+  config: TtsConfig,
   signal?: AbortSignal,
 ): Promise<{ cached: boolean }> {
+  const adapter = ttsFor(config.provider);
+  // Resolved before the cache lookup so the key is per-endpoint and a cache hit
+  // cannot skip validation of a misconfigured base URL.
+  const resolvedBaseUrl = resolveBaseUrl(config.baseUrl, config.provider, "tts");
   const dir = getCacheDir();
-  const fileName = cacheKey(word, langCode);
+  const fileName = cacheKey(word, langCode, cacheVariant(config, adapter.cacheVersion, resolvedBaseUrl));
   const filePath = path.join(dir, fileName);
 
   signal?.throwIfAborted();
@@ -195,21 +141,43 @@ export async function pronounce(
   let cached = true;
   if (!existsSync(filePath)) {
     cached = false;
-    const wavBuffer = await generateSpeechGemini(word, apiKey, signal);
+    const wavBuffer = await adapter.synthesize(word, langCode, config, signal);
     writeFileSync(filePath, wavBuffer);
     evictOldestCacheFiles(dir, MAX_CACHE_FILES);
   }
 
-  await playAudio(filePath);
+  const playbackMs = log.timer();
+  await playAudio(filePath, signal);
+  log.debug("tts playback completed", {
+    provider: config.provider,
+    model: config.model.trim(),
+    langCode,
+    cached,
+    playbackMs: playbackMs(),
+  });
   return { cached };
 }
 
-export async function pronounceFallback(word: string, langCode: string): Promise<void> {
+export async function pronounceFallback(word: string, langCode: string, signal?: AbortSignal): Promise<void> {
+  signal?.throwIfAborted();
   const voice = macosVoiceForLanguage(langCode);
+  const fallbackMs = log.timer();
+  log.debug("system voice fallback started", { langCode, voice, wordChars: word.length });
   return new Promise((resolve, reject) => {
-    execFile("/usr/bin/say", ["-v", voice, word], (err) => {
-      if (err) reject(err);
-      else resolve();
+    execFile("/usr/bin/say", ["-v", voice, word], { signal }, (err) => {
+      if (err) {
+        log.warn("system voice fallback failed", {
+          langCode,
+          voice,
+          fallbackMs: fallbackMs(),
+          error: err.name,
+          code: (err as NodeJS.ErrnoException).code,
+        });
+        reject(err);
+      } else {
+        log.debug("system voice fallback completed", { langCode, voice, fallbackMs: fallbackMs() });
+        resolve();
+      }
     });
   });
 }
@@ -232,15 +200,66 @@ if (import.meta.vitest) {
     });
   });
 
-  describe("isTtsSupported", () => {
-    it("returns true for languages with Gemini TTS voices", () => {
-      expect(isTtsSupported("en")).toBe(true);
-      expect(isTtsSupported("uk")).toBe(true);
-      expect(isTtsSupported("be")).toBe(true);
+  describe("planPronunciation", () => {
+    const prefs = (overrides: Partial<PronunciationPreferences>): PronunciationPreferences => ({
+      provider: "auto",
+      apiKey: "AIzaSyTest",
+      pronunciation: "auto",
+      ...overrides,
     });
 
-    it("returns false for unknown languages", () => {
-      expect(isTtsSupported("xx")).toBe(false);
+    it("uses the provider voice, including for a language with no macOS voice", () => {
+      const plan = planPronunciation("be", prefs({}));
+      expect(plan.kind).toBe("provider");
+      expect(plan.kind === "provider" && plan.config.provider).toBe("gemini");
+    });
+
+    it("goes straight to the system voice when System Voice is chosen, even for a provider with speech", () => {
+      expect(planPronunciation("uk", prefs({ pronunciation: "system" }))).toEqual({ kind: "system" });
+    });
+
+    it("goes straight to the system voice for providers without a speech endpoint", () => {
+      expect(planPronunciation("en", prefs({ provider: "anthropic" }))).toEqual({ kind: "system" });
+      expect(planPronunciation("en", prefs({ provider: "auto", apiKey: "sk-ant-api03-abc" }))).toEqual({
+        kind: "system",
+      });
+      expect(planPronunciation("en", prefs({ provider: "openai-compatible", apiKey: "any" }))).toEqual({
+        kind: "system",
+      });
+    });
+
+    it.each(["tts-1", "tts-1-hd"])("uses language-specific system voices for the OpenAI model %s", (ttsModel) => {
+      const legacy = prefs({ apiKey: "sk-abc", ttsModel: ` ${ttsModel} ` });
+      for (const langCode of ["en", "pl", "fr", "uk"]) {
+        expect(planPronunciation(langCode, legacy)).toEqual({ kind: "system" });
+      }
+      expect(planPronunciation("be", legacy)).toEqual({ kind: "unavailable" });
+      expect(planPronunciation("xx", legacy)).toEqual({ kind: "unavailable" });
+    });
+
+    it("keeps the default and instruction-capable custom OpenAI models on the provider path", () => {
+      for (const ttsModel of ["", " gpt-4o-mini-tts-2025-12-15 "]) {
+        expect(planPronunciation("be", prefs({ apiKey: "sk-abc", ttsModel }))).toMatchObject({
+          kind: "provider",
+          config: { provider: "openai" },
+        });
+      }
+    });
+
+    it("hides the action when only the system voice could speak and it has no voice for the language", () => {
+      expect(planPronunciation("be", prefs({ pronunciation: "system" }))).toEqual({ kind: "unavailable" });
+      expect(planPronunciation("be", prefs({ provider: "anthropic" }))).toEqual({ kind: "unavailable" });
+      expect(planPronunciation("xx", prefs({}))).toEqual({ kind: "unavailable" });
+    });
+
+    it("keeps the action for an unrecognized key so pressing it explains the configuration error", () => {
+      const plan = planPronunciation("en", prefs({ apiKey: "ollama" }));
+      expect(plan.kind).toBe("misconfigured");
+      expect(plan.kind === "misconfigured" && plan.error).toMatchObject({ message: "provider-undetected" });
+    });
+
+    it("hides the action for an unrecognized key when no voice at all covers the language", () => {
+      expect(planPronunciation("xx", prefs({ apiKey: "ollama" }))).toEqual({ kind: "unavailable" });
     });
   });
 
@@ -256,56 +275,48 @@ if (import.meta.vitest) {
   });
 
   describe("cacheKey", () => {
+    const VARIANT = "gemini:gemini-3.1-flash-tts-preview:v2:https://generativelanguage.googleapis.com/v1beta/models";
+
     it("produces deterministic filesystem-safe names with fixed length", () => {
-      const key = cacheKey("hello", "en");
-      // lang(2) + dash(1) + sha256-prefix(32) + .wav(4) = 39 chars
-      expect(key).toMatch(/^en-[0-9a-f]{32}\.wav$/);
-      expect(key.length).toBe(39);
+      const key = cacheKey("hello", "en", VARIANT);
+      // lang(2) + dash(1) + variant-prefix(8) + dash(1) + word-prefix(32) + .wav(4) = 48 chars
+      expect(key).toMatch(/^en-[0-9a-f]{8}-[0-9a-f]{32}\.wav$/);
+      expect(key.length).toBe(48);
     });
 
-    it("is case-insensitive", () => {
-      expect(cacheKey("Hello", "en")).toBe(cacheKey("hello", "en"));
+    it("is case-insensitive on the word", () => {
+      expect(cacheKey("Hello", "en", VARIANT)).toBe(cacheKey("hello", "en", VARIANT));
     });
 
     it("handles unicode words", () => {
-      const key = cacheKey("привіт", "uk");
-      expect(key).toMatch(/^uk-[0-9a-f]{32}\.wav$/);
+      expect(cacheKey("привіт", "uk", VARIANT)).toMatch(/^uk-[0-9a-f]{8}-[0-9a-f]{32}\.wav$/);
     });
 
     it("keeps filenames short even for long text", () => {
-      const longText = "a".repeat(1000);
-      const key = cacheKey(longText, "en");
-      expect(key.length).toBe(39);
+      expect(cacheKey("a".repeat(1000), "en", VARIANT).length).toBe(48);
+    });
+
+    it("changes when the language changes so cross-language homographs do not share audio", () => {
+      expect(cacheKey("but", "en", VARIANT)).not.toBe(cacheKey("but", "pl", VARIANT));
     });
   });
 
-  describe("prependWavHeader", () => {
-    it("produces a buffer starting with RIFF header", () => {
-      const pcm = Buffer.alloc(100);
-      const wav = prependWavHeader(pcm, 24000, 1, 16);
-      expect(wav.length).toBe(144); // 44 header + 100 data
-      expect(wav.toString("ascii", 0, 4)).toBe("RIFF");
-      expect(wav.toString("ascii", 8, 12)).toBe("WAVE");
-      expect(wav.toString("ascii", 12, 16)).toBe("fmt ");
-      expect(wav.toString("ascii", 36, 40)).toBe("data");
+  describe("cacheVariant", () => {
+    const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+    const config: TtsConfig = { provider: "gemini", apiKey: "k", model: "gemini-3.1-flash-tts-preview", baseUrl: "" };
+
+    it("changes when the provider, model, adapter version or endpoint changes", () => {
+      const base = cacheVariant(config, "v2", BASE);
+      expect(cacheVariant({ ...config, provider: "openai" }, "v2", BASE)).not.toBe(base);
+      expect(cacheVariant({ ...config, model: "gemini-2.5-flash-preview-tts" }, "v2", BASE)).not.toBe(base);
+      expect(cacheVariant(config, "v3", BASE)).not.toBe(base);
+      expect(cacheVariant(config, "v2", "http://localhost:4000/v1beta/models")).not.toBe(base);
     });
 
-    it("encodes correct sample rate", () => {
-      const pcm = Buffer.alloc(48);
-      const wav = prependWavHeader(pcm, 24000, 1, 16);
-      expect(wav.readUInt32LE(24)).toBe(24000);
-    });
-
-    it("encodes correct data size", () => {
-      const pcm = Buffer.alloc(200);
-      const wav = prependWavHeader(pcm, 24000, 1, 16);
-      expect(wav.readUInt32LE(40)).toBe(200);
-    });
-
-    it("encodes correct total file size in RIFF header", () => {
-      const pcm = Buffer.alloc(200);
-      const wav = prependWavHeader(pcm, 24000, 1, 16);
-      expect(wav.readUInt32LE(4)).toBe(200 + 44 - 8); // dataSize + headerSize - 8
+    it("ignores the API key and surrounding whitespace in the model", () => {
+      expect(cacheVariant({ ...config, apiKey: "other", model: ` ${config.model} ` }, "v2", BASE)).toBe(
+        cacheVariant(config, "v2", BASE),
+      );
     });
   });
 }

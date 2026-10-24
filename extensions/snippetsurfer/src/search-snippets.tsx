@@ -26,6 +26,7 @@ export default function Command() {
         ...previous,
         primaryAction: preferences["primaryAction"],
         pasteContentScope: preferences["pasteContentScope"] ?? "pasteScopeFull",
+        hideFolderInList: preferences["hideFolderInList"] ?? false,
       }));
     };
     fetch();
@@ -186,7 +187,9 @@ export default function Command() {
               id={i.id}
               key={i.id}
               title={i.name}
-              accessories={[{ icon: Icon.Folder, text: i.folder && i.folder !== "." ? i.folder : "" }]}
+              accessories={
+                !state.hideFolderInList && i.folder && i.folder !== "." ? [{ icon: Icon.Folder, text: i.folder }] : []
+              }
               keywords={[i.folder, ...i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))]}
               icon={Icon.Document}
               detail={<SnippetContent snippet={i} />}

@@ -3,6 +3,7 @@ export const STRINGS = {
   searchPeoplePlaceholder: "Search people",
   showDetails: "Show details",
   copyUrl: "Copy URL",
+  copyCoverUrl: "Copy Cover URL",
   copyTitle: "Copy title",
   authorLabel: "Author",
   formatLabel: "Format",

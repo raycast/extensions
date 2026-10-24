@@ -33,19 +33,57 @@
   ],
   "preferences": [
     {
-      "name": "geminiApiKey",
+      "name": "provider",
+      "type": "dropdown",
+      "required": false,
+      "title": "Provider",
+      "description": "AI service used for translation and pronunciation. Auto-detect picks Gemini, Anthropic or OpenAI from the API key prefix; choose a provider explicitly for any other key.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-Detect from API Key",
+          "value": "auto"
+        },
+        {
+          "title": "Google Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Anthropic",
+          "value": "anthropic"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "OpenAI-Compatible Server",
+          "value": "openai-compatible"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "Gemini API Key",
-      "description": "Get a free key at aistudio.google.com",
-      "placeholder": "AIza..."
+      "title": "API Key",
+      "description": "Key for your provider. Auto-detect recognizes Gemini (AIza…), Anthropic (sk-ant-…) and OpenAI (sk-…) keys. Local servers that need no key accept any value.",
+      "placeholder": "AIza…, sk-ant-… or sk-…"
+    },
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Server URL",
+      "description": "Advanced. Leave empty to use the provider's official endpoint; required for an OpenAI-Compatible Server. Accepts a server root or a full API base, for example http://localhost:11434/v1 or https://openrouter.ai/api/v1. Your API key is sent to this host. Do not include credentials or a query string. Plain http is accepted only for local addresses (localhost, 127.0.0.1, [::1], 0.0.0.0).",
+      "placeholder": "Official endpoint"
     },
     {
       "name": "sourceLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Source Language",
-      "description": "The language you want to translate from",
+      "title": "Default Source Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "en",
       "data": [
         {
@@ -122,8 +160,8 @@
       "name": "targetLanguage",
       "type": "dropdown",
       "required": true,
-      "title": "Target Language",
-      "description": "The language you want to translate to",
+      "title": "Default Target Language",
+      "description": "Used before you pick a language pair from the Translate dropdown",
       "default": "uk",
       "data": [
         {
@@ -197,30 +235,66 @@
       ]
     },
     {
+      "name": "translationModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Translation Model",
+      "description": "Model ID used for translation. Leave empty for the provider default: gemini-3.5-flash-lite (Gemini), claude-haiku-5-5 (Anthropic), gpt-6-luna (OpenAI). Required for an OpenAI-Compatible Server.",
+      "placeholder": "Provider default"
+    },
+    {
+      "name": "ttsModel",
+      "type": "textfield",
+      "required": false,
+      "title": "Text-to-Speech Model",
+      "description": "Model ID used for word pronunciation. Leave empty for the provider default: gemini-3.1-flash-tts-preview (Gemini), gpt-4o-mini-tts (OpenAI). Anthropic and OpenAI-Compatible Servers use the macOS system voice. OpenAI tts-1 and tts-1-hd also use the system voice to preserve the selected language.",
+      "placeholder": "Provider default"
+    },
+    {
+      "name": "pronunciation",
+      "type": "dropdown",
+      "required": false,
+      "title": "Pronunciation",
+      "description": "Provider voice uses Gemini or OpenAI speech and falls back to the macOS system voice when it is unavailable. Other providers always use the macOS system voice.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Provider Voice When Available",
+          "value": "auto"
+        },
+        {
+          "title": "macOS System Voice",
+          "value": "system"
+        }
+      ]
+    },
+    {
       "name": "readClipboardOnOpen",
       "type": "checkbox",
       "required": false,
       "title": "Read Clipboard on Open",
       "label": "Enable",
-      "description": "If enabled, prefill a suggestion only when clipboard content is a safe single word"
+      "description": "If enabled, prefill a suggestion only when clipboard content is a safe word or short phrase"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.7",
-    "zod": "^4.3.6"
+    "@raycast/api": "^1.104.25",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
+    "eslint": "^10.9.1",
     "husky": "^9.1.7",
-    "prettier": "^3.8.1",
-    "typescript": "^5.8.2",
-    "vitest": "^4.0.18"
+    "prettier": "^3.9.6",
+    "promptfoo": "^0.122.2",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
@@ -229,9 +303,20 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest",
+    "eval": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml --filter-providers '^vocabuilder-gemini$' -o evals/results/promptfoo.json",
+    "eval:smoke": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml --filter-providers '^vocabuilder-gemini$' --filter-sample 10 -o evals/results/promptfoo-smoke.json",
+    "eval:all": "mkdir -p evals/results && promptfoo eval -c evals/promptfooconfig.yaml -o evals/results/promptfoo-all.json",
+    "eval:validate": "promptfoo validate -c evals/promptfooconfig.yaml",
+    "eval:results": "promptfoo view",
     "prepare": "husky"
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.2",
+    "fast-uri": "3.1.8",
+    "sharp": "0.35.5"
+  }
 }

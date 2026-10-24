@@ -1,5 +1,28 @@
 # Changelog
 
+## [Add Ask AI Support and Improve History] - 2026-10-13
+
+- Added Ask Art Wallpapers support to browse artworks, read history, and set or download wallpapers through Raycast AI.
+- Added history search by artwork words, artist, creation year, usage dates, and action type, plus a tool to set a wallpaper directly from history.
+- Show each wallpaper once in history, with every recorded action and timestamp in its details, newest first.
+- Deleting a wallpaper from history removes all its recorded actions.
+- Keep earlier downloads available in Finder and match every recorded action in History search.
+- Load history files asynchronously while preserving complete artwork timelines.
+- Prevent older history loads from restoring deleted rows after a newer refresh.
+- Fixed README screenshot links.
+
+## [Windows Support] - 2026-06-30
+
+- Added Windows support for setting wallpapers across all commands (Today's Wallpapers, Set Random Wallpaper, History, and Auto Switch Wallpaper).
+- Wallpaper: uses PowerShell + Win32 `SystemParametersInfo` on Windows; macOS continues to use AppleScript.
+- Downloads now resolve the home directory cross-platform so saving to `~/Downloads` works on Windows.
+
+## [Metadata Screenshot Cleanup] - 2026-06-03
+
+- Converted metadata screenshots from JPG to PNG format.
+- Renamed metadata screenshots to `another-boring-piece-1.png`, `another-boring-piece-2.png`, and `another-boring-piece-3.png`.
+- Removed original JPG screenshot files from `metadata`.
+
 ## [Add History Command and Shortcuts] - 2026-05-23
 
 - New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.

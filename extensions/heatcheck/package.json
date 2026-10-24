@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heatcheck",
+  "title": "Heat Check",
+  "description": "See what's burning your CPU and spinning your fan",
+  "icon": "extension-icon.png",
+  "author": "kumamaki",
+  "version": "0.1.0",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "heat-check",
+      "title": "Check Heat",
+      "subtitle": "Heat Check",
+      "description": "See what's burning your CPU and spinning your fan",
+      "mode": "view"
+    },
+    {
+      "name": "diagnosis",
+      "title": "AI Diagnosis",
+      "subtitle": "Heat Check",
+      "description": "Ask AI to explain what's making your Mac run hot",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "execa": "^9.6.1",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "check": "npm run typecheck && npm run lint",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,10 +1,21 @@
-import { Action, ActionPanel, Form, Icon, LocalStorage, Toast, showToast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Form,
+  Icon,
+  LocalStorage,
+  Toast,
+  confirmAlert,
+  showToast,
+  type LaunchProps,
+} from "@raycast/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  CalendarRecurrence,
   createAppleCalendarEvent,
   createAppleReminder,
+  CreationOutcomeUnknownError,
   listWritableCalendars,
   listWritableReminderLists,
   openCalendarAtDate,
@@ -12,16 +23,39 @@ import {
   WritableReminderList,
 } from "./lib/apple-calendar";
 import {
+  defaultRecurrenceUntil,
+  getRecurrenceDateWindow,
+  MAX_RECURRENCE_COUNT,
+  prepareCalendarBatchForSubmit,
+  RecurrenceEndType,
+} from "./lib/calendar-recurrence";
+import { resolveDestinationSelection } from "./lib/destination-selection";
+import { resolveInitialSentence } from "./lib/launch-input";
+import {
+  BatchRetrySnapshot,
+  buildBatchParseErrorMessage,
+  buildBatchRetrySnapshot,
   firstBatchParseResult,
   MAX_BATCH_ITEMS,
-  parseKoreanScheduleBatch,
-  ParsedBatchError,
+  parseKoreanScheduleBatchWithRetrySnapshot,
   ParsedBatchItem,
 } from "./lib/parse-korean-schedule-batch";
 import { ParsedRecurrence, ParsedSchedule } from "./lib/parse-korean-schedule";
+import {
+  buildCreationOutcomeKey,
+  buildRetryItemKey,
+  createUnknownUnconfirmedCreationRecord,
+  mergeLoadedUnconfirmedCreationRecords,
+  mergeUnknownUnconfirmedCreationRecords,
+  migrateStoredUnconfirmedCreationKeys,
+  parseStoredUnconfirmedCreationRecords,
+  partitionUnconfirmedCreationRecords,
+  removeSuccessfulUnconfirmedCreationMatches,
+  serializeUnconfirmedCreationRecords,
+  type UnconfirmedCreationRecord,
+} from "./lib/creation-outcome-guard";
 
 type SubmitTarget = "calendar" | "reminder";
-type RecurrenceEndType = "count" | "until";
 
 interface FormValues {
   sentence: string;
@@ -29,9 +63,35 @@ interface FormValues {
   calendarId: string;
   reminderListId: string;
   location?: string;
-  recurrenceEndType: RecurrenceEndType;
-  recurrenceCount: string;
-  recurrenceUntil: Date | null;
+  recurrenceEndType?: RecurrenceEndType;
+  recurrenceCount?: string;
+  recurrenceUntil?: Date | null;
+}
+
+interface CreationAttemptOutcome {
+  submissionIndex: number;
+  item: ParsedBatchItem;
+  message: string;
+  creationOutcomeKey: string;
+  retryItemKey: string;
+}
+
+function buildRetrySnapshotForOutcomes(
+  outcomes: CreationAttemptOutcome[],
+  records: UnconfirmedCreationRecord[],
+  updatedRecordIds?: ReadonlyMap<number, string>,
+): BatchRetrySnapshot {
+  const activeRecordIds = new Set(records.map((record) => record.id));
+  return buildBatchRetrySnapshot(
+    outcomes.map((outcome) => {
+      const unconfirmedRecordId = updatedRecordIds?.get(outcome.submissionIndex) ?? outcome.item.unconfirmedRecordId;
+      return {
+        ...outcome.item,
+        unconfirmedRecordId:
+          unconfirmedRecordId && activeRecordIds.has(unconfirmedRecordId) ? unconfirmedRecordId : undefined,
+      };
+    }),
+  );
 }
 
 const CALENDAR_ID_STORAGE_KEY = "selectedCalendarId";
@@ -40,10 +100,43 @@ const TARGET_TYPE_STORAGE_KEY = "selectedSubmitTarget";
 const RECURRENCE_END_TYPE_STORAGE_KEY = "recurrenceEndType";
 const RECURRENCE_COUNT_STORAGE_KEY = "recurrenceCount";
 const RECURRENCE_UNTIL_STORAGE_KEY = "recurrenceUntilIso";
-const MAX_RECURRENCE_COUNT = 50;
+const UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY = "unconfirmedCreationRecordsV1";
+const V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeysV2";
+const LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY = "unconfirmedCreationKeys";
+const KOREAN_INPUT_EXAMPLE = "다음주 화요일 오후 3시 반에 강남에서 팀 미팅";
 
-export default function Command() {
-  const [sentence, setSentence] = useState("");
+function persistPreference(key: string, value?: string): void {
+  const operation = value ? LocalStorage.setItem(key, value) : LocalStorage.removeItem(key);
+  void operation.catch((error: unknown) =>
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to save preferences",
+      message: error instanceof Error ? error.message : String(error),
+    }),
+  );
+}
+
+async function persistUnconfirmedCreationRecords(records: UnconfirmedCreationRecord[]): Promise<void> {
+  const operation = records.length
+    ? LocalStorage.setItem(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY, serializeUnconfirmedCreationRecords(records))
+    : LocalStorage.removeItem(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY);
+  try {
+    await operation;
+    await LocalStorage.removeItem(V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+    await LocalStorage.removeItem(LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to save duplicate-risk warning",
+      message: `Keep this command open and check Calendar or Reminders before retrying. ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    });
+  }
+}
+
+export default function Command(props: LaunchProps<{ arguments: { sentence?: string } }>) {
+  const [sentence, setSentence] = useState(() => resolveInitialSentence(props));
   const [location, setLocation] = useState("");
   const [targetType, setTargetType] = useState<SubmitTarget>("calendar");
   const [isTargetManuallyOverridden, setIsTargetManuallyOverridden] = useState(false);
@@ -51,61 +144,62 @@ export default function Command() {
   const [reminderListId, setReminderListId] = useState("");
   const [calendars, setCalendars] = useState<WritableCalendar[]>([]);
   const [reminderLists, setReminderLists] = useState<WritableReminderList[]>([]);
-  const [isLoadingCalendars, setIsLoadingCalendars] = useState(true);
-  const [isLoadingReminderLists, setIsLoadingReminderLists] = useState(true);
+  const [isLoadingCalendars, setIsLoadingCalendars] = useState(false);
+  const [isLoadingReminderLists, setIsLoadingReminderLists] = useState(false);
+  const [hasLoadedCalendars, setHasLoadedCalendars] = useState(false);
+  const [hasLoadedReminderLists, setHasLoadedReminderLists] = useState(false);
+  const [hasLoadedPreferences, setHasLoadedPreferences] = useState(false);
   const [calendarLoadError, setCalendarLoadError] = useState<string | undefined>();
   const [reminderLoadError, setReminderLoadError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recurrenceEndType, setRecurrenceEndType] = useState<RecurrenceEndType>("count");
   const [recurrenceCount, setRecurrenceCount] = useState("10");
   const [recurrenceUntil, setRecurrenceUntil] = useState<Date | null>(defaultRecurrenceUntil());
+  const [retrySnapshot, setRetrySnapshot] = useState<BatchRetrySnapshot | undefined>();
+  const [unconfirmedCreationRecords, setUnconfirmedCreationRecords] = useState<UnconfirmedCreationRecord[]>([]);
+  const submissionInProgress = useRef(false);
 
-  const parsedBatch = useMemo(() => parseKoreanScheduleBatch(sentence), [sentence]);
+  const parsedBatch = useMemo(() => {
+    return parseKoreanScheduleBatchWithRetrySnapshot(sentence, retrySnapshot);
+  }, [retrySnapshot, sentence]);
   const parseResult = useMemo(() => firstBatchParseResult(parsedBatch), [parsedBatch]);
+  const batchIntent = useMemo(() => summarizeBatchIntent(parsedBatch.items), [parsedBatch.items]);
+  const hasRecurringItems = useMemo(
+    () => parsedBatch.items.some((item) => Boolean(item.value.recurrence)),
+    [parsedBatch.items],
+  );
+  const recurrenceDateWindow = useMemo(() => getRecurrenceDateWindow(parsedBatch.items), [parsedBatch.items]);
+  const recurrenceMinTime = recurrenceDateWindow?.min.getTime();
+  const recurrenceMaxTime = recurrenceDateWindow?.max.getTime();
 
   const persistCalendarId = useCallback((value: string) => {
-    if (value) {
-      void LocalStorage.setItem(CALENDAR_ID_STORAGE_KEY, value);
-    } else {
-      void LocalStorage.removeItem(CALENDAR_ID_STORAGE_KEY);
-    }
+    persistPreference(CALENDAR_ID_STORAGE_KEY, value);
   }, []);
 
   const persistReminderListId = useCallback((value: string) => {
-    if (value) {
-      void LocalStorage.setItem(REMINDER_LIST_ID_STORAGE_KEY, value);
-    } else {
-      void LocalStorage.removeItem(REMINDER_LIST_ID_STORAGE_KEY);
-    }
+    persistPreference(REMINDER_LIST_ID_STORAGE_KEY, value);
   }, []);
 
   const persistTargetType = useCallback((value: SubmitTarget) => {
-    void LocalStorage.setItem(TARGET_TYPE_STORAGE_KEY, value);
+    persistPreference(TARGET_TYPE_STORAGE_KEY, value);
   }, []);
 
   const persistRecurrenceEndType = useCallback((value: RecurrenceEndType) => {
-    void LocalStorage.setItem(RECURRENCE_END_TYPE_STORAGE_KEY, value);
+    persistPreference(RECURRENCE_END_TYPE_STORAGE_KEY, value);
   }, []);
 
   const persistRecurrenceCount = useCallback((value: string) => {
-    if (value) {
-      void LocalStorage.setItem(RECURRENCE_COUNT_STORAGE_KEY, value);
-    } else {
-      void LocalStorage.removeItem(RECURRENCE_COUNT_STORAGE_KEY);
-    }
+    persistPreference(RECURRENCE_COUNT_STORAGE_KEY, value);
   }, []);
 
   const persistRecurrenceUntil = useCallback((value: Date | null) => {
-    if (value) {
-      void LocalStorage.setItem(RECURRENCE_UNTIL_STORAGE_KEY, value.toISOString());
-    } else {
-      void LocalStorage.removeItem(RECURRENCE_UNTIL_STORAGE_KEY);
-    }
+    persistPreference(RECURRENCE_UNTIL_STORAGE_KEY, value?.toISOString());
   }, []);
 
   const handleCalendarChange = useCallback(
     (value: string) => {
       setCalendarId(value);
+      setCalendarLoadError(undefined);
       persistCalendarId(value);
     },
     [persistCalendarId],
@@ -114,6 +208,7 @@ export default function Command() {
   const handleReminderListChange = useCallback(
     (value: string) => {
       setReminderListId(value);
+      setReminderLoadError(undefined);
       persistReminderListId(value);
     },
     [persistReminderListId],
@@ -161,27 +256,28 @@ export default function Command() {
     try {
       const result = await listWritableCalendars();
       const cachedCalendarId = (await LocalStorage.getItem<string>(CALENDAR_ID_STORAGE_KEY)) ?? "";
-      setCalendars(result.calendars);
-      setCalendarId((current) => {
-        const currentOrCachedId = current || cachedCalendarId;
-        if (currentOrCachedId && result.calendars.some((calendar) => calendar.id === currentOrCachedId)) {
-          persistCalendarId(currentOrCachedId);
-          return currentOrCachedId;
-        }
-
-        const next = result.defaultCalendarIdentifier ?? result.calendars[0]?.id ?? "";
-        persistCalendarId(next);
-        return next;
+      const selection = resolveDestinationSelection({
+        currentId: calendarId,
+        storedId: cachedCalendarId,
+        defaultId: result.defaultCalendarIdentifier,
+        availableIds: result.calendars.map((calendar) => calendar.id),
       });
+      setCalendars(result.calendars);
+      setCalendarId(selection.selectedId);
+      if (selection.requiresReselection) {
+        setCalendarLoadError("The previously selected calendar is no longer available. Select another calendar.");
+      } else if (selection.selectedId) {
+        persistCalendarId(selection.selectedId);
+      }
     } catch (error) {
       setCalendars([]);
       setCalendarId("");
-      persistCalendarId("");
       setCalendarLoadError(error instanceof Error ? error.message : String(error));
     } finally {
+      setHasLoadedCalendars(true);
       setIsLoadingCalendars(false);
     }
-  }, [persistCalendarId]);
+  }, [calendarId, persistCalendarId]);
 
   const loadReminderLists = useCallback(async () => {
     setIsLoadingReminderLists(true);
@@ -190,27 +286,28 @@ export default function Command() {
     try {
       const result = await listWritableReminderLists();
       const cachedReminderListId = (await LocalStorage.getItem<string>(REMINDER_LIST_ID_STORAGE_KEY)) ?? "";
-      setReminderLists(result.reminderLists);
-      setReminderListId((current) => {
-        const currentOrCachedId = current || cachedReminderListId;
-        if (currentOrCachedId && result.reminderLists.some((reminderList) => reminderList.id === currentOrCachedId)) {
-          persistReminderListId(currentOrCachedId);
-          return currentOrCachedId;
-        }
-
-        const next = result.defaultReminderListIdentifier ?? result.reminderLists[0]?.id ?? "";
-        persistReminderListId(next);
-        return next;
+      const selection = resolveDestinationSelection({
+        currentId: reminderListId,
+        storedId: cachedReminderListId,
+        defaultId: result.defaultReminderListIdentifier,
+        availableIds: result.reminderLists.map((reminderList) => reminderList.id),
       });
+      setReminderLists(result.reminderLists);
+      setReminderListId(selection.selectedId);
+      if (selection.requiresReselection) {
+        setReminderLoadError("The previously selected reminder list is no longer available. Select another list.");
+      } else if (selection.selectedId) {
+        persistReminderListId(selection.selectedId);
+      }
     } catch (error) {
       setReminderLists([]);
       setReminderListId("");
-      persistReminderListId("");
       setReminderLoadError(error instanceof Error ? error.message : String(error));
     } finally {
+      setHasLoadedReminderLists(true);
       setIsLoadingReminderLists(false);
     }
-  }, [persistReminderListId]);
+  }, [persistReminderListId, reminderListId]);
 
   const loadPreferences = useCallback(async () => {
     const cachedTargetType = (await LocalStorage.getItem<string>(TARGET_TYPE_STORAGE_KEY)) as SubmitTarget | undefined;
@@ -239,30 +336,127 @@ export default function Command() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadCalendars();
-    void loadReminderLists();
-    void loadPreferences();
-  }, [loadCalendars, loadReminderLists, loadPreferences]);
+  const loadUnconfirmedCreationRecords = useCallback(async () => {
+    try {
+      const [cachedValue, v2Value, legacyValue] = await Promise.all([
+        LocalStorage.getItem<string>(UNCONFIRMED_CREATION_RECORDS_STORAGE_KEY),
+        LocalStorage.getItem<string>(V2_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY),
+        LocalStorage.getItem<string>(LEGACY_UNCONFIRMED_CREATION_KEYS_STORAGE_KEY),
+      ]);
+      const currentRecords = parseStoredUnconfirmedCreationRecords(cachedValue);
+      const migratedRecords = [
+        ...migrateStoredUnconfirmedCreationKeys(v2Value, "v2"),
+        ...migrateStoredUnconfirmedCreationKeys(legacyValue, "legacy"),
+      ];
+      const records = mergeLoadedUnconfirmedCreationRecords(currentRecords, migratedRecords);
+      setUnconfirmedCreationRecords(records);
+      if (v2Value !== undefined || legacyValue !== undefined) {
+        await persistUnconfirmedCreationRecords(records);
+      }
+    } catch (error) {
+      setUnconfirmedCreationRecords([createUnknownUnconfirmedCreationRecord("storage-read-error")]);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not verify the previous creation outcome",
+        message: `Check Calendar or Reminders before creating items. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+    }
+  }, []);
 
   useEffect(() => {
-    if (!parseResult?.ok || isTargetManuallyOverridden) {
+    let isActive = true;
+    void (async () => {
+      try {
+        await loadUnconfirmedCreationRecords();
+        await loadPreferences();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load saved preferences",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        if (isActive) {
+          setHasLoadedPreferences(true);
+        }
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadPreferences, loadUnconfirmedCreationRecords]);
+
+  useEffect(() => {
+    if (!hasLoadedPreferences) {
       return;
     }
 
-    const autoTargetType: SubmitTarget = parseResult.value.intent === "deadline" ? "reminder" : "calendar";
+    if (targetType === "calendar" && !hasLoadedCalendars && !isLoadingCalendars) {
+      void loadCalendars();
+    }
+    if (targetType === "reminder" && !hasLoadedReminderLists && !isLoadingReminderLists) {
+      void loadReminderLists();
+    }
+  }, [
+    hasLoadedCalendars,
+    hasLoadedPreferences,
+    hasLoadedReminderLists,
+    isLoadingCalendars,
+    isLoadingReminderLists,
+    loadCalendars,
+    loadReminderLists,
+    targetType,
+  ]);
+
+  useEffect(() => {
+    if (!batchIntent || batchIntent === "mixed" || isTargetManuallyOverridden) {
+      return;
+    }
+
+    const autoTargetType: SubmitTarget = batchIntent === "deadline" ? "reminder" : "calendar";
     if (targetType !== autoTargetType) {
       setTargetType(autoTargetType);
       persistTargetType(autoTargetType);
     }
-  }, [parseResult, isTargetManuallyOverridden, targetType, persistTargetType]);
+  }, [batchIntent, isTargetManuallyOverridden, targetType, persistTargetType]);
+
+  useEffect(() => {
+    if (recurrenceMinTime === undefined || recurrenceMaxTime === undefined) {
+      return;
+    }
+
+    const currentDay = recurrenceUntil ? dateOnlyTimestamp(recurrenceUntil) : undefined;
+    if (currentDay !== undefined && currentDay >= recurrenceMinTime && currentDay <= recurrenceMaxTime) {
+      return;
+    }
+
+    const next = defaultRecurrenceUntil(new Date(recurrenceMinTime), new Date(recurrenceMaxTime));
+    setRecurrenceUntil(next);
+    persistRecurrenceUntil(next);
+  }, [recurrenceMaxTime, recurrenceMinTime, recurrenceUntil, persistRecurrenceUntil]);
 
   async function handleSubmit(values: FormValues, options: { openCalendarAfterCreate: boolean }) {
+    if (submissionInProgress.current) {
+      return;
+    }
+
+    submissionInProgress.current = true;
+    try {
+      await submitValues(values, options);
+    } finally {
+      submissionInProgress.current = false;
+    }
+  }
+
+  async function submitValues(values: FormValues, options: { openCalendarAfterCreate: boolean }) {
     if (values.targetType === "calendar" && !values.calendarId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Calendar Selection Required",
-        message: "Please select a calendar before submitting.",
+        title: "Calendar selection required",
+        message: "Select a calendar before creating items.",
       });
       return;
     }
@@ -270,18 +464,27 @@ export default function Command() {
     if (values.targetType === "reminder" && !values.reminderListId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Reminder List Selection Required",
-        message: "Please select a reminder list before submitting.",
+        title: "Reminder list selection required",
+        message: "Select a reminder list before creating items.",
       });
       return;
     }
 
-    const submitBatch = parseKoreanScheduleBatch(values.sentence);
+    const submitBatch = parseKoreanScheduleBatchWithRetrySnapshot(values.sentence, retrySnapshot);
     if (submitBatch.tooManyItems) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Batch Item Limit Reached",
-        message: `You can submit up to ${MAX_BATCH_ITEMS} clauses at a time.`,
+        title: "Sentence split limit reached",
+        message: `You can create up to ${MAX_BATCH_ITEMS} items at once.`,
+      });
+      return;
+    }
+
+    if (submitBatch.errors.length > 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Fix parsing errors before creating items",
+        message: buildBatchParseErrorMessage(submitBatch.errors),
       });
       return;
     }
@@ -289,8 +492,17 @@ export default function Command() {
     if (submitBatch.items.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Parsing Failed",
-        message: submitBatch.errors[0]?.error ?? "Could not parse the schedule sentence.",
+        title: "Parsing failed",
+        message: submitBatch.errors[0]?.error ?? "Could not recognize the schedule sentence.",
+      });
+      return;
+    }
+
+    if (summarizeBatchIntent(submitBatch.items) === "mixed") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Mixed schedule types",
+        message: "Create Calendar events and Reminder items in separate submissions.",
       });
       return;
     }
@@ -298,51 +510,138 @@ export default function Command() {
     if (values.targetType === "reminder" && submitBatch.items.some((item) => item.value.recurrence)) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Recurring Events Not Supported for Reminders",
-        message: "Recurring events can currently be created only in Apple Calendar.",
+        title: "Recurring schedule limitation",
+        message: "Recurring schedules can currently be created only as Apple Calendar events.",
       });
       return;
     }
 
+    const manualLocation = values.location?.trim();
+    const recurrenceValues = {
+      recurrenceEndType: values.recurrenceEndType ?? recurrenceEndType,
+      recurrenceCount: values.recurrenceCount ?? recurrenceCount,
+      recurrenceUntil: values.recurrenceUntil ?? recurrenceUntil,
+    };
+    const preparedItems =
+      values.targetType === "calendar"
+        ? prepareCalendarBatchForSubmit(submitBatch.items, recurrenceValues, manualLocation)
+        : submitBatch.items.map((item) => ({
+            item,
+            parsed: {
+              ...item.value,
+              location: manualLocation || item.value.location,
+            },
+            recurrence: undefined,
+          }));
+
+    if (preparedItems instanceof Error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid recurrence settings",
+        message: preparedItems.message,
+      });
+      return;
+    }
+
+    const submissions = preparedItems.map((prepared) => ({
+      ...prepared,
+      creationOutcomeKey: buildCreationOutcomeKey({
+        targetType: values.targetType,
+        parsed: prepared.parsed,
+        recurrence: prepared.recurrence,
+      }),
+      retryItemKey: buildRetryItemKey(values.targetType, prepared.parsed),
+    }));
+    const unconfirmedRecordPartition = partitionUnconfirmedCreationRecords(
+      unconfirmedCreationRecords,
+      submissions.map((submission) => ({
+        creationOutcomeKey: submission.creationOutcomeKey,
+        retryItemKey: submission.retryItemKey,
+        unconfirmedRecordId: submission.item.unconfirmedRecordId,
+      })),
+    );
+    const matchingUnconfirmedRecords = unconfirmedRecordPartition.matching;
+
+    if (matchingUnconfirmedRecords.length > 0) {
+      const matchingItemCount = matchingUnconfirmedRecords.length;
+      const hasTrackedEditedRetry = unconfirmedRecordPartition.matches.some(
+        (match) => match.kind === "relaxed" && match.consumeOnSuccess,
+      );
+      const shouldRetry = await confirmAlert({
+        icon: Icon.ExclamationMark,
+        title: "Previous creation outcome is unknown",
+        message: `${matchingItemCount} previous item${matchingItemCount === 1 ? "" : "s"} may already exist. Check Calendar or Reminders before continuing to avoid duplicates.${
+          hasTrackedEditedRetry ? " Continue only if this is the edited retry of the item you checked." : ""
+        }`,
+        primaryAction: {
+          title: hasTrackedEditedRetry ? "Retry Checked Item" : "Retry After Checking",
+          style: Alert.ActionStyle.Default,
+        },
+        dismissAction: {
+          title: "Cancel",
+          style: Alert.ActionStyle.Cancel,
+        },
+      });
+      if (!shouldRetry) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
-      const manualLocation = values.location?.trim();
-      const failures: string[] = [];
+      const failures: CreationAttemptOutcome[] = [];
+      const unknownOutcomes: CreationAttemptOutcome[] = [];
+      const retryableOutcomes: CreationAttemptOutcome[] = [];
+      const successfulSubmissionIndexes = new Set<number>();
       let successCount = 0;
       let lastCreatedCalendarStart: Date | undefined;
 
-      for (const item of submitBatch.items) {
-        const parsed = {
-          ...item.value,
-          location: manualLocation || item.value.location,
-        };
-
+      for (const [
+        submissionIndex,
+        { item, parsed, recurrence, creationOutcomeKey, retryItemKey },
+      ] of submissions.entries()) {
         try {
           if (values.targetType === "reminder") {
             await createAppleReminder(parsed, {
               preferredReminderCalendarIdentifier: values.reminderListId,
             });
             successCount += 1;
+            successfulSubmissionIndexes.add(submissionIndex);
             continue;
-          }
-
-          const recurrenceOrError = buildRecurrenceForSubmit(parsed, values);
-          if (recurrenceOrError instanceof Error) {
-            throw recurrenceOrError;
           }
 
           const result = await createAppleCalendarEvent(parsed, {
             preferredCalendarIdentifier: values.calendarId,
-            recurrence: recurrenceOrError,
+            recurrence,
           });
           successCount += 1;
+          successfulSubmissionIndexes.add(submissionIndex);
           lastCreatedCalendarStart = parsed.start;
           void result;
         } catch (error) {
           const prefix = submitBatch.isBatch ? `[${item.input}] ` : "";
-          failures.push(`${prefix}${error instanceof Error ? error.message : String(error)}`);
+          const outcome = {
+            submissionIndex,
+            item,
+            creationOutcomeKey,
+            retryItemKey,
+            message: `${prefix}${error instanceof Error ? error.message : String(error)}`,
+          };
+          retryableOutcomes.push(outcome);
+          if (error instanceof CreationOutcomeUnknownError) {
+            unknownOutcomes.push(outcome);
+          } else {
+            failures.push(outcome);
+          }
         }
       }
+
+      const remainingUnconfirmedRecords = removeSuccessfulUnconfirmedCreationMatches(
+        unconfirmedCreationRecords,
+        unconfirmedRecordPartition.matches,
+        successfulSubmissionIndexes,
+      );
+      const didResolveUnconfirmedRecords = remainingUnconfirmedRecords.length !== unconfirmedCreationRecords.length;
 
       let openCalendarFailedMessage: string | undefined;
       if (
@@ -358,11 +657,47 @@ export default function Command() {
         }
       }
 
-      if (successCount === 0) {
+      if (unknownOutcomes.length > 0) {
+        const unknownMerge = mergeUnknownUnconfirmedCreationRecords(
+          remainingUnconfirmedRecords,
+          unconfirmedRecordPartition.matches,
+          unknownOutcomes,
+        );
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(
+          retryableOutcomes,
+          unknownMerge.records,
+          unknownMerge.recordIdsBySubmissionIndex,
+        );
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
+        setUnconfirmedCreationRecords(unknownMerge.records);
+        await persistUnconfirmedCreationRecords(unknownMerge.records);
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Create Items",
-          message: failures[0] ?? "No items were created.",
+          title:
+            successCount > 0
+              ? `Creation outcome unknown (${successCount} confirmed, ${unknownOutcomes.length} unconfirmed)`
+              : "Creation outcome unknown",
+          message: `${unknownOutcomes[0].message}${
+            failures.length > 0 ? ` ${failures.length} definite failure(s) also remain.` : ""
+          }`,
+        });
+        return;
+      }
+
+      if (didResolveUnconfirmedRecords) {
+        setUnconfirmedCreationRecords(remainingUnconfirmedRecords);
+        await persistUnconfirmedCreationRecords(remainingUnconfirmedRecords);
+      }
+
+      if (successCount === 0) {
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(retryableOutcomes, remainingUnconfirmedRecords);
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: values.targetType === "reminder" ? "Reminder creation failed" : "Event creation failed",
+          message: failures[0]?.message ?? "No items were created.",
         });
         return;
       }
@@ -370,20 +705,24 @@ export default function Command() {
       if (failures.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Partial Success (${successCount} succeeded, ${failures.length} failed)`,
-          message: failures[0],
+          title: `Partial success (${successCount} succeeded, ${failures.length} failed)`,
+          message: failures[0].message,
         });
+        const nextRetrySnapshot = buildRetrySnapshotForOutcomes(failures, remainingUnconfirmedRecords);
+        setRetrySnapshot(nextRetrySnapshot);
+        setSentence(nextRetrySnapshot.sentence);
       } else {
         const baseTitle =
-          values.targetType === "reminder" ? `Reminders Created (${successCount})` : `Events Created (${successCount})`;
+          values.targetType === "reminder" ? `Reminder created (${successCount})` : `Event created (${successCount})`;
         await showToast({
           style: Toast.Style.Success,
-          title: openCalendarFailedMessage ? `${baseTitle}, Failed to Open Calendar` : baseTitle,
+          title: openCalendarFailedMessage ? `${baseTitle}, failed to open Calendar` : baseTitle,
           message: openCalendarFailedMessage,
         });
       }
 
       if (failures.length === 0) {
+        setRetrySnapshot(undefined);
         setSentence("");
         setLocation("");
         setIsTargetManuallyOverridden(false);
@@ -397,9 +736,11 @@ export default function Command() {
   const manualLocation = location.trim();
   const previewLocation = manualLocation || parsedPreview?.location;
   const recommendedTargetType: SubmitTarget | undefined = parsedPreview
-    ? parsedPreview.intent === "deadline"
+    ? batchIntent === "deadline"
       ? "reminder"
-      : "calendar"
+      : batchIntent === "event"
+        ? "calendar"
+        : undefined
     : undefined;
   const parseStatusText = buildParseStatusText({
     sentence,
@@ -407,8 +748,42 @@ export default function Command() {
     parseResult,
   });
   const parsedCount = parsedBatch.items.length;
-  const isRecurringPreview = Boolean(parsedPreview?.recurrence);
+  const isRecurringPreview = hasRecurringItems;
   const shouldShowRecurrenceOptions = targetType === "calendar" && isRecurringPreview;
+  const sentenceError = buildSentenceError({
+    sentence,
+    parsedBatch,
+    parseResult,
+    batchIntent,
+  });
+  const targetTypeError =
+    targetType === "reminder" && isRecurringPreview ? "Recurring schedules require Apple Calendar." : undefined;
+  const calendarSelectionError =
+    targetType === "calendar" && hasLoadedCalendars && !isLoadingCalendars
+      ? (calendarLoadError ??
+        (!calendarId
+          ? calendars.length > 0
+            ? "Select a calendar."
+            : "No writable calendars are available."
+          : undefined))
+      : undefined;
+  const reminderSelectionError =
+    targetType === "reminder" && hasLoadedReminderLists && !isLoadingReminderLists
+      ? (reminderLoadError ??
+        (!reminderListId
+          ? reminderLists.length > 0
+            ? "Select a reminder list."
+            : "No writable reminder lists are available."
+          : undefined))
+      : undefined;
+  const recurrenceValidationResult = shouldShowRecurrenceOptions
+    ? prepareCalendarBatchForSubmit(parsedBatch.items, {
+        recurrenceEndType,
+        recurrenceCount,
+        recurrenceUntil,
+      })
+    : undefined;
+  const recurrenceError = recurrenceValidationResult instanceof Error ? recurrenceValidationResult.message : undefined;
 
   const handleSentenceChange = useCallback((value: string) => {
     setSentence(value);
@@ -417,35 +792,42 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={isSubmitting || isLoadingCalendars || isLoadingReminderLists}
+      isLoading={
+        isSubmitting ||
+        !hasLoadedPreferences ||
+        (targetType === "calendar" ? isLoadingCalendars : isLoadingReminderLists)
+      }
       actions={
         <ActionPanel>
           {targetType === "reminder" ? (
             <Action.SubmitForm<FormValues>
               icon={Icon.Bell}
-              title={parsedCount > 1 ? `Add to Reminders (${parsedCount})` : "Add to Reminders"}
+              title={parsedCount > 1 ? `Create ${parsedCount} Reminders` : "Create Reminder"}
               onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: false })}
             />
           ) : (
             <>
               <Action.SubmitForm<FormValues>
                 icon={Icon.Calendar}
-                title={parsedCount > 1 ? `Add to Apple Calendar (${parsedCount})` : "Add to Apple Calendar"}
+                title={parsedCount > 1 ? `Create ${parsedCount} Calendar Events` : "Create Calendar Event"}
                 onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: false })}
               />
               <Action.SubmitForm<FormValues>
                 icon={Icon.AppWindow}
-                title={parsedCount > 1 ? `Add and Open Calendar (${parsedCount})` : "Add and Open Calendar"}
+                title={parsedCount > 1 ? `Create ${parsedCount} Events and Open Calendar` : "Create and Open Calendar"}
                 onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: true })}
               />
             </>
           )}
           <Action
             icon={Icon.ArrowClockwise}
-            title="Reload Lists"
+            title="Refresh Lists"
             onAction={() => {
-              void loadCalendars();
-              void loadReminderLists();
+              if (targetType === "calendar") {
+                void loadCalendars();
+              } else {
+                void loadReminderLists();
+              }
             }}
           />
         </ActionPanel>
@@ -454,21 +836,19 @@ export default function Command() {
       <Form.TextArea
         id="sentence"
         title="Schedule Sentence"
-        placeholder="e.g. Next Tuesday 3:30 PM team meeting in Gangnam"
-        info={`Korean natural-language parsing (up to ${MAX_BATCH_ITEMS} clauses)`}
+        placeholder={`e.g. ${KOREAN_INPUT_EXAMPLE}`}
+        info={`Parses Korean natural language, up to ${MAX_BATCH_ITEMS} items per submission`}
         value={sentence}
+        error={sentenceError}
         onChange={handleSentenceChange}
       />
 
-      <Form.Description title="Parse Status" text={parseStatusText} />
-      {parsedPreview && (
-        <Form.Description title="Parse Summary" text={formatPreviewSummary(parsedPreview, previewLocation)} />
+      {!sentenceError && <Form.Description title="Parsing Status" text={parseStatusText} />}
+      {parsedPreview && !parsedBatch.isBatch && (
+        <Form.Description title="Parsing Summary" text={formatPreviewSummary(parsedPreview, previewLocation)} />
       )}
       {parsedBatch.isBatch && parsedBatch.items.length > 0 && (
-        <Form.Description title="Batch Preview" text={formatBatchPreview(parsedBatch.items)} />
-      )}
-      {parsedBatch.errors.length > 0 && (
-        <Form.Description title="Batch Errors" text={formatBatchErrors(parsedBatch.errors)} />
+        <Form.Description title="Batch Preview" text={formatBatchPreview(parsedBatch.items, manualLocation)} />
       )}
       {recommendedTargetType && (
         <Form.Description
@@ -476,7 +856,7 @@ export default function Command() {
           text={
             isTargetManuallyOverridden
               ? `${recommendedTargetType === "reminder" ? "Reminder Item" : "Apple Calendar Event"} (manual selection kept)`
-              : `${recommendedTargetType === "reminder" ? "Reminder Item" : "Apple Calendar Event"} (auto-applied)`
+              : `${recommendedTargetType === "reminder" ? "Reminder Item" : "Apple Calendar Event"} (automatically selected)`
           }
         />
       )}
@@ -485,12 +865,18 @@ export default function Command() {
         id="location"
         title="Location (Optional)"
         placeholder="e.g. Gangnam Station Exit 1"
-        info="Manual input overrides the parsed location from the sentence."
+        info="A manual location overrides the location parsed from the sentence"
         value={location}
         onChange={setLocation}
       />
 
-      <Form.Dropdown id="targetType" title="Target" value={targetType} onChange={handleTargetTypeChange}>
+      <Form.Dropdown
+        id="targetType"
+        title="Creation Target"
+        value={targetType}
+        error={targetTypeError}
+        onChange={handleTargetTypeChange}
+      >
         <Form.Dropdown.Item value="calendar" title="Apple Calendar Event" />
         <Form.Dropdown.Item value="reminder" title="Reminder Item" />
       </Form.Dropdown>
@@ -499,58 +885,62 @@ export default function Command() {
         <Form.Dropdown
           id="calendarId"
           title="Calendar"
-          info="Select the calendar to create events in."
+          info="Select the calendar where events will be created"
           value={calendarId}
+          error={calendarSelectionError}
           onChange={handleCalendarChange}
         >
           {isLoadingCalendars ? (
-            <Form.Dropdown.Item value="" title="Loading calendars..." />
+            <Form.Dropdown.Item value="" title="Loading Calendars..." />
           ) : calendars.length > 0 ? (
-            calendars.map((calendar) => (
-              <Form.Dropdown.Item
-                key={calendar.id}
-                value={calendar.id}
-                title={calendar.isDefault ? `${calendar.title} (Default)` : calendar.title}
-                keywords={[calendar.sourceTitle]}
-              />
-            ))
+            <>
+              {!calendarId && <Form.Dropdown.Item value="" title="Select a Calendar" />}
+              {calendars.map((calendar) => (
+                <Form.Dropdown.Item
+                  key={calendar.id}
+                  value={calendar.id}
+                  title={calendar.isDefault ? `${calendar.title} (Default)` : calendar.title}
+                  keywords={[calendar.sourceTitle]}
+                />
+              ))}
+            </>
           ) : (
-            <Form.Dropdown.Item value="" title="No writable calendars available" />
+            <Form.Dropdown.Item value="" title="No Writable Calendars" />
           )}
         </Form.Dropdown>
       ) : (
         <Form.Dropdown
           id="reminderListId"
           title="Reminder List"
-          info="Select the reminder list to add items to."
+          info="Select the list where reminders will be created"
           value={reminderListId}
+          error={reminderSelectionError}
           onChange={handleReminderListChange}
         >
           {isLoadingReminderLists ? (
-            <Form.Dropdown.Item value="" title="Loading reminder lists..." />
+            <Form.Dropdown.Item value="" title="Loading Reminder Lists..." />
           ) : reminderLists.length > 0 ? (
-            reminderLists.map((reminderList) => (
-              <Form.Dropdown.Item
-                key={reminderList.id}
-                value={reminderList.id}
-                title={reminderList.isDefault ? `${reminderList.title} (Default)` : reminderList.title}
-                keywords={[reminderList.sourceTitle]}
-              />
-            ))
+            <>
+              {!reminderListId && <Form.Dropdown.Item value="" title="Select a Reminder List" />}
+              {reminderLists.map((reminderList) => (
+                <Form.Dropdown.Item
+                  key={reminderList.id}
+                  value={reminderList.id}
+                  title={reminderList.isDefault ? `${reminderList.title} (Default)` : reminderList.title}
+                  keywords={[reminderList.sourceTitle]}
+                />
+              ))}
+            </>
           ) : (
-            <Form.Dropdown.Item value="" title="No writable reminder lists available" />
+            <Form.Dropdown.Item value="" title="No Writable Reminder Lists" />
           )}
         </Form.Dropdown>
       )}
 
-      {isRecurringPreview && (
+      {isRecurringPreview && targetType === "calendar" && (
         <Form.Description
           title="Recurrence Detected"
-          text={
-            targetType === "calendar"
-              ? "Recurring events will be created in Apple Calendar. Choose how the recurrence ends."
-              : "Recurring events can currently be created only in Apple Calendar."
-          }
+          text="Recurring schedules are created in Apple Calendar. Choose an occurrence count or end date."
         />
       )}
 
@@ -562,80 +952,70 @@ export default function Command() {
             value={recurrenceEndType}
             onChange={handleRecurrenceEndTypeChange}
           >
-            <Form.Dropdown.Item value="count" title="End by count" />
-            <Form.Dropdown.Item value="until" title="End by date" />
+            <Form.Dropdown.Item value="count" title="After Occurrence Count" />
+            <Form.Dropdown.Item value="until" title="On End Date" />
           </Form.Dropdown>
 
           {recurrenceEndType === "count" ? (
             <Form.TextField
               id="recurrenceCount"
-              title="Recurrence Count"
-              info={`1-${MAX_RECURRENCE_COUNT} times`}
+              title="Occurrence Count"
+              info={`Between 1 and ${MAX_RECURRENCE_COUNT}`}
               value={recurrenceCount}
+              error={recurrenceEndType === "count" ? recurrenceError : undefined}
               onChange={handleRecurrenceCountChange}
             />
           ) : (
             <Form.DatePicker
               id="recurrenceUntil"
               title="Recurrence End Date"
-              info="Must be after the start date, within 1 year"
+              info="Inclusive, on or after the start date and within 1 year"
+              type={Form.DatePicker.Type.Date}
+              min={recurrenceDateWindow?.min}
+              max={recurrenceDateWindow?.max}
               value={recurrenceUntil}
+              error={recurrenceEndType === "until" ? recurrenceError : undefined}
               onChange={handleRecurrenceUntilChange}
             />
           )}
         </>
       )}
-
-      {calendarLoadError && <Form.Description title="Calendar Error" text={calendarLoadError} />}
-      {reminderLoadError && <Form.Description title="Reminder Error" text={reminderLoadError} />}
     </Form>
   );
 }
 
-function buildRecurrenceForSubmit(parsed: ParsedSchedule, values: FormValues): CalendarRecurrence | undefined | Error {
-  const recurrence = parsed.recurrence;
-  if (!recurrence) {
+function buildSentenceError({
+  sentence,
+  parsedBatch,
+  parseResult,
+  batchIntent,
+}: {
+  sentence: string;
+  parsedBatch: ReturnType<typeof parseKoreanScheduleBatchWithRetrySnapshot>;
+  parseResult: ReturnType<typeof firstBatchParseResult>;
+  batchIntent: ReturnType<typeof summarizeBatchIntent>;
+}): string | undefined {
+  if (!sentence.trim()) {
     return undefined;
   }
 
-  if (values.recurrenceEndType === "count") {
-    const count = Number.parseInt(values.recurrenceCount, 10);
-    if (Number.isNaN(count) || count < 1 || count > MAX_RECURRENCE_COUNT) {
-      return new Error(`Recurrence count must be between 1 and ${MAX_RECURRENCE_COUNT}.`);
-    }
-    return {
-      ...recurrence,
-      interval: 1,
-      end: {
-        type: "count",
-        count,
-      },
-    };
+  if (parsedBatch.tooManyItems) {
+    return `You can create up to ${MAX_BATCH_ITEMS} items at once.`;
   }
 
-  const until = values.recurrenceUntil ? new Date(values.recurrenceUntil) : null;
-  if (!until || Number.isNaN(until.getTime())) {
-    return new Error("Please select a recurrence end date.");
+  if (parsedBatch.errors.length > 0) {
+    return buildBatchParseErrorMessage(parsedBatch.errors) ?? "Could not recognize the schedule sentence.";
   }
 
-  if (until.getTime() < parsed.start.getTime()) {
-    return new Error("Recurrence end date must be after the start date.");
+  if (batchIntent === "mixed") {
+    return "Calendar events and Reminder items must be submitted separately.";
   }
 
-  const oneYearAfterStart = new Date(parsed.start);
-  oneYearAfterStart.setFullYear(oneYearAfterStart.getFullYear() + 1);
-  if (until.getTime() > oneYearAfterStart.getTime()) {
-    return new Error("Recurrence end date must be within 1 year of the start date.");
+  if (parsedBatch.items.length === 0) {
+    return parseResult && !parseResult.ok ? parseResult.error : "Could not recognize the schedule sentence.";
   }
 
-  return {
-    ...recurrence,
-    interval: 1,
-    end: {
-      type: "until",
-      untilEpochMs: until.getTime(),
-    },
-  };
+  return undefined;
 }
 
 function buildParseStatusText({
@@ -644,23 +1024,27 @@ function buildParseStatusText({
   parseResult,
 }: {
   sentence: string;
-  parsedBatch: ReturnType<typeof parseKoreanScheduleBatch>;
+  parsedBatch: ReturnType<typeof parseKoreanScheduleBatchWithRetrySnapshot>;
   parseResult: ReturnType<typeof firstBatchParseResult>;
 }): string {
   if (!sentence.trim()) {
-    return "Enter a sentence to preview parsing.";
+    return "Enter a sentence to see a preview.";
   }
 
   if (parsedBatch.tooManyItems) {
-    return `Up to ${MAX_BATCH_ITEMS} clauses are supported at once.`;
+    return `You can create up to ${MAX_BATCH_ITEMS} items at once.`;
   }
 
   if (parsedBatch.items.length > 0 && parsedBatch.errors.length > 0) {
-    return `Partially parsed (${parsedBatch.items.length} succeeded, ${parsedBatch.errors.length} failed)`;
+    return `Partial parse success (${parsedBatch.items.length} succeeded, ${parsedBatch.errors.length} failed)`;
+  }
+
+  if (summarizeBatchIntent(parsedBatch.items) === "mixed") {
+    return "Calendar events and Reminder items must be submitted separately.";
   }
 
   if (parseResult?.ok) {
-    return parsedBatch.isBatch ? `${parsedBatch.items.length} items ready` : "Ready to submit";
+    return parsedBatch.isBatch ? `${parsedBatch.items.length} items ready to create` : "Ready to create";
   }
 
   if (parseResult && !parseResult.ok) {
@@ -670,18 +1054,26 @@ function buildParseStatusText({
   return "No parse result.";
 }
 
-function formatBatchPreview(items: ParsedBatchItem[]): string {
-  return items
-    .map((item, index) => {
-      const recurrence = item.value.recurrence ? ` / recurrence:${formatRecurrence(item.value.recurrence)}` : "";
-      const inherited = item.inheritedDate ? " (date inherited)" : "";
-      return `${index + 1}. ${item.value.title} - ${formatDate(item.value.start, item.value.allDay)}${recurrence}${inherited}`;
-    })
-    .join(" | ");
+function summarizeBatchIntent(items: ParsedBatchItem[]): ParsedSchedule["intent"] | "mixed" | undefined {
+  const intents = new Set(items.map((item) => item.value.intent));
+  if (intents.size === 0) {
+    return undefined;
+  }
+  if (intents.size > 1) {
+    return "mixed";
+  }
+  return intents.values().next().value;
 }
 
-function formatBatchErrors(errors: ParsedBatchError[]): string {
-  return errors.map((error, index) => `${index + 1}. [${error.input}] ${error.error}`).join(" | ");
+function formatBatchPreview(items: ParsedBatchItem[], manualLocation?: string): string {
+  return items
+    .map((item, index) => {
+      const location = manualLocation || item.value.location || "(none)";
+      const recurrence = item.value.recurrence ? ` / Recurrence: ${formatRecurrence(item.value.recurrence)}` : "";
+      const inherited = item.inheritedDate ? " (inherited date)" : "";
+      return `${index + 1}. ${item.value.title} - ${formatDate(item.value.start, item.value.allDay)} / Location: ${location}${recurrence}${inherited}`;
+    })
+    .join(" | ");
 }
 
 function formatPreviewSummary(parsedPreview: ParsedSchedule, location: string | undefined): string {
@@ -703,11 +1095,11 @@ function formatRecurrence(recurrence: ParsedRecurrence): string {
     return "Daily";
   }
   if (recurrence.frequency === "weekly") {
-    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const weekday = weekdays[recurrence.weekday ?? 0];
-    return `Weekly ${weekday}`;
+    return `Weekly on ${weekday}`;
   }
-  return `Monthly ${recurrence.dayOfMonth ?? 1}`;
+  return `Monthly on day ${recurrence.dayOfMonth ?? 1}`;
 }
 
 function formatDate(value: Date, allDay: boolean): string {
@@ -731,8 +1123,6 @@ function formatDate(value: Date, allDay: boolean): string {
   }).format(value);
 }
 
-function defaultRecurrenceUntil(): Date {
-  const value = new Date();
-  value.setMonth(value.getMonth() + 3);
-  return value;
+function dateOnlyTimestamp(value: Date): number {
+  return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
 }

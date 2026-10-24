@@ -1,8 +1,21 @@
 # Logos Search Changelog
 
+## [Floating Window Action & Scheme Priorities] - 2026-08-31
+
+- Added an "Open in Floating Window" action to the Logos Tools Launcher on macOS and Windows using Logos' documented shortcuts (`Option+Command+F` on macOS and `Ctrl+F11` on Windows).
+- Prioritized native Logos deep-link schemes (`logos4:...`, `logosres:...`) over `https://ref.ly/...` URLs in the tools launcher so tools open directly within Logos without opening the browser.
+
+## [Unreleased] - 2026-06-25
+
+### Fixed
+
+- Fixed the verse feature to open directly in Logos Bible Software instead of the browser.
+- Changed default open method to use the `logosres` scheme.
+
 ## [1.2.0] - 2026-01-05
 
 ### Added
+
 - **Logos Bible Search** command bug fix: Added a toggle for smart search (concepts, synonyms) and precise search (exact match) to ensure the selected search type is correctly triggered in Logos.
 - Comprehensive test suite with Vitest (37 unit tests).
 - GitHub issue templates for bug reports and feature requests.
@@ -10,6 +23,7 @@
 - FUNDING.yml for GitHub Sponsors.
 
 ### Changed
+
 - Refactored codebase to extract shared utilities (`encodeForRefLy`, `LOGOS_BUNDLE_ID`) reducing code duplication.
 - Enhanced README with badges, table of contents, and new sections.
 

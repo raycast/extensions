@@ -1,22 +1,23 @@
-import test from "node:test";
-import assert from "node:assert/strict";
 import * as fs from "fs";
+import assert from "node:assert/strict";
+import test from "node:test";
 import * as os from "os";
 import * as path from "path";
 
 test("findLatestMiseGeminiBinaryPath returns the highest installed node version binary", async () => {
-  const { findLatestMiseGeminiBinaryPath } = await import("./binary");
+  const { findLatestMiseGeminiBinaryPath } = await import("./binary.ts");
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-mise-"));
 
   const lowerVersionPath = path.join(tempDir, "20.18.0", "bin");
   const higherVersionPath = path.join(tempDir, "24.9.0", "bin");
+  const binaryName = process.platform === "win32" ? "gemini.cmd" : "gemini";
 
   fs.mkdirSync(lowerVersionPath, { recursive: true });
   fs.mkdirSync(higherVersionPath, { recursive: true });
 
-  const lowerGeminiPath = path.join(lowerVersionPath, "gemini");
-  const higherGeminiPath = path.join(higherVersionPath, "gemini");
+  const lowerGeminiPath = path.join(lowerVersionPath, binaryName);
+  const higherGeminiPath = path.join(higherVersionPath, binaryName);
 
   fs.writeFileSync(lowerGeminiPath, "#!/bin/sh\n", "utf-8");
   fs.writeFileSync(higherGeminiPath, "#!/bin/sh\n", "utf-8");
@@ -31,7 +32,7 @@ test("findLatestMiseGeminiBinaryPath returns the highest installed node version 
 });
 
 test("resolveGeminiBinaryPath ignores non-executable GEMINI_PATH", async () => {
-  const { resolveGeminiBinaryPath } = await import("./binary");
+  const { resolveGeminiBinaryPath } = await import("./binary.ts");
 
   const previousGeminiPath = process.env.GEMINI_PATH;
   const previousGeminiCliPath = process.env.GEMINI_CLI_PATH;

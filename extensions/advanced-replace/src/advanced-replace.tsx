@@ -1,7 +1,14 @@
-import { ActionPanel, Action, List, LaunchProps, Color } from "@raycast/api";
+import { ActionPanel, Action, List, LaunchProps, Color, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { deleteSavedItem, getSavedItems, moveItem } from "./utilities/storage";
-import { Entry, EntryCutPaste } from "./types";
+import {
+  assignSlot,
+  clearSlot,
+  deleteSavedItem,
+  getSavedItems,
+  getSlotAssignments,
+  moveItem,
+} from "./utilities/storage";
+import { Entry, EntryCutPaste, QUICK_SLOT_COUNT } from "./types";
 import FormCutPaste from "./components/FormCutPaste";
 import { performReplacement } from "./utilities/replacements";
 import EntryForm from "./components/EntryForm";
@@ -31,6 +38,14 @@ const orderTypes: OrderType[] = [
   { id: "manual", name: "Manual" },
 ];
 
+function EditFormFor({ entry }: { entry: Entry }) {
+  return entry.type === "cutPaste" ? (
+    <FormCutPaste initialValues={entry} />
+  ) : (
+    <FormDirectReplace initialValues={entry} />
+  );
+}
+
 function OrderDropdown(props: { onOrderTypeChange: (newValue: string) => void }) {
   const { onOrderTypeChange } = props;
 
@@ -51,10 +66,16 @@ function OrderDropdown(props: { onOrderTypeChange: (newValue: string) => void })
 
 export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues: EntryCutPaste }>>) {
   const { data: replacementEntries, revalidate, isLoading } = usePromise(getSavedItems);
+  const { data: slotAssignments, revalidate: revalidateSlots } = usePromise(getSlotAssignments);
   const [orderType, setOrderType] = useState("manual");
 
   function onOrderTypeChange(newValue: string) {
     setOrderType(newValue);
+  }
+
+  function slotForEntry(entryId: string): number | undefined {
+    const found = Object.entries(slotAssignments ?? {}).find(([, id]) => id === entryId);
+    return found ? Number(found[0]) : undefined;
   }
 
   let orderedEntries = [...(replacementEntries ?? [])];
@@ -94,88 +115,127 @@ export default function ManageOptions(props: Readonly<LaunchProps<{ draftValues:
       }
     >
       {!!orderedEntries &&
-        orderedEntries.map((option, index) => (
-          <List.Item
-            title={option.title}
-            subtitle={option.description}
-            accessories={[{ tag: tagOptions[option.type as Entry["type"]] }]}
-            actions={
-              <ActionPanel title="Manage item">
-                <Action
-                  title="Run and Paste"
-                  onAction={async () => {
-                    await performReplacement(option, "paste");
-                    revalidate();
-                  }}
-                />
-                <Action
-                  title="Run and Copy"
-                  onAction={async () => {
-                    await performReplacement(option, "copy");
-                    revalidate();
-                  }}
-                />
-                <Action.Push
-                  title="Create New"
-                  target={<EntryForm initialValues={props.draftValues ?? ({} as EntryCutPaste)} isNew />}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onPop={revalidate}
-                />
-                <Action.Push
-                  title="Edit Item"
-                  target={
-                    option?.type === "cutPaste" ? (
-                      <FormCutPaste initialValues={option} />
-                    ) : (
-                      <FormDirectReplace initialValues={option} />
-                    )
-                  }
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  onPop={revalidate}
-                />
-                <Action.Push
-                  title="Duplicate"
-                  target={
-                    <EntryForm
-                      initialValues={{ ...option, id: nanoid(), title: option.title + " (duplicated)" }}
-                      isNew
-                    />
-                  }
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  onPop={revalidate}
-                />
-                {orderType === "manual" && (
-                  <>
-                    <Action
-                      title="Move up"
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                      onAction={async () => {
-                        if (index > 0) await moveItem(index, index - 1, revalidate);
-                      }}
-                    />
-                    <Action
-                      title="Move Down"
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                      onAction={async () => {
-                        if (index < orderedEntries.length - 1) await moveItem(index, index + 1, revalidate);
-                      }}
-                    />
-                  </>
-                )}
-                <Action
-                  title="Delete"
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onAction={async () => {
-                    await deleteSavedItem(option);
-                    revalidate();
-                  }}
-                  style={Action.Style.Destructive}
-                />
-              </ActionPanel>
-            }
-            key={option?.id ?? index}
-          />
-        ))}
+        orderedEntries.map((option, index) => {
+          const assignedSlot = slotForEntry(option.id);
+          const accessories: List.Item.Accessory[] = [];
+          if (assignedSlot) {
+            accessories.push({
+              tag: { value: `Slot ${assignedSlot}`, color: Color.Blue },
+              icon: Icon.Pin,
+              tooltip: `Assigned to Quick Slot ${assignedSlot}`,
+            });
+          }
+          accessories.push({ tag: tagOptions[option.type as Entry["type"]] });
+
+          return (
+            <List.Item
+              title={option.title}
+              subtitle={option.description}
+              accessories={accessories}
+              actions={
+                <ActionPanel title="Manage item">
+                  <Action
+                    title="Run and Paste"
+                    onAction={async () => {
+                      await performReplacement(option, "paste");
+                      revalidate();
+                    }}
+                  />
+                  <Action
+                    title="Run and Copy"
+                    onAction={async () => {
+                      await performReplacement(option, "copy");
+                      revalidate();
+                    }}
+                  />
+                  <ActionPanel.Submenu
+                    title="Assign to Quick Slot"
+                    icon={Icon.Pin}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  >
+                    {Array.from({ length: QUICK_SLOT_COUNT }, (_, i) => i + 1).map((slot) => {
+                      const occupiedBy = slotAssignments?.[String(slot)];
+                      const isThisEntry = occupiedBy === option.id;
+                      return (
+                        <Action
+                          key={slot}
+                          title={
+                            isThisEntry
+                              ? `Quick Slot ${slot} (clear)`
+                              : occupiedBy
+                                ? `Quick Slot ${slot} (replace)`
+                                : `Quick Slot ${slot}`
+                          }
+                          icon={isThisEntry ? Icon.CheckCircle : Icon.Circle}
+                          onAction={async () => {
+                            if (isThisEntry) {
+                              await clearSlot(slot);
+                            } else {
+                              await assignSlot(slot, option.id);
+                            }
+                            revalidateSlots();
+                          }}
+                        />
+                      );
+                    })}
+                  </ActionPanel.Submenu>
+                  <Action.Push
+                    title="Create New"
+                    target={<EntryForm initialValues={props.draftValues ?? ({} as EntryCutPaste)} isNew />}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    onPop={revalidate}
+                  />
+                  <Action.Push
+                    title="Edit Item"
+                    target={<EditFormFor entry={option} />}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    onPop={revalidate}
+                  />
+                  <Action.Push
+                    title="Duplicate"
+                    target={
+                      <EntryForm
+                        initialValues={{ ...option, id: nanoid(), title: option.title + " (duplicated)" }}
+                        isNew
+                      />
+                    }
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onPop={revalidate}
+                  />
+                  {orderType === "manual" && (
+                    <>
+                      <Action
+                        title="Move up"
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                        onAction={async () => {
+                          if (index > 0) await moveItem(index, index - 1, revalidate);
+                        }}
+                      />
+                      <Action
+                        title="Move Down"
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                        onAction={async () => {
+                          if (index < orderedEntries.length - 1) await moveItem(index, index + 1, revalidate);
+                        }}
+                      />
+                    </>
+                  )}
+                  <Action
+                    title="Delete"
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={async () => {
+                      await deleteSavedItem(option);
+                      revalidate();
+                      revalidateSlots();
+                    }}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel>
+              }
+              key={option?.id ?? index}
+            />
+          );
+        })}
     </List>
   );
 }

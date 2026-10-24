@@ -11,34 +11,40 @@ import {
 import { useEffect, useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { SetApiKeyAction } from "./components/SetApiKeyAction";
+import { SignOutAction } from "./components/SignOutAction";
 import {
   getRecoveryHint,
   getUserFacingErrorMessage,
   quickSaveCard,
 } from "./lib/api";
-import { getPreferences } from "./lib/preferences";
+import { parseCaptureExtras } from "./lib/capture";
+import { useTeakAuth } from "./lib/useTeakAuth";
 
-type FormValues = {
+interface FormValues {
   content: string;
-};
+  notes: string;
+  tags: string;
+}
 
 const addSuccessActions = (
   toast: Toast,
   result: Awaited<ReturnType<typeof quickSaveCard>>,
 ) => {
-  if (result.appUrl) {
+  const appUrl = result.appUrl;
+  if (appUrl) {
     toast.primaryAction = {
       onAction: () => {
-        void open(result.appUrl!);
+        void open(appUrl);
       },
       title: "Open Card",
     };
   }
 
-  if (result.card?.url) {
+  const sourceUrl = result.card?.url;
+  if (sourceUrl) {
     toast.secondaryAction = {
       onAction: () => {
-        void open(result.card!.url!);
+        void open(sourceUrl);
       },
       title: "Open Source URL",
     };
@@ -47,22 +53,24 @@ const addSuccessActions = (
 
 export default function QuickSaveCommand() {
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+  const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const { apiKey } = getPreferences();
-  const hasApiKey = Boolean(apiKey?.trim());
+  const {
+    isAuthenticated,
+    error: authError,
+    isLoading: isCheckingAuth,
+    refresh: refreshAuth,
+  } = useTeakAuth();
 
   useEffect(() => {
     let isMounted = true;
 
     const loadClipboardText = async () => {
-      try {
-        const clipboardText = await Clipboard.readText();
-        if (isMounted && !content.trim() && clipboardText?.trim()) {
-          setContent(clipboardText.trim());
-        }
-      } catch {
-        // Ignore clipboard prefill failures and keep the form usable.
+      const clipboardText = await Clipboard.readText().catch(() => undefined);
+      if (isMounted && clipboardText?.trim()) {
+        setContent((current) => (current.trim() ? current : clipboardText));
       }
     };
 
@@ -74,8 +82,7 @@ export default function QuickSaveCommand() {
   }, []);
 
   const handleSubmit = async (values: FormValues) => {
-    const trimmed = values.content.trim();
-    if (!trimmed) {
+    if (!values.content.trim()) {
       await showToast({
         message: "Enter text or a URL before saving.",
         style: Toast.Style.Failure,
@@ -91,15 +98,21 @@ export default function QuickSaveCommand() {
     });
 
     try {
-      const result = await quickSaveCard({
-        content: trimmed,
-        source: "raycast_quick_save",
-      });
+      const result = await quickSaveCard(
+        {
+          content: values.content,
+          source: "raycast_quick_save",
+          ...parseCaptureExtras(values),
+        },
+        "interactive",
+      );
       addSuccessActions(toast, result);
       toast.style = Toast.Style.Success;
       toast.title = "Saved to Teak";
 
       setContent("");
+      setTags("");
+      setNotes("");
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Save failed";
@@ -112,8 +125,12 @@ export default function QuickSaveCommand() {
     }
   };
 
-  if (!hasApiKey) {
-    return <MissingApiKeyDetail />;
+  if (isCheckingAuth) {
+    return <Form isLoading navigationTitle="Quick Save to Teak" />;
+  }
+
+  if (!isAuthenticated) {
+    return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
   }
 
   return (
@@ -126,6 +143,7 @@ export default function QuickSaveCommand() {
             title={isSaving ? "Saving..." : "Save to Teak"}
           />
           <SetApiKeyAction />
+          <SignOutAction onSignedOut={refreshAuth} />
         </ActionPanel>
       }
       navigationTitle="Quick Save to Teak"
@@ -136,6 +154,20 @@ export default function QuickSaveCommand() {
         placeholder="Paste or type text, links, or notes..."
         title="Content"
         value={content}
+      />
+      <Form.TextField
+        id="tags"
+        onChange={setTags}
+        placeholder="design, research (optional)"
+        title="Tags"
+        value={tags}
+      />
+      <Form.TextArea
+        id="notes"
+        onChange={setNotes}
+        placeholder="Add a note (optional)"
+        title="Note"
+        value={notes}
       />
     </Form>
   );

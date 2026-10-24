@@ -8,7 +8,8 @@
   "contributors": [
     "andreaselia",
     "j3lte",
-    "chrismessina"
+    "chrismessina",
+    "tofrankie"
   ],
   "categories": [
     "Web",
@@ -54,6 +55,12 @@
       "name": "saveMultiple",
       "title": "Save Multiple to Wayback Machine",
       "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
+    },
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Search archived webpages snapshots",
       "mode": "view"
     }
   ],
@@ -107,16 +114,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.18.1"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.0.3",
-    "@types/react": "^19.2.7",
-    "eslint": "^9.39.1",
-    "prettier": "^3.4.2",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.1",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -124,5 +131,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

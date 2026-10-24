@@ -4,7 +4,13 @@
   "description": "Search Rust Standard Library documentation",
   "icon": "command-icon.png",
   "author": "patrick-ehimen",
-  "contributors": [],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "FariaF22"
+  ],
   "categories": [
     "Documentation",
     "Developer Tools"
@@ -20,7 +26,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.2",
     "cheerio": "^1.1.2"
   },
@@ -41,8 +47,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and run \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

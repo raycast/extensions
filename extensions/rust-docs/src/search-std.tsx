@@ -6,9 +6,10 @@ import {
   Toast,
   Icon,
   Color,
+  LocalStorage,
 } from "@raycast/api";
-import { useEffect, useState, useMemo } from "react";
-import { fetchSearchIndex } from "./api/rustdoc";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { fetchSearchIndex, DocItem } from "./api/rustdoc";
 import { useCachedPromise } from "@raycast/utils";
 import DocDetail from "./components/DocDetail";
 
@@ -56,6 +57,42 @@ function getColorForType(type: string): Color {
   return TYPE_COLORS[type] || Color.SecondaryText;
 }
 
+const FAVORITES_KEY = "rust-docs-favorites";
+const HISTORY_KEY = "rust-docs-history";
+const MAX_HISTORY = 10;
+
+function isDocItem(item: unknown): item is DocItem {
+  if (!item || typeof item !== "object") return false;
+
+  const candidate = item as Record<string, unknown>;
+
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.path === "string" &&
+    typeof candidate.desc === "string" &&
+    typeof candidate.type === "string" &&
+    typeof candidate.url === "string"
+  );
+}
+
+async function getStoredItems(key: string): Promise<DocItem[]> {
+  const storedValue = await LocalStorage.getItem<string>(key);
+  if (!storedValue) return [];
+
+  try {
+    const parsedValue = JSON.parse(storedValue);
+
+    if (Array.isArray(parsedValue) && parsedValue.every(isDocItem)) {
+      return parsedValue;
+    }
+  } catch {
+    // Fall through to clear invalid persisted data.
+  }
+
+  await LocalStorage.removeItem(key);
+  return [];
+}
+
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(fetchSearchIndex, [], {
     keepPreviousData: true,
@@ -63,6 +100,53 @@ export default function Command() {
   });
 
   const [searchText, setSearchText] = useState("");
+  const [favorites, setFavorites] = useState<DocItem[]>([]);
+  const [history, setHistory] = useState<DocItem[]>([]);
+
+  // Load favorites and history on mount
+  useEffect(() => {
+    (async () => {
+      const [storedFavorites, storedHistory] = await Promise.all([
+        getStoredItems(FAVORITES_KEY),
+        getStoredItems(HISTORY_KEY),
+      ]);
+
+      setFavorites(storedFavorites);
+      setHistory(storedHistory.slice(0, MAX_HISTORY));
+    })();
+  }, []);
+
+  const toggleFavorite = useCallback(async (item: DocItem) => {
+    let toastTitle = "Added to Favorites";
+
+    setFavorites((previousFavorites) => {
+      const isFavorite = previousFavorites.some((f) => f.url === item.url);
+      let newFavorites;
+      if (isFavorite) {
+        toastTitle = "Removed from Favorites";
+        newFavorites = previousFavorites.filter((f) => f.url !== item.url);
+      } else {
+        newFavorites = [item, ...previousFavorites];
+      }
+
+      void LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+
+    await showToast({
+      title: toastTitle,
+      style: Toast.Style.Success,
+    });
+  }, []);
+
+  const addToHistory = useCallback(async (item: DocItem) => {
+    setHistory((previousHistory) => {
+      const filteredHistory = previousHistory.filter((h) => h.url !== item.url);
+      const newHistory = [item, ...filteredHistory].slice(0, MAX_HISTORY);
+      void LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -76,7 +160,7 @@ export default function Command() {
 
   const filteredItems = useMemo(() => {
     if (!data) return [];
-    if (!searchText) return data.slice(0, 50);
+    if (!searchText) return [];
 
     const lowerSearch = searchText.toLowerCase();
 
@@ -100,6 +184,72 @@ export default function Command() {
       .slice(0, 100);
   }, [data, searchText]);
 
+  const topLevelModules = useMemo(() => {
+    if (!data) return [];
+    // Show top-level modules for browsing
+    // We filter for modules that don't have nested paths (mostly)
+    return data
+      .filter(
+        (item) =>
+          item.type === "module" &&
+          !item.path.includes("::", item.path.indexOf("::") + 2),
+      )
+      .slice(0, 40);
+  }, [data]);
+
+  const renderItem = (item: DocItem) => {
+    const isFavorite = favorites.some((f) => f.url === item.url);
+
+    return (
+      <List.Item
+        key={item.url}
+        title={item.name}
+        subtitle={item.path !== item.name ? item.path : item.type}
+        icon={{
+          source: getIconForType(item.type),
+          tintColor: getColorForType(item.type),
+        }}
+        accessories={[
+          { tag: { value: item.type, color: getColorForType(item.type) } },
+          {
+            icon: isFavorite
+              ? { source: Icon.Star, tintColor: Color.Yellow }
+              : undefined,
+          },
+        ]}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Sidebar}
+                target={<DocDetail item={item} />}
+                onPush={() => addToHistory(item)}
+              />
+              <Action.OpenInBrowser
+                url={item.url}
+                onOpen={() => addToHistory(item)}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title={
+                  isFavorite ? "Remove from Favorites" : "Add to Favorites"
+                }
+                icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+                onAction={() => toggleFavorite(item)}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action.CopyToClipboard content={item.path} title="Copy Path" />
+              <Action.CopyToClipboard content={item.url} title="Copy URL" />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
   return (
     <List
       isLoading={isLoading}
@@ -107,32 +257,38 @@ export default function Command() {
       searchBarPlaceholder="Search Rust Std Lib..."
       throttle
     >
-      {filteredItems.map((item) => (
-        <List.Item
-          key={item.url}
-          title={item.name}
-          subtitle={item.path !== item.name ? item.path : item.type}
-          icon={{
-            source: getIconForType(item.type),
-            tintColor: getColorForType(item.type),
-          }}
-          accessories={[
-            { tag: { value: item.type, color: getColorForType(item.type) } },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Show Details"
-                icon={Icon.Sidebar}
-                target={<DocDetail item={item} />}
+      {searchText === "" ? (
+        <>
+          {favorites.length > 0 && (
+            <List.Section title="Favorites">
+              {favorites.map(renderItem)}
+            </List.Section>
+          )}
+          {history.length > 0 && (
+            <List.Section title="Recent">
+              {history.map(renderItem)}
+            </List.Section>
+          )}
+          {topLevelModules.length > 0 && (
+            <List.Section title="Standard Library Modules">
+              {topLevelModules.map(renderItem)}
+            </List.Section>
+          )}
+          {favorites.length === 0 &&
+            history.length === 0 &&
+            topLevelModules.length === 0 &&
+            !isLoading && (
+              <List.EmptyView
+                title="Search for Rust documentation"
+                icon={Icon.MagnifyingGlass}
               />
-              <Action.OpenInBrowser url={item.url} />
-              <Action.CopyToClipboard content={item.path} title="Copy Path" />
-              <Action.CopyToClipboard content={item.url} title="Copy URL" />
-            </ActionPanel>
-          }
-        />
-      ))}
+            )}
+        </>
+      ) : (
+        <List.Section title="Results" subtitle={`${filteredItems.length}`}>
+          {filteredItems.map(renderItem)}
+        </List.Section>
+      )}
     </List>
   );
 }

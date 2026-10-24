@@ -83,8 +83,8 @@
     "pull": "npx @raycast/api@latest pull-contributions"
   },
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

@@ -1,16 +1,20 @@
-import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser";
-import { AntigravityError, AntigravityUsage } from "./types";
-import { createSimpleHook } from "../agents/hooks";
+import { fetchAntigravityOauthUsage } from "./oauth.ts";
+import { parseAntigravityCommandModelConfigsResponse, parseAntigravityUserStatusResponse } from "./parser.ts";
 import {
   AntigravityProbeError,
-  AntigravityProbeResult,
-  AntigravityProbeSource,
+  type AntigravityProbeResult,
+  type AntigravityProbeSource,
   fetchAntigravityRawStatus,
-} from "./probe";
+} from "./probe.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 type ProbeFetcher = (preferredSource?: AntigravityProbeSource) => Promise<AntigravityProbeResult>;
+type OauthUsageFetcher = () => Promise<{ usage: AntigravityUsage | null; error: AntigravityError | null } | null>;
 
-export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetchAntigravityRawStatus): Promise<{
+export async function fetchAntigravityUsage(
+  fetchRawStatus: ProbeFetcher = fetchAntigravityRawStatus,
+  fetchOauthUsage: OauthUsageFetcher = fetchAntigravityOauthUsage,
+): Promise<{
   usage: AntigravityUsage | null;
   error: AntigravityError | null;
 }> {
@@ -18,7 +22,7 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
     const probeResult = await fetchRawStatus();
 
     if (probeResult.source === "GetUserStatus") {
-      const userStatusParsed = parseAntigravityUserStatusResponse(probeResult.payload);
+      const userStatusParsed = parseAntigravityUserStatusResponse(probeResult.payload, probeResult.quotaSummaryPayload);
       if (!userStatusParsed.error || userStatusParsed.error.type !== "parse_error") {
         return userStatusParsed;
       }
@@ -32,7 +36,7 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
         const fallbackProbeResult = await fetchRawStatus("GetCommandModelConfigs");
 
         return fallbackProbeResult.source === "GetUserStatus"
-          ? parseAntigravityUserStatusResponse(fallbackProbeResult.payload)
+          ? parseAntigravityUserStatusResponse(fallbackProbeResult.payload, fallbackProbeResult.quotaSummaryPayload)
           : parseAntigravityCommandModelConfigsResponse(fallbackProbeResult.payload);
       } catch {
         return userStatusParsed;
@@ -41,11 +45,26 @@ export async function fetchAntigravityUsage(fetchRawStatus: ProbeFetcher = fetch
 
     return parseAntigravityCommandModelConfigsResponse(probeResult.payload);
   } catch (error) {
+    if (shouldFallbackToOauth(error)) {
+      try {
+        const oauthResult = await fetchOauthUsage();
+        if (oauthResult) {
+          return oauthResult;
+        }
+      } catch {
+        // Keep the original probe error when OAuth itself throws.
+      }
+    }
+
     return {
       usage: null,
       error: mapAntigravityError(error),
     };
   }
+}
+
+function shouldFallbackToOauth(error: unknown): boolean {
+  return error instanceof AntigravityProbeError && (error.code === "not_running" || error.code === "missing_csrf");
 }
 
 export function mapAntigravityError(error: unknown): AntigravityError {
@@ -101,7 +120,3 @@ export function mapAntigravityError(error: unknown): AntigravityError {
     message: "Unknown error while fetching Antigravity usage",
   };
 }
-
-export const useAntigravityUsage = createSimpleHook<AntigravityUsage, AntigravityError>({
-  fetcher: fetchAntigravityUsage,
-});

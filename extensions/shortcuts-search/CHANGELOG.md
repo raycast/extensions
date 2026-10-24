@@ -1,5 +1,29 @@
 # Shortcuts Search Changelog
 
+## [Reliability Fixes] - 2026-10-12
+
+- Show specific shortcut execution errors, such as a changed page or held modifier keys
+- Show an error toast when sign-in is cancelled from a favorite action
+- Clarify the delay preference range (0–5 seconds)
+- Explain when the current app or website has no shortcuts instead of closing, with links to the contribution guide and private shortcuts and an action to copy the app identifier
+- Tell unsupported browsers apart from browser pages that can't be read, and list the supported browsers
+- Detect the frontmost browser on macOS without requiring System Events automation access
+- Update to Raycast API 2.7
+
+## [Windows Support and Account Shortcuts] - 2026-10-04
+
+- Support Windows app detection, platform keymaps, and verified shortcut execution
+- Add Ctrl/Alt/Shift/Win and target-layout punctuation input with focus checks
+- Add Windows browser window/address capture and page-change cancellation
+- Preserve account shortcuts/favorites and add Windows CI coverage
+- Merge signed-in custom applications and shortcuts into existing commands
+- Add All Apps, My Apps, and Favorites filters to the application list
+- Add application and shortcut favorite actions without separate personal-data commands
+- Sync custom Windows app IDs/process names and choose between matching shortcut collections
+- Prefer Windows app IDs over stale process names, exclude conflicting IDs, and offer matching macOS collections
+- Ignore non-executable Windows app-ID duplicates when resolving a unique executable
+- Copy the current Windows app ID or executable process name for custom app setup
+
 ## [Update] - 2025-12-25
 
 - Add support for platform-specific keymaps

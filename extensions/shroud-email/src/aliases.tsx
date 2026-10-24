@@ -1,7 +1,20 @@
-import { Action, ActionPanel, Color, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { getFavicon, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { createAlias, getAliases, getDomains } from "./utils/api";
+import { createAlias, deleteAlias, getAliases, getDomains } from "./utils/api";
 import { Alias, AliasesCreateRequest, AliasesRequestParameters, AliasesResponse, DomainsResponse } from "./utils/types";
 import { API_DOMAIN } from "./utils/constants";
 
@@ -46,6 +59,22 @@ export default function Aliases() {
     }
   }
 
+  function confirmAndDelete(alias: Alias) {
+    confirmAlert({
+      title: `Are you sure you want to permanently delete ${alias.address}?`,
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Delete",
+        async onAction() {
+          setIsLoading(true);
+          const response = await deleteAlias({ address: alias.address });
+          if (!response) await getAliasesFromApi();
+          else setIsLoading(false);
+        },
+      },
+    });
+  }
+
   const numOfAliases = aliasesResponse && aliasesResponse.email_aliases.length;
   const title = aliasesResponse && `${numOfAliases} ${numOfAliases === 1 ? "alias" : "aliases"}`;
   return (
@@ -70,7 +99,7 @@ export default function Aliases() {
           title="No aliases found."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Go To Aliases" icon={Icon.Globe} url={API_DOMAIN} />
+              <Action.OpenInBrowser title="Go to Aliases" icon={Icon.Globe} url={API_DOMAIN} />
             </ActionPanel>
           }
         />
@@ -92,6 +121,13 @@ export default function Aliases() {
                       title="Create New Alias"
                       icon={Icon.AddPerson}
                       onAction={() => push(<AliasesCreate onAliasCreated={getAliasesFromApi} />)}
+                    />
+                    <Action
+                      title="Delete Alias"
+                      icon={Icon.Trash}
+                      onAction={() => confirmAndDelete(emailAlias)}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                     <Action title="Reload Aliases" icon={Icon.Redo} onAction={getAliasesFromApi} />
                   </ActionPanel>
@@ -136,10 +172,10 @@ export default function Aliases() {
                 icon={Icon.AddPerson}
                 actions={
                   <ActionPanel>
-                    <Action
+                    <Action.Push
                       title="Create New Alias"
                       icon={Icon.AddPerson}
-                      onAction={() => push(<AliasesCreate onAliasCreated={getAliasesFromApi} />)}
+                      target={<AliasesCreate onAliasCreated={getAliasesFromApi} />}
                     />
                   </ActionPanel>
                 }

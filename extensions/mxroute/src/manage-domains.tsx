@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   Form,
   getPreferenceValues,
   Icon,
@@ -19,6 +21,7 @@ import EmailForwarders from "./email-forwarders";
 import Advanced from "./advanced";
 import DNSInfo from "./dns-info";
 import { Domain, DomainVerificationKey } from "./types";
+import SpamFilters from "./spam-filters";
 
 const { server } = getPreferenceValues<Preferences>();
 
@@ -58,6 +61,34 @@ export default function ManageDomains() {
     }
   };
 
+  const confirmAndRemove = (domain: Domain) => {
+    confirmAlert({
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: `Remove ${domain.domain}?`,
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Remove",
+        async onAction() {
+          const toast = await showToast(Toast.Style.Animated, "Removing", domain.domain);
+          try {
+            await mutate(mxroute.domains.delete(domain.domain), {
+              optimisticUpdate(data) {
+                return data.filter((d) => d.domain !== domain.domain);
+              },
+              shouldRevalidateAfter: false,
+            });
+            toast.style = Toast.Style.Success;
+            toast.title = "Removed";
+          } catch (error) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed";
+            toast.message = `${error}`;
+          }
+        },
+      },
+    });
+  };
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter domains">
       {domains.map((domain) => (
@@ -67,7 +98,10 @@ export default function ManageDomains() {
           icon={getFavicon(`https://${domain.domain}`, { fallback: Icon.Globe })}
           accessories={[
             { tag: { value: !domain.mail_hosting ? "EXTERNAL MAIL" : undefined, color: Color.Yellow } },
-            { icon: Icon[`Number${String(domain.pointers.length).padStart(2, "0")}` as keyof typeof Icon] },
+            {
+              icon: Icon[`Number${String(domain.pointers.length).padStart(2, "0")}` as keyof typeof Icon],
+              tooltip: "Pointers",
+            },
             { tag: { value: "Mail", color: domain.mail_hosting ? Color.Green : Color.Red } },
             { tag: { value: "SSL", color: domain.ssl_enabled ? Color.Green : Color.Red } },
           ]}
@@ -97,16 +131,47 @@ export default function ManageDomains() {
                   onAction={() => toggleMailHostingStatus(domain)}
                 />
               </ActionPanel.Submenu>
+              <Action.Push icon={Icon.Shield} title="Spam Filters" target={<SpamFilters domain={domain.domain} />} />
               <ActionPanel.Submenu icon={Icon.Window} title="Email Clients">
-                <Action.OpenInBrowser title="Webmail (No DNS Required)" url={`https://${server}/webmail`} />
+                <ActionPanel.Section title="Webmail (No DNS Required)">
+                  <Action.OpenInBrowser
+                    icon={getFavicon(`https://${server}/webmail`)}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title={`${server}/webmail`}
+                    url={`https://${server}/webmail`}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Webmail (requires MX records)">
+                  <Action.OpenInBrowser
+                    icon={getFavicon("https://mail.mxlogin.com/")}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="mail.mxlogin.com"
+                    url="https://mail.mxlogin.com/"
+                  />
+                  <Action.OpenInBrowser
+                    icon={getFavicon("https://webmail.mxroute.com/")}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="webmail.mxroute.com"
+                    url="https://webmail.mxroute.com/"
+                  />
+                </ActionPanel.Section>
               </ActionPanel.Submenu>
-              <Action.Push
-                icon={Icon.Plus}
-                title="Add New Domain"
-                target={<AddDomain firstDomainName={domains[0].domain} />}
-                onPop={mutate}
-                shortcut={Keyboard.Shortcut.Common.New}
-              />
+              <ActionPanel.Section>
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Add New Domain"
+                  target={<AddDomain firstDomainName={domains[0].domain} />}
+                  onPop={mutate}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                />
+                <Action
+                  icon={Icon.Trash}
+                  title="Remove Domain"
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                  onAction={() => confirmAndRemove(domain)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

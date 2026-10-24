@@ -1,5 +1,52 @@
 # Apple Music Changelog
 
+## [Album Art in Menu Bar] - 2026-10-17
+
+- Added a "Menu Bar Icon" preference to the Menu Bar Player: choose the Apple Music icon (default), the current track's cover art, or no icon. Covers are extracted from Music, resized, and cached per track, and fall back to the Apple Music icon when unavailable.
+- Added a "Hide Track Title" preference. The icon, track title and artist name can each be shown or hidden independently, and the dropdown always shows the full track title and artist.
+- Menu Bar Player preference names are now Title Cased.
+- The Menu Bar Player dropdown now shows the track title and artist statically instead of a scrolling title, which froze at a random point while the menu was open. Long names are shortened with an ellipsis, and the full text is shown on hover.
+- The Menu Bar Player now refreshes right after the Next, Previous, Play, Pause, Play/Pause, and Dislike & Skip commands instead of waiting for its next interval run.
+
+## [Rewind and Fast Forward Commands] - 2026-10-17
+
+- Added "Rewind" and "Fast Forward" commands that move the current track back or ahead by 15 seconds, stopping at the start or end of the track.
+
+## [View Recommendations Command] - 2026-10-16
+
+- Added a new "View Recommendations" command that shows your personal Apple Music recommendation rooms as a grid of albums, playlists, and songs — with In Library badges, Add to Library, album tracklists, and Open in Music.
+- Albums, songs, and playlists that are already in your library can be played (or shuffled) straight from the grid.
+- Your own playlists are recognised when Apple recommends them back to you (for example in Recently Played) and play directly.
+
+## [Fix Add to Playlist] - 2026-10-08
+
+- Fixed adding a song that is not in your library yet to a playlist.
+
+## [Playback and Search Reliability] - 2026-09-28
+
+- Added timeouts for Music scripts and fixed subprocess completion handling.
+- Wait for Music to confirm shuffle and repeat changes before showing success, and recognize Repeat All as enabled.
+- Prioritize song titles over artists and albums in library searches, including Just Play and AI searches.
+- Fixed searches and playlist names containing quotes or backslashes, metadata containing equals signs, and empty library results.
+- Fixed loading indicators that stayed active when no track was playing or playlist loading failed.
+- Updated AI instructions for shuffle, favorites, and empty library results.
+- Bound playlist sync waits and explain errors for automatically managed playlists and inaccessible station tracks.
+- Adjust Music volume in one call with a shorter timeout, so volume shortcuts return promptly when Music stops responding.
+- Adding to a smart Favorite Songs or Favourite Songs playlist now favorites the current track.
+
+## [Search Apple Music Command] - 2026-08-22
+
+- Added a new "Search Apple Music" command that searches the Apple Music catalog for songs and albums — with album tracklists, Open in Music, and Add to Library (checking first whether the item is already in your library).
+- Added Apple Music account sign-in (via Raycast's OAuth proxy) powering the catalog features.
+
+## [Background Refresh Fix] - 2026-08-21
+
+- Reduced background current-track refreshes to once per minute.
+
+## [Fix Library Album Search] - 2026-06-15
+
+- Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
+
 ## [Just Play Command] - 2026-04-04
 
 - Added a new "Just Play" no-view command that takes a text query and immediately plays the best matching track from your library, with HUD feedback.

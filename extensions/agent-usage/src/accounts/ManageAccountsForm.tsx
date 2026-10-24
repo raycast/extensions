@@ -12,8 +12,10 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import type { AccountEntry, AccountsProvider } from "./types";
-import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage";
+
+import { validateManualCredential } from "../clinepass/accounts.ts";
+import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage.ts";
+import type { AccountEntry, AccountsProvider } from "./types.ts";
 
 interface ManageAccountsFormProps {
   provider: AccountsProvider;
@@ -26,7 +28,10 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
   const [accounts, setAccounts] = useState<AccountEntry[]>([]);
   const [newLabel, setNewLabel] = useState("");
   const [newToken, setNewToken] = useState("");
+  const [newAccountId, setNewAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const supportsAccountId = provider === "codex" || provider === "clinepass";
+  const isClinePass = provider === "clinepass";
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -42,6 +47,7 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
   const handleAdd = async () => {
     const labelTrimmed = newLabel.trim();
     const tokenTrimmed = newToken.trim();
+    const accountIdTrimmed = newAccountId.trim();
 
     if (!labelTrimmed) {
       await showToast({ style: Toast.Style.Failure, title: "Label is required" });
@@ -51,6 +57,13 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
       await showToast({ style: Toast.Style.Failure, title: "Token is required" });
       return;
     }
+    if (isClinePass) {
+      const validationError = validateManualCredential(tokenTrimmed, accountIdTrimmed);
+      if (validationError) {
+        await showToast({ style: Toast.Style.Failure, title: "Invalid ClinePass account", message: validationError });
+        return;
+      }
+    }
 
     const exists = accounts.some((a) => a.label.toLowerCase() === labelTrimmed.toLowerCase());
     if (exists) {
@@ -59,10 +72,11 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
     }
 
     try {
-      await addAccount(provider, labelTrimmed, tokenTrimmed);
+      await addAccount(provider, labelTrimmed, tokenTrimmed, supportsAccountId ? accountIdTrimmed : undefined);
       onSave();
       setNewLabel("");
       setNewToken("");
+      setNewAccountId("");
       await refresh();
       await showToast({ style: Toast.Style.Success, title: `Added "${labelTrimmed}"` });
     } catch (error) {
@@ -102,11 +116,19 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
   };
 
   const [editingLabel, setEditingLabel] = useState<Record<string, string>>({});
+  const [editingAccountId, setEditingAccountId] = useState<Record<string, string>>({});
 
-  const handleSaveLabel = async (account: AccountEntry) => {
+  const handleSaveAccount = async (account: AccountEntry) => {
     const newLabelValue = editingLabel[account.id]?.trim() ?? account.label;
+    const newAccountIdValue = supportsAccountId
+      ? (editingAccountId[account.id]?.trim() ?? account.accountId ?? "")
+      : undefined;
     if (!newLabelValue) {
       await showToast({ style: Toast.Style.Failure, title: "Label cannot be empty" });
+      return;
+    }
+    if (isClinePass && !newAccountIdValue?.startsWith("usr-")) {
+      await showToast({ style: Toast.Style.Failure, title: "Cline user ID must start with usr-." });
       return;
     }
     if (newLabelValue.toLowerCase() !== account.label.toLowerCase()) {
@@ -118,10 +140,10 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
     }
 
     try {
-      await updateAccount(provider, account.id, { label: newLabelValue });
+      await updateAccount(provider, account.id, { label: newLabelValue, accountId: newAccountIdValue || undefined });
       onSave();
       await refresh();
-      await showToast({ style: Toast.Style.Success, title: `Updated label to "${newLabelValue}"` });
+      await showToast({ style: Toast.Style.Success, title: `Updated "${newLabelValue}"` });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -154,7 +176,7 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
                 key={`save-${account.id}`}
                 title={`Save "${account.label}"`}
                 icon={Icon.CheckCircle}
-                onAction={() => void handleSaveLabel(account)}
+                onAction={() => void handleSaveAccount(account)}
               />
             ))}
           </ActionPanel.Section>
@@ -174,7 +196,16 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
       }
     >
       {/* Add New Account section at the TOP to prevent jitter */}
-      <Form.Description title="Add New Account" text="Enter a label and paste the API token for the new account." />
+      <Form.Description
+        title="Add New Account"
+        text={
+          supportsAccountId
+            ? isClinePass
+              ? "Enter a label, Cline user ID, and Cline API key. API keys start with sk_ and user IDs start with usr-."
+              : "Enter a label, API token, and optional ChatGPT account ID for multi-account setups."
+            : "Enter a label and paste the API token for the new account."
+        }
+      />
       <Form.TextField
         id="new-label"
         title="Label"
@@ -184,11 +215,20 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
       />
       <Form.PasswordField
         id="new-token"
-        title="Token"
-        placeholder="Paste API token here"
+        title={isClinePass ? "API Key" : "Token"}
+        placeholder={isClinePass ? "sk_..." : "Paste API token here"}
         value={newToken}
         onChange={setNewToken}
       />
+      {supportsAccountId && (
+        <Form.TextField
+          id="new-account-id"
+          title={isClinePass ? "Cline User ID" : "ChatGPT Account ID"}
+          placeholder={isClinePass ? "Required, e.g. usr-..." : "Optional, e.g. acct_..."}
+          value={newAccountId}
+          onChange={setNewAccountId}
+        />
+      )}
 
       {accounts.length > 0 && <Form.Separator />}
 
@@ -199,7 +239,7 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
 
       {accounts.map((account) => (
         <Form.TextField
-          key={account.id}
+          key={`label-${account.id}`}
           id={`label-${account.id}`}
           title={account.label}
           placeholder="Account label"
@@ -207,6 +247,17 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
           onChange={(val) => setEditingLabel((prev) => ({ ...prev, [account.id]: val }))}
         />
       ))}
+      {supportsAccountId &&
+        accounts.map((account) => (
+          <Form.TextField
+            key={`account-id-${account.id}`}
+            id={`account-id-${account.id}`}
+            title={`${account.label} ${isClinePass ? "User ID" : "Account ID"}`}
+            placeholder={isClinePass ? "Required Cline user ID" : "Optional ChatGPT account ID"}
+            defaultValue={account.accountId ?? ""}
+            onChange={(val) => setEditingAccountId((prev) => ({ ...prev, [account.id]: val }))}
+          />
+        ))}
     </Form>
   );
 }

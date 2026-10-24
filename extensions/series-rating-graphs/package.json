@@ -4,6 +4,20 @@
   "title": "Series Rating Graphs",
   "description": "Search for TV show ratings and get individual episode ratings, straight from Raycast",
   "icon": "extension-icon.png",
+  "author": "muhammadrizo",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Web",
+    "Data",
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,44 +29,33 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "2.3.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.1",
+    "@types/react": "19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "dev": "ray develop",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix",
     "build": "ray build",
-    "publish": "npx @raycast/api@latest publish",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
-  "author": "muhammadrizo",
-  "platforms": [
-    "Windows",
-    "macOS"
-  ],
-  "categories": [
-    "Media",
-    "Web",
-    "Data",
-    "Fun"
-  ],
   "preferences": [
     {
       "name": "viewMode",
-      "description": "Choose view mode",
+      "description": "Choose how to display results",
       "type": "dropdown",
       "required": false,
       "default": "grid",
-      "title": "View Mode",
+      "title": "Layout",
       "data": [
         {
           "title": "Grid",
@@ -66,7 +69,7 @@
     },
     {
       "name": "preferredWebsite",
-      "description": "Choose which website opens by default when viewing TV series details.",
+      "description": "Choose which website opens by default when viewing TV series details",
       "type": "dropdown",
       "required": false,
       "default": "seriesGraph",
@@ -87,30 +90,36 @@
       ]
     },
     {
-      "name": "tmdbAccessToken",
-      "description": "Optional TMDB Access Token for 'Open SeriesGraph Page' and 'Open TMDB Page' actions. Get from https://themoviedb.org/settings/api.",
-      "type": "password",
+      "name": "apiBaseUrl",
+      "title": "IMDxAPI Base URL",
+      "description": "Base URL for the IMDxAPI used to search titles and fetch episode ratings. Default: https://api.tiffara.com",
+      "type": "textfield",
       "required": false,
-      "title": "TMDB Read Access Token"
+      "default": "https://api.tiffara.com",
+      "placeholder": "https://api.tiffara.com"
+    },
+    {
+      "name": "tmdbAccessToken",
+      "title": "TMDB Read Access Token",
+      "description": "Optional TMDB Access Token for 'Open SeriesGraph Page' and 'Open TMDB Page' actions. Get from https://themoviedb.org/settings/api",
+      "type": "password",
+      "required": false
     },
     {
       "name": "downloadPath",
-      "description": "Specify the path download images",
+      "title": "Download Path",
+      "description": "Specify the path to download images",
       "type": "directory",
       "required": false,
-      "title": "Download Path",
-      "default": {
-        "macOS": "~/Downloads",
-        "Windows": "C:\\Users\\%USERPROFILE%\\Downloads"
-      }
+      "default": "~/Downloads"
     },
     {
       "name": "showInFinderAfterDownload",
-      "description": "Show in Finder/File Explorer after download",
+      "label": "Show Downloaded Image in Finder/File Explorer",
+      "description": "Show image in Finder/File Explorer after download",
       "type": "checkbox",
       "required": false,
-      "default": true,
-      "label": "Show In Finder/File Explorer"
+      "default": true
     }
   ]
 }

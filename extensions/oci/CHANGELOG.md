@@ -1,5 +1,14 @@
 # Oracle Cloud Changelog
 
+## [Manage Email Domains and Approved Senders] - 2026-07-14
+
+- view email domains
+    1. create email domain
+    2. delete email domain
+- view approved senders
+    1. create approved sender
+    2. delete approved sender
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

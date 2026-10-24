@@ -2,121 +2,198 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
-import { MODEL_REGISTRY, isDownloaded, getDownloadedModels } from "../../src/lib/models";
+import {
+  discoverHfCacheModels,
+  discoverLegacyDirModels,
+  getDownloadedModels,
+} from "../../src/lib/models";
 
-const TMP = join(tmpdir(), "handy-test-models");
-beforeEach(() => mkdirSync(TMP, { recursive: true }));
-afterEach(() => rmSync(TMP, { recursive: true, force: true }));
+const ROOT = join(tmpdir(), "handy-test-models");
+const HUB = join(ROOT, "hub");
+const MODELS = join(ROOT, "models");
 
-describe("MODEL_REGISTRY", () => {
-  it("has 15 known models", () => expect(MODEL_REGISTRY).toHaveLength(15));
-  it("Whisper Medium filename is whisper-medium-q4_1.bin, file type", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "medium")!;
-    expect(m.filename).toBe("whisper-medium-q4_1.bin");
-    expect(m.isDirectory).toBe(false);
+/** Write a fake hf-hub cache entry with a resolvable snapshot + real files. */
+function seedRepo(
+  repoDir: string, // e.g. "models--handy-computer--parakeet-ctc-0.6b-gguf"
+  files: string[],
+  { rev = "rev0", writeRef = true }: { rev?: string; writeRef?: boolean } = {},
+) {
+  const base = join(HUB, repoDir);
+  const snapshot = join(base, "snapshots", rev);
+  mkdirSync(snapshot, { recursive: true });
+  for (const f of files) writeFileSync(join(snapshot, f), "");
+  if (writeRef) {
+    mkdirSync(join(base, "refs"), { recursive: true });
+    writeFileSync(join(base, "refs", "main"), rev);
+  }
+}
+
+beforeEach(() => {
+  mkdirSync(HUB, { recursive: true });
+  mkdirSync(MODELS, { recursive: true });
+});
+afterEach(() => rmSync(ROOT, { recursive: true, force: true }));
+
+describe("discoverHfCacheModels", () => {
+  it("finds a GGUF model and enriches it from the catalog", () => {
+    seedRepo("models--handy-computer--parakeet-ctc-0.6b-gguf", [
+      "parakeet-ctc-0.6b-Q8_0.gguf",
+    ]);
+    const [model, ...rest] = discoverHfCacheModels(HUB);
+    expect(rest).toHaveLength(0);
+    expect(model.id).toBe(
+      "handy-computer/parakeet-ctc-0.6b-gguf/parakeet-ctc-0.6b-Q8_0.gguf",
+    );
+    expect(model.name).toBe("Parakeet CTC 0.6B");
+    expect(model.description).toMatch(/English/);
+    expect(model.quant).toBe("Q8_0");
+    expect(model.source).toBe("catalog");
+    // English-only → no language selection
+    expect(model.supportsLanguageSelection).toBe(false);
+    expect(model.supportedLanguages).toEqual(["en"]);
   });
-  it("Whisper Large filename is ggml-large-v3-q5_0.bin", () =>
-    expect(MODEL_REGISTRY.find(m => m.id === "large")?.filename).toBe("ggml-large-v3-q5_0.bin"));
-  it("Breeze ASR is a file (not directory)", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "breeze-asr")!;
-    expect(m.filename).toBe("breeze-asr-q5_k.bin");
-    expect(m.isDirectory).toBe(false);
+
+  it("marks multilingual models as language-selectable", () => {
+    seedRepo("models--handy-computer--parakeet-tdt-0.6b-v3-gguf", [
+      "parakeet-tdt-0.6b-v3-Q8_0.gguf",
+    ]);
+    const [model] = discoverHfCacheModels(HUB);
+    expect(model.name).toBe("Parakeet TDT 0.6B v3");
+    expect(model.supportsLanguageSelection).toBe(true);
+    expect(model.supportedLanguages?.length).toBe(25);
   });
-  it("Parakeet V3 is a directory", () =>
-    expect(MODEL_REGISTRY.find(m => m.id === "parakeet-tdt-0.6b-v3")?.isDirectory).toBe(true));
-  it("GigaAM uses .onnx extension and is a file", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "gigaam-v3-e2e-ctc")!;
-    expect(m.filename).toBe("giga-am-v3.int8.onnx");
-    expect(m.isDirectory).toBe(false);
+
+  it("lists every downloaded quant as its own entry", () => {
+    seedRepo("models--handy-computer--parakeet-ctc-0.6b-gguf", [
+      "parakeet-ctc-0.6b-Q4_K_M.gguf",
+      "parakeet-ctc-0.6b-Q8_0.gguf",
+    ]);
+    const quants = discoverHfCacheModels(HUB)
+      .map((m) => m.quant)
+      .sort();
+    expect(quants).toEqual(["Q4_K_M", "Q8_0"]);
   });
+
+  it("falls back to a prettified name for repos not in the catalog", () => {
+    seedRepo("models--someone--mystery-model-gguf", ["mystery-Q4_0.gguf"]);
+    const [model] = discoverHfCacheModels(HUB);
+    expect(model.name).toBe("mystery model");
+    expect(model.description).toBe("Downloaded model");
+    // Unknown model → permissive language selection
+    expect(model.supportsLanguageSelection).toBe(true);
+  });
+
+  it("honours the commit pinned by refs/main over other snapshots", () => {
+    seedRepo(
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      ["a-Q8_0.gguf"],
+      {
+        rev: "pinned",
+      },
+    );
+    // A stray older snapshot with a different file must be ignored.
+    const stray = join(
+      HUB,
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      "snapshots",
+      "stray",
+    );
+    mkdirSync(stray, { recursive: true });
+    writeFileSync(join(stray, "b-Q4_0.gguf"), "");
+    const files = discoverHfCacheModels(HUB).map((m) => m.id.split("/").pop());
+    expect(files).toEqual(["a-Q8_0.gguf"]);
+  });
+
+  it("falls back to another snapshot when the pinned one has no gguf", () => {
+    // refs/main points at a snapshot that exists but holds no downloaded gguf.
+    seedRepo(
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      ["config.json"],
+      {
+        rev: "pinned",
+      },
+    );
+    // A different snapshot for the same repo has the real download.
+    const downloaded = join(
+      HUB,
+      "models--handy-computer--parakeet-ctc-0.6b-gguf",
+      "snapshots",
+      "downloaded",
+    );
+    mkdirSync(downloaded, { recursive: true });
+    writeFileSync(join(downloaded, "parakeet-ctc-0.6b-Q8_0.gguf"), "");
+    const files = discoverHfCacheModels(HUB).map((m) => m.id.split("/").pop());
+    expect(files).toEqual(["parakeet-ctc-0.6b-Q8_0.gguf"]);
+  });
+
+  it("ignores non-model cache dirs and repos without a gguf", () => {
+    seedRepo("datasets--foo--bar", ["data.gguf"]); // wrong prefix
+    seedRepo("models--handy-computer--empty-gguf", ["config.json"]); // no gguf
+    mkdirSync(join(HUB, "version.txt"), { recursive: true });
+    expect(discoverHfCacheModels(HUB)).toEqual([]);
+  });
+
+  it("returns [] when the hub dir is missing", () =>
+    expect(discoverHfCacheModels(join(ROOT, "nope"))).toEqual([]));
 });
 
-describe("isDownloaded", () => {
-  it("returns false when file absent", () =>
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "no.bin", isDirectory: false, supportsLanguageSelection: false }, TMP)).toBe(false));
-  it("returns true when file present", () => {
-    writeFileSync(join(TMP, "test.bin"), "");
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "test.bin", isDirectory: false, supportsLanguageSelection: false }, TMP)).toBe(true);
+describe("discoverLegacyDirModels", () => {
+  it("resolves legacy built-in models to their short id, name and capabilities", () => {
+    writeFileSync(join(MODELS, "ggml-small.bin"), ""); // Whisper Small
+    mkdirSync(join(MODELS, "parakeet-tdt-0.6b-v2-int8")); // Parakeet V2
+    const models = discoverLegacyDirModels(MODELS);
+    const small = models.find((m) => m.id === "small");
+    expect(small?.name).toBe("Whisper Small");
+    expect(small?.supportsLanguageSelection).toBe(true);
+    const parakeet = models.find((m) => m.id === "parakeet-tdt-0.6b-v2");
+    expect(parakeet?.name).toBe("Parakeet V2");
+    expect(parakeet?.supportsLanguageSelection).toBe(false);
   });
-  it("returns true when dir present", () => {
-    mkdirSync(join(TMP, "model-dir"));
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "model-dir", isDirectory: true, supportsLanguageSelection: false }, TMP)).toBe(true);
+
+  it("includes custom .bin, .gguf files and dirs, and skips other files", () => {
+    writeFileSync(join(MODELS, "my-custom.bin"), "");
+    writeFileSync(join(MODELS, "another.gguf"), "");
+    mkdirSync(join(MODELS, "onnx-model"));
+    writeFileSync(join(MODELS, "ignore.txt"), "");
+    const custom = discoverLegacyDirModels(MODELS).filter(
+      (m) => m.source === "custom",
+    );
+    expect(custom.map((m) => m.id).sort()).toEqual([
+      "another.gguf",
+      "my-custom.bin",
+      "onnx-model",
+    ]);
   });
+
+  it("does not list a known legacy model as custom", () => {
+    writeFileSync(join(MODELS, "ggml-small.bin"), "");
+    const matches = discoverLegacyDirModels(MODELS).filter(
+      (m) => m.name === "ggml-small.bin" || m.id === "small",
+    );
+    expect(matches).toHaveLength(1);
+    expect(matches[0].source).toBe("catalog");
+  });
+
+  it("returns [] when the models dir is missing", () =>
+    expect(discoverLegacyDirModels(join(ROOT, "nope"))).toEqual([]));
 });
 
 describe("getDownloadedModels", () => {
-  it("returns only downloaded known models", () => {
-    writeFileSync(join(TMP, "ggml-small.bin"), "");
-    const r = getDownloadedModels(TMP);
-    expect(r.some(m => m.id === "small")).toBe(true);
-    expect(r.some(m => m.id === "medium")).toBe(false);
-  });
-  it("includes custom .bin files not in registry", () => {
-    writeFileSync(join(TMP, "my-custom.bin"), "");
-    expect(getDownloadedModels(TMP).some(m => m.filename === "my-custom.bin")).toBe(true);
-  });
-  it("does not duplicate known models as custom", () => {
-    writeFileSync(join(TMP, "ggml-small.bin"), "");
-    expect(getDownloadedModels(TMP).filter(m => m.filename === "ggml-small.bin")).toHaveLength(1);
-  });
-  it("returns [] when models dir missing", () =>
-    expect(getDownloadedModels("/nonexistent/path")).toEqual([]));
-});
-
-describe("MODEL_REGISTRY language selection fields", () => {
-  it("Whisper models support language selection with no language filter", () => {
-    for (const id of ["small", "medium", "turbo", "large"]) {
-      const m = MODEL_REGISTRY.find(m => m.id === id)!;
-      expect(m.supportsLanguageSelection).toBe(true);
-      expect(m.supportedLanguages).toBeUndefined();
-    }
+  it("merges HF cache and custom models", () => {
+    seedRepo("models--handy-computer--parakeet-ctc-0.6b-gguf", [
+      "parakeet-ctc-0.6b-Q8_0.gguf",
+    ]);
+    writeFileSync(join(MODELS, "my-custom.bin"), "");
+    const models = getDownloadedModels({ hubDir: HUB, modelsDir: MODELS });
+    expect(models.some((m) => m.source === "catalog")).toBe(true);
+    expect(models.some((m) => m.id === "my-custom.bin")).toBe(true);
   });
 
-  it("Breeze ASR supports language selection with no language filter", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "breeze-asr")!;
-    expect(m.supportsLanguageSelection).toBe(true);
-    expect(m.supportedLanguages).toBeUndefined();
-  });
-
-  it("SenseVoice supports language selection with 7 languages including zh", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "sense-voice-int8")!;
-    expect(m.supportsLanguageSelection).toBe(true);
-    expect(m.supportedLanguages).toEqual(
-      expect.arrayContaining(["zh", "zh-Hans", "zh-Hant", "en", "yue", "ja", "ko"])
-    );
-    expect(m.supportedLanguages).toHaveLength(7);
-  });
-
-  it("Canary 180M Flash supports language selection with en/de/es/fr", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "canary-180m-flash")!;
-    expect(m).toBeDefined();
-    expect(m.supportsLanguageSelection).toBe(true);
-    expect(m.supportedLanguages).toEqual(
-      expect.arrayContaining(["en", "de", "es", "fr"])
-    );
-    expect(m.supportedLanguages).toHaveLength(4);
-  });
-
-  it("Canary 1B v2 supports language selection with 25 languages", () => {
-    const m = MODEL_REGISTRY.find(m => m.id === "canary-1b-v2")!;
-    expect(m).toBeDefined();
-    expect(m.supportsLanguageSelection).toBe(true);
-    expect(m.supportedLanguages).toHaveLength(25);
-  });
-
-  it("Parakeet models do not support language selection", () => {
-    for (const id of ["parakeet-tdt-0.6b-v2", "parakeet-tdt-0.6b-v3"]) {
-      expect(MODEL_REGISTRY.find(m => m.id === id)!.supportsLanguageSelection).toBe(false);
-    }
-  });
-
-  it("Moonshine models do not support language selection", () => {
-    for (const id of ["moonshine-base", "moonshine-tiny-streaming-en", "moonshine-small-streaming-en", "moonshine-medium-streaming-en"]) {
-      expect(MODEL_REGISTRY.find(m => m.id === id)!.supportsLanguageSelection).toBe(false);
-    }
-  });
-
-  it("GigaAM does not support language selection", () => {
-    expect(MODEL_REGISTRY.find(m => m.id === "gigaam-v3-e2e-ctc")!.supportsLanguageSelection).toBe(false);
-  });
+  it("returns [] when nothing is downloaded", () =>
+    expect(
+      getDownloadedModels({
+        hubDir: join(ROOT, "nope"),
+        modelsDir: join(ROOT, "nope2"),
+      }),
+    ).toEqual([]));
 });

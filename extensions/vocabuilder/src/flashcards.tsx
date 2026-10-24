@@ -1,10 +1,14 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import PronounceAction from "./components/PronounceAction";
-import { useEffect, useReducer, useState } from "react";
+import { DetailMetadata } from "./components/DetailMetadata";
+import { useEffect, useReducer } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
+import LanguagePairDropdown from "./components/LanguagePairDropdown";
 import { useLanguagePair } from "./hooks/useLanguagePair";
-import { LanguagePair, storageKeyPrefix, swapLanguagePair } from "./lib/languages";
+import { LanguagePair, storageKeyPrefix } from "./lib/languages";
+import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { buildFlashcardDetailMarkdown } from "./lib/markdown";
+import { SHORTCUTS } from "./lib/shortcuts";
 import { getSessionCards, saveFlashcardProgress } from "./lib/storage";
 import { FlashcardProgress, Rating, Translation } from "./lib/types";
 
@@ -123,24 +127,26 @@ const initialState: StudyState = {
   easyCount: 0,
 };
 
+function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
+  return (
+    <Action title="Toggle Languages" icon={Icon.Switch} shortcut={SHORTCUTS.toggleLanguages} onAction={onAction} />
+  );
+}
+
 /** Flashcard review command view. */
 export default function Flashcards(props: { languagePair?: LanguagePair }) {
-  const langResult = useLanguagePair();
-  const initialPair = props.languagePair ?? langResult.pair;
-  const [languagePair, setLanguagePair] = useState<LanguagePair | null>(initialPair);
-
-  // Re-sync when preferences become valid after LanguageConfigError
-  if (!languagePair && langResult.pair) {
-    setLanguagePair(langResult.pair);
-  }
+  const langResult = useLanguagePair(props.languagePair);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const languagePair = langResult.pair;
+  const defaultPair = langResult.defaultPair;
   const pairKey = languagePair ? storageKeyPrefix(languagePair) : null;
 
   useEffect(() => {
     if (!languagePair) return;
     let stale = false;
+    dispatch({ type: "reset" });
     getSessionCards(languagePair).then(({ sessionCards, progressMap }) => {
       if (!stale) dispatch({ type: "loaded", cards: sessionCards, progressMap });
     });
@@ -149,30 +155,36 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
     };
   }, [pairKey]);
 
-  if (!languagePair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  if (!languagePair || !defaultPair) {
+    return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
+  }
 
-  function handleToggleLanguages() {
+  const activePair = languagePair;
+  const activeDefaultPair = defaultPair;
+
+  async function handleLanguagePairChange(value: string) {
+    if (value === pairKey) return;
     dispatch({ type: "reset" });
-    setLanguagePair((prev) => {
-      if (!prev) return prev;
-      const swapped = swapLanguagePair(prev);
-      showToast({
-        style: Toast.Style.Success,
-        title: `${swapped.source.name} → ${swapped.target.name}`,
+    const selected = await langResult.selectPairValue(value);
+    if (!selected) {
+      dispatch({ type: "loaded", cards: [], progressMap: new Map() });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid language pair",
+        message: "Choose one of the supported language pairs.",
       });
-      return swapped;
+      return;
+    }
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: languagePairTitle(selected),
     });
   }
 
-  function ToggleLanguagesAction() {
-    return (
-      <Action
-        title="Toggle Languages"
-        icon={Icon.Switch}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-        onAction={handleToggleLanguages}
-      />
-    );
+  function handleToggleLanguages() {
+    const swapped = swapLanguagePair(activePair);
+    void handleLanguagePairChange(languagePairValue(swapped));
   }
 
   async function handleRate(rating: Rating) {
@@ -198,6 +210,9 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
         navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
         isLoading
         searchBarPlaceholder=""
+        searchBarAccessory={
+          <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+        }
       />
     );
   }
@@ -209,7 +224,13 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
         ? "Translate some words first to build your deck."
         : `Again: ${state.againCount}  ·  Good: ${state.goodCount}  ·  Easy: ${state.easyCount}`;
     return (
-      <List navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`} searchBarPlaceholder="">
+      <List
+        navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
+        searchBarPlaceholder=""
+        searchBarAccessory={
+          <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+        }
+      >
         <List.EmptyView
           title={total === 0 ? "Nothing to review" : "Session complete!"}
           description={description}
@@ -220,7 +241,7 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
                 icon={Icon.XMarkCircle}
                 onAction={() => closeMainWindow({ clearRootSearch: true })}
               />
-              <ToggleLanguagesAction />
+              <ToggleLanguagesAction onAction={handleToggleLanguages} />
             </ActionPanel>
           }
         />
@@ -240,6 +261,9 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
       navigationTitle={`${languagePair.source.name} → ${languagePair.target.name}`}
       isShowingDetail={state.revealed}
       searchBarPlaceholder=""
+      searchBarAccessory={
+        <LanguagePairDropdown pair={activePair} defaultPair={activeDefaultPair} onChange={handleLanguagePairChange} />
+      }
     >
       <List.Item
         key={card.id}
@@ -247,18 +271,7 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
         subtitle={state.revealed ? undefined : "···"}
         accessories={[isNew ? { tag: { value: "New", color: Color.Green } } : {}, { text: position }]}
         detail={
-          <List.Item.Detail
-            markdown={detailMarkdown}
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title=""
-                  text={state.revealed ? "⌘O to pronounce · ⌘⇧O for translation" : "⌘O to pronounce"}
-                  icon={Icon.SpeakerHigh}
-                />
-              </List.Item.Detail.Metadata>
-            }
-          />
+          <List.Item.Detail markdown={detailMarkdown} metadata={<DetailMetadata languagePair={languagePair} />} />
         }
         actions={
           <ActionPanel>
@@ -269,29 +282,29 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
                   word={card.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
               </>
             ) : (
               <>
                 <Action title="Good" onAction={() => handleRate("good")} />
-                <Action title="Again" shortcut={{ modifiers: [], key: "1" }} onAction={() => handleRate("again")} />
-                <Action title="Easy" shortcut={{ modifiers: [], key: "2" }} onAction={() => handleRate("easy")} />
+                <Action title="Again" shortcut={SHORTCUTS.rateAgain} onAction={() => handleRate("again")} />
+                <Action title="Easy" shortcut={SHORTCUTS.rateEasy} onAction={() => handleRate("easy")} />
                 <PronounceAction
                   word={card.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
                 <PronounceAction
                   word={card.translation}
                   languageCode={languagePair.target.code}
                   title="Pronounce Translation"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceTranslation}
                 />
               </>
             )}
-            <ToggleLanguagesAction />
+            <ToggleLanguagesAction onAction={handleToggleLanguages} />
           </ActionPanel>
         }
       />
@@ -389,6 +402,17 @@ if (import.meta.vitest) {
       });
       expect(reloaded.phase).toBe("studying");
       expect(reloaded.sessionCards[0].word).toBe("banana");
+    });
+
+    it("can leave loading with an empty loaded state", () => {
+      const done = reducer(initialState, {
+        type: "loaded",
+        cards: [],
+        progressMap: new Map(),
+      });
+
+      expect(done.phase).toBe("done");
+      expect(done.sessionCards).toEqual([]);
     });
   });
 }

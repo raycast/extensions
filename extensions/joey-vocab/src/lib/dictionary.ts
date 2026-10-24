@@ -4,15 +4,15 @@ import type { DictionaryEntry } from "../types";
 /**
  * Normalizes a word by trimming and converting to lowercase.
  */
-function normalizeWord(word: string): string {
+function _normalizeWord(word: string): string {
   return word.trim().toLowerCase();
 }
 
 /**
  * Splits a normalized query into tokens for ordered-contains matching.
  */
-function tokenizeSearchQuery(query: string): string[] {
-  return normalizeWord(query)
+function _tokenizeSearchQuery(query: string): string[] {
+  return _normalizeWord(query)
     .split(" ")
     .map((token) => token.trim())
     .filter(Boolean);
@@ -22,8 +22,8 @@ function tokenizeSearchQuery(query: string): string[] {
  * Builds a SQL LIKE pattern from a search query.
  * Tokens are joined with % for ordered contains match: %token1%token2%
  */
-function createSqlLikePattern(query: string): string {
-  const tokens = tokenizeSearchQuery(query);
+function _createSqlLikePattern(query: string): string {
+  const tokens = _tokenizeSearchQuery(query);
   return `%${tokens.join("%")}%`;
 }
 
@@ -31,7 +31,7 @@ function createSqlLikePattern(query: string): string {
  * Returns true when every required dictionary column contains data.
  * Prevents partially populated cards from appearing in search results.
  */
-function isDictionaryEntryComplete(entry: DictionaryEntry): boolean {
+function _isDictionaryEntryComplete(entry: DictionaryEntry): boolean {
   const hasWordContent =
     Boolean(entry.id) &&
     Boolean(entry.word?.trim()) &&
@@ -62,13 +62,13 @@ function isDictionaryEntryComplete(entry: DictionaryEntry): boolean {
  * @throws {Error} When search query is empty or database query fails
  */
 export async function searchDictionary(searchQuery: string): Promise<DictionaryEntry[]> {
-  const normalizedWord = normalizeWord(searchQuery);
+  const normalizedWord = _normalizeWord(searchQuery);
 
   if (!normalizedWord) {
     return [];
   }
 
-  const likePattern = createSqlLikePattern(normalizedWord);
+  const likePattern = _createSqlLikePattern(normalizedWord);
 
   const { data: entries, error } = await supabase
     .from("dictionary")
@@ -81,5 +81,5 @@ export async function searchDictionary(searchQuery: string): Promise<DictionaryE
     throw new Error(`Failed to search dictionary: ${error.message}`);
   }
 
-  return ((entries as DictionaryEntry[]) || []).filter(isDictionaryEntryComplete);
+  return ((entries as DictionaryEntry[]) || []).filter(_isDictionaryEntryComplete);
 }

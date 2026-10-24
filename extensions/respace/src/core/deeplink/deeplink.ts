@@ -10,5 +10,5 @@ const EXTENSION_NAME = "respace";
  */
 export function getWorkspaceDeeplink(workspaceName: string): string {
   const args = JSON.stringify({ workspaceName });
-  return `raycast://extensions/${EXTENSION_AUTHOR}/${EXTENSION_NAME}/quick-open?arguments=${encodeURIComponent(args)}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${EXTENSION_AUTHOR}/${EXTENSION_NAME}/quick-open?arguments=${encodeURIComponent(args)}`;
 }

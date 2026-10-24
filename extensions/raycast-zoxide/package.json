@@ -23,14 +23,32 @@
       "name": "add-from-finder",
       "title": "Add from Finder",
       "subtitle": "zoxide",
-      "description": "Add the directory of the selected folder in Finder to zoxide. If there is no selection the directory of the open finder window will be used.",
+      "description": "Add the directory of the selected folder in Finder to zoxide. If there is no Finder selection or open window, a folder picker is shown.",
       "mode": "no-view"
     }
   ],
   "preferences": [
     {
+      "name": "search-mode",
+      "title": "Search Mode",
+      "description": "Full Path (fuzzy): filters your whole zoxide list with fzf, matching anywhere in the path (requires fzf). Folder Name (strict): a pure zoxide method that re-queries zoxide on each keystroke, matching the folder name with its native ranking.",
+      "type": "dropdown",
+      "required": true,
+      "default": "fuzzy",
+      "data": [
+        {
+          "title": "Full Path (fuzzy)",
+          "value": "fuzzy"
+        },
+        {
+          "title": "Folder Name (strict)",
+          "value": "zoxide"
+        }
+      ]
+    },
+    {
       "name": "open-in",
-      "title": "Open directories in",
+      "title": "Open Directories in",
       "description": "Choose the application to open directories with.",
       "type": "appPicker",
       "required": true,
@@ -38,23 +56,41 @@
       "placeholder": "Select an application"
     },
     {
+      "name": "open-in-terminal",
+      "title": "Terminal Application",
+      "description": "Application used by the \"Open in Terminal\" action.",
+      "type": "appPicker",
+      "required": true,
+      "default": "Terminal",
+      "placeholder": "Select a terminal application"
+    },
+    {
+      "name": "open-in-editor",
+      "title": "Editor Application",
+      "description": "Application used by the \"Open in Editor\" action.",
+      "type": "appPicker",
+      "required": true,
+      "default": "TextEdit",
+      "placeholder": "Select an editor application"
+    },
+    {
       "name": "addl-paths",
-      "title": "Additional path directories",
+      "title": "Additional Path Directories",
       "description": "Additional directories to prepend to the $PATH variable when using zoxide and other commands. Uses path syntax, e.g. `/usr/bin:/bin`.",
       "type": "textfield",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3"
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.19.15",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.0",
     "@types/react": "19.2.14",
-    "eslint": "^10.1.0",
-    "prettier": "^3.8.1",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
     "typescript": "^5.9.3"
   },
   "scripts": {

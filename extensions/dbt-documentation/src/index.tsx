@@ -1,8 +1,25 @@
-import { ActionPanel, List, Action, showToast, Toast, Detail, Icon } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { ActionPanel, List, Action, Detail, Icon, Keyboard } from "@raycast/api";
+import { useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import { load } from "cheerio";
-import fetch from "node-fetch";
+import { useCachedPromise, useFetch } from "@raycast/utils";
+
+type DocSearchHit = {
+  objectID: string;
+  hierarchy: {
+    lvl0: string | null;
+    lvl1: string | null;
+    lvl2: string | null;
+    lvl3: string | null;
+    lvl4: string | null;
+    lvl5: string | null;
+    lvl6: string | null;
+  };
+  content: string | null;
+  url: string;
+  anchor: string | null;
+  type: string;
+};
 
 const APPID = "57ZWAOQC7F";
 const APIKEY = "04a5092253f5120fdff2c77b3847d0e1";
@@ -10,49 +27,38 @@ const INDEX = "dbt";
 
 export function ListCodeSnippets(props: { url: string }) {
   const url = props.url;
-  const [listSnippets, setListSnippets] = useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  async function fetchSnippets() {
-    await fetch(url, { method: "GET" })
-      .then((response) => {
-        if (!response.ok) {
-          showToast(Toast.Style.Failure, "HTTP error", response.statusText);
-        }
-        return response.text();
-      })
+  const { isLoading, data: listSnippets } = useFetch(url, {
+    async parseResponse(response) {
+      if (!response.ok) throw new Error(response.statusText);
+      const result = await response.text();
+      return result;
+    },
+    mapResult(result) {
+      const $ = load(result);
+      const codes = $(`div > pre > code`);
+      const listSnippetsQuery: Array<string> = [];
 
-      .then((responseText) => {
-        const $ = load(responseText);
-        const codes = $(`div > pre > code`);
-        const listSnippetsQuery: Array<string> = [];
-
-        codes.each(function (index, element) {
-          // for each snippet the code is split across different spans
-          // we store each line as a string in the array codeIndividualSnippet and then join the lines
-          const codeIndividualSnippet: Array<string> = [];
-          $(element)
-            .children()
-            .each(function (index, element_child) {
-              codeIndividualSnippet.push($(element_child).text());
-            });
-          listSnippetsQuery.push(codeIndividualSnippet.join("\n"));
-        });
-
-        setListSnippets(listSnippetsQuery);
-        setIsLoading(false);
-      })
-
-      .catch((error) => {
-        showToast(Toast.Style.Failure, "Issue parsing the documentation page");
-        setListSnippets([]);
-        setIsLoading(false);
+      codes.each(function (index, element) {
+        // for each snippet the code is split across different spans
+        // we store each line as a string in the array codeIndividualSnippet and then join the lines
+        const codeIndividualSnippet: Array<string> = [];
+        $(element)
+          .children()
+          .each(function (index, element_child) {
+            codeIndividualSnippet.push($(element_child).text());
+          });
+        listSnippetsQuery.push(codeIndividualSnippet.join("\n"));
       });
-  }
-
-  useEffect(() => {
-    fetchSnippets();
-  }, [url]);
+      return {
+        data: listSnippetsQuery,
+      };
+    },
+    initialData: [],
+    failureToastOptions: {
+      message: "Issue parsing the documentation page",
+    },
+  });
 
   if (listSnippets.length > 0) {
     return (
@@ -69,12 +75,8 @@ export function ListCodeSnippets(props: { url: string }) {
                   icon={Icon.AppWindowList}
                   target={<SnippetDetails code_snippet={item} />}
                 />
-                <Action.OpenInBrowser
-                  url={url}
-                  title="Open Page in Browser"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
-                <Action.CopyToClipboard content={url} title="Copy Page URL" />
+                <Action.OpenInBrowser url={url} title="Open Page in Browser" shortcut={Keyboard.Shortcut.Common.Open} />
+                <Action.CopyToClipboard content={url} title="Copy Page URL" shortcut={Keyboard.Shortcut.Common.Copy} />
               </ActionPanel>
             }
             detail={<List.Item.Detail markdown={["```", item, "```"].join("\n")} />}
@@ -111,59 +113,52 @@ export default function main() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const search = async (query = "") => {
-    setIsLoading(true);
-
-    return await algoliaIndex
-      .search(query)
-      .then((res) => {
-        setIsLoading(false);
-        return res.hits;
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        showToast(Toast.Style.Failure, "Algolia Error", err.message);
-        return [];
-      });
-  };
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data: searchResults } = useCachedPromise(
+    async (query: string) => {
+      const res = await algoliaIndex.search<DocSearchHit>(query);
+      return res.hits;
+    },
+    [searchText],
+    {
+      failureToastOptions: {
+        title: "Algolia Error",
+      },
+    },
+  );
 
   return (
-    <List
-      throttle={true}
-      isLoading={isLoading || searchResults === undefined}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
-    >
+    <List throttle={true} isLoading={isLoading} onSearchTextChange={setSearchText}>
       {searchResults?.map((result) => (
         <List.Item
           key={result.objectID}
           title={
-            result.hierarchy.lvl2 || result.hierarchy.lvl3
-              ? (result.hierarchy.lvl2 || result.hierarchy.lvl3).replace("'", "'").replace(/&amp;/g, "&")
-              : result.hierarchy.lvl1
-              ? result.hierarchy.lvl1.replace("'", "'").replace(/&amp;/g, "&")
-              : ""
+            result.hierarchy.lvl2
+              ? result.hierarchy.lvl2.replace("'", "'").replace(/&amp;/g, "&")
+              : result.hierarchy.lvl3
+                ? result.hierarchy.lvl3.replace("'", "'").replace(/&amp;/g, "&")
+                : result.hierarchy.lvl1
+                  ? result.hierarchy.lvl1.replace("'", "'").replace(/&amp;/g, "&")
+                  : ""
           }
           subtitle={
             result.hierarchy.lvl2 || result.hierarchy.lvl3
               ? [result.hierarchy.lvl0, result.hierarchy.lvl1].join(" > ").replace(/&amp;/g, "&")
-              : result.hierarchy.lvl0.replace(/&amp;/g, "&")
+              : (result.hierarchy.lvl0 || "").replace(/&amp;/g, "&")
           }
           actions={
-            <ActionPanel title={result.name}>
+            <ActionPanel>
               <Action.OpenInBrowser url={result.url} title="Open in Browser" />
               <Action.CopyToClipboard content={result.url} title="Copy URL" />
               <Action.Push
                 title="Show Code Snippets"
                 icon={Icon.AppWindowList}
                 target={<ListCodeSnippets url={result.url} />}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                // eslint-disable-next-line @raycast/prefer-common-shortcut
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                }}
               />
             </ActionPanel>
           }

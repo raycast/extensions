@@ -21,7 +21,9 @@ export default function Command() {
         />
       }
     >
-      {readingList?.map((bookmark) => <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />)}
+      {readingList?.map((bookmark) => (
+        <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />
+      ))}
     </List>
   );
 }

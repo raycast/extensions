@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-ecosystem-map",
+  "title": "Agent Ecosystem Map",
+  "description": "Unified map of your AI coding config — skills, agents, MCP servers, rules across Claude Code, Codex, Gemini CLI, Cursor, Windsurf, Copilot",
+  "icon": "extension-icon.png",
+  "author": "spyrae",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "projectPath",
+      "type": "directory",
+      "required": false,
+      "title": "Project Directory",
+      "description": "Path to your project for scanning project-level config files (.cursor/rules, .windsurf/rules, AGENTS.md, CLAUDE.md, etc.)",
+      "placeholder": "~/Projects/my-app"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-ecosystem",
+      "title": "Search Ecosystem",
+      "subtitle": "Agent Ecosystem Map",
+      "description": "Search and browse all AI coding assets — skills, agents, MCP servers, rules, and instructions",
+      "mode": "view"
+    },
+    {
+      "name": "agents",
+      "title": "Agents",
+      "subtitle": "Agent Ecosystem Map",
+      "description": "Browse subagent definitions configured in your AI coding tools",
+      "mode": "view"
+    },
+    {
+      "name": "rules",
+      "title": "Rules",
+      "subtitle": "Agent Ecosystem Map",
+      "description": "Browse rules configured in Claude Code, Cursor, and Windsurf",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

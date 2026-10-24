@@ -9,4 +9,5 @@ export const INTERACTIONS = "interactions";
 export const ACTIVE_ORGANIZATION = "active_organization";
 export const ACTIVE_WORKSPACE = "active_workspace";
 export const LINKINIZE_DOMAIN = "https://app.linkinize.com";
+export const INVALID_FAVICONS = "invalid_favicons";
 export const EXTENSION_VERSION = packageJson.version;

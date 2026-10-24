@@ -1,5 +1,5 @@
-import { openThawUrl } from "@utils";
+import { runThawAction } from "@utils";
 
 export default async function ToggleApplicationMenus() {
-  await openThawUrl("toggle-application-menus", "Toggled Application Menus");
+  await runThawAction("toggle-application-menus");
 }

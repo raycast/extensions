@@ -4,19 +4,20 @@ Search and browse your [Navidrome](https://www.navidrome.org/) music library dir
 
 ## Commands
 
-| Command               | Description                                                  | View |
-| --------------------- | ------------------------------------------------------------ | ---- |
-| Search                | Search artists, albums, and songs with recent search history | List |
-| Recently Added Albums | Browse your newest albums with cover art                     | Grid |
-| Most Played Albums    | Browse your most frequently played albums                    | Grid |
+| Command               | Description                                                             | View |
+| --------------------- | ----------------------------------------------------------------------- | ---- |
+| Search                | Search artists, albums, songs, and playlists with recent search history | List |
+| Recently Added Albums | Browse your newest albums with cover art                                | Grid |
+| Most Played Albums    | Browse your most frequently played albums                               | Grid |
+| Playlists             | Browse all your Navidrome playlists                                     | List |
 
 ## Features
 
-- **Unified search** across artists, albums, and songs
+- **Unified search** across artists, albums, songs, and playlists
 - **Recent searches** — your last 10 queries are saved and shown when the search bar is empty
 - **Album art** — cover art thumbnails in search results and grid views
 - **Star indicators** — see which items you've favorited at a glance
-- **Open in browser** — jump straight to the artist/album page in Navidrome's web UI
+- **Open in browser** — jump straight to the artist/album/playlist page in Navidrome's web UI
 - **Copy to clipboard** — copy names, titles, or URLs
 
 ## Setup

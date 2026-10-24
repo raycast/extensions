@@ -8,7 +8,8 @@
   "contributors": [
     "timmevandermeer",
     "taken",
-    "Aayush9029"
+    "Aayush9029",
+    "sansaxena789"
   ],
   "pastContributors": [
     "J3n5en"
@@ -34,7 +35,7 @@
     {
       "name": "address",
       "title": "Web UI Address",
-      "description": "The address where your qBittorrent Web UI is running",
+      "description": "The address where your qBittorrent Web UI is running. If authentication is required, enter your username and password later in Extension Settings.",
       "placeholder": "http://localhost:8080",
       "type": "textfield",
       "required": true
@@ -42,18 +43,18 @@
     {
       "name": "username",
       "title": "Username",
-      "description": "Your qBittorrent Web UI username",
+      "description": "Your qBittorrent Web UI username, if authentication is required",
       "placeholder": "admin",
       "type": "textfield",
-      "required": true
+      "required": false
     },
     {
       "name": "password",
       "title": "Password",
-      "description": "Your qBittorrent Web UI password",
+      "description": "Your qBittorrent Web UI password, if authentication is required",
       "type": "password",
       "placeholder": "adminadmin",
-      "required": true
+      "required": false
     },
     {
       "name": "timeout",
@@ -75,7 +76,7 @@
     }
   ],
   "dependencies": {
-    "@ctrl/qbittorrent": "^9.11.2",
+    "@ctrl/qbittorrent": "^9.14.0",
     "@raycast/api": "^1.104.11",
     "change-case": "^5.4.4",
     "filesize": "^10.1.6"

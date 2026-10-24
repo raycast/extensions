@@ -18,6 +18,21 @@ Select "Create a new time entry" and pressing enter will bring you to the time e
 
 <img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/new-entry.png">
 
+### Quickstart New Timer
+
+Opens the new time entry form directly, skipping the recent-entries list. Assign
+it a global hotkey to start a timer from anywhere with one keystroke. On submit,
+Raycast closes immediately and is ready for your next command.
+
+<img width="600" alt="Quickstart New Timer Command" src="./assets/new-entry.png">
+
+### Quickstop Timer
+
+Stops the running time entry immediately, without opening a window. Assign it a
+global hotkey to end a timer from anywhere with one keystroke — a HUD confirms
+what was stopped and how long it ran. If nothing is running, it says so and does
+nothing.
+
 ### Manage Tags
 
 This command list all the tags you have access to. You can create, rename, and delete them, assuming you have the appropriate permissions.

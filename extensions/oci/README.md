@@ -17,6 +17,13 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
         - Create *Secret*
         - View *Versions*
             - View *Bundle*
+- View **Email** *Delivery*
+    - View *Email Domains*
+        - Create *Email Domain*
+        - Delete *Email Domain*
+    - View *Approved Senders*
+        - Create *Approved Sender*
+        - Delete *Approved Sender*
 
 ## 🚀 Getting Started
 

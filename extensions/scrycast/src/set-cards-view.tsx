@@ -6,9 +6,11 @@ import {
   ScryfallSearchResponse,
   SortOrder,
   SAVED_CARDS_KEY,
+  SCRYFALL_API_BASE,
   getCardImageUri,
   isFlippable,
   sortCards,
+  scryfallFetch,
 } from "./shared";
 import { CardDetailView, CardActions } from "./card-views";
 import Command from "./search-view";
@@ -49,7 +51,7 @@ type FetchResult = { type: "ok"; response: Response } | { type: "inactive" } | {
 
 async function fetchWithRetry(url: string, active: () => boolean): Promise<FetchResult> {
   for (let attempt = 0; attempt < 4; attempt++) {
-    const res = await fetch(url);
+    const res = await scryfallFetch(url);
     if (res.status !== 429) return { type: "ok", response: res };
     if (!active()) return { type: "inactive" };
     const retryAfter = parseInt(res.headers.get("Retry-After") ?? "2", 10);
@@ -151,7 +153,7 @@ export function SetCardsView({
         }
       }
 
-      const baseUrl = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&order=usd&dir=desc&unique=prints`;
+      const baseUrl = `${SCRYFALL_API_BASE}/cards/search?q=${encodeURIComponent(query)}&order=usd&dir=desc&unique=prints`;
       console.log(`[SetCardsView] fetching — set: ${setCode}, released: ${released}`);
 
       let page1: ScryfallSearchResponse;

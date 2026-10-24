@@ -1,5 +1,6 @@
 import { showHUD, PopToRootType } from "@raycast/api";
 import { useBaseWindowResize } from "./useBaseWindowResize";
+import { isTimeoutError, TIMEOUT_ERROR_HUD_TITLE } from "../utils/timeout";
 
 export function useFavWindowResize() {
   const { adjustWindowSize } = useBaseWindowResize();
@@ -23,6 +24,11 @@ export function useFavWindowResize() {
         });
       },
       onError: async (err) => {
+        if (isTimeoutError(err)) {
+          await showHUD(TIMEOUT_ERROR_HUD_TITLE, { popToRootType: PopToRootType.Immediate });
+          return;
+        }
+
         const errorStr = String(err);
         if (
           errorStr.includes("frontmost") ||

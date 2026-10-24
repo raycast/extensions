@@ -1,5 +1,22 @@
 # Asana Changelog
 
+## [Add Copy Short Task URL action] - 2026-10-21
+
+- Added a "Copy Task Short URL" action that copies the short `https://app.asana.com/0/0/<task-id>` link of a task
+
+## [Fix due date timezone handling] - 2026-10-05
+
+- Fix date-only deadlines appearing a day early in task lists, tooltips, and details.
+- Keep due date colors and Set Due Date confirmations consistent with the selected local date.
+
+## [Fix apostrophes in task descriptions] - 2026-08-06
+
+- Preserve apostrophes in task and subtask descriptions
+
+## [Fix pagination error in large workspaces] - 2026-07-01
+
+- Fixed the "Create Task" command failing with a "The result is too large" 400 error in large workspaces by paginating through users and tags
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

@@ -1,5 +1,18 @@
 # OpenCode Sessions Changelog
 
+## [Fix iTerm2 resume with no open windows] - 2026-06-18
+
+- Create an iTerm2 window when the app is running but has no windows, so "Resume in Terminal" no longer fails silently
+
+## [Update] - 2026-06-16
+
+- Added content search across session titles and message bodies
+- Added "New Session" command to start fresh OpenCode conversations from Raycast
+- Added terminal integration: resume sessions in iTerm2, Terminal.app, Warp, Ghostty, or Kitty
+- Added liveness detection showing Active/Open status for running sessions
+- Added "View Activity" panel showing session todos and recent messages via OpenCode SDK
+- Added terminal preference with auto-detection of running terminal app
+
 ## [Initial Version] - 2026-02-20
 
 - Browse sessions with time-grouped sections and project filtering

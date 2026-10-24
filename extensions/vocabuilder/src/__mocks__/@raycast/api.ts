@@ -17,13 +17,44 @@ export const LocalStorage = {
 };
 
 export const getPreferenceValues = vi.fn(() => ({
-  geminiApiKey: "test-api-key",
+  provider: "auto",
+  apiKey: "AIza-test-api-key",
+  apiBaseUrl: "",
   sourceLanguage: "en",
   targetLanguage: "uk",
+  translationModel: "",
+  ttsModel: "",
+  pronunciation: "auto",
 }));
-
-export const closeMainWindow = vi.fn(async () => {});
 
 export const environment = {
   supportPath: "/tmp/vocabuilder-test-support",
 };
+
+// colors.ts reads Color.Blue etc. at module load — Proxy keeps that working
+// without enumerating every Raycast color name.
+export const Color = new Proxy(
+  {},
+  {
+    get: (_target, prop) => String(prop),
+  },
+) as Record<string, string>;
+
+export const Toast = {
+  Style: { Animated: "animated", Failure: "failure", Success: "success" },
+};
+
+export const showToast = vi.fn(async () => ({ hide: vi.fn(async () => {}) }));
+export const captureException = vi.fn();
+
+// Placeholders: imported by .tsx files but only accessed inside render/handler
+// bodies, which tests never invoke. Exist so the import statement resolves.
+export const Action = {} as never;
+export const ActionPanel = {} as never;
+export const List = {} as never;
+export const Detail = {} as never;
+export const Icon = new Proxy({}, { get: (_target, name) => name }) as never;
+export const Keyboard = {} as never;
+export const closeMainWindow = vi.fn(async () => {});
+export const openExtensionPreferences = vi.fn(async () => {});
+export const useNavigation = () => ({ push: vi.fn(), pop: vi.fn() });

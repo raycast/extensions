@@ -1,5 +1,9 @@
 # Nextcloud Changelog
 
+## [Fix Open File URL format] - 2026-06-19
+
+- Use the correct Nextcloud URL format for opening files, fixing 403 errors
+
 ## [Fix Search when username is different] - 2025-12-13
 - Robust handling for hostname in `Preferences` (it should no longer crash even if user enters full URL) (ref: [Issue #23263](https://github.com/raycast/extensions/issues/23263))
 - Allow setting a custom username for files owner (ref: [Issue #23510](https://github.com/raycast/extensions/issues/23510))

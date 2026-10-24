@@ -1,9 +1,24 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  Form,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getIntakes, deleteIntake } from "./utils/storage";
+import { getIntakes, deleteIntake, updateIntake } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 import { CaffeineIntake } from "./types";
+import { BUILT_IN_PRESETS } from "./utils/drinkPresets";
+import { parseIntakeFromForm } from "./utils/intakeValidation";
 
 /**
  * Format date as "Today", "Yesterday", or "MMM DD, YYYY"
@@ -45,6 +60,77 @@ function formatDateKey(date: Date): string {
  * Get color for status indicator
  */
 import { getStatusColor, getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
+
+interface EditFormValues {
+  drinkType: string;
+  caffeineAmount: string;
+  amountDescription: string;
+  intakeTime: Date | null;
+}
+
+function EditIntakeForm({ intake, onSave }: { intake: CaffeineIntake; onSave: () => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: EditFormValues) {
+    const parsed = parseIntakeFromForm(values.caffeineAmount, values.intakeTime, intake.timestamp);
+    if (!parsed) {
+      return;
+    }
+
+    const { caffeineMg, chosenTime } = parsed;
+
+    try {
+      await updateIntake({
+        ...intake,
+        timestamp: chosenTime,
+        amount: caffeineMg,
+        drinkType: values.drinkType || intake.drinkType,
+        amountDescription: values.amountDescription || undefined,
+      });
+      onSave();
+      pop();
+      showToast({ style: Toast.Style.Success, title: "Updated", message: "Intake record updated" });
+    } catch {
+      showToast({ style: Toast.Style.Failure, title: "Error", message: "Failed to update intake" });
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle="Edit Intake"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} title="Save Changes" icon={Icon.Checkmark} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="drinkType"
+        title="Drink Type"
+        defaultValue={intake.drinkType}
+        placeholder={BUILT_IN_PRESETS[0]?.name ?? "Coffee"}
+      />
+      <Form.DatePicker
+        id="intakeTime"
+        title="Time"
+        type={Form.DatePicker.Type.DateTime}
+        defaultValue={intake.timestamp}
+      />
+      <Form.TextField
+        id="amountDescription"
+        title="Amount (Optional)"
+        defaultValue={intake.amountDescription ?? ""}
+        placeholder="e.g., 1 cup, 200ml"
+      />
+      <Form.TextField
+        id="caffeineAmount"
+        title="Caffeine Amount (mg)"
+        defaultValue={String(intake.amount)}
+        placeholder="Enter caffeine amount in milligrams"
+      />
+    </Form>
+  );
+}
 
 /**
  * Group caffeine intakes by date (YYYY-MM-DD format)
@@ -169,17 +255,26 @@ export default function Command() {
                 accessories={[{ text: `${intake.amount} mg` }, { text: formatTime(intake.timestamp) }]}
                 actions={
                   <ActionPanel>
+                    <Action.Push
+                      icon={Icon.Pencil}
+                      title="Edit Intake"
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                      target={<EditIntakeForm intake={intake} onSave={revalidate} />}
+                    />
                     <Action
                       icon={Icon.Trash}
                       title="Delete Intake"
                       style={Action.Style.Destructive}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "delete" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                      }}
                       onAction={() => handleDelete(intake.id, intake.drinkType, intake.amount)}
                     />
                     <Action
                       icon={Icon.ArrowClockwise}
                       title="Refresh"
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={revalidate}
                     />
                   </ActionPanel>

@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { createChecklistItem, createTask } from "./api/mutations";
 import type { TaskView } from "./api/types";
-import { dateOnlyEpochFromLocalDate } from "./helpers/date-codecs";
+import { dateOnlyEpochFromLocalDate, localDateFromDateOnlyEpoch, tomorrowDateOnlyEpoch } from "./helpers/date-codecs";
 import { useProjects } from "./hooks/use-projects";
 import { useTeams } from "./hooks/use-teams";
 import { ALL_WORKSPACES_ID, useWorkspaces } from "./hooks/use-workspaces";
@@ -79,11 +79,11 @@ const CreateTask = () => {
 
         await showToast({ style: Toast.Style.Success, title: "Task created" });
         await popToRoot();
-      } catch (error) {
+      } catch {
         await showToast({
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: "Check your connection and try again. Your task details are still here.",
           style: Toast.Style.Failure,
-          title: "Failed to create task",
+          title: "Task not created",
         });
       } finally {
         setIsSubmitting(false);
@@ -123,7 +123,13 @@ const CreateTask = () => {
         <Form.Dropdown.Item title="Upcoming" value="upcoming" />
         <Form.Dropdown.Item title="Someday" value="someday" />
       </Form.Dropdown>
-      {whenValue === "upcoming" && <Form.DatePicker id="startDate" title="Start Date" />}
+      {whenValue === "upcoming" && (
+        <Form.DatePicker
+          defaultValue={localDateFromDateOnlyEpoch(tomorrowDateOnlyEpoch())}
+          id="startDate"
+          title="Start Date"
+        />
+      )}
       <Form.DatePicker id="deadline" title="Deadline" />
       <Form.Dropdown defaultValue="" id="projectId" title="Project">
         <Form.Dropdown.Item title="No Project" value="" />

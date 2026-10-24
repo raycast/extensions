@@ -49,6 +49,7 @@ import {
   validateTotalValue,
   parseTotalValue,
   computeUnitsFromTotalValue,
+  validatePrice,
 } from "../utils/validation";
 import { formatUnits, formatCurrency, getDisplayName, hasCustomName } from "../utils/formatting";
 import { BatchRenameMatch } from "./BatchRenameForm";
@@ -73,11 +74,23 @@ export interface EditPositionUpdates {
    */
   customName: string | undefined;
 
+  /**
+   * The new average buy price per unit (native currency).
+   *
+   * - A number means "set this as the average cost"
+   * - `null` means "the user cleared the field" (remove the recorded cost)
+   * - `undefined` means "no change"
+   */
+  avgCostPrice: number | null | undefined;
+
   /** Whether the units value changed from the original */
   unitsChanged: boolean;
 
   /** Whether the custom name changed from the original */
   nameChanged: boolean;
+
+  /** Whether the average buy price changed from the original */
+  costChanged: boolean;
 }
 
 interface EditPositionFormProps {
@@ -240,7 +253,11 @@ function EditPhaseForm({
   const [totalValueInput, setTotalValueInput] = useState<string>("");
   const [valueCurrency, setValueCurrency] = useState<string>(baseCurrency);
   const [nameError, setNameError] = useState<string | undefined>(undefined);
+  const [avgCostError, setAvgCostError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Average buy price is only meaningful for traded securities
+  const showAvgCostField = !isCash && !isProperty && !isDebt;
 
   // ── Display Values ──
 
@@ -333,6 +350,19 @@ function EditPhaseForm({
     setTotalValueError(undefined);
   }
 
+  function handleAvgCostBlur(event: Form.Event<string>) {
+    const value = event.target.value;
+    if (value && value.trim().length > 0) {
+      setAvgCostError(validatePrice(value));
+    }
+  }
+
+  function handleAvgCostChange() {
+    if (avgCostError) {
+      setAvgCostError(undefined);
+    }
+  }
+
   function handleNameBlur(event: Form.Event<string>) {
     const value = event.target.value?.trim();
     if (value && value === position.name) {
@@ -356,6 +386,7 @@ function EditPhaseForm({
     inputMode?: string;
     valueCurrency?: string;
     displayName?: string;
+    avgCostPrice?: string;
   }) {
     // Validate name (if provided)
     const trimmedName = values.displayName?.trim() ?? "";
@@ -363,6 +394,26 @@ function EditPhaseForm({
       setNameError("Same as original name — clear the field to use the original, or enter a different name");
       return;
     }
+
+    // Validate and resolve the average buy price (optional field)
+    // - number: set as the new average cost
+    // - null: user cleared a previously recorded cost
+    // - undefined: no change
+    let newAvgCost: number | null | undefined = undefined;
+    if (showAvgCostField) {
+      const trimmedCost = values.avgCostPrice?.trim() ?? "";
+      if (trimmedCost) {
+        const costValidation = validatePrice(trimmedCost);
+        if (costValidation) {
+          setAvgCostError(costValidation);
+          return;
+        }
+        newAvgCost = Number(trimmedCost);
+      } else if (position.avgCostPrice !== undefined) {
+        newAvgCost = null;
+      }
+    }
+    const costChanged = newAvgCost !== undefined && (newAvgCost === null || newAvgCost !== position.avgCostPrice);
 
     let newUnits: number;
 
@@ -399,7 +450,7 @@ function EditPhaseForm({
     const nameChanged = trimmedName !== oldCustomName;
 
     // Skip if nothing changed
-    if (!unitsChanged && !nameChanged) {
+    if (!unitsChanged && !nameChanged && !costChanged) {
       onDone();
       return;
     }
@@ -411,8 +462,10 @@ function EditPhaseForm({
       const matches = await onSave({
         units: newUnits,
         customName: trimmedName || undefined,
+        avgCostPrice: newAvgCost,
         unitsChanged,
         nameChanged,
+        costChanged,
       });
 
       // If batch candidates found, transition to phase 2
@@ -526,6 +579,26 @@ function EditPhaseForm({
           />
 
           <Form.Description title="" text={unitsHelpText} />
+        </>
+      )}
+
+      {/* ── Average Buy Price (traded securities only) ── */}
+      {showAvgCostField && (
+        <>
+          <Form.TextField
+            id="avgCostPrice"
+            title="Average Buy Price"
+            placeholder={`e.g. 72.50 (${position.currency}, optional)`}
+            defaultValue={position.avgCostPrice !== undefined ? String(position.avgCostPrice) : ""}
+            error={avgCostError}
+            onChange={handleAvgCostChange}
+            onBlur={handleAvgCostBlur}
+          />
+
+          <Form.Description
+            title=""
+            text={`Optional. The average price per unit you paid, in ${position.currency}. Enables profit/loss tracking. Clear the field to remove it.`}
+          />
         </>
       )}
 

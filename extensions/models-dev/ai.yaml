@@ -1,0 +1,52 @@
+instructions: |
+  Use `query-models` for questions about available AI models, providers, capabilities, pricing, or context windows.
+  Multiple capabilities use AND semantics. Prices are USD per million tokens.
+  Identify models as `providerId/modelId` because model IDs are provider-scoped.
+  Always pass `query`; use an empty string for filter-only requests.
+
+evals:
+  - input: "@models-dev find Anthropic reasoning models with tool calling under $5 per million input tokens"
+    mocks:
+      query-models:
+        count: 0
+        models: []
+    expected:
+      - callsTool:
+          name: query-models
+          arguments:
+            query: ""
+            provider: anthropic
+            capabilities:
+              reasoning: true
+              tool_call: true
+            max_input_price: 5
+
+  - input: "@models-dev which open-weight vision models have at least a 128k context window?"
+    mocks:
+      query-models:
+        count: 0
+        models: []
+    expected:
+      - callsTool:
+          name: query-models
+          arguments:
+            query: ""
+            capabilities:
+              open_weights: true
+              vision: true
+            min_context: 128000
+
+  - input: "@models-dev show the cheapest audio models under $1 per million output tokens"
+    mocks:
+      query-models:
+        count: 0
+        models: []
+    expected:
+      - callsTool:
+          name: query-models
+          arguments:
+            query: ""
+            capabilities:
+              audio: true
+            max_output_price: 1
+            sort: output-price

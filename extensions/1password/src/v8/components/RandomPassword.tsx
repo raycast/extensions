@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { execFileSync } from "node:child_process";
 import { useEffect, useState } from "react";
 
 import { Item } from "../types";
-import { getCliPath, isWindows, windowsEnv } from "../utils";
+import { isWindows, op } from "../utils";
 
 import Shortcut = Keyboard.Shortcut;
 import Style = Toast.Style;
@@ -35,8 +34,9 @@ export function RandomPassword() {
 
       try {
         // https://1password.community/discussion/139189/feature-request-generate-random-passwords-with-cli-via-dedicated-command-e-g-op-generate
-        const stdout = execFileSync(
-          getCliPath(),
+        // Stays on the synchronous helper: `op item create` reads a piped stdin, so it needs
+        // `stdio: ["ignore", ...]`, which the async `execFile`-based path cannot express.
+        const stdout = op(
           [
             "item",
             "create",
@@ -47,9 +47,9 @@ export function RandomPassword() {
             "--format",
             "json",
           ],
-          { ...(windowsEnv ? { env: windowsEnv } : {}), stdio: ["ignore", "pipe", "pipe"] },
+          { stdio: ["ignore", "pipe", "pipe"] },
         );
-        const item: Item = JSON.parse(stdout.toString());
+        const item: Item = JSON.parse(stdout);
         const password = item.fields
           ?.filter((field) => field.id === "password")
           .filter(Boolean)

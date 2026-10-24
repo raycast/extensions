@@ -12,3 +12,6 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Claude Code project docs — keep out of the Raycast Store monorepo
+CLAUDE.md

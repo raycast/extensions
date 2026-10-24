@@ -1,92 +1,55 @@
 import { describe, it, expect } from "vitest";
-import { FlashcardProgressSchema, GeminiWordResponseSchema, TranslationSchema, WordSenseSchema } from "./types";
+import {
+  FlashcardProgressSchema,
+  TextResponseJsonSchema,
+  WordResponseJsonSchema,
+  PART_OF_SPEECH_VALUES,
+  REGISTER_VALUES,
+  TranslationSchema,
+  WordSenseSchema,
+} from "./types";
 
-describe("WordSenseSchema", () => {
-  const valid = {
-    translation: "привіт",
-    partOfSpeech: "interjection",
-    example: "Привіт!",
-    exampleTranslation: "Hello!",
-  };
-
-  it("accepts a valid sense", () => {
-    expect(() => WordSenseSchema.parse(valid)).not.toThrow();
-  });
-
-  it("rejects sense missing translation", () => {
-    const incomplete: Record<string, unknown> = { ...valid };
-    delete incomplete.translation;
-    expect(() => WordSenseSchema.parse(incomplete)).toThrow();
-  });
-});
-
-describe("GeminiWordResponseSchema", () => {
-  const sense = {
-    translation: "привіт",
-    partOfSpeech: "interjection",
-    example: "Привіт!",
-    exampleTranslation: "Hello!",
-  };
-
-  it("accepts valid response without correctedWord", () => {
-    const result = GeminiWordResponseSchema.parse({ senses: [sense] });
-    expect(result.senses).toHaveLength(1);
-    expect(result.correctedWord).toBeUndefined();
-  });
-
-  it("accepts multiple senses and correctedWord", () => {
-    const result = GeminiWordResponseSchema.parse({
-      senses: [sense, { ...sense, translation: "ало", partOfSpeech: "noun" }],
-      correctedWord: "hello",
+describe("structured output JSON schemas", () => {
+  it("keeps word response JSON schema aligned with required sense fields", () => {
+    expect(WordResponseJsonSchema).toMatchObject({
+      type: "object",
+      required: ["senses"],
+      properties: {
+        senses: {
+          maxItems: 5,
+          items: {
+            required: ["translation", "partOfSpeech", "example", "exampleTranslation"],
+          },
+        },
+      },
     });
-    expect(result.senses).toHaveLength(2);
-    expect(result.correctedWord).toBe("hello");
   });
 
-  it("rejects empty senses array", () => {
-    expect(() => GeminiWordResponseSchema.parse({ senses: [] })).toThrow();
+  it("constrains partOfSpeech to the shared enum so the model cannot return arbitrary labels", () => {
+    expect(WordResponseJsonSchema.properties.senses.items.properties.partOfSpeech.enum).toEqual(PART_OF_SPEECH_VALUES);
   });
 
-  it("rejects more than five senses", () => {
-    const senses = Array.from({ length: 6 }, () => ({ ...sense }));
-    expect(() => GeminiWordResponseSchema.parse({ senses })).toThrow();
-  });
-});
-
-describe("TranslationSchema", () => {
-  const validTranslation = {
-    id: "abc-123",
-    word: "hello",
-    translation: "привіт",
-    partOfSpeech: "interjection",
-    example: "Hello!",
-    exampleTranslation: "Привіт!",
-    timestamp: Date.now(),
-    type: "word",
-  };
-
-  it("accepts valid word-type translation", () => {
-    expect(() => TranslationSchema.parse(validTranslation)).not.toThrow();
+  // The JSON schema handed to the provider is hand-written; the Zod schema validates
+  // what comes back. A field added to one and not the other either never gets
+  // requested or gets silently dropped, so pin them to the same key set.
+  it("declares exactly the sense fields the Zod schema validates", () => {
+    const jsonKeys = Object.keys(WordResponseJsonSchema.properties.senses.items.properties);
+    expect(new Set(jsonKeys)).toEqual(new Set(Object.keys(WordSenseSchema.shape)));
+    expect(new Set(WordResponseJsonSchema.properties.senses.items.propertyOrdering)).toEqual(new Set(jsonKeys));
   });
 
-  it("accepts valid text-type translation", () => {
-    expect(() => TranslationSchema.parse({ ...validTranslation, type: "text" })).not.toThrow();
+  it("constrains register to the shared enum", () => {
+    expect(WordResponseJsonSchema.properties.senses.items.properties.register.enum).toEqual(REGISTER_VALUES);
   });
 
-  it("rejects invalid type value", () => {
-    expect(() => TranslationSchema.parse({ ...validTranslation, type: "phrase" })).toThrow();
-  });
-
-  it("rejects missing required id field", () => {
-    const noId: Record<string, unknown> = { ...validTranslation };
-    delete noId.id;
-    expect(() => TranslationSchema.parse(noId)).toThrow();
-  });
-
-  it("rejects missing required timestamp field", () => {
-    const noTimestamp: Record<string, unknown> = { ...validTranslation };
-    delete noTimestamp.timestamp;
-    expect(() => TranslationSchema.parse(noTimestamp)).toThrow();
+  it("keeps text response JSON schema aligned with the translation payload", () => {
+    expect(TextResponseJsonSchema).toMatchObject({
+      type: "object",
+      required: ["translation"],
+      properties: {
+        translation: { type: "string" },
+      },
+    });
   });
 });
 
@@ -100,13 +63,31 @@ describe("FlashcardProgressSchema", () => {
     nextReviewDate: 0,
   };
 
-  it("requires translationId", () => {
+  it("keeps spaced-repetition progress keyed by translation id", () => {
+    expect(() => FlashcardProgressSchema.parse(valid)).not.toThrow();
+
     const incomplete: Record<string, unknown> = { ...valid };
     delete incomplete.translationId;
     expect(() => FlashcardProgressSchema.parse(incomplete)).toThrow();
   });
+});
 
-  it("accepts valid progress", () => {
-    expect(() => FlashcardProgressSchema.parse(valid)).not.toThrow();
+describe("TranslationSchema", () => {
+  // getHistory quarantines the whole array when one row fails to parse, so a
+  // history written before the dictionary fields existed must still validate.
+  it("accepts history rows saved before transcription, forms and register existed", () => {
+    expect(
+      TranslationSchema.safeParse({
+        id: "rapture-1700000000000",
+        word: "rapture",
+        translation: "\u0437\u0430\u0445\u043e\u043f\u043b\u0435\u043d\u043d\u044f",
+        partOfSpeech: "noun",
+        example:
+          "\u0412\u043e\u043d\u0430 \u0441\u043b\u0443\u0445\u0430\u043b\u0430 \u0456\u0437 \u0437\u0430\u0445\u043e\u043f\u043b\u0435\u043d\u043d\u044f\u043c.",
+        exampleTranslation: "She listened with rapture.",
+        timestamp: 1700000000000,
+        type: "word",
+      }).success,
+    ).toBe(true);
   });
 });

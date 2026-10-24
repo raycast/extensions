@@ -2,94 +2,61 @@ import {
   ActionPanel,
   Action,
   List,
-  open,
   Icon,
   showToast,
   Toast,
   getPreferenceValues,
   Keyboard,
   closeMainWindow,
+  Clipboard,
+  LocalStorage,
+  Form,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { runAppleScript, useExec } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
+import { actions, Btt, type TriggerJson } from "bettertouchtool";
+import { createBttClient } from "./btt";
+import { showBttFailureToast } from "./btt-toast";
+import { DevelopmentDiagnosticsSection } from "./diagnostics";
+import {
+  getNamedTriggerInputDefinitions,
+  getNamedTriggerInputFieldId,
+  parseNamedTriggerInputValues,
+  type NamedTriggerInputDefinition,
+} from "./named-trigger-inputs";
+import {
+  filterNamedTriggers,
+  isTriggerEnabled,
+  parseNamedTriggerReferences,
+  type NamedTriggerReference,
+  type TriggerFilter,
+} from "./trigger-utils";
+import { sortPinnedItems } from "./pinning";
+import { usePinnedIds } from "./use-pinned-ids";
+
+const namedTriggerCacheKey = "known-named-triggers";
+const pinnedNamedTriggerIdsStorageKey = "pinned-named-trigger-ids";
+const triggerFetchBatchSize = 8;
 
 export default function Command() {
-  const [commands, setCommands] = useState<BTTTrigger[]>([]);
-  const [showDisabledTriggers, setShowDisabledTriggers] = useState(false);
-  const preferences: Preferences.Trigger = getPreferenceValues();
-  const shared_secret = preferences.bttSharedSecret;
-  const sharedSecretString = shared_secret ? `{ shared_secret: "${shared_secret}"}` : "";
-  const namedTriggerId = 643;
-  const applicationName = "BetterTouchTool";
-  const getTriggersJXA = `function run(argv) {
-    let btt = Application('${applicationName}');
-    if (!Application('${applicationName}').running()) {
-      return "error: ${applicationName} is not running. Please launch BTT to use this extension!";
-    }
-    try {
-      return btt.get_triggers(${
-        namedTriggerId
-          ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
-          : sharedSecretString
-      });
-    } catch (e) {
-      return "error: Could not run JXA script. Is BTT running?";
-    }
-
-  } run();`;
-
-  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA], {
-    onError: console.error,
+  const [triggerFilter, setTriggerFilter] = useState<TriggerFilter>("enabled");
+  const btt = useMemo(createBttClient, []);
+  const { isLoading: isLoadingPins, pinnedIds, togglePinned } = usePinnedIds(pinnedNamedTriggerIdsStorageKey);
+  const { triggerResultHandling } = getPreferenceValues<TriggerPreferences>();
+  const { isLoading, data, revalidate } = usePromise(loadNamedTriggers, [btt], {
+    failureToastOptions: { title: "Could not load named triggers" },
   });
+  const commands = useMemo(
+    () => sortPinnedItems(filterNamedTriggers(data ?? [], triggerFilter), pinnedIds, (trigger) => trigger.BTTUUID),
+    [data, pinnedIds, triggerFilter],
+  );
 
-  const checkError = (data: string) => {
-    if (!data || data === "null" || data.includes("error:")) {
-      const errorMessage =
-        data === "null"
-          ? "No data returned from BTT. Have you configured a shared secret?"
-          : data.replace("error:", "").trim() || "Unknown error";
-      const [part1, part2] = errorMessage.split(". ");
-      showToast({
-        title: part1 || "Error",
-        message: (part1 && part2) || "",
-        style: Toast.Style.Failure,
-      });
-      return true;
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    if (!isLoading && data && !checkError(data || "")) {
-      try {
-        const jsonData = JSON.parse(data);
-
-        const filteredTriggers = jsonData.filter(
-          (trigger: BTTTrigger) =>
-            !!trigger.BTTTriggerName &&
-            (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
-        );
-
-        setCommands(filteredTriggers);
-      } catch (error) {
-        checkError("error: Failed to parse triggers. Have you created a named trigger?");
-      }
-    }
-  }, [isLoading, data, showDisabledTriggers]);
-
-  const TriggerDropdown = ({ onTriggerTypeChange }: { onTriggerTypeChange: (value: string) => void }) => {
-    return (
-      <List.Dropdown tooltip="Determine if disabled triggers should be shown" onChange={onTriggerTypeChange}>
-        <List.Dropdown.Item key="true" title={"Show all triggers"} value={"true"} icon={Icon.Eye} />
-        <List.Dropdown.Item key="false" title={"Only show enabled triggers"} value={""} icon={Icon.EyeDisabled} />
-      </List.Dropdown>
-    );
-  };
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingPins}
       searchBarPlaceholder="Search named triggers..."
-      searchBarAccessory={<TriggerDropdown onTriggerTypeChange={(showAll) => setShowDisabledTriggers(!!showAll)} />}
+      searchBarAccessory={<TriggerDropdown value={triggerFilter} onChange={setTriggerFilter} />}
       throttle
       actions={
         <ActionPanel>
@@ -97,60 +64,122 @@ export default function Command() {
             <Action
               title="Refresh"
               onAction={revalidate}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               icon={Icon.RotateClockwise}
             />
           </ActionPanel.Section>
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     >
       <List.Section title="Results" subtitle={commands?.length + ""}>
         {commands?.map((triggerResult) => (
-          <TriggerItem key={triggerResult.BTTUUID} triggerResult={triggerResult} />
+          <TriggerItem
+            key={triggerResult.BTTUUID}
+            triggerResult={triggerResult}
+            btt={btt}
+            resultHandling={triggerResultHandling}
+            onTriggerChanged={revalidate}
+            isPinned={pinnedIds.has(triggerResult.BTTUUID)}
+            onTogglePinned={() => togglePinned(triggerResult.BTTUUID)}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
-  const preferences: Preferences.Trigger = getPreferenceValues();
-  const shared_secret = preferences.bttSharedSecret;
-  const sharedSecretString = shared_secret ? `shared_secret "${shared_secret}"` : "";
+function TriggerDropdown({ value, onChange }: { value: TriggerFilter; onChange: (value: TriggerFilter) => void }) {
+  return (
+    <List.Dropdown
+      tooltip="Filter named triggers by status"
+      value={value}
+      onChange={(newValue) => onChange(newValue as TriggerFilter)}
+    >
+      <List.Dropdown.Item title="Enabled Triggers" value="enabled" icon={Icon.CheckCircle} />
+      <List.Dropdown.Item title="Disabled Triggers" value="disabled" icon={Icon.XMarkCircle} />
+      <List.Dropdown.Item title="All Triggers" value="all" icon={Icon.List} />
+    </List.Dropdown>
+  );
+}
 
-  const triggerName = triggerResult.BTTTriggerName || triggerResult.BTTPredefinedActionName;
-  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}${
-    shared_secret ? "&shared_secret=" + shared_secret : ""
-  }`;
-  const handleTrigger = async () => {
-    await open(url);
-  };
+function TriggerItem({
+  triggerResult,
+  btt,
+  resultHandling,
+  onTriggerChanged,
+  isPinned,
+  onTogglePinned,
+}: {
+  triggerResult: BTTTrigger;
+  btt: Btt;
+  resultHandling: TriggerResultHandling;
+  onTriggerChanged: () => Promise<unknown>;
+  isPinned: boolean;
+  onTogglePinned: () => Promise<void>;
+}) {
+  const triggerName = triggerResult.BTTTriggerName;
+  const triggerHandle = btt.trigger(triggerResult.BTTUUID);
+  const enabled = isTriggerEnabled(triggerResult);
+  const inputDefinitions = getNamedTriggerInputDefinitions(triggerResult.BTTCustomContextMenuItemConfig);
 
-  const handleRun = async (closeWindow = false) => {
-    if (closeWindow) {
-      await closeMainWindow();
-    }
-    const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}" ${sharedSecretString}`;
+  const handleRun = async () => {
     try {
-      await runAppleScript(osaCommand);
+      const result = await triggerHandle.invoke();
+      await handleTriggerResult(result, resultHandling);
     } catch (error) {
-      showToast({
-        title: "Failed to run trigger",
-        message: error && String(error) !== "null" ? String(error) : "",
-        style: Toast.Style.Failure,
-      });
+      await showBttFailureToast(error, "Failed to run trigger");
     }
   };
 
-  const accessories = [];
+  const handleRunInBackground = async () => {
+    await closeMainWindow();
+    try {
+      await btt.triggerNamedAsync(triggerName);
+    } catch (error) {
+      await showBttFailureToast(error, "Failed to run trigger");
+    }
+  };
+
+  const handleReveal = async () => {
+    try {
+      await triggerHandle.reveal();
+    } catch (error) {
+      await showBttFailureToast(error, "Could not show trigger in BetterTouchTool");
+    }
+  };
+
+  const handleToggleEnabled = async () => {
+    try {
+      if (enabled) {
+        await triggerHandle.disable();
+      } else {
+        await triggerHandle.enable();
+      }
+      await showToast({ title: enabled ? "Trigger disabled" : "Trigger enabled", style: Toast.Style.Success });
+      await onTriggerChanged();
+    } catch (error) {
+      await showBttFailureToast(error, enabled ? "Could not disable trigger" : "Could not enable trigger");
+    }
+  };
+
+  const accessories: List.Item.Accessory[] = [];
+  if (isPinned) accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
+  if (!enabled) accessories.push({ tag: "Disabled" });
   if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
     accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes });
   }
   if (triggerResult.BTTPredefinedActionName) {
+    const actionConfig = triggerResult.BTTGenericActionConfig;
     accessories.push({
       text: triggerResult.BTTPredefinedActionName,
       icon: Icon.ArrowRight,
-      tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
+      tooltip:
+        typeof actionConfig === "string"
+          ? actionConfig
+          : actionConfig
+            ? JSON.stringify(actionConfig)
+            : triggerResult.BTTPredefinedActionName,
     });
   }
 
@@ -161,47 +190,207 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
-            <Action title="Run Trigger in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
+            {inputDefinitions.length > 0 ? (
+              <Action.Push
+                title="Configure and Run Trigger"
+                target={
+                  <NamedTriggerInputForm
+                    triggerName={triggerName}
+                    definitions={inputDefinitions}
+                    btt={btt}
+                    resultHandling={resultHandling}
+                  />
+                }
+                icon={Icon.List}
+              />
+            ) : (
+              <>
+                <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
+                <Action title="Run Trigger in Background" onAction={handleRunInBackground} icon={Icon.Play} />
+              </>
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action
-              title="Run Trigger with BTT via URL"
-              onAction={handleTrigger}
-              icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              title={isPinned ? "Unpin Named Trigger" : "Pin Named Trigger"}
+              onAction={onTogglePinned}
+              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="BetterTouchTool">
+            <Action
+              title="Show in BetterTouchTool"
+              onAction={handleReveal}
+              icon={Icon.AppWindow}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+            <Action
+              title={enabled ? "Disable Trigger" : "Enable Trigger"}
+              onAction={handleToggleEnabled}
+              icon={enabled ? Icon.XMarkCircle : Icon.CheckCircle}
+              shortcut={enabled ? { modifiers: ["cmd"], key: "d" } : undefined}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Trigger URL"
-              content={url}
+              title="Copy Trigger Name"
+              content={triggerName}
               shortcut={Keyboard.Shortcut.Common.Copy}
-              onCopy={() => console.log(triggerResult)}
             />
           </ActionPanel.Section>
+          <DevelopmentDiagnosticsSection />
         </ActionPanel>
       }
     />
   );
 }
 
-interface BTTTrigger {
-  BTTTriggerType: number;
-  BTTTriggerTypeDescription?: string;
+interface BTTTrigger extends TriggerJson {
+  BTTCustomContextMenuItemConfig?: unknown;
   BTTGestureNotes?: string;
-  BTTTriggerClass: string;
-  BTTPredefinedActionType: number;
-  BTTPredefinedActionName: string;
-  BTTGenericActionConfig?: string;
-  BTTNamedTriggerToTrigger?: string;
   BTTTriggerName: string;
-  BTTEnabled2: number;
-  BTTAlternateModifierKeys: string;
-  BTTRepeatDelay: string;
   BTTUUID: string;
-  BTTNotesInsteadOfDescription: string;
-  BTTEnabled: number;
-  BTTModifierMode: string;
-  BTTOrder: string;
-  BTTDisplayOrder: string;
-  BTTKeySequence: object;
+}
+
+interface TriggerPreferences {
+  triggerResultHandling: TriggerResultHandling;
+}
+
+type TriggerResultHandling = "clipboard" | "ignore" | "toast";
+
+function NamedTriggerInputForm({
+  triggerName,
+  definitions,
+  btt,
+  resultHandling,
+}: {
+  triggerName: string;
+  definitions: NamedTriggerInputDefinition[];
+  btt: Btt;
+  resultHandling: TriggerResultHandling;
+}) {
+  const { pop } = useNavigation();
+
+  async function submitTrigger(values: Record<string, string>) {
+    const parsed = parseNamedTriggerInputValues(definitions, values);
+    if (!parsed.success) {
+      await showToast({ title: parsed.error, style: Toast.Style.Failure });
+      return;
+    }
+
+    try {
+      const variables = Object.fromEntries(
+        Object.entries(parsed.variables).map(([name, value]) => [name, String(value)]),
+      );
+      const result = await btt.triggerAction(actions.triggerNamed(triggerName, variables));
+      await handleTriggerResult(result, resultHandling);
+      pop();
+    } catch (error) {
+      await showBttFailureToast(error, "Failed to run trigger");
+    }
+  }
+
+  const { handleSubmit, itemProps } = useForm<Record<string, string>>({
+    initialValues: Object.fromEntries(
+      definitions.map((definition, index) => [getNamedTriggerInputFieldId(index), definition.options[0] ?? ""]),
+    ),
+    validation: Object.fromEntries(
+      definitions.map((definition, index) => [
+        getNamedTriggerInputFieldId(index),
+        (value: string | undefined) => {
+          if (definition.type !== "number") return undefined;
+          const numberValue = Number(value);
+          return value?.trim() && Number.isFinite(numberValue)
+            ? undefined
+            : `“${definition.name}” must be a finite number.`;
+        },
+      ]),
+    ),
+    onSubmit: submitTrigger,
+  });
+
+  return (
+    <Form
+      navigationTitle={triggerName}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Run Trigger" onSubmit={handleSubmit} icon={Icon.PlayFilled} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title={triggerName} text="Enter the variables declared by this named trigger." />
+      <Form.Separator />
+      {definitions.map((definition, index) => {
+        const fieldId = getNamedTriggerInputFieldId(index);
+        if (definition.options.length > 0) {
+          return (
+            <Form.Dropdown key={fieldId} title={definition.name} info={definition.description} {...itemProps[fieldId]}>
+              {definition.options.map((option, optionIndex) => (
+                <Form.Dropdown.Item key={`${optionIndex}-${option}`} title={option} value={option} />
+              ))}
+            </Form.Dropdown>
+          );
+        }
+
+        return (
+          <Form.TextField
+            key={fieldId}
+            title={definition.name}
+            info={definition.description ?? (definition.type === "number" ? "Number" : "Text")}
+            placeholder={definition.type === "number" ? "Enter a number" : "Enter text"}
+            {...itemProps[fieldId]}
+          />
+        );
+      })}
+    </Form>
+  );
+}
+
+async function loadNamedTriggers(btt: Btt): Promise<BTTTrigger[]> {
+  const listedTriggers = await btt.getTriggers<BTTTrigger>({ triggerId: 643 });
+  const cachedReferences = parseNamedTriggerReferences(await LocalStorage.getItem(namedTriggerCacheKey));
+  const triggersByUuid = new Map(listedTriggers.map((trigger) => [trigger.BTTUUID, trigger]));
+  const missingReferences = cachedReferences.filter(({ uuid }) => !triggersByUuid.has(uuid));
+
+  for (let index = 0; index < missingReferences.length; index += triggerFetchBatchSize) {
+    const batch = missingReferences.slice(index, index + triggerFetchBatchSize);
+    const recoveredTriggers = await Promise.all(batch.map(({ uuid }) => loadTriggerIfAvailable(btt, uuid)));
+    for (const trigger of recoveredTriggers) {
+      if (trigger) triggersByUuid.set(trigger.BTTUUID, trigger);
+    }
+  }
+
+  const triggers = [...triggersByUuid.values()];
+  const references: NamedTriggerReference[] = triggers.map(({ BTTTriggerName: name, BTTUUID: uuid }) => ({
+    name,
+    uuid,
+  }));
+  await LocalStorage.setItem(namedTriggerCacheKey, JSON.stringify(references));
+  return triggers;
+}
+
+async function loadTriggerIfAvailable(btt: Btt, uuid: string): Promise<BTTTrigger | undefined> {
+  try {
+    const trigger = await btt.getTrigger<BTTTrigger>(uuid);
+    return trigger.BTTUUID && trigger.BTTTriggerName ? trigger : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function handleTriggerResult(result: string, handling: TriggerResultHandling) {
+  if (!result || handling === "ignore") return;
+
+  if (handling === "clipboard") {
+    await Clipboard.copy(result);
+    await showToast({ title: "Trigger result copied", style: Toast.Style.Success });
+    return;
+  }
+
+  await showToast({
+    title: "Trigger completed",
+    message: result.length > 200 ? `${result.slice(0, 197)}...` : result,
+    style: Toast.Style.Success,
+  });
 }

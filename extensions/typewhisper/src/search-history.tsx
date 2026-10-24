@@ -8,10 +8,11 @@ import {
   List,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { apiDelete, getBaseUrl, TypeWhisperError } from "./api";
+import { apiDelete, apiGet, TypeWhisperError } from "./api";
 import type { HistoryResponse } from "./types";
 
 const PAGE_SIZE = 50;
@@ -46,9 +47,13 @@ export default function Command() {
     params.set("q", searchText.trim());
   }
 
-  const { isLoading, data, revalidate } = useFetch<HistoryResponse>(
-    `${getBaseUrl()}/v1/history?${params.toString()}`,
-    { keepPreviousData: true },
+  const { isLoading, data, revalidate } = usePromise(
+    (query: string) =>
+      apiGet<HistoryResponse>(
+        "/v1/history",
+        Object.fromEntries(new URLSearchParams(query)),
+      ),
+    [params.toString()],
   );
 
   async function deleteEntry(id: string) {
@@ -180,14 +185,14 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Raw Text"
                     content={entry.raw_text}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.CopyName}
                   />
                 )}
                 {entry.app_url && (
                   <Action.OpenInBrowser
                     title="Open URL"
                     url={entry.app_url}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                 )}
                 <ActionPanel.Section>
@@ -195,13 +200,13 @@ export default function Command() {
                     title="Delete"
                     icon={{ source: Icon.Trash, tintColor: Color.Red }}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => deleteEntry(entry.id)}
                   />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => revalidate()}
                   />
                 </ActionPanel.Section>

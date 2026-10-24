@@ -1,8 +1,9 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getConnections } from "./db";
 import { ConnectionEntry, isBookmarkEntry, isHistoryEntry, isProtocolX } from "./types";
 import { IsCyberduckInstalled } from "./utils";
+import { getAvatarIcon, getFavicon } from "@raycast/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,9 +41,16 @@ export default function Command() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Protocol" onChange={setProtocol}>
-          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item icon="icon.png" title={`All (${connections.length})`} value="all" />
           {[...new Set(connections.map((c) => c.Protocol))].map((protocol) => (
-            <List.Dropdown.Item key={protocol} title={protocol.toUpperCase()} value={protocol} />
+            <List.Dropdown.Item
+              key={protocol}
+              icon={getAvatarIcon(protocol)}
+              title={`${protocol.toUpperCase()} (${
+                connections.filter((entry) => isProtocolX(entry, protocol)).length
+              })`}
+              value={protocol}
+            />
           ))}
         </List.Dropdown>
       }
@@ -70,11 +78,17 @@ export default function Command() {
 function ListItem(props: { entry: ConnectionEntry }) {
   const prot = props.entry.Protocol.toUpperCase();
   const name = props.entry.Nickname || props.entry.Hostname || "-";
+  const { Hostname, Port, Protocol, Username } = props.entry;
+  const accessories = [
+    ...(Number.isFinite(Port) ? [{ icon: Icon.Plug, tag: Port.toString(), tooltip: `Port: ${Port}` }] : []),
+    { icon: Icon.Person, text: Username, tooltip: `Username: ${Username}` },
+  ];
   return (
     <List.Item
+      icon={Hostname ? getFavicon(`https://${Hostname}`) : getAvatarIcon(Protocol)}
       title={name}
-      subtitle={`${props.entry.Hostname} - ${prot}`}
-      accessories={[{ text: props.entry.Username }]}
+      subtitle={`${Hostname || "-"} - ${prot}`}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

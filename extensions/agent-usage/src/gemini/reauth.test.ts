@@ -1,11 +1,11 @@
-import test from "node:test";
-import assert from "node:assert/strict";
 import * as fs from "fs";
+import assert from "node:assert/strict";
+import test from "node:test";
 import * as os from "os";
 import * as path from "path";
 
 test("shouldPromptGeminiReauth returns true only for unauthorized errors that have not been prompted", async () => {
-  const { shouldPromptGeminiReauth } = await import("./reauth");
+  const { shouldPromptGeminiReauth } = await import("./reauth.ts");
 
   assert.equal(shouldPromptGeminiReauth("unauthorized", false), true);
   assert.equal(shouldPromptGeminiReauth("unauthorized", true), false);
@@ -14,13 +14,14 @@ test("shouldPromptGeminiReauth returns true only for unauthorized errors that ha
 });
 
 test("getGeminiReauthCommand prefers GEMINI_PATH when provided", async () => {
-  const { getGeminiReauthCommand } = await import("./reauth");
+  const { getGeminiReauthCommand } = await import("./reauth.ts");
 
   const previousGeminiPath = process.env.GEMINI_PATH;
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-path-"));
-  const customGeminiPath = path.join(tempDir, "gemini");
+  const customGeminiPath = path.join(tempDir, process.platform === "win32" ? "gemini.cmd" : "gemini");
 
-  fs.writeFileSync(customGeminiPath, "#!/bin/sh\n", "utf-8");
+  fs.writeFileSync(customGeminiPath, process.platform === "win32" ? "@echo off\r\n" : "#!/bin/sh\n", "utf-8");
+  fs.chmodSync(customGeminiPath, 0o755);
   process.env.GEMINI_PATH = customGeminiPath;
 
   try {

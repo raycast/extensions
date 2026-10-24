@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
 
       - name: Setup git
         uses: raycast/github-actions/setup-git@master
@@ -43,15 +43,15 @@ jobs:
             git add docs
             git commit -m 'Docs: Update the utils docs'
             git push origin main
-            echo 'has_commit=true' >> $GITHUB_OUTPUT
+            echo 'has_commit=true' >> "$GITHUB_OUTPUT"
           else
             echo 'No changes'
-            echo 'has_commit=false' >> $GITHUB_OUTPUT
+            echo 'has_commit=false' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
 
       - name: Notify Failure to Slack
         if: failure()
@@ -68,18 +68,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
 
       - name: Get changed files in the docs folder
         id: changed-files
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v47
         with:
           files: |
             docs/utils-reference/**
@@ -123,14 +123,14 @@ jobs:
             git add .
             git commit -m 'Utils Docs: Update from the extensions repo'
             git push origin docs-sync-${{ github.sha }}
-            echo 'has_commit=true' >> $GITHUB_OUTPUT
+            echo 'has_commit=true' >> "$GITHUB_OUTPUT"
           else
             echo 'No changes'
-            echo 'has_commit=false' >> $GITHUB_OUTPUT
+            echo 'has_commit=false' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Open PR on the main repo
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         if: steps.commit.outputs.has_commit == 'true'
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -145,7 +145,7 @@ jobs:
 
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
 
       - name: Notify Failure to Slack
         if: failure()

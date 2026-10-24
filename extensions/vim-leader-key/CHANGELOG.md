@@ -1,5 +1,15 @@
 # Changelog
 
+## [Update] - 2026-09-30
+
+- Fixed Shell Command actions printing `setlocale` warnings on macOS when Language & Region advanced settings produce an extended locale identifier; non-POSIX `LC_*`/`LANG` values are now stripped before the command runs
+
+## [Update] - 2026-06-18
+
+- Added a visual keyboard layout with split shifted/unshifted key highlighting and size presets
+- Added inline key conflict feedback when creating actions and groups
+- Refreshed store screenshots
+
 ## [Update] - 2026-05-11
 
 - Added Quick Capture command for creating shortcuts from the current browser tab, selected Finder item, selected/clipboard URL or path, or frontmost app

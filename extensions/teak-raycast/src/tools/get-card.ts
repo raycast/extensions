@@ -6,7 +6,7 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
-  const card = await getCardById(input.cardId);
+  const card = await getCardById(input.cardId, "silent");
 
   return {
     aiSummary: card.aiSummary,

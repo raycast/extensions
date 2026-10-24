@@ -3,11 +3,10 @@ import path from "path";
 
 import { isFinderFrontmost, getCurrentFinderDirectory, selectInFinder, generateUniqueName } from "./common/finder";
 import { fsAsync } from "./common/fs-async";
+import { parseTextFileName } from "./common/text-file-name";
 
 export default async function CreateTextFile(props: LaunchProps<{ arguments: Arguments.CreateTextFile }>) {
-  const rawExt = props.arguments.extension?.trim() || "txt";
-  // strip leading dot if user typed ".md" instead of "md"
-  const extension = rawExt.replace(/^\./, "");
+  const { baseName, extension } = parseTextFileName(props.arguments.filename);
 
   const frontmost = await isFinderFrontmost();
   if (!frontmost) {
@@ -31,7 +30,7 @@ export default async function CreateTextFile(props: LaunchProps<{ arguments: Arg
   }
 
   // generate unique filename
-  const uniqueName = await generateUniqueName(targetDir, "untitled", extension);
+  const uniqueName = await generateUniqueName(targetDir, baseName, extension);
   const filePath = path.join(targetDir, uniqueName);
 
   // write the file

@@ -25,6 +25,7 @@ At the moment, MyIdlers does not have a setting for "Unlimited" but some service
 This extension is tested to work with the following versions:
 - `2.3.2`
 - `3.0.0`
+- `4.1.0`
 
 ## 👀 More
 

@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
 import React, { useMemo } from "react";
-import { AppHistory, recentEntry, ToolboxApp } from "../util";
+import { AppHistory, isWin, recentEntry, ToolboxApp } from "../util";
 import { OpenInJetBrainsApp } from "./OpenInJetBrainsApp";
 import { SortTools } from "../sortTools";
 import { entryAppAction, Toggles } from "../useAppHistory";
@@ -47,23 +47,32 @@ function FavActionSection({
       {addFav && recent && (
         <Action
           icon={Icon.Star}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-          title="Add to Fav"
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
+          title="Add to Favorites"
           onAction={() => addFav(recent?.path, recent?.app.channelId)}
         />
       )}
       {remFav && recent && (
         <Action
-          icon={Icon.Star}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-          title="Remove from Fav"
+          icon={Icon.StarDisabled}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
+          title="Remove from Favorites"
           onAction={() => remFav(recent?.path)}
         />
       )}
       {hide && recent && (
         <Action
           icon={Icon.EyeDisabled}
-          shortcut={{ modifiers: ["cmd"], key: "h" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "h" },
+            Windows: { modifiers: ["ctrl"], key: "h" },
+          }}
           title="Hide Project"
           onAction={() => hide(recent?.path)}
         />
@@ -71,7 +80,7 @@ function FavActionSection({
       <Action
         icon={Icon.List}
         title="Change Application Sort Order"
-        shortcut={{ modifiers: ["ctrl"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
         onAction={() =>
           push(
             <SortTools
@@ -116,7 +125,7 @@ export function RecentProject({
   const showDates = toggles.showDates.value;
 
   const keywords = useMemo(() => {
-    const splitPath = recent.path.split("/");
+    const splitPath = recent.path.split(/[\\/]/);
     return [
       ...new Set(
         [
@@ -239,11 +248,11 @@ export function RecentProject({
           <ActionPanel.Section>
             <OpenInJetBrainsApp tool={app} recent={recent} visit={visit} />
             <Action.ShowInFinder path={recent.path} />
-            {recent.exists ? <Action.OpenWith path={recent.path} /> : null}
+            {recent.exists ? <Action.OpenWith path={recent.path} shortcut={Keyboard.Shortcut.Common.Open} /> : null}
             <Action.CopyToClipboard
               title="Copy Path"
-              content={recent.path}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              content={isWin ? recent.path.replace(/\//g, "\\") : recent.path}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

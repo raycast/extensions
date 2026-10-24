@@ -26,6 +26,31 @@
   ],
   "preferences": [
     {
+      "name": "documentationSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "Documentation Source",
+      "description": "Use the live Polars docs by default, or always read from a downloaded local docs folder.",
+      "default": "online",
+      "data": [
+        {
+          "title": "Online",
+          "value": "online"
+        },
+        {
+          "title": "Local",
+          "value": "local"
+        }
+      ]
+    },
+    {
+      "name": "localDocsDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Local Docs Directory",
+      "description": "Downloaded Polars docs folder containing stable/objects.inv and the stable HTML tree."
+    },
+    {
       "name": "useShortPrefix",
       "type": "checkbox",
       "required": false,

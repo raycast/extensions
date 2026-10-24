@@ -9,6 +9,7 @@ import {
   open,
   closeMainWindow,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import path from "path";
 
@@ -17,11 +18,12 @@ import { getDefaultAction } from "../preferences";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
-import copyFileToClipboard from "../lib/copyFileToClipboard";
+import resolveGifFile from "../lib/resolveGifFile";
+import resolveSquareGifFile from "../lib/resolveSquareGifFile";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
-import { removeGifFromCache } from "../lib/cachedGifs";
-import { getAllFavIds, getAllRecentIds, remove, save } from "../lib/localGifs";
+import { isCacheableService, removeGifFromCache } from "../lib/cachedGifs";
+import { getAll, isSaved, remove, save } from "../lib/localGifs";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getServiceFromUrl } from "../lib/getServiceFromUrl";
 
@@ -37,17 +39,27 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
 
   const service = getServiceFromUrl(item);
 
-  const { data: favIds } = useCachedPromise(getAllFavIds);
-  const { data: recentIds } = useCachedPromise(getAllRecentIds);
+  const { data: favEntries, revalidate: revalidateFavs } = useCachedPromise(getAll, ["favs"] as const);
+  const { data: recentEntries, revalidate: revalidateRecents } = useCachedPromise(getAll, ["recent"] as const);
 
-  const isInFavorites = favIds?.includes(id);
-  const isInRecents = recentIds?.includes(id);
+  const cacheableService = isCacheableService(service) ? service : null;
+  const isInFavorites = isSaved(favEntries, service, id);
+  const isInRecents = isSaved(recentEntries, service, id);
 
+  // Bookkeeping only. A provider being unreachable here must not fail the copy or paste the
+  // user asked for - the GIF is already on the clipboard by the time this runs.
   const trackUsage = async () => {
-    if (service) {
+    if (!service) {
+      return;
+    }
+
+    try {
       await save(item, service, "recent");
+      revalidateRecents();
       await mutate();
       await visitGifItem?.(item);
+    } catch (error) {
+      console.error("Failed to record GIF usage:", error);
     }
   };
 
@@ -55,6 +67,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     try {
       if (service) {
         await remove(item, service, "recent");
+        revalidateRecents();
         await mutate();
         await showToast({ style: Toast.Style.Success, title: "Removed GIF from recents" });
       }
@@ -67,6 +80,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     try {
       if (service) {
         await save(item, service, "favs");
+        revalidateFavs();
         await mutate();
         await showToast({ style: Toast.Style.Success, title: "Added GIF to favorites" });
       }
@@ -79,6 +93,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     try {
       if (service) {
         await remove(item, service, "favs");
+        revalidateFavs();
         await mutate();
         await showToast({ style: Toast.Style.Success, title: "Removed GIF from favorites" });
       }
@@ -87,19 +102,20 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     }
 
     // Remove the GIF from the cache if it exists
-    try {
-      const fileName = item.download_name || path.basename(item.download_url);
-      await removeGifFromCache(fileName);
-    } catch (error) {
-      console.error("Failed to remove GIF from cache:", error);
+    if (cacheableService) {
+      try {
+        await removeGifFromCache(item, cacheableService);
+      } catch (error) {
+        console.error("Failed to remove GIF from cache:", error);
+      }
     }
   };
 
   async function copyGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
-      const isInFavorites = favIds?.includes(id);
-      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
+      const file = await resolveGifFile(item, cacheableService);
+      await Clipboard.copy({ file });
       await trackUsage();
       await closeMainWindow();
       await showToast({ style: Toast.Style.Success, title: `Copied GIF "${path.basename(file)}" to clipboard` });
@@ -108,14 +124,23 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     }
   }
 
+  async function copyGifAsSquare() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Copying GIF Square" });
+      const file = await resolveSquareGifFile(item);
+      await Clipboard.copy({ file });
+      await trackUsage();
+      await closeMainWindow();
+      await showToast({ style: Toast.Style.Success, title: `Copied square GIF "${path.basename(file)}"` });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy GIF square" });
+    }
+  }
+
   async function pasteGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF" });
-      const isInFavorites = favIds?.includes(id);
-      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
-      await trackUsage();
-      await closeMainWindow();
-      await Clipboard.paste({ file });
+      const file = await pasteGifFromUrl();
       await showToast({ style: Toast.Style.Success, title: `Pasted GIF "${path.basename(file)}"` });
     } catch (error) {
       console.error(error);
@@ -123,41 +148,57 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     }
   }
 
+  async function pasteGifSquare() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Pasting GIF Square" });
+      const file = await pasteResolvedFile(() => resolveSquareGifFile(item));
+      await showToast({ style: Toast.Style.Success, title: `Pasted square GIF "${path.basename(file)}"` });
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, { title: "Could not paste GIF square" });
+    }
+  }
+
+  async function pasteGifFromUrl() {
+    return pasteResolvedFile(() => resolveGifFile(item, cacheableService));
+  }
+
+  async function pasteResolvedFile(getFile: () => Promise<string>) {
+    const file = await getFile();
+    await Clipboard.paste({ file });
+    await trackUsage();
+    return file;
+  }
+
   const downloadGIFAction = async () => {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Downloading GIF", message: item.download_name });
-      const filePath = await downloadFile(item.download_url, item.download_name);
+      const filePath = await downloadFile(item, cacheableService);
 
-      if (typeof filePath === "string") {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Downloaded GIF",
-          message: filePath,
-          primaryAction: {
-            title: "Open File",
-            shortcut: { macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } },
-            onAction() {
-              open(filePath);
-            },
-          },
-          secondaryAction: {
-            title: "Show GIF in Finder",
-            shortcut: {
-              macOS: { modifiers: ["cmd", "shift"], key: "o" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "o" },
-            },
-            onAction() {
-              showInFinder(filePath);
-            },
-          },
-        });
-      }
-    } catch {
       await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not download GIF",
-        message: item.download_name,
+        style: Toast.Style.Success,
+        title: "Downloaded GIF",
+        message: filePath,
+        primaryAction: {
+          title: "Open File",
+          shortcut: { macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } },
+          onAction() {
+            open(filePath);
+          },
+        },
+        secondaryAction: {
+          title: "Show GIF in Finder",
+          shortcut: {
+            macOS: { modifiers: ["cmd", "shift"], key: "o" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "o" },
+          },
+          onAction() {
+            showInFinder(filePath);
+          },
+        },
       });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not download GIF" });
     }
   };
 
@@ -211,6 +252,14 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       onPaste={trackUsage}
     />
   );
+  const copySquareGif =
+    process.platform === "darwin" ? (
+      <Action icon={Icon.Clipboard} key="copySquareGif" title="Copy GIF Square" onAction={copyGifAsSquare} />
+    ) : undefined;
+  const pasteSquareGif =
+    process.platform === "darwin" ? (
+      <Action icon={Icon.Clipboard} key="pasteSquareGif" title="Paste GIF Square" onAction={pasteGifSquare} />
+    ) : undefined;
   const pasteGifUrl = (
     <Action.Paste
       key="pasteGifUrl"
@@ -222,7 +271,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   );
 
   let toggleFav: React.JSX.Element | undefined;
-  if (favIds) {
+  if (favEntries) {
     toggleFav = isInFavorites ? (
       <Action
         icon={Icon.Star}
@@ -280,10 +329,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       key="copyPageUrl"
       title="Copy Page Link"
       content={url}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "c" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-      }}
+      shortcut={Keyboard.Shortcut.Common.Copy}
       onCopy={trackUsage}
     />
   ) : undefined;
@@ -309,7 +355,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   );
 
   const actions: Array<(React.JSX.Element | undefined)[]> = [
-    [copyFile, pasteFile, copyGifUrl, pasteGifUrl, copyGifMarkdown, pasteGifMarkdown],
+    [copyFile, pasteFile, copyGifUrl, pasteGifUrl, copyGifMarkdown, pasteGifMarkdown, copySquareGif, pasteSquareGif],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];

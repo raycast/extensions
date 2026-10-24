@@ -6,16 +6,16 @@ Download and share custom video game assets and personalize your gaming library.
 
 ## Usage
 
-Before using this extension, please go to https://www.steamgriddb.com/profile/preferences/api to get your API.
+Before using this extension, please go to https://www.steamgriddb.com/profile/preferences/api to get your API key.
 
 ## Features
 
-- Browse all types of SteamGridDB images
-- Copy any SteamGridDB image to clipboard
+- Search for SteamGridDB games and browse grids, heroes, logos, and icons
+- Download and copy images
 
 ## API
 
-This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
+This extension follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
 
 You can use `crossLaunchCommand` or built-in `launchCommand` to call this extension.
 

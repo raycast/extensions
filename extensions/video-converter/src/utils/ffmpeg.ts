@@ -3,6 +3,9 @@ import fs from "fs";
 import type { FormValues } from "../types";
 
 import path from "path";
+import { inspectMedia } from "./mediaInfo";
+import { encodeGif } from "./gifski";
+import { findFFmpegTools, selectVideoEncoder, probeHardwareEncoder, encoderOptions } from "./ffmpegRuntime";
 
 export interface ConversionTask {
   id: number;
@@ -12,34 +15,21 @@ export interface ConversionTask {
   progress: number;
   fps: number;
   ffmpeg?: ffmpeg.FfmpegCommand;
+  abortController?: AbortController;
+  outputFile?: string;
+  warning?: string;
   status: "converting" | "done" | "queued" | "error" | "cancelled";
 }
-const codecs: Record<string, string> = {
-  h264: "h264",
-  h265: "libx265",
-  mpeg4: "mpeg4",
-  vp8: "libvpx",
-  vp9: "libvpx-vp9",
-  mpeg1: "mpeg1video",
-  mpeg2: "mpeg2video",
-};
-const hwAcceleratedCodecs: Record<string, string> = {
-  h264: "h264_videotoolbox",
-  h265: "hevc_videotoolbox",
-};
 const audioCodecs: Record<string, string> = {
   webm: "libopus",
   mpeg: "mp2",
   default: "aac",
 };
 const currentTasks: ConversionTask[] = [];
-const MAX_COMPLETED_TASKS = 10; // Keep only last 10 completed tasks
-const ffmpegPath = "/usr/local/bin/ffmpeg";
-const altPath = "/opt/homebrew/bin/ffmpeg";
 
 export async function convertVideo(values: FormValues, progress: (task: ConversionTask[]) => void) {
-  // Clean up old completed tasks
-  cleanupCompletedTasks();
+  setFFmpegPath();
+  currentTasks.splice(0, currentTasks.length);
 
   values.videoFiles.forEach((file: string, i: number) => {
     const task: ConversionTask = {
@@ -63,23 +53,6 @@ export async function convertVideo(values: FormValues, progress: (task: Conversi
   }
 }
 
-function cleanupCompletedTasks(): void {
-  // Remove old completed tasks
-  const completedTasks = currentTasks.filter(
-    (task) => task.status === "done" || task.status === "error" || task.status === "cancelled",
-  );
-
-  if (completedTasks.length > MAX_COMPLETED_TASKS) {
-    const tasksToRemove = completedTasks.slice(0, completedTasks.length - MAX_COMPLETED_TASKS);
-    tasksToRemove.forEach((task) => {
-      const index = currentTasks.findIndex((t) => t.id === task.id);
-      if (index !== -1) {
-        currentTasks.splice(index, 1);
-      }
-    });
-  }
-}
-
 async function convertFile(task: ConversionTask, params: FormValues, progress: (task: ConversionTask) => void) {
   if (task.status === "done" || task.status === "error" || task.status === "cancelled") {
     progress(task);
@@ -89,28 +62,12 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
   task.status = "converting";
   task.progress = 0;
   task.started = new Date();
+  progress(task);
   let bitrate = 0;
 
   try {
-    const duration = await getVideoDuration(task.file);
-
-    if (params.compressionMode === "bitrate") {
-      bitrate = parseInt(params.bitrate);
-    } else if (params.compressionMode === "filesize") {
-      const size = parseFloat(params.maxSize);
-      const sizeKb = size * 1000 * 8;
-      bitrate = Math.floor((sizeKb - parseInt(params.audioBitrate) * duration) / duration);
-      if (bitrate <= 0) {
-        throw new Error("Bitrate is too low for the selected file size");
-      }
-    } else {
-      throw new Error("Invalid compression mode");
-    }
-
-    const video = ffmpeg().input(task.file);
-    task.ffmpeg = video;
-    progress(task);
-    if (params.audioFiles.length) video.input(params.audioFiles[0]);
+    const info = await inspectMedia(task.file);
+    const duration = info.duration;
 
     const parsedPath = path.parse(task.file);
     const originalName = parsedPath.name;
@@ -135,35 +92,98 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
         .replace(/{name}/g, originalName)
         .replace(/{ext}/g, originalExt.replace(".", ""))
         .replace(/{format}/g, params.videoFormat)
-        .replace(/{codec}/g, params.videoCodec)
+        .replace(/{codec}/g, params.videoFormat === "gif" ? "gif" : params.videoCodec)
         .replace(/{len}/g, `${duration.toFixed()}s`);
     } else {
       fileName = originalName;
     }
 
     const outputPath = getAvailableFilePath(outputDir, fileName, params.videoFormat);
+    task.outputFile = outputPath;
+    if (["cancelled"].includes(task.status)) {
+      progress(task);
+      return;
+    }
+    if (params.videoFormat === "gif") {
+      task.abortController = new AbortController();
+      await encodeGif({
+        input: task.file,
+        output: outputPath,
+        quality: params.gifQuality,
+        fps: params.gifFps,
+        info,
+        signal: task.abortController.signal,
+        onProgress: (percent) => {
+          task.progress = Math.round(percent);
+          progress(task);
+        },
+      });
+      await finishConversion(task, params, progress);
+      return;
+    }
 
-    const videoCodec =
-      (params.useHardwareAcceleration ? hwAcceleratedCodecs[params.videoCodec] : codecs[params.videoCodec]) ||
-      codecs[params.videoCodec];
+    if (params.compressionMode === "bitrate") {
+      bitrate = parseInt(params.bitrate);
+    } else if (params.compressionMode === "filesize") {
+      const size = parseFloat(params.maxSize);
+      const sizeKb = size * 1000 * 8;
+      const audioBitrate = params.removeAudio ? 0 : parseInt(params.audioBitrate);
+      bitrate = Math.floor((sizeKb - audioBitrate * duration) / duration);
+      if (bitrate <= 0) {
+        throw new Error("Bitrate is too low for the selected file size");
+      }
+    } else {
+      throw new Error("Invalid compression mode");
+    }
+
+    const video = ffmpeg().input(task.file);
+    task.ffmpeg = video;
+    progress(task);
+    if (!params.removeAudio && params.audioFiles.length) video.input(params.audioFiles[0]);
+
+    const encoders = await new Promise<ffmpeg.Encoders>((resolve, reject) => {
+      ffmpeg.getAvailableEncoders((error, result) => (error ? reject(error) : resolve(result)));
+    });
+    const available = new Set(Object.keys(encoders));
+    const tools = findFFmpegTools();
+    if (!tools) throw new Error("FFmpeg and ffprobe are required");
+    const videoCodec = await selectVideoEncoder(
+      params.videoCodec,
+      params.useHardwareAcceleration,
+      available,
+      (encoder) => probeHardwareEncoder(tools.ffmpeg, encoder),
+    );
+    if (["cancelled"].includes(task.status)) {
+      progress(task);
+      return;
+    }
     const audioCodec = audioCodecs[params.videoFormat] || audioCodecs.default;
+    if (!params.removeAudio && !available.has(audioCodec)) {
+      throw new Error(`FFmpeg is missing ${audioCodec}. Install a full FFmpeg build.`);
+    }
 
     const options = [
-      `-c:a ${audioCodec}`,
-      `-b:a ${params.audioBitrate}k`,
       `-c:v ${videoCodec}`,
       "-map 0:v:0",
       `-b:v ${bitrate}k`,
       `-minrate ${bitrate}k`,
       `-maxrate ${bitrate}k`,
       `-bufsize ${bitrate * 2}k`,
-      `-preset ${params.preset}`,
+      ...encoderOptions(videoCodec, params.preset),
       "-y",
     ];
 
-    options.push(params.audioFiles.length ? "-map 1:a:0" : "-map 0:a:0");
+    if (params.removeAudio) {
+      options.push("-an");
+    } else {
+      options.push(
+        `-c:a ${audioCodec}`,
+        `-b:a ${params.audioBitrate}k`,
+        params.audioFiles.length ? "-map 1:a:0" : "-map 0:a:0?",
+      );
+    }
 
-    if (params.videoCodec === "h265") {
+    if (params.videoCodec === "h265" && ["mp4", "mov"].includes(params.videoFormat)) {
       options.push("-vtag hvc1");
     }
 
@@ -177,12 +197,7 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
         reject(err);
       });
       video.on("end", () => {
-        task.status = "done";
-        task.progress = 100;
-        task.elapsed = Math.floor((new Date().getTime() - task.started.getTime()) / 1000);
-        progress(task);
-        if (params.deleteOriginalFiles) deleteFile(task.file);
-        resolve(true);
+        void finishConversion(task, params, progress).then(() => resolve(true), reject);
       });
       video.on("progress", (p) => {
         if (p.percent) task.progress = Math.round(p.percent);
@@ -193,6 +208,10 @@ async function convertFile(task: ConversionTask, params: FormValues, progress: (
       video.saveToFile(outputPath);
     });
   } catch (error) {
+    if (["cancelled"].includes(task.status)) {
+      progress(task);
+      return;
+    }
     task.status = "error";
     progress(task);
     throw error;
@@ -206,6 +225,7 @@ export function cancelConversion(): void {
     task.status = "cancelled";
     task.progress = 0;
     task.fps = 0;
+    task.abortController?.abort();
 
     if (task.ffmpeg) {
       try {
@@ -225,34 +245,14 @@ export function cancelConversion(): void {
 }
 
 export function isFFmpegInstalled(): boolean {
-  try {
-    const exists = fs.existsSync(ffmpegPath) || fs.existsSync(altPath);
-    return exists;
-  } catch (error) {
-    console.error("Error checking FFmpeg installation:", error);
-    return false;
-  }
+  return !!findFFmpegTools();
 }
 
 export function setFFmpegPath(): void {
-  let path = "";
-  if (fs.existsSync(ffmpegPath)) path = ffmpegPath;
-  else if (fs.existsSync(altPath)) path = altPath;
-  else throw new Error("FFmpeg not found");
-
-  ffmpeg.setFfmpegPath(path);
-}
-
-function getVideoDuration(filePath: string): Promise<number> {
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(filePath, (err, metadata) => {
-      if (err) return reject(err);
-      if (!metadata?.format) return reject(new Error("Invalid metadata format"));
-      const duration = metadata.format.duration;
-      if (!duration) return reject(new Error("Duration not found"));
-      resolve(duration);
-    });
-  });
+  const tools = findFFmpegTools();
+  if (!tools) throw new Error("FFmpeg and ffprobe not found");
+  ffmpeg.setFfmpegPath(tools.ffmpeg);
+  ffmpeg.setFfprobePath(tools.ffprobe);
 }
 
 function getAvailableFilePath(outputDir: string, fileName: string, extension: string): string {
@@ -277,6 +277,20 @@ function getAvailableFilePath(outputDir: string, fileName: string, extension: st
   return fullPath;
 }
 
-function deleteFile(filePath: string): Promise<void> {
-  return fs.promises.unlink(filePath);
+async function finishConversion(
+  task: ConversionTask,
+  params: FormValues,
+  progress: (task: ConversionTask) => void,
+): Promise<void> {
+  task.status = "done";
+  task.progress = 100;
+  task.elapsed = Math.floor((Date.now() - task.started.getTime()) / 1000);
+  if (params.deleteOriginalFiles) {
+    try {
+      await fs.promises.unlink(task.file);
+    } catch (error) {
+      task.warning = `Converted, but could not delete original: ${error instanceof Error ? error.message : String(error)}`;
+    }
+  }
+  progress(task);
 }

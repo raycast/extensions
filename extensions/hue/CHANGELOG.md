@@ -1,5 +1,51 @@
 # Hue Changelog
 
+## [AI tools, Hue app look and bug fixes] - 2026-10-16
+
+### New
+
+- AI tools to control lights, rooms, zones and scenes with Raycast AI
+- Tiles look more like the Hue app, with its colors, brightness shading and room and zone icons
+- Icons for active scenes and unreachable lights
+- Linking starts as soon as the bridge's link button is pressed
+- Automatic reconnection when the connection to the bridge drops, for example after sleep or a network change
+- The bridge is found again when its IP address changes, without linking again
+- Link Again option when the bridge no longer accepts the extension
+- Retry action when loading fails
+
+### Improved
+
+- Changes show immediately in every light, room, zone and scene they affect
+- Lights, rooms, zones and scenes added or removed in the Hue app show up without reopening the command
+- Faster bridge discovery
+- Clearer error messages, pointing to the relevant preference where it applies
+- Support for bridges using Signify's new certificate
+- Renamed Increase and Decrease Color Temperature to Make Cooler and Make Warmer
+- Removed the Transition Time preference, which only applied to some changes
+
+### Fixed
+
+- Live updates from the bridge stopping or skipping changes
+- Changes hanging when the bridge doesn't respond
+- Wrong brightness shown for rooms, zones and scenes
+- Errors when holding a room or zone's brightness shortcut
+- Make Cooler and Make Warmer jumping to the coolest white from a color
+- Brightness actions offered for plugs
+- Bridge IP address and Bridge Username preferences clearing while typing
+- Toggle All Lights ignoring the bridge preferences
+- Loading indicator not showing, or never going away in Control Lights
+- Bridge setup toasts showing at the wrong time
+- Crash when the saved bridge configuration can't be read
+- Typos in color and action names
+
+## [Improvements] - 2026-06-01
+
+- Fix crash when setting a scene with certain light colors
+- Fix manual bridge IP setup failing when no bridge was previously discovered
+- Downgrade expected network errors (timeouts, connection refused, etc.) and rate limit responses to warnings
+- Treat bridge firmware update errors as expected
+- Update dependencies
+
 ## [Update HTTPS support] - 2025-12-25
 
 - Add CA Certificate

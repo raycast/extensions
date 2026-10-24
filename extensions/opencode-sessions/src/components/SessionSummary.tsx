@@ -44,7 +44,7 @@ export function SessionSummary({ session, project, mutate }: SessionSummaryProps
     execute: !transcriptLoading && transcript.length > 0,
     stream: true,
     creativity: "low",
-    model: AI.Model["OpenAI_GPT-4o_mini"],
+    model: AI.Model["OpenAI_GPT4o-mini"],
   });
 
   const isLoading = transcriptLoading || aiLoading;

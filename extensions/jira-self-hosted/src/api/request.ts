@@ -82,7 +82,10 @@ export const getAuthenticatedUri = async (uri: string, contentType: string) => {
     });
 
     if (response.ok) {
-      const dataUri = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+      const responseContentType = response.headers.get("content-type")?.split(";")[0] ?? contentType;
+      const dataUri = `data:${responseContentType};base64,${Buffer.from(await response.arrayBuffer()).toString(
+        "base64",
+      )}`;
       uriCache.set(uri, dataUri);
       return dataUri;
     }

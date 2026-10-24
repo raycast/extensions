@@ -1,7 +1,19 @@
-import { Action, ActionPanel, Detail, Form, popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState } from "react";
-import { analyzeText, createDiaryFromSnapshot } from "./api";
-import type { AIFoodAnalysisResult, MealType } from "./types";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Form,
+  Icon,
+  LaunchProps,
+  popToRoot,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import { addFavorite, analyzeText, createDiaryFromSnapshot } from "./api";
+import type { AnalyzeTextResponse, MealType, NutritionSource } from "./types";
 import {
   formatMealType,
   formatServingWithQuantity,
@@ -9,45 +21,52 @@ import {
   getDefaultServing,
   MEAL_ICONS,
   MEALS,
+  mealColor,
+  scaleNutrition,
 } from "./utils";
 
-export default function LogFood() {
+const QUANTITIES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+
+const SOURCE_LABELS: Record<NutritionSource, string> = {
+  database: "Nutrition database",
+  ai_estimated: "AI estimate",
+  label_extracted: "Label",
+};
+
+export default function LogFood(props: LaunchProps<{ arguments: Arguments.LogFood }>) {
+  // launchCommand (e.g. from the menu bar) may not pass an arguments object.
+  const initialDescription = props.arguments?.description?.trim();
+
+  // Launched from root search with an argument — skip the form entirely.
+  if (initialDescription) {
+    return <FoodConfirmation description={initialDescription} meal={getDefaultMeal()} />;
+  }
+
+  return <LogFoodForm />;
+}
+
+function LogFoodForm() {
   const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(false);
   const [descriptionError, setDescriptionError] = useState<string | undefined>();
 
-  async function handleSubmit(values: { description: string; meal: MealType }) {
-    if (!values.description.trim()) {
+  function handleSubmit(values: { description: string; meal: MealType }) {
+    const description = values.description.trim();
+    if (!description) {
       setDescriptionError("Description is required");
       return;
     }
-    if (values.description.trim().length < 2) {
+    if (description.length < 2) {
       setDescriptionError("At least 2 characters");
       return;
     }
-
-    setIsLoading(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Analyzing food..." });
-
-    try {
-      const result = await analyzeText(values.description.trim());
-      toast.hide();
-      push(<FoodConfirmation result={result} meal={values.meal} />);
-    } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Analysis Failed";
-      toast.message = err instanceof Error ? err.message : "Unknown error";
-    } finally {
-      setIsLoading(false);
-    }
+    push(<FoodConfirmation description={description} meal={values.meal} />);
   }
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Analyze Food" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Analyze Food" icon={Icon.Wand} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -77,40 +96,74 @@ export default function LogFood() {
   );
 }
 
-function FoodConfirmation({ result, meal }: { result: AIFoodAnalysisResult; meal: MealType }) {
+function FoodConfirmation({ description, meal: initialMeal }: { description: string; meal: MealType }) {
+  const [analysis, setAnalysis] = useState<AnalyzeTextResponse | undefined>();
+  const [error, setError] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
+
+  const [meal, setMeal] = useState<MealType>(initialMeal);
+  const [quantity, setQuantity] = useState<number | undefined>();
+  const [servingId, setServingId] = useState<string | undefined>();
   const [isLogging, setIsLogging] = useState(false);
-  const { food, quantity: suggestedQuantity, confidence, warnings, foodKey } = result;
-  const serving = getDefaultServing(food);
-  const quantity = suggestedQuantity ?? 1;
 
-  const n = food.nutrition;
-  const multiplier = serving.multiplier * quantity;
-  const cals = Math.round(n.calories * multiplier);
-  const protein = Math.round(n.protein * multiplier * 10) / 10;
-  const carbs = Math.round(n.carbs * multiplier * 10) / 10;
-  const fat = Math.round(n.fat * multiplier * 10) / 10;
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setError(undefined);
+    analyzeText(description)
+      .then((response) => {
+        if (cancelled) return;
+        setAnalysis(response);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Unknown error");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [description, attempt]);
 
-  const confidenceIcon = confidence === "high" ? "🟢" : confidence === "medium" ? "🟡" : "🔴";
-  const warningLines = warnings?.length ? warnings.map((w) => `> ⚠️ ${w}`).join("\n") : "";
+  if (error) {
+    return (
+      <Detail
+        markdown={`# Analysis Failed\n\n> ${error}\n\n**Description:** ${description}`}
+        actions={
+          <ActionPanel>
+            <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => setAttempt((a) => a + 1)} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
-  const markdown = `# ${food.name}${food.brand ? ` — ${food.brand}` : ""}
+  if (isLoading || !analysis) {
+    return <Detail isLoading markdown={`# Analyzing...\n\n_${description}_`} />;
+  }
 
-${warningLines}
+  const { result, tokenBalance } = analysis;
+  const { food, confidence, warnings, foodKey, analysisId, nutritionSource, requiresConfirmation } = result;
 
-| Nutrient | Amount |
-|----------|--------|
-| Calories | **${cals} kcal** |
-| Protein | ${protein}g |
-| Carbs | ${carbs}g |
-| Fat | ${fat}g |
-${n.fiber != null ? `| Fiber | ${Math.round(n.fiber * multiplier * 10) / 10}g |` : ""}
-${n.sugar != null ? `| Sugar | ${Math.round(n.sugar * multiplier * 10) / 10}g |` : ""}
+  const serving = food.servings.find((s) => s.id === servingId) ?? getDefaultServing(food);
+  const qty = quantity ?? result.quantity ?? 1;
+  const scaled = scaleNutrition(food.nutrition, serving, qty);
 
-**Serving:** ${formatServingWithQuantity(serving, quantity)}
-**Meal:** ${MEAL_ICONS[meal]} ${formatMealType(meal)}
-**Confidence:** ${confidenceIcon} ${confidence}`;
+  const callouts = [
+    ...(requiresConfirmation
+      ? ["> ⚠️ **Review this estimate** — unusually high calories or an uncertain analysis."]
+      : []),
+    ...(warnings ?? []).map((w) => `> ⚠️ ${w}`),
+  ].join("\n>\n");
 
-  async function handleLog() {
+  const markdown = `# ${food.name}${food.brand ? ` — ${food.brand}` : ""}\n\n${callouts}`;
+
+  const confidenceColor = confidence === "high" ? Color.Green : confidence === "medium" ? Color.Yellow : Color.Red;
+
+  async function handleLog(alsoFavorite: boolean) {
     setIsLogging(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Logging to diary..." });
 
@@ -119,13 +172,25 @@ ${n.sugar != null ? `| Sugar | ${Math.round(n.sugar * multiplier * 10) / 10}g |`
         food,
         foodKey,
         servingId: serving.id,
-        quantity,
+        quantity: qty,
         meal,
         loggedAt: new Date().toISOString(),
+        aiAnalysisId: analysisId,
       });
+      if (alsoFavorite) {
+        try {
+          await addFavorite(food);
+        } catch (err) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Logged, Favorite Failed";
+          toast.message = err instanceof Error ? err.message : "Unknown error";
+          await popToRoot();
+          return;
+        }
+      }
       toast.style = Toast.Style.Success;
       toast.title = `Logged ${food.name}`;
-      toast.message = `${cals} kcal`;
+      toast.message = `${scaled.calories} kcal${alsoFavorite ? " · added to favorites" : ""}`;
       await popToRoot();
     } catch (err) {
       toast.style = Toast.Style.Failure;
@@ -139,10 +204,75 @@ ${n.sugar != null ? `| Sugar | ${Math.round(n.sugar * multiplier * 10) / 10}g |`
     <Detail
       markdown={markdown}
       isLoading={isLogging}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Calories" text={`${scaled.calories} kcal`} />
+          <Detail.Metadata.Label title="Protein" text={`${scaled.protein} g`} />
+          <Detail.Metadata.Label title="Carbs" text={`${scaled.carbs} g`} />
+          <Detail.Metadata.Label title="Fat" text={`${scaled.fat} g`} />
+          {scaled.fiber != null && <Detail.Metadata.Label title="Fiber" text={`${scaled.fiber} g`} />}
+          {scaled.sugar != null && <Detail.Metadata.Label title="Sugar" text={`${scaled.sugar} g`} />}
+          {scaled.sodium != null && <Detail.Metadata.Label title="Sodium" text={`${scaled.sodium} mg`} />}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Serving" text={formatServingWithQuantity(serving, qty)} />
+          <Detail.Metadata.TagList title="Meal">
+            <Detail.Metadata.TagList.Item
+              text={`${MEAL_ICONS[meal]} ${formatMealType(meal)}`}
+              color={mealColor(meal)}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Confidence">
+            <Detail.Metadata.TagList.Item text={confidence} color={confidenceColor} />
+          </Detail.Metadata.TagList>
+          {nutritionSource && <Detail.Metadata.Label title="Source" text={SOURCE_LABELS[nutritionSource]} />}
+          {tokenBalance && (
+            <Detail.Metadata.Label
+              title="AI Tokens"
+              text={`${Math.round(tokenBalance.used / 1000)}k / ${Math.round(tokenBalance.limit / 1000)}k`}
+            />
+          )}
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
-          <Action title="Log to Diary" onAction={handleLog} />
-          <Action title="Cancel" onAction={popToRoot} shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action title="Log to Diary" icon={Icon.Checkmark} onAction={() => handleLog(false)} />
+          <Action
+            title="Log and Add to Favorites"
+            icon={Icon.Star}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={() => handleLog(true)}
+          />
+          <ActionPanel.Submenu title="Change Quantity" icon={Icon.Hashtag} shortcut={{ modifiers: ["cmd"], key: "u" }}>
+            {QUANTITIES.map((q) => (
+              <Action key={q} title={`${q} ×${q === qty ? "  ✓" : ""}`} onAction={() => setQuantity(q)} />
+            ))}
+          </ActionPanel.Submenu>
+          {food.servings.length > 1 && (
+            <ActionPanel.Submenu title="Change Serving" icon={Icon.Ruler} shortcut={{ modifiers: ["cmd"], key: "s" }}>
+              {food.servings.map((s) => (
+                <Action
+                  key={s.id}
+                  title={`${s.description}${s.id === serving.id ? "  ✓" : ""}`}
+                  onAction={() => setServingId(s.id)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
+          <ActionPanel.Submenu title="Change Meal" icon={Icon.Calendar} shortcut={{ modifiers: ["cmd"], key: "m" }}>
+            {MEALS.map((m) => (
+              <Action
+                key={m}
+                title={`${MEAL_ICONS[m]} ${formatMealType(m)}${m === meal ? "  ✓" : ""}`}
+                onAction={() => setMeal(m)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+          <Action
+            title="Cancel"
+            icon={Icon.XMarkCircle}
+            onAction={popToRoot}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
         </ActionPanel>
       }
     />

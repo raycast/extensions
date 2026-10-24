@@ -1,6 +1,7 @@
 // Available NixOS branches/versions
 export const AVAILABLE_BRANCHES = [
   { value: "unstable", title: "Unstable (rolling release)" },
+  { value: "26.05", title: "NixOS 26.05" },
   { value: "25.11", title: "NixOS 25.11" },
 ] as const;
 
@@ -46,7 +47,7 @@ export const API_CONFIG = {
   authorization: "Basic YVdWU0FMWHBadjpYOGdQSG56TDUyd0ZFZWt1eHNmUTljU2g=",
   versionUrl: "https://raw.githubusercontent.com/NixOS/nixos-search/main/version.nix",
   searchBaseUrl: "https://search.nixos.org/backend",
-  githubBaseUrl: "https://github.com/NixOS/nixpkgs/blob/nixos-unstable",
+  githubNixpkgsBase: "https://github.com/NixOS/nixpkgs/blob",
 } as const;
 
 // Search Configuration

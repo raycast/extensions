@@ -11,6 +11,6 @@ export default function WeeklyHoroscope(props: LaunchProps<{ arguments: Argument
   const params = new URLSearchParams({ sign });
   const { data, isLoading } = useFetch<WeeklyHoroscope>(API_URL + `weekly?${params}`);
 
-  const markdown = generateSignMarkdown(sign) + (!data ? "" : `## ${data.data.week} \n\n ${data.data.horoscope_data}`);
+  const markdown = generateSignMarkdown(sign) + (!data ? "" : `## ${data.data.date} \n\n ${data.data.horoscope}`);
   return <Detail isLoading={isLoading} markdown={markdown} actions={<HoroscopeActions data={data} />} />;
 }

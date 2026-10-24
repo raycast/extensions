@@ -269,6 +269,16 @@ export default function Command() {
       isShowingDetail
       searchBarAccessory={filterDropdown}
     >
+      {!showMarket && !showGear && !showRewards && !isLoading && (
+        <List.EmptyView
+          title="Nothing to show"
+          description={
+            filter === "affordable"
+              ? "You don't have enough gold for anything in the shop right now."
+              : "No items match this filter."
+          }
+        />
+      )}
       {showMarket && (
         <List.Section title="Market" subtitle={goldLabel}>
           {filteredItems
@@ -283,7 +293,17 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action title="Buy Item" icon={Icon.Cart} onAction={() => handleBuy(item)} />
-                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchData} />
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={fetchData}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Habitica Market"
+                      url="https://habitica.com/shops/market"
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
                   </ActionPanel>
                 }
               />
@@ -308,7 +328,17 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action title="Buy Gear" icon={Icon.Cart} onAction={() => handleBuy(item)} />
-                      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchData} />
+                      <Action
+                        title="Refresh"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onAction={fetchData}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open Habitica Equipment"
+                        url="https://habitica.com/inventory/equipment"
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      />
                     </ActionPanel>
                   }
                 />
@@ -331,7 +361,17 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action title="Buy Reward" icon={Icon.Cart} onAction={() => handleBuy(item)} />
-                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchData} />
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      onAction={fetchData}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Habitica"
+                      url="https://habitica.com/"
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
                   </ActionPanel>
                 }
               />

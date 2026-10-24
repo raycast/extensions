@@ -5,7 +5,6 @@ import {
   Image,
   List,
   getPreferenceValues,
-  Detail,
   openExtensionPreferences,
   Color,
   Keyboard,
@@ -25,58 +24,33 @@ import {
   CopyProjectName,
   AssignTask,
   Revalidate,
-  SubTask,
-  ParentTask,
 } from "./shortcut";
-import { Project, Task, CreateProjectFormValues, CreateTaskFormValues, ProjectDetail } from "./types";
+import {
+  Project,
+  Task,
+  CreateProjectFormValues,
+  CreateTaskFormValues,
+  ProjectDetail,
+  CustomFieldDefinition,
+} from "./types";
 import { KaneoAPI } from "./api/kaneo";
 import { useAuthSession } from "./hooks/useAuthSession";
-import { useEffect, useState } from "react";
-
-function formatDate(date: string | null) {
-  if (!date) return "N/A";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "N/A" : d.toLocaleString();
-}
-
-const formatShortDate = (date: string | null) => {
-  if (!date) return "N/A";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "N/A" : `${d.getDate()} ${d.toLocaleString("en-US", { month: "short" })}`;
-};
-
-const cleanDescription = (description: string) => {
-  return description?.length
-    ? description
-        .replace(/<p>/g, "")
-        .replace(/<\/p>/g, "\n")
-        .replace(/<br\s*\/?>/g, "\n")
-    : "No description";
-};
-
-const statusKey: Record<string, Keyboard.KeyEquivalent> = {
-  backlog: "b",
-  "to-do": "t",
-  "in-progress": "p",
-  "in-review": "r",
-  done: "d",
-};
-
-const priorityKey: Record<string, Keyboard.KeyEquivalent> = {
-  "no-priority": "n",
-  low: "l",
-  medium: "m",
-  high: "h",
-  urgent: "u",
-};
-
-const priorityColor: Record<string, string> = {
-  "no-priority": Color.SecondaryText,
-  low: Color.Blue,
-  medium: Color.Yellow,
-  high: Color.Orange,
-  urgent: Color.Red,
-};
+import { TaskDetailView } from "./components/TaskDetailView";
+import {
+  formatShortDate,
+  cleanDescription,
+  statusKey,
+  priorityKey,
+  priorityColor,
+  columnPriorities,
+  sortTasksByPriority,
+  sortTasksByDueDate,
+  dueDateColor,
+  resolveColumns,
+} from "./lib/task-helpers";
+import { useEffect, useMemo, useState } from "react";
+import { resolveImageUrl } from "./lib/get-api-url";
+import { sortCustomFields } from "./lib/custom-field-helpers";
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
@@ -138,6 +112,51 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
   );
 }
 
+// ---------- Custom fields (helpers du formulaire de création) ----------
+
+type CustomValue = string | boolean | string[] | Date | null;
+
+// Les options peuvent arriver en string[] ou en JSON string selon l'API
+const getFieldOptions = (field: CustomFieldDefinition): string[] => {
+  const raw = (field as { options?: unknown }).options;
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const getInitialCustomValue = (field: CustomFieldDefinition): CustomValue => {
+  const def = (field as { defaultValue?: unknown }).defaultValue;
+  switch (field.type) {
+    case "checkbox":
+      return def === true || def === "true";
+    case "date": {
+      const d = def ? new Date(String(def)) : null;
+      return d && !Number.isNaN(d.getTime()) ? d : null;
+    }
+    case "multiselect":
+      return Array.isArray(def) ? def.map(String) : [];
+    default:
+      return def === undefined || def === null ? "" : String(def);
+  }
+};
+
+const isEmptyCustomValue = (v: CustomValue) => v === null || v === "" || (Array.isArray(v) && v.length === 0);
+
+// L'API Kaneo attend TOUJOURS des strings pour les valeurs de custom fields
+const serializeCustomValue = (v: CustomValue): string => {
+  if (v instanceof Date) return v.toISOString();
+  if (Array.isArray(v)) return JSON.stringify(v); // multiselect -> '["6","8","4"]'
+  if (typeof v === "boolean") return String(v); // checkbox -> "true" / "false"
+  return String(v ?? ""); // number, text, dropdown -> string
+};
+
 function CreateTaskForm({
   projectId,
   columnStatuses,
@@ -148,25 +167,72 @@ function CreateTaskForm({
   onTaskCreated: () => void;
 }) {
   const { pop } = useNavigation();
-  const kaneoApi = new KaneoAPI();
+  const kaneoApi = useMemo(() => new KaneoAPI(), []);
+
+  const { isLoading: isLoadingFields, data: rawFields } = usePromise(
+    (id: string) => kaneoApi.getCustomFields(id),
+    [projectId],
+  );
+  const customFields = useMemo(() => sortCustomFields(rawFields ?? []), [rawFields]);
+
+  const [customValues, setCustomValues] = useState<Record<string, CustomValue>>({});
+  const [customErrors, setCustomErrors] = useState<Record<string, string | undefined>>({});
+
+  const getCustomValue = (field: CustomFieldDefinition): CustomValue =>
+    field.id in customValues ? customValues[field.id] : getInitialCustomValue(field);
+
+  const setCustomValue = (fieldId: string, value: CustomValue) => {
+    setCustomValues((prev) => ({ ...prev, [fieldId]: value }));
+    setCustomErrors((prev) => ({ ...prev, [fieldId]: undefined }));
+  };
+
+  const validateCustomFields = () => {
+    const errors: Record<string, string> = {};
+    for (const field of customFields) {
+      const v = getCustomValue(field);
+      if (field.required && field.type !== "checkbox" && isEmptyCustomValue(v)) {
+        errors[field.id] = `${field.name} is required`;
+      } else if (field.type === "number" && !isEmptyCustomValue(v) && Number.isNaN(Number(v))) {
+        errors[field.id] = "Must be a number";
+      }
+    }
+    setCustomErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     async onSubmit(values) {
+      if (!validateCustomFields()) return;
+
       await showToast({
         style: Toast.Style.Animated,
         title: "Creating task...",
       });
 
       try {
+        // Ne pas envoyer les champs vides (checkbox : seulement si cochée ou modifiée)
+        const customFieldsPayload = customFields
+          .filter((field) => {
+            const v = getCustomValue(field);
+            if (field.type === "checkbox") return v === true || field.id in customValues;
+            return !isEmptyCustomValue(v);
+          })
+          .map((field) => ({
+            fieldId: field.id,
+            value: serializeCustomValue(getCustomValue(field)),
+          }));
+
+        // Une seule requête : la tâche et ses custom fields sont créés ensemble
         await kaneoApi.createTask(projectId, {
           title: values.title,
           description: values.description || "",
           status: values.status,
           priority: values.priority || "no-priority",
           ...(values.dueDate && { dueDate: values.dueDate.toISOString() }),
+          customFields: customFieldsPayload,
         });
 
-        showToast(Toast.Style.Success, "Task created successfully");
+        await showToast(Toast.Style.Success, "Task created successfully");
 
         onTaskCreated();
         pop();
@@ -196,8 +262,86 @@ function CreateTaskForm({
     { value: "urgent", title: "Urgent" },
   ];
 
+  const renderCustomField = (field: CustomFieldDefinition) => {
+    const id = `custom-${field.id}`;
+    const title = field.required ? `${field.name} *` : field.name;
+    const error = customErrors[field.id];
+    const value = getCustomValue(field);
+    const options = getFieldOptions(field);
+
+    switch (field.type) {
+      case "checkbox":
+        return (
+          <Form.Checkbox
+            key={field.id}
+            id={id}
+            title={title}
+            label=""
+            error={error}
+            value={value === true}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+      case "date":
+        return (
+          <Form.DatePicker
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={value instanceof Date ? value : null}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+      case "multiselect":
+        return (
+          <Form.TagPicker
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={Array.isArray(value) ? value : []}
+            onChange={(v) => setCustomValue(field.id, v)}
+          >
+            {options.map((o) => (
+              <Form.TagPicker.Item key={o} value={o} title={o} />
+            ))}
+          </Form.TagPicker>
+        );
+      case "dropdown":
+        return (
+          <Form.Dropdown
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            value={typeof value === "string" ? value : ""}
+            onChange={(v) => setCustomValue(field.id, v)}
+          >
+            <Form.Dropdown.Item value="" title="—" />
+            {options.map((o) => (
+              <Form.Dropdown.Item key={o} value={o} title={o} />
+            ))}
+          </Form.Dropdown>
+        );
+      default:
+        return (
+          <Form.TextField
+            key={field.id}
+            id={id}
+            title={title}
+            error={error}
+            placeholder={field.type === "number" ? "Enter a number" : `Enter ${field.name.toLowerCase()}`}
+            value={typeof value === "string" ? value : ""}
+            onChange={(v) => setCustomValue(field.id, v)}
+          />
+        );
+    }
+  };
+
   return (
     <Form
+      isLoading={isLoadingFields}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
@@ -217,215 +361,24 @@ function CreateTaskForm({
         ))}
       </Form.Dropdown>
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
+
+      {customFields.length > 0 && <Form.Separator />}
+      {customFields.map(renderCustomField)}
     </Form>
-  );
-}
-
-function TaskDetailView({
-  taskId,
-  projectId,
-  columnStatuses,
-  columnPriorities,
-  onStatusUpdate,
-  onPriorityUpdate,
-}: {
-  taskId: string;
-  projectId: string;
-  columnStatuses: Array<{
-    isDone: boolean;
-    id: string;
-    name: string;
-  }>;
-  columnPriorities: Array<{ id: string; name: string }>;
-  onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
-  onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
-}) {
-  const api = new KaneoAPI();
-  const { webInstanceUrl, workspaceId } = getPreferenceValues<Preferences>();
-
-  const { isLoading, data: task, revalidate } = usePromise((id: string) => api.getTask(id), [taskId]);
-
-  if (isLoading || !task) {
-    return <Detail isLoading markdown="Loading task..." />;
-  }
-
-  const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "N/A";
-  const priorityRaw = task.priority || "no-priority";
-  const priority = priorityRaw.charAt(0).toUpperCase() + priorityRaw.slice(1).replaceAll("-", " ");
-
-  const openTask = (taskId: string) => {
-    const webUrl = new URL(webInstanceUrl);
-    webUrl.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/board`;
-    webUrl.searchParams.set("taskId", taskId);
-    return webUrl.toString();
-  };
-
-  const parentTasks = task.parentTasks || [];
-  const subTasks = task.subTasks || [];
-
-  const markdown = `${parentTasks.length > 0 ? `**Subtask of** ${parentTasks.map((parentTask) => `[${parentTask.title}](${openTask(parentTask.id)})`).join("\n")}\n\n` : ""}
-  # ${task.title}
-
-
-## Description
-${cleanDescription(task.description)}
-
-
-## Status
-${status}
-
-
-## Priority
-${priority}
-
-
-## Due Date
-${formatDate(task.dueDate)}
-
-
-## Assignee
-${task.assigneeName || "Unassigned"}
-
-
-## Created At
-${formatDate(task.createdAt)}
-`;
-
-  const handleStatusUpdate = async (taskId: string, newStatus: string, taskTitle: string) => {
-    await onStatusUpdate(taskId, newStatus, taskTitle);
-    await revalidate();
-  };
-
-  const handlePriorityUpdate = async (taskId: string, newPriority: string, taskTitle: string) => {
-    await onPriorityUpdate(taskId, newPriority, taskTitle);
-    await revalidate();
-  };
-
-  return (
-    <Detail
-      navigationTitle={task.title}
-      markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Status" text={status} />
-          <Detail.Metadata.Label title="Priority" text={priority} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Due Date" text={formatDate(task.dueDate)} />
-          <Detail.Metadata.Label title="Assignee" text={task.assigneeName || "Unassigned"} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Created At" text={formatDate(task.createdAt)} />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask(task.id)} />
-
-          {parentTasks.length > 0 && (
-            <Action.Push
-              title="Open Parent Task"
-              icon={Icon.Binoculars}
-              shortcut={ParentTask}
-              target={
-                <TaskDetailView
-                  taskId={parentTasks[0].id}
-                  projectId={projectId}
-                  columnStatuses={columnStatuses}
-                  columnPriorities={columnPriorities}
-                  onStatusUpdate={handleStatusUpdate}
-                  onPriorityUpdate={handlePriorityUpdate}
-                />
-              }
-              onPop={revalidate}
-            />
-          )}
-
-          {subTasks.length > 0 && (
-            <ActionPanel.Submenu title="Sub Tasks" icon={Icon.List} shortcut={SubTask}>
-              {subTasks.map((subTask) => (
-                <Action.Push
-                  key={subTask.id}
-                  title={subTask.title}
-                  icon={Icon.Binoculars}
-                  target={
-                    <TaskDetailView
-                      taskId={subTask.id}
-                      projectId={projectId}
-                      columnStatuses={columnStatuses}
-                      columnPriorities={columnPriorities}
-                      onStatusUpdate={handleStatusUpdate}
-                      onPriorityUpdate={handlePriorityUpdate}
-                    />
-                  }
-                  onPop={revalidate}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
-
-          <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
-            {columnStatuses
-              .filter((status) => status.id !== task.status)
-              .map((status) => {
-                return (
-                  <Action
-                    key={status.id}
-                    icon={status.isDone ? Icon.CircleProgress100 : Icon.Circle}
-                    shortcut={
-                      statusKey[status.id]
-                        ? {
-                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                          }
-                        : undefined
-                    }
-                    title={status.name}
-                    onAction={() => handleStatusUpdate(task.id, status.id, task.title)}
-                  />
-                );
-              })}
-          </ActionPanel.Submenu>
-
-          <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
-            {columnPriorities
-              .filter((priority) => priority.id !== (task.priority || "no-priority"))
-              .map((priority) => (
-                <Action
-                  key={priority.id}
-                  icon={Icon.Circle}
-                  shortcut={{
-                    Windows: { modifiers: ["ctrl", "shift"], key: priorityKey[priority.id] ?? "p" },
-                    macOS: { modifiers: ["cmd", "shift"], key: priorityKey[priority.id] ?? "p" },
-                  }}
-                  title={priority.name}
-                  onAction={() => handlePriorityUpdate(task.id, priority.id, task.title)}
-                />
-              ))}
-          </ActionPanel.Submenu>
-
-          <Action.CopyToClipboard title="Copy Task Title" content={task.title} shortcut={CopyTaskTitle} />
-          {task.description && (
-            <Action.CopyToClipboard
-              title="Copy Task Description"
-              content={cleanDescription(task.description)}
-              shortcut={CopyTaskDescription}
-            />
-          )}
-        </ActionPanel>
-      }
-    />
   );
 }
 
 function ProjectTasksList({ project }: { project: Project }) {
   const api = new KaneoAPI();
   const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
-  const {
-    isLoading,
-    data: dProject,
-    revalidate,
-  } = usePromise((id: string) => api.getProjectTasks(id), [project.id.toString()]);
+  const projectId = project.id.toString();
+
+  const { isLoading, data: dProject, revalidate } = usePromise((id: string) => api.getProjectTasks(id), [projectId]);
   const { session } = useAuthSession();
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | undefined>(dProject);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+
+  const refresh = () => revalidate();
 
   useEffect(() => {
     if (dProject) {
@@ -438,6 +391,7 @@ function ProjectTasksList({ project }: { project: Project }) {
   }
 
   const userId = session?.user?.id ?? null;
+
   const toggleAssignTask = async (task: Task) => {
     if (!userId) {
       await showToast({
@@ -515,31 +469,6 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
-  const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
-
-  const sortTasksByPriority = (tasks: Task[]) => {
-    return [...tasks].sort((a, b) => {
-      const aPriority = a.priority || "no-priority";
-      const bPriority = b.priority || "no-priority";
-
-      const aIndex = priorityOrder.indexOf(aPriority);
-      const bIndex = priorityOrder.indexOf(bPriority);
-
-      const aOrder = aIndex === -1 ? priorityOrder.length : aIndex;
-      const bOrder = bIndex === -1 ? priorityOrder.length : bIndex;
-
-      return aOrder - bOrder;
-    });
-  };
-
-  const sortTasksByDueDate = (tasks: Task[]) => {
-    return [...tasks].sort((a, b) => {
-      const aDueDate = a.dueDate || "";
-      const bDueDate = b.dueDate || "";
-      return new Date(aDueDate).getTime() - new Date(bDueDate).getTime();
-    });
-  };
-
   const updateTaskStatus = async (taskId: string, newStatus: string, taskTitle: string) => {
     await showToast({
       style: Toast.Style.Animated,
@@ -611,29 +540,17 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
-  const resolvedColumns = projectDetail?.data?.columns ?? projectDetail?.columns;
+  const resolvedColumns = resolveColumns(projectDetail);
 
-  const columnStatuses =
-    resolvedColumns?.map((col) => ({
-      id: col.id,
-      name: col.name,
-      isDone: col.isFinal,
-    })) || [];
-
-  const columnPriorities: Array<{ id: string; name: string }> = [
-    { id: "no-priority", name: "No priority" },
-    { id: "low", name: "Low" },
-    { id: "medium", name: "Medium" },
-    { id: "high", name: "High" },
-    { id: "urgent", name: "Urgent" },
-  ];
-
-  if (isLoading || !projectDetail) {
-    return <List isLoading navigationTitle={`Tasks - ${project.name}`} />;
-  }
+  const columnStatuses = resolvedColumns.map((col) => ({
+    id: col.id,
+    name: col.name,
+    isDone: col.isFinal,
+  }));
 
   return (
     <List
+      isShowingDetail={isShowingDetail}
       navigationTitle={`Tasks - ${project.name}`}
       searchBarPlaceholder="Search tasks..."
       actions={
@@ -642,18 +559,12 @@ function ProjectTasksList({ project }: { project: Project }) {
             title="Create Task"
             icon={Icon.Plus}
             shortcut={Keyboard.Shortcut.Common.New}
-            target={
-              <CreateTaskForm
-                projectId={project.id.toString()}
-                columnStatuses={columnStatuses}
-                onTaskCreated={revalidate}
-              />
-            }
+            target={<CreateTaskForm projectId={projectId} columnStatuses={columnStatuses} onTaskCreated={refresh} />}
           />
         </ActionPanel>
       }
     >
-      {resolvedColumns?.map((column) => {
+      {resolvedColumns.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (
@@ -667,57 +578,63 @@ function ProjectTasksList({ project }: { project: Project }) {
                   key={item.id}
                   icon={column.isFinal ? Icon.CircleProgress100 : Icon.Circle}
                   title={item.title}
-                  accessories={[
-                    {
-                      text:
-                        (youAsAssignee
-                          ? item.assigneeId === userId
-                            ? "You"
-                            : item.assigneeName
-                          : item.assigneeName) || "Unassigned",
-                      icon: item.assigneeName
-                        ? item.assigneeImage
-                          ? { source: item.assigneeImage, mask: Image.Mask.Circle }
-                          : getAvatarIcon(`${item.assigneeName}`)
-                        : undefined,
-                    },
-                    ...(item.dueDate
-                      ? [
+                  accessories={
+                    isShowingDetail
+                      ? []
+                      : [
                           {
-                            tag: {
-                              value: formatShortDate(item.dueDate),
-                              color: (() => {
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                const dueDate = new Date(item.dueDate);
-                                dueDate.setHours(0, 0, 0, 0);
-
-                                const threeDaysFromNow = new Date(today);
-                                threeDaysFromNow.setDate(today.getDate() + 3);
-
-                                if (dueDate < today) {
-                                  return Color.Red;
-                                } else if (dueDate <= threeDaysFromNow) {
-                                  return Color.Orange;
-                                } else {
-                                  return Color.Green;
+                            text:
+                              (youAsAssignee
+                                ? item.assigneeId === userId
+                                  ? "You"
+                                  : item.assigneeName
+                                : item.assigneeName) || "Unassigned",
+                            icon: item.assigneeName
+                              ? item.assigneeImage
+                                ? { source: resolveImageUrl(item.assigneeImage), mask: Image.Mask.Circle }
+                                : getAvatarIcon(`${item.assigneeName}`)
+                              : undefined,
+                          },
+                          ...(item.dueDate
+                            ? [
+                                {
+                                  tag: {
+                                    value: formatShortDate(item.dueDate),
+                                    color: dueDateColor(item.dueDate),
+                                  },
+                                  tooltip: "Due Date",
+                                },
+                              ]
+                            : []),
+                          {
+                            tag: priorityRaw
+                              ? {
+                                  value: capitalize(priorityRaw).replaceAll("-", " "),
+                                  color: priorityColor[priorityRaw],
                                 }
-                              })(),
-                            },
-                            tooltip: "Due Date",
+                              : undefined,
+                            tooltip: "Priority",
                           },
                         ]
-                      : []),
-                    {
-                      tag: priorityRaw
-                        ? {
-                            value: capitalize(priorityRaw).replaceAll("-", " "),
-                            color: priorityColor[priorityRaw],
-                          }
-                        : undefined,
-                      tooltip: "Priority",
-                    },
-                  ]}
+                  }
+                  detail={
+                    <List.Item.Detail
+                      markdown={item.description ? cleanDescription(item.description) : undefined}
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label title="Status" text={column.name} />
+                          <List.Item.Detail.Metadata.Label
+                            title="Priority"
+                            text={capitalize(priorityRaw).replaceAll("-", " ")}
+                          />
+                          <List.Item.Detail.Metadata.Label title="Assignee" text={item.assigneeName || "Unassigned"} />
+                          {item.dueDate && (
+                            <List.Item.Detail.Metadata.Label title="Due Date" text={formatShortDate(item.dueDate)} />
+                          )}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                   actions={
                     <ActionPanel>
                       <Action.Push
@@ -726,14 +643,21 @@ function ProjectTasksList({ project }: { project: Project }) {
                         target={
                           <TaskDetailView
                             taskId={item.id}
-                            projectId={project.id.toString()}
+                            projectId={projectId}
                             columnStatuses={columnStatuses}
                             columnPriorities={columnPriorities}
                             onStatusUpdate={updateTaskStatus}
                             onPriorityUpdate={updateTaskPriority}
                           />
                         }
-                        onPop={revalidate}
+                        onPop={refresh}
+                      />
+
+                      <Action
+                        title={isShowingDetail ? "Hide Details" : "Show Details"}
+                        icon={Icon.Sidebar}
+                        shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                        onAction={() => setIsShowingDetail((v) => !v)}
                       />
 
                       <Action.Push
@@ -742,12 +666,12 @@ function ProjectTasksList({ project }: { project: Project }) {
                         shortcut={Keyboard.Shortcut.Common.New}
                         target={
                           <CreateTaskForm
-                            projectId={project.id.toString()}
+                            projectId={projectId}
                             columnStatuses={columnStatuses}
-                            onTaskCreated={revalidate}
+                            onTaskCreated={refresh}
                           />
                         }
-                        onPop={revalidate}
+                        onPop={refresh}
                       />
 
                       <Action
@@ -819,7 +743,7 @@ function ProjectTasksList({ project }: { project: Project }) {
                         title="Revalidate"
                         icon={Icon.RotateAntiClockwise}
                         shortcut={Revalidate}
-                        onAction={() => revalidate()}
+                        onAction={() => refresh()}
                       />
                     </ActionPanel>
                   }

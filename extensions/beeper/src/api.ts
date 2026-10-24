@@ -24,7 +24,7 @@ const useMockData = () => getPreferences().useMockData === true;
 
 const createOAuthClient = () =>
   new OAuth.PKCEClient({
-    redirectMethod: OAuth.RedirectMethod.Web,
+    redirectMethod: OAuth.RedirectMethod.App,
     providerName: "Beeper Desktop",
     providerIcon: "extension-icon.png",
     providerId: "beeper-desktop-api",
@@ -49,7 +49,7 @@ export const getRaycastFocusLink = (
   } = {},
 ) => {
   const args = Object.keys(params).length > 0 ? `?arguments=${encodeURIComponent(JSON.stringify(params))}` : "";
-  return `raycast://extensions/${RAYCAST_EXTENSION_AUTHOR}/${RAYCAST_EXTENSION_NAME}/${RAYCAST_FOCUS_COMMAND}${args}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${RAYCAST_EXTENSION_AUTHOR}/${RAYCAST_EXTENSION_NAME}/${RAYCAST_FOCUS_COMMAND}${args}`;
 };
 
 export function createBeeperOAuth() {

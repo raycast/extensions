@@ -1,12 +1,9 @@
+import { BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import {
-  BrowserExtension,
-  environment,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { saveCardWithFeedback } from "./lib/capture";
-import { getPreferences } from "./lib/preferences";
+  ensureCredentialsForNoViewCommand,
+  saveCardWithFeedback,
+  showIfAlreadySaved,
+} from "./lib/capture";
 
 const isHttpUrl = (value: string): boolean => {
   try {
@@ -18,19 +15,7 @@ const isHttpUrl = (value: string): boolean => {
 };
 
 export default async function SaveCurrentBrowserTabCommand() {
-  const { apiKey } = getPreferences();
-  if (!apiKey?.trim()) {
-    await showToast({
-      message: "Set your Teak API key in extension preferences to continue.",
-      primaryAction: {
-        onAction: () => {
-          void openExtensionPreferences();
-        },
-        title: "Open Preferences",
-      },
-      style: Toast.Style.Failure,
-      title: "Missing API key",
-    });
+  if (!(await ensureCredentialsForNoViewCommand())) {
     return;
   }
 
@@ -52,6 +37,10 @@ export default async function SaveCurrentBrowserTabCommand() {
       style: Toast.Style.Failure,
       title: "No active browser tab found",
     });
+    return;
+  }
+
+  if (await showIfAlreadySaved(activeTab.url)) {
     return;
   }
 

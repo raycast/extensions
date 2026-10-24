@@ -1,5 +1,6 @@
 // Comprehensive test suite for math functions and expression parsing
 import { describe, it, expect } from "@jest/globals";
+import { createAngleModeState, createTrigonometricFunctions, getAngleMode, toggleAngleMode } from "./angle-mode";
 
 // Import all math functions (we'll need to export them from the main file)
 // For now, we'll redefine them here for testing purposes
@@ -483,6 +484,39 @@ describe("Angle Conversions", () => {
     it("should handle negative angles", () => {
       expect(rad2deg(-Math.PI / 2)).toBeCloseTo(-90);
     });
+  });
+});
+
+describe("Angle Modes", () => {
+  it("uses radians without conversion in radian mode", () => {
+    const trigonometry = createTrigonometricFunctions("radians");
+
+    expect(trigonometry.sin(Math.PI / 2)).toBeCloseTo(1);
+    expect(trigonometry.cos(Math.PI)).toBeCloseTo(-1);
+    expect(trigonometry.atan(1)).toBeCloseTo(Math.PI / 4);
+  });
+
+  it("converts trigonometric inputs and inverse outputs in degree mode", () => {
+    const trigonometry = createTrigonometricFunctions("degrees");
+
+    expect(trigonometry.sin(90)).toBeCloseTo(1);
+    expect(trigonometry.cos(180)).toBeCloseTo(-1);
+    expect(trigonometry.tan(45)).toBeCloseTo(1);
+    expect(trigonometry.asin(1)).toBeCloseTo(90);
+    expect(trigonometry.acos(0)).toBeCloseTo(90);
+    expect(trigonometry.atan(1)).toBeCloseTo(45);
+  });
+
+  it("toggles between degree and radian modes", () => {
+    expect(toggleAngleMode("radians")).toBe("degrees");
+    expect(toggleAngleMode("degrees")).toBe("radians");
+  });
+
+  it("uses the configured preference when it changes", () => {
+    const storedState = createAngleModeState("degrees", "degrees");
+
+    expect(getAngleMode(storedState, "degrees")).toBe("degrees");
+    expect(getAngleMode(storedState, "radians")).toBe("radians");
   });
 });
 

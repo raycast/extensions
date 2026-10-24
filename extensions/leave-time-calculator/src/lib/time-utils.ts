@@ -7,6 +7,18 @@ function parseTime(timeStr: string): Date {
   return date;
 }
 
+function parseTimeOnDate(dateStr: string, timeStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes, 0, 0);
+}
+
+function addCalendarDay(date: Date): Date {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + 1);
+  return nextDate;
+}
+
 function getReferenceNow(currentTime?: string): Date {
   const now = new Date();
 
@@ -38,24 +50,44 @@ export function calculateLeaveTime(
   startTime: string,
   workHours: number,
   breakMinutes: number,
+  startDate?: string,
 ): string {
-  const start = parseTime(startTime);
+  return formatTime(
+    calculateLeaveDate(startTime, workHours, breakMinutes, startDate),
+  );
+}
+
+export function calculateLeaveDate(
+  startTime: string,
+  workHours: number,
+  breakMinutes: number,
+  startDate?: string,
+): Date {
+  const start = startDate
+    ? parseTimeOnDate(startDate, startTime)
+    : parseTime(startTime);
   const totalMinutes = workHours * 60 + breakMinutes;
-  const leave = new Date(start.getTime() + totalMinutes * 60000);
-  return formatTime(leave);
+  return new Date(start.getTime() + totalMinutes * 60000);
 }
 
 export function calculateRemainingTime(
   leaveTime: string,
   startTime: string | null,
   currentTime?: string,
+  startDate?: string,
+  exactLeaveDate?: Date,
 ): { hours: number; minutes: number; isPast: boolean } {
   const now = getReferenceNow(currentTime);
-  let leave = parseTime(leaveTime);
+  let leave = exactLeaveDate
+    ? new Date(exactLeaveDate)
+    : startDate
+      ? parseTimeOnDate(startDate, leaveTime)
+      : parseTime(leaveTime);
 
-  // If start time is provided and leave time < start time, treat as overnight shift
-  if (startTime) {
-    const start = parseTime(startTime);
+  if (startTime && !exactLeaveDate) {
+    const start = startDate
+      ? parseTimeOnDate(startDate, startTime)
+      : parseTime(startTime);
     if (leave < start) {
       // Example: start=22:00, leave=06:00 represents a 22:00 to next day 06:00 shift.
       // The leave time needs to represent 06:00 of the next calendar day.
@@ -67,9 +99,9 @@ export function calculateRemainingTime(
       // - now < start:
       //     Already past midnight in the early morning (e.g., 01:00).
       //     06:00 refers to today's calendar date, so no +24 hours needed.
-      if (now >= start) {
+      if (startDate || now >= start) {
         // Still on start day -> leave is tomorrow on the calendar
-        leave = new Date(leave.getTime() + 24 * 60 * 60 * 1000);
+        leave = addCalendarDay(leave);
       }
       // If now < start:
       //   We're in the "overnight shift from yesterday" but already on

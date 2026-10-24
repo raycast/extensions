@@ -2,6 +2,9 @@ import { LocalStorage } from "@raycast/api";
 import { z } from "zod";
 import { FlashcardProgress, FlashcardProgressSchema, Translation, TranslationSchema } from "./types";
 import { LanguagePair, storageKeyPrefix } from "./languages";
+import { createLogger } from "./logger";
+
+const log = createLogger("storage");
 
 function historyKey(pair: LanguagePair): string {
   return `vocabuilder-history-${storageKeyPrefix(pair)}`;
@@ -29,7 +32,12 @@ async function backupCorruptedStorage(
   if (!existingBackup) {
     await LocalStorage.setItem(backupKey, raw);
   }
-  console.error(`[storage] Corrupted data detected for "${sourceKey}". Refusing to overwrite existing data.`, error);
+  log.error("corrupted data detected; refusing overwrite", {
+    sourceKey,
+    backupKey,
+    rawChars: raw.length,
+    error: error instanceof Error ? error.message : String(error),
+  });
 }
 
 async function parseStoredArray<T>(

@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { sendPathToBlip } from "./blip";
-import { getFirstSelectedFinderPath } from "./finder";
+import { getFirstSelectedFilePath } from "./finder";
+import { fileManagerName, isMac } from "./platform";
 
 type Values = {
   path: string[];
@@ -14,14 +15,14 @@ export default function Command() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadFinderSelection() {
+    async function loadSelection() {
       try {
-        const path = await getFirstSelectedFinderPath();
+        const path = await getFirstSelectedFilePath();
         if (isMounted) {
           setSelectedPaths([path]);
         }
       } catch {
-        // Finder selection is optional for this command.
+        // File manager selection is optional for this command.
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -29,7 +30,7 @@ export default function Command() {
       }
     }
 
-    loadFinderSelection();
+    loadSelection();
 
     return () => {
       isMounted = false;
@@ -55,6 +56,10 @@ export default function Command() {
     }
   }
 
+  const servicesDescription = isMac
+    ? "Raycast needs Accessibility permission to trigger Blip's Finder Services action."
+    : "Raycast needs Accessibility permission to trigger Blip's context menu action.";
+
   return (
     <Form
       isLoading={isLoading}
@@ -64,7 +69,9 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Choose a file or folder to send. If Finder has a current selection, it will appear here automatically. Raycast needs Accessibility permission to trigger Blip's Finder Services action." />
+      <Form.Description
+        text={`Choose a file or folder to send. If ${fileManagerName} has a current selection, it will appear here automatically. ${servicesDescription}`}
+      />
       <Form.FilePicker
         id="path"
         title="File or Folder"

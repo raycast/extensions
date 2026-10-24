@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 
 import { SearchFilter, withQuery, CacheActions } from "@/components";
 import { AVATAR_TYPE, COMMAND_NAME, PAGINATION_SIZE, QUERY_TYPE, CONFLUENCE_SEARCH_CONTENT_FILTERS } from "@/constants";
@@ -163,20 +163,23 @@ function ConfluenceSearchContents() {
                         icon={Icon.Pencil}
                         title="Edit in Browser"
                         url={item.editUrl}
-                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                       />
                     )}
                     <Action.CopyToClipboard
                       title="Copy Link"
                       content={item.url}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     {item.canFavorite && (
                       <Action
                         icon={item.isFavourited ? Icon.StarDisabled : Icon.Star}
                         title={item.isFavourited ? "Remove from Favourites" : "Add to Favourites"}
                         onAction={() => handleToggleFavorite(item.id, item.isFavourited)}
-                        shortcut={{ modifiers: ["cmd"], key: "f" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "f" },
+                          Windows: { modifiers: ["ctrl"], key: "f" },
+                        }}
                       />
                     )}
                     {item.spaceUrl && (
@@ -190,7 +193,7 @@ function ConfluenceSearchContents() {
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={refetchWithToast}
                     />
                     <CacheActions />

@@ -1,5 +1,25 @@
 # Figma Files Changelog
 
+## [Nested folders support] - 2026-10-18
+
+- Lists files in nested folders using Figma's folders API. Requires a personal
+  access token with the `folders:read` scope; the browser sign-in still lists
+  top-level folders only.
+- Folders show their full path, and searching a folder name finds the files
+  inside it. Filtering by a folder includes its subfolders.
+- Fixed files not updating: a single failed folder no longer discards the
+  whole refresh, and folders that were moved or deleted are removed.
+- Requests are throttled to stay within Figma's rate limits, and errors now
+  explain what went wrong instead of always reporting an expired token.
+- Folders appear as they load, progress is kept if Raycast is closed during a
+  long first load, and the empty view shows a loading message with actions.
+
+## [Open File URL from Clipboard command] - 2026-06-15
+
+- New "Open File URL from Clipboard" command that opens the Figma file URL in
+  your clipboard, preferring the Figma desktop app when installed.
+- Updated dependencies.
+
 ## [Adds cache clearing action] - 2025-10-30
 
 - More granular Oauth scopes for Figma

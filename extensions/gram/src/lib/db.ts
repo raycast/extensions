@@ -1,4 +1,4 @@
-import { execFilePromise } from "./utils";
+import { execFilePromise } from "./shell";
 
 /**
  * Minimum supported WorkspaceDb schema version.

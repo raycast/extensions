@@ -1,12 +1,4 @@
-import {
-  Application,
-  getPreferenceValues,
-  open,
-  openExtensionPreferences,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Application, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
@@ -52,13 +44,65 @@ function getUrlCondition(preference: UrlPreference): string {
 }
 
 /**
+ * Handles AppleScript errors by extracting the error message and showing an appropriate toast.
+ */
+function handleAppleScriptError(error: unknown, browserName: string): void {
+  const message = (error as { stderr?: string })?.stderr || (error as { message?: string })?.message || String(error);
+
+  if (message.includes("Allow JavaScript from Apple Events")) {
+    showToast({
+      title: "Enable JavaScript from Apple Events",
+      message: `Please enable "Allow JavaScript from Apple Events" in ${browserName}'s Develop menu.`,
+      style: Toast.Style.Failure,
+      primaryAction: {
+        onAction: () => {
+          open("https://www.raycast.com/danieldbird/youtube-music");
+        },
+        title: "🔗 How to enable JavaScript from Apple Events",
+      },
+    });
+    return;
+  }
+
+  if (
+    message.includes("not allowed to send") ||
+    message.includes("not allowed assistive") ||
+    message.includes("privacy")
+  ) {
+    showToast({
+      title: "Automation Permission Needed",
+      message: `macOS blocked the script from controlling ${browserName}. Check System Settings → Privacy & Security → Automation.`,
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
+  if (message.includes("can't get window") || message.includes("not running")) {
+    showToast({
+      title: "Browser Not Available",
+      message: `${browserName} doesn't appear to be running or doesn't support AppleScript.`,
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
+  showToast({
+    title: "AppleScript Execution Failed",
+    message: message.slice(0, 200),
+    style: Toast.Style.Failure,
+  });
+}
+
+/**
  * Executes JavaScript inside a matching YouTube or YouTube Music tab in the selected browser.
  */
 export async function runJSInYouTubeMusicTab(code: string): Promise<string | undefined> {
   const preferences = getPreferenceValues<Preferences>();
   const { browser, urlPreference } = preferences;
 
-  const result = await runAppleScript(`
+  let result: string;
+  try {
+    result = await runAppleScript(`
       tell application "${browser.name}"
         repeat with w in (every window)
           repeat with t in (every tab whose ${getUrlCondition(urlPreference)}) of w
@@ -74,11 +118,15 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
       end tell
       return "no-matching-tab"
     `);
+  } catch (error) {
+    handleAppleScriptError(error, browser.name);
+    return undefined;
+  }
 
   if (result.includes("Allow JavaScript from Apple Events")) {
     showToast({
       title: "Enable JavaScript from Apple Events",
-      message: 'Please enable "Allow JavaScript from Apple Events" in your browser\'s Develop menu.',
+      message: `Please enable "Allow JavaScript from Apple Events" in ${browser.name}'s Develop menu.`,
       style: Toast.Style.Failure,
       primaryAction: {
         onAction: () => {
@@ -87,7 +135,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
         title: "🔗 How to enable JavaScript from Apple Events",
       },
     });
-    throw new Error('⚠️ Enable "Allow JavaScript from Apple Events" in your browser\'s Develop menu.');
+    return undefined;
   }
 
   if (result.includes("JS Error")) {
@@ -96,7 +144,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
       message: result.split("JS Error: ")[1],
       style: Toast.Style.Failure,
     });
-    throw new Error(result.split("JS Error: ")[1]);
+    return undefined;
   }
 
   if (result === "no-matching-tab") {
@@ -105,7 +153,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
       message: "Please open a YouTube or YouTube Music tab in the selected browser",
       style: Toast.Style.Failure,
     });
-    throw new Error("No matching tab found");
+    return undefined;
   }
 
   return result;

@@ -33,7 +33,7 @@ export const parseUsageData = (response: CopilotInternalUserResponse): CopilotUs
   const chatMessagesLimit = chatSnapshot?.unlimited ? null : (chatSnapshot?.entitlement ?? 0);
   const chatMessagesCurrent = getConsumedPercentage(chatSnapshot);
 
-  // Extract premium interactions (premium requests)
+  // Extract premium interactions (AI credits)
   const premiumSnapshot = snapshots.premium_interactions;
   const premiumRequestsLimit = premiumSnapshot?.unlimited ? null : (premiumSnapshot?.entitlement ?? 0);
   const premiumRequestsCurrent = getConsumedPercentage(premiumSnapshot);

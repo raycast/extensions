@@ -15,7 +15,7 @@ import {
 import { AddNewTodo } from '../add-new-todo';
 import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
 import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '../helpers';
-import { capitalize } from '../utils';
+import { capitalize, getDateString } from '../utils';
 
 import EditTodo from './EditTodo';
 import OpenInThings from './OpenInThings';
@@ -179,10 +179,7 @@ New title:
   }
 
   function formatDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const datePart = `${year}-${month}-${day}`;
+    const datePart = getDateString(date);
 
     // If the user picked a full day, we avoid providing the time, as
     // Things leverages the time part to understand whether a reminder
@@ -199,7 +196,9 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        {!fromDetail && (
+        {fromDetail ? (
+          <OpenInThings id={todo.id} title="Open in Things" />
+        ) : (
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
@@ -223,7 +222,6 @@ New title:
             }
           />
         )}
-        <OpenInThings id={todo.id} title="Open in Things" />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
@@ -244,10 +242,12 @@ New title:
             }
           />
         )}
+
+        {!fromDetail && <OpenInThings id={todo.id} title="Open in Things" />}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={{ modifiers: ['cmd'], key: 's' }}>
+        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={Keyboard.Shortcut.Common.Save}>
           <Action {...listItems.today} onAction={() => schedule('today')} />
           <Action {...listItems.evening} onAction={() => schedule('evening')} />
           <Action {...listItems.tomorrow} onAction={() => schedule('tomorrow')} />
@@ -318,17 +318,19 @@ New title:
           <Action
             title="Generate Checklist with AI"
             icon={Icon.BulletPoints}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={generateChecklistWithAI}
           />
         )}
 
-        <Action
-          title="Make To-Do Actionable with AI"
-          icon={Icon.Text}
-          shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
-          onAction={makeTodoActionable}
-        />
+        {environment.canAccess(AI) && (
+          <Action
+            title="Make To-Do Actionable with AI"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
+            onAction={makeTodoActionable}
+          />
+        )}
 
         <Action
           title="Delete"
@@ -344,7 +346,7 @@ New title:
           <Action.OpenInBrowser
             title="Open URL from Notes"
             url={notesURL}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           <Action.CopyToClipboard title="Copy URL from Notes" content={notesURL} />
         </ActionPanel.Section>
@@ -396,13 +398,13 @@ New title:
         <Action.Open
           title={`Open ${capitalize(commandListName)} List in Things`}
           icon="things-flat.png"
-          shortcut={{ modifiers: ['ctrl'], key: 'o' }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           target={`things:///show?id=${commandListName.toLowerCase()}`}
         />
         <Action.Push
           title="Add New To-Do"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<AddNewTodo commandListName={commandListName} />}
         />
         <Action.CopyToClipboard title="Copy List URL" content={`things:///show?id=${commandListName.toLowerCase()}`} />
@@ -411,7 +413,7 @@ New title:
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ['cmd'], key: 'r' }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={refreshTodos}
         />
       </ActionPanel.Section>

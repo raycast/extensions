@@ -18,23 +18,23 @@
 ## 🚫 Cannot Be Implemented
 
 <details>
-<summary><strong>🖥️ Live Shell Command Execution</strong></summary>
+<summary><strong>🖥️ Interactive Shell Sessions</strong></summary>
 
 |                             |                                                                                                                                   |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **What users might expect** | Execute shell commands and see real-time output within the extension                                                              |
-| **Why it's not possible**   | Raycast extensions run in a sandboxed JavaScript environment without access to spawn child processes or capture stdout/stderr     |
+| **What users might expect** | A live interactive terminal session inside the extension                                                                          |
+| **What is actually limited**| Raycast has no terminal UI component, so there is nowhere to host an interactive session. Extensions **can** spawn child processes and capture stdout/stderr (they run in Node with `node:child_process` available); one-shot command execution is possible, an interactive TTY is not |
 | **Workaround**              | Use `Action.Open` to open Terminal.app or iTerm with a command, or `Action.CopyToClipboard` to copy commands for manual execution |
 
 </details>
 
 <details>
-<summary><strong>👁️ Real-Time File Watching</strong></summary>
+<summary><strong>👁️ Background File Watching</strong></summary>
 
 |                             |                                                                                                                                                 |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **What users might expect** | Automatic refresh when `~/.zshrc` is modified externally                                                                                        |
-| **Why it's not possible**   | Raycast extensions cannot run persistent background processes or register file system watchers. The extension only runs when explicitly invoked |
+| **What users might expect** | Automatic refresh when `~/.zshrc` is modified externally, even while the extension is closed                                                    |
+| **What is actually limited**| Extensions cannot run persistent *background* processes — nothing runs while no command is open. While a command **is** open, `fs.watch` works normally; only watching-while-closed is impossible |
 | **Workaround**              | Manual refresh via `Cmd+R`. The extension checks file modification timestamps on launch to invalidate stale caches                              |
 
 </details>
@@ -89,7 +89,7 @@
 |                             |                                                                                                                                                          |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **What users might expect** | Real syntax checking using zsh's parser (equivalent to `zsh -n`)                                                                                         |
-| **Why it's not possible**   | This would require executing `zsh -n` and capturing its output, which is not possible in the sandbox                                                     |
+| **What is actually limited**| Executing `zsh -n` **is** technically possible (extensions can spawn child processes), but it is not done automatically: it costs a subprocess per check and its diagnostics are line-oriented and hard to map back to the UI. A future explicit action may adopt it |
 | **Workaround**              | The extension performs structural validation (unmatched quotes, basic pattern matching) using JavaScript regex, but cannot catch all shell syntax errors |
 
 </details>

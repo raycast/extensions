@@ -1,7 +1,7 @@
 import { Clipboard } from "@raycast/api";
 import { ClipboardAdapter } from "../core/adapters/index.js";
 import { mdlog } from "../core/logging.js";
-import { debugConfig, createUtf8Env } from "../core/env.js";
+import { debugConfig } from "../core/env.js";
 
 const debugLog = (...args: unknown[]) => {
   if (debugConfig.clipboardDebug) {
@@ -11,56 +11,31 @@ const debugLog = (...args: unknown[]) => {
 
 export class RaycastClipboardAdapter implements ClipboardAdapter {
   /**
-   * Raycast launches processes with a complex locale that pbpaste doesn't understand.
-   * We must ensure UTF-8 encoding, otherwise emoji get corrupted into question marks.
+   * Read the rich-text (HTML) flavor of the clipboard.
    *
-   * Solution: Override with a simple UTF-8 locale that pbpaste understands.
-   * We try to preserve the user's language preference when possible.
+   * Uses the first-class `Clipboard.read()` API, which exposes the HTML
+   * representation of the clipboard (the `public.html` pasteboard flavor on
+   * macOS) when one is present. This is the supported, cross-platform way to
+   * read clipboard HTML and works inside the Raycast extension runtime.
+   *
+   * Earlier versions shelled out to `pbpaste -Prefer public.html` via
+   * `child_process`. That hack was macOS-only and stopped working in the
+   * Raycast 2 worker-thread runtime, which is why the extension appeared to do
+   * nothing. See https://github.com/raycast/extensions/issues/28973.
    */
-  private getExecOptions(): { encoding: string; env: Record<string, string> } {
-    return { encoding: "utf8", env: createUtf8Env() };
-  }
-
   async readHtml(): Promise<string | null> {
     try {
-      debugLog("Attempting to read HTML from system clipboard...");
+      debugLog("Reading HTML flavor via Clipboard.read()...");
 
-      // Use dynamic import to avoid TypeScript issues
-      const { execSync } = await import("child_process");
+      const { html } = await Clipboard.read();
 
-      const execOptions = this.getExecOptions();
-
-      // Try the public.html format which we know works for Word/Office content
-      try {
-        debugLog("Reading HTML from public.html format...");
-        const content = execSync("pbpaste -Prefer public.html", {
-          ...execOptions,
-          encoding: "utf8",
-        });
-
-        if (content && typeof content === "string" && content.trim()) {
-          // Check if it actually contains HTML tags
-          if (content.includes("<") && content.includes(">")) {
-            debugLog(`Found HTML content (${content.length} chars):`, content.substring(0, 200) + "...");
-
-            return content;
-          }
+      if (typeof html === "string" && html.trim()) {
+        // Only treat it as rich text if it actually contains markup, so a
+        // plain-text clipboard isn't mistaken for HTML.
+        if (html.includes("<") && html.includes(">")) {
+          debugLog(`Found HTML content (${html.length} chars):`, html.substring(0, 200) + "...");
+          return html;
         }
-      } catch (error) {
-        debugLog("public.html format failed:", error);
-      }
-
-      // Try default pbpaste without format specification
-      try {
-        debugLog("Trying default pbpaste...");
-        const defaultContent = execSync("pbpaste", {
-          ...execOptions,
-          encoding: "utf8",
-        });
-
-        debugLog("Default content:", typeof defaultContent, defaultContent.length, defaultContent.substring(0, 100));
-      } catch (error) {
-        debugLog("Default pbpaste failed:", error);
       }
 
       debugLog("No HTML content found in clipboard");

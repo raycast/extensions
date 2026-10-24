@@ -1,7 +1,8 @@
 import { Icon, MenuBarExtra, open, showHUD, launchCommand, LaunchType } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { LANGUAGES } from "./components";
 import { SAPSystem } from "./types";
-import { createAndOpenSAPCFile, getSAPSystems } from "./utils";
+import { createAndOpenSAPCFile, getSAPSystems, groupSystemsByCustomer, SYSTEM_TYPE_LABELS } from "./utils";
 
 export default function Command() {
   const { data: systems = [], isLoading } = useCachedPromise(getSAPSystems);
@@ -10,11 +11,11 @@ export default function Command() {
     return error instanceof Error ? error.message : "Unknown error";
   }
 
-  async function handleConnect(system: SAPSystem) {
+  async function handleConnect(system: SAPSystem, language?: string) {
     try {
-      const filePath = await createAndOpenSAPCFile(system);
+      const filePath = await createAndOpenSAPCFile(system, language);
       await open(filePath);
-      await showHUD(`Connecting to ${system.systemId} (Client ${system.client})`);
+      await showHUD(`Connecting to ${system.customerName} – ${system.systemId} (Client ${system.client})`);
     } catch (error) {
       await showHUD(`Failed to connect to ${system.systemId}: ${formatError(error)}`);
     }
@@ -37,21 +38,43 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra icon={Icon.Globe} tooltip="SAP Quick Connect" isLoading={isLoading}>
+    <MenuBarExtra
+      icon={{ source: { light: "sap-bar.png", dark: "sap-bar@dark.png" } }}
+      tooltip="SAP Quick Connect"
+      isLoading={isLoading}
+    >
       {systems.length === 0 ? (
         <MenuBarExtra.Item title="No SAP Systems Configured" icon={Icon.Warning} onAction={openAddSystem} />
       ) : (
-        <MenuBarExtra.Section title="SAP Systems">
-          {systems.map((system) => (
-            <MenuBarExtra.Item
-              key={system.id}
-              icon={Icon.Link}
-              title={`${system.systemId} - Client ${system.client}`}
-              subtitle={system.username}
-              onAction={() => handleConnect(system)}
-            />
-          ))}
-        </MenuBarExtra.Section>
+        groupSystemsByCustomer(systems).map(({ customerName, systems: customerSystems }) => (
+          <MenuBarExtra.Section key={customerName} title={customerName}>
+            {customerSystems.map((system) =>
+              system.language ? (
+                <MenuBarExtra.Item
+                  key={system.id}
+                  icon={Icon.Link}
+                  title={`${system.systemType} – ${system.systemId} (Client ${system.client})`}
+                  subtitle={SYSTEM_TYPE_LABELS[system.systemType]}
+                  onAction={() => handleConnect(system)}
+                />
+              ) : (
+                <MenuBarExtra.Submenu
+                  key={system.id}
+                  icon={Icon.Link}
+                  title={`${system.systemType} – ${system.systemId} (Client ${system.client})`}
+                >
+                  {LANGUAGES.map((lang) => (
+                    <MenuBarExtra.Item
+                      key={lang.value}
+                      title={lang.title}
+                      onAction={() => handleConnect(system, lang.value)}
+                    />
+                  ))}
+                </MenuBarExtra.Submenu>
+              ),
+            )}
+          </MenuBarExtra.Section>
+        ))
       )}
 
       <MenuBarExtra.Section>

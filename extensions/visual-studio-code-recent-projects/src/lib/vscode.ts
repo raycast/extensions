@@ -84,23 +84,51 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
+
+function macApplicationPath(appName: string, ...segments: string[]) {
+  const candidates = [
+    path.join("/Applications", appName, ...segments),
+    path.join(os.homedir(), "Applications", appName, ...segments),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
+function macAntigravityCliPath(): string {
+  return macApplicationPath("Antigravity IDE.app", "Contents", "Resources", "app", "bin", "antigravity-ide");
+}
+
+function macAntigravityProgramPath(): string {
+  return macApplicationPath("Antigravity IDE.app", "Contents", "Resources", "app");
+}
+
+function windowsAntigravityCliPath(programsFolder: string): string {
+  return path.join(programsFolder, "Antigravity IDE", "bin", "antigravity-ide.cmd");
+}
+
+function windowsAntigravityProgramPath(programsFolder: string): string {
+  return path.join(programsFolder, "Antigravity IDE");
+}
+
 function cliPaths(): Record<string, string> {
   let cliPaths: Record<string, string> = {};
 
   if (isWin) {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
-      Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
+      "Antigravity IDE": windowsAntigravityCliPath(programsFolder),
       Code: resolveWindowsVSCodePath(path.join("Microsoft VS Code", "bin", "code.cmd")),
       "Code - Insiders": resolveWindowsVSCodePath(path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd")),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
       Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob", "bin", "bobide.cmd"),
       Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
       Qoder: path.join(programsFolder, "Qoder", "bin", "code.cmd"),
       Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
       "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
       VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Devin: path.join(programsFolder, "Devin", "bin", "devin-desktop.cmd"),
       Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
       Lingma: path.join(programsFolder, "Lingma", "bin", "lingma.cmd"),
     };
@@ -108,26 +136,42 @@ function cliPaths(): Record<string, string> {
 
   if (isMac) {
     cliPaths = {
-      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
-      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
-      Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
-      Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
-      Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
-      Qoder: "/Applications/Qoder.app/Contents/Resources/app/bin/code",
-      Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
-      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
-      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
-      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
-      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
-      Lingma: "/Applications/Lingma.app/Contents/Resources/app/bin/code",
+      "Antigravity IDE": macAntigravityCliPath(),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code"),
+      "Code - Insiders": macApplicationPath(
+        "Visual Studio Code - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "code",
+      ),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app", "bin", "cursor"), // it also has code, which is an alias
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app", "bin", "bobide"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app", "bin", "kiro"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app", "bin", "code"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app", "bin", "code"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app", "bin", "marscode"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app", "bin", "marscode"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app", "bin", "codium"),
+      "VSCodium - Insiders": macApplicationPath(
+        "VSCodium - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "codium-insiders",
+      ),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app", "bin", "devin-desktop"),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app", "bin", "windsurf"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app", "bin", "code"),
     };
   }
 
   return cliPaths;
 }
 
-export function getVSCodeCLIFilename(): string {
+function getVSCodeCLIFilename(): string {
   const availableCliPaths = cliPaths();
   const name = availableCliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
@@ -142,10 +186,11 @@ function programPaths(): Record<string, string> {
   if (isWin) {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     programPaths = {
-      Antigravity: path.join(programsFolder, "Antigravity"),
+      "Antigravity IDE": windowsAntigravityProgramPath(programsFolder),
       Code: resolveWindowsVSCodePath("Microsoft VS Code"),
       "Code - Insiders": resolveWindowsVSCodePath("Microsoft VS Code Insiders"),
       Cursor: path.join(programsFolder, "cursor"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob"),
       Kiro: path.join(programsFolder, "Kiro"),
       Positron: path.join(programsFolder, "Positron"),
       Qoder: path.join(programsFolder, "Qoder"),
@@ -153,6 +198,7 @@ function programPaths(): Record<string, string> {
       "Trae CN": path.join(programsFolder, "Trae CN"),
       VSCodium: path.join(programsFolder, "VSCodium"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders"),
+      Devin: path.join(programsFolder, "Devin"),
       Windsurf: path.join(programsFolder, "Windsurf"),
       Lingma: path.join(programsFolder, "Lingma"),
     };
@@ -160,19 +206,21 @@ function programPaths(): Record<string, string> {
 
   if (isMac) {
     programPaths = {
-      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app",
-      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app",
-      Cursor: "/Applications/Cursor.app/Contents/Resources/app",
-      Kiro: "/Applications/Kiro.app/Contents/Resources/app",
-      Positron: "/Applications/Positron.app/Contents/Resources/app",
-      Qoder: "/Applications/Qoder.app/Contents/Resources/app",
-      Trae: "/Applications/Trae.app/Contents/Resources/app",
-      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app",
-      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app",
-      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app",
-      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app",
-      Lingma: "/Applications/Lingma.app/Contents/Resources/app",
+      "Antigravity IDE": macAntigravityProgramPath(),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app"),
+      "Code - Insiders": macApplicationPath("Visual Studio Code - Insiders.app", "Contents", "Resources", "app"),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app"),
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app"),
+      "VSCodium - Insiders": macApplicationPath("VSCodium - Insiders.app", "Contents", "Resources", "app"),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app"),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app"),
     };
   }
 
@@ -201,7 +249,7 @@ function resolveWindowsProductJSONPath(installDir: string): string {
               name,
               stats: fs.statSync(path.join(installDir, name)),
             }))
-            .sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs)[0]?.name;
+            .reduce((latest, current) => (current.stats.mtimeMs > latest.stats.mtimeMs ? current : latest)).name;
 
     const productJSONPath = versionedResourcesDir
       ? path.join(installDir, versionedResourcesDir, "resources", "app", "product.json")
@@ -224,11 +272,11 @@ export function getProductJSONPath(): string {
   return path.join(programPath, "product.json");
 }
 
-export class VSCodeCLI {
+class VSCodeCLI {
   private cliFilename: string;
-  private execOptions: child_process.ExecFileOptions | undefined;
+  private execOptions: child_process.ExecFileSyncOptions | undefined;
   constructor(cliFilename: string) {
-    this.cliFilename = `"${cliFilename}"`;
+    this.cliFilename = isWin ? `"${cliFilename}"` : cliFilename;
     this.execOptions = isWin ? { shell: true } : undefined;
   }
 
@@ -254,6 +302,10 @@ export class VSCodeCLI {
       [reuseWindow ? "--reuse-window" : "--new-window", "--file-uri", uri],
       this.execOptions,
     );
+  }
+
+  openAgentsWindowSync() {
+    child_process.execFileSync(this.cliFilename, ["--agents"], this.execOptions);
   }
 
   async newWindow() {
@@ -305,9 +357,9 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
   const extensionsRootFolder = path.join(os.homedir(), `.${getBuildScheme()}/extensions`);
-  const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
-  if (await fileExists(extensionsManifrestFilename)) {
-    const data = await afs.readFile(extensionsManifrestFilename, { encoding: "utf-8" });
+  const extensionsManifestFilename = path.join(extensionsRootFolder, "extensions.json");
+  if (await fileExists(extensionsManifestFilename)) {
+    const data = await afs.readFile(extensionsManifestFilename, { encoding: "utf-8" });
     const extensions = JSON.parse(data) as ExtensionMetaRoot[] | undefined;
     if (extensions && extensions.length > 0) {
       const result: Extension[] = [];
@@ -339,20 +391,99 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
 }
 
 export function getBuildNamePreference(): string {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const build = prefs.build as string;
+  // The preference value stays "Antigravity" so existing settings keep working,
+  // but the app was rebranded to "Antigravity IDE".
+  if (build === "Antigravity") {
+    return "Antigravity IDE";
+  }
   return build;
 }
 
+function getExtensionsGallery(): { serviceUrl?: string; itemUrl?: string } {
+  try {
+    const productJSONPath = getProductJSONPath();
+    if (productJSONPath && fs.existsSync(productJSONPath)) {
+      const productJSON = JSON.parse(fs.readFileSync(productJSONPath, "utf-8")) as {
+        extensionsGallery?: { serviceUrl?: string; itemUrl?: string };
+      };
+      return productJSON.extensionsGallery ?? {};
+    }
+  } catch {
+    // Ignore unreadable product.json and fall back to the build default below.
+  }
+  return {};
+}
+
+function getExtensionsGalleryServiceUrl(): string | undefined {
+  return getExtensionsGallery().serviceUrl;
+}
+
+export function getExtensionsGalleryName(): string {
+  const serviceUrl = getExtensionsGalleryServiceUrl();
+  if (serviceUrl) {
+    const normalizedUrl = serviceUrl.toLowerCase();
+    if (normalizedUrl.includes("marketplace.visualstudio.com")) return "VS Code Marketplace";
+    // Cursor routes Open VSX through its own proxy (marketplace.cursorapi.com),
+    // so treat Cursor hosts as Open VSX as well.
+    if (normalizedUrl.includes("open-vsx.org") || normalizedUrl.includes("cursor")) return "Open VSX";
+    // Custom marketplace URL configured in the app — show its host.
+    try {
+      return new URL(normalizedUrl).host;
+    } catch {
+      return serviceUrl;
+    }
+  }
+  // Fall back to the build default when product.json is unavailable.
+  const build = getBuildNamePreference();
+  return build === "Code" || build === "Code - Insiders" ? "VS Code Marketplace" : "Open VSX";
+}
+
+const FALLBACK_GALLERY_QUERY_URL =
+  "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
+
+/**
+ * The gallery query endpoint for the selected app's configured marketplace
+ * (`extensionsGallery.serviceUrl` in its `product.json`). Open VSX and its
+ * proxies implement the same gallery API as the VS Code Marketplace, so the
+ * same request body works. Falls back to the VS Code Marketplace endpoint
+ * when `product.json` is unavailable.
+ */
+export function getExtensionsGalleryQueryUrl(): string {
+  const serviceUrl = getExtensionsGalleryServiceUrl()?.replace(/\/+$/, "");
+  if (!serviceUrl) {
+    return FALLBACK_GALLERY_QUERY_URL;
+  }
+  return `${serviceUrl}/extensionquery?api-version=3.0-preview.1`;
+}
+
+const FALLBACK_GALLERY_ITEM_URL = "https://marketplace.visualstudio.com/items";
+
+/**
+ * The web page for an extension in the selected app's configured marketplace
+ * (`extensionsGallery.itemUrl` in its `product.json`). Open VSX implements
+ * the same `?itemName=` adapter as the VS Code Marketplace, so the same shape
+ * works for both. Falls back to the VS Code Marketplace page when
+ * `product.json` is unavailable.
+ */
+export function getExtensionsGalleryItemUrl(extensionID: string): string {
+  const itemUrl = getExtensionsGallery().itemUrl?.replace(/\/+$/, "") || FALLBACK_GALLERY_ITEM_URL;
+  return `${itemUrl}?itemName=${extensionID}`;
+}
+
 const buildSchemes: Record<string, string> = {
-  Antigravity: "antigravity",
+  "Antigravity IDE": "antigravity-ide",
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
   Cursor: "cursor",
+  "IBM Bob": "bobide",
   Kiro: "kiro",
   VSCodium: "vscode-oss",
+  "VSCodium - Insiders": "vscode-oss-insiders",
   Positron: "positron",
   Qoder: "qoder",
+  Devin: "devin",
   Windsurf: "windsurf",
   Trae: "trae",
   "Trae CN": "trae-cn",

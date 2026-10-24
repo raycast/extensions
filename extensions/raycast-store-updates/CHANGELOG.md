@@ -1,5 +1,80 @@
 # Raycast Store Updates Changelog
 
+## [Add Ask AI Command] - 2026-09-27
+
+- Add a Raycast AI tool for finding recent new and updated Store extensions by keyword, update type, number of days, or start date, with descriptions, dates, and links
+- Allow AI queries to show updates for extensions installed locally
+- Cache successful AI scans for 10 minutes to reduce GitHub API use
+- Show new extensions from the Store feed when GitHub updates are unavailable
+- Warn when the GitHub results do not cover the requested date range
+- Identify the pull request submitter for updates and use the pull request title to summarize changes
+
+## [Commit Links in Version History] - 2026-09-25
+
+- Version History rows can open or copy the `raycast/extensions` commit that added that version.
+- "Open in Raycast Store" is now "View Extension in Store", and Version History's "Open in Browser" is now "Open Changelog in Browser" (it opens the changelog rather than the Store page).
+- "Check for Extension Updates" is now "Update Installed Extensions", to set it apart from Refresh: it runs Raycast's updater on your installed extensions.
+
+## [US English] - 2026-09-24
+
+- Use US English spelling throughout the extension and its README
+
+## [Version History, Working My Updates, and Update Checks] - 2026-09-23
+
+- New extension icon
+- The changelog view is now a Version History: one row per version, dated where the changelog gives a date, with the full notes in a side pane
+- Copy the version you are looking at with "Copy Changes" (⌘⇧C), the newest one with "Copy Latest Changes", or the entire file with "Copy Changelog"
+- Fix "My Updates" and the menu bar's "My Updates" scope showing nothing: installed extensions are now identified correctly, including ones installed from the Store and ones you have never opened
+- If installed extensions cannot be determined, "My Updates" now shows all updates instead of wrongly claiming you have none
+- Refresh now re-checks which extensions you have installed, so a newly installed extension's updates appear without reopening the command
+- Fix an extension's newest update sometimes being hidden behind an older one, when the older pull request had seen more recent activity
+- Fix removed extensions sometimes not being reported when used without a GitHub token
+- Add a "Check for Extension Updates" action to the list (⌘⇧U) and the menu bar
+- "Open in Raycast Store" is now ⌥⇧⌘O, matching the Store's own shortcut
+
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x and `@raycast/utils` 2.x
+
+## [Fix Windows crash, reduce API usage, and improve the menu bar] - 2026-07-31
+
+- Fix a `TypeError: e is not iterable` crash reported on Windows. The GitHub API does not always answer an array-returning endpoint with an array, and on Windows requests traverse a system proxy that can return an HTML error page or an empty body with a 200 status. Responses are now parsed defensively instead of being cast and iterated
+- Handle every non-OK GitHub status, not just 403 and 429, which previously fell through to an unchecked cast
+- Only treat a 403 as a rate limit when GitHub reports the quota is actually exhausted. A 403 from a proxy or VPN carries no rate-limit headers and was starting an hour-long cooldown GitHub never asked for
+- Never invent a cooldown longer than the evidence supports: without a reset header the wait is the ordinary 5 minutes rather than a fabricated hour, and a stored cooldown beyond GitHub's one-hour window now self-heals
+- Reduce GitHub API usage: extension slugs are resolved from the `extension:` label already present in the pull-request response, and the per-pull-request file lookup is now capped per refresh so a single scan can no longer exhaust the hourly budget
+- Only adopt a slug the pull request's own label asserts. A branch name that happens to match another extension could previously produce the wrong store link and changelog
+- Fix duplicate entries when two removal pull requests deleted the same extension
+- Only report an extension as removed on a definitive 404, so a transient server error or rate limit no longer marks a live extension as deleted
+- Keep previously loaded updates on screen when a refresh fails, instead of clearing the list
+- Show the extension's own icon in the menu bar, with rounded corners in both the menu bar and the main list
+- Hold ⌥ on a menu bar item to open that extension's changelog inside Raycast instead of its store page
+- Add a preference for whether the menu bar counts all updates or only updates for extensions you have installed
+- Show recent activity in the menu bar on first run, instead of an empty badge until the next extension ships
+- Fix "Mark All as Seen" marking items seen that were never shown
+- Add an icon to every category tag, matching the Raycast Store's category styling
+- Fix the macOS platform icon being nearly invisible in dark mode
+- Add an experimental, opt-in GraphQL transport for the pull-request list. It requires a GitHub token — GraphQL has no unauthenticated tier — and falls back to REST without one or on any error. REST remains the default
+- Failure toasts now carry a "Copy Error" action
+
+## [Menu bar, category and author filters, GitHub token, and reliability fixes] - 2026-06-16
+
+- Add an optional menu-bar command with a badge showing the number of new and updated extensions since you last checked, a dropdown of recent items, "Mark All as Seen", and hourly background refresh
+- Add category and author filters: filter by any category present in the list, or "Show Only This Author" from any item, with a "Clear Filters" action
+- Add an optional GitHub personal access token preference that raises the API rate limit from 60 to 5,000 requests/hour, used for all update and removal detection calls
+- Group the list into time sections (Today, Yesterday, Previous 7 Days, Previous 30 Days, Earlier) for easier scanning, each showing its item count
+- Sort every filter tab (New, Updates, My Updates, Removed) newest-first, consistently with the All tab
+- Fix manual refresh being incorrectly blocked for the rest of the GitHub hourly window: the rate-limit cooldown is now set only on an actual 403/429 (or exhausted quota), not on every successful fetch
+- Cache extension `package.json` lookups (6h TTL) and bound network concurrency, eliminating the burst of uncached requests fired on every command open
+- Fix a race condition where revalidating could overwrite fresh data with stale results, and stop the updates pipeline from re-running redundantly when the feed merely reloads
+- Fall back to the PR's changed file paths when a title-derived slug doesn't resolve, avoiding wrong store URLs
+- Validate the remote `platforms` field before use to avoid crashes on malformed `package.json`
+- Keep previously loaded updates (and show a clear toast) when rate limited, instead of emptying the list
+- Show a loading state while updates are still being processed instead of a premature "No Extensions Found"
+- Add Windows keyboard-shortcut variants for read-status, copy-URL, and changelog actions
+- Fix "Previous Changelog" navigation when a changelog is opened directly from a mid-list item
+- Await refresh so the "Refreshing…" state is shown correctly
+
 ## [Add platform filter shortcuts] - 2026-04-30
 
 - Add keyboard shortcuts for toggling macOS-only and Windows-only extension filters

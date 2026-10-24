@@ -29,16 +29,18 @@ export type RemoteWorkspaceEntry = {
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry | RemoteWorkspaceEntry;
 
 export enum VSCodeBuild {
-  Antigravity = "Antigravity",
+  AntigravityIDE = "Antigravity IDE",
   Code = "Code",
   CodeInsiders = "Code - Insiders",
   Cursor = "Cursor",
+  IBMBob = "IBM Bob",
   Kiro = "Kiro",
   Positron = "Positron",
   Trae = "Trae",
   TraeCN = "Trae CN",
   VSCodium = "VSCodium",
   VSCodiumInsiders = "VSCodium - Insiders",
+  Devin = "Devin",
   Windsurf = "Windsurf",
   Lingma = "Lingma",
 }

@@ -1,24 +1,19 @@
 import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
-import fs from "fs/promises";
-import os from "os";
-import path from "path";
-import { execFile } from "child_process";
-import { promisify } from "util";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { extractErrorMessage } from "./utils/errors";
-import { expandTilde, pathExists } from "./utils/fs";
 import { LOGOS_BUNDLE_ID } from "./logos/constants";
 import { encodeForRefLy } from "./utils/encodeForRefLy";
-
-const execFileAsync = promisify(execFile);
+import {
+  type AutoCompleteInfo,
+  buildAutocompleteSearchTerms,
+  escapeSql,
+  normalizeAutocompleteRow,
+  resolveAutoComplete,
+  runSqliteQuery,
+} from "./utils/autocomplete";
 
 type Preferences = {
   autocompletePath?: string;
-};
-
-type AutoCompleteInfo = {
-  path: string;
-  mtimeMs: number;
 };
 
 type WordSense = {
@@ -27,8 +22,6 @@ type WordSense = {
   description?: string | null;
 };
 
-const SQLITE_BIN = "/usr/bin/sqlite3";
-const SQLITE_JSON_BUFFER = 16 * 1024 * 1024;
 const MIN_QUERY_LENGTH = 2;
 const RESULT_LIMIT = 75;
 const ENGLISH_LANGUAGE = "en";
@@ -233,58 +226,8 @@ function getEmptyState(params: {
   return { title: "No matches", description: "Try a different spelling.", icon: Icon.Text };
 }
 
-async function resolveAutoComplete(preferences: Preferences): Promise<AutoCompleteInfo> {
-  const override = preferences.autocompletePath?.trim();
-  if (override) {
-    const fullPath = expandTilde(override);
-    if (!(await pathExists(fullPath))) {
-      throw new Error(`AutoComplete.db not found at ${fullPath}`);
-    }
-    const stats = await fs.stat(fullPath);
-    return { path: fullPath, mtimeMs: stats.mtimeMs };
-  }
-
-  const supportDir = path.join(os.homedir(), "Library", "Application Support");
-  const dataRoots = [
-    path.join(supportDir, "Logos4", "Data"),
-    path.join(supportDir, "Logos", "Data"),
-    path.join(supportDir, "Verbum4", "Data"),
-    path.join(supportDir, "Verbum", "Data"),
-  ];
-
-  const dbMatches: AutoCompleteInfo[] = [];
-  const seenRoots = new Set<string>();
-
-  for (const dataDir of dataRoots) {
-    if (seenRoots.has(dataDir) || !(await pathExists(dataDir))) {
-      continue;
-    }
-    seenRoots.add(dataDir);
-
-    const accounts = await fs.readdir(dataDir, { withFileTypes: true });
-    for (const account of accounts) {
-      if (!account.isDirectory()) {
-        continue;
-      }
-
-      const candidate = path.join(dataDir, account.name, "AutoComplete", "AutoComplete.db");
-      if (await pathExists(candidate)) {
-        const stats = await fs.stat(candidate);
-        dbMatches.push({ path: candidate, mtimeMs: stats.mtimeMs });
-      }
-    }
-  }
-
-  if (dbMatches.length === 0) {
-    throw new Error("AutoComplete.db not found. Launch Logos once, then try again.");
-  }
-
-  dbMatches.sort((a, b) => b.mtimeMs - a.mtimeMs);
-  return dbMatches[0];
-}
-
 async function queryWordSenses(dbPath: string, rawQuery: string): Promise<WordSense[]> {
-  const terms = getSearchTerms(rawQuery);
+  const terms = buildAutocompleteSearchTerms(rawQuery);
   if (terms.length === 0) {
     return [];
   }
@@ -319,61 +262,9 @@ LIMIT ${RESULT_LIMIT};
 
   const rows = await runSqliteQuery(dbPath, sql);
   return rows
-    .map((row) => ({
-      reference: typeof row.reference === "string" ? row.reference : "",
-      label: typeof row.label === "string" ? row.label : String(row.reference ?? ""),
-      description: typeof row.description === "string" ? row.description : null,
-    }))
-    .filter((row) => row.reference)
+    .map(normalizeAutocompleteRow)
+    .filter((row): row is WordSense => Boolean(row))
     .sort((a, b) => a.label.localeCompare(b.label));
-}
-
-type SqliteRow = Record<string, unknown>;
-
-async function runSqliteQuery(dbPath: string, sql: string): Promise<SqliteRow[]> {
-  try {
-    const { stdout } = await execFileAsync(SQLITE_BIN, ["-readonly", "-json", dbPath, sql], {
-      maxBuffer: SQLITE_JSON_BUFFER,
-    });
-    const trimmed = stdout.trim();
-    if (!trimmed) {
-      return [];
-    }
-    return JSON.parse(trimmed) as SqliteRow[];
-  } catch (error) {
-    const execError = error as NodeJS.ErrnoException & { stderr?: string };
-    if (execError.code === "ENOENT") {
-      throw new Error("sqlite3 binary not found. Install the macOS Command Line Tools.");
-    }
-    const stderr = typeof execError.stderr === "string" ? execError.stderr.trim() : undefined;
-    throw new Error(stderr && stderr.length > 0 ? stderr : extractErrorMessage(error));
-  }
-}
-
-function getSearchTerms(rawQuery: string): string[] {
-  const trimmed = rawQuery.trim();
-  const seen = new Set<string>();
-  const terms: string[] = [];
-
-  const add = (term: string) => {
-    const normalized = term.toLowerCase();
-    if (!normalized || seen.has(normalized)) {
-      return;
-    }
-    seen.add(normalized);
-    terms.push(term);
-  };
-
-  if (trimmed) {
-    add(trimmed);
-    for (const piece of trimmed.split(/\s+/)) {
-      if (piece.length >= MIN_QUERY_LENGTH) {
-        add(piece);
-      }
-    }
-  }
-
-  return terms;
 }
 
 function buildWordStudyUris(entry: WordSense): string[] {
@@ -401,7 +292,7 @@ function buildWordStudyUris(entry: WordSense): string[] {
     guideWords.add(entry.reference);
   }
 
-  for (const word of guideWords) {
+  for (const word of Array.from(guideWords)) {
     for (const title of GUIDE_TITLES) {
       pushRefLyAbsolute(buildGuideRefLyUri(title, word, ENGLISH_LANGUAGE));
       add(buildGuideUri(title, word, ENGLISH_LANGUAGE));
@@ -502,8 +393,4 @@ function buildWordKey(label: string) {
     return undefined;
   }
   return `Word|language=en|word=${trimmed}`;
-}
-
-function escapeSql(input: string): string {
-  return input.replace(/'/g, "''");
 }

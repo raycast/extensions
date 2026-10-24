@@ -37,7 +37,7 @@ export default function Domains() {
           title="No domains with valid DNS records found."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Go To Domains" icon={Icon.Globe} url={API_DOMAIN + "domains"} />
+              <Action.OpenInBrowser title="Go to Domains" icon={Icon.Globe} url={API_DOMAIN + "domains"} />
             </ActionPanel>
           }
         />

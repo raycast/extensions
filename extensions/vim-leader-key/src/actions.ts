@@ -11,6 +11,7 @@ import {
 import { exec } from "child_process";
 import { promisify } from "util";
 import { Action, ActionType } from "./types";
+import { sanitizeShellEnvironment } from "./shell-env";
 import {
   getActiveBrowserAfterRaycastCloses,
   getUrlOpenApplication,
@@ -23,16 +24,23 @@ type ActionPreferences = Preferences & {
   openUrlsInActiveBrowser?: boolean;
 };
 
+interface ExecuteActionOptions {
+  skipActiveBrowserResolution?: boolean;
+}
+
 export async function executeAction(
   action: Action,
   onComplete?: () => void,
   browser?: string,
+  options: ExecuteActionOptions = {},
 ): Promise<void> {
   const { type, value, label } = action;
 
   try {
     const prefs = getPreferenceValues<ActionPreferences>();
-    const useActiveBrowser = shouldUseActiveBrowserForAction(action, prefs);
+    const useActiveBrowser =
+      !options.skipActiveBrowserResolution &&
+      shouldUseActiveBrowserForAction(action, prefs);
     await closeMainWindow();
 
     switch (type) {
@@ -74,7 +82,10 @@ async function openUrl(
   browser?: string,
   useActiveBrowser = false,
 ): Promise<void> {
-  if (url.startsWith("raycast://")) {
+  if (
+    url.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) ||
+    url.startsWith("raycast://")
+  ) {
     await open(url);
     return;
   }
@@ -114,7 +125,7 @@ async function openFolder(folderPath: string): Promise<void> {
 }
 
 async function runCommand(command: string): Promise<void> {
-  await execAsync(command);
+  await execAsync(command, { env: sanitizeShellEnvironment(process.env) });
 }
 
 export function getActionIcon(type: ActionType | "group"): Icon {

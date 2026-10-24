@@ -1,16 +1,7 @@
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, { AxiosError } from "axios";
 import { decode } from "html-entities";
 
-import {
-  DDG_URL,
-  DEFAULT_RETRIES,
-  DEFAULT_SLEEP,
-  DEFAULT_TIMEOUT,
-  HEADERS,
-  ImageSearchOptions,
-  OldVQDError,
-} from "./consts";
-import { LocalStorage } from "@raycast/api";
+import { DDG_URL, DEFAULT_RETRIES, DEFAULT_SLEEP, DEFAULT_TIMEOUT, HEADERS, ImageSearchOptions } from "./consts";
 
 export interface DuckDuckGoImage {
   height: number;
@@ -38,14 +29,39 @@ export interface ImageSearchResult {
   results: DuckDuckGoImage[];
 }
 
-function sleepPromise(ms: number): Promise<void> {
+export class SearchUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SearchUnavailableError";
+  }
+}
+
+class OldVQDError extends Error {}
+
+// Reuse one Axios client so VQD acquisition and image requests keep the same
+// proxy behavior, connection pool, headers, and timeout.
+const ddgClient = axios.create({
+  baseURL: DDG_URL,
+  headers: HEADERS,
+  timeout: DEFAULT_TIMEOUT,
+});
+
+function sleepPromise(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
-    setTimeout(resolve, ms);
+    const timeout = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timeout);
+        resolve();
+      },
+      { once: true },
+    );
   });
 }
 
 /** @internal */
-const VQD_REGEX = /vqd=['"](\d+-\d+(?:-\d+)?)['"]/;
+const VQD_PATTERNS = [/vqd=["']([^"']+)["']/, /vqd=([^&"'\s]+)/];
 
 /**
  * Get the VQD of a search query.
@@ -55,30 +71,28 @@ const VQD_REGEX = /vqd=['"](\d+-\d+(?:-\d+)?)['"]/;
  * @returns The VQD
  */
 async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
-  let vqd = await LocalStorage.getItem<string>("vqd");
-  if (vqd) return vqd;
-
   try {
-    const response = await axios.get(`https://duckduckgo.com/`, {
-      params: { q: query, ia },
-      timeout: DEFAULT_TIMEOUT,
+    const response = await ddgClient.get("/", {
+      // DDG only caches this page for a second, but a cached response can contain
+      // a VQD that has already become invalid by the time i.js receives it.
+      params: { q: query, ia, _: Date.now().toString() },
+      headers: { ...HEADERS, "cache-control": "no-cache", pragma: "no-cache" },
       signal,
     });
-    const match = VQD_REGEX.exec(response.data);
+    const html = typeof response.data === "string" ? response.data : "";
+    const match = VQD_PATTERNS.map((pattern) => pattern.exec(html)).find(Boolean);
     if (!match) {
       // noinspection ExceptionCaughtLocallyJS
       throw new Error(`Failed to extract VQD from response for query "${query}".`);
     }
-    vqd = match[1];
-    await LocalStorage.setItem("vqd", vqd);
-    return vqd;
+    return match[1];
   } catch (error) {
     if (error instanceof AxiosError && error.code === "ERR_CANCELED") {
       console.log("VQD request canceled");
       return;
     }
-    console.error("VQD Error!", error);
-    throw new Error(`Failed to get the VQD for query "${query}".`);
+    logRequestError("get-vqd", error);
+    throw new SearchUnavailableError("DuckDuckGo is temporarily unavailable. Please wait a moment and try again.");
   }
 }
 
@@ -95,23 +109,25 @@ async function makeNextFromQuery(
   if (!vqd) vqd = await getVQD(query, "web", signal);
   if (!vqd) return;
 
-  /* istanbul ignore next */
+  // DuckDuckGo expects six fixed filter slots:
+  // time, size, color, type, layout, license.
   const filters = [
+    "",
     options.filters?.size ? `size:${options.filters.size}` : "",
+    options.filters?.color ? `color:${options.filters.color}` : "",
     options.filters?.type ? `type:${options.filters.type}` : "",
     options.filters?.layout ? `layout:${options.filters.layout}` : "",
-    options.filters?.color ? `color:${options.filters.color}` : "",
     options.filters?.license ? `license:${options.filters.license}` : "",
   ];
-  console.log(filters);
 
   const queryObject: Record<string, string> = {
+    ct: "AT",
     l: options.locale || "en-us",
     o: "json",
     q: query,
     p: options.moderate ? "1" : "-1",
-    f: filters.toString(),
   };
+  if (filters.some(Boolean)) queryObject.f = filters.join(",");
 
   return {
     next: `i.js?${queryString(queryObject)}`,
@@ -122,50 +138,70 @@ async function makeNextFromQuery(
 export async function imageSearch(
   query: string,
   options: ImageSearchOptions = {},
-  retries: number = DEFAULT_RETRIES,
-  sleep: number = DEFAULT_SLEEP,
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
   console.log(`Searching for "${query}"...`);
-  const data = await makeNextFromQuery(query, options, signal);
-  if (!data) return { vqd: "", results: [] };
-  const { next, vqd } = data;
-  try {
-    return await imageNextSearch(next, vqd, retries, sleep, signal);
-  } catch (error) {
-    if (error instanceof OldVQDError) {
-      await LocalStorage.removeItem("vqd");
-      return await imageSearch(query, options, retries, sleep, signal);
+  // VQD is tied to a search session. Never reuse one global token for unrelated queries.
+  let rejectedVqd: string | undefined;
+  for (let vqdAttempt = 0; vqdAttempt < 2; vqdAttempt += 1) {
+    const data = await makeNextFromQuery(query, options, signal);
+    if (!data) return { vqd: "", results: [] };
+    if (data.vqd === rejectedVqd) {
+      throw new SearchUnavailableError("DuckDuckGo returned the same rejected search session. Please try again.");
     }
-    throw error;
+    try {
+      return await imageNextSearch(data.next, data.vqd, signal);
+    } catch (error) {
+      if (error instanceof OldVQDError && vqdAttempt === 0) {
+        rejectedVqd = data.vqd;
+        continue;
+      }
+      if (error instanceof OldVQDError) {
+        throw new SearchUnavailableError("DuckDuckGo rejected the search session. Please wait and try again.");
+      }
+      throw error;
+    }
   }
+  return { vqd: "", results: [] };
 }
 
-export async function imageNextSearch(
-  next: string,
-  vqd: string,
-  retries: number = DEFAULT_RETRIES,
-  sleep: number = DEFAULT_SLEEP,
-  signal?: AbortSignal,
-): Promise<ImageSearchResult> {
+function logRequestError(stage: string, error: unknown, attempt?: number) {
+  if (error instanceof AxiosError) {
+    console.error(stage, {
+      code: error.code,
+      status: error.response?.status,
+      attempt,
+      hostname: error.config?.url ? new URL(error.config.url, DDG_URL).hostname : undefined,
+    });
+    return;
+  }
+  console.error(stage, error instanceof Error ? error.message : String(error));
+}
+
+function isRetryable(error: AxiosError) {
+  const status = error.response?.status;
+  if (status) return status === 408 || status === 425 || status >= 500;
+  return error.code !== "ERR_CANCELED";
+}
+
+export async function imageNextSearch(next: string, vqd: string, signal?: AbortSignal): Promise<ImageSearchResult> {
   if (!vqd) return { vqd: "", results: [] };
-  console.log(`Searching for "${next}" with VQD "${vqd}"... (retries: ${retries}, sleep: ${sleep}ms)`);
-  const reqUrl = DDG_URL + next + `&vqd=${vqd}`;
+  console.log("Loading DuckDuckGo image results...");
+  const separator = next.includes("?") ? "&" : "?";
+  const reqUrl = `${next}${separator}vqd=${encodeURIComponent(vqd)}`;
   let attempt = 0;
-  const config: AxiosRequestConfig = {
-    headers: HEADERS,
-    timeout: DEFAULT_TIMEOUT,
-    signal,
-  };
 
   let data: DuckDuckGoSearchResponse | null = null;
 
   while (true) {
     try {
-      const response = await axios.get(reqUrl, config);
+      const response = await ddgClient.get(reqUrl, { signal });
 
       data = response.data as DuckDuckGoSearchResponse;
-      console.log(data, "results found" + (attempt ? ` (attempt ${attempt})` : ""));
+      if (!data || !Array.isArray(data.results)) {
+        throw new SearchUnavailableError("DuckDuckGo returned an anti-bot response. Please wait and try again.");
+      }
+      console.log(`DuckDuckGo returned ${data.results.length} images${attempt ? ` (attempt ${attempt + 1})` : ""}.`);
       break;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -174,17 +210,25 @@ export async function imageNextSearch(
           return { results: [], vqd };
         }
         if (error.response?.status === 403) {
-          console.log("OLD VQD, getting new one...");
-          await LocalStorage.removeItem("vqd");
           throw new OldVQDError();
         }
+        if (error.response?.status === 429) {
+          throw new SearchUnavailableError("DuckDuckGo rate-limited this search. Please wait before trying again.");
+        }
+        if (!isRetryable(error)) {
+          logRequestError("image-search", error, attempt + 1);
+          throw new SearchUnavailableError("Could not reach DuckDuckGo. Please try again later.");
+        }
       }
-      console.error(reqUrl, error);
+      if (error instanceof SearchUnavailableError) throw error;
       attempt += 1;
-      if (attempt > retries) {
-        throw Error("attempt finished");
+      logRequestError("image-search", error, attempt);
+      if (attempt > DEFAULT_RETRIES) {
+        throw new SearchUnavailableError("Could not reach DuckDuckGo after a retry.");
       }
-      await sleepPromise(sleep);
+      const delay = DEFAULT_SLEEP + Math.floor(Math.random() * 250);
+      await sleepPromise(delay, signal);
+      if (signal?.aborted) return { results: [], vqd };
     }
   }
   const result: ImageSearchResult = {

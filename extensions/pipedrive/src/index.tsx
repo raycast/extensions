@@ -275,7 +275,7 @@ function SearchListItem({
   revalidate: () => void;
 }) {
   const itemUrl = `https://${domain}/${searchResult.type}/${searchResult.id}`;
-  const { title, subtitle, accessoryTitle, name, email, phone, organization, ccEmail } = searchResult;
+  const { title, subtitle, accessoryTitle, name, email, phone, organization } = searchResult;
   const emoji = emojiMap[searchResult.type] || "";
 
   const detailsTarget =
@@ -387,10 +387,10 @@ function SearchListItem({
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
-            {ccEmail && (
+            {searchResult.type === "deal" && (
               <Action.CopyToClipboard
-                title="Copy Deal Name"
-                content={ccEmail}
+                title="Copy Deal Email"
+                content={`${domain.split(".")[0]}+deal${searchResult.id}@pipedrivemail.com`}
                 shortcut={Keyboard.Shortcut.Common.Duplicate}
               />
             )}

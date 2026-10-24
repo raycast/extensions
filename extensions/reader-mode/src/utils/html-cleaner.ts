@@ -1,6 +1,55 @@
 import { parseHTML } from "linkedom";
-import { parseLog } from "./logger";
 import { getSiteConfig } from "../config/site-config";
+import { parseLog } from "./logger";
+import { BARRIER_SELECTORS, caseInsensitive } from "./paywall-detector";
+
+type LinkedomDocument = ReturnType<typeof parseHTML>["document"];
+
+/**
+ * Content gates / paywall barriers, stripped before extraction.
+ *
+ * These are the DETECTOR's own barrier selectors (`paywall-detector.ts`), reused rather than
+ * re-listed — a hand-maintained copy drifted twice (Greptile flagged `content-gate`… then
+ * `meter-`/`pw-overlay`/`barrier`… missing), because the two lists must agree but nothing forced
+ * it. Now they can't drift: the cleaner strips exactly what the detector recognizes.
+ *
+ * Why strip them at all: if a gate's text ("Subscribe to read the rest…") is left in the article
+ * body it lands in the extraction and trips the candidate validator's gating-phrase check,
+ * rejecting an otherwise-complete article. Gate UI is never article content. Detection is
+ * unaffected — it runs against the RAW fetch html, not this cleaned DOM.
+ *
+ * Two guards applied uniformly:
+ *   - `caseInsensitive(...)` (the detector's own helper), so a capitalized `Content-Gate` is caught;
+ *   - `:not(p)`, so a site that (like Condé Nast's `paywall`) puts body paragraphs on a barrier
+ *     class isn't gutted — a real overlay is a container, not a bare paragraph.
+ *
+ * `CLEANER_KEEP` carves out `.subscriber-only`: sites put it on gated article content, and they
+ * SEGMENT it (a class per subscriber paragraph). `:not(p)` and the per-element 30%-text guard do
+ * NOT protect segmented content — four sibling `<div class="subscriber-only">` blocks at 25% each
+ * are all below the guard and would be deleted, gutting the article. So the cleaner never DELETES
+ * it; detection still SCORES it from the raw html (it stays in BARRIER_SELECTORS).
+ *
+ * Every OTHER barrier — including `[class*="premium"][class*="wrapper"]` — is stripped. A "wrapper"
+ * is a single container, so a genuine premium-content wrapper is one large block the 30% guard
+ * protects; stripping it removes the gate-text leak that would otherwise reject a full article.
+ * (The residual — deeply segmented premium-wrapper *content* below the guard — is noted in
+ * docs/known-issues.md; it is far less likely than the segmented subscriber-only case.)
+ */
+const CLEANER_KEEP = new Set([".subscriber-only"]);
+
+/**
+ * Article-body wrappers a barrier selector also matches. Medium and the NYT put the body in
+ * `meteredContent`, which `[class*="metered"]` catches; segmented, it falls under the 30% guard
+ * like `.subscriber-only`. Other metered elements (`meteredMessage`, a meter gate) are gate UI and
+ * are still stripped.
+ */
+const CONTENT_WRAPPERS: Record<string, string> = {
+  '[class*="metered"]': ':not([class*="meteredcontent" i]):not([class*="metered-content" i])',
+};
+
+const BARRIER_REMOVE_SELECTORS = BARRIER_SELECTORS.filter((s) => !CLEANER_KEEP.has(s)).map(
+  (s) => `${caseInsensitive(s)}${CONTENT_WRAPPERS[s] ?? ""}:not(p)`,
+);
 
 /**
  * Selectors for elements that should be removed before Readability processing.
@@ -21,9 +70,13 @@ const NEGATIVE_SELECTORS = [
   "#disqus_thread",
   ".disqus",
 
-  // Subscription/Newsletter boxes
-  '[class*="subscribe"]',
-  '[id*="subscribe"]',
+  // Subscription/Newsletter boxes. Exclude only `subscriber-only` — the substring match catches
+  // it, but sites put that class on gated *article content*, not a subscribe box, and stripping
+  // it deleted the article (the per-element 30% guard can't save segmented subscriber-only
+  // blocks). Scoped to `subscriber-only`, not all `subscriber`, so real subscriber UI
+  // (`subscriber-offer`, `subscriber-cta`) is still removed. "subscribe" still matches everything.
+  '[class*="subscribe"]:not([class*="subscriber-only"])',
+  '[id*="subscribe"]:not([id*="subscriber-only"])',
   '[class*="newsletter"]',
   '[id*="newsletter"]',
   '[class*="signup"]',
@@ -175,7 +228,9 @@ const NEGATIVE_SELECTORS = [
   '[class*="cta"]',
   '[class*="donate"]',
   '[class*="donation"]',
-  '[class*="paywall"]',
+  // `[class*="paywall"]` and the other barriers are stripped via BARRIER_REMOVE_SELECTORS (the
+  // detector's shared list, applied `:not(p)` so Condé Nast body paragraphs on `class="paywall"`
+  // survive). See the block near the top of this file.
   '[class*="upsell"]',
   '[class*="feedback"]',
 
@@ -247,6 +302,15 @@ const LINK_DENSITY_THRESHOLD = 0.25;
 const MIN_TEXT_LENGTH_FOR_DENSITY = 50;
 
 /**
+ * Share of the page's text an element may hold and still be removable as chrome.
+ *
+ * Navigation, sidebars, and footers are a modest fraction of a page's words. An element
+ * holding more than this is the article — even if its class name happens to contain
+ * "meta" or "share" and so matches one of the substring selectors above.
+ */
+const MAX_REMOVABLE_TEXT_RATIO = 0.3;
+
+/**
  * Calculates the link density of an element.
  * Link density = (text length in links) / (total text length)
  * Excludes hash-only anchors (internal page links).
@@ -267,7 +331,6 @@ function getLinkDensity(element: Element): number {
 }
 
 export interface CleaningResult {
-  html: string;
   removedCount: number;
   lazyImagesResolved: number;
   linkDenseRemoved: number;
@@ -275,14 +338,45 @@ export interface CleaningResult {
   siteConfigApplied: string | null;
 }
 
+/** Moves each lazy-loaded image's real source into `src` (or `srcset`). Returns how many it moved. */
+export function resolveLazyImages(root: Pick<LinkedomDocument, "querySelectorAll">): number {
+  let resolved = 0;
+  root.querySelectorAll("img").forEach((img) => {
+    const currentSrc = img.getAttribute("src");
+    const isPlaceholder =
+      !currentSrc ||
+      currentSrc.startsWith("data:") ||
+      currentSrc.includes("placeholder") ||
+      currentSrc.includes("transparent") ||
+      currentSrc.includes("blank");
+
+    if (isPlaceholder) {
+      for (const attr of LAZY_LOAD_ATTRIBUTES) {
+        const lazySrc = img.getAttribute(attr);
+        if (lazySrc && !lazySrc.startsWith("data:")) {
+          if (attr.includes("srcset")) {
+            img.setAttribute("srcset", lazySrc);
+          } else {
+            img.setAttribute("src", lazySrc);
+          }
+          resolved++;
+          break;
+        }
+      }
+    }
+  });
+  return resolved;
+}
+
 /**
- * Pre-cleans HTML before Readability processing.
+ * Pre-cleans a document before Readability processing, in place.
  * Removes sidebars, ads, comments, subscription boxes, and other non-article content.
+ *
+ * Mutates the document it is given rather than parsing and re-serializing HTML —
+ * the round-trip cost a second DOM plus a full copy of the markup as a string.
  */
-export function preCleanHtml(html: string, url: string): CleaningResult {
-  const { document } = parseHTML(html);
+export function preCleanHtml(document: LinkedomDocument, url: string): CleaningResult {
   let removedCount = 0;
-  let lazyImagesResolved = 0;
   let linkDenseRemoved = 0;
   let schemaArticleFound = false;
   let siteConfigApplied: string | null = null;
@@ -373,16 +467,12 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
     // Invalid URL, skip site config
   }
 
-  // Build a set of protected elements
-  const protectedElements = new Set<Element>();
-
-  // Collect all selectors to protect (built-in + site config articleSelector)
+  // Collect the article containers (built-in + site config articleSelector).
   const allProtectedSelectors = [...PROTECTED_SELECTORS];
   try {
     const hostname = new URL(url).hostname;
     const config = getSiteConfig(hostname);
     if (config?.articleSelector) {
-      // Add site-specific article selector to protected list
       allProtectedSelectors.push(config.articleSelector);
       parseLog.log("clean:protecting-article-selector", { url, selector: config.articleSelector });
     }
@@ -390,48 +480,57 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
     // Invalid URL, skip
   }
 
+  // Protect the article containers themselves and their ancestors, so cleaning can
+  // never delete the element that holds the article (or unmount it via a parent).
+  //
+  // Deliberately NOT their descendants: ads, share widgets, and newsletter boxes live
+  // *inside* <main>/<article> on most sites. Protecting every descendant marked ~97% of
+  // a Wikipedia page unremovable and quietly turned the whole cleaning pass into a no-op.
+  const protectedElements = new Set<Element>();
+
   allProtectedSelectors.forEach((selector) => {
     try {
       document.querySelectorAll(selector).forEach((el) => {
         protectedElements.add(el);
-        // Also protect all ancestors
+
         let parent = el.parentElement;
         while (parent) {
           protectedElements.add(parent);
           parent = parent.parentElement;
         }
-        // Also protect all descendants
-        el.querySelectorAll("*").forEach((child) => {
-          protectedElements.add(child);
-        });
       });
     } catch {
       // Selector might fail in linkedom, skip
     }
   });
 
-  // Remove negative elements (unless protected)
-  NEGATIVE_SELECTORS.forEach((selector) => {
+  // The negative selectors match on substrings, so a genuine article wrapper named
+  // "article-metadata-body" or "shared-story-body" matches [class*="meta"] / [class*="share"]
+  // and would be deleted along with the whole article. Chrome is small and articles are not,
+  // so an element holding a large share of the page's text is treated as content whatever
+  // its class name suggests.
+  const documentTextLength = (document.body?.textContent ?? "").trim().length;
+  const contentThreshold = documentTextLength * MAX_REMOVABLE_TEXT_RATIO;
+
+  /** Would removing this element take a substantial part of the page's text with it? */
+  const holdsSubstantialText = (el: Element): boolean =>
+    documentTextLength > 0 && (el.textContent ?? "").trim().length > contentThreshold;
+
+  /**
+   * An element may be removed unless it is an article container, an ancestor of one,
+   * or holds so much text that it is evidently the article itself.
+   */
+  const isProtected = (el: Element): boolean => protectedElements.has(el) || holdsSubstantialText(el);
+
+  // Remove negative elements and content-gate barriers (unless protected). Barriers are the
+  // detector's shared list (see BARRIER_REMOVE_SELECTORS) so the two can't drift apart.
+  [...NEGATIVE_SELECTORS, ...BARRIER_REMOVE_SELECTORS].forEach((selector) => {
     try {
       document.querySelectorAll(selector).forEach((el) => {
-        // Don't remove if it's protected or inside a protected element
-        if (protectedElements.has(el)) return;
+        if (isProtected(el)) return;
 
-        // Check if any ancestor is protected
-        let parent = el.parentElement;
-        let isProtected = false;
-        while (parent) {
-          if (protectedElements.has(parent)) {
-            isProtected = true;
-            break;
-          }
-          parent = parent.parentElement;
-        }
-
-        if (!isProtected) {
-          el.remove();
-          removedCount++;
-        }
+        el.remove();
+        removedCount++;
       });
     } catch {
       // Some selectors might fail in linkedom, skip them
@@ -441,20 +540,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   // Remove link-dense elements (likely navigation, not content)
   // Target div/section/aside elements that are mostly links
   document.querySelectorAll("div, section, aside, ul").forEach((el) => {
-    // Skip protected elements
-    if (protectedElements.has(el)) return;
-
-    // Check if any ancestor is protected
-    let parent = el.parentElement;
-    let isProtected = false;
-    while (parent) {
-      if (protectedElements.has(parent)) {
-        isProtected = true;
-        break;
-      }
-      parent = parent.parentElement;
-    }
-    if (isProtected) return;
+    if (isProtected(el)) return;
 
     const textLength = (el.textContent || "").length;
     if (textLength < MIN_TEXT_LENGTH_FOR_DENSITY) return;
@@ -494,31 +580,7 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
     }
   });
 
-  // Resolve lazy-loaded images
-  document.querySelectorAll("img").forEach((img) => {
-    const currentSrc = img.getAttribute("src");
-    const isPlaceholder =
-      !currentSrc ||
-      currentSrc.startsWith("data:") ||
-      currentSrc.includes("placeholder") ||
-      currentSrc.includes("transparent") ||
-      currentSrc.includes("blank");
-
-    if (isPlaceholder) {
-      for (const attr of LAZY_LOAD_ATTRIBUTES) {
-        const lazySrc = img.getAttribute(attr);
-        if (lazySrc && !lazySrc.startsWith("data:")) {
-          if (attr.includes("srcset")) {
-            img.setAttribute("srcset", lazySrc);
-          } else {
-            img.setAttribute("src", lazySrc);
-          }
-          lazyImagesResolved++;
-          break;
-        }
-      }
-    }
-  });
+  const lazyImagesResolved = resolveLazyImages(document);
 
   parseLog.log("clean:complete", {
     url,
@@ -530,7 +592,6 @@ export function preCleanHtml(html: string, url: string): CleaningResult {
   });
 
   return {
-    html: document.toString(),
     removedCount,
     lazyImagesResolved,
     linkDenseRemoved,

@@ -1,3 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
 # Dependencies
 node_modules/
 
@@ -12,15 +27,27 @@ dist/
 # Editor
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 
 # Environment
+# Load-bearing: `ray publish` copies the whole working tree — .gitignore included —
+# and these patterns keep copied local environment files out of the public Store PR.
 .env
-.env.local
+.env.*
+!.env.example
 
 # Raycast
 .raycast/
 
-# Claude Code
+# Agent tooling
+.agents/
 .claude/
+
+# Keep the tracked source config out of new Raycast Store submissions.
+/.coderabbit.yaml
+
+# Promptfoo local artifacts
+.promptfoo/
+evals/results/

@@ -1,5 +1,39 @@
 # Messages Changelog
 
+## [AI Message History and Activity] - 2026-08-31
+
+- Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search
+- Add an AI tool for overall and per-chat sent/received activity
+- Use stable chat IDs for existing-conversation sends and report AppleScript send failures accurately
+- Add unread filters and message-activity date ranges to AI chat search
+- Search a cached full Contacts catalog when an AI request names someone without a recent conversation
+
+## [Faster chat and recipient search] - 2026-07-10
+
+- Show cached Send Message recipients immediately, grouped under `Recents` and `Contacts`
+- Keep Open Chat focused on existing conversations
+
+## [Bug Fixes & Improvements] - 2026-07-01
+
+- Fix contacts showing only a phone number instead of their name
+- Show contacts identified by an email address in chats and message filters
+- Load contacts faster and stop re-fetching them while searching
+- Show cached contact names instantly when reopening commands
+
+## [Bug Fixes & Improvements] - 2026-06-10
+
+- Add `before` pagination cursor to load older messages in AI chat
+- Show contact name and photo when chat uses an email address instead of a phone number
+- Fix missing `await` on async calls (`showFailureToast`, `open`, `launchCommand`, `showToast`)
+- Fix AI instructions — skip message history fetch for simple sends
+- Remove deprecated AI model
+- Remove unused SQLite dependency from Swift package
+- Update packages
+- Exclude tapbacks and reactions from message results to reduce noise in AI context
+- Add reply-context (`replyingTo`) to messages — shows the text of the message being replied to when a message explicitly targets a non-adjacent earlier message
+- Return AI tool messages in chronological order (oldest first) with consecutive duplicate reply-context stripped
+- Improve AI instructions with message data format documentation and pagination guidance
+
 ## [Fix chat list memory usage] - 2026-05-28
 
 - Limit the initial chat lookup to the 50 displayed conversations before loading contact details.

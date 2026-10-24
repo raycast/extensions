@@ -26,13 +26,11 @@ export type Deck = {
 
 export type AddCardResult = { success: true; cardId: string } | { success: false; error: string };
 
-export type RequestCardSource = "search" | "list" | "add";
+export type RemoveCardResult = { success: true } | { success: false; error: string };
 
-export interface RequestCardPayload {
+export type RequestCardPayload = {
   word: string;
   context: string;
-  source?: RequestCardSource;
-  user?: string;
-}
+};
 
 export type RequestCardResult = { success: true } | { success: false; error: string };

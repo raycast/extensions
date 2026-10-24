@@ -7,7 +7,8 @@
   "author": "michaelschultz",
   "contributors": [
     "pernielsentikaer",
-    "GLaDO8"
+    "GLaDO8",
+    "igorabramkin"
   ],
   "version": "1.6.2",
   "license": "MIT",
@@ -22,7 +23,7 @@
       "type": "password",
       "required": false,
       "title": "Personal Access Token",
-      "description": "[Deprecated] You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+      "description": "Optional. Needed to see files in nested folders: create a token with the folders:read, file_content:read and file_metadata:read scopes. Without one, you sign in through the browser and only top-level folders are listed."
     },
     {
       "name": "TEAM_ID",
@@ -47,19 +48,26 @@
       "description": "See your Figma most recent files at a glance",
       "mode": "menu-bar",
       "interval": "2h"
+    },
+    {
+      "name": "open-file-url-from-clipboard",
+      "title": "Open File URL from Clipboard",
+      "subtitle": "Figma",
+      "description": "Opens the Figma file URL currently in the clipboard.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.18.6",
-    "@types/react": "^19.1.13",
-    "eslint": "^9.36.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

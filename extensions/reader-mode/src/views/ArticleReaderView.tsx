@@ -1,11 +1,11 @@
 import { Detail } from "@raycast/api";
-import { ArticleReaderState, ArticleReaderActions } from "../hooks/useArticleReader";
-import { UrlInputForm } from "./UrlInputForm";
-import { BlockedPageView } from "./BlockedPageView";
-import { NotReadableView } from "./NotReadableView";
-import { EmptyContentView } from "./EmptyContentView";
-import { ArticleDetailView } from "./ArticleDetailView";
 import { InactiveTabActions } from "../actions/InactiveTabActions";
+import { ArticleReaderActions, ArticleReaderState } from "../hooks/useArticleReader";
+import { ArticleDetailView } from "./ArticleDetailView";
+import { BlockedPageView } from "./BlockedPageView";
+import { EmptyContentView } from "./EmptyContentView";
+import { NotReadableView } from "./NotReadableView";
+import { UrlInputForm } from "./UrlInputForm";
 
 export interface ArticleReaderViewProps extends ArticleReaderState, ArticleReaderActions {
   showUrlForm?: boolean;
@@ -18,15 +18,18 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
   const {
     article,
     isLoading,
+    loadingStatus,
     error,
     blockedUrl,
     hasBrowserExtension,
     isWaitingForBrowser,
+    browserFetchError,
     foundTab,
     notReadableUrl,
     emptyContentUrl,
     reimportInactiveTab,
     summaryStyle,
+    summaryModel,
     currentSummary,
     isSummarizing,
     canAccessAI,
@@ -34,6 +37,7 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
     showUrlForm,
     invalidInput,
     handleSummarize,
+    handleRegenerate,
     handleStopSummarizing,
     handleReimportFromBrowser,
     handleRetryReimport,
@@ -47,7 +51,9 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
   } = props;
 
   if (isLoading) {
-    return <Detail isLoading={true} markdown="" />;
+    // Never an empty pane: loading can run long (a paywall bypass tries several
+    // sources in turn), and a blank screen with no words on it reads as a hang.
+    return <Detail isLoading={true} markdown={loadingStatus ? `# ${loadingStatus}` : "# Loading…"} />;
   }
 
   if (showUrlForm) {
@@ -82,12 +88,14 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
     return <EmptyContentView url={emptyContentUrl} />;
   }
 
-  if (blockedUrl && error) {
+  // Stays up while a fetch from the browser runs, which clears `error` until it settles.
+  if (blockedUrl && (error || isWaitingForBrowser)) {
     return (
       <BlockedPageView
         blockedUrl={blockedUrl}
         hasBrowserExtension={hasBrowserExtension}
         isWaitingForBrowser={isWaitingForBrowser}
+        browserFetchError={browserFetchError}
         foundTab={foundTab}
         onFetchFromBrowser={handleFetchFromBrowser}
       />
@@ -125,6 +133,8 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
       isSummarizing={isSummarizing}
       canAccessAI={canAccessAI}
       onSummarize={handleSummarize}
+      summaryModel={summaryModel}
+      onRegenerate={handleRegenerate}
       onStopSummarizing={isSummarizing ? handleStopSummarizing : undefined}
       onReimportFromBrowser={hasBrowserExtensionAvailable ? handleReimportFromBrowser : undefined}
     />

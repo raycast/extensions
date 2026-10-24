@@ -1,0 +1,271 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snipperapp",
+  "title": "SnipperApp",
+  "description": "Search, paste, and capture code snippets from your SnipperApp library and the SnipperApp Hub — with workspaces, favorites, and AI.",
+  "icon": "extension-icon.png",
+  "author": "teologov",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "snippet",
+    "snippets",
+    "code",
+    "snipperapp",
+    "paste",
+    "clipboard",
+    "hub"
+  ],
+  "commands": [
+    {
+      "name": "search-snippets",
+      "title": "Search Snippets",
+      "subtitle": "SnipperApp",
+      "description": "Search your local SnipperApp library and copy, paste, or open a snippet. Filter by workspace, language, or favorites.",
+      "mode": "view",
+      "keywords": [
+        "snippet",
+        "library",
+        "paste",
+        "favorite"
+      ]
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "subtitle": "SnipperApp",
+      "description": "Create a new snippet, prefilled from the clipboard or the current selection. Choose workspace, folder, and language.",
+      "mode": "view",
+      "keywords": [
+        "new",
+        "add",
+        "capture"
+      ]
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard as Snippet",
+      "subtitle": "SnipperApp",
+      "description": "Save the current clipboard contents as a new snippet in your last-used workspace.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Title (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save-selection",
+      "title": "Save Selection as Snippet",
+      "subtitle": "SnipperApp",
+      "description": "Save the selected text in the frontmost app as a new snippet.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recent-snippets",
+      "title": "Recent Snippets",
+      "subtitle": "SnipperApp",
+      "description": "Your most recently updated snippets, for instant re-access.",
+      "mode": "view",
+      "keywords": [
+        "recent",
+        "latest"
+      ]
+    },
+    {
+      "name": "paste-last",
+      "title": "Paste Last Snippet",
+      "description": "Paste the most recently used snippet into the frontmost app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-hub",
+      "title": "Search Hub",
+      "subtitle": "SnipperApp Hub",
+      "description": "Search public community snippets on the SnipperApp Hub and add them to your library.",
+      "mode": "view",
+      "keywords": [
+        "hub",
+        "community",
+        "public",
+        "discover"
+      ]
+    },
+    {
+      "name": "browse-trending",
+      "title": "Browse Trending",
+      "subtitle": "SnipperApp Hub",
+      "description": "Browse trending community snippets on the SnipperApp Hub.",
+      "mode": "view",
+      "keywords": [
+        "hub",
+        "trending",
+        "popular"
+      ]
+    },
+    {
+      "name": "snippets-menu-bar",
+      "title": "Snippets Menu Bar",
+      "subtitle": "SnipperApp",
+      "description": "A menu-bar menu of your favorite and recent snippets for one-click copy.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "disabledByDefault": true
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-snippets",
+      "title": "Search Snippets",
+      "description": "Search the user's local SnipperApp library by query, language, or favorites. Returns snippet summaries with a content preview."
+    },
+    {
+      "name": "get-snippet",
+      "title": "Get Snippet",
+      "description": "Get the full content of a local snippet by its id."
+    },
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "description": "Create a new snippet in the user's local SnipperApp library."
+    },
+    {
+      "name": "search-hub",
+      "title": "Search Hub",
+      "description": "Search public community snippets on the SnipperApp Hub."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Snippet Action: Primary",
+      "description": "The first action in a snippet's action menu.",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Copy as Markdown",
+          "value": "copyMarkdown"
+        },
+        {
+          "title": "Open in SnipperApp",
+          "value": "open"
+        },
+        {
+          "title": "Show Details",
+          "value": "details"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "title": "Snippet Action: Secondary",
+      "description": "The second action in a snippet's action menu.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy as Markdown",
+          "value": "copyMarkdown"
+        },
+        {
+          "title": "Open in SnipperApp",
+          "value": "open"
+        },
+        {
+          "title": "Show Details",
+          "value": "details"
+        }
+      ]
+    },
+    {
+      "name": "enableFrecency",
+      "title": "Result Ranking",
+      "label": "Rank by usage (frecency)",
+      "description": "Float your most frequently and recently used snippets to the top.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showWorkspace",
+      "title": "List Accessories",
+      "label": "Show workspace",
+      "description": "Show the workspace as an accessory in the snippet list.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLanguage",
+      "label": "Show language",
+      "description": "Show the language as an accessory in the snippet list.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "trackHubAnalytics",
+      "title": "Hub Analytics",
+      "label": "Send anonymous view/import events to the Hub",
+      "description": "Helps snippet authors see how their snippets are used. No personal data is sent.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "helperPath",
+      "title": "Helper Path",
+      "description": "Absolute path to the snipper-mcp helper inside SnipperApp. Detected automatically; override only if needed.",
+      "placeholder": "Detect automatically",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

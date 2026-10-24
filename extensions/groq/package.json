@@ -43,24 +43,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -101,24 +89,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -159,24 +135,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -217,24 +181,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -275,24 +227,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -333,24 +273,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -407,24 +335,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -482,24 +398,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -541,24 +445,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -600,24 +492,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -659,24 +539,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -718,24 +586,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -777,24 +633,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -836,24 +680,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -886,24 +718,12 @@
           "title": "GPT OSS 20B 131k"
         },
         {
-          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-          "title": "Llama 4 Maverick 131k"
+          "value": "qwen/qwen3.6-27b",
+          "title": "Qwen 3.6 27B 131k"
         },
         {
-          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "title": "Llama 4 Scout 131k"
-        },
-        {
-          "value": "llama-3.3-70b-versatile",
-          "title": "Llama 3.3 70B 128k"
-        },
-        {
-          "value": "llama-3.1-8b-instant",
-          "title": "Llama 3.1 8B 128k"
-        },
-        {
-          "value": "qwen/qwen3-32b",
-          "title": "Qwen 3 32B 128K"
+          "value": "qwen/qwen3.8-27b",
+          "title": "Qwen 3.8 27B 131k"
         }
       ]
     },
@@ -927,26 +747,46 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
+    "@raycast/api": "2.5.0",
     "gpt-tokenizer": "^2.2.1",
-    "openai": "^4.28.4"
+    "openai": "^7.33.0",
+    "@ai-sdk/groq": "^4.0.41",
+    "ai": "^7.0.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^19.1.2",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc --project tsconfig.test.json && vitest run"
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
+    "cross-spawn@5": "6.0.6",
+    "term-size": {
+      "execa": {
+        "cross-spawn": "6.0.6"
+      }
+    },
+    "electron": "41.10.6"
+  },
+  "ai": {
+    "modelProvider": "models"
+  }
 }

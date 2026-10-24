@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jovida-daily",
+  "title": "Jovida Daily",
+  "description": "Capture and manage your Jovida Daily todos — and let Raycast AI do it for you.",
+  "icon": "extension-icon.png",
+  "author": "AidenZ",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "my-todos",
+      "title": "My Todos",
+      "subtitle": "Jovida Daily",
+      "description": "Browse, search, complete, and manage your Jovida todos.",
+      "mode": "view"
+    },
+    {
+      "name": "add-todo",
+      "title": "Add Todo",
+      "subtitle": "Jovida Daily",
+      "description": "Quickly create a new Jovida todo.",
+      "mode": "view"
+    },
+    {
+      "name": "today-menubar",
+      "title": "Menu Bar Todos",
+      "subtitle": "Jovida Daily",
+      "description": "Show upcoming (today and later) pending todos in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-todos",
+      "title": "Get Todos",
+      "description": "List, search, and filter the user's Jovida todos. Use this first to read current todos and get their entry_id before updating, completing, or deleting. Defaults to today's pending todos. Works with multilingual queries; preserve the user's language in text fields."
+    },
+    {
+      "name": "view-todo",
+      "title": "View Todo",
+      "description": "Get full details for one Jovida todo, recurring todo, or occurrence: description, subtasks with ids/indexes, reminders, reminder channels, and repeat rule. Use before precise subtask edits."
+    },
+    {
+      "name": "create-todo",
+      "title": "Create Todo",
+      "description": "Create a single ONE-OFF Jovida todo (cannot repeat). Use for every normal task, including ones with a date, deadline, or reminder/alarm. Resolve relative dates from the user's local timezone/locale and pass either YYYY-MM-DD or ISO datetime with offset. For a routine the user explicitly asks to repeat, use Create Recurring Todo instead."
+    },
+    {
+      "name": "create-recurring-todo",
+      "title": "Create Recurring Todo",
+      "description": "Create a REPEATING Jovida todo (a routine on a schedule). Use ONLY when the user explicitly asks for repetition like 'every day', 'each Monday', 'weekly', '每天', or '每周一'. Never use for a one-off task that just has a date or a reminder."
+    },
+    {
+      "name": "update-todo",
+      "title": "Update Todo",
+      "description": "Change fields of an existing Jovida todo (title, due time, priority, category, description, subtasks, reminders). Only the fields you pass change. For individual subtask check/uncheck/add/remove, use Subtask Todo instead. Get the entry_id from get-todos first — never guess it."
+    },
+    {
+      "name": "subtask-todo",
+      "title": "Subtask Todo",
+      "description": "Check, uncheck, add, or remove subtasks without replacing the whole list. Use view-todo first when you need subtask ids or indexes."
+    },
+    {
+      "name": "complete-todo",
+      "title": "Complete Todo",
+      "description": "Mark one or more Jovida todos as done. Reversible. Get the entry_id from get-todos first."
+    },
+    {
+      "name": "delete-todo",
+      "title": "Delete Todo",
+      "description": "Permanently delete one or more Jovida todos. This is NOT reversible — there is no undo. Prefer complete-todo unless the item was never real. To stop a routine, delete its recurring_id; a single un-materialized occurrence cannot be deleted. Get the entry_id from get-todos first."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6",
+    "ulid": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

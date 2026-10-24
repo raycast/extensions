@@ -1,5 +1,11 @@
 # WHMCS Client Search Changelog
 
+## [Better Sync Errors] - 2026-06-11
+
+- Client Sync failures now show the actual error returned by your WHMCS install (e.g. "Invalid IP x.x.x.x") instead of a bare HTTP status, with a "Copy Error" action.
+- 403 errors now include guidance pointing to WHMCS's API IP Access Restriction setting.
+- When a sync fails, the Client Search window opens with the full error message and actions to copy the error or retry the sync. For IP-restriction errors, copying the offending IP address becomes the default action (`Return`), with the full error on `CMD + Return`.
+
 ## ["Open Support Ticket" Option] - 2025-12-10
 
 - You can now open a support ticket for your selected client by hitting `CMD + T`.

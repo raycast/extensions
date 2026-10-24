@@ -20,11 +20,13 @@ interface SvgActionProps {
   category: string;
 }
 
+const WORDMARK_KEYS: SvgActionKey[] = ["copySvgWordmark", "copySvgWordmarkUrl"];
+
 const SvgAction = ({ svg, category }: SvgActionProps) => {
   const preferences = getPreferenceValues<Preferences.Index>();
-  const { svgDefaultAction } = preferences;
+  const { svgDefaultAction, showWordmark } = preferences;
 
-  const actionSections: Record<SvgActionKey, JSX.Element> = {
+  const actionSections: Record<SvgActionKey, JSX.Element | null> = {
     copySvg: (
       <ActionPanel.Section title="Copy SVG" key="copySvg">
         <CopySvgActions svg={svg} />
@@ -35,11 +37,11 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
         <CopySvgFileActions svg={svg} />
       </ActionPanel.Section>
     ),
-    copySvgWordmark: (
+    copySvgWordmark: svg.wordmark ? (
       <ActionPanel.Section title="Copy SVG Wordmark" key="copySvgWordmark">
         <CopyWordmarkSvgActions svg={svg} />
       </ActionPanel.Section>
-    ),
+    ) : null,
     copyShadcnRegistry: (
       <ActionPanel.Section title="Copy shadcn/ui Registry" key="copyShadcnRegistry">
         <CopyShadcnRegistryActions svg={svg} />
@@ -70,11 +72,11 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
         <CopySvgUrlActions svg={svg} />
       </ActionPanel.Section>
     ),
-    copySvgWordmarkUrl: (
+    copySvgWordmarkUrl: svg.wordmark ? (
       <ActionPanel.Section title="Copy SVG Wordmark URL" key="copySvgWordmarkUrl">
         <CopyWordmarkSvgUrlAction svg={svg} />
       </ActionPanel.Section>
-    ),
+    ) : null,
     copyAstroComponent: (
       <ActionPanel.Section title="Copy Astro Component" key="copyAstroComponent">
         <CopyAstroComponentActions svg={svg} />
@@ -93,9 +95,14 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
   };
 
   const orderedKeys = Object.keys(actionSections) as SvgActionKey[];
-  const reorderedKeys: SvgActionKey[] = orderedKeys.includes(svgDefaultAction ?? "copySvg")
-    ? [svgDefaultAction ?? "copySvg", ...orderedKeys.filter((key) => key !== svgDefaultAction)]
-    : orderedKeys;
+  const visibleKeys = showWordmark ? orderedKeys : orderedKeys.filter((key) => !WORDMARK_KEYS.includes(key));
+
+  const defaultAction = svgDefaultAction ?? "copySvg";
+  const availableKeys = visibleKeys.filter((key) => actionSections[key] !== null);
+  // When the preferred default isn't available (e.g. wordmark preference but SVG has no wordmark),
+  // explicitly fall back to "copySvg" rather than relying on insertion order.
+  const effectiveDefault = availableKeys.includes(defaultAction) ? defaultAction : "copySvg";
+  const reorderedKeys: SvgActionKey[] = [effectiveDefault, ...availableKeys.filter((key) => key !== effectiveDefault)];
 
   return <ActionPanel>{reorderedKeys.map((key) => actionSections[key])}</ActionPanel>;
 };

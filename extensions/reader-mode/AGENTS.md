@@ -7,14 +7,17 @@
 **Always read the relevant documentation first:**
 
 - `docs/content-extraction.md` — Explains the extraction pipeline architecture
-- `docs/logger-integration.md` — Logging conventions
+- `docs/paywall-hopper.md` — The paywall bypass flow (detection is now evidence-based; see `src/utils/paywall-detector.ts`)
+- The `### Logging` section in `CONTRIBUTING.md` — Logging conventions
+- `docs/solutions/` — Write-ups of problems solved in this extension: what broke, what didn't work, and why the fix holds. Organized by category, with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when working in an area one covers
+- `docs/CONCEPTS.md` — The project's domain vocabulary (content gate, barrier, paywall signal, Paywall Hopper, data payload)
 - Existing code in the area you're modifying
 
 ## Content Extraction: Site Config vs Extractors
 
 This is the most common source of mistakes. There are **two different mechanisms** for handling site-specific content:
 
-### 1. Site Config (`src/utils/site-config.ts`)
+### 1. Site Config (`src/config/site-config.ts`)
 
 **Use for:** Simple element removal, custom article selectors
 
@@ -51,13 +54,18 @@ Extractors **bypass** Readability and handle all content extraction themselves. 
 
 ```text
 Need to remove elements from a site?
-  └─→ Add selectors to site-config.ts
+  └─→ Add selectors to config/site-config.ts
 
 Need custom article container selector?
-  └─→ Add articleSelector to site-config.ts
+  └─→ Add articleSelector to config/site-config.ts
 
 Need to completely restructure content?
   └─→ Create an extractor (rare)
+
+Page shows a teaser, but the full article is in <script id="__NUXT_DATA__"> or
+<script id="__NEXT_DATA__"> as a list of html/text blocks?
+  └─→ utils/data-payload.ts already reads it, for any site without a registered extractor.
+      A payload holding the article as one string isn't covered.
 ```
 
 ## Common Mistakes to Avoid
@@ -70,9 +78,20 @@ Need to completely restructure content?
 2. **Not testing after changes**
    - Always verify the article still extracts correctly after adding selectors
 
-3. **Adding overly broad selectors**
-   - Be specific with selectors to avoid removing article content
-   - Prefer attribute selectors like `[data-ctatext="View Bio"]` over class patterns
+3. **Adding overly broad selectors to a _site config_**
+   - In `site-config.ts`'s `removeSelectors`, be specific — a broad selector there deletes content unconditionally on that site. Prefer attribute selectors like `[data-ctatext="View Bio"]`.
+   - (This differs from the global `NEGATIVE_SELECTORS` in `html-cleaner.ts`, which are _intentionally_ broad `[class*="…"]` patterns. Those are safe because the cleaner protects the article container, its ancestors, and any element holding a large share of the page's text — see the cleaning invariant below. Do not "tighten" them without understanding that guard.)
+
+4. **Weakening the content-ratio guard in `html-cleaner.ts`**
+   - The guard (`MAX_REMOVABLE_TEXT_RATIO`) is what lets broad negative selectors run without eating the article. If you change the protection logic, keep the "does not remove article content that merely matches a chrome selector" test green.
+
+5. **Adding a paywall pattern without a test**
+   - `paywall-detector.ts` scores evidence and runs on every site. A new signal that tips the balance can create false positives (which fire a slow bypass waterfall on good articles). Add a fixture or synthetic case, and confirm the innocent-page tests stay green.
+
+6. **Changing the summary models in one place only**
+   - The models are listed twice: `SUMMARY_MODELS` in `src/config/ai.ts` (the "Regenerate with Model…" menu) and the `summaryModel` dropdown in `package.json`. Edit both; a test fails when they disagree.
+   - Use `AI.Model` keys that are not marked `@deprecated` in `node_modules/@raycast/api/types/index.d.ts`. A stored key Raycast later removes falls back to the default model instead of failing.
+   - `npm run publish` runs `scripts/sync-summary-models.mjs` first. It fails when the installed `@raycast/api` is behind npm's latest, or when `ai.ts`, the `summaryModel` dropdown (including its "Default (…)" label), disagree, or the test stub is missing a model `ai.ts` uses. It checks every model `ai.ts` names (the menu, the default, and each style's `AI.Model[...]`). It replaces each deprecated model with the successor Raycast's types name, and moves each model to the newest version of its own line (`GPT-#_Terra`, `Gemini_#_Flash`). It rewrites `ai.ts`, `package.json`, and the test stub. When it changes anything, it stops the publish and asks you to run the tests and add a CHANGELOG line before publishing again. Moving to a different line (GPT-5.4 mini → GPT-5.6 Terra) is a judgment call the script does not make.
 
 ## File Structure
 
@@ -83,16 +102,25 @@ src/
 │   ├── index.ts         # Extractor registry
 │   ├── hackernews.ts    # HN-specific extraction
 │   └── ...
+├── config/
+│   └── site-config.ts   # Site-specific selectors (works WITH Readability)
 ├── utils/
-│   ├── site-config.ts   # Site-specific selectors (works WITH Readability)
 │   ├── html-cleaner.ts  # Pre-cleaning logic using site configs
-│   ├── readability.ts   # Main extraction pipeline
+│   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → data payload → clean → parse)
+│   ├── data-payload.ts  # Reads an article from a Nuxt or Next.js data payload (teaser pages)
+│   ├── markdown-source.ts   # .md URLs and <link rel="alternate" type="text/markdown"> pages
+│   ├── paywall-detector.ts  # Evidence-based paywall scoring (no domain allowlist)
+│   ├── host-api.ts      # Bounded/guarded Raycast host API calls (Windows-safe)
 │   └── ...
 ```
 
 ## Testing
 
-Test extraction with the Raycast extension on real URLs before considering work complete.
+Run `npm test` — an automated suite (`tests/`) covering extraction, cleaning, and paywall detection. It encodes the regressions these features have hit before; keep it green.
+
+Fixtures are two-tier: **committed synthetic** pages in `tests/fixtures/` (reproduce paywall structure without real content — always run), and an **optional private** corpus of real captures in `.github/.private/tests/` (gitignored — skipped when absent). When you change cleaning or paywall logic, **add an assertion to the committed corpus** for the case you're fixing — every feature this suite guards was silently broken in production because nothing asserted its behavior.
+
+Then also test extraction with the Raycast extension on real URLs before considering work complete — the suite covers the parsing logic, not the live UI or host integration.
 
 <skills_system priority="1">
 
@@ -103,16 +131,18 @@ Test extraction with the Raycast extension on real URLs before considering work 
 When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
 
 How to use skills:
+
 - Invoke: `npx openskills read <skill-name>` (run in your shell)
   - For multiple: `npx openskills read skill-one,skill-two`
 - The skill content will load with detailed instructions on how to complete the task
 - Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
 
 Usage notes:
+
 - Only use skills listed in <available_skills> below
 - Do not invoke a skill that is already loaded in your context
 - Each skill invocation is stateless
-</usage>
+  </usage>
 
 <available_skills>
 
@@ -123,6 +153,7 @@ Usage notes:
 </skill>
 
 </available_skills>
+
 <!-- SKILLS_TABLE_END -->
 
 </skills_system>

@@ -16,7 +16,7 @@ export function useCategories() {
         throw new Error("Failed to load categories");
       }
       const json = (await response.json()) as {
-        categories: { categoryName: string; id: string }[];
+        categories: { categoryName: string; id: string; categoryId: string }[];
         hasOnThisDay?: boolean;
         hasChaosIndex?: boolean;
       };
@@ -24,18 +24,21 @@ export function useCategories() {
       const categories: Category[] = json.categories.map((cat) => ({
         name: cat.categoryName,
         id: cat.id,
+        categoryId: cat.categoryId,
       }));
 
       if (json.hasOnThisDay) {
         categories.push({
           name: "Today in History",
           id: "onthisday",
+          categoryId: "onthisday",
         });
       }
 
       categories.push({
         name: "Chaos Index",
         id: "chaos",
+        categoryId: "chaos",
       });
 
       return categories;

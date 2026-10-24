@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import React, { useCallback, useMemo } from "react";
 import { logger } from "@chrismessina/raycast-logger";
@@ -10,12 +10,16 @@ import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
+import { revalidated } from "./utils/fetchError";
+import { labelLists } from "./utils/listLabels";
 
 const log = logger.child("[Lists]");
 
-interface ListWithCount {
+interface ListNode {
   id: string;
   name: string;
   icon: string;
@@ -23,13 +27,12 @@ interface ListWithCount {
   type?: "manual" | "smart";
   description?: string;
   query?: string;
-  count: number;
-  children?: ListWithCount[];
+  children?: ListNode[];
 }
 
-function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
-  const listMap = new Map(lists.map((list) => [list.id, { ...list, children: [] as ListWithCount[] }]));
-  const rootLists: ListWithCount[] = [];
+function buildHierarchy(lists: ListNode[]): ListNode[] {
+  const listMap = new Map(lists.map((list) => [list.id, { ...list, children: [] as ListNode[] }]));
+  const rootLists: ListNode[] = [];
 
   lists.forEach((list) => {
     if (list.parentId === null) {
@@ -47,7 +50,7 @@ function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
 }
 
 function ListBookmarksView({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetListsBookmarks(listId);
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
 
   const handleRefresh = async () => {
@@ -58,7 +61,7 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
       action: async () => {
         try {
           log.log("Refreshing list bookmarks", { listId, listName });
-          await revalidate();
+          await revalidated(revalidate);
           log.info("List bookmarks refreshed", { listId });
         } catch (error) {
           log.error("Failed to refresh list bookmarks", { listId, listName, error });
@@ -68,10 +71,15 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
     });
   };
 
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
+
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={handleRefresh}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInList", { name: listName })}
@@ -82,15 +90,20 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
 }
 
 function ArchivedBookmarks() {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
     archived: true,
   });
   const { t } = useTranslation();
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInArchived")}
@@ -101,14 +114,20 @@ function ArchivedBookmarks() {
 }
 
 function FavoritedBookmarks() {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
     favourited: true,
   });
   const { t } = useTranslation();
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
+
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInFavorites")}
@@ -127,15 +146,15 @@ interface ListFormValues {
   query: string;
 }
 
-function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreated: () => void }) {
+function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: () => void }) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
-    initialValues: { name: "", icon: "", description: "", parentId: "", type: "manual", query: "" },
+    initialValues: { name: "", icon: DEFAULT_LIST_ICON, description: "", parentId: "", type: "manual", query: "" },
     validation: {
-      name: (value) => (!value?.trim() ? t("list.listName") + " is required" : undefined),
-      icon: (value) => (!isEmoji(value || "") ? "Must be a valid emoji" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("list.listName") }) : undefined),
+      icon: (value) => (!isEmoji(value || "") ? t("list.listIconInvalid") : undefined),
       query: makeSmartQueryValidator(t),
     },
     async onSubmit(values) {
@@ -147,7 +166,7 @@ function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreate
         action: async () => {
           const payload = {
             name: values.name.trim(),
-            icon: values.icon.trim() || undefined,
+            icon: values.icon.trim() || DEFAULT_LIST_ICON,
             description: values.description.trim() || undefined,
             parentId: values.parentId || undefined,
             type: values.type as "manual" | "smart",
@@ -181,7 +200,7 @@ function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreate
         placeholder={t("list.listNamePlaceholder")}
         autoFocus
       />
-      <Form.TextField {...itemProps.icon} title={t("list.listIcon")} placeholder={t("list.listIconPlaceholder")} />
+      <ListIconField {...itemProps.icon} />
       <Form.TextField
         {...itemProps.description}
         title={t("list.listDescription")}
@@ -189,8 +208,8 @@ function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreate
       />
       <Form.Dropdown {...itemProps.parentId} title={t("list.listParent")}>
         <Form.Dropdown.Item value="" title={t("list.listParentNone")} />
-        {lists.map((l) => (
-          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${l.name}` : l.name} />
+        {labelLists(lists).map(({ list: l, label }) => (
+          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${label}` : label} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.type} title={t("list.listType")}>
@@ -209,30 +228,22 @@ function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreate
   );
 }
 
-function EditListForm({
-  list,
-  lists,
-  onUpdated,
-}: {
-  list: ListWithCount;
-  lists: ListWithCount[];
-  onUpdated: () => void;
-}) {
+function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListNode[]; onUpdated: () => void }) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
     initialValues: {
       name: list.name,
-      icon: list.icon || "",
+      icon: list.icon || DEFAULT_LIST_ICON,
       description: list.description || "",
       parentId: list.parentId || "",
       type: list.type || "manual",
       query: list.query || "",
     },
     validation: {
-      name: (value) => (!value?.trim() ? t("list.listName") + " is required" : undefined),
-      icon: (value) => (!isEmoji(value || "") ? "Must be a valid emoji" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("list.listName") }) : undefined),
+      icon: (value) => (!isEmoji(value || "") ? t("list.listIconInvalid") : undefined),
       query: makeSmartQueryValidator(t),
     },
     async onSubmit(values) {
@@ -244,7 +255,7 @@ function EditListForm({
         action: async () => {
           const payload = {
             name: values.name.trim(),
-            icon: values.icon.trim() || undefined,
+            icon: values.icon.trim() || DEFAULT_LIST_ICON,
             description: values.description.trim() || undefined,
             parentId: values.parentId || null,
             type: values.type as "manual" | "smart",
@@ -281,7 +292,7 @@ function EditListForm({
         placeholder={t("list.listNamePlaceholder")}
         autoFocus
       />
-      <Form.TextField {...itemProps.icon} title={t("list.listIcon")} placeholder={t("list.listIconPlaceholder")} />
+      <ListIconField {...itemProps.icon} />
       <Form.TextField
         {...itemProps.description}
         title={t("list.listDescription")}
@@ -289,8 +300,8 @@ function EditListForm({
       />
       <Form.Dropdown {...itemProps.parentId} title={t("list.listParent")}>
         <Form.Dropdown.Item value="" title={t("list.listParentNone")} />
-        {parentOptions.map((l) => (
-          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${l.name}` : l.name} />
+        {labelLists(parentOptions).map(({ list: l, label }) => (
+          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${label}` : label} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.type} title={t("list.listType")}>
@@ -312,23 +323,25 @@ function EditListForm({
 const getDashboardListsPage = (apiUrl: string, listId: string) => `${apiUrl}/dashboard/lists/${listId}`;
 
 interface ListItemProps {
-  list: ListWithCount;
+  list: ListNode;
+  /** Disambiguated name — see labelLists. Falls back to list.name. */
+  label: string;
   level: number;
   apiUrl: string;
-  onOpen: (list: ListWithCount) => void;
-  onEdit: (list: ListWithCount) => void;
+  onOpen: (list: ListNode) => void;
+  onEdit: (list: ListNode) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
   t: (key: string) => string;
 }
 
-function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }: ListItemProps) {
+function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }: ListItemProps) {
   const icon = list.icon || (list.type === "smart" ? "✨" : undefined);
   return (
     <List.Item
       key={list.id}
       icon={icon}
-      title={`${"  ".repeat(level)}${list.name} (${list.count})`}
+      title={`${"  ".repeat(level)}${label}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -336,19 +349,19 @@ function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }
               title={t("list.openList")}
               onAction={() => onOpen(list)}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action
               title={t("list.editList")}
               onAction={() => onEdit(list)}
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title={t("list.createList")}
               onAction={onCreate}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -356,7 +369,7 @@ function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }
             <Action.CopyToClipboard
               title={t("common.copyId")}
               content={list.id}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -365,7 +378,7 @@ function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={() => onDelete(list.id)}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -375,7 +388,7 @@ function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }
 }
 
 export default function Lists() {
-  const { isLoading, lists, revalidate } = useGetAllLists();
+  const { isLoading, lists, error, hasLiveData, revalidate } = useGetAllLists();
   const { push } = useNavigation();
   const { config } = useConfig();
   const { t } = useTranslation();
@@ -386,34 +399,38 @@ export default function Lists() {
       const list = lists?.find((list) => list.id === id);
       const listName = list?.name;
 
+      // Declining the confirmation is a normal outcome, not an error. It used to
+      // raise a red Failure toast reading "Delete cancelled", which reports a
+      // successful no-op as a problem — and no other confirmAlert in this
+      // extension says anything when you back out. Stay silent to match.
       if (
-        await confirmAlert({
+        !(await confirmAlert({
           title: t("list.deleteList"),
           message: t("list.deleteConfirm", { name: listName || "" }),
-        })
+        }))
       ) {
-        await runWithToast({
-          loading: { title: t("common.deleting") },
-          success: { title: t("common.deleteSuccess") },
-          failure: { title: t("common.deleteFailed") },
-          action: async () => {
-            try {
-              log.info("Deleting list", { listId: id, listName });
-              await fetchDeleteList(id);
-              await revalidate();
-              log.info("List deleted", { listId: id });
-            } catch (error) {
-              log.error("Failed to delete list", { listId: id, listName, error });
-              throw error;
-            }
-          },
-        });
-      } else {
-        await showToast({
-          title: t("common.deleteCancel"),
-          style: Toast.Style.Failure,
-        });
+        return;
       }
+
+      await runWithToast({
+        loading: { title: t("common.deleting") },
+        success: { title: t("common.deleteSuccess") },
+        failure: { title: t("common.deleteFailed") },
+        action: async () => {
+          try {
+            log.info("Deleting list", { listId: id, listName });
+            await fetchDeleteList(id);
+            // Plain revalidate, NOT revalidated(): the list is already gone. A
+            // refresh that fails here must not turn a completed delete into
+            // "Couldn't delete list" — the hook's own onError reports it.
+            await revalidate();
+            log.info("List deleted", { listId: id });
+          } catch (error) {
+            log.error("Failed to delete list", { listId: id, listName, error });
+            throw error;
+          }
+        },
+      });
     },
     [lists, revalidate, t],
   );
@@ -427,28 +444,35 @@ export default function Lists() {
   }, [push]);
 
   const handleCreateList = useCallback(() => {
-    push(<CreateListForm lists={(lists as ListWithCount[]) || []} onCreated={revalidate} />);
+    push(<CreateListForm lists={(lists as ListNode[]) || []} onCreated={revalidate} />);
   }, [push, revalidate, lists]);
 
   const hierarchicalLists = useMemo(() => {
     if (!lists) return [];
-    const sorted = [...lists].sort((a, b) => a.name.localeCompare(b.name)) as ListWithCount[];
+    const sorted = [...lists].sort((a, b) => a.name.localeCompare(b.name)) as ListNode[];
     return buildHierarchy(sorted);
   }, [lists]);
 
+  // Indentation shows the hierarchy while browsing, but Raycast's filtering
+  // hides the parent rows — so a search for "hunt" leaves two identically
+  // titled entries with the nesting that distinguished them off screen.
+  const listLabels = useMemo(
+    () => new Map(labelLists(lists ?? []).map(({ list, label }) => [list.id, label])),
+    [lists],
+  );
+
   const renderListItems = useCallback(
-    (items: ListWithCount[], level = 0) => {
+    (items: ListNode[], level = 0) => {
       return items.flatMap((list) => {
         const result = [
           <ListItem
             key={list.id}
             list={list}
+            label={listLabels.get(list.id) ?? list.name}
             level={level}
             apiUrl={apiUrl}
             onOpen={(l) => push(<ListBookmarksView listId={l.id} listName={l.name} />)}
-            onEdit={(l) =>
-              push(<EditListForm list={l} lists={(lists as ListWithCount[]) || []} onUpdated={revalidate} />)
-            }
+            onEdit={(l) => push(<EditListForm list={l} lists={(lists as ListNode[]) || []} onUpdated={revalidate} />)}
             onCreate={handleCreateList}
             onDelete={handleDeleteList}
             t={t}
@@ -460,8 +484,11 @@ export default function Lists() {
         return result;
       });
     },
-    [apiUrl, push, revalidate, handleCreateList, handleDeleteList, t, lists],
+    [apiUrl, push, revalidate, handleCreateList, handleDeleteList, t, lists, listLabels],
   );
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List
@@ -472,7 +499,7 @@ export default function Lists() {
             title={t("list.createList")}
             onAction={handleCreateList}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel>
       }
@@ -488,7 +515,7 @@ export default function Lists() {
                 title={t("list.createList")}
                 onAction={handleCreateList}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -503,14 +530,14 @@ export default function Lists() {
               title={t("list.openFavorites")}
               onAction={handleShowFavoritedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/favourites`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }
@@ -524,14 +551,14 @@ export default function Lists() {
               title={t("list.openArchived")}
               onAction={handleShowArchivedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/archive`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }

@@ -1,4 +1,11 @@
-import { parseAliases, parseExports, parsePathEntries, parseFpathEntries, parseKeybindings } from "../utils/parsers";
+import {
+  parseAliases,
+  parseExports,
+  parsePathEntries,
+  parseFpathEntries,
+  parseKeybindings,
+  parseSources,
+} from "../utils/parsers";
 
 describe("parsers.ts", () => {
   describe("parseAliases", () => {
@@ -214,6 +221,27 @@ export NODE_ENV=development`;
     });
   });
 
+  describe("parseSources", () => {
+    it("should capture only the operand, not a trailing inline comment", () => {
+      const content = `source "/opt/zsh/highlight.zsh" # syntax highlighting
+source /opt/zsh/plain.zsh # plain form
+source ~/.config/zsh/simple.zsh`;
+
+      const result = parseSources(content);
+
+      expect(result).toEqual([
+        { path: '"/opt/zsh/highlight.zsh"' },
+        { path: "/opt/zsh/plain.zsh" },
+        { path: "~/.config/zsh/simple.zsh" },
+      ]);
+    });
+
+    it("should keep quoted operands intact including spaces", () => {
+      const content = `source "/opt/with space/file.zsh"`;
+      expect(parseSources(content)).toEqual([{ path: '"/opt/with space/file.zsh"' }]);
+    });
+  });
+
   describe("parsePathEntries", () => {
     it("should parse export PATH statements", () => {
       const content = `export PATH="/usr/local/bin:$PATH"`;
@@ -222,6 +250,28 @@ export NODE_ENV=development`;
 
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({ entry: "/usr/local/bin:$PATH", type: "export" });
+    });
+
+    it("should parse typeset -x and declare -x PATH statements", () => {
+      const content = `typeset -x PATH="/custom/bin:$PATH"
+declare -x PATH="/declared/bin:$PATH"`;
+
+      const result = parsePathEntries(content);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ entry: "/custom/bin:$PATH", type: "export" });
+      expect(result[1]).toEqual({ entry: "/declared/bin:$PATH", type: "export" });
+    });
+
+    it("should parse PATH+= string append syntax", () => {
+      const content = `PATH+=:/custom/bin
+PATH+="/quoted/bin"`;
+
+      const result = parsePathEntries(content);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ entry: "/custom/bin", type: "append" });
+      expect(result[1]).toEqual({ entry: "/quoted/bin", type: "append" });
     });
 
     it("should parse path+= array append syntax", () => {

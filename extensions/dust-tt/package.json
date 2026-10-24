@@ -10,7 +10,8 @@
     "henry_fontanier",
     "stang",
     "sebastien_flory",
-    "adrien_simon"
+    "adrien_simon",
+    "leandre_le_bizec"
   ],
   "categories": [
     "Productivity"
@@ -22,34 +23,6 @@
       "name": "ask",
       "title": "Ask Dust",
       "description": "Query @Dust on dust.tt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Ask a question",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "askClaude",
-      "title": "Ask Claude-4",
-      "description": "Query @claude-4 on Dust.tt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Ask a question",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "askGpt",
-      "title": "Ask GPT-5",
-      "description": "Query @gpt-5 on Dust.tt",
       "mode": "view",
       "arguments": [
         {
@@ -75,6 +48,19 @@
       "mode": "view"
     },
     {
+      "name": "setUpReplaceSelection",
+      "title": "Set up Replace Selection",
+      "subtitle": "Create a Quicklink for an agent",
+      "description": "Pick an agent and use \"Create Quicklink…\" to save a dedicated, freely-renamable shortcut that silently replaces your selected text with that agent's answer.",
+      "mode": "view"
+    },
+    {
+      "name": "replaceSelectionWithAgent",
+      "title": "Replace Selection with Agent",
+      "description": "Silently sends the currently selected text to the agent bound to this shortcut and replaces the selection with the answer. Create shortcuts for specific agents from \"Set up Replace Selection\". Runs with no window, only toasts.",
+      "mode": "no-view"
+    },
+    {
       "name": "pickWorkspace",
       "title": "Select Workspace",
       "subtitle": "Select a workspace to use",
@@ -89,11 +75,14 @@
     "@raycast/utils": "^1.18.0",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
+    "html-to-text": "^9.0.5",
     "jwt-decode": "^4.0.0",
+    "marked": "^18.0.13",
     "undici": "^6.20.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "22.14.0",
     "@types/react": "19.0.10",
     "eslint": "^8.51.0",
@@ -109,5 +98,6 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "packageManager": "npm@11.12.1+sha512.cdca14b85d647b3192028d02aadbe82d75f79a446aceea9874be98e6d768f20ebd3555770a48d0e9906106007877bbc690f715e9372f2e2dc644a3c3157fb14c"
 }

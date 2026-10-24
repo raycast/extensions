@@ -8,7 +8,8 @@
   "contributors": [
     "soulevans07",
     "BalliAsghar",
-    "midskyey"
+    "midskyey",
+    "ernest0n"
   ],
   "categories": [
     "Security",
@@ -32,6 +33,13 @@
       "subtitle": "Generate time-based one-time passwords",
       "description": "Generate time-based one-time passwords",
       "mode": "view"
+    },
+    {
+      "name": "paste-recent-otp",
+      "title": "Paste Recent OTP",
+      "subtitle": "One Time Password",
+      "description": "Paste the OTP code from the most recently used account into the active app",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -63,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^1.104.24",
     "@raycast/utils": "^2.2.0",
     "hi-base32": "^0.5.1",
     "jimp": "^0.22.7",
@@ -73,7 +81,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "eslint": "^9.31.0",

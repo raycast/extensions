@@ -124,7 +124,7 @@ return deviceNames as string
 // Scan displays from System Settings dropdown
 export async function scanDisplaysFromSystem(): Promise<Display[]> {
   try {
-    const deeplink = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
+    const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
     const { stdout } = await execFileAsync("osascript", ["-e", scanScript], {
       timeout: 15000,
       env: {

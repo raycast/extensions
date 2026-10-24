@@ -14,8 +14,67 @@ import { Action, ActionPanel, Icon, showToast, Toast, confirmAlert, Alert, Clipb
 import { undoLastChange, getHistory, getUndoCount } from "./history";
 import { restoreFromBackup, getZshrcPath, getBackupPath } from "./zsh";
 import { clearCache } from "./cache";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import HistoryView from "../history-view";
+
+/**
+ * Detail pane toggle state provided by list surfaces (home, focused
+ * views). When present, every action panel built from
+ * SharedActionsSection gains a "Show/Hide Detail" action (⌘⇧D) without
+ * each view having to thread the state through its action generators.
+ */
+export const DetailToggleContext = createContext<{ shown: boolean; toggle: () => void } | null>(null);
+
+/**
+ * Show/Hide Detail action (⌘⇧D), rendered when a surface provides
+ * DetailToggleContext
+ */
+function ToggleDetailAction() {
+  const detailToggle = useContext(DetailToggleContext);
+  if (!detailToggle) {
+    return null;
+  }
+  return (
+    <Action
+      title={detailToggle.shown ? "Hide Detail" : "Show Detail"}
+      icon={Icon.Sidebar}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onAction={detailToggle.toggle}
+    />
+  );
+}
+
+/**
+ * Item-level actions carried by SharedActionsSection.
+ *
+ * Every surface that shows an entry passes what it can here, so the full
+ * action set (Edit, Delete, Copy Value, Copy Name, Open Zshrc, Refresh)
+ * renders consistently and no view can ship a partial set.
+ */
+export interface ItemActions {
+  /** Form element to push for editing (e.g. <EditAlias …/>) */
+  editTarget?: React.ReactNode | undefined;
+  /** Title for the edit action (defaults to "Edit") */
+  editTitle?: string | undefined;
+  /** Handler that deletes the item (confirmation handled by the callee) */
+  onDelete?: (() => void | Promise<void>) | undefined;
+  /** Title for the delete action (defaults to "Delete") */
+  deleteTitle?: string | undefined;
+  /** Value copied by Copy Value (⌘C) — always the real, unmasked value */
+  copyValue?: string | undefined;
+  /** Name copied by Copy Name (⌘⇧C) */
+  copyName?: string | undefined;
+  /** Full definition line offered as Copy Definition */
+  copyDefinition?: string | undefined;
+  /** Whether the item's value is masked as a secret */
+  isSecret?: boolean | undefined;
+  /** Whether a secret value is currently revealed */
+  revealed?: boolean | undefined;
+  /** Toggles reveal/hide for a secret value (⌘U) */
+  onToggleReveal?: (() => void) | undefined;
+  /** Called when the user acts on the item (frecency tracking) */
+  onVisit?: (() => void) | undefined;
+}
 
 interface SharedActionsProps {
   /** Callback to refresh the view after changes */
@@ -24,10 +83,10 @@ interface SharedActionsProps {
   showUndo?: boolean;
   /** Whether to show backup restore action */
   showBackupRestore?: boolean;
-  /** Value to copy (if any) */
-  copyValue?: string;
-  /** Label for the copy action */
-  copyLabel?: string;
+  /** Whether to show the view-history action (home surfaces it as a Tool) */
+  showHistory?: boolean;
+  /** Item-level actions rendered ahead of the tools section */
+  item?: ItemActions;
 }
 
 /**
@@ -103,22 +162,69 @@ export function BackupRestoreAction({ onRefresh }: { onRefresh?: () => void }) {
 }
 
 /**
- * Copy action component
+ * Copies an item's value (⌘C) — always the real value, even when the
+ * displayed value is masked as a secret. Secrets are copied concealed (kept
+ * out of clipboard managers) and never echoed in the toast.
  */
-export function CopyAction({ value, label = "Copy" }: { value: string; label?: string }) {
+export function CopyValueAction({
+  value,
+  isSecret = false,
+  onCopy,
+}: {
+  value: string;
+  isSecret?: boolean | undefined;
+  onCopy?: (() => void) | undefined;
+}) {
   return (
     <Action
-      title={label}
+      title="Copy Value"
       icon={Icon.Clipboard}
       shortcut={{ modifiers: ["cmd"], key: "c" }}
       onAction={async () => {
-        await Clipboard.copy(value);
+        onCopy?.();
+        await Clipboard.copy(value, { concealed: isSecret });
         await showToast({
           style: Toast.Style.Success,
-          title: "Copied",
-          message: value.length > 50 ? value.slice(0, 47) + "..." : value,
+          title: "Value Copied",
+          ...(isSecret ? {} : { message: value.length > 50 ? value.slice(0, 47) + "..." : value }),
         });
       }}
+    />
+  );
+}
+
+/**
+ * Copies an item's name (⌘⇧C)
+ */
+export function CopyNameAction({ name, onCopy }: { name: string; onCopy?: (() => void) | undefined }) {
+  return (
+    <Action
+      title="Copy Name"
+      icon={Icon.Clipboard}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      onAction={async () => {
+        onCopy?.();
+        await Clipboard.copy(name);
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Name Copied",
+          message: name,
+        });
+      }}
+    />
+  );
+}
+
+/**
+ * Reveals or hides a masked secret value (⌘U)
+ */
+export function RevealValueAction({ revealed, onToggle }: { revealed: boolean; onToggle: () => void }) {
+  return (
+    <Action
+      title={revealed ? "Hide Value" : "Reveal Value"}
+      icon={revealed ? Icon.EyeDisabled : Icon.Eye}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onAction={onToggle}
     />
   );
 }
@@ -208,67 +314,74 @@ export function SharedActionsSection({
   onRefresh,
   showUndo = true,
   showBackupRestore = true,
-  copyValue,
-  copyLabel,
+  showHistory = true,
+  item,
 }: SharedActionsProps) {
   return (
-    <ActionPanel.Section title="Tools">
-      {copyValue && <CopyAction value={copyValue} label={copyLabel ?? "Copy"} />}
-      {showUndo && onRefresh && <UndoAction onRefresh={onRefresh} />}
-      {showBackupRestore && onRefresh && <BackupRestoreAction onRefresh={onRefresh} />}
-      <ViewHistoryAction onRefresh={onRefresh} />
-      <SourceConfigAction />
-      {onRefresh && (
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={onRefresh}
-        />
+    <>
+      {item && (
+        <ActionPanel.Section title="Item">
+          {item.editTarget && (
+            <Action.Push
+              title={item.editTitle ?? "Edit"}
+              icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={item.editTarget}
+              onPush={() => item.onVisit?.()}
+            />
+          )}
+          {item.copyValue !== undefined && (
+            <CopyValueAction value={item.copyValue} isSecret={item.isSecret} onCopy={item.onVisit} />
+          )}
+          {item.copyName !== undefined && <CopyNameAction name={item.copyName} onCopy={item.onVisit} />}
+          {item.copyDefinition !== undefined && (
+            <Action
+              title="Copy Definition"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              onAction={async () => {
+                item.onVisit?.();
+                // The definition embeds the value, so secrets stay concealed here too
+                await Clipboard.copy(item.copyDefinition!, { concealed: item.isSecret ?? false });
+                await showToast({ style: Toast.Style.Success, title: "Definition Copied" });
+              }}
+            />
+          )}
+          {item.isSecret && item.onToggleReveal && (
+            <RevealValueAction revealed={item.revealed ?? false} onToggle={item.onToggleReveal} />
+          )}
+          {item.onDelete && (
+            <Action
+              title={item.deleteTitle ?? "Delete"}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={async () => {
+                item.onVisit?.();
+                await item.onDelete?.();
+              }}
+            />
+          )}
+        </ActionPanel.Section>
       )}
-      <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-    </ActionPanel.Section>
-  );
-}
-
-/**
- * Standard actions for item management
- *
- * Use this for list items that can be edited/deleted.
- */
-export function ItemActionsSection({
-  onEdit,
-  onDelete,
-  onToggle,
-  isEnabled = true,
-}: {
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onToggle?: () => void;
-  isEnabled?: boolean;
-}) {
-  return (
-    <ActionPanel.Section title="Item Actions">
-      {onEdit && (
-        <Action title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} onAction={onEdit} />
-      )}
-      {onToggle && (
-        <Action
-          title={isEnabled ? "Disable" : "Enable"}
-          icon={isEnabled ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={onToggle}
-        />
-      )}
-      {onDelete && (
-        <Action
-          title="Delete"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-          onAction={onDelete}
-        />
-      )}
-    </ActionPanel.Section>
+      <ActionPanel.Section title="Tools">
+        {/* Safe actions lead: on panels without an Item section, the first
+            action is the Enter default, and Enter must never rewrite the file */}
+        <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
+        {onRefresh && (
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={onRefresh}
+          />
+        )}
+        <ToggleDetailAction />
+        {showUndo && onRefresh && <UndoAction onRefresh={onRefresh} />}
+        {showBackupRestore && onRefresh && <BackupRestoreAction onRefresh={onRefresh} />}
+        {showHistory && <ViewHistoryAction onRefresh={onRefresh} />}
+        <SourceConfigAction />
+      </ActionPanel.Section>
+    </>
   );
 }

@@ -1,15 +1,8 @@
 import { getSelectedText, open, showToast, showHUD, getPreferenceValues, Toast } from "@raycast/api";
-import { encodeForRayso } from "./utils";
-
-interface Preferences {
-  theme: string;
-  padding: number;
-  darkMode: boolean;
-  background: boolean;
-}
+import { createRaySoUrl } from "./utils";
 
 export default async () => {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   let selectedText;
   try {
@@ -21,13 +14,11 @@ export default async () => {
     return;
   }
 
-  const base64Text = encodeForRayso(selectedText);
-
   await showToast({
     style: Toast.Style.Animated,
     title: "Generating screenshot",
   });
 
-  const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&padding=${preferences.padding}&code=${base64Text}`;
+  const url = createRaySoUrl({ ...preferences, code: selectedText });
   await open(url);
 };

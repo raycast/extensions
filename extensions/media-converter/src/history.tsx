@@ -47,8 +47,8 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={Icon.Clock}
-          title="No conversions yet"
-          description="Your converted files will appear here. Run a conversion from Convert Media to get started."
+          title="No media operations yet"
+          description="Your converted and merged files will appear here."
         />
       </List>
     );
@@ -94,7 +94,13 @@ export default function Command() {
 
 function HistoryItem({ entry, onChange }: { entry: HistoryEntry; onChange: () => Promise<void> }) {
   const primaryOutput = entry.outputs[0];
-  const title = primaryOutput ? path.basename(primaryOutput) : "Conversion";
+  const title = primaryOutput
+    ? path.basename(primaryOutput)
+    : entry.operation === "merge"
+      ? "Merge"
+      : entry.operation === "edit"
+        ? "Edit"
+        : "Conversion";
   const [outputExists, setOutputExists] = useState(false);
   useEffect(() => {
     setOutputExists(primaryOutput ? fs.existsSync(primaryOutput) : false);
@@ -115,7 +121,7 @@ function HistoryItem({ entry, onChange }: { entry: HistoryEntry; onChange: () =>
         tintColor: outputExists ? Color.PrimaryText : Color.Orange,
       }}
       title={title}
-      subtitle={entry.outputFormat}
+      subtitle={`${entry.operation === "merge" ? "Merge" : entry.operation === "edit" ? "Edit" : "Convert"} · ${entry.outputFormat}`}
       accessories={[
         { text: savingsText },
         { text: timeStr },
@@ -130,32 +136,36 @@ function HistoryItem({ entry, onChange }: { entry: HistoryEntry; onChange: () =>
                 <Action title="Show in Finder" icon={Icon.Finder} onAction={() => showInFinder(primaryOutput)} />
               </>
             )}
-            <Action
-              title="Re-Run with Same Settings"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => rerunEntry(entry)}
-            />
-            <Action
-              title="Copy FFmpeg Command"
-              icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              onAction={async () => {
-                try {
-                  if (entry.inputs.length === 0) return;
-                  const cmd = await convertMedia(entry.inputs[0], entry.outputFormat, entry.quality, {
-                    returnCommandString: true,
-                    outputDir: entry.outputDir,
-                    stripMetadata: entry.stripMetadata,
-                    trim: entry.trim,
-                  });
-                  await Clipboard.copy(cmd);
-                  await showToast({ style: Toast.Style.Success, title: "Command copied" });
-                } catch (error) {
-                  showFailureToast(error, { title: "Failed to generate command" });
-                }
-              }}
-            />
+            {entry.operation === "convert" && entry.quality && (
+              <>
+                <Action
+                  title="Re-Run with Same Settings"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => rerunEntry(entry)}
+                />
+                <Action
+                  title="Copy FFmpeg Command"
+                  icon={Icon.Clipboard}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  onAction={async () => {
+                    try {
+                      if (entry.inputs.length === 0 || !entry.quality) return;
+                      const cmd = await convertMedia(entry.inputs[0], entry.outputFormat, entry.quality, {
+                        returnCommandString: true,
+                        outputDir: entry.outputDir,
+                        stripMetadata: entry.stripMetadata,
+                        trim: entry.trim,
+                      });
+                      await Clipboard.copy(cmd);
+                      await showToast({ style: Toast.Style.Success, title: "Command copied" });
+                    } catch (error) {
+                      showFailureToast(error, { title: "Failed to generate command" });
+                    }
+                  }}
+                />
+              </>
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
@@ -176,6 +186,7 @@ function HistoryItem({ entry, onChange }: { entry: HistoryEntry; onChange: () =>
 }
 
 async function rerunEntry(entry: HistoryEntry): Promise<void> {
+  if (entry.operation !== "convert" || !entry.quality) return;
   // Only pass inputs that still exist
   const stillExisting = entry.inputs.filter((p) => {
     try {

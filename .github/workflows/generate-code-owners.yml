@@ -13,7 +13,7 @@ jobs:
     if: github.repository == 'raycast/extensions'
     steps:
       - name: Checkout with minimal sparse checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -61,7 +61,8 @@ jobs:
             exit 1
           fi
           
-          if ! git sparse-checkout set $ALL_SPACED; then
+          read -ra paths_array <<< "$ALL_SPACED"
+          if ! git sparse-checkout set "${paths_array[@]}"; then
             echo "::error::Failed to set sparse checkout files"
             exit 1
           fi
@@ -82,16 +83,18 @@ jobs:
           ls -la scripts/ .github/ || true  # Debug: Confirm dirs/files
           
           # Store normalized for the script
-          echo "PACKAGE_FILES<<EOF" >> $GITHUB_ENV
-          echo "$PACKAGE_FILES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED" >> $GITHUB_ENV
+          {
+            echo "PACKAGE_FILES<<EOF"
+            echo "$PACKAGE_FILES"
+            echo "EOF"
+            echo "PACKAGE_FILES_SPACED=$PACKAGE_FILES_SPACED"
+          } >> "$GITHUB_ENV"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20.15.1
+          node-version: 22.22.2
       - name: Generate
         working-directory: scripts
         run: ./generate-code-owners.js "$PACKAGE_FILES"
@@ -99,15 +102,15 @@ jobs:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}
       - name: Set SHORT_SHA
         if: always()
-        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> "$GITHUB_ENV"
       - name: Check for changes
         id: check-changes
         run: |
           if git diff --quiet; then
-            echo "has-changes=false" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit"
           else
-            echo "has-changes=true" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
             echo "Changes detected, will commit"
           fi
       - name: Commit

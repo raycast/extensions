@@ -3,12 +3,13 @@ import {
   ActionPanel,
   Detail,
   Form,
+  getSelectedFinderItems,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
-import { readFileSync } from "fs";
+import { useEffect, useRef, useState } from "react";
+import { readFileSync, statSync } from "fs";
 import { basename } from "path";
 import { apiPostMultipart, TypeWhisperError } from "./api";
 import type { TranscribeResponse } from "./types";
@@ -23,6 +24,19 @@ const AUDIO_EXTENSIONS = [
   "mp4",
   "webm",
 ];
+
+function isSupportedAudioFile(filePath: string) {
+  const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
+  if (!AUDIO_EXTENSIONS.includes(ext)) {
+    return false;
+  }
+
+  try {
+    return statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+}
 
 function TranscriptionResult({
   result,
@@ -69,6 +83,48 @@ function TranscriptionResult({
 export default function Command() {
   const { push } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const didChooseFile = useRef(false);
+
+  useEffect(() => {
+    if (process.platform !== "darwin") {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function prefillSelectedFinderFile() {
+      try {
+        const selectedItems = await getSelectedFinderItems();
+        const selectedAudioFile = selectedItems
+          .map((item) => item.path)
+          .find(isSupportedAudioFile);
+
+        if (selectedAudioFile && isMounted) {
+          setSelectedFiles((currentFiles) => {
+            if (didChooseFile.current || currentFiles.length > 0) {
+              return currentFiles;
+            }
+
+            return [selectedAudioFile];
+          });
+        }
+      } catch {
+        // Keep the file picker empty when Finder is not active or has no usable selection.
+      }
+    }
+
+    void prefillSelectedFinderFile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  function handleFileChange(files: string[]) {
+    didChooseFile.current = true;
+    setSelectedFiles(files);
+  }
 
   async function handleSubmit(values: {
     file: string[];
@@ -145,6 +201,8 @@ export default function Command() {
       <Form.FilePicker
         id="file"
         title="Audio File"
+        value={selectedFiles}
+        onChange={handleFileChange}
         allowMultipleSelection={false}
         canChooseDirectories={false}
       />

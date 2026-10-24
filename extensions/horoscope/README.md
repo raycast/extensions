@@ -4,4 +4,4 @@
 
 # Horoscope
 
-Get Daily, Weekly or Monthly Horoscope by Sign via https://horoscope-app-api.vercel.app/.
+Get **Daily**, **Weekly** or **Monthly** Horoscope by Sign via https://freehoroscopeapi.com/.

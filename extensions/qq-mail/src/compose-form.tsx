@@ -14,6 +14,7 @@ import {
 import { sendEmail } from "./smtp-client";
 import { marked } from "marked";
 import { convert } from "html-to-text";
+import { formatDate } from "./utils";
 
 export type ComposeMode = "reply" | "replyAll" | "forward" | "new";
 
@@ -29,7 +30,8 @@ interface ComposeFormProps {
   };
 }
 
-export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
+export function ComposeForm(props: ComposeFormProps) {
+  const { mode, originalEmail } = props;
   const { pop } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
   const useMarkdown = prefs.composeFormat === "markdown";
@@ -78,9 +80,7 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
 
   const getQuotedBody = (): string => {
     if (!originalEmail) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
     const d = originalEmail.date;
-    const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     // Clean up HTML if present in the body
     const cleanBody = convert(originalEmail.body, { wordwrap: false });
     // Add > prefix to each line for proper email quoting
@@ -88,7 +88,7 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
       .split("\n")
       .map((line) => `> ${line}`)
       .join("\n");
-    const header = `\n\nOn ${dateStr}, ${originalEmail.from} wrote:\n`;
+    const header = `\n\nOn ${formatDate(d)}, ${originalEmail.from} wrote:\n`;
     return header + quotedLines;
   };
 

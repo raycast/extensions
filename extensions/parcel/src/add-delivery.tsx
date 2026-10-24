@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useEffect } from "react";
 import { useCarriers } from "./hooks/useCarriers";
 import { addDelivery } from "./api";
 
@@ -12,7 +11,7 @@ interface FormValues {
 }
 
 export default function Command() {
-  const { carriers, isLoading: carriersLoading, error: carriersError } = useCarriers();
+  const { carriers, isLoading: carriersLoading, error: carriersError, revalidate: revalidateCarriers } = useCarriers();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
@@ -66,21 +65,14 @@ export default function Command() {
     },
   });
 
-  useEffect(() => {
-    if (carriersError) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load carriers",
-        message: carriersError.message || "Unable to fetch supported carriers. Please try again later.",
-      });
-    }
-  }, [carriersError]);
-
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Delivery" icon={Icon.Plus} onSubmit={handleSubmit} />
+          {carriersError && (
+            <Action title="Retry Loading Carriers" icon={Icon.ArrowClockwise} onAction={revalidateCarriers} />
+          )}
         </ActionPanel>
       }
       isLoading={carriersLoading}

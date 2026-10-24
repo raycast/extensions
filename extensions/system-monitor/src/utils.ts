@@ -1,15 +1,4 @@
-import { execFile } from "child_process";
-import { promisify } from "util";
-
-const execFileP = promisify(execFile);
-
-/** Shell-free command execution. Uses execFile() instead of exec() to spawn
- *  binaries directly without /bin/sh, preventing zombie process accumulation.
- *  See: https://github.com/raycast/extensions/issues/26480 */
-export const execf = async (file: string, args: string[] = [], maxBuffer?: number): Promise<string> => {
-  const { stdout } = await execFileP(file, args, maxBuffer ? { maxBuffer } : undefined);
-  return String(stdout).trim();
-};
+export { execf, execTail } from "./lib/exec";
 
 export const formatBytes = (bytes: number): string => {
   const decimals = 2;
@@ -21,7 +10,8 @@ export const formatBytes = (bytes: number): string => {
   const k = 1024;
   const dm: number = decimals < 0 ? 0 : decimals;
   const sizes: string[] = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  const i: number = Math.floor(Math.log(bytes) / Math.log(k));
+  // Fractional rates (sub-1 B/s) would index below the array; clamp to bytes.
+  const i: number = Math.min(Math.max(Math.floor(Math.log(bytes) / Math.log(k)), 0), sizes.length - 1);
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
@@ -49,7 +39,7 @@ export const convertMsToTime = (milliseconds: number): string => {
 };
 
 export const convertMinutesToHours = (minutes: number): string => {
-  return `${`0${(minutes / 60) ^ 0}`.slice(-2)}:${`0${minutes % 60}`.slice(-2)}`;
+  return `${`0${Math.floor(minutes / 60)}`.slice(-2)}:${`0${minutes % 60}`.slice(-2)}`;
 };
 
 export const openActivityMonitorAppleScript = (radioButtonNumber?: number | null): string => {
@@ -84,4 +74,8 @@ export const openActivityMonitorAppleScript = (radioButtonNumber?: number | null
     end tell
   end tell
 `;
+};
+
+export const formatMegabytesAsGigabytes = (megabytes: number): string => {
+  return `${(megabytes / 1024).toFixed(1)} GB`;
 };

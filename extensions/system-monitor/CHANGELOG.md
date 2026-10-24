@@ -1,5 +1,57 @@
 # System Monitor Changelog
 
+## [Copy System Info] - 2026-10-24
+
+- Add a Copy Info submenu (⌘⇧C) on System Info to copy the macOS version, hostname, model, chip, serial number and other values
+
+## [Compact Layout] - 2026-10-13
+
+- Restructure the main view as a sectioned entity list (Overview / CPU / Memory / Disk / Power / Network) with colored percentage tags on the CPU, Memory, Disk and Power rows
+- Show every mounted volume as its own Disk row with a capacity tag; the boot volume's pane carries SMART status, physical-disk details and the live I/O rate (the "Disk" default tab opens on the boot volume)
+- Render per-core CPU usage as one wrapping row of colored tags, labeled by Performance/Efficiency cluster on Apple Silicon when the mapping can be verified via IORegistry (plain `C1…Cn` otherwise)
+- Compact the CPU and Memory panes so they fit a default Raycast window without scrolling: one-row temperature, fans and load average, paired memory breakdown, top 3 processes directly under usage
+- Lead System Info with live uptime and process count (polled only while the row is selected), pair related spec-sheet rows, and fold the storage rows into the boot volume's Disk pane
+- Color CPU temperature by severity and load average by load ÷ core count; add row icons to System Info
+- Color the Memory tags from macOS's own memory-pressure level instead of the used percentage
+
+## [Add Ask AI System Status] - 2026-09-27
+
+- Add Ask System Monitor in Raycast AI with current CPU, memory, disk, and battery readings
+- Add YAML evals for disk availability, CPU usage, and memory pressure questions
+
+## [Menu Bar Process Safety] - 2026-09-21
+
+- Keep background refreshes process-free by collecting CPU and storage without external programs
+- Keep the menu-bar Memory reading consistent with the Memory tab; the background refresh reuses the last value collected when the menu was opened
+- Reuse cached network, temperature, and battery values until the menu is opened instead of starting `nettop` or `temperature-reader` every 10 seconds
+- Prevent overlapping background workers with a stale-recoverable cross-process lease
+- Validate and bound the versioned menu-bar snapshot cache
+
+## [Disk Tab] - 2026-08-05
+
+- Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
+- Show SMART disk health, medium type and physical disk details
+- Distinguish "no throughput sample yet" from "zero throughput" so the first render never claims a fabricated 0 MB/s
+- Poll disk throughput only while the Disk tab is active, like the other tabs
+
+## [Apple Silicon Fan Monitoring] - 2026-08-04
+
+- Add fan RPM readings to the CPU view via a bundled SMC reader helper (`tools/smc-fan-reader.m`), following the same pattern as the existing temperature reader
+- Report fanless Macs as "Not available on this Mac" instead of showing an error or empty state
+
+## [Improvements] - 2026-08-03
+
+- Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
+- Poll only the active tab; inactive monitors stop shelling out to system tools
+- Reset rate baselines on tab switch so the first reading after switching back is a real measurement
+- Add per-core CPU usage and CPU hardware context (chip and core count) to the CPU view
+- Add GPU / unified memory reporting and model year to System Info
+- Expand Memory view with active, inactive, wired, compressed, purgeable, swap, and memory pressure stats
+- Add Copy System Report, Open System Settings, and Open System Information actions
+- Add semantic color highlighting for percentages and unavailable values across detail views
+- Fix process rows with narrow PIDs being dropped from top-process lists
+- Document what the extension reads and what the system report contains in a README privacy section
+
 ## [Eliminate Zombie Processes] - 2026-03-20
 
 - Replace all `exec()` calls with `execFile()` to avoid spawning shell processes

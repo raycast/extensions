@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  closeMainWindow,
+  Keyboard,
+} from "@raycast/api";
 import { useZedContext, withZed } from "./components/with-zed";
 import { isWindows } from "./lib/utils";
 import { exists } from "./lib/utils";
@@ -11,6 +21,7 @@ import { closeZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/
 import { showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
+import { openProject } from "./lib/open-project";
 
 const isMac = platform() === "darwin";
 
@@ -90,7 +101,10 @@ export function Command() {
                       title="Close Project Window"
                       icon={Icon.XMarkCircle}
                       onAction={() => closeEntry(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+                      }}
                     />
                   )}
                   {entry.type === "local" &&
@@ -103,14 +117,14 @@ export function Command() {
                     title="Unpin Entry"
                     icon={Icon.PinDisabled}
                     onAction={() => unpinEntry(entry)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={Keyboard.Shortcut.Common.Pin}
                   />
                   {entry.order > 0 ? (
                     <Action
                       title="Move up"
                       icon={Icon.ArrowUp}
                       onAction={() => moveUp(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
                     />
                   ) : null}
                   {entry.order < pinned.length - 1 ? (
@@ -118,7 +132,7 @@ export function Command() {
                       title="Move Down"
                       icon={Icon.ArrowDown}
                       onAction={() => moveDown(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
                     />
                   ) : null}
                   <RemoveActionSection
@@ -158,7 +172,10 @@ export function Command() {
                         title="Close Project Window"
                         icon={Icon.XMarkCircle}
                         onAction={() => closeEntry(entry)}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+                        }}
                       />
                     )}
                     {entry.type === "local" &&
@@ -171,7 +188,7 @@ export function Command() {
                       title="Pin Entry"
                       icon={Icon.Pin}
                       onAction={() => pinEntry(entry)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                      shortcut={Keyboard.Shortcut.Common.Pin}
                     />
                     <RemoveActionSection
                       onRemoveEntry={() => removeAndUnpinEntry(entry)}
@@ -192,20 +209,39 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const zedIcon = { fileIcon: app.path };
   const primaryPath = getEntryPrimaryPath(entry);
 
+  const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
+
+  // Already open projects keep focusing their existing window
+  const newWindow = getPreferenceValues<Preferences.Search>().openInNewWindow && !entry.isOpen;
+  const newWindowArgs = newWindow ? ["-n"] : [];
+
   // WSL support (Windows only)
-  const openZedInWsl = () => execWindowsZed(["--wsl", `${entry.wsl?.user}@${entry.wsl?.distro}`, `/${primaryPath}`]);
+  const openZedInWsl = () =>
+    execWindowsZed([
+      ...newWindowArgs,
+      "--wsl",
+      entry.wsl?.user ? `${entry.wsl.user}@${entry.wsl.distro}` : `${entry.wsl?.distro}`,
+      `/${primaryPath}`,
+    ]);
 
   if (entry.wsl) {
-    return <Action title="Open in Zed" onAction={openZedInWsl} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openZedInWsl} icon={zedIcon} />;
   }
+
+  // Helper to trigger staggered revalidations while Raycast is in the background.
+  // This gives Zed enough time to launch and update its SQLite DB.
+  const triggerRevalidation = () => {
+    setTimeout(revalidate, 500);
+    setTimeout(revalidate, 1500);
+    setTimeout(revalidate, 3000);
+  };
 
   // Multi-folder workspace - use CLI
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        setTimeout(revalidate, 200);
-        await closeMainWindow();
-        await openWithZedCli(cliPath, entry.paths);
+        await openProject(() => openWithZedCli(cliPath, entry.paths, newWindow), closeMainWindow);
+        triggerRevalidation();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -214,16 +250,29 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
         });
       }
     };
-    return <Action title="Open in Zed" onAction={openMultiFolder} icon={zedIcon} />;
+    return <Action title={actionTitle} onAction={openMultiFolder} icon={zedIcon} />;
+  }
+
+  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
+  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
+  if (entry.type === "remote") {
+    return (
+      <Action.Open
+        title={actionTitle}
+        target={entry.uri}
+        application={app}
+        icon={zedIcon}
+        onOpen={triggerRevalidation}
+      />
+    );
   }
 
   // If CLI available, use it for consistency (handles revalidation)
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        setTimeout(revalidate, 200);
-        await closeMainWindow();
-        await openWithZedCli(cliPath!, [entry.paths[0]]);
+        await openProject(() => openWithZedCli(cliPath!, [entry.paths[0]], newWindow), closeMainWindow);
+        triggerRevalidation();
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -232,11 +281,30 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
         });
       }
     };
-    return <Action title="Open in Zed" icon={zedIcon} onAction={openSingleFolder} />;
+    return <Action title={actionTitle} icon={zedIcon} onAction={openSingleFolder} />;
   }
 
-  // Fallback: open via URI scheme (no revalidation)
-  return <Action.Open title="Open in Zed" target={entry.uri} application={app} icon={zedIcon} />;
+  // The URI scheme can't request a new window, so use the Windows CLI instead
+  if (newWindow && isWindows) {
+    const openInNewWindow = async () => {
+      try {
+        await openProject(() => execWindowsZed([...newWindowArgs, primaryPath]).then(() => undefined), closeMainWindow);
+        triggerRevalidation();
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open project",
+          message: String(error),
+        });
+      }
+    };
+    return <Action title={actionTitle} icon={zedIcon} onAction={openInNewWindow} />;
+  }
+
+  // Fallback: open via URI scheme
+  return (
+    <Action.Open title={actionTitle} target={entry.uri} application={app} icon={zedIcon} onOpen={triggerRevalidation} />
+  );
 }
 
 function RemoveActionSection({
@@ -253,7 +321,7 @@ function RemoveActionSection({
         title="Remove from Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => onRemoveEntry()}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
       />
 
       <Action
@@ -261,7 +329,7 @@ function RemoveActionSection({
         title="Remove All Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => onRemoveAllEntries()}
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.RemoveAll}
       />
     </ActionPanel.Section>
   );

@@ -1,16 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import builtInPresetsFile from "../config/built-in-presets.json";
-import {
-  Preset,
-  AllOutputExtension,
-  QualitySettings,
-  TrimOptions,
-  MediaType,
-  OUTPUT_ALL_EXTENSIONS,
-} from "../types/media";
+import { Preset, AllOutputExtension, TrimOptions, MediaType } from "../types/media";
+import { isQualitySettings, isRecord, parseMediaType, parseOutputFormat, parseTrim } from "./storageValidation";
 
 const USER_PRESETS_KEY = "user-presets";
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 type StoredShape = { v: number; presets: Preset[] };
 
@@ -28,17 +22,20 @@ type RawPreset = {
 };
 
 function normaliseRaw(raw: RawPreset, markBuiltIn: boolean): Preset | null {
-  if (!OUTPUT_ALL_EXTENSIONS.includes(raw.outputFormat as (typeof OUTPUT_ALL_EXTENSIONS)[number])) {
-    return null;
-  }
+  if (!isRecord(raw) || typeof raw.id !== "string" || typeof raw.name !== "string") return null;
+  const outputFormat = parseOutputFormat(raw.outputFormat);
+  const mediaType = parseMediaType(raw.mediaType);
+  const trim = parseTrim(raw.trim);
+  if (!outputFormat || !mediaType || trim === null || !isQualitySettings(outputFormat, raw.quality)) return null;
+  if (mediaType !== "gif" && mediaType !== getMediaTypeForOutput(outputFormat)) return null;
   return {
     id: raw.id,
     name: raw.name,
     builtIn: markBuiltIn || raw.builtIn === true,
-    mediaType: raw.mediaType,
-    outputFormat: raw.outputFormat as AllOutputExtension,
-    quality: raw.quality as QualitySettings,
-    trim: raw.trim,
+    mediaType,
+    outputFormat,
+    quality: raw.quality,
+    trim,
     stripMetadata: raw.stripMetadata,
     outputDir: raw.outputDir,
     description: raw.description,
@@ -55,7 +52,11 @@ async function readUser(): Promise<StoredShape> {
   if (!raw) return { v: SCHEMA_VERSION, presets: [] };
   try {
     const parsed = JSON.parse(raw);
-    if (parsed && Array.isArray(parsed.presets)) {
+    if (
+      isRecord(parsed) &&
+      (parsed.v === undefined || parsed.v === 1 || parsed.v === SCHEMA_VERSION) &&
+      Array.isArray(parsed.presets)
+    ) {
       const presets = parsed.presets
         .map((p: RawPreset) => normaliseRaw(p, false))
         .filter((p: Preset | null): p is Preset => p !== null);
@@ -65,6 +66,13 @@ async function readUser(): Promise<StoredShape> {
     console.warn("Failed to parse user presets, resetting:", err);
   }
   return { v: SCHEMA_VERSION, presets: [] };
+}
+
+function getMediaTypeForOutput(format: AllOutputExtension): MediaType | "gif" {
+  if (format === ".gif") return "gif";
+  if (([".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"] as string[]).includes(format)) return "image";
+  if (([".mp3", ".aac", ".wav", ".flac", ".m4a"] as string[]).includes(format)) return "audio";
+  return "video";
 }
 
 async function writeUser(data: StoredShape): Promise<void> {

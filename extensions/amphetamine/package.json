@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amphetamine",
   "title": "Amphetamine",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Control Amphetamine sleep sessions from Raycast",
   "icon": "icon.png",
   "author": "gstvds",
@@ -10,7 +10,8 @@
     "System"
   ],
   "contributors": [
-    "mike_dloss"
+    "mike_dloss",
+    "ceyhuncicek"
   ],
   "license": "MIT",
   "commands": [
@@ -26,6 +27,52 @@
         "amp start",
         "amphetamine",
         "ampstart"
+      ]
+    },
+    {
+      "name": "quick-start",
+      "title": "Quick Start Session",
+      "subtitle": "Amphetamine",
+      "description": "Start a keep-awake session by typing the duration inline; leave all fields empty for a session with no time limit",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "type": "text",
+          "placeholder": "Hours (empty = no limit)",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "type": "text",
+          "placeholder": "Seconds",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "displaySleepAllowed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Display Sleep",
+          "label": "Allow the display to sleep during the session",
+          "description": "When enabled, the session keeps the Mac awake but lets the display turn off."
+        }
+      ],
+      "keywords": [
+        "quick",
+        "amp",
+        "amp quick",
+        "amphetamine",
+        "start",
+        "duration"
       ]
     },
     {

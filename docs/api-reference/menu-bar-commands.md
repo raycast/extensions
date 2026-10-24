@@ -79,9 +79,7 @@ Your root search should look similar to:
 
 ![Menu Bar Command - Activate Background Refresh](../.gitbook/assets/menu-bar-activate-command.webp)
 
-Running it once should activate it to:
-
-![Menu Bar Command - Refresh](../.gitbook/assets/menu-bar-refresh.webp)
+Running the command activates its menu bar item. Run it again to refresh the item.
 
 ## Lifecycle
 

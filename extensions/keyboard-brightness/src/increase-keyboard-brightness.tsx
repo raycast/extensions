@@ -11,6 +11,6 @@ export default async function command() {
       type: LaunchType.Background,
     });
   } catch {
-    () => {};
+    // menu bar command isn't enabled, ignore
   }
 }

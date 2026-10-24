@@ -1,7 +1,16 @@
 import { Grid, ActionPanel, Action, Color, Icon, useNavigation } from "@raycast/api";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { getCardImageUri, type Card, type ScryfallSearchResponse, FEEDBACK_URL } from "./shared";
+import {
+  getCardImageUri,
+  type Card,
+  type ScryfallSearchResponse,
+  FEEDBACK_URL,
+  scryfallFetch,
+  SCRYFALL_API_BASE,
+  SCRYFALL_HEADERS,
+  parseScryfallResponse,
+} from "./shared";
 import { CardDetailView } from "./card-views";
 import Command from "./search-view";
 import { SetCardsView } from "./set-cards-view";
@@ -37,8 +46,8 @@ const SET_TOP_CARDS_KEY = "setTopCards";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function fetchMostExpensiveCard(code: string): Promise<Card | undefined> {
-  const res = await fetch(
-    `https://api.scryfall.com/cards/search?q=e:${encodeURIComponent(code)}&order=usd&dir=desc&unique=prints`
+  const res = await scryfallFetch(
+    `${SCRYFALL_API_BASE}/cards/search?q=e:${encodeURIComponent(code)}&order=usd&dir=desc&unique=prints`
   );
   if (!res.ok) return undefined;
   const json = (await res.json()) as ScryfallSearchResponse;
@@ -149,7 +158,9 @@ export default function BrowseSets() {
   // Merged view: persisted wins (confirmed good data)
   const topCards = useMemo(() => ({ ...liveCards, ...(persistedCards ?? {}) }), [liveCards, persistedCards]);
 
-  const { isLoading, data } = useFetch<ScryfallSetsResponse>("https://api.scryfall.com/sets", {
+  const { isLoading, data } = useFetch<ScryfallSetsResponse>(`${SCRYFALL_API_BASE}/sets`, {
+    headers: SCRYFALL_HEADERS,
+    parseResponse: parseScryfallResponse,
     keepPreviousData: true,
   });
 

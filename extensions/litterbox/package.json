@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "litterbox",
   "title": "Litterbox",
-  "description": "Upload files to Litterbox from Raycast with a file picker, set expiry (1h, 12h, 24h, or 72h), and get shareable links. Recent uploads are listed until they expire.",
+  "description": "Upload files to Litterbox from Raycast with a file picker or Finder selection (macOS), set expiry (1h, 12h, 24h, or 72h), and get shareable links. Recent uploads are listed until they expire.",
   "icon": "icon.png",
   "author": "0xdhrv",
   "platforms": [
@@ -36,6 +36,18 @@
       "mode": "view"
     },
     {
+      "name": "upload-selected-finder-files",
+      "title": "Upload Selected Finder Files",
+      "description": "On macOS, review files selected in Finder, choose an expiry, and upload them to Litterbox. URLs are copied to the clipboard.",
+      "keywords": [
+        "finder",
+        "selected",
+        "upload",
+        "files"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "recent-uploads",
       "title": "View Recent Uploads",
       "subtitle": "Litterbox",
@@ -61,7 +73,7 @@
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "scripts": {
     "build": "ray build",

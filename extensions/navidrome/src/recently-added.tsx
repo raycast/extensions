@@ -1,31 +1,23 @@
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   getRecentlyAdded,
   getCoverArtUrl,
   getNavidromeWebUrl,
   type Album,
 } from "./api";
+import { FetchEmptyView } from "./components";
 
 export default function RecentlyAddedCommand() {
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error } = useCachedPromise(
     async () => {
       return await getRecentlyAdded(40);
     },
     [],
     {
       onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
+        showFailureToast(err, {
           title: "Failed to load recently added albums",
-          message: err.message,
         });
       },
     },
@@ -37,15 +29,18 @@ export default function RecentlyAddedCommand() {
       columns={5}
       searchBarPlaceholder="Filter recently added albums..."
     >
-      {!data || data.length === 0
-        ? !isLoading && (
-            <Grid.EmptyView
-              icon={Icon.Music}
-              title="No Albums Found"
-              description="Your library appears to be empty"
-            />
-          )
-        : data.map((album) => <AlbumGridItem key={album.id} album={album} />)}
+      {!data || data.length === 0 ? (
+        <FetchEmptyView
+          error={error}
+          isLoading={isLoading}
+          errorTitle="Could Not Load Albums"
+          emptyIcon={Icon.Music}
+          emptyTitle="No Albums Found"
+          emptyDescription="Your library appears to be empty"
+        />
+      ) : (
+        data.map((album) => <AlbumGridItem key={album.id} album={album} />)
+      )}
     </Grid>
   );
 }

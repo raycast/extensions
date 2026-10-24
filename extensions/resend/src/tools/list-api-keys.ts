@@ -1,10 +1,11 @@
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 /**
  * Tool to list all API keys from Resend
  * Returns the list of API keys with their details
  */
 const tool = async () => {
+  const resend = getResend();
   const { data, error } = await resend.apiKeys.list();
 
   if (error) {
@@ -14,4 +15,4 @@ const tool = async () => {
   return data;
 };
 
-export default tool;
+export default withResend(tool);

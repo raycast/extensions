@@ -1,15 +1,25 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Action, ActionPanel, Clipboard, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 
 import type { SearchResult } from "./@types/global";
 import { Adapter, MetadataType } from "./@types/global";
 
-import { SITE_URL } from "./constants";
+import { getSiteUrl } from "./constants";
 
 import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
-import { apiCall, isLinkValid } from "./shared/searchToClipboard";
+import { apiCall, isAbortError, isLinkValid } from "./shared/searchToClipboard";
 
 const searchResultLinksTitles: Record<string, string> = {
   [Adapter.YouTube]: "YouTube",
@@ -33,30 +43,42 @@ const searchResultTypesTitles: Record<MetadataType, string> = {
 };
 
 export default function Command() {
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [state, setState] = useState<{ searchText: string; searchResult: SearchResult | null }>({
     searchText: "",
     searchResult: null,
   });
 
-  const searchLinks = useCallback(
-    async (link: string) => {
-      setIsLoading(true);
+  const searchLinks = useCallback(async (link: string) => {
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-      try {
-        const response = await apiCall(link);
-        setState((prev) => ({ ...prev, searchResult: response }));
-        cacheLastSearch(link, response);
-      } catch (error) {
-        console.error(error);
-        setState((prev) => ({ ...prev, response: null }));
-        showToast(Toast.Style.Failure, "Error", (error as Error).message);
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiCall(link, undefined, controller.signal);
+      setState((prev) => ({ ...prev, searchResult: response }));
+      cacheLastSearch(link, response);
+    } catch (error) {
+      if (isAbortError(error) || controller.signal.aborted) {
+        return;
       }
 
-      setIsLoading(false);
-    },
-    [state.searchText, setIsLoading, setState],
-  );
+      console.error(error);
+      const message = (error as Error).message;
+      setState((prev) => ({ ...prev, searchResult: null }));
+      setErrorMessage(message);
+      showToast(Toast.Style.Failure, "Error", message);
+    } finally {
+      if (abortControllerRef.current === controller) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -75,7 +97,14 @@ export default function Command() {
         return;
       }
     })();
-  }, []);
+
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [searchLinks]);
+
+  const showErrorView = Boolean(errorMessage) && !state.searchResult && !isLoading;
+  const showEmptyPrompt = state.searchText === "" && !state.searchResult && !errorMessage;
 
   return (
     <List
@@ -86,10 +115,18 @@ export default function Command() {
           searchText: link,
           searchResult: null,
         });
+        setErrorMessage(null);
 
-        if (!link) return;
+        if (!link) {
+          abortControllerRef.current?.abort();
+          setIsLoading(false);
+          return;
+        }
 
         if (!isLinkValid(link)) {
+          abortControllerRef.current?.abort();
+          setIsLoading(false);
+          setErrorMessage("Invalid link or not supported");
           showToast(Toast.Style.Failure, "Error", "Invalid link or not supported");
           return;
         }
@@ -103,8 +140,28 @@ export default function Command() {
       }
       throttle
     >
-      {state.searchText === "" && !state.searchResult ? (
+      {showEmptyPrompt ? (
         <List.EmptyView title="Paste a music link (Spotify, Apple Music, Deezer, Tidal, etc.)" />
+      ) : showErrorView ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't convert link"
+          description={errorMessage ?? undefined}
+          actions={
+            <ActionPanel>
+              {isLinkValid(state.searchText) && (
+                <Action
+                  title="Retry"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => searchLinks(state.searchText)}
+                />
+              )}
+              <Action.OpenInBrowser title="Open Website" url={getSiteUrl()} />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <>
           {state.searchResult && (
@@ -116,7 +173,7 @@ export default function Command() {
                 subtitle={state.searchResult.description}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={`${SITE_URL}?id=${state.searchResult.universalLink}`} />
+                    <Action.OpenInBrowser url={`${getSiteUrl()}?id=${state.searchResult.universalLink}`} />
                     {state.searchResult.audio && (
                       <>
                         <Action
@@ -128,7 +185,7 @@ export default function Command() {
                           title="Stop Audio Preview"
                           icon={Icon.Play}
                           onAction={() => stopAudio()}
-                          shortcut={{ modifiers: ["cmd"], key: "." }}
+                          shortcut={Keyboard.Shortcut.Common.Pin}
                         />
                       </>
                     )}

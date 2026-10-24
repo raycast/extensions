@@ -1,0 +1,178 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aimeflux",
+  "title": "AimeFlux",
+  "description": "Control the AimeFlux CLI from Raycast.",
+  "icon": "icon-512.png",
+  "author": "erdiegoant",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "aimeflux",
+    "transcription",
+    "dictation",
+    "raycast",
+    "cli"
+  ],
+  "commands": [
+    {
+      "name": "start-dictation",
+      "title": "Start Dictation",
+      "subtitle": "AimeFlux",
+      "description": "Start AimeFlux dictation with optional mode and LLM cleanup.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "stop-dictation",
+      "title": "Stop Dictation",
+      "subtitle": "AimeFlux",
+      "description": "Stop the active AimeFlux dictation session.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-llm-cleanup",
+      "title": "Toggle LLM Cleanup",
+      "subtitle": "AimeFlux",
+      "description": "Toggle the global AimeFlux LLM cleanup setting.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "process-text",
+      "title": "Process Text",
+      "subtitle": "AimeFlux",
+      "description": "Run one-off text processing with your configured AimeFlux modes.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "browse-history",
+      "title": "Browse History",
+      "subtitle": "AimeFlux",
+      "description": "Browse AimeFlux history with inline mode filtering and item actions.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "copy-latest-history-item",
+      "title": "Copy Latest History Item",
+      "subtitle": "AimeFlux",
+      "description": "Copy the newest history item from AimeFlux.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "paste-latest-history-item",
+      "title": "Paste Latest History Item",
+      "subtitle": "AimeFlux",
+      "description": "Paste the newest history item into the frontmost application.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "import-text-into-history",
+      "title": "Import Text into History",
+      "subtitle": "AimeFlux",
+      "description": "Import inline text into AimeFlux history.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "show-current-mode",
+      "title": "Show Current Mode",
+      "subtitle": "AimeFlux",
+      "description": "Show the active manual mode and switch to another one.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "set-current-mode",
+      "title": "Set Current Mode",
+      "subtitle": "AimeFlux",
+      "description": "Change the active manual mode by name or ID.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "show-mode",
+      "title": "Show Mode",
+      "subtitle": "AimeFlux",
+      "description": "Inspect a mode with prompt, vocabulary, and replacement details.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-installed-models",
+      "title": "List Installed Models",
+      "subtitle": "AimeFlux",
+      "description": "Browse installed Whisper models and remove models that are not in active use.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-replacements",
+      "title": "List Replacements",
+      "subtitle": "AimeFlux",
+      "description": "Browse configured replacements and remove them in context.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "add-replacement",
+      "title": "Add Replacement",
+      "subtitle": "AimeFlux",
+      "description": "Add a global or mode-specific deterministic replacement.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-rule-packages",
+      "title": "List Rule Packages",
+      "subtitle": "AimeFlux",
+      "description": "Browse installed community rule packages.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-mode-packages",
+      "title": "List Mode Packages",
+      "subtitle": "AimeFlux",
+      "description": "Browse installed community mode packages.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-watch-folders",
+      "title": "List Watch Folders",
+      "subtitle": "AimeFlux",
+      "description": "Inspect configured AimeFlux watch folders.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "test": "tsc -p tsconfig.test.json && node --test dist-tests/tests/*.test.js",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  }
+}

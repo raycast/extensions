@@ -10,6 +10,10 @@ Portfolio Tracker is built for **long-term tracking** — prices refresh daily, 
 
 Search and add any publicly traded stock, ETF, or fund via Yahoo Finance with dynamic search. Fractional shares fully supported. Prices for LSE-listed securities quoted in pence are automatically converted to pounds.
 
+### Profit & Loss
+
+Record the average price you paid for a position (when adding it, or later via Edit Asset) and the tracker shows your unrealized profit/loss — both the amount and the percentage — right next to the daily change. Buying more units with a price paid updates your average cost with a weighted average, and the portfolio summary shows total P&L across everything you've recorded a buy price for.
+
 ### Property
 
 Add properties with or without a mortgage. Mortgage positions include full principal repayment tracking, UK HPI-based appreciation by postcode, shared ownership support, and a step-by-step breakdown of every calculation — equity, principal repaid, market movement — so you always know exactly how the number was derived.

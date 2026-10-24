@@ -26,7 +26,13 @@
     {
       "name": "index",
       "title": "Zshrc Manager",
-      "description": "View and manage your ~/.zshrc configuration (use dropdown to switch views)",
+      "description": "Search, browse, and manage your ~/.zshrc configuration from one home surface",
+      "mode": "view"
+    },
+    {
+      "name": "tools",
+      "title": "Zshrc Tools",
+      "description": "Health check, backups and change history for your zshrc",
       "mode": "view"
     }
   ],
@@ -136,8 +142,8 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/react-test-renderer": "^19.0.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.6",
+    "@vitest/ui": "^3.2.6",
     "eslint": "^9.22.0",
     "jsdom": "^27.0.1",
     "prettier": "^3.8.1",
@@ -145,7 +151,7 @@
     "react-dom": "^19.2.0",
     "react-test-renderer": "^19.0.0",
     "typescript": "^5.8.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.6"
   },
   "engines": {
     "node": ">=18.17.0 <23"

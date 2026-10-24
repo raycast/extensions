@@ -1,5 +1,9 @@
 # Keyboard Brightness Changelog
 
+## [Add Set Keyboard Brightness command] - 2026-07-14
+
+- Add a command to set keyboard brightness to a specific percentage.
+
 ## [Fix] - 2024-05-03
 - Resolved an issue where brightness value can go below 0 or above 100 if value is not incremented by every 10th percentage.
 

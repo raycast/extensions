@@ -12,6 +12,9 @@ const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
 /** Steam Guard character set (avoids 0, 1, I, L, O, S, Z for readability). */
 const STEAM_CHARS = "23456789BCDFGHJKMNPQRTVWXY";
 const STEAM_PERIOD = 30;
+const SECRET_WHITESPACE = /\s/g;
+/** Matches otpauth URIs with no label path segment, e.g. `otpauth://totp?secret=...`. */
+const OTPAUTH_URI_WITHOUT_LABEL = /^(otpauth:\/\/(?:totp|hotp))\?/;
 
 type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
@@ -54,6 +57,10 @@ const steamHooks = {
   },
 };
 
+function normalizeSecret(secret: string): string {
+  return secret.replace(SECRET_WHITESPACE, "");
+}
+
 /**
  * Creates a TOTP generator for regular or Steam Guard keys.
  * Steam uses HMAC-SHA1 with a custom 5-character alphanumeric encoding.
@@ -70,7 +77,7 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
   };
 
   if (opts.variant === "steam") {
-    const { secret } = opts;
+    const secret = normalizeSecret(opts.secret);
 
     return {
       period: STEAM_PERIOD,
@@ -90,7 +97,8 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
     };
   }
 
-  const { secret, period, algorithm, digits } = opts;
+  const { period, algorithm, digits } = opts;
+  const secret = normalizeSecret(opts.secret);
 
   return {
     period,
@@ -110,9 +118,17 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
   };
 }
 
+/**
+ * The label is optional in practice (Bitwarden itself accepts `otpauth://totp?secret=...`),
+ * but the URI parser requires the path segment, so an empty label is added.
+ */
+function normalizeOtpauthUri(uri: string): string {
+  return uri.replace(OTPAUTH_URI_WITHOUT_LABEL, "$1/?");
+}
+
 export function parseTotp(totpString: string): AuthenticatorOptions {
   if (totpString.includes("otpauth")) {
-    const [parsed, parseError] = tryCatch(() => parse(totpString));
+    const [parsed, parseError] = tryCatch(() => parse(normalizeOtpauthUri(totpString)));
     if (parseError) throw parseError;
     if (parsed.type !== "totp") throw new Error("Invalid authenticator key");
 

@@ -13,7 +13,11 @@
     "true-real-michael",
     "xmorse",
     "ivens_joris",
-    "FollowTheProcess"
+    "FollowTheProcess",
+    "justyt65",
+    "npc203",
+    "lvigerust",
+    "xndrbyte"
   ],
   "categories": [
     "Developer Tools"
@@ -29,14 +33,36 @@
       "title": "Open with Zed",
       "subtitle": "Zed",
       "description": "Opens the currently selected Finder item with Zed",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openInNewWindow",
+          "type": "checkbox",
+          "title": "Window",
+          "required": false,
+          "label": "Open in New Window",
+          "default": false,
+          "description": "Open selected items in a new Zed window"
+        }
+      ]
     },
     {
       "name": "search",
       "title": "Search Recent Projects",
       "subtitle": "Zed",
       "description": "Search and open recent projects with Zed",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInNewWindow",
+          "type": "checkbox",
+          "title": "Window",
+          "required": false,
+          "label": "Open in New Window",
+          "default": false,
+          "description": "Open projects in a new Zed window"
+        }
+      ]
     },
     {
       "name": "open-new-window",
@@ -106,7 +132,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
+    "@raycast/api": "^1.104.19",
     "@raycast/utils": "^2.2.1",
     "color-hash": "^2.0.2",
     "tildify": "^3.0.0"
@@ -119,7 +145,7 @@
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.6"
+    "vitest": "^4.1.0"
   },
   "scripts": {
     "build": "ray build",

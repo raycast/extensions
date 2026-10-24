@@ -18,10 +18,11 @@ import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { CREATE_API_KEY_PERMISSIONS, RESEND_URL } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useGetAPIKeys, useGetDomains } from "./lib/hooks";
-import { resend } from "./lib/resend";
 import { ApiKey, CreateApiKeyOptions } from "resend";
+import { getResend, withResend } from "./lib/oauth";
 
-export default function APIKeys() {
+export default withResend(APIKeys);
+function APIKeys() {
   const { isLoading, keys, error, revalidate, mutate } = useGetAPIKeys();
 
   async function confirmAndDelete(item: ApiKey) {
@@ -34,6 +35,7 @@ export default function APIKeys() {
     ) {
       const toast = await showToast(Toast.Style.Animated, "Deleting API Key", item.name);
       try {
+        const resend = getResend();
         await mutate(
           resend.apiKeys.remove(item.id).then(({ error }) => {
             if (error) throw new Error(error.message, { cause: error.name });
@@ -147,6 +149,7 @@ function APIKeysCreate({ onKeyCreated }: APIKeysCreateProps) {
       if (newKey.domain_id === "all") delete newKey.domain_id;
 
       try {
+        const resend = getResend();
         const { error, data } = await resend.apiKeys.create(newKey);
         if (error) throw new Error(error.message, { cause: error.name });
         showToast(Toast.Style.Success, "Created API Key", data.token);

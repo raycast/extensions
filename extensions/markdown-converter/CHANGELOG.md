@@ -1,5 +1,9 @@
 # Markdown Converter Changelog
 
+## [Fix Raycast 2 Compatibility] - 2026-06-24
+
+- **Fix commands doing nothing in Raycast 2**: Clipboard HTML is now read through the supported `Clipboard.read()` API instead of shelling out to `pbpaste` via `child_process`. The old approach was macOS-only and stopped working in the Raycast 2 worker-thread runtime, which made every command silently do nothing. Fixes [#28973](https://github.com/raycast/extensions/issues/28973)
+
 ## [Smart Clipboard Detection] - 2026-05-11
 
 - **Smart round-trip**: "Convert to" commands now handle rich text on the clipboard by round-tripping through Markdown first, instead of silently degrading. Copy styled text → run one command → paste clean formatting. Fixes [#26238](https://github.com/raycast/extensions/issues/26238)

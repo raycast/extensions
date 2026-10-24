@@ -36,22 +36,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^2.2.3"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "overrides": {
+    "minimatch": "^10.2.4",
+    "brace-expansion": "^5.0.5",
+    "picomatch": "^4.0.4",
+    "flatted": "^3.4.2",
+    "js-yaml": "^4.1.1",
+    "diff": "^8.0.4",
+    "babel-plugin-istanbul": "^8.0.2",
+    "test-exclude": "^8.0.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.27.1",
-    "@babel/preset-typescript": "^7.27.1",
-    "@raycast/eslint-config": "^2.1.1",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.28.0",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.5.0",
-    "@types/node-fetch": "^2.6.9",
-    "eslint": "^10.1.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.8.1",
-    "ts-jest": "^29.4.6",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

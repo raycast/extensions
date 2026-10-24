@@ -27,6 +27,10 @@ export default function Command() {
   } = useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
+  const totalDurationTodayCurrProj = useTotalDurationToday(
+    timeEntries.filter((entry) => entry && entry.project_id === runningTimeEntry?.project_id),
+    runningTimeEntry,
+  );
   const { resumeTimeEntry, stopRunningTimeEntry } = useTimeEntryActions(
     revalidateRunningTimeEntry,
     revalidateTimeEntries,
@@ -72,7 +76,9 @@ export default function Command() {
   const { currentTime } = useCurrentTime();
   const runningEntry = runningTimeEntry;
 
-  const currentDuration = runningEntry ? dayjs.duration(dayjs(currentTime).diff(runningEntry.start)) : undefined;
+  const currentDuration = runningEntry
+    ? dayjs.duration(Math.max(0, dayjs(currentTime).diff(runningEntry.start)))
+    : undefined;
   const currentDurationHhMmSs = currentDuration?.format("HH:mm:ss") || "";
   const currentDurationHhMm = currentDuration?.format("HH:mm") || "";
 
@@ -165,8 +171,16 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Today">
+        {runningEntry?.project_id ? (
+          <MenuBarExtra.Item
+            icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
+            title={runningEntry?.project_name || "No Project"}
+            subtitle={isLoading ? "Loading" : formatSeconds(totalDurationTodayCurrProj)}
+          />
+        ) : null}
         <MenuBarExtra.Item
-          title={isLoading ? "Loading" : formatSeconds(totalDurationToday)}
+          title="Total"
+          subtitle={isLoading ? "Loading" : formatSeconds(totalDurationToday)}
           icon={{ source: Icon.Clock }}
         />
       </MenuBarExtra.Section>

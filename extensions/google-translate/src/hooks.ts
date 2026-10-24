@@ -23,17 +23,25 @@ export const usePreferences = () => {
   return React.useMemo(() => getPreferenceValues<Preferences.Translate>(), []);
 };
 
-export const useTextState = () => {
+export const useTextState = (launchInput?: { text: string; requestId: string }) => {
   const preferences = usePreferences();
-  const [text, setText] = React.useState("");
+  const inputText = launchInput?.text;
+  const requestId = launchInput?.requestId;
+  const [text, setText] = React.useState(inputText ?? "");
   const textRef = React.useRef(text);
   textRef.current = text;
 
   React.useEffect(() => {
+    if (inputText !== undefined) {
+      setText((current) => (current === inputText ? current : inputText));
+      return;
+    }
+
+    let cancelled = false;
     if (preferences.autoInput) {
       getSelectedText()
         .then((cbText) => {
-          if (!textRef.current) {
+          if (!cancelled && !textRef.current) {
             setText(cbText ?? "");
           }
         })
@@ -41,7 +49,10 @@ export const useTextState = () => {
           console.log("Error:", err);
         });
     }
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [inputText, requestId]);
 
   return [text, setText] as const;
 };
@@ -51,8 +62,8 @@ export const useSelectedLanguagesSet = () => {
   const [selectedLanguageSet, setSelectedLanguageSet] = useCachedState<_StoredLanguageCodeSet>(
     "selectedLanguageSet",
     unifyLegacyLanguageSet({
-      langFrom: preferences.lang1,
-      langTo: preferences.lang2,
+      langFrom: preferences.langFrom,
+      langTo: preferences.lang1,
     }),
   );
 
@@ -61,7 +72,10 @@ export const useSelectedLanguagesSet = () => {
 
 export const usePreferencesLanguageSet = () => {
   const preferences = usePreferences();
-  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: [preferences.lang2] };
+  const preferencesLanguageSet: LanguageCodeSet = {
+    langFrom: preferences.langFrom,
+    langTo: [preferences.lang1, preferences.lang2],
+  };
   return preferencesLanguageSet;
 };
 

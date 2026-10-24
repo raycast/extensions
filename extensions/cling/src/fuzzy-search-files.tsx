@@ -299,6 +299,11 @@ function FileActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
         <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} />
+        <Action.CopyToClipboard
+          title="Copy File"
+          content={{ file: filePath }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        />
         <Action.Paste
           title="Paste Path in Frontmost App"
           content={copyablePath(filePath)}
@@ -349,7 +354,7 @@ function FileActions({
           <Action.CreateQuicklink
             title="Save as Quick Filter"
             quicklink={{
-              link: `raycast://extensions/alin/cling/fuzzy-search-files?fallbackText=${encodeURIComponent(searchText)}`,
+              link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/alin/cling/fuzzy-search-files?fallbackText=${encodeURIComponent(searchText)}`,
               name: `Cling: ${searchText}`,
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}

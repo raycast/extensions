@@ -12,7 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "types": ["@raycast/api", "@types/react", "@types/node"]
   }
 }

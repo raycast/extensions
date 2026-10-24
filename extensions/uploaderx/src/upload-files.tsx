@@ -105,7 +105,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Open
                 title="Manage Cloud Providers"
-                target="raycast://extensions/scisaif/uploaderx/manage-cloud-providers"
+                target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/scisaif/uploaderx/manage-cloud-providers`}
                 icon="⚙️"
               />
             </ActionPanel>

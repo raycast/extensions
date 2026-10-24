@@ -16,7 +16,11 @@
     "hrishabhn",
     "bogdan_bucur",
     "xmok",
-    "byheaven"
+    "byheaven",
+    "christianmagill",
+    "0xdhrv",
+    "stillo",
+    "shanto462"
   ],
   "license": "MIT",
   "keywords": [
@@ -25,6 +29,7 @@
     "media"
   ],
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist",
     "dev": "ray develop",
@@ -125,13 +130,39 @@
       "mode": "no-view"
     },
     {
+      "name": "rewind",
+      "title": "Rewind",
+      "subtitle": "Apple Music",
+      "description": "Rewind the current track by 15 seconds.",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "keywords": [
+        "seek",
+        "back",
+        "skip back"
+      ]
+    },
+    {
+      "name": "fast-forward",
+      "title": "Fast Forward",
+      "subtitle": "Apple Music",
+      "description": "Fast forward the current track by 15 seconds.",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "keywords": [
+        "seek",
+        "ahead",
+        "skip ahead"
+      ]
+    },
+    {
       "name": "currently-playing",
       "title": "Currently Playing Track",
       "subtitle": "Apple Music",
       "description": "Get info about currently playing track.",
       "disabledByDefault": true,
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "1m"
     },
     {
       "name": "remove-current-playing-from-current-playlist",
@@ -302,7 +333,7 @@
           "name": "hideIconWhenIdle",
           "description": "If enabled, the icon in the Menu Bar will be hidden when Music is not running or when nothing is playing",
           "type": "checkbox",
-          "label": "Hide icon when idle",
+          "label": "Hide Icon When Idle",
           "default": false,
           "required": false
         },
@@ -310,7 +341,15 @@
           "name": "hideArtistName",
           "description": "If enabled, the artist's name will be hidden in the Menu Bar",
           "type": "checkbox",
-          "label": "Hide artist's name",
+          "label": "Hide Artist Name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "hideTrackTitle",
+          "description": "If enabled, the track title will be hidden in the Menu Bar",
+          "type": "checkbox",
+          "label": "Hide Track Title",
           "default": false,
           "required": false
         },
@@ -318,7 +357,7 @@
           "name": "cleanupTitle",
           "description": "If enabled cleans up extra info like remix titles or versions from the song name",
           "type": "checkbox",
-          "label": "Cleanup song title",
+          "label": "Cleanup Song Title",
           "default": false,
           "required": false
         },
@@ -329,7 +368,58 @@
           "type": "textfield",
           "default": "30",
           "required": false
+        },
+        {
+          "name": "iconType",
+          "title": "Menu Bar Icon",
+          "description": "Choose between the Apple Music icon, the cover art of the current track, or no icon.",
+          "type": "dropdown",
+          "default": "music-icon",
+          "data": [
+            {
+              "title": "Apple Music Icon",
+              "value": "music-icon"
+            },
+            {
+              "title": "Cover Art",
+              "value": "cover-image"
+            },
+            {
+              "title": "No Icon",
+              "value": "none"
+            }
+          ],
+          "required": false
         }
+      ]
+    },
+    {
+      "name": "search-apple-music",
+      "title": "Search Apple Music",
+      "subtitle": "Apple Music",
+      "description": "Search the Apple Music catalog for songs and albums, and add them to your library.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "keywords": [
+        "search",
+        "catalog",
+        "album",
+        "song",
+        "library"
+      ]
+    },
+    {
+      "name": "view-recommendations",
+      "title": "View Recommendations",
+      "subtitle": "Apple Music",
+      "description": "Browse your personal Apple Music recommendations, add albums, playlists, and songs to your library, and play the ones already there.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "keywords": [
+        "recommendations",
+        "for you",
+        "discover",
+        "catalog"
       ]
     },
     {
@@ -1271,9 +1361,7 @@
           },
           "get-library-tracks": {
             "_tag": "Right",
-            "right": [
-              {}
-            ]
+            "right": []
           },
           "get-currently-playing": {
             "_tag": "Right",
@@ -1347,7 +1435,6 @@
     "@raycast/utils": "^2.2.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
-    "run-applescript": "^6.0.0",
     "ts-pattern": "^4.2.1"
   },
   "devDependencies": {
@@ -1360,5 +1447,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "js-yaml@4": "4.3.2"
+  }
 }

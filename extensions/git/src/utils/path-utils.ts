@@ -1,3 +1,4 @@
+import { realpathSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
@@ -14,6 +15,20 @@ export function resolveTildePath(path: string): string {
     return homedir();
   }
   return path;
+}
+
+/**
+ * Resolves symlinks in a path, falling back to the given path when it cannot be resolved.
+ * Required to compare paths from different sources, as Git always reports resolved paths.
+ * @param path - The path to resolve.
+ * @returns The path with resolved symlinks.
+ */
+export function realPath(path: string): string {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
 }
 
 /**
