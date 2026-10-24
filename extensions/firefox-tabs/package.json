@@ -44,6 +44,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish",
-    "format": "prettier --write src"
+    "format": "prettier --write src test",
+    "test": "node --test --experimental-strip-types --no-warnings \"test/**/*.test.ts\""
   }
 }
