@@ -435,12 +435,11 @@ export default function NowPlaying() {
     track.index === currentIndex || (playingIndex < 0 && state.videoId !== "" && track.videoId === state.videoId);
 
   const historyCount = historyLimit();
+  // The queue runs oldest to newest, so keep that order: the track that just
+  // played sits directly above Now Playing.
   const history =
     currentIndex > 0 && historyCount > 0
-      ? queue
-          .slice(Math.max(0, currentIndex - historyCount), currentIndex)
-          .reverse()
-          .filter((track) => !isPlaying(track))
+      ? queue.slice(Math.max(0, currentIndex - historyCount), currentIndex).filter((track) => !isPlaying(track))
       : [];
   // An unmarked queue position is unknown, not "everything is up next".
   const upNext =
