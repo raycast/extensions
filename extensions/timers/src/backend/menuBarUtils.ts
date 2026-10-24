@@ -1,5 +1,5 @@
 import { Icon } from "@raycast/api";
-import { formatTime } from "./formatUtils";
+import { formatTime, formatTimeWithoutSeconds } from "./formatUtils";
 import { Preferences, Stopwatch, Timer } from "./types";
 
 const formatMenuBarTitle = <T extends Timer | Stopwatch>(
@@ -8,11 +8,15 @@ const formatMenuBarTitle = <T extends Timer | Stopwatch>(
 ): string | undefined => {
   if (state === undefined || state?.length === 0 || state.length == undefined) return undefined;
 
+  const isTimer = "timeLeft" in state[0];
   const runTime = "timeLeft" in state[0] ? state[0].timeLeft : state[0].timeElapsed;
+  const timeFormatted =
+    isTimer && prefs.menuBarSeconds && runTime >= 60 ? formatTimeWithoutSeconds(runTime) : formatTime(runTime);
+
   if (prefs.showTitleInMenuBar) {
-    return `${state[0].name}: ~${formatTime(runTime)}`;
+    return `${state[0].name}: ~${timeFormatted}`;
   } else {
-    return `~${formatTime(runTime)}`;
+    return `~${timeFormatted}`;
   }
 };
 
