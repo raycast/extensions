@@ -183,10 +183,10 @@ export function parseThread(pageHtml: string, focalId: string): Thread {
       return undefined;
     }
   });
-  let focalIndex = posts.findLastIndex((p) => p?.id === focalId);
-  if (focalIndex < 0) focalIndex = posts.findIndex((p) => p);
+  const focalIndex = posts.findLastIndex((p) => p?.id === focalId);
   const focal = posts[focalIndex];
-  if (!focal) throw new Error("Could not read the post from the page.");
+  if (!focal)
+    throw new Error("Could not find the post on the page. Bring it into view or reload the page, then try again.");
 
   const parents = new Map<string, Post>();
   for (const p of posts.slice(0, focalIndex)) {

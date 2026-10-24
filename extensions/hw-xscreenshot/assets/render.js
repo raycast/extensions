@@ -166,17 +166,33 @@ function run(argv) {
     p.stroke;
   }
 
-  // Draws name, badge, handle and time on one baseline row; returns its height.
-  function headerRow(post, x, top, size, withWhen) {
+  function fit(str, size, bold, maxW) {
+    if (maxW <= 0) return "";
+    if (lineWidth(str, size, bold) <= maxW) return str;
+    let n = str.length;
+    while (n > 0 && lineWidth(str.slice(0, n) + "…", size, bold) > maxW) n--;
+    return n > 0 ? str.slice(0, n) + "…" : "";
+  }
+
+  // Draws name, badge, handle and time on one baseline row within width; returns its height.
+  function headerRow(post, x, top, size, withWhen, width) {
+    const badgeW = post.verified ? size + 7 : 0;
+    const handle = "@" + post.handle;
+    const handleW = lineWidth(handle, size - 1, false);
+    const name = fit(post.name, size, true, width - badgeW - 4 - Math.min(handleW, width * 0.4) - 6);
     let cx = x;
-    cx += line(cx, top, post.name, size, true, C.fg) + 4;
+    cx += line(cx, top, name, size, true, C.fg) + 4;
     if (post.verified) {
       const d = size + 1;
       badge(cx, top + (lineHeight(size) - d) / 2, d);
       cx += d + 6;
     }
-    cx += line(cx, top, "@" + post.handle, size - 1, false, C.sec) + 6;
-    if (withWhen && post.when) line(cx, top, "· " + post.when, size - 1, false, C.sec);
+    const handleFit = fit(handle, size - 1, false, x + width - cx);
+    cx += line(cx, top, handleFit, size - 1, false, C.sec) + 6;
+    if (withWhen && post.when) {
+      const when = "· " + post.when;
+      if (cx + lineWidth(when, size - 1, false) <= x + width) line(cx, top, when, size - 1, false, C.sec);
+    }
     return lineHeight(size);
   }
 
@@ -240,7 +256,7 @@ function run(argv) {
     const ix = x + padX, iw = w - 2 * padX;
     let y = top + padY;
     circleImage(q.avatarPath, ix, y, 22);
-    const rowH = Math.max(22, headerRow(q, ix + 28, y + 1, 15, true));
+    const rowH = Math.max(22, headerRow(q, ix + 28, y + 1, 15, true, iw - 28));
     y += rowH;
     if (q.runs.length) y += 6 + richText(q.runs, ix, y + 6, iw, 17);
     if (q.media.length) y += 10 + mediaBlock(q.media, ix, y + 10, iw, 12);
@@ -260,7 +276,7 @@ function run(argv) {
   function parentRow(p, x, top) {
     const bx = x + 60, bw = CONTENT_W - 60;
     circleImage(p.avatarPath, x, top, 48);
-    let h = headerRow(p, bx, top, 16, true);
+    let h = headerRow(p, bx, top, 16, true, bw);
     const body = postBody(p, bx, top + h + 4, bw, 18);
     h = Math.max(h + 4 + body, 48) + 20;
     if (drawing) fillRect(x + 23, top + 52, 2, h - 52, C.border);
@@ -269,10 +285,11 @@ function run(argv) {
 
   function focalBlock(p, x, top) {
     circleImage(p.avatarPath, x, top, 48);
+    const hw = CONTENT_W - 60;
     let nx = x + 60;
-    nx += line(nx, top + 4, p.name, 17, true, C.fg) + 4;
+    nx += line(nx, top + 4, fit(p.name, 17, true, hw - (p.verified ? 22 : 0)), 17, true, C.fg) + 4;
     if (p.verified) badge(nx, top + 4 + (lineHeight(17) - 18) / 2, 18);
-    line(x + 60, top + 4 + lineHeight(17), "@" + p.handle, 15, false, C.sec);
+    line(x + 60, top + 4 + lineHeight(17), fit("@" + p.handle, 15, false, hw), 15, false, C.sec);
     let y = top + 48 + 16;
     y += postBody(p, x, y, CONTENT_W, 23);
 

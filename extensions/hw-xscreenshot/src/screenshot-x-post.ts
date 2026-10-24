@@ -42,12 +42,15 @@ export default async function main() {
     if (!environment.canAccess(BrowserExtension)) {
       throw new Error("Install Raycast's browser extension, then try again.");
     }
-    const tab = (await BrowserExtension.getTabs()).find((t) => t.active && POST_URL.test(t.url));
-    const match = tab && POST_URL.exec(tab.url);
-    const [handle, id] = match ? [match[1], match[2]] : [];
-    if (!tab || !id) throw new Error("The active browser tab is not an X post.");
-
-    const html = await BrowserExtension.getContent({ tabId: tab.id, format: "html" });
+    // `active` is per window, so only the focused window's page (getContent without tabId) tells which candidate is current.
+    const html = await BrowserExtension.getContent({ format: "html" });
+    const candidates = (await BrowserExtension.getTabs()).flatMap((t) => {
+      const m = t.active ? POST_URL.exec(t.url) : null;
+      return m ? [{ handle: m[1], id: m[2], hits: html.split(`/status/${m[2]}`).length - 1 }] : [];
+    });
+    const post = candidates.filter((c) => c.hits > 0).sort((a, b) => b.hits - a.hits)[0];
+    if (!post) throw new Error("The active browser tab is not an X post.");
+    const { handle, id } = post;
     if (!html.includes("<article")) throw new Error("No post found on the page yet. Wait for it to load.");
 
     toast.title = "Rendering screenshot";
