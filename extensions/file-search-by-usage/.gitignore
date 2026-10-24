@@ -1,0 +1,6 @@
+node_modules/
+dist/
+harness/.build/
+raycast-env.d.ts
+.DS_Store
+docs/superpowers/
