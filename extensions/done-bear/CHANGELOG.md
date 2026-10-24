@@ -1,5 +1,9 @@
 # Done Bear Changelog
 
+## [Done Bear Sign-In Domain] - {PR_MERGE_DATE}
+
+- Sign in through auth.donebear.com, so the consent screen names Done Bear instead of a raw Supabase host
+
 ## [AI Task Creation] - 2026-08-16
 
 - Added an AI-powered Create Task command that turns one sentence into a reviewable task
