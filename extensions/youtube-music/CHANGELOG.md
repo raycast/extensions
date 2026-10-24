@@ -1,5 +1,15 @@
 # YouTube Music Changelog
 
+## [Search and Play] - {PR_MERGE_DATE}
+
+- Added: `Play Song` command — search YouTube Music from Raycast and start the chosen track in the selected browser.
+- Added: `Play Next` and `Add to Queue` actions, using the app's own search page and row menu. The tab returns to where it was afterwards and playback is not interrupted.
+- Added: `Now Playing` command — artwork, progress, the last five tracks and the rest of the queue, with transport, rating and remove-from-queue actions.
+- Added: a preference for how many recently played tracks `Now Playing` lists.
+- Added: in-app navigation through the music app's own `yt-navigate` event, so app windows do not show a "Leave app?" prompt before loading a track.
+- Added: a watcher that dismisses the "Are you still there?" prompt and resumes playback.
+- Changed: upgraded to `@raycast/api` 2.8.2.
+
 ## [Fix AppleScript Error Handling] - 2026-08-15
 
 - Fixed: `runJSInYouTubeMusicTab` now wraps `runAppleScript` in a try/catch block — previously, any AppleScript error (permissions, browser not running, invalid browser selection) was thrown unhandled and swallowed by empty catch blocks in commands, resulting in silent failures or "Unknown Error" HUD messages.

@@ -8,7 +8,8 @@
   "contributors": [
     "alexstrnik",
     "zach",
-    "gnostic"
+    "gnostic",
+    "danieltsam"
   ],
   "categories": [
     "Media",
@@ -53,9 +54,53 @@
       "type": "textfield",
       "description": "Number of seconds to fast forward or rewind.",
       "required": false
+    },
+    {
+      "name": "historyLimit",
+      "title": "Recently Played History",
+      "description": "How many recently played tracks Now Playing shows.",
+      "type": "dropdown",
+      "default": "5",
+      "required": false,
+      "data": [
+        {
+          "title": "Off",
+          "value": "0"
+        },
+        {
+          "title": "3 Songs",
+          "value": "3"
+        },
+        {
+          "title": "5 Songs",
+          "value": "5"
+        },
+        {
+          "title": "10 Songs",
+          "value": "10"
+        },
+        {
+          "title": "20 Songs",
+          "value": "20"
+        }
+      ]
     }
   ],
   "commands": [
+    {
+      "name": "play-song",
+      "title": "Play Song",
+      "subtitle": "YouTube Music",
+      "description": "Search YouTube Music and play a song in the selected browser.",
+      "mode": "view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "YouTube Music",
+      "description": "Show the current track, recent history and what is up next.",
+      "mode": "view"
+    },
     {
       "name": "play-pause",
       "title": "Toggle Play/Pause",
@@ -132,24 +177,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

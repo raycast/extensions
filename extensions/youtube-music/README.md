@@ -2,6 +2,8 @@
 
 Control the YouTube Music tab in the browser with your keyboard.
 
+The `Play Song` command searches YouTube Music and starts the chosen track in the selected browser. `Now Playing` shows the current track, the recently played tracks and the queue, with transport and rating actions. How many recently played tracks to list is set in the extension preferences. Both follow the playback setup below; no additional permissions are required.
+
 ## Required Setup
 
 The extension controls your browser via AppleScript by running JavaScript in the YouTube Music tab. You must enable **Allow JavaScript from Apple Events** in the browser you select in the extension preferences; otherwise commands will fail (often with "Unknown Error").
