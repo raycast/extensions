@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add MCP Checkup MCP Server] - {PR_MERGE_DATE}
+## [Add MCP Checkup MCP Server] - 2026-10-24
 
 - Add MCP Checkup to the official registry: look up observed status, reports and recent tool-list changes for public MCP servers, fetch the Ed25519-signed attestation behind a report, and request a one-off check of a server by URL. Hosted Streamable HTTP server at https://mcpcheckup.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
