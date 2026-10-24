@@ -17,6 +17,9 @@ import {
   toEuVatNumber,
 } from "./format";
 import type { FormattedAddressParts } from "./format";
+import { getLanguageFromOrder } from "./language";
+import type { Language } from "./language";
+import { translate } from "./translations";
 
 export type UiNameTimelineCategory = "current-legal" | "previous-legal" | "alternate";
 
@@ -99,20 +102,22 @@ export function selectPrimaryAddress(addresses: PrhAddress[] = []): PrhAddress |
   return addresses[0];
 }
 
-export function getBusinessIdStatusLabel(code?: string): string | undefined {
+export function getBusinessIdStatusLabel(code?: string, language: Language = "en"): string | undefined {
   if (!code) {
     return undefined;
   }
 
-  return BUSINESS_ID_STATUS_LABELS[code] ?? `Unknown (${code})`;
+  const key = BUSINESS_ID_STATUS_LABELS[code];
+  return key ? translate(key, language) : translate("unknown", language, { code });
 }
 
-export function getTradeRegisterStatusLabel(code?: string): string | undefined {
+export function getTradeRegisterStatusLabel(code?: string, language: Language = "en"): string | undefined {
   if (!code) {
     return undefined;
   }
 
-  return TRADE_REGISTER_STATUS_LABELS[code] ?? `Unknown (${code})`;
+  const key = TRADE_REGISTER_STATUS_LABELS[code];
+  return key ? translate(key, language) : translate("unknown", language, { code });
 }
 
 export function getActiveRegisteredEntries(entries: PrhRegisteredEntry[] = []): PrhRegisteredEntry[] {
@@ -125,7 +130,7 @@ export function getEntryLabel(entry: PrhRegisteredEntry, languageOrder: PrhLangu
     return description;
   }
 
-  return `Type ${entry.type}`;
+  return translate("type", getLanguageFromOrder(languageOrder), { type: entry.type });
 }
 
 function normalizeName(value?: string | null): string | undefined {
@@ -350,6 +355,7 @@ export function getRegisteredEntriesGroups(entries: PrhRegisteredEntry[] = []): 
 }
 
 export function toUiCompany(company: PrhCompany, languageOrder: PrhLanguageCode[]): UiCompany {
+  const language = getLanguageFromOrder(languageOrder);
   const names = company.names ?? [];
   const primaryName = selectPrimaryName(names);
   const primaryForm = selectPrimaryCompanyForm(company.companyForms ?? []);
@@ -389,9 +395,9 @@ export function toUiCompany(company: PrhCompany, languageOrder: PrhLanguageCode[
     companyFormCode: primaryForm?.type,
     companyFormLabel,
     tradeRegisterStatusCode: company.tradeRegisterStatus,
-    tradeRegisterStatusLabel: getTradeRegisterStatusLabel(company.tradeRegisterStatus),
+    tradeRegisterStatusLabel: getTradeRegisterStatusLabel(company.tradeRegisterStatus, language),
     businessIdStatusCode: company.status,
-    businessIdStatusLabel: getBusinessIdStatusLabel(company.status),
+    businessIdStatusLabel: getBusinessIdStatusLabel(company.status, language),
     mainBusinessLineCode: company.mainBusinessLine?.type,
     mainBusinessLineLabel,
     website,
