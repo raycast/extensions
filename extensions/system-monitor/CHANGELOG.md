@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Copy System Info] - {PR_MERGE_DATE}
+## [Copy System Info] - 2026-10-24
 
 - Add a Copy Info submenu (⌘⇧C) on System Info to copy the macOS version, hostname, model, chip, serial number and other values
 
