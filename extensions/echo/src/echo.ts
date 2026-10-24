@@ -64,16 +64,27 @@ export class EchoError extends Error {
   }
 }
 
+/// Long enough for Echo to cold-launch Spotify on a resume, short enough that a stalled Echo shows
+/// a retry instead of a spinner that never ends.
+const TIMEOUT_MS = 10_000;
+
+const notResponding = () => new EchoError("Echo is not responding", "Quit and reopen Echo, then try again.");
+const isTimeout = (e: unknown) => e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
-  const { token } = getPreferenceValues<{ token: string }>();
+  const { token } = getPreferenceValues<Preferences>();
+  // One signal for the whole exchange, so it also covers reading the body.
+  const signal = AbortSignal.timeout(TIMEOUT_MS);
 
   let res: Response;
   try {
     res = await fetch(`${BASE}${path}`, {
       ...init,
+      signal,
       headers: { "X-Echo-Token": token, "Content-Type": "application/json", ...(init?.headers ?? {}) },
     });
-  } catch {
+  } catch (e) {
+    if (isTimeout(e)) throw notResponding();
     throw new EchoError("Echo is not running", "Open Echo and try again.");
   }
 
@@ -89,7 +100,12 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     throw new EchoError("Echo could not do that", `The app replied with ${res.status}.`);
   }
-  return (await res.json()) as T;
+  try {
+    return (await res.json()) as T;
+  } catch (e) {
+    if (isTimeout(e)) throw notResponding();
+    throw new EchoError("Echo could not do that", "The app sent a reply this extension could not read.");
+  }
 }
 
 export async function fetchHistory(query: string, type: string, limit = 200): Promise<EchoItem[]> {
@@ -101,9 +117,10 @@ export async function fetchHistory(query: string, type: string, limit = 200): Pr
 }
 
 /// The thing you played most recently. Echo's list puts pinned items first, so its top row is not
-/// this when anything is pinned (Resume Last Played used to resume a pinned item instead).
+/// this when anything is pinned. Asks for Echo's maximum (500) so the newest unpinned item is in
+/// the batch even with many pins.
 export async function fetchLastPlayed(): Promise<EchoItem | undefined> {
-  const items = await fetchHistory("", "all");
+  const items = await fetchHistory("", "all", 500);
   return items.reduce<EchoItem | undefined>(
     (best, it) => (!best || new Date(it.lastPlayed) > new Date(best.lastPlayed) ? it : best),
     undefined,
