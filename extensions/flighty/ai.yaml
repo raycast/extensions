@@ -1,0 +1,8 @@
+instructions: |
+    These tools read the user's saved flights from the local Flighty app. They cannot search unsaved flights, fares, or availability, and cannot add or book flights.
+    Use search-flights to find flights, then get-flight with a returned ID for aircraft, baggage, booking code, or seat details.
+    Use period upcoming for next-flight requests and past for flight history. Use all with a date range when no past/upcoming restriction is requested.
+    Date filters are inclusive and use each departure airport's local date. Departure and arrival times use their respective airport time zones.
+    Follow nextOffset when more matching flights are needed. total counts all matches, not just the returned page.
+    Data reflects Flighty's last sync, not a live airline lookup. Keep scheduled, estimated, and actual times distinct; null means unknown.
+    Link flights using the returned Flighty URL. Include booking codes only when the user requests booking details.
