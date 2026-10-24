@@ -70,6 +70,7 @@ function startLoad(key: string, fetchPage: FetchPage): Load {
       } while (cursor);
       write(key, load.pages);
     } catch (error) {
+      console.error("[channel-directory] Scan failed:", error);
       load.error = error;
       load.failedAt = Date.now();
     } finally {
