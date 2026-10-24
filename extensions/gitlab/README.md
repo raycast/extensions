@@ -109,6 +109,17 @@ Once you have authorized, Raycast adds a logout option to the extension preferen
 
 Now you should be able to manage your GitLab instance with Raycast 🚀.
 
+#### Reading the token from the macOS Keychain
+
+Instead of pasting the token into Raycast, you can keep it in the login Keychain and share it with other tools:
+
+```sh
+# Prompts for the token; -U updates an existing item
+security add-generic-password -U -a "$USER" -s gitlab-token -w
+```
+
+Leave `API Token` empty and set `Keychain Service Name` to `gitlab-token`. The token is read once per command run. Items created with `security` are readable by it without a prompt; for items created elsewhere macOS asks once—choose **Always Allow**. If the item is missing, commands report `Keychain item "<name>" not found` instead of starting OAuth. To find the service name of an existing item, run `security find-generic-password -l "<Name in Keychain Access>" | grep svce`.
+
 > **Tip**: If your instance auto-revokes Personal Access Tokens (e.g. nightly), use OAuth instead. The Application ID is permanent; access tokens are minted from a long-lived refresh token, so you re-authorize only when the refresh token itself is revoked.
 
 ## API Token/Personal Access Token scope

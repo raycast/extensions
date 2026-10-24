@@ -367,6 +367,14 @@
    "placeholder": "Enter your GitLab API token if using PAT"
   },
   {
+   "name": "keychainService",
+   "type": "textfield",
+   "required": false,
+   "title": "Keychain Service Name",
+   "description": "Read the Personal Access Token from a macOS Keychain generic password item with this service name. Used when the API Token is empty; takes precedence over OAuth. Create it with `security add-generic-password -a \"$USER\" -s gitlab-token -w`.",
+   "placeholder": "gitlab-token"
+  },
+  {
    "name": "oauthClientId",
    "type": "textfield",
    "required": false,
