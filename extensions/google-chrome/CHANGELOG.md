@@ -1,5 +1,13 @@
 # Google Chrome Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix Search Tabs (and the Tabs section of Search All) staying empty. Tabs are now read once and filtered in memory.
+- Read tab titles and URLs in bulk per window, which makes listing tabs several times faster.
+- Show a dedicated error view with a shortcut to System Settings when macOS does not allow Raycast to control Google Chrome.
+- Refresh the tab list after closing a tab from Search Tabs.
+- Use separators that cannot appear in tab titles when parsing the AppleScript output.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Sort Bookmarks by Frecency] - 2026-09-14

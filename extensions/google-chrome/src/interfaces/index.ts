@@ -31,7 +31,8 @@ export interface HistoryEntry {
 export type GroupedEntries = Map<string, HistoryEntry[]>;
 
 export class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
+  static readonly TAB_FIELD_SEPARATOR: string = "\x1F";
+  static readonly TAB_RECORD_SEPARATOR: string = "\x1E";
 
   constructor(
     public readonly title: string,
@@ -43,13 +44,13 @@ export class Tab {
   ) {}
 
   static parse(line: string): Tab {
-    const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
+    const parts = line.split(this.TAB_FIELD_SEPARATOR);
 
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], line);
+    return new Tab(parts[0] ?? "", parts[1] ?? "", parts[2] ?? "", +parts[3], +parts[4], line);
   }
 
   key(): string {
-    return `${this.windowsId}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
+    return `${this.windowsId}-${this.tabIndex}`;
   }
 
   urlWithoutScheme(): string {
