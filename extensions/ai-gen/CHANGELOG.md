@@ -1,5 +1,13 @@
 # OpenAI Generator Changelog
 
+## [Compatible Image Providers and AI Tools] - {PR_MERGE_DATE}
+
+- Bound model discovery responses to 5 MiB before parsing.
+- Add Generate or Edit Image with a separate OpenAI-compatible provider, model discovery and manual model selection.
+- Add AI generation and reference-image editing tools, with upload confirmation.
+- Save provider images locally with configurable output and non-overwriting Save As.
+- Keep the existing OpenAI commands and key; request that key only when using those commands.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
@@ -13,13 +21,16 @@
 - Updated the API calls to OpenAI to use AbortController signals
 
 ## [Update text completion model] - 2022-11-28
+
 - Uses new GPT-3 `text-davinci-003` version
 
 ## [Add Create Image Variation & Edit commands] - 2022-11-12
+
 - Adds new Create Image Variation command to start a variation from an image on your local computer
 - Adds new Create Image Edit command to extend an image from your local computer using a mask
 
 ## [Advanced text completion fixes] - 2022-11-09
+
 - Fix text completion advanced options not saving if you hide the UI
 
 ## [Initial Version] - 2022-11-09
