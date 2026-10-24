@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shortcut-layers",
+  "title": "Shortcut Layers",
+  "description": "Layered keyboard shortcuts: one hotkey opens a layer, a single key runs an action",
+  "icon": "icon.png",
+  "author": "rhrabun",
+  "categories": ["Productivity"],
+  "keywords": ["shortcuts", "keyboard", "layers", "hyper", "karabiner", "leader key", "keybindings"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "run-layer",
+      "title": "Run Layer",
+      "description": "Open a layer and trigger an action with a single key",
+      "mode": "view"
+    },
+    {
+      "name": "manage-layers",
+      "title": "Manage Layers",
+      "description": "Create and edit layers and their actions",
+      "mode": "view"
+    },
+    {
+      "name": "import-layers",
+      "title": "Import Layers",
+      "description": "Import layers from a JSON file or pasted text",
+      "mode": "view"
+    },
+    {
+      "name": "export-layers",
+      "title": "Export Layers",
+      "description": "Export all layers to a JSON file in Downloads",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultMode",
+      "title": "Default Key Mode",
+      "description": "How keys behave inside a layer when it opens",
+      "type": "dropdown",
+      "required": false,
+      "default": "instant",
+      "data": [
+        { "title": "Instant — a single key runs its action", "value": "instant" },
+        { "title": "Search — type to filter, press Enter to run", "value": "search" }
+      ]
+    },
+    {
+      "name": "copyToClipboard",
+      "title": "Copy Exported JSON",
+      "label": "Copy to the clipboard too",
+      "description": "Also copy exported layers to the clipboard, in addition to writing the file",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.4",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts"
+  }
+}
