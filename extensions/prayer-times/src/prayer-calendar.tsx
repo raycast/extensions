@@ -93,7 +93,8 @@ function MonthGrid({ settings }: { settings: Settings }) {
   return (
     <Grid
       columns={7}
-      inset={Grid.Inset.Small}
+      aspectRatio="16/9"
+      inset={Grid.Inset.Medium}
       isLoading={isLoading}
       filtering={false}
       searchBarPlaceholder="Pick a month on the right"
@@ -131,7 +132,7 @@ function MonthGrid({ settings }: { settings: Settings }) {
             <Grid.Item
               key={key}
               content={{ value: { color: TONE_COLORS[tone] }, tooltip }}
-              title={key === todayKey ? `${date.getDate()} · Today` : String(date.getDate())}
+              title={`${date.toLocaleDateString(undefined, { weekday: "short" })} ${date.getDate()}${key === todayKey ? " · Today" : ""}`}
               subtitle={
                 tone === "future" ? "" : tone === "noData" ? "No data" : `${prayedCount(day)}/${PRAYER_KEYS.length}`
               }
