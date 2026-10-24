@@ -1,4 +1,4 @@
-import { Application, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
@@ -16,11 +16,6 @@ export type TabError =
   | "automation"
   | "browser-unavailable"
   | "applescript-error";
-
-interface Preferences {
-  browser: Application;
-  urlPreference: UrlPreference;
-}
 
 /**
  * Escapes JavaScript so it can safely be inserted into AppleScript.
@@ -129,6 +124,18 @@ export async function runJSInYouTubeMusicTab(
   const preferences = getPreferenceValues<Preferences>();
   const { browser, urlPreference } = preferences;
   const { silent = false, musicOnly = false, onError } = options ?? {};
+  // `browser` is required in the manifest, but the generated type is optional.
+  if (!browser) {
+    if (!silent) {
+      showToast({
+        title: "Browser Not Set",
+        message: "Choose a browser in the extension preferences.",
+        style: Toast.Style.Failure,
+      });
+    }
+    onError?.("browser-unavailable");
+    return undefined;
+  }
   // Commands that read the music player must not fall through to a regular
   // YouTube tab when the user prefers "Both" or "YouTube".
   const condition = musicOnly ? 'URL contains "music.youtube.com"' : getUrlCondition(urlPreference);
@@ -223,6 +230,14 @@ export async function runJSInYouTubeMusicTab(
  */
 export async function openInSelectedBrowser(url: string): Promise<void> {
   const { browser } = getPreferenceValues<Preferences>();
+  if (!browser) {
+    await showToast({
+      title: "Browser Not Set",
+      message: "Choose a browser in the extension preferences.",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
 
   try {
     await runAppleScript(`
