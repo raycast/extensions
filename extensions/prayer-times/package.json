@@ -31,6 +31,13 @@
       "mode": "view"
     },
     {
+      "name": "prayer-calendar",
+      "title": "Prayer Calendar",
+      "subtitle": "Prayer Times",
+      "description": "A month calendar of prayer status. Open any day to see its prayers, mark or change them, and expand each one for its times.",
+      "mode": "view"
+    },
+    {
       "name": "set-location",
       "title": "Set Prayer Location",
       "subtitle": "Prayer Times",
