@@ -244,7 +244,11 @@ describe.skipIf(!process.env.PORTCHECK_BIN)("real portcheck", () => {
       const row = rows(await list(bin)).find((r) => r.port === port);
       expect(row).toMatchObject({ pid: process.pid, proto: "tcp" });
       const data = await check(bin, port);
-      expect(stoppable(port, data)).toEqual([{ pid: process.pid, name: row!.name }]);
+      const target = { pid: process.pid, name: row!.name, startTime: row!.startTime };
+      expect(target.startTime).toBeTruthy();
+      expect(stoppable(port, data)).toEqual([target]);
+      expect(stillRunning(target, await list(bin))).toBe(true);
+      expect(stillRunning({ ...target, startTime: "2000-01-01T00:00:00Z" }, await list(bin))).toBe(false);
       expect(checkMarkdown(port, data)).toContain(`# Port ${port} is in use`);
       expect((await free(bin, "40000-40100")).ports).toHaveLength(1);
     } finally {
