@@ -119,19 +119,17 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ### Adding Screenshots
 
-In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
+Use Raycast's built-in **Capture Window** command to take pixel-perfect screenshots of your extension.
 
 #### How to use it?
 
-1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
-3. Open the command
-4. Press the hotkey, remember to tick `Save to Metadata`
+1. Search for **Capture Window** in Raycast (it ships with the core **Raycast** extension) and assign it a hotkey.
+2. Ensure your extension is opened in development mode (Capture Window hides development-only elements).
+3. Open the command you want to capture.
+4. Press the hotkey, then choose **Save to Metadata**.
 
 {% hint style="info" %}
-This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.
-
-You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
+Capture Window composes the image on its own background. Screenshots must be 2000×1250 (16:10, PNG); check the saved file before submitting.
 {% endhint %}
 
 ### Specifications
