@@ -89,7 +89,7 @@ export default function Command() {
     setIsLoading(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Searching Google" });
     try {
-      const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+      const { apiKey } = getPreferenceValues<Preferences>();
       const response = await searchGoogle(values, apiKey);
       toast.style = Toast.Style.Success;
       toast.title = `${response.results.length} Results Returned`;
