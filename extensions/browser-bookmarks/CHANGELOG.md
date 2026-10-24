@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Search] - {PR_MERGE_DATE}
+
+- Added support for the `Search` browser on macOS: its bookmarks, its pinned tabs, and its tab groups
+
 ## [Search Matching] - 2026-10-15
 
 - Stopped the root folder name of Chromium browsers (such as "Bookmarks Bar") from fuzzy-matching searches such as "board"
