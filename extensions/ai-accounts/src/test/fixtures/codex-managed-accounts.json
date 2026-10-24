@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "accounts": [
+    {
+      "id": "11111111-AAAA-4AAA-8AAA-111111111111",
+      "email": "Bob@Example.com",
+      "providerAccountID": "ws-bob-personal-0001",
+      "workspaceLabel": "Personal",
+      "workspaceAccountID": "WS-BOB-PERSONAL-0001",
+      "authFingerprint": "0000000000000000000000000000000000000000000000000000000000000001",
+      "managedHomePath": "/fake/CodexBar/managed-codex-homes/22222222-BBBB-4BBB-8BBB-222222222222",
+      "createdAt": 1790000000,
+      "updatedAt": 1790000100,
+      "lastAuthenticatedAt": 1790000100
+    },
+    {
+      "id": "33333333-CCCC-4CCC-8CCC-333333333333",
+      "email": "carol@school.example.edu",
+      "providerAccountID": "ws-carol-edu-0002",
+      "workspaceLabel": "Example University Pro (Edu)",
+      "workspaceAccountID": "ws-carol-edu-0002",
+      "authFingerprint": "0000000000000000000000000000000000000000000000000000000000000002",
+      "managedHomePath": "/fake/CodexBar/managed-codex-homes/44444444-DDDD-4DDD-8DDD-444444444444",
+      "createdAt": 1790000200,
+      "updatedAt": 1790000300,
+      "lastAuthenticatedAt": null
+    }
+  ]
+}
