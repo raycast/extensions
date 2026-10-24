@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Shopify Speed Check MCP Server] - {PR_MERGE_DATE}
+## [Add Shopify Speed Check MCP Server] - 2026-10-24
 
 - Add Shopify Speed Check to the registry: check a Shopify store's PageSpeed score and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees. Hosted Streamable HTTP server at https://tools.skaidigital.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
 
