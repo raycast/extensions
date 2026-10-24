@@ -7,7 +7,7 @@ Doorstopper is a Raycast extension which prevents your MacBook from going to sle
 
 > **Note:**  
 > The underlying commands need to be run with `sudo` privileges.  
-> The extension will prompt you for your password by default.
+> The extension will prompt you for your password by default, or you can set up passwordless mode once.
 
 ## Authenticate with Touch ID
 
@@ -34,6 +34,22 @@ auth       sufficient     pam_tid.so
 
 Changes to `/etc/pam.d/sudo` can be overwritten by macOS updates. If Touch ID is unavailable or not enabled for `sudo`, Doorstopper will continue to use the administrator password prompt.
 
+## Passwordless Mode and Auto-Off
+
+Run **Set up Passwordless Doorstopper** to install a sudoers rule for your macOS account at `/etc/sudoers.d/raycast-doorstopper-<username>`. Each account on the Mac gets its own rule file. macOS asks for your admin password once. The rule lets your user run only these two commands as root without a password:
+
+```text
+/usr/bin/pmset -a disablesleep 0
+/usr/bin/pmset -a disablesleep 1
+```
+
+With the rule installed:
+
+- Enabling and disabling Doorstopper no longer asks for a password or Touch ID.
+- Timers become available, and the menu bar command disables Doorstopper when a timer ends, the battery drops to the Low Battery Cutoff, or the Mac restarts. Keep **Doorstopper Status Menu Bar** enabled for this.
+
+Run the same command again to remove the rule.
+
 ## Installation 🛠️
 
 To install the Doorstopper extension, follow these steps:
@@ -47,7 +63,7 @@ To install the Doorstopper extension, follow these steps:
 Once installed, simply trigger the Raycast command palette and search for the Doorstopper commands.
 
 <p align="center">
-  <img src="metadata/capture-1.png" alt="Raycast Command Palette for Doorstopper">
+  <img src="metadata/doorstopper-3.png" alt="Raycast Command Palette for Doorstopper">
 </p>
 
 ## Features ✨
@@ -70,4 +86,18 @@ This command will show the current status of Doorstopper (enabled or disabled).
 
 ### 5. `Doorstopper Status Menu Bar`
 
-This command will show the current status of Doorstopper in the menu bar.
+This command will show the current status of Doorstopper in the menu bar, with the time left on a timer. It checks every minute and disables Doorstopper when a timer ends, the battery is low, or the Mac restarted. From the menu you can enable Doorstopper for a preset, recent or custom duration.
+
+### 6. `Enable Doorstopper for Duration`
+
+Pick how long to keep the MacBook awake with the lid closed: 30 minutes, 1, 2 or 4 hours, or indefinitely. Type a duration such as `45m`, `1h30`, `2.5h` or `1:30` (up to 7 days) to use your own. Timers need passwordless mode.
+
+### 7. `Set up Passwordless Doorstopper`
+
+Installs or removes the passwordless rule described above.
+
+## Preferences ⚙️
+
+- **Menu Bar Icon**: the icon set for the menu bar, or None to hide it.
+- **Low Battery Cutoff**: disable Doorstopper automatically on battery power at or below this level. Default 20%. Needs passwordless mode.
+- **Default Duration**: how long Toggle Doorstopper enables it for. Default Indefinitely.

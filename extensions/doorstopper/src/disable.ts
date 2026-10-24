@@ -1,10 +1,12 @@
-import { showFailureToast } from "@raycast/utils";
-import { stopDoorstopper } from "./util";
+import { showHUD } from "@raycast/api";
+import { disable } from "./lib/session";
+import { showCommandFailure } from "./lib/feedback";
 
 export default async function main() {
   try {
-    await stopDoorstopper({ menubar: true, status: false }, "Doorstopper is now disabled");
+    await disable();
+    await showHUD("Doorstopper is now disabled");
   } catch (error) {
-    showFailureToast("Failed to disable Doorstopper", { message: String(error) });
+    await showCommandFailure(error, "Failed to disable Doorstopper");
   }
 }
