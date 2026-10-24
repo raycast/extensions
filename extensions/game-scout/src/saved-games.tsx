@@ -25,7 +25,7 @@ const API_KEY = (preferences.itadApiKey || "").trim();
 const COUNTRY = preferences.country;
 
 const cache = new Cache();
-const CACHE_KEY = `itad_saved_prices_v22_${COUNTRY}`;
+const CACHE_KEY = `itad_saved_prices_v23_${COUNTRY}`;
 const CACHE_TTL =
   parseInt(preferences.refreshFrequency || "12") * 60 * 60 * 1000;
 const detailCache = new Cache({ namespace: "search_detail" });
@@ -37,6 +37,8 @@ import {
   isStoreAllowed,
   computeGameInsight,
   safeParse,
+  parseSavedGames,
+  isStringArray,
 } from "./utils";
 import type {
   BundleInfo,
@@ -101,10 +103,10 @@ export default function SavedGames() {
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(safeParse(s, ["all"])),
+      setSelectedStores(safeParse(s, ["all"], isStringArray)),
     );
     LocalStorage.getItem<string>("saved_itad_games").then((s) => {
-      setSavedGames(safeParse(s, []));
+      setSavedGames(parseSavedGames(s));
       setIsStorageLoaded(true);
     });
     LocalStorage.getItem<string>("last_seen_prices").then((s) =>
@@ -128,7 +130,9 @@ export default function SavedGames() {
           timestamp?: number;
         }>(cachedData, { requestedIds: [] });
 
-        const cachedRequestedIds = parsed.requestedIds || [];
+        const cachedRequestedIds = Array.isArray(parsed.requestedIds)
+          ? parsed.requestedIds
+          : [];
         const currentIds = savedGames.map((g) => String(g.id));
         const isSameRoster =
           currentIds.length === cachedRequestedIds.length &&
@@ -136,7 +140,14 @@ export default function SavedGames() {
 
         if (
           isSameRoster &&
-          parsed.timestamp &&
+          parsed.rawPrices &&
+          typeof parsed.rawPrices === "object" &&
+          !Array.isArray(parsed.rawPrices) &&
+          currentIds.every((id) => Array.isArray(parsed.rawPrices?.[id])) &&
+          parsed.overviewMap &&
+          typeof parsed.overviewMap === "object" &&
+          !Array.isArray(parsed.overviewMap) &&
+          typeof parsed.timestamp === "number" &&
           Date.now() - parsed.timestamp < CACHE_TTL
         ) {
           const safeOverview: Record<string, OverviewMapValue> = {};
@@ -184,10 +195,18 @@ export default function SavedGames() {
         ),
       ]);
 
+      if (!pRes.ok) {
+        throw new Error(`Saved game prices HTTP ${pRes.status}`);
+      }
+
       const [pJson, oJson] = await Promise.all([
-        pRes.ok ? pRes.json() : Promise.resolve(null),
+        pRes.json(),
         oRes.ok ? oRes.json() : Promise.resolve(null),
       ]);
+
+      if (!Array.isArray(pJson) && (!pJson || typeof pJson !== "object")) {
+        throw new Error("Unexpected saved game prices response");
+      }
 
       const priceMap: Record<string, Deal[]> = {};
       gameIds.forEach((id) => {
@@ -201,8 +220,20 @@ export default function SavedGames() {
             ? Object.values(pJson)
             : [];
 
-      priceEntries.forEach((it) => {
-        if (it.id != null) priceMap[String(it.id)] = it.deals || [];
+      if (
+        !priceEntries.every(
+          (item) =>
+            item &&
+            typeof item === "object" &&
+            item.id != null &&
+            (item.deals == null || Array.isArray(item.deals)),
+        )
+      ) {
+        throw new Error("Unexpected saved game deals data");
+      }
+
+      priceEntries.forEach((item) => {
+        priceMap[String(item.id)] = item.deals || [];
       });
 
       const bundleMapByGame: Record<string, BundleInfo[]> = {};
@@ -248,7 +279,7 @@ export default function SavedGames() {
       setRawPrices(priceMap);
       setOverviewMap((prev) => (oRes.ok ? newOverviewMap : prev));
 
-      if (Object.keys(priceMap).length > 0) {
+      if (oRes.ok && Object.keys(priceMap).length > 0) {
         cache.set(
           CACHE_KEY,
           JSON.stringify({
@@ -723,7 +754,7 @@ function GameDetail({
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((s) =>
-      setSelectedStores(safeParse(s, ["all"])),
+      setSelectedStores(safeParse(s, ["all"], isStringArray)),
     );
     LocalStorage.getItem<string>("preferred_chart_range").then((saved) => {
       if (saved === "3m" || saved === "6m" || saved === "1y") {
@@ -746,19 +777,21 @@ function GameDetail({
     const detailCacheKey = `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`;
     const fetchDetailData = async () => {
       setIsLoading(true);
-      const cached = detailCache.get(detailCacheKey);
+      const cached = refreshKey === 0 ? detailCache.get(detailCacheKey) : null;
       if (cached) {
         const parsed = safeParse<{
           timestamp?: number;
           data?: DetailData;
         } | null>(cached, null);
         if (
-          parsed &&
-          parsed.timestamp &&
+          parsed?.data &&
+          Array.isArray(parsed.data.deals) &&
+          Array.isArray(parsed.data.realBundles) &&
+          Array.isArray(parsed.data.historyChart) &&
+          typeof parsed.timestamp === "number" &&
           Date.now() - parsed.timestamp < DETAIL_CACHE_TTL
         ) {
           if (isMounted) {
-            if (!parsed.data) return;
             const d = parsed.data;
             setData({
               steamData: d.steamData ?? null,
@@ -808,6 +841,7 @@ function GameDetail({
         }
         const mockResponse = (mockData: unknown) =>
           Promise.resolve({
+            ok: true,
             json: () => Promise.resolve(mockData),
           } as Response);
 
@@ -816,7 +850,7 @@ function GameDetail({
             `https://api.isthereanydeal.com/games/bundles/v2?key=${API_KEY}&id=${gameId}`,
             { signal: abort.signal },
           ),
-          preloadedDeals != null
+          preloadedDeals != null && refreshKey === 0
             ? mockResponse([
                 {
                   deals: preloadedDeals,
@@ -840,7 +874,7 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          preloadedOverview != null
+          preloadedOverview != null && refreshKey === 0
             ? mockResponse([preloadedOverview])
             : fetch(
                 `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}`,
@@ -866,8 +900,14 @@ function GameDetail({
             ),
           );
         }
+        const responses = await Promise.all(fetchPromises);
+
+        if (!responses[1].ok || !responses[3].ok) {
+          throw new Error("Game detail prices or overview request failed");
+        }
+
         const jsons = await Promise.all(
-          (await Promise.all(fetchPromises)).map((r) => r.json()),
+          responses.map((response) => response.json()),
         );
         const [
           bundlesJson,
@@ -1161,20 +1201,66 @@ function GameDetail({
   const cutoffTime =
     now -
     (range === "3m" ? 90 : range === "6m" ? 180 : 365) * 24 * 60 * 60 * 1000;
-  if (allowedHistory.length > 0) {
-    allowedHistory
-      .filter((pt) => new Date(pt.timestamp).getTime() >= cutoffTime)
-      .reverse()
-      .forEach((pt) => {
-        const amount = pt.deal?.price?.amount;
-        if (amount == null) {
-          return;
-        }
-        plotData.push({
-          x: new Date(pt.timestamp).toISOString().split("T")[0],
-          y: amount,
-        });
-      });
+
+  const knownPrices = new Map<string, number>();
+
+  const addPoint = (time: number, price: number) => {
+    const date = new Date(time).toISOString().slice(0, 10);
+    const last = plotData[plotData.length - 1];
+
+    if (last?.x === date) {
+      last.y = price;
+    } else {
+      plotData.push({ x: date, y: price });
+    }
+  };
+
+  const sortedHistory = [...allowedHistory].sort(
+    (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+  );
+
+  for (const point of sortedHistory) {
+    const timestamp = Date.parse(point.timestamp);
+    const shop = point.shop?.name;
+    const price = point.deal?.price?.amount;
+
+    if (
+      !Number.isFinite(timestamp) ||
+      timestamp > now ||
+      !shop ||
+      typeof price !== "number" ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+      continue;
+    }
+
+    if (
+      timestamp >= cutoffTime &&
+      plotData.length === 0 &&
+      knownPrices.size > 0
+    ) {
+      addPoint(cutoffTime, Math.min(...knownPrices.values()));
+    }
+
+    knownPrices.set(shop, price);
+
+    if (timestamp >= cutoffTime) {
+      addPoint(timestamp, Math.min(...knownPrices.values()));
+    }
+  }
+
+  if (plotData.length > 0) {
+    const currentPrices = filteredDeals
+      .map((deal) => deal.price?.amount)
+      .filter(
+        (price): price is number =>
+          typeof price === "number" && Number.isFinite(price) && price >= 0,
+      );
+
+    if (currentPrices.length > 0) {
+      addPoint(now, Math.min(...currentPrices));
+    }
   }
 
   let chartUrl = "";
@@ -1267,7 +1353,12 @@ function GameDetail({
     chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&w=250&h=110&devicePixelRatio=2&bkg=transparent`;
   }
 
-  const steamCut = steamData?.price_overview?.discount_percent ?? 0;
+  const steamCut =
+    currentBest?.shop?.name === "Steam" &&
+    isStoreAllowed("Steam", selectedStores)
+      ? (steamData?.price_overview?.discount_percent ?? 0)
+      : 0;
+
   const effectiveCut = Math.max(currentBest?.cut ?? 0, steamCut);
   const isDiscounted = effectiveCut > 0;
   let saleTagText = "";

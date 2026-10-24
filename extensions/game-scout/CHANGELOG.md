@@ -4,8 +4,12 @@
 
 ### Bug Fixes & Improvements
 - **Improved Price History Chart Loading**: Added a loading indicator and error fallback, keeping the loading message visible until the chart image is ready.
+- **Improved Price History Accuracy**: Reworked the 3-, 6-, and 12-month charts to show the lowest known price across selected stores instead of mixing individual store prices.
 - **Fixed Top Deals API Error**: Corrected CheapShark API parameters and added response validation to prevent crashes when unexpected data is returned.
 - **Improved API Error Handling**: Added HTTP status checks and clearer error reporting for Top Deals.
+- **Fixed Price Refresh Behaviour**: Refresh now fetches current prices and retries failed chart requests instead of reusing old results.
+- **Improved Cache Reliability**: Prevented failed price requests from being cached as unavailable offers and improved handling of outdated or malformed cached data.
+- **Fixed Store-Specific Discounts**: Prevented Steam discounts from being incorrectly attributed to other storefronts.
 
 ### Maintenance
 - **Updated Raycast SDK**: Upgraded to Raycast API 2.9.0 with Windows and macOS compatibility.
