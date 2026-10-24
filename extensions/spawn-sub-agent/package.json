@@ -1,0 +1,89 @@
+{
+  "name": "spawn-sub-agent",
+  "title": "Agent Fork",
+  "description": "Spawn and orchestrate subagents.",
+  "icon": "icon.png",
+  "author": "Kristoffer",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "tools": [
+    {
+      "name": "spawn_sub_agent",
+      "title": "Agent Fork",
+      "description": "Spawn a subagent with structured parent/child identity, delegation metadata, capability descriptors, evidence return, and optional caller-owned governance hooks."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ollama_endpoint",
+      "type": "textfield",
+      "title": "Ollama Endpoint",
+      "description": "Full HTTP(S) URL to Ollama API (local or cloud-hosted). Example: http://localhost:11434 or https://ollama.example.com",
+      "required": true,
+      "placeholder": "http://localhost:11434",
+      "default": "http://localhost:11434"
+    },
+    {
+      "name": "default_model",
+      "type": "textfield",
+      "title": "Default Model",
+      "description": "Default Ollama model name or endpoint path. Can be overridden per call. Example: neural-chat:latest, mistral:latest",
+      "required": true,
+      "placeholder": "neural-chat:latest",
+      "default": "neural-chat:latest"
+    },
+    {
+      "name": "request_timeout_seconds",
+      "type": "textfield",
+      "title": "Request Timeout (seconds)",
+      "description": "Max wall-clock time before a subagent request times out. Range: 10â€“600 seconds.",
+      "required": false,
+      "placeholder": "120",
+      "default": "120"
+    },
+    {
+      "name": "log_delegations",
+      "type": "checkbox",
+      "title": "Logging",
+      "label": "Log all delegations to local audit trail (for cost tracking and compliance verification)",
+      "required": false,
+      "default": true,
+      "description": "Store delegation audit records locally for observable execution provenance."
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.20.4",
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.5.2"
+  },
+  "commands": [
+    {
+      "name": "agent-fork",
+      "title": "Agent Fork",
+      "description": "Spawn a bounded subagent and inspect its returned evidence.",
+      "mode": "view"
+    }
+  ]
+}
