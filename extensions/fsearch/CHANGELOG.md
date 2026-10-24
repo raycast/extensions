@@ -1,6 +1,6 @@
 # FSearch Changelog
 
-## [Remove Trashed Results Immediately] - 2026-10-24
+## [Remove Trashed Results Immediately] - {PR_MERGE_DATE}
 
 - Remove trashed files, folders, and their descendants from the current search results immediately.
 - Remove every matching line of a trashed file from Search File Contents.
