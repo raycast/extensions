@@ -1,8 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, List } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
+import { createHash } from "node:crypto";
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { useState } from "react";
 import SetLocation from "./set-location";
-import { dayTone, DayTone, monthDays, monthTable, prayedCount } from "./lib/calendar";
+import { dayTone, DayTone, monthDays, monthSvg, prayedCount } from "./lib/calendar";
 import { formatTime, ltrName } from "./lib/format";
 import { prayerActions, statusAccessory } from "./lib/prayer-actions";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerSlot, toDateKey } from "./lib/prayers";
@@ -40,6 +43,19 @@ const monthLabel = (key: string) =>
 
 const dayLabel = (date: Date) =>
   date.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+/**
+ * Markdown for an SVG image saved in the support folder (Raycast's Markdown shows local images, not inline
+ * SVG). Named by its content so a changed calendar is never served stale; older calendars are removed.
+ */
+function svgImage(svg: string, width: number): string {
+  const dir = join(environment.supportPath, "calendar");
+  const name = `${createHash("sha1").update(svg).digest("hex").slice(0, 12)}.svg`;
+  mkdirSync(dir, { recursive: true });
+  for (const old of readdirSync(dir)) if (old !== name) rmSync(join(dir, old), { force: true });
+  writeFileSync(join(dir, name), svg);
+  return `![Calendar](file://${encodeURI(join(dir, name))}?raycast-width=${width})`;
+}
 
 /** Reminder history for a date range, nothing for days still ahead. */
 async function historyFor(settings: Settings, from: Date, to: Date): Promise<History> {
@@ -117,6 +133,7 @@ function MonthView({ settings }: { settings: Settings }) {
     ? `${known.prayed}/${known.total} prayed · ${known.jamaat} with jamaat · ${known.madeUp} made up`
     : "No reminder history this month";
   const initial = keys.includes(todayKey) ? todayKey : keys[0];
+  const calendar = svgImage(monthSvg(year, monthIndex - 1, toneOf, todayKey, environment.appearance), 346);
 
   return (
     <List
@@ -141,8 +158,8 @@ function MonthView({ settings }: { settings: Settings }) {
           const slots = getDaySchedule(date, settings.schedule);
           const markdown = [
             `## ${monthLabel(month)}`,
-            monthTable(year, monthIndex - 1, toneOf, key),
-            "🟢 all five · 🟠 some · 🔴 none · ⚪ no reminders",
+            calendar,
+            "Green: all five · Orange: some · Red: none · Grey: no reminders · Outlined: today",
             `### ${dayLabel(date)}`,
             dayTable(slots, day),
           ].join("\n\n");
