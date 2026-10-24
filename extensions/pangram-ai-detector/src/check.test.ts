@@ -112,12 +112,14 @@ describe("runCheck", () => {
     expect(checksSent()).toBe(1);
   });
 
-  it("resumes a timed-out Check on Try Again instead of paying again", async () => {
+  it("resumes a timed-out Refresh on Try Again instead of paying again or serving the older result", async () => {
     const store = new MapStore();
+    await runCheck("Some text", options(store));
     fetch.mockImplementation(async (url: string) =>
       url.endsWith("/task") ? succeed(url) : Response.json({ stage: "STAGE_PREPROCESSING" }),
     );
-    await expect(runCheck("Some text", options(store, { timeoutMs: 50 }))).rejects.toThrow("timed out");
+    const refreshed = runCheck("Some text", options(store, { refresh: true, timeoutMs: 50 }));
+    await expect(refreshed).rejects.toThrow("timed out");
 
     fetch.mockImplementation(succeed);
     const beforeSend = vi.fn(async () => {});
@@ -125,6 +127,19 @@ describe("runCheck", () => {
 
     expect(retried.isCached).toBe(false);
     expect(beforeSend).not.toHaveBeenCalled();
-    expect(checksSent()).toBe(1);
+    expect(checksSent()).toBe(2);
+  });
+
+  it("sends a new Check on Refresh instead of resuming a timed-out one", async () => {
+    const store = new MapStore();
+    fetch.mockImplementation(async (url: string) =>
+      url.endsWith("/task") ? succeed(url) : Response.json({ stage: "STAGE_PREPROCESSING" }),
+    );
+    await expect(runCheck("Some text", options(store, { timeoutMs: 50 }))).rejects.toThrow("timed out");
+
+    fetch.mockImplementation(succeed);
+    await runCheck("Some text", options(store, { refresh: true }));
+
+    expect(checksSent()).toBe(2);
   });
 });

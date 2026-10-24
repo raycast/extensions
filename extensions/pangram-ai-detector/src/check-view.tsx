@@ -43,12 +43,14 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   const limitedConfidenceBelowWords = positiveNumber(preferences.limitedConfidenceBelowWords, 200);
   const timeoutSeconds = positiveNumber(preferences.timeoutSeconds, 300);
   const text = useRef<string>(undefined);
-  const [refreshes, setRefreshes] = useState(0);
+  // Only the run that Refresh starts sends a new Check; Try Again reruns normally.
+  const isRefresh = useRef(false);
   const [progress, setProgress] = useState("");
-  const refresh = () => setRefreshes((count) => count + 1);
 
   const { data, error, isLoading, revalidate } = usePromise(
-    async (refreshCount: number) => {
+    async () => {
+      const refresh = isRefresh.current;
+      isRefresh.current = false;
       setProgress("");
       text.current ??= await readSource();
       return runCheck(text.current, {
@@ -56,7 +58,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
         model: preferences.model,
         timeoutMs: timeoutSeconds * 1000,
         versionInvalidatesCache: preferences.versionInvalidatesCache,
-        refresh: refreshCount > 0,
+        refresh,
         store: cache,
         beforeSend: async (sent) => {
           const words = countWords(sent);
@@ -75,7 +77,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
         onResume: () => setProgress("Resuming your earlier Check (no new charge)…"),
       });
     },
-    [refreshes],
+    [],
     {
       onData: ({ previousModelVersion, result }) => {
         if (!previousModelVersion) return;
@@ -91,6 +93,11 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
       },
     },
   );
+
+  const refresh = () => {
+    isRefresh.current = true;
+    revalidate();
+  };
 
   const actions = (
     <ActionPanel>

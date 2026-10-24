@@ -10,13 +10,13 @@ export interface Store {
 
 export interface RunCheckOptions extends Omit<CheckOptions, "taskId" | "onSubmit"> {
   store: Store;
-  /** Skip any Cached Result. */
+  /** Send a new Check, skipping any Cached Result or earlier task. */
   refresh: boolean;
   /** Ignore Cached Results from a Model Version older than the last one seen. */
   versionInvalidatesCache: boolean;
   /** Runs before credits are spent, with the trimmed text; throw to cancel the Check. */
   beforeSend?: (text: string) => Promise<void>;
-  /** Runs instead of `beforeSend` when resuming a task that is already paid for. */
+  /** Runs instead of `beforeSend` when resuming an unfinished task that is already paid for. */
   onResume?: () => void;
 }
 
@@ -31,7 +31,7 @@ export interface CheckOutcome extends CacheEntry {
   previousModelVersion?: string;
 }
 
-/** Runs a Check on the trimmed text, serving a Cached Result when one is usable. */
+/** Runs a Check on the trimmed text, resuming a paid task or serving a usable Cached Result unless `refresh`. */
 export async function runCheck(
   text: string,
   { store, refresh, versionInvalidatesCache, beforeSend, onResume, ...options }: RunCheckOptions,
@@ -41,17 +41,20 @@ export async function runCheck(
   const versionKey = `modelVersion:${options.model}`;
   const lastModelVersion = store.get(versionKey);
 
-  const cached = refresh ? undefined : store.get(key);
-  if (cached) {
-    const entry = JSON.parse(cached) as CacheEntry;
-    if (!versionInvalidatesCache || entry.result.modelVersion === lastModelVersion) return { ...entry, isCached: true };
-  }
-
-  // A submitted task is already paid for: resume it rather than confirm and pay again.
+  // An unfinished task is paid for and newer than any Cached Result: resume it rather than pay again.
   const taskKey = `task:${key}`;
-  const taskId = store.get(taskKey);
-  if (taskId) onResume?.();
-  else await beforeSend?.(trimmed);
+  const taskId = refresh ? undefined : store.get(taskKey);
+  if (taskId) {
+    onResume?.();
+  } else {
+    const cached = refresh ? undefined : store.get(key);
+    if (cached) {
+      const entry = JSON.parse(cached) as CacheEntry;
+      if (!versionInvalidatesCache || entry.result.modelVersion === lastModelVersion)
+        return { ...entry, isCached: true };
+    }
+    await beforeSend?.(trimmed);
+  }
   let result: CheckResult;
   try {
     result = await checkText(trimmed, { ...options, taskId, onSubmit: (id) => store.set(taskKey, id) });
