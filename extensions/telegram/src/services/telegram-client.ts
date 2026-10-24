@@ -1,13 +1,13 @@
-import { TelegramClient, Rich, events } from "teleproto";
-import { StringSession } from "teleproto/sessions";
+import { TelegramClient, Rich, events, sessions, Api, password } from "teleproto";
 import { LocalStorage, environment } from "@raycast/api";
-import { Api } from "teleproto/tl";
-import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
 import QRCode from "qrcode";
 
 import { isTelegramAuthenticationError, TelegramAuthenticationError } from "../utils/errors";
+
+const { StringSession } = sessions;
+const { computeCheck } = password;
 
 const QR_CODE_TIMEOUT = 30000;
 
