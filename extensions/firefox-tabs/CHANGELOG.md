@@ -1,6 +1,6 @@
 # firefox-tabs Changelog
 
-## [Fix Typing Lag With Many Tabs] - {PR_MERGE_DATE}
+## [Fix Typing Lag With Many Tabs] - 2026-10-24
 
 - Cache favicons as files so searching stays responsive with hundreds of open tabs
 
