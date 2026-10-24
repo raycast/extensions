@@ -1,5 +1,12 @@
 # proton-pass Changelog
 
+## [Browse Items] - {PR_MERGE_DATE}
+
+- Search Items and List Vaults become one screen, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens it on the vault list
+- Search Items is now named Browse Items. The hotkeys and aliases of both commands keep working, and so do your preferences
+- Browse Items checks the pass-cli session before showing saved items and vaults: when it has ended, the login screen shows right away, instead of items whose passwords can't load. When pass-cli is slow to answer, the saved items show after a second, and the login screen replaces them if the session has ended
+- Browse Items says TOTP code rather than 2FA code, like Get TOTP Code: Copy TOTP Code, Paste TOTP Code, and the TOTP Code row of the details. 2FA covers other methods too, such as SMS codes
+
 ## [CLI Not Found Screen] - 2026-10-13
 
 - The screen shown when pass-cli can't be found points to the CLI Path preference, with an Open Extension Preferences action. It used to ask to install pass-cli, which the extension already does by itself
