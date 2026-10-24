@@ -51,8 +51,9 @@ async function request<T>(path: string, params: Record<string, string | undefine
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
     try {
-      const body = await res.json();
-      if (typeof body?.detail?.message === "string") message = body.detail.message;
+      const body: unknown = await res.json();
+      const detail = (body as { detail?: { message?: unknown } })?.detail;
+      if (detail && typeof detail.message === "string") message = detail.message;
     } catch {
       // non-JSON error body; keep the status text
     }

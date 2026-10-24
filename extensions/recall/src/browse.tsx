@@ -85,8 +85,7 @@ export default function Command() {
               key={card.id}
               title={card.title}
               subtitle={formatDate(card.created_at)}
-              icon={card.image ? { source: card.image } : Icon.Newspaper}
-              tooltip={card.source_url}
+              icon={card.image ? { source: card.image } : Icon.Bookmark}
               actions={<CardActions card={card} />}
             />
           ))}
