@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "task-timer",
+  "title": "Task Timer",
+  "description": "Start a task with a time limit and show the remaining time in the menu bar",
+  "icon": "extension-icon.png",
+  "author": "takutosan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-task",
+      "title": "Start Task",
+      "description": "Start a task with a time limit and show the remaining time in the menu bar.",
+      "mode": "view",
+      "keywords": [
+        "task",
+        "timer"
+      ]
+    },
+    {
+      "name": "task-timer",
+      "title": "Task Timer",
+      "description": "Show the active task countdown and controls in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "keywords": [
+        "task",
+        "timer"
+      ]
+    },
+    {
+      "name": "task-history",
+      "title": "Task History",
+      "keywords": [
+        "task history",
+        "history"
+      ],
+      "description": "Browse locally saved task sessions and their working time.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
