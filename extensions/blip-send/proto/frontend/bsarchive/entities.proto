@@ -1,0 +1,35 @@
+syntax = "proto3";
+package bsarchive;
+
+
+message Metadata {
+  map<string, bsarchive.AnyItem> items = 1;
+  map<string, string> disk_locations = 2;
+}
+
+message File {
+  int64 size = 1;
+  int64 mod_time_ms = 2;
+  bool is_executable = 3;
+}
+
+message Folder {
+}
+
+message Link {
+  string destination = 1;
+}
+
+message FolderStub {
+  int64 size = 1;
+  int64 children = 2;
+}
+
+message AnyItem {
+  oneof item {
+    bsarchive.File file = 1;
+    bsarchive.Folder folder = 2;
+    bsarchive.Link link = 3;
+    bsarchive.FolderStub folder_stub = 4;
+  }
+}
