@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amino-acid-lookup",
+  "title": "Amino Acid Lookup",
+  "description": "Look up amino acids by one-letter code, three-letter code or full name, and convert whole peptide sequences between notations.",
+  "icon": "extension-icon.png",
+  "author": "andreas_zankl",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "amino acid",
+    "protein",
+    "peptide",
+    "residue",
+    "one-letter",
+    "three-letter",
+    "biochemistry",
+    "molecular biology",
+    "bioinformatics",
+    "science"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Look Up Amino Acids",
+      "description": "Type a one-letter code, three-letter code, name or peptide sequence and see the other notations instantly.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Trp, W, Tryptophan or MKT\u2026",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "colorScheme",
+      "title": "Color Scheme",
+      "description": "How amino acids are colored in the list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "clustalx",
+      "data": [
+        {
+          "title": "Clustal X",
+          "value": "clustalx"
+        },
+        {
+          "title": "Taylor",
+          "value": "taylor"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "~5.9.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
