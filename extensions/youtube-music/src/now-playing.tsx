@@ -167,8 +167,16 @@ const readState = `(function() {
   var year = byline.length > 2 && /^(19|20)\\d{2}$/.test(lastBylinePart) ? lastBylinePart : "";
   var album = byline.length > 1 && byline[1] !== year ? byline[1] : "";
   var duration = video && isFinite(video.duration) && video.duration > 0 ? video.duration : seconds(time[1]);
+  var urlVideoId = (location.search.match(/[?&]v=([A-Za-z0-9_-]{11})/) || [])[1] || "";
+  var selectedId = selected >= 0 ? rowVideoId(items[selected]) : "";
+  var selectedTitle = selected >= 0 ? rowTitle(items[selected]) : "";
+  var barTitle = titleEl ? titleEl.textContent : "";
+  // The player bar carries the video title, which can be longer than the song
+  // title the queue row shows; prefer the queue title when it is the same track
+  // so the metadata and the list agree.
+  var title = selectedTitle && (!urlVideoId || selectedId === urlVideoId) ? selectedTitle : barTitle;
   return JSON.stringify({
-    title: titleEl ? titleEl.textContent : "",
+    title: title,
     artist: byline[0] || "",
     album: album,
     year: year,
@@ -179,9 +187,7 @@ const readState = `(function() {
     like: likeEl ? likeEl.getAttribute("like-status") : "INDIFFERENT",
     // Playback continues while the user browses Home, Search or an album, where
     // the URL has no video id; fall back to the row the player marks selected.
-    videoId:
-      (location.search.match(/[?&]v=([A-Za-z0-9_-]{11})/) || [])[1] ||
-      (selected >= 0 ? rowVideoId(items[selected]) : ""),
+    videoId: urlVideoId || selectedId,
     playlistId: (location.search.match(/[?&]list=([^&]+)/) || [])[1] || "",
     selectedIndex: selected,
     queue: queue
@@ -282,6 +288,7 @@ export default function NowPlaying() {
   const [queueArt, setQueueArt] = useState<Record<string, string>>({});
   const refresh = useCallback(() => setTick((value) => value + 1), []);
   const lastRaw = useRef<string | undefined>(undefined);
+  const loadedRef = useRef(false);
   const artworkFetched = useRef("");
   const artworkPending = useRef("");
   const artworkRetryAt = useRef(0);
@@ -343,7 +350,7 @@ export default function NowPlaying() {
         // when the snapshot actually changed. Otherwise a paused player keeps
         // re-rendering for no reason.
         if (raw && raw.startsWith("{")) {
-          setReason(null);
+          setReason((current) => (current === null ? current : null));
           if (raw !== lastRaw.current) {
             lastRaw.current = raw;
             try {
@@ -359,7 +366,8 @@ export default function NowPlaying() {
             }
           }
         } else {
-          setReason(tabError ?? (raw === "no-bar" ? "no-bar" : "no-tab"));
+          const nextReason = tabError ?? (raw === "no-bar" ? "no-bar" : "no-tab");
+          setReason((current) => (current === nextReason ? current : nextReason));
           if (lastRaw.current !== undefined) {
             lastRaw.current = undefined;
             setState(undefined);
@@ -369,7 +377,10 @@ export default function NowPlaying() {
         // A transient failure must not stop the loop.
       } finally {
         if (!cancelled) {
-          setLoaded(true);
+          if (!loadedRef.current) {
+            loadedRef.current = true;
+            setLoaded(true);
+          }
           timer = setTimeout(poll, POLL_MS);
         }
       }
@@ -685,38 +696,46 @@ function CurrentTrackActions({ state, onRefresh }: { state: PlayerState; onRefre
   );
 }
 
-// Metadata labels are single-line and truncate long values, so the track text
-// goes in markdown, which wraps and uses the detail pane's width. Only the short
-// progress row stays in metadata.
+// Metadata labels are single-line; the block below cannot wrap, so only short
+// values belong here.
 function TrackDetail({ state }: { state: PlayerState }) {
   const progress = state.duration > 0 ? state.position / state.duration : 0;
-  const details = [state.artist || "Unknown", state.album, state.year].filter(Boolean).join(" · ");
 
   return (
     <List.Item.Detail
-      markdown={`${
-        hasArtwork(state.artworkURL) ? `![Artwork](${artworkURL(state.artworkURL, ARTWORK_SIZE)})\n\n` : ""
-      }**${state.title}**\n\n${details}`}
+      markdown={hasArtwork(state.artworkURL) ? `![Artwork](${artworkURL(state.artworkURL, ARTWORK_SIZE)})` : ""}
       metadata={
-        state.duration > 0 ? (
-          <Detail.Metadata>
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Track" text={state.title} />
+          <Detail.Metadata.Label title="Artist" text={state.artist || "Unknown"} />
+          {state.album ? <Detail.Metadata.Label title="Album" text={state.album} /> : null}
+          {state.duration > 0 ? (
             <Detail.Metadata.Label
               title={state.playing ? "Playing" : "Paused"}
               text={`${formatTime(state.position)} / ${formatTime(state.duration)}`}
               icon={getProgressIcon(progress, Color.PrimaryText)}
             />
-          </Detail.Metadata>
-        ) : undefined
+          ) : null}
+          {state.year ? <Detail.Metadata.Label title="Year" text={state.year} /> : null}
+        </Detail.Metadata>
       }
     />
   );
 }
 
-// Same reason as TrackDetail: metadata truncates long titles, markdown wraps.
 function QueueDetail({ track }: { track: QueueTrack }) {
-  const details = [track.artist || "Unknown", track.duration].filter(Boolean).join(" · ");
-
-  return <List.Item.Detail markdown={`**${track.title}**\n\n${details}`} />;
+  return (
+    <List.Item.Detail
+      markdown=""
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Track" text={track.title} />
+          <Detail.Metadata.Label title="Artist" text={track.artist || "Unknown"} />
+          {track.duration ? <Detail.Metadata.Label title="Duration" text={track.duration} /> : null}
+        </Detail.Metadata>
+      }
+    />
+  );
 }
 
 async function removeQueueItem(track: QueueTrack) {
