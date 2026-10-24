@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "passig",
+  "title": "Passig",
+  "description": "Cerca, copia, incolla e salva le password del tuo vault Passig (zero-knowledge) direttamente da Raycast.",
+  "icon": "icon.png",
+  "author": "igsolutions",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "private": true,
+  "commands": [
+    {
+      "name": "search",
+      "title": "Cerca Password",
+      "subtitle": "Passig",
+      "description": "Cerca un elemento nel vault e copia/incolla username, password o codice TOTP.",
+      "mode": "view",
+      "keywords": [
+        "password",
+        "vault",
+        "login",
+        "passig"
+      ]
+    },
+    {
+      "name": "create",
+      "title": "Salva Password",
+      "subtitle": "Passig",
+      "description": "Crea un nuovo elemento di tipo login in un vault.",
+      "mode": "view"
+    },
+    {
+      "name": "import",
+      "title": "Importa Password",
+      "subtitle": "Passig",
+      "description": "Importa le password da Bitwarden, 1Password, LastPass, Chrome, Firefox, Safari, KeePass, Dashlane, Keeper, NordPass, Proton Pass, Enpass, RoboForm o da un CSV.",
+      "mode": "view",
+      "keywords": [
+        "import",
+        "importa",
+        "bitwarden",
+        "1password",
+        "lastpass",
+        "keepass",
+        "csv"
+      ]
+    },
+    {
+      "name": "generate",
+      "title": "Genera Password",
+      "subtitle": "Passig",
+      "description": "Genera una password robusta e copiala negli appunti.",
+      "mode": "view"
+    },
+    {
+      "name": "lock",
+      "title": "Blocca Passig",
+      "subtitle": "Passig",
+      "description": "Cancella le chiavi sbloccate e la sessione locale.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-clipboard",
+      "title": "Pulizia Appunti Passig",
+      "subtitle": "Passig",
+      "description": "Comando in background: svuota gli appunti 30 secondi dopo una copia se contengono ancora il segreto.",
+      "mode": "no-view",
+      "interval": "1m",
+      "disabledByDefault": false
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Email dell'account Passig",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "nome@esempio.it"
+    },
+    {
+      "name": "autoLockMinutes",
+      "title": "Auto-lock (minuti)",
+      "description": "Dopo quanti minuti dall'ultimo sblocco richiedere di nuovo la master password",
+      "type": "dropdown",
+      "required": false,
+      "default": "15",
+      "data": [
+        {
+          "title": "1 minuto",
+          "value": "1"
+        },
+        {
+          "title": "5 minuti",
+          "value": "5"
+        },
+        {
+          "title": "15 minuti",
+          "value": "15"
+        },
+        {
+          "title": "30 minuti",
+          "value": "30"
+        },
+        {
+          "title": "1 ora",
+          "value": "60"
+        },
+        {
+          "title": "4 ore",
+          "value": "240"
+        }
+      ]
+    },
+    {
+      "name": "deviceName",
+      "title": "Nome dispositivo",
+      "description": "Nome mostrato nell'elenco sessioni (es. 'Raycast MacBook')",
+      "type": "textfield",
+      "required": false,
+      "default": "Raycast"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "gen-icon": "cp ../../packages/brand/icons/mark-512.png assets/icon.png",
+    "vendor": "node scripts/vendor.mjs",
+    "prebuild": "node scripts/vendor.mjs",
+    "predev": "node scripts/vendor.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0",
+    "fflate": "^0.8.3",
+    "libsodium-wrappers-sumo": "^0.8.4",
+    "tldts": "^6.1.60",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "typescript": "^5.6.3"
+  }
+}
