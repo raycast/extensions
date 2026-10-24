@@ -39,6 +39,11 @@ export async function listModels(client: ModelflareClient, signal?: AbortSignal)
 // key's own model list, so its request has its own deadline.
 const CATALOG_TIMEOUT_MS = 8_000
 
+// Model profiles are optional metadata with built-in fallbacks, so a slow
+// profiles endpoint gets the same short deadline instead of the client's
+// default 120 seconds and never holds up the model list.
+const PROFILES_TIMEOUT_MS = 8_000
+
 /**
  * Public catalog from `GET https://modelflare.dev/api/pricing`. It needs no key
  * and is only served on the global host.
@@ -116,7 +121,7 @@ export class ModelDirectory {
     if (!options.force && cached && this.#now() - cached.loadedAt < this.#ttlMs) return cached
 
     const profilesPromise = this.#includeProfiles
-      ? fetchModelProfiles(this.#client, options.signal).catch(() => undefined)
+      ? fetchModelProfiles(this.#client, options.signal, PROFILES_TIMEOUT_MS).catch(() => undefined)
       : Promise.resolve(undefined)
     const models = await listModels(this.#client, options.signal)
     const requiresCatalog = needsCatalog(models)

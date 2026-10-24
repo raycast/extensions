@@ -31,9 +31,10 @@ export function modelflare(): { client: ModelflareClient; directory: ModelDirect
 
 export async function modelIds(kind: ModelKind): Promise<string[]> {
   const snapshot = await modelflare().directory.load();
-  return snapshot.models
-    .filter((model) => model.kind === kind && (kind !== "text" || model.endpoints.includes("openai")))
-    .map((model) => model.id);
+  // Every text model is listed: the gateway serves `chat/completions` for all of
+  // them and translates to the upstream protocol (Anthropic Messages, Responses)
+  // itself, so `supported_endpoint_types` does not limit the Ask command.
+  return snapshot.models.filter((model) => model.kind === kind).map((model) => model.id);
 }
 
 export async function explain(error: unknown, modelId?: string): Promise<string> {

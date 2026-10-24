@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
@@ -46,7 +47,7 @@ function parseParameters(text: string): Record<string, unknown> | undefined {
 }
 
 function Result(props: { files: string[] }) {
-  const markdown = props.files.map((file) => `![](${encodeURI(`file://${file}`)})`).join("\n\n");
+  const markdown = props.files.map((file) => `![](${pathToFileURL(file).href})`).join("\n\n");
   const first = props.files[0] ?? "";
   return (
     <Detail

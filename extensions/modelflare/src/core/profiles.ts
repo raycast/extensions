@@ -221,10 +221,15 @@ export function buildModelProfileIndex(value: unknown): ModelProfileIndex {
   return index
 }
 
-export async function fetchModelProfiles(client: ModelflareClient, signal?: AbortSignal): Promise<ModelProfileIndex> {
+export async function fetchModelProfiles(
+  client: ModelflareClient,
+  signal?: AbortSignal,
+  timeoutMs?: number,
+): Promise<ModelProfileIndex> {
   const body = await client.json<{ data?: unknown }>(MODEL_PROFILES_PATH, {
     method: 'GET',
     ...(signal ? { signal } : {}),
+    ...(timeoutMs !== undefined ? { timeoutMs } : {}),
   })
   const profiles = buildModelProfileIndex(body.data)
   if (profiles.size === 0) throw new Error('The Modelflare model profile catalog is unavailable')
