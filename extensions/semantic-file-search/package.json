@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "semantic-file-search",
+  "title": "Semantic File Search",
+  "description": "Find local documents, photos, video scenes and sounds by meaning. Requires the Semantic Search Engine.",
+  "icon": "icon.png",
+  "author": "nik_ustinovich",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "semantic-search",
+      "title": "Search Files",
+      "description": "Find local files from a natural-language description",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Describe a file",
+          "required": false
+        }
+      ],
+      "subtitle": "Semantic File Search"
+    },
+    {
+      "name": "automatic-index",
+      "title": "Check for Library Updates",
+      "description": "Check the automatic indexing schedule and update changed files when due",
+      "mode": "no-view",
+      "interval": "15m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serviceURL",
+      "type": "textfield",
+      "title": "Custom Local Service (Optional)",
+      "description": "Leave blank to use the installed Semantic Search Engine. Advanced: connect to your own local service.",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "serviceTokenPath",
+      "type": "textfield",
+      "title": "Custom Service Token File (Optional)",
+      "description": "Advanced: authentication file for your custom local service. Leave blank to use shared storage. Accepts an absolute path or ~/ path.",
+      "default": "",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "eslint": "10.0.1",
+    "prettier": "3.8.2",
+    "typescript": "5.9.3"
+  },
+  "version": "0.7.1",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}
