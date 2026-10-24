@@ -1,7 +1,5 @@
 import { loadRules, saveRules, getDefaultBrowser } from "../storage";
-import { Rule } from "../types";
-import { generateFinickyConfig, writeConfigFile } from "../utils/finicky";
-import { expandTilde } from "../utils/path";
+import { syncConfigFile, UnimportedRulesError } from "../utils/finicky";
 import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
@@ -36,12 +34,6 @@ function parsePatterns(value: string): string[] {
     .split(/[\n,]/)
     .map((pattern) => pattern.trim())
     .filter(Boolean);
-}
-
-async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
-  const configPath = expandTilde(args.configPath);
-  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
-  await writeConfigFile({ configPath, configContents: contents });
 }
 
 /**
@@ -89,11 +81,15 @@ export default async function tool(input: Input) {
   }
 
   rules[ruleIndex] = rule;
-  await saveRules(rules);
-
   if (configPath) {
-    await syncConfigFile({ configPath, defaultBrowser, rules });
+    try {
+      await syncConfigFile({ configPath, defaultBrowser: defaultBrowser, rules, previousRuleCount: rules.length });
+    } catch (error) {
+      if (error instanceof UnimportedRulesError) return `❌ ${error.message}`;
+      throw error;
+    }
   }
+  await saveRules(rules);
 
   return `✓ Successfully updated rule "${rule.name}"\nChanges:\n${updates.map((u) => `- ${u}`).join("\n")}`;
 }

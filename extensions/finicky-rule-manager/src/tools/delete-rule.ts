@@ -1,7 +1,5 @@
 import { loadRules, saveRules, getDefaultBrowser } from "../storage";
-import { Rule } from "../types";
-import { generateFinickyConfig, writeConfigFile } from "../utils/finicky";
-import { expandTilde } from "../utils/path";
+import { syncConfigFile, UnimportedRulesError } from "../utils/finicky";
 import { getPreferenceValues } from "@raycast/api";
 
 type Input = {
@@ -10,12 +8,6 @@ type Input = {
    */
   ruleIdentifier: string;
 };
-
-async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
-  const configPath = expandTilde(args.configPath);
-  const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
-  await writeConfigFile({ configPath, configContents: contents });
-}
 
 /**
  * Delete a Finicky rule by ID or name
@@ -35,11 +27,20 @@ export default async function tool(input: Input) {
   }
 
   const updatedRules = rules.filter((r) => r.id !== ruleToDelete.id);
-  await saveRules(updatedRules);
-
   if (configPath) {
-    await syncConfigFile({ configPath, defaultBrowser, rules: updatedRules });
+    try {
+      await syncConfigFile({
+        configPath,
+        defaultBrowser: defaultBrowser,
+        rules: updatedRules,
+        previousRuleCount: rules.length,
+      });
+    } catch (error) {
+      if (error instanceof UnimportedRulesError) return `❌ ${error.message}`;
+      throw error;
+    }
   }
+  await saveRules(updatedRules);
 
   return `✓ Successfully deleted rule "${ruleToDelete.name}"`;
 }
