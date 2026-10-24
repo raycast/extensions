@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Fix Issue Template Description Prefill] - {PR_MERGE_DATE}
+## [Fix Issue Template Description Prefill] - 2026-10-24
 
 - Fix issue description not being pre-filled when selecting an issue template whose description is stored on the template object rather than nested under `templateData`.
 
