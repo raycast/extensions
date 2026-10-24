@@ -1,33 +1,19 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
 import { getStateIcon } from "../../helpers/icons";
 import { useStates } from "../../hooks/useStates";
-import { Issue as WorkItem, State } from "@makeplane/plane-node-sdk";
-import { UpdateWorkItem } from "./WorkItemActions";
+import { State } from "@makeplane/plane-node-sdk";
 import { useState } from "react";
 
 interface UpdateStateSubmenuProps {
-  workItem: WorkItem;
-  handleUpdateWorkItem: (updatePayload: UpdateWorkItem) => void;
+  projectId: string;
+  currentStateId?: string | null;
+  onSelect: (state: State) => void;
 }
 
-export default function UpdateStateSubmenu({ workItem, handleUpdateWorkItem }: UpdateStateSubmenuProps) {
+/** States load only when the submenu opens, so list rows don't each spend a request. */
+export default function UpdateStateSubmenu({ projectId, currentStateId, onSelect }: UpdateStateSubmenuProps) {
   const [load, setLoad] = useState(false);
-
-  if (!workItem.project) {
-    return null;
-  }
-
-  const { states, isLoading: isLoadingStates } = useStates(workItem.project, { execute: load });
-
-  const handleUpdateState = (state: State) => {
-    handleUpdateWorkItem({
-      updatePayload: { state: state.id },
-      updatingMessage: "Updating State",
-      successMessage: `State updated to ${state.name}`,
-      errorMessage: `Error updating state to ${state.name}`,
-    });
-    setLoad(false);
-  };
+  const { states, isLoading: isLoadingStates } = useStates(projectId, { execute: load && !!projectId });
 
   return (
     <ActionPanel.Submenu
@@ -42,10 +28,10 @@ export default function UpdateStateSubmenu({ workItem, handleUpdateWorkItem }: U
         states.map((state) => (
           <Action
             key={state.id}
-            autoFocus={state.id === workItem.state}
+            autoFocus={state.id === currentStateId}
             title={state.name}
             icon={getStateIcon(state)}
-            onAction={() => handleUpdateState(state)}
+            onAction={() => onSelect(state)}
           />
         ))
       )}

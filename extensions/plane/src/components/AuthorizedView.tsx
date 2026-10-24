@@ -1,55 +1,49 @@
-import { plane, initializePlaneClient } from "../api/auth";
+import { isApiKeyAuth, plane, planeClient, selectWorkspace } from "../api/auth";
 import { withAccessToken } from "@raycast/utils";
-import { STORAGE_WORKSPACE_SLUG_KEY } from "../helpers/keys";
-import { List, LocalStorage, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Fragment, useEffect, useState } from "react";
 import WorkspaceSlugForm from "./WorkspaceSlugForm";
+import { onWorkspaceChange } from "../helpers/workspace-events";
 
-const preferences = getPreferenceValues<Preferences>();
-
+/**
+ * Renders children once a workspace is selected.
+ * `withAccessToken` runs `onAuthorize` first, which restores the stored slug into `planeClient`.
+ * "Change Workspace" (⌘⇧W) emits a change event; children remount with the new workspace.
+ */
 function AuthorizedView({ children }: { children: React.ReactNode }) {
-  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState<string>("");
+  const [workspaceSlug, setWorkspaceSlug] = useState<string | undefined>(planeClient?.workspaceSlug);
+  const [generation, setGeneration] = useState(0);
 
-  useEffect(() => {
-    async function checkWorkspace() {
-      try {
-        const apiKey = preferences.API_KEY || "";
-        setToken(apiKey);
-        const tokenKey = STORAGE_WORKSPACE_SLUG_KEY(apiKey);
-        const storedSlug = await LocalStorage.getItem<string>(tokenKey);
-        setWorkspaceSlug(storedSlug || null);
-      } catch (error) {
-        console.error("Failed to check workspace:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  useEffect(
+    () =>
+      onWorkspaceChange((slug) => {
+        setWorkspaceSlug(slug);
+        setGeneration((value) => value + 1);
+      }),
+    [],
+  );
+
+  if (!workspaceSlug) {
+    if (isApiKeyAuth()) {
+      return <WorkspaceSlugForm onWorkspaceSlugSubmit={selectWorkspace} />;
     }
-    checkWorkspace();
-  }, []);
-
-  function handleWorkspaceSlugSubmit(workspaceSlug: string) {
-    // Initialize planeClient with the workspace slug
-    initializePlaneClient(workspaceSlug, undefined, preferences.API_KEY);
-    setWorkspaceSlug(workspaceSlug);
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.House}
+          title="No Plane workspace found"
+          description="Install the Raycast app in a Plane workspace, or set an API key in the extension preferences."
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
-  if (!preferences.API_KEY) {
-    // if API_KEY is not set, we can just return the children and oauth flow will trigger
-    return <>{children}</>;
-  } else {
-    if (isLoading) {
-      return <List isLoading={true} />;
-    }
-
-    // if API_KEY is set, and no workspace slug is set, we need to show the workspace selection view
-    if (!workspaceSlug) {
-      return <WorkspaceSlugForm onWorkspaceSlugSubmit={handleWorkspaceSlugSubmit} token={token} />;
-    }
-
-    return <>{children}</>;
-  }
+  return <Fragment key={`${workspaceSlug}:${generation}`}>{children}</Fragment>;
 }
 
 export default withAccessToken(plane)(AuthorizedView);

@@ -1,0 +1,206 @@
+instructions: |
+  - Plane work items are identified as `PROJECT-NUMBER` (for example `ENG-123`). Pass the identifier the user gave to `get-work-item`, `update-work-item`, and `add-comment`; do not look up internal ids first.
+  - Format work item titles as Markdown links using the `url` field, e.g. `[ENG-123: Fix login](url)`.
+  - Never invent identifiers, projects, states, or members. If several plausible matches remain, ask the user to clarify.
+  - "My work items", "my tasks", or "what am I working on" means work items assigned to the current user: use `list-my-work-items`. Use `filter: created` only when the user asks about items they created, `filter: subscribed` for items they follow or are subscribed to, and `filter: mentions` for items that mention them (the last two work only on servers that support them; the tool says so otherwise). Pass `includeCompleted: true` only when the user asks for done or closed items.
+  - Use `search-work-items` for topic or keyword searches. It matches titles, sequence numbers, and project identifiers only, not descriptions.
+  - Project inputs accept the project identifier (e.g. `ENG`), name, or id. Call `list-projects` only to disambiguate or when the user asks which projects exist.
+  - States are project-specific. `create-work-item` and `update-work-item` accept a state name (e.g. `In Progress`) or a state group (`backlog`, `unstarted`, `started`, `completed`, `cancelled`), so pass what the user said. "Close" or "complete" a work item means `state: completed`.
+  - Priorities are `urgent`, `high`, `medium`, `low`, and `none`.
+  - Assignee inputs accept `me`, member names, emails, or ids. Use `addAssignees` / `removeAssignees` to change one person without touching the others; `assignees` replaces the whole set.
+  - Dates use `YYYY-MM-DD`. Pass the literal string `null` to clear a start or due date.
+  - Comments and descriptions are Markdown.
+  - Use `get-me` for the current user and the selected workspace. Use `list-members` for people in a project or workspace.
+
+evals:
+  - input: "@plane what's assigned to me?"
+    mocks:
+      list-my-work-items:
+        count: 1
+        workItems:
+          - id: wi-1
+            identifier: ENG-12
+            name: Fix flaky login redirect
+            url: https://app.plane.so/acme/browse/ENG-12
+            state: In Progress
+            stateGroup: started
+            priority: high
+    expected:
+      - callsTool:
+          name: list-my-work-items
+
+  - input: "@plane show work items I created, including done ones"
+    usedAsExample: false
+    mocks:
+      list-my-work-items:
+        count: 0
+        workItems: []
+    expected:
+      - callsTool:
+          name: list-my-work-items
+          arguments:
+            filter: created
+            includeCompleted: true
+
+  - input: "@plane open ENG-123"
+    mocks:
+      get-work-item:
+        id: wi-123
+        identifier: ENG-123
+        name: Add SSO support
+        url: https://app.plane.so/acme/browse/ENG-123
+        state: Todo
+        stateGroup: unstarted
+    expected:
+      - callsTool:
+          name: get-work-item
+          arguments:
+            identifier: ENG-123
+
+  - input: "@plane find work items about invoices"
+    usedAsExample: false
+    mocks:
+      search-work-items:
+        - id: wi-7
+          identifier: FIN-7
+          name: Invoice PDF export
+          project: FIN
+          url: https://app.plane.so/acme/browse/FIN-7
+    expected:
+      - callsTool:
+          name: search-work-items
+          arguments:
+            query:
+              includes: invoice
+
+  - input: "@plane create a bug in ENG called Crash on startup and assign it to me"
+    mocks:
+      create-work-item:
+        id: wi-200
+        identifier: ENG-200
+        name: Crash on startup
+        url: https://app.plane.so/acme/browse/ENG-200
+    expected:
+      - callsTool:
+          name: create-work-item
+          arguments:
+            project: ENG
+            title:
+              includes: Crash on startup
+            assignees:
+              includes: me
+
+  - input: "@plane mark ENG-42 as done"
+    mocks:
+      update-work-item:
+        id: wi-42
+        identifier: ENG-42
+        name: Update onboarding copy
+        state: Done
+        stateGroup: completed
+      list-states:
+        - id: state-done
+          name: Done
+          group: completed
+          isDefault: false
+    expected:
+      - callsTool:
+          name: update-work-item
+          arguments:
+            identifier: ENG-42
+            state:
+              or:
+                - completed
+                - Done
+                - done
+                - state-done
+
+  - input: "@plane set the priority of ENG-42 to urgent and due date to 2026-11-01"
+    usedAsExample: false
+    mocks:
+      update-work-item:
+        id: wi-42
+        identifier: ENG-42
+        name: Update onboarding copy
+        priority: urgent
+        dueDate: "2026-11-01"
+    expected:
+      - callsTool:
+          name: update-work-item
+          arguments:
+            identifier: ENG-42
+            priority: urgent
+            dueDate: "2026-11-01"
+
+  - input: "@plane add Priya to ENG-42"
+    usedAsExample: false
+    mocks:
+      update-work-item:
+        id: wi-42
+        identifier: ENG-42
+        name: Update onboarding copy
+        assignees:
+          - Priya Shah
+          - Alex Chen
+    expected:
+      - callsTool:
+          name: update-work-item
+          arguments:
+            identifier: ENG-42
+            addAssignees:
+              includes: Priya
+
+  - input: "@plane comment on ENG-42: shipped in v2.3"
+    mocks:
+      add-comment:
+        id: comment-1
+        workItem: ENG-42
+        url: https://app.plane.so/acme/browse/ENG-42
+    expected:
+      - callsTool:
+          name: add-comment
+          arguments:
+            identifier: ENG-42
+            comment:
+              includes: shipped in v2.3
+
+  - input: "@plane which states does the ENG project have?"
+    usedAsExample: false
+    mocks:
+      list-states:
+        - id: state-backlog
+          name: Backlog
+          group: backlog
+          isDefault: true
+        - id: state-progress
+          name: In Progress
+          group: started
+          isDefault: false
+    expected:
+      - callsTool:
+          name: list-states
+          arguments:
+            project: ENG
+
+  - input: "@plane which projects can I see?"
+    usedAsExample: false
+    mocks:
+      list-projects:
+        workspace: acme
+        projects:
+          - id: project-eng
+            identifier: ENG
+            name: Engineering
+    expected:
+      - callsTool: list-projects
+
+  - input: "@plane who am I logged in as?"
+    usedAsExample: false
+    mocks:
+      get-me:
+        id: user-me
+        displayName: alex
+        email: alex@example.com
+        workspace: acme
+    expected:
+      - callsTool: get-me

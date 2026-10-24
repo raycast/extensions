@@ -1,0 +1,122 @@
+import { requirePlaneClient } from "./auth";
+import { ApiVersion, buildVersionedApiUrl, getApiBasePath, QueryValue } from "../helpers/urls";
+import { extractErrorMessage, parseProblem, parseRetryAfter } from "../helpers/problem";
+import type { RawPaginated } from "./types";
+import { PlaneApiError } from "../helpers/plane-api-error";
+
+export { PlaneApiError };
+
+export type PlaneRequestOptions = {
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  query?: Record<string, QueryValue>;
+  body?: unknown;
+};
+
+export type PlaneResponse = {
+  status: number;
+  statusText: string;
+  ok: boolean;
+  headers: Headers;
+  body: unknown;
+  url: string;
+};
+
+/** Longest `Retry-After` we wait out before retrying a GET once. Longer waits surface as an error. */
+const MAX_RETRY_AFTER_SECONDS = 10;
+
+function parseBody(text: string): unknown {
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+/** Sends one request with the client's auth headers. Resolves for every HTTP status; rejects on network errors. */
+export async function sendPlaneRequest(url: string, options: PlaneRequestOptions = {}): Promise<PlaneResponse> {
+  const client = requirePlaneClient();
+  const hasBody = options.body !== undefined;
+  const response = await fetch(url, {
+    method: options.method ?? "GET",
+    headers: {
+      Accept: "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      // `X-API-Key` (v1 docs) and `X-Api-Key` (v2 docs) are the same header; names are case-insensitive.
+      ...client.getAuthHeaders(),
+    },
+    body: hasBody ? JSON.stringify(options.body) : undefined,
+  });
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok,
+    headers: response.headers,
+    body: parseBody(await response.text()),
+    url,
+  };
+}
+
+function toApiError(response: PlaneResponse): PlaneApiError {
+  const retryAfter = parseRetryAfter(response.headers.get("Retry-After"));
+  const detail = extractErrorMessage(response.body) || response.statusText || "Request failed";
+  return new PlaneApiError(response.status, `${detail} (HTTP ${response.status})`, response.url, response.body, {
+    code: parseProblem(response.body)?.code,
+    retryAfter,
+  });
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestVersion<T>(version: ApiVersion, path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  const url = buildVersionedApiUrl(getApiBasePath(), version, path, options.query);
+  let response = await sendPlaneRequest(url, options);
+
+  // Honor Retry-After on 429: wait it out once for short GETs, otherwise report how long to wait.
+  if (response.status === 429 && (options.method ?? "GET") === "GET") {
+    const retryAfter = parseRetryAfter(response.headers.get("Retry-After"));
+    if (retryAfter !== undefined && retryAfter <= MAX_RETRY_AFTER_SECONDS) {
+      await sleep(retryAfter * 1000);
+      response = await sendPlaneRequest(url, options);
+    }
+  }
+
+  if (!response.ok) throw toApiError(response);
+  return response.body as T;
+}
+
+/**
+ * Typed `fetch` for v1 endpoints the pinned SDK (0.1.3) lacks or mis-parses.
+ * Uses the same base path and auth headers as the SDK client.
+ */
+export function planeRequest<T>(path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  return requestVersion<T>("v1", path, options);
+}
+
+/** Same as `planeRequest`, for `/api/v2/...`. Errors are RFC 9457 problem+json, parsed into `PlaneApiError`. */
+export function planeRequestV2<T>(path: string, options: PlaneRequestOptions = {}): Promise<T> {
+  return requestVersion<T>("v2", path, options);
+}
+
+/** Builds `workspaces/{slug}/...` with each segment URL-encoded. */
+export function workspacePath(...segments: string[]): string {
+  const slug = requirePlaneClient().workspaceSlug;
+  return ["workspaces", slug, ...segments].map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+/** Some v1 endpoints return a bare array, others a paginated object. */
+export function toResults<T>(response: T[] | RawPaginated<T> | undefined): T[] {
+  if (!response) return [];
+  return Array.isArray(response) ? response : (response.results ?? []);
+}
+
+/** Maps a paginated v1 response to the shape `useCachedPromise` pagination expects. */
+export function toPage<T, R>(response: RawPaginated<T>, map: (item: T) => R) {
+  return {
+    data: (response.results ?? []).map(map),
+    hasMore: !!response.next_page_results,
+    cursor: response.next_cursor,
+  };
+}
