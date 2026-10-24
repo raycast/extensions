@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseModels, discoverModels } from "../src/lib/compatible-images/models";
+import { parseModels, discoverModels, MAX_MODEL_LIST_BYTES } from "../src/lib/compatible-images/models";
 import { saveCopy } from "../src/lib/compatible-images/save-copy";
 
 test("model candidates distinguish declared image output, name guesses, and other models", () => {
@@ -72,5 +72,37 @@ test("Save As preserves the original and refuses overwrites, traversal and fake 
     await assert.rejects(saveCopy(source, "", "copy.png"), /destination/);
   } finally {
     await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("model discovery rejects oversized declared and chunked responses", async () => {
+  for (const declared of [true, false]) {
+    const server = createServer((_req, res) => {
+      res.setHeader("Content-Type", "application/json");
+      if (declared) res.setHeader("Content-Length", MAX_MODEL_LIST_BYTES + 1);
+      res.write('{"data":[],"padding":"');
+      res.end("x".repeat(MAX_MODEL_LIST_BYTES));
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    assert.ok(address && typeof address !== "string");
+    try {
+      await assert.rejects(discoverModels(`http://127.0.0.1:${address.port}/v1`, "test-key"), /size limit/);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  }
+});
+
+test("model discovery still reports invalid JSON distinctly", async () => {
+  const server = createServer((_req, res) => res.end("not-json"));
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  assert.ok(address && typeof address !== "string");
+  try {
+    await assert.rejects(discoverModels(`http://127.0.0.1:${address.port}/v1`, "test-key"), /non-JSON/);
+  } finally {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });

@@ -1,4 +1,7 @@
 import { endpoint } from "./images";
+import { readBounded } from "./response";
+
+export const MAX_MODEL_LIST_BYTES = 5 * 1024 * 1024;
 
 export type Model = { id: string; source: "declared" | "inferred" | "unknown" };
 type ModelEntry = {
@@ -41,9 +44,10 @@ export async function discoverModels(baseUrl: string, apiKey: string): Promise<M
     throw new Error(
       `Model discovery returned HTTP ${response.status}. Check the API settings or enter a model ID manually.`
     );
+  const json = await readBounded(response, MAX_MODEL_LIST_BYTES);
   let payload: unknown;
   try {
-    payload = await response.json();
+    payload = JSON.parse(json.toString("utf8"));
   } catch {
     throw new Error("The models endpoint returned non-JSON content. Enter a model ID manually.");
   }

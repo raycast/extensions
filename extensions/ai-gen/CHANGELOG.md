@@ -2,6 +2,7 @@
 
 ## [Compatible Image Providers and AI Tools] - {PR_MERGE_DATE}
 
+- Bound model discovery responses to 5 MiB before parsing.
 - Add Generate or Edit Image with a separate OpenAI-compatible provider, model discovery and manual model selection.
 - Add AI generation and reference-image editing tools, with upload confirmation.
 - Save provider images locally with configurable output and non-overwriting Save As.
