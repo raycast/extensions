@@ -10,16 +10,21 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "toggle-recording",
       "title": "Toggle Screen Memory",
+      "subtitle": "Luci",
       "description": "Toggle Luci screen memory recording on/off",
       "mode": "no-view"
     },
     {
       "name": "status-menu-bar",
       "title": "Luci Status",
+      "subtitle": "Luci",
       "description": "Show Luci recording status and toggle from menu bar",
       "mode": "menu-bar",
       "interval": "10s"
