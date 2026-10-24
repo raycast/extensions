@@ -1,6 +1,6 @@
 # Game Scout Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-10-24
 
 ### Bug Fixes & Improvements
 - **Improved Price History Chart Loading**: Added a loading indicator and error fallback, keeping the loading message visible until the chart image is ready.
