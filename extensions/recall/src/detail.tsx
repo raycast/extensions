@@ -75,6 +75,7 @@ export function ChunkSearchPage({ cardId, cardTitle }: { cardId: string; cardTit
 
   return (
     <List
+      isShowingDetail
       isLoading={isLoading}
       searchText={query}
       onSearchTextChange={setQuery}
