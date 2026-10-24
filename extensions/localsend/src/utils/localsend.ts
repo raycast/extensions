@@ -431,10 +431,13 @@ export const cancelSession = async (device: LocalSendDevice, sessionId: string):
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
     try {
-      await deviceFetch(`${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`, {
-        method: "POST",
-        signal: controller.signal,
-      });
+      await deviceFetch(
+        `${device.protocol}://${device.ip}:${device.port}/api/localsend/v2/cancel?sessionId=${sessionId}`,
+        {
+          method: "POST",
+          signal: controller.signal,
+        },
+      );
       clearTimeout(timeoutId);
     } catch (fetchError) {
       clearTimeout(timeoutId);
