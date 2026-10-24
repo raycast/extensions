@@ -34,6 +34,12 @@ export function SubscriptionList() {
   const { subscriptions, deleteSubscription, updateSubscription, isLoading } = useSubscriptions();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("billingDay");
+  const categories = [
+    ...CATEGORIES,
+    ...[...new Set(subscriptions.map((s) => s.category))]
+      .filter((category) => !CATEGORIES.includes(category))
+      .sort((a, b) => a.localeCompare(b)),
+  ];
 
   const filtered = subscriptions
     .filter((s) => selectedCategory === "all" || s.category === selectedCategory)
@@ -139,7 +145,7 @@ export function SubscriptionList() {
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Category" onChange={setSelectedCategory}>
           <List.Dropdown.Item value="all" title="All Categories" />
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <List.Dropdown.Item key={cat} value={cat} title={cat} />
           ))}
         </List.Dropdown>
