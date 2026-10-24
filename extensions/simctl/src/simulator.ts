@@ -23,7 +23,16 @@ export async function getSimulatorApplication() {
 
 export async function openSimulator(device: { udid: string; state: string; name: string }) {
   const application = await getSimulatorApplication();
-  if (device.state !== "Booted") {
+  // The cached list may be stale after a failed launch or changes outside Raycast.
+  const { stdout } = await execFileAsync("xcrun", ["simctl", "list", "--json", "devices"]);
+  const list: { devices: Record<string, { udid: string; state: string }[]> } = JSON.parse(stdout);
+  const currentDevice = Object.values(list.devices)
+    .flat()
+    .find(({ udid }) => udid === device.udid);
+  if (!currentDevice) {
+    throw new Error(`Simulator "${device.name}" is no longer available. Refresh the device list and try again.`);
+  }
+  if (currentDevice.state !== "Booted") {
     await execFileAsync("xcrun", ["simctl", "boot", device.udid]);
   }
   // Device Hub ignores Simulator's -CurrentDeviceUDID argument and uses a URL instead.

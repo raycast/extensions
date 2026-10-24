@@ -58,6 +58,8 @@ export default function Command() {
             await closeMainWindow({ clearRootSearch: true });
           } catch (error) {
             await showFailureToast(error, { title: "Failed to Open Simulator" });
+          } finally {
+            fetchSimulators();
           }
         }}
       />
