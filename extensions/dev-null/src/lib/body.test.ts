@@ -41,7 +41,7 @@ describe("bodyError", () => {
 
   it("accepts exactly 4,000 characters and refuses 4,001", () => {
     expect(bodyError("x".repeat(4000))).toBeUndefined();
-    expect(bodyError("x".repeat(4001))).toMatch(/4,001 of 4,000/);
+    expect(bodyError("x".repeat(4001))).toContain(`${(4001).toLocaleString()} of ${(4000).toLocaleString()}`);
   });
 
   it("accepts a commit over 4,000 raw characters that fits once links are discounted", () => {
@@ -52,12 +52,12 @@ describe("bodyError", () => {
   });
 
   it("refuses a link longer than 2,048 characters", () => {
-    expect(bodyError(`https://example.com/${"g".repeat(2048)}`)).toMatch(/2,048/);
+    expect(bodyError(`https://example.com/${"g".repeat(2048)}`)).toContain((2048).toLocaleString());
   });
 
   it("refuses more than 40,000 raw characters even when links bring the count down", () => {
     const link = `https://example.com/${"h".repeat(2000)} `;
-    expect(bodyError(link.repeat(20))).toMatch(/40,000/);
+    expect(bodyError(link.repeat(20))).toContain((40000).toLocaleString());
   });
 
   it("refuses a lone surrogate, which can't be sent as UTF-8", () => {

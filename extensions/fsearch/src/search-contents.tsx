@@ -7,6 +7,7 @@ import { editorName, openAtLine, preferredEditor } from "./lib/editors";
 import { grep, type GrepFile, type GrepMode } from "./lib/fsearch";
 import { expandHome, fileName, folderOf, formatDuration } from "./lib/format";
 import { useFSearch } from "./lib/use-fsearch";
+import { useTrashedPaths } from "./lib/use-trashed-paths";
 
 const NARROW = "The search stopped early. Add ext:, type:, or in: to search fewer files.";
 
@@ -22,6 +23,7 @@ export default function Command({
 }: LaunchProps<{ arguments: Arguments.SearchContents }>) {
   const [text, setText] = useState(args.text || fallbackText || "");
   const [mode, setMode] = useState<GrepMode>((args.mode as GrepMode) || "literal");
+  const { onTrash, isVisible } = useTrashedPaths();
   const folder = args.folder?.trim() ? expandHome(args.folder) : undefined;
   const { pattern, q } = splitContentQuery(text);
   const execute = pattern.length > 0;
@@ -33,7 +35,7 @@ export default function Command({
     execute,
   );
 
-  const files = execute && !error ? (data?.files ?? []) : [];
+  const files = execute && !error ? (data?.files ?? []).filter((file) => isVisible(file.path)) : [];
   const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
   // The daemon stops reading at its time budget; the best-ranked files come first.
   const incomplete = execute && !error && !isLoading && data?.complete === false;
@@ -78,7 +80,7 @@ export default function Command({
       ) : (
         <>
           {files.map((file, index) => (
-            <FileSection key={file.path} file={file} timing={index === 0 ? timing : undefined} />
+            <FileSection key={file.path} file={file} timing={index === 0 ? timing : undefined} onTrash={onTrash} />
           ))}
           {incomplete && (
             <List.Section title="Some Files Weren't Searched">
@@ -91,7 +93,7 @@ export default function Command({
   );
 }
 
-function FileSection({ file, timing }: { file: GrepFile; timing?: string }) {
+function FileSection({ file, timing, onTrash }: { file: GrepFile; timing?: string; onTrash: (path: string) => void }) {
   const editor = preferredEditor();
   const name = fileName(file.path);
   return (
@@ -107,6 +109,7 @@ function FileSection({ file, timing }: { file: GrepFile; timing?: string }) {
           actions={
             <FileActions
               path={file.path}
+              onTrash={onTrash}
               isFolder={false}
               primary={
                 editor !== "default" && (

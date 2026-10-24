@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [
+    "src/**/*",
+    "raycast-env.d.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ES2023"
+    ],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "types": [
+      "node"
+    ]
+  }
+}
