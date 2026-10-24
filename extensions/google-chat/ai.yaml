@@ -1,0 +1,231 @@
+instructions: |
+  - Google Chat conversations are spaces (named rooms), group chats (unnamed, several people) and direct messages (DMs). Each has a resource name like `spaces/AAAA`.
+  - Pass what the user said as `to` or `space` (an email, a Chat link, or the exact title of a space or DM). The tools resolve it. Only call `list-spaces` to disambiguate or when the user asks to see conversations.
+  - To message a person, prefer their email. If you only have a name, call `find-person` first and use the email it returns. Never guess an email.
+  - "Unread", "what did I miss" or "how many unread messages" means `get-unread`. Its `totalUnread` is the total across conversations (`500+` means at least 500); report it as given. Use `search-messages` for keyword searches; set `unreadOnly`, `mentionsMe` or `hasLink` when the user asks for those. Search skips muted spaces.
+  - To @mention people in a space or group chat, pass their names or emails (or "all") as `mentions` to `send-message`. Write "@Name" in `text` where the mention should go; otherwise it goes at the start. Mentions don't work in direct messages.
+  - To reply in a thread, pass the message's `thread` value from `get-messages`, `get-unread` or `search-messages` as `thread` to `send-message`.
+  - `add-reaction` needs the message resource name (`spaces/AAAA/messages/BBBB`) from another tool, and one Unicode emoji.
+  - Format conversation titles and messages as markdown links when the result has a `url`.
+  - Keep the user's message text as written. Google Chat formatting is *bold*, _italic_, ~strikethrough~ and `code`, not Markdown.
+  - Never invent resource names, emails or thread names. If several conversations match, ask which one.
+
+evals:
+  - input: "@google-chat what are my unread messages?"
+    mocks:
+      get-unread:
+        lookbackDays: 14
+        totalUnread: "2"
+        conversationsWithUnread: 1
+        mentionsMe: true
+        conversations:
+          - name: spaces/AAAA
+            title: Data Platform
+            type: SPACE
+            mentionsMe: true
+            unreadCount: 2
+            url: https://chat.google.com/room/AAAA
+            messages:
+              - name: spaces/AAAA/messages/m1.m1
+                sender: Sara Khan
+                text: "@Alex can you review the pipeline PR?"
+                createTime: "2026-10-14T09:00:00Z"
+                thread: spaces/AAAA/threads/m1
+                mentionsMe: true
+              - name: spaces/AAAA/messages/m1.m2
+                sender: Ali Raza
+                text: Pipeline is green again.
+                createTime: "2026-10-14T08:30:00Z"
+                thread: spaces/AAAA/threads/m1
+                mentionsMe: false
+    expected:
+      - callsTool: get-unread
+
+  - input: "@google-chat how many unread messages do I have?"
+    usedAsExample: false
+    mocks:
+      get-unread:
+        lookbackDays: 14
+        totalUnread: "37"
+        conversationsWithUnread: 2
+        mentionsMe: false
+        conversations:
+          - name: spaces/AAAA
+            title: Data Platform
+            type: SPACE
+            mentionsMe: false
+            unreadCount: 30
+            url: https://chat.google.com/room/AAAA
+            messages: []
+          - name: spaces/DM1
+            title: Sara Khan
+            type: DIRECT_MESSAGE
+            mentionsMe: false
+            unreadCount: 7
+            url: https://chat.google.com/dm/DM1
+            messages: []
+    expected:
+      - callsTool: get-unread
+      - includes: "37"
+
+  - input: "@google-chat list my direct messages"
+    mocks:
+      list-spaces:
+        - name: spaces/DM1
+          title: Sara Khan
+          type: DIRECT_MESSAGE
+          email: sara@example.com
+          url: https://chat.google.com/dm/DM1
+    expected:
+      - callsTool:
+          name: list-spaces
+          arguments:
+            type: DIRECT_MESSAGE
+
+  - input: "@google-chat what was said recently in the Data Platform space?"
+    mocks:
+      get-messages:
+        space:
+          name: spaces/AAAA
+          title: Data Platform
+          type: SPACE
+          url: https://chat.google.com/room/AAAA
+        messages:
+          - name: spaces/AAAA/messages/m2.m2
+            sender: Ali Raza
+            text: Deployed the new ingestion job.
+            createTime: "2026-10-14T08:00:00Z"
+            thread: spaces/AAAA/threads/m2
+        hasMore: false
+    expected:
+      - callsTool:
+          name: get-messages
+          arguments:
+            space:
+              includes: Data Platform
+
+  - input: "@google-chat send sara@example.com a message saying the report is ready"
+    mocks:
+      send-message:
+        sentTo: Sara Khan
+        space: spaces/DM1
+        message: spaces/DM1/messages/m3.m3
+        url: https://chat.google.com/dm/DM1/m3/m3
+    expected:
+      - callsTool:
+          name: send-message
+          arguments:
+            to: sara@example.com
+            text:
+              includes: report is ready
+
+  - input: "@google-chat message Ali Raza that I'm running 5 minutes late"
+    mocks:
+      find-person:
+        - name: Ali Raza
+          email: ali@example.com
+      send-message:
+        sentTo: Ali Raza
+        space: spaces/DM2
+        message: spaces/DM2/messages/m4.m4
+    expected:
+      - callsTool:
+          name: find-person
+          arguments:
+            query:
+              includes: Ali
+      - callsTool:
+          name: send-message
+          arguments:
+            to: ali@example.com
+            text:
+              includes: late
+
+  - input: "@google-chat tell Sara and Ali in Data Platform that the pipeline is fixed, and mention them"
+    mocks:
+      send-message:
+        sentTo: Data Platform
+        space: spaces/AAAA
+        message: spaces/AAAA/messages/m7.m7
+        mentioned:
+          - Sara Khan
+          - Ali Raza
+        url: https://chat.google.com/room/AAAA/m7/m7
+    expected:
+      - callsTool:
+          name: send-message
+          arguments:
+            to:
+              includes: Data Platform
+            text:
+              includes: pipeline
+            mentions:
+              includes: Sara
+
+  - input: "@google-chat find messages about the budget forecast"
+    mocks:
+      search-messages:
+        - name: spaces/AAAA/messages/m5.m5
+          space: Finance
+          sender: Hina Malik
+          text: Budget forecast for Q4 is in the shared drive.
+          createTime: "2026-10-10T10:00:00Z"
+    expected:
+      - callsTool:
+          name: search-messages
+          arguments:
+            query:
+              includes: budget
+
+  - input: "@google-chat show unread messages that mention me"
+    usedAsExample: false
+    mocks:
+      search-messages: []
+    expected:
+      - callsTool:
+          name: search-messages
+          arguments:
+            unreadOnly: true
+            mentionsMe: true
+
+  - input: "@google-chat who is Hina in our directory?"
+    usedAsExample: false
+    mocks:
+      find-person:
+        - name: Hina Malik
+          email: hina@example.com
+    expected:
+      - callsTool:
+          name: find-person
+          arguments:
+            query:
+              includes: Hina
+
+  - input: "@google-chat reply 'on it' in the thread spaces/AAAA/threads/m1 in Data Platform"
+    usedAsExample: false
+    mocks:
+      send-message:
+        sentTo: Data Platform
+        space: spaces/AAAA
+        message: spaces/AAAA/messages/m1.m6
+        thread: spaces/AAAA/threads/m1
+    expected:
+      - callsTool:
+          name: send-message
+          arguments:
+            thread: spaces/AAAA/threads/m1
+            text:
+              includes: on it
+
+  - input: "@google-chat react with a thumbs up to message spaces/AAAA/messages/m1.m1"
+    usedAsExample: false
+    mocks:
+      add-reaction:
+        reaction: spaces/AAAA/messages/m1.m1/reactions/r1
+        emoji: "👍"
+    expected:
+      - callsTool:
+          name: add-reaction
+          arguments:
+            message: spaces/AAAA/messages/m1.m1
+            emoji: "👍"
