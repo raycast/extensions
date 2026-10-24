@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-search-windows",
+  "title": "Folder Search for Windows",
+  "description": "Find, pin and open folders instantly on Windows, including Google Drive and external drives.",
+  "icon": "icon.png",
+  "author": "alan_zirpoli",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-folders",
+      "title": "Search Folders",
+      "description": "Find folders by name, then open, reveal, browse or pin them.",
+      "mode": "view"
+    },
+    {
+      "name": "index-folders",
+      "title": "Rebuild Folder Index",
+      "description": "Rescan your drives so Search Folders finds new folders.",
+      "mode": "no-view",
+      "interval": "6h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchRoots",
+      "title": "Search Roots",
+      "description": "Folders to search in, separated by ; (e.g. G:\\Il mio Drive;D:\\Progetti). Leave empty to search your user folder and every other drive (external disks, Google Drive…).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "C:\\Users\\you\\Documents;D:\\Projects"
+    },
+    {
+      "name": "sort",
+      "title": "Sort Results By",
+      "description": "Order of the results returned by Everything (when installed).",
+      "type": "dropdown",
+      "required": false,
+      "default": "date-modified-descending",
+      "data": [
+        {
+          "title": "Most recently modified",
+          "value": "date-modified-descending"
+        },
+        {
+          "title": "Name (A–Z)",
+          "value": "name-ascending"
+        },
+        {
+          "title": "Path (A–Z)",
+          "value": "path-ascending"
+        }
+      ]
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of folders to show.",
+      "type": "textfield",
+      "required": false,
+      "default": "100"
+    },
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Terminal used by the “Open in Terminal” action.",
+      "type": "dropdown",
+      "required": false,
+      "default": "wt",
+      "data": [
+        {
+          "title": "Windows Terminal",
+          "value": "wt"
+        },
+        {
+          "title": "PowerShell 7 (pwsh)",
+          "value": "pwsh"
+        },
+        {
+          "title": "Windows PowerShell",
+          "value": "powershell"
+        },
+        {
+          "title": "Command Prompt",
+          "value": "cmd"
+        }
+      ]
+    },
+    {
+      "name": "editorCommand",
+      "title": "Editor Command",
+      "description": "Command used by “Open in Editor” (e.g. code, cursor, zed).",
+      "type": "textfield",
+      "required": false,
+      "default": "code"
+    },
+    {
+      "name": "esPath",
+      "title": "es.exe Path",
+      "description": "Optional. Full path to es.exe, the Everything command-line tool. Leave empty to detect it automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "C:\\Program Files\\Everything\\es.exe"
+    },
+    {
+      "name": "indexDepth",
+      "title": "Index Depth",
+      "description": "How many folder levels deep the built-in index goes (used for Google Drive, external disks and anything Everything doesn't index).",
+      "type": "textfield",
+      "required": false,
+      "default": "12"
+    },
+    {
+      "name": "indexMaxAge",
+      "title": "Index Refresh (hours)",
+      "description": "Re-index a location when its index is older than this.",
+      "type": "textfield",
+      "required": false,
+      "default": "6"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
