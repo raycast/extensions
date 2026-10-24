@@ -22,7 +22,7 @@ Switch your [ToneCue](https://didact.digital/tonecue/) audio scenes from Raycast
 
 ## AI
 
-Ask `@tonecue` which scene is active and why, why your devices switched (it reads the switch history), to apply a scene, or to mute.
+Ask `@tonecue-audio-scenes` which scene is active and why, why your devices switched (it reads the switch history), to apply a scene, or to mute.
 
 ![Ask ToneCue](media/ask-tonecue.png)
 

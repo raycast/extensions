@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { APP_BUNDLE_ID, DOWNLOAD_URL, NotRunningError } from "./client";
 
@@ -34,8 +35,7 @@ export async function done(text: string) {
   }
 }
 
-export const fail = (error: unknown) =>
-  showToast({ style: Toast.Style.Failure, title: "ToneCue", message: message(error) });
+export const fail = (error: unknown) => showFailureToast(error, { title: "ToneCue" });
 
 /** Opens the app. Not run automatically: without ToneCue running the extension is meant to say so. */
 function launchApp() {
@@ -56,14 +56,14 @@ export function ErrorView({ error, retry }: { error: Error; retry: () => void })
       }
       actions={
         <ActionPanel>
-          {notRunning && <Action title="Open Tonecue" icon={Icon.Play} onAction={launchApp} />}
+          {notRunning && <Action title="Open ToneCue" icon={Icon.Play} onAction={launchApp} />}
           <Action
             title="Try Again"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={retry}
           />
-          <Action.OpenInBrowser title="Get Tonecue" url={DOWNLOAD_URL} />
+          <Action.OpenInBrowser title="Get ToneCue" url={DOWNLOAD_URL} />
         </ActionPanel>
       }
     />

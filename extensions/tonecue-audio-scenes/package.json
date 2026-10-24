@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "tonecue",
-  "title": "ToneCue",
+  "name": "tonecue-audio-scenes",
+  "title": "ToneCue - Audio Scenes",
   "description": "Switch your ToneCue audio scenes, microphone and speakers from Raycast. Requires the ToneCue menu bar app.",
   "icon": "tonecue-icon.png",
   "author": "IngoJ",
@@ -99,7 +99,7 @@
     "instructions": "ToneCue switches the Mac's microphone and speakers by scene. Use get-status to learn scene names before apply-scene. Use get-history to explain why devices changed (source rule = a scene decided, hand = the user picked, system = macOS reacted). Never apply a scene or change mute unless the user asks for it.",
     "evals": [
       {
-        "input": "@tonecue which scene is active and why?",
+        "input": "@tonecue-audio-scenes which scene is active and why?",
         "mocks": {
           "get-status": {
             "activeScene": "Meeting",
@@ -141,7 +141,7 @@
         ]
       },
       {
-        "input": "@tonecue switch to my Desk scene",
+        "input": "@tonecue-audio-scenes switch to my Desk scene",
         "mocks": {
           "get-status": {
             "activeScene": "Meeting",
@@ -188,7 +188,7 @@
         ]
       },
       {
-        "input": "@tonecue mute my microphone",
+        "input": "@tonecue-audio-scenes mute my microphone",
         "mocks": {
           "set-mute": "Microphone muted."
         },
@@ -204,7 +204,7 @@
         ]
       },
       {
-        "input": "@tonecue why did my audio devices switch earlier?",
+        "input": "@tonecue-audio-scenes why did my audio devices switch earlier?",
         "mocks": {
           "get-history": [
             {
