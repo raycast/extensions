@@ -1,6 +1,6 @@
 # Roblox Developer Tools Changelog
 
-## [Robux Earned] - {PR_MERGE_DATE}
+## [Robux Earned] - 2026-10-24
 
 - Track game or account earnings in your menu bar, updated every 30 seconds with automatic retries
 - Choose a time range and display Robux or estimated DevEx USD
