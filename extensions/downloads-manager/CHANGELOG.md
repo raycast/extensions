@@ -4,6 +4,10 @@
 
 - Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
 
+## [Fix render timeout for large Downloads folders] - {PR_MERGE_DATE}
+
+- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
+
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 
 Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
