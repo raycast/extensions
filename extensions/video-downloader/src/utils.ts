@@ -132,6 +132,7 @@ export const {
   enableBrowserExtensionSupport,
   forceIpv4,
   cookiesFromBrowser,
+  firefoxContainer,
   ytdlPath: ytdlPathPreference,
   ffmpegPath: ffmpegPathPreference,
   ffprobePath: ffprobePathPreference,
@@ -230,12 +231,22 @@ export type DownloadOptions = {
 //   would sleep before every media segment (e.g. +1s × hundreds of HLS
 //   segments). Use `throttle: true` only for extractor/metadata calls, where
 //   the retries and throttling actually help.
+export function formatCookiesFromBrowserArg(browser?: string, container?: string): string | undefined {
+  if (!browser || browser === "none") return undefined;
+  if (browser === "firefox" && container?.trim()) {
+    const cleanContainer = container.trim().replace(/^::+/, "");
+    if (cleanContainer) return `firefox::${cleanContainer}`;
+  }
+  return browser;
+}
+
 export function getCommonArgs({ throttle = false }: { throttle?: boolean } = {}): string[] {
   const args: string[] = [];
 
   if (forceIpv4) args.push("--force-ipv4");
-  if (cookiesFromBrowser && cookiesFromBrowser !== "none") {
-    args.push("--cookies-from-browser", cookiesFromBrowser);
+  const cookiesArg = formatCookiesFromBrowserArg(cookiesFromBrowser, firefoxContainer);
+  if (cookiesArg) {
+    args.push("--cookies-from-browser", cookiesArg);
   }
   if (throttle) {
     args.push("--extractor-retries", "3");
