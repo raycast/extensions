@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recall",
+  "title": "Recall",
+  "description": "Browse and read the cards saved in your Recall knowledge base — filter by date or source URL, read content, and ask questions about any card.",
+  "icon": "recall-icon.png",
+  "author": "dedseq",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "recall",
+    "knowledge base",
+    "bookmarks",
+    "read later",
+    "second brain"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse Recall",
+      "description": "Browse and read the cards saved in your Recall knowledge base",
+      "mode": "view",
+      "icon": "recall-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Recall API key (sk_...) — create one at app.getrecall.ai → Settings → API & MCP",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
