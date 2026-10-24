@@ -1,0 +1,44 @@
+{
+  "name": "inspiration-image",
+  "title": "Inspiration Image",
+  "description": "Compose selected text or clipboard screenshots over a chosen background.",
+  "author": "zyxing",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "text-to-image",
+      "title": "Add Background to Selected Text",
+      "description": "Compose selected text over a background image.",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot-to-image",
+      "title": "Add Background to Clipboard Screenshot",
+      "description": "Compose a clipboard screenshot over a background image.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build:native": "bash scripts/build-native.sh",
+    "build": "npm run build:native && ray build -e dist -o dist",
+    "dev": "npm run build:native && ray develop",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.7.0"
+  }
+}
