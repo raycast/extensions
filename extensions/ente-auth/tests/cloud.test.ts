@@ -14,10 +14,10 @@ import { request } from "../src/cloud/client";
 import { TOTPModel } from "../src/cloud/model";
 import { DEFAULT_API_ORIGIN, normalizeAPIOrigin } from "../src/cloud/server";
 import { createSRPClient } from "../src/cloud/srp";
-import { cacheKey } from "../src/cloud/storage";
+import { cacheKey, changeMode } from "../src/cloud/storage";
 import { syncSession } from "../src/cloud/sync";
 import { STORAGE_KEY } from "../src/constants/secrets";
-import { parseSecrets } from "../src/helpers/secrets";
+import { parseSecrets, storeSecrets } from "../src/helpers/secrets";
 import { fixture, mockFetch, mockStorage, OTP_URI, PASSWORD, response } from "./fixtures";
 
 const parameters = { ...SRP.params[4096], hash: "sha256" };
@@ -350,6 +350,29 @@ it("clears rejected sessions and cached codes without retrying", async () => {
 		model.dispose();
 	}
 });
+
+it.each([false, true])(
+	"reloads imports on local ticks without cloud requests: saved mode=%s",
+	async (savedMode) => {
+		const entries = parseSecrets([OTP_URI]);
+		await storeSecrets(entries);
+		if (savedMode) await changeMode("import");
+		const model = new TOTPModel();
+		try {
+			await model.start();
+			expect(model.state).toMatchObject({ mode: "import", entries, hasSession: false });
+			const updated = parseSecrets([
+				OTP_URI.replace("Synthetic", "Updated").replace("JBSWY3DPEHPK3PXP", "GEZDGNBVGY3TQOJQ"),
+			]);
+			await storeSecrets(updated);
+			await model.tick();
+			expect(model.state).toMatchObject({ mode: "import", entries: updated, hasImportedEntries: true });
+			expect(fetchMock).not.toHaveBeenCalled();
+		} finally {
+			model.dispose();
+		}
+	}
+);
 
 it("loads and removes imported entries without cloud requests", async () => {
 	const entries = parseSecrets([OTP_URI]);

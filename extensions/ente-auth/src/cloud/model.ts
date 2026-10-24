@@ -246,8 +246,12 @@ export class TOTPModel {
 				return;
 			}
 
-			// The timer updates only local codes and checks local account state.
-			this.update({});
+			// The timer updates local codes and imports without making cloud requests.
+			if (mode.mode === "import") {
+				await this.refresh();
+			} else {
+				this.update({});
+			}
 		} catch {
 			this.controller.abort();
 			this.session = null;
