@@ -1,5 +1,10 @@
 # Downloads Manager Changelog
 
+## [Fix Quick Look preview process leak] - {PR_MERGE_DATE}
+
+- Fixed Manage Downloads slowing down and becoming unresponsive on large Downloads folders. Quick Look previews that timed out leaked a background process and a temp directory for every previewed item; timed-out previews are now killed, and starting a new preview cancels the previous one.
+- Quick Look no longer runs for `.zip` and `.ipynb` files. `qlmanage` does not return for either type, so there was never a thumbnail to show.
+
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 
 Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
