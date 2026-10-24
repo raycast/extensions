@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Fix render timeout for large Downloads folders] - 2026-10-24
+## [Fix render timeout for large Downloads folders] - {PR_MERGE_DATE}
 
 - Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
 
