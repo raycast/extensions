@@ -1,0 +1,8 @@
+# publicacao na Store
+node_modules/
+dist/
+raycast-env.d.ts
+.DS_Store
+*.bak-antes-publicar
+docs/
+.verify/out/
