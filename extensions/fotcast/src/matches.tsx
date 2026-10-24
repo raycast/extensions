@@ -34,7 +34,7 @@ import {
 } from "./schedule";
 import { toggleFavorite, useFavorites } from "./store";
 
-// Footer: "Today · Thu, Sep 10"; a plain date label is already complete.
+// Day label: "Today · Thu, Sep 10"; a plain date label is already complete.
 function footerTitle(date: Date): string {
   const label = dayLabel(date);
   const short = date.toLocaleDateString(undefined, {
@@ -323,7 +323,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading || favs.isLoading}
-      navigationTitle={footerTitle(date)}
       searchBarPlaceholder="Search teams or leagues…"
       searchBarAccessory={
         <List.Dropdown tooltip="Leagues" storeValue onChange={setFilter}>
@@ -367,6 +366,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.SoccerBall}
           title="No matches"
+          description={footerTitle(date)}
           actions={
             <ActionPanel>
               <Action.PickDate
@@ -380,7 +380,11 @@ export default function Command() {
         />
       )}
       {sections.map((section) => (
-        <List.Section key={section.key} title={section.title}>
+        <List.Section
+          key={section.key}
+          title={section.title}
+          subtitle={footerTitle(date)}
+        >
           {section.matches.map((item) => (
             <MatchRow
               key={`${section.key}:${item.match.id}`}
