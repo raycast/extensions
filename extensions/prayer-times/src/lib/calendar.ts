@@ -161,8 +161,9 @@ export function panelSvg(
   for (const prayer of prayers) {
     y += 22;
     const cells = [prayer.name, prayer.start, prayer.jamaat ?? "—", prayer.end];
+    // direction="ltr" keeps an Urdu or Arabic name starting at the left edge instead of running off it.
     cells.forEach((cell, i) =>
-      parts.push(text(columns[i], y, 12, colors.text, cell, i === 0 ? `font-weight="600"` : "")),
+      parts.push(text(columns[i], y, 12, colors.text, cell, i === 0 ? `font-weight="600" direction="ltr"` : "")),
     );
     if (prayer.status) {
       const label = STATUS_LABELS[prayer.status];
