@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "it-toolbox",
+  "title": "IT Toolbox",
+  "description": "Sixteen everyday developer tools for timestamps, encoding, hashing, UUIDs, JSON, JWTs, CIDR, cron, colors and text",
+  "icon": "icon.png",
+  "author": "huid",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "timestamp",
+      "title": "Timestamp",
+      "subtitle": "IT Toolbox",
+      "description": "Convert between timestamps and human-readable dates, in seconds or milliseconds",
+      "keywords": ["epoch", "unix", "time", "date", "iso8601", "datetime"],
+      "mode": "view"
+    },
+    {
+      "name": "url-encode",
+      "title": "URL Encode / Decode",
+      "subtitle": "IT Toolbox",
+      "description": "Encode and decode URLs, and break a URL down into its query parameters",
+      "keywords": ["url", "uri", "encode", "decode", "percent", "query"],
+      "mode": "view"
+    },
+    {
+      "name": "base64",
+      "title": "Base64 Encode / Decode",
+      "subtitle": "IT Toolbox",
+      "description": "Encode and decode Base64, URL-safe Base64, hex and binary",
+      "keywords": ["base64", "b64", "encode", "decode", "hex", "binary"],
+      "mode": "view"
+    },
+    {
+      "name": "hash",
+      "title": "Hash (MD5/SHA)",
+      "subtitle": "IT Toolbox",
+      "description": "Compute MD5, SHA-1, SHA-256, SHA-512 and CRC32 digests",
+      "keywords": ["md5", "sha", "sha1", "sha256", "sha512", "crc32", "checksum", "digest"],
+      "mode": "view"
+    },
+    {
+      "name": "uuid",
+      "title": "UUID / ULID Generator",
+      "subtitle": "IT Toolbox",
+      "description": "Generate UUID v4, UUID v7, ULID and NanoID values in bulk",
+      "keywords": ["uuid", "guid", "ulid", "nanoid", "id", "generate"],
+      "mode": "view"
+    },
+    {
+      "name": "json",
+      "title": "JSON Format / Validate",
+      "subtitle": "IT Toolbox",
+      "description": "Format, minify, sort and validate JSON, and turn it into TypeScript interfaces",
+      "keywords": ["json", "format", "prettify", "minify", "validate", "typescript"],
+      "mode": "view"
+    },
+    {
+      "name": "jwt",
+      "title": "JWT Decoder",
+      "subtitle": "IT Toolbox",
+      "description": "Decode a JWT header and payload, and check whether the token has expired",
+      "keywords": ["jwt", "token", "bearer", "decode", "payload"],
+      "mode": "view"
+    },
+    {
+      "name": "radix-convert",
+      "title": "Radix Convert",
+      "subtitle": "IT Toolbox",
+      "description": "Convert between binary, octal, decimal, hexadecimal, Base32 and Base36",
+      "keywords": ["binary", "octal", "decimal", "hex", "radix", "base36"],
+      "mode": "view"
+    },
+    {
+      "name": "diff-text",
+      "title": "Text Diff",
+      "subtitle": "IT Toolbox",
+      "description": "Compare two blocks of text line by line, optionally ignoring case and whitespace",
+      "keywords": ["diff", "compare", "text", "changes"],
+      "mode": "view"
+    },
+    {
+      "name": "crypto-random",
+      "title": "Random / Password Generator",
+      "subtitle": "IT Toolbox",
+      "description": "Generate strong random passwords, integers and strings",
+      "keywords": ["password", "random", "generator", "secret", "entropy"],
+      "mode": "view"
+    },
+    {
+      "name": "case-convert",
+      "title": "Case Convert",
+      "subtitle": "IT Toolbox",
+      "description": "Convert between camelCase, PascalCase, snake_case, kebab-case and more",
+      "keywords": ["camel", "pascal", "snake", "kebab", "case", "naming"],
+      "mode": "view"
+    },
+    {
+      "name": "ip-tool",
+      "title": "IP / CIDR Tool",
+      "subtitle": "IT Toolbox",
+      "description": "Convert between IPv4, integers and binary, and work out CIDR subnet details",
+      "keywords": ["ip", "ipv4", "cidr", "subnet", "netmask", "network"],
+      "mode": "view"
+    },
+    {
+      "name": "cron",
+      "title": "Cron Parser",
+      "subtitle": "IT Toolbox",
+      "description": "Explain a 5-field cron expression and list its next 10 run times",
+      "keywords": ["cron", "crontab", "schedule", "expression"],
+      "mode": "view"
+    },
+    {
+      "name": "qr-code",
+      "title": "QR Code Generator",
+      "subtitle": "IT Toolbox",
+      "description": "Turn text or a URL into a QR code",
+      "keywords": ["qr", "qrcode", "barcode", "link"],
+      "mode": "view"
+    },
+    {
+      "name": "color-convert",
+      "title": "Color Convert",
+      "subtitle": "IT Toolbox",
+      "description": "Convert between HEX, RGB, HSL and CMYK, with WCAG contrast checks",
+      "keywords": ["hex", "rgb", "hsl", "cmyk", "color", "contrast", "wcag"],
+      "mode": "view"
+    },
+    {
+      "name": "text-transform",
+      "title": "Text Toolkit",
+      "subtitle": "IT Toolbox",
+      "description": "Change case, dedupe lines, sort, trim, and convert text to SQL or CSV",
+      "keywords": ["text", "case", "sort", "dedupe", "trim", "stats", "csv", "sql"],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "react": "^19.0.0",
+    "tsx": "^4.19.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx src/__tests__/toolbox.test.ts"
+  }
+}
