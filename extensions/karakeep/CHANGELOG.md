@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.4.6] - {PR_MERGE_DATE}
+## [2.4.6] - 2026-10-24
 
 - Fixed screenshot previews being blank on self-hosted Karakeep v0.33.x. The extension was fetching images through the Next.js image optimizer route (`/_next/image`), which returns HTTP 400 in v0.33.x. It now fetches directly from `/api/assets/{id}`, which returns the image with HTTP 200 on all supported server versions.
 
