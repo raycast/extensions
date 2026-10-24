@@ -19,6 +19,19 @@ const CACHE_LIMIT = 50;
 // `yt-navigate`; too short a window reports failure for a track that did start.
 const NAVIGATION_TIMEOUT_MS = 5000;
 
+// Every action here drives the same browser tab. Run them one at a time so a
+// second action cannot replace the page or menu the first one is still reading.
+let pendingAction: Promise<unknown> = Promise.resolve();
+
+function runExclusive<T>(action: () => Promise<T>): Promise<T> {
+  const result = pendingAction.then(action, action);
+  pendingAction = result.then(
+    () => undefined,
+    () => undefined
+  );
+  return result;
+}
+
 // The "Add to queue" row action is labelled per locale, but its icon is the
 // Material `playlist_add` glyph, which is the same everywhere.
 const ADD_TO_QUEUE_ICON = "M21 6.998";
@@ -263,18 +276,18 @@ function SongItem({ song, query }: { song: SongResult; query: string }) {
       accessories={song.duration ? [{ text: song.duration }] : undefined}
       actions={
         <ActionPanel>
-          <Action title="Play Song" icon={Icon.Play} onAction={() => playSong(song)} />
+          <Action title="Play Song" icon={Icon.Play} onAction={() => runExclusive(() => playSong(song))} />
           <Action
             title="Play Next"
             icon={Icon.Forward}
             shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
-            onAction={() => queueSong(song, query, "next")}
+            onAction={() => runExclusive(() => queueSong(song, query, "next"))}
           />
           <Action
             title="Add to Queue"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["opt"], key: "enter" }}
-            onAction={() => queueSong(song, query, "end")}
+            onAction={() => runExclusive(() => queueSong(song, query, "end"))}
           />
           <Action.CopyToClipboard
             title="Copy to Clipboard"

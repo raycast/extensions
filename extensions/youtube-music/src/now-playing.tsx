@@ -25,6 +25,7 @@ const POLL_MS = 1000;
 const ARTWORK_SIZE = 240;
 const DEFAULT_HISTORY_LIMIT = 5;
 const MAX_HISTORY_LIMIT = 50;
+const ARTWORK_RETRY_MS = 10_000;
 const UP_NEXT_LIMIT = 50;
 const NOW_PLAYING_ID = "ytm-now-playing";
 
@@ -35,11 +36,6 @@ interface QueueTrack {
   videoId: string;
   index: number;
   artworkURL?: string;
-}
-
-interface Preferences {
-  browser: { name: string };
-  historyLimit?: string;
 }
 
 // The preference is a dropdown, so the value arrives as a string. Clamp it
@@ -83,29 +79,36 @@ const queueRowHelpers = `
     var title = item.querySelector(".song-title");
     return (title ? title.textContent : "").replace(/\\s+/g, " ").trim();
   }
-  function findQueueRow(videoId, title) {
+  function findQueueRow(videoId, title, index) {
     var wanted = (title || "").replace(/\\s+/g, " ").trim();
     var items = document.querySelectorAll("ytmusic-player-queue-item");
-    var titleMatch = null;
-    var titleMatches = 0;
+    var matches = [];
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
       var id = rowVideoId(item);
       if (id && videoId) {
-        if (id === videoId) {
-          return { item: item, status: rowTitle(item) === wanted ? "ok" : "mismatch" };
-        }
+        if (id === videoId) matches.push(item);
         continue;
       }
-      if (wanted && rowTitle(item) === wanted) {
-        titleMatch = item;
-        titleMatches++;
+      if (wanted && rowTitle(item) === wanted) matches.push(item);
+    }
+    if (!matches.length) return { item: null, status: "no-match" };
+    if (matches.length === 1) {
+      return { item: matches[0], status: rowTitle(matches[0]) === wanted ? "ok" : "mismatch" };
+    }
+    // The same song can legitimately be in the queue more than once. Use the
+    // position from the snapshot to pick the right occurrence, and only when
+    // that row still matches; the queue re-indexes when items are removed.
+    if (index >= 0 && index < items.length) {
+      var candidate = items[index];
+      var candidateId = rowVideoId(candidate);
+      var candidateTitle = rowTitle(candidate);
+      var idMatches = videoId ? candidateId === videoId : wanted && candidateTitle === wanted;
+      if (idMatches && (!wanted || candidateTitle === wanted)) {
+        return { item: candidate, status: "ok" };
       }
     }
-    // Without an id, a title is only safe when exactly one row carries it.
-    if (titleMatches === 1) return { item: titleMatch, status: "ok" };
-    if (titleMatches > 1) return { item: null, status: "ambiguous" };
-    return { item: null, status: "no-match" };
+    return { item: null, status: "ambiguous" };
   }
 `;
 
@@ -174,7 +177,11 @@ const readState = `(function() {
     duration: duration,
     playing: video ? !video.paused : false,
     like: likeEl ? likeEl.getAttribute("like-status") : "INDIFFERENT",
-    videoId: (location.search.match(/[?&]v=([A-Za-z0-9_-]{11})/) || [])[1] || "",
+    // Playback continues while the user browses Home, Search or an album, where
+    // the URL has no video id; fall back to the row the player marks selected.
+    videoId:
+      (location.search.match(/[?&]v=([A-Za-z0-9_-]{11})/) || [])[1] ||
+      (selected >= 0 ? rowVideoId(items[selected]) : ""),
     playlistId: (location.search.match(/[?&]list=([^&]+)/) || [])[1] || "",
     selectedIndex: selected,
     queue: queue
@@ -219,7 +226,7 @@ const dislikeTrack = `(function() {
 function playQueueItem(track: QueueTrack): string {
   return `(function() {
   ${queueRowHelpers}
-  var found = findQueueRow(${JSON.stringify(track.videoId)}, ${JSON.stringify(track.title)});
+  var found = findQueueRow(${JSON.stringify(track.videoId)}, ${JSON.stringify(track.title)}, ${track.index});
   if (found.status !== "ok") return found.status;
   var button = found.item.querySelector("ytmusic-play-button-renderer");
   if (!button) return "no-button";
@@ -231,7 +238,7 @@ function playQueueItem(track: QueueTrack): string {
 function openQueueMenu(track: QueueTrack): string {
   return `(function() {
   ${queueRowHelpers}
-  var found = findQueueRow(${JSON.stringify(track.videoId)}, ${JSON.stringify(track.title)});
+  var found = findQueueRow(${JSON.stringify(track.videoId)}, ${JSON.stringify(track.title)}, ${track.index});
   if (found.status !== "ok") return found.status;
   var button = found.item.querySelector("ytmusic-menu-renderer button");
   if (!button) return "no-button";
@@ -275,25 +282,47 @@ export default function NowPlaying() {
   const [queueArt, setQueueArt] = useState<Record<string, string>>({});
   const refresh = useCallback(() => setTick((value) => value + 1), []);
   const lastRaw = useRef<string | undefined>(undefined);
-  const artSignature = useRef("");
+  const artworkFetched = useRef("");
+  const artworkPending = useRef("");
+  const artworkRetryAt = useRef(0);
+  const lastPlaylistId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
 
     const loadQueueArtwork = (snapshot: PlayerState) => {
-      const signature = [snapshot.videoId, snapshot.playlistId ?? "", ...snapshot.queue.map((t) => t.videoId)].join(
-        "|"
-      );
-      if (signature === artSignature.current) return;
-      artSignature.current = signature;
+      const ids = snapshot.queue.map((track) => track.videoId).filter(Boolean);
+      if (ids.length === 0 || !snapshot.videoId) return;
 
-      // One request per queue change; rows keep their fallback art meanwhile.
-      void fetchQueueArtwork(snapshot.videoId, snapshot.playlistId)
+      // Browsing away from the watch page clears `list` from the URL while the
+      // queue keeps playing; keep the last one so the request still matches it.
+      if (snapshot.playlistId) lastPlaylistId.current = snapshot.playlistId;
+
+      const signature = ids.join("|");
+      if (signature === artworkFetched.current || signature === artworkPending.current) return;
+      if (Date.now() < artworkRetryAt.current) return;
+
+      artworkPending.current = signature;
+      void fetchQueueArtwork(snapshot.videoId, snapshot.playlistId || lastPlaylistId.current)
         .then((art) => {
-          if (!cancelled && art.size > 0) setQueueArt(Object.fromEntries(art));
+          if (cancelled) return;
+          // Only a request that produced artwork counts as done; an empty or
+          // failed response is retried after a pause.
+          if (art.size > 0) {
+            artworkFetched.current = signature;
+            artworkRetryAt.current = 0;
+            setQueueArt(Object.fromEntries(art));
+          } else {
+            artworkRetryAt.current = Date.now() + ARTWORK_RETRY_MS;
+          }
         })
-        .catch(() => undefined);
+        .catch(() => {
+          if (!cancelled) artworkRetryAt.current = Date.now() + ARTWORK_RETRY_MS;
+        })
+        .finally(() => {
+          if (artworkPending.current === signature) artworkPending.current = "";
+        });
     };
 
     const poll = async () => {
@@ -391,10 +420,16 @@ export default function NowPlaying() {
   }
 
   const { queue, selectedIndex } = state;
-  // The row the app marks `selected` can be missing during a track change and
-  // can disagree with the player bar, so locate the playing track by video id
-  // first and only fall back to the marked row.
-  const playingIndex = state.videoId !== "" ? queue.findIndex((track) => track.videoId === state.videoId) : -1;
+  // A song can appear in the queue more than once. Prefer the row the app marks
+  // selected when it holds the playing track, so a later occurrence is not
+  // reported as the first one; otherwise fall back to the first id match.
+  const selectedRow = selectedIndex >= 0 ? queue[selectedIndex] : undefined;
+  const playingIndex =
+    selectedRow && state.videoId !== "" && selectedRow.videoId === state.videoId
+      ? selectedIndex
+      : state.videoId !== ""
+      ? queue.findIndex((track) => track.videoId === state.videoId)
+      : -1;
   const currentIndex = playingIndex >= 0 ? playingIndex : selectedIndex;
   const isPlaying = (track: QueueTrack) =>
     track.index === currentIndex || (playingIndex < 0 && state.videoId !== "" && track.videoId === state.videoId);
@@ -427,7 +462,7 @@ export default function NowPlaying() {
         <List.Section title="Recently Played">
           {history.map((track) => (
             <QueueItem
-              key={`recent-${track.videoId || track.index}`}
+              key={`recent-${track.index}-${track.videoId}`}
               track={track}
               artwork={queueArt}
               onRefresh={refresh}
@@ -452,7 +487,7 @@ export default function NowPlaying() {
         <List.Section title="Up Next">
           {upNext.map((track) => (
             <QueueItem
-              key={`next-${track.videoId || track.index}`}
+              key={`next-${track.index}-${track.videoId}`}
               track={track}
               artwork={queueArt}
               onRefresh={refresh}
