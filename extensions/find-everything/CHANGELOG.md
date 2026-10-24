@@ -1,59 +1,10 @@
 # Changelog
 
-## 2026-10-16 (f)
+## Initial Version - {PR_MERGE_DATE}
 
-- Query language (engine-level — works in the app, the Raycast extension and the `fe` CLI):
-  `ext:md;pdf` / `*.md` extension filters, `in:downloads` / bare `invoice in downloads` location scoping,
-  `type:doc|image|video|audio|zip|code|app` macros, `!noise` exclusion, `a|b` alternation,
-  `"exact phrase"` literal, `sort:name|new|old|big|small`, `size:>10m`, `dm:today|week|<n>d`.
-- Query history: `↑` on the first result row cycles through past queries, `↓` walks back; persisted in `history.json` (last 30).
-- `⇧Tab` in path mode jumps to the parent directory.
-- Dead-end rescue: `↵` on an empty result list opens a web search instead of doing nothing.
-- Shortcut hints render as Raycast-style keycaps (one cap per key, combos side-by-side); action panel and help card can no longer overlap.
-- Fixed: early `-m` exits left orphaned `rg` processes blocked on full pipes; all pipeline children are killed when fzf finishes.
-
-## 2026-10-16 (c)
-
-- Native macOS app `app/Find Everything.app` — SwiftUI/NSPanel floating panel, global `⌥Space` hotkey, shared `fe` engine + shared index. Build via `app/bundle-app.sh`, install via `install.sh`.
-- Onboarding: missing tools (`fe`/`fd`/`rg`/`fzf`) are downloaded from GitHub releases into `~/Library/Application Support/FindEverything/bin` — no Homebrew or admin rights.
-- Full keyboard control: `⌘K` action panel with type-to-filter and `→`/`←` submenus (Open With…, Switch Scope), `⌘↵` folder, `⌥↵` reveal, `⌘D`/`⌘I` details, `⌘Y` Quick Look, `⌘T` Terminal, `⌘⌫` Trash, `⌘1`–`⌘6` + `⌘⌥←`/`→` scopes, `⌃N`/`⌃P`/`PgUp`/`PgDn`/`Home`/`End` navigation, `⌘W` hide, `⌘Q` quit, `⎋` back (clears query first).
-- Mouse parity: hover selects, double-click opens, right-click context menu mirrors the action list, `⋯` footer button opens ⌘K panel.
-- User habits: "Recently Opened" when the query field is empty, opened items rank higher; stored in `~/Library/Application Support/FindEverything/opens.json`.
-- Detail pane shows text previews for code/text files and image previews; toast confirmations for copy/trash.
-- Keys are captured via a local event monitor — arrows and Enter now work while the search field has focus (the text field's editor previously swallowed them). Fixed `⌘K` never firing (wrong keycode 37→40) and swapped `⌘5`/`⌘6` scope keys.
-- `FE_REMOTE=1` enables a `/tmp/fe-cmd` test channel for deterministic UI automation; `FE_KEEP_VISIBLE=1` keeps the panel up for screenshots.
-- `fe` no longer crashes with EPIPE when piped into `head`.
-
-## 2026-10-16 (d)
-
-- Pins (`⌘P`): pinned files show a pin badge, lead the recents list and rank above other results; stored in `pins.json`.
-- Path passthrough: typing or pasting an existing absolute/`~/` path resolves it directly — Enter opens without touching the index.
-- Footer shows measured search latency (`80 results · 60ms`).
-- More file actions: Duplicate (`<name> copy`), Compress to zip, Copy file contents (`⌘⌥⇧C`), Share via NSSharingServicePicker, Finder Get Info on `⌘I`.
-- Result rows are draggable file references into Finder or other apps.
-
-## 2026-10-16 (e)
-
-- **Fixed real-keyboard arrows**: physical keyboards mark ↑↓/nav keys with `.function`; masking modifiers to just ⌘⌥⌃⇧ makes navigation fire on real hardware (synthetic tests had masked the bug).
-- Grouped results like Raycast: sections "Pinned" → "Recently Used" → "Applications" → "Files & Folders", with in-list headers.
-- Hotkey reference moved out of the footer: `?` button or `⌘/` opens a shortcuts card; `Keyboard Shortcuts` is also an entry in the ⌘K panel. Footer stays clean (status + latency + `?`/`⋯` buttons).
-
-## 2026-10-16 (b)
-
-- Standalone CLI `fe` for macOS and Linux — same engine as the Raycast extension, shared index at `~/.cache/hypersearch`. Commands: interactive picker (`fe`), `fe search`, `fe index`, `fe status`, `fe open`, `fe preview`.
-- Engine extracted to `src/engine.ts`; the Raycast command is now a thin UI on top of it.
-- Fixed `rg` dir-search printing `shard:/path` filename prefixes (`--no-filename`).
-- Fixed bare-name binaries (`open`, `xdg-open`, PATH-resolved `rg`) resolving as missing.
-- Bun-compiled binaries for darwin-arm64, darwin-x64, linux-x64, linux-arm64.
-
-## 2026-10-16
-
-- Speed: index split into 8 shards, `rg` scans them in parallel — typical query ~30ms (was ~150ms via Node stream). Worst-case queries (e.g. "e") capped at ~30ms instead of ~3s via per-shard `-m` limits.
-- `rg` now reads index files directly (mmap/page cache) instead of a Node.js pipe.
-- Shards auto-heal: missing dir is re-split from the flat index in ~150ms, no rescan needed.
-- Page cache warmed at startup so the first keystroke is not a cold disk read.
-- Default index refresh interval 15 → 60 min (less background churn).
-
-## 2026-10-17
-
-- Initial: HyperSearch Raycast extension — persistent `fd` index per scope (`~/.cache/hypersearch/index-<scope>.txt`), `fzf --filter` fuzzy ranking, real Finder file icons, lazy stat for size/mtime, stale-while-revalidate index refresh (`Cmd+R` forces rebuild). No Spotlight dependency.
+- Search files and folders without Spotlight using a persistent fd index, ripgrep filtering, and fzf ranking.
+- Choose Home, Downloads, Documents, Applications, All, or custom search paths.
+- Filter by extension, folder, file type, exclusions, exact phrases, and alternatives.
+- Open files, reveal them in Finder, copy paths or files, and inspect file details and image previews.
+- Refresh stale indexes in the background and rebuild manually with Command-R, including from an empty result list.
+- Include a standalone CLI that shares the index with the extension.

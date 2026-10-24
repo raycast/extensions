@@ -11,10 +11,8 @@ import {
   FD,
   FZF,
   RG,
-  SPLIT,
   OPEN_CMD,
   ensureIndex,
-  rebuildIndex,
   runSearch,
   rerank,
   applyPostFilters,
@@ -23,7 +21,6 @@ import {
   indexPathFor,
   shardDirFor,
   openPath,
-  scopePaths,
 } from "./engine";
 
 const VERSION = "0.2.0";
@@ -33,9 +30,10 @@ const RESET = "[0m";
 
 // In a compiled binary execPath IS the tool; under `bun run` it is the
 // interpreter, so re-invoke script + interpreter in that case.
+const shellQuote = (s: string) => "'" + s.replace(/'/g, "'\\''") + "'";
 const SELF = process.argv[1]?.endsWith(".ts")
-  ? `${process.execPath} ${process.argv[1]}`
-  : process.execPath;
+  ? `${shellQuote(process.execPath)} ${shellQuote(process.argv[1])}`
+  : shellQuote(process.execPath);
 
 interface Flags {
   scope: Scope;
@@ -70,6 +68,9 @@ function parseFlags(argv: string[]): { pos: string[]; flags: Flags } {
       pos.push(a);
     }
   }
+  if (!SCOPES.includes(flags.scope))
+    throw new Error(`Unknown scope: ${flags.scope}`);
+  flags.limit = Math.max(1, Math.min(5000, flags.limit));
   return { pos, flags };
 }
 
@@ -89,18 +90,20 @@ FLAGS
       --tui              tab-separated ANSI rows for fzf reload
   -h, --help     -v, --version
 
-Deps: fd, rg, fzf, split — index at ${INDEX_DIR}`;
+Deps: fd, rg, fzf — index at ${INDEX_DIR}`;
 
 async function cmdSearch(q: string, flags: Flags): Promise<void> {
   if (q.trim().length < 2) return;
-  await ensureIndex(flags.scope, {}, false, false).catch(() => {});
+  await ensureIndex(flags.scope, {}, false, false);
   const out = await runSearch(q, flags.scope, flags.limit);
   const ranked = applyPostFilters(rerank(out, q), parseQuery(q));
   for (const p of ranked) {
     if (flags.tui) {
       const name = path.basename(p);
       const dir = path.dirname(p).replace(HOME, "~");
-      process.stdout.write(`${p}\t${BOLD}${name}${RESET}  ${DIM}${dir}${RESET}\n`);
+      process.stdout.write(
+        `${p}\t${BOLD}${name}${RESET}  ${DIM}${dir}${RESET}\n`,
+      );
     } else {
       process.stdout.write(`${p}\n`);
     }
@@ -109,7 +112,7 @@ async function cmdSearch(q: string, flags: Flags): Promise<void> {
 
 async function cmdIndex(flags: Flags): Promise<void> {
   const t0 = Date.now();
-  await rebuildIndex(flags.scope, {});
+  await ensureIndex(flags.scope, {}, true);
   const file = indexPathFor(flags.scope);
   const dir = shardDirFor(flags.scope);
   const lines = fs.existsSync(file)
@@ -129,7 +132,6 @@ function cmdStatus(): void {
     ["fd", FD],
     ["rg", RG],
     ["fzf", FZF],
-    ["split", SPLIT],
     ["open", OPEN_CMD],
   ];
   for (const [n, b] of bins) {
@@ -160,7 +162,7 @@ function cmdPreview(p: string): void {
     );
     if (!s.isDirectory() && s.size > 0 && s.size < 2 * 1024 * 1024) {
       const head = fs.readFileSync(p, "utf8").slice(0, 4000);
-      if (!head.includes("")) console.log(`\n${DIM}${head}${RESET}`);
+      if (!head.includes("\0")) console.log(`\n${DIM}${head}${RESET}`);
     }
   } catch {
     console.log("file no longer exists");
@@ -178,10 +180,12 @@ function cmdReveal(p: string): void {
 
 async function cmdTui(flags: Flags): Promise<void> {
   if (!fs.existsSync(FZF)) {
-    console.error("fzf not found — install it first (brew install fzf / apt install fzf)");
+    console.error(
+      "fzf not found — install it first (brew install fzf / apt install fzf)",
+    );
     process.exit(1);
   }
-  await ensureIndex(flags.scope, {}).catch(() => {});
+  await ensureIndex(flags.scope, {}, false, false);
   const search = `${SELF} search --tui --scope ${flags.scope} --limit ${flags.limit}`;
   const fz = spawn(
     FZF,
@@ -204,6 +208,10 @@ async function cmdTui(flags: Flags): Promise<void> {
     ],
     { stdio: "inherit" },
   );
+  fz.on("error", (error) => {
+    console.error(`fe: ${error.message}`);
+    process.exit(1);
+  });
   fz.on("close", (code) => process.exit(code ?? 0));
 }
 
@@ -239,6 +247,8 @@ async function main(): Promise<void> {
 // turn into an EPIPE crash — exiting cleanly is the correct behavior.
 process.stdout.on("error", (e: NodeJS.ErrnoException) => {
   if (e.code === "EPIPE") process.exit(0);
+  console.error(`fe: ${e.message}`);
+  process.exit(1);
 });
 
 main().catch((e) => {

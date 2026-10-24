@@ -9,12 +9,11 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { execFile, ChildProcess } from "child_process";
+import { execFile } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import {
   Scope,
-  EngineOpts,
   ensureIndex,
   runSearch,
   rerank,
@@ -24,10 +23,6 @@ import {
   prettyPath,
   scopePaths,
 } from "./engine";
-
-interface Prefs extends EngineOpts {
-  resultLimit: string;
-}
 
 interface Meta {
   size?: number;
@@ -52,7 +47,7 @@ const isImage = (p: string) =>
   IMG_EXT.has(path.extname(p).slice(1).toLowerCase());
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences.SearchFiles>();
   const [scope, setScope] = useState<Scope>("home");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<string[]>([]);
@@ -61,17 +56,28 @@ export default function Command() {
   const [meta, setMeta] = useState<Record<string, Meta>>({});
   const [showDetail, setShowDetail] = useState(false);
   const [tick, setTick] = useState(0);
-  const procRef = useRef<ChildProcess[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
   const seq = useRef(0);
-  const limit = Math.max(
-    10,
-    parseInt(prefs.resultLimit || "300", 10) || 300,
-  );
+  const limit = Math.max(10, parseInt(prefs.resultLimit || "300", 10) || 300);
 
   useEffect(() => {
     let alive = true;
     setIndexing(true);
-    ensureIndex(scope, prefs)
+    const changed = () => {
+      if (alive) {
+        setMeta({});
+        setTick((t) => t + 1);
+      }
+    };
+    const failed = (e: Error) => {
+      if (alive)
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Index build failed",
+          message: e.message,
+        });
+    };
+    ensureIndex(scope, prefs, false, true, changed, failed)
       .then(() => {
         if (alive) setIndexing(false);
       })
@@ -88,10 +94,18 @@ export default function Command() {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scope]);
+  }, [
+    scope,
+    prefs.includeHidden,
+    prefs.includeIgnored,
+    prefs.extraExcludes,
+    prefs.customSearchPaths,
+    prefs.indexMaxAgeMinutes,
+  ]);
 
   useEffect(() => {
+    const mySeq = ++seq.current;
+    const controller = new AbortController();
     const q = query.trim();
     if (indexing || q.length < 2) {
       setResults([]);
@@ -99,50 +113,69 @@ export default function Command() {
       return;
     }
     const timer = setTimeout(async () => {
-      const mySeq = ++seq.current;
       setSearching(true);
-      for (const p of procRef.current) p.kill("SIGKILL");
-      const out = await runSearch(q, scope, limit, (c) => {
-        procRef.current = c;
-      });
-      if (mySeq !== seq.current) return;
-      setResults(applyPostFilters(rerank(out, q), parseQuery(q)));
-      setSearching(false);
-    }, 120);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, scope, indexing, tick]);
+      try {
+        const out = await runSearch(
+          q,
+          scope,
+          limit,
+          undefined,
+          controller.signal,
+        );
+        if (mySeq !== seq.current) return;
+        setMeta({});
+        setResults(applyPostFilters(rerank(out, q), parseQuery(q)));
+      } catch (e) {
+        if (mySeq !== seq.current) return;
+        setResults([]);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Search failed",
+          message: String(e?.message || e),
+        });
+      } finally {
+        if (mySeq === seq.current) setSearching(false);
+      }
+    }, 20);
+    return () => {
+      clearTimeout(timer);
+      ++seq.current;
+      controller.abort();
+    };
+  }, [query, scope, indexing, tick, limit]);
 
   useEffect(() => {
-    const pending = results.slice(0, 60).filter((p) => !(p in meta));
+    const pending = [
+      ...new Set([
+        ...results.slice(0, 60),
+        ...(selected && results.includes(selected) ? [selected] : []),
+      ]),
+    ].filter((p) => !(p in meta));
     if (!pending.length) return;
     let alive = true;
     Promise.all(
       pending.map(async (p): Promise<[string, Meta]> => {
         try {
           const s = await fs.promises.stat(p);
-          return [
-            p,
-            { size: s.size, mtime: s.mtime, dir: s.isDirectory() },
-          ];
+          return [p, { size: s.size, mtime: s.mtime, dir: s.isDirectory() }];
         } catch {
           return [p, { gone: true }];
         }
       }),
     ).then((entries) => {
-      if (alive)
-        setMeta((m) => ({ ...m, ...Object.fromEntries(entries) }));
+      if (alive) setMeta((m) => ({ ...m, ...Object.fromEntries(entries) }));
     });
     return () => {
       alive = false;
     };
-  }, [results]);
+  }, [results, selected]);
 
   const refresh = () => {
     setIndexing(true);
     ensureIndex(scope, prefs, true)
       .then(() => {
         setIndexing(false);
+        setMeta({});
         setTick((t) => t + 1); // retrigger search effect
         showToast({ style: Toast.Style.Success, title: "Index rebuilt" });
       })
@@ -176,11 +209,12 @@ export default function Command() {
 
   return (
     <List
-      isLoading={indexing}
-      throttle
+      isLoading={indexing || searching}
+      throttle={false}
       isShowingDetail={showDetail}
       searchText={query}
       onSearchTextChange={setQuery}
+      onSelectionChange={setSelected}
       navigationTitle="Find Everything"
       searchBarPlaceholder="Find every file on your Mac — instantly…"
       searchBarAccessory={
@@ -219,14 +253,28 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView title={emptyTitle} description={emptyDesc} />
+      <List.EmptyView
+        title={emptyTitle}
+        description={emptyDesc}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Rebuild Index"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={refresh}
+            />
+          </ActionPanel>
+        }
+      />
       {results.map((p) => {
         const m = meta[p];
         const accessories: List.Item.Accessory[] = [];
         if (m?.dir) accessories.push({ tag: "Folder" });
         if (m?.size !== undefined && !m?.dir)
           accessories.push({ text: humanBytes(m.size) });
-        if (m?.gone) accessories.push({ tag: { value: "gone", color: "#888" } });
+        if (m?.gone)
+          accessories.push({ tag: { value: "gone", color: "#888" } });
         const shownPath = prettyPath(p);
         const detailMd =
           isImage(p) && !m?.dir && !m?.gone
@@ -235,6 +283,7 @@ export default function Command() {
         return (
           <List.Item
             key={p}
+            id={p}
             icon={{ fileIcon: p }}
             title={path.basename(p)}
             subtitle={{ value: shownPath, tooltip: p }}
@@ -244,10 +293,7 @@ export default function Command() {
                 markdown={detailMd}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Path"
-                      text={p}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Path" text={p} />
                     <List.Item.Detail.Metadata.Label
                       title="Size"
                       text={

@@ -1,7 +1,11 @@
-import { spawn, ChildProcess } from "child_process";
+import { spawn, execFile, ChildProcess } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { pipeline } from "stream/promises";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 export const HOME = os.homedir();
 export const IS_MAC = process.platform === "darwin";
@@ -9,10 +13,7 @@ export const INDEX_DIR = path.join(HOME, ".cache", "hypersearch");
 
 // Homebrew first, then system paths, then PATH lookup as last resort.
 const BIN_DIRS = [
-  path.join(
-    HOME,
-    "Library/Application Support/FindEverything/bin",
-  ),
+  path.join(HOME, "Library/Application Support/FindEverything/bin"),
   "/opt/homebrew/bin",
   "/usr/local/bin",
   "/usr/bin",
@@ -21,16 +22,23 @@ const BIN_DIRS = [
   path.join(HOME, "bin"),
 ];
 export const findBin = (name: string): string => {
-  for (const d of BIN_DIRS) {
+  for (const d of [
+    ...BIN_DIRS,
+    ...(process.env.PATH || "").split(path.delimiter),
+  ]) {
     const p = path.join(d, name);
-    if (fs.existsSync(p)) return p;
+    try {
+      fs.accessSync(p, fs.constants.X_OK);
+      if (fs.statSync(p).isFile()) return p;
+    } catch {
+      continue;
+    }
   }
   return name;
 };
-export const FD = findBin("fd");
+export const FD = findBin("fd") === "fd" ? findBin("fdfind") : findBin("fd");
 export const FZF = findBin("fzf");
 export const RG = findBin("rg");
-export const SPLIT = findBin("split");
 export const OPEN_CMD = IS_MAC ? findBin("open") : findBin("xdg-open");
 
 export const BASE_EXCLUDES = [
@@ -164,106 +172,171 @@ export const shardDirFor = (scope: Scope) =>
   path.join(INDEX_DIR, `index-${scope}.d`);
 
 export const SHARD_COUNT = 8;
-// Per-shard match cap -> at most SHARD_COUNT*cap candidates reach fzf,
-// which bounds the worst-case query (e.g. "e") at ~30ms instead of seconds.
-const SHARD_CAP = 4000;
-const FILE_CAP = 32000;
 
 const inFlight = new Map<string, Promise<void>>();
+const shardJobs = new Map<string, Promise<void>>();
 
-// The flat index stays canonical; shards are a derived cache that lets
-// rg scan all 8 in parallel (~4x) and gives -m a spread across the tree.
-export async function shardIndex(file: string, dir: string): Promise<void> {
-  if (!fs.existsSync(file) || fs.statSync(file).size === 0) return;
-  const tmpDir = `${dir}.tmp`;
-  fs.rmSync(tmpDir, { recursive: true, force: true });
-  fs.mkdirSync(tmpDir, { recursive: true });
-  await new Promise<void>((resolve, reject) => {
-    const c = spawn(SPLIT, [
-      "-n",
-      String(SHARD_COUNT),
-      file,
-      path.join(tmpDir, "s-"),
-    ]);
-    c.on("error", reject);
-    c.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`split exited ${code}`)),
-    );
+const indexSignature = (file: string) => {
+  const s = fs.statSync(file);
+  return JSON.stringify([s.ino, s.size, s.mtimeMs]);
+};
+const settingsFor = (scope: Scope, opts: EngineOpts) =>
+  JSON.stringify({
+    paths: scopePaths(scope, opts),
+    hidden: !!opts.includeHidden,
+    ignored: !!opts.includeIgnored,
+    excludes: opts.extraExcludes || "",
   });
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.renameSync(tmpDir, dir);
+function settingsMatch(scope: Scope, opts: EngineOpts): boolean {
+  try {
+    const file = indexPathFor(scope);
+    const stored = JSON.parse(fs.readFileSync(`${file}.settings`, "utf8"));
+    return (
+      stored.settings === settingsFor(scope, opts) &&
+      stored.signature === indexSignature(file)
+    );
+  } catch {
+    return false;
+  }
 }
 
-export function rebuildIndex(scope: Scope, opts: EngineOpts): Promise<void> {
+// Native line splitting avoids a JavaScript callback and write per indexed path.
+export async function shardIndex(file: string, dir: string): Promise<void> {
+  const pending = shardJobs.get(dir);
+  if (pending) {
+    await pending;
+    return shardIndex(file, dir);
+  }
+  if (shardsFresh(file, dir)) return;
+  const job = (async () => {
+    const signature = indexSignature(file);
+    const tmpDir = fs.mkdtempSync(`${dir}.tmp-`);
+    try {
+      const { stdout } = await execFileAsync(findBin("wc"), ["-l", file], {
+        timeout: 300000,
+      });
+      const count = Number(stdout.trim().split(/\s+/)[0]);
+      if (!Number.isFinite(count))
+        throw new Error("Could not count index lines");
+      // Include a possible unterminated final line; split never cuts a path.
+      const lines = Math.max(1, Math.ceil((count + 1) / SHARD_COUNT));
+      await execFileAsync(
+        findBin("split"),
+        ["-l", String(lines), file, path.join(tmpDir, "part-")],
+        { timeout: 300000 },
+      );
+      const parts = fs.readdirSync(tmpDir).sort();
+      if (parts.length > SHARD_COUNT)
+        throw new Error("Index changed while splitting");
+      for (let i = 0; i < SHARD_COUNT; i++) {
+        const target = path.join(tmpDir, `s-${i}`);
+        if (parts[i]) fs.renameSync(path.join(tmpDir, parts[i]), target);
+        else fs.writeFileSync(target, "");
+      }
+      if (indexSignature(file) !== signature) return;
+      fs.writeFileSync(path.join(tmpDir, ".source"), signature);
+      fs.rmSync(dir, { recursive: true, force: true });
+      fs.renameSync(tmpDir, dir);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  })();
+  shardJobs.set(dir, job);
+  try {
+    await job;
+  } finally {
+    if (shardJobs.get(dir) === job) shardJobs.delete(dir);
+  }
+}
+
+export async function rebuildIndex(
+  scope: Scope,
+  opts: EngineOpts,
+): Promise<void> {
   const file = indexPathFor(scope);
   const pending = inFlight.get(file);
-  if (pending) return pending;
+  if (pending) {
+    await pending;
+    if (settingsMatch(scope, opts)) return;
+    return rebuildIndex(scope, opts);
+  }
 
-  const job = new Promise<void>((resolve, reject) => {
-    const tmp = `${file}.tmp`;
+  const job = (async () => {
+    fs.mkdirSync(INDEX_DIR, { recursive: true });
+    const tmpDir = fs.mkdtempSync(`${file}.tmp-`);
+    const tmp = path.join(tmpDir, "index");
     const dirs = scopePaths(scope, opts);
-    if (dirs.length === 0) {
-      fs.writeFileSync(tmp, "");
-      fs.renameSync(tmp, file);
-      resolve();
-      return;
-    }
-    const excludes = [
-      ...BASE_EXCLUDES,
-      ...(opts.extraExcludes || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      ...(scope === "all" ? ALL_EXCLUDES : []),
-    ];
-    const args = ["--absolute-path", "--color=never"];
-    if (opts.includeHidden) args.push("--hidden");
-    if (opts.includeIgnored) args.push("--no-ignore");
-    for (const e of excludes) args.push("--exclude", e);
-    args.push("", ...dirs);
+    const settings = settingsFor(scope, opts);
+    try {
+      if (dirs.length === 0) {
+        fs.writeFileSync(tmp, "");
+      } else {
+        const excludes = [
+          ...BASE_EXCLUDES,
+          ...(opts.extraExcludes || "")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          ...(scope === "all" ? ALL_EXCLUDES : []),
+        ];
+        const args = ["--absolute-path", "--color=never"];
+        if (opts.includeHidden) args.push("--hidden");
+        if (opts.includeIgnored) args.push("--no-ignore");
+        for (const e of excludes) args.push("--exclude", e);
+        args.push("", ...dirs);
 
-    const out = fs.createWriteStream(tmp);
-    const child = spawn(FD, args);
-    child.stdout.pipe(out);
-    child.stderr.resume();
-    child.on("error", reject);
-    child.on("close", (code) => {
-      out.close(() => {
-        if (code === 0) {
-          fs.renameSync(tmp, file);
-          shardIndex(file, shardDirFor(scope))
-            .catch(() => {})
-            .then(resolve);
-        } else {
-          fs.rmSync(tmp, { force: true });
-          reject(new Error(`fd exited with code ${code}`));
+        const out = fs.createWriteStream(tmp);
+        const child = spawn(FD, args);
+        const timeout = setTimeout(() => child.kill("SIGKILL"), 300000);
+        child.stderr.resume();
+        const exited = new Promise<void>((resolve, reject) => {
+          child.on("error", reject);
+          child.on("close", (code) =>
+            code === 0
+              ? resolve()
+              : reject(new Error(`fd exited with code ${code}`)),
+          );
+        });
+        try {
+          await Promise.all([pipeline(child.stdout, out), exited]);
+        } catch (error) {
+          child.kill("SIGKILL");
+          out.destroy();
+          await exited.catch(() => undefined);
+          throw error;
+        } finally {
+          clearTimeout(timeout);
         }
-      });
-    });
-  }).finally(() => inFlight.delete(file));
+      }
+      const metadata = path.join(tmpDir, "settings");
+      fs.writeFileSync(
+        metadata,
+        JSON.stringify({ settings, signature: indexSignature(tmp) }),
+      );
+      fs.renameSync(tmp, file);
+      fs.renameSync(metadata, `${file}.settings`);
+      // The flat index remains usable if the derived cache cannot be written.
+      await shardIndex(file, shardDirFor(scope)).catch((error) =>
+        console.error(`Shard cache: ${error.message}`),
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  })().finally(() => inFlight.delete(file));
 
   inFlight.set(file, job);
-  return job;
+  await job;
 }
 
-// Shard dir may be missing on upgrade from a flat-index install; split it
-// on the fly (~150ms) instead of waiting for the next fd rebuild.
+// Repair the derived cache without rescanning the filesystem.
 export async function ensureShards(scope: Scope): Promise<void> {
   const file = indexPathFor(scope);
   const dir = shardDirFor(scope);
   if (!fs.existsSync(file)) return;
-  const dirFresh =
-    fs.existsSync(dir) &&
-    fs.statSync(dir).mtimeMs >= fs.statSync(file).mtimeMs;
-  if (!dirFresh) await shardIndex(file, dir).catch(() => {});
-  // Warm the OS page cache so the first keystroke never hits cold disk.
-  if (fs.existsSync(dir))
-    spawn(RG, ["-c", "--no-ignore", ".", dir], {
-      stdio: "ignore",
-      detached: true,
-    })
-      .on("error", () => {})
-      .unref();
+  if (!shardsFresh(file, dir))
+    await shardIndex(file, dir).catch((error) =>
+      console.error(`Shard cache: ${error.message}`),
+    );
 }
 
 export async function ensureIndex(
@@ -271,21 +344,30 @@ export async function ensureIndex(
   opts: EngineOpts,
   force = false,
   background = true,
+  onRebuilt?: () => void,
+  onError?: (error: Error) => void,
 ): Promise<string> {
   const file = indexPathFor(scope);
   fs.mkdirSync(INDEX_DIR, { recursive: true });
   const maxAgeMs =
-    Math.max(1, parseFloat(opts.indexMaxAgeMinutes || "60")) * 60_000;
-  const exists = fs.existsSync(file);
+    Math.max(1, parseFloat(opts.indexMaxAgeMinutes || "60") || 60) * 60_000;
+  const exists = fs.existsSync(file) && settingsMatch(scope, opts);
   const stale = exists && Date.now() - fs.statSync(file).mtimeMs > maxAgeMs;
   if (exists && !stale && !force) {
     await ensureShards(scope);
     return file;
   }
   if (exists && stale && !force) {
-    // CLI callers pass background=false so a queued fd scan can't pin
-    // the event loop after results were already printed.
-    if (background) rebuildIndex(scope, opts).catch(() => {});
+    if (!background) {
+      await rebuildIndex(scope, opts);
+      return file;
+    }
+    void rebuildIndex(scope, opts)
+      .then(onRebuilt)
+      .catch((error) => {
+        if (onError) onError(error);
+        else console.error(`Background index rebuild: ${error.message}`);
+      });
     await ensureShards(scope);
     return file; // stale-while-revalidate
   }
@@ -296,9 +378,23 @@ export async function ensureIndex(
 // Search target: shard dir when available (parallel scan), flat file else.
 function searchTarget(scope: Scope): { target: string; isDir: boolean } {
   const dir = shardDirFor(scope);
-  if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0)
+  if (shardsFresh(indexPathFor(scope), dir))
     return { target: dir, isDir: true };
   return { target: indexPathFor(scope), isDir: false };
+}
+
+function shardsFresh(file: string, dir: string): boolean {
+  try {
+    return (
+      fs.readFileSync(path.join(dir, ".source"), "utf8") ===
+        indexSignature(file) &&
+      Array.from({ length: SHARD_COUNT }, (_, i) =>
+        fs.existsSync(path.join(dir, `s-${i}`)),
+      ).every(Boolean)
+    );
+  } catch {
+    return false;
+  }
 }
 
 // Query language (Everything-style, validated): `ext:md;pdf` / `*.md`
@@ -316,10 +412,17 @@ export interface ParsedQuery {
 }
 const reEsc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const IN_ALIASES: Record<string, string> = {
-  downloads: "Downloads", documents: "Documents", docs: "Documents",
-  desktop: "Desktop", pictures: "Pictures", pics: "Pictures",
-  music: "Music", movies: "Movies", applications: "Applications",
-  apps: "Applications", projects: "Projects",
+  downloads: "Downloads",
+  documents: "Documents",
+  docs: "Documents",
+  desktop: "Desktop",
+  pictures: "Pictures",
+  pics: "Pictures",
+  music: "Music",
+  movies: "Movies",
+  applications: "Applications",
+  apps: "Applications",
+  projects: "Projects",
 };
 const TYPE_MACROS: Record<string, string> = {
   doc: "txt|md|pdf|rtf|odt|doc|docx|pages|tex|epub",
@@ -331,12 +434,23 @@ const TYPE_MACROS: Record<string, string> = {
   app: "app|dmg|pkg",
 };
 const SIZE_UNITS: Record<string, number> = {
-  b: 1, k: 1 << 10, kb: 1 << 10, m: 1 << 20, mb: 1 << 20,
-  g: 1 << 30, gb: 1 << 30,
+  b: 1,
+  k: 1 << 10,
+  kb: 1 << 10,
+  m: 1 << 20,
+  mb: 1 << 20,
+  g: 1 << 30,
+  gb: 1 << 30,
 };
 const DM_DAYS: Record<string, number> = {
-  today: 1, yesterday: 2, week: 7, thisweek: 7,
-  month: 31, thismonth: 31, year: 366, thisyear: 366,
+  today: 1,
+  yesterday: 2,
+  week: 7,
+  thisweek: 7,
+  month: 31,
+  thismonth: 31,
+  year: 366,
+  thisyear: 366,
 };
 export function parseQuery(q: string): ParsedQuery {
   const pq: ParsedQuery = { fuzzy: [], constraints: [] };
@@ -347,10 +461,11 @@ export function parseQuery(q: string): ParsedQuery {
   const toks = rest.split(/\s+/).filter(Boolean);
   const inTarget = (v: string) => {
     const lv = v.toLowerCase();
-    if (IN_ALIASES[lv])
-      return `/${IN_ALIASES[lv]}/`;
-    if (v.startsWith("/") || v.startsWith("~"))
-      return reEsc(v.startsWith("~") ? HOME + v.slice(1) : v);
+    if (IN_ALIASES[lv]) return `/${IN_ALIASES[lv]}/`;
+    if (v.startsWith("/") || v === "~" || v.startsWith("~/")) {
+      const folder = path.resolve(v.startsWith("~") ? HOME + v.slice(1) : v);
+      return `^${reEsc(folder === "/" ? folder : folder + "/")}`;
+    }
     return `/${reEsc(lv)}/`;
   };
   for (let i = 0; i < toks.length; i++) {
@@ -364,7 +479,7 @@ export function parseQuery(q: string): ParsedQuery {
       pq.constraints.push({ pattern: reEsc(tok.slice(1)), negate: true });
       continue;
     }
-    if (tok.startsWith("*." ) && /^[\w-]+$/.test(tok.slice(2))) {
+    if (tok.startsWith("*.") && /^[\w-]+$/.test(tok.slice(2))) {
       pq.constraints.push({ pattern: `\\.${tok.slice(2)}$`, negate: false });
       continue;
     }
@@ -375,7 +490,9 @@ export function parseQuery(q: string): ParsedQuery {
       const lv = v.toLowerCase();
       if (k === "ext") {
         // ext:md;pdf;txt — `;` lists like Everything
-        const parts = lv.split(";").filter((e) => /^[\w-]+(\.[\w-]+)*$/.test(e));
+        const parts = lv
+          .split(";")
+          .filter((e) => /^[\w-]+(\.[\w-]+)*$/.test(e));
         if (parts.length)
           pq.constraints.push({
             pattern: `\\.(${parts.map(reEsc).join("|")})$`,
@@ -435,87 +552,167 @@ export function parseQuery(q: string): ParsedQuery {
   return pq;
 }
 
-// Pipeline: rg(term1, file/dir directly) -> rg(term2) ... -> fzf --filter
-// rg narrows the index to ~2k candidates in ~25ms (8 parallel shards);
-// fzf ranks them. Each shard is -m capped so worst-case queries stay ~30ms.
+// Candidate filters preserve fuzzy subsequences; no cap runs before all terms.
 export function runSearch(
   query: string,
   scope: Scope,
   limit: number,
   onSpawn?: (c: ChildProcess[]) => void,
+  signal?: AbortSignal,
 ): Promise<string[]> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const pq = parseQuery(query);
     const children: ChildProcess[] = [];
+    let source: fs.ReadStream | undefined;
+    let settled = false;
+    const abort = () => done([]);
+    const timer = setTimeout(
+      () => fail(new Error("Search timed out after 15 seconds")),
+      15000,
+    );
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      source?.destroy();
+      for (const child of children) {
+        child.stdin?.destroy();
+        child.stdout?.destroy();
+        child.kill("SIGKILL");
+      }
+    };
+    const fail = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    const done = (paths: string[]) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(paths);
+    };
     onSpawn?.(children);
-
+    if (signal?.aborted) {
+      done([]);
+      return;
+    }
+    signal?.addEventListener("abort", abort, { once: true });
+    const { target, isDir } = searchTarget(scope);
+    const stages: string[][] = [];
+    for (const term of pq.fuzzy) {
+      const literal = term.startsWith("'");
+      const pattern = literal
+        ? term.slice(1)
+        : term
+            .split("|")
+            .map((alt) => [...alt].map(reEsc).join(".*"))
+            .join("|");
+      stages.push(["-S", ...(literal ? ["-F"] : []), "--", pattern]);
+    }
+    for (const constraint of pq.constraints) {
+      stages.push([
+        "-i",
+        ...(constraint.negate ? ["-v"] : []),
+        "--",
+        constraint.pattern,
+      ]);
+    }
     let stream: NodeJS.ReadableStream | undefined;
-    if (RG) {
-      const { target, isDir } = searchTarget(scope);
-      const stages: string[][] = [];
-      for (const term of pq.fuzzy) {
-        if (term.includes("|")) continue; // alternation already a regex stage
-        stages.push([
-          ...(isDir ? ["--no-ignore", "--no-filename"] : []),
-          "-S", "-F", "-m",
-          String(isDir ? SHARD_CAP : FILE_CAP),
-          "--no-line-number", "--",
-          term.startsWith("'") ? term.slice(1) : term,
-        ]);
-      }
-      for (const c of pq.constraints) {
-        stages.push([
-          ...(isDir ? ["--no-ignore", "--no-filename"] : []),
-          "-i", ...(c.negate ? ["-v"] : []), "-m",
-          String(isDir ? SHARD_CAP : FILE_CAP),
-          "--no-line-number", "--", c.pattern,
-        ]);
-      }
-      for (const [i, args] of stages.entries()) {
-        if (i === 0) args.push(target);
-        const p = spawn(RG, args, {
-          stdio: ["pipe", "pipe", "ignore"],
-        });
-        children.push(p);
-        p.on("error", () => {}); // binary missing -> empty stage
-        p.stdin!.on("error", () => {}); // EPIPE on early kill
-        p.stdout!.on("error", () => {});
-        if (stream) stream.pipe(p.stdin!);
-        stream = p.stdout!;
-      }
+    for (const [i, args] of stages.entries()) {
+      const child = spawn(
+        RG,
+        [
+          "--no-config",
+          "--color=never",
+          "--no-line-number",
+          "--no-heading",
+          "--no-filename",
+          ...(i === 0 && isDir ? ["--no-ignore"] : []),
+          ...(i === stages.length - 1
+            ? ["-m", String(i === 0 && isDir ? 4000 : 32000)]
+            : []),
+          ...args,
+          ...(i === 0 ? [target] : []),
+        ],
+        { stdio: ["pipe", "pipe", "pipe"] },
+      );
+      children.push(child);
+      let errorText = "";
+      child.stderr!.on("data", (d) => {
+        errorText = (errorText + d).slice(-2000);
+      });
+      child.on("error", fail);
+      child.on("close", (code) => {
+        if (code !== null && code > 1)
+          fail(new Error(errorText || `rg exited with code ${code}`));
+      });
+      child.stdin!.on("error", (error: NodeJS.ErrnoException) => {
+        if (error.code !== "EPIPE") fail(error);
+      });
+      child.stdout!.on("error", fail);
+      if (stream) stream.pipe(child.stdin!);
+      stream = child.stdout!;
     }
     if (!stream) {
-      stream = fs.createReadStream(indexPathFor(scope));
-      stream.on("error", () => {});
+      source = fs.createReadStream(indexPathFor(scope));
+      source.on("error", fail);
+      stream = source;
     }
-    // fzf needs `a | b` with spaces for OR; quoted terms use 'exact syntax.
-    const fzfFilter = pq.fuzzy
-      .map((t) => (t.includes("|") ? t.split("|").join(" | ") : t))
+    // rg has already matched literal phrases in full. fzf's extended parser
+    // would reinterpret embedded spaces and pipes if it received them again.
+    const filter = pq.fuzzy
+      .filter((t) => !t.startsWith("'"))
+      .map((t) => t.split("|").join(" | "))
       .join(" ");
-    const fz = spawn(
+    const fzf = spawn(
       FZF,
-      [`--filter=${fzfFilter}`, "--scheme=path", "--no-bold"],
-      { stdio: ["pipe", "pipe", "ignore"] },
+      [`--filter=${filter}`, "--scheme=path", "--no-bold"],
+      {
+        stdio: ["pipe", "pipe", "pipe"],
+        env: {
+          ...process.env,
+          FZF_DEFAULT_OPTS: "",
+          FZF_DEFAULT_OPTS_FILE: "",
+        },
+      },
     );
-    children.push(fz);
-    fz.stdin!.on("error", () => {});
-    stream.pipe(fz.stdin!);
-
-    let buf = "";
-    let lines = 0;
-    fz.stdout!.on("data", (d) => {
-      const s = d.toString();
-      buf += s;
-      lines += (s.match(/\n/g) || []).length;
-      if (buf.length > 8 * 1024 * 1024 || lines > 5000) fz.kill("SIGKILL");
+    children.push(fzf);
+    fzf.on("error", fail);
+    fzf.stdin!.on("error", (error: NodeJS.ErrnoException) => {
+      if (error.code !== "EPIPE") fail(error);
     });
-    fz.on("close", () => {
-      // Downstream exits early on -m caps; upstream rg stages would
-      // otherwise block forever writing into a readerless pipe.
-      for (const c of children) c.kill("SIGKILL");
-      resolve(buf.split("\n").filter(Boolean).slice(0, limit));
+    let errorText = "";
+    fzf.stderr!.on("data", (d) => {
+      errorText = (errorText + d).slice(-2000);
     });
-    fz.on("error", () => resolve([]));
+    const output: string[] = [];
+    let partial = "";
+    fzf.stdout!.setEncoding("utf8");
+    fzf.stdout!.on("data", (chunk: string) => {
+      const lines = (partial + chunk).split("\n");
+      partial = lines.pop() || "";
+      for (const line of lines) {
+        if (line) output.push(line);
+        if (output.length >= limit) {
+          done(output);
+          return;
+        }
+      }
+    });
+    fzf.on("close", (code, signal) => {
+      if (code !== null && code > 1) {
+        fail(new Error(errorText || `fzf exited with code ${code}`));
+        return;
+      }
+      if (signal) {
+        done([]);
+        return;
+      }
+      if (partial) output.push(partial);
+      done(output.slice(0, limit));
+    });
+    stream.pipe(fzf.stdin!);
   });
 }
 
@@ -523,9 +720,9 @@ export function runSearch(
 // hits whose basename contains ALL query terms float to the top.
 // Takes the raw query; operator tokens are parsed away internally.
 export function rerank(paths: string[], q: string): string[] {
-  const groups = parseQuery(q)
-    .fuzzy.map((t) => t.replace(/^'/, "").toLowerCase())
-    .map((t) => t.split("|")); // each group's alts are OR-ed
+  const groups = parseQuery(q).fuzzy.map((t) =>
+    t.startsWith("'") ? [t.slice(1).toLowerCase()] : t.toLowerCase().split("|"),
+  ); // each group's alts are OR-ed
   const seen = new Set<string>();
   const nameHit: string[] = [];
   const rest: string[] = [];
