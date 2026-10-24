@@ -1,0 +1,746 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spacetile",
+  "title": "Spacetile",
+  "description": "Drive the Spacetile tiling window manager from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "alistairstead",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "subtitle": "Spacetile",
+      "description": "Send any Spacetile command, e.g. focus west or layout stack.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "focus west",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "space-1",
+      "title": "Switch to Space 1",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 1` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-1",
+      "title": "Send to Space 1",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 1` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-2",
+      "title": "Switch to Space 2",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 2` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-2",
+      "title": "Send to Space 2",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 2` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-3",
+      "title": "Switch to Space 3",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 3` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-3",
+      "title": "Send to Space 3",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 3` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-4",
+      "title": "Switch to Space 4",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 4` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-4",
+      "title": "Send to Space 4",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 4` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-5",
+      "title": "Switch to Space 5",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 5` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-5",
+      "title": "Send to Space 5",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 5` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-6",
+      "title": "Switch to Space 6",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 6` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-6",
+      "title": "Send to Space 6",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 6` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-7",
+      "title": "Switch to Space 7",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 7` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-7",
+      "title": "Send to Space 7",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 7` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-8",
+      "title": "Switch to Space 8",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 8` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-8",
+      "title": "Send to Space 8",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 8` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-9",
+      "title": "Switch to Space 9",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 9` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-9",
+      "title": "Send to Space 9",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 9` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-10",
+      "title": "Switch to Space 10",
+      "subtitle": "Spacetile",
+      "description": "Sends `space 10` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-10",
+      "title": "Send to Space 10",
+      "subtitle": "Spacetile",
+      "description": "Sends `send 10` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-west",
+      "title": "Focus the Window on the Left",
+      "subtitle": "Spacetile",
+      "description": "Sends `focus west` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-south",
+      "title": "Focus the Window Below",
+      "subtitle": "Spacetile",
+      "description": "Sends `focus south` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-north",
+      "title": "Focus the Window Above",
+      "subtitle": "Spacetile",
+      "description": "Sends `focus north` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-east",
+      "title": "Focus the Window on the Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `focus east` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-prev",
+      "title": "Previous Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `space prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-next",
+      "title": "Next Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `space next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-last",
+      "title": "Last-Used Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `space last` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "display-next",
+      "title": "Focus Next Display",
+      "subtitle": "Spacetile",
+      "description": "Sends `display next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "display-prev",
+      "title": "Focus Previous Display",
+      "subtitle": "Spacetile",
+      "description": "Sends `display prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stack-prev",
+      "title": "Previous Window in Stack",
+      "subtitle": "Spacetile",
+      "description": "Sends `stack prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stack-next",
+      "title": "Next Window in Stack",
+      "subtitle": "Spacetile",
+      "description": "Sends `stack next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-west",
+      "title": "Swap with the Window on the Left",
+      "subtitle": "Spacetile",
+      "description": "Sends `swap west` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-south",
+      "title": "Swap with the Window Below",
+      "subtitle": "Spacetile",
+      "description": "Sends `swap south` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-north",
+      "title": "Swap with the Window Above",
+      "subtitle": "Spacetile",
+      "description": "Sends `swap north` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "swap-east",
+      "title": "Swap with the Window on the Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `swap east` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pop-out",
+      "title": "Pop out",
+      "subtitle": "Spacetile",
+      "description": "Sends `pop out` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pop-in",
+      "title": "Pop Back in",
+      "subtitle": "Spacetile",
+      "description": "Sends `pop in` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-prev",
+      "title": "Send to Previous Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `send prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-next",
+      "title": "Send to Next Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `send next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-display-next",
+      "title": "Send to Next Display",
+      "subtitle": "Spacetile",
+      "description": "Sends `send display next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-display-prev",
+      "title": "Send to Previous Display",
+      "subtitle": "Spacetile",
+      "description": "Sends `send display prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "join-west",
+      "title": "Join with the Window on the Left",
+      "subtitle": "Spacetile",
+      "description": "Sends `join west` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "join-south",
+      "title": "Join with the Window Below",
+      "subtitle": "Spacetile",
+      "description": "Sends `join south` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "join-north",
+      "title": "Join with the Window Above",
+      "subtitle": "Spacetile",
+      "description": "Sends `join north` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "join-east",
+      "title": "Join with the Window on the Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `join east` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "zoom",
+      "title": "Zoom (Fill the Space)",
+      "subtitle": "Spacetile",
+      "description": "Sends `zoom` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "float",
+      "title": "Toggle Float",
+      "subtitle": "Spacetile",
+      "description": "Sends `float` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "split",
+      "title": "Toggle Split Direction",
+      "subtitle": "Spacetile",
+      "description": "Sends `split` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "balance",
+      "title": "Balance",
+      "subtitle": "Spacetile",
+      "description": "Sends `balance` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-bsp",
+      "title": "Tile This Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `layout bsp` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-stack",
+      "title": "Stack This Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `layout stack` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "layout-float",
+      "title": "Float This Space",
+      "subtitle": "Spacetile",
+      "description": "Sends `layout float` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-horizontal",
+      "title": "Mirror Left ↔ Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `mirror horizontal` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-vertical",
+      "title": "Mirror Top ↕ Bottom",
+      "subtitle": "Spacetile",
+      "description": "Sends `mirror vertical` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate-90",
+      "title": "Rotate Clockwise",
+      "subtitle": "Spacetile",
+      "description": "Sends `rotate 90` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate-270",
+      "title": "Rotate Anticlockwise",
+      "subtitle": "Spacetile",
+      "description": "Sends `rotate 270` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "retile",
+      "title": "Retile",
+      "subtitle": "Spacetile",
+      "description": "Sends `retile` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "close",
+      "title": "Close Window",
+      "subtitle": "Spacetile",
+      "description": "Sends `close` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "place-column",
+      "title": "Maximize Height",
+      "subtitle": "Spacetile",
+      "description": "Sends `place column` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "place-left",
+      "title": "Left ½ → ⅔ → ⅓",
+      "subtitle": "Spacetile",
+      "description": "Sends `place left` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-left.png"
+    },
+    {
+      "name": "place-right",
+      "title": "Right ½ → ⅔ → ⅓",
+      "subtitle": "Spacetile",
+      "description": "Sends `place right` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-right.png"
+    },
+    {
+      "name": "place-top",
+      "title": "Top ½ → ⅔ → ⅓",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top.png"
+    },
+    {
+      "name": "place-bottom",
+      "title": "Bottom ½ → ⅔ → ⅓",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom.png"
+    },
+    {
+      "name": "place-left-3-4",
+      "title": "Left ¾",
+      "subtitle": "Spacetile",
+      "description": "Sends `place left 3/4` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-left-3-4.png"
+    },
+    {
+      "name": "place-right-3-4",
+      "title": "Right ¾",
+      "subtitle": "Spacetile",
+      "description": "Sends `place right 3/4` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-right-3-4.png"
+    },
+    {
+      "name": "place-center",
+      "title": "Centre ⅓",
+      "subtitle": "Spacetile",
+      "description": "Sends `place center` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-center.png"
+    },
+    {
+      "name": "place-top-left",
+      "title": "Top-Left ¼",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top-left` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top-left.png"
+    },
+    {
+      "name": "place-top-right",
+      "title": "Top-Right ¼",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top-right` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top-right.png"
+    },
+    {
+      "name": "place-bottom-left",
+      "title": "Bottom-Left ¼",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom-left` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom-left.png"
+    },
+    {
+      "name": "place-bottom-right",
+      "title": "Bottom-Right ¼",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom-right` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom-right.png"
+    },
+    {
+      "name": "place-top-left-sixth",
+      "title": "Top-Left ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top-left-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top-left-sixth.png"
+    },
+    {
+      "name": "place-top-center-sixth",
+      "title": "Top-Centre ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top-center-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top-center-sixth.png"
+    },
+    {
+      "name": "place-top-right-sixth",
+      "title": "Top-Right ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place top-right-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-top-right-sixth.png"
+    },
+    {
+      "name": "place-bottom-left-sixth",
+      "title": "Bottom-Left ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom-left-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom-left-sixth.png"
+    },
+    {
+      "name": "place-bottom-center-sixth",
+      "title": "Bottom-Centre ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom-center-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom-center-sixth.png"
+    },
+    {
+      "name": "place-bottom-right-sixth",
+      "title": "Bottom-Right ⅙",
+      "subtitle": "Spacetile",
+      "description": "Sends `place bottom-right-sixth` to Spacetile.",
+      "mode": "no-view",
+      "icon": "regions/place-bottom-right-sixth.png"
+    },
+    {
+      "name": "grow",
+      "title": "Grow",
+      "subtitle": "Spacetile",
+      "description": "Sends `grow` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shrink",
+      "title": "Shrink",
+      "subtitle": "Spacetile",
+      "description": "Sends `shrink` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore",
+      "title": "Restore",
+      "subtitle": "Spacetile",
+      "description": "Sends `restore` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "border-horizontal-minus100",
+      "title": "Move Vertical Border Left",
+      "subtitle": "Spacetile",
+      "description": "Sends `border horizontal -100` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "border-horizontal-100",
+      "title": "Move Vertical Border Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `border horizontal 100` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "border-vertical-minus100",
+      "title": "Raise Horizontal Border",
+      "subtitle": "Spacetile",
+      "description": "Sends `border vertical -100` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "border-vertical-100",
+      "title": "Lower Horizontal Border",
+      "subtitle": "Spacetile",
+      "description": "Sends `border vertical 100` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullscreen",
+      "title": "Toggle Full Screen",
+      "subtitle": "Spacetile",
+      "description": "Sends `fullscreen` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullscreen-pair",
+      "title": "Full Screen with the Neighbouring Window",
+      "subtitle": "Spacetile",
+      "description": "Sends `fullscreen pair` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-fullscreen-prev",
+      "title": "Previous Full-Screen App",
+      "subtitle": "Spacetile",
+      "description": "Sends `space fullscreen prev` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "space-fullscreen-next",
+      "title": "Next Full-Screen App",
+      "subtitle": "Spacetile",
+      "description": "Sends `space fullscreen next` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause or Resume Tiling",
+      "subtitle": "Spacetile",
+      "description": "Sends `pause` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Open Settings",
+      "subtitle": "Spacetile",
+      "description": "Sends `settings` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-spacing",
+      "title": "Toggle Spacing",
+      "subtitle": "Spacetile",
+      "description": "Sends `toggle spacing` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-border",
+      "title": "Toggle Active Border",
+      "subtitle": "Spacetile",
+      "description": "Sends `toggle border` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-dim",
+      "title": "Toggle Dimming",
+      "subtitle": "Spacetile",
+      "description": "Sends `toggle dim` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preselect-west",
+      "title": "Next Window Goes Left",
+      "subtitle": "Spacetile",
+      "description": "Sends `preselect west` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preselect-south",
+      "title": "Next Window Goes Below",
+      "subtitle": "Spacetile",
+      "description": "Sends `preselect south` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preselect-north",
+      "title": "Next Window Goes Above",
+      "subtitle": "Spacetile",
+      "description": "Sends `preselect north` to Spacetile.",
+      "mode": "no-view"
+    },
+    {
+      "name": "preselect-east",
+      "title": "Next Window Goes Right",
+      "subtitle": "Spacetile",
+      "description": "Sends `preselect east` to Spacetile.",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "generate": "swift run --package-path ../app spacetile-catalog . && node scripts/generate.mts",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "dependencies": {
+    "@raycast/api": "^2.6.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "title-case": "^4.3.2",
+    "typescript": "~6.0"
+  }
+}
