@@ -12,7 +12,7 @@ import { STATUS_LABELS } from "./lib/status";
 import { STATUS_COLORS, statusIcon } from "./lib/status-icons";
 import { History, loadHistory, PrayerRecord } from "./lib/tracker";
 
-/** Months offered in the month picker: two years back and one ahead. */
+/** Months offered in the month picker: this month first (Raycast opens on the first item), then two years back. */
 const MONTHS_BACK = 24;
 
 const TONE_COLORS: Record<DayTone, Color.ColorLike> = {
@@ -81,10 +81,14 @@ function MonthGrid({ settings }: { settings: Settings }) {
     { keepPreviousData: true },
   );
 
-  const months = Array.from({ length: MONTHS_BACK + 2 }, (_, i) =>
-    monthKey(new Date(now.getFullYear(), now.getMonth() + 1 - i, 1)),
+  const months = Array.from({ length: MONTHS_BACK + 1 }, (_, i) =>
+    monthKey(new Date(now.getFullYear(), now.getMonth() - i, 1)),
   );
-  const shift = (by: number) => setMonth(monthKey(new Date(year, monthIndex - 1 + by, 1)));
+  // Stay within the months the picker offers.
+  const shift = (by: number) => {
+    const next = monthKey(new Date(year, monthIndex - 1 + by, 1));
+    if (months.includes(next)) setMonth(next);
+  };
   const known = summarize(
     history,
     dates.map((date) => toDateKey(date)),
