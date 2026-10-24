@@ -1,10 +1,25 @@
-import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { closeMainWindow, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
-import { exec } from "child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "util";
+import { showError } from "@chrismessina/raycast-kit";
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
+import { BrowserExtension, environment } from "@raycast/api";
+import { isWindows, getBrowserName, requireBraveExecutable } from "../util/platform";
+import { launchBrave, switchToTabByTitle, createNewTab } from "../util/windows-browser";
+
+const execFileAsync = promisify(execFile);
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
+  if (isWindows) {
+    requireBraveExecutable();
+    if (!environment.canAccess(BrowserExtension)) return [];
+    return (await BrowserExtension.getTabs()).map(
+      (tab) => new Tab(tab.title || tab.url, tab.url, tab.favicon ?? "", 0, tab.id),
+    );
+  }
   const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
@@ -12,7 +27,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
-  const { browserOption } = getPreferenceValues<Preferences>();
+  const browserOption = getBrowserName();
 
   const openTabs = await runAppleScript(`
       set _output to ""
@@ -50,7 +65,7 @@ export async function openAllBookmarksInFolder({
   openTabInProfile: Preferences["openTabInProfile"];
 }): Promise<void> {
   try {
-    const { browserOption } = getPreferenceValues<Preferences>();
+    const browserOption = getBrowserName();
 
     const buildArgs = (profile?: string): string[] => {
       const args: string[] = [];
@@ -74,25 +89,12 @@ export async function openAllBookmarksInFolder({
         break;
     }
 
-    const urlsString = urls.map((url) => `"${url}"`).join(" ");
-    const argsString = args.map((arg) => `"${arg}"`).join(" ");
-    const command = `open -na "${browserOption}" --args ${argsString} ${urlsString}`;
-
-    await new Promise((resolve, reject) => {
-      exec(command, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          closeMainWindow({ clearRootSearch: true });
-          resolve(true);
-        }
-      });
-    });
+    if (isWindows) await launchBrave([...args, ...urls.filter((url) => !url.toLowerCase().startsWith("javascript:"))]);
+    else await execFileAsync("open", ["-na", browserOption, "--args", ...args, ...urls]);
+    await closeMainWindow({ clearRootSearch: true });
   } catch (e) {
     console.error(e);
-    await showFailureToast("Could not open all bookmarks", {
-      message: e instanceof Error ? e.message : String(e),
-    });
+    await showError(e, { title: "Could Not Open All Bookmarks" });
   }
 }
 
@@ -113,71 +115,67 @@ export async function openNewTab({
   newWindow?: boolean;
   incognito?: boolean;
 }): Promise<boolean | string> {
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-  const installed = await checkAppInstalled();
-  if (installed) {
-    closeMainWindow({ clearRootSearch: true });
-  }
+  try {
+    await checkAppInstalled();
+    const browserOption = getBrowserName();
+    const targetUrl = url ? url : query ? `https://www.google.com/search?q=${encodeURIComponent(query)}` : "";
 
-  const { browserOption } = getPreferenceValues<Preferences>();
-  const targetUrl = url ? url : query ? `https://www.google.com/search?q=${encodeURIComponent(query)}` : "";
+    // Build command arguments based on options
+    const buildArgs = (profile?: string): string[] => {
+      const args: string[] = [];
+      if (profile) {
+        args.push(`--profile-directory=${profile}`);
+      }
+      if (newWindow) {
+        args.push("--new-window");
+      }
+      if (incognito) {
+        args.push("--incognito");
+      }
+      if (targetUrl) {
+        args.push(targetUrl);
+      }
+      return args;
+    };
 
-  // Helper to run shell command
-  const runShellCommand = (command: string): Promise<boolean | string> => {
-    return new Promise((resolve, reject) => {
-      exec(command, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(true);
-        }
-      });
+    let args: string[] = [];
+
+    switch (openTabInProfile) {
+      case SettingsProfileOpenBehaviour.Default:
+        args = buildArgs();
+        break;
+      case SettingsProfileOpenBehaviour.ProfileCurrent:
+        args = buildArgs(profileCurrent);
+        break;
+      case SettingsProfileOpenBehaviour.ProfileOriginal:
+        args = buildArgs(profileOriginal);
+        break;
+    }
+
+    if (isWindows) {
+      if (!targetUrl && !newWindow && !incognito && openTabInProfile === SettingsProfileOpenBehaviour.Default)
+        await createNewTab();
+      else await launchBrave(args.length ? args : ["brave://newtab/"]);
+    } else await execFileAsync("open", ["-na", browserOption, "--args", ...args]);
+    await closeMainWindow({ clearRootSearch: true });
+    await popToRoot({ clearSearchBar: true });
+    return true;
+  } catch (error) {
+    await showError(error, {
+      title: incognito
+        ? "Could Not Open Private Window"
+        : newWindow
+          ? "Could Not Open Brave Window"
+          : "Could Not Open Brave Tab",
     });
-  };
-
-  // Build command arguments based on options
-  const buildArgs = (profile?: string): string[] => {
-    const args: string[] = [];
-    if (profile) {
-      args.push(`--profile-directory=${profile}`);
-    }
-    if (newWindow) {
-      args.push("--new-window");
-    }
-    if (incognito) {
-      args.push("--incognito");
-    }
-    if (targetUrl) {
-      args.push(targetUrl);
-    }
-    return args;
-  };
-
-  let args: string[] = [];
-
-  switch (openTabInProfile) {
-    case SettingsProfileOpenBehaviour.Default:
-      args = buildArgs();
-      break;
-    case SettingsProfileOpenBehaviour.ProfileCurrent:
-      args = buildArgs(profileCurrent);
-      break;
-    case SettingsProfileOpenBehaviour.ProfileOriginal:
-      args = buildArgs(profileOriginal);
-      break;
+    return false;
   }
-
-  const argsString = args.map((arg) => `"${arg}"`).join(" ");
-  const command = `open -na "${browserOption}" --args ${argsString}`;
-
-  return runShellCommand(command);
 }
 
 export async function closeTab(tabIndex: number): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
-  await runAppleScript(`tell application "${browserOption}}"
+  if (isWindows) throw new Error("Closing tabs is available on macOS only.");
+  const browserOption = getBrowserName();
+  await runAppleScript(`tell application "${browserOption}"
     tell window 1
       delete tab ${tabIndex}
     end tell
@@ -185,7 +183,12 @@ export async function closeTab(tabIndex: number): Promise<void> {
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
+  if (isWindows) {
+    await closeMainWindow();
+    await switchToTabByTitle(tab.title);
+    return;
+  }
+  const browserOption = getBrowserName();
   await runAppleScript(`
     tell application "${browserOption}"
       activate
@@ -197,7 +200,11 @@ export async function setActiveTab(tab: Tab): Promise<void> {
 }
 
 const checkAppInstalled = async (): Promise<boolean> => {
-  const { browserOption } = getPreferenceValues<Preferences>();
+  if (isWindows) {
+    requireBraveExecutable();
+    return true;
+  }
+  const browserOption = getBrowserName();
 
   const appInstalled = await runAppleScript(`
 set isInstalled to false
@@ -214,9 +221,11 @@ return isInstalled`);
 };
 
 export async function executeJavascript(code: string): Promise<void> {
-  const { browserOption } = getPreferenceValues<Preferences>();
+  const browserOption = getBrowserName();
 
   try {
+    if (isWindows)
+      throw new Error("Running bookmarklets is available on macOS only. Copy the code to run it manually in Brave.");
     const decodedCode = decodeURIComponent(code);
 
     // We manually escape the characters that break AppleScript strings.
@@ -242,12 +251,11 @@ export async function executeJavascript(code: string): Promise<void> {
     await closeMainWindow();
   } catch (e) {
     console.error(e);
-    if (e instanceof Error && e.message.includes("Allow JavaScript from Apple Events")) {
-      await showFailureToast("Enable 'View > Developer > Allow JavaScript from Apple Events' in Brave.");
-    } else {
-      await showFailureToast("Could not run bookmarklet", {
-        message: e instanceof Error ? e.message : String(e),
-      });
-    }
+    await showError(e, {
+      title: "Could Not Run Bookmarklet",
+      message: getErrorMessage(e).includes("Allow JavaScript from Apple Events")
+        ? "Enable View > Developer > Allow JavaScript from Apple Events in Brave."
+        : undefined,
+    });
   }
 }
