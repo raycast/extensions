@@ -15,11 +15,11 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getQuickLookPreviewDataUrl, isQuickLookPreviewSupported } from "./quicklook";
 import {
   defaultDownloadsLayout,
   downloadsFolder,
   getDownloads,
-  getQuickLookPreviewDataUrl,
   getTextFilePreview,
   isImageFile,
   isTextFile,
@@ -36,7 +36,13 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
   const isHiddenFile = download.file.startsWith(".");
   const isText = !download.isDirectory && isTextFile(download.file);
   const shouldShowImagePreview =
-    isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
+    isDarwin &&
+    showPreview &&
+    !download.isDirectory &&
+    isSelected &&
+    !isHiddenFile &&
+    !isText &&
+    isQuickLookPreviewSupported(download.file);
   const shouldShowTextPreview = showPreview && !download.isDirectory && isSelected && !isHiddenFile && isText;
 
   const { data, isLoading } = usePromise(
