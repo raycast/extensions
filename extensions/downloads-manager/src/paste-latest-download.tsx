@@ -1,6 +1,6 @@
 import { popToRoot, showHUD, Clipboard, closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
+import { getLatestDownloadAsync, hasAccessToDownloadsFolder } from "./utils";
 
 export default async function main() {
   if (!hasAccessToDownloadsFolder()) {
@@ -10,7 +10,7 @@ export default async function main() {
 
   let download;
   try {
-    download = getLatestDownload();
+    download = await getLatestDownloadAsync();
   } catch (error) {
     await showFailureToast(error, { title: "Could not get latest download" });
     return;
