@@ -1,6 +1,6 @@
 # Fotcast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-24
 
 - Matches command: a day's fixtures across every league, grouped by competition,
   with the kickoff time or live match clock as the row subtitle and a score
