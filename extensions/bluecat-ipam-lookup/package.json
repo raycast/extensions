@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bluecat-ipam-lookup",
+  "title": "BlueCat BAM Lookup",
+  "description": "Look up IP addresses, networks, and DNS records in BlueCat Address Manager",
+  "icon": "bam-ip-lookup-icon-512.png",
+  "author": "afly007",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ipam",
+      "title": "BAM Lookup",
+      "subtitle": "BlueCat",
+      "description": "Search BlueCat Address Manager by IP address, CIDR network, or DNS name",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "IP, CIDR, or name",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Address Manager URL",
+      "description": "Base URL of your BlueCat Address Manager, e.g. https://bam.example.com",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://bam.example.com"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "API user name",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "api-user"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "API user password",
+      "type": "password",
+      "required": true,
+      "placeholder": "Password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
