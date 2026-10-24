@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Better search ranking] - {PR_MERGE_DATE}
+
+- Improved: Search now lists exact name matches first, then names that start with what you typed, then names containing it, and description-only matches last. Searching `dia` finds Dia before AirMedia
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Remove Tap fix] - 2026-10-04

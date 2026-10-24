@@ -18,7 +18,7 @@ import {
   cachedFormulaIndex,
   cachedCaskIndex,
 } from "./fetch";
-import { brewCompare } from "./helpers";
+import { brewCompare, searchRank } from "./helpers";
 import { PopularityRanks, byPopularity } from "./analytics";
 
 /** Progress callback for search download phases */
@@ -117,8 +117,13 @@ export async function brewSearch(
       matchingFormulaEntries.sort(byPopularity(ranks.formulae));
       matchingCaskEntries.sort(byPopularity(ranks.casks));
     } else {
-      matchingFormulaEntries.sort((a, b) => brewCompare(a.id, b.id, target));
-      matchingCaskEntries.sort((a, b) => brewCompare(a.id, b.id, target));
+      // Exact and prefix matches first, then alphabetical within each tier
+      matchingFormulaEntries.sort(
+        (a, b) => searchRank(a, target) - searchRank(b, target) || brewCompare(a.id, b.id, target),
+      );
+      matchingCaskEntries.sort(
+        (a, b) => searchRank(a, target) - searchRank(b, target) || brewCompare(a.id, b.id, target),
+      );
     }
   } else {
     // No search text - every entry, ordered by popularity or alphabetically

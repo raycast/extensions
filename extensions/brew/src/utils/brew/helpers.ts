@@ -470,6 +470,20 @@ export function brewCompare(lhs: string, rhs: string, target: string): number {
   }
 }
 
+/**
+ * How well an index entry matches a lowercased query; lower is better.
+ * 0 exact name or alias, 1 name prefix, 2 a name word starts with it,
+ * 3 name contains it, 4 alias or description only.
+ */
+export function searchRank(entry: { n: string; d?: string; a?: string[] }, target: string): number {
+  const name = entry.n;
+  if (name === target || entry.a?.includes(target)) return 0;
+  if (name.startsWith(target)) return 1;
+  if (name.split(/[-_.@+\s]/).some((word) => word.startsWith(target))) return 2;
+  if (name.includes(target)) return 3;
+  return 4;
+}
+
 /// Command Strings
 
 /**
