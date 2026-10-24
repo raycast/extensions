@@ -1,6 +1,6 @@
 # Done Bear Changelog
 
-## [Done Bear Sign-In Domain] - {PR_MERGE_DATE}
+## [Done Bear Sign-In Domain] - 2026-10-24
 
 - Sign in through auth.donebear.com, so the consent screen names Done Bear instead of a raw Supabase host
 
