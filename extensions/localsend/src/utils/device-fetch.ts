@@ -1,4 +1,4 @@
-import { Agent, fetch as undiciFetch } from "undici";
+import { Agent } from "undici";
 
 // LocalSend devices serve HTTPS with a self-signed certificate generated on
 // the device itself — the protocol has no certificate authority — so TLS
@@ -11,11 +11,4 @@ const httpsDeviceDispatcher = new Agent({ connect: { rejectUnauthorized: false }
  * certificates by design); http:// URLs are passed through unchanged.
  */
 export const deviceFetch = (url: string, init?: RequestInit): Promise<Response> =>
-  undiciFetch(
-    url,
-    // undici bundles its own undici-types copy, so its RequestInit is not
-    // identical to the global one; the values are structurally compatible.
-    (url.startsWith("https:") ? { ...init, dispatcher: httpsDeviceDispatcher } : init) as Parameters<
-      typeof undiciFetch
-    >[1],
-  ) as Promise<Response>;
+  fetch(url, url.startsWith("https:") ? ({ ...init, dispatcher: httpsDeviceDispatcher } as RequestInit) : init);

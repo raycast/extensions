@@ -56,7 +56,7 @@ export default function Command() {
         const isFav = await isFavoriteDevice(device.fingerprint);
         setDevices((prev) =>
           prev.map((d) =>
-            d.ip === device.ip ? { ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
+            d.ip === device.ip ? { ...d, ...info, ip: device.ip, lastSeen: Date.now(), isFavorite: isFav } : d,
           ),
         );
         await showToast({
