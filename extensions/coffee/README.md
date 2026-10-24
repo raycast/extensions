@@ -25,15 +25,15 @@ Once installed, simply trigger the Raycast command palette and search for the de
 
 ### 1. **Caffeinate/Decaffeinate**
 
-Keep your computer awake indefinitely or cancel the caffeination.
+Keep your computer awake indefinitely or stop Coffee’s own caffeination. Other applications’ sleep prevention remains untouched.
 
 ### 2. **Toggle Caffeination**
 
-Toggle between keeping your computer caffeinated and in a decaffeinated state.
+Start or stop Coffee’s own caffeination.
 
 ### 3. **Caffeinate For**
 
-Caffeinate your computer for a specified amount of time.
+Caffeinate your computer for a specified amount of time. Hours, minutes, and seconds must be non-negative whole numbers with a total greater than zero. Invalid durations leave an existing session running.
 
 <p align="center">
   <img src="./metadata/coffee-2.png" alt="Caffeinate For Command">
@@ -77,10 +77,20 @@ Get the current state of caffeination.
 
 Get the status of current caffeination in your menu bar.
 
+On macOS, Coffee distinguishes its own session from **External caffeination** started by another application or a terminal. External activity shows a process count and keeps the icon visible when **Hide the icon** is enabled. Only a Coffee-managed session selects a Coffee action or shows its countdown. Starting, replacing, toggling, or stopping Coffee leaves external processes running.
+
+Coffee saves its process ID and creation time, so it can recognize a surviving session after Raycast restarts. Sessions already running when upgrading to this version have no ownership record and appear as external. Coffee can start a new managed session alongside them; the older process must expire or be stopped through its original caller.
+
+On Windows, Coffee tracks its own keep-awake worker. External sleep prevention is not monitored. A session surviving an update remains controllable, but its description may be omitted until the next session if it was saved by an older version.
+
 ### 8. **Auto-Caffeinate on Launch**
 
 Optionally have Coffee start caffeinating your computer (indefinitely) automatically whenever Raycast launches. Enable the **Start caffeination when Raycast starts** toggle under the **Launch** section in the extension's preferences.
 
 > **Requirements:** Either the _Caffeinate Status_ command (15 s background interval) or the _Caffeinate Status Menu Bar_ command (1 m background interval) must be enabled in Raycast — the auto-start feature piggybacks on these background ticks.
 
-**How session detection works:** Coffee tracks the Raycast process PID. A new PID means Raycast actually relaunched, so the computer is caffeinated automatically. Putting the computer to sleep and waking it does **not** trigger a re-caffeination, because the PID stays the same — your manual decaffeination is honoured until you truly restart Raycast.
+**How session detection works:** Coffee tracks the Raycast process PID. A new PID means Raycast actually relaunched, so Coffee starts automatically if it has no surviving session. External caffeination does not suppress an enabled launch session. Putting the computer to sleep and waking it does **not** trigger a re-caffeination, because the PID stays the same — your manual decaffeination is honoured until you truly restart Raycast.
+
+## Development
+
+Run `npm run check` for the test suite, TypeScript checking, and source/test linting. `npm run lint` additionally runs Raycast's extension validation. The Windows native bridge also requires a Windows-target Rust compilation check; release packaging from macOS requires `cargo-xwin` and the Windows build dependencies.
