@@ -2,7 +2,7 @@
 
 ## [Read API token from macOS Keychain] - {PR_MERGE_DATE}
 
-- Add the optional `Keychain Service Name` preference to read the Personal Access Token from a macOS Keychain generic password item instead of storing it in the extension preferences
+- Add the optional `Keychain Service Name` preference to read the Personal Access Token from a macOS Keychain generic password item instead of storing it in the extension preferences (macOS only)
 
 ## [My Merge Requests scope fix] - 2026-10-04
 

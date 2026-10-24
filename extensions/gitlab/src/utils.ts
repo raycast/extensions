@@ -353,6 +353,11 @@ let keychainToken: { service: string; token: Promise<string> } | undefined;
  * the next request retries after the user fixes the item.
  */
 export function getKeychainToken(service: string): Promise<string> {
+  if (process.platform !== "darwin") {
+    return Promise.reject(
+      new Error("Keychain Service Name is only supported on macOS. Clear it and set the API Token instead."),
+    );
+  }
   if (keychainToken?.service !== service) {
     const token = execFileAsync("/usr/bin/security", ["find-generic-password", "-s", service, "-w"]).then(
       ({ stdout }) => {
