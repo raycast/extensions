@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 01 · How Your Watchlist Extension Works</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="lesson-meta">
+      <span class="badge accent">Lesson 01</span>
+      <span class="badge">Raycast Extension</span>
+      <span class="badge green">~15 min</span>
+    </div>
+    <h1>How Your Watchlist Extension Works</h1>
+    <p class="lead">
+      You vibe-coded this. An AI wrote it. Now let's make sure <em>you</em> own it —
+      every file, every connection, every design decision, explained from first principles.
+    </p>
+  </header>
+
+  <hr />
+
+  <!-- ── 1. The Big Picture ───────────────────────────────── -->
+  <section class="section">
+    <h2>The big picture</h2>
+    <p>
+      Your extension has <strong>three layers</strong>. Data lives in a Markdown file.
+      A TypeScript module reads and writes it. React components (using the Raycast API)
+      render it and handle user input.
+    </p>
+
+    <div class="flow">
+      <span class="flow-node highlight">Movies.md</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">media-data.ts</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">media.tsx</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node">Raycast UI</span>
+    </div>
+
+    <div class="flow">
+      <span class="flow-node">User types a title</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">cinemeta.ts</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">add-media.tsx</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node highlight">media-data.ts</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-node">Movies.md</span>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">💡</span>
+      <div>
+        Raycast extensions don't have a server or database.
+        Your whole persistence layer is a single <code>.md</code> file on disk — elegant and Obsidian-friendly.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. File by File ──────────────────────────────────── -->
+  <section class="section">
+    <h2>File by file</h2>
+
+    <div class="card">
+      <h3>📄 media-data.ts — the data layer</h3>
+      <p>
+        The backbone. It knows nothing about Raycast or React.
+        Its only job is to read and write <code>Movies.md</code> as a structured Markdown table.
+      </p>
+      <p>Key exports:</p>
+      <ul style="margin-left:1.5rem; margin-bottom:0.75rem; color:var(--text);">
+        <li><code>loadMedia()</code> — returns <code>{ watchlist, watched }</code></li>
+        <li><code>addItem(it, section)</code> — inserts a row, creates the header if missing</li>
+        <li><code>markWatched(title)</code> — splices the row out of Watchlist, inserts into Watched</li>
+        <li><code>updateItem(title, section, patch)</code> — overwrites one row in-place</li>
+        <li><code>removeItem(title, section)</code> — deletes the row</li>
+      </ul>
+      <div class="callout tip">
+        <span class="callout-icon">🔑</span>
+        <div>
+          <strong>Key insight:</strong> all mutations are "read the whole file → splice lines → write the whole file."
+          This is safe because Raycast extensions run one command at a time — no concurrency risk.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎬 cinemeta.ts — the search API</h3>
+      <p>
+        A thin wrapper over
+        <a href="https://v3-cinemeta.strem.io" target="_blank">Stremio's Cinemeta API</a> —
+        IMDb-backed, no key needed, no account needed.
+        Two endpoints are used:
+      </p>
+      <pre><code><span class="cm">// Search results (a list)</span>
+GET /catalog/<span class="ty">movie</span>|<span class="ty">series</span>/top/search=<span class="str">{query}</span>.json
+
+<span class="cm">// Full metadata for one title</span>
+GET /meta/<span class="ty">movie</span>|<span class="ty">series</span>/<span class="str">{imdbId}</span>.json</code></pre>
+      <p>
+        <code>searchAll()</code> fires both in parallel with <code>Promise.all</code> and concatenates movies first.
+        Each result is normalised into a <code>SearchHit</code> — a clean interface your UI can trust.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>📋 media.tsx — the main list view</h3>
+      <p>
+        The default command. Renders two sections (<em>Watchlist</em> / <em>Watched</em>)
+        with a sidebar detail panel. Key state:
+      </p>
+      <pre><code><span class="kw">const</span> [watchlist, setWatchlist] = <span class="fn">useState</span>&lt;<span class="ty">MediaItem</span>[]&gt;([]);
+<span class="kw">const</span> [watched,   setWatched]   = <span class="fn">useState</span>&lt;<span class="ty">MediaItem</span>[]&gt;([]);
+<span class="kw">const</span> [descs,     setDescs]     = <span class="fn">useState</span>&lt;<span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">string</span>&gt;&gt;({});
+<span class="kw">const</span> [filter,    setFilter]    = <span class="fn">useState</span>&lt;<span class="ty">Filter</span>&gt;(<span class="str">"all"</span>);
+<span class="kw">const</span> [showDetail, setShowDetail] = <span class="fn">useState</span>(<span class="kw">true</span>);</code></pre>
+      <p>
+        <code>descs</code> is a lazy cache of plot descriptions fetched from Cinemeta.
+        The second <code>useEffect</code> fetches up to 20 at a time — only for items that have
+        an <code>imdbId</code> and aren't already in the cache.
+      </p>
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div>
+          The <code>descs</code> effect lists <code>descs</code> itself as a dependency.
+          This is safe only because it immediately bails out when there's nothing new to fetch
+          (<code>if (all.length === 0) return</code>). Without that guard, it would loop forever.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>➕ add-media.tsx — the search &amp; add flow</h3>
+      <p>
+        A separate command (and also reachable via <kbd>⌘N</kbd> from the main list).
+        It debounces the search input by 320 ms using <code>setTimeout</code> + <code>useRef(seq)</code>
+        to cancel stale requests:
+      </p>
+      <pre><code><span class="kw">const</span> seq = <span class="fn">useRef</span>(<span class="num">0</span>);
+<span class="kw">const</span> mine = ++seq.current; <span class="cm">// increment before async work</span>
+<span class="cm">// … later, inside the async callback:</span>
+<span class="kw">if</span> (seq.current === mine) <span class="fn">setHits</span>(res); <span class="cm">// only update if still relevant</span></code></pre>
+      <p>
+        This pattern (a monotonic counter) is the idiomatic way to avoid stale async results
+        in React without reaching for a full abort-controller per request.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>⭐ rate.tsx &amp; ✏️ edit.tsx — small forms</h3>
+      <p>
+        Both push a <code>Form</code> onto the Raycast navigation stack.
+        <code>rate.tsx</code> handles moving an item from Watchlist → Watched (with an optional rating/notes).
+        <code>edit.tsx</code> patches any field on an existing item via <code>updateItem()</code>.
+        Neither holds state beyond the form values — all persistence goes through <code>media-data.ts</code>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 3. The Markdown Table Format ─────────────────────── -->
+  <section class="section">
+    <h2>The Markdown table format</h2>
+    <p>
+      Your data store is a human-readable Markdown table in <code>Movies.md</code>.
+      Each row is one media item:
+    </p>
+    <pre><code>| ✓ | Poster | Title | Type | Year | Director | Genre | IMDb | Mine | Notes |
+|:-:|:-:|---|:-:|:-:|---|---|:-:|:-:|---|
+| ☐ | ![\\|55](https://…poster.jpg) | [Dune](https://www.imdb.com/title/tt1160419/) | Movie | 2021 | Denis Villeneuve | Sci-Fi | 8.0 | | |</code></pre>
+
+    <p>
+      <code>media-data.ts</code> parses this by hand — no external library.
+      The tricky parts are handled by two helpers:
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3><code>splitRow()</code></h3>
+        <p>Splits a pipe-delimited row while respecting <code>\|</code> escape sequences inside cell values.</p>
+      </div>
+      <div class="card">
+        <h3><code>sectionBounds()</code></h3>
+        <p>Finds the line range for a <code>## Watchlist</code> or <code>## Watched</code> heading, so mutations never touch the wrong section.</p>
+      </div>
+      <div class="card">
+        <h3><code>layoutOf()</code></h3>
+        <p>Detects whether the table already has a header row + divider, so it can insert one when the section is empty.</p>
+      </div>
+      <div class="card">
+        <h3><code>parseTitle()</code></h3>
+        <p>Extracts the plain title and IMDb ID from a Markdown link like <code>[Title](https://…/tt1234567/)</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. Data flow walkthrough ──────────────────────────── -->
+  <section class="section">
+    <h2>Data flow: adding a movie</h2>
+    <p>Here's what happens when you search for "Dune" and press Enter:</p>
+
+    <ol style="margin-left:1.5rem; color:var(--text); display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1rem;">
+      <li>
+        <strong>Keystroke in <code>add-media.tsx</code></strong> triggers the debounced effect.
+        After 320 ms of silence, <code>searchAll("Dune")</code> is called.
+      </li>
+      <li>
+        <strong><code>cinemeta.ts</code></strong> fires two parallel requests to Cinemeta —
+        one for movies, one for series — and joins the results.
+      </li>
+      <li>
+        <strong>User picks a result</strong>. <code>choose(hit, "Watchlist")</code> is called.
+        It first calls <code>exists()</code> to prevent duplicates, then <code>detail()</code>
+        to grab the full metadata.
+      </li>
+      <li>
+        <strong><code>addItem()</code> in <code>media-data.ts</code></strong> reads <code>Movies.md</code>,
+        inserts a new table row under <code>## Watchlist</code>, and writes the file back.
+      </li>
+      <li>
+        <strong>Back in <code>media.tsx</code></strong>, the <code>onAdded</code> callback fires,
+        which calls <code>refresh()</code> → <code>loadMedia()</code> → state update → re-render.
+      </li>
+    </ol>
+
+    <div class="callout tip">
+      <span class="callout-icon">🔗</span>
+      <div>
+        Primary source:
+        <a href="https://developers.raycast.com/api-reference/user-interface/list" target="_blank">
+          Raycast List API reference
+        </a>
+        — explains every prop used in <code>media.tsx</code> and <code>add-media.tsx</code>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. Quiz ───────────────────────────────────────────── -->
+  <section class="section">
+    <h2>Check your understanding</h2>
+    <p>Answer from memory — don't scroll up. Each answer is the same length.</p>
+
+    <!-- Q1 -->
+    <div class="quiz" id="q1">
+      <p class="quiz-q">1 · Where does the extension permanently store your watchlist data?</p>
+      <ul class="options">
+        <li><button onclick="answer(this, false, 'q1')">In a SQLite database file</button></li>
+        <li><button onclick="answer(this, true,  'q1')">In a Markdown file on disk</button></li>
+        <li><button onclick="answer(this, false, 'q1')">In Raycast's extension store</button></li>
+        <li><button onclick="answer(this, false, 'q1')">In localStorage in the browser</button></li>
+      </ul>
+      <p class="feedback" id="q1-fb"></p>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz" id="q2">
+      <p class="quiz-q">2 · What does the <code>seq</code> ref in <code>add-media.tsx</code> prevent?</p>
+      <ul class="options">
+        <li><button onclick="answer(this, false, 'q2')">Multiple renders on keystroke</button></li>
+        <li><button onclick="answer(this, false, 'q2')">Requests firing before 320 ms</button></li>
+        <li><button onclick="answer(this, true,  'q2')">Stale async results overwriting</button></li>
+        <li><button onclick="answer(this, false, 'q2')">Duplicate rows being inserted</button></li>
+      </ul>
+      <p class="feedback" id="q2-fb"></p>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz" id="q3">
+      <p class="quiz-q">3 · Which module is responsible for moving a title from Watchlist to Watched?</p>
+      <ul class="options">
+        <li><button onclick="answer(this, false, 'q3')">rate.tsx directly edits the file</button></li>
+        <li><button onclick="answer(this, true,  'q3')">media-data.ts via markWatched()</button></li>
+        <li><button onclick="answer(this, false, 'q3')">cinemeta.ts via the detail() call</button></li>
+        <li><button onclick="answer(this, false, 'q3')">media.tsx via a direct splice()</button></li>
+      </ul>
+      <p class="feedback" id="q3-fb"></p>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz" id="q4">
+      <p class="quiz-q">4 · Why is the <code>descs</code> state dependency in the second <code>useEffect</code> safe — even though including it normally risks an infinite loop?</p>
+      <ul class="options">
+        <li><button onclick="answer(this, false, 'q4')">React de-duplicates state updates</button></li>
+        <li><button onclick="answer(this, false, 'q4')">The effect uses a cancelled flag</button></li>
+        <li><button onclick="answer(this, true,  'q4')">The effect bails out when nothing new</button></li>
+        <li><button onclick="answer(this, false, 'q4')">Raycast memoises all useEffect calls</button></li>
+      </ul>
+      <p class="feedback" id="q4-fb"></p>
+    </div>
+  </section>
+
+  <!-- ── Footer / ask me ──────────────────────────────────── -->
+  <hr />
+  <section class="section" style="margin-bottom:0">
+    <div class="callout info">
+      <span class="callout-icon">🤖</span>
+      <div>
+        <strong>Ask your teacher anything.</strong><br />
+        Anything unclear? Want to trace a specific flow in more depth?
+        Just ask — I'm here.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── Score pill ─────────────────────────────────────────── -->
+<div id="score-bar">
+  <div class="score-pill" id="score-pill">0 / 4</div>
+</div>
+
+<script>
+  const answers = { q1: false, q2: false, q3: false, q4: false };
+  const feedbacks = {
+    q1: {
+      right: "Correct — Movies.md lives in your Obsidian vault and is human-editable.",
+      wrong: "Nope — the whole persistence layer is a Markdown file. No database required.",
+    },
+    q2: {
+      right: "Exactly — a monotonically increasing counter lets the callback discard results from earlier, slower requests.",
+      wrong: "Not quite. The seq ref is about ensuring only the latest async response is applied to state.",
+    },
+    q3: {
+      right: "Right — rate.tsx collects the user's input, but delegates the actual file manipulation to markWatched() in media-data.ts.",
+      wrong: "Wrong. The data layer owns all file operations. UI components call its functions; they never splice files directly.",
+    },
+    q4: {
+      right: "Correct. The guard `if (all.length === 0) return` means once every item has a description, the effect is a no-op and never re-runs.",
+      wrong: "Not quite. The key is the early-return guard at the top of the effect.",
+    },
+  };
+
+  let score = 0;
+
+  function answer(btn, isCorrect, qid) {
+    const quiz = document.getElementById(qid);
+    const buttons = quiz.querySelectorAll('button');
+    const fb = document.getElementById(qid + '-fb');
+
+    // Already answered?
+    if (quiz.dataset.answered) return;
+    quiz.dataset.answered = '1';
+
+    buttons.forEach(b => b.disabled = true);
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    fb.textContent = isCorrect ? feedbacks[qid].right : feedbacks[qid].wrong;
+    fb.classList.add('visible');
+
+    if (isCorrect) {
+      score++;
+      answers[qid] = true;
+    }
+
+    updateScore();
+  }
+
+  function updateScore() {
+    const pill = document.getElementById('score-pill');
+    pill.textContent = `${score} / 4`;
+    if (score === 4) {
+      pill.classList.add('done');
+      pill.textContent = '✓ 4 / 4 — solid!';
+    }
+  }
+</script>
+
+</body>
+</html>

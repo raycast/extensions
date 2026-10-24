@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "watchlist",
+  "title": "Watchlist",
+  "description": "Track movies and series in an Obsidian watchlist with fast Raycast actions",
+  "icon": "icon.png",
+  "author": "hesham",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "media",
+      "title": "Watchlist",
+      "subtitle": "Obsidian",
+      "description": "Browse your movies and series, mark them watched, rate them",
+      "mode": "view",
+      "icon": "icon-list.png"
+    },
+    {
+      "name": "add-media",
+      "title": "Add Movie or Series",
+      "subtitle": "Obsidian",
+      "description": "Search by title and pick from real results, metadata filled in for you",
+      "mode": "view",
+      "icon": "icon-add.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notePath",
+      "title": "Movies Markdown File",
+      "description": "Choose the Movies.md file used by your Obsidian watchlist",
+      "type": "file",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
