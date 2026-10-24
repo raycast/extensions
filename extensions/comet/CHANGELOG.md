@@ -1,5 +1,11 @@
 # Comet Browser Changelog
 
+## [Add Profile Switcher] - {PR_MERGE_DATE}
+
+- Added **Switch Comet Profile**: lists your Comet profiles with their colors, open windows and the last-used profile. Focuses the profile's existing window, or opens one. Includes a Copy Deeplink action for each profile.
+- Added **Open Profile 1–5**: commands that each open a Comet profile you choose, so every profile can have its own alias and hotkey. Takes an optional URL argument. Profiles 3–5 are disabled by default.
+- Added an **Always open a new window** preference
+
 ## [Fix French Text in UI] - 2025-10-24
 
 - Fixed inconsistent language in Search History command - changed "Historique" to "Results" for English consistency
