@@ -12,3 +12,10 @@ describe("codeBlock", () => {
     expect(block.endsWith("\n`````")).toBe(true);
   });
 });
+
+describe("codeBlock with large input", () => {
+  it("handles more backtick runs than the engine allows as call arguments", () => {
+    const content = "a`".repeat(500_000) + "a````";
+    expect(codeBlock(content).startsWith("`````\n")).toBe(true);
+  });
+});

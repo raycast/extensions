@@ -1,7 +1,5 @@
 # Dev Essentials
 
-[![CI](https://github.com/vinh0604/raycast-devutils/actions/workflows/ci.yml/badge.svg)](https://github.com/vinh0604/raycast-devutils/actions/workflows/ci.yml)
-
 Everyday developer utilities for Raycast: UUIDs, Unix timestamps, and JWT / JWS / JWE tokens.
 
 | Command | Usage | What it does |
@@ -20,17 +18,3 @@ Run with no token, the Decode JWT/JWS/JWE commands open a menu and offer any tok
 **Keys:** you can enter a shared secret (UTF-8, Base64, Base64URL or hex), a PEM (SPKI/PKCS#8/PKCS#1/SEC1 key or X.509 certificate), a JWK, a JWKS, or, for verification only, a JWKS URL. If you give a private key where a public key is needed, the public key is derived from it. Press `⌘G` in the sign/encrypt forms to generate a matching key or key pair.
 
 Tip: set Raycast aliases (`uuid`, `ts`, `jwt`, …) in Raycast Settings → Extensions so you can type the alias followed by the argument.
-
-## Development
-
-```sh
-npm install
-npm run dev     # load into Raycast with hot reload
-npm test        # unit tests (vitest)
-npm run lint    # ESLint, Prettier and Raycast Store validation
-npm run publish # submit to the Raycast Store
-```
-
-## License
-
-[MIT](LICENSE)

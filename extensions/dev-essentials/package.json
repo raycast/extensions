@@ -16,6 +16,7 @@
     {
       "name": "uuid",
       "title": "Generate UUID",
+      "subtitle": "Dev Essentials",
       "description": "Generate a UUID (v4 by default, or v7), show it and copy it to the clipboard.",
       "keywords": [
         "uuid",
@@ -36,6 +37,7 @@
     {
       "name": "ts",
       "title": "Convert Timestamp",
+      "subtitle": "Dev Essentials",
       "description": "Show the current Unix timestamp, or convert a timestamp, ISO date-time or relative duration (e.g. \"10 seconds ago\").",
       "keywords": [
         "ts",
@@ -58,6 +60,7 @@
     {
       "name": "jwt",
       "title": "Decode JWT",
+      "subtitle": "Dev Essentials",
       "description": "Decode, verify and sign JSON Web Tokens.",
       "keywords": [
         "jwt",
@@ -79,6 +82,7 @@
     {
       "name": "jws",
       "title": "Decode JWS",
+      "subtitle": "Dev Essentials",
       "description": "Decode, verify and sign JSON Web Signatures with arbitrary payloads.",
       "keywords": [
         "jws",
@@ -100,6 +104,7 @@
     {
       "name": "jwe",
       "title": "Decode JWE",
+      "subtitle": "Dev Essentials",
       "description": "Inspect, decrypt and encrypt JSON Web Encryption tokens.",
       "keywords": [
         "jwe",
