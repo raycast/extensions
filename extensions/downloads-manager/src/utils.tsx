@@ -27,7 +27,7 @@ import {
   rmSync,
   statSync,
 } from "fs";
-import { rm } from "fs/promises";
+import { opendir, rm, stat } from "fs/promises";
 import { join } from "path";
 import { execFile, execSync } from "child_process";
 import { homedir, tmpdir } from "os";
@@ -211,6 +211,79 @@ function getDownloadsInOrder(
 
 export function getDownloads(limit?: number, offset: number = 0, currentFolderPath: string | null = null) {
   return getDownloadsInOrder(fileOrder, limit, offset, currentFolderPath);
+}
+
+async function countDirectoryItemsAsync(dirPath: string): Promise<number> {
+  try {
+    const dir = await opendir(dirPath);
+    let count = 0;
+    for await (const entry of dir) {
+      if (showHiddenFiles || !entry.name.startsWith(".")) {
+        count += 1;
+      }
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+async function getDownloadsInOrderAsync(
+  order: DownloadOrder,
+  limit?: number,
+  offset: number = 0,
+  currentFolderPath: string | null = null,
+): Promise<Download[]> {
+  const folderPath = currentFolderPath ?? downloadsFolder;
+  const maximumCandidates = limit === undefined ? undefined : offset + limit;
+  const candidates: Download[] = [];
+
+  const dir = await opendir(folderPath);
+  for await (const entry of dir) {
+    if (!showHiddenFiles && entry.name.startsWith(".")) {
+      continue;
+    }
+
+    const path = join(folderPath, entry.name);
+    try {
+      const stats = await stat(path);
+      const isDirectory = stats.isDirectory();
+      const download: Download = {
+        file: entry.name,
+        path,
+        size: isDirectory ? 0 : stats.size,
+        isDirectory,
+        lastModifiedAt: stats.mtime,
+        createdAt: stats.ctime,
+        addedAt: stats.atime,
+        birthAt: stats.birthtime,
+      };
+
+      const insertionIndex = candidates.findIndex((candidate) => compareDownloads(download, candidate, order) < 0);
+      candidates.splice(insertionIndex === -1 ? candidates.length : insertionIndex, 0, download);
+      if (maximumCandidates !== undefined && candidates.length > maximumCandidates) {
+        candidates.pop();
+      }
+    } catch (error) {
+      console.warn(`Skipping '${path}' because it could not be stat'd:`, error);
+    }
+  }
+
+  const page = limit === undefined ? candidates : candidates.slice(offset, offset + limit);
+  return Promise.all(
+    page.map(async (download) => ({
+      ...download,
+      itemCount: download.isDirectory ? await countDirectoryItemsAsync(download.path) : undefined,
+    })),
+  );
+}
+
+export async function getDownloadsAsync(
+  limit?: number,
+  offset: number = 0,
+  currentFolderPath: string | null = null,
+): Promise<Download[]> {
+  return getDownloadsInOrderAsync(fileOrder, limit, offset, currentFolderPath);
 }
 
 export function getLatestDownload() {
