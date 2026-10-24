@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Candor Finance MCP Server] - 2026-10-24
+
+- Add Candor Finance to the official registry: tell your agent what you want with your money, and it sets up goals and a budget from your real US accounts and keeps you on them, with a weekly review that tells the agent what's worth talking through and why. Figures are calculated from the records; read-only toward the accounts, and it never moves money. Hosted Streamable HTTP server at https://api.candor.money/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add TechFabric MCP Server] - 2026-10-24
 
 - Add TechFabric to the official registry: search and read techfabric.com (https://www.techfabric.com), and let TechFabric's engineers write blog posts and case studies for it from their own coding agent, under their byline. Hosted Streamable HTTP server at https://www.techfabric.com/mcp; reading needs no sign-in, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account. A direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Docs: https://www.techfabric.com/mcp-servers

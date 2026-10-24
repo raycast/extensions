@@ -230,6 +230,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "candor-finance",
+    title: "Candor Finance",
+    description:
+      "Reach your money goals with the AI agent you already use. Tell it what you want, like paying off the cards, buying the house or working four days a week, even if you haven't worked it out yet. With Candor, it breaks that into steps and sets up the plan from your real US bank, card and investment accounts: goals with a measure and a pace, a budget that pays for them, every charge sorted to match. Then it keeps you on it. Every week Candor reviews your whole financial life, from everyday spending to investments, and everything you and your agent have saved, and tells your agent what's worth talking through and why. Every figure comes from your records, and the plan, decisions and reasons stay saved when you switch agents. Read-only: Candor never moves money. Hosted remote personal finance MCP server over Streamable HTTP; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Paid Candor plan with a 7-day free trial.",
+    icon: "https://candor.money/social/candor-facebook-logo.png",
+    homepage: "https://candor.money/mcp?utm_source=raycast&utm_medium=mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
+    },
+    remoteUrl: "https://api.candor.money/mcp",
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
