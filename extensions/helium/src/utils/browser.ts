@@ -1,4 +1,5 @@
-import { BrowserExtension, environment, showToast, Toast, open } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
+import { BrowserExtension, environment, open } from "@raycast/api";
 import { Tab } from "../types";
 import { listHeliumTabs } from "./browser-control";
 import { isWindows } from "./platform";
@@ -60,11 +61,7 @@ export async function getBrowserTabs(): Promise<Tab[]> {
   try {
     return await fetchBrowserTabs();
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Get Tabs",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    await showError(error, { title: "Failed to Get Tabs" });
     return [];
   }
 }
@@ -106,10 +103,6 @@ export async function openUrl(url: string, application?: string): Promise<void> 
   try {
     await open(url, application);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Open URL",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+    await showError(error, { title: "Failed to Open URL" });
   }
 }
