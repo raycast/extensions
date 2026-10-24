@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Hide Profiles] - {PR_MERGE_DATE}
+## [Hide Profiles] - 2026-10-24
 
 - Add a "Hide Profile" action (⌘H) to Switch Profiles. Hidden profiles are left out of Switch Profiles and of Move Current Tab's destinations, and their Quicklinks keep working.
 - Add a "Show Hidden Profiles" action (⇧⌘H) to list hidden profiles and unhide them. It only appears while a profile is hidden.
