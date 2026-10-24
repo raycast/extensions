@@ -382,6 +382,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://databricks.techfabric.com/mcp",
   },
   {
+    name: "datawebot",
+    title: "datawebot",
+    description:
+      "Ecommerce product data for agents. Search products across online shops worldwide (title, price, shop, rating, reviews, image, link), list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Paid from 200 free trial credits. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in by email (free), or an optional API key as a Bearer header.",
+    icon: "https://raw.githubusercontent.com/datawebot/datawebot-mcp/main/assets/logo.png",
+    homepage: "https://www.datawebot.com/docs/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.datawebot.com/mcp"],
+    },
+    remoteUrl: "https://mcp.datawebot.com/mcp",
+  },
+  {
     name: "desearch",
     title: "Desearch",
     description:
@@ -561,6 +574,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.edgechat.ai/mcp"],
     },
+  },
+  {
+    name: "evolink",
+    title: "EvoLink",
+    description:
+      "Image, video, music and speech generation with 150+ models from one EvoLink account. Search models and read their published prices, get a quote for an exact task, generate after you approve it, then track the task and your balance. Model search, prices, quotes, task status and balance checks are free; generation is billed to your EvoLink balance. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/Evolink-AI/mcp-plugin/main/assets/logo.png",
+    homepage:
+      "https://evolink.ai/mcp?utm_source=raycast&utm_medium=referral&utm_campaign=mcp_remote&utm_content=directory_listing",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.evolink.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.evolink.ai/mcp",
   },
   {
     name: "exa",
@@ -836,6 +863,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mcp-checkup",
+    title: "MCP Checkup",
+    description:
+      "Check a public MCP server before you connect it. Look up observed status and reports for servers MCP Checkup tracks, search them by what their tools do, see recent changes to a server's tool list, fetch the Ed25519-signed (DSSE) attestation behind a report, and request a one-off check of a server by URL. Attestations can be verified offline with the open-source verifier at github.com/mcpcheckup/checks (Apache-2.0). Hosted remote Streamable HTTP server at https://mcpcheckup.com/mcp; no sign-in, no API key.",
+    icon: "https://mcpcheckup.com/apple-touch-icon.png",
+    homepage: "https://mcpcheckup.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpcheckup.com/mcp"],
+    },
+    remoteUrl: "https://mcpcheckup.com/mcp",
+  },
+  {
     name: "medbillanalyzer",
     title: "MedBillAnalyzer",
     description:
@@ -931,6 +971,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         RADAR_STATE: "/absolute/path/to/state",
       },
     },
+  },
+  {
+    name: "overlayqa",
+    title: "OverlayQA",
+    description:
+      "Design QA for coding agents. Run WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, then create and manage QA issues, comments, labels and client review links in OverlayQA. 31 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. A free OverlayQA account includes 3 scans a day; creating issues needs a paid plan after a 14-day trial.",
+    icon: "https://raw.githubusercontent.com/OverlayQA/mcp/main/icon.png",
+    homepage: "https://overlayqa.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.overlayqa.com/mcp"],
+    },
+    remoteUrl: "https://api.overlayqa.com/mcp",
   },
   {
     name: "paddle",
@@ -1218,6 +1271,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "send21",
+    title: "send21",
+    description:
+      "Crypto pay links and API for people and AI agents. Create pay links and payment drafts priced in any of 161 fiat currencies, paid in BTC (on-chain or Lightning), USDC, USDT, EURC, SOL or ETH to the owner's approved addresses, check whether they are paid, and propose new receiving addresses for the owner to approve. Non-custodial: send21 never holds keys or funds, and the payer signs in their own wallet. Hosted remote Streamable HTTP server through `mcp-remote`; send21 API key as an `Authorization: Bearer` header (free account).",
+    icon: "https://raw.githubusercontent.com/send21io/send21-plugin/main/assets/logo.png",
+    homepage: "https://send21.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://send21.io/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
+  },
+  {
     name: "sentry",
     title: "Sentry",
     description: "This service provides a Model Context Provider (MCP) for interacting with Sentry's API.",
@@ -1433,6 +1498,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "techfabric",
+    title: "TechFabric",
+    description:
+      "Lets TechFabric's engineers write blog posts and case studies for techfabric.com from the coding agent they already use, with its repository and context: today's brief, the site's checks, and a draft under their byline that only they publish. Anyone can also search and read the site. Hosted remote Streamable HTTP server; reading needs no sign-in and no API key, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account (dynamic client registration and PKCE).",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://www.techfabric.com/mcp-servers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://www.techfabric.com/mcp",
+  },
+  {
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
@@ -1610,6 +1688,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.xtiles.app/mcp"],
     },
     remoteUrl: "https://mcp.xtiles.app/mcp",
+  },
+  {
+    name: "revid",
+    title: "Revid",
+    description:
+      "Research what goes viral, make finished short-form videos and post them. Search viral TikTok, YouTube, Instagram and X videos for hooks and formats, render a finished video with voice, captions, music and AI footage from a prompt, script, article or upload, run recurring series, then publish or schedule it to your connected accounts. 30 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a Revid API key as a bearer token.",
+    icon: "https://www.revid.ai/revid_logo_square_bg_512.png",
+    homepage: "https://www.revid.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.revid.ai/api/mcp"],
+    },
+    remoteUrl: "https://www.revid.ai/api/mcp",
   },
   {
     name: "firecrawl",
@@ -2649,6 +2740,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "serato-dj-mcp"],
+    },
+  },
+  {
+    name: "shopify-speed-check",
+    title: "Shopify Speed Check",
+    description:
+      "Check any Shopify store's PageSpeed and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees.",
+    homepage: "https://www.skaidigital.com/tools/shopify-speed-test",
+    remoteUrl: "https://tools.skaidigital.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tools.skaidigital.com/mcp"],
     },
   },
   {

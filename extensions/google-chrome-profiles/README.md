@@ -46,6 +46,10 @@ The command opens the URL in the destination profile, reusing an existing matchi
 
 Profile switching and tab moves use Raycast's Accessibility and Automation permissions for Chrome and System Events. If ordinary profile switching cannot use the menu, it falls back to opening the profile directly. Tab moves require menu access to identify and verify the destination profile.
 
+## Hide profiles
+
+Hit `⌘ H` on a profile in **Switch Profiles** to hide it. Hidden profiles no longer appear in Switch Profiles or as destinations in **Move Current Tab to Another Profile**, and their Quicklinks keep working. To bring one back, hit `⌘ ⇧ H` to show hidden profiles, then `⌘ H` on the profile to unhide it.
+
 ## Hotkey (recommended)
 
 I highly recommend that you map the default Google Chrome profile shortcut (`⌘ ⇧ M`) to open this extension. Like so:

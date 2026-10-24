@@ -6,6 +6,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchPlayerCount, settings } from "./utils";
+import openGamePage from "./game-page";
+import launchGame from "./launch";
 
 type State = {
   loading: boolean;
@@ -44,7 +46,7 @@ export default function Command() {
 
   // Keep the command alive while fetching, without flashing an icon when hidden.
   if (state.loading) return <MenuBarExtra isLoading />;
-  if (hideZeroPlayers && state.game?.playing === 0) {
+  if (hideZeroPlayers === true && state.game?.playing === 0 && !state.error) {
     return null;
   }
 
@@ -59,7 +61,18 @@ export default function Command() {
       <MenuBarExtra.Item title={state.error ?? `${count} players online`} />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title="Open Settings"
+        title="Open in Roblox"
+        icon={Icon.Globe}
+        onAction={openGamePage}
+      />
+      <MenuBarExtra.Item
+        title="Launch"
+        icon={Icon.Play}
+        onAction={launchGame}
+      />
+      <MenuBarExtra.Item
+        title="Settings"
+        icon={Icon.Gear}
         onAction={openCommandPreferences}
       />
     </MenuBarExtra>

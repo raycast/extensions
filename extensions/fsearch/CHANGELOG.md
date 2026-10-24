@@ -1,5 +1,11 @@
 # FSearch Changelog
 
+## [Remove Trashed Results Immediately] - 2026-10-24
+
+- Remove trashed files, folders, and their descendants from the current search results immediately.
+- Remove every matching line of a trashed file from Search File Contents.
+- Keep deleted paths hidden while the search index catches up, and preserve results when trashing is cancelled or fails.
+
 ## [Root Search Filters] - 2026-10-11
 
 - Show how long each search took in the top left of the results.
