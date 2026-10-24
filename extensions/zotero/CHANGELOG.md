@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Fix Reference Export] - {PR_MERGE_DATE}
+## [Fix Reference Export] - 2026-10-24
 
 - The reference and BibTeX export actions no longer copy or paste an empty reference, and no longer report "Copied to Clipboard" / "Pasted to App" when generating the reference failed. They now show why it failed instead, e.g. a missing Better BibTeX CSL JSON file, a missing CSL style, or an entry that isn't in the export
 
