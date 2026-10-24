@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translate-bidirectional",
+  "title": "Translate Bidirectional AI",
+  "description": "Translate selected or clipboard text between a source and target language of your choice using Raycast AI, with automatic language detection. Solves a key limitation of Raycast AI Commands: they don't support conditional logic to check the current selection first and fall back to the clipboard. This extension does exactly that — merging both operations into a single command so you always translate the right text without switching between two separate commands.",
+  "icon": "translate.png",
+  "author": "jonnathanvb",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Translate Bidirectional AI",
+      "description": "Translate the selected text (or the clipboard, as fallback) with Raycast AI, streaming the result with its original formatting preserved.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryLanguage",
+      "title": "Primary Language",
+      "description": "Text not in this language is translated to it.",
+      "type": "textfield",
+      "required": false,
+      "default": "Brazilian Portuguese (pt-BR)"
+    },
+    {
+      "name": "secondaryLanguage",
+      "title": "Secondary Language",
+      "description": "Used when the input is already in the primary language.",
+      "type": "textfield",
+      "required": false,
+      "default": "English"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
