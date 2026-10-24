@@ -5,13 +5,13 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { useState } from "react";
 import SetLocation from "./set-location";
-import { dayTone, DayTone, monthDays, monthSvg, prayedCount } from "./lib/calendar";
+import { dayTone, DayTone, monthDays, PANEL_WIDTH, panelSvg, prayedCount } from "./lib/calendar";
 import { formatTime, ltrName } from "./lib/format";
 import { prayerActions, statusAccessory } from "./lib/prayer-actions";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerSlot, toDateKey } from "./lib/prayers";
 import { loadSettings, Settings } from "./lib/settings";
 import { summarize } from "./lib/stats";
-import { PrayerStatusValue, STATUS_LABELS } from "./lib/status";
+import { STATUS_LABELS } from "./lib/status";
 import { STATUS_COLORS, statusIcon } from "./lib/status-icons";
 import { History, loadHistory, PrayerRecord } from "./lib/tracker";
 
@@ -24,15 +24,6 @@ const TONE_COLORS: Record<DayTone, Color.ColorLike> = {
   none: Color.Red,
   noData: Color.SecondaryText,
   future: Color.SecondaryText,
-};
-
-/** Emoji per status in the day's table under the month (Markdown has no colors). */
-const STATUS_EMOJI: Record<PrayerStatusValue, string> = {
-  jamaat: "🕌",
-  ontime: "✅",
-  late: "🟡",
-  madeup: "↩️",
-  missed: "❌",
 };
 
 /** `YYYY-MM` for a date. */
@@ -87,17 +78,6 @@ export default function Command() {
   return <MonthView settings={settings} />;
 }
 
-/** The selected day's prayers as a Markdown table, for under the month. */
-function dayTable(slots: PrayerSlot[], day: History[string] | undefined): string {
-  const rows = slots.map((slot) => {
-    const status = day?.[slot.key]?.status;
-    const label = status ? `${STATUS_EMOJI[status]} ${STATUS_LABELS[status]}` : "—";
-    const jamaat = slot.jamaat ? formatTime(slot.jamaat) : "—";
-    return `| ${ltrName(slot.name)} | ${formatTime(slot.start)} | ${jamaat} | ${formatTime(slot.end)} | ${label} |`;
-  });
-  return ["| Prayer | Starts | Jamaat | Ends | Status |", "|---|---|---|---|---|", ...rows].join("\n");
-}
-
 /** Days of a month on the left; the whole month and the selected day's prayers on the right. */
 function MonthView({ settings }: { settings: Settings }) {
   const now = new Date();
@@ -133,7 +113,29 @@ function MonthView({ settings }: { settings: Settings }) {
     ? `${known.prayed}/${known.total} prayed · ${known.jamaat} with jamaat · ${known.madeUp} made up`
     : "No reminder history this month";
   const initial = keys.includes(todayKey) ? todayKey : keys[0];
-  const calendar = svgImage(monthSvg(year, monthIndex - 1, toneOf, todayKey, environment.appearance), 346);
+  const [selection, setSelection] = useState<string | null>(initial);
+  const shown = selection && keys.includes(selection) ? selection : initial;
+  const shownDate = dates[keys.indexOf(shown)];
+  // Only the selected day's detail is visible, so one image (for that day) serves every row.
+  const panel = svgImage(
+    panelSvg(
+      year,
+      monthIndex - 1,
+      toneOf,
+      todayKey,
+      shown,
+      dayLabel(shownDate),
+      getDaySchedule(shownDate, settings.schedule).map((slot) => ({
+        name: slot.name,
+        start: formatTime(slot.start),
+        jamaat: slot.jamaat && formatTime(slot.jamaat),
+        end: formatTime(slot.end),
+        status: history[shown]?.[slot.key]?.status,
+      })),
+      environment.appearance,
+    ),
+    PANEL_WIDTH,
+  );
 
   return (
     <List
@@ -141,6 +143,7 @@ function MonthView({ settings }: { settings: Settings }) {
       isShowingDetail
       filtering={false}
       selectedItemId={initial}
+      onSelectionChange={setSelection}
       searchBarPlaceholder="Pick a month on the right"
       searchBarAccessory={
         <List.Dropdown tooltip="Month" value={month} onChange={setMonth}>
@@ -156,13 +159,7 @@ function MonthView({ settings }: { settings: Settings }) {
           const day = history[key];
           const tone = toneOf(key);
           const slots = getDaySchedule(date, settings.schedule);
-          const markdown = [
-            `## ${monthLabel(month)}`,
-            calendar,
-            "Green: all five · Orange: some · Red: none · Grey: no reminders · Outlined: today",
-            `### ${dayLabel(date)}`,
-            dayTable(slots, day),
-          ].join("\n\n");
+
           return (
             <List.Item
               key={key}
@@ -175,7 +172,7 @@ function MonthView({ settings }: { settings: Settings }) {
               ]
                 .filter(Boolean)
                 .join(" · ")}
-              detail={<List.Item.Detail markdown={markdown} />}
+              detail={<List.Item.Detail markdown={panel} />}
               actions={
                 <ActionPanel>
                   <Action.Push
