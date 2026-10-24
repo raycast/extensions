@@ -6,6 +6,8 @@ import {
   List,
   ActionPanel,
   Action,
+  Alert,
+  confirmAlert,
   Icon,
   Color,
   Detail,
@@ -14,6 +16,7 @@ import {
   Cache,
   openExtensionPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.SavedGames>();
@@ -631,19 +634,30 @@ export default function SavedGames() {
                             onAction={() => removeGame(game.id)}
                             icon={Icon.Trash}
                             style={Action.Style.Destructive}
-                            shortcut={{
-                              Windows: { modifiers: ["ctrl"], key: "s" },
-                              macOS: { modifiers: ["cmd"], key: "s" },
-                            }}
+                            shortcut={Keyboard.Shortcut.Common.Save}
                           />
                           <Action
                             title="Clear All Saved Games"
                             onAction={async () => {
-                              setSavedGames([]);
+                              const confirmed = await confirmAlert({
+                                title: "Clear All Saved Games?",
+                                message: `This will permanently remove ${savedGames.length} saved games.`,
+                                primaryAction: {
+                                  title: "Clear All",
+                                  style: Alert.ActionStyle.Destructive,
+                                },
+                                dismissAction: {
+                                  title: "Cancel",
+                                },
+                              });
+
+                              if (!confirmed) return;
+
                               await LocalStorage.setItem(
                                 "saved_itad_games",
                                 JSON.stringify([]),
                               );
+                              setSavedGames([]);
                               cache.remove(CACHE_KEY);
                             }}
                             icon={Icon.Trash}
@@ -680,9 +694,7 @@ interface GameDetailProps {
   removeGame?: () => void;
   preloadedDeals?: Deal[];
   preloadedOverview?:
-    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
-    | OverviewItem
-    | null;
+    { prices?: OverviewItem[]; bundles?: BundleInfo[] } | OverviewItem | null;
 }
 
 function GameDetail({
@@ -1532,10 +1544,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action.CopyToClipboard
               title="Copy Game Name"
               content={gameTitle}
-              shortcut={{
-                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             {currentBest?.url && (
               <Action.CopyToClipboard
@@ -1570,10 +1579,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
-              shortcut={{
-                Windows: { modifiers: ["ctrl"], key: "r" },
-                macOS: { modifiers: ["cmd"], key: "r" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={() => {
                 detailCache.remove(
                   `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`,
@@ -1603,10 +1609,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 title="Remove from Saved"
                 onAction={removeGame}
                 icon={Icon.Trash}
-                shortcut={{
-                  Windows: { modifiers: ["ctrl"], key: "s" },
-                  macOS: { modifiers: ["cmd"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 style={Action.Style.Destructive}
               />
             )}

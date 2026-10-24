@@ -2,6 +2,18 @@
 
 ## [Update] - 2026-06-01
 
+### Bug Fixes & Improvements
+- **Improved Price History Chart Loading**: Added a loading indicator and error fallback, keeping the loading message visible until the chart image is ready.
+- **Fixed Top Deals API Error**: Corrected CheapShark API parameters and added response validation to prevent crashes when unexpected data is returned.
+- **Improved API Error Handling**: Added HTTP status checks and clearer error reporting for Top Deals.
+
+### Maintenance
+- **Updated Raycast SDK**: Upgraded to Raycast API 2.9.0 with Windows and macOS compatibility.
+- **Updated Development Dependencies**: Upgraded ESLint to 10.13.0 and refreshed compatible dependencies.
+- **Resolved Security Vulnerabilities**: Updated affected dependencies and verified zero reported vulnerabilities with npm audit.
+
+## [Update] - 2026-06-01
+
 ### Performance & Optimization
 - **Prevented Runtime Crashes**: Implemented safe JSON parsing (safeParse) for all LocalStorage and Cache reads, eliminating silent failures and extension crashes caused by corrupted or incomplete storage data.
 - **Fixed Race Conditions**: Refactored fetchPrices with strict AbortSignal guards to prevent stale API responses from corrupting the state during rapid UI interactions or filter changes.

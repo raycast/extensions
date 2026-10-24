@@ -12,6 +12,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.SearchGames>();
@@ -495,10 +496,7 @@ export default function Command() {
                       title={isSaved ? "Remove from Saved" : "Save Game"}
                       onAction={() => toggleSave(game)}
                       icon={isSaved ? Icon.Trash : Icon.Star}
-                      shortcut={{
-                        Windows: { modifiers: ["ctrl"], key: "s" },
-                        macOS: { modifiers: ["cmd"], key: "s" },
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.Save}
                       style={
                         isSaved
                           ? Action.Style.Destructive
@@ -526,9 +524,7 @@ interface GameDetailProps {
   removeGame?: () => void;
   preloadedDeals?: Deal[];
   preloadedOverview?:
-    | { prices?: OverviewItem[]; bundles?: BundleInfo[] }
-    | OverviewItem
-    | null;
+    { prices?: OverviewItem[]; bundles?: BundleInfo[] } | OverviewItem | null;
 }
 
 function GameDetail({
@@ -552,6 +548,11 @@ function GameDetail({
     lastChecked: null,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [chartPreview, setChartPreview] = useState<{
+  url: string;
+  dataUri?: string;
+  error?: boolean;
+} | null>(null);
   const [range, setRange] = useState<"3m" | "6m" | "1y">("1y");
   const SHOW_CHART = preferences.showPriceHistoryChart ?? true;
   const [selectedStores, setSelectedStores] = useState<string[]>(["all"]);
@@ -1104,6 +1105,49 @@ function GameDetail({
     };
     chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&w=250&h=110&devicePixelRatio=2&bkg=transparent`;
   }
+  
+  useEffect(() => {
+  if (!chartUrl) return;
+
+  const controller = new AbortController();
+
+  const loadChart = async () => {
+    try {
+      const response = await fetch(chartUrl, {
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chart request failed: ${response.status}`);
+      }
+
+      const imageData = await response.arrayBuffer();
+      const dataUri = `data:image/png;base64,${Buffer.from(imageData).toString("base64")}`;
+
+      if (!controller.signal.aborted) {
+        setChartPreview({ url: chartUrl, dataUri });
+      }
+    } catch {
+      if (!controller.signal.aborted) {
+        setChartPreview({ url: chartUrl, error: true });
+      }
+    }
+  };
+
+  void loadChart();
+
+  return () => controller.abort();
+}, [chartUrl]);
+
+const chartBody = isLoading
+  ? "⏳ Loading chart…"
+  : !chartUrl
+    ? "No price history available."
+    : chartPreview?.url !== chartUrl
+      ? "⏳ Loading chart…"
+      : chartPreview.dataUri
+        ? `![Price History](${chartPreview.dataUri})`
+        : "Chart unavailable.";
 
   const steamCut = steamData?.price_overview?.discount_percent ?? 0;
   const effectiveCut = Math.max(currentBest?.cut ?? 0, steamCut);
@@ -1190,7 +1234,7 @@ ${heroSection}
 | :--- | :--- | :--- | :--- |
 ${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : isUnreleased ? `| ${releaseDateText || "TBA"} | - | - | - |` : "| No info | - | - | - |"}
 
-${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
+${SHOW_CHART ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n${chartBody}\n` : ""}
 `;
 
   const tinyPlusGreen =
@@ -1382,10 +1426,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action.CopyToClipboard
               title="Copy Game Name"
               content={gameTitle}
-              shortcut={{
-                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                macOS: { modifiers: ["cmd", "shift"], key: "c" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             {currentBest?.url && (
               <Action.CopyToClipboard
@@ -1420,10 +1461,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
             <Action
               title="Refresh Data"
               icon={Icon.ArrowClockwise}
-              shortcut={{
-                Windows: { modifiers: ["ctrl"], key: "r" },
-                macOS: { modifiers: ["cmd"], key: "r" },
-              }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={() => {
                 detailCache.remove(
                   `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`,
@@ -1453,10 +1491,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 title={isSaved ? "Remove from Saved" : "Save Game"}
                 onAction={toggleSave}
                 icon={isSaved ? Icon.Trash : Icon.Star}
-                shortcut={{
-                  Windows: { modifiers: ["ctrl"], key: "s" },
-                  macOS: { modifiers: ["cmd"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 style={
                   isSaved ? Action.Style.Destructive : Action.Style.Regular
                 }
@@ -1467,10 +1502,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 title="Remove from Saved"
                 onAction={removeGame}
                 icon={Icon.Trash}
-                shortcut={{
-                  Windows: { modifiers: ["ctrl"], key: "s" },
-                  macOS: { modifiers: ["cmd"], key: "s" },
-                }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 style={Action.Style.Destructive}
               />
             )}
