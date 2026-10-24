@@ -685,47 +685,38 @@ function CurrentTrackActions({ state, onRefresh }: { state: PlayerState; onRefre
   );
 }
 
-// `List.Item.Detail` renders markdown above the metadata block, and the block
-// cannot be resized, so only the artwork goes in markdown. Text lives in
-// metadata rows, otherwise the pane starts scrolling.
+// Metadata labels are single-line and truncate long values, so the track text
+// goes in markdown, which wraps and uses the detail pane's width. Only the short
+// progress row stays in metadata.
 function TrackDetail({ state }: { state: PlayerState }) {
   const progress = state.duration > 0 ? state.position / state.duration : 0;
+  const details = [state.artist || "Unknown", state.album, state.year].filter(Boolean).join(" · ");
 
   return (
     <List.Item.Detail
-      markdown={hasArtwork(state.artworkURL) ? `![Artwork](${artworkURL(state.artworkURL, ARTWORK_SIZE)})` : ""}
+      markdown={`${
+        hasArtwork(state.artworkURL) ? `![Artwork](${artworkURL(state.artworkURL, ARTWORK_SIZE)})\n\n` : ""
+      }**${state.title}**\n\n${details}`}
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Track" text={state.title} />
-          <Detail.Metadata.Label title="Artist" text={state.artist || "Unknown"} />
-          {state.album ? <Detail.Metadata.Label title="Album" text={state.album} /> : null}
-          {state.duration > 0 ? (
+        state.duration > 0 ? (
+          <Detail.Metadata>
             <Detail.Metadata.Label
               title={state.playing ? "Playing" : "Paused"}
               text={`${formatTime(state.position)} / ${formatTime(state.duration)}`}
               icon={getProgressIcon(progress, Color.PrimaryText)}
             />
-          ) : null}
-          {state.year ? <Detail.Metadata.Label title="Year" text={state.year} /> : null}
-        </Detail.Metadata>
+          </Detail.Metadata>
+        ) : undefined
       }
     />
   );
 }
 
+// Same reason as TrackDetail: metadata truncates long titles, markdown wraps.
 function QueueDetail({ track }: { track: QueueTrack }) {
-  return (
-    <List.Item.Detail
-      markdown=""
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Track" text={track.title} />
-          <Detail.Metadata.Label title="Artist" text={track.artist || "Unknown"} />
-          {track.duration ? <Detail.Metadata.Label title="Duration" text={track.duration} /> : null}
-        </Detail.Metadata>
-      }
-    />
-  );
+  const details = [track.artist || "Unknown", track.duration].filter(Boolean).join(" · ");
+
+  return <List.Item.Detail markdown={`**${track.title}**\n\n${details}`} />;
 }
 
 async function removeQueueItem(track: QueueTrack) {
