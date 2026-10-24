@@ -1,0 +1,527 @@
+{
+  "source": "Actual local engine results from the user query on 2026-10-14, filenames and paths replaced. Guidance is a replay input, not a successful live provider decision.",
+  "hits": [
+    {
+      "path": "/fixture/image-0.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 0,
+      "score": 4.943298369487058,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "2765",
+        "height": "6144"
+      }
+    },
+    {
+      "path": "/fixture/image-1.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 1,
+      "score": 4.809508983864209,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "4800",
+        "height": "3000"
+      }
+    },
+    {
+      "path": "/fixture/image-2.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 2,
+      "score": 4.1512945991831485,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "1280",
+        "height": "960"
+      }
+    },
+    {
+      "path": "/fixture/image-3.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 3,
+      "score": 4.074578475275181,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-4.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 4,
+      "score": 3.9088072578187845,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-5.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 5,
+      "score": 3.748276867679036,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "2499",
+        "height": "3544"
+      }
+    },
+    {
+      "path": "/fixture/image-6.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 6,
+      "score": 3.7319306059454393,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-7.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 7,
+      "score": 3.579010220986181,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-8.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 8,
+      "score": 3.546545816694678,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-9.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 9,
+      "score": 3.475651906693577,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-10.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 10,
+      "score": 3.473177601435859,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-11.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 11,
+      "score": 3.4612455898969965,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-12.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 12,
+      "score": 3.4497277712704273,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-13.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 13,
+      "score": 3.4454827460950885,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-14.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 14,
+      "score": 3.4265818031541886,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-15.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 15,
+      "score": 3.378649373596602,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-16.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 16,
+      "score": 3.340996817004786,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "2200",
+        "height": "1232"
+      }
+    },
+    {
+      "path": "/fixture/image-17.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 17,
+      "score": 3.3126335347066593,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-18.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 18,
+      "score": 3.2949345860118777,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "2752",
+        "height": "1728"
+      }
+    },
+    {
+      "path": "/fixture/image-19.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 19,
+      "score": 3.2900265599872043,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "1920",
+        "height": "1080"
+      }
+    },
+    {
+      "path": "/fixture/image-20.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 20,
+      "score": 3.2722144560559143,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-21.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 21,
+      "score": 3.2598157992272188,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-22.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 22,
+      "score": 3.2549540064401246,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-23.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 23,
+      "score": 3.225378100318632,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "180",
+        "height": "320"
+      }
+    },
+    {
+      "path": "/fixture/image-24.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 24,
+      "score": 3.224191591364639,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-25.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 25,
+      "score": 3.2201845219102987,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "4096",
+        "height": "2560"
+      }
+    },
+    {
+      "path": "/fixture/image-26.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 26,
+      "score": 3.2138657078000845,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "878",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-27.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 27,
+      "score": 3.179097016302198,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "320",
+        "height": "240"
+      }
+    },
+    {
+      "path": "/fixture/image-28.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 28,
+      "score": 3.106958718861543,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-29.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 29,
+      "score": 3.101767742187822,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-30.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 30,
+      "score": 3.0967088008092865,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-31.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 31,
+      "score": 3.0929919168146887,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-32.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 32,
+      "score": 3.0875441043612923,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-33.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 33,
+      "score": 3.0659897945979715,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-34.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 34,
+      "score": 3.0595978393488674,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "720",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-35.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 35,
+      "score": 3.0563124422613615,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "4096",
+        "height": "2560"
+      }
+    },
+    {
+      "path": "/fixture/image-36.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 36,
+      "score": 3.0402465294421988,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-37.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 37,
+      "score": 3.0223584599986104,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "720",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-38.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 38,
+      "score": 3.018464323141983,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "720",
+        "height": "1280"
+      }
+    },
+    {
+      "path": "/fixture/image-39.png",
+      "kind": "image",
+      "segment": "image",
+      "segment_id": 39,
+      "score": 3.0155722075666245,
+      "modified": 1,
+      "size": 1,
+      "info": {
+        "width": "960",
+        "height": "1280"
+      }
+    }
+  ],
+  "strong": 40,
+  "meaning": true
+}
