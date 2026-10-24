@@ -1,4 +1,4 @@
-import { PRAYER_KEYS } from "./prayers";
+import { PRAYER_KEYS, toDateKey } from "./prayers";
 import { StatRecord } from "./stats";
 
 /** How a calendar day is colored: all five prayed, some, none, no reminder data, or still ahead. */
@@ -40,4 +40,29 @@ export function dayTone(day: Partial<Record<string, StatRecord>> | undefined, da
   if (!day || Object.keys(day).length === 0) return "noData";
   const count = prayedCount(day);
   return count === PRAYER_KEYS.length ? "full" : count > 0 ? "partial" : "none";
+}
+
+/** Dot per day in the month table. */
+export const TONE_DOTS: Record<DayTone, string> = { full: "🟢", partial: "🟠", none: "🔴", noData: "⚪", future: "" };
+
+/**
+ * A month as a Markdown table, Monday first, each day with its dot; the selected day is bold.
+ *
+ * @param year - Full year.
+ * @param month - Month, 0–11.
+ * @param toneOf - Tone for a date key.
+ * @param selected - Date key to highlight.
+ * @returns Markdown table.
+ */
+export function monthTable(year: number, month: number, toneOf: (date: string) => DayTone, selected: string): string {
+  const { blanks, dates } = monthDays(year, month);
+  const cells: string[] = Array<string>(blanks).fill(" ");
+  for (const date of dates) {
+    const key = toDateKey(date);
+    const label = `${TONE_DOTS[toneOf(key)]} ${date.getDate()}`.trim();
+    cells.push(key === selected ? `**${label}**` : label);
+  }
+  while (cells.length % 7) cells.push(" ");
+  const rows = Array.from({ length: cells.length / 7 }, (_, i) => `| ${cells.slice(i * 7, i * 7 + 7).join(" | ")} |`);
+  return ["| Mon | Tue | Wed | Thu | Fri | Sat | Sun |", "|:-:|:-:|:-:|:-:|:-:|:-:|:-:|", ...rows].join("\n");
 }

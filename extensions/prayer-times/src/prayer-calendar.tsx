@@ -1,14 +1,14 @@
-import { Action, ActionPanel, Color, Grid, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import SetLocation from "./set-location";
-import { dayTone, DayTone, monthDays, prayedCount } from "./lib/calendar";
+import { dayTone, DayTone, monthDays, monthTable, prayedCount } from "./lib/calendar";
 import { formatTime, ltrName } from "./lib/format";
 import { prayerActions, statusAccessory } from "./lib/prayer-actions";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerSlot, toDateKey } from "./lib/prayers";
 import { loadSettings, Settings } from "./lib/settings";
 import { summarize } from "./lib/stats";
-import { STATUS_LABELS } from "./lib/status";
+import { PrayerStatusValue, STATUS_LABELS } from "./lib/status";
 import { STATUS_COLORS, statusIcon } from "./lib/status-icons";
 import { History, loadHistory, PrayerRecord } from "./lib/tracker";
 
@@ -19,8 +19,17 @@ const TONE_COLORS: Record<DayTone, Color.ColorLike> = {
   full: Color.Green,
   partial: Color.Orange,
   none: Color.Red,
-  noData: "rgba(142, 142, 147, 0.25)",
-  future: "rgba(142, 142, 147, 0.1)",
+  noData: Color.SecondaryText,
+  future: Color.SecondaryText,
+};
+
+/** Emoji per status in the day's table under the month (Markdown has no colors). */
+const STATUS_EMOJI: Record<PrayerStatusValue, string> = {
+  jamaat: "🕌",
+  ontime: "✅",
+  late: "🟡",
+  madeup: "↩️",
+  missed: "❌",
 };
 
 /** `YYYY-MM` for a date. */
@@ -43,9 +52,9 @@ export default function Command() {
   const { data: settings, isLoading, error } = usePromise(loadSettings);
   if (!settings) {
     return (
-      <Grid isLoading={isLoading}>
+      <List isLoading={isLoading}>
         {!isLoading && (
-          <Grid.EmptyView
+          <List.EmptyView
             icon={Icon.Pin}
             title="Set your location"
             description={error?.message ?? "Choose a city or use your current location"}
@@ -56,18 +65,30 @@ export default function Command() {
             }
           />
         )}
-      </Grid>
+      </List>
     );
   }
-  return <MonthGrid settings={settings} />;
+  return <MonthView settings={settings} />;
 }
 
-function MonthGrid({ settings }: { settings: Settings }) {
+/** The selected day's prayers as a Markdown table, for under the month. */
+function dayTable(slots: PrayerSlot[], day: History[string] | undefined): string {
+  const rows = slots.map((slot) => {
+    const status = day?.[slot.key]?.status;
+    const label = status ? `${STATUS_EMOJI[status]} ${STATUS_LABELS[status]}` : "—";
+    const jamaat = slot.jamaat ? formatTime(slot.jamaat) : "—";
+    return `| ${ltrName(slot.name)} | ${formatTime(slot.start)} | ${jamaat} | ${formatTime(slot.end)} | ${label} |`;
+  });
+  return ["| Prayer | Starts | Jamaat | Ends | Status |", "|---|---|---|---|---|", ...rows].join("\n");
+}
+
+/** Days of a month on the left; the whole month and the selected day's prayers on the right. */
+function MonthView({ settings }: { settings: Settings }) {
   const now = new Date();
   const todayKey = toDateKey(now);
   const [month, setMonth] = useState(monthKey(now));
   const [year, monthIndex] = month.split("-").map(Number);
-  const { blanks, dates } = monthDays(year, monthIndex - 1);
+  const { dates } = monthDays(year, monthIndex - 1);
   const {
     data: history = {},
     isLoading,
@@ -89,57 +110,55 @@ function MonthGrid({ settings }: { settings: Settings }) {
     const next = monthKey(new Date(year, monthIndex - 1 + by, 1));
     if (months.includes(next)) setMonth(next);
   };
-  const known = summarize(
-    history,
-    dates.map((date) => toDateKey(date)),
-  );
+  const keys = dates.map((date) => toDateKey(date));
+  const known = summarize(history, keys);
+  const toneOf = (key: string) => dayTone(history[key], key, todayKey);
+  const totals = known.knownDays
+    ? `${known.prayed}/${known.total} prayed · ${known.jamaat} with jamaat · ${known.madeUp} made up`
+    : "No reminder history this month";
+  const initial = keys.includes(todayKey) ? todayKey : keys[0];
 
   return (
-    <Grid
-      columns={7}
-      aspectRatio="16/9"
-      inset={Grid.Inset.Medium}
+    <List
       isLoading={isLoading}
+      isShowingDetail
       filtering={false}
+      selectedItemId={initial}
       searchBarPlaceholder="Pick a month on the right"
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Month" value={month} onChange={setMonth}>
+        <List.Dropdown tooltip="Month" value={month} onChange={setMonth}>
           {months.map((key) => (
-            <Grid.Dropdown.Item key={key} title={monthLabel(key)} value={key} />
+            <List.Dropdown.Item key={key} title={monthLabel(key)} value={key} />
           ))}
-        </Grid.Dropdown>
+        </List.Dropdown>
       }
     >
-      <Grid.Section
-        title={monthLabel(month)}
-        subtitle={
-          known.knownDays
-            ? `${known.prayed}/${known.total} prayed · ${known.jamaat} with jamaat · ${known.madeUp} made up · Mon–Sun`
-            : "Mon–Sun"
-        }
-      >
-        {Array.from({ length: blanks }, (_, i) => (
-          <Grid.Item key={`blank-${i}`} content={{ color: "rgba(0, 0, 0, 0)" }} />
-        ))}
+      <List.Section title={monthLabel(month)} subtitle={totals}>
         {dates.map((date) => {
           const key = toDateKey(date);
           const day = history[key];
-          const tone = dayTone(day, key, todayKey);
+          const tone = toneOf(key);
           const slots = getDaySchedule(date, settings.schedule);
-          const tooltip = slots
-            .map((slot) => {
-              const status = day?.[slot.key]?.status;
-              return `${ltrName(slot.name)} ${formatTime(slot.start)}: ${status ? STATUS_LABELS[status] : "—"}`;
-            })
-            .join("\n");
+          const markdown = [
+            `## ${monthLabel(month)}`,
+            monthTable(year, monthIndex - 1, toneOf, key),
+            "🟢 all five · 🟠 some · 🔴 none · ⚪ no reminders",
+            `### ${dayLabel(date)}`,
+            dayTable(slots, day),
+          ].join("\n\n");
           return (
-            <Grid.Item
+            <List.Item
               key={key}
-              content={{ value: { color: TONE_COLORS[tone] }, tooltip }}
-              title={`${date.toLocaleDateString(undefined, { weekday: "short" })} ${date.getDate()}${key === todayKey ? " · Today" : ""}`}
-              subtitle={
-                tone === "future" ? "" : tone === "noData" ? "No data" : `${prayedCount(day)}/${PRAYER_KEYS.length}`
-              }
+              id={key}
+              icon={{ source: Icon.CircleFilled, tintColor: TONE_COLORS[tone] }}
+              title={`${date.toLocaleDateString(undefined, { weekday: "short" })} ${date.getDate()}`}
+              subtitle={[
+                key === todayKey ? "Today" : "",
+                tone === "future" || tone === "noData" ? "" : `${prayedCount(day)}/${PRAYER_KEYS.length}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              detail={<List.Item.Detail markdown={markdown} />}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -147,6 +166,20 @@ function MonthGrid({ settings }: { settings: Settings }) {
                     icon={Icon.Calendar}
                     target={<DayView settings={settings} initialDate={date} onChange={revalidate} />}
                   />
+                  {slots
+                    .filter((slot) => slot.start <= now)
+                    .map((slot) => {
+                      const record = day?.[slot.key];
+                      return (
+                        <ActionPanel.Submenu
+                          key={slot.id}
+                          title={`Mark ${ltrName(slot.name)}`}
+                          icon={record?.status ? statusIcon(record.status) : Icon.Circle}
+                        >
+                          {prayerActions(slot, record, settings, now, revalidate)}
+                        </ActionPanel.Submenu>
+                      );
+                    })}
                   <Action
                     title="Previous Month"
                     icon={Icon.ChevronLeft}
@@ -170,8 +203,8 @@ function MonthGrid({ settings }: { settings: Settings }) {
             />
           );
         })}
-      </Grid.Section>
-    </Grid>
+      </List.Section>
+    </List>
   );
 }
 

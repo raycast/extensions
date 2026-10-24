@@ -19,9 +19,10 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
   7 days with jamaat and made-up counts. With Apple Reminders on, the status is kept in the reminder's
   notes as a `prayer-status: jamaat|ontime|late|missed|madeup` line above the `prayer-times://` key, so
   other tools that sync these reminders can read and keep it.
-- **Prayer Calendar**: a month calendar colored by how many prayers were marked each day. Open any
-  day to see its five prayers with their status, mark or change them, step day by day, and expand a
-  prayer (⌘D) for its start, jamaat, preferred and end times and when it was prayed.
+- **Prayer Calendar**: the month's days on the left; on the right the whole month as a calendar with a
+  dot per day (all five, some, or none marked) and the selected day's prayers with their status. Mark
+  prayers from any day, or open it to step day by day and expand a prayer (⌘D) for its times and when
+  it was prayed.
 - **Apple Reminders**: one timed reminder per prayer, kept 14 days ahead, with heads-up, start,
   jamaat and ending alarms, so alerts fire even when Raycast isn't running.
 - **Jamaat rules** per prayer: `13:30`, `+10`, `floor5+15`, `ceil5+10`, `end-30`, plus a Jumu'ah rule.
