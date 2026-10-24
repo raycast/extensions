@@ -286,6 +286,11 @@ export async function getDownloadsAsync(
   return getDownloadsInOrderAsync(fileOrder, limit, offset, currentFolderPath);
 }
 
+export async function getLatestDownloadAsync(): Promise<Download | undefined> {
+  const results = await getDownloadsInOrderAsync(latestDownloadOrder, 1);
+  return results[0];
+}
+
 export function getLatestDownload() {
   return getDownloadsInOrder(latestDownloadOrder, 1)[0];
 }
