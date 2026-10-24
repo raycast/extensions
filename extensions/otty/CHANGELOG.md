@@ -1,6 +1,6 @@
 # Otty Changelog
 
-## [Search Otty Tabs, Agents, Settings, Themes, and Recipes] - {PR_MERGE_DATE}
+## [Search Otty Tabs, Agents, Settings, Themes, and Recipes] - 2026-10-24
 
 - Add Search Otty Tabs: browse Otty by tab, pane, or window, see which coding agents are working or need input, and press Enter to jump straight there; tabs you visit from Raycast come first.
 - Preview any pane in the sidebar (⌘⇧D; ⌘⇧Y toggles the preview, ⌘⇧I the details) and send it a message through Otty's Prompt Queue.
