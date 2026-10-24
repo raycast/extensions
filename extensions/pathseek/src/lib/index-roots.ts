@@ -1,28 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { stat } from "node:fs/promises";
-import path from "node:path";
-import os from "node:os";
+import { normalizeIndexRoots } from "./index-root-paths";
+
+export { normalizeIndexRoots } from "./index-root-paths";
 
 const ROOTS_KEY = "configured-index-roots-v1";
-
-export function normalizeIndexRoots(folders: string[]): string[] {
-  return [
-    ...new Set(
-      folders
-        .map((folder) => folder.trim())
-        .filter(Boolean)
-        .map((folder) =>
-          path.resolve(
-            folder === "~"
-              ? os.homedir()
-              : folder.startsWith("~/")
-                ? path.join(os.homedir(), folder.slice(2))
-                : folder,
-          ),
-        ),
-    ),
-  ];
-}
 
 /**
  * Reading the configured roots does NOT scan any directory and never runs fd.

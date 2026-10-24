@@ -29,6 +29,21 @@ test("the core index store never schedules or launches an automatic rebuild", as
   assert.doesNotMatch(code, /\bsetTimeout\s*\(/);
 });
 
+test("rebuild paths are selected lazily so explicit choices skip corrupt index reads", async () => {
+  const code = await source("lib/index-store.ts");
+  assert.match(code, /selectRebuildRoots\(selectedRoots, async \(\) =>/);
+  assert.doesNotMatch(code, /const previous = await readIndex\(\)/);
+});
+
+test("preferences use the Raycast-generated type", async () => {
+  const store = await source("lib/index-store.ts");
+  const trace = await source("lib/command-trace.ts");
+  assert.match(store, /getPreferenceValues<Preferences>\(\)/);
+  assert.match(trace, /getPreferenceValues<Preferences>\(\)/);
+  assert.doesNotMatch(store, /export type Preferences =/);
+  assert.doesNotMatch(trace, /type TracePreferences =/);
+});
+
 test("Rebuild Index starts only on explicit form submit or Action", async () => {
   const code = await source("rebuild-index.tsx");
   assert.match(code, /<Form\.FilePicker/);

@@ -11,3 +11,5 @@ dist/
 # Raycast generated files
 raycast-env.d.ts
 .build/
+raycast-env.d.ts
+.build/

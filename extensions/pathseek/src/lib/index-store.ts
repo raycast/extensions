@@ -9,7 +9,8 @@ import { pipeline } from "node:stream/promises";
 import { Transform } from "node:stream";
 import lockfile from "proper-lockfile";
 import { beginCommandTrace } from "./command-trace";
-import { getConfiguredIndexRoots, normalizeIndexRoots } from "./index-roots";
+import { getConfiguredIndexRoots } from "./index-roots";
+import { selectRebuildRoots } from "./index-root-paths";
 import {
   ACTIVE_INDEX_FILENAME,
   cleanupLegacyIndexes,
@@ -19,14 +20,6 @@ import {
   readIndexHeader,
   type SavedIndexMetadata,
 } from "./index-files";
-
-export type Preferences = {
-  includeHidden: boolean;
-  followSymlinks: boolean;
-  excludePatterns?: string;
-  fdBinary?: string;
-  fzfBinary?: string;
-};
 
 export type IndexMetadata = SavedIndexMetadata;
 
@@ -237,10 +230,9 @@ export async function rebuildIndex(
       console.warn("Stale build artifact cleanup deferred:", error);
     }
     const prefs = getPreferences();
-    const previous = await readIndex();
-    const roots = selectedRoots
-      ? normalizeIndexRoots(selectedRoots)
-      : await getConfiguredIndexRoots(previous?.roots);
+    const roots = await selectRebuildRoots(selectedRoots, async () =>
+      getConfiguredIndexRoots((await readIndex())?.roots),
+    );
     if (!roots.length)
       throw new Error(
         "Choose folders in Rebuild Index before building your first index.",

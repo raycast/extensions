@@ -28,7 +28,6 @@ export type CommandTraceRecord = {
   errorCode?: string;
 };
 
-type TracePreferences = { enableCommandTracing?: boolean };
 const TRACE_FILE = path.join(environment.supportPath, "command-trace.jsonl");
 const PREVIOUS_FILE = path.join(
   environment.supportPath,
@@ -38,7 +37,7 @@ const MAX_LOG_BYTES = 256 * 1024;
 const MAX_VIEW_EVENTS = 50;
 
 export function commandTracingEnabled(): boolean {
-  return getPreferenceValues<TracePreferences>().enableCommandTracing === true;
+  return getPreferenceValues<Preferences>().enableCommandTracing === true;
 }
 
 function sanitizedCode(error: unknown): string {
