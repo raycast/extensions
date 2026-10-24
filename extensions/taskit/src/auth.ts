@@ -2,6 +2,7 @@ import { getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 import { TaskitClient } from "./api";
 import {
   exchangeAuthorizationCode,
+  providerIdFor,
   refreshAccessToken,
   registerPublicClient,
   sessionRejected,
@@ -12,7 +13,6 @@ export const DEFAULT_API_BASE_URL =
   "https://func-taskit-dev-872f21.azurewebsites.net";
 
 const CLIENT_ID_PREFIX = "taskit-oauth-client:";
-const ISSUER_KEY = "taskit-token-issuer";
 
 export class NotSignedInError extends Error {
   constructor() {
@@ -21,16 +21,23 @@ export class NotSignedInError extends Error {
   }
 }
 
-export const oauthClient = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: "Taskit",
-  providerIcon: "icon.png",
-  providerId: "taskit",
-  description: "Sign in with your Taskit account",
-});
+const clients = new Map<string, OAuth.PKCEClient>();
+const accessTokens = new Map<string, string>();
 
-let accessToken: string | undefined;
-let boundIssuer: string | undefined;
+function clientFor(issuer: string): OAuth.PKCEClient {
+  const providerId = providerIdFor(issuer);
+  const cached = clients.get(providerId);
+  if (cached) return cached;
+  const client = new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.Web,
+    providerName: "Taskit",
+    providerIcon: "icon.png",
+    providerId,
+    description: "Sign in with your Taskit account",
+  });
+  clients.set(providerId, client);
+  return client;
+}
 
 export function readConfig(): { apiBaseUrl: string } {
   const prefs = getPreferenceValues<Preferences>();
@@ -62,28 +69,10 @@ async function clientIdFor(
   return client.client_id;
 }
 
-async function rememberIssuer(issuer: string): Promise<void> {
-  boundIssuer = issuer;
-  await LocalStorage.setItem(ISSUER_KEY, issuer);
-}
-
 async function clearSession(issuer: string): Promise<void> {
   await LocalStorage.removeItem(clientKey(issuer));
-  await LocalStorage.removeItem(ISSUER_KEY);
-  await oauthClient.removeTokens();
-  accessToken = undefined;
-  boundIssuer = undefined;
-}
-
-async function requireMatchingServer(): Promise<string> {
-  const issuer = readConfig().apiBaseUrl;
-  const stored = await LocalStorage.getItem<string>(ISSUER_KEY);
-  if (stored && stored !== issuer) {
-    accessToken = undefined;
-    boundIssuer = undefined;
-    throw new NotSignedInError();
-  }
-  return issuer;
+  await clientFor(issuer).removeTokens();
+  accessTokens.delete(issuer);
 }
 
 async function storeTokens(
@@ -93,18 +82,19 @@ async function storeTokens(
   if (!tokens.refresh_token) {
     throw new Error("Taskit did not return a refresh token");
   }
-  await oauthClient.setTokens({
+  await clientFor(issuer).setTokens({
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token,
     expires_in: tokens.expires_in,
     scope: tokens.scope,
   });
-  accessToken = tokens.access_token;
-  await rememberIssuer(issuer);
+  accessTokens.set(issuer, tokens.access_token);
 }
 
-async function refreshStored(refreshToken: string): Promise<void> {
-  const issuer = await requireMatchingServer();
+async function refreshStored(
+  issuer: string,
+  refreshToken: string,
+): Promise<void> {
   const clientId = await LocalStorage.getItem<string>(clientKey(issuer));
   if (!clientId) throw new NotSignedInError();
   try {
@@ -119,21 +109,17 @@ async function refreshStored(refreshToken: string): Promise<void> {
 }
 
 export async function ensureAccessToken(): Promise<string> {
-  const issuer = await requireMatchingServer();
-  const tokens = await oauthClient.getTokens();
+  const issuer = readConfig().apiBaseUrl;
+  const tokens = await clientFor(issuer).getTokens();
   if (!tokens?.accessToken) throw new NotSignedInError();
   if (tokens.refreshToken && tokens.isExpired()) {
-    await refreshStored(tokens.refreshToken);
+    await refreshStored(issuer, tokens.refreshToken);
   } else {
-    accessToken = tokens.accessToken;
-    if (!(await LocalStorage.getItem<string>(ISSUER_KEY))) {
-      await rememberIssuer(issuer);
-    } else {
-      boundIssuer = issuer;
-    }
+    accessTokens.set(issuer, tokens.accessToken);
   }
-  if (!accessToken || boundIssuer !== issuer) throw new NotSignedInError();
-  return accessToken;
+  const token = accessTokens.get(issuer);
+  if (!token) throw new NotSignedInError();
+  return token;
 }
 
 export async function probeSession(): Promise<boolean> {
@@ -147,19 +133,18 @@ export async function probeSession(): Promise<boolean> {
 }
 
 export function taskitClient(): TaskitClient {
-  const { apiBaseUrl } = readConfig();
+  const issuer = readConfig().apiBaseUrl;
   return new TaskitClient({
-    baseUrl: apiBaseUrl,
+    baseUrl: issuer,
     getToken: () => {
-      if (!accessToken || boundIssuer !== readConfig().apiBaseUrl) {
-        throw new NotSignedInError();
-      }
-      return accessToken;
+      const token = accessTokens.get(issuer);
+      if (!token) throw new NotSignedInError();
+      return token;
     },
     refresh: async () => {
-      const tokens = await oauthClient.getTokens();
+      const tokens = await clientFor(issuer).getTokens();
       if (!tokens?.refreshToken) throw new NotSignedInError();
-      await refreshStored(tokens.refreshToken);
+      await refreshStored(issuer, tokens.refreshToken);
     },
   });
 }
@@ -171,7 +156,8 @@ export async function taskit(): Promise<TaskitClient> {
 
 export async function signIn(): Promise<void> {
   const issuer = readConfig().apiBaseUrl;
-  const draft = await oauthClient.authorizationRequest({
+  const client = clientFor(issuer);
+  const draft = await client.authorizationRequest({
     endpoint: `${issuer}/authorize`,
     clientId: "taskit",
     scope: "tasks",
@@ -179,9 +165,7 @@ export async function signIn(): Promise<void> {
   const clientId = await clientIdFor(issuer, draft.redirectURI);
   const url = new URL(draft.toURL());
   url.searchParams.set("client_id", clientId);
-  const { authorizationCode } = await oauthClient.authorize({
-    url: url.toString(),
-  });
+  const { authorizationCode } = await client.authorize({ url: url.toString() });
   const tokens = await exchangeAuthorizationCode({
     issuer,
     clientId,

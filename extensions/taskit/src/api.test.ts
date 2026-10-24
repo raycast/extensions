@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ApiError, TaskitClient } from "./api";
 import {
   exchangeAuthorizationCode,
+  providerIdFor,
   refreshAccessToken,
   registerPublicClient,
   sessionRejected,
@@ -190,6 +191,18 @@ describe("Taskit OAuth", () => {
       expect(sessionRejected(error)).toBe(true);
     }
     expect(sessionRejected(new Error("offline"))).toBe(false);
+  });
+});
+
+describe("sign-in servers", () => {
+  it("keeps a separate Raycast token store for each API server", () => {
+    const hosted = providerIdFor(
+      "https://func-taskit-dev-872f21.azurewebsites.net",
+    );
+    const local = providerIdFor("http://localhost:7071");
+    expect(hosted).not.toBe(local);
+    expect(hosted).not.toBe("taskit");
+    expect(local.startsWith("taskit:")).toBe(true);
   });
 });
 

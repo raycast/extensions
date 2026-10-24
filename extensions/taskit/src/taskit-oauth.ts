@@ -1,3 +1,8 @@
+/** Raycast stores OAuth tokens under this id, so each API server gets its own sign-in. */
+export function providerIdFor(issuer: string): string {
+  return `taskit:${issuer}`;
+}
+
 export interface OAuthTokenResponse {
   access_token: string;
   refresh_token?: string;
