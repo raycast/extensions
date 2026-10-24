@@ -1,5 +1,11 @@
 # Bear Changelog
 
+## [Search Performance and Database Lifecycle] - {PR_MERGE_DATE}
+
+- Fold searchable note fields once per database snapshot and limit matching notes before joining tags.
+- Reuse the search connection for tag selection, debounce queries, and render actions and details for the selected note.
+- Close database snapshots when commands unmount and preserve encryption state and creation dates in note links.
+
 ## [Fix non-Latin search] - 2026-10-12
 
 - Search is now case-insensitive for non-Latin text such as Cyrillic: [#32214](https://github.com/raycast/extensions/issues/32214)

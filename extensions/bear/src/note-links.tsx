@@ -15,14 +15,14 @@ export default function NoteLinks({ note }: { note: Note }) {
       setBacklinks(db.getBacklinks(note.id));
       setLinks(db.getNoteLinks(note.id));
     }
-  }, [db]);
+  }, [db, note.id]);
 
-  if (error) {
-    showToast(Toast.Style.Failure, "Something went wrong", error.message);
-  }
+  useEffect(() => {
+    if (error) showToast(Toast.Style.Failure, "Something went wrong", error.message);
+  }, [error]);
 
   return (
-    <List isLoading={backlinks == undefined} navigationTitle={note.title}>
+    <List isLoading={!error && backlinks == undefined} navigationTitle={note.title}>
       <List.Section title="Note Backlinks">
         {backlinks?.map((note) => (
           <List.Item

@@ -85,6 +85,9 @@ export class BearDb {
     this.database.create_function("lower", (value: unknown) =>
       value == null ? null : String(value).toLocaleLowerCase().replace(/ς/g, "σ"),
     );
+    this.database.run(`CREATE TEMP TABLE bear_search AS
+      SELECT Z_PK AS id, lower(ZTITLE) AS title, lower(ZTEXT) AS text,
+        lower(ZUNIQUEIDENTIFIER) AS identifier FROM ZSFNOTE`);
   }
 
   close() {
@@ -104,7 +107,7 @@ export class BearDb {
       formattedTags: formatTags(tags),
       encrypted: row.encrypted === 1,
       pinned: row.pinned === 1,
-      wordCount: [...text.matchAll(/\b\w+\b/g)].length,
+      wordCount: (text.match(/\b\w+\b/g) ?? []).length,
     };
   }
 
@@ -125,11 +128,8 @@ export class BearDb {
     const statement = this.database.prepare(
       this.getBearVersion() === 2 ? BearDb.searchNotesQueries.v2 : BearDb.searchNotesQueries.v1,
     );
-    if (tag) {
-      statement.bind({ ":query": `${searchQuery}`, ":tag": `${tag}` });
-    } else {
-      statement.bind({ ":query": `${searchQuery}` });
-    }
+    const foldedQuery = searchQuery.toLocaleLowerCase().replace(/ς/g, "σ");
+    statement.bind({ ":query": foldedQuery, ":pattern": `%${foldedQuery}%`, ":tag": tag ?? null });
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
