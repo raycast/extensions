@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Search] - {PR_MERGE_DATE}
+## [Support for Search] - 2026-10-24
 
 - Added support for the `Search` browser on macOS: its bookmarks, its pinned tabs, and its tab groups
 
