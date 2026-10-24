@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://backend.getrecall.ai/api/v1";
 
-
 export interface Card {
   id: string;
   title: string;
