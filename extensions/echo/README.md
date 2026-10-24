@@ -14,7 +14,7 @@ Summon, filter, navigate and resume, all from the keys. This extension brings Ec
 2. Press **Copy** next to **Access Token**.
 3. Paste the token when Raycast asks for it, or later under **Raycast Settings > Extensions > Echo**.
 
-Your listening history never leaves your Mac. The extension only talks to the Echo app over a private channel on your own Mac. Resetting the token in Echo disconnects Raycast until you paste the new one.
+Your listening history never leaves your Mac. The extension only talks to the Echo app over a private channel on your own Mac. Some cover pictures, such as YouTube thumbnails, load from the site they came from. Resetting the token in Echo disconnects Raycast until you paste the new one.
 
 ## Commands
 
