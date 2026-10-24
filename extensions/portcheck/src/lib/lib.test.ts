@@ -146,6 +146,7 @@ describe("check reports", () => {
     expect(md).toContain("**Started by:** npm (7) ← zsh (3)");
     expect(md).toContain("`node server.js`");
     expect(stoppable(3000, busy)).toEqual([{ pid: 42, name: "node" }]);
+    expect(md.match(/## node/g)).toHaveLength(1);
   });
   it("covers free, denied, containers and hidden owners", () => {
     expect(checkMarkdown(3000, { ports: [] })).toContain("is free");

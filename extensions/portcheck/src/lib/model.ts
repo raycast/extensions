@@ -68,7 +68,12 @@ export function checkMarkdown(port: number, data: CheckData): string {
     return `# Port ${port} can't be used\n\nYour user isn't allowed to bind it.`;
   }
   const lines = [`# Port ${port} is in use`, ""];
+  const seen = new Set<string>();
   for (const s of p.holders) {
+    // One section per process, even when it listens on both IPv4 and IPv6.
+    const key = `${s.pid ?? ""}/${holderName(s)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     lines.push(`## ${holderName(s)}${s.pid !== undefined && !s.container ? ` (pid ${s.pid})` : ""}`, "");
     const by = startedBy(s);
     if (by) lines.push(`- **Started by:** ${by}`);
