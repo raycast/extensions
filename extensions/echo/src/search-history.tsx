@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  closeMainWindow,
   Color,
   confirmAlert,
   Form,
@@ -10,7 +11,6 @@ import {
   Keyboard,
   List,
   PopToRootType,
-  showHUD,
   showToast,
   Toast,
   useNavigation,
@@ -113,12 +113,12 @@ function Row({ item, onChanged }: { item: EchoItem; onChanged: () => void }) {
     }
   }
 
-  // Playback actions close Raycast once Echo has started, leaving a short HUD. A failure keeps the
-  // window open so the error toast is still visible.
-  async function play(label: string, fn: () => Promise<unknown>) {
+  // Playback actions just close Raycast once Echo has started: the music starting is the
+  // confirmation. A failure keeps the window open so the error toast is still visible.
+  async function play(fn: () => Promise<unknown>) {
     try {
       await fn();
-      await showHUD(label, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+      await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
     } catch (e) {
       await showFailureToast(e, { title: e instanceof EchoError ? e.message : "That did not work" });
     }
@@ -144,35 +144,31 @@ function Row({ item, onChanged }: { item: EchoItem; onChanged: () => void }) {
           <ActionPanel.Section>
             {/* Echo's own Play section, same names and same order. Return resolves exactly as it
                 does in Echo: a web video comes back the way you last had it. */}
-            <Action title="Play" icon={Icon.Play} onAction={() => play("Playing", () => resumeItem(item.id, "auto"))} />
+            <Action title="Play" icon={Icon.Play} onAction={() => play(() => resumeItem(item.id, "auto"))} />
             <Action
               title="Play and Open"
               icon={Icon.ArrowNe}
-              onAction={() => play("Opening", () => resumeItem(item.id, "open"))}
+              onAction={() => play(() => resumeItem(item.id, "open"))}
             />
             {item.canPiP && (
               <Action
                 title={item.prefersWatch ? "Play in Background" : "Play in Picture in Picture"}
                 icon={item.prefersWatch ? Icon.SpeakerOn : Icon.Video}
                 shortcut={{ modifiers: ["opt"], key: "enter" }}
-                onAction={() =>
-                  play(item.prefersWatch ? "Playing in the background" : "Opening Picture in Picture", () =>
-                    resumeItem(item.id, item.prefersWatch ? "background" : "pip"),
-                  )
-                }
+                onAction={() => play(() => resumeItem(item.id, item.prefersWatch ? "background" : "pip"))}
               />
             )}
             <Action
               title="Play from Beginning"
               icon={Icon.Rewind}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              onAction={() => play("Playing from the beginning", () => resumeItem(item.id, "start"))}
+              onAction={() => play(() => resumeItem(item.id, "start"))}
             />
             <Action
               title="Play or Pause"
               icon={Icon.Pause}
               shortcut={{ modifiers: ["cmd", "shift"], key: "space" }}
-              onAction={() => play("Toggled playback", playPause)}
+              onAction={() => play(playPause)}
             />
           </ActionPanel.Section>
 
