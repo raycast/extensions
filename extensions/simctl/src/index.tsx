@@ -1,7 +1,23 @@
 import { ActionPanel, List, Action, Color, Icon, useNavigation, closeMainWindow } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
+import { existsSync } from "fs";
 import { useEffect, useState } from "react";
+
+// Xcode 27 renamed Simulator.app to DeviceHub.app.
+// Use xcode-select -p to find the active Xcode installation regardless of where it is installed.
+function resolveSimulatorApp(): string {
+  try {
+    const developerPath = execSync("xcode-select -p", { encoding: "utf8" }).trim();
+    const xcodeBundle = developerPath.replace(/\/Contents\/Developer$/, "");
+    if (existsSync(`${xcodeBundle}/Contents/Applications/DeviceHub.app`)) {
+      return "DeviceHub";
+    }
+  } catch {
+    // fall through to default
+  }
+  return "Simulator";
+}
 
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
@@ -48,22 +64,23 @@ export default function Command() {
         title={device.state === "Booted" ? "Open" : "Boot"}
         icon={Icon.Power}
         onAction={() => {
+          const simulatorApp = resolveSimulatorApp();
           exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
-          exec(`open -g -a Simulator`);
+          exec(`open -g -a ${simulatorApp}`);
           const appleScript = `
             tell application "System Events"
               repeat
                 set windowFound to false
-                set theWindows to windows of process "Simulator"
+                set theWindows to windows of process "${simulatorApp}"
                 repeat with theWindow in theWindows
                   set theWindowName to name of theWindow
                   if theWindowName contains "${device.name}" then
-                    tell application "Simulator" to activate
+                    tell application "${simulatorApp}" to activate
                     perform action "AXRaise" of theWindow
                     set windowFound to true
-                    exit repeat 
+                    exit repeat
                   end if
                   delay 0.1
                 end repeat
