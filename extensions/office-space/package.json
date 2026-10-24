@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "office-space",
+  "title": "Office Space",
+  "description": "Your coding agents and dev servers from Raycast: see who needs you, message agents, run recipes, send pages, text and files to an agent, and start agents from issues.",
+  "icon": "extension-icon.png",
+  "author": "kocheck",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "agents",
+      "title": "Agents",
+      "subtitle": "Office Space",
+      "description": "Every agent session: status, project, branch and cost. Message, open, resume, interrupt or stop them.",
+      "mode": "view"
+    },
+    {
+      "name": "needs-you",
+      "title": "Needs You",
+      "subtitle": "Office Space",
+      "description": "Go through every agent waiting on you: see the question and recent output, then reply, approve, open or skip.",
+      "mode": "view"
+    },
+    {
+      "name": "message-agent",
+      "title": "Message Agent",
+      "subtitle": "Office Space",
+      "description": "Type a message into an agent Office Space hosts.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "message",
+          "placeholder": "Message",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "run-recipe",
+      "title": "Run Recipe",
+      "subtitle": "Office Space",
+      "description": "Start an agent from a recipe: repo, worktree, pinned servers, brief and first message.",
+      "mode": "view"
+    },
+    {
+      "name": "servers",
+      "title": "Dev Servers",
+      "subtitle": "Office Space",
+      "description": "Dev servers listening on this Mac and pinned servers: open, stop, restart, logs.",
+      "mode": "view"
+    },
+    {
+      "name": "skills",
+      "title": "Skills",
+      "subtitle": "Office Space",
+      "description": "Search the skills library and choose where each skill is synced.",
+      "mode": "view"
+    },
+    {
+      "name": "digest",
+      "title": "Today's Agent Digest",
+      "subtitle": "Office Space",
+      "description": "What each agent worked on today, what it logged, and its token use.",
+      "mode": "view"
+    },
+    {
+      "name": "send-page",
+      "title": "Send Page to Agent",
+      "subtitle": "Office Space",
+      "description": "Send the browser's current page (with its content as Markdown) and a note to the agent working on it.",
+      "mode": "view"
+    },
+    {
+      "name": "send-selection",
+      "title": "Send Selection to Agent",
+      "subtitle": "Office Space",
+      "description": "Send the text selected in any app to an agent, with a note.",
+      "mode": "view"
+    },
+    {
+      "name": "send-clipboard",
+      "title": "Send Clipboard to Agent",
+      "subtitle": "Office Space",
+      "description": "Send what's on the clipboard to an agent, with a note.",
+      "mode": "view"
+    },
+    {
+      "name": "send-files",
+      "title": "Send Finder Selection to Agent",
+      "subtitle": "Office Space",
+      "description": "Attach the files selected in Finder (screenshots, logs, designs) and send them to an agent.",
+      "mode": "view"
+    },
+    {
+      "name": "start-from-issue",
+      "title": "Start Agent from Issue or PR",
+      "subtitle": "Office Space",
+      "description": "Paste a GitHub issue or PR, or a Linear issue: Office Space picks the repo, makes a worktree branch and hands the agent the issue.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Issue or PR URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hubPath",
+      "title": "hub Path",
+      "description": "Leave empty to use the hub inside OfficeSpace.app.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "codeFolders",
+      "title": "Code Folders",
+      "description": "Where your repos live (comma-separated), for Start Agent from Issue or PR.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/code, ~/Developer, ~/Projects, ~/src, ~/GitHub"
+    },
+    {
+      "name": "linearApiKey",
+      "title": "Linear API Key",
+      "description": "Optional, to read Linear issues (Linear \u2192 Settings \u2192 API \u2192 Personal API keys).",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.5.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish",
+    "test:hub": "esbuild test/hub.test.ts --bundle --platform=node --outfile=.test/hub.test.js --alias:@raycast/api=./test/raycast-stub.js --log-level=warning && node .test/hub.test.js",
+    "check": "tsc --noEmit && eslint src && prettier --check src"
+  }
+}
