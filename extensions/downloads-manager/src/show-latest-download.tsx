@@ -1,5 +1,5 @@
 import { popToRoot, showHUD, showInFinder, closeMainWindow } from "@raycast/api";
-import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
+import { getLatestDownloadAsync, hasAccessToDownloadsFolder } from "./utils";
 
 export default async function main() {
   if (!hasAccessToDownloadsFolder()) {
@@ -7,7 +7,7 @@ export default async function main() {
     return;
   }
 
-  const latestDownload = getLatestDownload();
+  const latestDownload = await getLatestDownloadAsync();
   if (!latestDownload) {
     await showHUD("No downloads found");
     return;

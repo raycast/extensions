@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   defaultDownloadsLayout,
   downloadsFolder,
-  getDownloads,
+  getDownloadsAsync,
   getQuickLookPreviewDataUrl,
   getTextFilePreview,
   isImageFile,
@@ -117,16 +117,17 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", true);
   const cancelRef = useRef<AbortController | null>(null);
 
-  const loadNextPage = useCallback((offset: number) => {
+  const loadNextPage = useCallback(async (offset: number) => {
     setIsLoading(true);
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
+    const signal = cancelRef.current.signal;
 
     try {
-      const newDownloads = getDownloads(PAGE_SIZE, offset, currentFolderPath);
+      const newDownloads = await getDownloadsAsync(PAGE_SIZE, offset, currentFolderPath);
       const hasMoreItems = newDownloads.length === PAGE_SIZE;
 
-      if (!cancelRef.current.signal.aborted) {
+      if (!signal.aborted) {
         if (offset === 0) {
           setDownloads(newDownloads);
           setSelectedItemId(newDownloads[0]?.path ?? null);
@@ -139,7 +140,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     } catch (error) {
       console.error("Error loading downloads:", error);
     } finally {
-      if (!cancelRef.current.signal.aborted) {
+      if (!signal.aborted) {
         setIsLoading(false);
       }
     }
