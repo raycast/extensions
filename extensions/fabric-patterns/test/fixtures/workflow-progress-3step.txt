@@ -1,0 +1,9 @@
+[step 1/3 summarize] running...
+[step 1/3 summarize] model= vendor= inputLen=12 override=false
+[step 1/3 summarize] done (1211 chars)
+[step 2/3 extract_wisdom] running...
+[step 2/3 extract_wisdom] model= vendor= inputLen=1211 override=false
+[step 2/3 extract_wisdom] done (4701 chars)
+[step 3/3 summarize] running...
+[step 3/3 summarize] model= vendor= inputLen=4701 override=false
+[step 3/3 summarize] done (5900 chars)

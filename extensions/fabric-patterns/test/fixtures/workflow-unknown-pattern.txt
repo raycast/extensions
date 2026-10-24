@@ -1,0 +1,1 @@
+workflow /tmp/x/unknown.json is invalid: [step 2/2 nope_xyz_pattern] pattern not found: pattern 'nope_xyz_pattern' not found. Run 'fabric -l' to see available patterns

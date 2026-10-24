@@ -1,0 +1,57 @@
+Available Vendors:
+
+Abacus
+AIML
+Aliyun DashScope
+Anthropic
+API Route
+Apple Foundation Models
+Azure
+AzureAIGateway
+AzureEntra
+Bedrock
+ByteDance Ark
+Cerebras
+Cheaper Inference
+ClaudeCode
+Codex
+Copilot
+DeepSeek
+DemonRoute
+DigitalOcean
+Eden AI
+Exolab
+FuturMix
+Gemini
+GrokAI
+Groq
+Infermatic
+Langdock
+LiteLLM
+llama.cpp
+llmman
+LM Studio
+Mammouth
+MiniMax
+Mistral
+Novita AI
+Ollama
+onomeo
+OpenAI
+OpenCode Go
+OpenCode Zen
+OpenRouter
+Opper
+OrcaRouter
+Perplexity
+Pzero
+Requesty
+SiliconCloud
+Synthorai
+Together
+TrustedRouter
+Venice AI
+VertexAI
+Y-API
+Z AI
+Zhipu AI
