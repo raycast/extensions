@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search files and folders without Spotlight using a persistent fd index, ripgrep filtering, and fzf ranking.
 - Choose Home, Downloads, Documents, Applications, All, or custom search paths.

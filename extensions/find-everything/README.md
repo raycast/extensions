@@ -49,7 +49,7 @@ bun run src/cli.ts status
 bun run src/cli.ts pick
 ```
 
-To compile it, run `bun run build-cli`. The executable is written to `dist-bin/fe`. Linux CLI users can install `fd-find`, `fzf`, and `ripgrep` with their package manager; `fdfind` is supported as an alternative to `fd`. CLI searches wait for stale indexes to refresh before printing results.
+To compile it, run `bun run build-cli`. The executable is written to `dist-bin/fe`. Linux CLI users can install `fd-find`, `fzf`, and `ripgrep` with their package manager; `fdfind` is supported as an alternative to `fd`. CLI searches wait for stale indexes to refresh before printing results. The CLI reuses the last saved indexing preferences for each scope, so switching between Raycast and the terminal does not rebuild a fresh index. Before the first build, its hidden-file default matches Raycast.
 
 ## Index storage
 

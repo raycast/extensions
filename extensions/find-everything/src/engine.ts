@@ -187,6 +187,38 @@ const settingsFor = (scope: Scope, opts: EngineOpts) =>
     ignored: !!opts.includeIgnored,
     excludes: opts.extraExcludes || "",
   });
+
+// The CLI follows the last settings used to build this scope in Raycast.
+export function loadIndexOptions(scope: Scope): EngineOpts {
+  try {
+    const stored = JSON.parse(
+      fs.readFileSync(`${indexPathFor(scope)}.settings`, "utf8"),
+    );
+    const settings = JSON.parse(stored.settings);
+    if (
+      !Array.isArray(settings.paths) ||
+      !settings.paths.every((p: unknown) => typeof p === "string") ||
+      typeof settings.hidden !== "boolean" ||
+      typeof settings.ignored !== "boolean" ||
+      typeof settings.excludes !== "string"
+    )
+      throw new Error("Invalid index settings");
+    return {
+      includeHidden: settings.hidden,
+      includeIgnored: settings.ignored,
+      extraExcludes: settings.excludes,
+      customSearchPaths:
+        typeof stored.customSearchPaths === "string"
+          ? stored.customSearchPaths
+          : settings.paths.join(","),
+      indexMaxAgeMinutes:
+        typeof stored.maxAgeMinutes === "string" ? stored.maxAgeMinutes : "60",
+    };
+  } catch {
+    return { includeHidden: true }; // Same first-run default as the Raycast manifest.
+  }
+}
+
 function settingsMatch(scope: Scope, opts: EngineOpts): boolean {
   try {
     const file = indexPathFor(scope);
@@ -311,7 +343,12 @@ export async function rebuildIndex(
       const metadata = path.join(tmpDir, "settings");
       fs.writeFileSync(
         metadata,
-        JSON.stringify({ settings, signature: indexSignature(tmp) }),
+        JSON.stringify({
+          settings,
+          signature: indexSignature(tmp),
+          customSearchPaths: opts.customSearchPaths || "",
+          maxAgeMinutes: opts.indexMaxAgeMinutes || "60",
+        }),
       );
       fs.renameSync(tmp, file);
       fs.renameSync(metadata, `${file}.settings`);

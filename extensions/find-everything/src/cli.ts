@@ -13,6 +13,7 @@ import {
   RG,
   OPEN_CMD,
   ensureIndex,
+  loadIndexOptions,
   runSearch,
   rerank,
   applyPostFilters,
@@ -94,7 +95,7 @@ Deps: fd, rg, fzf — index at ${INDEX_DIR}`;
 
 async function cmdSearch(q: string, flags: Flags): Promise<void> {
   if (q.trim().length < 2) return;
-  await ensureIndex(flags.scope, {}, false, false);
+  await ensureIndex(flags.scope, loadIndexOptions(flags.scope), false, false);
   const out = await runSearch(q, flags.scope, flags.limit);
   const ranked = applyPostFilters(rerank(out, q), parseQuery(q));
   for (const p of ranked) {
@@ -112,7 +113,7 @@ async function cmdSearch(q: string, flags: Flags): Promise<void> {
 
 async function cmdIndex(flags: Flags): Promise<void> {
   const t0 = Date.now();
-  await ensureIndex(flags.scope, {}, true);
+  await ensureIndex(flags.scope, loadIndexOptions(flags.scope), true);
   const file = indexPathFor(flags.scope);
   const dir = shardDirFor(flags.scope);
   const lines = fs.existsSync(file)
@@ -185,7 +186,7 @@ async function cmdTui(flags: Flags): Promise<void> {
     );
     process.exit(1);
   }
-  await ensureIndex(flags.scope, {}, false, false);
+  await ensureIndex(flags.scope, loadIndexOptions(flags.scope), false, false);
   const search = `${SELF} search --tui --scope ${flags.scope} --limit ${flags.limit}`;
   const fz = spawn(
     FZF,

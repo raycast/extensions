@@ -172,3 +172,19 @@ test("binary discovery resolves custom PATH executables", () => {
     ),
   ).toEqual(tool);
 });
+
+test("CLI searches reuse Raycast's saved indexing preferences without rebuilding", () => {
+  const folder = join(home, "shared-settings");
+  mkdirSync(folder, { recursive: true });
+  writeFileSync(join(folder, ".hidden-report.txt"), "shared");
+  expect(
+    run(`const fs=await import('node:fs');
+    const opts={customSearchPaths:${JSON.stringify(folder)},includeHidden:true,includeIgnored:true,extraExcludes:'ignored-*'};
+    await e.ensureIndex('custom',opts,true);
+    const before=fs.statSync(e.indexPathFor('custom')).ino;
+    const {spawnSync}=await import('node:child_process');
+    const cli=spawnSync(process.execPath,[${JSON.stringify(cli)},'search','hidden-report','--scope','custom'],{env:process.env,encoding:'utf8',timeout:10000});
+    await e.ensureIndex('custom',opts);
+    console.log(JSON.stringify({status:cli.status,found:cli.stdout.includes('.hidden-report.txt'),reused:before===fs.statSync(e.indexPathFor('custom')).ino}));`),
+  ).toEqual({ status: 0, found: true, reused: true });
+});
