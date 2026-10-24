@@ -28,22 +28,26 @@ export function formatMinutes(ms: number, round: "ceil" | "floor"): string {
   return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
+/** A moment in a prayer's time that the menu bar and root search count down to. */
+export type MomentKind = "start" | "jamaat" | "preferredEnd" | "late" | "end";
+
 /**
- * The next moment the menu bar counts down to: the start, then the jamaat, the preferred end, the late
- * boundary and the end, whichever comes first after `now`.
+ * The next moment to count down to: the start, then the jamaat, the preferred end, the late boundary and
+ * the end, whichever comes first after `now`. Moments at the same time count as the end, then as late.
  *
  * @param slot - Prayer slot.
  * @param now - Current instant.
- * @returns The moment, and whether it is an end (shown in brackets) or the jamaat (shown with the mosque).
+ * @returns The moment.
  */
-export function nextMoment(slot: PrayerSlot, now: Date): { at: Date; kind: "start" | "jamaat" | "end" } {
-  const moments = [
-    { at: slot.start, kind: "start" as const },
+export function nextMoment(slot: PrayerSlot, now: Date): { at: Date; kind: MomentKind } {
+  const moments: { at: Date; kind: MomentKind }[] = [
+    { at: slot.start, kind: "start" },
     ...(slot.jamaat ? [{ at: slot.jamaat, kind: "jamaat" as const }] : []),
-    ...(slot.preferredEnd ? [{ at: slot.preferredEnd, kind: "end" as const }] : []),
-    { at: slot.late, kind: "end" as const },
-    { at: slot.end, kind: "end" as const },
-  ].sort((a, b) => a.at.getTime() - b.at.getTime());
+    { at: slot.end, kind: "end" },
+    { at: slot.late, kind: "late" },
+    ...(slot.preferredEnd ? [{ at: slot.preferredEnd, kind: "preferredEnd" as const }] : []),
+  ];
+  moments.sort((a, b) => a.at.getTime() - b.at.getTime()); // stable: ties keep the order above
   return moments.find((moment) => moment.at > now) ?? moments[moments.length - 1];
 }
 
@@ -78,7 +82,7 @@ export function menuBarTitle(state: MenuBarState, now: Date, windows: AlertWindo
     disliked: "orange",
   };
   return {
-    text: moment.kind === "end" ? `${name} (${left})` : `${name} ${left}`,
+    text: moment.kind === "start" || moment.kind === "jamaat" ? `${name} ${left}` : `${name} (${left})`,
     tone: tones[kind],
     mosque: moment.kind === "jamaat",
   };

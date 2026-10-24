@@ -7,6 +7,7 @@ import { deliverAlert } from "./alerts";
 import { addFired, readFired, readSnoozes, writeSnoozes } from "./storage";
 import { loadHistory, prayedSet, syncReminders } from "./tracker";
 import { formatRelative, formatTime, ltrName } from "./format";
+import { MomentKind, nextMoment } from "./menubar-title";
 
 /** In current-location mode, take a fix this long before each prayer starts. */
 const LOCATE_LEAD = 30 * 60_000;
@@ -113,8 +114,17 @@ export async function tick(initial: Settings, now = new Date()): Promise<TickRes
   return { settings, slots, prayed, popups, changedReminders, syncError };
 }
 
+const MOMENT_WORDS: Record<MomentKind, string> = {
+  start: "starts",
+  jamaat: "jamaat",
+  preferredEnd: "preferred time ends",
+  late: "late",
+  end: "ends",
+};
+
 /**
- * Root search subtitle: the running prayer while unprayed, otherwise the next one.
+ * Root search subtitle: the running prayer while unprayed, counting down to its next moment (jamaat,
+ * preferred end, late boundary or end), otherwise the next prayer.
  *
  * @param slots - Timeline slots.
  * @param prayed - Prayed slot ids.
@@ -125,8 +135,9 @@ export function subtitleFor(slots: PrayerSlot[], prayed: ReadonlySet<string>, no
   const running = currentSlot(slots, now);
   const next = nextSlot(slots, now);
   if (running && !prayed.has(running.id)) {
-    const parts = [`${ltrName(running.name)} · ends ${formatRelative(running.end, now)}`];
-    if (running.jamaat && running.jamaat > now) parts.push(`jamaat ${formatTime(running.jamaat)}`);
+    const moment = nextMoment(running, now);
+    const parts = [`${ltrName(running.name)} · ${MOMENT_WORDS[moment.kind]} ${formatRelative(moment.at, now)}`];
+    if (moment.kind !== "end") parts.push(`ends ${formatTime(running.end)}`);
     return parts.join(" · ");
   }
   if (!next) return "";
