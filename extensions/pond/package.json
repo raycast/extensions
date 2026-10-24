@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pond",
+  "title": "Pond",
+  "description": "Search your Pond library, save URLs, and switch libraries from Raycast.",
+  "icon": "pond-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "subtitle": "Pond",
+      "description": "Search saves in your active Pond library and open their original URLs.",
+      "mode": "view"
+    },
+    {
+      "name": "save-url",
+      "title": "Save URL",
+      "subtitle": "Pond",
+      "description": "Save a web URL to your active Pond library.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard URL",
+      "subtitle": "Pond",
+      "description": "Save the web URL on your clipboard to Pond.",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-current-tab",
+      "title": "Save Current Browser Tab",
+      "subtitle": "Pond",
+      "description": "Save the URL of your active browser tab to Pond.",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-library",
+      "title": "Switch Library",
+      "subtitle": "Pond",
+      "description": "Open or switch to a recent Pond library.",
+      "mode": "view"
+    },
+    {
+      "name": "pond",
+      "title": "Open Library",
+      "subtitle": "Pond",
+      "description": "Open the active library in Pond.",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup",
+      "title": "Set up Pond",
+      "subtitle": "Pond",
+      "description": "Connect Pond, check your API token, and see the active library and save count.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-library",
+      "title": "Search Library",
+      "description": "Search saves by keywords, source, exact tag, and saved date. Returns metadata, original URLs, Pond links, library IDs, and a pagination cursor."
+    },
+    {
+      "name": "save-url",
+      "title": "Save URL",
+      "description": "Queue a web URL for archiving in the active Pond library, with optional tags. For existing URLs, supplied tags are added to their current tags.",
+      "type": "function"
+    },
+    {
+      "name": "get-save",
+      "title": "Get Save",
+      "description": "Read a save and its metadata using the exact save ID and library ID from search results."
+    },
+    {
+      "name": "get-library-info",
+      "title": "Get Library Info",
+      "description": "Read the active Pond library name, path, and number of saves."
+    },
+    {
+      "name": "list-libraries",
+      "title": "List Libraries",
+      "description": "List recent Pond libraries with their exact paths, active status, and availability."
+    },
+    {
+      "name": "switch-library",
+      "title": "Switch Library",
+      "description": "Switch to an available recent library using its exact path from List Libraries. Subsequent searches and saves use this library."
+    },
+    {
+      "name": "open-save",
+      "title": "Open Save",
+      "description": "Open an existing save in Pond using its save ID and library ID from search results."
+    },
+    {
+      "name": "open-library",
+      "title": "Open Library",
+      "description": "Bring Pond to the front and open its active library. Works without an API token."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Local API Token",
+      "description": "Copy the token from Pond Settings \u2192 General \u2192 Raycast. Required for search and save commands.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "baseUrl",
+      "title": "Local API URL",
+      "description": "Pond's local HTTP API address. Only localhost, 127.0.0.1, or [::1] is supported.",
+      "type": "textfield",
+      "required": false,
+      "default": "http://127.0.0.1:41610/api/v2"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.2.7",
+    "react": "19.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "tsx": "^4.20.6"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
