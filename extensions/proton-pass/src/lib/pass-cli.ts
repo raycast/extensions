@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
 import { clearCache } from "./cache";
 import { ensureCli } from "./cli";
+import { findExecutable } from "./core/which";
 import { createPassCliAdapter, PassCliAdapter } from "./core/adapter";
 import {
   BrowserLoginStatus,
@@ -60,9 +61,23 @@ function getConfiguredCliPath(): string | undefined {
   return stripSurroundingQuotes(configured);
 }
 
-/** The pass-cli the extension runs: the CLI Path preference when set, otherwise the one it installed. */
+/**
+ * The pass-cli the extension runs.
+ *
+ * An explicit CLI Path wins. On Linux the default `pass-cli` then means an
+ * executable already on PATH, including ~/.local/bin, so an existing login
+ * session is reused. Anything else is the copy this extension installs.
+ */
 export async function getCliPath(): Promise<string> {
-  return getConfiguredCliPath() ?? ensureCli();
+  const configured = getConfiguredCliPath();
+  if (configured) return configured;
+
+  if (process.platform === "linux") {
+    const onPath = findExecutable(DEFAULT_CLI_COMMAND, getEnhancedPath());
+    if (onPath) return onPath;
+  }
+
+  return ensureCli();
 }
 
 /** Where the browser login keeps its state while it runs, so that it's found again after Raycast closed. */

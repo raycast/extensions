@@ -431,6 +431,75 @@ test("pass-cli not found shows its screen instead of the cached items, which can
   assert.equal(totp.render(Command, {}).props.error, "not_installed");
 });
 
+test("on Linux the default CLI path uses pass-cli on PATH and does not download one", async () => {
+  let ensured = 0;
+  let lookedUp = 0;
+  const api = loadView(
+    "pass-cli.ts",
+    {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "pass-cli" }),
+      },
+      "node:os": { homedir: () => "/home/example" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": {},
+      "./cli": {
+        ensureCli: async () => {
+          ensured++;
+          return "/downloaded/pass-cli";
+        },
+      },
+      "./core/which": {
+        findExecutable: (command: string) => {
+          lookedUp++;
+          return command === "pass-cli" ? "/home/example/.local/bin/pass-cli" : undefined;
+        },
+      },
+      "./core/adapter": {},
+      "./core/login": {},
+      "./mock-data": {},
+      "./types": { PassCliError },
+    },
+    { process: { platform: "linux", env: { PATH: "/usr/bin" } } },
+  ) as unknown as { getCliPath: () => Promise<string> };
+
+  assert.equal(await api.getCliPath(), "/home/example/.local/bin/pass-cli");
+  assert.equal(lookedUp, 1);
+  assert.equal(ensured, 0);
+});
+
+test("on Linux an explicit CLI Path is used as given", async () => {
+  let lookedUp = 0;
+  const api = loadView(
+    "pass-cli.ts",
+    {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({ cliPath: "/opt/pass-cli" }),
+      },
+      "node:os": { homedir: () => "/home/example" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": {},
+      "./cli": { ensureCli: async () => "/downloaded/pass-cli" },
+      "./core/which": {
+        findExecutable: () => {
+          lookedUp++;
+          return "/home/example/.local/bin/pass-cli";
+        },
+      },
+      "./core/adapter": {},
+      "./core/login": {},
+      "./mock-data": {},
+      "./types": { PassCliError },
+    },
+    { process: { platform: "linux", env: { PATH: "/usr/bin" } } },
+  ) as unknown as { getCliPath: () => Promise<string> };
+
+  assert.equal(await api.getCliPath(), "/opt/pass-cli");
+  assert.equal(lookedUp, 0);
+});
+
 test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
   let clears = 0;
   const vault = { shareId: "vault", name: "Personal" };
@@ -444,6 +513,7 @@ test("item-list authentication failures clear saved session metadata on both lis
       },
     },
     "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/which": { findExecutable: () => undefined },
     "./core/adapter": {
       createPassCliAdapter: () => ({
         listVaults: async () => [vault],
@@ -472,6 +542,7 @@ test("only the user's own vaults have their members counted, to know whether the
     "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": {},
     "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/which": { findExecutable: () => undefined },
     "./core/adapter": {
       createPassCliAdapter: () => ({
         listVaultRoles: async () =>
@@ -521,6 +592,7 @@ for (const stalled of ["roles", "members"]) {
       "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
       "./cache": {},
       "./cli": { ensureCli: async () => "/fixture-cli" },
+      "./core/which": { findExecutable: () => undefined },
       "./core/adapter": {
         createPassCliAdapter: () => ({
           listVaultRoles: async () => {
@@ -1860,6 +1932,7 @@ test("no pass-cli command starts while a browser login is saving its session", a
     "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": { clearCache: async () => undefined },
     "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/which": { findExecutable: () => undefined },
     "./core/adapter": {
       createPassCliAdapter: () => {
         adapters++;
@@ -1898,6 +1971,7 @@ test("a browser login clears the previous account's cache, and is canceled when 
       },
     },
     "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/which": { findExecutable: () => undefined },
     "./core/adapter": {},
     "./core/login": {
       startDetachedLogin: async () => {
@@ -1932,6 +2006,7 @@ test("Logout forgets the login that was over when it started, and only that one"
       },
     },
     "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/which": { findExecutable: () => undefined },
     "./core/adapter": {
       createPassCliAdapter: () => ({
         logout: async () => {

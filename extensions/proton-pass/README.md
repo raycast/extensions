@@ -13,9 +13,11 @@ This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
 
 ### 1. CLI Installation (Automatic)
 
-The extension automatically downloads and installs the Proton Pass CLI on first use. No manual installation required!
+The extension downloads and installs Proton Pass CLI 2.3.3 on first use for macOS, Windows, and Linux (x64 and arm64).
 
-If you prefer to install manually on macOS, you can use Homebrew:
+On Linux, a `pass-cli` already on `PATH` is used instead, including `~/.local/bin`. That keeps the session created by `pass-cli login` in a terminal. Set **CLI Path** when the binary lives somewhere else.
+
+If you prefer to install it yourself, on macOS or Linux:
 
 ```bash
 brew install protonmail/proton/pass-cli
@@ -51,7 +53,7 @@ pass-cli vault list
 
 ## Preferences
 
-- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses one already on `PATH` on Linux, and otherwise the copy the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history

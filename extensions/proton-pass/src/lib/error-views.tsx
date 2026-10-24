@@ -46,7 +46,7 @@ function getErrorConfig(errorType: PassCliErrorType, contextTitle?: string, mess
       return {
         icon: Icon.XMarkCircle,
         title: "Unsupported Platform",
-        description: `Proton Pass supports macOS arm64/x64 and Windows x64. Current platform: ${process.platform}-${process.arch}.`,
+        description: `Proton Pass CLI supports macOS arm64/x64, Linux x64/arm64, and Windows x64. Current platform: ${process.platform}-${process.arch}.`,
         showDocsLink: false,
         showRetry: false,
       };

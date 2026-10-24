@@ -44,8 +44,10 @@ export async function installArtifact(options: InstallArtifactOptions): Promise<
       }
     }
 
-    if (platform === "darwin") {
+    if (platform === "darwin" || platform === "linux") {
       await chmod(stagedBinary, 0o755);
+    }
+    if (platform === "darwin") {
       try {
         await execFileAsync("/usr/bin/xattr", ["-d", "com.apple.quarantine", stagedBinary]);
       } catch {
