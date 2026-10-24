@@ -2704,6 +2704,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "shopify-speed-check",
+    title: "Shopify Speed Check",
+    description:
+      "Check any Shopify store's PageSpeed and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees.",
+    homepage: "https://www.skaidigital.com/tools/shopify-speed-test",
+    remoteUrl: "https://tools.skaidigital.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tools.skaidigital.com/mcp"],
+    },
+  },
+  {
     name: "site-spec",
     title: "Site Spec",
     description:
