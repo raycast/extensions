@@ -11,7 +11,8 @@
     "alexs",
     "peduarte",
     "pernielsentikaer",
-    "0xdhrv"
+    "0xdhrv",
+    "alexi.build"
   ],
   "categories": [
     "Communication",
@@ -37,7 +38,7 @@
       "type": "textfield",
       "placeholder": "John Doe",
       "description": "Your name to use as the default sender",
-      "required": true
+      "required": false
     },
     {
       "name": "sender_email",
@@ -45,7 +46,7 @@
       "type": "textfield",
       "placeholder": "john@example.com",
       "description": "Your email address to use as the default sender",
-      "required": true
+      "required": false
     }
   ],
   "commands": [
@@ -82,6 +83,13 @@
       "title": "Contacts",
       "subtitle": "Resend",
       "description": "View, create, update, and delete contacts, or organize them in segments",
+      "mode": "view"
+    },
+    {
+      "name": "careers",
+      "title": "Careers",
+      "subtitle": "Resend",
+      "description": "Browse open positions at Resend and apply",
       "mode": "view"
     }
   ],
@@ -255,10 +263,25 @@
       "name": "remove-api-key",
       "title": "Remove API Key",
       "description": "Delete an API key from your Resend account"
+    },
+    {
+      "name": "list-positions",
+      "title": "List Positions",
+      "description": "List open positions at Resend"
+    },
+    {
+      "name": "retrieve-position",
+      "title": "Retrieve Position",
+      "description": "Get a position and its application questions"
+    },
+    {
+      "name": "apply-to-position",
+      "title": "Apply to Position",
+      "description": "Submit a job application with your answers and local resume after confirmation"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.21",
+    "@raycast/api": "^2.8.0",
     "@raycast/utils": "^2.2.7",
     "resend": "^6.25.0"
   },
