@@ -1,6 +1,6 @@
 # FIP Changelog
 
-## [Fix Track Information and Playback] - {PR_MERGE_DATE}
+## [Fix Track Information and Playback] - 2026-10-24
 
 - Fix Previous Track and Next Track, which only showed "Le direct" since Radio France changed its live metadata
 - Fix the missing cover, and show the album, year, label and airing time of a track
