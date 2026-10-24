@@ -30,8 +30,18 @@ export async function loadEventsByAccount(
   );
   const result: EventListResult = { events: [], failures: [] };
   responses.forEach((response, index) => {
-    if (response.status === "fulfilled") result.events.push(...response.value);
-    else result.failures.push({ accountId: accounts[index][0], error: response.reason });
+    if (response.status === "fulfilled") {
+      const [accountId, accountCalendars] = accounts[index];
+      result.events.push(
+        ...response.value
+          .filter(
+            (event) =>
+              accountCalendars.some((calendar) => calendar.id === event.calendarId) &&
+              (!event.accountId || event.accountId === accountId),
+          )
+          .map((event) => ({ ...event, accountId })),
+      );
+    } else result.failures.push({ accountId: accounts[index][0], error: response.reason });
   });
   return result;
 }
