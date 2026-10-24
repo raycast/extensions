@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Clipboard, Icon, Toast, closeMainWindow, open, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { ReactNode } from "react";
 
 import { ProcessInfo } from "../Interfaces";
 import { buildSystemReport } from "../lib/system-report";
@@ -8,9 +9,11 @@ import { openActivityMonitorAppleScript } from "../utils";
 interface ActionsProps {
   radioButtonNumber?: number;
   processes?: ProcessInfo[];
+  /** Pane-specific actions listed after the shared ones. */
+  children?: ReactNode;
 }
 
-export const Actions = ({ radioButtonNumber }: ActionsProps) => {
+export const Actions = ({ radioButtonNumber, children }: ActionsProps) => {
   const handleRunAppleScript = async () => {
     try {
       await runAppleScript(openActivityMonitorAppleScript(radioButtonNumber ?? null));
@@ -51,6 +54,7 @@ export const Actions = ({ radioButtonNumber }: ActionsProps) => {
         onAction={() => open("file:///System/Applications/Utilities/System%20Information.app")}
       />
       <Action icon={Icon.Clipboard} title="Copy System Report" onAction={handleCopySystemReport} />
+      {children}
     </ActionPanel>
   );
 };
