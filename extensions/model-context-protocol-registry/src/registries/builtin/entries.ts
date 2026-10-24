@@ -738,6 +738,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kimiko",
+    title: "Kimiko",
+    description:
+      "Your meetings, notes and tasks from Kimiko, the private AI note taker, in Raycast AI and your other AI apps. Search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks; three prompts cover a weekly review, meeting prep and open loops. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp, so this entry is Mac only. No hosted endpoint and no API key: it reads Kimiko's database on your Mac, and it stays off until you turn on Allow AI apps in Kimiko → Settings → Connections. On the first connection, macOS asks you to allow Keychain access. An AI app may send what it reads to its own cloud service. Kimiko is a paid app with a free trial.",
+    icon: "https://kimiko.app/brand/kimiko-logo-dark-512.png",
+    homepage: "https://kimiko.app/#mcp-connector",
+    configuration: {
+      command: "/Applications/Kimiko.app/Contents/MacOS/kimiko-mcp",
+      args: [],
+    },
+  },
+  {
     name: "kolect",
     title: "Kolect Creator Search",
     description:
