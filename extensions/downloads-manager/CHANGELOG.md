@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Add Rename action] - {PR_MERGE_DATE}
+## [Add Rename action] - 2026-10-24
 
 - Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
 
