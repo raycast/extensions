@@ -28,6 +28,7 @@
     {
       "name": "search",
       "title": "Search File Contents",
+      "subtitle": "Local Content Search",
       "description": "Describe what you remember to find matching documents, images, audio, and video on your Mac",
       "keywords": [
         "content",
@@ -39,6 +40,7 @@
     {
       "name": "manage",
       "title": "Manage Content Index",
+      "subtitle": "Local Content Search",
       "description": "Choose folders, follow background indexing, and control pause, exclusions, power, and memory limits",
       "keywords": [
         "indexing",
@@ -50,6 +52,7 @@
     {
       "name": "setup",
       "title": "Install Local Content Search",
+      "subtitle": "Local Content Search",
       "description": "Set up the local EmbeddingGemma 2 model and independent macOS login service",
       "keywords": [
         "install",
@@ -59,32 +62,31 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "helperPath",
+      "title": "Helper Path",
+      "description": "Optional extracted helper release directory containing bin/ and licenses/. Leave empty to download the verified release. Only select a helper you trust.",
+      "type": "directory",
+      "required": false
+    }
+  ],
   "scripts": {
     "dev": "ray develop",
-    "build": "npm run build:service && ray build -e dist -o dist/extension --exit-on-error",
-    "build:service": "esbuild service/main.ts --bundle --platform=node --target=node22 --outfile=dist/service.cjs",
-    "build:native": "cd native && ./scripts/build-llama.sh && swift build -c release -j 2",
-    "test": "tsx --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src service tests scripts --max-warnings 0",
-    "format": "prettier --write src service tests scripts package.json tsconfig.json",
-    "install:service": "npm run build:service && tsx scripts/install.ts",
-    "uninstall:service": "tsx scripts/uninstall.ts",
-    "download:models": "tsx scripts/download.ts",
-    "test:native": "cd native && swift test -j 2",
-    "test:e2e": "tsx scripts/e2e.ts"
+    "build": "ray build --exit-on-error",
+    "lint": "ray lint --exit-on-error",
+    "fix-lint": "ray lint --fix"
   },
   "dependencies": {
     "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.3",
     "react": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "esbuild": "^0.25.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "tsx": "^4.0.0",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.0.0"
   }

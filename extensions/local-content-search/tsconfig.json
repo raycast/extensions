@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.AsyncIterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.AsyncIterable"
+    ],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
@@ -10,5 +14,8 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "service", "tests", "scripts"]
+  "include": [
+    "src",
+    "service"
+  ]
 }

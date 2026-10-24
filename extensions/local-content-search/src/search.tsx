@@ -11,6 +11,8 @@ import { basename, dirname } from "node:path";
 import { LocalClient } from "../service/client";
 import { Hit } from "../service/protocol";
 import { location } from "./location";
+import { InstallationGate } from "./installation";
+import { showFailureToast } from "@raycast/utils";
 
 // Debounce and abort stale requests; typing never launches overlapping model workers.
 const DEBOUNCE_MS = 300;
@@ -41,23 +43,50 @@ function actions(hit?: Hit) {
         <Action
           title="Manage Content Index"
           icon={Icon.Gear}
-          onAction={() =>
-            launchCommand({ name: "manage", type: LaunchType.UserInitiated })
-          }
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "manage",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (failure) {
+              await showFailureToast(failure, {
+                title: "Could not open index controls",
+              });
+            }
+          }}
         />
         <Action
           title="Set Up Local Search"
           icon={Icon.Download}
-          onAction={() =>
-            launchCommand({ name: "setup", type: LaunchType.UserInitiated })
-          }
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "setup",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (failure) {
+              await showFailureToast(failure, {
+                title: "Could not open setup",
+              });
+            }
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
+// Do not mount query effects until the independently installed service is healthy.
 export default function Search() {
+  return (
+    <InstallationGate>
+      <SearchView />
+    </InstallationGate>
+  );
+}
+
+function SearchView() {
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);

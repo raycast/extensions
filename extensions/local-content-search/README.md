@@ -6,23 +6,13 @@ Find a file by what it contains, even when you cannot remember its name. Describ
 
 ## Install
 
-Requires Apple Silicon, macOS 14+, at least 8 GB RAM, Node 22.22.2+, full Xcode with Swift 6.2+, and CMake. Run these commands from the extension directory:
+Requires Apple Silicon, macOS 14+, at least 8 GB RAM, and 4 GB free disk space. No Terminal, Xcode, CMake, separately installed Node, API key, or DigUp app is needed.
 
-```sh
-npm ci
-npm run build:native
-npm run download:models
-npm run install:service
-npm run dev
-```
+1. Open any Local Content Search command. First launch downloads the helper and models (about 905 MB total), verifies pinned SHA-256 checksums, and starts the background service. Keep the command open until setup finishes.
+2. Open **Manage Content Index → Choose Folders and Limits** and select a small folder first. No folders are selected automatically.
+3. Wait for searchable files, then run **Search File Contents** and describe what you remember.
 
-The model download is about 865 MB. The downloader pins the revision and verifies both SHA-256 checksums before installation. No Google API key or DigUp app is required.
-
-1. Open **Manage Content Index** in Raycast.
-2. Choose **Choose Folders and Limits** and select a small folder first. The included `examples/` folder is a safe test.
-3. Wait for searchable files, then run **Search File Contents**. Try `restrictions on domestic animals` against the sample lease.
-
-The extension is registered locally through Raycast's developer tooling. It has not been published to the Raycast Store.
+Setup shows download progress and errors. If it stops, choose **Retry Setup**. Valid model downloads are reused. Advanced users can set **Helper Path** in extension preferences to an extracted, trusted helper release directory containing `bin/` and `licenses/`; leave it empty for verified downloads.
 
 ## Commands
 
@@ -30,7 +20,7 @@ The extension is registered locally through Raycast's developer tooling. It has 
 | --- | --- |
 | Search File Contents | Semantic and exact-word retrieval, excerpts, page/time metadata, Quick Look, open/reveal, and copy actions |
 | Manage Content Index | Select folders, inspect progress, pause/resume, set exclusions, and choose power/memory limits |
-| Install Local Content Search | Installation and removal instructions |
+| Install Local Content Search | Download and verify the helper/models, register the service, or remove it |
 
 Readers support text/Markdown, rich documents, PDFs including scans, images/screenshots with OCR, audio windows, and sampled video frames with audio. macOS frameworks handle decoding; no external transcription service is used.
 
@@ -56,43 +46,27 @@ Resource limits reduce risk; they cannot guarantee that macOS or a driver will n
 
 ## Privacy
 
-After setup, the extension and service require no network access. They make no remote inference requests, telemetry calls, or update checks. Files, queries, extracted content, and embeddings stay on the Mac. The service accepts requests through a private Unix socket, not a TCP port.
+Setup downloads the helper from this project's public GitHub releases and models from Hugging Face. After setup, the extension and service require no network access. They make no remote inference requests, telemetry calls, or update checks. Files, queries, extracted content, and embeddings stay on the Mac. The service accepts requests through a private Unix socket, not a TCP port.
 
 State lives under `~/Library/Application Support/LocalSearch`. Its directory is user-private, but extracted text and vectors are not separately encrypted; use FileVault if you need disk encryption. Removing a folder hides its results immediately and prunes its records on the next indexing pass. Removing the final folder prunes records even while paused or power-blocked. Interrupted cleanup remains queued across restarts until it succeeds; the service reports cleanup failures.
 
-## Test
-
-```sh
-npm test && npm run lint && npm run typecheck
-npm run build
-npm run test:native
-npm run test:e2e
-npm audit
-```
-
-The end-to-end suite runs the real model and native engine against temporary synthetic files. It checks semantic retrieval, live updates, pause/resume with Raycast closed, unavailable folders, deletions, credential exclusions, PDF pages, image matches, spoken-audio matches, and video timestamps. It requires the downloaded models plus local `say` and Homebrew `ffmpeg` for fixture generation; these tools are not runtime dependencies.
-
-Running the suite writes `docs/e2e-results.json`; see [`docs/README.md`](docs/README.md). Installed-service searches on the development Mac measured 360–572 ms for fresh queries and 3 ms for a repeated query; these are small-index measurements, not performance guarantees for a whole disk.
-
 ## Uninstall or diagnose
 
-```sh
-npm run uninstall:service
-```
+Open **Install Local Content Search**, choose **Remove Background Service**, and confirm. This stops and unregisters the login service while preserving models, settings, and the index. Other commands will not reinstall it until you explicitly choose Install again. Removing the Raycast extension alone does not stop the independent service; remove the service first.
 
-This stops and unregisters the login service while preserving models, settings, and the index. Disable/remove the three commands in Raycast's extension settings separately. Logs are under `~/Library/Application Support/LocalSearch/logs`.
+Logs are under `~/Library/Application Support/LocalSearch/logs`.
 
-If saved configuration cannot be read, pause/resume cannot replace it with an empty folder list. Restore the configuration or explicitly choose folders; recovery preserves the original as `config.json.invalid-<timestamp>` in the state directory. If a Node upgrade removes the binary used by the login agent, rerun `npm run install:service` with the new Node installation.
+If saved configuration cannot be read, pause/resume cannot replace it with an empty folder list. Restore the configuration or explicitly choose folders; recovery preserves the original as `config.json.invalid-<timestamp>` in the state directory. The helper includes its own Node runtime, so changes to a separately installed Node do not affect the service.
 
 ## Boundaries
 
 - Open File opens the original file; it does not seek Preview/QuickTime to a matched page or timestamp. The result displays the location.
 - Code projects are skipped except screenshots. Dedicated code indexing is not enabled.
 - Each fresh query starts a text-only native encoder. Repeated queries use a bounded cache; large-index latency still needs measurement.
-- Folder access remains subject to macOS privacy permissions. Missing or unreadable folders do not authorize broader disk access.
+- Folder access remains subject to macOS privacy permissions. macOS may ask you to allow access to a selected folder; setup cannot approve that prompt for you. Missing or unreadable folders do not authorize broader disk access.
 
 ## Source and licenses
 
-The Raycast UI, Unix service, installer, resource controls, and integration tests are implemented in this repository. The native readers, index/store/search code, and llama.cpp adapter are adapted from MIT-licensed DigUp source at `6faa29e4c315a3a591de1b41bd78751bdf39588d`. They are compiled into this project's own engine; no DigUp application or installed CLI is used.
+The Raycast UI, Unix service, installer, resource controls, and integration tests are available in the public helper repository. The native readers, index/store/search code, and llama.cpp adapter are adapted from MIT-licensed DigUp source at `6faa29e4c315a3a591de1b41bd78751bdf39588d`. They are compiled into this project's own engine; no DigUp application or installed CLI is used.
 
-See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). The icon and cover were generated through `yoyo imagegen`, reviewed, and saved under `media/brand/`. Only the 512-pixel icon is bundled as a runtime asset.
+The helper and its build source are available at [github.com/sushilk1991/raycast-local-search](https://github.com/sushilk1991/raycast-local-search). See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). Installed helper licenses are retained alongside local service state.

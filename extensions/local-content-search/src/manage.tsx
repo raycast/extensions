@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { LocalClient } from "../service/client";
 import { Config, Status, validateConfig } from "../service/protocol";
 import { retainStatus } from "./state";
+import { InstallationGate } from "./installation";
+import { showFailureToast } from "@raycast/utils";
 
 // All indexing controls go through the service; the UI never touches SQL or model state.
 const client = new LocalClient();
@@ -46,11 +48,7 @@ function Settings({ status, saved }: { status: Status; saved: () => void }) {
         title: "Folder settings saved",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Settings not saved",
-        message: String(error),
-      });
+      await showFailureToast(error, { title: "Settings not saved" });
     }
   }
 
@@ -122,7 +120,16 @@ function Settings({ status, saved }: { status: Status; saved: () => void }) {
   );
 }
 
+// The setup gate prevents the first status poll from showing a missing-service error.
 export default function Manage() {
+  return (
+    <InstallationGate>
+      <ManageView />
+    </InstallationGate>
+  );
+}
+
+function ManageView() {
   const [status, setStatus] = useState<Status>();
   const [error, setError] = useState<string>();
   const { push } = useNavigation();
@@ -149,11 +156,7 @@ export default function Manage() {
       setStatus(await client.configure(config, expected));
     } catch (failure) {
       refresh();
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Control failed",
-        message: String(failure),
-      });
+      await showFailureToast(failure, { title: "Control failed" });
     }
   }
   const controls = (
@@ -182,11 +185,7 @@ export default function Manage() {
               try {
                 setStatus(await client.rescan());
               } catch (failure) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Rescan failed",
-                  message: String(failure),
-                });
+                await showFailureToast(failure, { title: "Rescan failed" });
               }
             }}
           />

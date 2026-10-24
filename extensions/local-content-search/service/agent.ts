@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { Paths } from "../service/paths";
+import { Paths } from "./paths";
 
 // launchd runs Node directly; XML escaping preserves paths without shell interpretation.
 export const AGENT_LABEL = "com.sushil.local-content-search";
