@@ -26,6 +26,10 @@ export interface CheckOptions {
   apiKey: string;
   model: string;
   timeoutMs: number;
+  /** Resume this submitted task instead of submitting the text again. */
+  taskId?: string;
+  /** Runs once Pangram accepts the text, with the task ID a retry can resume. */
+  onSubmit?: (taskId: string) => void;
 }
 
 /** A failed Check. `status` is the HTTP status when the API rejected the request. */
@@ -38,6 +42,9 @@ export class PangramError extends Error {
     this.name = "PangramError";
   }
 }
+
+/** A Check that outlasted the timeout. Its task may still finish. */
+export class CheckTimeoutError extends PangramError {}
 
 /** Task payload from `GET /task/{id}`; result fields are present on success only. */
 interface Task {
@@ -57,8 +64,11 @@ interface Task {
   }[];
 }
 
-/** Runs one Pangram Check: submits the text, then polls the task until it finishes. */
-export async function checkText(text: string, { apiKey, model, timeoutMs }: CheckOptions): Promise<CheckResult> {
+/** Runs one Pangram Check: submits the text (or resumes `taskId`), then polls the task until it finishes. */
+export async function checkText(
+  text: string,
+  { apiKey, model, timeoutMs, taskId, onSubmit }: CheckOptions,
+): Promise<CheckResult> {
   const signal = AbortSignal.timeout(timeoutMs);
   const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
     const response = await fetch(`${BASE_URL}${path}`, {
@@ -76,13 +86,16 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
   };
 
   try {
-    const { task_id } = await request<{ task_id: string }>("/task", {
-      method: "POST",
-      body: JSON.stringify({ text, model }),
-    });
+    if (!taskId) {
+      ({ task_id: taskId } = await request<{ task_id: string }>("/task", {
+        method: "POST",
+        body: JSON.stringify({ text, model }),
+      }));
+      onSubmit?.(taskId);
+    }
     for (;;) {
       // The Check is already paid for: ride out temporary poll failures until the timeout.
-      const task = await request<Task>(`/task/${task_id}`).catch((error: unknown) => {
+      const task = await request<Task>(`/task/${taskId}`).catch((error: unknown) => {
         if (signal.aborted || !isTemporary(error)) throw error;
       });
       if (task?.stage === "STAGE_SUCCESS") return toCheckResult(task);
@@ -90,7 +103,7 @@ export async function checkText(text: string, { apiKey, model, timeoutMs }: Chec
       await sleep(POLL_INTERVAL_MS, undefined, { signal });
     }
   } catch (error) {
-    if (signal.aborted) throw new PangramError(`Check timed out after ${timeoutMs / 1000} seconds.`);
+    if (signal.aborted) throw new CheckTimeoutError(`Check timed out after ${timeoutMs / 1000} seconds.`);
     throw error;
   }
 }

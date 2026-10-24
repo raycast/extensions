@@ -13,12 +13,3 @@ export async function readClipboard(): Promise<string> {
   if (!text.trim()) throw new Error("No text on the clipboard. Copy text and try again.");
   return text;
 }
-
-/** Reads the Selection, falling back to the Clipboard. */
-export function readSelectionOrClipboard(): Promise<string> {
-  return readSelection().catch(() =>
-    readClipboard().catch(() => {
-      throw new Error("No selected or copied text. Select or copy text and try again.");
-    }),
-  );
-}

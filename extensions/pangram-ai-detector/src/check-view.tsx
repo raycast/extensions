@@ -44,12 +44,12 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   const timeoutSeconds = positiveNumber(preferences.timeoutSeconds, 300);
   const text = useRef<string>(undefined);
   const [refreshes, setRefreshes] = useState(0);
-  const [isSending, setIsSending] = useState(false);
+  const [progress, setProgress] = useState("");
   const refresh = () => setRefreshes((count) => count + 1);
 
   const { data, error, isLoading, revalidate } = usePromise(
     async (refreshCount: number) => {
-      setIsSending(false);
+      setProgress("");
       text.current ??= await readSource();
       return runCheck(text.current, {
         apiKey: preferences.apiKey,
@@ -70,8 +70,9 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
             });
             if (!confirmed) throw new Cancelled();
           }
-          setIsSending(true);
+          setProgress("Checking…");
         },
+        onResume: () => setProgress("Resuming your earlier Check (no new charge)…"),
       });
     },
     [refreshes],
@@ -108,7 +109,7 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   );
 
   if (isLoading || !data) {
-    const markdown = isLoading ? (isSending ? "Checking…" : "") : `## Check failed\n\n${error?.message ?? ""}`;
+    const markdown = isLoading ? progress : `## Check failed\n\n${error?.message ?? ""}`;
     return <Detail isLoading={isLoading} markdown={markdown} actions={actions} />;
   }
 

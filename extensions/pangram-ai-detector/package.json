@@ -12,13 +12,6 @@
   ],
   "commands": [
     {
-      "name": "check-text",
-      "title": "Check Text",
-      "description": "Check the selected text, or the clipboard if nothing is selected, for AI writing.",
-      "keywords": ["ai", "detect", "detector", "gpt", "pangram"],
-      "mode": "view"
-    },
-    {
       "name": "check-selected-text",
       "title": "Check Selected Text",
       "description": "Check the selected text for AI writing.",

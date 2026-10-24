@@ -15,7 +15,6 @@ The icon uses [Pangram's logo](https://www.pangram.com/favicon.svg). The Pangram
 
 ## Commands
 
-- **Check Text**: checks the selected text, or the clipboard if nothing is selected.
 - **Check Selected Text**: checks the selected text.
 - **Check Clipboard Text**: checks the clipboard text.
 
