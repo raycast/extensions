@@ -1,4 +1,4 @@
-import { getSelectedText, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getSelectedText, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
 import { insertNode } from "./lib/api";
 import { insertNodeOptimistically } from "./lib/cache";
 import { getPreferences } from "./lib/preferences";
@@ -43,6 +43,7 @@ export default async function Command(props: { arguments: Arguments.AddToToday }
     }
 
     await showHUD("Added to Today");
+    await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
