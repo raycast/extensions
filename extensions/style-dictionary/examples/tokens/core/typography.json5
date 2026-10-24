@@ -1,0 +1,60 @@
+{
+  font: {
+    family: {
+      sans: { value: ["Inter", "Helvetica Neue", "sans-serif"], type: "fontFamily" },
+      serif: { value: ["Georgia", "serif"], type: "fontFamily" },
+      mono: { value: ["Menlo", "monospace"], type: "fontFamily" },
+    },
+    weight: {
+      regular: { value: 400, type: "fontWeight" },
+      medium: { value: 500, type: "fontWeight" },
+      semibold: { value: 600, type: "fontWeight" },
+      bold: { value: 700, type: "fontWeight" },
+    },
+    size: {
+      sm: { value: "0.875rem", type: "dimension" },
+      base: { value: "1rem", type: "dimension" },
+      lg: { value: "1.25rem", type: "dimension" },
+      xl: { value: "1.5rem", type: "dimension" },
+      "2xl": { value: "2rem", type: "dimension" },
+    },
+  },
+  typography: {
+    display: {
+      value: {
+        fontFamily: "{font.family.serif}",
+        fontSize: "{font.size.2xl}",
+        fontWeight: "{font.weight.bold}",
+        lineHeight: 1.2,
+      },
+      type: "typography",
+    },
+    heading: {
+      value: {
+        fontFamily: "{font.family.sans}",
+        fontSize: "{font.size.xl}",
+        fontWeight: "{font.weight.semibold}",
+        lineHeight: 1.3,
+      },
+      type: "typography",
+    },
+    body: {
+      value: {
+        fontFamily: "{font.family.sans}",
+        fontSize: "{font.size.base}",
+        fontWeight: "{font.weight.regular}",
+        lineHeight: 1.5,
+      },
+      type: "typography",
+    },
+    code: {
+      value: {
+        fontFamily: "{font.family.mono}",
+        fontSize: "{font.size.sm}",
+        fontWeight: "{font.weight.medium}",
+        lineHeight: 1.6,
+      },
+      type: "typography",
+    },
+  },
+}
