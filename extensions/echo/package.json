@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "echo",
+  "title": "Echo",
+  "description": "Search everything you have played and resume it at the exact spot.",
+  "icon": "echo-icon.png",
+  "author": "theodore_hq",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search Echo History",
+      "description": "One tidy history across every app and tab, and Echo drops you back at the exact second you left off.",
+      "mode": "view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Echo",
+      "description": "Show what is currently playing, as a live line you can keep in Favorites. Return plays or pauses it.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "resume-last",
+      "title": "Resume Last Played",
+      "subtitle": "Echo",
+      "description": "Pick up the most recent thing you were playing.",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Play or Pause",
+      "subtitle": "Echo",
+      "description": "Toggle playback of whatever is currently playing.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Access Token",
+      "description": "Copy this from Echo, under Settings > Raycast.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste the token from Echo"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.12.0",
+    "prettier": "3.9.9",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
