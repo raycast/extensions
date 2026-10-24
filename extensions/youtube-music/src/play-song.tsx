@@ -67,33 +67,6 @@ export const currentHref = `(function() {
   return location.href;
 })();`;
 
-/**
- * YouTube Music pauses after a long idle period and asks "Are you still there?".
- * The prompt renders `ytmusic-you-there-renderer` with one action button;
- * clicking it records the response and resumes playback. Installed once per page
- * load.
- */
-export const keepPlaying = `(function() {
-  if (window.__ytmKeepPlaying) return "already";
-  window.__ytmKeepPlaying = true;
-  var pending = false;
-  function check() {
-    pending = false;
-    var dialog = document.querySelector("ytmusic-you-there-renderer");
-    if (!dialog || dialog.__ytmDismissed) return;
-    var button = dialog.querySelector("button") || dialog.querySelector("yt-button-renderer");
-    if (!button) return;
-    dialog.__ytmDismissed = true;
-    button.click();
-  }
-  new MutationObserver(function() {
-    if (pending) return;
-    pending = true;
-    setTimeout(check, 0);
-  }).observe(document.documentElement, { childList: true, subtree: true });
-  return "installed";
-})();`;
-
 // The queue is client-side state, so adding to it means using the app's own
 // search page and row menu. The page is opened with the same songs filter that
 // produced the Play Song results: the app's default search page is a mixed
@@ -346,7 +319,6 @@ async function playSong(song: SongResult) {
     return;
   }
 
-  await runMusic(keepPlaying);
   await closeMainWindow();
   await showHUD(`Playing ${song.title}`);
 }

@@ -18,6 +18,61 @@ export type TabError =
   | "applescript-error";
 
 /**
+ * YouTube Music pauses after a long idle period and asks whether you are still
+ * listening. The renderer exists in the DOM from page load and is only made
+ * visible later, so a hidden renderer must not be marked as handled: check that
+ * it is visible before clicking, and unmark it if the click has no effect.
+ * Installed once per page load, by every command.
+ */
+export const keepPlaying = `(function() {
+  if (window.__ytmKeepPlayingV2) return "already";
+  window.__ytmKeepPlayingV2 = true;
+
+  function visible(el) {
+    if (!el) return false;
+    var rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function check() {
+    var dialog = document.querySelector("ytmusic-you-there-renderer");
+    if (!dialog || !visible(dialog)) {
+      if (dialog) dialog.__ytmDismissedV2 = false;
+      return;
+    }
+    if (dialog.__ytmDismissedV2) return;
+    var button = dialog.querySelector("button") || dialog.querySelector("yt-button-renderer");
+    if (!button || !visible(button)) return;
+    dialog.__ytmDismissedV2 = true;
+    button.click();
+    // A click that did not close the dialog gets another attempt next pass.
+    setTimeout(function() {
+      if (visible(dialog)) dialog.__ytmDismissedV2 = false;
+    }, 1500);
+  }
+
+  var pending = false;
+  function schedule() {
+    if (pending) return;
+    pending = true;
+    setTimeout(function() {
+      pending = false;
+      check();
+    }, 0);
+  }
+
+  new MutationObserver(schedule).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "style", "aria-hidden", "hidden", "opened"]
+  });
+  setInterval(check, 1000);
+  check();
+  return "installed";
+})();`;
+
+/**
  * Escapes JavaScript so it can safely be inserted into AppleScript.
  */
 function escapeJS(js: string): string {
@@ -139,6 +194,9 @@ export async function runJSInYouTubeMusicTab(
   // Commands that read the music player must not fall through to a regular
   // YouTube tab when the user prefers "Both" or "YouTube".
   const condition = musicOnly ? 'URL contains "music.youtube.com"' : getUrlCondition(urlPreference);
+  // Install the idle-prompt watcher on every command; it is idempotent and
+  // returns before running its own check on later calls.
+  const script = `${keepPlaying}\n${code}`;
 
   let result: string;
   try {
@@ -151,7 +209,7 @@ export async function runJSInYouTubeMusicTab(
           repeat with t in (every tab whose ${condition}) of w
             tell t
               try
-                return ${runJS(browser.name, code)}
+                return ${runJS(browser.name, script)}
               on error errMsg
                 return "JS Error: " & errMsg
               end try
