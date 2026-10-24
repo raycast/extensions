@@ -19,8 +19,6 @@ function resolveSimulatorApp(): string {
   return "Simulator";
 }
 
-const SIMULATOR_APP = resolveSimulatorApp();
-
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,19 +64,20 @@ export default function Command() {
         title={device.state === "Booted" ? "Open" : "Boot"}
         icon={Icon.Power}
         onAction={() => {
+          const simulatorApp = resolveSimulatorApp();
           exec(`xcrun simctl boot ${device.udid}`, () => {
             fetchSimulators();
           });
-          exec(`open -g -a ${SIMULATOR_APP}`);
+          exec(`open -g -a ${simulatorApp}`);
           const appleScript = `
             tell application "System Events"
               repeat
                 set windowFound to false
-                set theWindows to windows of process "${SIMULATOR_APP}"
+                set theWindows to windows of process "${simulatorApp}"
                 repeat with theWindow in theWindows
                   set theWindowName to name of theWindow
                   if theWindowName contains "${device.name}" then
-                    tell application "${SIMULATOR_APP}" to activate
+                    tell application "${simulatorApp}" to activate
                     perform action "AXRaise" of theWindow
                     set windowFound to true
                     exit repeat
