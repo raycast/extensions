@@ -11,4 +11,5 @@ For example, you can search through your open workspaces and jump straight to on
 ## Requirements
 
 - [cmux](https://cmux.app) installed and running
+- cmux **Socket Control Mode** set to **Automation mode** (cmux Settings → Automation), so Raycast can connect to cmux
 - [Raycast](https://raycast.com) installed

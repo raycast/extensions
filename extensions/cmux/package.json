@@ -5,6 +5,9 @@
   "description": "Interacts with the cmux terminal app for Mac",
   "icon": "extension-icon.png",
   "author": "steve_occhipinti",
+  "contributors": [
+    "csyio"
+  ],
   "platforms": [
     "macOS"
   ],
