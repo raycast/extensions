@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>PathSeek — Folder, Search, Navigate</title>
+  <rect x="10" y="10" width="492" height="492" rx="112" fill="#10192F"/>
+  <rect x="27" y="27" width="458" height="458" rx="98" fill="none" stroke="#203455" stroke-width="5"/>
+  <path d="M91 180c0-16 13-29 29-29h102l32 34h135c17 0 31 14 31 31v163c0 17-14 31-31 31H120c-16 0-29-13-29-29V180Z" fill="#2A5076"/>
+  <path d="M91 217c0-14 12-26 26-26h281c15 0 27 12 27 27v155c0 20-16 36-36 36H126c-19 0-35-16-35-35V217Z" fill="#3D93AE"/>
+  <path d="M91 218c0-15 12-27 27-27h280c15 0 27 12 27 27v37H91v-37Z" fill="#56C5C2"/>
+  <circle cx="251" cy="279" r="97" fill="#10213A" stroke="#C7FEF0" stroke-width="21"/>
+  <path d="M319 350l62 63" fill="none" stroke="#C7FEF0" stroke-width="29" stroke-linecap="round"/>
+  <path d="M202 279h92" fill="none" stroke="#55DCC5" stroke-width="24" stroke-linecap="round"/>
+  <path d="M270 247l34 32-34 32" fill="none" stroke="#55DCC5" stroke-width="23" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
