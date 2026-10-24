@@ -2,6 +2,10 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot } from "@r
 import { useEffect, useState } from "react";
 import { api, TwosList } from "./api";
 
+// Sentinel dropdown value: the API resolves `list: "today"` to the user's day
+// list in their timezone, creating it if needed.
+const TODAY = "__today__";
+
 interface Values {
   list_id: string;
   text: string;
@@ -31,10 +35,6 @@ export default function AddThing({ defaultValue = "" }: { defaultValue?: string 
   }, []);
 
   async function handleSubmit(values: Values) {
-    if (!values.list_id) {
-      await showToast({ style: Toast.Style.Failure, title: "Pick a list" });
-      return;
-    }
     if (!values.text.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "Enter some text" });
       return;
@@ -44,10 +44,9 @@ export default function AddThing({ defaultValue = "" }: { defaultValue?: string 
       title: "Adding…",
     });
     try {
-      const body: Record<string, unknown> = {
-        list_id: values.list_id,
-        text: values.text,
-      };
+      const body: Record<string, unknown> = { text: values.text };
+      if (!values.list_id || values.list_id === TODAY) body.list = "today";
+      else body.list_id = values.list_id;
       if (values.type) body.type = values.type;
       if (values.url) body.url = values.url;
       await api("/things", { method: "POST", body: JSON.stringify(body) });
@@ -70,7 +69,8 @@ export default function AddThing({ defaultValue = "" }: { defaultValue?: string 
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="list_id" title="List">
+      <Form.Dropdown id="list_id" title="List" defaultValue={TODAY}>
+        <Form.Dropdown.Item value={TODAY} title="Today" icon={Icon.Calendar} />
         {lists.map((l) => (
           <Form.Dropdown.Item key={l.id} value={l.id} title={`${l.emoji || ""} ${l.title}`.trim()} />
         ))}
