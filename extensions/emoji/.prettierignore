@@ -1,0 +1,3 @@
+# Deterministic output from scripts/generate-catalogs.mjs.
+assets/catalogs/
+src/generated/

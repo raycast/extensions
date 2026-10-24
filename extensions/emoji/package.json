@@ -9,7 +9,8 @@
     "sxn",
     "maxdavid",
     "sinasab",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "methodx"
   ],
   "license": "MIT",
   "categories": [
@@ -100,33 +101,35 @@
       "title": "Shortcodes",
       "label": "Add Shortcodes",
       "default": false,
-      "description": "Add short codes to the emojis (e.g. zap for ⚡️) which can be used in platforms like GitHub and Slack."
+      "description": "Show shortcode labels and a Copy Shortcode action. Shortcodes are always searchable."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.77.0",
-    "cross-fetch": "^3.1.5",
-    "emojilib": "^3.0.12",
-    "fuse.js": "^6.5.3",
-    "raycast-toolkit": "^1.0.3"
+    "@raycast/api": "^2.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react": "^18.2.0",
-    "typescript": "^4.6.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "emojilib": "^3.0.12",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.8",
+    "react": "^19.3.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "generate": "node scripts/generate-catalogs.mjs",
+    "prebuild": "npm run generate",
+    "predev": "npm run generate",
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "js-yaml@3": "3.15.2",
     "fast-uri": "3.1.8"
   }
