@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flashdata-google-search",
+  "title": "FlashData Google Search",
+  "description": "Search Google and copy structured results for research and AI agent workflows using your own FlashData API key.",
+  "icon": "icon.png",
+  "author": "flashdatadev",
+  "platforms": ["macOS"],
+  "categories": ["Web", "Developer Tools"],
+  "keywords": ["google", "search", "serp", "research", "web", "api"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-google",
+      "title": "Search Google",
+      "subtitle": "FlashData",
+      "description": "Run one Google Search with your FlashData Credits, browse sources, and copy results as JSON or Markdown.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "FlashData API Key",
+      "description": "Your own FlashData key with Google Search access. Searches use Credits from your FlashData account.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your FlashData API key"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "node --test tests/*.test.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "node -e \"throw new Error('Use npm run publish for the Raycast Store; do not publish this extension to npm.')\""
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  }
+}
