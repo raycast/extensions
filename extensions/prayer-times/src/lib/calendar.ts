@@ -49,13 +49,13 @@ const WIDTH = 7 * CELL.width + 6 * CELL.gap;
 /** Cell fills per tone, status colors (the phone app's tokens), and text colors, per Raycast appearance. */
 const PALETTE = {
   light: {
-    fill: { full: "#34C759", partial: "#FF9500", none: "#FF3B30", noData: "#E5E5EA", future: "none" },
+    fill: { full: "#34C759", partial: "#FFCC66", none: "#FF3B30", noData: "#E5E5EA", future: "none" },
     status: { jamaat: "#248A3D", ontime: "#248A3D", late: "#975800", madeup: "#45544F", missed: "#D70015" },
     text: "#1C1C1E",
     muted: "#8E8E93",
   },
   dark: {
-    fill: { full: "#30D158", partial: "#FF9F0A", none: "#FF453A", noData: "#3A3A3C", future: "none" },
+    fill: { full: "#30D158", partial: "#FFC04D", none: "#FF453A", noData: "#3A3A3C", future: "none" },
     status: { jamaat: "#30D158", ontime: "#30D158", late: "#E9B452", madeup: "#A8B4AF", missed: "#FF6961" },
     text: "#F2F2F7",
     muted: "#8E8E93",

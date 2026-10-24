@@ -20,7 +20,7 @@ const MONTHS_BACK = 24;
 
 const TONE_COLORS: Record<DayTone, Color.ColorLike> = {
   full: Color.Green,
-  partial: Color.Orange,
+  partial: { light: "#FFCC66", dark: "#FFC04D" },
   none: Color.Red,
   noData: Color.SecondaryText,
   future: Color.SecondaryText,
