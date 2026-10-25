@@ -44,8 +44,8 @@ import {
 
 /** A no-view command cannot render the Installer view, so a missing tool is
  *  handed off to the main Download command, which can. */
-async function handOff(tool: string, url: string): Promise<void> {
-  await showToast({
+function handOff(tool: string, url: string): Promise<Toast> {
+  return showToast({
     style: Toast.Style.Failure,
     title: `${tool} Is Not Installed`,
     message: "Open The Downloader to install it, then download again.",
@@ -102,12 +102,37 @@ function paintCancelled(toast: Toast) {
   toast.secondaryAction = undefined;
 }
 
+/**
+ * How long Fast Download stays loaded after its last toast. A toast's actions
+ * run inside the command, and Raycast for Windows unloads a no-view command as
+ * soon as it returns — Open Folder or Copy Error on a finished download's toast
+ * then did nothing. macOS keeps them working on its own. Long enough to open
+ * the toast's actions (Ctrl+T) while it shows and pick one.
+ */
+const TOAST_ACTIONS_WINDOW_MS = 20_000;
+
+/**
+ * On Windows, keep the command loaded for a while when `toast` has actions.
+ * A fixed wait: the toast's action getters hand back proxies for whatever
+ * handler is current, so its actions can't be wrapped to end the wait early.
+ */
+async function keepToastActionsAlive(toast: Toast | undefined): Promise<void> {
+  if (process.platform !== "win32" || !toast) return;
+  if (!toast.primaryAction && !toast.secondaryAction) return;
+  await new Promise((resolve) => setTimeout(resolve, TOAST_ACTIONS_WINDOW_MS));
+}
+
 export default async function FastDownload(props: LaunchProps<{ arguments: Arguments.FastDownload }>): Promise<void> {
+  await keepToastActionsAlive(await download(props));
+}
+
+/** Run the download; resolves with the toast left on screen, whose actions may still be used. */
+async function download(props: LaunchProps<{ arguments: Arguments.FastDownload }>): Promise<Toast | undefined> {
   const { url: rawUrl } = props.arguments;
 
   if (!isValidUrl(rawUrl)) {
     await showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: rawUrl });
-    return;
+    return undefined;
   }
   // Prefix https:// for scheme-less input before any runner sees it.
   const url = normalizeUrl(rawUrl);
@@ -136,7 +161,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       toast.title = "Cookies from Browser";
       toast.message = browser.warning;
       toast.primaryAction = { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() };
-      return;
+      return toast;
     }
 
     const { signal } = attachStop(toast);
@@ -192,7 +217,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       }
     }
     await settle(session, toast, outcome);
-    return;
+    return toast;
   }
 
   if (type === "spotify") {
@@ -220,7 +245,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
         title: "Open Setup Guide",
         onAction: () => open(SPOTDL_SETUP_GUIDE_URL),
       };
-      return;
+      return toast;
     }
 
     const { signal } = attachStop(toast);
@@ -299,7 +324,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       }
     }
     await settle(session, toast, outcome);
-    return;
+    return toast;
   }
 
   if (type === "webpage") {
@@ -343,7 +368,7 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
       }
     }
     await settle(session, toast, outcome);
-    return;
+    return toast;
   }
 
   // video — the default route (detectSource routes unknown hosts to "webpage", handled above)
@@ -420,4 +445,5 @@ export default async function FastDownload(props: LaunchProps<{ arguments: Argum
     }
   }
   await settle(session, toast, outcome);
+  return toast;
 }
