@@ -1,0 +1,527 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yab",
+  "title": "Yab",
+  "description": "Search Yab's tabs, spaces, history (including the text of pages you read), bookmarks, downloads and mail, open windows, and hand tasks to Yab's agent.",
+  "icon": "icon.png",
+  "author": "serafimcloud",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "browser",
+    "tabs",
+    "history",
+    "arc",
+    "yab",
+    "agent"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Yab",
+      "subtitle": "Yab",
+      "description": "Open tabs, bookmarks, history, search suggestions and the agent, in one field",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Yab",
+      "description": "Every tab of every space, pins first",
+      "mode": "view"
+    },
+    {
+      "name": "search-space-tabs",
+      "title": "Search Space Tabs",
+      "subtitle": "Yab",
+      "description": "Tabs of the space on screen",
+      "mode": "view"
+    },
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "subtitle": "Yab",
+      "description": "Go to a space, or open a tab or window in it",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Yab",
+      "description": "Pages you visited, found by title, address or the words inside them",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Yab",
+      "description": "The bookmarks bar and its folders",
+      "mode": "view"
+    },
+    {
+      "name": "search-downloads",
+      "title": "Search Downloads",
+      "subtitle": "Yab",
+      "description": "What you downloaded, and the files you gave to sites",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Yab",
+      "description": "Open an address or search in a new tab",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Address or words",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Yab",
+      "description": "Open a new window",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-private-window",
+      "title": "New Private Window",
+      "subtitle": "Yab",
+      "description": "Open a private window, optionally at an address",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Address or words",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-small-window",
+      "title": "Open in Small Window",
+      "subtitle": "Yab",
+      "description": "Yab's small floating window, like Little Arc. Empty takes the address on the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Address or words",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "move-page-to-yab",
+      "title": "Move Page to Yab",
+      "subtitle": "Yab",
+      "description": "Open the front tab of Safari, Chrome, Arc, Dia, Brave or Edge in Yab",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "closeInSource",
+          "title": "Source Browser",
+          "label": "Close the tab there",
+          "description": "Close the tab in the browser it came from",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "copy-tab-url",
+      "title": "Copy Current Tab URL",
+      "subtitle": "Yab",
+      "description": "Copy the address of the tab in front",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-tab-markdown",
+      "title": "Copy Current Tab as Markdown Link",
+      "subtitle": "Yab",
+      "description": "Copy [title](address) of the tab in front",
+      "mode": "no-view"
+    },
+    {
+      "name": "close-duplicate-tabs",
+      "title": "Close Duplicate Tabs",
+      "subtitle": "Yab",
+      "description": "Close every second copy of a page, in every space",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask-yab",
+      "title": "Ask Yab",
+      "subtitle": "Yab",
+      "description": "Hand a task to Yab's agent and read the answer here",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "What to do",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "cli",
+          "title": "Agent",
+          "description": "Who does the task",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Yab's Choice",
+              "value": ""
+            },
+            {
+              "title": "Claude",
+              "value": "claude"
+            },
+            {
+              "title": "ChatGPT (Codex)",
+              "value": "codex"
+            },
+            {
+              "title": "Cursor",
+              "value": "cursor"
+            }
+          ]
+        },
+        {
+          "name": "effort",
+          "title": "Effort",
+          "description": "How hard the agent thinks",
+          "type": "dropdown",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Yab's Choice",
+              "value": ""
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            }
+          ]
+        },
+        {
+          "name": "access",
+          "title": "Access",
+          "description": "Browser keeps the agent inside Yab; Full also lets it use this Mac",
+          "type": "dropdown",
+          "default": "browser",
+          "required": false,
+          "data": [
+            {
+              "title": "Browser Only",
+              "value": "browser"
+            },
+            {
+              "title": "Full",
+              "value": "full"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask-in-yab",
+      "title": "Ask in Yab",
+      "subtitle": "Yab",
+      "description": "Open ⌘J in Yab with your words",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "send",
+          "title": "Sending",
+          "label": "Send at once",
+          "description": "Send the words instead of leaving them in the field",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "agent-sessions",
+      "title": "Agent Sessions",
+      "subtitle": "Yab",
+      "description": "What Yab's agents are doing and what waits for you",
+      "mode": "view"
+    },
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "subtitle": "Yab",
+      "description": "Mail kept in Yab, every account",
+      "mode": "view"
+    },
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "Yab",
+      "description": "Files downloaded, sent and brought by mail, found by name or the words inside",
+      "mode": "view"
+    },
+    {
+      "name": "search-memory",
+      "title": "Search Memory",
+      "subtitle": "Yab",
+      "description": "What Yab knows about you, people, sites and projects",
+      "mode": "view"
+    },
+    {
+      "name": "snippets",
+      "title": "Search Snippets",
+      "subtitle": "Yab",
+      "description": "Yab's snippets, pasted into the app in front",
+      "mode": "view"
+    },
+    {
+      "name": "purchases",
+      "title": "Purchases",
+      "subtitle": "Yab",
+      "description": "Subscriptions with their monthly total, orders and receipts, read from your mail",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Yab in the Menu Bar",
+      "subtitle": "Yab",
+      "description": "Spaces, pins and agents from the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "whats-new",
+      "title": "What's New in Yab",
+      "subtitle": "Yab",
+      "description": "Open Yab's changelog",
+      "mode": "no-view"
+    },
+    {
+      "name": "store",
+      "title": "Yab Store",
+      "subtitle": "Yab",
+      "description": "Open Yab's store of plugins and boosts",
+      "mode": "no-view"
+    },
+    {
+      "name": "manual",
+      "title": "Yab Manual",
+      "subtitle": "Yab",
+      "description": "Open Yab's manual",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "Every open tab of Yab's front window, in every space, with its space"
+    },
+    {
+      "name": "get-focused-tab",
+      "title": "Get Focused Tab",
+      "description": "The tab in front, with its space"
+    },
+    {
+      "name": "get-spaces",
+      "title": "Get Spaces",
+      "description": "Yab's spaces, with which one is on screen"
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Bring an open tab to the front, going to its space"
+    },
+    {
+      "name": "select-space",
+      "title": "Select Space",
+      "description": "Go to a space"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "description": "Close open tabs"
+    },
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "description": "Open an address or a search in a new tab, optionally in a given space"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a new window, optionally at an address or in a space"
+    },
+    {
+      "name": "new-private-window",
+      "title": "New Private Window",
+      "description": "Open a private window, optionally at an address"
+    },
+    {
+      "name": "open-small-window",
+      "title": "Open Small Window",
+      "description": "Open an address in Yab's small floating window"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search pages the user visited by title, address and the text of the page, optionally limited to recent days"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search Yab's bookmarks"
+    },
+    {
+      "name": "search-downloads",
+      "title": "Search Downloads",
+      "description": "Search files the user downloaded in Yab"
+    },
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "description": "Search the user's mail kept in Yab"
+    },
+    {
+      "name": "search-memory",
+      "title": "Search Memory",
+      "description": "Search what Yab knows about the user, people, companies, sites and projects"
+    },
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "Hand a task to Yab's own browser agent, which can sign in, read and act on sites as the user, and return its answer"
+    }
+  ],
+  "ai": {
+    "instructions": "Yab is a web browser. A window has spaces; each space has pins (location topApp), kept tabs (pinned) and today's tabs (unpinned). Assume the space on screen unless the user names another. When the user says 'this tab' or 'the page I'm on', use get-focused-tab. Tab and space ids come only from get-tabs, get-focused-tab and get-spaces; never invent one. Close only the tabs the user asked to close. search-history matches the words inside pages too, so use it for 'that article about X I read'. Use run-task only for work that needs a browser session (signing in, reading a logged-in site, filling a form); answer simple questions yourself."
+  },
+  "preferences": [
+    {
+      "name": "app",
+      "title": "Yab",
+      "description": "Which Yab to use",
+      "type": "dropdown",
+      "default": "dev.serafim.fast",
+      "required": false,
+      "data": [
+        {
+          "title": "Yab",
+          "value": "dev.serafim.fast"
+        },
+        {
+          "title": "Yab Dev",
+          "value": "dev.serafim.fast.dev"
+        }
+      ]
+    },
+    {
+      "name": "suggestions",
+      "title": "Search Suggestions",
+      "description": "Where Search Yab gets suggestions from",
+      "type": "dropdown",
+      "default": "google",
+      "required": false,
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "primary",
+      "title": "Open Links In",
+      "description": "What ↵ does on a page that isn't open; ⌘↵ does the other",
+      "type": "dropdown",
+      "default": "tab",
+      "required": false,
+      "data": [
+        {
+          "title": "New Tab",
+          "value": "tab"
+        },
+        {
+          "title": "Small Window",
+          "value": "small"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "19.0.10",
+    "eslint": "^9.20.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
