@@ -17,6 +17,11 @@ test("a clock time that has passed means tomorrow", () => {
   assert.match(option?.title ?? "", /tomorrow/i);
 });
 
+test("the same typed time resolves again when chosen after it has passed", () => {
+  assert.equal(parseCustomPause("15:30", at(15, 29))?.request.until, at(15, 30).toISOString());
+  assert.equal(parseCustomPause("15:30", at(15, 31))?.request.until, new Date(2026, 9, 25, 15, 30).toISOString());
+});
+
 test("lengths: plain number, minutes, hours, both", () => {
   const minutes = (text: string) => parseCustomPause(text, at(10))?.request.minutes;
   assert.equal(minutes("45"), 45);

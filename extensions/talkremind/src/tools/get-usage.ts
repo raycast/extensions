@@ -7,8 +7,6 @@ type Input = {
   days?: number;
 };
 
-const TOP_APPS = 25;
-
 export default async function tool({ days = 7 }: Input) {
   const [usage, installed] = await Promise.all([getUsage(Math.round(days)), getApplications()]);
   const name = (bundleId: string) => installed.find((a) => a.bundleId === bundleId)?.name ?? bundleId;
@@ -25,7 +23,7 @@ export default async function tool({ days = 7 }: Input) {
       dictatedWords: d.dictatedWords,
       dictationSharePercent: percent(d.share),
     })),
-    apps: usage.apps.slice(0, TOP_APPS).map((a) => ({
+    apps: usage.apps.map((a) => ({
       app: name(a.bundleID),
       typedWords: a.typedWords,
       dictatedWords: a.dictatedWords,

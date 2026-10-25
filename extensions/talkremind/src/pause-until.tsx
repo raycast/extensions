@@ -27,6 +27,8 @@ export default function Command() {
   const text = query.trim().toLowerCase();
   const presets = custom || !text ? PRESETS : PRESETS.filter((p) => p.title.toLowerCase().includes(text));
   const options = custom ? [custom, ...presets] : presets;
+  // A typed clock time means "the next 15:30" at the moment of choosing, not when the list was drawn.
+  const selected = (option: PauseOption) => (option === custom ? (parseCustomPause(query) ?? option) : option);
 
   return (
     <List
@@ -62,7 +64,7 @@ export default function Command() {
                 icon={option === custom ? Icon.Clock : Icon.Pause}
                 actions={
                   <ActionPanel>
-                    <Action title="Pause" icon={Icon.Pause} onAction={() => pause(option)} />
+                    <Action title="Pause" icon={Icon.Pause} onAction={() => pause(selected(option))} />
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
