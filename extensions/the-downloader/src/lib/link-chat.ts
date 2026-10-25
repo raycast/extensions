@@ -312,7 +312,6 @@ export function bodyForSave(ctx: LinkContext): { name: string; content: string }
   return { name: `${ctx.title} - ${label}`, content: `${ctx.title}\n${ctx.url}\n\n${bodyText(ctx.body)}\n` };
 }
 
-/** How to link a moment, for models answering from the tool output (videos on YouTube and Vimeo). */
 /**
  * Last line of every AI tool answer. The tool text is English, and models
  * sometimes answered a German question in English; the extension's AI
@@ -320,6 +319,7 @@ export function bodyForSave(ctx: LinkContext): { name: string; content: string }
  */
 const REPLY_LANGUAGE_LINE = "\n\nReply in the language of the user's message, not the language of this text.";
 
+/** How to link a moment, for models answering from the tool output (videos on YouTube and Vimeo). */
 function momentLinkLine(ctx: LinkContext): string {
   const at = (s: number) => timestampUrl(ctx, s);
   return at(0)
