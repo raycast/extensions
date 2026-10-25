@@ -1,6 +1,6 @@
 # Prayer Times Changelog
 
-## [Prayer Statuses, Calendar and Arabic Names] - {PR_MERGE_DATE}
+## [Prayer Statuses, Calendar and Arabic Names] - 2026-10-25
 
 - Mark a prayer Missed; an unmarked prayer counts as missed once its time ends, and late, made up (qaza) and missed have their own colors
 - Every prayer has a start, a preferred end and an end; Hanafi Dhuhr is preferred until the one-shadow Asr
