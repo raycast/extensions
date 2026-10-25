@@ -1,5 +1,6 @@
 import { CalculationMethod, CalculationParameters, Coordinates, Madhab, PrayerTimes } from "adhan";
-import { applyJamaatRule, parseJamaatRule } from "./jamaat";
+import { applyJamaatRule, formulaMinutes, parseJamaatRule } from "./jamaat";
+import { ExprError, NameValues } from "./rule-expr";
 import { PrayerRules, SHORT_MAGHRIB_MINUTES, STARS_MINUTES, YELLOW_SUN_MINUTES } from "./rules";
 
 export type PrayerKey = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
@@ -84,6 +85,8 @@ export interface PrayerSlot {
   preferredEnd?: Date;
   late: Date;
   jamaat?: Date;
+  /** Why a formula jamaat rule gave no time on this day. */
+  jamaatError?: string;
   /** Friday Dhuhr, prayed as Jumu'ah. */
   jumuah?: boolean;
 }
@@ -250,6 +253,40 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
   };
 
   const slots: PrayerSlot[] = [];
+  const midnightOfDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime();
+  const minutesOf = (at: Date) => Math.floor((at.getTime() - midnightOfDay) / MINUTE);
+  /** Names a formula rule can use (jamaat.ts FORMULA_NAMES), as on the phone. */
+  const formulaNames = (key: PrayerKey, start: Date, end: Date, preferredEnd: Date): NameValues => ({
+    start: () => minutesOf(start),
+    end: () => minutesOf(end),
+    preferred_end: () => minutesOf(preferredEnd),
+    sunrise: () => minutesOf(times.sunrise),
+    sunset: () => minutesOf(sunset),
+    midnight: () => minutesOf(midnight),
+    latest_start_week: () => latestStartThisWeek(day, key, config),
+    weekday: () => ((day.getDay() + 6) % 7) + 1,
+    is_friday: () => (isFriday ? 1 : 0),
+    day: () => day.getDate(),
+    month: () => day.getMonth() + 1,
+    ...Object.fromEntries(
+      PRAYER_KEYS.flatMap((p) => [
+        [`${p}_start`, () => minutesOf(bounds[p][0])],
+        [`${p}_end`, () => minutesOf(bounds[p][1])],
+        [
+          `${p}_jamaat`,
+          () => {
+            if (PRAYER_KEYS.indexOf(p) >= PRAYER_KEYS.indexOf(key)) {
+              throw new ExprError(`'${p}_jamaat' is only available to prayers after ${p}`);
+            }
+            const jamaat = slots.find((slot) => slot.key === p)?.jamaat;
+            if (!jamaat) throw new ExprError(`There is no jamaat time for ${p}`);
+            return minutesOf(jamaat);
+          },
+        ],
+      ]),
+    ),
+  });
+
   for (const key of PRAYER_KEYS) {
     const [calculatedStart, end, preferred] = bounds[key];
     let start = calculatedStart;
@@ -261,17 +298,29 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
       rule.kind === "after" && COMBINES[key] === rule.prayer
         ? slots.find((slot) => slot.key === rule.prayer)
         : undefined;
+    // Every prayer has a preferred end; without one inside its time (e.g. two shadows is Hanafi Asr's start, or
+    // Hanafi Fajr) it is the end itself.
+    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : end;
     let jamaat = applyJamaatRule(rule, start, end, combinedWith && (combinedWith.jamaat ?? combinedWith.start));
-    if (jamaat && jamaat < start) {
+    let jamaatError: string | undefined;
+    if (rule.kind === "formula") {
+      try {
+        const at = new Date(
+          midnightOfDay + formulaMinutes(rule.source, formulaNames(key, start, end, preferredEnd)) * MINUTE,
+        );
+        // Never before the adhan, as the phone's limits keep it.
+        jamaat = at < start ? start : at;
+      } catch (err) {
+        if (!(err instanceof ExprError)) throw err;
+        jamaatError = err.toString();
+      }
+    } else if (jamaat && jamaat < start) {
       // Prayed together before its own start: valid only where the earlier prayer's time runs into this one
       // (Ja'fari: Dhuhr until sunset, Maghrib until midnight). The prayer's time then starts at the jamaat.
       const shared = key === "asr" ? config.dhuhrEnd === "sunset" : config.maghribEnd === "midnight";
       if (shared) start = jamaat;
       else jamaat = undefined;
     }
-    // Every prayer has a preferred end; without one inside its time (e.g. two shadows is Hanafi Asr's start, or
-    // Hanafi Fajr) it is the end itself.
-    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : end;
     slots.push({
       id: `${date}/${key}`,
       key,
@@ -283,9 +332,30 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
       preferredEnd,
       late: config.lateAt === "preferred" ? preferredEnd : end,
       jamaat: jamaat && jamaat < end ? jamaat : undefined,
+      ...(jamaatError && { jamaatError }),
     });
   }
   return slots;
+}
+
+/**
+ * A prayer's latest start (minutes after midnight) in the week from Saturday that holds `day`, for a
+ * formula's `latest_start_week`, as the phone's weekly rule works it out.
+ *
+ * @param day - Any day of the week.
+ * @param key - Prayer.
+ * @param config - Schedule configuration.
+ * @returns Latest start, in minutes after midnight.
+ */
+function latestStartThisWeek(day: Date, key: PrayerKey, config: ScheduleConfig): number {
+  const noJamaat = { ...config, jamaat: { fajr: "", dhuhr: "", asr: "", maghrib: "", isha: "" }, jamaatJumuah: "" };
+  const saturday = addDays(day, -((day.getDay() + 1) % 7));
+  let latest = 0;
+  for (let i = 0; i < 7; i++) {
+    const start = getDaySchedule(addDays(saturday, i), noJamaat).find((slot) => slot.key === key)!.start;
+    latest = Math.max(latest, start.getHours() * 60 + start.getMinutes());
+  }
+  return latest;
 }
 
 /**
