@@ -5,8 +5,8 @@ import { ComponentType, createElement } from "react";
 import { jira, jiraWithApiToken } from "../api/jiraCredentials";
 
 export function withJiraCredentials<T, R>(fn: (input: T) => Promise<R> | R) {
-  const { token, email, siteUrl } = getPreferenceValues<Preferences>();
-  const service = token && email && siteUrl ? jiraWithApiToken : jira;
+  const { token, keychainService, email, siteUrl } = getPreferenceValues<Preferences>();
+  const service = (token || keychainService) && email && siteUrl ? jiraWithApiToken : jira;
 
   if (environment.commandMode === "no-view") {
     return withAccessToken<T>(service)(async (input: T) => {
