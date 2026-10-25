@@ -60,6 +60,7 @@ export const BROWSERS_BUNDLE_ID = {
   ghostBrowser: "com.ghostbrowser.gb1",
   island: "io.island.island",
   safari: "com.apple.safari",
+  search: "com.officecommun.search",
   sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
@@ -150,6 +151,7 @@ const BROWSER_DEFINITIONS: BrowserDefinition[] = [
   { id: BROWSERS_BUNDLE_ID.ghostBrowser, name: "Ghost Browser", macBundleId: "com.ghostbrowser.gb1" },
   { id: BROWSERS_BUNDLE_ID.island, name: "Island", macBundleId: "io.island.island" },
   { id: BROWSERS_BUNDLE_ID.safari, name: "Safari", macBundleId: "com.apple.safari" },
+  { id: BROWSERS_BUNDLE_ID.search, name: "Search", macBundleId: "com.officecommun.search" },
   { id: BROWSERS_BUNDLE_ID.sidekick, name: "Sidekick", macBundleId: "com.pushplaylabs.sidekick" },
   {
     id: BROWSERS_BUNDLE_ID.edge,

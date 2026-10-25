@@ -4,6 +4,18 @@
 
 - Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
 
+## [Add Candor Finance MCP Server] - 2026-10-24
+
+- Add Candor Finance to the official registry: tell your agent what you want with your money, and it sets up goals and a budget from your real US accounts and keeps you on them, with a weekly review that tells the agent what's worth talking through and why. Figures are calculated from the records; read-only toward the accounts, and it never moves money. Hosted Streamable HTTP server at https://api.candor.money/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add TechFabric MCP Server] - 2026-10-24
+
+- Add TechFabric to the official registry: search and read techfabric.com (https://www.techfabric.com), and let TechFabric's engineers write blog posts and case studies for it from their own coding agent, under their byline. Hosted Streamable HTTP server at https://www.techfabric.com/mcp; reading needs no sign-in, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account. A direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Docs: https://www.techfabric.com/mcp-servers
+
+## [Add MCP Checkup MCP Server] - 2026-10-24
+
+- Add MCP Checkup to the official registry: look up observed status, reports and recent tool-list changes for public MCP servers, fetch the Ed25519-signed attestation behind a report, and request a one-off check of a server by URL. Hosted Streamable HTTP server at https://mcpcheckup.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Shopify Speed Check MCP Server] - 2026-10-24
 
 - Add Shopify Speed Check to the registry: check a Shopify store's PageSpeed score and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees. Hosted Streamable HTTP server at https://tools.skaidigital.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
