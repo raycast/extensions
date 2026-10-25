@@ -40,35 +40,40 @@ describe("variantLabel", () => {
 });
 
 describe("fileNameFor", () => {
-  it("keeps the CDN file name", () => {
-    expect(
-      fileNameFor(
-        "portabase",
-        "dark",
-        "webp",
-        "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/portabase-dark.webp",
-      ),
-    ).toBe("portabase-dark.webp");
+  const native = { name: "portabase", source: "native" as const };
+  const external = { name: "githubpages", source: "simpleicons" as const };
+
+  it("names Dashboard Icons files like the CDN", () => {
+    expect(fileNameFor(native, "default", "webp")).toBe("portabase.webp");
+    expect(fileNameFor(native, "dark", "webp")).toBe("portabase-dark.webp");
+    expect(fileNameFor(native, "wordmark-light", "svg")).toBe("portabase-wordmark-light.svg");
   });
 
-  it("derives a name when the URL has no matching extension", () => {
-    expect(fileNameFor("githubpages", "default", "svg", "https://cdn.simpleicons.org/githubpages/222222")).toBe(
-      "githubpages.svg",
-    );
-    expect(fileNameFor("githubpages", "light", "png", "https://example.com/x/dark.png")).toBe("dark.png");
-    expect(fileNameFor("githubpages", "light", "svg", "https://cdn.simpleicons.org/githubpages/FFFFFF")).toBe(
-      "githubpages-light.svg",
-    );
+  it("adds the source for external catalogs instead of their generic file names", () => {
+    expect(fileNameFor(external, "default", "png")).toBe("githubpages-simpleicons.png");
+    expect(fileNameFor(external, "light", "png")).toBe("githubpages-simpleicons-light.png");
+  });
+
+  it("gives every icon, source, variant and format its own name", () => {
+    const names = [
+      fileNameFor(native, "default", "svg"),
+      fileNameFor({ name: "portabase", source: "selfhst" }, "default", "svg"),
+      fileNameFor(native, "dark", "svg"),
+      fileNameFor(native, "default", "png"),
+      fileNameFor(external, "default", "png"),
+      fileNameFor({ name: "gitlab", source: "simpleicons" }, "default", "png"),
+    ];
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it("sanitizes unsafe characters", () => {
-    expect(fileNameFor("a/b c", "default", "svg", "not a url")).toBe("a-b-c.svg");
+    expect(fileNameFor({ name: "a/b c", source: "native" }, "default", "svg")).toBe("a-b-c.svg");
   });
 
   it("never produces hidden or relative file names", () => {
-    expect(fileNameFor("x", "default", "svg", "https://cdn.example.com/%2e%2e%2f%2e%2e%2fevil.svg")).toBe("evil.svg");
-    expect(fileNameFor("x", "default", "svg", "https://cdn.example.com/.hidden.svg")).toBe("hidden.svg");
-    expect(fileNameFor("..", "default", "png", "https://cdn.example.com/a")).toBe("icon.png");
+    expect(fileNameFor({ name: "../../evil", source: "native" }, "default", "svg")).toBe("evil.svg");
+    expect(fileNameFor({ name: ".hidden", source: "native" }, "default", "svg")).toBe("hidden.svg");
+    expect(fileNameFor({ name: "..", source: "native" }, "default", "png")).toBe("icon.png");
   });
 });
 
@@ -114,7 +119,7 @@ describe("primaryFile", () => {
 
   it("falls back to another format when the preferred one is missing", () => {
     expect(primaryFile(details(iconPngOnly), "svg")?.fileName).toBe("premium-mobile.webp");
-    expect(primaryFile(details(iconSimpleIcons), "webp")?.fileName).toBe("brand.png");
+    expect(primaryFile(details(iconSimpleIcons), "webp")?.fileName).toBe("githubpages-simpleicons.png");
   });
 });
 

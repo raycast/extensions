@@ -48,21 +48,16 @@ function sanitizeFileName(value: string): string {
 }
 
 /**
- * File name for a downloaded icon. Uses the CDN file name when the URL ends with the
- * format's extension (e.g. "portabase-dark.webp"), so saved files match dashboardicons.com.
- * Otherwise (e.g. Simple Icons URLs without extension) it is derived from the icon name.
+ * File name for a downloaded icon, derived from the icon instead of the URL: "portabase-dark.webp" for
+ * Dashboard Icons, "githubpages-simpleicons-light.png" for external catalogs. Some catalogs serve generic
+ * names (Simple Icons: "brand.png", and "dark.png" for the light variant), which would be misleading and
+ * would let copies of different icons overwrite each other. Each icon, source, variant and format
+ * combination therefore gets its own name.
  */
-export function fileNameFor(iconName: string, variant: string, format: Format, url: string): string {
-  try {
-    const last = decodeURIComponent(new URL(url).pathname.split("/").pop() ?? "");
-    if (last.toLowerCase().endsWith(`.${format}`) && last.length > format.length + 1) {
-      return sanitizeFileName(last);
-    }
-  } catch {
-    // Fall through to the derived name.
-  }
+export function fileNameFor(icon: Pick<IconDetails, "name" | "source">, variant: string, format: Format): string {
+  const base = icon.source === "native" ? icon.name : `${icon.name}-${icon.source}`;
   const suffix = variant === "default" ? "" : `-${variant}`;
-  return `${sanitizeFileName(`${iconName}${suffix}`)}.${format}`;
+  return `${sanitizeFileName(`${base}${suffix}`)}.${format}`;
 }
 
 /** Groups every available file of an icon by variant, ordered Base, Light, Dark, wordmarks, then custom variants. */
@@ -78,7 +73,7 @@ export function groupIconFiles(icon: IconDetails, preferred: Format = "webp"): V
       const files: IconFile[] = [];
       for (const format of orderedFormats(preferred)) {
         const url = icon.urls[format]?.[variant];
-        if (url) files.push({ variant, format, url, fileName: fileNameFor(icon.name, variant, format, url) });
+        if (url) files.push({ variant, format, url, fileName: fileNameFor(icon, variant, format) });
       }
       const known = KNOWN_VARIANTS.find((entry) => entry.key === variant);
       return { variant, label: variantLabel(variant), hint: known?.hint, files };

@@ -78,15 +78,24 @@ function source(value: unknown): Source {
   return SOURCES.includes(value as Source) ? (value as Source) : "native";
 }
 
+/**
+ * Parses search results and keeps one entry per icon (source and name), the best-ranked one. The server
+ * returns each icon once today, but the UI keys rows by icon, so duplicates must never reach it.
+ */
 export function parseSearchResults(content: unknown): SearchResult[] {
   if (!isObject(content) || !Array.isArray(content.results)) return [];
+  const seen = new Set<string>();
   return content.results.flatMap((item): SearchResult[] => {
     if (!isObject(item)) return [];
     const name = str(item.name);
     const previewUrl = str(item.preview_url);
     if (!name || !previewUrl) return [];
+    const iconSource = source(item.source);
+    const key = `${iconSource}:${name}`;
+    if (seen.has(key)) return [];
+    seen.add(key);
     const matchedVariant = isObject(item.matched_variant) ? (str(item.matched_variant.key) ?? undefined) : undefined;
-    return [{ name, title: str(item.title) ?? name, source: source(item.source), previewUrl, matchedVariant }];
+    return [{ name, title: str(item.title) ?? name, source: iconSource, previewUrl, matchedVariant }];
   });
 }
 

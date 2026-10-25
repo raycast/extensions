@@ -222,15 +222,28 @@ describe("DashboardIconsClient.findIcons", () => {
 });
 
 describe("parsing", () => {
-  it("skips malformed search results and keeps matched variants", () => {
+  it("skips malformed search results and keeps one entry per icon", () => {
     const results = parseSearchResults(searchGithub);
     expect(results.map((result) => `${result.source}:${result.name}`)).toEqual([
       "native:github",
       "simpleicons:githubpages",
-      "native:github",
     ]);
-    expect(results[2].matchedVariant).toBe("light");
     expect(parseSearchResults(null)).toEqual([]);
+  });
+
+  it("keeps the matched variant", () => {
+    const results = parseSearchResults({
+      results: [
+        {
+          name: "github",
+          title: "github",
+          source: "native",
+          preview_url: "https://cdn.example.com/svg/github-light.svg",
+          matched_variant: { key: "light", label: "Light", stem: "github-light" },
+        },
+      ],
+    });
+    expect(results[0].matchedVariant).toBe("light");
   });
 
   it("falls back to JSON text content without structuredContent", () => {

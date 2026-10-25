@@ -4,6 +4,10 @@ Raycast extension that searches dashboardicons.com through the public endpoint o
 
 This file is for anyone working on the project with Claude Code: contributors and the maintainer alike.
 
+## Language
+
+Talk to the user in English, including inside the project skills and agents, unless the user's own instructions (for example their personal `~/.claude/CLAUDE.md`) set another language; then use that one. Files, code, comments, commit messages, pull requests and docs are always in English.
+
 ## Commands
 
 ```bash

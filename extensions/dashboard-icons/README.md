@@ -156,13 +156,9 @@ A release is a pull request to [raycast/extensions](https://github.com/raycast/e
    ```
 
    This runs all checks (`npm run check`: lint, build, typecheck, unit and live tests) and then `npm run publish`, which asks you to sign in with GitHub and opens or updates the pull request in `raycast/extensions`.
-5. **Follow the review.** Fixes during the review go into the same version: merge them here, then run `npm run publish` again to update the same pull request.
-6. **After Raycast merges**, tag the published commit and create a GitHub release with the changelog entry:
-
-   ```bash
-   git tag -a v1.0.1 -m "v1.0.1" && git push origin v1.0.1
-   gh release create v1.0.1 --title "v1.0.1" --notes "<changelog entry>"
-   ```
+5. **Mark progress:** tag the submitted commit `vX.Y.Z` and create a GitHub **pre-release** titled "vX.Y.Z (in Store review)" that links the Raycast pull request.
+6. **Follow the review.** Fixes during the review go into the same version: merge them here, then run `npm run publish` again to update the same pull request; the pre-release tag moves to the new submitted commit.
+7. **After Raycast merges**, turn the pre-release into a regular release with the changelog entry and the Store link. If the review required fixes, the tag first moves to the last submitted commit.
 
 ## License
 
