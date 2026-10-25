@@ -1,11 +1,11 @@
-import { List } from "@raycast/api";
+import { List, LaunchProps } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useYabWindow } from "./components";
 import { spaceInfos } from "./data";
 import { filterFor, HistoryDropdown, HistoryItem, useHistory } from "./history";
 
-export default function Command() {
-  const [text, setText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const [choice, setChoice] = useState("all");
   const [host, setHost] = useState<string>();
   const spaces = useMemo(() => spaceInfos(), []);
@@ -19,7 +19,9 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail}
+      filtering={false}
       throttle
+      searchText={text}
       onSearchTextChange={setText}
       navigationTitle={host ? `History · ${host.replace(/^www\./, "")}` : "Search History"}
       searchBarPlaceholder={

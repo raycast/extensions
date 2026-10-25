@@ -1,13 +1,14 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
-import { useMemo } from "react";
+import { ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { favicon, OpenActions, useYabWindow } from "./components";
 import { bookmarks, domainOf } from "./data";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const items = useMemo(() => bookmarks(), []);
   const { data: window } = useYabWindow({ launch: false });
   return (
-    <List searchBarPlaceholder="Search bookmarks…">
+    <List searchBarPlaceholder="Search bookmarks…" searchText={text} onSearchTextChange={setText}>
       <List.EmptyView icon={Icon.Bookmark} title="No bookmarks" description="Yab's bookmarks bar shows here." />
       {items.map((b) => (
         <List.Item

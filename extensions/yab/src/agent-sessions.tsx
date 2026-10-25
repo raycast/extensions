@@ -73,8 +73,16 @@ export default function Command() {
                         style={Action.Style.Destructive}
                         shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={async () => {
-                          await cli(["session", "stop", r.id]);
-                          await showToast({ style: Toast.Style.Success, title: "Stopped" });
+                          const stopped = await cli(["session", "stop", r.id]);
+                          await showToast(
+                            stopped.code === 0
+                              ? { style: Toast.Style.Success, title: "Stopped" }
+                              : {
+                                  style: Toast.Style.Failure,
+                                  title: "Couldn't stop it",
+                                  message: stopped.stdout.trim(),
+                                },
+                          );
                           revalidate();
                         }}
                       />

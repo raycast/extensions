@@ -26,8 +26,6 @@ type Run = {
   ended?: number;
 };
 
-type AskPrefs = { cli?: string; effort?: string; access?: string };
-
 /**
  * `yab "…"` (or `yab session resume ID "…"` for a follow-up) run and read
  * as it goes: `session ID`, then `  · step` lines, then a blank line and
@@ -42,7 +40,7 @@ export function AskView(props: { prompt: string; resume?: string; title?: string
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const prefs = getPreferenceValues<AskPrefs>();
+      const prefs = getPreferenceValues<Preferences.AskYab>();
       const args = props.resume
         ? ["session", "resume", props.resume, ...(props.prompt ? [props.prompt] : [])]
         : // `yab agent`, so a task that starts with "every" or "session" is never read as one of yab's words.
@@ -87,6 +85,10 @@ export function AskView(props: { prompt: string; resume?: string; title?: string
             answering = true;
           }
         }
+      });
+      proc.on("error", (error) => {
+        if (cancelled) return;
+        setRun((r) => ({ ...r, state: "failed", ended: Date.now(), answer: `Yab couldn't start: ${error.message}` }));
       });
       proc.on("close", (code) => {
         if (cancelled) return;
@@ -174,7 +176,15 @@ export function AskView(props: { prompt: string; resume?: string; title?: string
               style={Action.Style.Destructive}
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
-                await cli(["session", "stop", run.session!]);
+                const stopped = await cli(["session", "stop", run.session!]);
+                if (stopped.code !== 0) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Couldn't stop it",
+                    message: stopped.stdout.trim(),
+                  });
+                  return;
+                }
                 child.current?.kill("SIGINT");
                 await showToast({ style: Toast.Style.Success, title: "Stopped" });
               }}
@@ -205,7 +215,15 @@ export function FollowUp({ session, steer }: { session: string; steer?: boolean 
               const text = v.text.trim();
               if (!text) return;
               if (!steer) return push(<AskView prompt={text} resume={session} />);
-              await cli(["session", "steer", session, text]);
+              const told = await cli(["session", "steer", session, text]);
+              if (told.code !== 0) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Couldn't tell the agent",
+                  message: told.stdout.trim(),
+                });
+                return;
+              }
               await showToast({ style: Toast.Style.Success, title: "Told the agent" });
               push(<AskView prompt="" resume={session} title={text} />);
             }}

@@ -4,7 +4,7 @@ import { closeTab, readWindow, Tab } from "./yab";
 
 /** Copies of a page among today's tabs; pins and kept tabs always stay, and so does the one in front. */
 export function duplicates(tabs: Tab[]): Tab[] {
-  const norm = (u: string) => u.replace(/#.*$/, "").replace(/\/$/, "");
+  const norm = (u: string) => u.replace(/\/$/, "");
   const keep = new Map<string, Tab>();
   for (const t of tabs) {
     const key = norm(t.url);

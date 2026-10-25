@@ -1,4 +1,4 @@
-import { getPreferenceValues, Tool } from "@raycast/api";
+import { Tool } from "@raycast/api";
 import { cli } from "../yab";
 
 type Input = {
@@ -13,9 +13,9 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => ({
 
 /** Hand a task to Yab's own browser agent, which signs in, reads and acts on sites as the user, and answer what it found. */
 export default async function tool(input: Input) {
-  const { access } = getPreferenceValues<{ access?: string }>();
+  // Browser access only: a tool Raycast AI calls never gets this Mac.
   const { stdout, code } = await cli(
-    [input.task, "--access", access || "browser", "--wait-person", "5"],
+    ["agent", input.task, "--access", "browser", "--wait-person", "5"],
     15 * 60 * 1000,
   );
   const answer = stdout.split("\n\n").slice(1).join("\n\n").trim() || stdout.trim();

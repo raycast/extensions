@@ -15,7 +15,7 @@ import { bundleID, Snippet, snippetPlaces, snippets } from "./data";
 
 /** `{{clipboard}}` and `{{date}}` are filled here; `{{cursor}}` goes; the rest the form asks for. */
 async function fill(body: string, given: Record<string, string>): Promise<string> {
-  const clip = body.includes("{{clipboard}}") ? ((await Clipboard.readText()) ?? "") : "";
+  const clip = /\{\{\s*clipboard\s*\}\}/.test(body) ? ((await Clipboard.readText()) ?? "") : "";
   return body.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, name: string) => {
     if (name === "clipboard") return clip;
     if (name === "date") return new Date().toLocaleDateString(undefined, { dateStyle: "long" });

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, LaunchProps } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -52,8 +52,8 @@ function MemoryFile({ path }: { path: string }) {
   );
 }
 
-export default function Command() {
-  const [text, setText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const { data, isLoading } = useCachedPromise(
     async (q: string) => {
       const { stdout } = await cli(
@@ -73,6 +73,7 @@ export default function Command() {
       isLoading={isLoading}
       throttle
       filtering={false}
+      searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Search what Yab knows…"
     >

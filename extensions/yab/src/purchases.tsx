@@ -10,9 +10,7 @@ export default function Command() {
   const [text, setText] = useState("");
   const { data, isLoading, error } = useCachedPromise(
     async (k: string, q: string) =>
-      purchases(
-        await callTool("purchases", { kind: k, ...(k === "receipts" && q.trim() ? { query: q.trim() } : {}) }, 45000),
-      ),
+      purchases(await callTool("purchases", { kind: k, ...(k === "receipts" && q.trim() ? { query: q.trim() } : {}) })),
     [kind, kind === "receipts" ? text : ""],
     { keepPreviousData: true },
   );

@@ -3,9 +3,9 @@
 // Yab's socket only answers its own binary, so Raycast runs that binary.
 // docs/raycast.md, "How it reaches Yab".
 
-import { Clipboard, getApplications, open } from "@raycast/api";
+import { Clipboard, closeMainWindow, getApplications, open } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { execFile, spawn } from "child_process";
+import { ChildProcessWithoutNullStreams, execFile, spawn } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
 import { promisify } from "util";
@@ -197,6 +197,16 @@ export function openTabFor(tabs: Tab[] | undefined, url: string): Tab | undefine
   return tabs?.find((t) => norm(t.url) === norm(url));
 }
 
+/**
+ * A Yab without this word (older than 0.39.1): the only error a fallback is
+ * for. Anything else, a refusal from macOS (-1743) or Yab's own error, is
+ * shown as it is.
+ */
+export function missingWord(error: unknown): boolean {
+  const text = String((error as Error)?.message ?? error);
+  return /-1708|-2741|-2753|-10000|Expected|understand/.test(text) && !/-1743/.test(text);
+}
+
 // MARK: - opening
 
 /** A new tab at an address or a search, in a space when given. */
@@ -210,7 +220,8 @@ export async function newTab(text: string, spaceId?: string) {
         tellYab(`tell (first space of front window whose id is ${lit(spaceId)}) to make new tab${props}\nactivate`),
       );
       return;
-    } catch {
+    } catch (error) {
+      if (!missingWord(error)) throw error;
       // A Yab before spaces took new tabs: go there, then make it.
       await runAppleScript(tellYab(`tell front window to focus (first space whose id is ${lit(spaceId)})`));
     }
@@ -232,9 +243,12 @@ export async function newPrivateWindow(url?: string) {
   if (!(await isRunning())) await ensureWindow();
   try {
     await runAppleScript(tellYab(`make new window with properties {incognito:true}\nactivate`));
-  } catch {
+  } catch (error) {
+    if (!missingWord(error)) throw error;
     // A Yab without the word: its menu's ⇧⌘N.
+    await closeMainWindow({ clearRootSearch: true });
     await runAppleScript(tellYab(`activate`));
+    await new Promise((r) => setTimeout(r, 300));
     await runAppleScript(`tell application "System Events" to keystroke "n" using {command down, shift down}`);
     await new Promise((r) => setTimeout(r, 400));
   }
@@ -249,7 +263,8 @@ export async function newPrivateWindow(url?: string) {
 export async function openSmallWindow(url?: string) {
   try {
     await runAppleScript(tellYab(url ? `open small window ${lit(url)}` : `open small window`));
-  } catch {
+  } catch (error) {
+    if (!missingWord(error)) throw error;
     // Before the word: an outside link opens there while Settings › Links says so.
     if (url) await open(url, bundleID());
     else await runAppleScript(tellYab(`activate`));
@@ -265,18 +280,24 @@ export async function openURL(url: string, where: "tab" | "small" = "tab") {
 /** ⌘J in Yab with the words in it. */
 export async function askInYab(prompt: string, send: boolean) {
   await ensureWindow();
+  const words = prompt.trim();
   try {
-    await runAppleScript(tellYab(`ask ${lit(prompt)} send ${send}\nactivate`));
-  } catch {
+    await runAppleScript(tellYab(`ask ${lit(words)} send ${send && words.length > 0}\nactivate`));
+  } catch (error) {
+    // Yab 0.39.1 and 0.39.2 answer an empty ask "Nothing to ask": ⌘J by its key then.
+    const empty = !words && /Nothing to ask/.test(String((error as Error)?.message ?? error));
+    if (!missingWord(error) && !empty) throw error;
     // Before the word: through the keyboard, as a person would.
-    await Clipboard.copy(prompt);
+    if (words) await Clipboard.copy(words);
+    // Raycast's window would take the keys: it goes first.
+    await closeMainWindow({ clearRootSearch: true });
     await runAppleScript(tellYab(`activate`));
+    await new Promise((r) => setTimeout(r, 300));
     await runAppleScript(`
       tell application "System Events"
         keystroke "j" using {command down}
-        delay 0.35
-        keystroke "v" using {command down}
-        ${send ? "delay 0.1\nkey code 36" : ""}
+        ${words ? `delay 0.35\nkeystroke "v" using {command down}` : ""}
+        ${send && words ? "delay 0.1\nkey code 36" : ""}
       end tell`);
   }
 }
@@ -285,7 +306,8 @@ export async function askInYab(prompt: string, send: boolean) {
 export async function showMail(id: string) {
   try {
     await runAppleScript(tellYab(`show mail ${lit(id)}\nactivate`));
-  } catch {
+  } catch (error) {
+    if (!missingWord(error)) throw error;
     const [account, thread] = id.split("|");
     await open(`https://mail.google.com/mail/u/${encodeURIComponent(account)}/#all/${thread}`, bundleID());
   }
@@ -325,61 +347,118 @@ export async function cli(args: string[], timeout = 20000): Promise<{ stdout: st
   }
 }
 
+type Pending = { resolve: (text: string) => void; reject: (error: Error) => void; timer: NodeJS.Timeout };
+
 /**
- * One MCP tool of Yab's, called once: initialize, the call, then the
- * process is let go. Answers the tool's text.
+ * One `yab mcp` for as long as the command is open. Yab asks the person
+ * once a session ("Let Raycast search your mail?"), and a session is a
+ * process: a process a call would ask again at every keystroke.
  */
-export async function callTool(name: string, args: Record<string, unknown>, timeout = 30000): Promise<string> {
-  const bin = await yabBinary();
-  return new Promise((resolvePromise, reject) => {
+class YabMcp {
+  private child?: ChildProcessWithoutNullStreams;
+  private ready?: Promise<void>;
+  private buffer = "";
+  private next = 2;
+  private pending = new Map<number, Pending>();
+
+  private start(bin: string): Promise<void> {
     const child = spawn(bin, ["mcp"], { env: env() });
-    let buffer = "";
-    let done = false;
-    const finish = (error?: Error, text?: string) => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      child.stdin.end();
-      child.kill();
-      if (error) reject(error);
-      else resolvePromise(text ?? "");
+    this.child = child;
+    this.buffer = "";
+    const failAll = (error: Error) => {
+      for (const [, p] of this.pending) {
+        clearTimeout(p.timer);
+        p.reject(error);
+      }
+      this.pending.clear();
+      this.child = undefined;
+      this.ready = undefined;
     };
-    const timer = setTimeout(() => finish(new Error("Yab took too long to answer")), timeout);
-    child.on("error", (e) => finish(e));
-    child.on("exit", () => finish(new Error("Yab stopped before answering")));
-    child.stdout.on("data", (chunk: Buffer) => {
-      buffer += chunk.toString("utf8");
-      let at: number;
-      while ((at = buffer.indexOf("\n")) >= 0) {
-        const line = buffer.slice(0, at).trim();
-        buffer = buffer.slice(at + 1);
-        if (!line.startsWith("{")) continue;
-        try {
-          const message = JSON.parse(line) as {
+    child.on("error", (e) => failAll(e));
+    child.on("exit", () => failAll(new Error("Yab stopped before answering")));
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("Yab didn't start its tools")), 20000);
+      child.stdout.on("data", (chunk: Buffer) => {
+        this.buffer += chunk.toString("utf8");
+        let at: number;
+        while ((at = this.buffer.indexOf("\n")) >= 0) {
+          const line = this.buffer.slice(0, at).trim();
+          this.buffer = this.buffer.slice(at + 1);
+          if (!line.startsWith("{")) continue;
+          let message: {
             id?: number;
             result?: { isError?: boolean; content?: { type: string; text?: string }[] };
             error?: { message: string };
           };
-          if (message.id !== 2) continue;
-          if (message.error) return finish(new Error(message.error.message));
+          try {
+            message = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (message.id === 1) {
+            clearTimeout(timer);
+            this.send({ jsonrpc: "2.0", method: "notifications/initialized" });
+            resolve();
+            continue;
+          }
+          const waiting = message.id === undefined ? undefined : this.pending.get(message.id);
+          if (!waiting) continue;
+          this.pending.delete(message.id!);
+          clearTimeout(waiting.timer);
           const text = (message.result?.content ?? []).map((c) => c.text ?? "").join("\n");
-          if (message.result?.isError) return finish(new Error(text || "Yab couldn't do that"));
-          return finish(undefined, text);
-        } catch {
-          // Not a whole message yet.
+          if (message.error) waiting.reject(new Error(message.error.message));
+          else if (message.result?.isError) waiting.reject(new Error(text || "Yab couldn't do that"));
+          else waiting.resolve(text);
         }
-      }
+      });
+      this.send({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Raycast", version: "1.0" } },
+      });
     });
-    const send = (m: unknown) => child.stdin.write(JSON.stringify(m) + "\n");
-    send({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "initialize",
-      params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Raycast", version: "1.0" } },
+  }
+
+  private send(message: unknown) {
+    this.child?.stdin.write(JSON.stringify(message) + "\n");
+  }
+
+  async call(name: string, args: Record<string, unknown>, timeout: number): Promise<string> {
+    if (!this.ready) {
+      const bin = await yabBinary();
+      this.ready = this.start(bin).catch((error) => {
+        this.ready = undefined;
+        throw error;
+      });
+    }
+    await this.ready;
+    const id = this.next++;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error("Yab took too long to answer"));
+      }, timeout);
+      this.pending.set(id, { resolve, reject, timer });
+      this.send({ jsonrpc: "2.0", id, method: "tools/call", params: { name, arguments: args } });
     });
-    send({ jsonrpc: "2.0", method: "notifications/initialized" });
-    send({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name, arguments: args } });
-  });
+  }
+
+  stop() {
+    this.child?.stdin.end();
+    this.child?.kill();
+  }
+}
+
+const mcp = new YabMcp();
+process.on("exit", () => mcp.stop());
+
+/**
+ * One of Yab's MCP tools, through the command's one `yab mcp`. The wait
+ * covers a person answering Yab's question about letting Raycast in.
+ */
+export async function callTool(name: string, args: Record<string, unknown>, timeout = 120000): Promise<string> {
+  return mcp.call(name, args, timeout);
 }
 
 export async function activateYab() {

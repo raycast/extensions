@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, useNavigation, LaunchProps } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { AskView } from "./ask-view";
@@ -14,8 +14,8 @@ function matches(text: string, ...fields: string[]): boolean {
   return words.every((w) => hay.includes(w));
 }
 
-export default function Command() {
-  const [text, setText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const { push } = useNavigation();
   const { data: window, isLoading: loadingTabs, revalidate } = useYabWindow();
   const spaces = useMemo(() => spaceInfos(), []);
@@ -46,6 +46,7 @@ export default function Command() {
       isLoading={loadingTabs || loadingHistory}
       filtering={false}
       throttle
+      searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Search tabs, history, bookmarks or the web…"
     >

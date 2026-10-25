@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Keyboard,
+  LaunchProps,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { attempt } from "./components";
@@ -30,8 +42,8 @@ async function act(hit: MailHit, action: string, done: string, until?: string) {
   }
 }
 
-export default function Command() {
-  const [text, setText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async (q: string) =>
       q.trim()
@@ -49,6 +61,7 @@ export default function Command() {
       isShowingDetail={hits.length > 0}
       throttle
       filtering={false}
+      searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Search mail, as in Yab: from:anna has:attachment…"
     >

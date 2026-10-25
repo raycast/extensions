@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Detail, Icon, List, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, Keyboard, LaunchProps } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { useState } from "react";
 import { fileHits } from "./parse";
 import { callTool } from "./yab";
 
-export default function Command() {
-  const [text, setText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [text, setText] = useState(props.fallbackText ?? "");
   const [from, setFrom] = useState("all");
   const { data, isLoading, error } = useCachedPromise(
     async (q: string, f: string) =>
@@ -25,6 +25,7 @@ export default function Command() {
       isLoading={isLoading}
       throttle
       filtering={false}
+      searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Search names, senders, sites and the words inside…"
       searchBarAccessory={

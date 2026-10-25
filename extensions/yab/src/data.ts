@@ -268,8 +268,12 @@ async function searchHistoryPlain(text: string, filter: HistoryFilter): Promise<
       const q = quote(`%${w.replace(/[%_\\]/g, "\\$&")}%`);
       return `(p.title LIKE ${q} ESCAPE '\\' OR p.url LIKE ${q} ESCAPE '\\')`;
     });
-  const where = [...like];
+  const where = [...like, `EXISTS (SELECT 1 FROM visits v WHERE v.key = p.key AND v.quiet = 0)`];
   if (filter.since) where.push(`p.last >= ${Math.floor(filter.since)}`);
+  if (filter.until) where.push(`p.last < ${Math.floor(filter.until)}`);
+  if (filter.host) where.push(`p.host = ${quote(filter.host)}`);
+  if (filter.space)
+    where.push(`EXISTS (SELECT 1 FROM visits v WHERE v.key = p.key AND v.space = ${quote(filter.space)})`);
   const rows = await sqlite<HistoryRow>(
     "diary.sqlite",
     `SELECT p.key, p.url, p.title, p.host, p.count, p.last, 0 AS inPage FROM pages p
