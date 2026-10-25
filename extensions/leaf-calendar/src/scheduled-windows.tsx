@@ -63,7 +63,7 @@ export default function ScheduledWindows() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Scheduled Windows" searchBarPlaceholder="Search scheduled windows">
+    <List isLoading={isLoading} searchBarPlaceholder="Search scheduled windows">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Bookmark}
         title={error ? describeError(error).title : "No scheduled windows"}

@@ -138,7 +138,7 @@ export default function FindTimeToMeet() {
     <List
       isLoading={free.isLoading || links.isLoading}
       searchBarPlaceholder="Search free times"
-      navigationTitle={picked.length ? `${picked.length} Selected` : "Find a Time to Meet"}
+      navigationTitle={picked.length ? `${picked.length} Selected` : undefined}
       searchBarAccessory={
         <List.Dropdown tooltip="Booking Link" value={linkId} onChange={changeLink}>
           <List.Dropdown.Item title="No Booking Link" value={PLAIN} icon={Icon.Clock} />

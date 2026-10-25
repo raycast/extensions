@@ -1,4 +1,5 @@
-import { environment, OAuth, showToast, Toast } from "@raycast/api";
+import { environment, OAuth } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import os from "node:os";
@@ -96,5 +97,5 @@ export function describeError(error: unknown): { title: string; message: string 
 }
 
 export async function showLeafError(error: unknown): Promise<void> {
-  await showToast({ style: Toast.Style.Failure, ...describeError(error) });
+  await showFailureToast(error, describeError(error));
 }

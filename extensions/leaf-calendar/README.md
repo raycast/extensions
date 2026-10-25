@@ -1,6 +1,8 @@
 # Leaf Calendar
 
-See your agenda, join meetings, create and move events, and share booking times through [Leaf Calendar](https://github.com/artistro08/leaf-calendar), right from Raycast.
+A raycast extension to access Leaf Calendar with your raycast workflow.
+
+You can see your agenda, setup scheduling links, and schedule events. You can also see all your calendars in one place
 
 ## Introduction
 
@@ -53,19 +55,6 @@ That's it! Leaf Calendar lists Raycast under **Settings › Connected apps**. Re
 
 - **Agenda Length**: how many days My Agenda shows, from today. 7 by default.
 - **Time Slots** (Find a Time to Meet): how long each offered time is, from 15 minutes to 2 hours, or the whole free stretch. 30 minutes by default. A booking link uses its own length.
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-Run the tests, which talk to a fake Leaf Calendar pipe server instead of the real app:
-
-```bash
-npm test
-```
 
 ## Documentation
 
