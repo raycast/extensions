@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add VOMO MCP Server] - 2026-10-25
+
+- Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
+
 ## [Add CSolar Energia MCP Server] - 2026-10-25
 
 - Add CSolar Energia to the official registry: solar power estimates from the electricity bill or consumption (panels, installed power, generation, estimated price, savings and payback) and the service area check for São Paulo state, Brazil. Read-only, answers in Portuguese. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://csolar.com.br/mcp.
