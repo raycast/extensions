@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 import { promisify } from "util";
@@ -183,9 +174,7 @@ export default function IslandSettings() {
     }
   };
 
-  const handleToggleWidget = async (
-    widget: "media" | "mixer" | "system" | "timer" | "calendar",
-  ) => {
+  const handleToggleWidget = async (widget: "media" | "mixer" | "system" | "timer" | "calendar") => {
     const nextVal = !menuConfig[widget];
     setMenuConfig((prev) => ({ ...prev, [widget]: nextVal }));
     await setWidgetVisibility(widget, nextVal);
@@ -195,9 +184,7 @@ export default function IslandSettings() {
     });
   };
 
-  const handleToggleMetric = async (
-    metric: "CPU" | "GPU" | "Memory" | "Battery" | "Network" | "Disk",
-  ) => {
+  const handleToggleMetric = async (metric: "CPU" | "GPU" | "Memory" | "Battery" | "Network" | "Disk") => {
     const nextVal = !metricConfig[metric];
     setMetricConfig((prev) => ({ ...prev, [metric]: nextVal }));
     await setMetricVisibility(metric, nextVal);
@@ -208,10 +195,7 @@ export default function IslandSettings() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search settings and customization options..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search settings and customization options...">
       <List.Section title="Dynamic Island Service Status">
         <List.Item
           icon={{
@@ -239,11 +223,7 @@ export default function IslandSettings() {
             <ActionPanel>
               {isRunning ? (
                 <>
-                  <Action
-                    title="Toggle Expand / Collapse"
-                    icon={Icon.Switch}
-                    onAction={handleToggle}
-                  />
+                  <Action title="Toggle Expand / Collapse" icon={Icon.Switch} onAction={handleToggle} />
                   <Action
                     title="Stop Island Service"
                     icon={Icon.Stop}
@@ -252,17 +232,9 @@ export default function IslandSettings() {
                   />
                 </>
               ) : (
-                <Action
-                  title="Start Island Service"
-                  icon={Icon.Play}
-                  onAction={handleStartDaemon}
-                />
+                <Action title="Start Island Service" icon={Icon.Play} onAction={handleStartDaemon} />
               )}
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -280,9 +252,7 @@ export default function IslandSettings() {
           }
           accessories={[
             {
-              text: status?.hasHardwareNotch
-                ? "Physical Notch"
-                : "Pill Overlay",
+              text: status?.hasHardwareNotch ? "Physical Notch" : "Pill Overlay",
             },
           ]}
         />
@@ -308,9 +278,7 @@ export default function IslandSettings() {
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.CPU ? "Hide from System Ui" : "Show in System Ui"
-                }
+                title={metricConfig.CPU ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.CPU ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("CPU")}
               />
@@ -330,20 +298,14 @@ export default function IslandSettings() {
               text: metricConfig.Memory ? "Visible on Notch" : "Hidden",
               icon: {
                 source: metricConfig.Memory ? Icon.Check : Icon.Minus,
-                tintColor: metricConfig.Memory
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: metricConfig.Memory ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.Memory
-                    ? "Hide from System Ui"
-                    : "Show in System Ui"
-                }
+                title={metricConfig.Memory ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.Memory ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("Memory")}
               />
@@ -363,20 +325,14 @@ export default function IslandSettings() {
               text: metricConfig.Battery ? "Visible on Notch" : "Hidden",
               icon: {
                 source: metricConfig.Battery ? Icon.Check : Icon.Minus,
-                tintColor: metricConfig.Battery
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: metricConfig.Battery ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.Battery
-                    ? "Hide from System Ui"
-                    : "Show in System Ui"
-                }
+                title={metricConfig.Battery ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.Battery ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("Battery")}
               />
@@ -387,9 +343,7 @@ export default function IslandSettings() {
         <List.Item
           icon={{
             source: Icon.Network,
-            tintColor: metricConfig.Network
-              ? Color.Orange
-              : Color.SecondaryText,
+            tintColor: metricConfig.Network ? Color.Orange : Color.SecondaryText,
           }}
           title="Network Bandwidth Card"
           subtitle="Live download and upload transfer rates"
@@ -398,20 +352,14 @@ export default function IslandSettings() {
               text: metricConfig.Network ? "Visible on Notch" : "Hidden",
               icon: {
                 source: metricConfig.Network ? Icon.Check : Icon.Minus,
-                tintColor: metricConfig.Network
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: metricConfig.Network ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.Network
-                    ? "Hide from System Ui"
-                    : "Show in System Ui"
-                }
+                title={metricConfig.Network ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.Network ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("Network")}
               />
@@ -431,20 +379,14 @@ export default function IslandSettings() {
               text: metricConfig.Disk ? "Visible on Notch" : "Hidden",
               icon: {
                 source: metricConfig.Disk ? Icon.Check : Icon.Minus,
-                tintColor: metricConfig.Disk
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: metricConfig.Disk ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.Disk
-                    ? "Hide from System Ui"
-                    : "Show in System Ui"
-                }
+                title={metricConfig.Disk ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.Disk ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("Disk")}
               />
@@ -471,9 +413,7 @@ export default function IslandSettings() {
           actions={
             <ActionPanel>
               <Action
-                title={
-                  metricConfig.GPU ? "Hide from System Ui" : "Show in System Ui"
-                }
+                title={metricConfig.GPU ? "Hide from System Ui" : "Show in System Ui"}
                 icon={metricConfig.GPU ? Icon.EyeDisabled : Icon.Eye}
                 onAction={() => handleToggleMetric("GPU")}
               />
@@ -569,9 +509,7 @@ export default function IslandSettings() {
               text: menuConfig.system ? "Visible in Menu" : "Hidden",
               icon: {
                 source: menuConfig.system ? Icon.Check : Icon.Minus,
-                tintColor: menuConfig.system
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: menuConfig.system ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
@@ -645,9 +583,7 @@ export default function IslandSettings() {
               text: menuConfig.calendar ? "Visible in Menu" : "Hidden",
               icon: {
                 source: menuConfig.calendar ? Icon.Check : Icon.Minus,
-                tintColor: menuConfig.calendar
-                  ? Color.Green
-                  : Color.SecondaryText,
+                tintColor: menuConfig.calendar ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
@@ -680,11 +616,7 @@ export default function IslandSettings() {
           subtitle="Configure hover-to-expand, island style silhouette, and auto-hide timing"
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />

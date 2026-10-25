@@ -1,9 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import {
-  isDaemonRunning,
-  sendSocketCommand,
-  startDaemonIfNotRunning,
-} from "./lib/ipc";
+import { isDaemonRunning, sendSocketCommand, startDaemonIfNotRunning } from "./lib/ipc";
 
 export default async function Command() {
   try {

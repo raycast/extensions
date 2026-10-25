@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 import { promisify } from "util";
@@ -30,13 +22,10 @@ export default function VolumeMixerCommand() {
 
   const fetchVolume = async () => {
     try {
-      const { stdout } = await execAsync(
-        "osascript -e 'output volume of (get volume settings)'",
-      );
-      const { stdout: mutedOut } = await execAsync(
-        "osascript -e 'output muted of (get volume settings)'",
-      );
-      const vol = parseInt(stdout.trim(), 10) || 50;
+      const { stdout } = await execAsync("osascript -e 'output volume of (get volume settings)'");
+      const { stdout: mutedOut } = await execAsync("osascript -e 'output muted of (get volume settings)'");
+      const parsedVolume = parseInt(stdout.trim(), 10);
+      const vol = Number.isNaN(parsedVolume) ? 50 : parsedVolume;
       const isMuted = mutedOut.trim() === "true";
       setState((prev) => ({
         ...prev,
@@ -92,9 +81,7 @@ export default function VolumeMixerCommand() {
   const handleToggleMute = async () => {
     try {
       const nextMuted = !state.muted;
-      await execAsync(
-        `osascript -e 'set volume output muted ${nextMuted ? "true" : "false"}'`,
-      );
+      await execAsync(`osascript -e 'set volume output muted ${nextMuted ? "true" : "false"}'`);
       setState((prev) => ({ ...prev, muted: nextMuted }));
       await showToast({
         style: Toast.Style.Success,
@@ -126,11 +113,7 @@ export default function VolumeMixerCommand() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show Volume Mixer on Notch"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show Volume Mixer on Notch" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title={state.muted ? "Unmute Audio" : "Mute Audio"}
                 icon={state.muted ? Icon.SpeakerHigh : Icon.SpeakerOff}
@@ -162,16 +145,8 @@ export default function VolumeMixerCommand() {
             title={`Set Volume to ${preset}%`}
             actions={
               <ActionPanel>
-                <Action
-                  title={`Set to ${preset}%`}
-                  icon={Icon.Check}
-                  onAction={() => handleSetVolume(preset)}
-                />
-                <Action
-                  title="Show Volume Mixer on Notch"
-                  icon={Icon.Eye}
-                  onAction={handleShowOnNotch}
-                />
+                <Action title={`Set to ${preset}%`} icon={Icon.Check} onAction={() => handleSetVolume(preset)} />
+                <Action title="Show Volume Mixer on Notch" icon={Icon.Eye} onAction={handleShowOnNotch} />
               </ActionPanel>
             }
           />

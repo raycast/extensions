@@ -1,20 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  getIslandStatus,
-  MediaTrackInfo,
-  sendSocketCommand,
-  startDaemonIfNotRunning,
-} from "./lib/ipc";
+import { getIslandStatus, MediaTrackInfo, sendSocketCommand, startDaemonIfNotRunning } from "./lib/ipc";
 
 export default function MediaController() {
   const [media, setMedia] = useState<MediaTrackInfo | null>(null);
@@ -121,10 +107,7 @@ export default function MediaController() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search playback controls..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search playback controls...">
       <List.Section title="Now Playing">
         <List.Item
           icon={{
@@ -170,16 +153,8 @@ export default function MediaController() {
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
                 onAction={handleExpandOnNotch}
               />
-              <Action
-                title="Open Spotify"
-                icon={Icon.AppWindow}
-                onAction={() => open("spotify:")}
-              />
-              <Action
-                title="Open Apple Music"
-                icon={Icon.AppWindow}
-                onAction={() => open("music:")}
-              />
+              <Action title="Open Spotify" icon={Icon.AppWindow} onAction={() => open("spotify:")} />
+              <Action title="Open Apple Music" icon={Icon.AppWindow} onAction={() => open("music:")} />
             </ActionPanel>
           }
         />

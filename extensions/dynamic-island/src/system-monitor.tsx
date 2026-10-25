@@ -1,18 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   getIslandStatus,
   IslandStatus,
   sendSocketCommand,
-  setMetricVisibility,
+  toggleMetricVisibility,
   startDaemonIfNotRunning,
 } from "./lib/ipc";
 
@@ -59,10 +51,7 @@ export default function SystemMonitor() {
   const batVal = sys?.batteryPercent ?? 100;
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search system telemetry & customization options..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search system telemetry & customization options...">
       <List.Section title="Live Hardware Dashboard">
         <List.Item
           icon={{
@@ -73,12 +62,7 @@ export default function SystemMonitor() {
           subtitle={`${cpuVal.toFixed(1)}% Utilization`}
           accessories={[
             {
-              text:
-                cpuVal > 80
-                  ? "Heavy Load"
-                  : cpuVal > 40
-                    ? "Moderate Load"
-                    : "Optimal",
+              text: cpuVal > 80 ? "Heavy Load" : cpuVal > 40 ? "Moderate Load" : "Optimal",
               icon: {
                 source: cpuVal > 80 ? Icon.Exclamationmark : Icon.Check,
                 tintColor: cpuVal > 80 ? Color.Red : Color.Green,
@@ -87,19 +71,15 @@ export default function SystemMonitor() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show on Notch Island"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show on Notch Island" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title="Toggle Cpu Card on Notch"
                 icon={Icon.Switch}
                 onAction={async () => {
-                  await setMetricVisibility("CPU", true);
+                  const visible = await toggleMetricVisibility("CPU");
                   await showToast({
                     style: Toast.Style.Success,
-                    title: "CPU Metric Enabled on Notch",
+                    title: visible ? "CPU Metric Enabled on Notch" : "CPU Metric Disabled on Notch",
                   });
                 }}
               />
@@ -125,19 +105,15 @@ export default function SystemMonitor() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show on Notch Island"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show on Notch Island" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title="Toggle Memory Card on Notch"
                 icon={Icon.Switch}
                 onAction={async () => {
-                  await setMetricVisibility("Memory", true);
+                  const visible = await toggleMetricVisibility("Memory");
                   await showToast({
                     style: Toast.Style.Success,
-                    title: "Memory Metric Enabled on Notch",
+                    title: visible ? "Memory Metric Enabled on Notch" : "Memory Metric Disabled on Notch",
                   });
                 }}
               />
@@ -163,19 +139,15 @@ export default function SystemMonitor() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show on Notch Island"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show on Notch Island" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title="Toggle Battery Card on Notch"
                 icon={Icon.Switch}
                 onAction={async () => {
-                  await setMetricVisibility("Battery", true);
+                  const visible = await toggleMetricVisibility("Battery");
                   await showToast({
                     style: Toast.Style.Success,
-                    title: "Battery Metric Enabled on Notch",
+                    title: visible ? "Battery Metric Enabled on Notch" : "Battery Metric Disabled on Notch",
                   });
                 }}
               />
@@ -201,19 +173,15 @@ export default function SystemMonitor() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show on Notch Island"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show on Notch Island" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title="Toggle Network Card on Notch"
                 icon={Icon.Switch}
                 onAction={async () => {
-                  await setMetricVisibility("Network", true);
+                  const visible = await toggleMetricVisibility("Network");
                   await showToast({
                     style: Toast.Style.Success,
-                    title: "Network Metric Enabled on Notch",
+                    title: visible ? "Network Metric Enabled on Notch" : "Network Metric Disabled on Notch",
                   });
                 }}
               />
@@ -239,19 +207,15 @@ export default function SystemMonitor() {
           ]}
           actions={
             <ActionPanel>
-              <Action
-                title="Show on Notch Island"
-                icon={Icon.Eye}
-                onAction={handleShowOnNotch}
-              />
+              <Action title="Show on Notch Island" icon={Icon.Eye} onAction={handleShowOnNotch} />
               <Action
                 title="Toggle Disk Card on Notch"
                 icon={Icon.Switch}
                 onAction={async () => {
-                  await setMetricVisibility("Disk", true);
+                  const visible = await toggleMetricVisibility("Disk");
                   await showToast({
                     style: Toast.Style.Success,
-                    title: "Disk Metric Enabled on Notch",
+                    title: visible ? "Disk Metric Enabled on Notch" : "Disk Metric Disabled on Notch",
                   });
                 }}
               />

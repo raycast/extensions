@@ -1,19 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  FocusTimerInfo,
-  getIslandStatus,
-  sendSocketCommand,
-  startDaemonIfNotRunning,
-} from "./lib/ipc";
+import { FocusTimerInfo, getIslandStatus, sendSocketCommand, startDaemonIfNotRunning } from "./lib/ipc";
 
 export default function FocusTimer() {
   const [timer, setTimer] = useState<FocusTimerInfo | null>(null);
@@ -101,10 +88,7 @@ export default function FocusTimer() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search focus timer presets..."
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search focus timer presets...">
       {timer && (
         <List.Section title="Current Active Session">
           <List.Item
