@@ -32,47 +32,21 @@ export async function pveFetch<T = unknown>(server: PveServer, url: string, opti
   return (await response.json()) as ApiResponse<T>;
 }
 
-export async function startVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/start`;
-  await pveFetch(vm.server, url, {
+async function postVmStatus(vm: WithServer<PveVm>, action: string): Promise<string> {
+  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/${action}`;
+  const response = await pveFetch<string>(vm.server, url, {
     method: "POST",
   });
+  return response.data;
 }
 
-export async function stopVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/stop`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function shutdownVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/shutdown`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function suspendVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/suspend`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function resetVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reset`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function resumeVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/resume`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
+export const startVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "start");
+export const stopVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "stop");
+export const shutdownVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "shutdown");
+export const suspendVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "suspend");
+export const resetVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "reset");
+export const resumeVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "resume");
+export const rebootVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "reboot");
 
 /**
  * Applies `edit` to the tags the VM has right now and returns the saved list. We send the config
@@ -93,11 +67,4 @@ export async function editVmTags(vm: WithServer<PveVm>, edit: (current: string[]
     body,
   });
   return tags;
-}
-
-export async function rebootVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reboot`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
 }

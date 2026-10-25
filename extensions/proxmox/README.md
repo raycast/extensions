@@ -40,6 +40,10 @@ If you have an empty list of VMs/LXCs (while your account can see them in Proxmo
 
 > **Privilege Separation**: Unchecked
 
+#### Missing tasks or empty system log
+
+A token only sees the tasks it started unless it has `Sys.Audit`, and reading the system log needs `Sys.Syslog`. Both are read-only privileges on `/nodes`.
+
 #### Editing tags fails
 
 Editing tags needs the `VM.Config.Options` privilege, which the `PVEVMUser` role does not include. Setting a tag listed in "Registered Tags" also needs `Sys.Modify` on `/`.

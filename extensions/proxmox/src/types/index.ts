@@ -135,8 +135,32 @@ export type VmAction = {
     doing: string;
     ended: string;
   };
-  func: (vm: WithServer<PveVm>) => Promise<unknown>;
+  /** Resolves to the UPID of the task Proxmox started */
+  func: (vm: WithServer<PveVm>) => Promise<string>;
   needConfirm?: boolean;
+};
+
+export type PveTask = {
+  upid: string;
+  node: string;
+  type: string;
+  /** The VM or other object the task works on */
+  id?: string;
+  user: string;
+  starttime: number;
+  endtime?: number;
+  /** "OK", "WARNINGS: n" or an error message, absent while the task runs */
+  status?: string;
+};
+
+export type PveTaskStatus = {
+  status: "running" | "stopped";
+  exitstatus?: string;
+};
+
+export type PveTaskLogLine = {
+  n: number;
+  t: string;
 };
 
 export type WithShowErrorScreen<T extends object> = T & { showErrorScreen: boolean };

@@ -26,6 +26,20 @@ export function getVmStatusIcon(status: PveVmStatus): Image {
   }
 }
 
+/** `status` is "OK", "WARNINGS: n" or an error message, and absent while the task runs */
+export function getTaskStatusIcon(status?: string): Image {
+  if (status === undefined) {
+    return { source: Icon.CircleProgress50, tintColor: Color.Blue };
+  }
+  if (status === "OK") {
+    return { source: Icon.CheckCircle, tintColor: Color.Green };
+  }
+  if (status.startsWith("WARNINGS")) {
+    return { source: Icon.Warning, tintColor: Color.Orange };
+  }
+  return { source: Icon.XMarkCircle, tintColor: Color.Red };
+}
+
 export function getStorageStatusIcon(status: string): Image {
   switch (status) {
     case "available":

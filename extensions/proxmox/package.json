@@ -46,6 +46,30 @@
         "server",
         "host"
       ]
+    },
+    {
+      "name": "tasks",
+      "title": "Show Tasks",
+      "subtitle": "Proxmox",
+      "description": "Show the recent tasks of your Proxmox servers and their logs",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "task",
+        "log"
+      ]
+    },
+    {
+      "name": "system-log",
+      "title": "Show System Log",
+      "subtitle": "Proxmox",
+      "description": "Show the system log of your Proxmox nodes",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "journal",
+        "syslog"
+      ]
     }
   ],
   "preferences": [
