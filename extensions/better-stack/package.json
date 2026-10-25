@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "better-uptime",
+  "name": "better-stack",
   "title": "Better Stack",
   "description": "Check on your Better Stack monitors, incidents and heartbeats.",
   "icon": "command-icon.png",
@@ -95,7 +95,7 @@
   "ai": {
     "evals": [
       {
-        "input": "@better-uptime Is the Raycast monitor up?",
+        "input": "@better-stack Is the Raycast monitor up?",
         "expected": [
           {
             "callsTool": {
@@ -238,7 +238,7 @@
         }
       },
       {
-        "input": "@better-uptime Is there a down monitor?",
+        "input": "@better-stack Is there a down monitor?",
         "mocks": {
           "get-monitors": [
             {
@@ -380,7 +380,7 @@
         ]
       },
       {
-        "input": "@better-uptime When was the last time a monitor was checked?",
+        "input": "@better-stack When was the last time a monitor was checked?",
         "mocks": {
           "get-monitors": [
             {
@@ -522,7 +522,7 @@
         ]
       },
       {
-        "input": "@better-uptime Are there any ongoing incidents?",
+        "input": "@better-stack Are there any ongoing incidents?",
         "mocks": {
           "get-incidents": [
             {
@@ -735,7 +735,7 @@
         ]
       },
       {
-        "input": "@better-uptime Are all of the heartbeats working?",
+        "input": "@better-stack Are all of the heartbeats working?",
         "mocks": {
           "get-heartbeats": [
             {
