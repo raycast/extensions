@@ -93,6 +93,7 @@ type Node =
   | { kind: "unary"; op: string; x: Node; at: number }
   | { kind: "binary"; op: string; a: Node; b: Node; at: number }
   | { kind: "cond"; then: Node; cond: Node; otherwise: Node }
+  | { kind: "chain"; operands: Node[]; ops: string[] }
   | { kind: "call"; fn: string; args: Node[]; at: number };
 
 const num = (v: Value) => (typeof v === "boolean" ? (v ? 1 : 0) : v);
@@ -118,6 +119,16 @@ function evalNode(n: Node, names: NameValues): Value {
       return truthy(evalNode(n.cond, names)) ? evalNode(n.then, names) : evalNode(n.otherwise, names);
     case "binary":
       return evalBinary(n, names);
+    case "chain": {
+      // Python's a < b <= c: each pair compared, the middle worked out once, stopping at the first false.
+      let left = num(evalNode(n.operands[0], names));
+      for (let i = 0; i < n.ops.length; i++) {
+        const right = num(evalNode(n.operands[i + 1], names));
+        if (!compare(n.ops[i], left, right)) return false;
+        left = right;
+      }
+      return true;
+    }
     case "call":
       return evalCall(
         n.fn,
@@ -158,6 +169,13 @@ function evalBinary(n: Extract<Node, { kind: "binary" }>, names: NameValues): Va
       return x - y * Math.floor(x / y);
     case "**":
       return Math.pow(x, y);
+  }
+  if (COMPARISONS.includes(n.op)) return compare(n.op, x, y);
+  throw new ExprError(`Unknown operator '${n.op}'`, n.at);
+}
+
+function compare(op: string, x: number, y: number): boolean {
+  switch (op) {
     case "<":
       return x < y;
     case "<=":
@@ -168,10 +186,9 @@ function evalBinary(n: Extract<Node, { kind: "binary" }>, names: NameValues): Va
       return x >= y;
     case "==":
       return x === y;
-    case "!=":
+    default:
       return x !== y;
   }
-  throw new ExprError(`Unknown operator '${n.op}'`, n.at);
 }
 
 function evalCall(fn: string, v: number[], at: number): number {
@@ -227,6 +244,8 @@ function namesOf(n: Node): Set<string> {
       return new Set([...namesOf(n.a), ...namesOf(n.b)]);
     case "cond":
       return new Set([...namesOf(n.then), ...namesOf(n.cond), ...namesOf(n.otherwise)]);
+    case "chain":
+      return new Set(n.operands.flatMap((o) => [...namesOf(o)]));
     case "call":
       return new Set(n.args.flatMap((a) => [...namesOf(a)]));
   }
@@ -303,13 +322,18 @@ class Parser {
   }
 
   private compare(): Node {
-    let l = this.sum();
+    const first = this.sum();
+    const operands = [first];
+    const ops: { op: string; at: number }[] = [];
     while (this.cur().type === "op" && COMPARISONS.includes(this.cur().text)) {
       const { text: op, at } = this.cur();
       this.i++;
-      l = { kind: "binary", op, a: l, b: this.sum(), at };
+      ops.push({ op, at });
+      operands.push(this.sum());
     }
-    return l;
+    if (ops.length === 0) return first;
+    if (ops.length === 1) return { kind: "binary", op: ops[0].op, a: first, b: operands[1], at: ops[0].at };
+    return { kind: "chain", operands, ops: ops.map((o) => o.op) };
   }
 
   private sum(): Node {

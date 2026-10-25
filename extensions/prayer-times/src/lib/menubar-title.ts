@@ -109,6 +109,8 @@ export function countdownTo(
     ...(bounds.red ? [{ at: bounds.red, kind: "soon" as const }] : []),
     { at: slot.end, kind: "end" },
   ];
+  // A late jamaat (e.g. end-5) can come after the preferred end or ending soon: count to whichever is nearer.
+  targets.sort((a, b) => a.at.getTime() - b.at.getTime());
   return targets.find((target) => target.at > now);
 }
 

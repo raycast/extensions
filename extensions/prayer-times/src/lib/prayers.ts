@@ -253,8 +253,11 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
   };
 
   const slots: PrayerSlot[] = [];
-  const midnightOfDay = new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime();
-  const minutesOf = (at: Date) => Math.floor((at.getTime() - midnightOfDay) / MINUTE);
+  // Clock minutes after the day's midnight (+1440 per day later), so `at(13, 30)` stays 13:30 on a day the
+  // clocks change. Calendar days are counted in UTC, which has no clock changes.
+  const dayNumber = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000;
+  const minutesOf = (at: Date) => (dayNumber(at) - dayNumber(day)) * 1440 + at.getHours() * 60 + at.getMinutes();
+  const clock = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   /** Names a formula rule can use (jamaat.ts FORMULA_NAMES), as on the phone. */
   const formulaNames = (key: PrayerKey, start: Date, end: Date, preferredEnd: Date): NameValues => ({
     start: () => minutesOf(start),
@@ -305,11 +308,12 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
     let jamaatError: string | undefined;
     if (rule.kind === "formula") {
       try {
-        const at = new Date(
-          midnightOfDay + formulaMinutes(rule.source, formulaNames(key, start, end, preferredEnd)) * MINUTE,
-        );
+        const minutes = formulaMinutes(rule.source, formulaNames(key, start, end, preferredEnd));
+        const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, minutes);
         // Never before the adhan, as the phone's limits keep it.
         jamaat = at < start ? start : at;
+        if (jamaat >= end)
+          jamaatError = `The result (${clock(jamaat)}) is at or after the prayer's end (${clock(end)})`;
       } catch (err) {
         if (!(err instanceof ExprError)) throw err;
         jamaatError = err.toString();
