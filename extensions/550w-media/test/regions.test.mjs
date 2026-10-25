@@ -6,7 +6,7 @@ const base=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url)
 test('regions have independent identity and fixed language, no UI region switch',()=>{
   for(const region of ['cn','global']) {
     const manifest=regionalManifest(base,region);
-    assert.equal(manifest.version,'3.1.5');assert.equal(manifest.name,regions[region].name);
+    assert.equal(manifest.version,base.version);assert.equal(manifest.name,regions[region].name);
     assert.equal(manifest.title,regions[region].title);
     assert.equal(manifest.preferences.some(p=>p.name==='region'),false);
     assert.equal(manifest.preferences.find(p=>p.name==='apiKey').description.includes(regions[region].key),true);

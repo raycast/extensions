@@ -1,5 +1,10 @@
 # 550W Watermark & Text Eraser Changelog
 
+## [3.1.6] - 2026-10-25
+
+- Preserve actionable authorization recovery on HTTP 401/403 without replaying processing requests.
+- Include product and package version declarations in supported OAuth and service requests.
+
 ## [Prepare 3.1.5 Review Candidate] - {PR_MERGE_DATE}
 
 - Show action-specific inputs and upload limits.

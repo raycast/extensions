@@ -1,3 +1,4 @@
+import {version as packageVersion} from "../src/generated/version.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {request} from '../src/transport.mjs';
@@ -17,4 +18,12 @@ test('invalid files/coordinates reject before request; unknown outcomes never re
   let calls=0;const fetcher=async()=>{calls++;throw new Error('secret token');};
   await assert.rejects(request('eraseVideo',auth,{operationId:'fixture-operation',area:'2,2,1,1'},new File(['x'],'a.mp4'),fetcher),/region/);assert.equal(calls,0);
   await assert.rejects(request('eraseVideo',auth,{operationId:'fixture-operation'},new File(['x'],'a.mp4'),fetcher),/Outcome not confirmed/);assert.equal(calls,1);
+});
+
+test('401 and 403 preserve reconnect/permission diagnostics without replaying paid requests',async()=>{
+ for(const [status,code] of [[401,'RECONNECT_SAME_ACCOUNT'],[403,'REAUTHORIZE_REQUIRED_SCOPES']]){
+  let calls=0;
+  await assert.rejects(request('removeVideoWatermark',auth,{operationId:'fixture-operation',videoUrl:'https://v.douyin.com/example/'},undefined,async(url,options)=>{calls++;assert.equal(options.headers['X-550W-Product'],'adapter-raycast');assert.equal(options.headers['X-550W-Product-Version'],packageVersion);assert.equal(JSON.parse(options.body).operationId,'fixture-operation');return Response.json({error:'secret-provider-message'}, {status});}),e=>e.status===status && e.code===code && !e.message.includes('secret-provider-message'));
+  assert.equal(calls,1);
+ }
 });

@@ -1,4 +1,17 @@
+import { version } from "./generated/version.mjs";
 import { request as openRequest, token, publicUrl } from "./generated/api.mjs";
+export class OAuthAccessError extends Error {
+  constructor(status) {
+    super(
+      status === 401
+        ? "550W authorization expired or was revoked. Reconnect the same account, then check the original operation before submitting again."
+        : "550W authorization lacks required permissions. Authorize the required scopes on the same account, then check the original operation.",
+    );
+    this.status = status;
+    this.code =
+      status === 401 ? "RECONNECT_SAME_ACCOUNT" : "REAUTHORIZE_REQUIRED_SCOPES";
+  }
+}
 export async function request(
   endpoint,
   auth,
@@ -7,7 +20,16 @@ export async function request(
   fetcher = fetch,
 ) {
   if (auth.mode !== "oauth")
-    return openRequest(endpoint, auth, values, file, fetcher);
+    return openRequest(endpoint, auth, values, file, (url, init) =>
+      fetcher(url, {
+        ...init,
+        headers: {
+          ...init.headers,
+          "X-550W-Product": "adapter-raycast",
+          "X-550W-Product-Version": version,
+        },
+      }),
+    );
   if (!["cn", "global"].includes(auth.region))
     throw new Error("Invalid region");
   let route, body;
@@ -67,6 +89,8 @@ export async function request(
         method: body ? "POST" : "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          "X-550W-Product": "adapter-raycast",
+          "X-550W-Product-Version": version,
           ...(typeof body === "string"
             ? { "Content-Type": "application/json" }
             : {}),
@@ -76,6 +100,8 @@ export async function request(
         signal: AbortSignal.timeout(file ? 600000 : 90000),
       },
     );
+    if (response.status === 401 || response.status === 403)
+      throw new OAuthAccessError(response.status);
     if (!response.ok) throw new Error();
     const reader = response.body.getReader(),
       parts = [];
@@ -100,7 +126,8 @@ export async function request(
     const result = JSON.parse(new TextDecoder().decode(bytes));
     if (!Number.isInteger(result?.code)) throw new Error();
     return result;
-  } catch {
+  } catch (error) {
+    if (error instanceof OAuthAccessError) throw error;
     throw new Error(
       "Outcome not confirmed. Query the original operation before repeating a paid submission.",
     );

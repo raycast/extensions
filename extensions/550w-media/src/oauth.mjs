@@ -1,3 +1,4 @@
+import { version } from "./generated/version.mjs";
 export const host = "https://www.550wai.cn";
 export const scope = "credits:read tasks:read tasks:submit media:upload";
 class OAuthFailure extends Error {
@@ -76,6 +77,11 @@ export function createSession({ client, storage, region, fetcher = fetch }) {
     try {
       const response = await fetcher(host + path, {
         ...options,
+        headers: {
+          ...options?.headers,
+          "X-550W-Product": "adapter-raycast",
+          "X-550W-Product-Version": version,
+        },
         redirect: "error",
         signal: AbortSignal.timeout(15000),
       });

@@ -1,3 +1,4 @@
+import {version as packageVersion} from "../src/generated/version.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -63,6 +64,7 @@ function fixture(region = "global", initial) {
   };
   const fetcher = async (url, options) => {
     calls.push({ url, options });
+    assert.equal(options.headers["X-550W-Product"],"adapter-raycast"); assert.equal(options.headers["X-550W-Product-Version"],packageVersion);
     return new Response(
       url.endsWith("/register")
         ? JSON.stringify({ client_id: "public-client" })
