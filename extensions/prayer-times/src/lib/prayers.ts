@@ -14,6 +14,12 @@ export const PRAYER_NAMES: Record<PrayerKey, string> = {
   isha: "Isha",
 };
 
+/** The Arabic Prayer Names choice (Arabic letters, e.g. ظهر with Arabic heh, not Urdu ہ). */
+export const ARABIC_NAMES: Pick<ScheduleConfig, "names" | "jumuahName"> = {
+  names: { fajr: "فجر", dhuhr: "ظهر", asr: "عصر", maghrib: "مغرب", isha: "عشاء" },
+  jumuahName: "جمعة",
+};
+
 /** adhan's methods plus Ja'fari (Leva Institute, Qom), which adhan doesn't ship. */
 export type MethodName = keyof typeof CalculationMethod | "Jafari";
 
@@ -44,7 +50,7 @@ export interface ScheduleConfig {
   ishaPreferred?: PrayerRules["ishaPreferred"];
   /** Whether a prayer counts as late after its valid end or its preferred end; missing is `valid`. */
   lateAt?: "valid" | "preferred";
-  /** Display name per prayer (the Reminder Titles setting); empty entries fall back to English. */
+  /** Display name per prayer (the Prayer Names setting); empty entries fall back to English. */
   names?: Partial<Record<PrayerKey, string>>;
   /** Display name for Friday's Dhuhr; empty falls back to "Jumu'ah". */
   jumuahName?: string;
@@ -61,8 +67,9 @@ export interface ScheduleConfig {
 /**
  * One prayer on one day: when it starts, when its time ends, and its jamaat if configured.
  *
- * `end` is the valid end; after it the prayer is late (qaza). `preferredEnd`, when the school has one, is
- * the earlier start of the disliked (makruh) time or the end of the preferred time. `late` is whichever of
+ * `end` is the valid end; after it the prayer is late (qaza). `preferredEnd` is the start of the disliked
+ * (makruh) time or the end of the preferred time; `getDaySchedule` always sets it, to `end` when the school
+ * has none for that prayer (optional only for hand-built slots). `late` is whichever of
  * the two the Counts as Late After setting picks: on-time, ending alerts and the red countdown use it.
  */
 export interface PrayerSlot {
@@ -207,7 +214,7 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
     dhuhr: [
       times.dhuhr,
       config.dhuhrEnd === "sunset" ? sunset : config.dhuhrEnd === "shafiAsr" ? asrAt("shafi") : times.asr,
-      config.dhuhrPreferred === "asr" ? times.asr : undefined,
+      config.dhuhrPreferred === "asr" ? times.asr : config.dhuhrPreferred === "shafiAsr" ? asrAt("shafi") : undefined,
     ],
     asr: [
       times.asr,
@@ -262,8 +269,9 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
       if (shared) start = jamaat;
       else jamaat = undefined;
     }
-    // A preferred end only counts when it falls inside the prayer's time (e.g. two shadows is Hanafi Asr's start).
-    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : undefined;
+    // Every prayer has a preferred end; without one inside its time (e.g. two shadows is Hanafi Asr's start, or
+    // Hanafi Fajr) it is the end itself.
+    const preferredEnd = preferred && preferred > start && preferred < end ? preferred : end;
     slots.push({
       id: `${date}/${key}`,
       key,
@@ -273,7 +281,7 @@ export function getDaySchedule(day: Date, config: ScheduleConfig): PrayerSlot[] 
       start,
       end,
       preferredEnd,
-      late: config.lateAt === "preferred" && preferredEnd ? preferredEnd : end,
+      late: config.lateAt === "preferred" ? preferredEnd : end,
       jamaat: jamaat && jamaat < end ? jamaat : undefined,
     });
   }

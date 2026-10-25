@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import {
   getPrayerStatuses as swiftGetPrayerStatuses,
   movePrayerReminders as swiftMovePrayerReminders,
+  saveStatusLines as swiftSaveStatusLines,
   setPrayerCompleted as swiftSetPrayerCompleted,
   syncPrayerReminders as swiftSyncPrayerReminders,
 } from "swift:../../swift/PrayerTimes";
@@ -121,6 +122,17 @@ export function setPrayerCompleted(
   return withTimeout(
     swiftSetPrayerCompleted(listName, key, completed, completionDate?.toISOString() ?? null, status ?? null),
   );
+}
+
+/**
+ * Write status lines onto completed prayer reminders that have none yet.
+ *
+ * @param listName - Reminders list.
+ * @param entries - Keys and the prayed status to store for each.
+ * @returns How many were written.
+ */
+export function saveStatusLines(listName: string, entries: { key: string; status: string }[]): Promise<number> {
+  return withTimeout(swiftSaveStatusLines({ listName, entries }) as Promise<number>);
 }
 
 const LOCATION_APP = "Prayer Times Location.app";

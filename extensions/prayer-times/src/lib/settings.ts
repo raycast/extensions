@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { AlertWindows } from "./state";
-import { MethodName, PRAYER_KEYS, PrayerKey, ScheduleConfig } from "./prayers";
+import { ARABIC_NAMES, MethodName, PRAYER_KEYS, PrayerKey, ScheduleConfig } from "./prayers";
 import { PlanOptions } from "./plan";
 import { readLocation, StoredLocation } from "./location";
 import { parseJamaatRule } from "./jamaat";
@@ -98,7 +98,6 @@ export function buildSettings(location: StoredLocation): Settings {
   const { latitude, longitude } = location;
 
   const offsets = (prefs.adjustments ?? "").split(",").map((part) => toNumber(part, 0));
-  const titles = (prefs.reminderTitles ?? "").split(",").map((part) => part.trim());
   const alerts = prefs.alerts ?? "reminders";
 
   const rules = resolveRules(toSchool(prefs.school), {
@@ -109,7 +108,7 @@ export function buildSettings(location: StoredLocation): Settings {
     maghribPreferred: prefs.maghribPreferred,
     ishaEnd: prefs.ishaEnd,
     ishaPreferred: prefs.ishaPreferred,
-    dhuhrEndsAtOneShadow: prefs.dhuhrEndsAtShafiAsr !== false,
+    dhuhrEndsAtOneShadow: prefs.dhuhrEndsAtShafiAsr === true,
   });
 
   const dueAt = prefs.dueAt === "jamaat" ? "jamaat" : "start";
@@ -147,8 +146,7 @@ export function buildSettings(location: StoredLocation): Settings {
         isha: prefs.jamaatIsha ?? "",
       },
       jamaatJumuah: prefs.jamaatJumuah ?? "",
-      names: Object.fromEntries(PRAYER_KEYS.map((key, i) => [key, titles[i] ?? ""])) as Record<PrayerKey, string>,
-      jumuahName: (prefs.jumuahTitle ?? "").trim() || "Jumu'ah",
+      ...(prefs.prayerNames === "arabic" ? ARABIC_NAMES : {}),
     },
     windows,
     plan: {

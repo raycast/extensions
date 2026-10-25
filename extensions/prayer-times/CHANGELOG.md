@@ -1,5 +1,16 @@
 # Prayer Times Changelog
 
+## [Prayer Statuses, Calendar and Arabic Names] - 2026-10-25
+
+- Mark a prayer Missed; an unmarked prayer counts as missed once its time ends, and late, made up (qaza) and missed have their own colors
+- Every prayer has a start, a preferred end and an end; Hanafi Dhuhr is preferred until the one-shadow Asr
+- Prayer Names setting: English or Arabic, replacing the free-text titles
+- Prayer Calendar: one-page month with each day colored by most of its prayers, a day view with prayed times, and Save History to store past statuses
+- Today's Prayers: times in fixed columns, the last 7 days and today as a table, and Enter opens a day's record
+- Menu bar: the masjid on a colored disc that shows what it counts down to (start, jamaat, preferred end, end)
+- Times always show as four-digit 24-hour times
+- New icon
+
 ## [Initial Version] - 2026-10-24
 
 - Offline prayer times (adhan) with calculation method, madhab, minute adjustments and Isha/Dhuhr end options

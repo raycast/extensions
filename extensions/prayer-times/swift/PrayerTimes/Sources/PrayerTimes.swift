@@ -27,6 +27,18 @@ struct PlannedReminder: Codable {
   let notes: String
 }
 
+/// One past prayer's status to write down, for `saveStatusLines`.
+struct StatusEntry: Codable {
+  let key: String
+  /// A prayed status: jamaat, ontime, late or madeup.
+  let status: String
+}
+
+struct StatusLinesPayload: Codable {
+  let listName: String
+  let entries: [StatusEntry]
+}
+
 struct SyncPayload: Codable {
   let listName: String
   let reminders: [PlannedReminder]
@@ -398,6 +410,31 @@ private func sync(_ payload: SyncPayload) async throws -> SyncResult {
     }
     if changed { try store.commit() }
     return moved
+  }
+}
+
+/// Write `prayer-status:` lines onto completed prayer reminders that have none yet, so their status is stored
+/// instead of worked out again from the completion time. Each reminder is refreshed right before it is changed,
+/// and one that is no longer completed or has gained a status line meanwhile is left alone. Only the status line
+/// changes. Returns how many were written.
+@raycast func saveStatusLines(payload: StatusLinesPayload) async throws -> Int {
+  try await withSyncLock {
+    let store = try await authorizedStore()
+    guard let calendar = try findList(store, named: payload.listName) else { return 0 }
+    let days = payload.entries.map { String($0.key.prefix(10)) }.sorted()
+    guard let first = days.first, let last = days.last else { return 0 }
+    let index = indexByKey(await fetchReminders(store, in: calendar, from: first, to: last))
+    var written = 0
+    for entry in payload.entries {
+      guard let reminder = index[entry.key], reminder.refresh(), reminder.isCompleted,
+        statusLine(in: reminder.notes) == nil
+      else { continue }
+      reminder.notes = withStatus(reminder.notes, entry.status)
+      try store.save(reminder, commit: false)
+      written += 1
+    }
+    if written > 0 { try store.commit() }
+    return written
   }
 }
 
