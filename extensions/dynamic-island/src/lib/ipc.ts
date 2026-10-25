@@ -157,43 +157,13 @@ export async function postDistributedNotification(notificationName: string): Pro
 /**
  * Seeds a macOS default value only if it has not already been configured by the user.
  */
-async function seedDefaultIfNotSet(
-  key: string,
-  type: "-bool" | "-string" | "-int" | "-float",
-  value: string | boolean | number,
-): Promise<void> {
-  try {
-    await execAsync(`defaults read ${DEFAULTS_DOMAIN} "${key}"`);
-  } catch {
-    await execAsync(`defaults write ${DEFAULTS_DOMAIN} "${key}" ${type} ${value}`);
-  }
-}
-
 /**
  * Synchronizes Raycast extension preferences directly to the Dynamic Island engine.
- * Widget visibility preferences only seed defaults if unset so user customizations
- * in Settings are preserved as the single source of truth.
+ * Widget visibility and system metrics are configured directly via the Dynamic Island Settings command.
  */
 export async function syncPreferencesToDefaults(): Promise<void> {
   try {
     const prefs = getPreferenceValues<Preferences>();
-
-    if (prefs.showMediaWidget !== undefined) {
-      await seedDefaultIfNotSet("showMediaWidget", "-bool", prefs.showMediaWidget);
-    }
-    if (prefs.showMixerWidget !== undefined) {
-      await seedDefaultIfNotSet("showMixerWidget", "-bool", prefs.showMixerWidget);
-    }
-    if (prefs.showSystemWidget !== undefined) {
-      await seedDefaultIfNotSet("showSystemWidget", "-bool", prefs.showSystemWidget);
-    }
-    if (prefs.showTimerWidget !== undefined) {
-      await seedDefaultIfNotSet("showTimerWidget", "-bool", prefs.showTimerWidget);
-    }
-    if (prefs.showCalendarWidget !== undefined) {
-      await seedDefaultIfNotSet("showCalendarWidget", "-bool", prefs.showCalendarWidget);
-    }
-
     const commands: string[] = [];
 
     if (prefs.hoverToExpand !== undefined) {
@@ -235,6 +205,17 @@ export async function setWidgetVisibility(
 }
 
 /**
+ * Updates the visibility of an individual metric in the System UI.
+ */
+export async function setMetricVisibility(
+  metric: "CPU" | "GPU" | "Memory" | "Battery" | "Network" | "Disk",
+  visible: boolean,
+): Promise<void> {
+  await execAsync(`defaults write ${DEFAULTS_DOMAIN} showMetric${metric} -bool ${visible}`);
+  await postDistributedNotification(`${NOTIFICATION_PREFIX}.requestStatus`);
+}
+
+/**
  * Gets the visibility of an individual metric in the System UI.
  */
 export async function getMetricVisibility(
@@ -259,17 +240,6 @@ export async function toggleMetricVisibility(
   const next = !current;
   await setMetricVisibility(metric, next);
   return next;
-}
-
-/**
- * Updates the visibility of an individual metric in the System UI.
- */
-export async function setMetricVisibility(
-  metric: "CPU" | "GPU" | "Memory" | "Battery" | "Network" | "Disk",
-  visible: boolean,
-): Promise<void> {
-  await execAsync(`defaults write ${DEFAULTS_DOMAIN} showMetric${metric} -bool ${visible}`);
-  await postDistributedNotification(`${NOTIFICATION_PREFIX}.requestStatus`);
 }
 
 /**
