@@ -316,7 +316,7 @@ export function bodyForSave(ctx: LinkContext): { name: string; content: string }
 function momentLinkLine(ctx: LinkContext): string {
   const at = (s: number) => timestampUrl(ctx, s);
   return at(0)
-    ? `\n\nWhen you point to a moment, make its time the link text, like [4:05](${at(245)}) — never other words.`
+    ? `\n\nWhen you point to a moment, and for every point of a summary, make its time the link text, like [4:05](${at(245)}) — never other words.`
     : "";
 }
 
