@@ -13,8 +13,8 @@ export interface PrayerRules {
   asrStart: "hanafi" | "shafi";
   /** Dhuhr's valid end: Asr, the earlier one-shadow Asr (Hanafi precaution), or sunset (Ja'fari shared time). */
   dhuhrEnd: "asr" | "shafiAsr" | "sunset";
-  /** Dhuhr's preferred end: Asr's start (Ja'fari, whose Dhuhr is valid until sunset). */
-  dhuhrPreferred: "none" | "asr";
+  /** Dhuhr's preferred end: the one-shadow (Shafi'i) Asr (Hanafi), or Asr's start (Ja'fari, valid until sunset). */
+  dhuhrPreferred: "none" | "shafiAsr" | "asr";
   /** Asr's preferred end: the sun turning yellow, or a shadow twice its object. Valid end is always sunset. */
   asrPreferred: "none" | "yellow" | "twoShadows";
   /** Maghrib starts at sunset, or once the eastern redness has gone (Ja'fari). */
@@ -44,8 +44,8 @@ export const SHORT_MAGHRIB_MINUTES = 25;
 export const SCHOOL_RULES: Record<School, PrayerRules> = {
   hanafi: {
     asrStart: "hanafi",
-    dhuhrEnd: "shafiAsr",
-    dhuhrPreferred: "none",
+    dhuhrEnd: "asr",
+    dhuhrPreferred: "shafiAsr",
     asrPreferred: "yellow",
     maghribStart: "sunset",
     maghribEnd: "isha",
@@ -111,7 +111,7 @@ export interface RuleOverrides {
   maghribPreferred?: Choice<PrayerRules["maghribPreferred"]>;
   ishaEnd?: Choice<PrayerRules["ishaEnd"]>;
   ishaPreferred?: Choice<PrayerRules["ishaPreferred"]>;
-  /** Hanafi precaution: end Dhuhr at the one-shadow Asr even when Asr starts at two shadows. */
+  /** Hanafi precaution, off by default: end Dhuhr at the one-shadow Asr instead of preferring it until then. */
   dhuhrEndsAtOneShadow?: boolean;
 }
 
@@ -133,7 +133,7 @@ export function resolveRules(school: School, overrides: RuleOverrides = {}): Pra
   const dhuhrEnd =
     base.dhuhrEnd === "sunset"
       ? "sunset"
-      : asrStart === "hanafi" && overrides.dhuhrEndsAtOneShadow !== false
+      : asrStart === "hanafi" && overrides.dhuhrEndsAtOneShadow === true
         ? "shafiAsr"
         : "asr";
   return {

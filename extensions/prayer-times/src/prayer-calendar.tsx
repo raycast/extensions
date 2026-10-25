@@ -5,26 +5,18 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { useState } from "react";
 import SetLocation from "./set-location";
-import { dayTone, DayTone, monthDays, PANEL_WIDTH, panelSvg, prayedCount } from "./lib/calendar";
+import { dayTone, monthDays, PANEL_WIDTH, panelSvg, prayedCount } from "./lib/calendar";
 import { formatTime, ltrName } from "./lib/format";
-import { prayerActions, statusAccessory } from "./lib/prayer-actions";
+import { prayerActions, saveHistoryAction, statusAccessory } from "./lib/prayer-actions";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerSlot, toDateKey } from "./lib/prayers";
 import { loadSettings, Settings } from "./lib/settings";
 import { summarize } from "./lib/stats";
 import { STATUS_LABELS } from "./lib/status";
-import { STATUS_COLORS, statusIcon } from "./lib/status-icons";
+import { STATUS_COLORS, statusIcon, toneColor } from "./lib/status-icons";
 import { History, loadHistory, PrayerRecord } from "./lib/tracker";
 
 /** Months offered in the month picker: this month first (Raycast opens on the first item), then two years back. */
 const MONTHS_BACK = 24;
-
-const TONE_COLORS: Record<DayTone, Color.ColorLike> = {
-  full: Color.Green,
-  partial: { light: "#FFCC66", dark: "#FFC04D" },
-  none: Color.Red,
-  noData: Color.SecondaryText,
-  future: Color.SecondaryText,
-};
 
 /** `YYYY-MM` for a date. */
 const monthKey = (date: Date) => toDateKey(date).slice(0, 7);
@@ -164,7 +156,7 @@ function MonthView({ settings }: { settings: Settings }) {
             <List.Item
               key={key}
               id={key}
-              icon={{ source: Icon.CircleFilled, tintColor: TONE_COLORS[tone] }}
+              icon={{ source: Icon.CircleFilled, tintColor: toneColor(tone) }}
               title={`${date.toLocaleDateString(undefined, { weekday: "short" })} ${date.getDate()}`}
               subtitle={[
                 key === todayKey ? "Today" : "",
@@ -206,6 +198,7 @@ function MonthView({ settings }: { settings: Settings }) {
                     shortcut={{ modifiers: ["cmd"], key: "]" }}
                     onAction={() => shift(1)}
                   />
+                  {saveHistoryAction(settings, revalidate)}
                   <Action
                     title="Go to This Month"
                     icon={Icon.Calendar}
@@ -255,7 +248,15 @@ function prayerDetail(slot: PrayerSlot, record: PrayerRecord | undefined) {
   );
 }
 
-function DayView({ settings, initialDate, onChange }: { settings: Settings; initialDate: Date; onChange: () => void }) {
+export function DayView({
+  settings,
+  initialDate,
+  onChange,
+}: {
+  settings: Settings;
+  initialDate: Date;
+  onChange: () => void;
+}) {
   const [date, setDate] = useState(initialDate);
   const [expanded, setExpanded] = useState(false);
   const {
@@ -279,10 +280,20 @@ function DayView({ settings, initialDate, onChange }: { settings: Settings; init
           const record = day?.[slot.key];
           const accessories: List.Item.Accessory[] = expanded
             ? []
-            : [
-                ...(slot.jamaat ? [{ text: `Jamaat ${formatTime(slot.jamaat)}`, icon: Icon.TwoPeople }] : []),
-                { text: `Ends ${formatTime(slot.end)}` },
+            : // Accessories line up from the right, so the fixed-width times go last and the status tag,
+              // whose width varies, goes first; every row keeps the same columns.
+              [
                 statusAccessory(slot, record, now),
+                {
+                  text: `Jamaat ${slot.jamaat ? formatTime(slot.jamaat) : "--:--"}`,
+                  icon: { source: "masjid.png", tintColor: Color.SecondaryText },
+                },
+                { text: `Ends ${formatTime(slot.end)}` },
+                {
+                  // Cached history holds completedAt as a string.
+                  text: `Prayed ${record?.completed && record.completedAt ? formatTime(new Date(record.completedAt)) : "--:--"}`,
+                  icon: Icon.Clock,
+                },
               ];
           return (
             <List.Item

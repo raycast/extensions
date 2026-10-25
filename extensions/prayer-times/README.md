@@ -7,12 +7,13 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 ![Prayer Menu Bar showing Asr jamaat in 7 minutes, with the day's prayers in the dropdown](media/menu-bar.png)
 
-- **Menu bar countdown**: only the time left until the next moment: `Asr -5` (until start), mosque
-  icon `Asr -5` (until jamaat), `Asr (-40)` (until the preferred end, the late boundary or the end). Icon color shows the state. The dropdown lists every
+- **Menu bar countdown**: the masjid mark and only the time left until the next moment: `Asr -5` (until the
+  start or jamaat), `Asr (-40)` (until the preferred end or the end). The icon's color follows the live
+  windows of the phone app: light green around the start, brand green around jamaat, yellow before the
+  preferred time ends, red before the prayer time ends, plain in between. The dropdown lists every
   prayer plus sunrise, midnight and tahajjud, color-coded as with jamaat, on time, late,
-  made up (qaza), current or missed,
-  with each prayer's preferred time. Click a prayer to mark it; hold ⌥ to mark a late one (or one
-  recorded late) as prayed on time.
+  made up (qaza), current or missed, with each prayer's preferred time. Click a prayer to mark it; hold ⌥
+  to mark a late one (or one recorded late) as prayed on time.
 - **Next Prayer** command: live root-search subtitle. Add it to Favorites to keep it on top.
 - **Today's Prayers**: mark as prayed (the clock decides on time, late, or made up once its time has ended), or as prayed with
   jamaat, on time, late (still within its time), or made up (qaza, after its time ended); change or unmark it later, and see the last
@@ -52,19 +53,20 @@ downloaded and no other app is needed.
 ## Prayer times by school
 
 Each prayer has a **valid end** (after it the prayer is late) and, depending on the school, an earlier
-**preferred end** (after it, delaying is disliked, makruh). The menu bar turns orange after the preferred
-end. **Counts as Late After** picks which end the ending reminder, the red countdown and on-time history use.
+**preferred end** (after it the prayer is less preferred, for some prayers disliked, makruh). A prayer with no
+earlier preferred end, like Fajr, is preferred until its end. The menu bar turns yellow before the preferred end. **Counts as Late After** picks which end the ending reminder, the red countdown and on-time history use.
 
-|                         | Hanafi                 | Shafi'i     | Maliki                 | Hanbali     | Ja'fari (Shia)               |
-| ----------------------- | ---------------------- | ----------- | ---------------------- | ----------- | ---------------------------- |
-| Asr starts              | 2 shadow lengths       | 1           | 1                      | 1           | 1                            |
-| Asr preferred until     | sun turns yellow       | 2 shadows   | sun turns yellow       | 2 shadows   | –                            |
-| Dhuhr ends              | 1 shadow (precaution)  | Asr         | Asr                    | Asr         | sunset (preferred until Asr) |
-| Maghrib starts          | sunset                 | sunset      | sunset                 | sunset      | eastern redness gone         |
-| Maghrib preferred until | stars appear (~35 min) | –           | short window (~25 min) | –           | Isha                         |
-| Maghrib ends            | Isha                   | Isha        | Isha                   | Isha        | midnight                     |
-| Isha preferred until    | midnight               | first third | first third            | first third | first third                  |
-| Isha ends               | Fajr                   | Fajr        | Fajr                   | Fajr        | midnight                     |
+|                         | Hanafi                 | Shafi'i     | Maliki                 | Hanbali     | Ja'fari (Shia)       |
+| ----------------------- | ---------------------- | ----------- | ---------------------- | ----------- | -------------------- |
+| Asr starts              | 2 shadow lengths       | 1           | 1                      | 1           | 1                    |
+| Asr preferred until     | sun turns yellow       | 2 shadows   | sun turns yellow       | 2 shadows   | –                    |
+| Dhuhr preferred until   | 1 shadow (Shafi'i Asr) | –           | –                      | –           | Asr                  |
+| Dhuhr ends              | Asr (2 shadows)        | Asr         | Asr                    | Asr         | sunset               |
+| Maghrib starts          | sunset                 | sunset      | sunset                 | sunset      | eastern redness gone |
+| Maghrib preferred until | stars appear (~35 min) | –           | short window (~25 min) | –           | Isha                 |
+| Maghrib ends            | Isha                   | Isha        | Isha                   | Isha        | midnight             |
+| Isha preferred until    | midnight               | first third | first third            | first third | first third          |
+| Isha ends               | Fajr                   | Fajr        | Fajr                   | Fajr        | midnight             |
 
 Shadow lengths include the noon shadow. Midnight and the first third are measured from sunset to the next
 Fajr. The sun is taken to turn yellow 20 minutes before sunset. Every rule can be overridden in preferences,
@@ -79,3 +81,4 @@ on the eastern redness and the shared times of Dhuhr and Asr, and of Maghrib and
 
 - Prayer time calculation: [adhan-js](https://github.com/batoulapps/adhan-js) (MIT)
 - City list: [GeoNames](https://www.geonames.org/) cities with 5,000+ people (CC BY 4.0)
+- Icon: "Shah Faisal Masjid" by kreatikar on [Pixabay](https://pixabay.com/vectors/shah-faisal-masjid-islamabad-3337226/) (Pixabay Content License)

@@ -1,26 +1,28 @@
 import { Color, Icon, Image } from "@raycast/api";
+import { DayTone } from "./calendar";
+import { NOT_STARTED_HEX, STATUS_HEX, TONE_HEX } from "./colors";
 import { PrayerStatusValue } from "./status";
 
-const ICONS: Record<PrayerStatusValue, Icon> = {
-  jamaat: Icon.TwoPeople,
+/** The masjid mark inside a disc (the phone app's jamaat glyph), tinted like Raycast icons. */
+const ICONS: Record<PrayerStatusValue, Image.Source> = {
+  jamaat: "masjid-disc.png",
   ontime: Icon.CheckCircle,
   late: Icon.CheckCircle,
   madeup: Icon.ArrowCounterClockwise,
   missed: Icon.XMarkCircle,
 };
 
-// Late and made up use the phone app's tokens (design/tokens/themes.json, light = classic, dark = night),
-// converted from OKLCH: late oklch(52% 0.12 65) / oklch(80% 0.13 80), made up oklch(43% 0.02 175) / oklch(76% 0.015 170).
-const LATE_AMBER: Color.Dynamic = { light: "#975800", dark: "#E9B452", adjustContrast: true };
-const MADE_UP_GREY: Color.Dynamic = { light: "#45544F", dark: "#A8B4AF", adjustContrast: true };
+/** Prayers not started yet, or with no record. */
+export const NOT_STARTED_GREY: Color.Dynamic = { ...NOT_STARTED_HEX, adjustContrast: true };
 
-export const STATUS_COLORS: Record<PrayerStatusValue, Color.ColorLike> = {
-  jamaat: Color.Green,
-  ontime: Color.Green,
-  late: LATE_AMBER,
-  madeup: MADE_UP_GREY,
-  missed: Color.Red,
-};
+export const STATUS_COLORS = Object.fromEntries(
+  Object.entries(STATUS_HEX).map(([status, hex]) => [status, { ...hex, adjustContrast: true }]),
+) as Record<PrayerStatusValue, Color.Dynamic>;
+
+/** A day's color (its worst status, or grey), the same as the calendar's. */
+export function toneColor(tone: DayTone): Color.Dynamic {
+  return { ...TONE_HEX[tone], adjustContrast: true };
+}
 
 /**
  * Tinted icon for a prayer status, shared by Today's Prayers and the menu bar.

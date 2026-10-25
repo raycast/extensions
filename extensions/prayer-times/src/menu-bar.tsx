@@ -15,23 +15,17 @@ import { addDays, getReferenceTimes, getTimeline, PrayerSlot, ReferenceTime, toD
 import { activeSlot, AlertKind, menuBarState } from "./lib/state";
 import { snooze } from "./lib/storage";
 import { loadHistory, prayedSet, PrayerRecord, setPrayed, setStatus } from "./lib/tracker";
-import { MARK_TITLES, markOptions, STATUS_LABELS } from "./lib/status";
+import { clockStatus, MARK_TITLES, markOptions, STATUS_LABELS } from "./lib/status";
 import { statusIcon } from "./lib/status-icons";
 import { formatTime, ltrName } from "./lib/format";
 import { menuBarTitle, TitleTone } from "./lib/menubar-title";
 
-/** Silhouettes (black on transparent) tinted by state: the mosque for jamaat, the minaret otherwise. */
-const MASJID = "masjid.png";
-const MINARET = "minaret.png";
-
-const TONE_COLORS: Record<TitleTone, Color> = {
-  plain: Color.PrimaryText,
-  yellow: Color.Yellow,
-  green: Color.Green,
-  blue: Color.Blue,
-  orange: Color.Orange,
-  red: Color.Red,
-};
+/** The masjid on a colored disc, like the app logo, colored by what the countdown is to (lib/menubar-title.ts). */
+const toneIcon = (tone: TitleTone) =>
+  // The logo's dark green would vanish on a dark menu bar, so it is lifted there.
+  tone === "darkGreen"
+    ? { source: { light: "masjid-bar-darkGreen.png", dark: "masjid-bar-darkGreen-dark.png" } }
+    : `masjid-bar-${tone}.png`;
 
 /** One row of the dropdown: a prayer, or a reference time like sunrise. */
 type Row = { type: "prayer"; slot: PrayerSlot; at: Date } | { type: "reference"; time: ReferenceTime; at: Date };
@@ -69,7 +63,7 @@ function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active
   if (active && slot.preferredEnd && now >= slot.preferredEnd) {
     return {
       icon: { source: Icon.CircleProgress75, tintColor: Color.Orange },
-      subtitle: `Disliked time · ends ${formatTime(slot.end)}`,
+      subtitle: `Preferred time over · ends ${formatTime(slot.end)}`,
     };
   }
   if (active) {
@@ -94,7 +88,7 @@ export default function Command() {
   // before the fresh read lands. The read is a small LocalStorage lookup.
   const { data: settings, isLoading, error } = usePromise(loadSettings);
   if (!settings) {
-    if (isLoading) return <MenuBarExtra isLoading icon={{ source: MINARET, tintColor: Color.PrimaryText }} />;
+    if (isLoading) return <MenuBarExtra isLoading icon={toneIcon("white")} />;
     return (
       <MenuBarExtra icon={{ source: Icon.Warning, tintColor: Color.Orange }} tooltip={error?.message}>
         <MenuBarExtra.Item
@@ -126,7 +120,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
   if (!isLoading && !state && !error) return null;
 
   const current = activeSlot(slots, now);
-  const title = state ? menuBarTitle(state, now, settings.windows) : undefined;
+  const title = state ? menuBarTitle(state, now) : undefined;
   const rows = dropdownRows(slots, getReferenceTimes(now, settings.schedule), current, now);
   const shown = state && state.kind !== "upcoming" ? state.slot : undefined;
   const snoozeKind: AlertKind | undefined =
@@ -145,11 +139,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={
-        !title
-          ? { source: Icon.Warning, tintColor: Color.Orange }
-          : { source: title.mosque ? MASJID : MINARET, tintColor: TONE_COLORS[title.tone] }
-      }
+      icon={!title ? { source: Icon.Warning, tintColor: Color.Orange } : toneIcon(title.tone)}
       title={title?.text}
       tooltip={error ? `Reminders: ${error.message}` : "Prayer Times"}
     >
@@ -161,7 +151,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
         <MenuBarExtra.Section title={sectionTitle(shown, now)}>
           <MenuBarExtra.Item
             title={`Mark ${ltrName(shown.name)} as Prayed`}
-            icon={Icon.CheckCircle}
+            icon={statusIcon(clockStatus(shown, now))}
             onAction={() => run(`${ltrName(shown.name)} marked prayed`, () => setPrayed(shown, settings, true))}
           />
           {markOptions(shown, undefined, now).map((status) => (
