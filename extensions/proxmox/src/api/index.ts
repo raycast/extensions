@@ -1,5 +1,6 @@
-import type { ApiResponse, PveServer, PveVm, WithServer } from "@/types";
+import type { ApiResponse, PveServer, PveVm, PveVmConfig, WithServer } from "@/types";
 import { buildHeaders } from "@/utils/headers";
+import { parseTags } from "@/utils/tags";
 
 /** Upper bound for a single request, a server that stops answering must not stay pending forever */
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -73,14 +74,25 @@ export async function resumeVm(vm: WithServer<PveVm>) {
   });
 }
 
-export async function setVmTags(vm: WithServer<PveVm>, tags: string[]) {
+/**
+ * Applies `edit` to the tags the VM has right now and returns the saved list. We send the config
+ * digest along, so Proxmox rejects the save when someone changed the VM since we read it.
+ */
+export async function editVmTags(vm: WithServer<PveVm>, edit: (current: string[]) => string[]): Promise<string[]> {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/config`;
-  const body =
-    tags.length > 0 ? new URLSearchParams({ tags: tags.join(";") }) : new URLSearchParams({ delete: "tags" });
+  const { data: config } = await pveFetch<PveVmConfig>(vm.server, url);
+  const tags = edit(parseTags(config.tags));
+  const body = new URLSearchParams({ digest: config.digest });
+  if (tags.length > 0) {
+    body.set("tags", tags.join(";"));
+  } else {
+    body.set("delete", "tags");
+  }
   await pveFetch(vm.server, url, {
     method: "PUT",
     body,
   });
+  return tags;
 }
 
 export async function rebootVm(vm: WithServer<PveVm>) {

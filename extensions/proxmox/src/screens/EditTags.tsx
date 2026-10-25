@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { PveClusterOptions, PveVm, WithServer } from "@/types";
-import { setVmTags } from "@/api";
+import { editVmTags } from "@/api";
 import { usePveFetch } from "@/hooks/use-pve-fetch";
 import { describeFetchError } from "@/utils/errors";
 import { getTagColor, isValidTag, normalizeTag, parseTags } from "@/utils/tags";
@@ -24,22 +24,20 @@ export const EditTags = ({ vm, onChange }: EditTagsProps) => {
   const newTag = normalizeTag(searchText);
   const canCreate = isValidTag(newTag) && !knownTags.includes(newTag);
 
-  // Proxmox replaces the whole tag list on every save, so we run saves one at a time and
-  // build each list from the last saved one, which keeps quick edits from overwriting each other.
-  const savedTags = useRef(tags);
+  // Each save reads the VM's current tags first, so we run saves one at a time to let each one
+  // see the result of the previous one.
   const saveQueue = useRef(Promise.resolve());
 
   const applyEdit = async (edit: (current: string[]) => string[], message: string) => {
-    const next = edit(savedTags.current);
     const toast = await showToast({ title: "Saving tags", message, style: Toast.Style.Animated });
+    let next: string[];
     try {
-      await setVmTags(vm, next);
+      next = await editVmTags(vm, edit);
     } catch (e) {
       await showFailureToast(e, { title: `Failed to save the tags of ${vm.name}`, message: describeFetchError(e) });
       return;
     }
 
-    savedTags.current = next;
     setTags(next);
     setSearchText("");
     onChange();
