@@ -3,7 +3,8 @@ import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 const bundleId = "com.kodehort.spacetile";
 
-// The same channel as app/scripts/spacetile-ctl: Spacetile runs the object of each
+// The same channel as the installed `spacetile` command, posted directly so the extension needs
+// neither that command nor a PATH that finds it: Spacetile runs the object of each
 // com.kodehort.spacetile.command distributed notification as a command. Prints whether it
 // posted, since nothing listens while Spacetile isn't running.
 const post = `
