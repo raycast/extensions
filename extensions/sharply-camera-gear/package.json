@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "sharply",
+  "name": "sharply-camera-gear",
   "title": "Sharply Gear Search",
   "description": "Find photography gear and open its Sharply page.",
   "icon": "extension-icon.png",
