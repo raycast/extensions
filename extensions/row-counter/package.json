@@ -9,23 +9,33 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
-      "name": "counter",
+      "name": "add-row",
       "title": "Add Row",
       "subtitle": "Knitting",
       "description": "Adds a row and shows the current row.",
       "mode": "no-view"
     },
     {
-      "name": "counter-see",
+      "name": "remove-row",
+      "title": "Remove Row",
+      "subtitle": "Knitting",
+      "description": "Removes a row, without going below 0.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-row-count",
       "title": "Show Row Count",
       "subtitle": "Knitting",
       "description": "Shows which row you're on.",
       "mode": "no-view"
     },
     {
-      "name": "counter-reset",
+      "name": "reset-row-counter",
       "title": "Reset Row Counter",
       "subtitle": "Knitting",
       "description": "Resets the row count to 0.",
