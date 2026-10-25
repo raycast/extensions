@@ -3,6 +3,7 @@ import {
   Action,
   Alert,
   confirmAlert,
+  Form,
   getFrontmostApplication,
   getPreferenceValues,
   Grid,
@@ -12,8 +13,12 @@ import {
   LocalStorage,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
+import { lstatSync } from "fs";
+import { rename } from "fs/promises";
+import { dirname, join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getQuickLookPreviewDataUrl, isQuickLookPreviewSupported } from "./quicklook";
 import {
@@ -104,6 +109,90 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
 const PAGE_SIZE = 100;
 const MOVE_TO_TRASH_CONFIRMATION_KEY = "manage-downloads-move-to-trash-confirmed";
 
+function entryExists(path: string): boolean {
+  try {
+    // lstat, because existsSync follows links and reports a broken symlink as missing.
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isSameEntry(firstPath: string, secondPath: string): boolean {
+  try {
+    // lstat, not stat: two symlinks can share a target but are still different entries.
+    const first = lstatSync(firstPath);
+    const second = lstatSync(secondPath);
+    return first.dev === second.dev && first.ino === second.ino;
+  } catch {
+    return false;
+  }
+}
+
+function RenameForm({ download, onRenamed }: { download: Download; onRenamed: (path: string, name: string) => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { name: string }) {
+    const nextName = values.name.trim();
+
+    if (nextName === download.file) {
+      pop();
+      return;
+    }
+
+    if (!nextName) {
+      await showFailureToast(new Error("A name can't be empty"), { title: "Invalid Name" });
+      return;
+    }
+
+    const invalidCharacters = process.platform === "win32" ? /[\\/:*?"<>|]/ : /[/:]/;
+    if (invalidCharacters.test(nextName) || nextName === "." || nextName === "..") {
+      await showFailureToast(
+        new Error(`A name can't contain ${process.platform === "win32" ? `/ \\ : * ? " < > |` : "/ or :"}`),
+        { title: "Invalid Name" },
+      );
+      return;
+    }
+
+    const nextPath = join(dirname(download.path), nextName);
+
+    // An existing destination is only fine when it is the same entry, which means
+    // a case-only rename on a case-insensitive volume. On a case-sensitive volume
+    // two names differing in case are different files, and two hard links to one
+    // file are different entries, so both are rejected.
+    const isCaseOnlyRename = nextName.toLowerCase() === download.file.toLowerCase();
+    const isSameFile = isCaseOnlyRename && isSameEntry(download.path, nextPath);
+
+    if (entryExists(nextPath) && !isSameFile) {
+      await showFailureToast(new Error(`"${nextName}" already exists in this folder`), { title: "Rename Failed" });
+      return;
+    }
+
+    try {
+      await rename(download.path, nextPath);
+      await showToast({ style: Toast.Style.Success, title: "Renamed", message: nextName });
+      onRenamed(nextPath, nextName);
+      pop();
+    } catch (error) {
+      await showFailureToast(error, { title: "Rename Failed" });
+    }
+  }
+
+  return (
+    <Form
+      navigationTitle={`Rename ${download.isDirectory ? "Folder" : "File"}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Rename" icon={Icon.Pencil} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" title="Name" defaultValue={download.file} placeholder="New name" />
+    </Form>
+  );
+}
+
 function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: string }) {
   const { primaryAction = "open" } = getPreferenceValues<Preferences.ManageDownloads>();
   const { data: frontmostApplication } = usePromise(async () => {
@@ -169,6 +258,13 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
       ),
     );
   }
+
+  const handleRenamed = useCallback((oldPath: string, nextPath: string, nextName: string) => {
+    setDownloads((current: Download[]) =>
+      current.map((item: Download) => (item.path === oldPath ? { ...item, path: nextPath, file: nextName } : item)),
+    );
+    setSelectedItemId((current) => (current === oldPath ? nextPath : current));
+  }, []);
 
   async function handleMoveToTrash(paths: string | string[]) {
     const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
@@ -310,6 +406,20 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
             shortcut={Keyboard.Shortcut.Common.RemoveAll}
             style={Action.Style.Destructive}
             onAction={() => handleMoveToTrash(downloads.map((d: Download) => d.path))}
+          />
+          <Action.Push
+            title="Rename"
+            icon={Icon.Pencil}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
+            target={
+              <RenameForm
+                download={download}
+                onRenamed={(nextPath, nextName) => handleRenamed(download.path, nextPath, nextName)}
+              />
+            }
           />
         </ActionPanel.Section>
       </ActionPanel>

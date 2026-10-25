@@ -295,6 +295,7 @@
 /extensions/bootstrap-icons                                         @RobErskine
 /extensions/boox-companion                                          @metrovoc
 /extensions/bored                                                   @BossElijah
+/extensions/bose-noise-cancelling                                   @eric-ostholm
 /extensions/botpress                                                @ermek-botpress
 /extensions/bouncer-email-verifier                                  @ekamran
 /extensions/braid                                                   @felixhabib
@@ -311,7 +312,7 @@
 /extensions/brightness-control                                      @CaliCastle @pavzagor @fisaogullari @0xdhrv @muhammadrizo-y
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
 /extensions/browser-ai                                              @aeither
-/extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @sayuthisobri @0xdhrv @pernielsentikaer @haneul486 @Just-Me-22 @mguellsegarra @teziovsky @noisysocks
+/extensions/browser-bookmarks                                       @thomaslombart @Chahine-tech @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys @selfish @theherk @zhsks311 @daniel-nagy @gewoonseba @ridemountainpig @sayuthisobri @0xdhrv @pernielsentikaer @haneul486 @Just-Me-22 @mguellsegarra @teziovsky @noisysocks
 /extensions/browser-history                                         @crisboarna @TKDKid1000 @MikuGeek @ridemountainpig
 /extensions/browser-router                                          @raghavg02
 /extensions/browser-tabs                                            @koinzhang @ridemountainpig @artistro08
@@ -693,6 +694,7 @@
 /extensions/deta-space                                              @deta @SlumberDemon
 /extensions/deutscherwetterdienst                                   @NicolaiSchmid
 /extensions/dev-cache-cleaner                                       @gfazioli
+/extensions/dev-essentials                                          @vinh0604
 /extensions/dev-null                                                @chrismessina
 /extensions/dev-servers                                             @tavlean
 /extensions/dev-to                                                  @aeither @xmok
@@ -1009,6 +1011,7 @@
 /extensions/format-graphql                                          @tngranados @xmok
 /extensions/formizee                                                @xmok
 /extensions/forscore                                                @pernielsentikaer
+/extensions/fotcast                                                 @fcarysnyder
 /extensions/fotmob                                                  @sonla58 @j3lte @Antitoxic9639 @Guztaver @pernielsentikaer
 /extensions/foundry-cast-cli                                        @merklefruit
 /extensions/foxhop                                                  @kud
@@ -2248,6 +2251,7 @@
 /extensions/potter-db                                               @xmok
 /extensions/power-management                                        @sasivarnan @erics118 @bbatsche @iamyeizi
 /extensions/powertoys-tool-runner                                   @LostViking09 @iml885203 @mitsimi
+/extensions/prayer-times                                            @SMRehan
 /extensions/premier-league                                          @anhthang @jfkisafk @pernielsentikaer
 /extensions/prettier                                                @aeither @jasonwaters @xmok
 /extensions/pretty-pr-link                                          @joaopcm
@@ -2852,6 +2856,7 @@
 /extensions/stripe                                                  @pradeepb28 @farisaziz12 @bradgarropy @remorses @pernielsentikaer
 /extensions/subflow                                                 @ridemountainpig
 /extensions/sublime                                                 @phgn0
+/extensions/subnets                                                 @k1rk
 /extensions/subnoto                                                 @Mikescops
 /extensions/subscription-manager                                    @shivraj-roy
 /extensions/substack                                                @j3lte @alexibuild

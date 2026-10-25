@@ -4,6 +4,9 @@
 
 - Fixed Manage Downloads slowing down and becoming unresponsive on large Downloads folders. Quick Look previews that timed out leaked a background process and a temp directory for every previewed item; timed-out previews are now killed, and starting a new preview cancels the previous one.
 - Quick Look no longer runs for `.zip` and `.ipynb` files. `qlmanage` does not return for either type, so there was never a thumbnail to show.
+## [Add Rename action] - 2026-10-24
+
+- Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
 
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 
