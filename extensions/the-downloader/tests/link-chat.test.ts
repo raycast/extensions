@@ -352,6 +352,14 @@ describe("exports and tool output", () => {
     expect(text).toContain("(The text is longer; this is its start.)");
   });
 
+  it("ends both AI tool answers by reminding the model to reply in the user's language", () => {
+    // The tool text is English; a German question still gets a German answer.
+    const reminder = "Reply in the language of the user's message, not the language of this text.";
+    for (const text of [linkTextForAI(pageWith(2)), linkTextForAI(videoWith(2)), linkInfoForAI(post)]) {
+      expect(text.trimEnd().endsWith(reminder)).toBe(true);
+    }
+  });
+
   it("tells the AI tools what kind of link it is, with moment links only for videos", () => {
     expect(linkInfoForAI(pageWith(2))).toContain("A web page on Example News.");
     expect(linkInfoForAI(pageWith(2))).toContain("Use the read-link tool to read the article.");

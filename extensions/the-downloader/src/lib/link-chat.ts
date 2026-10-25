@@ -313,6 +313,13 @@ export function bodyForSave(ctx: LinkContext): { name: string; content: string }
 }
 
 /** How to link a moment, for models answering from the tool output (videos on YouTube and Vimeo). */
+/**
+ * Last line of every AI tool answer. The tool text is English, and models
+ * sometimes answered a German question in English; the extension's AI
+ * instructions say the same, but the reminder right after the text lands better.
+ */
+const REPLY_LANGUAGE_LINE = "\n\nReply in the language of the user's message, not the language of this text.";
+
 function momentLinkLine(ctx: LinkContext): string {
   const at = (s: number) => timestampUrl(ctx, s);
   return at(0)
@@ -335,7 +342,7 @@ export function linkInfoForAI(ctx: LinkContext): string {
   } else {
     more = "## Content\nUse the read-link tool to read the article.";
   }
-  return `${dossier}\n\n${kind}\n\n${more}${momentLinkLine(ctx)}\n`;
+  return `${dossier}\n\n${kind}\n\n${more}${momentLinkLine(ctx)}${REPLY_LANGUAGE_LINE}\n`;
 }
 
 /** Most text `read-link` hands Raycast AI: a 6-hour transcript or a huge page shouldn't fill its whole context. */
@@ -351,7 +358,7 @@ export function linkTextForAI(ctx: LinkContext): string {
   const body = hasBody(ctx)
     ? `## ${name}\n${text}${cut}`
     : `## ${name}\nNot available${ctx.note ? `: ${ctx.note}` : ""}. Answer from the information above and say that the ${BODY_NAMES[ctx.kind].notes} couldn't be read.`;
-  return `${dossier}\n\n${body}${momentLinkLine(ctx)}\n`;
+  return `${dossier}\n\n${body}${momentLinkLine(ctx)}${REPLY_LANGUAGE_LINE}\n`;
 }
 
 /** A saved conversation as Markdown. */
