@@ -24,7 +24,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -37,7 +36,6 @@
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "tsx": "^4.0.0",
     "typescript": "^5.8.0"
   },
   "platforms": [
