@@ -79,7 +79,7 @@ export function HistoryItem(props: {
   const picture = showDetail ? pictureFile(page.key) : undefined;
   const md = [
     picture ? `![](${pathToFileURL(picture).href}?raycast-height=170)` : "",
-    page.passage ? `> …${passageMarkdown(page.passage)}…` : "",
+    page.passage ? `> ${passageMarkdown(page.passage)}` : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -106,7 +106,10 @@ export function HistoryItem(props: {
                 <List.Item.Detail.Metadata.Link title="Address" text={domain} target={page.url} />
                 <List.Item.Detail.Metadata.Label
                   title="Last Visit"
-                  text={new Date(page.last * 1000).toLocaleString()}
+                  text={new Date(page.last * 1000).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 />
                 <List.Item.Detail.Metadata.Label title="Visits" text={String(page.count)} />
                 {space ? (
