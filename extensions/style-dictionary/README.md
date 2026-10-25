@@ -55,17 +55,6 @@ Use **Enter Copies** in the project settings to choose what <kbd>↵</kbd> copie
 | <kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>1</kbd>–<kbd>9</kbd>                                 | Pin the selected token or group to that slot   |
 | <kbd>⌘</kbd> <kbd>R</kbd>                                                           | Reload the token files                         |
 
-## Development
-
-```sh
-npm install
-npm run dev     # run in Raycast
-npm test
-npm run lint
-```
-
-`examples/tokens` holds a small demo token set (mixed legacy and DTCG files) you can add as a project to try things out.
-
 ## License
 
 MIT

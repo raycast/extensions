@@ -220,7 +220,7 @@ function Level({ project, path, accessory }: LevelProps) {
       filtering={false}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search by name, path, or value (any color format)"
-      navigationTitle={path.length ? path.join(".") : project.name}
+      navigationTitle={path.length ? path.join(".") : undefined}
       searchBarAccessory={accessory}
     >
       {!isLoading && (

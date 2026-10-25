@@ -15,7 +15,7 @@ export type Token = {
 
 export async function loadTokens(dirs: string[]): Promise<Token[]> {
   const sd = new StyleDictionary({
-    source: dirs.map((d) => `${d}/**/*.{json,json5}`),
+    source: dirs.map((d) => `${d.replace(/[?*()[\]{}]/g, "\\$&")}/**/*.{json,json5}`),
     usesDtcg: true,
     hooks: {
       parsers: {
