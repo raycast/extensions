@@ -155,8 +155,8 @@
               "value": "anthropic-claude-sonnet-5-5"
             },
             {
-              "title": "Claude Haiku 4.5",
-              "value": "anthropic-claude-4-5-haiku"
+              "title": "Claude Haiku 5.5",
+              "value": "anthropic-claude-haiku-5-5"
             },
             {
               "title": "GPT-6.1 Sol",
@@ -171,8 +171,8 @@
               "value": "google-gemini-3.8-flash"
             },
             {
-              "title": "Gemini 3.1 Pro",
-              "value": "google-gemini-3.1-pro"
+              "title": "Gemini 4 Argon",
+              "value": "google-gemini-4-argon"
             }
           ]
         },
@@ -914,8 +914,8 @@
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@raycast/api": "^2.7.0",
-    "@raycast/utils": "^2.3.2",
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
     "execa": "^9.6.1",
     "linkedom": "^0.18.13",
     "srt-parser-2": "^1.2.3",
