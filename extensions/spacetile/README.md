@@ -14,13 +14,13 @@ npm run lint
 
 ## Generated commands
 
-The commands come from the app's catalogue (`KeyAction.sections` in `app/Sources/SpacetileCore/KeyCatalog.swift`), so Raycast offers exactly what Settings → Keys lists. After changing it:
+The commands come from Spacetile's catalogue (`KeyAction.sections` in the app's `KeyCatalog.swift`), so Raycast offers exactly what Settings → Keys lists. Every `src/<name>.ts` that starts with a "Generated" header, the matching `commands` in `package.json`, `catalog.json` and `assets/regions/*.png` are generated from the app's source, which isn't part of this extension. Edit them there, not here. Hand-written commands (`run-command`) are left alone.
+
+In a checkout of Spacetile's own repository, run this from the repository root after changing the catalogue, and commit the results:
 
 ```sh
-npm run generate
+app/scripts/raycast-generate
 ```
-
-This runs the app's `spacetile-catalog` tool, which writes `catalog.json` and draws `assets/regions/*.png` for the placement commands, then `scripts/generate.mts`, which writes one `src/<name>.ts` per command and the matching `commands` in `package.json`. Commit the results. Hand-written commands (`run-command`) are listed in the script and left alone.
 
 ## Publishing
 

@@ -720,7 +720,6 @@
     }
   ],
   "scripts": {
-    "generate": "swift run --package-path ../app spacetile-catalog . && node scripts/generate.mts",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
@@ -740,7 +739,6 @@
     "@types/react": "19.0.10",
     "eslint": "^10.12.0",
     "prettier": "^3.9.9",
-    "title-case": "^4.3.2",
     "typescript": "~6.0"
   }
 }
