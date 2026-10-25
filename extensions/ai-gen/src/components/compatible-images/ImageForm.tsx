@@ -2,6 +2,9 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
   Detail,
   Form,
   Icon,
@@ -10,9 +13,13 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
-import { createImage, ImageResult } from "../../lib/compatible-images/images";
+import { useEffect, useRef, useState } from "react";
+import { randomUUID } from "node:crypto";
+import { ImageResult } from "../../lib/compatible-images/images";
 import { getConfig } from "../../lib/compatible-images/config";
+import { modelKey } from "../../lib/compatible-images/provider-settings";
+import { jobsDirectory, latestJob, latestJobKey } from "../../lib/compatible-images/background";
+import { ImageJob, isActive, saveJob } from "../../lib/compatible-images/jobs";
 import ModelPicker from "./ModelPicker";
 import SaveAs from "./SaveAs";
 
@@ -23,38 +30,89 @@ type Values = {
   quality: string;
 };
 export default function Command(props: { initialImage?: string }) {
-  const [busy, setBusy] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [job, setJob] = useState<ImageJob>();
   const [error, setError] = useState<string>();
+  const submission = useRef(false);
+  const submittedJob = useRef<string | undefined>(undefined);
+  const shown = useRef<string | undefined>(undefined);
   const { push } = useNavigation();
+  const busy = submitting || loading || isActive(job);
+  useEffect(() => {
+    let disposed = false;
+    async function refresh() {
+      try {
+        const next = await latestJob();
+        if (!disposed) {
+          setJob(next);
+          setLoading(false);
+        }
+      } catch {
+        if (!disposed) {
+          setError("Could not read the previous image job. Check your saved images before retrying.");
+          setLoading(false);
+        }
+      }
+    }
+    void refresh();
+    const timer = setInterval(refresh, 1500);
+    return () => {
+      disposed = true;
+      clearInterval(timer);
+    };
+  }, []);
+  useEffect(() => {
+    if (
+      job?.status === "succeeded" &&
+      job.result &&
+      shown.current !== job.id &&
+      (!props.initialImage || submittedJob.current === job.id)
+    ) {
+      shown.current = job.id;
+      push(<Result result={job.result} />);
+    }
+  }, [job, push, props.initialImage]);
   async function submit(values: Values) {
-    if (busy) return;
+    if (busy || submission.current) return;
     if (!values.prompt.trim()) {
       setError("Enter an image prompt.");
       return;
     }
-    setBusy(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating image…",
-      message: "This may take several minutes",
-    });
+    submission.current = true;
+    setSubmitting(true);
+    let pending: ImageJob | undefined;
     try {
-      const result = await createImage(await getConfig(), {
-        prompt: values.prompt,
-        imagePath: values.images[0],
-        size: values.size,
-        quality: values.quality,
+      const previous = await latestJob();
+      if (isActive(previous)) {
+        setJob(previous);
+        return;
+      }
+      const config = await getConfig();
+      pending = { id: randomUUID(), startedAt: Date.now(), status: "pending" };
+      await saveJob(jobsDirectory, pending);
+      await LocalStorage.setItem(latestJobKey, pending.id);
+      submittedJob.current = pending.id;
+      setJob(pending);
+      await launchCommand({
+        name: "run-image-job",
+        type: LaunchType.Background,
+        context: {
+          jobId: pending.id,
+          input: { prompt: values.prompt, imagePath: values.images[0], size: values.size, quality: values.quality },
+          providerKey: modelKey(config),
+          model: config.model,
+        },
       });
-      toast.style = Toast.Style.Success;
-      toast.title = "Image saved";
-      toast.message = undefined;
-      push(<Result result={result} />);
+      await showToast({ title: "Creating image in background", message: "You can close this window and return later" });
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not create image";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : "Could not start image job";
+      // A launch error may be ambiguous. Leave any created job pending rather than retrying it.
+      setError(message);
+      await showToast({ style: Toast.Style.Failure, title: "Could not start image job", message });
     } finally {
-      setBusy(false);
+      submission.current = false;
+      setSubmitting(false);
     }
   }
   return (
@@ -63,11 +121,28 @@ export default function Command(props: { initialImage?: string }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title={busy ? "Creating Image…" : "Create Image"} icon={Icon.Stars} onSubmit={submit} />
+          {job?.result && (
+            <Action.Push title="View Latest Image" icon={Icon.Image} target={<Result result={job.result} />} />
+          )}
           <Action.Push title="Choose Default Model" icon={Icon.Gear} target={<ModelPicker />} />
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
+      {job && (
+        <Form.Description
+          title="Latest Image Job"
+          text={
+            isActive(job)
+              ? "Creating in background. You can close Raycast and return here later."
+              : job.status === "failed"
+              ? job.error || "Image creation failed."
+              : job.status === "succeeded"
+              ? "Image saved. Use View Latest Image in the action menu."
+              : "Job status unknown: Raycast may have stopped it. Check your provider and saved images before submitting again; it will not retry automatically."
+          }
+        />
+      )}
       <Form.Description text="Set Image Provider Base URL and Image Provider API Key in extension preferences, then use Choose Default Model in the action menu (⌘K)." />
       <Form.TextArea
         id="prompt"

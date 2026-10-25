@@ -4,7 +4,7 @@ The OpenAI Generator extension uses the OpenAI [Image Generation](https://beta.o
 
 ## Usage
 
-This extension provides 5 commands:
+This extension provides 5 main commands:
 
 1. **Complete Text** - uses the GPT-3 AI models to generate a text completion that attempts to match whatever context or pattern you gave it
 2. **Create Image** - uses the DALL•E AI model to generate new images
@@ -47,6 +47,8 @@ The [GPT-3](https://beta.openai.com/docs/models/gpt-3) Text Completion API is pr
 2. Open **Generate or Edit Image**, then **⌘K → Choose Default Model**. Select a discovered model or enter its exact ID manually. Model discovery is optional and does not establish Images API compatibility or generate a billable test image.
 3. Enter a prompt. Optionally choose one PNG, JPEG, or WebP reference image to edit it. This workflow does not send a mask; the provider and model must support mask-free editing. Use **Create Image Edit** for the original OpenAI mask workflow.
 
+**Background generation:** the form launches a separate **Run Image Job** helper command (keep it enabled). You can dismiss the window or use another command, then reopen **Generate or Edit Image** to recover the latest result. Job status and the resulting file path are saved locally, without API keys or prompts. This is not a system service: quitting Raycast, restarting the extension, or Raycast’s execution limits can interrupt it. After ten minutes without a recorded outcome, the form shows an unknown status; check the provider and output folder before submitting again. No job is retried automatically. The AI tools keep their existing invocation lifecycle.
+
 The model selection is stored separately for each provider URL and key. Reopen the picker after changing provider settings. Images are saved to `~/Pictures/OpenAI Generator/`, or **Save Provider Images To**. Results support opening, copying, revealing in Finder, editing again, and **Save as…**. Save As keeps the original and refuses to overwrite another file or convert formats.
 
 In Raycast AI Chat, select **OpenAI Generator** (`@ai-gen`) to use its generation and editing tools with the same custom-provider settings and saved model. Editing requires an accessible absolute local file path, with a confirmation showing the file, destination, model and instructions before upload. Chat attachments without local paths must be saved first or selected through the form. Local previews depend on Raycast; tool results also contain the file path.
@@ -65,7 +67,7 @@ In Raycast AI Chat, select **OpenAI Generator** (`@ai-gen`) to use its generatio
 
 Run `npm ci`, `npm run build`, `npm run check`, and `npm run lint`. The mock tests cover provider routing, credential separation, model discovery, multipart uploads, bounded responses and non-overwriting saves without calling a paid API.
 
-Generation was confirmed with a real API in the original Image Atelier extension. On 2026-10-25, the integrated development command was opened in Raycast and its form layout was visually checked. Real-provider editing, interactive end-to-end checks and regression testing of the original commands under the upgraded SDK remain outstanding.
+The user confirmed successful generation with `gpt-image-2.5` in the integrated command on 2026-10-25. The background handoff and window-dismissal behavior still need a real Raycast run. On 2026-10-25, the integrated development command was opened in Raycast and its form layout was visually checked. Real-provider editing, interactive end-to-end checks and regression testing of the original commands under the upgraded SDK remain outstanding.
 
 The following is an unmodified capture of the integrated command in development mode (including its local-extension indicator), not a Store-formatted screenshot or evidence of successful API generation/editing.
 

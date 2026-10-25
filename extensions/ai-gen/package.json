@@ -50,6 +50,12 @@
       "subtitle": "OpenAI-Compatible Provider",
       "description": "Generate or edit an image with your own provider and model, then save it locally",
       "mode": "view"
+    },
+    {
+      "name": "run-image-job",
+      "title": "Run Image Job",
+      "description": "Runs a submitted Generate or Edit Image request in the background",
+      "mode": "no-view"
     }
   ],
   "preferences": [
