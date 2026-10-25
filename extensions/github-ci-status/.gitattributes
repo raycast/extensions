@@ -1,0 +1,2 @@
+# Preserve the upstream signed app byte-for-byte, including its text resources.
+assets/notification-helper/terminal-notifier.app/** -text -diff -whitespace
