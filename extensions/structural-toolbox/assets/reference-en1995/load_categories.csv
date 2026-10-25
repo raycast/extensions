@@ -1,0 +1,46 @@
+key,NA,id,element,qk_area,Qk_point,psi0,psi1,psi2,ldc,reference,status
+EN|A-floors,EN,A-floors,Floor,2.0,2.0,0.7,0.5,0.3,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|A-floors,NL,A-floors,Floor,1.75,3.0,0.4,0.5,0.3,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|A-floors,UK,A-floors,Floor,2.0,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|A-floors,DE,A-floors,Floor,2.0,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|A-stairs,EN,A-stairs,Floor,3.0,2.0,0.7,0.5,0.3,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|A-stairs,NL,A-stairs,Floor,2.0,3.0,0.4,0.5,0.3,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|A-stairs,UK,A-stairs,Floor,3.0,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|A-stairs,DE,A-stairs,Floor,3.0,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|A-balconies,EN,A-balconies,Floor,2.5,2.0,0.7,0.5,0.3,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|A-balconies,NL,A-balconies,Floor,2.5,3.0,0.4,0.5,0.3,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|A-balconies,UK,A-balconies,Floor,2.5,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|A-balconies,DE,A-balconies,Floor,2.5,2.0,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|B-offices,EN,B-offices,Floor,3.0,4.5,0.7,0.5,0.3,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|B-offices,NL,B-offices,Floor,2.5,3.0,0.5,0.5,0.3,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|B-offices,UK,B-offices,Floor,3.0,4.5,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|B-offices,DE,B-offices,Floor,3.0,4.5,0.7,0.5,0.3,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|C1-tables,EN,C1-tables,Floor,3.0,4.0,0.7,0.7,0.6,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|C1-tables,NL,C1-tables,Floor,3.0,4.0,0.6,0.7,0.6,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|C1-tables,UK,C1-tables,Floor,3.0,4.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|C1-tables,DE,C1-tables,Floor,3.0,4.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|C3-no-obstacles,EN,C3-no-obstacles,Floor,5.0,4.0,0.7,0.7,0.6,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|C3-no-obstacles,NL,C3-no-obstacles,Floor,5.0,4.0,0.6,0.7,0.6,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|C3-no-obstacles,UK,C3-no-obstacles,Floor,5.0,4.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|C3-no-obstacles,DE,C3-no-obstacles,Floor,5.0,4.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|D1-retail,EN,D1-retail,Floor,5.0,5.0,0.7,0.7,0.6,Medium-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|D1-retail,NL,D1-retail,Floor,4.0,4.0,0.4,0.7,0.6,Medium-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|D1-retail,UK,D1-retail,Floor,5.0,5.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|D1-retail,DE,D1-retail,Floor,5.0,5.0,0.7,0.7,0.6,Medium-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|E1-storage,EN,E1-storage,Floor,7.5,7.0,1.0,0.9,0.8,Long-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|E1-storage,NL,E1-storage,Floor,5.0,7.0,1.0,0.9,0.8,Long-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|E1-storage,UK,E1-storage,Floor,7.5,7.0,1.0,0.9,0.8,Long-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|E1-storage,DE,E1-storage,Floor,7.5,7.0,1.0,0.9,0.8,Long-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|H-roof,EN,H-roof,Roof,0.4,1.0,0.0,0.0,0.0,Short-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|H-roof,NL,H-roof,Roof,1.0,1.5,0.0,0.0,0.0,Short-term,NEN-EN 1991-1-1/NB cat. H: q_k = 1.0 kN/m2 for pitch <= 15 deg; 4 - 0.2 alpha for 15-20 deg; 0 for >= 20 deg (slope rule: LIB_NA roofH_a1 / roofH_a2); acts on roof elements up to 10 m2,VERIFY against NB text
+UK|H-roof,UK,H-roof,Roof,0.4,1.0,0.0,0.0,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|H-roof,DE,H-roof,Roof,0.4,1.0,0.0,0.0,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|Snow,EN,Snow,Roof,0,0,0.5,0.2,0.0,Short-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|Snow,NL,Snow,Roof,0,0,0.0,0.2,0.0,Short-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|Snow,UK,Snow,Roof,0,0,0.5,0.2,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|Snow,DE,Snow,Roof,0,0,0.5,0.2,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+EN|Wind,EN,Wind,Any,0,0,0.6,0.2,0.0,Short-term,EN 1991-1-1 Table 6.2 (recommended value); EN 1990 Table A1.1; EN 1995-1-1 Table 2.2,VERIFY recommended value
+NL|Wind,NL,Wind,Any,0,0,0.0,0.2,0.0,Short-term,NEN-EN 1991-1-1/NB; NEN-EN 1990/NB Table A1.1; NEN-EN 1995-1-1/NB (values from user reference workbook),VERIFY
+UK|Wind,UK,Wind,Any,0,0,0.6,0.2,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+DE|Wind,DE,Wind,Any,0,0,0.6,0.2,0.0,Short-term,copied from EN recommended values - replace with NA values,VERIFY (copied from EN)
+User|A-floors,User,A-floors,Floor,1.75,3.0,0.4,0.5,0.3,Medium-term,user defined,USER

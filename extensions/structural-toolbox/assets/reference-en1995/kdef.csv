@@ -1,0 +1,6 @@
+kdef_class,SC1,SC2,SC3,reference
+Solid,0.60,0.80,2.00,EN 1995-1-1 Table 3.2 (solid timber; glulam; LVL)
+CLT,0.80,1.00,0,product ETA (typical); SC3 not permitted
+Plywood3,0.80,1.00,2.50,EN 1995-1-1 Table 3.2 (EN 636 Part 3)
+OSB3,1.50,2.25,0,EN 1995-1-1 Table 3.2 (OSB/3 and OSB/4); SC3 not permitted
+Particle5,2.25,3.00,0,EN 1995-1-1 Table 3.2 (particleboard P5); SC3 not permitted
