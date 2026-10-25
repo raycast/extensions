@@ -72,6 +72,7 @@ export function getAnthropicApiAccessory(
   if (error) {
     if (error.type === "not_configured") return { text: "Not Configured", tooltip: error.message };
     if (error.type === "unauthorized") return { text: "Session Expired", tooltip: error.message };
+    if (error.type === "billing_denied") return { text: "Billing Access Denied", tooltip: error.message };
     if (error.type === "network_error") return { text: "Network Error", tooltip: error.message };
     if (error.type === "parse_error") return { text: "Parse Error", tooltip: error.message };
     return { text: "Error", tooltip: error.message };

@@ -21,6 +21,6 @@ export interface AnthropicApiUsage {
 }
 
 export interface AnthropicApiError {
-  type: "not_configured" | "unauthorized" | "network_error" | "parse_error" | "unknown";
+  type: "not_configured" | "unauthorized" | "billing_denied" | "network_error" | "parse_error" | "unknown";
   message: string;
 }

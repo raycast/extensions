@@ -72,6 +72,35 @@ test("parseOpenAICreditGrants accepts a summary without grants", () => {
   assert.equal(result.usage?.nextExpiringGrant, null);
 });
 
+test("parseOpenAICreditGrants rejects a malformed used amount instead of counting it as unspent", () => {
+  const result = parseOpenAICreditGrants(
+    {
+      total_granted: 10,
+      total_used: 8,
+      total_available: 2,
+      grants: { data: [{ grant_amount: 10, used_amount: "8", expires_at: inDays(30) }] },
+    },
+    now,
+  );
+
+  assert.equal(result.usage, null);
+  assert.equal(result.error?.type, "parse_error");
+});
+
+test("parseOpenAICreditGrants treats a missing used amount as nothing spent", () => {
+  const result = parseOpenAICreditGrants(
+    {
+      total_granted: 10,
+      total_used: 0,
+      total_available: 10,
+      grants: { data: [{ grant_amount: 10, expires_at: inDays(30) }] },
+    },
+    now,
+  );
+
+  assert.equal(result.usage?.nextExpiringGrant?.remaining, 10);
+});
+
 test("parseOpenAICreditGrants rejects malformed responses", () => {
   assert.equal(parseOpenAICreditGrants(null).error?.type, "parse_error");
   assert.equal(

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { HttpFetchOptions, HttpFetchResult } from "../agents/http.ts";
 import {
+  fetchAnthropicApiUsage,
   normalizeAnthropicConsoleCookie,
   parseAnthropicCurrentSpend,
   parseAnthropicPrepaidCredits,
@@ -108,4 +110,103 @@ test("parseAnthropicCurrentSpend reads month-to-date spend or reports it unavail
   assert.equal(parseAnthropicCurrentSpend({ amount: 4210 }, 3), 4.21);
   assert.equal(parseAnthropicCurrentSpend({ amount: -1 }), null);
   assert.equal(parseAnthropicCurrentSpend({}), null);
+});
+
+/** A Console stand-in keyed by URL path that answers like `httpFetch`, recording each request. */
+function fakeConsole(routes: Record<string, { status: number; data?: unknown }>) {
+  const requested: string[] = [];
+  const request = async (options: HttpFetchOptions): Promise<HttpFetchResult> => {
+    const path = new URL(options.url).pathname;
+    requested.push(path);
+    const route = routes[path] ?? { status: 404 };
+    if (route.status === 401) {
+      return { data: null, error: { type: "unauthorized", message: options.unauthorizedMessage ?? "" }, status: 401 };
+    }
+    if (route.status === 403 && options.forbiddenMessage) {
+      return { data: null, error: { type: "unauthorized", message: options.forbiddenMessage }, status: 403 };
+    }
+    if (route.status >= 400) {
+      return { data: null, error: { type: "unknown", message: `HTTP ${route.status}` }, status: route.status };
+    }
+    return { data: route.data, error: null, status: route.status };
+  };
+  return { request, requested };
+}
+
+const apiOrganizations = {
+  status: 200,
+  data: [
+    { uuid: "org-1", name: "Denied", capabilities: ["api"] },
+    { uuid: "org-2", name: "Readable", capabilities: ["api"] },
+  ],
+};
+
+test("fetchAnthropicApiUsage moves past an organization whose billing is denied", async () => {
+  const { request, requested } = fakeConsole({
+    "/api/organizations": apiOrganizations,
+    "/api/organizations/org-1/prepaid/credits": { status: 403 },
+    "/api/organizations/org-2/prepaid/credits": { status: 200, data: { amount: 5000, currency: "USD" } },
+    "/api/organizations/org-2/current_spend": { status: 200, data: { amount: 125 } },
+  });
+
+  const result = await fetchAnthropicApiUsage("sessionKey=sk-ant-sid01-abc", request);
+
+  assert.equal(result.error, null);
+  assert.equal(result.usage?.organizationName, "Readable");
+  assert.equal(result.usage?.balance, 50);
+  assert.equal(result.usage?.monthToDateSpend, 1.25);
+  assert.deepEqual(requested, [
+    "/api/organizations",
+    "/api/organizations/org-1/prepaid/credits",
+    "/api/organizations/org-2/prepaid/credits",
+    "/api/organizations/org-2/current_spend",
+  ]);
+});
+
+test("fetchAnthropicApiUsage reports denied billing, not an expired session, when no organization is readable", async () => {
+  const { request, requested } = fakeConsole({
+    "/api/organizations": apiOrganizations,
+    "/api/organizations/org-1/prepaid/credits": { status: 403 },
+    "/api/organizations/org-2/prepaid/credits": { status: 403 },
+  });
+
+  const result = await fetchAnthropicApiUsage("sessionKey=sk-ant-sid01-abc", request);
+
+  assert.equal(result.usage, null);
+  assert.equal(result.error?.type, "billing_denied");
+  assert.equal(requested.includes("/api/organizations/org-2/current_spend"), false);
+});
+
+test("fetchAnthropicApiUsage keeps the balance when the optional spend request fails", async () => {
+  const { request } = fakeConsole({
+    "/api/organizations": { status: 200, data: [{ uuid: "org-1", name: "Personal", capabilities: ["api"] }] },
+    "/api/organizations/org-1/prepaid/credits": { status: 200, data: { amount: 1999, currency: "USD" } },
+    "/api/organizations/org-1/current_spend": { status: 500 },
+  });
+
+  const result = await fetchAnthropicApiUsage("sessionKey=sk-ant-sid01-abc", request);
+
+  assert.equal(result.error, null);
+  assert.equal(result.usage?.balance, 19.99);
+  assert.equal(result.usage?.monthToDateSpend, null);
+});
+
+test("fetchAnthropicApiUsage treats a rejected organization list as an expired session", async () => {
+  const { request, requested } = fakeConsole({ "/api/organizations": { status: 403 } });
+
+  const result = await fetchAnthropicApiUsage("sessionKey=sk-ant-sid01-expired", request);
+
+  assert.equal(result.error?.type, "unauthorized");
+  assert.match(result.error?.message ?? "", /session expired/i);
+  assert.deepEqual(requested, ["/api/organizations"]);
+});
+
+test("fetchAnthropicApiUsage asks for a Console organization when the account only has chat organizations", async () => {
+  const { request } = fakeConsole({
+    "/api/organizations": { status: 200, data: [{ uuid: "chat-org", name: "Chat", capabilities: ["chat"] }] },
+  });
+
+  const result = await fetchAnthropicApiUsage("sessionKey=sk-ant-sid01-abc", request);
+
+  assert.equal(result.error?.type, "not_configured");
 });

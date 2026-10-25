@@ -1,4 +1,5 @@
 import { httpFetch } from "../agents/http.ts";
+import type { HttpFetchOptions, HttpFetchResult } from "../agents/http.ts";
 import type { AnthropicApiCreditGrant, AnthropicApiError, AnthropicApiUsage } from "./types.ts";
 
 // Undocumented Console endpoints behind platform.claude.com/settings/billing. The Admin API reports
@@ -22,6 +23,7 @@ const BILLING_DENIED_MESSAGE =
   "Claude Console billing access was denied for every API organization on this account. Ask the organization owner for billing access.";
 
 type AnthropicApiResult = { usage: AnthropicApiUsage | null; error: AnthropicApiError | null };
+type ConsoleRequest = (options: HttpFetchOptions) => Promise<HttpFetchResult>;
 
 export interface ConsoleOrganization {
   id: string;
@@ -171,10 +173,13 @@ export function parseAnthropicCurrentSpend(data: unknown, exponent = 2): number 
   return amount === undefined || amount < 0 ? null : amount / 10 ** exponent;
 }
 
-export async function fetchAnthropicApiUsage(cookieHeader: string): Promise<AnthropicApiResult> {
+export async function fetchAnthropicApiUsage(
+  cookieHeader: string,
+  request: ConsoleRequest = httpFetch,
+): Promise<AnthropicApiResult> {
   const headers = { ...CONSOLE_HEADERS, Cookie: cookieHeader };
   // The organization list doubles as the session check; a rejected cookie answers 403.
-  const organizationsResponse = await httpFetch({
+  const organizationsResponse = await request({
     url: `${CONSOLE_ORIGIN}/api/organizations`,
     headers,
     unauthorizedMessage: SESSION_EXPIRED_MESSAGE,
@@ -199,7 +204,7 @@ export async function fetchAnthropicApiUsage(cookieHeader: string): Promise<Anth
 
   // The first organization whose billing this member can read wins; 403 moves to the next one.
   for (const organization of organizations) {
-    const creditsResponse = await httpFetch({
+    const creditsResponse = await request({
       url: `${CONSOLE_ORIGIN}/api/organizations/${organization.id}/prepaid/credits`,
       headers,
       unauthorizedMessage: SESSION_EXPIRED_MESSAGE,
@@ -211,7 +216,7 @@ export async function fetchAnthropicApiUsage(cookieHeader: string): Promise<Anth
     if (!result.usage) return result;
 
     // Spend is optional: a broken report must not discard an authenticated balance.
-    const spendResponse = await httpFetch({
+    const spendResponse = await request({
       url: `${CONSOLE_ORIGIN}/api/organizations/${organization.id}/current_spend`,
       headers,
     });
@@ -220,5 +225,5 @@ export async function fetchAnthropicApiUsage(cookieHeader: string): Promise<Anth
     return { usage: { ...result.usage, monthToDateSpend }, error: null };
   }
 
-  return { usage: null, error: { type: "unauthorized", message: BILLING_DENIED_MESSAGE } };
+  return { usage: null, error: { type: "billing_denied", message: BILLING_DENIED_MESSAGE } };
 }

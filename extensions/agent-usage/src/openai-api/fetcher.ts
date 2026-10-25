@@ -53,9 +53,10 @@ export function parseOpenAICreditGrants(data: unknown, now = Date.now()): OpenAI
       if (!raw || typeof raw !== "object") return parseError("grant");
       const grant = raw as Record<string, unknown>;
       const granted = amount(grant.grant_amount);
-      const used = amount(grant.used_amount) ?? 0;
+      const used = grant.used_amount === undefined || grant.used_amount === null ? 0 : amount(grant.used_amount);
       const expiresAt = amount(grant.expires_at);
       if (granted === undefined) return parseError("grant amount");
+      if (used === undefined) return parseError("grant used amount");
       // Expiry is unix seconds; a grant without one never lapses.
       if (expiresAt === undefined || expiresAt * 1000 <= now || granted - used <= 0) continue;
       if (!nextExpiringGrant || expiresAt * 1000 < Date.parse(nextExpiringGrant.expiresAt)) {
