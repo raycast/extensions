@@ -45,15 +45,18 @@ Built strictly according to [Raycast Extension Guidelines](https://developers.ra
 
 ## 🛠️ Configuration & Preferences
 
+### Raycast Preferences
 Go to **Raycast Preferences → Extensions → Dynamic Island**:
 
-- **Display Mode**: Auto-detect MacBook Notch, Always Notch, or Floating Pill.
-- **Hover to Expand**: Expand the notch island when your mouse pointer hovers over the camera housing.
-- **Show Media in Menu**: Toggle Now Playing widget in the island menu.
-- **Show Volume Mixer in Menu**: Toggle Volume Mixer in the island menu.
-- **Show System in Menu**: Toggle System Stats in the island menu.
-- **Show Timer in Menu**: Toggle Focus Timer in the island menu.
-- **Show Calendar in Menu**: Toggle Calendar in the island menu.
+- **Display Mode**: Choose how the island anchors (`Auto-detect MacBook Notch`, `Always Notch`, or `Floating Pill`).
+- **Hover to Expand**: Automatically expand the island when your mouse cursor hovers over the notch.
+
+### Dynamic Island Settings
+Open the **Dynamic Island Settings** command in Raycast to manage widget visibility and system monitors interactively:
+
+- **Widget Visibility**: Toggle Now Playing, Volume Mixer, System Stats, Focus Timer, and Calendar widgets on the island menu.
+- **System Metric Cards**: Customize which hardware metrics (CPU, GPU, Memory, Battery, Network, and Disk) appear on the notch.
+- **Hardware Notch & Daemon Controls**: Adjust hover timing, restart the native background engine, or manage notch silhouette options.
 
 ---
 
