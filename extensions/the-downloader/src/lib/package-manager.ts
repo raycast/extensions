@@ -6,6 +6,7 @@ import { downloadSpotdl, getInstalledVersion, getLatestRelease, isManagedBinary 
 import { HOMEBREW_FORMULAE, isWingetUpdateNotApplicable, WINGET_PACKAGES } from "./tools.js";
 import { resetWingetPackagesCache } from "./binary.js";
 import { PackageIssue } from "./tool-status.js";
+import { wingetRow } from "./winget.js";
 
 /** Caps for package-manager calls, so a wedged brew/winget can't hang a check or an upgrade forever. */
 const CHECK_TIMEOUT_MS = 90_000;
@@ -109,15 +110,9 @@ export async function checkOutdated(): Promise<{ outdated: Record<string, string
     try {
       const wingetPath = await getWingetPath();
       const { stdout: upgradeOutput } = await execa(wingetPath, ["upgrade"], { timeout: CHECK_TIMEOUT_MS });
-      for (const line of upgradeOutput.split("\n")) {
-        for (const pkg of WINGET_PACKAGES) {
-          if (line.includes(pkg)) {
-            const versionMatch = line.match(/(\d+\.)+\d+/g);
-            if (versionMatch && versionMatch.length >= 2) {
-              outdated[pkg] = versionMatch[1];
-            }
-          }
-        }
+      for (const pkg of WINGET_PACKAGES) {
+        const available = wingetRow(upgradeOutput, pkg)?.available;
+        if (available) outdated[pkg] = available;
       }
     } catch (error) {
       issues.push({ pkg: "winget", message: errorMessageOf(error) });

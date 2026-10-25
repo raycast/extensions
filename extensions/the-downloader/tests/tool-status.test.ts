@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toolStatus, versionReport } from "../src/lib/tool-status";
+import { displayVersion, toolStatus, versionReport } from "../src/lib/tool-status";
 
 describe("toolStatus", () => {
   const versions = { "yt-dlp": "2026.08.19", ffmpeg: "8.0", deno: "not installed", monolith: "" };
@@ -40,5 +40,17 @@ describe("versionReport", () => {
         { name: "Deno", status: { kind: "missing" } },
       ]),
     ).toBe("yt-dlp: 1 (update available: 2)\nDeno: not installed");
+  });
+});
+
+describe("displayVersion", () => {
+  it("shows FFmpeg for yt-dlp's nightly build by its date, so the row's status still fits", () => {
+    expect(displayVersion("N-127043-g5a54fcf75e-20260930")).toBe("2026.09.30");
+  });
+
+  it("leaves every other version as it is", () => {
+    expect(displayVersion("2026.10.21")).toBe("2026.10.21");
+    expect(displayVersion("8.0")).toBe("8.0");
+    expect(displayVersion("< 1.32.0")).toBe("< 1.32.0");
   });
 });

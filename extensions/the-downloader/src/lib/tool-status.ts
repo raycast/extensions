@@ -27,6 +27,16 @@ export function toolStatus(
   return { kind: "current", version };
 }
 
+/**
+ * A version short enough for the Updater's row: winget's FFmpeg for yt-dlp is a
+ * nightly build versioned `N-127043-g5a54fcf75e-20260930`, shown as its build
+ * date `2026.09.30` (yt-dlp's own style) so the status tag beside it still fits.
+ */
+export function displayVersion(version: string): string {
+  const nightly = /^N-\d+-g[0-9a-f]+-(\d{4})(\d{2})(\d{2})$/.exec(version);
+  return nightly ? `${nightly[1]}.${nightly[2]}.${nightly[3]}` : version;
+}
+
 /** Plain-text summary of every tool, for "Copy Version Info". */
 export function versionReport(rows: { name: string; status: ToolStatus }[]): string {
   return rows

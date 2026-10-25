@@ -6,8 +6,9 @@ import { getHomebrewPath, getSpotdlPath, getWingetPath, isMac, isWindows } from 
 import { getInstalledVersion } from "../lib/managed-binary.js";
 import { friendlyNameFor, HOMEBREW_FORMULAE, toolInfoFor, WINGET_PACKAGES } from "../lib/tools.js";
 import { checkOutdated, errorMessageOf, upgrade } from "../lib/package-manager.js";
+import { isWingetNotInstalled, wingetRow } from "../lib/winget.js";
 import { clearToolCheckCache } from "../lib/tool-updates.js";
-import { PackageIssue, ToolStatus, toolStatus, versionReport } from "../lib/tool-status.js";
+import { displayVersion, PackageIssue, ToolStatus, toolStatus, versionReport } from "../lib/tool-status.js";
 
 type CheckResult = { versions: Record<string, string>; outdated: Record<string, string>; checkIssues: PackageIssue[] };
 
@@ -31,6 +32,11 @@ function statusIcon(status: ToolStatus, upgrading: boolean): Image.ImageLike {
   }
 }
 
+/** The installed version, shortened to fit the row; the full one is in the tooltip. */
+function versionText(version: string): List.Item.Accessory {
+  return { text: displayVersion(version), tooltip: version };
+}
+
 function statusAccessories(status: ToolStatus, upgrading: boolean): List.Item.Accessory[] {
   if (upgrading) return [{ tag: { value: "Upgrading…", color: Color.Blue } }];
   switch (status.kind) {
@@ -39,17 +45,20 @@ function statusAccessories(status: ToolStatus, upgrading: boolean): List.Item.Ac
     case "missing":
       return [{ tag: { value: "Not Installed", color: Color.SecondaryText } }];
     case "current":
-      return [{ text: status.version }, { tag: { value: "Up to Date", color: Color.Green } }];
+      return [versionText(status.version), { tag: { value: "Up to Date", color: Color.Green } }];
     case "outdated":
-      return [{ text: status.version }, { tag: { value: `Update → ${status.latest}`, color: Color.Yellow } }];
+      return [
+        versionText(status.version),
+        { tag: { value: `Update → ${displayVersion(status.latest)}`, color: Color.Yellow }, tooltip: status.latest },
+      ];
     case "check-failed":
       return [
-        ...(status.version ? [{ text: status.version }] : []),
+        ...(status.version ? [versionText(status.version)] : []),
         { tag: { value: "Check Failed", color: Color.Orange }, tooltip: status.message },
       ];
     case "upgrade-failed":
       return [
-        ...(status.version ? [{ text: status.version }] : []),
+        ...(status.version ? [versionText(status.version)] : []),
         { tag: { value: "Upgrade Failed", color: Color.Red }, tooltip: status.message },
       ];
   }
@@ -274,8 +283,18 @@ async function getVersions(): Promise<{ versions: Record<string, string>; issues
       const wingetPath = await getWingetPath();
       for (const pkg of WINGET_PACKAGES) {
         try {
-          const { stdout } = await execa(wingetPath, ["list", "--id", pkg, "--exact"]);
-          versions[pkg] = parseWingetVersion(stdout, pkg);
+          // winget exits non-zero for a package that isn't installed — that's an
+          // answer, not a failed check, so read the exit code instead of throwing.
+          const { stdout, exitCode } = await execa(wingetPath, ["list", "--id", pkg, "--exact"], { reject: false });
+          const row = wingetRow(stdout, pkg);
+          if (isWingetNotInstalled(exitCode)) {
+            versions[pkg] = "not installed";
+          } else if (exitCode === 0 && row) {
+            versions[pkg] = row.version;
+          } else {
+            versions[pkg] = "";
+            issues.push({ pkg, message: stdout.trim() || `winget exited with code ${exitCode}` });
+          }
         } catch (error) {
           versions[pkg] = "";
           issues.push({ pkg, message: errorMessageOf(error) });
@@ -288,17 +307,4 @@ async function getVersions(): Promise<{ versions: Record<string, string>; issues
   }
   versions["spotdl"] = await getSpotdlVersion();
   return { versions, issues };
-}
-
-function parseWingetVersion(output: string, packageId: string): string {
-  const lines = output.split("\n");
-  for (const line of lines) {
-    if (line.includes(packageId)) {
-      const versionMatch = line.match(/(\d+\.)+\d+/);
-      if (versionMatch) {
-        return versionMatch[0];
-      }
-    }
-  }
-  return "";
 }
