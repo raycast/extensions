@@ -18,14 +18,16 @@
     {
       "name": "search-tabs",
       "title": "Search Firefox Tabs",
+      "subtitle": "Firefox",
       "description": "Search open Firefox tabs by title or URL",
       "mode": "view"
     },
     {
       "name": "setup-bridge",
-      "title": "Setup Firefox Bridge",
-      "description": "Register the native messaging host with Firefox",
-      "mode": "no-view"
+      "title": "Set up Firefox Bridge",
+      "subtitle": "Firefox",
+      "description": "Install the native host and check the companion extension in each Firefox profile",
+      "mode": "view"
     }
   ],
   "dependencies": {

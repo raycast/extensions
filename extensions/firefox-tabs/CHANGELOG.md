@@ -1,6 +1,27 @@
-# firefox-tabs Changelog
+# Firefox Tabs Changelog
 
-## [Fix Typing Lag With Many Tabs] - {PR_MERGE_DATE}
+## [Fix Setup After Raycast Updates] - {PR_MERGE_DATE}
+
+- Fix installing or updating the native host failing with "file already exists" after Raycast moved its bundled Node.js
+
+## [Automatic Native Host Updates] - {PR_MERGE_DATE}
+
+- Install a pinned native host release and check it against hashes shipped with the extension
+- Update an older native host automatically when Search Firefox Tabs or Set up Firefox Bridge opens, then reconnect each Firefox profile to it
+
+## [Profile Setup] - {PR_MERGE_DATE}
+
+- Search Firefox Tabs lists running profiles that are missing the companion extension, with an action to install it in that profile
+- Offer to install the companion extension, instead of native host setup, when Firefox is running without it
+- Set up Firefox Bridge (renamed from Setup Firefox Bridge) shows the native host and every Firefox profile with what each one still needs, and only downloads the native host when it isn't installed
+
+## [Multiple Firefox Profiles] - {PR_MERGE_DATE}
+
+- Show tabs from every running Firefox profile, not just one
+- Switch to and close tabs in the profile they belong to
+- Show each profile's avatar and color on its window tags, and filter tabs by profile from the search bar
+
+## [Fix Typing Lag With Many Tabs] - 2026-10-24
 
 - Cache favicons as files so searching stays responsive with hundreds of open tabs
 

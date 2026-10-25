@@ -1,7 +1,8 @@
 import { accessSync, constants, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
-import { join, resolve } from "path";
+import { dirname, join, resolve } from "path";
 import { environment } from "@raycast/api";
+import { MANIFEST_PATH } from "./manifest";
 
 // -- Firefox detection --
 
@@ -50,7 +51,7 @@ export function resolveNativeHostPath(): string {
   }
 
   // Neither found
-  throw new Error("Native host not found. Run the 'Setup Firefox Bridge' command to install it.");
+  throw new Error("Native host not found. Run the Set up Firefox Bridge command to install it.");
 }
 
 // -- Manifest generation --
@@ -72,6 +73,19 @@ export function generateManifest(runShPath: string): string {
   );
 }
 
+// -- Manifest location --
+
+export { MANIFEST_PATH, isNativeHostRegistered } from "./manifest";
+
+/** Version of the installed native host bundle, or null if it isn't installed. */
+export function installedHostVersion(): string | null {
+  try {
+    return readFileSync(join(homedir(), ".raycast-firefox", "bin", "version.txt"), "utf-8").trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 // -- Manifest writing --
 
 /**
@@ -82,11 +96,9 @@ export function generateManifest(runShPath: string): string {
  * the manifest was written.
  */
 export function writeManifest(manifestJson: string): string {
-  const targetDir = join(homedir(), "Library", "Application Support", "Mozilla", "NativeMessagingHosts");
-  mkdirSync(targetDir, { recursive: true });
-  const manifestPath = join(targetDir, "raycast_firefox.json");
-  writeFileSync(manifestPath, manifestJson, "utf-8");
-  return manifestPath;
+  mkdirSync(dirname(MANIFEST_PATH), { recursive: true });
+  writeFileSync(MANIFEST_PATH, manifestJson, "utf-8");
+  return MANIFEST_PATH;
 }
 
 // -- Manifest validation --
@@ -132,56 +144,5 @@ export function validateManifest(manifestPath: string, expectedRunShPath: string
       valid: false,
       error: `Failed to read/parse manifest: ${err instanceof Error ? err.message : String(err)}`,
     };
-  }
-}
-
-// -- Chain verification --
-
-/**
- * Verify the full communication chain by pinging the native host HTTP server.
- *
- * - Hit /health to check if the host is reachable
- * - If healthy, hit /tabs to check if the WebExtension is connected
- * - Catches all errors gracefully (connection refused, timeout, etc.)
- */
-export async function verifyChain(port: number): Promise<{ reachable: boolean; tabsOk: boolean }> {
-  try {
-    const healthRes = await fetch(`http://127.0.0.1:${port}/health`, {
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!healthRes.ok) {
-      return { reachable: false, tabsOk: false };
-    }
-
-    try {
-      const tabsRes = await fetch(`http://127.0.0.1:${port}/tabs`, {
-        signal: AbortSignal.timeout(3000),
-      });
-      return { reachable: true, tabsOk: tabsRes.ok };
-    } catch {
-      return { reachable: true, tabsOk: false };
-    }
-  } catch {
-    return { reachable: false, tabsOk: false };
-  }
-}
-
-// -- Port discovery --
-
-/**
- * Read the HTTP server port from ~/.raycast-firefox/port.
- * Falls back to 26394 on any error (file missing, parse failure).
- */
-export function getPort(): number {
-  try {
-    const portPath = join(homedir(), ".raycast-firefox", "port");
-    const content = readFileSync(portPath, "utf-8").trim();
-    const port = parseInt(content, 10);
-    if (Number.isNaN(port) || port <= 0 || port > 65535) {
-      return 26394;
-    }
-    return port;
-  } catch {
-    return 26394;
   }
 }
