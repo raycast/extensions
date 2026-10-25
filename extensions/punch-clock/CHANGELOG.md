@@ -1,6 +1,6 @@
 # Punch Clock Changelog
 
-## [Menu Bar Setup Check] - {PR_MERGE_DATE}
+## [Menu Bar Setup Check] - 2026-10-25
 
 - Warn when starting a timer if the "Work Timer" countdown is not currently
   visible in the menu bar, including after that command has been turned off
