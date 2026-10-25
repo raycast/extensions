@@ -49,7 +49,7 @@ function getPressureColor() {
 }
 
 function getProcesses() {
-  const output = execSync("ps -axm -o rss,comm", { encoding: "utf-8" });
+  const output = execSync("ps -axm -ww -o rss,comm", { encoding: "utf-8" });
   const outputArr = output.split("\n");
   const [, ...allProcesses] = outputArr;
   const splitEachProcesses = allProcesses.map((proc) => {

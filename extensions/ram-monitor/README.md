@@ -2,7 +2,7 @@
 
 A little ring in your Mac's menu bar that shows how much RAM you're using. It fills up as memory fills up, and turns green, yellow, or red with macOS memory pressure. Click it to see which apps are eating your memory.
 
-![RAM Monitor menu](media/menu.png)
+![Image 1](media/1.png) ![Image 2](media/2.png) ![Image 3](media/3.png)
 
 ## Why I built this
 
