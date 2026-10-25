@@ -1,4 +1,4 @@
-# Sharply for Raycast
+# Sharply Gear Search
 
 Search public photography gear and press Enter to open the selected Sharply page. No account or API key is required.
 
@@ -12,16 +12,12 @@ For quicker access, assign the command an alias such as `gear` or a hotkey in Ra
 
 The command searches after at least two characters, throttles typing, caches query results between launches, and preserves Sharply's ranking. The subtitle beside the gear name shows the typical estimated used price for the selected market (shown as `~$…`) when available and stays blank otherwise, with no MSRP fallback. It shows up to 25 matches; refine your query for a more specific item. Enter opens the gear page; the action menu also provides Copy Gear Page Link, Refresh Results (⌘R), and Search Sharply Website.
 
-## API behavior
+## Privacy and limits
 
-Requests go directly to `https://www.sharplyphoto.com/api/search` with `q`, `page=1`, `pageSize=25`, and `includeTotal=false`. It uses the same anonymous endpoint as the website. No credentials or embedded API keys are sent. Searches support the website's model and alias matching.
-
-The website endpoint is not a versioned developer API contract. Keep anonymous search narrowly scoped, with server-side limits and rate controls as needed. Requests time out after 15 seconds. Security checkpoints and rate limits show an error with a website search action; the extension does not attempt to bypass them.
-
-Full search provides estimated used prices and thumbnails that the suggestions endpoint currently omits.
+Searches are sent anonymously to sharplyphoto.com; no account, API key, or personal data is sent. Requests time out after 15 seconds. If Sharply rate-limits a search or shows a security check, the extension shows an error with a link to search on the website instead.
 
 ## Price market
 
 In Raycast Settings → Extensions → Sharply Gear Search, choose **Price Market**: US (USD, default), UK (GBP), or EU (EUR). Market selection is explicit; the extension does not detect your macOS locale or location. Open Extension Preferences is also available in the action menu.
 
-Prices use each market’s own estimate, without currency conversion or cross-market fallback. When an estimate is missing, the subtitle stays blank. New recent opens retain all three markets so switching preferences updates their prices. Older history contains only US prices until the items are reopened from search.
+Prices use each market’s own estimate, without currency conversion or cross-market fallback. When an estimate is missing, the subtitle stays blank. New recent opens retain all three markets so switching preferences updates their prices.
