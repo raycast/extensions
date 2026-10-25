@@ -1,5 +1,10 @@
 # Proxmox Changelog
 
+## [VM Tags] - {PR_MERGE_DATE}
+
+- Show the tags of a VM in its details, and find VMs by tag in the search bar
+- Added an `Edit Tags` action to add, remove or create tags on a VM
+
 ## [Fix Slow Server Loading] - 2026-09-10
 
 - Fixed the VM and storage lists staying empty and loading forever when a server responds slower than the refresh interval

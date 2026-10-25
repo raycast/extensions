@@ -46,8 +46,15 @@ export type PveVm = {
 
   node: string;
   status: PveVmStatus;
+  /** Semicolon separated, absent when the VM has no tags */
+  tags?: string;
   uptime: number;
   vmid: number;
+};
+
+export type PveClusterOptions = {
+  /** Every tag the token may set: the ones in use plus the allow-list */
+  "allowed-tags"?: string[];
 };
 
 export type PveStorage = {

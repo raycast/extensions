@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { type PveVm, PveVmStatus, PveVmTypes, type WithServer } from "@/types";
 import { formatCPU, formatPercentage, formatShortTime, formatStorageSize } from "@/utils/format";
+import { getTagColor, parseTags } from "@/utils/tags";
 
 type VmDetailProps = {
   vm: WithServer<PveVm>;
@@ -8,6 +9,7 @@ type VmDetailProps = {
 
 export const VmDetail = ({ vm }: VmDetailProps) => {
   const hasDetails = vm.status !== PveVmStatus.stopped;
+  const tags = parseTags(vm.tags);
   let cpu, memory, disk;
   if (hasDetails) {
     cpu = [formatPercentage(vm.cpu), formatCPU(vm.maxcpu)].join(" / ");
@@ -39,6 +41,13 @@ export const VmDetail = ({ vm }: VmDetailProps) => {
           <List.Item.Detail.Metadata.Label title="Server" text={vm.server.name} />
           <List.Item.Detail.Metadata.Label title="Node" text={vm.node} />
           <List.Item.Detail.Metadata.Label title="Status" text={vm.status} />
+          {tags.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Tags">
+              {tags.map((tag) => (
+                <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} color={getTagColor(tag)} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="CPU" text={cpu} />
           <List.Item.Detail.Metadata.Label title="Memory" text={memory} />

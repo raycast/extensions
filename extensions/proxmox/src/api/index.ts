@@ -73,6 +73,16 @@ export async function resumeVm(vm: WithServer<PveVm>) {
   });
 }
 
+export async function setVmTags(vm: WithServer<PveVm>, tags: string[]) {
+  const url = `api2/json/nodes/${vm.node}/${vm.id}/config`;
+  const body =
+    tags.length > 0 ? new URLSearchParams({ tags: tags.join(";") }) : new URLSearchParams({ delete: "tags" });
+  await pveFetch(vm.server, url, {
+    method: "PUT",
+    body,
+  });
+}
+
 export async function rebootVm(vm: WithServer<PveVm>) {
   const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reboot`;
   await pveFetch(vm.server, url, {
