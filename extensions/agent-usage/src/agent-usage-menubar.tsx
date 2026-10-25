@@ -23,6 +23,7 @@ import {
 import {
   useAihubmixUsage,
   useAmpUsage,
+  useAnthropicApiUsage,
   useAntigravityUsage,
   useClaudeAccounts,
   useClinePassAccounts,
@@ -36,6 +37,7 @@ import {
   useKimiAccounts,
   useMiniMaxUsage,
   useMinimaxCNUsage,
+  useOpenAIApiUsage,
   useOpencodegoUsage,
   useOpenRouterUsage,
   useRaycastUsage,
@@ -46,6 +48,7 @@ import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/ty
 import { getThemeIcon } from "./agents/ui.tsx";
 import { getAihubmixAccessory } from "./aihubmix/renderer.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
+import { getAnthropicApiAccessory } from "./anthropic-api/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
 import { getClinePassAccessory } from "./clinepass/renderer.tsx";
@@ -59,6 +62,7 @@ import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
 import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
+import { getOpenAIApiAccessory } from "./openai-api/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
 import { getOpenRouterAccessory } from "./openrouter/renderer.tsx";
 import { getRaycastAccessory } from "./raycast/renderer.tsx";
@@ -107,6 +111,7 @@ export default function MenuBarCommand() {
 
   const isAihubmixVisible = Boolean(prefs.showAihubmix);
   const isAmpVisible = Boolean(prefs.showAmp);
+  const isAnthropicApiVisible = Boolean(prefs.showAnthropicApi);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isClinePassVisible = Boolean(prefs.showClinePass);
   const isCodexVisible = Boolean(prefs.showCodex);
@@ -122,12 +127,14 @@ export default function MenuBarCommand() {
   const isZaiVisible = Boolean(prefs.showZai);
   const isMinimaxVisible = Boolean(prefs.showMinimax);
   const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
+  const isOpenAIApiVisible = Boolean(prefs.showOpenAIApi);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
   const isOpenRouterVisible = Boolean(prefs.showOpenRouter);
   const isRaycastVisible = Boolean(prefs.showRaycast);
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
+  const anthropicApiState = useAnthropicApiUsage(isAnthropicApiVisible);
   const claudeState = useClaudeAccounts(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
@@ -143,6 +150,7 @@ export default function MenuBarCommand() {
   const zaiState = useZaiAccounts(isZaiVisible);
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
   const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
+  const openaiApiState = useOpenAIApiUsage(isOpenAIApiVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
   const openrouterState = useOpenRouterUsage(isOpenRouterVisible);
   const raycastState = useRaycastUsage(isRaycastVisible);
@@ -172,6 +180,20 @@ export default function MenuBarCommand() {
         ),
         revalidate: ampState.revalidate,
         lastFetchedAt: ampState.lastFetchedAt,
+      },
+      {
+        id: "anthropic-api",
+        name: "Claude API",
+        icon: getThemeIcon("claude-icon.svg"),
+        visible: isAnthropicApiVisible,
+        isLoading: anthropicApiState.isLoading,
+        accessory: getAnthropicApiAccessory(
+          anthropicApiState.usage,
+          anthropicApiState.error,
+          anthropicApiState.isLoading,
+        ),
+        revalidate: anthropicApiState.revalidate,
+        lastFetchedAt: anthropicApiState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -258,6 +280,16 @@ export default function MenuBarCommand() {
         accessory: getMinimaxCNAccessory(minimaxcnState.usage, minimaxcnState.error, minimaxcnState.isLoading),
         revalidate: minimaxcnState.revalidate,
         lastFetchedAt: minimaxcnState.lastFetchedAt,
+      },
+      {
+        id: "openai-api",
+        name: "OpenAI API",
+        icon: getThemeIcon("codex-icon.svg"),
+        visible: isOpenAIApiVisible,
+        isLoading: openaiApiState.isLoading,
+        accessory: getOpenAIApiAccessory(openaiApiState.usage, openaiApiState.error, openaiApiState.isLoading),
+        revalidate: openaiApiState.revalidate,
+        lastFetchedAt: openaiApiState.lastFetchedAt,
       },
       {
         id: "opencode-go",
@@ -365,6 +397,18 @@ export default function MenuBarCommand() {
       raycastState.error,
       raycastState.revalidate,
       raycastState.lastFetchedAt,
+      isAnthropicApiVisible,
+      anthropicApiState.isLoading,
+      anthropicApiState.usage,
+      anthropicApiState.error,
+      anthropicApiState.revalidate,
+      anthropicApiState.lastFetchedAt,
+      isOpenAIApiVisible,
+      openaiApiState.isLoading,
+      openaiApiState.usage,
+      openaiApiState.error,
+      openaiApiState.revalidate,
+      openaiApiState.lastFetchedAt,
     ],
   );
 

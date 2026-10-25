@@ -9,6 +9,8 @@ import { checkAntigravityCredentials } from "../antigravity/credential-check.ts"
 import { checkGrokCredentials } from "../grok/auth.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
+import { fetchAnthropicApiUsage, normalizeAnthropicConsoleCookie } from "../anthropic-api/fetcher.ts";
+import type { AnthropicApiError, AnthropicApiUsage } from "../anthropic-api/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
 import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts";
 import { fetchClaudeUsage, listClaudeOAuthAccounts, dedupeClaudeAccounts } from "../claude/fetcher.ts";
@@ -47,6 +49,8 @@ import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
 import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
 import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
 import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
+import { fetchOpenAIApiUsage, normalizeOpenAISessionToken } from "../openai-api/fetcher.ts";
+import type { OpenAIApiError, OpenAIApiUsage } from "../openai-api/types.ts";
 import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEY } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
 import { resolveOpenRouterApiKey } from "../openrouter/auth.ts";
@@ -70,26 +74,13 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
  * coupling every fetcher/auth/parser module to the Raycast runtime.
  */
 
-// Root-level preferences shared by both commands.
-type SharedPrefs = {
-  additionalClaudeHomes?: string;
-  additionalCodexHomes?: string;
-  aihubmixApiKey?: string;
-  copilotAuthToken?: string;
-  cursorCookieHeader?: string;
-  deepseekApiKey?: string;
-  kimiAuthToken?: string;
-  syntheticApiToken?: string;
-  zaiApiToken?: string;
-  minimaxApiToken?: string;
-  minimaxcnApiToken?: string;
-  opencodegoApiKey?: string;
-  openrouterApiKey?: string;
-  raycastCookieHeader?: string;
-};
+// Text preferences shared by every command, keyed by the generated `Preferences` type.
+type TextPreferenceKey = {
+  [K in keyof Preferences]-?: Preferences[K] extends string | undefined ? K : never;
+}[keyof Preferences];
 
-function prefValue(key: keyof SharedPrefs): string {
-  return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
+function prefValue(key: TextPreferenceKey): string {
+  return getPreferenceValues<Preferences>()[key]?.trim() || "";
 }
 
 export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
@@ -118,6 +109,24 @@ export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
     error: (message) => ({ type: "unknown", message }),
   },
   fetcher: fetchAmpUsage,
+});
+
+export const useAnthropicApiUsage = createUsageHook<AnthropicApiUsage, AnthropicApiError>({
+  agentId: "anthropic-api",
+  resolveAuthKey: async () => normalizeAnthropicConsoleCookie(prefValue("anthropicConsoleCookie")) ?? "",
+  fetcher: async (cookieHeader) => {
+    if (!cookieHeader) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "Claude Console session not configured. Sign in at platform.claude.com, then paste the sessionKey cookie in extension settings (Cmd+,).",
+        },
+      };
+    }
+    return fetchAnthropicApiUsage(cookieHeader);
+  },
 });
 
 export const useAntigravityUsage = createUsageHook<AntigravityUsage, AntigravityError>({
@@ -282,6 +291,24 @@ export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>
       };
     }
     return fetchMinimaxCNUsage(primaryToken);
+  },
+});
+
+export const useOpenAIApiUsage = createUsageHook<OpenAIApiUsage, OpenAIApiError>({
+  agentId: "openai-api",
+  resolveAuthKey: async () => normalizeOpenAISessionToken(prefValue("openaiPlatformSessionToken")) ?? "",
+  fetcher: async (sessionToken) => {
+    if (!sessionToken) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "OpenAI platform session not configured. Sign in at platform.openai.com, then paste the session token from its billing page in extension settings (Cmd+,).",
+        },
+      };
+    }
+    return fetchOpenAIApiUsage(sessionToken);
   },
 });
 

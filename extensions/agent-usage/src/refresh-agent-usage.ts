@@ -3,6 +3,7 @@ import { environment, getPreferenceValues, LaunchType, showHUD } from "@raycast/
 import {
   useAihubmixUsage,
   useAmpUsage,
+  useAnthropicApiUsage,
   useAntigravityUsage,
   useClaudeAccounts,
   useCopilotAccounts,
@@ -13,6 +14,7 @@ import {
   useGrokUsage,
   useMiniMaxUsage,
   useMinimaxCNUsage,
+  useOpenAIApiUsage,
   useOpencodegoUsage,
   useOpenRouterUsage,
   useRaycastUsage,
@@ -26,6 +28,7 @@ import {
 const providers = {
   showAihubmix: useAihubmixUsage,
   showAmp: useAmpUsage,
+  showAnthropicApi: useAnthropicApiUsage,
   showAntigravity: useAntigravityUsage,
   showClaude: useClaudeAccounts,
   showCopilot: useCopilotAccounts,
@@ -36,6 +39,7 @@ const providers = {
   showGrok: useGrokUsage,
   showMinimax: useMiniMaxUsage,
   showMinimaxCN: useMinimaxCNUsage,
+  showOpenAIApi: useOpenAIApiUsage,
   showOpencodeGo: useOpencodegoUsage,
   showOpenRouter: useOpenRouterUsage,
   showRaycast: useRaycastUsage,

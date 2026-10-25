@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, Claude API, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenAI API, OpenCode Go, OpenRouter, Raycast, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -24,6 +24,7 @@ Track usage across your AI coding agents in one place.
 | **AIHubMix**    | AIHubMix user self API      |     ✓      |    —     |    ✓    |       —       | Paste the Access Key from https://console.aihubmix.com/setting, or set `AIHUBMIX_ACCESS_KEY`                                                                                     |
 | **Amp**         | Local SQLite database       |     —      |    —     |    —    |       —       | Auto-detected from local database                                                                                                                                                |
 | **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       ✓       | Run `claude` to log in, and add extra `CLAUDE_CONFIG_DIR` paths under **Additional Claude Homes** for more accounts                                                              |
+| **Claude API**  | Claude Console billing API  |     ✓      |    —     |    —    |       —       | Paste the `sessionKey` cookie from https://platform.claude.com/settings/billing in preferences                                                                                   |
 | **ClinePass**   | Cline API                   |     ✓      |    —     |    —    |       ✓       | Auto-detected from the local Cline login, or add a user ID and API key via Manage Accounts                                                                                       |
 | **Codex**       | OpenAI API                  |     ✓      |    —     |    —    |       ✓       | Run `codex login`, add additional `CODEX_HOME` paths in preferences, or paste a token manually                                                                                   |
 | **Copilot**     | GitHub Copilot internal API |     ✓      |    —     |    ✓    |       ✓       | Add named accounts, sign in with GitHub CLI, or use `GH_TOKEN`/`GITHUB_TOKEN`                                                                                                    |
@@ -37,6 +38,7 @@ Track usage across your AI coding agents in one place.
 | **Synthetic**   | Synthetic API               |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `synthetic`, or paste API key from https://synthetic.new/billing                                                                                                    |
 | **MiniMax**     | MiniMax API                 |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `minimax-coding-plan`, set `MINIMAX_API_KEY` env var, or paste token in preferences                                                                                 |
 | **MinimaxCN**   | MinimaxCN API (国内版)      |     ✓      |    —     |    ✓    |       —       | Set `MINIMAX_CN_API_KEY` env var, or paste token in preferences                                                                                                                  |
+| **OpenAI API**  | OpenAI platform billing API |     ✓      |    —     |    —    |       —       | Paste the platform.openai.com session token in preferences (API keys cannot read the balance)                                                                                    |
 | **OpenCode Go** | OpenCode API                |     ✓      |    ✓     |    —    |       —       | Select OpenCode Go when running `opencode auth login`, or paste your subscribed account's API key into the OpenCode Go API Key preference. The manual preference takes priority. |
 | **OpenRouter**  | OpenRouter credits API      |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `openrouter`, set `OPENROUTER_API_KEY`/`OPENROUTER_KEY`, or paste an API key                                                                                        |
 | **Raycast**     | Raycast website credits API |     ✓      |    —     |    —    |       —       | Paste the `__raycast_session` cookie from https://www.raycast.com/settings in preferences                                                                                        |
@@ -80,6 +82,18 @@ Agent Usage shows the credits you have left on OpenRouter. Create a key from [Op
 Manual preferences take priority, followed by OpenCode and environment variables.
 
 Which balance is shown depends on the key type. A **provisioning key** can read the account ledger (`/api/v1/credits`), so the row shows account-wide credits purchased minus credits used. A regular **inference key** cannot read that ledger, so Agent Usage falls back to the key endpoint (`/api/v1/key`) and shows that key's own spending cap instead — or `$X.XX used` when the key has no cap.
+
+### Claude API Credentials
+
+The **Claude API** row shows the prepaid API credit balance of your Claude Console organization, separate from the Claude subscription row. It also shows month-to-date spend and the next credit grant about to expire, such as a subscription's monthly API credit. Anthropic has no public balance API: the Admin API reports spend only and is unavailable to individual accounts. Agent Usage therefore reads the same undocumented endpoints as the Console billing page.
+
+Sign in at [Claude Console Billing](https://platform.claude.com/settings/billing), copy the `sessionKey` cookie value from your browser's developer tools (Application → Cookies → `platform.claude.com`), and paste it into the **Claude Console Session Cookie** extension preference. A full Cookie header also works; only `sessionKey` and `lastActiveOrg` are sent. If you belong to several API organizations, include `lastActiveOrg` to choose which one is shown. Otherwise the first organization whose billing you can read is used.
+
+### OpenAI API Credentials
+
+The **OpenAI API** row shows the prepaid credit balance of your OpenAI platform organization, separate from the Codex (ChatGPT) row. OpenAI has no public balance API either, and the billing endpoint rejects every API key, Admin keys included. It only answers the browser session of platform.openai.com.
+
+Open [OpenAI Billing](https://platform.openai.com/settings/organization/billing/overview), open your browser's developer tools, and pick any request to `api.openai.com` in the Network tab. Copy the token from its `Authorization: Bearer …` request header and paste it into the **OpenAI Platform Session Token** extension preference. The `Bearer` prefix is optional. Sign-in sessions expire, so paste a fresh token when the row shows **Session Expired**.
 
 ### Cursor Credentials
 
