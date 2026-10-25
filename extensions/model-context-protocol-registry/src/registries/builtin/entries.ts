@@ -915,6 +915,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mediapronet",
+    title: "MEDIAPRONET",
+    description:
+      "Search MEDIAPRONET, a directory where builders launch and get discovered: newly launched startups, websites, SaaS and AI tools. Keyword search with category and pricing filters, full listing profiles, alternatives to a named product, categories, trending and the site of the day. 7 read-only tools. Remote Streamable HTTP server at https://mediapronet.com/api/mcp; no sign-in, no API key.",
+    icon: "https://mediapronet.com/android-icon-192x192.png",
+    homepage: "https://mediapronet.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mediapronet.com/api/mcp"],
+    },
+    remoteUrl: "https://mediapronet.com/api/mcp",
+  },
+  {
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
