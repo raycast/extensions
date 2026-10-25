@@ -53,9 +53,9 @@ export function showsVotes(phase: Phase): boolean {
 }
 
 // Whether the saved snapshot can still change: false before the count is near, and once it's done.
+// A winner can be declared before the count ends, so only a finished count stops the fetching.
 function needsFetch(snapshot: ElectionSnapshot, now = Date.now()): boolean {
-  const phase = phaseOf(snapshot, now);
-  if (phase === "counted" || phase === "decided") return false;
+  if (snapshot.finished) return false;
   if (snapshot.pollsClose && now < Date.parse(snapshot.pollsClose) - FETCH_BEFORE_COUNT_MS) return false;
   return true;
 }

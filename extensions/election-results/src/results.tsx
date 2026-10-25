@@ -1,11 +1,23 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import { ballotIcon, forgetSnapshot, loadSnapshot, phaseOf, scheduleLines, showsVotes, statusText } from "./election";
 import type { ElectionSummary } from "./sources/types";
+
+const REFRESH_MS = 60 * 1000;
 
 // The results of one election: status, candidates and schedule. Opened from Browse Elections.
 export function ElectionResults({ election }: { election: ElectionSummary }) {
   const { data, isLoading, error, revalidate } = useCachedPromise(loadSnapshot, [election]);
+
+  // Reload every minute while the count can still change, like the menu bar. loadSnapshot
+  // only goes to the network inside the fetch window, so this also keeps the status current.
+  const finished = data?.finished ?? false;
+  useEffect(() => {
+    if (finished) return;
+    const timer = setInterval(revalidate, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [finished, revalidate]);
 
   async function refreshNow() {
     await forgetSnapshot(election.id);

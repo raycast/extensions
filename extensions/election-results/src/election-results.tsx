@@ -1,6 +1,7 @@
 import { Color, getPreferenceValues, Icon, Keyboard, LocalStorage, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import {
   ballotIcon,
   followedElection,
@@ -16,9 +17,11 @@ import type { ElectionSnapshot } from "./sources/types";
 // What we remember between background runs, to notice when something changes.
 type SeenState = { reporting: boolean; leader?: string; winner?: string; late?: boolean };
 
-function notify(title: string, message: string) {
+const execFileAsync = promisify(execFile);
+
+async function notify(title: string, message: string) {
   const script = `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)} sound name "Glass"`;
-  execFile("osascript", ["-e", script]);
+  await execFileAsync("osascript", ["-e", script]);
 }
 
 async function announceChanges(snapshot: ElectionSnapshot) {
@@ -32,14 +35,25 @@ async function announceChanges(snapshot: ElectionSnapshot) {
   const late = phaseOf(snapshot) === "late";
   const heading = `${snapshot.flag} ${snapshot.country} election`;
 
+  let message: string | undefined;
   if (winner && winner !== seen.winner) {
-    notify(heading, `${winner} wins!`);
+    message = `${winner} wins!`;
   } else if (reporting && !seen.reporting) {
-    notify(heading, `Results are coming in. ${leader} leads.`);
+    message = `Results are coming in. ${leader} leads.`;
   } else if (leader && seen.leader && leader !== seen.leader) {
-    notify(heading, `${leader} takes the lead (${snapshot.reportingPercent.toFixed(1)}% counted)`);
+    message = `${leader} takes the lead (${snapshot.reportingPercent.toFixed(1)}% counted)`;
   } else if (late && !seen.late) {
-    notify(heading, "No results yet, 3 hours after the polls closed. Check the TSE site.");
+    message = "No results yet, 3 hours after the polls closed. Check the TSE site.";
+  }
+
+  if (message) {
+    try {
+      await notify(heading, message);
+    } catch (error) {
+      // Keep the old state, so the next run tries again. The results still show.
+      console.error("Couldn't show the notification", error);
+      return;
+    }
   }
 
   await LocalStorage.setItem(storageKey, JSON.stringify({ reporting, leader, winner, late } satisfies SeenState));

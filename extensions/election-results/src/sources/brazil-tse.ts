@@ -20,7 +20,7 @@ type TseConfig = {
   pl: { c: string; dt: string; e: { cd: string; t: string; abr?: { cd: string; cp?: { cd: string }[] }[] }[] }[];
 };
 
-type TseCandidate = { nmu: string; seq: string; e: string; vap: string; pvapn: string };
+type TseCandidate = { nmu: string; seq: string; e: string; st: string; vap: string; pvapn: string };
 type TseParty = { sg: string; cand: TseCandidate[] };
 type TseResponse = {
   t: string;
@@ -88,7 +88,8 @@ export async function fetchBrazilPresident(election: ElectionSummary): Promise<E
           color: PARTY_COLORS[party.sg] ?? FALLBACK_COLOR,
           votes: toNumber(candidate.vap),
           percent: toNumber(candidate.pvapn),
-          elected: candidate.e === "s" && data.t === "2",
+          // TSE marks e = "s" for both runoff candidates too. Only st says "Eleito" for a winner.
+          elected: candidate.e === "s" && /^eleit[oa]$/i.test(candidate.st),
         };
         return { candidate: parsed, seq: Number(candidate.seq) };
       }),
