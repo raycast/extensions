@@ -67,22 +67,24 @@ function cliPath(): string {
   return found;
 }
 
-async function ougi(...args: string[]): Promise<string> {
+async function ougi(timeout: number, ...args: string[]): Promise<string> {
   try {
-    const { stdout } = await run(cliPath(), args);
+    const { stdout } = await run(cliPath(), args, { timeout });
     return stdout;
   } catch (error) {
     if (error instanceof CliMissingError) throw error;
+    if ((error as { killed?: boolean }).killed) throw new Error(`ougi did not respond within ${timeout / 1000} s`);
     const stderr = (error as { stderr?: string }).stderr?.trim();
     throw new Error(stderr?.replace(/^ougi: /, "") || (error instanceof Error ? error.message : String(error)));
   }
 }
 
 export async function read(): Promise<Reading> {
-  return JSON.parse(await ougi("read"));
+  return JSON.parse(await ougi(10_000, "read"));
 }
 
 // value: "auto", "max", an RPM number, or a percentage like "50%". Always applies to every fan.
 export async function setFans(value: string): Promise<Fan[]> {
-  return JSON.parse(await ougi("fan", "all", value)).fans;
+  // Taking fans over from the system takes up to ~15 s on Apple Silicon.
+  return JSON.parse(await ougi(30_000, "fan", "all", value)).fans;
 }

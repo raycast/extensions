@@ -170,6 +170,20 @@ export default function Command() {
 
   return (
     <List isLoading={!reading} isShowingDetail searchBarPlaceholder="Filter sensors…">
+      {error && (
+        // Readings below are from the last successful refresh; say so instead of passing them off as current.
+        <List.Item
+          title="Readings Are Out of Date"
+          subtitle={error.message}
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          detail={
+            <List.Item.Detail
+              markdown={`### Readings are out of date\n\nThe last refresh failed:\n\n\`${error.message}\``}
+            />
+          }
+          actions={<ActionPanel>{refreshAction}</ActionPanel>}
+        />
+      )}
       {fans.length > 0 && (
         <List.Section title="Fans" subtitle={controlNote}>
           {fans.map((fan) => (

@@ -39,7 +39,7 @@
   "preferences": [
     {
       "name": "cliPath",
-      "title": "ougi Path",
+      "title": "Ougi Path",
       "description": "Path to the ougi command-line tool. Leave empty to find it in /opt/homebrew/bin or /usr/local/bin.",
       "type": "textfield",
       "required": false,
@@ -47,8 +47,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.9.0",
-    "@raycast/utils": "^2.3.3"
+    "@raycast/api": "^2.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.0",
