@@ -14,6 +14,7 @@ import {
   appleAvailable,
   appleEngine,
   buildFmArgs,
+  enginesFor,
   firstOllamaModel,
   friendlyFmError,
   ollamaEngine,
@@ -87,6 +88,11 @@ describe("Apple fm", () => {
 
   it("offers no Private Cloud engine: fm's only model is the on-device `system` one", () => {
     expect(Object.keys(ENGINE_TITLES)).toEqual(["raycast", "apple", "ollama"]);
+  });
+
+  it("offers Apple Intelligence on a Mac only", () => {
+    expect(enginesFor("darwin")).toEqual(["raycast", "apple", "ollama"]);
+    expect(enginesFor("win32")).toEqual(["raycast", "ollama"]);
   });
 
   it("streams stdout and strips terminal escapes", async () => {
@@ -322,9 +328,28 @@ describe("Ollama", () => {
 describe("resolveEngine", () => {
   const settings = { ollamaUrl: "http://127.0.0.1:11434", ollamaContext: 8192 };
 
+  /** Run `fn` as if on `value` (e.g. "darwin"), whatever machine runs the tests. */
+  async function asPlatform<T>(value: NodeJS.Platform, fn: () => Promise<T>): Promise<T> {
+    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+    Object.defineProperty(process, "platform", { value });
+    try {
+      return await fn();
+    } finally {
+      Object.defineProperty(process, "platform", platform);
+    }
+  }
+
   it("returns the requested engine", async () => {
-    expect((await resolveEngine("apple", settings)).id).toBe("apple");
+    expect((await asPlatform("darwin", () => resolveEngine("apple", settings))).id).toBe("apple");
     expect((await resolveEngine("ollama", settings)).contextBudget).toBe(Math.floor(8192 * 0.6));
+  });
+
+  it("treats Apple Intelligence picked on Windows as Automatic", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("{}")),
+    );
+    expect((await asPlatform("win32", () => resolveEngine("apple", settings))).id).toBe("ollama");
   });
 
   it("treats a saved engine that no longer exists (Private Cloud) as Automatic", async () => {

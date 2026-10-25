@@ -5,6 +5,7 @@ import {
   ENGINE_TITLES,
   EngineId,
   EngineSettings,
+  enginesFor,
   FM_PATH,
   parseFmAvailability,
   raycastAvailable,
@@ -211,14 +212,18 @@ export function ollamaStatus(probe: OllamaProbe): EngineStatus {
 // Raycast AI
 // ---------------------------------------------------------------------------
 
-export function raycastStatus(canAccess: boolean): EngineStatus {
+export function raycastStatus(canAccess: boolean, platform: NodeJS.Platform = process.platform): EngineStatus {
   if (canAccess) return { engine: "raycast", ready: true };
+  const free = enginesFor(platform)
+    .filter((id) => id !== "raycast")
+    .map((id) => ENGINE_TITLES[id].replace(/ \(.*\)$/, ""))
+    .join(" or ");
   return {
     engine: "raycast",
     ready: false,
     state: "no-pro",
     title: "Raycast AI needs Raycast Pro",
-    message: "Pick Apple Intelligence or Ollama in the engine dropdown to chat for free, or upgrade to Raycast Pro.",
+    message: `Pick ${free} in the engine dropdown to chat for free, or upgrade to Raycast Pro.`,
     fixes: [switchEngine],
   };
 }
@@ -299,7 +304,7 @@ export async function checkEngine(id: EngineId, settings: EngineSettings): Promi
   }
 }
 
-/** Every engine's status, in Automatic's order. */
+/** Every engine's status on this platform, in Automatic's order. */
 export function checkAllEngines(settings: EngineSettings): Promise<EngineStatus[]> {
-  return Promise.all((Object.keys(ENGINE_TITLES) as EngineId[]).map((id) => checkEngine(id, settings)));
+  return Promise.all(enginesFor().map((id) => checkEngine(id, settings)));
 }

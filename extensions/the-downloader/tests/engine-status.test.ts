@@ -138,6 +138,13 @@ describe("raycastStatus", () => {
     expect(s).toMatchObject({ ready: false, state: "no-pro" });
     expect(s.ready === false && s.title).toMatch(/Raycast Pro/);
   });
+
+  it("suggests only the free engines this platform has", () => {
+    const mac = raycastStatus(false, "darwin");
+    const windows = raycastStatus(false, "win32");
+    expect(mac.ready === false && mac.message).toMatch(/^Pick Apple Intelligence or Ollama in/);
+    expect(windows.ready === false && windows.message).toMatch(/^Pick Ollama in/);
+  });
 });
 
 describe("automaticStatus", () => {

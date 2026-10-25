@@ -22,7 +22,15 @@ import {
   showInFinder,
   showToast,
 } from "@raycast/api";
-import { ENGINE_TITLES, EngineId, EnginePreference, engineSettings, resolveEngine } from "../lib/ai-engines.js";
+import {
+  ENGINE_TITLES,
+  EngineId,
+  EnginePreference,
+  enginesFor,
+  engineSettings,
+  resolveEngine,
+  usableEngine,
+} from "../lib/ai-engines.js";
 import { checkEngine } from "../lib/engine-status.js";
 import { EngineNotice, useEngineStatus } from "./engine-notice.js";
 import { chatKey, deleteChat, findChat, saveChat } from "../lib/chat-store.js";
@@ -259,13 +267,16 @@ function overviewMarkdown(ctx: LinkContext): string {
       `_Read from the [Internet Archive's copy](${ctx.archive.viewUrl}) saved ${formatDate(ctx.archive.savedOn)}, not the live page._`,
     );
   }
-  parts.push(bodySummary(ctx));
-  if (!hasBody(ctx) && ctx.noteReason === "language") {
-    parts.push(
+  if (hasBody(ctx)) return [...parts, bodySummary(ctx)].join("\n\n");
+  // Nothing to read: say so first, above the thumbnail, which would otherwise
+  // push the note — and its way out (the archived copy) — out of view.
+  const notice = [bodySummary(ctx)];
+  if (ctx.noteReason === "language") {
+    notice.push(
       "To use the captions in the video's own language, set **Transcript Language** to `auto` in Chat About Link's preferences.",
     );
   }
-  return parts.join("\n\n");
+  return [...notice, ...parts].join("\n\n");
 }
 
 /** Show text as-is in Markdown, e.g. an error from yt-dlp. */
@@ -381,7 +392,7 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
   const [archived, setArchived] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [engine, setEngine] = useState<EnginePreference>((prefs.aiEngine as EnginePreference) || "auto");
+  const [engine, setEngine] = useState<EnginePreference>(usableEngine(prefs.aiEngine));
   const { status: engineStatus, statuses: engineStatuses, recheck: recheckEngines } = useEngineStatus(engine, settings);
   const [selectedId, setSelectedId] = useState<string>();
   const [seesImages, setSeesImages] = useState<boolean>();
@@ -728,7 +739,7 @@ export function LinkChat({ url, initialQuestion, root }: { url: string; initialQ
         <List.Dropdown tooltip="AI Engine" value={engine} onChange={(v) => setEngine(v as EnginePreference)}>
           <List.Dropdown.Item value="auto" title="Automatic" icon={Icon.Wand} />
           <List.Dropdown.Section title="Engines">
-            {(Object.keys(ENGINE_TITLES) as (keyof typeof ENGINE_TITLES)[]).map((id) => (
+            {enginesFor().map((id) => (
               <List.Dropdown.Item key={id} value={id} title={ENGINE_TITLES[id]} />
             ))}
           </List.Dropdown.Section>

@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, open, openCommandPreferences, showToast } from "@raycast/api";
-import { ENGINE_TITLES, EngineId, EnginePreference, EngineSettings } from "../lib/ai-engines.js";
+import { ENGINE_TITLES, EngineId, EnginePreference, EngineSettings, usableEngine } from "../lib/ai-engines.js";
 import { EngineStatus, automaticStatus, checkAllEngines, switchTarget } from "../lib/engine-status.js";
 
 /** How often to look again while an engine is on its way (e.g. Apple's model downloading). */
@@ -26,10 +26,11 @@ export function useEngineStatus(preference: EnginePreference, settings: EngineSe
     };
   }, [checks, settings]);
 
+  const chosen = usableEngine(preference);
   const status = statuses
-    ? preference in ENGINE_TITLES
-      ? statuses.find((s) => s.engine === preference)
-      : automaticStatus(statuses)
+    ? chosen === "auto"
+      ? automaticStatus(statuses)
+      : statuses.find((s) => s.engine === chosen)
     : undefined;
 
   const waiting = !!status && !status.ready && !!status.waiting;

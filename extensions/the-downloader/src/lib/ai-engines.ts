@@ -15,6 +15,21 @@ export const ENGINE_TITLES: Record<EngineId, string> = {
   ollama: "Ollama (Local)",
 };
 
+/** The engines this platform can run, in Automatic's order. Apple Intelligence exists only on a Mac. */
+export function enginesFor(platform: NodeJS.Platform = process.platform): EngineId[] {
+  const all = Object.keys(ENGINE_TITLES) as EngineId[];
+  return platform === "darwin" ? all : all.filter((id) => id !== "apple");
+}
+
+/**
+ * A saved engine preference this platform can honour; anything else counts as
+ * Automatic — an engine an older version offered (the removed Private Cloud), or
+ * Apple Intelligence picked in the preferences on Windows.
+ */
+export function usableEngine(preference: string | undefined): EnginePreference {
+  return enginesFor().includes(preference as EngineId) ? (preference as EngineId) : "auto";
+}
+
 export type EngineSettings = {
   /** An `AI.Model` value, or empty for Raycast's default. */
   raycastModel?: string;
@@ -402,8 +417,8 @@ export function createEngine(id: EngineId, settings: EngineSettings): Engine {
  * Raycast AI, which offers Raycast Pro when asked.
  */
 export async function resolveEngine(preference: EnginePreference, settings: EngineSettings): Promise<Engine> {
-  // An engine saved by an older version (the removed Private Cloud) counts as Automatic.
-  if (preference !== "auto" && preference in ENGINE_TITLES) return createEngine(preference, settings);
+  const usable = usableEngine(preference);
+  if (usable !== "auto") return createEngine(usable, settings);
   if (raycastAvailable()) return createEngine("raycast", settings);
   if (await appleAvailable()) return createEngine("apple", settings);
   if (await ollamaAvailable(settings.ollamaUrl)) return createEngine("ollama", settings);
