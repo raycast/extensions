@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parse-logs",
   "title": "Parse Logs",
-  "description": "Parse log files and extract lines containing specific search queries",
+  "description": "Parse log files and extract the lines that match a search or regular expression",
   "icon": "extension-icon.png",
   "author": "NormC",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "parse-log-file",
       "title": "Parse Log File",
-      "description": "Extract lines out of a log file that contain a given string.",
+      "description": "Extract the lines of a log file that contain some text or match a regular expression.",
       "mode": "view",
       "preferences": [
         {
@@ -36,6 +36,13 @@
           "required": true,
           "default": ".log",
           "placeholder": ".log, .txt, .out"
+        },
+        {
+          "name": "outputFolderPath",
+          "title": "Output Folder",
+          "description": "Where to save parsed results. Leave empty to save next to the log file (or in Downloads if that folder can't be written to).",
+          "type": "directory",
+          "required": false
         }
       ]
     }
