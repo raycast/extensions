@@ -12,7 +12,6 @@ export function formatUsedPrice(
   legacyUsd?: number | null,
 ): string | undefined {
   const amount = prices?.[market] ?? (market === "US" ? legacyUsd : null);
-  if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0)
-    return undefined;
+  if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0) return undefined;
   return `~${formatters[market].format(amount / 100)}`;
 }

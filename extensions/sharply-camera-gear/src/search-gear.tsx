@@ -21,21 +21,13 @@ import { useState } from "react";
 export default function SearchGear() {
   const { priceMarket: market } = getPreferenceValues<Preferences.SearchGear>();
   const [query, setQuery] = useState("");
-  const {
-    data: recents = [],
-    mutate: updateRecents,
-    isLoading: loadingRecents,
-  } = useCachedPromise(readRecentGear);
+  const { data: recents = [], mutate: updateRecents, isLoading: loadingRecents } = useCachedPromise(readRecentGear);
   const blank = query.trim().length === 0;
   const ready = query.trim().length >= 2;
-  const { data, error, isLoading, revalidate } = useCachedPromise(
-    searchGear,
-    [query.trim()],
-    {
-      execute: ready,
-      failureToastOptions: { title: "Could not search Sharply" },
-    },
-  );
+  const { data, error, isLoading, revalidate } = useCachedPromise(searchGear, [query.trim()], {
+    execute: ready,
+    failureToastOptions: { title: "Could not search Sharply" },
+  });
   async function openGear(gear: Gear) {
     try {
       await recentHistory.load();
@@ -57,15 +49,8 @@ export default function SearchGear() {
           shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       )}
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Gear}
-        onAction={openExtensionPreferences}
-      />
-      <Action.OpenInBrowser
-        title="Search Sharply Website"
-        url={`${BASE_URL}/search?q=${encodeURIComponent(query)}`}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <Action.OpenInBrowser title="Search Sharply Website" url={`${BASE_URL}/search?q=${encodeURIComponent(query)}`} />
     </ActionPanel>
   );
   return (
@@ -88,11 +73,7 @@ export default function SearchGear() {
                 ? "Searching…"
                 : "No Matching Gear"
         }
-        description={
-          ready && error && !data
-            ? error.message
-            : "Type at least two characters of a brand or model name."
-        }
+        description={ready && error && !data ? error.message : "Type at least two characters of a brand or model name."}
         actions={settingsActions}
       />
       <List.Section title={blank ? "Recently Opened" : "Search Results"}>
@@ -101,28 +82,13 @@ export default function SearchGear() {
             key={gear.slug}
             id={gear.slug}
             title={gear.name}
-            subtitle={formatUsedPrice(
-              gear.estimatedUsedPrices,
-              market,
-              gear.estimatedUsedUsdCents,
-            )}
+            subtitle={formatUsedPrice(gear.estimatedUsedPrices, market, gear.estimatedUsedUsdCents)}
             icon={gear.thumbnailUrl ?? Icon.Camera}
-            keywords={[
-              gear.slug.replaceAll("-", " "),
-              gear.brandName ?? "",
-              gear.gearType,
-            ]}
+            keywords={[gear.slug.replaceAll("-", " "), gear.brandName ?? "", gear.gearType]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Open Gear Page"
-                  icon={Icon.Globe}
-                  onAction={() => openGear(gear)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Gear Page Link"
-                  content={gearUrl(gear.slug)}
-                />
+                <Action title="Open Gear Page" icon={Icon.Globe} onAction={() => openGear(gear)} />
+                <Action.CopyToClipboard title="Copy Gear Page Link" content={gearUrl(gear.slug)} />
                 {ready && (
                   <Action
                     title="Refresh Results"
@@ -131,11 +97,7 @@ export default function SearchGear() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 )}
-                <Action
-                  title="Open Extension Preferences"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
                 <Action.OpenInBrowser
                   title="Search Sharply Website"
                   url={`${BASE_URL}/search?q=${encodeURIComponent(query)}`}

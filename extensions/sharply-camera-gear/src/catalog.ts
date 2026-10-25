@@ -16,14 +16,10 @@ export function gearUrl(slug: string): string {
   return `${BASE_URL}/gear/${encodeURIComponent(slug)}`;
 }
 
-export function usedPrice(
-  item: object,
-  market: PriceMarket = "US",
-): number | null {
+export function usedPrice(item: object, market: PriceMarket = "US"): number | null {
   if (!("usedPriceProjection" in item)) return null;
   const projection = item.usedPriceProjection;
-  if (!projection || typeof projection !== "object" || !(market in projection))
-    return null;
+  if (!projection || typeof projection !== "object" || !(market in projection)) return null;
   const estimate = (projection as Record<string, unknown>)[market];
   if (
     !estimate ||
@@ -34,9 +30,7 @@ export function usedPrice(
   )
     return null;
   const amount = estimate.typical;
-  return typeof amount === "number" && Number.isInteger(amount) && amount > 0
-    ? amount
-    : null;
+  return typeof amount === "number" && Number.isInteger(amount) && amount > 0 ? amount : null;
 }
 
 export async function searchGear(query: string): Promise<Gear[]> {
@@ -53,31 +47,18 @@ export async function searchGear(query: string): Promise<Gear[]> {
   });
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error(
-        "Sharply blocked this request. Open website search or try again later.",
-      );
+      throw new Error("Sharply blocked this request. Open website search or try again later.");
     }
     if (response.status === 429) {
-      throw new Error(
-        "Sharply's request limit was reached. Try again in a minute.",
-      );
+      throw new Error("Sharply's request limit was reached. Try again in a minute.");
     }
-    throw new Error(
-      `Sharply is unavailable (HTTP ${response.status}). Try again later.`,
-    );
+    throw new Error(`Sharply is unavailable (HTTP ${response.status}). Try again later.`);
   }
   if (!response.headers.get("content-type")?.includes("application/json")) {
-    throw new Error(
-      "Sharply returned a browser security checkpoint. Open website search or try again later.",
-    );
+    throw new Error("Sharply returned a browser security checkpoint. Open website search or try again later.");
   }
   const payload: unknown = await response.json();
-  if (
-    !payload ||
-    typeof payload !== "object" ||
-    !("results" in payload) ||
-    !Array.isArray(payload.results)
-  ) {
+  if (!payload || typeof payload !== "object" || !("results" in payload) || !Array.isArray(payload.results)) {
     throw new Error("Sharply returned an invalid search response.");
   }
   return payload.results.map((item: unknown) => {
@@ -103,14 +84,8 @@ export async function searchGear(query: string): Promise<Gear[]> {
       slug: item.slug,
       name: item.name,
       gearType: item.gearType,
-      brandName:
-        "brandName" in item && typeof item.brandName === "string"
-          ? item.brandName
-          : null,
-      thumbnailUrl:
-        "thumbnailUrl" in item && typeof item.thumbnailUrl === "string"
-          ? item.thumbnailUrl
-          : null,
+      brandName: "brandName" in item && typeof item.brandName === "string" ? item.brandName : null,
+      thumbnailUrl: "thumbnailUrl" in item && typeof item.thumbnailUrl === "string" ? item.thumbnailUrl : null,
     };
   });
 }
