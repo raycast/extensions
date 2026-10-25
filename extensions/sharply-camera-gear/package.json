@@ -6,6 +6,13 @@
   "icon": "extension-icon.png",
   "author": "flohhhhh",
   "license": "MIT",
+  "keywords": [
+    "camera",
+    "lens",
+    "photography",
+    "gear",
+    "used prices"
+  ],
   "categories": [
     "Productivity",
     "Web"
