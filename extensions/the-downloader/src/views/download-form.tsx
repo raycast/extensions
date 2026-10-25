@@ -839,6 +839,10 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             value={filetype}
             info={filetypeGuidance(source)}
             onChange={(next) => {
+              // Only a real pick counts: if Raycast reports the type shown for a new
+              // link (Image for Pinterest), the user's own choice must stay, so
+              // pasting a video link again brings their Audio back.
+              if (next === filetype) return;
               setFiletype(next as Filetype);
               setFiletypeTouched(true);
             }}
