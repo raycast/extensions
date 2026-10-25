@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import path from "node:path";
 import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
 import { uniqueFilePath } from "./unique-path.js";
 
@@ -14,9 +15,14 @@ export type MonolithSaveOptions = {
   abortSignal?: AbortSignal;
 };
 
-/** Build monolith CLI args. monolith writes the self-contained HTML to `outputPath`. */
+/**
+ * Build monolith CLI args. monolith writes the self-contained HTML to `outputPath`,
+ * named by its file name alone: monolith 2.10 on Windows can't open an absolute
+ * `--output` path (`C:\…` panics with "could not prepare output … cannot find the
+ * path specified"), so `runMonolithSave` runs it inside the output's folder.
+ */
 export function buildMonolithArgs(o: MonolithSaveOptions): string[] {
-  const args = ["--output", o.outputPath];
+  const args = ["--output", path.basename(o.outputPath)];
   if (o.noJavaScript) args.push("--no-js");
   args.push(o.url);
   return args;
@@ -97,6 +103,7 @@ export async function runMonolithSave(binaryPath: string, options: MonolithSaveO
   let result: { code: number | null; stderr: string };
   try {
     result = await runWithWatchdog(binaryPath, buildMonolithArgs(options), {
+      cwd: path.dirname(options.outputPath),
       idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
       abortSignal: options.abortSignal,
     });

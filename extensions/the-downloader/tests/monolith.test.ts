@@ -31,12 +31,19 @@ describe("buildMonolithArgs", () => {
         outputPath: "/Downloads/example.com-x.html",
         noJavaScript: false,
       }),
-    ).toEqual(["--output", "/Downloads/example.com-x.html", "https://example.com/x"]);
+    ).toEqual(["--output", "example.com-x.html", "https://example.com/x"]);
   });
 
   it("adds --no-js for Lightweight mode", () => {
     expect(buildMonolithArgs({ url: "https://example.com/x", outputPath: "/d/page.html", noJavaScript: true })).toEqual(
-      ["--output", "/d/page.html", "--no-js", "https://example.com/x"],
+      ["--output", "page.html", "--no-js", "https://example.com/x"],
+    );
+  });
+
+  it("names the output by its file name alone — monolith on Windows can't open an absolute C:\\ path", () => {
+    const outputPath = path.join(os.tmpdir(), "Downloads", "example.com-x.html");
+    expect(buildMonolithArgs({ url: "https://example.com/x", outputPath, noJavaScript: false })[1]).toBe(
+      "example.com-x.html",
     );
   });
 });
@@ -129,6 +136,20 @@ describe("runMonolithSave", () => {
     );
   });
 
+  it("runs monolith inside the output's folder, so the bare file name lands there", () => {
+    const child = fakeChild();
+    (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+    const outputPath = path.join(os.tmpdir(), "Downloads", "page.html");
+
+    runMonolithSave("/monolith", { url: "https://example.com/x", outputPath, noJavaScript: false });
+
+    expect(spawn).toHaveBeenCalledWith(
+      "/monolith",
+      ["--output", "page.html", "https://example.com/x"],
+      expect.objectContaining({ cwd: path.dirname(outputPath) }),
+    );
+  });
+
   it("kills monolith and rejects when no output arrives within options.idleMs (CDN stall)", async () => {
     vi.useFakeTimers();
     try {
@@ -155,13 +176,29 @@ describe("runMonolithSave", () => {
 
 describe("webpageOutputPath", () => {
   it("names the file after the page, numbered instead of overwriting an earlier save", () => {
-    const taken = new Set(["/out/example.com-news.html"]);
-    expect(webpageOutputPath("/out", "https://example.com/news", () => false)).toBe("/out/example.com-news.html");
-    expect(webpageOutputPath("/out", "https://example.com/news", (p) => taken.has(p))).toBe(
-      "/out/example.com-news (2).html",
+    const out = path.join("/", "out");
+    const taken = new Set([path.join(out, "example.com-news.html")]);
+    expect(webpageOutputPath(out, "https://example.com/news", () => false)).toBe(
+      path.join(out, "example.com-news.html"),
+    );
+    expect(webpageOutputPath(out, "https://example.com/news", (p) => taken.has(p))).toBe(
+      path.join(out, "example.com-news (2).html"),
     );
   });
 });
+
+/** Creating a symlink on Windows needs Developer Mode or an elevated shell. */
+function canSymlink(): boolean {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
+  try {
+    fs.symlinkSync(path.join(dir, "target"), path.join(dir, "link"));
+    return true;
+  } catch {
+    return false;
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
 
 describe("reserveWebpagePath", () => {
   it("takes the name at once, so two saves of one page started together get different files", () => {
@@ -177,7 +214,7 @@ describe("reserveWebpagePath", () => {
     }
   });
 
-  it("steps past a broken symlink with the name instead of retrying it forever", () => {
+  it.skipIf(!canSymlink())("steps past a broken symlink with the name instead of retrying it forever", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "monolith-"));
     try {
       fs.symlinkSync(path.join(dir, "gone.html"), path.join(dir, "example.com-a.html"));

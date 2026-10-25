@@ -27,6 +27,8 @@ export type RunOptions = {
   idleMs: number;
   /** Environment for the child. Defaults to the parent's `process.env`. */
   env?: NodeJS.ProcessEnv;
+  /** Working directory for the child. Defaults to the parent's. */
+  cwd?: string;
   /** Called per stdout chunk so callers can parse incremental progress. Stdout's tail is also returned on close. */
   onStdoutChunk?: (chunk: string) => void;
   /** Called per complete stdout line (newline-buffered across chunks). Use this when a line could be split across stream chunks — e.g. a tagged filepath that must be matched whole. */
@@ -79,6 +81,7 @@ export function runWithWatchdog(binary: string, args: string[], options: RunOpti
     const child = spawn(binary, args, {
       stdio: ["ignore", "pipe", "pipe"],
       env: options.env ?? process.env,
+      cwd: options.cwd,
       // On POSIX, run the child as its own process-group leader so termination
       // can signal the whole group (negative pid) — otherwise killing yt-dlp
       // orphans its ffmpeg grandchild, which keeps re-encoding under launchd.

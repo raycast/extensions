@@ -7,11 +7,13 @@ describe("uniqueFilePath", () => {
   const taken = (...names: string[]) => (p: string) => names.map((n) => path.join(folder, n)).includes(p);
 
   it("uses the plain name when it's free", () => {
-    expect(uniqueFilePath(folder, "Talk", "txt", taken())).toBe("/out/Talk.txt");
+    expect(uniqueFilePath(folder, "Talk", "txt", taken())).toBe(path.join(folder, "Talk.txt"));
   });
 
   it("numbers the name instead of overwriting an existing file", () => {
-    expect(uniqueFilePath(folder, "Talk", "txt", taken("Talk.txt"))).toBe("/out/Talk (2).txt");
-    expect(uniqueFilePath(folder, "Talk", "txt", taken("Talk.txt", "Talk (2).txt"))).toBe("/out/Talk (3).txt");
+    expect(uniqueFilePath(folder, "Talk", "txt", taken("Talk.txt"))).toBe(path.join(folder, "Talk (2).txt"));
+    expect(uniqueFilePath(folder, "Talk", "txt", taken("Talk.txt", "Talk (2).txt"))).toBe(
+      path.join(folder, "Talk (3).txt"),
+    );
   });
 });
