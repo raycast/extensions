@@ -73,27 +73,13 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
  * coupling every fetcher/auth/parser module to the Raycast runtime.
  */
 
-// Root-level preferences shared by both commands.
-type SharedPrefs = {
-  additionalClaudeHomes?: string;
-  additionalCodexHomes?: string;
-  aihubmixApiKey?: string;
-  copilotAuthToken?: string;
-  cursorCookieHeader?: string;
-  deepseekApiKey?: string;
-  elevenlabsApiKey?: string;
-  kimiAuthToken?: string;
-  syntheticApiToken?: string;
-  zaiApiToken?: string;
-  minimaxApiToken?: string;
-  minimaxcnApiToken?: string;
-  opencodegoApiKey?: string;
-  openrouterApiKey?: string;
-  raycastCookieHeader?: string;
-};
+// Text preferences shared by every command, keyed by the generated `Preferences` type.
+type TextPreferenceKey = {
+  [K in keyof Preferences]-?: Preferences[K] extends string | undefined ? K : never;
+}[keyof Preferences];
 
-function prefValue(key: keyof SharedPrefs): string {
-  return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
+function prefValue(key: TextPreferenceKey): string {
+  return getPreferenceValues<Preferences>()[key]?.trim() || "";
 }
 
 export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
