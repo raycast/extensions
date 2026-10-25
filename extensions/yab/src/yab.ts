@@ -366,6 +366,8 @@ class YabMcp {
     this.child = child;
     this.buffer = "";
     const failAll = (error: Error) => {
+      // A child replaced since (a startup that timed out) leaves the new one alone.
+      if (this.child !== child) return;
       for (const [, p] of this.pending) {
         clearTimeout(p.timer);
         p.reject(error);
@@ -377,7 +379,13 @@ class YabMcp {
     child.on("error", (e) => failAll(e));
     child.on("exit", () => failAll(new Error("Yab stopped before answering")));
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("Yab didn't start its tools")), 20000);
+      const timer = setTimeout(() => {
+        failAll(new Error("Yab didn't start its tools"));
+        child.removeAllListeners();
+        child.stdout.removeAllListeners();
+        child.kill();
+        reject(new Error("Yab didn't start its tools"));
+      }, 20000);
       child.stdout.on("data", (chunk: Buffer) => {
         this.buffer += chunk.toString("utf8");
         let at: number;
@@ -425,12 +433,14 @@ class YabMcp {
   }
 
   async call(name: string, args: Record<string, unknown>, timeout: number): Promise<string> {
+    // Set before any await, so calls made together wait for one child.
     if (!this.ready) {
-      const bin = await yabBinary();
-      this.ready = this.start(bin).catch((error) => {
-        this.ready = undefined;
-        throw error;
-      });
+      this.ready = yabBinary()
+        .then((bin) => this.start(bin))
+        .catch((error) => {
+          this.ready = undefined;
+          throw error;
+        });
     }
     await this.ready;
     const id = this.next++;
