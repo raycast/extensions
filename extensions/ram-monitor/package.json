@@ -2,11 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ram-monitor",
   "title": "RAM Monitor",
-  "description": "Shows RAM usage in the menu bar.",
-  "icon": "extension-icon.png",
+  "description": "See your Mac's RAM usage and memory pressure at a glance, plus which apps use the most memory.",
+  "icon": "pressure-gradient.png",
   "author": "boch-rvf",
   "platforms": [
-    "Windows",
     "macOS"
   ],
   "categories": [
@@ -17,9 +16,9 @@
     {
       "name": "ram-usage",
       "title": "RAM Usage",
-      "description": "Shows my RAM usage in the menu bar",
+      "description": "Show RAM usage, memory pressure, and the apps using the most memory in the menu bar.",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "20s"
     }
   ],
   "tools": [],
