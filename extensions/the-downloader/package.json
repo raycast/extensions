@@ -38,7 +38,7 @@
           "title": "Auto Load URL from Selected Text",
           "description": "When you open Download, fill in a link from the text selected in the frontmost app.",
           "type": "checkbox",
-          "label": "Enable",
+          "label": "Fill in a link from selected text",
           "default": false,
           "required": false
         },
@@ -47,7 +47,7 @@
           "title": "Exact Format Selection",
           "description": "Adds an Exact Format field (every yt-dlp format and its size) to the Download form for videos.",
           "type": "checkbox",
-          "label": "Enable",
+          "label": "Show the Exact Format field",
           "default": false,
           "required": false
         }
@@ -115,7 +115,7 @@
         {
           "name": "aiEngine",
           "title": "AI Engine",
-          "description": "Which AI answers. Automatic: Raycast AI if you have Pro, then Apple Intelligence, then Ollama.",
+          "description": "Which AI answers. Automatic: Raycast AI if you have Pro, then Apple Intelligence (on a Mac), then Ollama.",
           "type": "dropdown",
           "default": "auto",
           "required": false,
@@ -129,7 +129,7 @@
               "value": "raycast"
             },
             {
-              "title": "Apple Intelligence (On-Device)",
+              "title": "Apple Intelligence (On-Device, Mac Only)",
               "value": "apple"
             },
             {
@@ -385,7 +385,7 @@
       "title": "Auto Load URL from Clipboard",
       "description": "When you open Download or Chat About Link, fill in a link you've copied.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Fill in a copied link",
       "default": false,
       "required": false
     },
@@ -394,7 +394,7 @@
       "title": "Browser Extension Support",
       "description": "Offer the current browser tab's link. Needs the Raycast browser extension.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Offer the current browser tab's link",
       "default": false,
       "required": false
     },
@@ -403,7 +403,7 @@
       "title": "Check for Tool Updates",
       "description": "Before a download, offer to update outdated tools (yt-dlp, gallery-dl, FFmpeg…).",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Offer tool updates before a download",
       "default": true,
       "required": false
     },
@@ -655,14 +655,14 @@
       "title": "Advanced: Force IPv4",
       "description": "Only if downloads fail on a network with broken IPv6: make yt-dlp use IPv4.",
       "type": "checkbox",
-      "label": "Enable",
+      "label": "Use IPv4 only",
       "default": false,
       "required": false
     },
     {
       "name": "homebrewPath",
-      "title": "Advanced: Homebrew Path",
-      "description": "macOS only. Leave empty unless Homebrew is in an unusual place (`which brew` shows it).",
+      "title": "Advanced: Homebrew Path (macOS)",
+      "description": "Not used on Windows. Leave empty unless Homebrew is in an unusual place (`which brew` shows it).",
       "type": "textfield",
       "default": {
         "macOS": "/opt/homebrew/bin/brew",
@@ -673,49 +673,49 @@
     {
       "name": "ytdlPath",
       "title": "Advanced: yt-dlp Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which yt-dlp` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which yt-dlp` (macOS) or `where yt-dlp` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "ffmpegPath",
       "title": "Advanced: FFmpeg Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffmpeg` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffmpeg` (macOS) or `where ffmpeg` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "ffprobePath",
       "title": "Advanced: FFprobe Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffprobe` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which ffprobe` (macOS) or `where ffprobe` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "denoPath",
       "title": "Advanced: Deno Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which deno` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which deno` (macOS) or `where deno` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "galleryDlPath",
       "title": "Advanced: gallery-dl Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which gallery-dl` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which gallery-dl` (macOS) or `where gallery-dl` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "spotDlPath",
       "title": "Advanced: spotDL Path",
-      "description": "Leave empty to use the copy The Downloader downloads. Custom: `which spotdl` shows yours.",
+      "description": "Leave empty to use the copy The Downloader downloads. Custom: `which spotdl` (macOS) or `where spotdl` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "monolithPath",
       "title": "Advanced: Monolith Path",
-      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which monolith` shows yours.",
+      "description": "Leave empty to use the one The Downloader finds or installs. Custom: `which monolith` (macOS) or `where monolith` (Windows) shows yours.",
       "type": "textfield",
       "required": false
     }

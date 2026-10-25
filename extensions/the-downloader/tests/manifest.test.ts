@@ -49,3 +49,17 @@ describe("Raycast AI Model preference", () => {
     expect(preference.data[0]).toMatchObject({ value: "" });
   });
 });
+
+describe("Checkbox preferences", () => {
+  const checkboxes = [
+    ...manifest.preferences,
+    ...manifest.commands.flatMap((c: { preferences?: unknown[] }) => c.preferences ?? []),
+  ].filter((p: { type: string }) => p.type === "checkbox") as { name: string; label: string }[];
+
+  it("say what they turn on — Raycast for Windows shows the label, not the title", () => {
+    expect(checkboxes.length).toBeGreaterThan(0);
+    for (const { name, label } of checkboxes) {
+      expect(label, name).not.toMatch(/^(enable|enabled|on)$/i);
+    }
+  });
+});
