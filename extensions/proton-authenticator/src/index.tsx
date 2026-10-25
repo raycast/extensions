@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert, useNavigation } from "@raycast/api";
-import { useCachedState, getProgressIcon, showFailureToast, useFrecencySorting } from "@raycast/utils";
+import { useCachedState, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
 
@@ -7,7 +7,7 @@ import { STATE_KEYS } from "./lib/constants";
 import { TOTPAccount, ImportMode, MissingKey, LoadResult } from "./types";
 import { loadAccountsFromStorage, clearStoredData, getImportMode, setImportMode } from "./lib/storage";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
-import { getProgressColor } from "./lib/colors";
+import { getProgressColor, getProgressIcon } from "./lib/colors";
 import SetupFormJSON from "./components/SetupFormJSON";
 import SetupSQLite from "./components/SetupSQLite";
 import ModeSelector from "./components/ModeSelector";
@@ -263,10 +263,8 @@ export default function Command() {
               {
                 text: `${remaining}s`,
                 icon: {
-                  source: getProgressIcon(remaining / (account.period || 30), colors.main, {
-                    background: colors.background,
-                    backgroundOpacity: 1,
-                  }),
+                  source: getProgressIcon(remaining / (account.period || 30)),
+                  tintColor: colors.main,
                 },
                 tooltip: "Time remaining",
               },
