@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+raycast-env.d.ts
+.env
+.env.*
+!.env.example
+.raycast-swift-build/
+.swiftpm/
+compiled_raycast_swift/
+compiled_raycast_rust/
