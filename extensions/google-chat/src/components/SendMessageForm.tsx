@@ -294,7 +294,8 @@ export function SendMessageForm(props: SendMessageFormProps) {
     <Form
       isLoading={isLoading || mention.isLoading}
       enableDrafts={props.enableDrafts}
-      navigationTitle={props.recipientTitle ? `Message ${props.recipientTitle}` : "Send Message"}
+      // As the Send Message command itself, Raycast shows the command name.
+      navigationTitle={props.recipientTitle ? `Message ${props.recipientTitle}` : undefined}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Send Message" icon={Icon.Message} onSubmit={submit} />

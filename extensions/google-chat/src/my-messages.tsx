@@ -165,7 +165,6 @@ function MyMessages({ launchView }: { launchView?: string }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Home"
       searchBarPlaceholder={unreadOnly ? "Filter unread conversations" : "Filter conversations"}
       pagination={unreadOnly ? undefined : reads.pagination}
       searchBarAccessory={
