@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add CodeTrendy MCP Server] - 2026-10-25
+
+- Add CodeTrendy to the official registry: search a curated directory of newly launched startups, SaaS products and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://codetrendy.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add VOMO MCP Server] - 2026-10-25
 
 - Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
