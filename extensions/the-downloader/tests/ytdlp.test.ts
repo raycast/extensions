@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 
@@ -13,6 +16,7 @@ import {
   runVideoDownload,
 } from "../src/lib/ytdlp";
 import { PROGRESS_TEMPLATE } from "../src/lib/progress";
+import { AbortError } from "../src/lib/run";
 
 function fakeChild() {
   const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter; kill: () => void };
@@ -363,5 +367,59 @@ describe("buildThumbnailArgs", () => {
   it("passes the deno JS runtime when it's installed", () => {
     const args = buildThumbnailArgs({ url: "https://youtu.be/a", outputTemplate: "/o.%(ext)s", denoPath: "/deno" });
     expect(args[args.indexOf("--js-runtimes") + 1]).toBe("deno:/deno");
+  });
+});
+
+describe("Stop cleans up partial downloads", () => {
+  function tempDir(): string {
+    return fs.mkdtempSync(path.join(os.tmpdir(), "ytdlp-"));
+  }
+
+  it("removes the .part, .ytdl and fragment files of the stream being written when the download is stopped", async () => {
+    const dir = tempDir();
+    try {
+      const destination = path.join(dir, "Talk (abc).f401.mp4");
+      const finished = path.join(dir, "Earlier (xyz).mp4");
+      for (const file of [`${destination}.part`, `${destination}.ytdl`, `${destination}.part-Frag3`, finished]) {
+        fs.writeFileSync(file, "x");
+      }
+      const child = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+      const controller = new AbortController();
+      const promise = runVideoDownload(
+        "/yt-dlp",
+        { url: "https://youtu.be/abc", format: "bv*+ba#mp4", outputTemplate: "/o", ffmpegPath: "/ff", abortSignal: controller.signal },
+        () => undefined,
+      );
+      child.stdout.emit("data", Buffer.from(`[download] Destination: ${destination}\n`));
+      controller.abort();
+
+      await expect(promise).rejects.toBeInstanceOf(AbortError);
+      expect(fs.readdirSync(dir)).toEqual(["Earlier (xyz).mp4"]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("leaves partial files alone when yt-dlp fails on its own (it can resume them)", async () => {
+    const dir = tempDir();
+    try {
+      const destination = path.join(dir, "Talk (abc).mp4");
+      fs.writeFileSync(`${destination}.part`, "x");
+      const child = fakeChild();
+      (spawn as ReturnType<typeof vi.fn>).mockReturnValueOnce(child);
+      const promise = runVideoDownload(
+        "/yt-dlp",
+        { url: "https://youtu.be/abc", format: "bv*+ba#mp4", outputTemplate: "/o", ffmpegPath: "/ff" },
+        () => undefined,
+      );
+      child.stdout.emit("data", Buffer.from(`[download] Destination: ${destination}\n`));
+      child.emit("close", 1);
+
+      await expect(promise).rejects.toThrow();
+      expect(fs.existsSync(`${destination}.part`)).toBe(true);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

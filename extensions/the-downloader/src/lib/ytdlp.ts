@@ -1,7 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
 import { execa } from "execa";
 import { Video } from "../types.js";
 import { PROGRESS_TEMPLATE, YtdlpEvent, parseYtdlpLine } from "./progress.js";
-import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
+import { AbortError, DEFAULT_IDLE_MS, RunResult, runWithWatchdog } from "./run.js";
 
 /**
  * Pull the first JSON object out of yt-dlp's stdout. yt-dlp can emit `[debug]`
@@ -178,6 +180,35 @@ export function buildVideoDownloadArgs(a: VideoDownloadArgs): string[] {
 
 export type VideoDownloadResult = { filePath: string };
 
+/** `[download] Destination: …` — the file yt-dlp is writing a stream to. */
+const DESTINATION_RE = /^\[download\] Destination:\s*(.+)$/;
+
+/**
+ * After Stop, remove what yt-dlp leaves of the streams it was writing: the
+ * `.part` file, its `.ytdl` resume note and any `.part-Frag…` pieces. Only the
+ * named streams' leftovers go — never a finished file.
+ */
+export function removePartialDownloads(destinations: string[]): void {
+  for (const destination of destinations) {
+    const leftovers = [`${destination}.part`, `${destination}.ytdl`];
+    const fragmentPrefix = `${path.basename(destination)}.part-Frag`;
+    try {
+      for (const name of fs.readdirSync(path.dirname(destination))) {
+        if (name.startsWith(fragmentPrefix)) leftovers.push(path.join(path.dirname(destination), name));
+      }
+    } catch {
+      /* the folder is gone — nothing left to clean */
+    }
+    for (const leftover of leftovers) {
+      try {
+        fs.rmSync(leftover, { force: true });
+      } catch {
+        /* still locked or already gone */
+      }
+    }
+  }
+}
+
 /**
  * Run yt-dlp for a media download. `onProgress` receives the download percentage
  * as yt-dlp reports it; `onEvent`, when given, receives every parsed progress,
@@ -194,10 +225,13 @@ export async function runVideoDownload(
 ): Promise<VideoDownloadResult> {
   let filePath = "";
   let skippedLive = false;
+  const destinations: string[] = [];
   // Line-buffered (via onStdoutLine) so a tagged filepath split across two
   // stream chunks is still matched whole.
   const handleLine = (line: string) => {
     if (/does not pass filter \(!is_live\)/.test(line)) skippedLive = true;
+    const destination = DESTINATION_RE.exec(line.trim());
+    if (destination) destinations.push(destination[1].trim());
     const event = parseYtdlpLine(line);
     if (event) {
       if (event.type === "progress" && event.progress.percent !== undefined) onProgress(event.progress.percent);
@@ -209,12 +243,20 @@ export async function runVideoDownload(
       filePath = tagged[1].trim();
     }
   };
-  const { code, stderr } = await runWithWatchdog(binaryPath, buildVideoDownloadArgs(options), {
-    idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
-    env: { ...process.env, PYTHONUNBUFFERED: "1" },
-    onStdoutLine: handleLine,
-    abortSignal: options.abortSignal,
-  });
+  let result: RunResult;
+  try {
+    result = await runWithWatchdog(binaryPath, buildVideoDownloadArgs(options), {
+      idleMs: options.idleMs ?? DEFAULT_IDLE_MS,
+      env: { ...process.env, PYTHONUNBUFFERED: "1" },
+      onStdoutLine: handleLine,
+      abortSignal: options.abortSignal,
+    });
+  } catch (error) {
+    // The whole process tree has exited by now, so nothing holds the files open.
+    if (error instanceof AbortError) removePartialDownloads(destinations);
+    throw error;
+  }
+  const { code, stderr } = result;
   if (code === 0 && skippedLive && !filePath) throw new LiveStreamError();
   if (code === 0) return { filePath };
   throw new Error(stderr.trim() || `yt-dlp exited with code ${code}`);
