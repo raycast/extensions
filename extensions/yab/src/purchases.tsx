@@ -5,6 +5,13 @@ import { attempt, favicon } from "./components";
 import { purchases } from "./parse";
 import { callTool, openURL, showMail } from "./yab";
 
+/** Not opened this year, or not in two months: worth a look before it renews. */
+function unused(detail: string): boolean {
+  if (/not opened this year/.test(detail)) return true;
+  const days = Number(detail.match(/last opened (\d+) days/)?.[1] ?? 0);
+  return days >= 60;
+}
+
 export default function Command() {
   const [kind, setKind] = useState("subscriptions");
   const [text, setText] = useState("");
@@ -41,11 +48,7 @@ export default function Command() {
             icon={p.site ? favicon(`https://${p.site}`) : Icon.Cart}
             title={p.title}
             subtitle={p.detail}
-            accessories={
-              /not opened|last opened (\d{2,}) days/.test(p.detail)
-                ? [{ tag: { value: "Unused", color: Color.Orange } }]
-                : []
-            }
+            accessories={unused(p.detail) ? [{ tag: { value: "Unused", color: Color.Orange } }] : []}
             actions={
               <ActionPanel>
                 {p.tracking ? (

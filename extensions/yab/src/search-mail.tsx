@@ -84,7 +84,6 @@ export default function Command(props: LaunchProps) {
                     : Color.SecondaryText,
                 }}
                 title={hit.subject || "(no subject)"}
-                subtitle={hit.from}
                 accessories={[{ text: hit.when }]}
                 keywords={[hit.from, hit.snippet]}
                 detail={<MailDetail id={hit.id} />}

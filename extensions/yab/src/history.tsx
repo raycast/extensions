@@ -95,7 +95,7 @@ export function HistoryItem(props: {
       id={page.key}
       icon={favicon(page.url)}
       title={page.title || domain}
-      subtitle={showDetail ? (page.inPage ? "in the page" : domain) : { value: domain, tooltip: page.url }}
+      subtitle={showDetail ? undefined : { value: domain, tooltip: page.url }}
       accessories={accessories}
       detail={
         showDetail ? (
