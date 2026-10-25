@@ -11,10 +11,12 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { createSetupTask } from "./state";
 import {
   installationState,
   installService,
   removeService,
+  restartService,
 } from "../service/install";
 
 // Commands -> shared setup gate -> verified installer. Folder access always waits for user selection.
@@ -24,9 +26,15 @@ export function InstallationGate({ children }: { children?: ReactNode }) {
   const [error, setError] = useState<string>();
   const active = useRef(true);
   const lastProgress = useRef(0);
-  const preferences = getPreferenceValues<{ helperPath?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
+  const [runSetup] = useState(createSetupTask);
 
-  async function install() {
+  // Replayed mount effects join the same operation rather than reporting their own lock as an error.
+  function install() {
+    return runSetup(installNow);
+  }
+
+  async function installNow() {
     setState("installing");
     setError(undefined);
     try {
@@ -48,6 +56,7 @@ export function InstallationGate({ children }: { children?: ReactNode }) {
         );
       }, preferences.helperPath);
       if (active.current) {
+        setError(undefined);
         setState("ready");
       }
     } catch (failure) {
@@ -60,6 +69,34 @@ export function InstallationGate({ children }: { children?: ReactNode }) {
     }
   }
 
+  // An intact helper can recover offline; failed restarts never silently switch to a download.
+  function restart() {
+    return runSetup(restartNow);
+  }
+
+  async function restartNow() {
+    setState("restarting");
+    setError(undefined);
+    try {
+      await restartService((message) => {
+        if (active.current) {
+          setStage(message);
+        }
+      });
+      if (active.current) {
+        setError(undefined);
+        setState("ready");
+      }
+    } catch (failure) {
+      if (!active.current) {
+        return;
+      }
+      setError(failure instanceof Error ? failure.message : String(failure));
+      setState("stopped");
+      await showFailureToast(failure, { title: "Service restart failed" });
+    }
+  }
+
   useEffect(() => {
     active.current = true;
     void installationState()
@@ -69,6 +106,10 @@ export function InstallationGate({ children }: { children?: ReactNode }) {
         }
         if (value === "missing") {
           await install();
+          return;
+        }
+        if (value === "stopped") {
+          await restart();
           return;
         }
         setState(value);
@@ -87,12 +128,12 @@ export function InstallationGate({ children }: { children?: ReactNode }) {
   if (state === "ready" && children) {
     return <>{children}</>;
   }
-  const busy = state === "checking" || state === "installing";
+  const busy = ["checking", "installing", "restarting"].includes(state);
   const markdown = `# Local Content Search
 
 ${busy ? stage : state === "ready" ? "Installed and ready for offline search." : state === "disabled" ? "The background service has been removed. Install it again when you need it." : "Set up on-device search without Terminal or developer tools."}
 
-${error ? `Setup stopped: ${error}\n\nCheck your connection and free disk space, then choose Retry Setup. No folders were selected automatically.` : ""}
+${error ? (state === "stopped" ? `Service restart stopped: ${error}\n\nChoose Restart Background Service to retry with installed files. Repair Installation downloads a new helper and requires a connection.` : `Setup stopped: ${error}\n\nCheck your connection and free disk space, then choose Retry Setup. No folders were selected automatically.`) : ""}
 
 ## First setup
 
@@ -115,9 +156,22 @@ Choose **Remove Background Service** below. This stops indexing and disables the
       markdown={markdown}
       actions={
         <ActionPanel>
+          {state === "stopped" && (
+            <Action
+              title="Restart Background Service"
+              icon={Icon.ArrowClockwise}
+              onAction={restart}
+            />
+          )}
           {!busy && state !== "ready" && (
             <Action
-              title={error ? "Retry Setup" : "Install Local Content Search"}
+              title={
+                state === "stopped"
+                  ? "Repair Installation"
+                  : error
+                    ? "Retry Setup"
+                    : "Install Local Content Search"
+              }
               icon={Icon.Download}
               onAction={install}
             />

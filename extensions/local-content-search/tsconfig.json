@@ -15,6 +15,7 @@
     "noEmit": true
   },
   "include": [
+    "raycast-env.d.ts",
     "src",
     "service"
   ]

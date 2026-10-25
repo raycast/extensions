@@ -1,4 +1,5 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
+import { constants } from "node:fs";
 import { promisify } from "node:util";
 import { arch, homedir, totalmem } from "node:os";
 import { join } from "node:path";
@@ -13,6 +14,7 @@ import {
   rename,
   rm,
   statfs,
+  stat,
   unlink,
   writeFile,
 } from "node:fs/promises";
@@ -33,6 +35,12 @@ const SETUP_DISK_BYTES = 4 * 1024 ** 3;
 const SERVICE_WAIT_MS = 15000;
 const POLL_MS = 250;
 const LAUNCHD_IO_ERROR = 5;
+const EXIT_SUCCESS = 0;
+const LOCK_BUSY_EXIT = 75;
+const LOCK_READY = "locked\n";
+// Allow a crashed parent's pipe helper a brief interval to observe EOF and release its lock.
+const LOCK_WAIT_SECONDS = 1;
+const LOCK_TIMEOUT_MS = 5000;
 type Execute = typeof execCommand;
 export type InstallProgress = (
   stage: string,
@@ -191,38 +199,157 @@ async function waitForService(locations: Paths): Promise<void> {
   throw new Error(`Service did not become ready. See ${locations.logs}`);
 }
 
-// Exclusive ownership prevents two Raycast commands from replacing the helper simultaneously.
+// Parent pipe -> lockf/kernel lock -> cat acknowledgement. EOF (including parent crash) releases ownership.
+// Keep the inode permanently; PID contents never determine ownership. Command mode also supports macOS 14.
 async function acquireLock(locations: Paths) {
   const lock = join(locations.base, "install.lock");
-  try {
-    const owner = Number(await readFile(lock, "utf8"));
-    if (!Number.isInteger(owner) || owner <= 0) {
-      throw new Error(
-        "Setup lock is incomplete; close the other setup command and retry",
-      );
-    }
-    try {
-      process.kill(owner, 0);
-      throw new Error(
-        "Setup is already running. Keep that command open until it finishes",
-      );
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ESRCH") {
-        throw error;
-      }
-      await unlink(lock);
-    }
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      throw error;
-    }
-  }
-  const handle = await open(lock, "wx", 0o600);
-  await handle.writeFile(String(process.pid));
+  const handle = await open(lock, "a", 0o600);
   await handle.close();
-  return async () => {
-    await unlink(lock);
-  };
+  const child = spawn(
+    "/usr/bin/lockf",
+    ["-k", "-t", String(LOCK_WAIT_SECONDS), lock, "/bin/cat"],
+    { stdio: "pipe" },
+  );
+  const closed = new Promise<number | null>((done) => {
+    child.once("close", done);
+    child.once("error", () => {
+      done(null);
+    });
+  });
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      let output = "",
+        diagnostic = "";
+      child.stdout.on("data", (chunk: Buffer) => {
+        output += chunk.toString();
+        if (output === LOCK_READY) {
+          resolve();
+        }
+      });
+      child.stderr.on("data", (chunk: Buffer) => {
+        diagnostic += chunk.toString();
+      });
+      child.stdin.on("error", () => {});
+      child.once("error", reject);
+      child.once("close", (code) => {
+        reject(
+          new Error(
+            code === LOCK_BUSY_EXIT
+              ? "Setup is already running. Keep that command open until it finishes"
+              : `Could not acquire setup lock: ${diagnostic.trim() || code}`,
+          ),
+        );
+      });
+      timer = setTimeout(() => {
+        reject(new Error("Setup lock acknowledgement timed out"));
+      }, LOCK_TIMEOUT_MS);
+      child.stdin.write(LOCK_READY);
+    });
+    return async () => {
+      child.stdin.end();
+      if ((await closed) !== EXIT_SUCCESS) {
+        throw new Error("Setup lock holder exited unexpectedly");
+      }
+    };
+  } catch (error) {
+    child.stdin.destroy();
+    child.kill("SIGTERM");
+    await closed;
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Installed-version is written only after a verified install; required files must still exist locally.
+async function installedFilesReady(locations: Paths): Promise<boolean> {
+  try {
+    if (
+      (await readFile(join(locations.base, "installed-version"), "utf8")) !==
+      HELPER_VERSION
+    ) {
+      return false;
+    }
+    for (const file of [
+      join(locations.base, "bin/node"),
+      locations.engine,
+      locations.daemon,
+    ]) {
+      const info = await stat(file);
+      if (!info.isFile() || info.size === 0) {
+        return false;
+      }
+    }
+    for (const model of MODELS) {
+      const info = await stat(join(locations.models, model.name));
+      if (!info.isFile() || info.size !== model.bytes) {
+        return false;
+      }
+    }
+    await access(join(locations.base, "bin/node"), constants.X_OK);
+    await access(locations.engine, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Cached files do not authorize automatic recovery after explicit removal.
+async function serviceRemoved(locations: Paths): Promise<boolean> {
+  return access(join(locations.base, "disabled"))
+    .then(() => true)
+    .catch(() => false);
+}
+
+// Restart the installed helper without fetching or rewriting models, configuration or index data.
+export async function restartService(
+  report: InstallProgress,
+  locations = paths(),
+  agents = AGENTS,
+  run: Execute = execCommand,
+  ready = async () => {
+    await waitForService(locations);
+  },
+): Promise<void> {
+  const releaseLock = await acquireLock(locations);
+  try {
+    if (await serviceRemoved(locations)) {
+      throw new Error(
+        "Service was explicitly removed; choose Install to enable it again",
+      );
+    }
+    if (!(await installedFilesReady(locations))) {
+      throw new Error(
+        "Installed files are incomplete; choose Repair Installation while online",
+      );
+    }
+    if (
+      await new LocalClient(locations.socket)
+        .status()
+        .then((status) => status.modelReady)
+        .catch(() => false)
+    ) {
+      report("Background service already running");
+      return;
+    }
+    report("Restarting installed background service; no downloads");
+    await mkdir(agents, { recursive: true });
+    await mkdir(locations.logs, { recursive: true, mode: 0o700 });
+    await stopService(run);
+    const plist = join(agents, `${AGENT_LABEL}.plist`);
+    await writeFile(
+      plist,
+      launchAgent(join(locations.base, "bin/node"), locations),
+      { mode: 0o600 },
+    );
+    await run("/usr/bin/plutil", ["-lint", plist]);
+    await registerService(plist, run);
+    await ready();
+    report("Background service restarted");
+  } finally {
+    await releaseLock();
+  }
 }
 
 // The UI calls this once; network and launchd mechanics stay below the command layer.
@@ -308,28 +435,20 @@ export async function removeService(
   }
 }
 
-export async function installationState(): Promise<
-  "ready" | "missing" | "disabled"
-> {
-  const locations = paths();
-  if (
-    await access(join(locations.base, "disabled"))
-      .then(() => true)
-      .catch(() => false)
-  ) {
+export async function installationState(
+  locations = paths(),
+): Promise<"ready" | "missing" | "disabled" | "stopped"> {
+  if (await serviceRemoved(locations)) {
     return "disabled";
   }
-  const version = await readFile(
-    join(locations.base, "installed-version"),
-    "utf8",
-  ).catch(() => "");
-  if (version !== HELPER_VERSION) {
+  if (!(await installedFilesReady(locations))) {
     return "missing";
   }
   try {
-    const status = await new LocalClient().status();
+    const status = await new LocalClient(locations.socket).status();
     return status.modelReady ? "ready" : "missing";
   } catch {
-    return "missing";
+    // An intact installation with an unavailable socket needs a local restart, not another download.
+    return "stopped";
   }
 }

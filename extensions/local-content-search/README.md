@@ -54,6 +54,8 @@ State lives under `~/Library/Application Support/LocalSearch`. Its directory is 
 
 Open **Install Local Content Search**, choose **Remove Background Service**, and confirm. This stops and unregisters the login service while preserving models, settings, and the index. Other commands will not reinstall it until you explicitly choose Install again. Removing the Raycast extension alone does not stop the independent service; remove the service first.
 
+If an installed service stops, opening a command restarts it from local files without downloading again. If recovery fails, choose **Restart Background Service** to retry offline. **Repair Installation** downloads a new helper and requires a connection.
+
 Logs are under `~/Library/Application Support/LocalSearch/logs`.
 
 If saved configuration cannot be read, pause/resume cannot replace it with an empty folder list. Restore the configuration or explicitly choose folders; recovery preserves the original as `config.json.invalid-<timestamp>` in the state directory. The helper includes its own Node runtime, so changes to a separately installed Node do not affect the service.
