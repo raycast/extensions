@@ -1,7 +1,6 @@
-import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import {
   getSearchBookmarks,
@@ -9,71 +8,47 @@ import {
   getSearchGroupFolders,
   getSearchGroupTabs,
   getSearchPins,
+  readSearchData,
+  readSearchProfiles,
+  SEARCH_PERSONAL_PROFILE,
   SEARCH_PINS_FOLDER,
-  type SearchBookmarkNode,
-  type SearchPinsFile,
-  type SearchSession,
 } from "../utils/searchBookmarks";
 import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
 
 // Search keeps its data in a folder named after the app rather than after its
 // bundle id, so the path is given here in full.
 const SEARCH_PATH = getBrowserDataPath(BROWSERS_BUNDLE_ID.search, `${homedir()}/Library/Application Support/Search`);
-const BOOKMARKS_PATH = `${SEARCH_PATH}/bookmarks.json`;
-const PINS_PATH = `${SEARCH_PATH}/pins.json`;
-
-// Any of these files is missing until there is something to put in it, and one
-// without the others is an ordinary state rather than an error.
-async function readJson<T>(path: string): Promise<T | undefined> {
-  try {
-    return JSON.parse(await readFile(path, "utf-8")) as T;
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-
-    if (code === "ENOENT" || error instanceof SyntaxError) {
-      return undefined;
-    }
-
-    throw error;
-  }
-}
-
-// One session file per space: session.json for the first, session-<id>.json
-// for the others.
-async function readSessions(): Promise<SearchSession[]> {
-  let names: string[];
-
-  try {
-    names = await readdir(SEARCH_PATH);
-  } catch {
-    return [];
-  }
-
-  const files = names.filter((name) => name === "session.json" || /^session-.+\.json$/.test(name));
-  const sessions = await Promise.all(files.map((name) => readJson<SearchSession>(`${SEARCH_PATH}/${name}`)));
-
-  return sessions.filter((session): session is SearchSession => session !== undefined);
-}
 
 export default function useSearchBookmarks(enabled: boolean) {
-  const { data, isLoading, mutate, error } = useCachedPromise(
+  const [currentProfile, setCurrentProfile] = useCachedState("search-profile", "");
+  const { data: profiles } = useCachedPromise(
     async (enabled: boolean) => {
       if (!enabled) {
         return;
       }
 
-      const [bookmarks, pins, sessions] = await Promise.all([
-        readJson<SearchBookmarkNode[]>(BOOKMARKS_PATH),
-        readJson<SearchPinsFile>(PINS_PATH),
-        readSessions(),
-      ]);
+      // Initially set the current profile when nothing is set in the cache yet
+      if (currentProfile === "") {
+        setCurrentProfile(SEARCH_PERSONAL_PROFILE);
+      }
 
-      return { bookmarks: bookmarks ?? [], pins: pins ?? {}, sessions };
+      return readSearchProfiles(SEARCH_PATH);
     },
     [enabled],
   );
 
-  const pins = data ? getSearchPins(data.pins) : [];
+  const { data, isLoading, mutate, error } = useCachedPromise(
+    async (profile: string, enabled: boolean) => {
+      if (!enabled) {
+        return;
+      }
+
+      return readSearchData(SEARCH_PATH, profile);
+    },
+    [currentProfile, enabled],
+  );
+
+  const pins = data ? getSearchPins(data.pins, data.keys) : [];
   const bookmarks = data ? [...getSearchBookmarks(data.bookmarks), ...pins, ...getSearchGroupTabs(data.sessions)] : [];
   const folders = data ? [...getSearchFolders(data.bookmarks), ...getSearchGroupFolders(data.sessions)] : [];
 
@@ -91,5 +66,8 @@ export default function useSearchBookmarks(enabled: boolean) {
     isLoading,
     mutate,
     error,
+    profiles: profiles || [],
+    currentProfile,
+    setCurrentProfile,
   };
 }

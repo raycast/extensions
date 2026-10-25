@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Search Profiles] - {PR_MERGE_DATE}
+
+- Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu
+
 ## [Support for Search] - 2026-10-24
 
 - Added support for the `Search` browser on macOS: its bookmarks, its pinned tabs, and its tab groups

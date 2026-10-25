@@ -1,3 +1,5 @@
+import { readdir, readFile } from "fs/promises";
+
 // Search keeps its bookmarks as plain JSON: a list of nodes, each with an id
 // and a title, holding either an address or children. A node with children is
 // a folder; a node with an address is a bookmark.
@@ -84,12 +86,15 @@ export type SearchPin = {
 // Pins are kept per space, plus a "shared" list shown above every space.
 export type SearchPinsFile = Record<string, SearchPin[]>;
 
-export function getSearchPins(pins: SearchPinsFile): SearchBookmark[] {
+export function getSearchPins(pins: SearchPinsFile, keys?: string[]): SearchBookmark[] {
   const bookmarks: SearchBookmark[] = [];
   const seen = new Set<string>();
+  // With several profiles, only the keys of the chosen one are read. With a
+  // single profile there is nothing to choose and every key is read.
+  const wanted = keys && new Set(keys.map((key) => key.toLowerCase()));
 
-  for (const list of Object.values(pins)) {
-    if (!Array.isArray(list)) {
+  for (const [key, list] of Object.entries(pins)) {
+    if (!Array.isArray(list) || (wanted && !wanted.has(key.toLowerCase()))) {
       continue;
     }
 
@@ -176,4 +181,137 @@ export function getSearchGroupTabs(sessions: SearchSession[]): SearchBookmark[] 
   }
 
   return bookmarks;
+}
+
+// Profiles, from 1.0.7 on: whole separate browsers in one app. Personal keeps
+// the files that were there before, every other profile has its own bookmarks
+// file and its own key in pins.json. `profiles.json` is written only once a
+// second profile exists, so no file means there is nothing to choose.
+export const SEARCH_PERSONAL_PROFILE = "00000000-0000-0000-0000-0000000000A1";
+export const SEARCH_FIRST_SPACE = "00000000-0000-0000-0000-000000000001";
+
+export type SearchProfile = {
+  id: string;
+  name: string;
+};
+
+export type SearchSpace = {
+  id: string;
+  /// Absent for a space of Personal, which is every space from before profiles.
+  profile?: string;
+};
+
+const same = (one: string, other: string) => one.toLowerCase() === other.toLowerCase();
+
+export function getSearchProfiles(saved?: SearchProfile[]): { path: string; name: string }[] {
+  if (!saved?.length) {
+    return [];
+  }
+
+  const personal = saved.find((profile) => same(profile.id, SEARCH_PERSONAL_PROFILE));
+
+  return [
+    { path: SEARCH_PERSONAL_PROFILE, name: personal?.name || "Personal" },
+    ...saved
+      .filter((profile) => !same(profile.id, SEARCH_PERSONAL_PROFILE))
+      .map((profile) => ({ path: profile.id, name: profile.name })),
+  ];
+}
+
+export function bookmarksFileFor(profile: string): string {
+  return same(profile, SEARCH_PERSONAL_PROFILE) ? "bookmarks.json" : `bookmarks-${profile}.json`;
+}
+
+/// The spaces a profile holds. A space with no profile of its own is Personal's.
+export function spacesOfProfile(spaces: SearchSpace[], profile: string): string[] {
+  const personal = same(profile, SEARCH_PERSONAL_PROFILE);
+
+  return spaces.filter((space) => (space.profile ? same(space.profile, profile) : personal)).map((space) => space.id);
+}
+
+/// Where a profile's pins are: the list every one of its spaces shows, then
+/// each space's own.
+export function pinKeysFor(profile: string, spaces: string[]): string[] {
+  const shared = same(profile, SEARCH_PERSONAL_PROFILE) ? "shared" : `shared:${profile}`;
+
+  return [shared, ...spaces];
+}
+
+/// The session file of a space: the first space kept the name it had before
+/// there were spaces.
+export function sessionFileFor(space: string): string {
+  return same(space, SEARCH_FIRST_SPACE) ? "session.json" : `session-${space}.json`;
+}
+
+// Any of Search's files is missing until there is something to put in it, and
+// one without the others is an ordinary state rather than an error.
+async function readJson<T>(root: string, name: string): Promise<T | undefined> {
+  try {
+    return JSON.parse(await readFile(`${root}/${name}`, "utf-8")) as T;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+
+    if (code === "ENOENT" || error instanceof SyntaxError) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
+// One session file per space. With a single profile there is nothing to
+// choose, so every file in the folder is read; with several, only the files
+// of the chosen profile's spaces are.
+async function readSessions(root: string, spaces?: string[]): Promise<SearchSession[]> {
+  let names: string[];
+
+  if (spaces) {
+    names = spaces.map(sessionFileFor);
+  } else {
+    try {
+      names = (await readdir(root)).filter((name) => name === "session.json" || /^session-.+\.json$/.test(name));
+    } catch {
+      return [];
+    }
+  }
+
+  const sessions = await Promise.all(names.map((name) => readJson<SearchSession>(root, name)));
+
+  return sessions.filter((session): session is SearchSession => session !== undefined);
+}
+
+export async function readSearchProfiles(root: string) {
+  return getSearchProfiles(await readJson<SearchProfile[]>(root, "profiles.json"));
+}
+
+export type SearchData = {
+  bookmarks: SearchBookmarkNode[];
+  pins: SearchPinsFile;
+  sessions: SearchSession[];
+  /// The pins keys to read, or undefined when there is nothing to choose
+  /// between and every key is read.
+  keys?: string[];
+};
+
+/// Everything one profile holds. Before 1.0.7 there were no profiles, so
+/// `profiles.json` is missing and the whole folder is that one profile's.
+export async function readSearchData(root: string, profile: string): Promise<SearchData> {
+  const chosen = profile || SEARCH_PERSONAL_PROFILE;
+  const several = ((await readJson<SearchProfile[]>(root, "profiles.json")) ?? []).length > 1;
+  const spaces = several
+    ? spacesOfProfile((await readJson<SearchSpace[]>(root, "spaces.json")) ?? [], chosen)
+    : undefined;
+
+  const [bookmarks, pins, sessions] = await Promise.all([
+    readJson<SearchBookmarkNode[]>(root, bookmarksFileFor(chosen)),
+    readJson<SearchPinsFile>(root, "pins.json"),
+    readSessions(root, spaces),
+  ]);
+
+  return {
+    bookmarks: bookmarks ?? [],
+    pins: pins ?? {},
+    sessions,
+    keys: spaces && pinKeysFor(chosen, spaces),
+  };
 }
