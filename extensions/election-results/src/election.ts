@@ -2,7 +2,8 @@ import { Color, Image, LocalStorage } from "@raycast/api";
 import { fetchBrazilElections, fetchBrazilPresident } from "./sources/brazil-tse";
 import type { ElectionSnapshot, ElectionSummary } from "./sources/types";
 
-// Shared by the commands: the election list, loading, phases, the ballot-box icon and dates.
+// Shared by the commands and the AI tools: the election list, loading, phases, the ballot-box
+// icon and dates.
 
 // The list of elections changes rarely, so it's kept for a few hours.
 const LIST_KEY = "elections";
@@ -19,10 +20,15 @@ export async function listElections(): Promise<ElectionSummary[]> {
   return elections;
 }
 
+// One election by id, or the newest when there is no id or it is unknown.
+export async function findElection(id?: string): Promise<ElectionSummary | undefined> {
+  const elections = await listElections();
+  return elections.find((election) => election.id === id) ?? elections[0];
+}
+
 // The election the menu bar follows: the one picked in Browse Elections, or the newest.
 export async function followedElection(): Promise<ElectionSummary | undefined> {
-  const [elections, followedId] = await Promise.all([listElections(), LocalStorage.getItem<string>(FOLLOWED_KEY)]);
-  return elections.find((election) => election.id === followedId) ?? elections[0];
+  return findElection((await LocalStorage.getItem<string>(FOLLOWED_KEY)) ?? undefined);
 }
 
 export async function followElection(id: string) {

@@ -17,8 +17,13 @@ export type ElectionSummary = {
 };
 
 export type Candidate = {
+  // The name on the ballot, and the shortest form of it.
   name: string;
   shortName: string;
+  // Legal name, running mate and the source's outcome in English, when the source has them.
+  fullName?: string;
+  runningMate?: string;
+  outcome?: string;
   party: string;
   // Hex color for the party, used for the ballot box and the candidate icons.
   color: string;

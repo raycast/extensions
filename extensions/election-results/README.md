@@ -9,6 +9,17 @@ The first elections are Brazil's 2026 presidential elections: the first round an
 - **Browse Elections:** every election, newest first. Open one to see every candidate's share and votes, how much is counted, and the voting schedule. Use **Show in Menu Bar** to pick the election the menu bar follows.
 - **Election Results Menu Bar:** a ballot box in your menu bar that shows how the count is going, and notifies you on big moments. It follows the newest election until you pick another.
 
+## Ask Raycast AI
+
+Mention `@election-results` in Raycast AI to ask about the results, then keep chatting:
+
+- "Who came first in Brazil's 2026 first round, and by how much?"
+- "How close was the first round?"
+- "Who is leading the runoff right now?"
+- "Who was Lula's running mate?"
+
+The AI takes every number from the official results, and says when it adds general knowledge about candidates or parties.
+
 ## In the menu bar
 
 The ballot box shows where the election is:

@@ -20,7 +20,25 @@ type TseConfig = {
   pl: { c: string; dt: string; e: { cd: string; t: string; abr?: { cd: string; cp?: { cd: string }[] }[] }[] }[];
 };
 
-type TseCandidate = { nmu: string; seq: string; e: string; st: string; vap: string; pvapn: string };
+type TseCandidate = {
+  nm: string;
+  nmu: string;
+  seq: string;
+  e: string;
+  st: string;
+  vap: string;
+  pvapn: string;
+  vs?: { nmu: string }[];
+};
+
+// TSE's candidate status ("st"), in English. Unknown values pass through as TSE wrote them.
+const OUTCOMES: Record<string, string> = {
+  eleito: "Elected",
+  eleita: "Elected",
+  "2º turno": "Goes to the runoff",
+  "não eleito": "Not elected",
+  "não eleita": "Not elected",
+};
 type TseParty = { sg: string; cand: TseCandidate[] };
 type TseResponse = {
   t: string;
@@ -81,9 +99,13 @@ export async function fetchBrazilPresident(election: ElectionSummary): Promise<E
     group.par.flatMap((party) =>
       party.cand.map((candidate) => {
         const name = titleCase(candidate.nmu);
+        const status = candidate.st.trim();
         const parsed: Candidate = {
           name,
           shortName: name.split(" ").pop() ?? name,
+          fullName: titleCase(candidate.nm),
+          runningMate: candidate.vs?.[0] ? titleCase(candidate.vs[0].nmu) : undefined,
+          outcome: status ? (OUTCOMES[status.toLowerCase()] ?? status) : undefined,
           party: party.sg,
           color: PARTY_COLORS[party.sg] ?? FALLBACK_COLOR,
           votes: toNumber(candidate.vap),

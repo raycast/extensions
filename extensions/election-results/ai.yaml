@@ -1,0 +1,111 @@
+instructions: |
+  Election results come from official sources (for Brazil, the TSE electoral court) through two tools:
+  list-elections finds elections and their ids, and get-election-results returns one election's count.
+  Call get-election-results before stating any number, and take every number from it. Do not guess
+  results, and say when a count is still running (phase "counting") or has not started.
+
+  Shares are percentages of valid votes. Give the gap between candidates in percentage points and votes.
+  A first round can end with no winner: the top two then go to a runoff ("Goes to the runoff").
+
+  Give times in the election's time zone and in the user's time zone.
+
+  Users may ask follow-up questions about candidates, parties or why someone won or lost. Answer from
+  the tool's data first, then from general knowledge, and say which is which. Stay neutral: present
+  facts and the main views on each side, do not say whom to vote for, and do not present speculation
+  as fact. Name the source and link it when you cite results.
+
+evals:
+  - input: "@election-results Who came first in Brazil's 2026 first round, and by how much?"
+    mocks:
+      list-elections:
+        - id: "br:6258"
+          country: Brazil
+          title: "President · Runoff"
+          pollsOpen: "2026-10-25T08:00:00-03:00"
+          pollsClose: "2026-10-25T17:00:00-03:00"
+          timeZone: America/Sao_Paulo
+        - id: "br:6257"
+          country: Brazil
+          title: "President · First round"
+          pollsOpen: "2026-10-04T08:00:00-03:00"
+          pollsClose: "2026-10-04T17:00:00-03:00"
+          timeZone: America/Sao_Paulo
+      get-election-results: &first-round
+        id: "br:6257"
+        country: Brazil
+        title: "President · First round"
+        phase: counted
+        status: "Count finished · Bolsonaro first, no winner yet"
+        reportingPercent: 100
+        countFinished: true
+        pollsOpen: "2026-10-04T08:00:00-03:00"
+        pollsClose: "2026-10-04T17:00:00-03:00"
+        timeZone: America/Sao_Paulo
+        sourceUpdatedAt: "2026-10-05T12:51:47-03:00"
+        winner: null
+        gapBetweenFirstTwo:
+          percentagePoints: 1.87
+          votes: 2224965
+        candidates:
+          - name: Flavio Bolsonaro
+            fullName: Flavio Nantes Bolsonaro
+            party: PL
+            runningMate: Alfredo Gaspar
+            votes: 56104503
+            percent: 47.03
+            outcome: Goes to the runoff
+          - name: Lula
+            fullName: Luiz Inácio Lula Da Silva
+            party: PT
+            runningMate: Geraldo Alckmin
+            votes: 53879538
+            percent: 45.16
+            outcome: Goes to the runoff
+          - name: Escritor Augusto Cury
+            fullName: Augusto Jorge Cury
+            party: AVANTE
+            runningMate: Júlio Delgado
+            votes: 3448569
+            percent: 2.89
+            outcome: Not elected
+        source: "Tribunal Superior Eleitoral (TSE), Brazil's electoral court"
+        sourceUrl: "https://resultados.tse.jus.br/oficial/app/index.html"
+    expected:
+      - callsTool: get-election-results
+      - includes: Bolsonaro
+      - meetsCriteria: "Says Flavio Bolsonaro came first with about 47% against Lula's about 45%, a gap of about 1.9 percentage points or 2.2 million votes, and that both go to a runoff"
+
+  - input: "@election-results How close was the first round?"
+    mocks:
+      get-election-results: *first-round
+    expected:
+      - callsTool: get-election-results
+      - meetsCriteria: "Gives the gap between the top two as about 1.87 percentage points and about 2.2 million votes"
+
+  - input: "@election-results Who was Lula's running mate in the first round?"
+    mocks:
+      get-election-results: *first-round
+    expected:
+      - callsTool: get-election-results
+      - includes: Alckmin
+
+  - input: "@election-results Which elections can you show me?"
+    mocks:
+      list-elections:
+        - id: "br:6258"
+          country: Brazil
+          title: "President · Runoff"
+          pollsOpen: "2026-10-25T08:00:00-03:00"
+          pollsClose: "2026-10-25T17:00:00-03:00"
+          timeZone: America/Sao_Paulo
+        - id: "br:6257"
+          country: Brazil
+          title: "President · First round"
+          pollsOpen: "2026-10-04T08:00:00-03:00"
+          pollsClose: "2026-10-04T17:00:00-03:00"
+          timeZone: America/Sao_Paulo
+    expected:
+      - callsTool: list-elections
+      - includes: Runoff
+      - not:
+          callsTool: get-election-results
