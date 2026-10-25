@@ -853,7 +853,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "local-commander",
     title: "Local Commander",
     description:
-      "Connects Raycast AI to Windows 11 computers you own. Your AI can read approved project files and Git state, run the checks and commands you authorize, and check local services; your workspace at localcmd.app shows which computer ran each request and how it ended. Once you approve a computer it can do what your Windows account can do; you can limit it to folders, block commands or switch it off at any time. Needs the Local Commander agent paired on each PC (`npx local-commander-agent@latest`). Free plan for up to 5 computers. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
+      "Remote control of all your computers from Raycast AI. Connect your Windows, Mac and Linux machines (work PC, home PC, servers) and ask in one chat: run commands and scripts, read and edit files, check services and logs, take a screenshot, work with Git. The same computers are reachable from ChatGPT, Claude and any AI app with remote MCP, including on your phone. You choose full access or only some folders, block commands and switch any computer off at any time. Needs the Local Commander agent on each computer (`npx local-commander-agent@latest`). Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
     icon: "https://raw.githubusercontent.com/netbka/local-commander-plugins/main/assets/logo.png",
     homepage: "https://localcmd.app",
     remoteUrl: "https://localcmd.app/mcp",
