@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import { faviconFile, isSymbol } from "./data";
+import { bundleID, faviconFile, isSymbol } from "./data";
 import {
   closeTab,
   newPrivateWindow,
@@ -215,7 +215,7 @@ export function CopyActions({ url, title }: { url: string; title?: string }) {
         shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       />
       <Action.CreateQuicklink
-        quicklink={{ link: url, name: title, application: prefs().app || "dev.serafim.fast" }}
+        quicklink={{ link: url, name: title, application: bundleID() }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
       />
     </ActionPanel.Section>

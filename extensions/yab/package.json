@@ -446,24 +446,6 @@
   },
   "preferences": [
     {
-      "name": "app",
-      "title": "Yab",
-      "description": "Which Yab to use",
-      "type": "dropdown",
-      "default": "dev.serafim.fast",
-      "required": false,
-      "data": [
-        {
-          "title": "Yab",
-          "value": "dev.serafim.fast"
-        },
-        {
-          "title": "Yab Dev",
-          "value": "dev.serafim.fast.dev"
-        }
-      ]
-    },
-    {
       "name": "suggestions",
       "title": "Search Suggestions",
       "description": "Where Search Yab gets suggestions from",

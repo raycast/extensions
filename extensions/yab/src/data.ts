@@ -2,7 +2,6 @@
 // ~/Library/Application Support/Yab (Yab Dev for the dev build); a file that
 // is missing or unreadable reads as empty. docs/raycast.md, "Reading the files".
 
-import { getPreferenceValues } from "@raycast/api";
 import { execFile } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
@@ -14,8 +13,9 @@ const run = promisify(execFile);
 /** Swift's default Date: seconds since 2001-01-01. */
 const APPLE_EPOCH = 978307200;
 
+/** Yab's bundle id. YAB_BUNDLE points the extension at a dev build, for evals/raycast; Raycast never sets it. */
 export function bundleID(): string {
-  return getPreferenceValues<Preferences>().app || "dev.serafim.fast";
+  return process.env.YAB_BUNDLE || "dev.serafim.fast";
 }
 
 export function dataDir(): string {
