@@ -6,11 +6,13 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, test } from "node:test";
 import {
   compareVersions,
+  describeDownloadError,
   hostUpdateNeeded,
   isValidPin,
   outdatedHostPids,
   planHostUpdate,
   restartOutdatedHosts,
+  restartableHostPids,
   verifyPinnedFile,
 } from "../src/lib/host-version.ts";
 
@@ -170,5 +172,38 @@ describe("planHostUpdate", () => {
     assert.equal(planHostUpdate(null, "1.2.0", [11]), "none");
     assert.equal(planHostUpdate("1.3.0", "1.2.0", [11]), "none");
     assert.equal(planHostUpdate("garbage", "1.2.0", [11]), "none");
+  });
+});
+
+describe("restartableHostPids", () => {
+  test("keeps only hosts running the installed bundle, so a leftover host.pid or dead record doesn't trigger an update", () => {
+    const running = new Set([11, 13]);
+    assert.deepEqual(
+      restartableHostPids([11, 12, 13, 14], (pid) => running.has(pid)),
+      [11, 13]
+    );
+  });
+
+  test("plans nothing when the only outdated PIDs can't be restarted", () => {
+    // version.txt is current; host.pid is left from a 1.1.x host that crashed.
+    assert.equal(
+      planHostUpdate(
+        "1.2.0",
+        "1.2.0",
+        restartableHostPids([999], () => false)
+      ),
+      "none"
+    );
+  });
+});
+
+describe("describeDownloadError", () => {
+  test("explains a dropped connection and a timeout", () => {
+    assert.match(describeDownloadError(new TypeError("fetch failed")), /internet connection/);
+    assert.match(describeDownloadError(Object.assign(new Error("aborted"), { name: "TimeoutError" })), /timed out/);
+  });
+
+  test("keeps other messages", () => {
+    assert.equal(describeDownloadError(new Error("Download failed (HTTP 404)")), "Download failed (HTTP 404)");
   });
 });

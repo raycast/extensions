@@ -2,7 +2,7 @@ import { Action, Color, Icon, Image, LaunchType, List, Toast, launchCommand, sho
 import { showFailureToast } from "@raycast/utils";
 import type { ReactElement } from "react";
 import { AMO_URL } from "./constants";
-import { type ProfileStatus, openInProfile } from "./profile-status";
+import { type ProfileStatus, firefoxExecutableFor, openInProfile, runningFirefoxPids } from "./profile-status";
 import { type FirefoxProfile, type ProfileLabel, labelProfile } from "./profiles";
 
 /**
@@ -58,8 +58,13 @@ export async function openSetupCommand() {
 }
 
 async function openAndConfirm(status: ProfileStatus, url: string | undefined, what: string) {
-  openInProfile(status.profile.path, url);
-  await showToast({ style: Toast.Style.Success, title: what, message: status.profile.name });
+  try {
+    const executable = firefoxExecutableFor(status.firefoxPid, status.profile.path, runningFirefoxPids());
+    await openInProfile(status.profile.path, url, executable);
+    await showToast({ style: Toast.Style.Success, title: what, message: status.profile.name });
+  } catch (error) {
+    await showFailureToast(error, { title: `Couldn't open Firefox for ${status.profile.name}` });
+  }
 }
 
 /** The main fix for a profile, as an Action, or null if it needs nothing. */

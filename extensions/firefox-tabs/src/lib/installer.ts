@@ -2,7 +2,7 @@ import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, renameSync, rmSync, un
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { environment } from "@raycast/api";
-import { type HostPin, verifyPinnedFile } from "./host-version";
+import { type HostPin, describeDownloadError, verifyPinnedFile } from "./host-version";
 import { ensureSymlink, replaceSymlink } from "./node-symlink";
 import PINNED_HOST from "./native-host-pin.json";
 
@@ -153,10 +153,7 @@ export async function installNativeHost(
   try {
     assets = await getPinnedRelease(pin);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("fetch failed")) {
-      throw new Error("Check your internet connection and try again.");
-    }
-    throw error;
+    throw new Error(describeDownloadError(error));
   }
 
   // Validate required assets exist in the release
@@ -166,10 +163,16 @@ export async function installNativeHost(
   }
 
   // Step 2: Download both assets in parallel
-  const [hostBundleBuf, runShBuf] = await Promise.all([
-    downloadAsset(assets.get("host.bundle.js")!),
-    downloadAsset(assets.get("run.sh")!),
-  ]);
+  let hostBundleBuf: Buffer;
+  let runShBuf: Buffer;
+  try {
+    [hostBundleBuf, runShBuf] = await Promise.all([
+      downloadAsset(assets.get("host.bundle.js")!),
+      downloadAsset(assets.get("run.sh")!),
+    ]);
+  } catch (error) {
+    throw new Error(describeDownloadError(error));
+  }
 
   // Step 3: Verify checksums
   onProgress("Verifying checksum...");

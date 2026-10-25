@@ -230,6 +230,16 @@ describe("tabsChanged", () => {
     }
   });
 
+  test("detects a container that only changed color", () => {
+    const blue = tab({ container: { name: "Work", color: "blue" } });
+    const red = tab({ container: { name: "Work", color: "red" } });
+    assert.equal(tabsChanged([blue], [red]), true);
+  });
+
+  test("detects a host that came back on another port, so actions go to the right one", () => {
+    assert.equal(tabsChanged([tab()], [tab({ host: { key: "78957", port: 26396 } })]), true);
+  });
+
   test("tells the same tab ID in another profile apart", () => {
     assert.equal(tabsChanged([tab()], [tab({ host: { key: "99313" } })]), true);
   });

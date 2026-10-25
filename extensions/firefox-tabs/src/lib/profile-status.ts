@@ -1,11 +1,10 @@
-import { execFile, spawn } from "child_process";
+import { execFile, execFileSync, spawn } from "child_process";
 import { existsSync, readFileSync } from "fs";
+import { homedir } from "os";
 import { basename, dirname, join, resolve } from "path";
 import type { FirefoxProfile } from "./profiles";
 
 export const EXTENSION_ID = "raycast-firefox@lau.engineering";
-
-const FIREFOX_BINARY = "/Applications/Firefox.app/Contents/MacOS/firefox";
 
 /**
  * Whether the companion extension is installed in a profile, from the
@@ -130,11 +129,129 @@ export function profilesNeedingSetup(statuses: ProfileStatus[]): ProfileStatus[]
   return statuses.filter((s) => s.state !== "connected" && s.state !== "not-running");
 }
 
+/** Whether `path` is the executable inside a Firefox app bundle. */
+export function isFirefoxExecutable(path: string): boolean {
+  return /\.app\/Contents\/MacOS\/firefox$/.test(path.trim());
+}
+
+function executableOf(pid: number): string {
+  try {
+    return execFileSync("ps", ["-o", "comm=", "-p", String(pid)], { encoding: "utf-8" }).trim();
+  } catch {
+    return "";
+  }
+}
+
+/** PIDs of every running Firefox process (one per running profile). */
+export function runningFirefoxPids(): number[] {
+  try {
+    return execFileSync("pgrep", ["-x", "firefox"], { encoding: "utf-8" })
+      .split("\n")
+      .map((line) => parseInt(line, 10))
+      .filter((pid) => pid > 0);
+  } catch {
+    return [];
+  }
+}
+
+const DEFAULT_EXECUTABLES = ["Firefox", "Firefox Developer Edition", "Firefox Nightly"].flatMap((name) => [
+  `/Applications/${name}.app/Contents/MacOS/firefox`,
+  join(homedir(), "Applications", `${name}.app`, "Contents", "MacOS", "firefox"),
+]);
+
 /**
- * Open `url` in a specific Firefox profile. If that profile is already
- * running, Firefox hands the URL to it; otherwise this starts it.
+ * The Firefox executable a profile last ran with, from the LastPlatformDir
+ * in its compatibility.ini (".../Firefox.app/Contents/Resources"), or null.
  */
-export function openInProfile(profilePath: string, url?: string, run: typeof spawn = spawn): void {
-  const args = ["--profile", profilePath, ...(url ? [url] : [])];
-  run(FIREFOX_BINARY, args, { detached: true, stdio: "ignore" }).unref();
+export function lastFirefoxExecutable(
+  profilePath: string,
+  read: (file: string) => string = (file) => readFileSync(file, "utf-8")
+): string | null {
+  let text: string;
+  try {
+    text = read(join(profilePath, "compatibility.ini"));
+  } catch {
+    return null;
+  }
+  const dir = text.match(/^LastPlatformDir=(.+)$/m)?.[1]?.trim();
+  return dir && /\.app\/Contents\/Resources$/.test(dir) ? join(dirname(dir), "MacOS", "firefox") : null;
+}
+
+/**
+ * The Firefox executable to start for a profile, so Developer Edition,
+ * Nightly and copies outside /Applications work, and a profile isn't opened
+ * (and so upgraded) by a different Firefox:
+ * 1. the one the profile is running from;
+ * 2. the one it last ran with (compatibility.ini);
+ * 3. a standard install;
+ * 4. the one another running profile uses.
+ * Null if there is none.
+ */
+export function firefoxExecutableFor(
+  firefoxPid: number | null,
+  profilePath: string,
+  otherFirefoxPids: number[],
+  {
+    executable = executableOf,
+    exists = existsSync,
+    defaults = DEFAULT_EXECUTABLES,
+    lastUsed = lastFirefoxExecutable,
+  }: {
+    executable?: (pid: number) => string;
+    exists?: (path: string) => boolean;
+    defaults?: string[];
+    lastUsed?: (profilePath: string) => string | null;
+  } = {}
+): string | null {
+  if (firefoxPid !== null) {
+    const own = executable(firefoxPid);
+    if (isFirefoxExecutable(own)) return own;
+  }
+  const last = lastUsed(profilePath);
+  if (last && exists(last)) return last;
+  const standard = defaults.find((path) => exists(path));
+  if (standard) return standard;
+  for (const pid of otherFirefoxPids) {
+    const path = executable(pid);
+    if (isFirefoxExecutable(path)) return path;
+  }
+  return null;
+}
+
+/**
+ * Open `url` in a specific Firefox profile by starting Firefox's own
+ * executable with `--profile`. If that profile is already running, Firefox
+ * hands the URL to it and the new process exits; otherwise this starts the
+ * profile. (Launching through `open -n` instead starts a second copy that
+ * doesn't hand the URL over.) Rejects if Firefox can't be started.
+ */
+export function openInProfile(
+  profilePath: string,
+  url: string | undefined,
+  executablePath: string | null,
+  run: typeof spawn = spawn
+): Promise<void> {
+  if (!executablePath) return Promise.reject(new Error("Firefox couldn't be found. Is it installed?"));
+  return new Promise((resolvePromise, reject) => {
+    const child = run(executablePath, ["--profile", profilePath, ...(url ? [url] : [])], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.once("error", reject);
+    child.once("spawn", () => {
+      child.unref();
+      resolvePromise();
+    });
+  });
+}
+
+/** How often open commands re-check which profiles need setup. */
+export const SETUP_RECHECK_MS = 15000;
+
+/** Whether two setup checks found the same thing, so the list needn't re-render. */
+export function sameSetup(
+  a: { statuses: ProfileStatus[]; profiles: unknown[] },
+  b: { statuses: ProfileStatus[]; profiles: unknown[] }
+): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }

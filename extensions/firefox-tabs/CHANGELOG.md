@@ -14,6 +14,7 @@
 
 - Search Firefox Tabs lists running profiles that are missing the companion extension, with an action to install it in that profile
 - Offer to install the companion extension, instead of native host setup, when Firefox is running without it
+- Open pages in a profile with the Firefox it runs from, so Developer Edition, Nightly and Firefox outside /Applications work
 - Set Up Firefox Bridge (renamed from Setup Firefox Bridge) shows the native host and every Firefox profile with what each one still needs, and only downloads the native host when it isn't installed
 
 ## [Multiple Firefox Profiles] - {PR_MERGE_DATE}

@@ -4,6 +4,7 @@ import {
   lstatSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readlinkSync,
   rmSync,
   symlinkSync,
@@ -92,5 +93,14 @@ describe("ensureSymlink", () => {
   test("creates a missing link", () => {
     assert.equal(ensureSymlink(node, link), true);
     assert.equal(readlinkSync(link), node);
+  });
+});
+
+describe("replaceSymlink leaves no temporary links behind", () => {
+  test("after replacing a link", () => {
+    replaceSymlink(node, link);
+    replaceSymlink(node, link);
+    const leftovers = readdirSync(join(dir, ".raycast-firefox")).filter((n) => n.includes(".tmp-"));
+    assert.deepEqual(leftovers, []);
   });
 });

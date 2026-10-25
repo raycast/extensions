@@ -1,5 +1,5 @@
 import { execFile } from "child_process";
-import { readFileSync, readdirSync } from "fs";
+import { readFileSync, readdirSync, realpathSync } from "fs";
 import { homedir } from "os";
 import { basename, isAbsolute, join, resolve } from "path";
 
@@ -159,7 +159,24 @@ export async function loadProfiles(firefoxDir: string = FIREFOX_DIR): Promise<Fi
     }
   }
 
-  return mergeProfiles(store, ini);
+  // Running profiles are found by the real path of their lock file, so
+  // resolve symlinks (e.g. a Firefox folder moved elsewhere and linked back).
+  return mergeProfiles(
+    store.map((p) => withRealPath(p)),
+    ini.map((p) => withRealPath(p))
+  );
+}
+
+/** The profile with its path resolved through symlinks, if the folder exists. */
+export function withRealPath(
+  profile: FirefoxProfile,
+  realpath: (path: string) => string = realpathSync
+): FirefoxProfile {
+  try {
+    return { ...profile, path: realpath(profile.path) };
+  } catch {
+    return profile;
+  }
 }
 
 export interface ProfileLabel {

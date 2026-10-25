@@ -16,6 +16,7 @@ import {
   parseProfilesIni,
   parseStoreRows,
   profileDirName,
+  withRealPath,
 } from "../src/lib/profiles.ts";
 
 const FF = "/Users/me/Library/Application Support/Firefox";
@@ -243,5 +244,27 @@ describe("labelHosts", () => {
       icon: { name: DEFAULT_AVATAR_ICON },
       colorIndex: 1,
     });
+  });
+});
+
+describe("withRealPath", () => {
+  test("resolves a profile folder reached through a symlink, to match the running profile's lock path", () => {
+    const profile = {
+      path: "/Users/me/Library/Application Support/Firefox/Profiles/x.default",
+      name: "x",
+      avatar: null,
+    };
+    const real = withRealPath(profile, () => "/Users/me/Dropbox/Firefox/Profiles/x.default");
+    assert.equal(real.path, "/Users/me/Dropbox/Firefox/Profiles/x.default");
+  });
+
+  test("keeps the path of a folder that doesn't exist", () => {
+    const profile = { path: "/gone", name: "gone", avatar: null };
+    assert.equal(
+      withRealPath(profile, () => {
+        throw new Error("ENOENT");
+      }).path,
+      "/gone"
+    );
   });
 });

@@ -169,3 +169,22 @@ export function planHostUpdate(
   }
   return "none";
 }
+
+/**
+ * Outdated host PIDs that can actually be restarted: running, and running the
+ * installed bundle. A leftover host.pid or record from a host that crashed,
+ * a reused PID, or a development host must not make an update look necessary.
+ */
+export function restartableHostPids(pids: number[], isHost: (pid: number) => boolean = isInstalledHost): number[] {
+  return pids.filter(isHost);
+}
+
+/** A download error as a message for the user. */
+export function describeDownloadError(error: unknown): string {
+  const name = (error as Error)?.name;
+  const message = error instanceof Error ? error.message : String(error);
+  if (name === "TimeoutError" || name === "AbortError")
+    return "The download timed out. Check your internet connection and try again.";
+  if (message.includes("fetch failed")) return "Check your internet connection and try again.";
+  return message;
+}

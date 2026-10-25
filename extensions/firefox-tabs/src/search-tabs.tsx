@@ -10,9 +10,9 @@ import {
   closeMainWindow,
   showToast,
 } from "@raycast/api";
-import { MutatePromise, getAvatarIcon, usePromise } from "@raycast/utils";
+import { getAvatarIcon } from "@raycast/utils";
 import { execFile } from "child_process";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { type ClassifiedError, FailureMode, classifyError, fetchWithRetry, showActionError } from "./lib/errors";
 import { AMO_URL } from "./lib/constants";
 import { faviconPath } from "./lib/favicon-cache";
@@ -27,7 +27,17 @@ import {
   tabsChanged,
   windowKey,
 } from "./lib/hosts";
-import { profilesNeedingSetup } from "./lib/profile-status";
+import { SETUP_RECHECK_MS, profilesNeedingSetup, sameSetup } from "./lib/profile-status";
+import {
+  HOST_RESTART_GRACE_MS,
+  type TabAction,
+  type TabState,
+  initialTabState,
+  needsFullLoad,
+  tabReducer,
+  visibleTabs as tabsToShow,
+  waitForHosts,
+} from "./lib/tab-store";
 import { ProfileSetupItem, SetupAction, openSetupCommand, profileColor, profileIcon } from "./lib/profile-ui";
 import { type ProfileLabel, labelHosts } from "./lib/profiles";
 import { loadProfileStatuses } from "./lib/setup-status";
@@ -270,33 +280,31 @@ async function switchTab(tab: HostTab) {
 
 // -- Tab closing --
 
-async function closeTab(tab: HostTab, mutate: MutatePromise<HostTab[], undefined>) {
+/**
+ * Close a tab in its own profile. `settle` reports whether it worked, so the
+ * list can drop the tab for good or bring it back.
+ */
+async function closeTab(tab: HostTab, settle: (ok: boolean) => void) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Closing tab...",
   });
   try {
-    await mutate(
-      (async () => {
-        const res = await fetch(`http://127.0.0.1:${tab.host.port}/close`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tabId: tab.id }),
-        });
-        if (!res.ok) {
-          const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
-          throw new Error(body.error ?? `HTTP ${res.status}`);
-        }
-      })(),
-      {
-        optimisticUpdate(data) {
-          return (data ?? []).filter((t) => tabKey(t) !== tabKey(tab));
-        },
-      }
-    );
+    const res = await fetch(`http://127.0.0.1:${tab.host.port}/close`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tabId: tab.id }),
+      signal: AbortSignal.timeout(HOST_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
+      throw new Error(body.error ?? `HTTP ${res.status}`);
+    }
+    settle(true);
     toast.style = Toast.Style.Success;
     toast.title = "Tab closed";
   } catch (error) {
+    settle(false);
     toast.hide();
     await showActionError(error, "close tab");
   }
@@ -353,88 +361,118 @@ const ERROR_ICONS: Record<FailureMode, Icon> = {
 // -- Component --
 
 export default function SearchTabs() {
-  const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
-
-  const handleError = useCallback(async (error: Error) => {
-    setClassifiedError(await classifyError(error));
-  }, []);
-
-  // Tabs from the background refresh, shown until the next full load.
-  const [refreshed, setRefreshed] = useState<HostTab[] | null>(null);
-
-  const handleData = useCallback(() => {
-    setClassifiedError(null);
-    setRefreshed(null);
-  }, []);
-
-  const {
-    data: loadedTabs = [],
-    isLoading,
-    revalidate,
-    mutate,
-  } = usePromise(
-    () => {
-      // Fast-fail: if no host is registered, none is listening, so skip retries.
-      if (readHosts().length === 0) {
-        return Promise.reject(new Error("port-file-missing"));
-      }
-      return fetchWithRetry(fetchTabsFromAllHosts);
-    },
-    [],
-    {
-      onError: handleError,
-      onData: handleData,
-    }
+  const [state, dispatch] = useReducer(
+    (current: TabState<HostTab>, action: TabAction<HostTab>) => tabReducer(current, action, tabsChanged),
+    undefined,
+    () => initialTabState<HostTab>()
   );
-  useHostsWatcher(revalidate);
-  const tabs = refreshed ?? loadedTabs;
+  const tabs = tabsToShow(state);
+  const [isLoading, setIsLoading] = useState(true);
+  const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const loading = useRef(false);
+  const loadSeq = useRef(0);
+
+  // A full load: on open, on Retry, and when a host starts or stops. Only the
+  // newest load's result is applied.
+  const reload = useCallback(async () => {
+    const seq = ++loadSeq.current;
+    const startedAt = stateRef.current.version;
+    loading.current = true;
+    setIsLoading(true);
+    try {
+      // Hosts vanish for a moment when they restart (after a native host
+      // update, or when Firefox updates the companion extension). A list that
+      // had tabs waits for them instead of reporting Firefox as not set up.
+      const hosts =
+        stateRef.current.tabs.length > 0 ? await waitForHosts(readHosts, HOST_RESTART_GRACE_MS) : readHosts();
+      // Distinct error so classifyError skips pgrep (avoids a race during
+      // Firefox shutdown where the process lingers briefly).
+      if (hosts.length === 0) throw new Error("port-file-missing");
+      const fresh = await fetchWithRetry(fetchTabsFromAllHosts);
+      if (seq !== loadSeq.current) return;
+      dispatch({ type: "loaded", tabs: fresh, startedAt });
+      setClassifiedError(null);
+    } catch (error) {
+      if (seq !== loadSeq.current) return;
+      dispatch({ type: "loadFailed", error });
+      const classified = await classifyError(error);
+      if (seq === loadSeq.current) setClassifiedError(classified);
+    } finally {
+      if (seq === loadSeq.current) {
+        loading.current = false;
+        setIsLoading(false);
+      }
+    }
+  }, []);
+  useEffect(() => {
+    reload();
+  }, [reload]);
+  useHostsWatcher(reload);
 
   // Raycast keeps this command open between uses, so re-read tabs while it
   // is: otherwise tabs opened, closed or navigated in Firefox don't show
-  // until the command is opened afresh. Refreshes skip the loading indicator
-  // and only re-render when something shown changed. A refresh that works
-  // after an error also clears it, e.g. once Firefox is running again.
-  const shownRef = useRef(tabs);
-  shownRef.current = tabs;
+  // until the command is opened afresh. Refreshes skip the loading indicator,
+  // only re-render when something shown changed (see tabReducer), and hand
+  // over to a full load when every host keeps failing or all hosts are gone.
   useEffect(() => {
     let inFlight = false;
     const timer = setInterval(async () => {
-      if (inFlight || readHosts().length === 0) return;
+      if (inFlight || loading.current) return;
+      const current = stateRef.current;
+      if (needsFullLoad(current) || (readHosts().length === 0 && current.tabs.length > 0)) {
+        reload();
+        return;
+      }
+      if (readHosts().length === 0) return;
       inFlight = true;
+      const startedAt = current.version;
       try {
-        const fresh = await fetchTabsFromAllHosts();
-        if (tabsChanged(shownRef.current, fresh)) setRefreshed(fresh);
-        setClassifiedError(null);
+        dispatch({ type: "refreshed", tabs: await fetchTabsFromAllHosts(), startedAt });
       } catch {
-        // Keep the shown list; the next refresh or Retry tries again
+        dispatch({ type: "refreshFailed", startedAt });
       } finally {
         inFlight = false;
       }
     }, TAB_REFRESH_MS);
     return () => clearInterval(timer);
-  }, []);
+  }, [reload]);
 
   // Bring an installed native host up to the pinned release. The update
-  // restarts the running hosts, and the watcher refreshes the list when they
-  // re-register.
+  // restarts the running hosts; the list waits for them to come back.
   useEffect(() => {
     updateOutdatedHost();
   }, []);
 
-  // Re-check every profile's setup whenever the set of connected hosts or
-  // the error changes, e.g. after the extension is installed in a profile.
+  // Profile setup is re-checked when the connected hosts or the error change,
+  // and every SETUP_RECHECK_MS, because a profile that needs setup has no
+  // host: starting or quitting it changes nothing else the list can see.
+  // State only changes when the result does, so an unchanged check doesn't
+  // re-render the list.
+  const errorShown = state.error ? classifiedError : null;
   const hostSignature = [...new Set(tabs.map((t) => t.host.key))].sort().join(",");
-  const { data: setup, revalidate: recheckSetup } = usePromise(loadProfileStatuses, []);
-  // Retry re-checks profiles as well: closing a profile that had no host
-  // doesn't change the tabs, so the tab-driven re-check wouldn't notice it.
-  const retry = () => {
-    revalidate();
-    recheckSetup();
-  };
-  const errorMode = classifiedError?.mode;
+  const [setup, setSetup] = useState<Awaited<ReturnType<typeof loadProfileStatuses>>>();
+  const setupSeq = useRef(0);
+  const recheckSetup = useCallback(async () => {
+    const seq = ++setupSeq.current;
+    const next = await loadProfileStatuses();
+    // Checks can overlap (timer, host changes, Retry): keep only the newest.
+    if (seq !== setupSeq.current) return;
+    setSetup((previous) => (previous && sameSetup(previous, next) ? previous : next));
+  }, []);
+  const errorMode = errorShown?.mode;
   useEffect(() => {
     recheckSetup();
-  }, [hostSignature, errorMode]);
+  }, [hostSignature, errorMode, recheckSetup]);
+  useEffect(() => {
+    const timer = setInterval(recheckSetup, SETUP_RECHECK_MS);
+    return () => clearInterval(timer);
+  }, [recheckSetup]);
+  const retry = () => {
+    reload();
+    recheckSetup();
+  };
   const profiles = setup?.profiles ?? [];
   const needsSetup = profilesNeedingSetup(setup?.statuses ?? []);
   const [profileFilter, setProfileFilter] = useState("all");
@@ -486,7 +524,10 @@ export default function SearchTabs() {
 
     urlsToFetch.forEach(async (url) => {
       try {
-        const res = await fetch(`http://127.0.0.1:${tabs[0].host.port}/favicon?url=${encodeURIComponent(url)}`);
+        const port = readHosts()[0]?.port ?? tabs[0].host.port;
+        const res = await fetch(`http://127.0.0.1:${port}/favicon?url=${encodeURIComponent(url)}`, {
+          signal: AbortSignal.timeout(HOST_TIMEOUT_MS),
+        });
         if (res.ok) {
           const json = (await res.json()) as {
             ok: boolean;
@@ -497,7 +538,9 @@ export default function SearchTabs() {
           }
         }
       } catch {
-        // Favicon fetch failed -- fallback icon will be used
+        // The host couldn't be reached: forget the URL so a later render
+        // tries again. A favicon the host reports as unavailable isn't retried.
+        fetchedRef.current.delete(url);
       } finally {
         settled++;
         if (settled === urlsToFetch.length) {
@@ -536,26 +579,26 @@ export default function SearchTabs() {
       }
     >
       <List.EmptyView
-        icon={classifiedError ? ERROR_ICONS[classifiedError.mode] : Icon.MagnifyingGlass}
-        title={classifiedError ? classifiedError.title : "No Results"}
-        description={classifiedError?.description}
+        icon={errorShown ? ERROR_ICONS[errorShown.mode] : Icon.MagnifyingGlass}
+        title={errorShown ? errorShown.title : "No Results"}
+        description={errorShown?.description}
         actions={
-          classifiedError ? (
+          errorShown ? (
             <ActionPanel>
-              {classifiedError.mode === FailureMode.FirefoxNotRunning && (
+              {errorShown.mode === FailureMode.FirefoxNotRunning && (
                 <Action
                   title="Launch Firefox"
                   icon={Icon.Globe}
                   onAction={() => {
                     execFile("open", ["-a", "Firefox"]);
-                    setTimeout(revalidate, 2000);
+                    setTimeout(reload, 2000);
                   }}
                 />
               )}
-              {classifiedError.mode === FailureMode.ExtensionNotInstalled && (
+              {errorShown.mode === FailureMode.ExtensionNotInstalled && (
                 <Action.OpenInBrowser title="Install Firefox Extension" url={AMO_URL} />
               )}
-              {classifiedError.mode === FailureMode.HostNotRunning && (
+              {errorShown.mode === FailureMode.HostNotRunning && (
                 <Action title="Set up Native Host" icon={Icon.Terminal} onAction={openSetupCommand} />
               )}
               <Action
@@ -612,8 +655,9 @@ export default function SearchTabs() {
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
-                      setRefreshed((shown) => shown && shown.filter((t) => tabKey(t) !== tabKey(tab)));
-                      closeTab(tab, mutate);
+                      const key = tabKey(tab);
+                      dispatch({ type: "closeStarted", key });
+                      closeTab(tab, (ok) => dispatch({ type: "closeSettled", key, ok }));
                     }}
                   />
                 </ActionPanel.Section>

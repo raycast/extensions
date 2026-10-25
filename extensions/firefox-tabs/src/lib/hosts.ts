@@ -115,7 +115,7 @@ export async function fetchFromHosts<T>(
 
 /** A tab as fetched from a host. Tab and window IDs are only unique within one host. */
 interface HostScoped {
-  host: { key: string };
+  host: { key: string; port?: number };
   id: number;
   windowId: number;
 }
@@ -158,12 +158,13 @@ interface ShownTab extends HostScoped {
   status?: string;
   favIconUrl?: string | null;
   lastAccessed?: number;
-  container?: { name: string } | null;
+  container?: { name: string; color?: string } | null;
 }
 
 function tabSignature(t: ShownTab): string {
   return JSON.stringify([
     tabKey(t),
+    t.host.port,
     t.windowId,
     t.title,
     t.url,
@@ -173,6 +174,7 @@ function tabSignature(t: ShownTab): string {
     t.favIconUrl,
     t.lastAccessed,
     t.container?.name ?? null,
+    t.container?.color ?? null,
   ]);
 }
 

@@ -1,3 +1,4 @@
+import { spawnSync } from "child_process";
 import { accessSync, constants, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { dirname, join, resolve } from "path";
@@ -11,8 +12,14 @@ import { MANIFEST_PATH } from "./manifest";
  * Simple path check — macOS only (Raycast is macOS-only).
  */
 export function isFirefoxInstalled(): boolean {
-  return existsSync("/Applications/Firefox.app");
+  if (existsSync("/Applications/Firefox.app")) return true;
+  // A running Firefox of any edition, wherever it is installed.
+  if (spawnSync("pgrep", ["-x", "firefox"], { stdio: "ignore" }).status === 0) return true;
+  // Otherwise ask Launch Services, which finds apps outside /Applications.
+  return FIREFOX_APP_NAMES.some((name) => spawnSync("/usr/bin/open", ["-Ra", name], { stdio: "ignore" }).status === 0);
 }
+
+const FIREFOX_APP_NAMES = ["Firefox", "Firefox Developer Edition", "Firefox Nightly"];
 
 // -- Path resolution --
 
