@@ -193,7 +193,7 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
   const { push } = useNavigation();
 
   const [url, setUrl] = useState(initialUrl);
-  const [filetype, setFiletype] = useState<Filetype>(() =>
+  const [pickedFiletype, setFiletype] = useState<Filetype>(() =>
     isValidUrl(initialUrl) ? defaultFiletype(detectSource(initialUrl), audioPreferred) : "video",
   );
   const [filetypeTouched, setFiletypeTouched] = useState(false);
@@ -241,19 +241,17 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
 
   const validUrl = isValidUrl(url);
   const source = useMemo(() => detectSource(url), [url]);
+  // Keep Filetype valid for the URL: the source default until the user picks
+  // one, and even then a type the source supports (e.g. Video was picked, then
+  // a Pinterest link is pasted, which only supports Image). Derived on every
+  // render — an effect lagged one render behind a new link, so the dropdown
+  // briefly held a type the link doesn't offer.
+  const filetype = !validUrl
+    ? pickedFiletype
+    : filetypeTouched
+      ? clampFiletype(source, pickedFiletype, audioPreferred)
+      : defaultFiletype(source, audioPreferred);
   const ytdlpBound = resolveTool(source, filetype) === "yt-dlp";
-
-  // Keep Filetype valid for the URL: snap to the source default until the user
-  // overrides it, and — even after they override — clamp to a supported type
-  // when the detected source can't do the current pick (e.g. Video was selected,
-  // then a Pinterest link is pasted, which only supports Image).
-  useEffect(() => {
-    if (!validUrl) return;
-    const src = detectSource(url);
-    setFiletype((current) =>
-      filetypeTouched ? clampFiletype(src, current, audioPreferred) : defaultFiletype(src, audioPreferred),
-    );
-  }, [url, filetypeTouched, validUrl, audioPreferred]);
 
   // The required tools must all exist; otherwise the form is replaced by the Installer.
   const missingTool = useMemo(
@@ -806,7 +804,16 @@ export function DownloadForm({ initialUrl }: DownloadFormProps) {
             <Action icon={Icon.Folder} title="Open Download Folder" onAction={() => open(downloadPath)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.Push icon={Icon.Hammer} title="Update Libraries" target={<Updater />} />
+            <Action.Push
+              icon={Icon.Hammer}
+              title="Update Libraries"
+              // A shortcut, since this last section sits below the fold of the action panel.
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+              }}
+              target={<Updater />}
+            />
             <Action.OpenInBrowser icon={Icon.Info} title="About This Extension" url={ABOUT_URL} />
           </ActionPanel.Section>
         </ActionPanel>
