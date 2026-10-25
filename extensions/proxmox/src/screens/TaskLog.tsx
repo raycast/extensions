@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { PveServer, PveTask, PveTaskLogLine, PveTaskStatus } from "@/types";
 import { usePveFetch } from "@/hooks/use-pve-fetch";
@@ -24,15 +24,13 @@ export const TaskLog = ({ server, node, upid }: TaskLogProps) => {
     setRunning(false);
     showFailureToast(error, { message: describeFetchError(error) });
   };
-  const { data: status } = usePveFetch<PveTaskStatus & Pick<PveTask, "type" | "id" | "user" | "starttime">>(
-    server,
-    `${taskUrl}/status`,
-    {
-      timerInterval: running ? 1000 : null,
-      onData: (data) => setRunning(data.status !== "stopped"),
-      onError,
-    },
-  );
+  const { data: status, revalidate: revalidateStatus } = usePveFetch<
+    PveTaskStatus & Pick<PveTask, "type" | "id" | "user" | "starttime">
+  >(server, `${taskUrl}/status`, {
+    timerInterval: running ? 1000 : null,
+    onData: (data) => setRunning(data.status !== "stopped"),
+    onError,
+  });
   const {
     data: lines,
     isLoading,
@@ -49,7 +47,20 @@ export const TaskLog = ({ server, node, upid }: TaskLogProps) => {
     }
   }, [running]);
 
+  // A failed request stops the polling, so refreshing restarts it until the status says the task stopped.
+  const refresh = () => {
+    setRunning(true);
+    revalidateStatus();
+    revalidateLog();
+  };
+
   const log = (lines ?? []).map((line) => line.t).join("\n");
+  const truncated = (lines?.length ?? 0) >= LOG_LINE_LIMIT;
+  const markdown =
+    (truncated ? `Showing the first ${LOG_LINE_LIMIT} lines, open the task in Proxmox to see the rest.\n\n` : "") +
+    "```\n" +
+    log +
+    "\n```";
   const exitStatus = running ? undefined : status?.exitstatus;
   const title = status ? getTaskTitle(status) : "Task";
   const duration = status ? formatShortTime(Math.round(Date.now() / 1000) - status.starttime) : undefined;
@@ -58,7 +69,7 @@ export const TaskLog = ({ server, node, upid }: TaskLogProps) => {
     <Detail
       isLoading={isLoading || running}
       navigationTitle={title}
-      markdown={"```\n" + log + "\n```"}
+      markdown={markdown}
       metadata={
         status && (
           <Detail.Metadata>
@@ -75,6 +86,12 @@ export const TaskLog = ({ server, node, upid }: TaskLogProps) => {
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Log" content={log} />
           <Action.CopyToClipboard title="Copy UPID" content={upid} />
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={refresh}
+          />
         </ActionPanel>
       }
     />

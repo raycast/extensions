@@ -5,6 +5,7 @@ import type { PveServer } from "@/types";
 import { usePveFetch } from "@/hooks/use-pve-fetch";
 import { describeFetchError } from "@/utils/errors";
 import { parseJournal } from "@/utils/journal";
+import { ServerErrorItem } from "@/components/ServerErrorItem";
 
 const JOURNAL_LINES = 500;
 
@@ -14,9 +15,12 @@ const nodeKey = ({ server, node }: JournalNode) => `${server.id}/${node}`;
 
 type JournalProps = {
   nodes: JournalNode[];
+  /** Servers whose nodes failed to load, shown with a retry */
+  failedServers: { server: PveServer; error: string }[];
+  retryServers: () => void;
 };
 
-export const Journal = ({ nodes }: JournalProps) => {
+export const Journal = ({ nodes, failedServers, retryServers }: JournalProps) => {
   const [selected, setSelected] = useState(nodeKey(nodes[0]));
   const current = nodes.find((node) => nodeKey(node) === selected) ?? nodes[0];
   const { data, isLoading, revalidate } = usePveFetch<string[]>(
@@ -48,6 +52,9 @@ export const Journal = ({ nodes }: JournalProps) => {
         </List.Dropdown>
       }
     >
+      {failedServers.map(({ server, error }) => (
+        <ServerErrorItem key={`${server.id}/error`} server={server} error={error} revalidate={retryServers} />
+      ))}
       {entries.map((entry) => (
         <List.Item
           key={entry.key}

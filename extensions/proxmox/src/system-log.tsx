@@ -10,9 +10,10 @@ const Command = () => {
   });
   const results = data ?? [];
   const nodes = results.flatMap((result) => (result.data ?? []).map(({ node }) => ({ server: result.server, node })));
+  const failedServers = results.flatMap(({ server, error }) => (error !== undefined ? [{ server, error }] : []));
 
   if (nodes.length > 0) {
-    return <Journal nodes={nodes} />;
+    return <Journal nodes={nodes} failedServers={failedServers} retryServers={revalidate} />;
   }
 
   return (
@@ -20,16 +21,9 @@ const Command = () => {
       {!isLoading && servers.length === 0 ? (
         <NoServersEmptyView />
       ) : (
-        results
-          .filter((result) => result.error !== undefined)
-          .map((result) => (
-            <ServerErrorItem
-              key={`${result.server.id}/error`}
-              server={result.server}
-              error={result.error ?? ""}
-              revalidate={revalidate}
-            />
-          ))
+        failedServers.map(({ server, error }) => (
+          <ServerErrorItem key={`${server.id}/error`} server={server} error={error} revalidate={revalidate} />
+        ))
       )}
     </List>
   );
