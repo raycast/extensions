@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add ElevenLabs credits] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show ElevenLabs credits left this billing cycle, plan, and next reset in the list and menu bar
+- Add an **ElevenLabs API Key** preference, with `ELEVENLABS_API_KEY` auto-detected from your shell
+
 ## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback

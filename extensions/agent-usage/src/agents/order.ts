@@ -13,6 +13,7 @@ export const DEFAULT_AGENT_ORDER = [
   "cursor",
   "deepseek",
   "droid",
+  "elevenlabs",
   "gemini",
   "grok",
   "kimi",

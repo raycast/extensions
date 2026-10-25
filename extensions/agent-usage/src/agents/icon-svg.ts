@@ -15,6 +15,7 @@ export const DARK_MODE_INVERTED_LIST_ICONS = [
   "copilot-icon.svg",
   "cursor-icon.svg",
   "droid-icon.svg",
+  "elevenlabs-icon.svg",
   "grok-icon.svg",
   "opencode-go-icon.svg",
   "synthetic-icon.svg",

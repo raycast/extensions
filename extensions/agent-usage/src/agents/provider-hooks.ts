@@ -35,6 +35,9 @@ import type { DeepSeekError, DeepSeekUsage } from "../deepseek/types.ts";
 import { resolveDroidAuth } from "../droid/auth.ts";
 import { fetchDroidUsage } from "../droid/fetcher.ts";
 import type { DroidError, DroidUsage } from "../droid/types.ts";
+import { resolveElevenLabsApiKey } from "../elevenlabs/auth.ts";
+import { fetchElevenLabsUsage } from "../elevenlabs/fetcher.ts";
+import type { ElevenLabsError, ElevenLabsUsage } from "../elevenlabs/types.ts";
 import { fetchGeminiUsage, readGeminiAuthKey } from "../gemini/fetcher.ts";
 import type { GeminiError, GeminiUsage } from "../gemini/types.ts";
 import { fetchGrokUsage } from "../grok/fetcher.ts";
@@ -78,6 +81,7 @@ type SharedPrefs = {
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
+  elevenlabsApiKey?: string;
   kimiAuthToken?: string;
   syntheticApiToken?: string;
   zaiApiToken?: string;
@@ -221,6 +225,24 @@ export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({
       };
     }
     return fetchDroidUsage(accessToken);
+  },
+});
+
+export const useElevenLabsUsage = createUsageHook<ElevenLabsUsage, ElevenLabsError>({
+  agentId: "elevenlabs",
+  resolveAuthKey: async () => (await resolveElevenLabsApiKey(prefValue("elevenlabsApiKey"))) ?? "",
+  fetcher: async (apiKey) => {
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "ElevenLabs API key not configured. Add it in extension settings (Cmd+,) or set ELEVENLABS_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchElevenLabsUsage(apiKey);
   },
 });
 
