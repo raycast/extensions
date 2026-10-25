@@ -230,6 +230,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "candor-finance",
+    title: "Candor Finance",
+    description:
+      "Reach your money goals with the AI agent you already use. Tell it what you want, like paying off the cards, buying the house or working four days a week, even if you haven't worked it out yet. With Candor, it breaks that into steps and sets up the plan from your real US bank, card and investment accounts: goals with a measure and a pace, a budget that pays for them, every charge sorted to match. Then it keeps you on it. Every week Candor reviews your whole financial life, from everyday spending to investments, and everything you and your agent have saved, and tells your agent what's worth talking through and why. Every figure comes from your records, and the plan, decisions and reasons stay saved when you switch agents. Read-only: Candor never moves money. Hosted remote personal finance MCP server over Streamable HTTP; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Paid Candor plan with a 7-day free trial.",
+    icon: "https://candor.money/social/candor-facebook-logo.png",
+    homepage: "https://candor.money/mcp?utm_source=raycast&utm_medium=mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
+    },
+    remoteUrl: "https://api.candor.money/mcp",
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -354,6 +367,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "csolar-energia",
+    title: "CSolar Energia",
+    description:
+      "Solar power estimates for homes and businesses in São Paulo state, Brazil, from CSolar Energia, a solar installer. From the monthly electricity bill in reais or the consumption in kWh, get the number of 630 W panels, installed power, monthly generation, estimated installed price, monthly savings and payback, and check whether CSolar serves a city (all 645 municipalities of São Paulo state). Estimates, not quotes; answers in Portuguese. Read-only, no personal data. Remote Streamable HTTP server at https://csolar.com.br/mcp; no sign-in, no API key.",
+    icon: "https://csolar.com.br/favicon.png",
+    homepage: "https://csolar.com.br/para-agentes#mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://csolar.com.br/mcp"],
+    },
+    remoteUrl: "https://csolar.com.br/mcp",
   },
   {
     name: "datacircle",
@@ -861,6 +887,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.maqami.co/"],
     },
+  },
+  {
+    name: "mcp-checkup",
+    title: "MCP Checkup",
+    description:
+      "Check a public MCP server before you connect it. Look up observed status and reports for servers MCP Checkup tracks, search them by what their tools do, see recent changes to a server's tool list, fetch the Ed25519-signed (DSSE) attestation behind a report, and request a one-off check of a server by URL. Attestations can be verified offline with the open-source verifier at github.com/mcpcheckup/checks (Apache-2.0). Hosted remote Streamable HTTP server at https://mcpcheckup.com/mcp; no sign-in, no API key.",
+    icon: "https://mcpcheckup.com/apple-touch-icon.png",
+    homepage: "https://mcpcheckup.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpcheckup.com/mcp"],
+    },
+    remoteUrl: "https://mcpcheckup.com/mcp",
   },
   {
     name: "medbillanalyzer",
@@ -1485,6 +1524,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "techfabric",
+    title: "TechFabric",
+    description:
+      "Lets TechFabric's engineers write blog posts and case studies for techfabric.com from the coding agent they already use, with its repository and context: today's brief, the site's checks, and a draft under their byline that only they publish. Anyone can also search and read the site. Hosted remote Streamable HTTP server; reading needs no sign-in and no API key, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account (dynamic client registration and PKCE).",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://www.techfabric.com/mcp-servers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://www.techfabric.com/mcp",
+  },
+  {
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
@@ -1593,6 +1645,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
+    },
+  },
+  {
+    name: "vomo",
+    title: "VOMO",
+    description:
+      "Find and read your VOMO meeting notes and original transcripts. List saved notes, search by keyword, and retrieve summaries or transcripts from your own account. Read-only notes:read access; no recording, uploads, edits, deletion, or purchases. Connects to VOMO's hosted server through mcp-remote with OAuth sign-in, dynamic client registration, and PKCE. Requires Node.js with npm and an existing VOMO account with saved notes.",
+    icon: "https://vomo.ai/icons/vomo-app-icon.svg",
+    homepage: "https://vomo.ai/cli",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp", "--host", "127.0.0.1"],
     },
   },
   {
