@@ -56,7 +56,7 @@ Open the **Dynamic Island Settings** command in Raycast to manage widget visibil
 
 - **Widget Visibility**: Toggle Now Playing, Volume Mixer, System Stats, Focus Timer, and Calendar widgets on the island menu.
 - **System Metric Cards**: Customize which hardware metrics (CPU, GPU, Memory, Battery, Network, and Disk) appear on the notch.
-- **Hardware Notch & Daemon Controls**: Adjust hover timing, restart the native background engine, or manage notch silhouette options.
+- **Daemon Controls**: Stop or start the native background engine.
 
 ---
 
