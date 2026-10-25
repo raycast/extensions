@@ -2,18 +2,9 @@
 
 Search public photography gear and press Enter to open the selected Sharply page. No account or API key is required.
 
-## Install locally
+## Usage
 
-1. Clone this repository and open a terminal in its folder:
-
-   ```sh
-   git clone https://github.com/nyphotohouse/sharply-raycast.git
-   cd sharply-raycast
-   ```
-
-2. Run `npm install`, then `npm run dev` to import the command into Raycast.
-3. Open Raycast and run **Search Gear** (subtitle: Sharply).
-4. Type a brand or model name, use the arrow keys to select a result, and press Enter.
+Open Raycast and run **Search Gear** (subtitle: Sharply). Type a brand or model name, use the arrow keys to select a result, and press Enter.
 
 When the search is blank, **Recently Opened** shows your last 10 unique gear pages opened through this command, newest first. Reopening an item moves it to the top. History is stored locally in Raycast and keeps the thumbnail and price from the last open. Browser history and copied links are not included.
 
@@ -25,20 +16,9 @@ The command searches after at least two characters, throttles typing, caches que
 
 Requests go directly to `https://www.sharplyphoto.com/api/search` with `q`, `page=1`, `pageSize=25`, and `includeTotal=false`. It uses the same anonymous endpoint as the website. No credentials or embedded API keys are sent. Searches support the website's model and alias matching.
 
-The website endpoint is not a versioned developer API contract. Coordinate changes with Sharply if distributing the extension. Keep anonymous search narrowly scoped, with server-side limits and rate controls as needed. Requests time out after 15 seconds. Security checkpoints and rate limits show an error with a website search action; the extension does not attempt to bypass them.
+The website endpoint is not a versioned developer API contract. Keep anonymous search narrowly scoped, with server-side limits and rate controls as needed. Requests time out after 15 seconds. Security checkpoints and rate limits show an error with a website search action; the extension does not attempt to bypass them.
 
 Full search provides estimated used prices and thumbnails that the suggestions endpoint currently omits.
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development, contribution sync, and Store release workflow.
-
-- `npm run build` — build and validate the command.
-- `npm run lint` — Raycast lint checks.
-- `npm run typecheck` — TypeScript checks.
-- `npm test` — public request, response validation, and error handling tests.
-
-The extension icon is copied from Sharply's favicon. This extension is separate from the Next.js application and needs no Sharply server changes.
 
 ## Price market
 
