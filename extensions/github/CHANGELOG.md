@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Windows Action Shortcuts] - {PR_MERGE_DATE}
+
+- Support Windows shortcuts for actions, submenus, and toast actions.
+
 ## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.

@@ -162,7 +162,10 @@ export default function NotificationActions({ notification, userId, mutateList }
           <Action
             title="Mark All as Read"
             icon={Icon.Circle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+            }}
             onAction={markAllNotificationsAsRead}
           />
         </>
@@ -172,7 +175,10 @@ export default function NotificationActions({ notification, userId, mutateList }
         title="Mark as Done"
         icon={Icon.Circle}
         onAction={markNotificationAsDone}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "d" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+        }}
       />
 
       <Action
@@ -186,14 +192,20 @@ export default function NotificationActions({ notification, userId, mutateList }
           <Action.CopyToClipboard
             content={url}
             title={`Copy ${getNotificationTypeTitle(notification)} URL`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "," },
+              Windows: { modifiers: ["ctrl", "shift"], key: "," },
+            }}
           />
         ) : null}
 
         <Action.CopyToClipboard
           content={notification.subject.title}
           title={`Copy ${getNotificationTypeTitle(notification)} Title`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "," },
+            Windows: { modifiers: ["ctrl", "shift"], key: "," },
+          }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
