@@ -452,7 +452,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "deed-page",
     title: "deed.page",
     description:
-      "Publish static sites from your agent to a permanent public HTTPS URL at <slug>.deed.page: send a files map and a slug, then update, list, delete, roll back to a retained version, attach a custom domain and read cookieless analytics. 26 tools. Hosted remote Streamable HTTP server at https://deed.page/mcp; publishing needs no sign-in and no API key, and the first publish returns an owner token for later changes. Free sites are public.",
+      "Publish static sites from your agent to a permanent public HTTPS URL at `<slug>.deed.page`: send a files map and a slug, then update, list, delete, roll back to a retained version, attach a custom domain and read cookieless analytics. 26 tools. Hosted remote Streamable HTTP server at https://deed.page/mcp; publishing needs no sign-in and no API key, and the first publish returns an owner token for later changes. Free sites are public.",
     icon: "https://deed.page/icon.png",
     homepage: "https://deed.page/docs",
     configuration: {
