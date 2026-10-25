@@ -14,9 +14,14 @@ The Jira extension supports OAuth authentication by default. But if you want, yo
 On macOS, instead of pasting the API token into Raycast, you can keep it in the login Keychain and share it with other tools. This option is not available on Windows; use the `API Token` field there.
 
 ```sh
-# Prompts for the token; -U updates an existing item
-security add-generic-password -U -a "$USER" -s jira-token -w
+# Copy the API token to the clipboard first; -U updates an existing item
+security add-generic-password -U -a "$USER" -s jira-token -w "$(pbpaste)"
+
+# Should print the full token length (about 192 characters)
+security find-generic-password -s jira-token -w | tr -d '\n' | wc -c
 ```
+
+Pass the token as an argument as shown. Don't use the interactive prompt (`-w` with no value): it truncates long values, and Atlassian API tokens are long enough to be cut off, which makes Jira reject them with `401`.
 
 Leave `API Token` empty, set `Keychain Service Name` to `jira-token`, and fill in `Email` and `Jira Site URL` as above. An `API Token` value takes precedence over the Keychain. The token is read once per command run. Items created with `security` are readable by it without a prompt; for items created elsewhere macOS asks once—choose **Always Allow**. If the item is missing, commands report `Keychain item "<name>" not found`. To find the service name of an existing item, run `security find-generic-password -l "<Name in Keychain Access>" | grep svce`.
 

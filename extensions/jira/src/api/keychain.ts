@@ -32,7 +32,7 @@ export function getKeychainToken(service: string): Promise<string> {
       (error: ExecFileException & { stderr?: string }) => {
         throw new Error(
           error.code === KEYCHAIN_ITEM_NOT_FOUND
-            ? `Keychain item "${service}" not found. Create it with \`security add-generic-password -a "$USER" -s ${service} -w\` or fix the Keychain Service Name preference.`
+            ? `Keychain item "${service}" not found. Copy the API token and run \`security add-generic-password -U -a "$USER" -s ${service} -w "$(pbpaste)"\`, or fix the Keychain Service Name preference.`
             : `Reading the Jira API token from Keychain item "${service}" failed: ${error.stderr?.trim() || error.message}`,
         );
       },
