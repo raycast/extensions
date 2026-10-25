@@ -5,6 +5,7 @@ import { LocalStorage, Tool } from "@raycast/api";
 import { normalizeBody } from "../lib/body";
 import { postCommit, prepareCommit } from "../lib/devnull";
 import { writePreview } from "../lib/images";
+import { rememberUsername } from "../username";
 
 type Input = {
   /**
@@ -95,8 +96,10 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  */
 export default async function tool(input: Input) {
   const commit = commitOf(input);
-  const approvedImageHashes = await takeApproval(input);
+  // null rather than undefined: there should have been an approval, so a missing one is logged as such.
+  const approvedImageHashes = (await takeApproval(input)) ?? null;
   const result = await postCommit(commit, { log: (message, data) => logger.log(message, data), approvedImageHashes });
+  await rememberUsername(result.url);
   return {
     url: result.url,
     pendingReview: result.pending,

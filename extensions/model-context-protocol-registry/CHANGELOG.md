@@ -4,6 +4,42 @@
 
 - Add CSolar Energia to the official registry: solar power estimates from the electricity bill or consumption (panels, installed power, generation, estimated price, savings and payback) and the service area check for São Paulo state, Brazil. Read-only, answers in Portuguese. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://csolar.com.br/mcp.
 
+## [Add Candor Finance MCP Server] - 2026-10-24
+
+- Add Candor Finance to the official registry: tell your agent what you want with your money, and it sets up goals and a budget from your real US accounts and keeps you on them, with a weekly review that tells the agent what's worth talking through and why. Figures are calculated from the records; read-only toward the accounts, and it never moves money. Hosted Streamable HTTP server at https://api.candor.money/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add TechFabric MCP Server] - 2026-10-24
+
+- Add TechFabric to the official registry: search and read techfabric.com (https://www.techfabric.com), and let TechFabric's engineers write blog posts and case studies for it from their own coding agent, under their byline. Hosted Streamable HTTP server at https://www.techfabric.com/mcp; reading needs no sign-in, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account. A direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Docs: https://www.techfabric.com/mcp-servers
+
+## [Add MCP Checkup MCP Server] - 2026-10-24
+
+- Add MCP Checkup to the official registry: look up observed status, reports and recent tool-list changes for public MCP servers, fetch the Ed25519-signed attestation behind a report, and request a one-off check of a server by URL. Hosted Streamable HTTP server at https://mcpcheckup.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Shopify Speed Check MCP Server] - 2026-10-24
+
+- Add Shopify Speed Check to the registry: check a Shopify store's PageSpeed score and Core Web Vitals, find slow apps and scripts, and compare Shopify plan fees. Hosted Streamable HTTP server at https://tools.skaidigital.com/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
+
+## [Add EvoLink MCP Server] - 2026-10-23
+
+- Add EvoLink to the official registry: image, video, music and speech generation with 150+ models from one EvoLink account. Search models and published prices, get a quote for an exact task, generate after approval, and track tasks and balance. Hosted Streamable HTTP server at https://mcp.evolink.ai/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Revid MCP Servezr] - 2026-10-23
+
+- Add Revid to the official registry: research what goes viral on TikTok, YouTube, Instagram and X, make finished short-form videos with voice, captions, music and AI footage, and publish or schedule them to connected accounts. Hosted Streamable HTTP server at https://www.revid.ai/api/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add datawebot MCP Server] - 2026-10-23
+
+- Add datawebot to the official registry: ecommerce product data for agents. Search products across online shops worldwide, list every seller's price for one product with direct shop links, and run extraction Jobs on Amazon search and product pages (10 countries) and 1,100+ Shopify stores. Hosted Streamable HTTP server at https://mcp.datawebot.com/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add send21 MCP Server] - 2026-10-23
+
+- Add send21 to the official registry: crypto pay links and API for people and AI agents. Create fiat-priced pay links and payment drafts paid to the owner's approved addresses, check payment status and propose receiving addresses for the owner to approve; send21 is non-custodial and the payer signs in their own wallet. Hosted Streamable HTTP server at https://send21.io/mcp, through mcp-remote with a send21 API key as an `Authorization: Bearer` header.
+
+## [Add OverlayQA MCP Server] - 2026-10-23
+
+- Add OverlayQA to the official registry: design QA for coding agents, with WCAG accessibility (axe-core), color-contrast and design-token audits and AI visual reviews on any public URL, plus QA issues, comments, labels and client review links in OverlayQA. Hosted Streamable HTTP server at https://api.overlayqa.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Wave AI MCP Server] - 2026-10-22
 
 - Add Wave AI to the official registry: an AI note taker for phone calls, meetings and in-person conversations. Search and quote recordings, ask what a person said with Voice ID, and update action items, folders and sharing. Hosted Streamable HTTP server at https://mcp.wave.co with OAuth 2.0 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
