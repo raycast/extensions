@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dynamic-island",
+  "title": "Dynamic Island",
+  "description": "Transform your MacBook notch into an interactive Dynamic Island for media, timers, shelf, and system stats.",
+  "icon": "icon.png",
+  "author": "abhay",
+  "categories": [
+    "Productivity",
+    "System",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-island",
+      "title": "Toggle Dynamic Island",
+      "description": "Show, hide, or expand the Dynamic Island on your notch",
+      "mode": "no-view"
+    },
+    {
+      "name": "island-settings",
+      "title": "Dynamic Island Settings",
+      "description": "Configure widgets, notch behavior, and island options directly in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "media-controller",
+      "title": "Media Controller",
+      "description": "Control currently playing music and display track info on the notch",
+      "mode": "view"
+    },
+    {
+      "name": "volume-mixer",
+      "title": "Volume Mixer",
+      "description": "Adjust master and application audio volume on the Dynamic Island",
+      "mode": "view"
+    },
+    {
+      "name": "system-monitor",
+      "title": "System Monitor",
+      "description": "Display real-time CPU, RAM, and Battery stats on the Dynamic Island",
+      "mode": "view"
+    },
+    {
+      "name": "focus-timer",
+      "title": "Focus Timer",
+      "description": "Start a Pomodoro focus timer with live countdown on the notch",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "islandStyle",
+      "type": "dropdown",
+      "title": "Display Mode",
+      "description": "Choose how the island is anchored",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect MacBook Notch",
+          "value": "auto"
+        },
+        {
+          "title": "Always Notch",
+          "value": "notch"
+        },
+        {
+          "title": "Floating Pill (Top Center)",
+          "value": "pill"
+        }
+      ]
+    },
+    {
+      "name": "hoverToExpand",
+      "type": "checkbox",
+      "title": "Hover to Expand",
+      "label": "Expand the island when the cursor hovers over the notch",
+      "description": "Expand the island when the cursor hovers over the notch",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showMediaWidget",
+      "type": "checkbox",
+      "title": "Show Media in Menu",
+      "label": "Include Now Playing media controller in the island menu",
+      "description": "Show the Now Playing widget in the island menu",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showMixerWidget",
+      "type": "checkbox",
+      "title": "Show Volume Mixer in Menu",
+      "label": "Include Volume Mixer in the island menu",
+      "description": "Show the Volume Mixer widget in the island menu",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showSystemWidget",
+      "type": "checkbox",
+      "title": "Show System in Menu",
+      "label": "Include System Stats in the island menu",
+      "description": "Show the System Stats widget in the island menu",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showTimerWidget",
+      "type": "checkbox",
+      "title": "Show Timer in Menu",
+      "label": "Include Focus Timer in the island menu",
+      "description": "Show the Focus Timer widget in the island menu",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showCalendarWidget",
+      "type": "checkbox",
+      "title": "Show Calendar in Menu",
+      "label": "Include Calendar in the island menu",
+      "description": "Show the Calendar widget in the island menu",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.10.1",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
