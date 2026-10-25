@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add VOMO MCP Server] - {PR_MERGE_DATE}
+## [Add VOMO MCP Server] - 2026-10-25
 
 - Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
 
