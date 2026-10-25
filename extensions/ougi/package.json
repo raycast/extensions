@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ougi",
+  "title": "Ougi",
+  "description": "Monitor every Mac temperature sensor and fan speed, and control the fans with overheat protection",
+  "icon": "icon.png",
+  "author": "arturious",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "fan",
+    "temperature",
+    "smc",
+    "thermal",
+    "cpu",
+    "gpu",
+    "sensors",
+    "cooling"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Fans & Temperatures",
+      "description": "Show fan speeds and all temperature sensors, and control the fans",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-fans",
+      "title": "Toggle Fans Auto/Max",
+      "description": "Switch all fans between automatic control and maximum speed",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "ougi Path",
+      "description": "Path to the ougi command-line tool. Leave empty to find it in /opt/homebrew/bin or /usr/local/bin.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/ougi"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
