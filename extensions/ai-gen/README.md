@@ -65,4 +65,8 @@ In Raycast AI Chat, select **OpenAI Generator** (`@ai-gen`) to use its generatio
 
 Run `npm ci`, `npm run build`, `npm run check`, and `npm run lint`. The mock tests cover provider routing, credential separation, model discovery, multipart uploads, bounded responses and non-overwriting saves without calling a paid API.
 
-Generation was confirmed with a real API in the original Image Atelier extension. Real-provider editing, the integrated command's UI, and the existing commands under the upgraded SDK still need manual regression testing. The original extension's screenshot is not presented as evidence of the integrated UI.
+Generation was confirmed with a real API in the original Image Atelier extension. On 2026-10-25, the integrated development command was opened in Raycast and its form layout was visually checked. Real-provider editing, interactive end-to-end checks and regression testing of the original commands under the upgraded SDK remain outstanding.
+
+The following is an unmodified capture of the integrated command in development mode (including its local-extension indicator), not a Store-formatted screenshot or evidence of successful API generation/editing.
+
+![Generate or Edit Image in OpenAI Generator](media/compatible-image-form.png)
