@@ -7,6 +7,7 @@
 - Discover the Window menu regardless of Cursor's language and pass window titles as script arguments
 - Focus the selected window when multiple Cursor windows share the same title
 - Keep focusing uniquely titled windows when other windows open or close before selection
+- Request a refresh when the number of same-titled windows changes before focusing
 
 ## [New Feature] - 2026-06-15
 

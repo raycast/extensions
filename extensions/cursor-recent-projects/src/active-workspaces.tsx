@@ -73,6 +73,7 @@ function buildFocusScript(): string {
     on run argv
       set windowTitle to item 1 of argv
       set windowIndex to item 2 of argv as integer
+      set listedTitleCount to item 3 of argv as integer
       tell application "Cursor" to activate
       set {windowMenuIndex, identifiers} to my getWindowMenuData()
       if windowMenuIndex is 0 then error "No open Cursor windows found"
@@ -87,15 +88,19 @@ function buildFocusScript(): string {
       repeat with i from 1 to count identifiers
         if item i of identifiers contains "makeKeyAndOrderFront:" then
           set currentWindowIndex to currentWindowIndex + 1
-          if item i of windowNames is windowTitle then
-            set titleMatchIndex to i as integer
-            set titleMatchCount to titleMatchCount + 1
-            if currentWindowIndex is windowIndex then set menuItemIndex to i as integer
-          end if
+          considering case
+            if item i of windowNames is windowTitle then
+              set titleMatchIndex to i as integer
+              set titleMatchCount to titleMatchCount + 1
+              if currentWindowIndex is windowIndex then set menuItemIndex to i as integer
+            end if
+          end considering
         end if
       end repeat
-      -- Recover a shifted position only for a unique title; duplicates need their saved position.
-      if menuItemIndex is 0 and titleMatchCount is 1 then set menuItemIndex to titleMatchIndex
+      -- A changed title count makes the saved selection unreliable, even at the same position.
+      if titleMatchCount is not listedTitleCount then error "Window list changed. Refresh and try again."
+      -- Recover a shifted position only for titles that were already unique when listed.
+      if menuItemIndex is 0 and listedTitleCount is 1 then set menuItemIndex to titleMatchIndex
       if menuItemIndex is 0 then error "Window list changed. Refresh and try again."
       tell application "System Events"
         tell process "Cursor"
@@ -228,6 +233,7 @@ export default function ActiveWorkspaces() {
     <List isLoading={isLoading} searchBarPlaceholder="Search active workspaces...">
       <List.EmptyView title="No Active Workspaces" description="Open a Cursor window to see it listed here." />
       {windows.map((window) => {
+        const titleCount = windows.filter((candidate) => candidate.rawTitle === window.rawTitle).length;
         const accessories: List.Item.Accessory[] = [];
         if (window.fileName) {
           accessories.push({ text: window.fileName, tooltip: `Open file: ${window.fileName}` });
@@ -259,7 +265,11 @@ export default function ActiveWorkspaces() {
                   onAction={async () => {
                     try {
                       await closeMainWindow();
-                      await runAppleScript(buildFocusScript(), [window.rawTitle, String(window.windowIndex)]);
+                      await runAppleScript(buildFocusScript(), [
+                        window.rawTitle,
+                        String(window.windowIndex),
+                        String(titleCount),
+                      ]);
                     } catch (error) {
                       await showToast({
                         title: "Failed to focus window",
