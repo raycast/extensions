@@ -6,6 +6,7 @@ import {
   Form,
   Icon,
   List,
+  closeMainWindow,
   confirmAlert,
   environment,
   getPreferenceValues,
@@ -13,6 +14,7 @@ import {
   Toast,
   useNavigation,
   getApplications,
+  getFrontmostApplication,
   Application,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
@@ -253,6 +255,29 @@ function openUrl(url: string, app?: SavedApp, background = false): void {
     runOpenCommand("rundll32.exe", ["url.dll,FileProtocolHandler", url]);
   } else {
     runOpenCommand("xdg-open", [url]);
+  }
+}
+
+const BROWSER_BUNDLE_IDS = [
+  "com.apple.Safari",
+  "com.google.Chrome",
+  "company.thebrowser.Browser",
+  "org.mozilla.firefox",
+  "com.microsoft.edgemac",
+  "com.brave.Browser",
+  "com.operasoftware.Opera",
+  "com.vivaldi.Vivaldi",
+];
+
+// Opens the link in the browser that was active behind Raycast, else the default browser
+async function openInActiveBrowser(url: string): Promise<void> {
+  try {
+    const front = await getFrontmostApplication();
+    const isBrowser = front.bundleId && BROWSER_BUNDLE_IDS.includes(front.bundleId);
+    openUrl(url, isBrowser ? { name: front.name, path: front.path, bundleId: front.bundleId } : undefined);
+    await closeMainWindow();
+  } catch {
+    await showToast(Toast.Style.Failure, "Failed to open link");
   }
 }
 
@@ -815,6 +840,12 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                     ) : (
                       <Action.OpenInBrowser title="Open Link" url={item.url} />
                     )}
+                    <Action
+                      title="Open in Active Browser"
+                      icon={Icon.Window}
+                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                      onAction={() => openInActiveBrowser(item.url)}
+                    />
                     <Action.OpenWith path={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                     <Action
                       title="Open Link (Keep Window Open)"
@@ -827,6 +858,16 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                           await showToast(Toast.Style.Failure, "Failed to open link");
                         }
                       }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy URL"
+                      content={item.url}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open in Browser"
+                      url={item.url}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
                     />
                   </>
                 ) : (
