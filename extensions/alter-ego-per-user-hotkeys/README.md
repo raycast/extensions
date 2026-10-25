@@ -106,5 +106,4 @@ accounts.
 - **Usernames** are macOS short account names (the name of your home folder),
   not display names.
 - **Don't run *Run for Current User* directly.** It only works when launched
-  from its Quicklink. If you run it directly, Alter Ego sends you to **Manage
-  Alter Ego** instead.
+  from its Quicklink. To set up or edit a mapping, run **Manage Alter Ego**.
