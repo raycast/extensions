@@ -1,6 +1,6 @@
 # Better Uptime Changelog
 
-## [Windows support and fixes] - {PR_MERGE_DATE}
+## [Windows support and fixes] - 2026-10-25
 
 - Add Windows support
 - Update to Raycast API 2
