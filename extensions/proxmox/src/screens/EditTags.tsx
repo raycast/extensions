@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { PveClusterOptions, PveVm, WithServer } from "@/types";
@@ -24,7 +24,13 @@ export const EditTags = ({ vm, onChange }: EditTagsProps) => {
   const newTag = normalizeTag(searchText);
   const canCreate = isValidTag(newTag) && !knownTags.includes(newTag);
 
-  const save = async (next: string[], message: string) => {
+  // Proxmox replaces the whole tag list on every save, so we run saves one at a time and
+  // build each list from the last saved one, which keeps quick edits from overwriting each other.
+  const savedTags = useRef(tags);
+  const saveQueue = useRef(Promise.resolve());
+
+  const applyEdit = async (edit: (current: string[]) => string[], message: string) => {
+    const next = edit(savedTags.current);
     const toast = await showToast({ title: "Saving tags", message, style: Toast.Style.Animated });
     try {
       await setVmTags(vm, next);
@@ -33,12 +39,20 @@ export const EditTags = ({ vm, onChange }: EditTagsProps) => {
       return;
     }
 
+    savedTags.current = next;
     setTags(next);
     setSearchText("");
     onChange();
     toast.style = Toast.Style.Success;
     toast.title = "Saved tags";
   };
+
+  const save = (edit: (current: string[]) => string[], message: string) => {
+    saveQueue.current = saveQueue.current.then(() => applyEdit(edit, message));
+  };
+
+  const addTag = (tag: string) => save((current) => [...new Set([...current, tag])].sort(), `Adding ${tag}`);
+  const removeTag = (tag: string) => save((current) => current.filter((t) => t !== tag), `Removing ${tag}`);
 
   const renderTag = (tag: string, active: boolean) => (
     <List.Item
@@ -49,18 +63,9 @@ export const EditTags = ({ vm, onChange }: EditTagsProps) => {
       actions={
         <ActionPanel>
           {active ? (
-            <Action
-              title="Remove Tag"
-              icon={Icon.Minus}
-              onAction={() =>
-                save(
-                  tags.filter((t) => t !== tag),
-                  `Removing ${tag}`,
-                )
-              }
-            />
+            <Action title="Remove Tag" icon={Icon.Minus} onAction={() => removeTag(tag)} />
           ) : (
-            <Action title="Add Tag" icon={Icon.Plus} onAction={() => save([...tags, tag].sort(), `Adding ${tag}`)} />
+            <Action title="Add Tag" icon={Icon.Plus} onAction={() => addTag(tag)} />
           )}
         </ActionPanel>
       }
@@ -83,11 +88,7 @@ export const EditTags = ({ vm, onChange }: EditTagsProps) => {
           keywords={[searchText]}
           actions={
             <ActionPanel>
-              <Action
-                title="Create Tag"
-                icon={Icon.Plus}
-                onAction={() => save([...tags, newTag].sort(), `Adding ${newTag}`)}
-              />
+              <Action title="Create Tag" icon={Icon.Plus} onAction={() => addTag(newTag)} />
             </ActionPanel>
           }
         />
