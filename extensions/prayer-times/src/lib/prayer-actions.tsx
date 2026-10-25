@@ -84,7 +84,8 @@ export function prayerActions(
           onAction={() => mark(clockStatus(slot, new Date()))}
         />
       )}
-      {markOptions(slot, record?.status, now).map((status) => (
+      {/* An unmarked prayer shows as missed once it ends; Mark Missed stays offered until that is written down. */}
+      {markOptions(slot, record?.saved ?? prayed, now).map((status) => (
         <Action
           key={status}
           title={`${prayed ? "Change to" : "Mark"} ${MARK_TITLES[status]}`}

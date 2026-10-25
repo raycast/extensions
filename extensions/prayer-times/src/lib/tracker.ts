@@ -8,7 +8,7 @@ import {
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerKey, PrayerSlot, toDateKey } from "./prayers";
 import { planHash, planReminders } from "./plan";
 import { Settings } from "./settings";
-import { clockStatus, countsOnTime, parseStatus, prayedAt, PrayerStatusValue, statusOf } from "./status";
+import { clockStatus, countsOnTime, parseStatus, prayedAt, PrayerStatusValue, statusOf, validStatus } from "./status";
 import {
   clearSnoozes,
   readLocalLog,
@@ -30,6 +30,8 @@ export interface PrayerRecord {
   onTime: boolean;
   /** How it was prayed, or missed; undefined while an unmarked prayer's time is still running. */
   status?: PrayerStatusValue;
+  /** The status as written down (a valid `prayer-status:` line or local mark), not worked out from the clock. */
+  saved?: PrayerStatusValue;
 }
 
 /** Reminder state keyed by local date, then prayer. */
@@ -136,6 +138,7 @@ export async function loadHistory(settings: Settings, from: Date, to: Date): Pro
         completedAt,
         onTime: countsOnTime(value),
         status: value,
+        saved: validStatus(status.status, status.isCompleted),
       };
     }
   }

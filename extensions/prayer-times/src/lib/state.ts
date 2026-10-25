@@ -16,8 +16,6 @@ export interface AlertWindows {
    * when lateness follows it); menu bar shows until it ends or is prayed.
    */
   endingReminderMinutes: number;
-  /** Menu bar turns yellow this long before the preferred time ends (prayers that have one). */
-  preferredReminderMinutes: number;
   /** Heads-up this long before the due time; 0 for none. The menu bar also shows the next prayer from then. */
   headsUpMinutes: number;
   /** What the heads-up counts down to: the start, or jamaat when the prayer has one. */
@@ -40,11 +38,11 @@ export interface PrayerAlert {
 export interface MenuBarState {
   slot: PrayerSlot;
   /**
-   * The live windows, as on the phone: `start`, `jamaat`, `preferred` (before the preferred end), `ending`
-   * (before the valid end). Quiet between them: `pending` before the preferred end, `disliked` after it.
+   * The live windows: `start`, `jamaat`, `ending` (before the valid end). Between them: `pending` before
+   * the preferred end, `disliked` after it. The menu bar color comes from what it counts down to, not these.
    * `upcoming`: the next prayer.
    */
-  kind: Exclude<AlertKind, "headsUp"> | "preferred" | "disliked" | "pending" | "upcoming";
+  kind: Exclude<AlertKind, "headsUp"> | "disliked" | "pending" | "upcoming";
 }
 
 /**
@@ -196,8 +194,7 @@ export function nextSlot(slots: PrayerSlot[], now: Date): PrayerSlot | undefined
  *
  * Once a prayer starts it stays until it is marked prayed or its time ends. Its windows, as on the phone's
  * live notification, with a later window taking over an earlier one it overlaps: the first minutes after
- * the start, jamaat (from before it until a few minutes after), before the preferred end, before the valid
- * end. Between them it is pending, or disliked after the preferred end. After it's prayed, the next prayer
+ * the start, jamaat (from before it until a few minutes after), before the valid end. Between them it is pending, or disliked after the preferred end. After it's prayed, the next prayer
  * shows as a countdown during the heads-up window, or all the time with `always`.
  *
  * @param slots - Timeline slots, sorted by start.
@@ -220,9 +217,6 @@ export function menuBarState(
     const after = windows.startWindowMinutes * MINUTE;
     const preferred = slot.preferredEnd?.getTime();
     if (t >= slot.end.getTime() - windows.endingReminderMinutes * MINUTE) return { slot, kind: "ending" };
-    if (preferred && t >= preferred - windows.preferredReminderMinutes * MINUTE && t < preferred) {
-      return { slot, kind: "preferred" };
-    }
     const jamaat = slot.jamaat?.getTime();
     if (jamaat && t >= jamaat - windows.jamaatReminderMinutes * MINUTE && t < jamaat + after) {
       return { slot, kind: "jamaat" };

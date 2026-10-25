@@ -457,14 +457,6 @@
       "default": "10"
     },
     {
-      "name": "preferredReminderMinutes",
-      "title": "Before Preferred Ends (Minutes)",
-      "description": "The menu bar turns yellow this many minutes before a prayer's preferred time ends (prayers that have one).",
-      "type": "textfield",
-      "required": false,
-      "default": "15"
-    },
-    {
       "name": "useReminders",
       "title": "Apple Reminders",
       "label": "Keep prayers in Apple Reminders",

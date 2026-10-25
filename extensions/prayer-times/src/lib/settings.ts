@@ -116,7 +116,6 @@ export function buildSettings(location: StoredLocation): Settings {
   const windows: AlertWindows = {
     startWindowMinutes: toNumber(prefs.startWindowMinutes, 5),
     endingReminderMinutes: toNumber(prefs.endingReminderMinutes, 30),
-    preferredReminderMinutes: toNumber(prefs.preferredReminderMinutes, 15),
     jamaatReminderMinutes: toNumber(prefs.jamaatReminderMinutes, 10),
     headsUpMinutes,
     dueAt,
