@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
+import { join } from "node:path";
 import { getPreferenceValues, environment } from "@raycast/api";
 import { Format, Video } from "./types.js";
 import { execSync } from "child_process";
@@ -38,10 +39,11 @@ export const {
  * never expanded downstream — yt-dlp/monolith would write into a literal `~`
  * folder relative to the cwd. Expanding here makes the out-of-box default work
  * on first run without the user touching the directory picker. `~user`-style
- * specs (no separator after the tilde) are left untouched.
+ * specs (no separator after the tilde) are left untouched. Joined rather than
+ * spliced, so Windows gets `C:\Users\me\Downloads`, not `C:\Users\me/Downloads`.
  */
 export function expandTilde(p: string): string {
-  return p.replace(/^~(?=$|[/\\])/, os.homedir());
+  return /^~(?=$|[/\\])/.test(p) ? join(os.homedir(), p.slice(1)) : p;
 }
 
 /** The configured download folder, with a leading `~` expanded to the home directory. */

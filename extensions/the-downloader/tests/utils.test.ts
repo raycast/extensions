@@ -1,11 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
+import { beforeAll, describe, it, expect, vi } from "vitest";
 import * as os from "node:os";
+import * as path from "node:path";
 
 // utils.ts destructures getPreferenceValues() and imports `environment` at
 // module load. `@raycast/api` is aliased to tests/stubs/raycast-api.ts (see
 // vitest.config.ts), which supplies downloadPath "~/Downloads" and
 // networkIdleTimeoutSec "120".
-import { sanitizeVideoTitle, expandTilde, getIdleTimeoutMs, formatFilesize, getVideoFormats } from "../src/utils";
+import { expandTilde, getIdleTimeoutMs, formatFilesize, getVideoFormats } from "../src/utils";
 import { Format, Video } from "../src/types";
 
 const originalPlatform = process.platform;
@@ -27,59 +28,65 @@ async function loadUtilsForPlatform(platform: NodeJS.Platform) {
   }
 }
 
-describe("sanitizeVideoTitle (host platform = macOS)", () => {
+describe("sanitizeVideoTitle (macOS)", () => {
+  // Loaded as macOS so these hold on any host: Windows strips more characters (`?` among them).
+  let mac: typeof import("../src/utils");
+  beforeAll(async () => {
+    mac = await loadUtilsForPlatform("darwin");
+  });
+
   it("strips forward slashes so 'AC/DC' can't become a subpath", () => {
-    expect(sanitizeVideoTitle("AC/DC - Thunderstruck")).toBe("ACDC - Thunderstruck");
+    expect(mac.sanitizeVideoTitle("AC/DC - Thunderstruck")).toBe("ACDC - Thunderstruck");
   });
 
   it("strips backslashes", () => {
-    expect(sanitizeVideoTitle("foo\\bar")).toBe("foobar");
+    expect(mac.sanitizeVideoTitle("foo\\bar")).toBe("foobar");
   });
 
   it("strips colons on macOS", () => {
-    expect(sanitizeVideoTitle("Episode 1: The Beginning")).toBe("Episode 1 The Beginning");
+    expect(mac.sanitizeVideoTitle("Episode 1: The Beginning")).toBe("Episode 1 The Beginning");
   });
 
   it("collapses leading dots so '..\\/etc' can't traverse", () => {
     // Separators are stripped first ("../etc" -> "..etc"), then leading dots.
-    expect(sanitizeVideoTitle("../etc/passwd")).toBe("etcpasswd");
+    expect(mac.sanitizeVideoTitle("../etc/passwd")).toBe("etcpasswd");
   });
 
   it("removes control characters", () => {
-    expect(sanitizeVideoTitle("abc")).toBe("abc");
+    expect(mac.sanitizeVideoTitle("abc")).toBe("abc");
   });
 
   it("collapses runs of spaces to a single space", () => {
-    expect(sanitizeVideoTitle("a    b     c")).toBe("a b c");
+    expect(mac.sanitizeVideoTitle("a    b     c")).toBe("a b c");
   });
 
   it("removes control characters such as tabs entirely", () => {
     // Tab is char code 9 (< 32) so it is filtered out, not turned into a space.
-    expect(sanitizeVideoTitle("a\tb")).toBe("ab");
+    expect(mac.sanitizeVideoTitle("a\tb")).toBe("ab");
   });
 
   it("falls back to 'untitled' for an all-stripped title", () => {
-    expect(sanitizeVideoTitle("///")).toBe("untitled");
-    expect(sanitizeVideoTitle("   ")).toBe("untitled");
-    expect(sanitizeVideoTitle("...")).toBe("untitled");
+    expect(mac.sanitizeVideoTitle("///")).toBe("untitled");
+    expect(mac.sanitizeVideoTitle("   ")).toBe("untitled");
+    expect(mac.sanitizeVideoTitle("...")).toBe("untitled");
   });
 
   it("truncates at the last sentence-ending punctuation within the max length", () => {
     const long = "First sentence. " + "x".repeat(300);
-    expect(sanitizeVideoTitle(long)).toBe("First sentence");
+    expect(mac.sanitizeVideoTitle(long)).toBe("First sentence");
   });
 
   it("hard-truncates an over-long title with no punctuation boundary", () => {
-    expect(sanitizeVideoTitle("x".repeat(300))).toBe("x".repeat(200));
+    expect(mac.sanitizeVideoTitle("x".repeat(300))).toBe("x".repeat(200));
   });
 
   it("leaves short titles containing punctuation whole (no boundary cut under the cap)", () => {
     // Regression: the boundary cut used to apply unconditionally, chopping
     // every title at its last . ! or ? — "Mr. Robot…" became "Mr".
-    expect(sanitizeVideoTitle("Mr. Robot S01E01 Explained")).toBe("Mr. Robot S01E01 Explained");
-    expect(sanitizeVideoTitle("What is Love? Haddaway Story")).toBe("What is Love? Haddaway Story");
-    expect(sanitizeVideoTitle("iPhone 15.5 Review")).toBe("iPhone 15.5 Review");
-    expect(sanitizeVideoTitle("Top 10 Goals!")).toBe("Top 10 Goals!");
+    expect(mac.sanitizeVideoTitle("Mr. Robot S01E01 Explained")).toBe("Mr. Robot S01E01 Explained");
+    expect(mac.sanitizeVideoTitle("What is Love? Haddaway Story")).toBe("What is Love? Haddaway Story");
+    expect(mac.sanitizeVideoTitle("iPhone 15.5 Review")).toBe("iPhone 15.5 Review");
+    expect(mac.sanitizeVideoTitle("Top 10 Goals!")).toBe("Top 10 Goals!");
   });
 });
 
@@ -97,7 +104,12 @@ describe("sanitizeVideoTitle (Windows reserved set)", () => {
 
 describe("expandTilde", () => {
   it("expands a leading ~/ to the home directory", () => {
-    expect(expandTilde("~/Downloads")).toBe(`${os.homedir()}/Downloads`);
+    expect(expandTilde("~/Downloads")).toBe(path.join(os.homedir(), "Downloads"));
+  });
+
+  it.runIf(process.platform === "win32")("uses Windows separators only, not C:\\Users\\me/Downloads", () => {
+    expect(expandTilde("~/Downloads")).not.toContain("/");
+    expect(expandTilde("~\\Downloads")).toBe(expandTilde("~/Downloads"));
   });
 
   it("expands a bare ~", () => {
