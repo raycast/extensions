@@ -16,9 +16,10 @@ function splitArgs(text: string): string[] {
   return text.match(/(?:[^\s"]+|"[^"]*"?)+/g) ?? [];
 }
 
-// Quotes search terms that start with "-" so es.exe does not read them as switches.
+// Quotes the leading "-" of search terms so es.exe does not read them as switches. Only the dash is quoted,
+// so terms that contain quotes themselves, like -report" final", keep working.
 function toSearchArgs(searchText: string): string[] {
-  return splitArgs(searchText).map((arg) => (arg.startsWith("-") && !arg.includes('"') ? `"${arg}"` : arg));
+  return splitArgs(searchText).map((arg) => (arg.startsWith("-") ? `"-"${arg.slice(1)}` : arg));
 }
 
 export async function searchFilesWithCLI(searchText: string, preferences: Preferences): Promise<FileInfo[]> {
