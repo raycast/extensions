@@ -10,6 +10,7 @@ import {
   getSearchPins,
   getSearchProfiles,
   pinKeysFor,
+  profileToRead,
   SEARCH_PERSONAL_PROFILE,
   sessionFileFor,
   spacesOfProfile,
@@ -204,4 +205,17 @@ test("with several profiles, only the chosen one's pins are read", () => {
     ["Personal"],
   );
   assert.equal(getSearchPins(file).length, 3);
+});
+
+test("a profile deleted in Search falls back to Personal", () => {
+  const saved = [
+    { path: SEARCH_PERSONAL_PROFILE, name: "Personal" },
+    { path: OTHER, name: "Work" },
+  ];
+
+  assert.equal(profileToRead(saved, OTHER), OTHER);
+  assert.equal(profileToRead(saved, OTHER.toLowerCase()), OTHER.toLowerCase());
+  assert.equal(profileToRead(saved, "77777777-8888-9999-0000-111111111111"), SEARCH_PERSONAL_PROFILE);
+  assert.equal(profileToRead(saved, ""), SEARCH_PERSONAL_PROFILE);
+  assert.equal(profileToRead([], OTHER), SEARCH_PERSONAL_PROFILE);
 });

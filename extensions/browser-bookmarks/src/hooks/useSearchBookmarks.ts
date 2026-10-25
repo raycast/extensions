@@ -8,9 +8,9 @@ import {
   getSearchGroupFolders,
   getSearchGroupTabs,
   getSearchPins,
+  profileToRead,
   readSearchData,
   readSearchProfiles,
-  SEARCH_PERSONAL_PROFILE,
   SEARCH_PINS_FOLDER,
 } from "../utils/searchBookmarks";
 import { BROWSERS_BUNDLE_ID, getBrowserDataPath } from "./useAvailableBrowsers";
@@ -21,18 +21,22 @@ const SEARCH_PATH = getBrowserDataPath(BROWSERS_BUNDLE_ID.search, `${homedir()}/
 
 export default function useSearchBookmarks(enabled: boolean) {
   const [currentProfile, setCurrentProfile] = useCachedState("search-profile", "");
-  const { data: profiles } = useCachedPromise(
+  const { data: profiles, mutate: mutateProfiles } = useCachedPromise(
     async (enabled: boolean) => {
       if (!enabled) {
         return;
       }
 
-      // Initially set the current profile when nothing is set in the cache yet
-      if (currentProfile === "") {
-        setCurrentProfile(SEARCH_PERSONAL_PROFILE);
+      const found = await readSearchProfiles(SEARCH_PATH);
+
+      // Nothing set in the cache yet, or a profile that has since been
+      // deleted in Search: the choice goes back to Personal.
+      const read = profileToRead(found, currentProfile);
+      if (read !== currentProfile) {
+        setCurrentProfile(read);
       }
 
-      return readSearchProfiles(SEARCH_PATH);
+      return found;
     },
     [enabled],
   );
@@ -64,7 +68,11 @@ export default function useSearchBookmarks(enabled: boolean) {
       return { ...folder, icon: "search.png", browser: BROWSERS_BUNDLE_ID.search };
     }),
     isLoading,
-    mutate,
+    // Refresh reads the profiles again too, so one added in Search while this
+    // command is open can be picked without opening it afresh.
+    mutate: async () => {
+      await Promise.all([mutate(), mutateProfiles()]);
+    },
     error,
     profiles: profiles || [],
     currentProfile,

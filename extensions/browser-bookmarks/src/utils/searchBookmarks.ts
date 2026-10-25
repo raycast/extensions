@@ -218,6 +218,18 @@ export function getSearchProfiles(saved?: SearchProfile[]): { path: string; name
   ];
 }
 
+/// The profile to read, given what is saved and what is there. A profile
+/// deleted in Search leaves its id behind in the cache, and reading a file
+/// that is gone would leave the person with an empty list and no submenu to
+/// get out of it, so the choice falls back to Personal.
+export function profileToRead(saved: { path: string }[], chosen: string): string {
+  if (!chosen || !saved.some((profile) => same(profile.path, chosen))) {
+    return SEARCH_PERSONAL_PROFILE;
+  }
+
+  return chosen;
+}
+
 export function bookmarksFileFor(profile: string): string {
   return same(profile, SEARCH_PERSONAL_PROFILE) ? "bookmarks.json" : `bookmarks-${profile}.json`;
 }
