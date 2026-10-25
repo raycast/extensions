@@ -1,15 +1,25 @@
 import { Clipboard, confirmAlert, showToast, Toast } from "@raycast/api";
-import { stat } from "fs/promises";
-import { basename } from "path";
-import { promisify } from "util";
-import { exec } from "child_process";
+import { randomUUID } from "crypto";
+import { existsSync } from "fs";
+import { readFile, rm, stat } from "fs/promises";
+import { tmpdir } from "os";
+import { basename, dirname, join } from "path";
 import { FileInfo, Preferences } from "../types";
+import { execFileAsync } from "../utils/command";
 import { downloadCli } from "../utils/download-cli";
-
-const execAsync = promisify(exec);
 
 // Tracks whether a download attempt has already been made this session.
 let cliDownloadAttempted = false;
+
+// Splits text into es.exe arguments on whitespace, keeping quoted parts such as path:"C:\Program Files" together.
+function splitArgs(text: string): string[] {
+  return text.match(/(?:[^\s"]+|"[^"]*"?)+/g) ?? [];
+}
+
+// Quotes search terms that start with "-" so es.exe does not read them as switches.
+function toSearchArgs(searchText: string): string[] {
+  return splitArgs(searchText).map((arg) => (arg.startsWith("-") && !arg.includes('"') ? `"${arg}"` : arg));
+}
 
 export async function searchFilesWithCLI(searchText: string, preferences: Preferences): Promise<FileInfo[]> {
   if (!searchText) {
@@ -19,17 +29,51 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
   const { esExePath, defaultSort, maxResults, customCliArgs, useRegex } = preferences;
 
   try {
-    const esCommand = esExePath || "es.exe";
     const maxResultsCount = Number(maxResults) || 100;
 
     const cliArgs = `${customCliArgs?.trim() || ""}${useRegex ? " -r" : ""}`;
 
+    // es.exe prints results in the console code page, which garbles non-ASCII file names, but its
+    // CSV export is always UTF-8. So the results are exported to a temporary file and read back.
+    const csvPath = join(tmpdir(), `everything-search-${randomUUID()}.csv`);
+
     // Use es.exe with CSV output format to get file info in one call
-    const command = `chcp 65001 > nul && "${esCommand}" -csv -n ${maxResultsCount} -name -filename-column -size -date-created -date-modified ${defaultSort} ${cliArgs} ${searchText}`;
+    const args = [
+      "-export-csv",
+      `"${csvPath}"`,
+      "-n",
+      String(maxResultsCount),
+      "-name",
+      "-filename-column",
+      "-size",
+      "-date-created",
+      "-date-modified",
+      ...splitArgs(defaultSort || ""),
+      ...splitArgs(cliArgs),
+      ...toSearchArgs(searchText),
+    ];
 
-    const { stdout } = await execAsync(command);
+    if (esExePath && !existsSync(esExePath)) {
+      throw Object.assign(new Error(`Cannot find es.exe at: ${esExePath}`), { code: "ENOENT" });
+    }
 
-    const lines = stdout
+    // Run es.exe directly instead of through cmd.exe, so characters like & | < > in the search
+    // text are not treated as shell syntax. The arguments are passed verbatim because es.exe parses
+    // its own command line and would not understand Node's \" escaping of quoted search terms.
+    // Verbatim mode also leaves the program path unquoted, so a custom es.exe is started from its
+    // own folder by file name, which keeps a path with spaces out of the command line.
+    let csv: string;
+    try {
+      await execFileAsync(esExePath ? basename(esExePath) : "es.exe", args, {
+        cwd: esExePath ? dirname(esExePath) : undefined,
+        windowsVerbatimArguments: true,
+      });
+      csv = await readFile(csvPath, "utf8");
+    } finally {
+      await rm(csvPath, { force: true });
+    }
+
+    const lines = csv
       .trim()
       .split(/\r?\n/)
       .filter((line) => line);
@@ -96,11 +140,8 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
     // es.exe exits with code 8 ("Everything IPC not found") when the Everything app is not running
     const isEverythingNotRunning = errorCode === 8 || stderr.includes("Everything IPC");
 
-    const isNotFound =
-      errorCode === 1 ||
-      stderr.includes("not recognized") ||
-      stderr.includes("command not found") ||
-      errorMessage.includes("not recognized");
+    // es.exe is started without a shell, so a missing executable fails with ENOENT
+    const isNotFound = errorCode === "ENOENT";
 
     if (isEverythingNotRunning) {
       await showToast({
