@@ -3,7 +3,7 @@ import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { environment } from "@raycast/api";
 import { type HostPin, verifyPinnedFile } from "./host-version";
-import { replaceSymlink } from "./node-symlink";
+import { ensureSymlink, replaceSymlink } from "./node-symlink";
 import PINNED_HOST from "./native-host-pin.json";
 
 // -- Constants --
@@ -117,6 +117,15 @@ function createNodeSymlink(): void {
   replaceSymlink(process.execPath, SYMLINK_PATH);
 }
 
+/**
+ * Point ~/.raycast-firefox/node at the Node.js running this extension if it
+ * points anywhere else, e.g. after Raycast moved its bundled runtime. Returns
+ * whether the link changed.
+ */
+export function refreshNodeSymlink(): boolean {
+  return ensureSymlink(process.execPath, SYMLINK_PATH);
+}
+
 // -- Public API --
 
 /**
@@ -130,8 +139,8 @@ function createNodeSymlink(): void {
  * 1. Look up the pinned native-host release on GitHub
  * 2. Download host.bundle.js and run.sh in parallel
  * 3. Verify both against the SHA-256 hashes pinned in native-host-pin.json
- * 4. Install files atomically (temp dir -> final dir, version.txt last)
- * 5. Create Node.js symlink at ~/.raycast-firefox/node
+ * 4. Create Node.js symlink at ~/.raycast-firefox/node
+ * 5. Install files atomically (temp dir -> final dir, version.txt last)
  */
 export async function installNativeHost(
   onProgress: (message: string) => void,
@@ -168,7 +177,11 @@ export async function installNativeHost(
   verifyPinnedFile(hostBundleBuf, "host.bundle.js", pin);
   verifyPinnedFile(runShBuf, "run.sh", pin);
 
-  // Step 4: Atomic install
+  // Step 4: Create the Node.js symlink before installing the files, so
+  // version.txt (written last) only appears once every step has succeeded.
+  createNodeSymlink();
+
+  // Step 5: Atomic install
   onProgress("Installing files...");
 
   // Use environment.supportPath for temp dir when available, fall back to OS temp
@@ -192,9 +205,6 @@ export async function installNativeHost(
       // Best-effort cleanup
     }
   }
-
-  // Step 5: Create Node.js symlink
-  createNodeSymlink();
 
   return {
     version: pin.version,

@@ -145,3 +145,27 @@ export function restartOutdatedHosts(
   }
   return stopped;
 }
+
+/**
+ * What to do about the native host when a command opens:
+ * - install: the installed bundle is older than the pin
+ * - restart: the bundle is current but outdated hosts are still running,
+ *   e.g. an earlier update installed the files and then failed
+ * - none: nothing to do (also when nothing is installed, or the installed
+ *   version is newer or unreadable)
+ */
+export function planHostUpdate(
+  installedVersion: string | null,
+  pinnedVersion: string,
+  outdatedPids: number[]
+): "install" | "restart" | "none" {
+  if (hostUpdateNeeded(installedVersion, pinnedVersion)) return "install";
+  try {
+    if (installedVersion && compareVersions(installedVersion, pinnedVersion) === 0 && outdatedPids.length > 0) {
+      return "restart";
+    }
+  } catch {
+    // Unreadable version: leave it alone
+  }
+  return "none";
+}

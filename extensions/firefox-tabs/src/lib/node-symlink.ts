@@ -1,4 +1,4 @@
-import { lstatSync, mkdirSync, symlinkSync, unlinkSync } from "fs";
+import { lstatSync, mkdirSync, readlinkSync, symlinkSync, unlinkSync } from "fs";
 import { dirname } from "path";
 
 /**
@@ -25,4 +25,19 @@ export function replaceSymlink(target: string, linkPath: string): void {
   if (existing) unlinkSync(linkPath);
 
   symlinkSync(target, linkPath);
+}
+
+/**
+ * Make `linkPath` point at `target` unless it already does. Returns whether
+ * the link was changed. Raycast can move its bundled Node.js at any time, so
+ * this runs whenever a command opens, not only when installing.
+ */
+export function ensureSymlink(target: string, linkPath: string): boolean {
+  try {
+    if (readlinkSync(linkPath) === target) return false;
+  } catch {
+    // Missing, or not a link
+  }
+  replaceSymlink(target, linkPath);
+  return true;
 }

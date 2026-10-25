@@ -3,7 +3,15 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, test } from "node:test";
-import { type Host, fetchFromHosts, numberWindows, readHosts, tabKey, windowKey } from "../src/lib/hosts.ts";
+import {
+  type Host,
+  fetchFromHosts,
+  numberWindows,
+  readHosts,
+  tabKey,
+  tabsChanged,
+  windowKey,
+} from "../src/lib/hosts.ts";
 
 let dir: string;
 
@@ -118,6 +126,24 @@ describe("fetchFromHosts", () => {
     );
   });
 
+  test("leaves out a host that doesn't answer in time instead of waiting for it", { timeout: 2000 }, async () => {
+    const started = Date.now();
+    const result = await fetchFromHosts(
+      [host("a"), host("b")],
+      (h) => (h.key === "a" ? new Promise<string[]>(() => {}) : Promise.resolve(["b1"])),
+      50
+    );
+    assert.deepEqual(result, ["b1"]);
+    assert.ok(Date.now() - started < 1000, "didn't wait for the stalled host");
+  });
+
+  test("rejects with a timeout when every host stalls", { timeout: 2000 }, async () => {
+    await assert.rejects(
+      fetchFromHosts([host("a")], () => new Promise<string[]>(() => {}), 20),
+      /didn't respond within 20ms/
+    );
+  });
+
   test("resolves empty for no hosts", async () => {
     assert.deepEqual(await fetchFromHosts([], async () => ["x"]), []);
   });
@@ -161,5 +187,55 @@ describe("numberWindows", () => {
     const numbers = numberWindows([tab("b", 1), tab("a", 5)], () => 0);
     assert.equal(numbers.get("a:5"), 1);
     assert.equal(numbers.get("b:1"), 2);
+  });
+});
+
+describe("tabsChanged", () => {
+  const tab = (over: object = {}) => ({
+    host: { key: "78957" },
+    id: 1,
+    windowId: 19,
+    title: "New Tab",
+    url: "about:home",
+    active: true,
+    pinned: false,
+    status: "complete",
+    favIconUrl: null,
+    lastAccessed: 100,
+    container: null,
+    ...over,
+  });
+
+  test("detects a tab navigated to a new page", () => {
+    const navigated = tab({ title: "test-cloudrun", url: "https://test-cloudrun.a.run.app/" });
+    assert.equal(tabsChanged([tab()], [navigated]), true);
+  });
+
+  test("detects opened and closed tabs", () => {
+    assert.equal(tabsChanged([tab()], [tab(), tab({ id: 2 })]), true);
+    assert.equal(tabsChanged([tab(), tab({ id: 2 })], [tab()]), true);
+  });
+
+  test("detects changes the list shows or sorts by", () => {
+    for (const change of [
+      { active: false },
+      { pinned: true },
+      { status: "loading" },
+      { favIconUrl: "https://x/favicon.ico" },
+      { lastAccessed: 200 },
+      { windowId: 20 },
+      { container: { name: "Work" } },
+    ]) {
+      assert.equal(tabsChanged([tab()], [tab(change)]), true, JSON.stringify(change));
+    }
+  });
+
+  test("tells the same tab ID in another profile apart", () => {
+    assert.equal(tabsChanged([tab()], [tab({ host: { key: "99313" } })]), true);
+  });
+
+  test("reports no change for an identical refresh, so the list doesn't re-render", () => {
+    assert.equal(tabsChanged([tab(), tab({ id: 2 })], [tab(), tab({ id: 2 })]), false);
+    assert.equal(tabsChanged([], []), false);
   });
 });

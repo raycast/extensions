@@ -9,6 +9,7 @@ import {
   hostUpdateNeeded,
   isValidPin,
   outdatedHostPids,
+  planHostUpdate,
   restartOutdatedHosts,
   verifyPinnedFile,
 } from "../src/lib/host-version.ts";
@@ -147,5 +148,27 @@ describe("restartOutdatedHosts", () => {
       }) as typeof process.kill,
     });
     assert.equal(stopped, 0);
+  });
+});
+
+describe("planHostUpdate", () => {
+  test("installs over an older native host", () => {
+    assert.equal(planHostUpdate("1.1.1", "1.2.0", []), "install");
+    assert.equal(planHostUpdate("1.1.1", "1.2.0", [11]), "install");
+  });
+
+  test("restarts outdated hosts when the files are already current", () => {
+    // An earlier update installed 1.2.0 and failed before stopping the old hosts.
+    assert.equal(planHostUpdate("1.2.0", "1.2.0", [11, 12]), "restart");
+  });
+
+  test("does nothing when everything is current", () => {
+    assert.equal(planHostUpdate("1.2.0", "1.2.0", []), "none");
+  });
+
+  test("does nothing when nothing is installed, or the install is newer or unreadable", () => {
+    assert.equal(planHostUpdate(null, "1.2.0", [11]), "none");
+    assert.equal(planHostUpdate("1.3.0", "1.2.0", [11]), "none");
+    assert.equal(planHostUpdate("garbage", "1.2.0", [11]), "none");
   });
 });

@@ -1,9 +1,18 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, test } from "node:test";
-import { replaceSymlink } from "../src/lib/node-symlink.ts";
+import { ensureSymlink, replaceSymlink } from "../src/lib/node-symlink.ts";
 
 let dir: string;
 let node: string;
@@ -62,5 +71,26 @@ describe("replaceSymlink", () => {
     mkdirSync(link, { recursive: true });
     assert.throws(() => replaceSymlink(node, link), /is a directory/);
     assert.equal(existsSync(link), true);
+  });
+});
+
+describe("ensureSymlink", () => {
+  test("leaves a link that already points at the target alone", () => {
+    replaceSymlink(node, link);
+    const before = lstatSync(link).ino;
+    assert.equal(ensureSymlink(node, link), false);
+    assert.equal(lstatSync(link).ino, before, "same link, not recreated");
+  });
+
+  test("repairs a link left dangling when Raycast moved its Node.js", () => {
+    mkdirSync(join(dir, ".raycast-firefox"));
+    symlinkSync(join(dir, "node", "runtime", "node-v22.22.2-darwin-arm64", "bin", "node"), link);
+    assert.equal(ensureSymlink(node, link), true);
+    assert.equal(readlinkSync(link), node);
+  });
+
+  test("creates a missing link", () => {
+    assert.equal(ensureSymlink(node, link), true);
+    assert.equal(readlinkSync(link), node);
   });
 });

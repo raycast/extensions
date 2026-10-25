@@ -48,12 +48,12 @@ const STATE_TAGS: Record<ProfileStatus["state"], { value: string; color: Color }
   "not-running": { value: "Not Running", color: Color.SecondaryText },
 };
 
-/** Open Set up Firefox Bridge, showing a toast if Raycast can't launch it. */
+/** Open Set Up Firefox Bridge, showing a toast if Raycast can't launch it. */
 export async function openSetupCommand() {
   try {
     await launchCommand({ name: "setup-bridge", type: LaunchType.UserInitiated });
   } catch (error) {
-    await showFailureToast(error, { title: "Couldn't open Set up Firefox Bridge" });
+    await showFailureToast(error, { title: "Couldn't open Set Up Firefox Bridge" });
   }
 }
 

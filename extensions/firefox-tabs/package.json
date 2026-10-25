@@ -24,7 +24,7 @@
     },
     {
       "name": "setup-bridge",
-      "title": "Set up Firefox Bridge",
+      "title": "Set Up Firefox Bridge",
       "subtitle": "Firefox",
       "description": "Install the native host and check the companion extension in each Firefox profile",
       "mode": "view"

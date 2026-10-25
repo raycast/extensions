@@ -58,7 +58,7 @@ export default function SetupBridge() {
   useEffect(() => {
     if (!firefoxInstalled) return;
     if (!host.registered) install();
-    else if (host.outdated) update();
+    else update();
   }, []);
 
   if (!firefoxInstalled) {

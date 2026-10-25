@@ -16,7 +16,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type ClassifiedError, FailureMode, classifyError, fetchWithRetry, showActionError } from "./lib/errors";
 import { AMO_URL } from "./lib/constants";
 import { faviconPath } from "./lib/favicon-cache";
-import { type Host, fetchFromHosts, numberWindows, readHosts, tabKey, windowKey } from "./lib/hosts";
+import {
+  HOST_TIMEOUT_MS,
+  type Host,
+  TAB_REFRESH_MS,
+  fetchFromHosts,
+  numberWindows,
+  readHosts,
+  tabKey,
+  tabsChanged,
+  windowKey,
+} from "./lib/hosts";
 import { profilesNeedingSetup } from "./lib/profile-status";
 import { ProfileSetupItem, SetupAction, openSetupCommand, profileColor, profileIcon } from "./lib/profile-ui";
 import { type ProfileLabel, labelHosts } from "./lib/profiles";
@@ -301,7 +311,9 @@ async function fetchAllTabs(host: Host): Promise<HostTab[]> {
   let pages = 0;
 
   while (hasMore && pages < maxPages) {
-    const res = await fetch(`http://127.0.0.1:${host.port}/tabs?offset=${allTabs.length}`);
+    const res = await fetch(`http://127.0.0.1:${host.port}/tabs?offset=${allTabs.length}`, {
+      signal: AbortSignal.timeout(HOST_TIMEOUT_MS),
+    });
     if (!res.ok) {
       const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
       throw new Error(body.error ?? `HTTP ${res.status}`);
@@ -347,12 +359,16 @@ export default function SearchTabs() {
     setClassifiedError(await classifyError(error));
   }, []);
 
+  // Tabs from the background refresh, shown until the next full load.
+  const [refreshed, setRefreshed] = useState<HostTab[] | null>(null);
+
   const handleData = useCallback(() => {
     setClassifiedError(null);
+    setRefreshed(null);
   }, []);
 
   const {
-    data: tabs = [],
+    data: loadedTabs = [],
     isLoading,
     revalidate,
     mutate,
@@ -371,6 +387,32 @@ export default function SearchTabs() {
     }
   );
   useHostsWatcher(revalidate);
+  const tabs = refreshed ?? loadedTabs;
+
+  // Raycast keeps this command open between uses, so re-read tabs while it
+  // is: otherwise tabs opened, closed or navigated in Firefox don't show
+  // until the command is opened afresh. Refreshes skip the loading indicator
+  // and only re-render when something shown changed. A refresh that works
+  // after an error also clears it, e.g. once Firefox is running again.
+  const shownRef = useRef(tabs);
+  shownRef.current = tabs;
+  useEffect(() => {
+    let inFlight = false;
+    const timer = setInterval(async () => {
+      if (inFlight || readHosts().length === 0) return;
+      inFlight = true;
+      try {
+        const fresh = await fetchTabsFromAllHosts();
+        if (tabsChanged(shownRef.current, fresh)) setRefreshed(fresh);
+        setClassifiedError(null);
+      } catch {
+        // Keep the shown list; the next refresh or Retry tries again
+      } finally {
+        inFlight = false;
+      }
+    }, TAB_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   // Bring an installed native host up to the pinned release. The update
   // restarts the running hosts, and the watcher refreshes the list when they
@@ -383,6 +425,12 @@ export default function SearchTabs() {
   // the error changes, e.g. after the extension is installed in a profile.
   const hostSignature = [...new Set(tabs.map((t) => t.host.key))].sort().join(",");
   const { data: setup, revalidate: recheckSetup } = usePromise(loadProfileStatuses, []);
+  // Retry re-checks profiles as well: closing a profile that had no host
+  // doesn't change the tabs, so the tab-driven re-check wouldn't notice it.
+  const retry = () => {
+    revalidate();
+    recheckSetup();
+  };
   const errorMode = classifiedError?.mode;
   useEffect(() => {
     recheckSetup();
@@ -514,7 +562,7 @@ export default function SearchTabs() {
                 title="Retry"
                 icon={Icon.ArrowClockwise}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
+                onAction={retry}
               />
             </ActionPanel>
           ) : undefined
@@ -534,7 +582,7 @@ export default function SearchTabs() {
                     title="Retry"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={revalidate}
+                    onAction={retry}
                   />
                 </ActionPanel>
               }
@@ -563,7 +611,10 @@ export default function SearchTabs() {
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={() => closeTab(tab, mutate)}
+                    onAction={() => {
+                      setRefreshed((shown) => shown && shown.filter((t) => tabKey(t) !== tabKey(tab)));
+                      closeTab(tab, mutate);
+                    }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

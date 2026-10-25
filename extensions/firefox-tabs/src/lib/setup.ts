@@ -51,7 +51,7 @@ export function resolveNativeHostPath(): string {
   }
 
   // Neither found
-  throw new Error("Native host not found. Run the Set up Firefox Bridge command to install it.");
+  throw new Error("Native host not found. Run the Set Up Firefox Bridge command to install it.");
 }
 
 // -- Manifest generation --
