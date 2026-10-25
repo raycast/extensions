@@ -662,7 +662,7 @@
     {
       "name": "homebrewPath",
       "title": "Advanced: Homebrew Path (macOS)",
-      "description": "Not used on Windows. Leave empty unless Homebrew is in an unusual place (`which brew` shows it).",
+      "description": "Change only if Homebrew is somewhere else (`which brew` shows where). Not used on Windows.",
       "type": "textfield",
       "default": {
         "macOS": "/opt/homebrew/bin/brew",
