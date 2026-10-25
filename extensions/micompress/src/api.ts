@@ -7,7 +7,7 @@ import type { ReadableStream as WebReadableStream } from "stream/web";
 import { categoryFor, endpointPath, extOf } from "./categories";
 
 const BASE = "https://micompress.com";
-const UA = "micompress-raycast/1.0.0 (+https://micompress.com)";
+const UA = "micompress-raycast/1.0.1 (+https://micompress.com)";
 export const SITE = `${BASE}/?utm_source=raycast&utm_medium=extension&utm_campaign=extend`;
 
 // The public API sits behind Cloudflare, which rejects request bodies over 100 MB.
@@ -30,7 +30,11 @@ function freeOutputPath(input: string): string {
   return candidate;
 }
 
-export async function compressFile(input: string, preset: string): Promise<{ dest: string; meta: Meta }> {
+export async function compressFile(
+  input: string,
+  preset: string,
+  apiKey?: string,
+): Promise<{ dest: string; meta: Meta }> {
   const filename = basename(input);
   const category = categoryFor(filename);
   if (!category) throw new Error(`Unsupported file type ".${extOf(filename) || "?"}"`);
@@ -43,18 +47,26 @@ export async function compressFile(input: string, preset: string): Promise<{ des
   form.append("file", await openAsBlob(input), filename);
   form.append("preset", preset);
 
-  const res = await fetch(`${BASE}/${endpointPath(category)}/compress`, {
-    method: "POST",
-    body: form,
-    headers: { Accept: "application/json", "User-Agent": UA },
-  });
-  let json: Meta & { success?: boolean; error?: string; downloadUrl?: string };
+  // The API key authenticates the compress POST only (not the download GET).
+  const headers: Record<string, string> = { Accept: "application/json", "User-Agent": UA };
+  if (apiKey?.trim()) headers["X-API-Key"] = apiKey.trim();
+
+  const res = await fetch(`${BASE}/${endpointPath(category)}/compress`, { method: "POST", body: form, headers });
+  let json: Meta & { success?: boolean; error?: string; code?: string; downloadUrl?: string };
   try {
     json = (await res.json()) as typeof json;
   } catch {
     throw new Error(`Unexpected response (HTTP ${res.status})`);
   }
-  if (!json.success || !json.downloadUrl) throw new Error(json.error || `HTTP ${res.status}`);
+  if (!json.success || !json.downloadUrl) {
+    if (json.code === "LOGIN_REQUIRED") {
+      throw new Error(`Over the anonymous size limit — add a free API key from ${BASE}/account in preferences`);
+    }
+    if (json.code === "API_QUOTA_REACHED" || json.code === "USAGE_LIMIT_REACHED") {
+      throw new Error(`${json.error || "Monthly quota reached"} — see ${BASE}/plans`);
+    }
+    throw new Error(json.error || `HTTP ${res.status}`);
+  }
 
   const dl = await fetch(BASE + json.downloadUrl, { headers: { "User-Agent": UA } });
   if (!dl.ok || !dl.body) throw new Error(`Download failed (HTTP ${dl.status})`);

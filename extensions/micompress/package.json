@@ -14,6 +14,16 @@
     "macOS",
     "Windows"
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional personal API key from micompress.com/account — accepts files up to 100 MB and adds a monthly allowance.",
+      "type": "password",
+      "required": false,
+      "placeholder": "mc_…"
+    }
+  ],
   "commands": [
     {
       "name": "compress-file",

@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, Form, Toast, showToast, popToRoot, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Toast,
+  getPreferenceValues,
+  showToast,
+  popToRoot,
+  open,
+} from "@raycast/api";
 import { basename } from "path";
 import { useState } from "react";
 import { compressFile, SITE } from "./api";
@@ -17,6 +27,7 @@ export default function Command() {
       return;
     }
     setLoading(true);
+    const { apiKey } = getPreferenceValues<Preferences>();
     const toast = await showToast({ style: Toast.Style.Animated, title: "Compressing…" });
 
     let inTotal = 0;
@@ -25,7 +36,7 @@ export default function Command() {
 
     for (const file of values.files) {
       try {
-        const { meta } = await compressFile(file, values.preset);
+        const { meta } = await compressFile(file, values.preset, apiKey);
         inTotal += meta.inputSize || 0;
         savedTotal += (meta.inputSize || 0) - (meta.outputSize || 0);
       } catch (e) {
