@@ -1,6 +1,6 @@
 # Changelog
 
-## [Secure Pairing with MuteDeck] - {PR_MERGE_DATE}
+## [Secure Pairing with MuteDeck] - 2026-10-26
 
 ### New
 
