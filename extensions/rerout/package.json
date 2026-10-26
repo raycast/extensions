@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rerout",
+  "title": "Rerout",
+  "description": "Create branded short links, copy them, view your links, and manage tags — powered by the Rerout API.",
+  "icon": "extension-icon.png",
+  "author": "ngonidzashe_mangudya",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-link",
+      "title": "Create Short Link",
+      "subtitle": "Rerout",
+      "description": "Create a branded short link and copy it to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "my-links",
+      "title": "My Links",
+      "subtitle": "Rerout",
+      "description": "Browse your links, copy short URLs, open targets and QR codes, or delete.",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Manage Tags",
+      "subtitle": "Rerout",
+      "description": "View, create, and delete project tags.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Rerout project API key (rrk_… or a sandbox rrk_test_… key). Create one in the dashboard under API keys.",
+      "type": "password",
+      "required": true,
+      "placeholder": "rrk_…"
+    },
+    {
+      "name": "baseUrl",
+      "title": "API Base URL",
+      "description": "Leave empty to use Rerout. Set only for staging or self-hosted deployments.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.rerout.co",
+      "default": "https://api.rerout.co"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
+    "@rerout/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.8.4",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
