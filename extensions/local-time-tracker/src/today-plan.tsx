@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDailyPlan } from "./hooks/use-daily-plan";
 import { formatDuration } from "./lib/duration";
 import { showFailure } from "./lib/errors";
-import { planDateLabel, planItemId, type PlanItem } from "./lib/plan-model";
+import { planDateLabel, planItemId, sortPlansForDisplay, type PlanItem } from "./lib/plan-model";
 import { planContent, planForDate, localDateKey, planMatches } from "./lib/planning";
 import {
   importLatestPlansToToday,
@@ -147,7 +147,8 @@ export default function TodayPlanCommand() {
         />
       ) : null}
       {!error &&
-        plan?.goals.map((goal) => (
+        plan &&
+        sortPlansForDisplay(plan.goals).map((goal) => (
           <List.Section key={goal.id}>
             {goal.tasks.length ? (
               <List.Item

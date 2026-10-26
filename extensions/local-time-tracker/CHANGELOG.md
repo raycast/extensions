@@ -1,5 +1,9 @@
 # Changelog
 
+## [Completed Plans Last] - {PR_MERGE_DATE}
+
+- Automatically show completed plans after unfinished plans in Today's Plan, keeping each plan's subtasks together and preserving manual order within each group.
+
 ## [Daily Plans and Subtasks] - 2026-10-21
 
 - Add Today's Plan for daily goals, optional subtasks, completion, and tracked time, with goals and subtasks entered in one form field.
