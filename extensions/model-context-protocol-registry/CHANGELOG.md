@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add backlink-guard MCP Server] - {PR_MERGE_DATE}
+
+- Add backlink-guard to the official registry: checks a link source before you submit your site to it and gives an action and a verdict with the evidence, against Google's link spam policies; it also verifies a listing once it is live and audits your own backlinks. Local stdio server `backlink-guard` from PyPI through `uvx --with mcp backlink-guard mcp`; GLASSER_API_KEY (or AISA_API_KEY) and GOANYAPI_API_KEY are optional and add the paid signals.
+
 ## [Update Local Commander MCP Server] - 2026-10-26
 
 - Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
