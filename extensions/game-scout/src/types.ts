@@ -59,8 +59,7 @@ export interface OverviewItem {
 }
 
 export type OverviewResponse =
-  | OverviewItem[]
-  | Record<string, OverviewItem | OverviewItem[]>;
+  OverviewItem[] | Record<string, OverviewItem | OverviewItem[]>;
 
 export interface HistoryPoint {
   timestamp: string;
