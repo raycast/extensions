@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Webly MCP Server] - 2026-10-26
+
+- Add Webly to the official registry: website hosting for AI agents. Publish a website or share files and folders at a live URL in seconds, claim it, edit it over MCP, publish drafts you approve, connect custom domains and roll back with version history. Hosted Streamable HTTP server at https://api.webly.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Rename the GetMattered entry] - 2026-10-26
 
 - Rename the job search entry to GetMattered (id `getmattered`) and move its homepage, icon and remote server to getmattered.com.
