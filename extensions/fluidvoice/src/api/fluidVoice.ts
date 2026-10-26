@@ -70,7 +70,6 @@ export class FluidVoiceAPI {
     const timeout = controller ? setTimeout(() => controller.abort(), timeoutMs) : undefined;
 
     try {
-      console.log(`[FluidVoice] ${options.method || "GET"} ${url}`);
       const response = await localRequest(url, {
         ...options,
         signal: controller?.signal ?? options.signal,

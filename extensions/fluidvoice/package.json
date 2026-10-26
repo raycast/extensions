@@ -48,7 +48,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --test tests/*.test.cjs",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -87,5 +86,69 @@
       "default": "5"
     }
   ],
-  "$schema": "https://www.raycast.com/schemas/extension.json"
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "ai": {
+    "evals": [
+      {
+        "input": "@fluidvoice Transcribe the local audio file \"/Users/example/Downloads/interview.mp3\".",
+        "mocks": {
+          "transcribe": "The planning meeting is scheduled for Friday at 10 AM."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe",
+              "arguments": {
+                "source": "/Users/example/Downloads/interview.mp3"
+              }
+            }
+          },
+          {
+            "includes": "Friday"
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@fluidvoice Transcribe this file URL, passing the URL unchanged to the tool: file:///Users/example/Downloads/voice%20memo.m4a",
+        "mocks": {
+          "transcribe": "The planning meeting is scheduled for Friday at 10 AM."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe",
+              "arguments": {
+                "source": "file:///Users/example/Downloads/voice%20memo.m4a"
+              }
+            }
+          },
+          {
+            "includes": "Friday"
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@fluidvoice Transcribe this web audio URL: https://example.com/audio/interview.mp3",
+        "mocks": {
+          "transcribe": "The planning meeting is scheduled for Friday at 10 AM."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "transcribe",
+              "arguments": {
+                "source": "https://example.com/audio/interview.mp3"
+              }
+            }
+          },
+          {
+            "includes": "Friday"
+          }
+        ],
+        "usedAsExample": false
+      }
+    ]
+  }
 }
