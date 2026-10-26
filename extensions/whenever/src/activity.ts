@@ -68,7 +68,7 @@ export async function launchRun(
 	try {
 		result = await client.start(attempt);
 	} catch (error) {
-		if (!(error instanceof LaunchUncertain)) await activity.observed(attempt.runId);
+		if (!pending && !(error instanceof LaunchUncertain)) await activity.observed(attempt.runId);
 		throw error;
 	}
 	try {

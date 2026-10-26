@@ -75,6 +75,29 @@ test('retries a lost launch under its own run ID, so Whenever cannot start a sec
 	assert.equal(result.runId, 'stable');
 	assert.deepEqual((await activity.read()).runs, [{ ...run('stable'), pending: false }]);
 });
+test('keeps an uncertain launch when its retry fails before Whenever answers', async () => {
+	const activity = new Activity(storage(), 'first');
+	const sent: string[] = [];
+	const failures = [
+		new LaunchUncertain('stable'),
+		new Error('Could not refresh the Whenever sign-in.'),
+	];
+	const client = {
+		start: async (request: Start) => {
+			sent.push(request.runId);
+			const failure = failures.shift();
+			if (failure) throw failure;
+			return { runId: request.runId, launchState: 'launched' as const };
+		},
+	};
+	const request = { workflowId: 'workflow-1', version: 3, runId: 'stable', input: null };
+	await assert.rejects(launchRun(client, activity, request), LaunchUncertain);
+	await assert.rejects(launchRun(client, activity, { ...request, runId: 'second' }), /sign-in/);
+	assert.deepEqual((await activity.read()).runs, [run('stable')]);
+	await launchRun(client, activity, { ...request, runId: 'third' });
+	assert.deepEqual(sent, ['stable', 'stable', 'stable']);
+});
+
 test('releases an inspected launch for a deliberate new run', async () => {
 	const activity = new Activity(storage(), 'first');
 	await activity.rememberRun({
