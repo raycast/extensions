@@ -3,6 +3,7 @@
 ## [Completed Plans Last] - {PR_MERGE_DATE}
 
 - Automatically show completed plans after unfinished plans in Today's Plan, keeping each plan's subtasks together and preserving manual order within each group.
+- Show Reports weekly bars in fixed Monday-to-Sunday order with weekday and date labels, leaving future days empty and highlighting today's tracked time.
 
 ## [Daily Plans and Subtasks] - 2026-10-21
 

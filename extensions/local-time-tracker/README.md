@@ -75,7 +75,7 @@ Times are split at local midnight, consistent with Reports; totals include work 
 
 Reports shows **Today**, **This Week**, or **This Month**, with totals and session counts for the overview, a project group, or an individual project. Today includes only today's time: a new day starts with zero until you track work. Earlier logs remain available in This Week, This Month, and **Work Logs**.
 
-The visual summary includes project mix, the last seven days, and 35-day activity. The daily charts keep their own rolling windows, so they can show earlier activity even when Today is zero. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
+The visual summary includes project mix, this week's Monday-to-Sunday bars, and 35-day activity. Weekly bars show weekday and date labels, highlight today's tracked time, and leave future days empty. The week switches on Monday at local midnight. Both charts are independent of the selected summary period, so they can show earlier activity even when Today is zero; 35-day activity keeps its rolling window. Expand the project list to see more than two projects. The card follows Raycast's light or dark appearance; after changing Raycast's theme while Reports is open, return to the root search and reopen Reports to refresh its appearance.
 
 ## Editing Work Times
 
