@@ -1,5 +1,11 @@
 # GIF Search Changelog
 
+## [Add GIPHY Stickers and All Sources] - {PR_MERGE_DATE}
+
+- Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
+- Add an All Sources option that searches GIPHY, Klipy, and Finer Gifs Club at once, one section per provider.
+- Remove the outdated note that Klipy needs a personal API key.
+
 ## [Fix search pagination with invalid preferences] - 2026-09-30
 
 - Fall back to 20 results per page when Max Results is empty or invalid, so scrolling can continue loading GIFs.

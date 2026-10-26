@@ -22,7 +22,8 @@
     "clins1994",
     "0xdhrv",
     "Olli0103",
-    "alexi.build"
+    "alexi.build",
+    "hla_htun"
   ],
   "license": "MIT",
   "categories": [
@@ -34,7 +35,8 @@
     "Giphy",
     "Finer",
     "Klipy",
-    "clips"
+    "clips",
+    "stickers"
   ],
   "commands": [
     {
