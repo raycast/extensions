@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Terminal Tax MCP Server] - {PR_MERGE_DATE}
+## [Update Terminal Tax MCP Server] - 2026-10-26
 
 - Update Terminal Tax: three tools (was four); nothing to install or connect to file, since an assistant sends JSON-RPC HTTPS POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly; the person reviews and signs on one private filing page; the icon now loads from github.com/terminaltax/terminal-tax-mcp-server.
 
