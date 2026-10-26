@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Mnemoverse MCP Server] - {PR_MERGE_DATE}
+## [Update Mnemoverse MCP Server] - 2026-10-26
 
 - Mnemoverse now connects to its hosted Streamable HTTP server at https://mcp.mnemoverse.com/mcp through mcp-remote, with OAuth 2.1 sign-in (dynamic client registration and PKCE) instead of an API key, and the description no longer counts tools.
 
