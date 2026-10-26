@@ -1,10 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export type ServiceName = "giphy" | "giphy-clips" | "klipy" | "finergifs" | "favorites" | "recents";
+export type ServiceName = "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs" | "favorites" | "recents";
 
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   GIPHY_CLIPS: "giphy-clips",
+  GIPHY_STICKERS: "giphy-stickers",
   KLIPY: "klipy",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
@@ -27,6 +28,8 @@ export function getServiceTitle(service?: ServiceName) {
       return "GIPHY GIFs";
     case GIF_SERVICE.GIPHY_CLIPS:
       return "GIPHY Clips";
+    case GIF_SERVICE.GIPHY_STICKERS:
+      return "GIPHY Stickers";
     case GIF_SERVICE.KLIPY:
       return "Klipy";
     case GIF_SERVICE.FINER_GIFS:

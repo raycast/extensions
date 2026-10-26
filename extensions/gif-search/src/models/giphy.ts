@@ -9,7 +9,9 @@ import { fetchProviderJson } from "../lib/fetchProviderJson";
 const API_BASE_URL = "https://gif-search.raycast.com/api/giphy";
 type GiphyResults = { data: GiphyGif[] };
 
-function getGiphyUrl(type: "gifs" | "videos" | undefined, opt?: APIOpt) {
+type GiphyType = "gifs" | "videos" | "stickers";
+
+function getGiphyUrl(type: GiphyType | undefined, opt?: APIOpt) {
   const reqUrl = new URL(API_BASE_URL);
   reqUrl.searchParams.set("limit", opt?.limit?.toString() ?? "10");
   reqUrl.searchParams.set("offset", opt?.offset?.toString() ?? "0");
@@ -22,8 +24,10 @@ function getGiphyUrl(type: "gifs" | "videos" | undefined, opt?: APIOpt) {
   return reqUrl;
 }
 
-export default async function giphy(type?: "gifs" | "videos") {
-  const provider = type === "videos" ? "GIPHY Clips" : "GIPHY";
+const PROVIDER_NAMES: Record<GiphyType, string> = { gifs: "GIPHY", videos: "GIPHY Clips", stickers: "GIPHY Stickers" };
+
+export default async function giphy(type?: GiphyType) {
+  const provider = PROVIDER_NAMES[type ?? "gifs"];
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {

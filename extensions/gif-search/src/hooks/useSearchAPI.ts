@@ -12,6 +12,8 @@ export async function getAPIByServiceName(service: ServiceName) {
       return await giphy();
     case GIF_SERVICE.GIPHY_CLIPS:
       return await giphy("videos");
+    case GIF_SERVICE.GIPHY_STICKERS:
+      return await giphy("stickers");
     case GIF_SERVICE.KLIPY:
       return await klipy();
     case GIF_SERVICE.FINER_GIFS:

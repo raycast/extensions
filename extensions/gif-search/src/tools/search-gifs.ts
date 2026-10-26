@@ -2,8 +2,8 @@ import { getAPIByServiceName } from "../hooks/useSearchAPI";
 type Input = {
   /** Words that describe the GIF or reaction to find. */
   query: string;
-  /** Search provider. Use giphy-clips for video clips; defaults to giphy. */
-  service?: "giphy" | "giphy-clips" | "klipy" | "finergifs";
+  /** Search provider. Use giphy-clips for video clips and giphy-stickers for stickers; defaults to giphy. */
+  service?: "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs";
 };
 
 /** Search a GIF provider and return media links and available source page links. */

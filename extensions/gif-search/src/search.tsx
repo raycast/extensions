@@ -111,6 +111,11 @@ export default function GifSearch() {
               icon={{ source: "giphy-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
+              title="GIPHY Stickers"
+              value={GIF_SERVICE.GIPHY_STICKERS}
+              icon={{ source: "giphy-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
               title="Klipy"
               value={GIF_SERVICE.KLIPY}
               icon={{ source: "klipy-logo-square-180.png" }}
