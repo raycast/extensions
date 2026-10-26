@@ -190,6 +190,29 @@ describe("buildReencodeConcatGraph", () => {
     assert.equal(graph.filter, "[0:v:0][1:v:0]concat=n=2:v=1:a=0[v]");
     assert.deepEqual(graph.mapArgs, ["-map", "[v]"]);
   });
+
+  it("inserts scale filters when video inputs have different dimensions", () => {
+    const graph = buildReencodeConcatGraph(2, "video", [
+      { videoCodec: "av1", videoWidth: 1280, videoHeight: 704, audioCodec: "aac" },
+      { videoCodec: "av1", videoWidth: 1280, videoHeight: 720, audioCodec: "aac" },
+    ]);
+
+    assert.equal(
+      graph.filter,
+      "[0:v:0]scale=1280:704,setsar=1[sv0];[1:v:0]scale=1280:704,setsar=1[sv1];[sv0][0:a:0][sv1][1:a:0]concat=n=2:v=1:a=1[v][a]",
+    );
+    assert.deepEqual(graph.mapArgs, ["-map", "[v]", "-map", "[a]"]);
+  });
+
+  it("does not insert scale filters when video inputs share the same dimensions", () => {
+    const graph = buildReencodeConcatGraph(2, "video", [
+      { videoCodec: "av1", videoWidth: 1280, videoHeight: 720, audioCodec: "aac" },
+      { videoCodec: "av1", videoWidth: 1280, videoHeight: 720, audioCodec: "aac" },
+    ]);
+
+    assert.equal(graph.filter, "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[v][a]");
+    assert.deepEqual(graph.mapArgs, ["-map", "[v]", "-map", "[a]"]);
+  });
 });
 
 describe("normaliseMergeBaseName", () => {

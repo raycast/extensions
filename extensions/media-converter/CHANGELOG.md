@@ -1,5 +1,9 @@
 # Media Converter Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Fixed "Input link parameters do not match" crash when merging video files that have different resolutions. The re-encode path now scales all inputs to the first video's dimensions before concatenating them.
+
 ## Video Editing Controls - 2026-09-24
 
 - Extend Edit Media playback speeds from 0.25×–4× to 0.25×–40× with synchronized audio.
