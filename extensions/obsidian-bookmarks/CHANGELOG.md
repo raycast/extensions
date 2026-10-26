@@ -1,5 +1,9 @@
 # Obsidian Bookmarks Changelog
 
+## [Dia Support] - {PR_MERGE_DATE}
+
+- Fill in the page title when saving a bookmark from Dia. Only the URL used to be detected.
+
 ## [Keep Window Open on Bookmark Deletion] - 2026-10-16
 
 - Keep the Raycast window open after deleting a bookmark and remove it from the list immediately ([#32044](https://github.com/raycast/extensions/issues/32044)).
