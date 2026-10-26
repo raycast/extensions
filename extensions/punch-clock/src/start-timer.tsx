@@ -1,13 +1,36 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  launchCommand,
+  LaunchType,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { parseWholeNumber, validateBreakMinutes, validateHours, validateMinutes } from "./duration";
-import { formatClock, getState, startTimer, TimerState } from "./timer";
+import { formatClock, getState, hasMenuBarBeenSeen, startTimer, TimerState } from "./timer";
 
 interface FormValues {
   hours: string;
   minutes: string;
   breakMinutes: string;
+}
+
+async function showMenuBar() {
+  try {
+    await launchCommand({ name: "menu-bar", type: LaunchType.UserInitiated });
+  } catch {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open Work Timer",
+    });
+  }
 }
 
 export default function StartTimer() {
@@ -63,19 +86,52 @@ export default function StartTimer() {
       }
 
       setIsSubmitting(true);
+      let state: TimerState;
       try {
-        const state = await startTimer(totalMinutes, breakMinutes);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Timer Started",
-          message: `Ends around ${formatClock(state.endTime)}`,
-        });
-        await popToRoot();
+        state = await startTimer(totalMinutes, breakMinutes);
       } catch {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to start timer",
         });
+        setIsSubmitting(false);
+        return;
+      }
+
+      try {
+        let menuBarHasBeenSeen: boolean;
+        try {
+          menuBarHasBeenSeen = await hasMenuBarBeenSeen();
+        } catch {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Timer Started",
+            message: "Could not check menu bar setup.",
+          });
+          await popToRoot();
+          return;
+        }
+
+        if (menuBarHasBeenSeen) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Timer Started",
+            message: `Ends around ${formatClock(state.endTime)}`,
+          });
+        } else {
+          const shouldShowMenuBar = await confirmAlert({
+            title: "Enable the Menu Bar to See Your Timer",
+            message: `Timer started, ends around ${formatClock(state.endTime)}. Enable "Work Timer" in your menu bar to see the countdown.`,
+            primaryAction: {
+              title: "Show in Menu Bar",
+            },
+            dismissAction: { title: "OK" },
+          });
+          if (shouldShowMenuBar) {
+            await showMenuBar();
+          }
+        }
+        await popToRoot();
       } finally {
         setIsSubmitting(false);
       }
@@ -88,6 +144,7 @@ export default function StartTimer() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Timer" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action title="Show in Menu Bar…" icon={Icon.Gear} onAction={() => void showMenuBar()} />
         </ActionPanel>
       }
     >

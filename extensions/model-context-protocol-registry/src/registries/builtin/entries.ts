@@ -19,6 +19,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "3dsellers",
+    title: "3Dsellers",
+    description:
+      "Run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant. Search and create products, publish listings, update inventory and prices, manage orders, run bulk edits and CSV imports, and answer buyer messages through your 3Dsellers account. 150+ tools. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/3dsellers/ebay-mcp-server/main/assets/logo.png",
+    homepage: "https://www.3dsellers.com/channel-integration/3dsellers-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.3dsellers.com/mcp"],
+    },
+    remoteUrl: "https://api.3dsellers.com/mcp",
+  },
+  {
     name: "60fps",
     title: "60fps",
     description:
@@ -329,6 +342,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "codetrendy",
+    title: "CodeTrendy",
+    description:
+      "Search CodeTrendy, a curated directory of newly launched startups, SaaS products and AI tools: keyword search with category and pricing filters, full listing profiles, alternatives to a named product, categories, trending and the site of the day. 7 read-only tools. Remote Streamable HTTP server at https://codetrendy.com/api/mcp; no sign-in, no API key.",
+    icon: "https://codetrendy.com/android-icon-192x192.png",
+    homepage: "https://codetrendy.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codetrendy.com/api/mcp"],
+    },
+    remoteUrl: "https://codetrendy.com/api/mcp",
+  },
+  {
     name: "codex-reset",
     title: "Codex Reset",
     description:
@@ -354,6 +380,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "csolar-energia",
+    title: "CSolar Energia",
+    description:
+      "Solar power estimates for homes and businesses in São Paulo state, Brazil, from CSolar Energia, a solar installer. From the monthly electricity bill in reais or the consumption in kWh, get the number of 630 W panels, installed power, monthly generation, estimated installed price, monthly savings and payback, and check whether CSolar serves a city (all 645 municipalities of São Paulo state). Estimates, not quotes; answers in Portuguese. Read-only, no personal data. Remote Streamable HTTP server at https://csolar.com.br/mcp; no sign-in, no API key.",
+    icon: "https://csolar.com.br/favicon.png",
+    homepage: "https://csolar.com.br/para-agentes#mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://csolar.com.br/mcp"],
+    },
+    remoteUrl: "https://csolar.com.br/mcp",
   },
   {
     name: "datacircle",
@@ -892,15 +931,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
-      "Hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next. Shared rooms for multi-agent work. One key or OAuth across Claude Code, Cursor, VS Code and ChatGPT. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com, set as `MNEMOVERSE_API_KEY`.",
+      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms (beta) let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
     icon: "https://mnemoverse.com/apple-touch-icon.png",
-    homepage: "https://mnemoverse.com/docs/api/mcp-server",
+    homepage: "https://mnemoverse.com/docs/api/remote-mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "@mnemoverse/mcp-memory-server@latest"],
-      env: {
-        MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
-      },
+      args: ["-y", "mcp-remote", "https://mcp.mnemoverse.com/mcp"],
     },
   },
   {
@@ -1619,6 +1655,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.voicemoat.com/api/mcp"],
+    },
+  },
+  {
+    name: "vomo",
+    title: "VOMO",
+    description:
+      "Find and read your VOMO meeting notes and original transcripts. List saved notes, search by keyword, and retrieve summaries or transcripts from your own account. Read-only notes:read access; no recording, uploads, edits, deletion, or purchases. Connects to VOMO's hosted server through mcp-remote with OAuth sign-in, dynamic client registration, and PKCE. Requires Node.js with npm and an existing VOMO account with saved notes.",
+    icon: "https://vomo.ai/icons/vomo-app-icon.svg",
+    homepage: "https://vomo.ai/cli",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp", "--host", "127.0.0.1"],
     },
   },
   {
