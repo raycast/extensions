@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Just Domain MCP Server] - {PR_MERGE_DATE}
+
+- Add Just Domain. to the official registry: check a domain name, both prices and whether it can transfer in, then register it on justdomain.ai. Hosted remote Streamable HTTP server at https://mcp.justdomain.ai/ with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Local Commander MCP Server] - 2026-10-26
 
 - Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
