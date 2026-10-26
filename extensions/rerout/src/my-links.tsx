@@ -10,14 +10,46 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { errorMessage, getClient } from "./rerout";
+
+const PAGE_SIZE = 100;
 
 export default function MyLinks() {
   const client = getClient();
-  const { data, isLoading, revalidate } = usePromise(async () => {
-    const result = await client.links.list({ limit: 100 });
-    return result.links;
-  });
+  const [searchText, setSearchText] = useState("");
+  const { data, isLoading, revalidate, pagination } = usePromise(
+    () =>
+      async ({ cursor }: { cursor?: number }) => {
+        const result = await client.links.list({ limit: PAGE_SIZE, cursor });
+        return {
+          data: result.links,
+          hasMore: result.next_cursor !== null,
+          cursor: result.next_cursor ?? undefined,
+        };
+      },
+    [],
+  );
+
+  // The API has no server-side search, so while the user is searching keep
+  // fetching pages until every link is loaded and can be matched locally.
+  useEffect(() => {
+    if (searchText && pagination?.hasMore && !isLoading) {
+      pagination.onLoadMore();
+    }
+  }, [searchText, pagination?.hasMore, isLoading]);
+
+  const query = searchText.trim().toLowerCase();
+  const links = (data ?? []).filter(
+    (link) =>
+      !query ||
+      [
+        link.short_url,
+        link.code,
+        link.target_url,
+        ...(link.tags ?? []).map((t) => t.name),
+      ].some((value) => value.toLowerCase().includes(query)),
+  );
 
   async function deleteLink(code: string) {
     const confirmed = await confirmAlert({
@@ -43,8 +75,14 @@ export default function MyLinks() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter links…">
-      {(data ?? []).map((link) => (
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search links…"
+    >
+      {links.map((link) => (
         <List.Item
           key={link.code}
           icon={link.is_active ? Icon.Link : Icon.MinusCircle}
@@ -86,10 +124,19 @@ export default function MyLinks() {
           }
         />
       ))}
-      <List.EmptyView
-        title="No Links Yet"
-        description="Create one with the Create Short Link command."
-      />
+      {query ? (
+        <List.EmptyView
+          title={isLoading ? "Searching…" : "No Matching Links"}
+          description={
+            isLoading ? "" : `Nothing matches "${searchText.trim()}".`
+          }
+        />
+      ) : (
+        <List.EmptyView
+          title="No Links Yet"
+          description="Create one with the Create Short Link command."
+        />
+      )}
     </List>
   );
 }
