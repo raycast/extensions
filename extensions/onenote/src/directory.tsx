@@ -85,8 +85,13 @@ export function getListItems(
   );
 }
 
+// node:sqlite (Node 22) throws RangeError for INTEGER values > 2^53. OneNote stores timestamps
+// as Windows FILETIME (100-ns ticks since 1601), which exceed that threshold. CAST to REAL so
+// they come back as JS Number without precision loss that matters for display.
 const LIST_COLUMNS =
-  "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, LastModifiedTime, RecentTime, PinTime, Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content, " +
+  "Type, GOID, GUID, GOSID, ParentGOID, GrandparentGOIDs, ContentRID, RootRevGenCount, " +
+  "CAST(LastModifiedTime AS REAL) AS LastModifiedTime, CAST(RecentTime AS REAL) AS RecentTime, CAST(PinTime AS REAL) AS PinTime, " +
+  "Color, Title, EnterpriseIdentity, substr(Content, 1, 1000) AS Content, " +
   "(SELECT Title FROM Entities AS Parent WHERE Parent.GOID = Entities.ParentGOID LIMIT 1) AS ParentTitle, " +
   "(SELECT json_group_object(Ancestor.GOID, Ancestor.Title) FROM EntityAncestors AS Link " +
   "CROSS JOIN Entities AS Ancestor WHERE Link.EntityGOID = Entities.GOID " +
