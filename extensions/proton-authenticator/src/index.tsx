@@ -73,14 +73,24 @@ export default function Command() {
   const openKeySetup = () => {
     push(
       <SetupSQLite
-        onAccountsLoaded={(loadedAccounts, missing) => {
+        onAccountsLoaded={(loadedAccounts, missing, undecodableCount) => {
           setAccounts(loadedAccounts);
           setMissingKeys(missing);
+          showUndecodableWarning(undecodableCount);
           pop();
         }}
         onBack={pop}
       />,
     );
+  };
+
+  // Returns true if a warning toast was shown
+  const showUndecodableWarning = (undecodableCount: number): boolean => {
+    if (undecodableCount === 0) return false;
+    showFailureToast(`${undecodableCount} ${undecodableCount === 1 ? "entry" : "entries"} could not be read`, {
+      title: "Some Entries Skipped",
+    });
+    return true;
   };
 
   // Returns true if a warning toast was shown
@@ -101,13 +111,7 @@ export default function Command() {
       });
       return true;
     }
-    if (undecodableCount > 0) {
-      showFailureToast(`${undecodableCount} ${undecodableCount === 1 ? "entry" : "entries"} could not be read`, {
-        title: "Some Entries Skipped",
-      });
-      return true;
-    }
-    return false;
+    return showUndecodableWarning(undecodableCount);
   };
 
   const loadAccounts = async () => {
@@ -119,7 +123,8 @@ export default function Command() {
       setMissingKeys(result.missingKeys);
       if (result.accounts.length === 0) {
         setNeedsSetup(true);
-        setSetupStep(result.missingKeys.length > 0 ? "sqlite" : "select");
+        // Database setup explains why nothing loaded, the mode selector would not
+        setSetupStep(result.missingKeys.length > 0 || result.undecodableCount > 0 ? "sqlite" : "select");
       } else {
         setAccounts(result.accounts);
         setNeedsSetup(false);
@@ -180,9 +185,10 @@ export default function Command() {
     return () => clearInterval(interval);
   }, [accounts]);
 
-  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[], missing: MissingKey[] = []) => {
+  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[], missing: MissingKey[] = [], undecodableCount = 0) => {
     setAccounts(loadedAccounts);
     setMissingKeys(missing);
+    showUndecodableWarning(undecodableCount);
     setNeedsSetup(false);
     setSetupStep(null);
     setError(null);

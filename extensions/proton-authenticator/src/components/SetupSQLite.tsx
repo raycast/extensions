@@ -10,7 +10,7 @@ const DATABASE_NOT_FOUND =
   "Proton Authenticator database not found. Please ensure the app is installed and has been opened at least once.";
 
 interface SetupSQLiteProps {
-  onAccountsLoaded: (accounts: TOTPAccount[], missingKeys: MissingKey[]) => void;
+  onAccountsLoaded: (accounts: TOTPAccount[], missingKeys: MissingKey[], undecodableCount: number) => void;
   onBack: () => void;
 }
 
@@ -49,6 +49,7 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
   const [error, setError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<TOTPAccount[]>([]);
   const [missingKeys, setMissingKeys] = useState<MissingKey[]>([]);
+  const [undecodableCount, setUndecodableCount] = useState(0);
 
   // Decrypt with the keys saved so far to find out which Keychain items are still needed
   useEffect(() => {
@@ -63,25 +64,32 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
         // Saved keys already decrypt everything, nothing to add
         if (result.missingKeys.length === 0 && result.accounts.length > 0) {
           await setImportMode("sqlite");
-          onAccountsLoaded(result.accounts, []);
+          onAccountsLoaded(result.accounts, [], result.undecodableCount);
           return;
         }
         setAccounts(result.accounts);
         setMissingKeys(result.missingKeys);
+        setUndecodableCount(result.undecodableCount);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to read database"))
       .finally(() => setIsLoading(false));
   }, []);
 
   const handleKeyAdded = (result: DatabaseLoadResult) => {
-    if (result.missingKeys.length === 0) {
-      showToast(Toast.Style.Success, "Connected", `Loaded ${result.accounts.length} accounts`);
-      onAccountsLoaded(result.accounts, []);
+    if (result.missingKeys.length === 0 && result.accounts.length > 0) {
+      // Otherwise the caller shows a warning toast for the skipped entries
+      if (result.undecodableCount === 0) {
+        showToast(Toast.Style.Success, "Connected", `Loaded ${result.accounts.length} accounts`);
+      }
+      onAccountsLoaded(result.accounts, [], result.undecodableCount);
       return;
     }
 
     setAccounts(result.accounts);
     setMissingKeys(result.missingKeys);
+    setUndecodableCount(result.undecodableCount);
+    // No keys left to add means nothing could be read, which the empty view explains
+    if (result.missingKeys.length === 0) return;
     showToast(
       Toast.Style.Success,
       "Key Added",
@@ -100,7 +108,7 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
       icon={Icon.ArrowRight}
       onAction={async () => {
         await setImportMode("sqlite");
-        onAccountsLoaded(accounts, missingKeys);
+        onAccountsLoaded(accounts, missingKeys, undecodableCount);
       }}
     />
   );
@@ -109,8 +117,13 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
     return (
       <List navigationTitle="Connect to Local Database">
         <List.EmptyView
-          title={error ? "Cannot Read Database" : "No Entries Found"}
-          description={error ?? "Add an entry in Proton Authenticator, then try again."}
+          title={error ? "Cannot Read Database" : undecodableCount > 0 ? "Cannot Read Entries" : "No Entries Found"}
+          description={
+            error ??
+            (undecodableCount > 0
+              ? `${formatEntryCount(undecodableCount)} decrypted but could not be read. Use JSON import instead.`
+              : "Add an entry in Proton Authenticator, then try again.")
+          }
           icon={Icon.Warning}
           actions={<ActionPanel>{backAction}</ActionPanel>}
         />
