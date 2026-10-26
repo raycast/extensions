@@ -179,13 +179,13 @@ export function Directory(props: { elt?: OneNoteItem; databasePath: string; full
       } else {
         const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE ParentGOID = '${quoteSql(
           props.elt.GOID
-        )}' ORDER BY RecentTime DESC`;
+        )}' ORDER BY Entities.RecentTime DESC`;
         return getListItems(query, props.databasePath, props.fullTextIndexed, props.elt);
       }
     }
   }
   // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC`;
-  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY RecentTime DESC`;
+  const query = `SELECT ${LIST_COLUMNS} FROM Entities WHERE 1 = 1 ORDER BY Entities.RecentTime DESC`;
   return getListItems(query, props.databasePath, props.fullTextIndexed);
 }
 

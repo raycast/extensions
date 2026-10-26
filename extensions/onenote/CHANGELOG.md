@@ -1,8 +1,8 @@
 # OneNote Changelog
 
-## [Fix search crash on macOS 27] - {PR_MERGE_DATE}
+## [Fix search crash on Raycast 2.9] - {PR_MERGE_DATE}
 
-- Fixed "Value is too large to be represented as a JavaScript number" crash when searching notes on macOS 27 / Node 22. OneNote stores timestamps as Windows FILETIME integers (1.3e17 ticks), which exceed the 53-bit limit that node:sqlite enforces. The query now casts those columns to REAL before returning them.
+- Fixed a "Value is too large to be represented as a JavaScript number" error when searching notes.
 
 ## [Fix note search and loading errors] - 2026-10-06
 
