@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Terminal Tax MCP Server] - 2026-10-26
+
+- Update Terminal Tax: three tools (was four); nothing to install or connect to file, since an assistant sends JSON-RPC HTTPS POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly; the person reviews and signs on one private filing page; the icon now loads from github.com/terminaltax/terminal-tax-mcp-server.
+
 ## [Add Webly MCP Server] - 2026-10-26
 
 - Add Webly to the official registry: website hosting for AI agents. Publish a website or share files and folders at a live URL in seconds, claim it, edit it over MCP, publish drafts you approve, connect custom domains and roll back with version history. Hosted Streamable HTTP server at https://api.webly.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
