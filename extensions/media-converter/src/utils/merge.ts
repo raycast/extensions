@@ -57,9 +57,13 @@ export function parseStreamInfo(stderr: string): StreamInfo {
     info.durationSec = Number(durMatch[1]) * 3600 + Number(durMatch[2]) * 60 + Number(durMatch[3]);
   }
 
-  // Video line: "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1920x1080 [...], 2396 kb/s, 30 fps, ..."
+  // Video line examples:
+  //   "Stream #0:0(und): Video: h264 (High), yuv420p, 1920x1080 [...], 30 fps"
+  //   "Stream #0:0(und): Video: h264 (High), yuv420p(tv, bt709), 1920x1080 [...], 30 fps"
+  // The pix_fmt field may contain commas inside parentheses (e.g. "tv, bt709"),
+  // so match lazily up to the first ",\s*WxH" rather than counting commas.
   const vMatch = stderr.match(
-    /Stream #\d+:\d+(?:\[[^\]]+\])?(?:\(\w+\))?: Video:\s*(\w+)[^,]*,[^,]*,\s*(\d+)x(\d+)[^\n]*?(\d+(?:\.\d+)?)\s*fps/,
+    /Stream #\d+:\d+(?:\[[^\]]+\])?(?:\(\w+\))?: Video:\s*(\w+)[^\n]*?,\s*(\d+)x(\d+)[^\n]*?(\d+(?:\.\d+)?)\s*fps/,
   );
   if (vMatch) {
     info.videoCodec = vMatch[1];
@@ -69,6 +73,18 @@ export function parseStreamInfo(stderr: string): StreamInfo {
   } else {
     const vCodec = stderr.match(/Stream #\d+:\d+[^:]*: Video:\s*(\w+)/);
     if (vCodec) info.videoCodec = vCodec[1];
+  }
+
+  // Portrait videos stored with a 90- or 270-degree rotation (common on phones)
+  // have their encoded dimensions as landscape (e.g. 1920x1080) while FFmpeg
+  // processes them in portrait orientation (1080x1920).  Swap W/H so the scale
+  // filter targets the correct display dimensions.
+  const dispMatrixMatch = stderr.match(/displaymatrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/);
+  const rotateTagMatch = stderr.match(/rotate\s*:\s*(-?\d+)/);
+  const rawDeg = dispMatrixMatch ? Number(dispMatrixMatch[1]) : rotateTagMatch ? Number(rotateTagMatch[1]) : 0;
+  const normDeg = ((rawDeg % 360) + 360) % 360;
+  if ((normDeg === 90 || normDeg === 270) && info.videoWidth != null && info.videoHeight != null) {
+    [info.videoWidth, info.videoHeight] = [info.videoHeight, info.videoWidth];
   }
 
   // Audio line: "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s"

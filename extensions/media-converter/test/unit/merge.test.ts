@@ -8,9 +8,6 @@ import {
   type StreamInfo,
 } from "../../src/utils/merge";
 
-// Note: we deliberately use a simple pix_fmt without parenthesised color info
-// (e.g. `yuv420p` instead of `yuv420p(tv, bt709)`) — the current parser
-// regex doesn't support commas inside the pix_fmt segment.
 const SAMPLE_STDERR_MP4 = `
 Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'a.mp4':
   Duration: 00:00:10.00, start: 0.000000, bitrate: 5000 kb/s
@@ -51,6 +48,43 @@ describe("parseStreamInfo", () => {
     const info = parseStreamInfo(stderr);
     assert.equal(info.videoCodec, "vp9");
     assert.equal(info.videoWidth, undefined);
+  });
+
+  it("parses dimensions from a pix_fmt that contains commas inside parentheses", () => {
+    // yuv420p(tv, bt709) has a comma inside — the old two-comma regex failed here.
+    const stderr = `  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709), 1920x1080 [SAR 1:1 DAR 16:9], 2396 kb/s, 30 fps, 30 tbr, 15360 tbn (default)`;
+    const info = parseStreamInfo(stderr);
+    assert.equal(info.videoCodec, "h264");
+    assert.equal(info.videoWidth, 1920);
+    assert.equal(info.videoHeight, 1080);
+    assert.equal(info.videoFps, 30);
+  });
+
+  it("swaps width and height for a 90-degree displaymatrix rotation", () => {
+    const stderr = `  Stream #0:0: Video: h264, yuv420p, 1920x1080, 30 fps
+    Side data:
+      displaymatrix: rotation of -90.00 degrees`;
+    const info = parseStreamInfo(stderr);
+    assert.equal(info.videoWidth, 1080);
+    assert.equal(info.videoHeight, 1920);
+  });
+
+  it("swaps width and height for a 270-degree rotate tag", () => {
+    const stderr = `  Stream #0:0: Video: h264, yuv420p, 1920x1080, 30 fps
+  Metadata:
+    rotate          : 270`;
+    const info = parseStreamInfo(stderr);
+    assert.equal(info.videoWidth, 1080);
+    assert.equal(info.videoHeight, 1920);
+  });
+
+  it("does not swap dimensions for a 180-degree rotation", () => {
+    const stderr = `  Stream #0:0: Video: h264, yuv420p, 1920x1080, 30 fps
+    Side data:
+      displaymatrix: rotation of 180.00 degrees`;
+    const info = parseStreamInfo(stderr);
+    assert.equal(info.videoWidth, 1920);
+    assert.equal(info.videoHeight, 1080);
   });
 });
 
