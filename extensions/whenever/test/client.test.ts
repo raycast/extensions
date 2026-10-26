@@ -266,6 +266,34 @@ test('preserves failure details and accepts an unknown run version', async (t) =
 	assert.equal(page.events[0].message, 'Permission denied');
 });
 
+const refusal = (request: RpcRequest, code: string): Answer => ({
+	raw: {
+		jsonrpc: '2.0',
+		id: request.id,
+		result: {
+			isError: true,
+			structuredContent: { result: { status: 'failed', code, message: 'Refused' } },
+		},
+	},
+});
+
+test('sends a run ID Whenever already holds to inspection rather than reporting a failed start', async (t) => {
+	const { client } = await service(t, (request) => refusal(request, 'MANUAL_RUN_CONFLICT'));
+	await assert.rejects(
+		client.start({ workflowId: 'workflow-1', version: 4, runId: 'stable', input: null }),
+		(error) => error instanceof LaunchUncertain && error.runId === 'stable',
+	);
+});
+
+test('reports any other refused launch as not started', async (t) => {
+	const { client } = await service(t, (request) => refusal(request, 'WORKFLOW_SETUP_REQUIRED'));
+	await assert.rejects(
+		client.start({ workflowId: 'workflow-1', version: 4, runId: 'stable', input: null }),
+		(error) =>
+			!(error instanceof LaunchUncertain) && error instanceof Error && error.message === 'Refused',
+	);
+});
+
 test('requires inspection when the server reports an unknown launch', async (t) => {
 	const { client } = await service(t, () => ({
 		result: {

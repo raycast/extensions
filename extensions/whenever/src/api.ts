@@ -329,7 +329,11 @@ export class WheneverClient {
 			return { runId: request.runId, launchState: oneOf(result.launchState, LAUNCHED_STATES) };
 		} catch (error) {
 			if (error instanceof SignInRequired) throw error;
-			if (error instanceof RequestRefused && error.payload.status !== 'launch_uncertain')
+			if (
+				error instanceof RequestRefused &&
+				error.payload.status !== 'launch_uncertain' &&
+				error.payload.code !== 'MANUAL_RUN_CONFLICT'
+			)
 				throw error;
 			throw new LaunchUncertain(request.runId);
 		}

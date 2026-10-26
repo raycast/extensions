@@ -29,6 +29,6 @@ npm run dev
 
 Before opening a pull request, run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`.
 
-The extension belongs to the Whenever organization in Raycast. `npm run publish` publishes it to the organization's private store, which only members can install from. To list it in the public Raycast Store, add `"access": "public"` to `package.json` before publishing; Raycast reviews public extensions first.
+The extension belongs to the Whenever organization in Raycast and is public, so `npm run publish` submits it to the public Raycast Store for review. To publish only to the organization's private store, remove `"access": "public"` from `package.json` first.
 
 Publishing and the owner check in `npm run lint` need you signed in with `npx ray login`, as a member of the organization.

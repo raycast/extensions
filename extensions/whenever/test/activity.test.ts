@@ -37,12 +37,10 @@ test('clearing a connection removes only its own local activity', async () => {
 		['run-2'],
 	);
 });
-test('remembers a lost launch before dispatch and prevents a second launch for that workflow', async () => {
+test('remembers a lost launch before dispatch without storing its input', async () => {
 	const activity = new Activity(storage(), 'first');
-	let calls = 0;
 	const client = {
 		start: async (request: Start) => {
-			calls++;
 			assert.equal((await activity.read()).runs[0].runId, request.runId);
 			throw new LaunchUncertain(request.runId);
 		},
@@ -54,9 +52,28 @@ test('remembers a lost launch before dispatch and prevents a second launch for t
 		input: { text: 'private input' },
 	};
 	await assert.rejects(launchRun(client, activity, request), LaunchUncertain);
-	await assert.rejects(launchRun(client, activity, { ...request, runId: 'second' }), /Inspect/);
-	assert.equal(calls, 1);
+	assert.deepEqual((await activity.read()).runs, [run('stable')]);
 	assert.equal(JSON.stringify(await activity.read()).includes('private input'), false);
+});
+
+test('retries a lost launch under its own run ID, so Whenever cannot start a second run', async () => {
+	const activity = new Activity(storage(), 'first');
+	const sent: string[] = [];
+	let reachable = false;
+	const client = {
+		start: async (request: Start) => {
+			sent.push(request.runId);
+			if (!reachable) throw new LaunchUncertain(request.runId);
+			return { runId: request.runId, launchState: 'launched' as const };
+		},
+	};
+	const request = { workflowId: 'workflow-1', version: 3, runId: 'stable', input: null };
+	await assert.rejects(launchRun(client, activity, request), LaunchUncertain);
+	reachable = true;
+	const result = await launchRun(client, activity, { ...request, runId: 'second' });
+	assert.deepEqual(sent, ['stable', 'stable']);
+	assert.equal(result.runId, 'stable');
+	assert.deepEqual((await activity.read()).runs, [{ ...run('stable'), pending: false }]);
 });
 test('releases an inspected launch for a deliberate new run', async () => {
 	const activity = new Activity(storage(), 'first');

@@ -57,24 +57,25 @@ export async function launchRun(
 	const pending = (await activity.read()).runs.find(
 		(run) => run.workflowId === request.workflowId && run.pending,
 	);
-	if (pending) throw new LaunchUncertain(pending.runId);
+	// Whenever never starts a second run under one run ID, so a launch that may be lost is retried under its own ID.
+	const attempt = pending ? { ...request, runId: pending.runId } : request;
 	await activity.rememberRun({
-		runId: request.runId,
-		workflowId: request.workflowId,
-		version: request.version,
+		runId: attempt.runId,
+		workflowId: attempt.workflowId,
+		version: attempt.version,
 		pending: true,
 	});
 	let result;
 	try {
-		result = await client.start(request);
+		result = await client.start(attempt);
 	} catch (error) {
-		if (!(error instanceof LaunchUncertain)) await activity.observed(request.runId);
+		if (!(error instanceof LaunchUncertain)) await activity.observed(attempt.runId);
 		throw error;
 	}
 	try {
-		await activity.observed(request.runId);
+		await activity.observed(attempt.runId);
 	} catch {
-		throw new LaunchUncertain(request.runId);
+		throw new LaunchUncertain(attempt.runId);
 	}
 	return result;
 }

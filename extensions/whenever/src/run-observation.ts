@@ -29,13 +29,28 @@ export const unobserved: Observation = {
 	more: false,
 	reading: false,
 };
+const KEPT_TYPES = new Set([
+	'step_started',
+	'step_completed',
+	'step_failed',
+	'step_retried',
+	'run_started',
+	'run_succeeded',
+	'run_failed',
+	'run_timed_out',
+	'run_cancelled',
+]);
+// Step and lifecycle events build the timeline rows, so only logs and other events are dropped.
+function capped(events: RunEvent[]) {
+	let excess = events.length - EVENT_LIMIT;
+	if (excess <= 0) return events;
+	return events.filter((event) => KEPT_TYPES.has(event.type) || excess-- <= 0);
+}
 export function observe(state: Observation, page: RunPage): Observation {
 	const last = state.events.at(-1)?.seq ?? -1;
 	return {
 		run: page.run,
-		events: [...state.events, ...page.events.filter((event) => event.seq > last)].slice(
-			-EVENT_LIMIT,
-		),
+		events: capped([...state.events, ...page.events.filter((event) => event.seq > last)]),
 		output: page.output.kind === 'not-observed' ? state.output : page.output,
 		complete: page.complete,
 		more: page.truncated,

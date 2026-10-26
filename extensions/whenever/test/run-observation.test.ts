@@ -121,3 +121,38 @@ test('a failed step carries its failure, and a failure before start reads as did
 	assert.equal(step[0].tone, 'error');
 	assert.equal(step[0].description, 'Failed · 10ms · Permission denied');
 });
+
+test('keeps every step in a long run whose logs exceed the event limit', () => {
+	const events = [
+		{ runId: 'run-1', seq: 0, ts: 0, type: 'step_started', stepIndex: 0, name: 'Sync rows' },
+		...Array.from({ length: 600 }, (_, index) => ({
+			runId: 'run-1',
+			seq: index + 1,
+			ts: index + 1,
+			type: 'log',
+			message: `Row ${index + 1}`,
+		})),
+		{
+			runId: 'run-1',
+			seq: 601,
+			ts: 601,
+			type: 'step_failed',
+			stepIndex: 0,
+			durationMs: 601,
+			message: 'Sheet is read-only',
+		},
+	];
+	const state = observe(unobserved, {
+		run: { runId: 'run-1', workflowId: 'workflow-1', version: '3', status: 'failed', startedAt: 0 },
+		events,
+		nextSeq: 601,
+		truncated: false,
+		complete: true,
+		output: { kind: 'not-observed' },
+	});
+	assert.equal(state.events.length, 500);
+	const rows = timeline(state.events);
+	assert.equal(rows[0].title, 'Sync rows');
+	assert.equal(rows[0].description, 'Failed · 601ms · Sheet is read-only');
+	assert.equal(rows.at(-1)?.title, 'Row 600');
+});
