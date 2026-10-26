@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-26
 - Fixed searches that contain `&`, `|`, `<`, `>`, `^` or `%`, or start with `-`, failing with "Error Searching Files" or returning wrong results
 
 ## [Fix] - 2026-10-15
