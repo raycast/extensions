@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Local Commander MCP Server] - {PR_MERGE_DATE}
+## [Update Local Commander MCP Server] - 2026-10-26
 
 - Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
 
