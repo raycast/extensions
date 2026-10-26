@@ -1,5 +1,13 @@
 # DuckDuckGo Image Search Changelog
 
+## [Blocked Search Recovery] - {PR_MERGE_DATE}
+
+- Replaced the rejected Chrome/131 request profile with a Firefox profile verified against first-page and paginated image searches.
+- Recognize DuckDuckGo's `botnet_challenge` response explicitly and pause requests for one minute across queries and pagination.
+- Offer browser search and manual retry actions when image search is unavailable, preserving the query, locale, moderation, layout, and license filters in the browser link.
+- Distinguish unexpected responses from confirmed anti-bot challenges and add offline regression checks with `npm test`.
+- Browser verification is not shared with Raycast; DuckDuckGo can still reject individual requests.
+
 ## [Search Reliability and Pagination] - 2026-07-14
 
 - Added a shared browser-like DuckDuckGo HTTP client with platform-appropriate headers, consistent timeouts, and connection reuse.
