@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Rename the GetMattered entry] - 2026-10-26
+
+- Rename the job search entry to GetMattered (id `getmattered`) and move its homepage, icon and remote server to getmattered.com.
+
 ## [Update Mnemoverse MCP Server] - 2026-10-26
 
 - Mnemoverse now connects to its hosted Streamable HTTP server at https://mcp.mnemoverse.com/mcp through mcp-remote, with OAuth 2.1 sign-in (dynamic client registration and PKCE) instead of an API key, and the description no longer counts tools.
