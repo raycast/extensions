@@ -1,0 +1,3 @@
+dist/
+package-lock.json
+raycast-env.d.ts

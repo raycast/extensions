@@ -1,0 +1,74 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "whenever",
+	"version": "0.1.0",
+	"private": true,
+	"title": "Whenever",
+	"description": "Find Whenever workflows, run saved versions, and inspect their results.",
+	"icon": "icon.png",
+	"author": "kasparasb",
+	"owner": "whenever",
+	"access": "public",
+	"license": "MIT",
+	"platforms": [
+		"macOS"
+	],
+	"categories": [
+		"Productivity",
+		"Developer Tools"
+	],
+	"commands": [
+		{
+			"name": "open-whenever",
+			"title": "Open Whenever",
+			"description": "Open Whenever in your default browser.",
+			"mode": "no-view"
+		},
+		{
+			"name": "search-workflows",
+			"title": "Search Workflows",
+			"description": "Search workflows, manage favorites, and inspect saved versions.",
+			"mode": "view"
+		},
+		{
+			"name": "run-workflow",
+			"title": "Run Workflow",
+			"description": "Review input and run a saved workflow version.",
+			"mode": "view"
+		},
+		{
+			"name": "workflow-runs",
+			"title": "Workflow Runs",
+			"description": "Inspect run history, failures, and results.",
+			"mode": "view"
+		},
+		{
+			"name": "account",
+			"title": "Whenever Account",
+			"description": "Connect or sign out of your Whenever account.",
+			"mode": "view"
+		}
+	],
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"lint": "ESLINT_FLAGS=unstable_native_nodejs_ts_config ray lint --exit-on-error --non-interactive && eslint --flag unstable_native_nodejs_ts_config . && prettier --check .",
+		"test": "node --test test/*.test.ts",
+		"typecheck": "tsc --noEmit",
+		"publish": "ESLINT_FLAGS=unstable_native_nodejs_ts_config ray publish",
+		"prepublishOnly": "node scripts/block-npm-publish.ts"
+	},
+	"dependencies": {
+		"@raycast/api": "2.7.2",
+		"react": "19.0.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "2.2.0",
+		"@types/node": "22.19.17",
+		"@types/react": "19.0.10",
+		"eslint": "10.12.0",
+		"prettier": "3.9.9",
+		"typescript": "6.0.3"
+	},
+	"type": "module"
+}

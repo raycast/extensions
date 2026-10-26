@@ -1,0 +1,25 @@
+{
+	"include": [
+		"src/**/*",
+		"test/**/*.ts",
+		"scripts/**/*.ts",
+		"eslint.config.ts",
+		"types/**/*.d.ts",
+		"raycast-env.d.ts"
+	],
+	"compilerOptions": {
+		"lib": ["ES2024"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"target": "ES2023",
+		"strict": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react-jsx",
+		"resolveJsonModule": true,
+		"allowImportingTsExtensions": true,
+		"types": ["node", "react"]
+	}
+}
