@@ -129,13 +129,31 @@ export function buildReencodeConcatGraph(
   }
 
   const includeAudio = streams.length === inputCount && streams.every((s) => Boolean(s.audioCodec));
-  const filterParts: string[] = [];
+
+  // Insert scale filters when inputs have different dimensions so FFmpeg's
+  // concat filter doesn't abort with a parameter-mismatch error.  Only
+  // activate when every stream carries full dimension info; inputs without
+  // that info pass through unchanged and let FFmpeg report the mismatch.
+  const allHaveDims =
+    streams.length === inputCount && streams.every((s) => s.videoWidth != null && s.videoHeight != null);
+  const targetW = allHaveDims ? streams[0].videoWidth : undefined;
+  const targetH = allHaveDims ? streams[0].videoHeight : undefined;
+  const needsScale = allHaveDims && streams.some((s) => s.videoWidth !== targetW || s.videoHeight !== targetH);
+
+  const scaleFilters: string[] = [];
+  const concatParts: string[] = [];
   for (let i = 0; i < inputCount; i++) {
-    filterParts.push(includeAudio ? `[${i}:v:0][${i}:a:0]` : `[${i}:v:0]`);
+    if (needsScale && targetW != null && targetH != null) {
+      scaleFilters.push(`[${i}:v:0]scale=${targetW}:${targetH},setsar=1[sv${i}]`);
+    }
+    const vPad = needsScale ? `[sv${i}]` : `[${i}:v:0]`;
+    concatParts.push(includeAudio ? `${vPad}[${i}:a:0]` : vPad);
   }
+  const concatFilter = `${concatParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`;
+  const filter = scaleFilters.length > 0 ? `${scaleFilters.join(";")};${concatFilter}` : concatFilter;
 
   return {
-    filter: `${filterParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`,
+    filter,
     mapArgs: includeAudio ? ["-map", "[v]", "-map", "[a]"] : ["-map", "[v]"],
   };
 }
