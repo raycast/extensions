@@ -79,7 +79,6 @@ const RUN_STATUS: Record<Run['status'], Presentation> = {
 };
 export const NEVER_STARTED: Presentation = { label: 'Did not start', tone: 'error' };
 export const runStatusPresentation = (status: Run['status']) => RUN_STATUS[status];
-// A start the platform refused is recorded as a lone failure with no version, because no version ran.
 export const runPresentation = (run: Pick<Run, 'status' | 'version'>): Presentation =>
 	run.status === 'failed' && run.version === undefined ? NEVER_STARTED : RUN_STATUS[run.status];
 

@@ -33,7 +33,6 @@ export async function accountKey(): Promise<string> {
 	return key;
 }
 async function redirectURI() {
-	// Raycast builds the redirect URI only inside an authorization request, and registration needs it first.
 	const request = await oauth.authorizationRequest({
 		endpoint: AUTHORIZE_URL,
 		clientId: 'registration-preview',

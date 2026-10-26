@@ -310,7 +310,6 @@ export class WheneverClient {
 	}
 	async start(request: Start) {
 		const token = await this.token();
-		// The run id is chosen before dispatch. A lost answer never authorizes a second launch.
 		try {
 			const result = await this.send(token, 'run_workflow_manual', {
 				workflow_id: request.workflowId,

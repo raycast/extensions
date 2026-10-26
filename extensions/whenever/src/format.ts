@@ -2,7 +2,6 @@ import { SignInRequired } from './api.ts';
 
 export const errorMessage = (error: unknown) =>
 	error instanceof Error ? error.message : 'The request failed. Try again.';
-// Raycast renders \( \) and \[ \] as LaTeX, so brackets become entities and parentheses stay plain.
 const ENTITIES: Record<string, string> = { '&': '&amp;', '[': '&#91;', ']': '&#93;', $: '&#36;' };
 export const md = (value: string) =>
 	value.replace(/[\\`*_{}<>!#|]/g, '\\$&').replace(/[&[\]$]/g, (char) => ENTITIES[char] ?? char);

@@ -40,7 +40,6 @@ const KEPT_TYPES = new Set([
 	'run_timed_out',
 	'run_cancelled',
 ]);
-// Step and lifecycle events build the timeline rows, so only logs and other events are dropped.
 function capped(events: RunEvent[]) {
 	let excess = events.length - EVENT_LIMIT;
 	if (excess <= 0) return events;
@@ -117,9 +116,7 @@ const stepRow = (step: Step): TimelineItem => ({
 	tone: STEP_TONE[step.status],
 });
 
-// Mirrors the web app's run timeline: one row per step, plus logs and run lifecycle events.
 export function timeline(events: RunEvent[]): TimelineItem[] {
-	// Steps are rendered last because later events finish them.
 	const rows: Array<() => TimelineItem> = [];
 	const steps = new Map<number, Step>();
 	let startedAt: number | undefined;

@@ -57,7 +57,6 @@ export async function launchRun(
 	const pending = (await activity.read()).runs.find(
 		(run) => run.workflowId === request.workflowId && run.pending,
 	);
-	// Whenever never starts a second run under one run ID, so a launch that may be lost is retried under its own ID.
 	const attempt = pending ? { ...request, runId: pending.runId } : request;
 	await activity.rememberRun({
 		runId: attempt.runId,
