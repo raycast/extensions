@@ -10,8 +10,8 @@ const execute = promisify(execFile);
 const READ_IMAGE = `
 ObjC.import("AppKit");
 function run(argv) {
-  const pasteboard = argv.length
-    ? $.NSPasteboard.pasteboardWithName(argv[0])
+  const pasteboard = argv.length > 1
+    ? $.NSPasteboard.pasteboardWithName(argv[1])
     : $.NSPasteboard.generalPasteboard;
   const type = pasteboard.availableTypeFromArray([
     "public.png", "public.tiff", "public.jpeg", "public.heic",
@@ -20,20 +20,32 @@ function run(argv) {
   if (type.isNil()) return "";
   const data = pasteboard.dataForType(type);
   if (data.isNil()) return "";
-  return ObjC.unwrap(data.base64EncodedStringWithOptions(0));
+  if (!data.writeToFileAtomically(argv[0], false)) {
+    throw new Error("Could not write clipboard image to a temporary file");
+  }
+  return "image";
 }
 `;
 
 export async function readClipboardImage(pasteboardName?: string): Promise<Buffer | undefined> {
   if (process.platform !== "darwin") return undefined;
 
-  const { stdout } = await execute(
-    "/usr/bin/osascript",
-    ["-l", "JavaScript", "-e", READ_IMAGE, ...(pasteboardName ? [pasteboardName] : [])],
-    { maxBuffer: 64 * 1024 * 1024 },
-  );
-  const encoded = stdout.trim();
-  return encoded ? Buffer.from(encoded, "base64") : undefined;
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "raycast-save-clipboard-"));
+  try {
+    const source = path.join(directory, "image");
+    await fs.promises.writeFile(source, Buffer.alloc(0), { mode: 0o600 });
+    const { stdout } = await execute("/usr/bin/osascript", [
+      "-l",
+      "JavaScript",
+      "-e",
+      READ_IMAGE,
+      source,
+      ...(pasteboardName ? [pasteboardName] : []),
+    ]);
+    return stdout.trim() === "image" ? await fs.promises.readFile(source) : undefined;
+  } finally {
+    await fs.promises.rm(directory, { recursive: true, force: true });
+  }
 }
 
 export function saveClipboardImageAsJpeg(data: Buffer, destination: string): void {

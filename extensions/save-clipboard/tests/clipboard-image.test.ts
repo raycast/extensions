@@ -71,9 +71,49 @@ for (const type of ["png", "tiff"]) {
 
 test("text-only clipboard has no native image", onMac, async () => {
   const name = createPasteboard();
+  const before = fs.readdirSync(os.tmpdir()).filter((entry) => entry.startsWith("raycast-save-clipboard-"));
   try {
     assert.equal(await readClipboardImage(name), undefined);
+    assert.deepEqual(
+      fs.readdirSync(os.tmpdir()).filter((entry) => entry.startsWith("raycast-save-clipboard-")),
+      before,
+    );
   } finally {
     releasePasteboard(name);
+  }
+});
+
+test("reads and saves a native TIFF larger than the former stdout limit", onMac, async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "save-clipboard-test-"));
+  let name: string | undefined;
+  const before = fs.readdirSync(os.tmpdir()).filter((entry) => entry.startsWith("raycast-save-clipboard-"));
+  try {
+    const fixture = path.join(directory, "large.tiff");
+    execFileSync("/usr/bin/sips", [
+      "-s",
+      "format",
+      "tiff",
+      "-z",
+      "4096",
+      "4096",
+      path.resolve("assets/extension-icon.png"),
+      "--out",
+      fixture,
+    ]);
+    const original = fs.readFileSync(fixture);
+    assert.ok(original.length > 48 * 1024 * 1024);
+    name = createPasteboard(fixture, "public.tiff");
+    const image = await readClipboardImage(name);
+    assert.deepEqual(image, original);
+    const output = path.join(directory, "large.jpg");
+    saveClipboardImageAsJpeg(image!, output);
+    assert.deepEqual(fs.readFileSync(output).subarray(0, 3), Buffer.from([0xff, 0xd8, 0xff]));
+    assert.deepEqual(
+      fs.readdirSync(os.tmpdir()).filter((entry) => entry.startsWith("raycast-save-clipboard-")),
+      before,
+    );
+  } finally {
+    if (name) releasePasteboard(name);
+    fs.rmSync(directory, { recursive: true, force: true });
   }
 });
