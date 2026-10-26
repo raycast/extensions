@@ -27,20 +27,22 @@ export function Runs({ workflow, activity }: { workflow: Workflow; activity: Act
 			navigationTitle={`${workflow.name} · Run history`}
 			searchBarPlaceholder="Search runs by status, trigger, or ID"
 		>
-			<List.EmptyView
-				icon={Icon.Clock}
-				title={state.busy ? 'Loading runs…' : 'No runs yet'}
-				description="Run the workflow to see activity here."
-				actions={
-					<ActionPanel>
-						<Action title="Refresh" icon={Icon.ArrowClockwise} onAction={state.reload} />
-						<Action.OpenInBrowser
-							title="Open Workflow in Whenever"
-							url={workflowUrl(workflow.id)}
-						/>
-					</ActionPanel>
-				}
-			/>
+			{!state.busy && (
+				<List.EmptyView
+					icon={Icon.Clock}
+					title="No runs yet"
+					description="Run the workflow to see activity here."
+					actions={
+						<ActionPanel>
+							<Action title="Refresh" icon={Icon.ArrowClockwise} onAction={state.reload} />
+							<Action.OpenInBrowser
+								title="Open Workflow in Whenever"
+								url={workflowUrl(workflow.id)}
+							/>
+						</ActionPanel>
+					}
+				/>
+			)}
 			{state.data && state.data.completeness !== 'complete' && (
 				<List.Section
 					title="Partial run history"

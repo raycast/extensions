@@ -124,7 +124,11 @@ export function RunForm({ workflow, activity }: { workflow: Workflow; activity: 
 							/>
 						</>
 					) : null}
-					<Action title="Refresh Saved Version" onAction={state.reload} />
+					<Action
+						title="Refresh Saved Version"
+						icon={Icon.ArrowClockwise}
+						onAction={state.reload}
+					/>
 					<Action.OpenInBrowser title="Open Workflow in Whenever" url={workflowUrl(workflow.id)} />
 				</ActionPanel>
 			}

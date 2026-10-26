@@ -27,7 +27,7 @@
 		{
 			"name": "search-workflows",
 			"title": "Search Workflows",
-			"description": "Search workflows, manage favorites, and inspect saved versions.",
+			"description": "Search workflows, see their status, and inspect saved versions.",
 			"mode": "view"
 		},
 		{
@@ -59,7 +59,7 @@
 		"prepublishOnly": "node scripts/block-npm-publish.ts"
 	},
 	"dependencies": {
-		"@raycast/api": "2.7.2",
+		"@raycast/api": "2.7.3",
 		"react": "19.0.0"
 	},
 	"devDependencies": {

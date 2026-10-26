@@ -102,25 +102,21 @@ export function Workflows({ account, primary }: { account: string; primary: Dest
 			onSearchTextChange={setSearchText}
 			searchBarPlaceholder={DESTINATIONS[primary].placeholder}
 		>
-			<List.EmptyView
-				icon={Icon.MagnifyingGlass}
-				title={
-					list.busy
-						? 'Loading workflows…'
-						: searchText
-							? 'No matching workflows'
-							: 'No workflows yet'
-				}
-				description={
-					searchText ? 'Try a different search term.' : 'Workflows you create will appear here.'
-				}
-				actions={
-					<ActionPanel>
-						<Action.OpenInBrowser title="Open Whenever" url={APP_URL} />
-						<Action title="Refresh" icon={Icon.ArrowClockwise} onAction={reload} />
-					</ActionPanel>
-				}
-			/>
+			{!list.busy && (
+				<List.EmptyView
+					icon={Icon.MagnifyingGlass}
+					title={searchText ? 'No matching workflows' : 'No workflows yet'}
+					description={
+						searchText ? 'Try a different search term.' : 'Workflows you create will appear here.'
+					}
+					actions={
+						<ActionPanel>
+							<Action.OpenInBrowser title="Open Whenever" url={APP_URL} />
+							<Action title="Refresh" icon={Icon.ArrowClockwise} onAction={reload} />
+						</ActionPanel>
+					}
+				/>
+			)}
 			{list.data && list.data.completeness !== 'complete' && (
 				<List.Section
 					title="Partial workflow list"
@@ -141,6 +137,7 @@ export function Workflows({ account, primary }: { account: string; primary: Dest
 								<ActionPanel>
 									<Action
 										title="Inspect Run"
+										icon={Icon.List}
 										onAction={() =>
 											push(
 												<RunDetail

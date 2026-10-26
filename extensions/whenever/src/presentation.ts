@@ -75,7 +75,7 @@ const RUN_STATUS: Record<Run['status'], Presentation> = {
 	succeeded: { label: 'Succeeded', tone: 'success' },
 	failed: { label: 'Failed', tone: 'error' },
 	timed_out: { label: 'Timed out', tone: 'error' },
-	cancelled: { label: 'Cancelled', tone: 'neutral' },
+	cancelled: { label: 'Canceled', tone: 'neutral' },
 };
 export const NEVER_STARTED: Presentation = { label: 'Did not start', tone: 'error' };
 export const runStatusPresentation = (status: Run['status']) => RUN_STATUS[status];
