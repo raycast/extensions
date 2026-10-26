@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
 import { Color, Grid, Icon, showToast, Toast } from "@raycast/api";
 
 import {
+  getAllSourcesServices,
   getMaxResults,
   getServiceTitle,
   getGridItemSize,
@@ -11,12 +12,14 @@ import {
   GIF_SERVICE,
   GRID_COLUMNS,
   isServiceName,
+  ServiceName,
 } from "./preferences";
 
 import useSearchAPI from "./hooks/useSearchAPI";
 import useLocalGifs from "./hooks/useLocalGifs";
 
 import { GifGridSection } from "./components/GifGridSection";
+import { SourceSection, SourceState } from "./components/SourceSection";
 
 export default function GifSearch() {
   const limit = getMaxResults();
@@ -26,20 +29,37 @@ export default function GifSearch() {
   const searchService = isServiceName(cachedSearchService) ? cachedSearchService : GIF_SERVICE.GIPHY;
 
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
+  const columns = GRID_COLUMNS[itemSize];
+
+  const isAllSources = searchService === GIF_SERVICE.ALL;
+  const providerService = isAllSources ? undefined : searchService;
 
   const {
     data: results,
     error,
     isLoading,
     pagination,
-  } = useSearchAPI({ term: searchTerm, service: searchService, limit });
+  } = useSearchAPI({ term: searchTerm, service: providerService, limit });
   const {
     recentGifs,
     favoriteGifs,
     allGifs,
     isLoading: isLoadingLocalGifs,
     mutate,
-  } = useLocalGifs(searchService, itemSize);
+  } = useLocalGifs(providerService, itemSize);
+
+  const allSources = getAllSourcesServices();
+  const perSourceLimit = Math.min(limit, columns * 2);
+  const [sourceStates, setSourceStates] = useState<Partial<Record<ServiceName, SourceState>>>({});
+  const onSourceStateChange = useCallback((service: ServiceName, state: SourceState) => {
+    setSourceStates((previous) => ({ ...previous, [service]: state }));
+  }, []);
+
+  // A source that hasn't reported yet counts as loading, so the empty state doesn't flash.
+  const isLoadingAllSources = isAllSources && allSources.some((service) => sourceStates[service]?.isLoading ?? true);
+  const allSourcesEmpty = isAllSources && allSources.every((service) => sourceStates[service]?.count === 0);
+  const failedSources = isAllSources ? allSources.filter((service) => sourceStates[service]?.error) : [];
+  const failedSourcesKey = failedSources.join(",");
 
   const onServiceChange = (service: string) => {
     if (isServiceName(service)) setSearchService(service);
@@ -62,15 +82,33 @@ export default function GifSearch() {
     });
   }, [error, searchService, showAllFavs, showAllRecents]);
 
+  useEffect(() => {
+    if (!failedSources.length) {
+      return;
+    }
+
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Could not load GIFs from ${failedSources.map(getServiceTitle).join(", ")}`,
+      message: sourceStates[failedSources[0]]?.error?.message,
+    });
+  }, [failedSourcesKey]);
+
   let placeholder = `Search for GIFs${searchService ? ` on ${getServiceTitle(searchService)}` : ""}`;
   if (showAllFavs) placeholder = "Search favorites";
   if (showAllRecents) placeholder = "Search recents";
+  if (isAllSources) placeholder = "Search GIFs across all sources";
 
   let emptyState = { text: "Enter a search above to get started…", icon: Icon.MagnifyingGlass };
   if (showAllFavs) emptyState = { text: "Add some GIFs to your Favorites first…", icon: Icon.Clock };
   if (showAllRecents) emptyState = { text: "Work with some GIFs first…", icon: Icon.Clock };
-  if (searchTerm.length > 0 && results?.length === 0) emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  if (!isAllSources && searchTerm.length > 0 && results?.length === 0) {
+    emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  }
   if (showProviderError) emptyState = { text: error?.message ?? "Could not load GIFs.", icon: Icon.Image };
+  if (isAllSources && searchTerm.length > 0 && !isLoadingAllSources && allSourcesEmpty) {
+    emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  }
 
   let sections = [
     ...(searchTerm.length === 0
@@ -91,15 +129,14 @@ export default function GifSearch() {
       }) ?? [];
   }
 
-  const columns = GRID_COLUMNS[itemSize];
-
   return (
     <Grid
       columns={columns}
-      pagination={showLocalGifsView ? undefined : pagination}
+      pagination={showLocalGifsView || isAllSources ? undefined : pagination}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Change GIF Provider" onChange={onServiceChange} value={searchService}>
           <Grid.Dropdown.Section>
+            <Grid.Dropdown.Item title="All Sources" value={GIF_SERVICE.ALL} icon={{ source: Icon.AppWindowGrid3x3 }} />
             <Grid.Dropdown.Item
               title="GIPHY GIFs"
               value={GIF_SERVICE.GIPHY}
@@ -137,23 +174,34 @@ export default function GifSearch() {
         </Grid.Dropdown>
       }
       filtering={showAllFavs || showAllRecents}
-      isLoading={isLoading || isLoadingLocalGifs}
+      isLoading={isLoading || isLoadingLocalGifs || isLoadingAllSources}
       throttle
       searchBarPlaceholder={placeholder}
       onSearchTextChange={setSearchTerm}
     >
       <Grid.EmptyView title={emptyState.text} icon={emptyState.icon} />
-      {sections.map((section) => (
-        <GifGridSection
-          key={section.title}
-          title={section.title}
-          results={section.results ?? []}
-          isLocalGifSection={section.isLocalGifSection}
-          term={searchTerm}
-          service={searchService}
-          mutate={mutate}
-        />
-      ))}
+      {isAllSources
+        ? allSources.map((service) => (
+            <SourceSection
+              key={service}
+              service={service}
+              term={searchTerm}
+              limit={perSourceLimit}
+              onStateChange={onSourceStateChange}
+              mutate={mutate}
+            />
+          ))
+        : sections.map((section) => (
+            <GifGridSection
+              key={section.title}
+              title={section.title}
+              results={section.results ?? []}
+              isLocalGifSection={section.isLocalGifSection}
+              term={searchTerm}
+              service={searchService}
+              mutate={mutate}
+            />
+          ))}
     </Grid>
   );
 }

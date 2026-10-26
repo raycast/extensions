@@ -115,3 +115,24 @@ test("favorites and recents include GIPHY Stickers", () => {
   assert.ok(!getServices().includes("favorites"));
   assert.ok(!getServices().includes("recents"));
 });
+
+test("All Sources searches GIF providers only and is never stored as a provider", () => {
+  const { getAllSourcesServices, getServices, isServiceName } = load("preferences", { "@raycast/api": raycastApi() });
+
+  assert.deepEqual([...getAllSourcesServices()], ["giphy", "klipy", "finergifs"]);
+  assert.ok(isServiceName("all"));
+  assert.ok(!getServices().includes("all"));
+});
+
+test("All Sources has no API of its own and is not a cache owner", async () => {
+  const stubs = {
+    "@raycast/api": { ...raycastApi(), environment: { supportPath: "/support" } },
+    "@raycast/utils": { useCachedPromise() {} },
+  };
+  const { getAPIByServiceName } = load("hooks/useSearchAPI", stubs);
+  const { isCacheableService } = load("lib/cachedGifs", stubs);
+
+  assert.equal(await getAPIByServiceName("all"), null);
+  assert.equal(isCacheableService("all"), false);
+  assert.equal(isCacheableService("giphy-stickers"), true);
+});

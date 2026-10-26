@@ -20,6 +20,7 @@ export async function getAPIByServiceName(service: ServiceName) {
       return finergifs();
     case GIF_SERVICE.FAVORITES:
     case GIF_SERVICE.RECENTS:
+    case GIF_SERVICE.ALL:
       return null;
   }
 

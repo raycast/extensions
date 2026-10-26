@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export type ServiceName = "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs" | "favorites" | "recents";
+export type ServiceName =
+  "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs" | "favorites" | "recents" | "all";
 
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
@@ -10,6 +11,7 @@ export const GIF_SERVICE: { [name: string]: ServiceName } = {
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
   RECENTS: "recents",
+  ALL: "all",
 };
 
 export function isServiceName(service?: string): service is ServiceName {
@@ -18,8 +20,13 @@ export function isServiceName(service?: string): service is ServiceName {
 
 export function getServices() {
   return Object.values(GIF_SERVICE).filter((service) => {
-    return service != GIF_SERVICE.FAVORITES && service != GIF_SERVICE.RECENTS;
+    return service != GIF_SERVICE.FAVORITES && service != GIF_SERVICE.RECENTS && service != GIF_SERVICE.ALL;
   });
+}
+
+// Clips and stickers stay out of All Sources because they are different media from GIFs.
+export function getAllSourcesServices(): ServiceName[] {
+  return [GIF_SERVICE.GIPHY, GIF_SERVICE.KLIPY, GIF_SERVICE.FINER_GIFS];
 }
 
 export function getServiceTitle(service?: ServiceName) {
@@ -34,6 +41,8 @@ export function getServiceTitle(service?: ServiceName) {
       return "Klipy";
     case GIF_SERVICE.FINER_GIFS:
       return "Finer Gifs Club";
+    case GIF_SERVICE.ALL:
+      return "All Sources";
   }
 
   return "";
