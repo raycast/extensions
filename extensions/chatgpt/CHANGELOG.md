@@ -6,6 +6,7 @@
 - Rename the per-model and per-command reasoning toggle to `Override global reasoning effort`; when it is disabled, the model or command follows the global preference instead of always omitting `reasoning_effort`.
 - Show in Models whether a model's reasoning effort comes from its own override or from the global setting.
 - The global reasoning effort applies to chat requests; the image commands keep omitting `reasoning_effort`.
+- Fix the model dropdown in the Models and AI Command forms: typing now filters the model list, and a manually typed model ID can be selected again with `Use "…"` (including when the provider does not return a model list). Raycast disables its built-in dropdown filtering when a search callback is set, so the model picker now filters the options itself.
 
 ## [Fix Crash on Launch] - 2026-10-16
 

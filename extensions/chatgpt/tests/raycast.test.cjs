@@ -60,7 +60,7 @@ async function change(app, id, next) {
 async function chooseCustomModel(app, id, searchText) {
   const target = field(app.tree, id);
   assert.equal(target.kind, "Dropdown");
-  assert.equal(target.filteringEnabled, true);
+  assert.equal(target.filteringEnabled, false, "the extension filters the model list itself");
   await app.callback(target.onSearchTextChange, { value: searchText, eventCount: ++eventCount });
   const modelId = searchText.trim();
   await app.waitFor(
@@ -823,6 +823,37 @@ test("the model form shows the global fallback and starts an override from it", 
     ["none", "minimal", "low", "medium", "high", "xhigh"],
   );
   assert.match(field(app.tree, "enableReasoningEffortChange").info, /Customizes reasoning effort/);
+});
+
+test("the model dropdown filters while typing and saves a manually typed model ID", native, async (t) => {
+  const api = await provider(t);
+  const app = await launch("model", {}, api.prefs);
+  t.after(app.close);
+  await app.waitFor(page("Models"));
+  await select(app, "default");
+  await action(app, "Edit Model");
+  await app.waitFor(page("Edit Model"));
+  await app.waitFor((tree) => !field(tree, "option").isLoading);
+  const modelIds = (tree) =>
+    field(tree, "option")
+      .menu.sections.flatMap((section) => section.items)
+      .map((item) => item.id);
+  assert.deepEqual(modelIds(app.tree), ["remote-one", "remote-two", DEFAULT_MODEL.option]);
+  await app.callback(field(app.tree, "option").onSearchTextChange, {
+    value: "remote-one",
+    eventCount: ++eventCount,
+  });
+  await app.waitFor((tree) => !modelIds(tree).includes("remote-two"));
+  assert.deepEqual(modelIds(app.tree), ["remote-one", DEFAULT_MODEL.option]);
+  await chooseCustomModel(app, "option", "  manual/model-v2  ");
+  assert.equal(value(app.tree, "option"), "manual/model-v2");
+  await change(app, "name", "Manual model");
+  await submit(app, "Submit");
+  await app.waitFor(page("Models"));
+  const saved = Object.values(JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models).find(
+    (model) => model.name === "Manual model",
+  );
+  assert.equal(saved.option, "manual/model-v2");
 });
 
 test("an inherited AI command follows the global effort when its base has no override", native, async (t) => {
