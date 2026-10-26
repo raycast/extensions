@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Local Commander MCP Server] - 2026-10-26
+
+- Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
+
 ## [Update Terminal Tax MCP Server] - 2026-10-26
 
 - Update Terminal Tax: three tools (was four); nothing to install or connect to file, since an assistant sends JSON-RPC HTTPS POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly; the person reviews and signs on one private filing page; the icon now loads from github.com/terminaltax/terminal-tax-mcp-server.
