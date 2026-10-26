@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -45,4 +45,41 @@ export const readChromeLocalState = async (browser: BrowserConfig) => {
 
 export function sortByLastUsed(profiles: Profile[]): Profile[] {
   return [...profiles].sort((a, b) => (b.activeTime ?? 0) - (a.activeTime ?? 0));
+}
+
+// Profile names can change; directory names can overlap between browsers.
+const hiddenProfilesKey = (browser: BrowserConfig) => `hiddenProfiles:${browser.dataPath}`;
+
+export function parseHiddenDirectories(value: string | undefined): string[] {
+  try {
+    const directories: unknown = JSON.parse(value ?? "[]");
+    return Array.isArray(directories) ? directories.filter((item): item is string => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function loadHiddenDirectories(browser: BrowserConfig): Promise<string[]> {
+  return parseHiddenDirectories(await LocalStorage.getItem<string>(hiddenProfilesKey(browser)));
+}
+
+export async function saveHiddenDirectories(
+  browser: BrowserConfig,
+  directories: string[],
+  profiles: Profile[],
+): Promise<string[]> {
+  const existing = new Set(profiles.map((profile) => profile.directory));
+  const saved = [...new Set(directories)].filter((directory) => existing.has(directory));
+  await LocalStorage.setItem(hiddenProfilesKey(browser), JSON.stringify(saved));
+  return saved;
+}
+
+export function moveDestinations(
+  profiles: Profile[],
+  sourceDirectory: string | undefined,
+  hiddenDirectories: string[],
+): Profile[] {
+  return profiles.filter(
+    (profile) => profile.directory !== sourceDirectory && !hiddenDirectories.includes(profile.directory),
+  );
 }
