@@ -8,6 +8,10 @@
 - Your ring reconnects as soon as it's turned on, and Configure Wave shows it
   within a second.
 - The app picker opens instantly after the first time.
+- Dictation into a terminal always runs the line: quotes are typed as
+  typographic ones, which a shell doesn't wait on.
+- No double text when Raycast Dictation's output is set to paste.
+- Uninstalling the extension also stops its background helper.
 
 ## [Initial Version] - 2026-10-23
 

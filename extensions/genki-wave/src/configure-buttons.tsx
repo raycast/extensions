@@ -59,7 +59,7 @@ import ChooseWave from "./choose-wave";
 import WaveStatus from "./wave-status";
 import { collectDiagnostics } from "./diagnostics";
 import { applyFix, restartListener } from "./fixes";
-import { helperPath, identify, readListenerLog, readPublishedStatus } from "./helper";
+import { extensionFolder, helperPath, identify, readListenerLog, readPublishedStatus } from "./helper";
 import * as listener from "./listener";
 import { accessibilityProblem, dictationOutputProblem } from "./setup";
 import { Fix, fixFor, listenerTrouble, onboarding, readingAge, ringState, RingState, shortTarget } from "./summary";
@@ -116,7 +116,7 @@ export default function ConfigureButtons() {
     // After a store update, move a running listener onto the new helper.
     if (running.data === true) {
       helperPath()
-        .then((helper) => listener.update(helper))
+        .then((helper) => listener.update(helper, extensionFolder()))
         .catch(() => undefined)
         .then(migrate);
       return;
@@ -124,7 +124,7 @@ export default function ConfigureButtons() {
     if (running.data !== false || autoStarted.current) return;
     autoStarted.current = true;
     helperPath()
-      .then((helper) => listener.start(helper))
+      .then((helper) => listener.start(helper, extensionFolder()))
       .then(() => running.revalidate())
       .catch((e) => showFailureToast(e, { title: "Couldn't start Wave" }));
   }, [running.data]);
