@@ -98,7 +98,10 @@ export default function SetupSQLite({ onAccountsLoaded, onBack }: SetupSQLitePro
     <Action
       title={`Continue with ${accounts.length} Accounts`}
       icon={Icon.ArrowRight}
-      onAction={() => onAccountsLoaded(accounts, missingKeys)}
+      onAction={async () => {
+        await setImportMode("sqlite");
+        onAccountsLoaded(accounts, missingKeys);
+      }}
     />
   );
 
