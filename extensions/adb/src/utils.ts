@@ -6,7 +6,7 @@ import path from "path";
 
 export async function checkAdbExists() {
   const sdk = getPreferenceValues().androidSDK;
-  const sdkPath = sdk.replace("~", expandTilde("~")); 
+  const sdkPath = sdk.replace("~", expandTilde("~"));
   const adb = path.join(sdkPath, "platform-tools", "adb");
   if (!fs.existsSync(adb) && !fs.existsSync(`${adb}.exe`)) {
     throw new Error(`❗️ADB not found here: ${adb}`);

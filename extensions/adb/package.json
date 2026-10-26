@@ -223,7 +223,7 @@
       "required": true,
       "default": {
         "macOS": "~/Library/Android/sdk",
-        "Windows": "C:\\Users\\${USER}\\AppData\\Local\\Android\\Sdk"
+        "Windows": "~\\AppData\\Local\\Android\\Sdk"
       }
     }
   ],
