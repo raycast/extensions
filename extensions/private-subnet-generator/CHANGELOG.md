@@ -1,6 +1,6 @@
 # Private Subnet Generator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-26
 
 - Generate random private IPv4 prefixes according to RFC 1918.
 - Generate random IPv6 Unique Local Address prefixes according to RFC 4193.
