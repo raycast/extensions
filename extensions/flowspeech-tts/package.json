@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flowspeech-tts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "FlowSpeech TTS",
   "description": "Turn selected or copied text into natural speech with FlowSpeech",
   "icon": "extension-icon.png",
@@ -22,13 +22,19 @@
       "title": "Speak Copied Text",
       "description": "Read text from the clipboard with FlowSpeech",
       "mode": "no-view"
+    },
+    {
+      "name": "show-recovery",
+      "title": "Show Speech Recovery",
+      "description": "Show saved request IDs without creating another recording",
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
       "name": "apiKey",
       "title": "FlowSpeech API Key",
-      "description": "Create an API key in your FlowSpeech settings",
+      "description": "Developer API key; generation requires active paid API access and consumes credits",
       "type": "password",
       "required": true
     },
@@ -76,7 +82,9 @@
   },
   "scripts": {
     "prepublishOnly": "echo \"This extension is published through the Raycast Store, not npm.\" && exit 1",
-    "build": "ray build",
+    "build": "ray build -e dist -o .build",
+    "test": "tsc -p tsconfig.test.json && node --test test/*.test.mjs",
+    "test:build": "npm run build && tsc -p tsconfig.test.json && node --test test/built-check.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
