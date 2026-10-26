@@ -1,6 +1,6 @@
 # Prayer Times Changelog
 
-## [Menu Bar Periods and Jamaat Formulas] - {PR_MERGE_DATE}
+## [Menu Bar Periods and Jamaat Formulas] - 2026-10-26
 
 - Menu bar: the masjid disc shows the prayer's period (grey, dark green, light green, yellow, red) and the title says what it counts down to, e.g. `Dhuhr Pref. ends 8m`
 - An unmarked prayer shows as `Dhuhr ended` after its time, with Mark as Prayed and Mark Missed
