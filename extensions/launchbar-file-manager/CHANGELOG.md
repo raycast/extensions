@@ -1,6 +1,6 @@
 # LaunchBar File Manager Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial release] - 2026-10-26
 
 - Browse the filesystem LaunchBar-style: `→` enters folders, `←` goes up, type to filter
 - Multi-select with `⇧↑`/`⇧↓`, Quick Look with `Space`, detail pane with `⌘I`
