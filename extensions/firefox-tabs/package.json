@@ -35,6 +35,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.0.0",
+    "prettier": "2.8.8",
     "typescript": "^5.0.0"
   },
   "scripts": {
@@ -42,6 +43,8 @@
     "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "format": "prettier --write src test",
+    "test": "node --test --experimental-strip-types --no-warnings \"test/**/*.test.ts\""
   }
 }

@@ -18,14 +18,9 @@ import { existsSync, watch } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  type ClassifiedError,
-  FailureMode,
-  classifyError,
-  fetchWithRetry,
-  showActionError,
-} from "./lib/errors";
+import { type ClassifiedError, FailureMode, classifyError, fetchWithRetry, showActionError } from "./lib/errors";
 import { AMO_URL } from "./lib/constants";
+import { faviconPath } from "./lib/favicon-cache";
 import { getPort } from "./lib/setup";
 
 // -- Types matching the native host HTTP API response --
@@ -162,11 +157,7 @@ function getFallbackIcon(tab: Tab): Image.ImageLike {
   const raw = tab.title?.[0] ?? "";
   const code = raw.charCodeAt(0);
   const isSurrogate = code >= 0xd800 && code <= 0xdfff;
-  const letter = (
-    (isSurrogate ? "" : raw) ||
-    hostname?.[0] ||
-    "?"
-  ).toUpperCase();
+  const letter = ((isSurrogate ? "" : raw) || hostname?.[0] || "?").toUpperCase();
   return getAvatarIcon(letter, {
     background: domainColor(hostname),
     gradient: false,
@@ -178,18 +169,13 @@ function getFallbackIcon(tab: Tab): Image.ImageLike {
  * - If a cached favicon data URI is available, use it
  * - Otherwise fall back to letter avatar / Firefox icon / loading spinner
  */
-function getTabIcon(
-  tab: Tab,
-  favicons: Record<string, string>,
-): Image.ImageLike {
-  // Use data URIs directly from Firefox (most common case)
-  if (tab.favIconUrl?.startsWith("data:")) {
-    return { source: tab.favIconUrl, mask: Image.Mask.RoundedRectangle };
-  }
-  // Use cached favicon fetched via native host for http(s) URLs
-  if (tab.favIconUrl && favicons[tab.favIconUrl]) {
+function getTabIcon(tab: Tab, favicons: Record<string, string>): Image.ImageLike {
+  // Data URIs come directly from Firefox (most common case); http(s)
+  // favicons are fetched via the native host into `favicons`.
+  const dataUri = tab.favIconUrl?.startsWith("data:") ? tab.favIconUrl : tab.favIconUrl && favicons[tab.favIconUrl];
+  if (dataUri) {
     return {
-      source: favicons[tab.favIconUrl],
+      source: faviconPath(dataUri) ?? dataUri,
       mask: Image.Mask.RoundedRectangle,
     };
   }
@@ -221,10 +207,7 @@ function getWindowNumber(windowId: number, allWindowIds: number[]): number {
  * Build the accessories array for a List.Item.
  * Order: Pin icon, Active tag, Container tag, Window tag.
  */
-function buildAccessories(
-  tab: Tab,
-  windowNumber: number,
-): List.Item.Accessory[] {
+function buildAccessories(tab: Tab, windowNumber: number): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
   if (tab.pinned) {
@@ -259,9 +242,7 @@ async function switchTab(tabId: number, windowId: number) {
       body: JSON.stringify({ tabId, windowId }),
     });
     if (!response.ok) {
-      const body = (await response
-        .json()
-        .catch(() => ({ error: "Unknown error" }))) as { error?: string };
+      const body = (await response.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
       throw new Error(body.error ?? `HTTP ${response.status}`);
     }
   } catch (error) {
@@ -271,10 +252,7 @@ async function switchTab(tabId: number, windowId: number) {
 
 // -- Tab closing --
 
-async function closeTab(
-  tabId: number,
-  mutate: MutatePromise<Tab[], undefined>,
-) {
+async function closeTab(tabId: number, mutate: MutatePromise<Tab[], undefined>) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Closing tab...",
@@ -288,9 +266,7 @@ async function closeTab(
           body: JSON.stringify({ tabId }),
         });
         if (!res.ok) {
-          const body = (await res
-            .json()
-            .catch(() => ({ error: "Unknown error" }))) as { error?: string };
+          const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
           throw new Error(body.error ?? `HTTP ${res.status}`);
         }
       })(),
@@ -298,7 +274,7 @@ async function closeTab(
         optimisticUpdate(data) {
           return (data ?? []).filter((t) => t.id !== tabId);
         },
-      },
+      }
     );
     toast.style = Toast.Style.Success;
     toast.title = "Tab closed";
@@ -317,13 +293,9 @@ async function fetchAllTabs(): Promise<Tab[]> {
   let pages = 0;
 
   while (hasMore && pages < maxPages) {
-    const res = await fetch(
-      `http://127.0.0.1:${getPort()}/tabs?offset=${allTabs.length}`,
-    );
+    const res = await fetch(`http://127.0.0.1:${getPort()}/tabs?offset=${allTabs.length}`);
     if (!res.ok) {
-      const body = (await res
-        .json()
-        .catch(() => ({ error: "Unknown error" }))) as { error?: string };
+      const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
       throw new Error(body.error ?? `HTTP ${res.status}`);
     }
     const json = (await res.json()) as TabsResponse;
@@ -349,8 +321,7 @@ const ERROR_ICONS: Record<FailureMode, Icon> = {
 // -- Component --
 
 export default function SearchTabs() {
-  const [classifiedError, setClassifiedError] =
-    useState<ClassifiedError | null>(null);
+  const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
 
   const handleError = useCallback(async (error: Error) => {
     setClassifiedError(await classifyError(error));
@@ -379,7 +350,7 @@ export default function SearchTabs() {
     {
       onError: handleError,
       onData: handleData,
-    },
+    }
   );
   // Watch ~/.raycast-firefox/port for changes. The native host writes this
   // file on startup and removes it when Firefox disconnects (stdin EOF).
@@ -423,9 +394,9 @@ export default function SearchTabs() {
               t.favIconUrl &&
               !t.favIconUrl.startsWith("data:") &&
               !favicons[t.favIconUrl] &&
-              !fetchedRef.current.has(t.favIconUrl),
+              !fetchedRef.current.has(t.favIconUrl)
           )
-          .map((t) => t.favIconUrl as string),
+          .map((t) => t.favIconUrl as string)
       ),
     ];
 
@@ -442,9 +413,7 @@ export default function SearchTabs() {
 
     urlsToFetch.forEach(async (url) => {
       try {
-        const res = await fetch(
-          `http://127.0.0.1:${getPort()}/favicon?url=${encodeURIComponent(url)}`,
-        );
+        const res = await fetch(`http://127.0.0.1:${getPort()}/favicon?url=${encodeURIComponent(url)}`);
         if (res.ok) {
           const json = (await res.json()) as {
             ok: boolean;
@@ -466,23 +435,15 @@ export default function SearchTabs() {
   }, [tabs]);
 
   // Sort tabs by most recently accessed first
-  const sortedTabs = [...tabs].sort(
-    (a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0),
-  );
+  const sortedTabs = [...tabs].sort((a, b) => (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0));
 
   // Compute unique sorted window IDs for window number assignment
-  const windowIds = [...new Set(sortedTabs.map((t) => t.windowId))].sort(
-    (a, b) => a - b,
-  );
+  const windowIds = [...new Set(sortedTabs.map((t) => t.windowId))].sort((a, b) => a - b);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Firefox tabs...">
       <List.EmptyView
-        icon={
-          classifiedError
-            ? ERROR_ICONS[classifiedError.mode]
-            : Icon.MagnifyingGlass
-        }
+        icon={classifiedError ? ERROR_ICONS[classifiedError.mode] : Icon.MagnifyingGlass}
         title={classifiedError ? classifiedError.title : "No Results"}
         description={classifiedError?.description}
         actions={
@@ -499,10 +460,7 @@ export default function SearchTabs() {
                 />
               )}
               {classifiedError.mode === FailureMode.ExtensionNotInstalled && (
-                <Action.OpenInBrowser
-                  title="Install Firefox Extension"
-                  url={AMO_URL}
-                />
+                <Action.OpenInBrowser title="Install Firefox Extension" url={AMO_URL} />
               )}
               {classifiedError.mode === FailureMode.HostNotRunning && (
                 <Action
@@ -533,18 +491,11 @@ export default function SearchTabs() {
           title={tab.title || "Untitled"}
           subtitle={cleanUrl(tab.url)}
           keywords={urlKeywords(tab.url)}
-          accessories={buildAccessories(
-            tab,
-            getWindowNumber(tab.windowId, windowIds),
-          )}
+          accessories={buildAccessories(tab, getWindowNumber(tab.windowId, windowIds))}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action
-                  title="Switch to Tab"
-                  icon={Icon.Globe}
-                  onAction={() => switchTab(tab.id, tab.windowId)}
-                />
+                <Action title="Switch to Tab" icon={Icon.Globe} onAction={() => switchTab(tab.id, tab.windowId)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action

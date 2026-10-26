@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "genki-wave",
+  "title": "Genki Wave",
+  "description": "Use the buttons and swipes on your Genki Wave ring to dictate into any app, control slides and media, or run any Raycast command.",
+  "icon": "icon.png",
+  "author": "multivac61",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "configure-buttons",
+      "title": "Configure Wave",
+      "description": "Map your Wave ring: buttons and swipes to dictation, slides, media, keys or any Raycast command.",
+      "mode": "view",
+      "keywords": [
+        "genki",
+        "wave",
+        "ring",
+        "buttons",
+        "dictation",
+        "slides",
+        "swipe"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "helperPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Helper Path",
+      "description": "Run a wave-helper you installed yourself instead of the one the extension downloads.",
+      "placeholder": "/opt/homebrew/bin/wave-helper"
+    }
+  ]
+}

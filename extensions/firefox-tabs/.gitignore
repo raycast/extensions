@@ -16,3 +16,6 @@ compiled_raycast_rust
 node_modules/
 dist/
 raycast-env.d.ts
+
+# Local dev path for setup.ts, never published
+assets/project-root.txt

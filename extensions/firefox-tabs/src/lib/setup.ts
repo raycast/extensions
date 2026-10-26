@@ -1,11 +1,4 @@
-import {
-  accessSync,
-  constants,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "fs";
+import { accessSync, constants, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join, resolve } from "path";
 import { environment } from "@raycast/api";
@@ -57,9 +50,7 @@ export function resolveNativeHostPath(): string {
   }
 
   // Neither found
-  throw new Error(
-    "Native host not found. Run the 'Setup Firefox Bridge' command to install it.",
-  );
+  throw new Error("Native host not found. Run the 'Setup Firefox Bridge' command to install it.");
 }
 
 // -- Manifest generation --
@@ -77,7 +68,7 @@ export function generateManifest(runShPath: string): string {
       allowed_extensions: ["raycast-firefox@lau.engineering"],
     },
     null,
-    2,
+    2
   );
 }
 
@@ -91,13 +82,7 @@ export function generateManifest(runShPath: string): string {
  * the manifest was written.
  */
 export function writeManifest(manifestJson: string): string {
-  const targetDir = join(
-    homedir(),
-    "Library",
-    "Application Support",
-    "Mozilla",
-    "NativeMessagingHosts",
-  );
+  const targetDir = join(homedir(), "Library", "Application Support", "Mozilla", "NativeMessagingHosts");
   mkdirSync(targetDir, { recursive: true });
   const manifestPath = join(targetDir, "raycast_firefox.json");
   writeFileSync(manifestPath, manifestJson, "utf-8");
@@ -113,10 +98,7 @@ export function writeManifest(manifestJson: string): string {
  * - Has the expected path to run.sh
  * - The path points to an existing, executable file
  */
-export function validateManifest(
-  manifestPath: string,
-  expectedRunShPath: string,
-): { valid: boolean; error?: string } {
+export function validateManifest(manifestPath: string, expectedRunShPath: string): { valid: boolean; error?: string } {
   try {
     const content = readFileSync(manifestPath, "utf-8");
     const manifest = JSON.parse(content) as { name?: string; path?: string };
@@ -148,9 +130,7 @@ export function validateManifest(
   } catch (err) {
     return {
       valid: false,
-      error: `Failed to read/parse manifest: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+      error: `Failed to read/parse manifest: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
 }
@@ -164,9 +144,7 @@ export function validateManifest(
  * - If healthy, hit /tabs to check if the WebExtension is connected
  * - Catches all errors gracefully (connection refused, timeout, etc.)
  */
-export async function verifyChain(
-  port: number,
-): Promise<{ reachable: boolean; tabsOk: boolean }> {
+export async function verifyChain(port: number): Promise<{ reachable: boolean; tabsOk: boolean }> {
   try {
     const healthRes = await fetch(`http://127.0.0.1:${port}/health`, {
       signal: AbortSignal.timeout(3000),
