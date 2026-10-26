@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Malformed Import Entries] - {PR_MERGE_DATE}
+## [Fix Malformed Import Entries] - 2026-10-26
 
 - A service entry missing its whole `otp` object is now skipped instead of aborting the entire import.
 - A `services` payload that isn't an array is now rejected with a clear format error instead of a raw crash.
