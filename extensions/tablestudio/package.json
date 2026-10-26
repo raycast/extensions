@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tablestudio",
+  "title": "TableStudio",
+  "description": "Search your TableStudio connections, tables and views and open them straight in the app, and start or stop your local database servers.",
+  "icon": "command-icon.png",
+  "author": "johntan",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Databases",
+      "subtitle": "TableStudio",
+      "description": "Find a connection, table or view and open it in TableStudio. Filter by kind in the search bar, or press ↵ on a connection to browse just its tables.",
+      "mode": "view",
+      "keywords": [
+        "connection",
+        "connections",
+        "table",
+        "tables",
+        "view",
+        "views",
+        "database",
+        "db",
+        "postgres",
+        "mysql",
+        "sqlite"
+      ]
+    },
+    {
+      "name": "localdatabases",
+      "title": "Manage Local Databases",
+      "subtitle": "TableStudio",
+      "description": "Start or stop the database servers TableStudio runs on this Mac.",
+      "mode": "view",
+      "keywords": [
+        "local",
+        "server",
+        "start",
+        "stop",
+        "postgres",
+        "mysql",
+        "sqlite"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": false,
+      "title": "Access Token",
+      "description": "Usually filled in for you by the Connect Raycast button in TableStudio → Settings → Search & Launchers. Paste it here only if you'd rather set it manually."
+    },
+    {
+      "name": "port",
+      "type": "textfield",
+      "required": false,
+      "title": "Port",
+      "description": "Only needed if you set the token manually and changed the port from 7432."
+    },
+    {
+      "name": "cacheResults",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Offline Access",
+      "label": "Keep a copy for when TableStudio isn't running",
+      "description": "Stores the list inside Raycast so you can still search when the app is closed. Turn off to keep nothing at rest."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.0",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
