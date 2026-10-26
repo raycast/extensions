@@ -137,37 +137,84 @@ test("All Sources has no API of its own and is not a cache owner", async () => {
   assert.equal(isCacheableService("giphy-stickers"), true);
 });
 
-test("All Sources reports a failure, not an empty search, when every source fails", () => {
-  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
-  const failure = { isLoading: false, error: new Error("offline"), count: 0 };
+function gifs(prefix, count) {
+  return Array.from({ length: count }, (_, index) => ({ id: `${prefix}${index}` }));
+}
 
-  const status = getAllSourcesStatus(["giphy", "klipy"], { giphy: failure, klipy: failure });
+function loadAllSources() {
+  return load("lib/allSources");
+}
 
-  assert.equal(status.allFailed, true);
-  assert.deepEqual([...status.failed], ["giphy", "klipy"]);
+test("All Sources mixes providers one GIF at a time and keeps the leftovers", () => {
+  const { interleave } = loadAllSources();
+  assert.deepEqual([...interleave([["g0", "g1", "g2"], ["k0"]])], ["g0", "k0", "g1", "g2"]);
+  assert.deepEqual([...interleave([])], []);
 });
 
-test("All Sources treats one failed source and one empty source as no results", () => {
-  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
+test("All Sources pages every provider with its own cursor or offset", async () => {
+  const { fetchAllSourcesPage } = loadAllSources();
+  const calls = [];
+  const load = async (service, opt) => {
+    calls.push({ service, ...opt });
+    return service === "giphy" ? { results: gifs("g", 2) } : { results: gifs("k", 2), next: "cursor-2" };
+  };
 
-  const status = getAllSourcesStatus(["giphy", "klipy"], {
-    giphy: { isLoading: false, error: new Error("offline"), count: 0 },
-    klipy: { isLoading: false, count: 0 },
-  });
+  const first = await fetchAllSourcesPage(["giphy", "klipy"], {}, 2, load);
+  assert.deepEqual([...first.results.map((gif) => gif.id)], ["g0", "k0", "g1", "k1"]);
+  assert.equal(first.hasMore, true);
 
-  assert.equal(status.allFailed, false);
-  assert.equal(status.isEmpty, true);
-  assert.deepEqual([...status.failed], ["giphy"]);
+  calls.length = 0;
+  await fetchAllSourcesPage(["giphy", "klipy"], first.cursor, 2, load);
+  assert.deepEqual(
+    calls.map((call) => ({ ...call })),
+    [
+      { service: "giphy", next: undefined, offset: 2 },
+      { service: "klipy", next: "cursor-2", offset: 2 },
+    ],
+  );
 });
 
-test("All Sources stays loading until every source has reported", () => {
-  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
+test("All Sources stops asking a provider once it runs out", async () => {
+  const { fetchAllSourcesPage } = loadAllSources();
+  const calls = [];
+  const load = async (service) => {
+    calls.push(service);
+    return service === "giphy" ? { results: gifs("g", 1) } : { results: gifs("k", 2), next: "" };
+  };
 
-  const status = getAllSourcesStatus(["giphy", "klipy"], {
-    giphy: { isLoading: false, error: new Error("offline"), count: 0 },
-  });
+  const first = await fetchAllSourcesPage(["giphy", "klipy"], {}, 2, load);
+  assert.equal(first.hasMore, false, "GIPHY returned a short page and Klipy returned no next cursor");
 
-  assert.equal(status.isLoading, true);
-  assert.equal(status.isEmpty, false);
-  assert.equal(status.allFailed, false);
+  calls.length = 0;
+  const second = await fetchAllSourcesPage(["giphy", "klipy"], first.cursor, 2, load);
+  assert.deepEqual([...calls], []);
+  assert.equal(second.results.length, 0);
+});
+
+test("All Sources keeps the working provider and drops a failing one", async () => {
+  const { fetchAllSourcesPage } = loadAllSources();
+  const load = async (service) => {
+    if (service === "klipy") throw new Error("offline");
+    return { results: gifs("g", 2) };
+  };
+
+  const first = await fetchAllSourcesPage(["giphy", "klipy"], {}, 2, load);
+  assert.deepEqual([...first.results.map((gif) => gif.id)], ["g0", "g1"]);
+  assert.deepEqual([...first.failures.map((failure) => failure.service)], ["klipy"]);
+  assert.match(first.failures[0].error.message, /offline/);
+  assert.equal(first.allFailed, false);
+  assert.equal(first.hasMore, true);
+  assert.equal(first.cursor.klipy.done, true);
+});
+
+test("All Sources reports a failure, not an empty search, when every provider fails", async () => {
+  const { fetchAllSourcesPage } = loadAllSources();
+  const load = async () => {
+    throw new Error("offline");
+  };
+
+  const page = await fetchAllSourcesPage(["giphy", "klipy"], {}, 2, load);
+  assert.equal(page.allFailed, true);
+  assert.equal(page.hasMore, false);
+  assert.deepEqual([...page.failures.map((failure) => failure.service)], ["giphy", "klipy"]);
 });
