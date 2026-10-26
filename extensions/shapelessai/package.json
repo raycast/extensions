@@ -53,7 +53,105 @@
     }
   ],
   "ai": {
-    "instructions": "ShapelessAI posts to the user's own social accounts. Call list-accounts first to get a connectionId. Keep the user's text as written unless they ask for edits. Prefer the queue unless the user names a time or says now."
+    "instructions": "ShapelessAI posts to the user's own social accounts. Call list-accounts first to get a connectionId. Keep the user's text as written unless they ask for edits. Prefer the queue unless the user names a time or says now.",
+    "evals": [
+      {
+        "input": "@shapelessai which social accounts do I have connected?",
+        "mocks": {
+          "list-accounts": [
+            {
+              "connectionId": "c1",
+              "platform": "bluesky",
+              "handle": "me.bsky.social",
+              "name": "Me"
+            },
+            {
+              "connectionId": "c2",
+              "platform": "linkedin",
+              "handle": "jane-doe",
+              "name": "Jane Doe"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-accounts"
+          },
+          {
+            "includes": "bluesky"
+          }
+        ]
+      },
+      {
+        "input": "@shapelessai schedule \"Hello world\" on my Bluesky account tomorrow at 9am",
+        "mocks": {
+          "list-accounts": [
+            {
+              "connectionId": "c1",
+              "platform": "bluesky",
+              "handle": "me.bsky.social",
+              "name": "Me"
+            }
+          ],
+          "create-post": {
+            "id": "p1",
+            "status": "scheduled",
+            "scheduledAt": "2030-01-02T09:00:00.000Z",
+            "publishedLocation": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-post",
+              "arguments": {
+                "connectionId": "c1",
+                "postText": {
+                  "includes": "Hello world"
+                }
+              }
+            }
+          },
+          {
+            "not": {
+              "callsTool": {
+                "name": "create-post",
+                "arguments": {
+                  "publishNow": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@shapelessai show my failed posts",
+        "mocks": {
+          "list-posts": [
+            {
+              "id": "p2",
+              "platform": "x",
+              "status": "failed",
+              "postText": "Launch day",
+              "scheduledAt": "2030-01-01T10:00:00.000Z",
+              "publishedAt": null,
+              "publishedLocation": null,
+              "error": "Token expired"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-posts",
+              "arguments": {
+                "status": "failed"
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "dependencies": {
     "@raycast/api": "^2.7.3",

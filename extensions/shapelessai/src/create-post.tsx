@@ -10,7 +10,12 @@ import {
   showToast,
 } from "@raycast/api";
 import { useForm, usePromise } from "@raycast/utils";
-import { accountLabel, createPost, listConnections } from "./api";
+import {
+  accountLabel,
+  createPost,
+  listConnections,
+  pastTimeError,
+} from "./api";
 
 type Values = {
   connectionId: string;
@@ -21,44 +26,51 @@ type Values = {
 
 export default function Command() {
   const { data: accounts, isLoading, revalidate } = usePromise(listConnections);
-  const { handleSubmit, itemProps, values } = useForm<Values>({
-    initialValues: { when: "queue" },
-    validation: {
-      connectionId: (v) => (v ? undefined : "Pick an account"),
-      postText: (v) => (v?.trim() ? undefined : "Write the post"),
-    },
-    async onSubmit(v) {
-      if (v.when === "at" && !v.scheduledAt) {
-        await showToast({ style: Toast.Style.Failure, title: "Pick a time" });
-        return;
-      }
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Sending to ShapelessAI",
-      });
-      try {
-        const post = await createPost({
-          connectionId: v.connectionId,
-          postText: v.postText,
-          scheduledAt:
-            v.when === "at" && v.scheduledAt
-              ? v.scheduledAt.toISOString()
-              : undefined,
-          publishNow: v.when === "now",
+  const { handleSubmit, itemProps, values, setValidationError } =
+    useForm<Values>({
+      initialValues: { when: "queue" },
+      validation: {
+        connectionId: (v) => (v ? undefined : "Pick an account"),
+        postText: (v) => (v?.trim() ? undefined : "Write the post"),
+      },
+      async onSubmit(v) {
+        // The check depends on "when", which a per-field validator cannot see, so it runs here and marks the field.
+        if (v.when === "at") {
+          const error = v.scheduledAt
+            ? pastTimeError(v.scheduledAt)
+            : "Pick a time";
+          if (error) {
+            setValidationError("scheduledAt", error);
+            return;
+          }
+        }
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: "Sending to ShapelessAI",
         });
-        toast.style = Toast.Style.Success;
-        toast.title = post.status === "published" ? "Posted" : "Scheduled";
-        toast.message = post.scheduledAt
-          ? new Date(post.scheduledAt).toLocaleString()
-          : undefined;
-        await popToRoot();
-      } catch (e) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Not sent";
-        toast.message = (e as Error).message;
-      }
-    },
-  });
+        try {
+          const post = await createPost({
+            connectionId: v.connectionId,
+            postText: v.postText,
+            scheduledAt:
+              v.when === "at" && v.scheduledAt
+                ? v.scheduledAt.toISOString()
+                : undefined,
+            publishNow: v.when === "now",
+          });
+          toast.style = Toast.Style.Success;
+          toast.title = post.status === "published" ? "Posted" : "Scheduled";
+          toast.message = post.scheduledAt
+            ? new Date(post.scheduledAt).toLocaleString()
+            : undefined;
+          await popToRoot();
+        } catch (e) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Not sent";
+          toast.message = (e as Error).message;
+        }
+      },
+    });
 
   return (
     <Form
@@ -68,6 +80,7 @@ export default function Command() {
           <Action.SubmitForm title="Create Post" onSubmit={handleSubmit} />
           <Action
             title="Connect an Account"
+            icon={Icon.Plus}
             onAction={() => open("https://shapelessai.com/settings")}
           />
           <Action

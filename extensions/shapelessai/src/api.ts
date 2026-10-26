@@ -86,3 +86,11 @@ export async function createPost({
   });
   return res.post || res;
 }
+
+/** A set time that is not in the future would publish at once, so it is refused before anything is sent. */
+export function pastTimeError(scheduledAt?: string | Date | null) {
+  if (!scheduledAt) return undefined;
+  const t = new Date(scheduledAt).getTime();
+  if (Number.isNaN(t)) return "That time is not a valid date";
+  return t <= Date.now() ? "Pick a time in the future" : undefined;
+}

@@ -1,5 +1,10 @@
 import { Tool } from "@raycast/api";
-import { accountLabel, createPost, listConnections } from "../api";
+import {
+  accountLabel,
+  createPost,
+  listConnections,
+  pastTimeError,
+} from "../api";
 
 type Input = {
   /** The connectionId of the account, from list-accounts. */
@@ -14,6 +19,8 @@ type Input = {
 
 // Posting to someone's real account is visible to their audience, so Raycast asks before it happens.
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const timeError = pastTimeError(input.scheduledAt);
+  if (timeError) throw new Error(timeError);
   const account = (await listConnections()).find(
     (c) => c.id === input.connectionId,
   );
@@ -36,6 +43,8 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 export default async function tool(input: Input) {
+  const timeError = pastTimeError(input.scheduledAt);
+  if (timeError) throw new Error(timeError);
   const post = await createPost(input);
   return {
     id: post.id,
