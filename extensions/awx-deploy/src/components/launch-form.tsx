@@ -1,38 +1,63 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { SurveyQuestion, SurveySpec, authHeaders } from "../common/awx";
+import {
+  LaunchConfig,
+  LaunchPrompts,
+  SurveyQuestion,
+  SurveySpec,
+  TemplateKind,
+  authHeaders,
+  launchConfigUrl,
+  surveySpecUrl,
+} from "../common/awx";
+
+/** Form field ids for launch prompts, namespaced so they can't clash with survey variables. */
+const PROMPT_IDS = {
+  job_type: "prompt:job_type",
+  limit: "prompt:limit",
+  job_tags: "prompt:job_tags",
+  skip_tags: "prompt:skip_tags",
+} as const;
 
 /**
  * Launch a job template or workflow.
  *
- * If `surveyEndpoint` is given and the target has a survey, its questions are
- * rendered as form fields and submitted as `extra_vars`. Otherwise a free-form
- * extra-variables editor is shown.
+ * Fields the template enables "Prompt on launch" for (job type, limit, tags)
+ * are shown prefilled with the template's defaults. If the target has a survey,
+ * its questions are rendered as form fields and submitted as `extra_vars`.
+ * Otherwise a free-form extra-variables editor is shown.
  */
 export function LaunchForm({
   name,
   submitTitle = "Launch",
   launch,
   jobUrl,
-  surveyEndpoint,
+  template,
   onLaunched,
 }: {
   name: string;
   submitTitle?: string;
-  launch: (extraVars: string) => Promise<{ id: number; ignored_fields?: Record<string, unknown> }>;
+  launch: (
+    extraVars: string,
+    prompts: LaunchPrompts,
+  ) => Promise<{ id: number; ignored_fields?: Record<string, unknown> }>;
   jobUrl: (id: number) => string;
-  surveyEndpoint?: string;
+  template: { kind: TemplateKind; id: number };
   onLaunched?: () => void;
 }) {
   const { pop } = useNavigation();
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [jsonError, setJsonError] = useState<string | undefined>();
 
-  const { data: survey, isLoading } = useFetch<SurveySpec>(surveyEndpoint ?? "", {
+  const { data: survey, isLoading: isLoadingSurvey } = useFetch<SurveySpec>(surveySpecUrl(template.kind, template.id), {
     headers: authHeaders(),
-    execute: Boolean(surveyEndpoint),
   });
+  const { data: config, isLoading: isLoadingConfig } = useFetch<LaunchConfig>(
+    launchConfigUrl(template.kind, template.id),
+    { headers: authHeaders() },
+  );
+  const isLoading = isLoadingSurvey || isLoadingConfig;
 
   const questions = survey?.spec ?? [];
   const hasSurvey = questions.length > 0;
@@ -42,6 +67,13 @@ export function LaunchForm({
   }
 
   async function submit(values: Form.Values) {
+    // Only send prompts the template accepts; AWX ignores the rest.
+    const prompts: LaunchPrompts = {};
+    if (config?.ask_job_type_on_launch) prompts.job_type = values[PROMPT_IDS.job_type];
+    if (config?.ask_limit_on_launch) prompts.limit = values[PROMPT_IDS.limit];
+    if (config?.ask_tags_on_launch) prompts.job_tags = values[PROMPT_IDS.job_tags];
+    if (config?.ask_skip_tags_on_launch) prompts.skip_tags = values[PROMPT_IDS.skip_tags];
+
     let extraVars: string;
 
     if (hasSurvey) {
@@ -107,7 +139,7 @@ export function LaunchForm({
 
     const toast = await showToast({ style: Toast.Style.Animated, title: `Launching "${name}"…` });
     try {
-      const job = await launch(extraVars);
+      const job = await launch(extraVars, prompts);
       const ignored = job.ignored_fields ? Object.keys(job.ignored_fields) : [];
       if (ignored.length > 0) {
         // The job launched, but AWX dropped our variables — surface it instead of a plain success.
@@ -142,6 +174,7 @@ export function LaunchForm({
       }
     >
       <Form.Description title="Target" text={name} />
+      {config && renderPromptFields(config)}
       {hasSurvey ? (
         questions.map((q) => renderSurveyField(q, errors[q.variable], () => clearError(q.variable)))
       ) : (
@@ -167,6 +200,60 @@ export function LaunchForm({
       )}
     </Form>
   );
+}
+
+function renderPromptFields(config: LaunchConfig) {
+  const defaults = config.defaults ?? {};
+  const fields = [];
+  if (config.ask_job_type_on_launch) {
+    fields.push(
+      <Form.Dropdown
+        key={PROMPT_IDS.job_type}
+        id={PROMPT_IDS.job_type}
+        title="Job Type"
+        info="Check runs the playbook in dry-run mode, reporting what would change without changing it."
+        defaultValue={defaults.job_type || "run"}
+      >
+        <Form.Dropdown.Item value="run" title="Run" />
+        <Form.Dropdown.Item value="check" title="Check" />
+      </Form.Dropdown>,
+    );
+  }
+  if (config.ask_limit_on_launch) {
+    fields.push(
+      <Form.TextField
+        key={PROMPT_IDS.limit}
+        id={PROMPT_IDS.limit}
+        title="Limit"
+        info="Host pattern to restrict the run to. Leave empty to run against the whole inventory."
+        defaultValue={defaults.limit ?? ""}
+      />,
+    );
+  }
+  if (config.ask_tags_on_launch) {
+    fields.push(
+      <Form.TextField
+        key={PROMPT_IDS.job_tags}
+        id={PROMPT_IDS.job_tags}
+        title="Job Tags"
+        info="Comma-separated tags to run."
+        defaultValue={defaults.job_tags ?? ""}
+      />,
+    );
+  }
+  if (config.ask_skip_tags_on_launch) {
+    fields.push(
+      <Form.TextField
+        key={PROMPT_IDS.skip_tags}
+        id={PROMPT_IDS.skip_tags}
+        title="Skip Tags"
+        info="Comma-separated tags to skip."
+        defaultValue={defaults.skip_tags ?? ""}
+      />,
+    );
+  }
+  if (fields.length > 0) fields.push(<Form.Separator key="prompt:separator" />);
+  return fields;
 }
 
 function renderSurveyField(q: SurveyQuestion, error: string | undefined, onChange: () => void) {
