@@ -24,9 +24,9 @@ export function getServices() {
   });
 }
 
-// Clips and stickers stay out of All Sources because they are different media from GIFs.
+// Clips and stickers are different media, and Finer Gifs only covers The Office, so All Sources skips them.
 export function getAllSourcesServices(): ServiceName[] {
-  return [GIF_SERVICE.GIPHY, GIF_SERVICE.KLIPY, GIF_SERVICE.FINER_GIFS];
+  return [GIF_SERVICE.GIPHY, GIF_SERVICE.KLIPY];
 }
 
 export function getServiceTitle(service?: ServiceName) {

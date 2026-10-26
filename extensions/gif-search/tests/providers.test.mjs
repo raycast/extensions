@@ -119,7 +119,7 @@ test("favorites and recents include GIPHY Stickers", () => {
 test("All Sources searches GIF providers only and is never stored as a provider", () => {
   const { getAllSourcesServices, getServices, isServiceName } = load("preferences", { "@raycast/api": raycastApi() });
 
-  assert.deepEqual([...getAllSourcesServices()], ["giphy", "klipy", "finergifs"]);
+  assert.deepEqual([...getAllSourcesServices()], ["giphy", "klipy"]);
   assert.ok(isServiceName("all"));
   assert.ok(!getServices().includes("all"));
 });

@@ -62,16 +62,18 @@ export default function GifSearch() {
   const failedSourcesKey = failedSources.join(",");
 
   const onServiceChange = (service: string) => {
+    // Results from an earlier visit to All Sources would otherwise replay their errors on return.
+    setSourceStates({});
     if (isServiceName(service)) setSearchService(service);
     setSearchTerm(searchTerm);
   };
 
   const showAllFavs = searchService === GIF_SERVICE.FAVORITES;
   const showAllRecents = searchService === GIF_SERVICE.RECENTS;
-  const showProviderError = Boolean(error && !results?.length && !showAllFavs && !showAllRecents);
+  const showProviderError = Boolean(error && !results?.length && !showAllFavs && !showAllRecents && !isAllSources);
 
   useEffect(() => {
-    if (!error || showAllFavs || showAllRecents) {
+    if (!error || showAllFavs || showAllRecents || isAllSources) {
       return;
     }
 
@@ -80,7 +82,7 @@ export default function GifSearch() {
       title: `Could not load GIFs from ${getServiceTitle(searchService)}`,
       message: error.message,
     });
-  }, [error, searchService, showAllFavs, showAllRecents]);
+  }, [error, searchService, showAllFavs, showAllRecents, isAllSources]);
 
   useEffect(() => {
     if (!failedSources.length) {
