@@ -72,7 +72,7 @@
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0",
     "node-fetch": "^3.3.2",
-    "openai": "^4.86.2"
+    "openai": "^5.23.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
