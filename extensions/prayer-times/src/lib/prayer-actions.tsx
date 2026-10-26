@@ -1,10 +1,10 @@
-import { Action, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { formatRelative, ltrName } from "./format";
 import { PrayerSlot } from "./prayers";
 import { Settings } from "./settings";
-import { clockStatus, MARK_TITLES, markOptions, PrayedStatus, STATUS_LABELS } from "./status";
-import { STATUS_COLORS, statusIcon } from "./status-icons";
-import { PrayerRecord, setStatus } from "./tracker";
+import { clockStatus, MARK_TITLES, markOptions, PrayerStatusValue, STATUS_LABELS } from "./status";
+import { NOT_STARTED_GREY, STATUS_COLORS, statusIcon } from "./status-icons";
+import { PrayerRecord, saveHistory, setStatus } from "./tracker";
 
 /**
  * Status accessory for a prayer row: its status once prayed, otherwise when it starts or ends.
@@ -20,10 +20,10 @@ export function statusAccessory(slot: PrayerSlot, record: PrayerRecord | undefin
   }
   if (now < slot.start) return { text: formatRelative(slot.start, now), icon: Icon.Clock };
   if (slot.preferredEnd && now >= slot.preferredEnd && now < slot.end) {
-    return { tag: { value: `Disliked · ends ${formatRelative(slot.end, now)}`, color: Color.Orange } };
+    return { tag: { value: `Preferred time over · ends ${formatRelative(slot.end, now)}`, color: Color.Orange } };
   }
   if (now < slot.end) return { tag: { value: `Ends ${formatRelative(slot.end, now)}`, color: Color.Blue } };
-  if (!record) return { tag: { value: "No reminder", color: Color.SecondaryText } };
+  if (!record) return { tag: { value: "No reminder", color: NOT_STARTED_GREY } };
   return { tag: { value: STATUS_LABELS.missed, color: STATUS_COLORS.missed } };
 }
 
@@ -68,7 +68,7 @@ export function prayerActions(
   if (slot.start > now) return null;
   const name = ltrName(slot.name);
   const prayed = record?.completed ? record.status : undefined;
-  const mark = (status: PrayedStatus | undefined) =>
+  const mark = (status: PrayerStatusValue | undefined) =>
     runUpdate(
       `${name} ${status ? `marked ${STATUS_LABELS[status].toLowerCase()}` : "unmarked"}`,
       () => setStatus(slot, settings, status),
@@ -78,9 +78,14 @@ export function prayerActions(
     <>
       {/* Default: the clock decides on time, late or made up, read when clicked. */}
       {!prayed && (
-        <Action title="Mark as Prayed" icon={Icon.CheckCircle} onAction={() => mark(clockStatus(slot, new Date()))} />
+        <Action
+          title="Mark as Prayed"
+          icon={statusIcon(clockStatus(slot, now))}
+          onAction={() => mark(clockStatus(slot, new Date()))}
+        />
       )}
-      {markOptions(slot, prayed, now).map((status) => (
+      {/* An unmarked prayer shows as missed once it ends; Mark Missed stays offered until that is written down. */}
+      {markOptions(slot, record?.saved ?? prayed, now).map((status) => (
         <Action
           key={status}
           title={`${prayed ? "Change to" : "Mark"} ${MARK_TITLES[status]}`}
@@ -91,4 +96,41 @@ export function prayerActions(
       {prayed && <Action title="Unmark Prayed" icon={Icon.XMarkCircle} onAction={() => mark(undefined)} />}
     </>
   );
+}
+
+/**
+ * "Save History": a dry run first, then a confirmation showing what will be written, then the write.
+ *
+ * @param settings - Settings.
+ * @param reload - Called after saving.
+ * @returns Action, or null without Apple Reminders.
+ */
+export function saveHistoryAction(settings: Settings, reload: () => void) {
+  if (!settings.reminders.enabled) return null;
+  const run = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Checking history…" });
+    try {
+      const found = await saveHistory(settings, false);
+      toast.hide();
+      if (found.entries.length === 0) {
+        await showToast({ style: Toast.Style.Success, title: "History already saved" });
+        return;
+      }
+      const counts = (Object.entries(found.byStatus) as [keyof typeof STATUS_LABELS, number][])
+        .map(([status, n]) => `${n} ${STATUS_LABELS[status].toLowerCase()}`)
+        .join(", ");
+      const ok = await confirmAlert({
+        title: `Save ${found.entries.length} Past Prayers?`,
+        message: `Writes each one's status into its reminder (${counts}), worked out from when it was ticked, so it no longer changes with settings. Prayers never ticked are left as they are.`,
+        primaryAction: { title: "Save History", style: Alert.ActionStyle.Default },
+      });
+      if (!ok) return;
+      await runUpdate("History saved", () => saveHistory(settings, true).then(() => undefined), reload);
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not check history";
+      toast.message = err instanceof Error ? err.message : String(err);
+    }
+  };
+  return <Action title="Save History" icon={Icon.SaveDocument} onAction={run} />;
 }

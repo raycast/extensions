@@ -16,7 +16,9 @@ export interface AlertWindows {
    * when lateness follows it); menu bar shows until it ends or is prayed.
    */
   endingReminderMinutes: number;
-  /** Heads-up this long before the due time; 0 for none. Not shown in the menu bar. */
+  /** The menu bar turns light green this long before the preferred end (lib/menubar-title.ts). */
+  preferredReminderMinutes: number;
+  /** Heads-up this long before the due time; 0 for none. The menu bar also shows the next prayer from then. */
   headsUpMinutes: number;
   /** What the heads-up counts down to: the start, or jamaat when the prayer has one. */
   dueAt: "start" | "jamaat";
@@ -38,13 +40,12 @@ export interface PrayerAlert {
 export interface MenuBarState {
   slot: PrayerSlot;
   /**
-   * `start`, `jamaat`, `ending`: alert windows. `disliked`: past the preferred end, still valid.
-   * `pending`: running, not prayed, no window. `upcoming`: the next prayer.
+   * The live windows: `start`, `jamaat`, `ending` (before the valid end). Between them: `pending` before
+   * the preferred end, `disliked` after it. The menu bar color comes from what it counts down to, not these.
+   * `ended`: its time is over and it isn't marked. `upcoming`: the next prayer.
    */
-  kind: Exclude<AlertKind, "headsUp"> | "disliked" | "pending" | "upcoming";
+  kind: Exclude<AlertKind, "headsUp"> | "disliked" | "pending" | "ended" | "upcoming";
 }
-
-const JAMAAT_GRACE = 5 * MINUTE;
 
 /**
  * Build the alerts a slot can produce.
@@ -193,14 +194,15 @@ export function nextSlot(slots: PrayerSlot[], now: Date): PrayerSlot | undefined
 /**
  * Decide what the menu bar shows.
  *
- * Once a prayer starts it stays until it is marked prayed or its time ends. While shown: the jamaat
- * window wins, then the ending window (before it becomes late), then the disliked time after its
- * preferred end, then the first minutes after start, else pending. After it's prayed, the next prayer shows as a countdown during
- * the heads-up window, or all the time with `always`.
+ * Once a prayer starts it stays until it is marked prayed or its time ends. Its windows, as on the phone's
+ * live notification, with a later window taking over an earlier one it overlaps: the first minutes after
+ * the start, jamaat (from before it until a few minutes after), before the valid end. Between them it is pending, or disliked after the preferred end. After it's prayed, the next prayer
+ * shows as a countdown during the heads-up window, or all the time with `always`. An unmarked prayer whose
+ * time is over shows as ended until then.
  *
  * @param slots - Timeline slots, sorted by start.
  * @param now - Current instant.
- * @param prayed - Slot ids marked prayed.
+ * @param prayed - Slot ids marked prayed (or missed).
  * @param windows - Minute settings.
  * @param always - Show the next prayer's countdown even outside the heads-up window.
  * @returns State to render, or undefined to hide the item.
@@ -215,19 +217,23 @@ export function menuBarState(
   const slot = activeSlot(slots, now);
   if (slot && !prayed.has(slot.id) && now < slot.end) {
     const t = now.getTime();
-    if (slot.jamaat) {
-      const from = slot.jamaat.getTime() - windows.jamaatReminderMinutes * MINUTE;
-      if (t >= from && t < slot.jamaat.getTime() + JAMAAT_GRACE) return { slot, kind: "jamaat" };
+    const after = windows.startWindowMinutes * MINUTE;
+    const preferred = slot.preferredEnd?.getTime();
+    if (t >= slot.end.getTime() - windows.endingReminderMinutes * MINUTE) return { slot, kind: "ending" };
+    const jamaat = slot.jamaat?.getTime();
+    if (jamaat && t >= jamaat - windows.jamaatReminderMinutes * MINUTE && t < jamaat + after) {
+      return { slot, kind: "jamaat" };
     }
-    const late = slot.late.getTime();
-    if (t >= late - windows.endingReminderMinutes * MINUTE && t < late) return { slot, kind: "ending" };
-    if (slot.preferredEnd && t >= slot.preferredEnd.getTime()) return { slot, kind: "disliked" };
-    if (t < slot.start.getTime() + windows.startWindowMinutes * MINUTE) return { slot, kind: "start" };
-    return { slot, kind: "pending" };
+    if (t < slot.start.getTime() + after) return { slot, kind: "start" };
+    return { slot, kind: preferred && t >= preferred ? "disliked" : "pending" };
   }
   const next = nextSlot(slots, now);
-  if (!next) return undefined;
   const inHeadsUp =
-    windows.headsUpMinutes > 0 && next.start.getTime() - now.getTime() <= windows.headsUpMinutes * MINUTE;
+    next !== undefined &&
+    windows.headsUpMinutes > 0 &&
+    next.start.getTime() - now.getTime() <= windows.headsUpMinutes * MINUTE;
+  // An unmarked prayer stays as "ended" until the next one's heads-up (Fajr after sunrise, Isha after midnight).
+  if (slot && !prayed.has(slot.id) && !inHeadsUp) return { slot, kind: "ended" };
+  if (!next) return undefined;
   return always || inHeadsUp ? { slot: next, kind: "upcoming" } : undefined;
 }

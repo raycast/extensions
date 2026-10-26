@@ -45,6 +45,13 @@
       "mode": "view"
     },
     {
+      "name": "jamaat-formulas",
+      "title": "Jamaat Formula Guide",
+      "subtitle": "Prayer Times",
+      "description": "How to write a jamaat rule as a formula, like ceil(start, 15) + 15, with today's result or error for each prayer.",
+      "mode": "view"
+    },
+    {
       "name": "prayer-alert",
       "title": "Prayer Alert",
       "subtitle": "Prayer Times",
@@ -197,10 +204,10 @@
       "name": "dhuhrEndsAtShafiAsr",
       "title": "Dhuhr Ends At",
       "label": "End Dhuhr at the earlier (Shafi'i) Asr time",
-      "description": "With two-shadow Asr: Dhuhr's time, its ending reminder and on-time check end when the shadow equals the object's length. Not used for Ja'fari, whose Dhuhr is valid until sunset.",
+      "description": "With two-shadow Asr: end Dhuhr when the shadow equals the object's length. Off by default: Dhuhr stays valid until Asr, and that earlier time is its preferred end. Not used for Ja'fari, whose Dhuhr is valid until sunset.",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": false
     },
     {
       "name": "adjustments",
@@ -361,7 +368,7 @@
     {
       "name": "jamaatFajr",
       "title": "Fajr Jamaat",
-      "description": "Fixed HH:MM (24h), +N minutes after start, floor5+N (round start down to 5 min, add N), ceil5+N, end-N (N minutes before the prayer time ends), or empty for none.",
+      "description": "Fixed HH:MM (24h), +N minutes after start, floor5+N (round start down to 5 min, add N), ceil5+N, end-N (N minutes before the prayer time ends), a formula such as ceil(start, 15) + 15 (see Jamaat Formula Guide), or empty for none.",
       "type": "textfield",
       "required": false,
       "default": "floor5+15"
@@ -377,7 +384,7 @@
     {
       "name": "jamaatJumuah",
       "title": "Jumu'ah Jamaat",
-      "description": "Friday Dhuhr. Empty uses the Dhuhr rule.",
+      "description": "Friday Dhuhr, same format as Fajr Jamaat. Empty uses the Dhuhr rule.",
       "type": "textfield",
       "required": false,
       "default": ""
@@ -441,9 +448,17 @@
       "default": "5"
     },
     {
+      "name": "preferredReminderMinutes",
+      "title": "Before Preferred End (Minutes)",
+      "description": "The menu bar masjid turns from dark to light green this many minutes before the preferred time ends.",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
       "name": "endingReminderMinutes",
-      "title": "Ending Reminder (Minutes)",
-      "description": "Notify this many minutes before the prayer time ends. The menu bar keeps showing it until marked prayed.",
+      "title": "Ending Soon (Minutes)",
+      "description": "Notify this many minutes before the prayer time ends; the menu bar masjid turns red from then. The menu bar keeps showing it until marked prayed.",
       "type": "textfield",
       "required": false,
       "default": "30"
@@ -513,20 +528,22 @@
       "default": "Prayer"
     },
     {
-      "name": "reminderTitles",
-      "title": "Reminder Titles",
-      "description": "Comma-separated names for Fajr,Dhuhr,Asr,Maghrib,Isha, used in the menu bar, alerts and reminder titles. Any language works, e.g. فجر,ظہر,عصر,مغرب,عشاء.",
-      "type": "textfield",
+      "name": "prayerNames",
+      "title": "Prayer Names",
+      "description": "English or Arabic names for the prayers in the menu bar, alerts and reminder titles.",
+      "type": "dropdown",
       "required": false,
-      "default": "Fajr,Dhuhr,Asr,Maghrib,Isha"
-    },
-    {
-      "name": "jumuahTitle",
-      "title": "Jumu'ah Title",
-      "description": "Name for Dhuhr on Fridays, e.g. Jumu'ah or جمعہ.",
-      "type": "textfield",
-      "required": false,
-      "default": "Jumu'ah"
+      "default": "english",
+      "data": [
+        {
+          "title": "English (Fajr, Dhuhr…)",
+          "value": "english"
+        },
+        {
+          "title": "Arabic (فجر، ظهر…)",
+          "value": "arabic"
+        }
+      ]
     },
     {
       "name": "daysAhead",
