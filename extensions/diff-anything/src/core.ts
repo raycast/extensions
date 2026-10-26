@@ -7,8 +7,8 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 export const bundleId = "com.martingruner.diffanything";
-/** The first version that opens files handed over by macOS, which the sandboxed Store app may read. */
-export const minimumVersion = "1.6.1";
+/** Minimum supported Store release for the macOS file handoff. */
+export const minimumVersion = "1.7.0";
 export const storeUrl = "macappstore://apps.apple.com/app/id6795463996";
 export const planNotice =
   "The comparison opens in the Diff Anything app, with the features and limits of your Diff Anything plan. Purchase or restore Pro in the app.";

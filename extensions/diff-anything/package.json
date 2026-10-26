@@ -19,21 +19,22 @@
       "name": "compare-files",
       "title": "Compare Files or Folders",
       "description": "Open two files or two folders, including a Finder selection, side by side in Diff Anything.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Diff Anything"
     },
     {
       "name": "compare-text",
       "title": "Compare Text",
       "description": "Open two texts, typed or loaded from the clipboard, side by side in Diff Anything.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Diff Anything"
     }
   ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit",
-    "test": "node --test test/*.test.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@raycast/api": "^2.7.3"
