@@ -1,5 +1,12 @@
 # Changelog
 
+## [Reasoning Effort and Model Picker] - {PR_MERGE_DATE}
+
+- Add a global `Reasoning Effort` preference (`none`, `minimal`, `low`, `medium`, `high`, `xhigh`) that chat models without their own override follow.
+- Rename the per-model and per-command reasoning toggle to `Override global reasoning effort`; when it is disabled, the model or command follows the global preference instead of always omitting `reasoning_effort`.
+- Show in Models whether a model's reasoning effort comes from its own override or from the global setting.
+- The global reasoning effort applies to chat requests; the image commands keep omitting `reasoning_effort`.
+
 ## [Fix Crash on Launch] - 2026-10-16
 
 - Fix every command crashing on launch with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7: [#32288](https://github.com/raycast/extensions/issues/32288)

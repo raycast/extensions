@@ -1,6 +1,7 @@
-import type { Command, Model, ReasoningEffort } from "../type";
+import type { Command, Model } from "../type";
 import { COMMAND_MODEL_PREFIX, DEFAULT_COMMANDS, DEFAULT_MODEL } from "./model-defaults";
 import { resolveCommandSettings } from "./command-settings";
+import { REASONING_EFFORTS } from "./reasoning-effort";
 
 export const CATALOG_STORAGE_KEY = "model-command-catalog-v1";
 export type Catalog = { version: 1; models: Record<string, Model>; commands: Record<string, Command> };
@@ -12,7 +13,6 @@ export const commandIdFromModel = (id: string) =>
   isCommandModel(id) ? id.slice(COMMAND_MODEL_PREFIX.length + 1) : undefined;
 
 export function normalizeModel(model: StoredModel, timestamp: string): Model {
-  const efforts: ReasoningEffort[] = ["none", "low", "medium", "high"];
   return {
     ...DEFAULT_MODEL,
     ...model,
@@ -20,7 +20,7 @@ export function normalizeModel(model: StoredModel, timestamp: string): Model {
     updated_at: model.updated_at || timestamp,
     temperature: String(model.temperature ?? DEFAULT_MODEL.temperature),
     enableReasoningEffortChange: Boolean(model.enableReasoningEffortChange),
-    reasoningEffort: efforts.includes(model.reasoningEffort!) ? model.reasoningEffort! : "medium",
+    reasoningEffort: REASONING_EFFORTS.includes(model.reasoningEffort!) ? model.reasoningEffort! : "medium",
     vision: model.vision ?? false,
     pinned: model.pinned ?? false,
   };

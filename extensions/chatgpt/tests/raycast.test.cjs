@@ -779,6 +779,76 @@ test("Ask and Full Text Input list only base models and submit the selected base
   assert.equal(api.requests[0].messages[0].content, writer.prompt);
 });
 
+test(
+  "global reasoning effort applies to models without an override while per-model overrides win",
+  native,
+  async (t) => {
+    const api = await provider(t);
+    const app = await launch("ask", fixture, { ...api.prefs, reasoningEffort: "low" });
+    t.after(app.close);
+    await app.waitFor(page("Ask"));
+    // Ask starts on the Default model, which has no per-model reasoning override.
+    await app.callback(body(app.tree).onSearchTextChange, { value: "First question", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarText.value === "First question");
+    await action(app, "Get Answer");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 1);
+    assert.equal(api.requests[0].model, DEFAULT_MODEL.option);
+    assert.equal(api.requests[0].reasoning_effort, "low", "the global effort applies when the model has no override");
+    await app.callback(body(app.tree).searchBarAccessory.onChange, { value: "writer", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarAccessory.value.value === "writer");
+    await app.callback(body(app.tree).onSearchTextChange, { value: "Second question", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarText.value === "Second question");
+    await action(app, "Get Answer");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 2);
+    assert.equal(api.requests[1].model, writer.option);
+    assert.equal(api.requests[1].reasoning_effort, "high", "the model override wins over the global effort");
+  },
+);
+
+test("the model form shows the global fallback and starts an override from it", native, async (t) => {
+  const app = await launch("model", {}, { reasoningEffort: "medium" });
+  t.after(app.close);
+  await app.waitFor(page("Models"));
+  await select(app, "default");
+  await action(app, "Edit Model");
+  await app.waitFor(page("Edit Model"));
+  assert.equal(value(app.tree, "enableReasoningEffortChange"), false);
+  assert.match(field(app.tree, "enableReasoningEffortChange").info, /global Reasoning Effort setting \(medium\)/);
+  await change(app, "enableReasoningEffortChange", true);
+  assert.equal(value(app.tree, "reasoningEffort"), "medium");
+  assert.deepEqual(
+    field(app.tree, "reasoningEffort")
+      .menu.sections.flatMap((section) => section.items)
+      .map((item) => item.id),
+    ["none", "minimal", "low", "medium", "high", "xhigh"],
+  );
+  assert.match(field(app.tree, "enableReasoningEffortChange").info, /Customizes reasoning effort/);
+});
+
+test("an inherited AI command follows the global effort when its base has no override", native, async (t) => {
+  const api = await provider(t);
+  const baseWithoutOverride = { ...writer, enableReasoningEffortChange: false };
+  const app = await launch(
+    "model",
+    {
+      models: JSON.stringify({ writer: baseWithoutOverride }),
+      commands: JSON.stringify({ rewrite: inheritedCommand }),
+    },
+    { ...api.prefs, reasoningEffort: "medium" },
+  );
+  t.after(app.close);
+  await app.waitFor(page("Models"));
+  await select(app, "command-rewrite");
+  await action(app, "Run AI Command");
+  await app.waitFor((tree) => body(tree).kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
+  assert.equal(api.requests[0].model, inheritedCommand.model);
+  assert.equal(
+    api.requests[0].reasoning_effort,
+    "medium",
+    "the command inherits the global fallback from its base model",
+  );
+});
+
 test("Ask without an explicit preset restores the last model across separate command launches", native, async (t) => {
   const support = cacheDirectory(t);
   const savedStorage = await rememberWriter(support);

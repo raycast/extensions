@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
@@ -13,6 +13,7 @@ import { commandIdFromModel, commandModelId, isCommandModel } from "./utils/mode
 import { useModelCatalog } from "./hooks/useModelCatalog";
 import { CommandForm } from "./views/command/from";
 import { EditModelAction } from "./actions/edit-model";
+import { reasoningEffortLabel } from "./utils/reasoning-effort";
 import { CommandManagementActions, RunCommandAction } from "./actions/command";
 import Ask from "./ask";
 
@@ -22,6 +23,7 @@ export default function Model() {
   const { catalog } = useModelCatalog();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const globalReasoningEffort = getPreferenceValues<{ reasoningEffort?: string }>().reasoningEffort;
 
   const { push } = useNavigation();
 
@@ -146,9 +148,7 @@ export default function Model() {
         model.prompt.toLowerCase().includes(searchText.toLowerCase()) ||
         model.name.toLowerCase().includes(searchText.toLowerCase()) ||
         model.temperature.toLocaleString().toLowerCase().includes(searchText.toLowerCase()) ||
-        (model.enableReasoningEffortChange ? model.reasoningEffort.toLowerCase() : "disabled").includes(
-          searchText.toLowerCase(),
-        )
+        reasoningEffortLabel(model, globalReasoningEffort).toLowerCase().includes(searchText.toLowerCase())
       );
     });
 
