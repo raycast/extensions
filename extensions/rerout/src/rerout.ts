@@ -1,11 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Rerout } from "@rerout/sdk";
 
-interface Preferences {
-  apiKey: string;
-  baseUrl?: string;
-}
-
 /**
  * Construct the Rerout SDK client from the extension's preferences. The SDK is
  * the shared engine across surfaces (CLI and this extension); here the API key
