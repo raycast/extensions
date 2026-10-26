@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Rename the GetMattered entry] - {PR_MERGE_DATE}
+## [Rename the GetMattered entry] - 2026-10-26
 
 - Rename the job search entry to GetMattered (id `getmattered`) and move its homepage, icon and remote server to getmattered.com.
 
