@@ -1,3 +1,6 @@
+import type { PrayerKey } from "./prayers";
+import { ExprError, NameValues, RuleExpression } from "./rule-expr";
+
 /**
  * Jamaat rules, written as short strings in preferences:
  *
@@ -10,6 +13,9 @@
  * - `"dhuhr+10"`  10 minutes after Dhuhr's jamaat (Asr only), `"maghrib+5"` after Maghrib's (Isha only):
  *                 combined prayers, as most Shia mosques pray them
  *
+ * - anything else is a formula (rule-expr.ts), as on the phone: `ceil(start, 15) + 15` rounds the start up
+ *   to 15 minutes and adds 15
+ *
  * The step after floor/ceil is optional and defaults to 5.
  */
 export type JamaatRule =
@@ -19,9 +25,38 @@ export type JamaatRule =
   | { kind: "round"; direction: "floor" | "ceil"; step: number; minutes: number }
   | { kind: "beforeEnd"; minutes: number }
   | { kind: "after"; prayer: "dhuhr" | "maghrib"; minutes: number }
+  | { kind: "formula"; source: string }
   | { kind: "invalid"; text: string };
 
 const MINUTE = 60_000;
+
+/** Prayer order (prayers.ts's PRAYER_KEYS, repeated so the two modules don't import each other's values). */
+const PRAYER_KEYS: readonly PrayerKey[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+
+/** The longest formula kept, as on the phone. */
+export const FORMULA_MAX_LENGTH = 300;
+
+/**
+ * The names a formula can use, in minutes after the day's midnight unless noted: `start`, `end`,
+ * `preferred_end` (the end where the school has none), `sunrise`, `sunset`, `midnight`, `latest_start_week`
+ * (this prayer's latest start in the week from Saturday), `weekday` (Monday 1 to Sunday 7), `is_friday`
+ * (1 or 0), `day`, `month`, each prayer's `_start` and `_end`, and an earlier prayer's `_jamaat`.
+ */
+export const FORMULA_NAMES = [
+  "start",
+  "end",
+  "preferred_end",
+  "sunrise",
+  "sunset",
+  "midnight",
+  "latest_start_week",
+  "weekday",
+  "is_friday",
+  "day",
+  "month",
+  ...PRAYER_KEYS.flatMap((key) => [`${key}_start`, `${key}_end`]),
+  ...PRAYER_KEYS.slice(0, -1).map((key) => `${key}_jamaat`),
+];
 
 /**
  * Parse a jamaat rule string.
@@ -57,7 +92,59 @@ export function parseJamaatRule(text: string | undefined): JamaatRule {
     return { kind: "round", direction: round[1] as "floor" | "ceil", step, minutes: Number(round[3]) };
   }
 
-  return { kind: "invalid", text: value };
+  return { kind: "formula", source: (text ?? "").trim().slice(0, FORMULA_MAX_LENGTH) };
+}
+
+/**
+ * What stops a formula from working for a prayer, found without a day: it doesn't parse, it uses a name
+ * that doesn't exist, or a jamaat that isn't earlier. Day-dependent problems (an earlier prayer with no
+ * jamaat, a result outside the day) show on the slot as `jamaatError`.
+ *
+ * @param source - Formula text.
+ * @param key - The prayer it is for.
+ * @returns The problem, or undefined.
+ */
+export function formulaProblem(source: string, key: PrayerKey): string | undefined {
+  let names: Set<string>;
+  try {
+    names = RuleExpression.cached(source).names;
+  } catch (err) {
+    if (err instanceof ExprError) return err.toString();
+    throw err;
+  }
+  if (names.size === 0) {
+    // No names: the same time every day, so it can be checked now.
+    try {
+      formulaMinutes(source, {});
+    } catch (err) {
+      if (err instanceof ExprError) return err.toString();
+      throw err;
+    }
+  }
+  for (const name of names) {
+    if (!FORMULA_NAMES.includes(name)) return `Unknown name '${name}'`;
+    const jamaatOf = PRAYER_KEYS.find((p) => name === `${p}_jamaat`);
+    if (jamaatOf && PRAYER_KEYS.indexOf(jamaatOf) >= PRAYER_KEYS.indexOf(key)) {
+      return `'${name}' is only available to prayers after ${jamaatOf}`;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * A formula's jamaat, in minutes after the day's midnight.
+ *
+ * @param source - Formula text.
+ * @param names - Each name's value, looked up only when used.
+ * @returns Whole minutes, 0 to 2880.
+ * @throws ExprError when the formula fails or lands outside the day.
+ */
+export function formulaMinutes(source: string, names: NameValues): number {
+  const value = RuleExpression.cached(source).evaluate(names);
+  // Halves away from zero, as Dart's round() on the phone.
+  const v = Math.sign(value) * Math.round(Math.abs(value));
+  if (v < 0 || v > 2 * 1440) throw new ExprError(`The result (${v} minutes) is outside the day`);
+  return v;
 }
 
 /**
@@ -74,6 +161,7 @@ export function applyJamaatRule(rule: JamaatRule, start: Date, end?: Date, earli
   switch (rule.kind) {
     case "none":
     case "invalid":
+    case "formula": // worked out in getDaySchedule, which has the names
       return undefined;
     case "fixed": {
       const at = new Date(start.getFullYear(), start.getMonth(), start.getDate(), rule.hours, rule.minutes);
