@@ -1,6 +1,6 @@
 # Proton Authenticator Changelog
 
-## [Fix multi-key decryption] - {PR_MERGE_DATE}
+## [Fix multi-key decryption] - 2026-10-26
 
 ### Fixed
 
