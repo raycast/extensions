@@ -67,7 +67,7 @@
   "preferences": [
     {
       "name": "portcheckPath",
-      "title": "portcheck Path",
+      "title": "Portcheck Path",
       "description": "Path to the portcheck binary. Leave empty to find it in Homebrew, ~/.local/bin, ~/go/bin or PATH.",
       "type": "textfield",
       "required": false
