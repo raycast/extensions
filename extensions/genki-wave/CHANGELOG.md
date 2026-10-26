@@ -1,6 +1,6 @@
 # Genki Wave Changelog
 
-## [Faster connection, sturdier dictation] - {PR_MERGE_DATE}
+## [Faster connection, sturdier dictation] - 2026-10-26
 
 - Dictating into an app that isn't open now opens it and types into it,
   instead of failing.
