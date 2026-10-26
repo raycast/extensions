@@ -218,3 +218,88 @@ test("All Sources reports a failure, not an empty search, when every provider fa
   assert.equal(page.hasMore, false);
   assert.deepEqual([...page.failures.map((failure) => failure.service)], ["giphy", "klipy"]);
 });
+
+function klipyMedia(slug, formats) {
+  const file = (size) => Object.fromEntries(formats.map((format) => [format, { url: `https://static.klipy.com/${slug}-${size}.${format}`, width: 100, height: 90, size: 1234 }]));
+  return { id: 1, slug, title: `${slug} title`, type: "sticker", tags: ["t"], file: { hd: file("hd"), md: file("md"), sm: file("sm"), xs: file("xs") } };
+}
+
+function klipyPage(items, { page = 1, hasNext = true } = {}) {
+  return { result: true, data: { data: items, current_page: page, per_page: 24, has_next: hasNext } };
+}
+
+function loadKlipyContent(responder, prefs = { klipyApiKey: "KEY" }) {
+  const { requests, stub } = withFetch(responder);
+  const module = load("models/klipyContent", { "@raycast/api": raycastApi(prefs), "lib/fetchProviderJson": { ...stub, ProviderRequestError: Error } });
+  return { requests, klipyContent: module.default };
+}
+
+test("Klipy Stickers calls the native API with the user's key and skips ads", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() => klipyPage([{ type: "ad" }, klipyMedia("grr", ["gif", "webp"])], { page: 2 }));
+
+  const { results, next } = await klipyContent("stickers").search("grr", { limit: 5, next: "2" });
+  const url = requests[0].url;
+
+  assert.equal(url.origin + url.pathname, "https://api.klipy.com/api/v1/KEY/stickers/search");
+  assert.equal(url.searchParams.get("q"), "grr");
+  assert.equal(url.searchParams.get("page"), "2");
+  assert.equal(url.searchParams.get("per_page"), "8", "Klipy rejects pages smaller than 8");
+  assert.equal(url.searchParams.get("content_filter"), "low");
+  assert.equal(next, "3");
+  assert.equal(results.length, 1);
+  assert.equal(results[0].id, "grr");
+  assert.equal(results[0].url, "https://klipy.com/stickers/grr");
+  assert.equal(results[0].gif_url, "https://static.klipy.com/grr-hd.gif");
+  assert.equal(results[0].small_preview_gif_url, "https://static.klipy.com/grr-sm.gif");
+  assert.equal(results[0].download_name, "grr-title.gif");
+});
+
+test("Klipy Memes use the static-memes segment and keep PNG files", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() => klipyPage([klipyMedia("meme", ["png", "webp"])], { hasNext: false }));
+
+  const { results, next } = await klipyContent("memes").trending({ limit: 20 });
+
+  assert.equal(requests[0].url.pathname, "/api/v1/KEY/static-memes/trending");
+  assert.equal(next, "");
+  assert.equal(results[0].url, "https://klipy.com/static-memes/meme");
+  assert.equal(results[0].download_name, "meme-title.png");
+});
+
+test("Klipy Clips download the MP4 and preview the GIF", async () => {
+  const clip = {
+    url: "https://klipy.com/clips/they-love-me",
+    slug: "they-love-me",
+    title: "They love me",
+    type: "clip",
+    file: { mp4: "https://static.klipy.com/c.mp4", gif: "https://static.klipy.com/c.gif", webp: "https://static.klipy.com/c.webp" },
+    file_meta: { mp4: { width: 640, height: 360 } },
+  };
+  const { klipyContent } = loadKlipyContent(() => klipyPage([clip]));
+
+  const [result] = (await klipyContent("clips").search("love")).results;
+
+  assert.equal(result.download_url, "https://static.klipy.com/c.mp4");
+  assert.equal(result.download_name, "they-love-me.mp4");
+  assert.equal(result.small_preview_gif_url, "https://static.klipy.com/c.gif");
+  assert.equal(result.metadata.width, 640);
+});
+
+test("Klipy content looks favorites up by slug and needs an API key", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() => klipyPage([klipyMedia("a", ["gif"])]));
+  await klipyContent("stickers").gifs(["a", "b"]);
+  assert.equal(requests[0].url.pathname, "/api/v1/KEY/stickers/items");
+  assert.equal(requests[0].url.searchParams.get("slugs"), "a,b");
+
+  const keyless = loadKlipyContent(() => klipyPage([]), { klipyApiKey: "  " });
+  await assert.rejects(keyless.klipyContent("clips").search("x"), /Klipy API key/);
+  assert.equal(keyless.requests.length, 0);
+});
+
+test("Klipy Stickers, Clips and Memes resolve from their page URLs", () => {
+  const { getServiceFromUrl } = load("lib/getServiceFromUrl");
+  const gif = (url) => ({ url, download_url: "" });
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/stickers/a")), "klipy-stickers");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/clips/a")), "klipy-clips");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/static-memes/a")), "klipy-memes");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/gifs/a")), "klipy");
+});

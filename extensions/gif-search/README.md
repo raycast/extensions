@@ -2,8 +2,9 @@ Elevat your Mac workflow with the GIF Search extension. This extension searches 
 
 ## **Discover the Perfect GIF in Seconds**
 
-- **Multi-Source Search**: Effortlessly switch between GIPHY GIFs, GIPHY Clips, GIPHY Stickers, Klipy, and TheFinerGifs.club using the search bar dropdown.
+- **Multi-Source Search**: Effortlessly switch between GIPHY GIFs, GIPHY Clips, GIPHY Stickers, Klipy GIFs, Klipy Stickers, Klipy Clips, Klipy Memes, and TheFinerGifs.club using the search bar dropdown.
 - **All Sources**: Search GIPHY and Klipy together in one mixed grid. Each GIF shows its provider's logo, and scrolling keeps loading more from both.
+- **Klipy Stickers, Clips and Memes**: These use Klipy's own API, so they need a free API key from [partner.klipy.com](https://partner.klipy.com) in the extension preferences. Klipy GIFs work without one.
 - **Quick Access to Favorites & Recents**: Jump straight to your saved GIFs with the dedicated **Browse Favorite GIFs** and **Browse Recent GIFs** commands — assign each a hotkey or alias for one-keystroke access.
 - **Smart Keyword Recognition**: Find the ideal GIF for any situation, whether you're looking for a reaction, meme, or emoji\-style animation.
 - **Mac\-Optimized Performance**: Lightning-fast results, perfect for power users who demand speed and efficiency.

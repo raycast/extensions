@@ -157,6 +157,21 @@ export default function GifSearch() {
               icon={{ source: "klipy-logo-square-180.png" }}
             />
             <Grid.Dropdown.Item
+              title="Klipy Stickers"
+              value={GIF_SERVICE.KLIPY_STICKERS}
+              icon={{ source: "klipy-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
+              title="Klipy Clips"
+              value={GIF_SERVICE.KLIPY_CLIPS}
+              icon={{ source: "klipy-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
+              title="Klipy Memes"
+              value={GIF_SERVICE.KLIPY_MEMES}
+              icon={{ source: "klipy-logo-square-180.png" }}
+            />
+            <Grid.Dropdown.Item
               title="Finer Gifs Club"
               value={GIF_SERVICE.FINER_GIFS}
               icon={{ source: "finergifs-logo.svg", tintColor: Color.PrimaryText }}
