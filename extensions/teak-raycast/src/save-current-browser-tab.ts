@@ -2,6 +2,7 @@ import { BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import {
   ensureCredentialsForNoViewCommand,
   saveCardWithFeedback,
+  showIfAlreadySaved,
 } from "./lib/capture";
 
 const isHttpUrl = (value: string): boolean => {
@@ -36,6 +37,10 @@ export default async function SaveCurrentBrowserTabCommand() {
       style: Toast.Style.Failure,
       title: "No active browser tab found",
     });
+    return;
+  }
+
+  if (await showIfAlreadySaved(activeTab.url)) {
     return;
   }
 

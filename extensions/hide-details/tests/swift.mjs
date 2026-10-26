@@ -23,6 +23,7 @@ export function redactImage({
   recognition = "fast",
   customRegex = "",
   forReview = false,
+  blurFaces = false,
 }) {
   return callSwift(
     "redactImage",
@@ -35,5 +36,6 @@ export function redactImage({
     customRegex,
     inputPath,
     forReview,
+    blurFaces,
   );
 }

@@ -1,0 +1,38 @@
+{
+  "prev": [
+    {
+      "firstLine": "Le direct",
+      "secondLine": "Bebop, afro jazz, salsa, bossa, blues, tout le jazz, ses cousins et ses cousines",
+      "thirdLine": "Jazz",
+      "songUuid": null,
+      "cover": "2de59c50-9912-401e-9d1f-95a2f0b66567",
+      "startTime": null,
+      "endTime": null
+    }
+  ],
+  "now": {
+    "firstLine": "B's Paris blues",
+    "firstLineSongUuid": "7d258284-b85f-4b0a-8ecc-8a9b4c739df8",
+    "secondLine": "Branford Marsalis",
+    "secondLineSongUuid": "7d258284-b85f-4b0a-8ecc-8a9b4c739df8",
+    "thirdLine": "Jazz",
+    "songUuid": "7d258284-b85f-4b0a-8ecc-8a9b4c739df8",
+    "cover": "f05df121-fd11-4cee-9fdb-16f2e3d3613d",
+    "startTime": 1792675853,
+    "endTime": 1792676112
+  },
+  "next": [
+    {
+      "firstLine": "Piece of mind",
+      "firstLineSongUuid": "c214c86a-52c7-45f3-be86-e6a2c0e00b43",
+      "secondLine": "Idris Muhammad",
+      "secondLineSongUuid": "c214c86a-52c7-45f3-be86-e6a2c0e00b43",
+      "thirdLine": "Jazz",
+      "songUuid": "c214c86a-52c7-45f3-be86-e6a2c0e00b43",
+      "cover": "f42e28e5-61b8-401f-ac2c-43caa93eb1ab",
+      "startTime": 1792676112,
+      "endTime": 1792676664
+    }
+  ],
+  "delayToRefresh": 100000
+}

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "substack",
   "title": "Substack",
-  "description": "Search Substack posts and profiles from Raycast",
+  "description": "Search Substack posts and profiles and create newsletter drafts from Raycast",
   "icon": "command-icon.png",
   "author": "j3lte",
   "categories": [
@@ -23,13 +23,60 @@
       "subtitle": "Substack",
       "description": "Search Substack profiles",
       "mode": "view"
+    },
+    {
+      "name": "create-substack-draft",
+      "title": "Create Draft",
+      "subtitle": "Substack",
+      "description": "Create a newsletter draft from Markdown and review it in Substack",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "publication",
+          "title": "Publication",
+          "description": "Your publication's Substack subdomain or URL, for example yourname.substack.com. Use the Substack domain even if you have a custom domain.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "yourname.substack.com"
+        },
+        {
+          "name": "sessionCookie",
+          "title": "Substack Session Cookie",
+          "description": "The value of your substack.sid browser cookie. Paste only its value, without the cookie name.",
+          "type": "password",
+          "required": false
+        },
+        {
+          "name": "connectCookie",
+          "title": "Connect Session Cookie",
+          "description": "Optional connect.sid cookie value if your account requires it. Paste only its value.",
+          "type": "password",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-accounts",
+      "title": "Manage Accounts",
+      "subtitle": "Substack",
+      "description": "Add, edit, remove and choose default Substack connections",
+      "mode": "view"
+    },
+    {
+      "name": "list-my-drafts",
+      "title": "List My Drafts",
+      "subtitle": "Substack",
+      "description": "List remote unpublished drafts for a selected Substack account",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
+    "@zweer/substack-client": "1.1.0",
     "ahooks": "^3.9.6",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "marked": "^15.0.12"
   },
   "platforms": [
     "macOS",
@@ -37,18 +84,48 @@
   ],
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@testing-library/react": "16.3.3",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "5.0.3",
     "eslint": "^9.39.1",
+    "jsdom": "29.1.1",
     "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "5.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:types": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "contributors": [
+    "alexi.build"
+  ],
+  "tools": [
+    {
+      "name": "list-accounts",
+      "title": "List Accounts",
+      "description": "List configured Substack connections without credentials"
+    },
+    {
+      "name": "list-my-drafts",
+      "title": "List My Drafts",
+      "description": "List a page of remote unpublished newsletter drafts for a configured account"
+    },
+    {
+      "name": "create-draft",
+      "title": "Create Draft",
+      "description": "Create an unpublished newsletter draft from Markdown. Does not publish or email subscribers. Never retry an uncertain creation."
+    }
+  ]
 }

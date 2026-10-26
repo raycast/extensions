@@ -24,7 +24,7 @@ const Action = ({
 }: {
   title: string;
   onAction?: () => void;
-}) => createElement("button", { onClick: onAction }, title);
+}) => createElement("button", { onClick: onAction, type: "button" }, title);
 Object.assign(Action, { OpenInBrowser: Action, Open: Action });
 mock.module("@raycast/api", () => ({
   ...createRaycastApiMock(false, {
@@ -43,7 +43,7 @@ mock.module("@raycast/api", () => ({
     },
   }),
   Action,
-  openExtensionPreferences: () => {},
+  openExtensionPreferences: () => undefined,
   showToast: () => Promise.resolve(),
   Toast: { Style: { Failure: "failure" } },
   ActionPanel: ({ children }: { children: ReactNode }) =>
@@ -70,8 +70,6 @@ afterEach(async () => {
 });
 afterAll(() => GlobalRegistrator.unregister());
 
-// Failures: retry does nothing, discovery outage masquerades as signed out,
-// saved credentials are ignored after recovery, or a retry opens the browser.
 test("connection recovery renders and invokes its supplied retry handler", async () => {
   let retries = 0;
   await act(async () =>
@@ -95,12 +93,15 @@ test("connection recovery renders and invokes its supplied retry handler", async
 
 function AuthView() {
   const state = useTeakAuth();
-  if (state.isLoading) return createElement("p", null, "Checking session");
-  if (state.error)
+  if (state.isLoading) {
+    return createElement("p", null, "Checking session");
+  }
+  if (state.error) {
     return createElement(MissingApiKeyDetail, {
       error: state.error,
       onSignedIn: state.refresh,
     });
+  }
   return createElement(
     "p",
     null,
@@ -109,34 +110,42 @@ function AuthView() {
 }
 
 test("real auth hook reports discovery failure and Retry recovers saved credentials", async () => {
-  let available = false;
+  let available = false as boolean;
   let discoveryRequests = 0;
   const issuer = "https://scholarly-hay-77.authkit.app";
   globalThis.fetch = ((input) => {
     discoveryRequests += 1;
-    if (!available) return Promise.resolve(new Response(null, { status: 503 }));
+    if (!available) {
+      return Promise.resolve(new Response(null, { status: 503 }));
+    }
     const url = String(input);
-    const body = url.includes("oauth-protected-resource")
-      ? {
+    const discoveryBody = () => {
+      if (url.includes("oauth-protected-resource")) {
+        return {
           resource: "https://teakvault.com/mcp",
           authorization_servers: [issuer],
-        }
-      : url.includes("teak-oauth-clients")
-        ? {
-            issuer,
-            primary: "workos",
-            clients: Object.fromEntries(
-              ["cli", "raycast", "chrome", "firefox", "safari"].map(
-                (surface) => [surface, "client_01M47GV3CYKFW0H78W0XYKGTM5"],
-              ),
-            ),
-          }
-        : {
-            issuer,
-            code_challenge_methods_supported: ["S256"],
-            authorization_endpoint: `${issuer}/authorize`,
-            token_endpoint: `${issuer}/oauth2/token`,
-          };
+        };
+      }
+      if (url.includes("teak-oauth-clients")) {
+        return {
+          issuer,
+          primary: "workos",
+          clients: Object.fromEntries(
+            ["cli", "raycast", "chrome", "firefox", "safari"].map((surface) => [
+              surface,
+              "client_01M47GV3CYKFW0H78W0XYKGTM5",
+            ]),
+          ),
+        };
+      }
+      return {
+        issuer,
+        code_challenge_methods_supported: ["S256"],
+        authorization_endpoint: `${issuer}/authorize`,
+        token_endpoint: `${issuer}/oauth2/token`,
+      };
+    };
+    const body = discoveryBody();
     return Promise.resolve(Response.json(body));
   }) as typeof fetch;
   await act(async () => root.render(createElement(AuthView)));

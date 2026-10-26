@@ -229,6 +229,7 @@ function WorkLogEditor({
       id: workLog?.id ?? crypto.randomUUID(),
       projectId: project.id,
       description: details.description.trim(),
+      ...(workLog?.plan ? { plan: workLog.plan } : {}),
       startedAt: times.startedAt,
       endedAt: times.endedAt,
       createdAt: workLog?.createdAt ?? savedAt,
