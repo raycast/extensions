@@ -4,6 +4,30 @@
 
 - Add deed.page to the official registry: publish static sites from an agent to a permanent public HTTPS URL, then update, list, delete, roll back, attach custom domains and read analytics. Hosted Streamable HTTP server at https://deed.page/mcp with no sign-in and no API key to publish, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
+## [Update Local Commander MCP Server] - 2026-10-26
+
+- Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
+
+## [Update Terminal Tax MCP Server] - 2026-10-26
+
+- Update Terminal Tax: three tools (was four); nothing to install or connect to file, since an assistant sends JSON-RPC HTTPS POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly; the person reviews and signs on one private filing page; the icon now loads from github.com/terminaltax/terminal-tax-mcp-server.
+
+## [Add Webly MCP Server] - 2026-10-26
+
+- Add Webly to the official registry: website hosting for AI agents. Publish a website or share files and folders at a live URL in seconds, claim it, edit it over MCP, publish drafts you approve, connect custom domains and roll back with version history. Hosted Streamable HTTP server at https://api.webly.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Rename the GetMattered entry] - 2026-10-26
+
+- Rename the job search entry to GetMattered (id `getmattered`) and move its homepage, icon and remote server to getmattered.com.
+
+## [Update Mnemoverse MCP Server] - 2026-10-26
+
+- Mnemoverse now connects to its hosted Streamable HTTP server at https://mcp.mnemoverse.com/mcp through mcp-remote, with OAuth 2.1 sign-in (dynamic client registration and PKCE) instead of an API key, and the description no longer counts tools.
+
+## [Add 3Dsellers MCP Server] - 2026-10-26
+
+- Add 3Dsellers to the official registry: run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant (products, listings, inventory, prices, orders, bulk edits, CSV imports and buyer messages, 150+ tools). Hosted Streamable HTTP server at https://api.3dsellers.com/mcp with OAuth 2.0 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add CodeTrendy MCP Server] - 2026-10-25
 
 - Add CodeTrendy to the official registry: search a curated directory of newly launched startups, SaaS products and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://codetrendy.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
