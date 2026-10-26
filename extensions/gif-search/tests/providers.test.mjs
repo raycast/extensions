@@ -136,3 +136,38 @@ test("All Sources has no API of its own and is not a cache owner", async () => {
   assert.equal(isCacheableService("all"), false);
   assert.equal(isCacheableService("giphy-stickers"), true);
 });
+
+test("All Sources reports a failure, not an empty search, when every source fails", () => {
+  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
+  const failure = { isLoading: false, error: new Error("offline"), count: 0 };
+
+  const status = getAllSourcesStatus(["giphy", "klipy"], { giphy: failure, klipy: failure });
+
+  assert.equal(status.allFailed, true);
+  assert.deepEqual([...status.failed], ["giphy", "klipy"]);
+});
+
+test("All Sources treats one failed source and one empty source as no results", () => {
+  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
+
+  const status = getAllSourcesStatus(["giphy", "klipy"], {
+    giphy: { isLoading: false, error: new Error("offline"), count: 0 },
+    klipy: { isLoading: false, count: 0 },
+  });
+
+  assert.equal(status.allFailed, false);
+  assert.equal(status.isEmpty, true);
+  assert.deepEqual([...status.failed], ["giphy"]);
+});
+
+test("All Sources stays loading until every source has reported", () => {
+  const { getAllSourcesStatus } = load("lib/allSourcesStatus");
+
+  const status = getAllSourcesStatus(["giphy", "klipy"], {
+    giphy: { isLoading: false, error: new Error("offline"), count: 0 },
+  });
+
+  assert.equal(status.isLoading, true);
+  assert.equal(status.isEmpty, false);
+  assert.equal(status.allFailed, false);
+});

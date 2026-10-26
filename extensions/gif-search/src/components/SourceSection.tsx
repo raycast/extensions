@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 
 import useSearchAPI from "../hooks/useSearchAPI";
+import { SourceState } from "../lib/allSourcesStatus";
 import { getServiceTitle, ServiceName } from "../preferences";
 import { GifGridSection } from "./GifGridSection";
-
-export type SourceState = { isLoading: boolean; error?: Error; count: number };
 
 interface SourceSectionProps {
   service: ServiceName;

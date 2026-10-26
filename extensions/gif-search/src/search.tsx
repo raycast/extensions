@@ -19,7 +19,8 @@ import useSearchAPI from "./hooks/useSearchAPI";
 import useLocalGifs from "./hooks/useLocalGifs";
 
 import { GifGridSection } from "./components/GifGridSection";
-import { SourceSection, SourceState } from "./components/SourceSection";
+import { SourceSection } from "./components/SourceSection";
+import { getAllSourcesStatus, SourceState } from "./lib/allSourcesStatus";
 
 export default function GifSearch() {
   const limit = getMaxResults();
@@ -55,10 +56,9 @@ export default function GifSearch() {
     setSourceStates((previous) => ({ ...previous, [service]: state }));
   }, []);
 
-  // A source that hasn't reported yet counts as loading, so the empty state doesn't flash.
-  const isLoadingAllSources = isAllSources && allSources.some((service) => sourceStates[service]?.isLoading ?? true);
-  const allSourcesEmpty = isAllSources && allSources.every((service) => sourceStates[service]?.count === 0);
-  const failedSources = isAllSources ? allSources.filter((service) => sourceStates[service]?.error) : [];
+  const allSourcesStatus = getAllSourcesStatus(allSources, sourceStates);
+  const isLoadingAllSources = isAllSources && allSourcesStatus.isLoading;
+  const failedSources = isAllSources ? allSourcesStatus.failed : [];
   const failedSourcesKey = failedSources.join(",");
 
   const onServiceChange = (service: string) => {
@@ -108,8 +108,11 @@ export default function GifSearch() {
     emptyState = { text: "No GIFs were found.", icon: Icon.Image };
   }
   if (showProviderError) emptyState = { text: error?.message ?? "Could not load GIFs.", icon: Icon.Image };
-  if (isAllSources && searchTerm.length > 0 && !isLoadingAllSources && allSourcesEmpty) {
+  if (isAllSources && searchTerm.length > 0 && allSourcesStatus.isEmpty) {
     emptyState = { text: "No GIFs were found.", icon: Icon.Image };
+  }
+  if (isAllSources && allSourcesStatus.allFailed) {
+    emptyState = { text: "Could not load GIFs from any source.", icon: Icon.Image };
   }
 
   let sections = [
