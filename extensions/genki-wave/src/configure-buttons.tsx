@@ -15,7 +15,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { usePromise, showFailureToast } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -129,14 +129,15 @@ export default function ConfigureButtons() {
       .catch((e) => showFailureToast(e, { title: "Couldn't start Wave" }));
   }, [running.data]);
 
-  // Re-read the listener's log while open, so a ring that connects, drops or stops responding shows up live.
+  // Re-read the listener's log every second while open (a few milliseconds of work), so a ring
+  // that connects, drops or stops responding shows up live.
   const [, setTick] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => {
       setTick((t) => t + 1);
       running.revalidate();
       agent.revalidate();
-    }, 2000);
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
   // Loaded isn't running: launchd may be failing to start the helper at all.
@@ -832,8 +833,9 @@ async function openApps(): Promise<string[]> {
 /** Picks an app to dictate into: what's open now, the usual suspects, then everything installed. */
 function AppPicker(props: { current?: string; title?: string; onPick: (app: DictationApp) => Promise<void> }) {
   const { pop } = useNavigation();
-  const apps = usePromise(getApplications);
-  const open = usePromise(openApps);
+  // Cached: listing installed apps takes a moment; show the last list at once and refresh it.
+  const apps = useCachedPromise(getApplications);
+  const open = useCachedPromise(openApps);
   // Apps installed in two places (e.g. KiCad) share a bundle id; list each once.
   const installed = (apps.data ?? []).filter(
     (a, i, all) => a.bundleId && all.findIndex((b) => b.bundleId === a.bundleId) === i,
