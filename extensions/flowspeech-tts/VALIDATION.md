@@ -1,5 +1,9 @@
 # Raycast Hardening Handoff
 
+Historical handoff for commit d1eadb69. The subsequent review corrections and
+their exact verification are recorded in REVIEW_FIXES.md; this report's artifact
+hash and no-view implementation describe the earlier candidate, not the new one.
+
 Date: 2026-10-26. Status: **complete, stable, and frozen for coordinator ownership**.
 Branch: `codex/flowspeech-api-v1`.
 The original extension landed in commit

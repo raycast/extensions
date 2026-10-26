@@ -1,7 +1,12 @@
-import { Clipboard, LocalStorage, showToast, Toast } from "@raycast/api";
+import { environment, LocalStorage } from "@raycast/api";
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
+import { lock } from "proper-lockfile";
 import { validateId } from "./client";
 
 const PREFIX = "flowspeech.recovery.";
+export const MAX_RECOVERY_RECORDS = 200;
+export const MAX_COMPLETED_RECORDS = 50;
 export interface RecoveryRecord {
   requestId: string;
   jobId?: string;
@@ -11,15 +16,82 @@ export interface RecoveryRecord {
 
 export async function saveRecovery(record: RecoveryRecord): Promise<void> {
   const requestId = validateId(record.requestId);
-  await LocalStorage.setItem(
-    PREFIX + requestId,
-    JSON.stringify({
-      requestId,
-      createdAt: record.createdAt,
-      state: record.state,
-      ...(record.jobId ? { jobId: validateId(record.jobId) } : {}),
-    }),
-  );
+  if (!Number.isFinite(Date.parse(record.createdAt)) || !["pending", "completed", "interrupted"].includes(record.state))
+    throw new Error("Invalid recovery record");
+  await withStoreLock(async (check) => {
+    const records = await recoveryRecords();
+    check();
+    const existing = records.some((value) => value.requestId === requestId);
+    // Completed means playback finished. Pending and interrupted IDs are never pruned.
+    const completed = records.filter((value) => value.state === "completed" && value.requestId !== requestId);
+    const keep = Math.min(
+      MAX_COMPLETED_RECORDS - (record.state === "completed" ? 1 : 0),
+      Math.max(
+        0,
+        MAX_RECOVERY_RECORDS - records.filter((value) => value.state !== "completed").length - (existing ? 0 : 1),
+      ),
+    );
+    for (const old of completed.slice(keep)) {
+      check();
+      await LocalStorage.removeItem(PREFIX + old.requestId);
+    }
+    check();
+    if (!existing && records.length - completed.slice(keep).length >= MAX_RECOVERY_RECORDS)
+      throw new Error(
+        "Recovery storage is full. Review saved IDs in Show Speech Recovery before starting another request.",
+      );
+    await LocalStorage.setItem(
+      PREFIX + requestId,
+      JSON.stringify({
+        requestId,
+        createdAt: record.createdAt,
+        state: record.state,
+        ...(record.jobId ? { jobId: validateId(record.jobId) } : {}),
+      }),
+    );
+    check();
+  });
+}
+
+async function withStoreLock<T>(operation: (check: () => void) => Promise<T>): Promise<T> {
+  await mkdir(environment.supportPath, { recursive: true });
+  let compromised: Error | undefined;
+  const release = await lock(path.join(environment.supportPath, "recovery-store"), {
+    realpath: false,
+    stale: 30_000,
+    update: 1000,
+    retries: { retries: 20, minTimeout: 25, maxTimeout: 100, factor: 1 },
+    onCompromised: (error) => {
+      compromised = error;
+    },
+  });
+  const check = () => {
+    if (compromised) throw new Error("Recovery storage lock was interrupted; retry later");
+  };
+  try {
+    return await operation(check);
+  } finally {
+    await release();
+  }
+}
+
+export async function clearCompletedRecovery(): Promise<void> {
+  await withStoreLock(async (check) => {
+    for (const record of await recoveryRecords()) {
+      if (record.state !== "completed") continue;
+      check();
+      await LocalStorage.removeItem(PREFIX + record.requestId);
+    }
+  });
+}
+
+// Only called after per-record confirmation. Bulk cleanup cannot remove unresolved IDs.
+export async function forgetRecovery(requestId: string): Promise<void> {
+  const id = validateId(requestId);
+  await withStoreLock(async (check) => {
+    check();
+    await LocalStorage.removeItem(PREFIX + id);
+  });
 }
 
 export async function recoveryRecords(): Promise<RecoveryRecord[]> {
@@ -65,23 +137,6 @@ export function errorJobId(error: unknown): string | undefined {
   }
 }
 
-export async function showRecovery(): Promise<void> {
-  const records = await recoveryRecords();
-  if (!records.length) {
-    await showToast({ style: Toast.Style.Success, title: "No saved speech requests" });
-    return;
-  }
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Saved speech recovery IDs",
-    message: recoveryText(records[0]),
-    primaryAction: {
-      title: "Copy All Recovery IDs",
-      onAction: () => {
-        void Clipboard.copy(
-          records.map((record) => `${record.createdAt} ${record.state}: ${recoveryText(record)}`).join("\n"),
-        );
-      },
-    },
-  });
+export function recoveryExport(records: RecoveryRecord[]): string {
+  return records.map((record) => `${record.createdAt} ${record.state}: ${recoveryText(record)}`).join("\n");
 }

@@ -1,4 +1,4 @@
-import { host, selectedCommand, recoveryCommand, records } from "./host-fixture.mjs";
+import { host, selectedCommand, recoveryCommand, records, viewText } from "./host-fixture.mjs";
 import path from "node:path";
 
 const [mode, directory, storageFile] = process.argv.slice(2);
@@ -18,6 +18,6 @@ if (mode === "generate") {
   await selectedCommand();
 } else {
   await recoveryCommand();
-  process.send({ phase: "recovered", message: host.toasts.at(-1).message, requests });
+  process.send({ phase: "recovered", message: viewText(host.recoveryView), requests });
   process.disconnect();
 }

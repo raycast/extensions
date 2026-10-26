@@ -15,19 +15,19 @@
       "name": "speak-selected",
       "title": "Speak Selected Text",
       "description": "Read the currently selected text with FlowSpeech",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "speak-copied",
       "title": "Speak Copied Text",
       "description": "Read text from the clipboard with FlowSpeech",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "show-recovery",
       "title": "Show Speech Recovery",
       "description": "Show saved request IDs without creating another recording",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -70,14 +70,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "2.1.2"
+    "@raycast/api": "2.1.2",
+    "proper-lockfile": "4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
     "@types/node": "22.19.15",
     "@types/react": "19.2.14",
+    "@types/proper-lockfile": "4.1.4",
     "eslint": "10.0.2",
     "prettier": "3.8.1",
+    "react-test-renderer": "19.0.0",
     "typescript": "5.9.3"
   },
   "scripts": {

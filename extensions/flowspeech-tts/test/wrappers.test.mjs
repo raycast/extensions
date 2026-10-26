@@ -18,6 +18,9 @@ import {
   saveRecovery,
   errorJobId,
   records,
+  closeViews,
+  viewText,
+  invoke,
 } from "./host-fixture.mjs";
 import { id, requestId, input, job, json, wav } from "./fixtures.mjs";
 
@@ -38,6 +41,9 @@ beforeEach(async () => {
     clipboard: "Copied words",
     onToast: undefined,
     playbackError: undefined,
+    holdPlayback: false,
+    confirm: true,
+    confirmations: [],
     preferences: { apiKey: "test-key", voiceName: "Kore" },
   });
   originalFetch = globalThis.fetch;
@@ -46,6 +52,7 @@ beforeEach(async () => {
   };
 });
 afterEach(async () => {
+  await closeViews();
   globalThis.fetch = originalFetch;
   await rm(directory, { recursive: true, force: true });
 });
@@ -175,7 +182,7 @@ for (const kind of ["external signal", "toast stop"]) {
     assert.equal(host.copied.at(-1), record.requestId);
     assert.deepEqual(await readdir(host.supportPath), []);
     await recoveryCommand();
-    assert.ok(host.toasts.at(-1).message.includes(record.requestId));
+    assert.ok(viewText(host.recoveryView).includes(record.requestId));
     assert.equal(calls.length, 1);
   });
 }
@@ -223,7 +230,7 @@ test("playback failure retains IDs, redacts key and text, and cleans audio", asy
 
 test("concurrent commands keep separate durable recovery records", async () => {
   successTransport();
-  await Promise.all([selectedCommand(), copiedCommand()]);
+  await Promise.all([speakText(async () => host.selected), speakText(async () => host.clipboard)]);
   assert.equal(records().length, 2);
   assert.equal(new Set(records().map((record) => record.requestId)).size, 2);
   assert.equal(host.played.length, 2);
@@ -236,7 +243,7 @@ test("recovery command is read-only, ignores malformed data, and copies only IDs
   host.storage["flowspeech.recovery." + id] = JSON.stringify({ requestId, state: "pending", createdAt: "invalid" });
   assert.equal((await recoveryRecords()).length, 1);
   await recoveryCommand();
-  host.toasts.at(-1).primaryAction.onAction();
+  await invoke(host.recoveryView, "Copy All Recovery IDs");
   assert.ok(host.copied[0].includes(requestId));
   assert.ok(!host.copied[0].includes("test-key"));
   assert.equal(errorJobId(new Error("failure; jobId=" + id)), id);
@@ -245,7 +252,7 @@ test("recovery command is read-only, ignores malformed data, and copies only IDs
 
 test("empty recovery command does not generate speech", async () => {
   await recoveryCommand();
-  assert.equal(host.toasts.at(-1).title, "No saved speech requests");
+  assert.ok(viewText(host.recoveryView).includes("No saved speech requests"));
 });
 
 test("later storage failures cannot remove the durable pre-submission UUID", async () => {
@@ -259,7 +266,7 @@ test("later storage failures cannot remove the durable pre-submission UUID", asy
   assert.equal(records()[0].state, "pending");
   assert.equal(host.played.length, 1);
   await recoveryCommand();
-  assert.ok(host.toasts.at(-1).message.includes(records()[0].requestId));
+  assert.ok(viewText(host.recoveryView).includes(records()[0].requestId));
 });
 
 test("stop playback aborts before starting the player without cancelling the completed job", async () => {

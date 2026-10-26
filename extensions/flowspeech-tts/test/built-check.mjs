@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, rm, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { host, loadBuilt, records } from "./host-fixture.mjs";
+import { host, loadBuilt, records, closeViews, invoke } from "./host-fixture.mjs";
 import { job, json, wav } from "./fixtures.mjs";
 
 let directory, originalFetch;
@@ -22,6 +22,7 @@ beforeEach(async () => {
     clipboard: "Built clipboard text",
     onToast: undefined,
     playbackError: undefined,
+    holdPlayback: false,
     preferences: { apiKey: "test-key", voiceName: "Kore" },
   });
   originalFetch = globalThis.fetch;
@@ -30,6 +31,7 @@ beforeEach(async () => {
   };
 });
 afterEach(async () => {
+  await closeViews();
   globalThis.fetch = originalFetch;
   await rm(directory, { recursive: true, force: true });
 });
@@ -62,13 +64,13 @@ test("distribution stop action retains UUID and does not call server cancellatio
   const running = loadBuilt("speak-selected")();
   for (let i = 0; i < 100 && calls.length === 0; i++) await delay(5);
   assert.equal(calls.length, 1);
-  host.toasts[0].primaryAction.onAction();
+  await invoke(host.views.at(-1), "Stop Waiting");
   await running;
   assert.equal(records()[0].state, "interrupted");
   assert.ok(host.toasts.at(-1).message.includes(records()[0].requestId));
   assert.equal(calls.length, 1);
   await loadBuilt("show-recovery")();
-  host.toasts.at(-1).primaryAction.onAction();
+  await invoke(host.recoveryView, "Copy All Recovery IDs");
   assert.ok(host.copied[0].includes(records()[0].requestId));
   assert.equal(calls.length, 1);
 });
@@ -107,6 +109,7 @@ test("distribution inventory, source maps, icon and secret scan match the intend
     manifest.commands.map((command) => command.name),
     ["speak-selected", "speak-copied", "show-recovery"],
   );
+  assert.ok(manifest.commands.every((command) => command.mode === "view"));
   const expected = [
     "assets",
     "package.json",
@@ -118,14 +121,19 @@ test("distribution inventory, source maps, icon and secret scan match the intend
     const map = JSON.parse(await readFile(".build/" + command.name + ".js.map", "utf8"));
     for (let index = 0; index < map.sources.length; index++) {
       const source = path.resolve(".build", map.sources[index]);
-      assert.ok(source.startsWith(path.resolve("src") + path.sep));
+      const runtimeDependency = path.relative(path.resolve("node_modules"), source).split(path.sep)[0];
+      assert.ok(
+        source.startsWith(path.resolve("src") + path.sep) ||
+          (source.startsWith(path.resolve("node_modules") + path.sep) &&
+            ["proper-lockfile", "graceful-fs", "retry"].includes(runtimeDependency)),
+      );
       assert.equal(map.sourcesContent[index], await readFile(source, "utf8"));
     }
     for (const extension of [".js", ".js.map"]) {
       const content = await readFile(".build/" + command.name + extension, "utf8");
       assert.doesNotMatch(
         content,
-        /(?:test-key|gh[pousr]_[A-Za-z0-9]{25,}|npm_[A-Za-z0-9]{25,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/,
+        /(?:test-key|react-test-renderer|\/Users\/|\/private\/var\/folders\/|gh[pousr]_[A-Za-z0-9]{25,}|npm_[A-Za-z0-9]{25,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/,
       );
     }
   }

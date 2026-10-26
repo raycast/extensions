@@ -10,6 +10,9 @@
 - Persist caller-known request IDs before submission and add Show Speech Recovery
 - Add local stop actions without automatically cancelling paid server jobs
 - Test actual wrappers, simulated host termination, and distribution commands
+- Keep stop and recovery-copy controls in command views for closed-window launches
+- Let clean checkouts run tests without generated Raycast preference declarations
+- Bound completed recovery history, protect unresolved IDs, and confirm manual removal
 
 ## [Initial Version] - 2026-09-29
 

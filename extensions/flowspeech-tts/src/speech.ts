@@ -7,11 +7,23 @@ import { promisify } from "node:util";
 import { generateSpeech } from "./api";
 import { toWav } from "./audio";
 import { errorJobId, recoveryText, saveRecovery, type RecoveryRecord } from "./recovery";
+import type { SpeechPreferences } from "./preferences";
 
 const execFileAsync = promisify(execFile);
 const MAX_TEXT_LENGTH = 10_000;
 
-export async function speakText(getText: () => Promise<string | undefined>, signal?: AbortSignal): Promise<void> {
+export interface SpeechFeedback {
+  title: string;
+  message?: string;
+  requestId?: string;
+  phase: "waiting" | "playing" | "finished";
+}
+
+export async function speakText(
+  getText: () => Promise<string | undefined>,
+  signal?: AbortSignal,
+  onFeedback?: (feedback: SpeechFeedback) => void,
+): Promise<void> {
   const controller = new AbortController();
   const operationSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
   let audioPath: string | undefined;
@@ -29,7 +41,7 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     if (text.length > MAX_TEXT_LENGTH)
       throw new Error(`Text is too long. Use ${MAX_TEXT_LENGTH.toLocaleString()} characters or fewer`);
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<SpeechPreferences>();
     apiKey = preferences.apiKey;
     record = { requestId: randomUUID(), createdAt: new Date().toISOString(), state: "pending" };
 
@@ -42,6 +54,7 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     await saveRecovery(record);
     persisted = true;
     const copyId = record.requestId;
+    onFeedback?.({ title: "Generating speech...", message: recoveryText(record), requestId: copyId, phase: "waiting" });
     await showToast({
       style: Toast.Style.Animated,
       title: "Generating speech...",
@@ -56,7 +69,7 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     });
 
     const generatedAudio = await generateSpeech(text, preferences.voiceName, apiKey, record.requestId, operationSignal);
-    record = { ...record, jobId: generatedAudio.jobId, state: "completed" };
+    record = { ...record, jobId: generatedAudio.jobId };
     // The pre-submission record remains recoverable if this optional update fails.
     await saveRecovery(record).catch(() => undefined);
     const wav = toWav(generatedAudio);
@@ -65,6 +78,12 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     await file.close();
     file = undefined;
 
+    onFeedback?.({
+      title: "Playing with FlowSpeech",
+      message: recoveryText(record),
+      requestId: copyId,
+      phase: "playing",
+    });
     await showToast({
       style: Toast.Style.Success,
       title: "Playing with FlowSpeech",
@@ -73,6 +92,9 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     });
     operationSignal.throwIfAborted();
     await execFileAsync("/usr/bin/afplay", [audioPath], { signal: operationSignal });
+    record = { ...record, state: "completed" };
+    await saveRecovery(record).catch(() => undefined);
+    onFeedback?.({ title: "Speech finished", message: recoveryText(record), requestId: copyId, phase: "finished" });
   } catch (error) {
     if (record && persisted) {
       record = { ...record, jobId: record.jobId ?? errorJobId(error), state: "interrupted" };
@@ -87,6 +109,12 @@ export async function speakText(getText: () => Promise<string | undefined>, sign
     if (text) message = message.split(text).join("[text]");
     if (record && persisted) message += `\n${recoveryText(record)}`;
     const copyId = persisted ? record?.requestId : undefined;
+    onFeedback?.({
+      title: operationSignal.aborted ? "Speech stopped" : "Could not play speech",
+      message,
+      requestId: copyId,
+      phase: "finished",
+    });
     await showToast({
       style: Toast.Style.Failure,
       title: operationSignal.aborted
