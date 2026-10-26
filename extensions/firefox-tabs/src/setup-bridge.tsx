@@ -1,11 +1,4 @@
-import {
-  launchCommand,
-  LaunchType,
-  open,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { launchCommand, LaunchType, open, showHUD, showToast, Toast } from "@raycast/api";
 import { installNativeHost } from "./lib/installer";
 import { AMO_URL } from "./lib/constants";
 import { isFirefoxRunning } from "./lib/errors";
@@ -77,8 +70,7 @@ export default async function Command() {
     } catch {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't Write Manifest";
-      toast.message =
-        "Check permissions on ~/Library/Application Support/Mozilla/";
+      toast.message = "Check permissions on ~/Library/Application Support/Mozilla/";
       return;
     }
 

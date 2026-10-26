@@ -56,9 +56,7 @@ async function getLatestNativeHostRelease(): Promise<{
   });
 
   if (res.status === 403) {
-    throw new Error(
-      "GitHub rate limit reached. Please try again in a few minutes.",
-    );
+    throw new Error("GitHub rate limit reached. Please try again in a few minutes.");
   }
   if (!res.ok) {
     throw new Error(`Failed to check for updates (HTTP ${res.status})`);
@@ -70,13 +68,9 @@ async function getLatestNativeHostRelease(): Promise<{
   }>;
 
   // Find the first release whose tag starts with "native-host@"
-  const release = releases.find((r) =>
-    r.tag_name.startsWith(NATIVE_HOST_TAG_PREFIX),
-  );
+  const release = releases.find((r) => r.tag_name.startsWith(NATIVE_HOST_TAG_PREFIX));
   if (!release) {
-    throw new Error(
-      "No native host release found. Please check https://github.com/toshi38/raycast-firefox/releases",
-    );
+    throw new Error("No native host release found. Please check https://github.com/toshi38/raycast-firefox/releases");
   }
 
   const version = release.tag_name.slice(NATIVE_HOST_TAG_PREFIX.length);
@@ -126,22 +120,14 @@ function parseSha256Sums(content: string): Map<string, string> {
  * Verify a downloaded file's SHA256 checksum against the expected value.
  * Throws with a clear message on mismatch or missing entry.
  */
-function verifyChecksum(
-  buffer: Buffer,
-  filename: string,
-  checksums: Map<string, string>,
-): void {
+function verifyChecksum(buffer: Buffer, filename: string, checksums: Map<string, string>): void {
   const expected = checksums.get(filename);
   if (!expected) {
-    throw new Error(
-      `No checksum found for ${filename} in SHA256SUMS.txt. The release may be malformed.`,
-    );
+    throw new Error(`No checksum found for ${filename} in SHA256SUMS.txt. The release may be malformed.`);
   }
   const actual = sha256(buffer);
   if (actual !== expected) {
-    throw new Error(
-      `Checksum mismatch for ${filename}. The download may be corrupted. Please try again.`,
-    );
+    throw new Error(`Checksum mismatch for ${filename}. The download may be corrupted. Please try again.`);
   }
 }
 
@@ -152,7 +138,7 @@ function verifyChecksum(
 function atomicInstall(
   tempDir: string,
   files: Array<{ name: string; buffer: Buffer; executable?: boolean }>,
-  version: string,
+  version: string
 ): void {
   // Write files to temp dir first
   for (const file of files) {
@@ -231,9 +217,7 @@ function createNodeSymlink(): void {
  * 4. Install files atomically (temp dir -> final dir, version.txt last)
  * 5. Create Node.js symlink at ~/.raycast-firefox/node
  */
-export async function installNativeHost(
-  onProgress: (message: string) => void,
-): Promise<InstallResult> {
+export async function installNativeHost(onProgress: (message: string) => void): Promise<InstallResult> {
   // Step 1: Fetch release info
   onProgress("Downloading native host...");
 
@@ -248,15 +232,9 @@ export async function installNativeHost(
   }
 
   // Validate required assets exist in the release
-  const missingAssets = REQUIRED_ASSETS.filter(
-    (name) => !releaseInfo.assets.has(name),
-  );
+  const missingAssets = REQUIRED_ASSETS.filter((name) => !releaseInfo.assets.has(name));
   if (missingAssets.length > 0) {
-    throw new Error(
-      `Release is missing required files: ${missingAssets.join(
-        ", ",
-      )}. Please report this issue.`,
-    );
+    throw new Error(`Release is missing required files: ${missingAssets.join(", ")}. Please report this issue.`);
   }
 
   // Step 2: Download all three assets in parallel
@@ -287,7 +265,7 @@ export async function installNativeHost(
         { name: "host.bundle.js", buffer: hostBundleBuf },
         { name: "run.sh", buffer: runShBuf, executable: true },
       ],
-      releaseInfo.version,
+      releaseInfo.version
     );
   } finally {
     // Clean up temp dir

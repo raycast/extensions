@@ -1,5 +1,9 @@
 # firefox-tabs Changelog
 
+## [Fix Typing Lag With Many Tabs] - 2026-10-24
+
+- Cache favicons as files so searching stays responsive with hundreds of open tabs
+
 ## [Added Setup Command and Native Host Bundling] - 2026-04-22
 
 - One-command setup: run "Setup Firefox Bridge" to install everything automatically
