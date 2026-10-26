@@ -2263,6 +2263,7 @@
   "amanvarshney01/prisma-postgres": "prisma-postgres",
   "nch/prismical": "prismical",
   "maksym_prokopov/pritunl": "pritunl",
+  "cmdr/private-subnet-generator": "private-subnet-generator",
   "sedlacek-martin/privatebin": "privatebin",
   "ph00lt0/privileges": "privileges",
   "snaka/privmask": "privmask",

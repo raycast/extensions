@@ -2265,6 +2265,7 @@
 /extensions/prisma-postgres                                         @AmanVarshney01 @pernielsentikaer
 /extensions/prismical                                               @nchopra
 /extensions/pritunl                                                 @mprokopov
+/extensions/private-subnet-generator                                @cimnine
 /extensions/privatebin                                              @sedlacek-martin
 /extensions/privileges                                              @ph00lt0 @riesinger
 /extensions/privmask                                                @snaka
