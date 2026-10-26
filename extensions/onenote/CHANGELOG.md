@@ -1,6 +1,6 @@
 # OneNote Changelog
 
-## [Fix search crash on Raycast 2.9] - {PR_MERGE_DATE}
+## [Fix search crash on Raycast 2.9] - 2026-10-26
 
 - Fixed a "Value is too large to be represented as a JavaScript number" error when searching notes.
 
