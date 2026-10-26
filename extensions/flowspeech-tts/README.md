@@ -99,8 +99,9 @@ even when reading a response body fails. Unsupported input fields are rejected.
 ## Development
 
 Run `npm ci`, `npm test`, `npm run lint`, and `npm run test:build` with Node 24.
-Tests can run directly after installation, without first running Raycast or a
-build: preference types are explicit source types, not ignored generated globals.
+Tests can run directly after installation without opening Raycast. `npm test`
+first runs the official distribution build to generate `raycast-env.d.ts` from
+the manifest, then type-checks and runs the tests using those preference types.
 `npm run build` writes a distribution build to local `.build/` without installing
 or launching the extension. Contract, React component, and wrapper tests mock HTTP,
 native Raycast APIs, and playback. The test renderer matches the host API's React

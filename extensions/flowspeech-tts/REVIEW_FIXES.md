@@ -1,7 +1,9 @@
 # Raycast Review Corrections
 
 Date: 2026-10-26. Base: d1eadb693f17bd759cf6eb8bd0b93b8cf96b298d.
-Scope: this extension only. PR #32780 remains draft; coordinator owns publication.
+Scope: this extension only. The initial pass below was handed off as a draft.
+The generated-preference follow-up at the end supersedes its preference-type
+implementation and records the remaining native-validation gaps.
 
 ## Independent Assessment
 
@@ -111,3 +113,46 @@ owns review, push, CI, and any eventual change to PR draft status.
 - https://developers.raycast.com/api-reference/user-interface/actions
 - https://developers.raycast.com/information/lifecycle
 - https://github.com/moxystudio/node-proper-lockfile
+
+## Generated Preference Types Follow-up
+
+Date: 2026-10-26. Base: 4f31a5c574f6eb9cd3c84e40552d5db88f6a9b16.
+The subsequent review correctly identified that the handwritten preference
+interface duplicated the manifest. Removed `src/preferences.ts` and changed the
+speech wrapper to `getPreferenceValues<Preferences>()`, using Raycast's generated
+declaration. `npm test` now runs the official distribution build via `pretest`, so
+the declaration exists before TypeScript checks even in a fresh source copy.
+No dependencies, API request behavior, playback logic or host settings changed.
+
+Verification with Node 24.19.0 and npm 10.8.2:
+
+- Working-copy `npm test`: 148 passed, none failed/skipped/cancelled.
+- Fresh source copy, initially without `raycast-env.d.ts`, `.build` or
+  `.test-dist`: `npm test` generated declarations and passed all 148 tests.
+  This copy reused the existing locked dependencies through a symlink; it was
+  not a fresh dependency installation.
+- `npm run test:build`: official distribution build, TypeScript and seven
+  built-command tests passed. Inventory/source-map/icon/secret checks passed.
+- `npm run lint`: manifest/author, icons, ESLint and Prettier passed.
+- Distribution: eight files, 592642 bytes; aggregate SHA-256 using the algorithm
+  above is `1db2c51fa75f70595dde98b2c82451c822f2aa18b4c683ccc0d3bf2b9b64f719`.
+  JS, manifest and icon match the fresh source copy byte-for-byte. Its source maps
+  differ only in relative dependency paths because dependencies are symlinked;
+  mappings and embedded source contents match. No absolute local paths or QA
+  dummy credentials appear in the distribution checks.
+
+All native APIs, HTTP and playback remain mocked in these tests. No Raycast
+launch, real playback, production generation or paid API calls occurred in this
+follow-up. Earlier native QA preparation at the base commit built successfully,
+but the host refused local-source installation with:
+
+```text
+Development session couldn't start due to inability to install from local sources
+```
+
+That attempt used Raycast 1.104.32 and an isolated API 1.104.25 QA adapter; the
+production manifest still uses API 2.1.2. The cause is unconfirmed, and no native
+compatibility, selected/copied speech, stop controls or host-restart recovery pass
+is claimed. No native screencast is available. The new preference-only correction
+has not been attempted in the native host. Maintainer review/assistance is being
+requested with these gaps disclosed; native-test checklist items remain unchecked.

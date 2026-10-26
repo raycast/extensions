@@ -86,6 +86,7 @@
   "scripts": {
     "prepublishOnly": "echo \"This extension is published through the Raycast Store, not npm.\" && exit 1",
     "build": "ray build -e dist -o .build",
+    "pretest": "npm run build",
     "test": "tsc -p tsconfig.test.json && node --test test/*.test.mjs",
     "test:build": "npm run build && tsc -p tsconfig.test.json && node --test test/built-check.mjs",
     "dev": "ray develop",

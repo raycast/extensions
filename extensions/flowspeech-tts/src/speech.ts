@@ -7,7 +7,6 @@ import { promisify } from "node:util";
 import { generateSpeech } from "./api";
 import { toWav } from "./audio";
 import { errorJobId, recoveryText, saveRecovery, type RecoveryRecord } from "./recovery";
-import type { SpeechPreferences } from "./preferences";
 
 const execFileAsync = promisify(execFile);
 const MAX_TEXT_LENGTH = 10_000;
@@ -41,7 +40,7 @@ export async function speakText(
     if (text.length > MAX_TEXT_LENGTH)
       throw new Error(`Text is too long. Use ${MAX_TEXT_LENGTH.toLocaleString()} characters or fewer`);
 
-    const preferences = getPreferenceValues<SpeechPreferences>();
+    const preferences = getPreferenceValues<Preferences>();
     apiKey = preferences.apiKey;
     record = { requestId: randomUUID(), createdAt: new Date().toISOString(), state: "pending" };
 
