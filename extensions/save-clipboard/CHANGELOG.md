@@ -1,5 +1,9 @@
 # Save Clipboard As Changelog
 
+## [Fix Native Clipboard Images] - {PR_MERGE_DATE}
+
+- Fix detecting and saving screenshots and images copied as native clipboard data without a file path
+
 ## [Initial Version] - 2026-05-05
 
 - Save images, files, text, and HTML content from your clipboard to disk
