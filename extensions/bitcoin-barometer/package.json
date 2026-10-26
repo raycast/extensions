@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "description": "The current Bitcoin Barometer reading: cycle score, zone and 7-day change.",
   "icon": "extension-icon.png",
+  "platforms": ["macOS"],
   "author": "multiassist",
   "license": "MIT",
   "categories": ["Finance", "Data"],
@@ -12,7 +13,7 @@
     { "name": "menu-bar", "title": "Barometer Menu Bar", "description": "Shows the current score in the menu bar.", "mode": "menu-bar", "interval": "15m" },
     { "name": "show-barometer", "title": "Show Bitcoin Barometer", "description": "Shows the current reading.", "mode": "view" }
   ],
-  "dependencies": { "@raycast/api": "^1.100.0", "@raycast/utils": "^1.19.0" },
+  "dependencies": { "@raycast/api": "^2.9.0", "@raycast/utils": "^2.3.3" },
   "devDependencies": { "typescript": "^5.8.0", "@types/react": "^19.0.0", "@types/node": "^22.0.0", "@raycast/eslint-config": "^2.0.0", "eslint": "^9.0.0", "prettier": "^3.0.0" },
   "scripts": { "build": "ray build -e dist", "dev": "ray develop", "lint": "ray lint" }
 }
