@@ -19,6 +19,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "3dsellers",
+    title: "3Dsellers",
+    description:
+      "Run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant. Search and create products, publish listings, update inventory and prices, manage orders, run bulk edits and CSV imports, and answer buyer messages through your 3Dsellers account. 150+ tools. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/3dsellers/ebay-mcp-server/main/assets/logo.png",
+    homepage: "https://www.3dsellers.com/channel-integration/3dsellers-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.3dsellers.com/mcp"],
+    },
+    remoteUrl: "https://api.3dsellers.com/mcp",
+  },
+  {
     name: "60fps",
     title: "60fps",
     description:
@@ -70,15 +83,15 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://app.aggregate.finance/mcp",
   },
   {
-    name: "aiapplyd",
-    title: "AI Applyd",
+    name: "getmattered",
+    title: "GetMattered",
     description:
-      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: AI Applyd rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 34 hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
-    icon: "https://aiapplyd.com/apple-touch-icon.png",
-    homepage: "https://aiapplyd.com/mcps?source=raycast-mcp-registry",
+      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: GetMattered rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 34 hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://getmattered.com/apple-touch-icon.png",
+    homepage: "https://getmattered.com/mcps?source=raycast-mcp-registry",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.aiapplyd.com/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.getmattered.com/mcp"],
     },
   },
   {
@@ -865,7 +878,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "local-commander",
     title: "Local Commander",
     description:
-      "Connects Raycast AI to Windows 11 computers you own. Your AI can read approved project files and Git state, run the checks and commands you authorize, and check local services; your workspace at localcmd.app shows which computer ran each request and how it ended. Once you approve a computer it can do what your Windows account can do; you can limit it to folders, block commands or switch it off at any time. Needs the Local Commander agent paired on each PC (`npx local-commander-agent@latest`). Free plan for up to 5 computers. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
+      "Remote control of all your computers from Raycast AI. Connect your Windows, Mac and Linux machines (work PC, home PC, servers) and ask in one chat: run commands and scripts, read and edit files, check services and logs, take a screenshot, work with Git. The same computers are reachable from ChatGPT, Claude and any AI app with remote MCP, including on your phone. You choose full access or only some folders, block commands and switch any computer off at any time. Needs the Local Commander agent on each computer (`npx local-commander-agent@latest`). Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
     icon: "https://raw.githubusercontent.com/netbka/local-commander-plugins/main/assets/logo.png",
     homepage: "https://localcmd.app",
     remoteUrl: "https://localcmd.app/mcp",
@@ -930,15 +943,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
-      "Hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next. Shared rooms for multi-agent work. One key or OAuth across Claude Code, Cursor, VS Code and ChatGPT. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com, set as `MNEMOVERSE_API_KEY`.",
+      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms (beta) let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
     icon: "https://mnemoverse.com/apple-touch-icon.png",
-    homepage: "https://mnemoverse.com/docs/api/mcp-server",
+    homepage: "https://mnemoverse.com/docs/api/remote-mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "@mnemoverse/mcp-memory-server@latest"],
-      env: {
-        MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
-      },
+      args: ["-y", "mcp-remote", "https://mcp.mnemoverse.com/mcp"],
     },
   },
   {
@@ -1552,8 +1562,8 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
-      "E-file a 2025 US federal Form 1040 from your AI assistant. Four tools check the prepared return and return either the problems to fix or one link to a hosted filing page, where you review the complete return, type your Social Security number and PINs, sign and pay; Terminal Tax then e-files it. $19.99, charged only if the IRS accepts it. Federal only. Hosted remote Streamable HTTP server; no account, API key or OAuth.",
-    icon: "https://raw.githubusercontent.com/maxdhs/terminal-tax-mcp-server/main/logo.png",
+      "E-file a 2025 US federal Form 1040 from your AI assistant. Nothing to install or connect to file: any assistant that can run a shell command or make an HTTPS request sends JSON-RPC POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly, with no account, API key or OAuth. Three tools (create_filing_session, get_packet_schema, continue_filing_session) start a filing session, return the packet schema, and check the prepared packet, returning either the problems to correct or one link to a private filing page, where you review the complete return, sign it and authorize payment; Terminal Tax then e-files it with the IRS. $19.99 per federal return, charged only if the IRS accepts it. Federal only.",
+    icon: "https://raw.githubusercontent.com/terminaltax/terminal-tax-mcp-server/main/logo.png",
     homepage: "https://terminal.tax",
     configuration: {
       command: "npx",
@@ -1709,6 +1719,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://web3juice.com/api/mcp"],
     },
     remoteUrl: "https://web3juice.com/api/mcp",
+  },
+  {
+    name: "webly",
+    title: "Webly",
+    description:
+      "Website hosting for AI agents: publish a website, or share files and folders, at a live URL in seconds. Claim a site to keep it, edit it over MCP, publish drafts you approve, connect a custom domain and roll back with version history. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a bearer API key.",
+    icon: "https://raw.githubusercontent.com/Webly-AI/webly-plugin/main/assets/logo.svg",
+    homepage: "https://webly.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webly.ai/v1/mcp"],
+    },
+    remoteUrl: "https://api.webly.ai/v1/mcp",
   },
   {
     name: "xero",

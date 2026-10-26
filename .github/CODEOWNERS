@@ -1520,6 +1520,7 @@
 /extensions/latex-math-symbols                                      @JeffersonDing
 /extensions/lattice-scholar-extension                               @frank-miao
 /extensions/launch-agents                                           @stevensd2m
+/extensions/launchbar-file-manager                                  @imed-ghomari
 /extensions/launchd-monitor                                         @wesbaker
 /extensions/launchdarkly                                            @luarmr
 /extensions/launchpad-plus                                          @kbysiec
@@ -1613,6 +1614,7 @@
 /extensions/lorem-picsum                                            @MichaelFarquhar @j3lte
 /extensions/lotr                                                    @xmok
 /extensions/lotus-mtg-companion                                     @MadMaxMcKinney
+/extensions/luci-screen-memory                                      @akulafb
 /extensions/lucide-animated                                         @shivraj-roy
 /extensions/lucide-icons                                            @aeither @xilopaint @ridemountainpig @j3lte @muhammadrizo-y
 /extensions/lucky-surf                                              @Popalay
