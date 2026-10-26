@@ -7,13 +7,18 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 ![Prayer Menu Bar showing Asr jamaat in 7 minutes, with the day's prayers in the dropdown](media/menu-bar.png)
 
-- **Menu bar countdown**: the masjid mark and only the time left until the next moment: `Asr -5` (until the
-  start or jamaat), `Asr (-40)` (until the preferred end or the end). The icon's color follows the live
-  windows of the phone app: light green around the start, brand green around jamaat, yellow before the
-  preferred time ends, red before the prayer time ends, plain in between. The dropdown lists every
+- **Menu bar countdown**: the masjid on a disc colored by where the prayer's time stands, the prayer, and
+  what comes next: `Dhuhr Starts 15m`, `Dhuhr Jamaat 30m`, `Dhuhr Pref. ends 8m`, `Dhuhr Ending soon 16m`,
+  `Dhuhr Ends 16m`, or `Dhuhr ended` once its time is over unmarked. Grey before the start, dark green from
+  the start, light green from **Before Preferred End** minutes before the preferred end, yellow after it,
+  red from **Ending Soon** minutes before the end (when the preferred end comes later, it stays yellow to the end). The dropdown names the current period in words, lists every
   prayer plus sunrise, midnight and tahajjud, color-coded as with jamaat, on time, late,
   made up (qaza), current or missed, with each prayer's preferred time. Click a prayer to mark it; hold ⌥
   to mark a late one (or one recorded late) as prayed on time.
+- **Jamaat formulas**: besides the short rules (`13:30`, `+10`, `floor5+15`, `end-30`), a Jamaat setting can
+  hold a formula in the phone app's small Python-like language, e.g. `ceil(start, 15) + 15` (round the start up
+  to 15 minutes, add 15) or `at(13, 30) if is_friday else ceil(start, 15) + 15`. **Jamaat Formula Guide**
+  lists the names and functions and shows each prayer's jamaat today, or why its formula gives none.
 - **Next Prayer** command: live root-search subtitle. Add it to Favorites to keep it on top.
 - **Today's Prayers**: mark as prayed (the clock decides on time, late, or made up once its time has ended), or as prayed with
   jamaat, on time, late (still within its time), or made up (qaza, after its time ended); change or unmark it later, and see the last
@@ -54,7 +59,7 @@ downloaded and no other app is needed.
 
 Each prayer has a **valid end** (after it the prayer is late) and, depending on the school, an earlier
 **preferred end** (after it the prayer is less preferred, for some prayers disliked, makruh). A prayer with no
-earlier preferred end, like Fajr, is preferred until its end. The menu bar turns yellow before the preferred end. **Counts as Late After** picks which end the ending reminder, the red countdown and on-time history use.
+earlier preferred end, like Fajr, is preferred until its end. The menu bar turns light green shortly before the preferred end and yellow after it. **Counts as Late After** picks which end the ending reminder, the red countdown and on-time history use.
 
 |                         | Hanafi                 | Shafi'i     | Maliki                 | Hanbali     | Ja'fari (Shia)       |
 | ----------------------- | ---------------------- | ----------- | ---------------------- | ----------- | -------------------- |
