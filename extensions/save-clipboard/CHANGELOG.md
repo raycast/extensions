@@ -1,6 +1,6 @@
 # Save Clipboard As Changelog
 
-## [Fix Native Clipboard Images] - {PR_MERGE_DATE}
+## [Fix Native Clipboard Images] - 2026-10-26
 
 - Fix detecting and saving screenshots and images copied as native clipboard data without a file path
 
