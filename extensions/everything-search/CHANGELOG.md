@@ -1,5 +1,8 @@
 # Everything Search Changelog
 
+## [Fix] - 2026-10-26
+- Fixed searches that contain `&`, `|`, `<`, `>`, `^` or `%`, or start with `-`, failing with "Error Searching Files" or returning wrong results
+
 ## [Fix] - 2026-10-15
 - Fixed long and cut-off error message when Everything app is not running ([#32381](https://github.com/raycast/extensions/issues/32381))
 
