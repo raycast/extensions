@@ -2,7 +2,8 @@
 
 ## [Fix Malformed Import Entries] - {PR_MERGE_DATE}
 
-- A service entry missing its whole `otp` object, or a `services` payload that isn't an array, no longer aborts the entire import. Malformed entries now drop silently instead of throwing.
+- A service entry missing its whole `otp` object is now skipped instead of aborting the entire import.
+- A `services` payload that isn't an array is now rejected with a clear format error instead of a raw crash.
 - `digits` and `period` from the import file are now clamped to sane ranges instead of being used unvalidated.
 
 ## [Add Windows Support] - 2026-09-17
