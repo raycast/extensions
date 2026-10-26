@@ -26,28 +26,24 @@ import {
   refreshAuthFile,
   setAuthFileDisabled,
 } from "./api";
-import { canUseReset, loadQuota, percentLeft, QuotaAccount, QuotaResult, spendReset, supportsQuota } from "./quota";
+import { canUseReset, percentLeft, QuotaAccount, QuotaResult, spendReset, supportsQuota } from "./quota";
+import { fetchAllQuotas } from "./history";
+import { UsageView } from "./usageView";
 import { providerOverviewMarkdown, quotaChartMarkdown, remainingHex } from "./quotaChart";
 
 /**
  * "details": list + detail pane per account. "limits": one line per account with every limit inline.
- * "overview": one item per provider with summed limits and a segmented bar across its accounts.
+ * "overview": one item per provider with summed limits. "forecast" and "drain": full-width timelines.
  */
-type View = "details" | "limits" | "overview";
+type View = "details" | "limits" | "overview" | "forecast" | "drain";
 
 const VIEWS: { value: View; title: string; icon: Icon }[] = [
   { value: "details", title: "Details", icon: Icon.Sidebar },
   { value: "limits", title: "Limits", icon: Icon.Gauge },
   { value: "overview", title: "Overview", icon: Icon.BarChart },
+  { value: "forecast", title: "Forecast", icon: Icon.LineChart },
+  { value: "drain", title: "Drain Rate", icon: Icon.Waveform },
 ];
-
-async function fetchAllQuotas(
-  connection: ConnectionId,
-  accounts: QuotaAccount[],
-): Promise<Record<string, QuotaResult>> {
-  const results = await Promise.all(accounts.map(async (a) => [a.auth_index, await loadQuota(connection, a)] as const));
-  return Object.fromEntries(results);
-}
 
 export default function Command() {
   // Remount when the server or key changes, so no kept data or in-flight result from the old connection carries over.
@@ -63,7 +59,7 @@ function Accounts({ connection }: { connection: ConnectionId }) {
   // Key quota fetching on stable fields only, so status changes don't re-hit upstream.
   const quotaAccounts: QuotaAccount[] = (files.data ?? [])
     .filter(supportsQuota)
-    .map(({ auth_index, provider, id_token }) => ({ auth_index, provider, id_token }));
+    .map(({ id, auth_index, provider, id_token }) => ({ id, auth_index, provider, id_token }));
   const quotas = useCachedPromise(fetchAllQuotas, [connection, quotaAccounts], {
     execute: quotaAccounts.length > 0,
     keepPreviousData: true,
@@ -114,10 +110,38 @@ function Accounts({ connection }: { connection: ConnectionId }) {
     view,
     nextView,
     switchView: () => setView(nextView.value),
+    setView,
     reloadAll,
     refreshAll,
     reloadFiles: files.revalidate,
   };
+
+  if (view === "forecast" || view === "drain") {
+    return (
+      <UsageView
+        connection={connection}
+        mode={view}
+        accounts={quotaAccounts}
+        quotas={quotas.data?.quotas ?? {}}
+        historyError={quotas.data?.historyError ?? null}
+        loading={files.isLoading || quotas.isLoading}
+        reload={reloadAll}
+        toggle={() => setView(view === "forecast" ? "drain" : "forecast")}
+        showAccounts={setView}
+        actions={
+          <>
+            <Action
+              title={`Show ${nextView.title}`}
+              icon={nextView.icon}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={actions.switchView}
+            />
+            <OpenManagementCenterAction />
+          </>
+        }
+      />
+    );
+  }
 
   return (
     <List
@@ -145,7 +169,7 @@ function Accounts({ connection }: { connection: ConnectionId }) {
                 key={provider}
                 provider={provider}
                 accounts={accounts}
-                quotas={quotas.data}
+                quotas={quotas.data?.quotas}
                 loading={quotas.isLoading}
                 actions={actions}
               />
@@ -154,14 +178,14 @@ function Accounts({ connection }: { connection: ConnectionId }) {
             <List.Section
               key={provider}
               title={providerTitle(provider)}
-              subtitle={sectionSubtitle(accounts, quotas.data)}
+              subtitle={sectionSubtitle(accounts, quotas.data?.quotas)}
             >
               {accounts.map((file) => (
                 <AccountItem
                   key={file.id}
                   file={file}
-                  result={quotas.data?.[file.auth_index]}
-                  quotaLoading={supportsQuota(file) && !quotas.data?.[file.auth_index] && quotas.isLoading}
+                  result={quotas.data?.quotas?.[file.auth_index]}
+                  quotaLoading={supportsQuota(file) && !quotas.data?.quotas?.[file.auth_index] && quotas.isLoading}
                   actions={actions}
                 />
               ))}
@@ -176,6 +200,7 @@ type ListActions = {
   view: View;
   nextView: (typeof VIEWS)[number];
   switchView: () => void;
+  setView: (view: View) => void;
   reloadAll: () => void;
   refreshAll: () => void;
   reloadFiles: () => void;
@@ -308,13 +333,34 @@ function CommonActions({ actions }: { actions: ListActions }) {
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
         onAction={actions.reloadAll}
       />
+      <ViewActions actions={actions} />
+      <OpenManagementCenterAction />
+    </>
+  );
+}
+
+function ViewActions({ actions }: { actions: ListActions }) {
+  return (
+    <>
       <Action
         title={`Show ${actions.nextView.title}`}
         icon={actions.nextView.icon}
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={actions.switchView}
       />
-      <OpenManagementCenterAction />
+      <ActionPanel.Submenu title="Switch View" icon={Icon.AppWindow}>
+        {VIEWS.map((v) => (
+          <Action key={v.value} title={v.title} icon={v.icon} onAction={() => actions.setView(v.value)} />
+        ))}
+      </ActionPanel.Submenu>
+      {actions.view !== "forecast" && actions.view !== "drain" && (
+        <Action
+          title="Show Forecast"
+          icon={Icon.LineChart}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          onAction={() => actions.setView("forecast")}
+        />
+      )}
     </>
   );
 }
@@ -526,10 +572,13 @@ function sectionSubtitle(accounts: AuthFile[], quotas: Record<string, QuotaResul
   return `${count} · W ${left}% / ${weekly.length * 100}%`;
 }
 
-/** Provider logos from the Management Center; OpenAI's is monochrome, so it's tinted to the text color. */
+/** Bundled Management Center logos; monochrome marks follow Raycast’s text color. */
 function providerIcon(provider: string): Image.ImageLike {
   if (provider === "claude") return { source: "claude.svg" };
   if (provider === "codex") return { source: "openai.svg", tintColor: Color.PrimaryText };
+  if (provider === "antigravity") return { source: "antigravity.svg" };
+  if (provider === "meta") return { source: "meta.svg" };
+  if (provider === "xai") return { source: "xai.svg", tintColor: Color.PrimaryText };
   return Icon.Person;
 }
 
@@ -545,7 +594,13 @@ function accountTitle(file: AuthFile | undefined): string | undefined {
 }
 
 function providerTitle(provider: string): string {
-  return provider === "codex" ? "Codex" : provider === "claude" ? "Claude" : titleCase(provider);
+  return provider === "codex"
+    ? "Codex"
+    : provider === "claude"
+      ? "Claude"
+      : provider === "xai"
+        ? "xAI"
+        : titleCase(provider);
 }
 
 function titleCase(value: string): string {

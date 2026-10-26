@@ -29,7 +29,7 @@ export type ResetOffer =
 export type Quota = { plan: string | null; windows: QuotaWindow[]; reset: ResetOffer | null };
 
 /** The account fields quota fetching depends on; stable across routine status changes. */
-export type QuotaAccount = Pick<AuthFile, "auth_index" | "provider" | "id_token">;
+export type QuotaAccount = Pick<AuthFile, "auth_index" | "provider" | "id_token"> & { id?: string };
 
 export function supportsQuota(file: AuthFile): boolean {
   return (file.provider === "codex" || file.provider === "claude") && !file.disabled && file.auth_index !== "";
