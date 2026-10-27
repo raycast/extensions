@@ -1,5 +1,22 @@
 # Changelog
 
+## [Saving again, cleaner lists and fixes] - 2026-10-27
+
+- Saving a link that's already in Teak moves that card to the top of your library, and back from Archive, instead of stopping at "Already saved"
+- A type menu beside the search bar filters by Links, Text, Quotes, Images and more, in step with `type:`
+- Images show a thumbnail and palettes one of their real colors in the list, other cards a colored type icon
+- Every tag shows on hover behind a **+N**, and the date is when the card was last saved, matching the list's order
+- Lists show a section with a card count, and Archive and Favorites no longer repeat the archived mark or star on every card
+- Card actions are grouped the same way in lists and details, with Move to Trash and the account actions last
+- Empty and failed lists keep Reload, Clear Filters, Leave Archive or Leave Trash, Open Teak and Sign Out
+- A signed-out command opens Sign in with Teak right away
+- Card details lead with the card's states and tags, and skip content that only repeats the link or the title
+- Random Cards tells an empty vault apart from a finished shuffle
+- Browse Tags and Browse Folders can reload after an error, and show each count once
+- An untitled upload shows its file name instead of "IMAGE Card"
+- Settings links and API key hints point to Teak Settings → Integrations → API keys
+- New store screenshots
+
 ## [Folders, Find Similar, done states and more] - 2026-10-21
 
 - New Browse Folders command lists your folders and smart folders and opens any of them as a card list

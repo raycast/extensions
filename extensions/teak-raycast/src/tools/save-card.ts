@@ -17,5 +17,7 @@ export default async function tool(content: string) {
     "silent",
   );
 
-  return `Saved to Teak: ${result.cardId}`;
+  return result.resaved
+    ? `Already in Teak, moved to the top: ${result.cardId}`
+    : `Saved to Teak: ${result.cardId}`;
 }

@@ -153,11 +153,25 @@ const normalizeFavorited = (value?: string): boolean | undefined => {
 const WHITESPACE = /\s/;
 const NEEDS_QUOTING = /[\s":\\]/;
 
-const tokenizeSearchText = (rawQuery: string): string[] => {
-  const tokens: string[] = [];
+interface SearchToken {
+  /** The whole token was one quoted phrase: words to match, never a filter. */
+  phrase: boolean;
+  text: string;
+}
+
+const tokenizeSearchText = (rawQuery: string): SearchToken[] => {
+  const tokens: SearchToken[] = [];
   let current = "";
   let hasContent = false;
   let inQuotes = false;
+  let phrase = false;
+
+  const push = () => {
+    tokens.push({ phrase, text: current });
+    current = "";
+    hasContent = false;
+    phrase = false;
+  };
 
   for (let index = 0; index < rawQuery.length; index += 1) {
     const char = rawQuery[index];
@@ -183,6 +197,7 @@ const tokenizeSearchText = (rawQuery: string): string[] => {
     }
 
     if (char === '"') {
+      phrase = !hasContent;
       inQuotes = true;
       hasContent = true;
       continue;
@@ -190,23 +205,26 @@ const tokenizeSearchText = (rawQuery: string): string[] => {
 
     if (WHITESPACE.test(char)) {
       if (hasContent) {
-        tokens.push(current);
-        current = "";
-        hasContent = false;
+        push();
       }
       continue;
     }
 
+    // A word glued to a closing quote isn't a plain phrase any more.
+    phrase = false;
     current += char;
     hasContent = true;
   }
 
   if (hasContent) {
-    tokens.push(current);
+    push();
   }
 
   return tokens;
 };
+
+const quotePhrase = (value: string): string =>
+  `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
 const formatFilterValue = (value: string): string => {
   if (!NEEDS_QUOTING.test(value)) {
@@ -244,7 +262,13 @@ export const parseSearchFilters = (rawQuery: string): ParsedSearchFilters => {
   const ocrText: string[] = [];
   const price: string[] = [];
 
-  for (const token of tokens) {
+  for (const { phrase, text: token } of tokens) {
+    if (phrase) {
+      if (token.trim()) {
+        queryTerms.push(quotePhrase(token));
+      }
+      continue;
+    }
     const normalized = token.toLowerCase();
 
     if (["fav", "favorite", "favorites"].includes(normalized)) {

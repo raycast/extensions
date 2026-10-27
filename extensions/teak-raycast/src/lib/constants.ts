@@ -44,9 +44,12 @@ const normalizeUrl = (url: string): string =>
 export const getApiBaseUrl = (): string =>
   normalizeUrl(environment.isDevelopment ? DEV_API_URL : PROD_API_URL);
 
-export const TEAK_SETTINGS_URL = environment.isDevelopment
-  ? `${TEAK_DEV_APP_URL}/settings`
-  : `${TEAK_APP_URL}/settings`;
+export const TEAK_HOME_URL = environment.isDevelopment
+  ? TEAK_DEV_APP_URL
+  : TEAK_APP_URL;
+
+/** Settings → Integrations, where API keys are made. */
+export const TEAK_API_KEYS_URL = `${TEAK_HOME_URL}/settings/integrations`;
 
 export const getTeakCardUrl = (cardId: string): string => {
   const url = new URL(

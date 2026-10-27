@@ -1,18 +1,21 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import type { RaycastCard } from "../lib/api";
-import { getOpenableUrl, getTeakUrl } from "../lib/cardDetailModel";
+import {
+  getCardTitle,
+  getOpenableUrl,
+  getTeakUrl,
+} from "../lib/cardDetailModel";
 import type { ParsedSearchFilters } from "../lib/searchFilters";
 import {
   deleteCardForever,
   moveCardToTrash,
   restoreFromTrash,
 } from "../lib/trashActions";
+import { AccountActions } from "./AccountActions";
 import { CardDetail } from "./CardDetail";
 import { CardFilterActions } from "./CardFilterActions";
-import { CardOrganizeActions } from "./CardOrganizeActions";
+import { CardCopyActions, CardOrganizeActions } from "./CardOrganizeActions";
 import { EditCardForm } from "./EditCardForm";
-import { SetApiKeyAction } from "./SetApiKeyAction";
-import { SignOutAction } from "./SignOutAction";
 
 export interface CardListActionsProps {
   canSaveSmartFolder: boolean;
@@ -43,33 +46,42 @@ export function CardListActions(props: CardListActionsProps) {
   } = props;
   const openableUrl = getOpenableUrl(card);
   return (
-    <ActionPanel>
-      <Action.Push
-        icon={Icon.Eye}
-        target={
-          <CardDetail
-            card={card}
-            onCardDeleted={onCardRemoved}
-            onCardUpdated={onCardUpdated}
-            onFilterByTag={onFilterByTag}
-            onNavigateBackAfterDelete={() => undefined}
-          />
-        }
-        title="View Card"
-      />
-      {openableUrl ? (
-        <Action.OpenInBrowser title="Open URL" url={openableUrl} />
-      ) : null}
-      {card.fileUrl ? (
-        <Action.OpenInBrowser
-          icon={Icon.Paperclip}
-          title="Open File"
-          url={card.fileUrl}
+    <ActionPanel title={getCardTitle(card, 40)}>
+      <ActionPanel.Section>
+        <Action.Push
+          icon={Icon.Sidebar}
+          target={
+            <CardDetail
+              card={card}
+              onCardDeleted={onCardRemoved}
+              onCardUpdated={onCardUpdated}
+              onFilterByTag={onFilterByTag}
+              onNavigateBackAfterDelete={() => undefined}
+              onSignedOut={onSignedOut}
+            />
+          }
+          title="View Card"
         />
-      ) : null}
-      <Action.OpenInBrowser title="Open in Teak" url={getTeakUrl(card)} />
+        {openableUrl ? (
+          <Action.OpenInBrowser title="Open URL" url={openableUrl} />
+        ) : null}
+        {card.fileUrl ? (
+          <Action.OpenInBrowser
+            icon={Icon.Paperclip}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+            title="Open File"
+            url={card.fileUrl}
+          />
+        ) : null}
+        <Action.OpenInBrowser
+          icon={Icon.AppWindow}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          title="Open in Teak"
+          url={getTeakUrl(card)}
+        />
+      </ActionPanel.Section>
       {inTrash ? (
-        <ActionPanel.Section>
+        <ActionPanel.Section title="Trash">
           <Action
             icon={Icon.ArrowCounterClockwise}
             onAction={() => void restoreFromTrash(card, onCardRemoved)}
@@ -79,41 +91,26 @@ export function CardListActions(props: CardListActionsProps) {
           <Action
             icon={Icon.Trash}
             onAction={() => void deleteCardForever(card, onCardRemoved)}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             style={Action.Style.Destructive}
             title="Delete Forever"
           />
         </ActionPanel.Section>
       ) : (
-        <ActionPanel.Section>
+        <CardOrganizeActions card={card} onCardUpdated={onCardUpdated}>
           <Action
-            icon={Icon.Star}
+            icon={card.isFavorited ? Icon.StarDisabled : Icon.Star}
             onAction={() => onToggleFavorite(card)}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
-            title={card.isFavorited ? "Remove Favorite" : "Add Favorite"}
+            title={card.isFavorited ? "Unfavorite" : "Favorite"}
           />
           <Action.Push
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
             target={<EditCardForm card={card} onCardUpdated={onCardUpdated} />}
             title="Edit Card"
           />
-          <Action
-            icon={Icon.Trash}
-            onAction={() =>
-              void moveCardToTrash(card, {
-                onRemoved: onCardRemoved,
-                onRestored: onCardUpdated,
-              })
-            }
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            style={Action.Style.Destructive}
-            title="Move to Trash"
-          />
-        </ActionPanel.Section>
-      )}
-      {inTrash ? null : (
-        <CardOrganizeActions card={card} onCardUpdated={onCardUpdated} />
+        </CardOrganizeActions>
       )}
       <CardFilterActions
         canSaveSmartFolder={props.canSaveSmartFolder}
@@ -125,18 +122,24 @@ export function CardListActions(props: CardListActionsProps) {
         removeTagFilterFromList={props.removeTagFilterFromList}
         showFavoritesFilter={props.showFavoritesFilter}
       />
-      <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard content={card.content} title="Copy Content" />
-        {card.url ? (
-          <Action.CopyToClipboard content={card.url} title="Copy URL" />
-        ) : null}
-        <Action.CopyToClipboard
-          content={getTeakUrl(card)}
-          title="Copy Teak Link"
-        />
-      </ActionPanel.Section>
-      <SetApiKeyAction />
-      <SignOutAction onSignedOut={onSignedOut} />
+      <CardCopyActions card={card} />
+      {inTrash ? null : (
+        <ActionPanel.Section>
+          <Action
+            icon={Icon.Trash}
+            onAction={() =>
+              void moveCardToTrash(card, {
+                onRemoved: onCardRemoved,
+                onRestored: onCardUpdated,
+              })
+            }
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
+            title="Move to Trash"
+          />
+        </ActionPanel.Section>
+      )}
+      <AccountActions onSignedOut={onSignedOut} />
     </ActionPanel>
   );
 }

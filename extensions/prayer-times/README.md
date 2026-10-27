@@ -9,7 +9,7 @@ reminders in Apple Reminders, and tracks which prayers were prayed on time.
 
 - **Menu bar countdown**: the masjid on a disc colored by where the prayer's time stands, the prayer, and
   what comes next: `Dhuhr Starts 15m`, `Dhuhr Jamaat 30m`, `Dhuhr Pref. ends 8m`, `Dhuhr Ending soon 16m`,
-  `Dhuhr Ends 16m`, or `Dhuhr ended` once its time is over unmarked. Grey before the start, dark green from
+  `Dhuhr Ends 16m`; it clears once the prayer's time ends. Grey before the start, dark green from
   the start, light green from **Before Preferred End** minutes before the preferred end, yellow after it,
   red from **Ending Soon** minutes before the end (when the preferred end comes later, it stays yellow to the end). The dropdown names the current period in words, lists every
   prayer plus sunrise, midnight and tahajjud, color-coded as with jamaat, on time, late,
