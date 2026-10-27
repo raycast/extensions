@@ -33,7 +33,15 @@ function RepositoryForm() {
     async () => {
       const [{ data: viewer }, organizations] = await Promise.all([
         octokit.users.getAuthenticated(),
-        octokit.paginate(octokit.orgs.listForAuthenticatedUser, { per_page: 100 }),
+        // Personal repositories don't need the organization list, so a failure here shouldn't block the form
+        octokit.paginate(octokit.orgs.listForAuthenticatedUser, { per_page: 100 }).catch((error) => {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed loading organizations",
+            message: getErrorMessage(error),
+          });
+          return [];
+        }),
       ]);
 
       return {
