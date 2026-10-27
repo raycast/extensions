@@ -10,6 +10,7 @@ export function compactSnapshotForList(
     indicator: snapshot.indicator,
     fetchedAt: snapshot.fetchedAt,
     error: snapshot.error,
+    redetectedProvider: snapshot.redetectedProvider,
     components: [],
     incidents: snapshot.incidents.map((incident) => ({
       id: incident.id,

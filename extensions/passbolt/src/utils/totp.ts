@@ -1,6 +1,7 @@
 import { TOTP, URI } from "otpauth";
-import { getDomain } from "tldts";
-import type { Resource, ResourceType, TotpConfiguration, TotpResource } from "../types";
+import { websiteMatchContext, websiteRelevanceScore } from "./website";
+export { websiteHostname, websiteMatchScore } from "./website";
+import type { ResourceType, TotpConfiguration, TotpResource } from "../types";
 
 function object(value: unknown): Record<string, unknown> | undefined {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -131,49 +132,13 @@ export function filterTotpResources(resources: TotpResource[], query: string): T
   });
 }
 
-export function websiteHostname(value?: string): string | undefined {
-  if (!value) return undefined;
-  try {
-    const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(value) && !/^[^/:]+:\d+(?:\/|$)/.test(value);
-    const url = new URL(hasScheme ? value : `https://${value}`);
-    return ["https:", "http:"].includes(url.protocol) ? url.hostname.toLowerCase().replace(/\.$/, "") : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-// The current website only needs parsing once per ranking pass instead of once per entry.
-interface WebsiteMatchContext {
-  host: string;
-  domain: string | null;
-}
-
-function websiteMatchContext(currentUrl?: string): WebsiteMatchContext | undefined {
-  const host = websiteHostname(currentUrl);
-  if (!host) return undefined;
-  return { host, domain: getDomain(host, { allowPrivateDomains: true }) };
-}
-
-function websiteScore(resource: Resource, context?: WebsiteMatchContext): number {
-  if (!context) return 0;
-  let score = 0;
-  for (const uri of [resource.uri, ...(resource.uris ?? [])]) {
-    const host = websiteHostname(uri);
-    if (!host) continue;
-    if (host === context.host) return 2;
-    if (context.domain && getDomain(host, { allowPrivateDomains: true }) === context.domain) score = 1;
-  }
-  return score;
-}
-
-export function websiteMatchScore(resource: Resource, currentUrl?: string): number {
-  return websiteScore(resource, websiteMatchContext(currentUrl));
-}
-
-function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
-  const context = websiteMatchContext(currentUrl);
+function scoreTotpResources(resources: TotpResource[], currentUrl?: string, title?: string) {
+  const context = websiteMatchContext(currentUrl, title);
   return resources
-    .map((resource) => ({ resource, score: websiteScore(resource, context) }))
+    .map((resource) => ({
+      resource,
+      score: websiteRelevanceScore(resource, context, [resource.totp?.issuer, resource.totp?.label]),
+    }))
     .sort(
       (a, b) =>
         b.score - a.score ||
@@ -182,18 +147,19 @@ function scoreTotpResources(resources: TotpResource[], currentUrl?: string) {
     );
 }
 
-export function rankTotpResources(resources: TotpResource[], currentUrl?: string): TotpResource[] {
-  return scoreTotpResources(resources, currentUrl).map(({ resource }) => resource);
+export function rankTotpResources(resources: TotpResource[], currentUrl?: string, title?: string): TotpResource[] {
+  return scoreTotpResources(resources, currentUrl, title).map(({ resource }) => resource);
 }
 
 // Scores each entry once and splits the ranked list in a single pass.
 export function rankAndPartitionTotpResources(
   resources: TotpResource[],
   currentUrl?: string,
+  title?: string,
 ): { matching: TotpResource[]; others: TotpResource[] } {
   const matching: TotpResource[] = [];
   const others: TotpResource[] = [];
-  for (const { resource, score } of scoreTotpResources(resources, currentUrl)) {
+  for (const { resource, score } of scoreTotpResources(resources, currentUrl, title)) {
     (score > 0 ? matching : others).push(resource);
   }
   return { matching, others };

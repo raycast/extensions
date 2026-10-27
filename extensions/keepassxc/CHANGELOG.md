@@ -1,5 +1,21 @@
 # KeePassXC Extension Changelog
 
+## [1.11.0] - 2026-10-23
+
+### Added
+
+- Fuzzy search on entry titles.
+- Filter entries by username with `u:<name>` anywhere in the search bar.
+- Show or hide the password when unlocking the database.
+
+### Changed
+
+- Favicons are displayed by default.
+
+### Fixed
+
+- Error about locale "C" not being UTF-8 when running `keepassxc-cli`.
+
 ## [1.10.0] - 2026-03-30
 
 ### Added

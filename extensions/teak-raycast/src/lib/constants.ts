@@ -1,7 +1,6 @@
 import { environment } from "@raycast/api";
 
 const DEFAULT_TEAK_DEV_APP_URL = "http://localhost:3000";
-// Dev Convex deployment that `convex dev` targets.
 const DEFAULT_TEAK_DEV_API_URL = "https://reminiscent-kangaroo-59.convex.site";
 
 const normalizeBaseUrl = (label: string, rawUrl: string): string => {
