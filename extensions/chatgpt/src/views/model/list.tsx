@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Model } from "../../type";
 
 export const ModelListView = ({
@@ -42,8 +42,6 @@ export const ModelListItem = ({
 
 const ModelDetailView = (props: { model: Model; markdown?: string | null | undefined }) => {
   const { model, markdown } = props;
-  const icons = [Icon.StackedBars1, Icon.StackedBars2, Icon.StackedBars3, Icon.StackedBars4];
-  const t = Number.parseFloat((model.temperature ?? "0").toString());
 
   return (
     <List.Item.Detail
@@ -53,11 +51,6 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
           <List.Item.Detail.Metadata.TagList title="Model">
             <List.Item.Detail.Metadata.TagList.Item text={model.option} />
           </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Label
-            title="Temperature"
-            text={model.temperature.toLocaleString()}
-            icon={icons[Math.min(Math.floor(t / 0.5), 3)]}
-          />
           <List.Item.Detail.Metadata.Label
             title="Reasoning"
             text={model.enableReasoningEffortChange ? model.reasoningEffort : "disabled"}

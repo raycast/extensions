@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
@@ -8,6 +9,14 @@ import { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
 
 export default function Saved() {
+  return (
+    <AuthGate>
+      <SavedContent />
+    </AuthGate>
+  );
+}
+
+function SavedContent() {
   const savedChat = useSavedChat();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);

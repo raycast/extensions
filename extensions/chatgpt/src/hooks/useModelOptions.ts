@@ -1,43 +1,52 @@
 import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { listCodexAppServerModels } from "../utils/codex-app-server";
+import { resolveAuthStatus } from "../utils/auth";
+import { normalizeAvailableOptions } from "../utils/model-support";
 import { getModelIds } from "../utils/model-response";
-import { getConfiguration, useChatGPT } from "./useChatGPT";
+import { useChatGPT } from "./useChatGPT";
+import { getConfiguration } from "./useChatGPT";
 
 export function useModelOptions() {
-  const gpt = useChatGPT();
-  const { useAzure } = getConfiguration();
+  const client = useChatGPT({ allowMissingApiKey: true });
   const [options, setOptions] = useState<string[]>([]);
-  const [isLoading, setLoading] = useState(!useAzure);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (useAzure) {
-      setLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
+    let active = true;
     setLoading(true);
-    gpt.models
-      .list({ signal: controller.signal })
-      .then((res) => {
-        if (controller.signal.aborted) return;
-        setOptions(getModelIds(res.data, (res as unknown as { body: unknown }).body));
-      })
-      .catch(async (err: unknown) => {
-        if (controller.signal.aborted) return;
-        console.error(err);
-        await showToast({
-          title: "Could not load models",
-          message: "You can still enter a model ID manually. Check your API endpoint and key.",
-          style: Toast.Style.Failure,
-        });
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [gpt, useAzure]);
+    const load = async () => {
+      try {
+        const auth = await resolveAuthStatus();
+        const models =
+          auth.provider === "apiKey" && client
+            ? getConfiguration().useAzure
+              ? [getConfiguration().azureDeployment].filter((value): value is string => !!value)
+              : await client.models
+                  .list()
+                  .then((res) => getModelIds(res.data, (res as unknown as { body: unknown }).body))
+            : (await listCodexAppServerModels())
+                .filter((model) => !model.hidden)
+                .map((model) => model.model || model.id);
+        if (active) setOptions(normalizeAvailableOptions(models));
+      } catch (error) {
+        if (active) {
+          setOptions([]);
+          await showToast({
+            title: "Could not load available models",
+            message: String(error),
+            style: Toast.Style.Failure,
+          });
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [client]);
 
   return { options, isLoading };
 }
