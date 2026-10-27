@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Just Domain and Just Publish MCP Servers] - {PR_MERGE_DATE}
+## [Add Just Domain and Just Publish MCP Servers] - 2026-10-27
 
 - Add Just Domain. to the official registry: check a domain name, both prices and whether it can transfer in, then register it on justdomain.ai. Hosted remote Streamable HTTP server at https://mcp.justdomain.ai/ with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 - Add Just Publish. to the official registry: publish and update the website you built with AI at a live public URL. Hosted remote Streamable HTTP server at https://mcp.justpublish.ai/ with OAuth sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
