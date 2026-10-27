@@ -1,0 +1,22 @@
+#!/bin/sh
+# Blocks commits that would add real customer data to fixtures/.
+# Enable with: git config core.hooksPath .githooks
+
+files=$(git diff --cached --name-only --diff-filter=ACM -- fixtures/)
+[ -z "$files" ] && exit 0
+
+if git diff --cached --name-only -- fixtures/raw/ | grep -q .; then
+  echo "pre-commit: fixtures/raw/ holds unscrubbed API responses and must never be committed." >&2
+  exit 1
+fi
+
+# Any email not on example.com, or a Stripe id that wasn't faked.
+leaks=$(git diff --cached -U0 -- $files | grep '^+' |
+  grep -nE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|"(cus|sub|pm|in|price|prod)_[A-Za-z0-9]+"' |
+  grep -vE '@example\.com|"(cus|sub|pm|in|price|prod)_fake[0-9]+"')
+
+if [ -n "$leaks" ]; then
+  echo "pre-commit: possible customer data in staged fixtures:" >&2
+  echo "$leaks" | head -20 >&2
+  exit 1
+fi

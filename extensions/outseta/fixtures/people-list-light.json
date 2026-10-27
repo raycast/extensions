@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "limit": 3,
+    "offset": 0,
+    "total": 6
+  },
+  "items": [
+    {
+      "Email": "edsger.hopper@example.com",
+      "FirstName": "Barbara",
+      "LastName": "Dijkstra",
+      "PersonAccount": [
+        {
+          "Account": {
+            "Name": "Liskov & Co"
+          }
+        }
+      ],
+      "Uid": "fake0009"
+    },
+    {
+      "Email": "radia.allen@example.com",
+      "FirstName": "Linus",
+      "LastName": "Perlman",
+      "PersonAccount": [
+        {
+          "Account": {
+            "Name": "Lovelace & Co"
+          }
+        }
+      ],
+      "Uid": "fake0023"
+    },
+    {
+      "Email": "edsger.turing@example.com",
+      "FirstName": "Barbara",
+      "LastName": "Liskov",
+      "PersonAccount": [
+        {
+          "Account": {
+            "Name": "Knuth & Co"
+          }
+        }
+      ],
+      "Uid": "fake0038"
+    }
+  ]
+}
