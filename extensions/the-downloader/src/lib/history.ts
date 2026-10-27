@@ -148,12 +148,13 @@ let writeChain: Promise<unknown> = Promise.resolve();
 // a write check in another command can tell a deliberate deletion from a
 // concurrent write that dropped its entry, and doesn't bring it back.
 const DELETIONS_KEY = "download-history-deletions-v1";
-const REMOVED_LIMIT = 200;
+// Room for a whole history cleared at once, plus as many removed after it.
+const REMOVED_LIMIT = 2 * HISTORY_LIMIT;
 
 export type HistoryDeletions = {
   /** When the history was last cleared (ms). */
   clearedAt: number;
-  /** IDs removed since then, oldest first: one by one, or by the clear itself. */
+  /** IDs the user deleted, oldest first: one by one, or by a clear. */
   removed: string[];
 };
 
@@ -178,9 +179,13 @@ export function wasDeleted(deletions: HistoryDeletions, id: string, recordedAt: 
   return deletions.removed.includes(id) || deletions.clearedAt > recordedAt;
 }
 
+async function loadDeletions(): Promise<HistoryDeletions> {
+  return parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY));
+}
+
 /** Save a deletion marker. Throws when it can't be saved. */
 async function saveDeletion(change: (d: HistoryDeletions) => HistoryDeletions): Promise<void> {
-  const d = change(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)));
+  const d = change(await loadDeletions());
   await LocalStorage.setItem(DELETIONS_KEY, JSON.stringify({ ...d, removed: d.removed.slice(-REMOVED_LIMIT) }));
 }
 
@@ -198,17 +203,23 @@ const VERIFY_ATTEMPTS = 2;
  * change: a deletion saves its marker there, so no other write can land in
  * between, and a marker that can't be saved rejects `written` with the list
  * untouched.
+ *
+ * Every write also leaves out the entries the user deleted, and every check
+ * fails while one of them is back: another command's write may have started
+ * from the list as it was before a Remove or Clear History.
  */
 function mutate(
   change: (list: HistoryEntry[]) => HistoryEntry[],
-  applied?: (list: HistoryEntry[]) => boolean | Promise<boolean>,
+  applied?: (list: HistoryEntry[], deletions: HistoryDeletions) => boolean,
   attempts = VERIFY_ATTEMPTS,
   before?: (list: HistoryEntry[]) => Promise<void>,
 ): { written: Promise<HistoryEntry[]>; verified: Promise<void> } {
   const written = writeChain.then(async () => {
     const current = parseHistory(await LocalStorage.getItem<string>(STORAGE_KEY));
     await before?.(current);
-    const list = change(current);
+    // Read after the list, so any deletion already in it is covered.
+    const removed = new Set((await loadDeletions()).removed);
+    const list = change(current).filter((e) => !removed.has(e.id));
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     return list;
   });
@@ -218,7 +229,10 @@ function mutate(
       ? written
           .then(() => new Promise((resolve) => setTimeout(resolve, VERIFY_DELAY_MS)))
           .then(async () => {
-            if (!(await applied(await loadHistory()))) await mutate(change, applied, attempts - 1).verified;
+            const list = await loadHistory();
+            const deletions = await loadDeletions();
+            const undone = !applied(list, deletions) || list.some((e) => deletions.removed.includes(e.id));
+            if (undone) await mutate(change, applied, attempts - 1).verified;
           })
           .catch(() => undefined)
       : written.then(
@@ -247,9 +261,7 @@ export async function recordDownload(entry: HistoryEntry | undefined): Promise<v
       (list) => addEntry(list, recorded),
       // Missing because the user removed it or cleared the history (maybe in
       // the History command) is fine; only a concurrent write's loss is re-applied.
-      async (list) =>
-        list.some((e) => e.id === recorded.id) ||
-        wasDeleted(parseDeletions(await LocalStorage.getItem<string>(DELETIONS_KEY)), recorded.id, recordedAt),
+      (list, deletions) => list.some((e) => e.id === recorded.id) || wasDeleted(deletions, recorded.id, recordedAt),
     );
     await written;
     // Wait for the check too: a no-view command (Fast Download) may end as soon as this returns.
@@ -276,12 +288,22 @@ export function removeFromHistory(id: string): Promise<HistoryEntry[]> {
 /** Clear the history. Rejects, leaving it as it was, when the clear can't be saved. */
 export function clearHistory(): Promise<HistoryEntry[]> {
   // Everything recorded before now is covered by `clearedAt`; the entries being
-  // cleared are listed too, for those recorded in this same millisecond. Newest
-  // last, so they're the ones kept within the limit.
+  // cleared are listed too, for those recorded in this same millisecond and so
+  // other commands' writes leave them out. Newest last, so they're the ones
+  // kept within the limit.
+  let cleared: string[] = [];
+  // The check and its retry drop only what was cleared: a download recorded
+  // after the clear stays.
   return mutate(
-    () => [],
-    undefined,
+    (list) => list.filter((e) => !cleared.includes(e.id)),
+    (list) => !list.some((e) => cleared.includes(e.id)),
     VERIFY_ATTEMPTS,
-    (list) => saveDeletion(() => ({ clearedAt: Date.now(), removed: list.map((e) => e.id).reverse() })),
+    (list) => {
+      cleared = list.map((e) => e.id).reverse();
+      return saveDeletion((d) => ({
+        clearedAt: Date.now(),
+        removed: [...d.removed.filter((id) => !cleared.includes(id)), ...cleared],
+      }));
+    },
   ).written;
 }

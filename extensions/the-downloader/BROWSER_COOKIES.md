@@ -12,6 +12,12 @@ That's it for most people — the extension finds the right profile automaticall
 
 If the browser isn't installed (or hasn't been opened yet, so it has no cookies on disk), the download stops with a toast like _"No Arc profile with cookies was found"_. Install/open the browser, or switch to **Custom**.
 
+## macOS: Chrome-family browsers and the Keychain
+
+On macOS, Chrome, Chromium, Edge, Brave, Opera, Vivaldi and Arc encrypt their cookies with a key that the browser keeps in your Keychain (for example _"Chrome Safe Storage"_). To read those cookies, gallery-dl asks macOS for that key, and macOS shows a prompt where you choose **Allow** or **Deny**. The Downloader itself never reads or writes the Keychain, and nothing is asked unless you pick one of these browsers.
+
+Firefox (and Zen, Floorp, LibreWolf) and Safari don't use the Keychain for cookies, so they never trigger this prompt. On Windows there is no Keychain prompt for any browser.
+
 ## Custom Browser Spec
 
 Pick **Custom** when:

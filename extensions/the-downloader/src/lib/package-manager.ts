@@ -40,23 +40,38 @@ export async function upgrade(
       }
     }
   } else if (isWindows) {
-    const wingetPath = await getWingetPath();
-    for (const pkg of WINGET_PACKAGES) {
-      if (!outdated[pkg]) continue;
-      attempted += 1;
+    // Look winget up only when there's something for it to upgrade, and turn a
+    // missing winget into per-package issues instead of throwing: spotDL below
+    // comes from GitHub and must still update without winget.
+    const pending = WINGET_PACKAGES.filter((pkg) => outdated[pkg]);
+    let wingetPath = "";
+    if (pending.length > 0) {
       try {
-        await execa(wingetPath, ["upgrade", "--id", pkg, "--accept-source-agreements", "--accept-package-agreements"], {
-          timeout: UPGRADE_TIMEOUT_MS,
-        });
+        wingetPath = await getWingetPath();
       } catch (error) {
-        // winget exits non-zero when a package has no available upgrade (it
-        // may have been upgraded since the check) — not a real failure.
-        const exitCode = (error as { exitCode?: number }).exitCode;
-        if (exitCode === 0 || isWingetUpdateNotApplicable(exitCode)) continue;
-        issues.push({ pkg, message: errorMessageOf(error) });
+        attempted += pending.length;
+        for (const pkg of pending) issues.push({ pkg, message: errorMessageOf(error) });
       }
     }
-    resetWingetPackagesCache();
+    if (wingetPath) {
+      for (const pkg of pending) {
+        attempted += 1;
+        try {
+          await execa(
+            wingetPath,
+            ["upgrade", "--id", pkg, "--accept-source-agreements", "--accept-package-agreements"],
+            { timeout: UPGRADE_TIMEOUT_MS },
+          );
+        } catch (error) {
+          // winget exits non-zero when a package has no available upgrade (it
+          // may have been upgraded since the check) — not a real failure.
+          const exitCode = (error as { exitCode?: number }).exitCode;
+          if (exitCode === 0 || isWingetUpdateNotApplicable(exitCode)) continue;
+          issues.push({ pkg, message: errorMessageOf(error) });
+        }
+      }
+      resetWingetPackagesCache();
+    }
   }
   if (outdated["spotdl"]) {
     attempted += 1;

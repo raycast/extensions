@@ -75,10 +75,16 @@ export function getHomebrewPath(): string {
 
 export async function getWingetPath() {
   // PATH lookup first — it's fast and authoritative when winget's directory
-  // is on PATH (the normal case in a shell).
+  // is on PATH (the normal case in a shell). `where` prints one path per line
+  // (e.g. stable + preview winget), so split before cleaning each line: the
+  // cleanup strips newlines and would otherwise glue the paths together.
   try {
-    const wingetPath = sanitizeWindowsPath(execSync("where winget").toString().trim());
-    if (wingetPath) return wingetPath.split("\n")[0];
+    const found = execSync("where winget")
+      .toString()
+      .split("\n")
+      .map(sanitizeWindowsPath)
+      .find((line) => line && fs.existsSync(line));
+    if (found) return found;
   } catch {
     /* fall through to the canonical-install-location fallback */
   }

@@ -1,8 +1,10 @@
 import fs from "node:fs";
 import { getGalleryDlPath } from "../../utils.js";
+import { detectSource } from "../detect.js";
 import { LinkContext, LinkFact, LinkLoadError } from "../link-context.js";
 import { formatCount } from "../media-info.js";
 import { runWithWatchdog } from "../run.js";
+import { isValidUrl, normalizeUrl } from "../url.js";
 
 // Social posts (Instagram, Reddit, Pinterest, …): gallery-dl's metadata, read
 // with `-j` so nothing is downloaded. The caption or text becomes the body;
@@ -76,7 +78,8 @@ function titleOf(meta: Meta, caption: string | undefined, site: string): string 
 /**
  * gallery-dl's `-j` output as a LinkContext. `[2, meta]` records describe the
  * post, `[3, url, meta]` its files, `[-1, { message }]` an error (e.g. a login
- * wall), which becomes a LinkLoadError saying what to change.
+ * wall), which becomes a LinkLoadError saying what to change. Queue records
+ * (`[6, url, meta]`, a link to read next) are left to loadPostLink.
  */
 export function parseGalleryJson(json: unknown, url: string, now = Date.now()): LinkContext {
   const records = Array.isArray(json) ? (json as unknown[][]).filter(Array.isArray) : [];
@@ -164,6 +167,22 @@ export function buildPostArgs(url: string, cookiesFromBrowser?: string): string[
   ];
 }
 
+/**
+ * A short link (pin.it, a Reddit share link) prints no post, only a queue
+ * record naming the link it stands for. That link, when the output holds
+ * nothing else and it passes the checks a pasted link gets: an http(s) link to
+ * a gallery site. Anything else — a local address, another kind of site — is
+ * never read.
+ */
+function queuedPostUrl(json: unknown): string | undefined {
+  const records = Array.isArray(json) ? (json as unknown[][]).filter(Array.isArray) : [];
+  if (records.some((r) => r[0] === 2 || r[0] === 3 || r[0] === -1)) return undefined;
+  const target = records.find((r) => r[0] === 6)?.[1];
+  if (typeof target !== "string" || !isValidUrl(target)) return undefined;
+  const url = new URL(normalizeUrl(target)).href;
+  return detectSource(url) === "gallery" ? url : undefined;
+}
+
 /** Read a post with gallery-dl. The URL must already be validated and normalized. */
 export async function loadPostLink(
   url: string,
@@ -173,15 +192,19 @@ export async function loadPostLink(
   if (!fs.existsSync(binary)) {
     throw new Error("gallery-dl is not installed. Open The Downloader's Download command to install it.");
   }
-  const { code, stdout, stderr } = await runWithWatchdog(binary, buildPostArgs(url, options.cookiesFromBrowser), {
-    idleMs: 60_000,
-    abortSignal: options.signal,
-  });
-  let json: unknown;
-  try {
-    json = JSON.parse(stdout);
-  } catch {
-    throw new Error(stderr.trim() || `gallery-dl exited with code ${code}`);
-  }
-  return parseGalleryJson(json, url);
+  const read = async (target: string): Promise<unknown> => {
+    const { code, stdout, stderr } = await runWithWatchdog(binary, buildPostArgs(target, options.cookiesFromBrowser), {
+      idleMs: 60_000,
+      abortSignal: options.signal,
+    });
+    try {
+      return JSON.parse(stdout);
+    } catch {
+      throw new Error(stderr.trim() || `gallery-dl exited with code ${code}`);
+    }
+  };
+  const json = await read(url);
+  // Follow a short link once; if what it leads to is another queue record, that is "found nothing".
+  const next = queuedPostUrl(json);
+  return parseGalleryJson(next ? await read(next) : json, url);
 }

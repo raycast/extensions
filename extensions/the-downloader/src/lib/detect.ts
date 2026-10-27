@@ -16,15 +16,38 @@ const GALLERY_DOMAINS = [
 ];
 
 /**
- * Pinterest needs its own check: it serves the same boards from regional TLDs
- * (pinterest.de, pinterest.co.uk, …) and from `pin.it` short links, none of
- * which a fixed "pinterest.com" entry would match. Match `pin.it` exactly, or
- * any host with a `pinterest` domain label (covers regional TLDs and country
- * subdomains like in.pinterest.com) — while leaving lookalikes such as
- * "notpinterest.com" alone.
+ * Pinterest serves the same boards from regional domains (pinterest.de,
+ * pinterest.co.uk, …), from country subdomains (in.pinterest.com) and from
+ * `pin.it` short links. Only these real domains count: gallery-dl reads any
+ * `pinterest.<anything>` host as Pinterest and sends its requests to that host,
+ * so a name such as `pinterest.local` would reach the local network.
  */
+const PINTEREST_DOMAINS = [
+  "pinterest.com",
+  "pinterest.at",
+  "pinterest.ca",
+  "pinterest.ch",
+  "pinterest.cl",
+  "pinterest.co.kr",
+  "pinterest.co.uk",
+  "pinterest.com.au",
+  "pinterest.com.mx",
+  "pinterest.de",
+  "pinterest.dk",
+  "pinterest.es",
+  "pinterest.fr",
+  "pinterest.ie",
+  "pinterest.it",
+  "pinterest.jp",
+  "pinterest.nz",
+  "pinterest.ph",
+  "pinterest.pt",
+  "pinterest.ru",
+  "pinterest.se",
+];
+
 function isPinterest(host: string): boolean {
-  return host === "pin.it" || host.split(".").includes("pinterest");
+  return host === "pin.it" || matches(host, PINTEREST_DOMAINS);
 }
 
 const SPOTIFY_DOMAINS = ["open.spotify.com"];

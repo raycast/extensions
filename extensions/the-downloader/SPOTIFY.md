@@ -2,13 +2,13 @@
 
 The Downloader uses [spotDL](https://github.com/spotDL/spotify-downloader) for Spotify links — pasted track, album, or playlist URLs get fetched as audio files (MP3, M4A, OPUS, or FLAC, your choice).
 
-spotDL needs Spotify API credentials to look up track metadata (title, artist, album, cover art). Without them it falls back to an anonymous flow that frequently fails with _"Could not get session auth tokens"_. The fix is a free Spotify Developer app — it takes about a minute, and you only do it once.
+spotDL needs Spotify API credentials to look up track metadata (title, artist, album, cover art). Without them it falls back to an anonymous flow that frequently fails with _"Could not get session auth tokens"_. The fix is your own Spotify Developer app — it takes about a minute, and you only do it once. Creating the app is free, but Spotify only lets an app in Development Mode work while its owner has **Spotify Premium**. Without Premium, leave the credentials empty: spotDL then uses its anonymous flow, which works only some of the time.
 
 ## One-time setup
 
 ### 1. Create a Spotify Developer app
 
-1. Go to https://developer.spotify.com/dashboard. Log in with any Spotify account (free works).
+1. Go to https://developer.spotify.com/dashboard. Log in with your Spotify Premium account (a free account can create the app, but Spotify won't let it work).
 2. Click **Create app**.
 3. Fill in:
    - **App name** — anything, e.g. `Raycast Downloader`.

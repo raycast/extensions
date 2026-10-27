@@ -91,7 +91,7 @@ ${installBlock}
 
 spotDL needs Spotify API credentials to look up track metadata. Without them, downloads fail with _"Could not get session auth tokens"_ — Spotify's anonymous flow is unreliable. The one-time setup takes about a minute:
 
-1. Go to https://developer.spotify.com/dashboard and log in with any Spotify account.
+1. Go to https://developer.spotify.com/dashboard and log in with your Spotify account. It needs **Spotify Premium**: Spotify only lets developer apps work while their owner has Premium.
 2. Click **Create app**. Use any name and description. For **Redirect URI**, enter \`http://127.0.0.1:9900/\` (this is the address spotDL opens during user-auth; for public-only downloads any value works, but matching this default lets you flip on private-playlist support later). Tick **Web API**. Save.
 3. Open your new app, then **Settings**. Copy the **Client ID**. Click **View client secret** and copy the **Client Secret**.
 4. Open this extension's preferences (⌘,) and paste them into **Spotify: Client ID** and **Spotify: Client Secret**.

@@ -154,6 +154,30 @@ export function abortError(): Error {
   return Object.assign(new Error("The request was stopped."), { name: "AbortError" });
 }
 
+/**
+ * Waits for `promise`, but rejects as soon as `signal` stops — a DNS lookup
+ * takes no signal and can hang. The listener goes once the promise settles,
+ * so redirects don't pile them up.
+ */
+function untilStopped<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const stop = () => reject(abortError());
+    if (signal.aborted) stop();
+    else signal.addEventListener("abort", stop, { once: true });
+    // Always handled, even after a stop: a lookup that fails later must not go unhandled.
+    promise.then(
+      (value) => {
+        signal.removeEventListener("abort", stop);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener("abort", stop);
+        reject(error);
+      },
+    );
+  });
+}
+
 function formatSize(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${Math.round(bytes / (1024 * 1024))} MB` : `${Math.ceil(bytes / 1024)} KB`;
 }
@@ -298,7 +322,8 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
         throw new Error("Only http and https links can be read.");
       }
       const host = current.hostname.replace(/^\[|\]$/g, "");
-      const targets = await checkedAddresses(host, resolve, allow);
+      // The deadline and a stop end the wait too: `controller` stops for both.
+      const targets = await untilStopped(checkedAddresses(host, resolve, allow), controller.signal);
       if (controller.signal.aborted) throw abortError();
       const hop = await request(
         current,
