@@ -1,4 +1,4 @@
-# Copy to AI Chat Changelog
+# AI Web Chat Launcher Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

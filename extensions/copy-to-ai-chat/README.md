@@ -1,10 +1,11 @@
-# Copy to AI Chat
+# AI Web Chat Launcher
 
-<img src="assets/extension-icon.png" alt="Copy to AI Chat" width="96" height="96" />
+<img src="assets/extension-icon.png" alt="AI Web Chat Launcher" width="96" height="96" />
 
-Open Claude, Gemini, ChatGPT, or Grok in Google Chrome from Raycast, with a typed
-query or the text on your clipboard. Review your prompt in the chat box before
-sending it. No API key is needed.
+Start a chat on the Claude, ChatGPT, Gemini, or Grok website with a prompt you type in Raycast or text from your clipboard.
+
+Chats open in Google Chrome. Review your prompt in the chat box before sending
+it. No API key is needed.
 
 ## Commands and shortcuts
 
@@ -83,8 +84,8 @@ bypass any service's sign-in or subscription requirements.
 Requires Node.js and npm, in addition to the requirements above:
 
 ```sh
-git clone https://github.com/noah-jacksonn/copy-to-ai-chat.git
-cd copy-to-ai-chat
+git clone https://github.com/noah-jacksonn/ai-web-chat-launcher.git
+cd ai-web-chat-launcher
 npm ci
 npm run dev
 ```

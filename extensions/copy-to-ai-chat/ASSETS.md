@@ -8,8 +8,8 @@
 
 The respective providers retain ownership of their marks. These icons identify the destinations of the local commands.
 
-`extension-icon.png` is original AI-generated artwork created for Copy to AI
-Chat with GPT Image 2.5 Sunburst, selected by Noah Jackson and exported as a
+`extension-icon.png` is original artwork generated with GPT Image 2.5 Sunburst
+for this extension, selected by Noah Jackson and exported as a
 512 × 512 transparent PNG. It depicts a clipboard and speech bubble and does
 not contain any provider's mark.
 
