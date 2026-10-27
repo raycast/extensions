@@ -70,7 +70,7 @@
       "subtitle": "Bitbucket",
       "description": "Shows Bitbucket notifications in the menu bar: review requests, approvals and requested changes, comments and mentions on pull requests, merged or declined pull requests, and failed pipelines.",
       "mode": "menu-bar",
-      "interval": "15m",
+      "interval": "30m",
       "preferences": [
         {
           "name": "alwaysShow",

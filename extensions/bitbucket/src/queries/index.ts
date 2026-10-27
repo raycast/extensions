@@ -695,19 +695,16 @@ function listClosedPullRequests(repoPath: string, myUuid: string, since: string)
   });
 }
 
-// Bitbucket has no repo-wide comments endpoint, so comments are read per pull request: only
-// PRs you authored or review that changed within the window (a new comment bumps updated_on).
-async function listComments(repoPath: string, myUuid: string, since: string): Promise<PullRequestComment[]> {
-  const pullRequests = await apiGetAll<{ id: number; title: string; author?: { uuid?: string } }>(
-    `${repoPath}/pullrequests`,
-    {
-      q: `(author.uuid="${myUuid}" OR reviewers.uuid="${myUuid}") AND updated_on>${JSON.stringify(since)}`,
-      sort: "-updated_on",
-      pagelen: "50",
-      fields: "values.id,values.title,values.author.uuid,next",
-    },
-  );
+// Bitbucket has no repo-wide comments endpoint, so comments are read per pull request. The caller
+// passes the open PRs you authored or review that changed within the window (a new comment bumps
+// updated_on), which the PR scan already fetched, so no extra list request is needed here.
+type CommentTarget = { id: number; title: string; author?: { uuid?: string } };
 
+async function listComments(
+  repoPath: string,
+  since: string,
+  pullRequests: CommentTarget[],
+): Promise<PullRequestComment[]> {
   const comments: PullRequestComment[] = [];
   // Sequential on purpose: the repo scan is already concurrent and parallel bursts drop connections.
   for (const pr of pullRequests) {
@@ -748,7 +745,12 @@ function listPipelines(repoPath: string, since: string) {
 
 type RepoEvents = { events: NotificationEvent[]; failedSources: number };
 
-async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string, since: string): Promise<RepoEvents> {
+async function listNotificationEventsForRepo(
+  repo: RepoWithSlug,
+  myUuid: string,
+  since: string,
+  involvedPullRequests: CommentTarget[],
+): Promise<RepoEvents> {
   const repoPath = `/repositories/${preferences.workspace}/${repo.slug}`;
   const repoName = repo.name ?? repo.slug;
   const prUrl = (id: number) => `https://bitbucket.org/${preferences.workspace}/${repo.slug}/pull-requests/${id}`;
@@ -764,7 +766,7 @@ async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string,
       return { status: "rejected", reason };
     }
   };
-  const comments = await settle("comments", () => listComments(repoPath, myUuid, since));
+  const comments = await settle("comments", () => listComments(repoPath, since, involvedPullRequests));
   const closed = await settle("closed pull requests", () => listClosedPullRequests(repoPath, myUuid, since));
   const pipelines = await settle("pipelines", () => listPipelines(repoPath, since));
   const settled = [comments, closed, pipelines];
@@ -830,14 +832,28 @@ async function listNotificationEventsForRepo(repo: RepoWithSlug, myUuid: string,
 export const NOTIFICATION_LOOKBACK_DAYS = 7;
 
 export async function getNotificationEvents(
+  openPullRequests: OpenPullRequest[],
   lookbackDays = NOTIFICATION_LOOKBACK_DAYS,
 ): Promise<ScanResult<NotificationEvent>> {
   const uuid = await getCurrentUserUuid();
   const since = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
   let partialFailures = 0;
 
+  // Reuse the PR scan the caller already did (your PRs / PRs you review) for the comment lookups.
+  const involvedByRepo = new Map<string, CommentTarget[]>();
+  for (const pr of openPullRequests) {
+    if (!pr.updated_on || pr.updated_on < since) continue;
+    const slug = pr.destination.repository.slug;
+    involvedByRepo.set(slug, [...(involvedByRepo.get(slug) ?? []), pr]);
+  }
+
   const result = await scanOpenPullRequests(async (repo) => {
-    const { events, failedSources } = await listNotificationEventsForRepo(repo, uuid, since);
+    const { events, failedSources } = await listNotificationEventsForRepo(
+      repo,
+      uuid,
+      since,
+      involvedByRepo.get(repo.slug) ?? [],
+    );
     if (failedSources > 0) {
       partialFailures += 1;
     }

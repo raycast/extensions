@@ -59,12 +59,12 @@ interface NotificationsData {
 }
 
 async function fetchNotifications(): Promise<NotificationsData> {
-  const [myUuid, pullRequests, events, savedDismissed] = await Promise.all([
+  const [myUuid, pullRequests, savedDismissed] = await Promise.all([
     getCurrentUserUuid(),
     getMyOpenPullRequests(),
-    getNotificationEvents(),
     loadDismissed(),
   ]);
+  const events = await getNotificationEvents(pullRequests.values);
 
   const notifications: PullRequestNotification[] = [];
   const windowStart = Date.now() - NOTIFICATION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
