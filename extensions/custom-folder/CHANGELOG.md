@@ -1,5 +1,9 @@
 # Custom folder Changelog
 
+## [Node 22 and Node 26 preparation] - {PR_MERGE_DATE}
+
+- Remove unused native dependencies so installation does not require unrelated native binaries.
+
 ## [Enhancement] - 2025-03-12
 
 - Added the ability to retrieve the selected folder when Finder is the frontmost application.
