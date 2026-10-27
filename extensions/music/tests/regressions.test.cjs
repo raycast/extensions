@@ -139,6 +139,26 @@ test("volume hotkeys read and set volume in one time-limited Music call", async 
   assert.match(calls[1][0], /set nextVolume to \(sound volume\) \+ \(-5\)/);
 });
 
+test("rewind and fast forward clamp the position inside one time-limited Music call", async () => {
+  const calls = [];
+  const player = loadSource("src/util/scripts/player-controls.ts", async (...args) => {
+    calls.push(args);
+    return "42.5";
+  });
+
+  assert.deepEqual(await player.position.rewind(15)(), { _tag: "Right", right: 42.5 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][2].timeout, 5_000);
+  assert.match(calls[0][0], /if player state is stopped then error/);
+  assert.match(calls[0][0], /set nextPosition to \(player position\) \+ \(-15\)/);
+  assert.match(calls[0][0], /if nextPosition < 0 then set nextPosition to 0/);
+  assert.match(calls[0][0], /if nextPosition > trackDuration then set nextPosition to trackDuration/);
+
+  await player.position.fastForward(30)();
+  assert.equal(calls.length, 2);
+  assert.match(calls[1][0], /set nextPosition to \(player position\) \+ \(30\)/);
+});
+
 test("playlist insertion is bounded, escaped, and is not retried after a failure", async () => {
   const scripts = [];
   const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
@@ -183,6 +203,20 @@ test("a regular playlist named Favorite Songs still receives a duplicate", async
   assert.equal((await currentTrack.addToPlaylist("Favorite Songs")())._tag, "Right");
   assert.equal(scripts.length, 2);
   assert.ok(scripts[1].includes("duplicate (item 1 of existingTracks) to targetPlaylist"));
+});
+
+test("subscription tracks are added to the library source before the playlist", async () => {
+  const scripts = [];
+  const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {
+    scripts.push(script);
+    return "";
+  });
+
+  assert.equal((await currentTrack.addToPlaylist("Road Trip")())._tag, "Right");
+  assert.match(
+    scripts[0],
+    /duplicate playingTrack to library playlist 1\s+on error number -10006\s+duplicate playingTrack to source 1/,
+  );
 });
 
 test("subprocess execution drains stdout and stderr concurrently", async () => {

@@ -28,17 +28,21 @@ export function formatRelativeTime(timestamp: string, now = new Date()): string 
   return Math.abs(hours) < 24 ? formatter.format(hours, "hour") : formatter.format(Math.trunc(hours / 24), "day");
 }
 
-export function formatDateTime(timestamp: string): string {
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(timestamp));
+export function formatDateTime(timestamp: string, timeZone?: string): string {
+  const formatted = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short", timeZone }).format(
+    new Date(timestamp),
+  );
+  return timeZone ? `${formatted} ${timeZone}` : formatted;
 }
 
-export function formatRecordDate(timestamp: string): string {
+export function formatRecordDate(timestamp: string, timeZone?: string): string {
   return new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
+    timeZone,
   }).format(new Date(timestamp));
 }
 
@@ -54,21 +58,12 @@ export function menuBarTitle(response: ForecastResponse, display: MenuBarDisplay
 
 export function forecastTooltip(response: ForecastResponse, now = new Date()): string {
   const reset = latestReset(response, now);
-  return `Codex reset likelihood: ${formatPercentage(response.forecast?.score24h)} within 24h, ${formatPercentage(response.forecast?.score48h)} within 48h. Last reset: ${reset ? `${formatRelativeTime(reset.dateTime, now)} (${formatDateTime(reset.dateTime)})` : "unknown"}.`;
+  return `Codex reset likelihood: ${formatPercentage(response.forecast?.score24h)} within 24h, ${formatPercentage(response.forecast?.score48h)} within 48h. Last reset: ${reset ? `${formatRelativeTime(reset.dateTime, now)} (${formatDateTime(reset.dateTime)})` : "unknown"}. Data: codex-reset.com.`;
 }
 
 export function sourceWarning(response: ForecastResponse, now = new Date()): string | undefined {
-  if (response.status !== "live" || response.forecastStatus !== "current")
-    return "The source has not published a current forecast.";
-  // A current forecast can remain unchanged until the source's next scheduled reassessment.
-  if (response.forecast?.nextReassessmentAt && now.getTime() > Date.parse(response.forecast.nextReassessmentAt))
-    return "The forecast is awaiting its scheduled reassessment.";
-  if (
-    response.ingestion &&
-    (response.ingestion.status !== "succeeded" ||
-      response.ingestion.accountsSucceeded < response.ingestion.accountsRequested)
-  ) {
-    return "Some monitored sources did not respond to the latest check.";
-  }
+  if (!response.forecast) return "The source has not published a forecast.";
+  if (response.publishedExpiresAt && now.getTime() > Date.parse(response.publishedExpiresAt) + 5 * 60_000)
+    return "The provider’s published data is overdue for an update.";
   return undefined;
 }

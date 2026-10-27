@@ -8,6 +8,10 @@ export interface Session {
   Score: number; // The score of the session (from Zoxide)
   Attached: number; // Whether the session is currently attached
   Windows: number; // The number of windows in the session
+  Icon?: string;
+  Alias?: string;
+  AliasAutoConnect?: boolean;
+  TmuxWindows?: Window[];
 }
 
 export interface Window {
@@ -20,7 +24,7 @@ export interface Window {
 export const UPGRADE_SESH_MESSAGE = "Please upgrade to the latest version of the sesh CLI";
 
 export function getSessions({ tmuxOnly = false } = {}) {
-  const args = ["list", "--json", ...(tmuxOnly ? ["--tmux"] : [])];
+  const args = ["list", "--json", "--hide-duplicates", ...(tmuxOnly ? ["--tmux"] : [])];
   return new Promise<Session[]>((resolve, reject) => {
     execFile("sesh", args, { env: getEnv() }, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -79,6 +83,26 @@ export function getWindows(session: string) {
   });
 }
 
+export interface SessionWindows {
+  name: string;
+  windows: Window[];
+  error?: string;
+}
+
+export async function getSessionWindows(sessions: Session[]): Promise<SessionWindows[]> {
+  const tmuxSessions = sessions.filter((session) => session.Src === "tmux");
+  // sesh < 2.32 doesn't include TmuxWindows in `list --json`, so fetch them per session
+  const results = await Promise.allSettled(
+    tmuxSessions.map((session) => session.TmuxWindows ?? getWindows(session.Name)),
+  );
+  return tmuxSessions.map((session, i) => {
+    const result = results[i];
+    return result.status === "fulfilled"
+      ? { name: session.Name, windows: result.value }
+      : { name: session.Name, windows: [], error: String(result.reason) };
+  });
+}
+
 export function connectToWindow(session: string, name: string, { create = false } = {}): Promise<void> {
   const args = ["window", "connect", "--switch", "--target", session, ...(create ? ["--new"] : []), "--", name];
   return new Promise<void>((resolve, reject) => {
@@ -120,5 +144,18 @@ export async function switchToWindow(session: string, window: Window, sessionWin
 export function isTmuxRunning(): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     execFile("tmux", ["ls"], { env: getEnv() }, (error, _, stderr) => resolve(!(error || stderr)));
+  });
+}
+
+export function connectToBrowserWorktree(): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    execFile("sesh", ["worktree", "connect", "--browser", "--switch"], { env: getEnv() }, (error, _, stderr) => {
+      if (error) {
+        console.error("error ", error);
+        console.error("stderr ", stderr);
+        return reject(stderr.trim() || error.message);
+      }
+      return resolve();
+    });
   });
 }

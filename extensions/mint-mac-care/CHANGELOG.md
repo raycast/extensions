@@ -1,5 +1,29 @@
 # Mint Changelog
 
+## [The current free allowance] - 2026-10-18
+
+- The first page before Mint is installed states today's free use: cleaning, organizing, Optimize and app uninstall share one free 1 GB each week. It no longer promises a free first clean of any size, which Mint stopped offering in 1.0.97.
+
+## [Easier to find] - 2026-10-16
+
+- The listing says what Mint is for: Mac storage cleanup and optimization for you and your AI agents.
+- Commands come up for more of what people search, like cleanup, deep clean, optimizer, Xcode, node_modules, Claude Code and Cursor.
+
+## [Clearer access, recovery and AI answers] - 2026-10-12
+
+- Installation guidance now explains Direct's weekly free allowances and the differences between editions.
+- Undo guidance explains which actions can be recovered and when recovery is no longer possible.
+- A new guide helps you check a slow Mac while AI tasks are running before quitting apps or cleaning files.
+- When Mint does not answer, Raycast AI says so instead of saying the Mac has not been scanned.
+- With an older Mint, disk sizes are read in the units Mint writes them, and a full disk's 0 bytes free is shown.
+- Without Mint installed, asking Raycast AI to open a Mint command says how to get Mint instead of opening a command that cannot run.
+
+## [Ask Mint in Raycast AI] - 2026-10-05
+
+- Ask Mint in Raycast AI: "@mint what's taking up space?", "@mint which apps are using the most memory?", "@mint what grew on my disk this week?" The answers come from Mint and only read. To act, Mint opens Free Disk, Optimize Storage or Free Memory for you to review and confirm.
+- The commands are easier to find in Raycast's search: cleaner, junk, disk space, duplicates, uninstaller, system data and more.
+- Without Mint yet, the first page also offers one line for Homebrew: `brew install --cask dzg-studio/mint/mint`.
+
 ## [Optimize, Organize and a status at a glance] - 2026-10-01
 
 - Every command is a list with a picture: groups on the left, what is in each on the right, ↵ acting on the whole group.
@@ -22,7 +46,7 @@
 - Review what Codex, Claude Code, Claude Desktop, Cursor, and other AI tools keep on this Mac.
 - See conversation age, archived Codex storage, and media Mint could compress while keeping the text readable.
 - Scan and clean disk space after reviewing every item.
-- Release memory, uninstall apps with their leftovers, and redact files locally.
+- Release memory and uninstall apps with their leftovers.
 - Undo recoverable Mint actions from Raycast.
 - Keep Mint's Boundaries, plan allowance, history, and Developer ID checks across both interfaces.
 

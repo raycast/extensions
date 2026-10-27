@@ -106,15 +106,15 @@ export default function Command() {
   );
 
   const completedCount = history.filter((item) => item.status === "completed").length;
-  const cancelledCount = history.filter((item) => item.status === "cancelled").length;
-  const failedCount = history.length - completedCount - cancelledCount;
+  const canceledCount = history.filter((item) => item.status === "cancelled").length;
+  const failedCount = history.length - completedCount - canceledCount;
 
-  // Cancelled is its own outcome now — folding it into "failed" told the user a
+  // Canceled is its own outcome now — folding it into "failed" told the user a
   // download they stopped on purpose had gone wrong.
   const historySummary = [
     `${completedCount} completed`,
     failedCount > 0 ? `${failedCount} failed` : null,
-    cancelledCount > 0 ? `${cancelledCount} cancelled` : null,
+    canceledCount > 0 ? `${canceledCount} canceled` : null,
   ]
     .filter(Boolean)
     .join(", ");

@@ -1,9 +1,8 @@
 import { PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { client, collectFiltered, PageInput } from "./linearUtils";
+import { mapPage, serializeLabel } from "./serializers";
+import { withLinear } from "./withLinear";
 
 interface Input extends PageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -11,9 +10,9 @@ interface Input extends PageInput {
   /** Sort: createdAt | updatedAt */ orderBy?: "createdAt" | "updatedAt";
   name?: string;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const name = input.name?.toLowerCase();
-  return collectFiltered(
+  const page = await collectFiltered(
     ({ first, after }) =>
       client().initiativeLabels({
         first,
@@ -23,4 +22,5 @@ export default withAccessToken(linear)(async (input: Input) => {
     (label) => !name || label.name.toLowerCase().includes(name),
     input,
   );
+  return mapPage(page, serializeLabel);
 });

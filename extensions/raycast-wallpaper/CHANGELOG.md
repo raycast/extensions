@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Fix memory limit when setting HEIC wallpapers on Windows] - 2026-10-05
+
+- Convert HEIC wallpapers to PNG instead of JPEG on Windows. The JPEG conversion of a full-resolution wallpaper exceeded the extension memory limit.
+
 ## [Fix Windows wallpapers and improve reliability] - 2026-10-01
 
 - Convert HEIC wallpapers to full-resolution JPEGs on Windows to prevent blank backgrounds.

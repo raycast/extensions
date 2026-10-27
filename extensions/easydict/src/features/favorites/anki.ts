@@ -6,13 +6,23 @@ import { timedFetch } from "@/shared/http";
 import { type FavoriteWord, resolveFavoriteTranslations } from "./model";
 import { getFavoriteView } from "./view";
 
+/** Mirror the manifest defaults for when the optional Anki preferences are left empty. */
+const DEFAULT_ANKI_CONNECT_URL = "http://127.0.0.1:8765";
+const DEFAULT_ANKI_DECK_NAME = "Easydict";
+
 /**
  * AnkiConnect listens on `127.0.0.1:8765` by default, and its `webBindPort` config can move it,
- * so the address comes from the AnkiConnect URL preference. Accept hand-typed values without a scheme.
+ * so the address comes from the AnkiConnect URL preference. Accept hand-typed values without a
+ * scheme, and fall back to the default address when the optional preference is empty.
  */
 export function normalizeAnkiUrl(value: string): string {
-  const trimmed = value.trim().replace(/\/+$/, "");
+  const trimmed = value.trim().replace(/\/+$/, "") || DEFAULT_ANKI_CONNECT_URL;
   return /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+}
+
+/** The deck preference is optional; an empty value means the default deck. */
+export function resolveAnkiDeckName(value: string): string {
+  return value.trim() || DEFAULT_ANKI_DECK_NAME;
 }
 
 /** Note type created on first use; users may restyle its templates in Anki. */
@@ -123,12 +133,13 @@ export async function addFavoritesToAnki(
   { deckName, url }: { deckName: string; url: string },
 ): Promise<AddToAnkiResult> {
   const endpoint = normalizeAnkiUrl(url);
-  await ensureDeckAndModel(endpoint, deckName);
+  const deck = resolveAnkiDeckName(deckName);
+  await ensureDeckAndModel(endpoint, deck);
 
   // The same word saved in several language directions maps to one Anki note.
   const seen = new Set<string>();
   const notes = favorites
-    .map((favorite) => buildAnkiNote(favorite, deckName))
+    .map((favorite) => buildAnkiNote(favorite, deck))
     .filter((note) => !seen.has(note.fields.Word) && seen.add(note.fields.Word));
 
   const checks = await invokeAnki<{ canAdd: boolean; error?: string }[]>(endpoint, "canAddNotesWithErrorDetail", {

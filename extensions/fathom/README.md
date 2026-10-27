@@ -50,7 +50,7 @@ To use this extension, you'll need a Fathom API key:
 
 Recordings are large — typically 250–650 MB for a 30–60 minute meeting — and Fathom needs about half a minute to prepare one before the transfer can start.
 
-Because of that, downloads run in a **background process that keeps going after you dismiss Raycast**. Start a download, press Escape, and it continues; reopen Search Meetings to see the progress. If a transfer is interrupted it resumes from where it stopped rather than starting over, and cancelling leaves no half-written file behind.
+Because of that, downloads run in a **background process that keeps going after you dismiss Raycast**. Start a download, press Escape, and it continues; reopen Search Meetings to see the progress. If a transfer is interrupted it resumes from where it stopped rather than starting over, and canceling leaves no half-written file behind.
 
 Files land in the **Export Directory** set in extension preferences (`~/Downloads` by default), named after the meeting and its date.
 

@@ -1,5 +1,14 @@
 # Obsidian Changelog
 
+## [Quick Capture Validation] - 2026-10-10
+
+- Restrict Quick Capture to existing regular Markdown files inside the vault
+- Keep multiline captures in one list item and document route setup and append behavior
+
+## [Quick Capture] - 2026-10-02
+
+- Add a Quick Capture command for preset Daily Note, To Do, and Shopping routes without the Advanced URI plugin
+
 ## [Fix notes not loading when a file name contains a backslash] - 2026-09-28
 
 - Fix Search Note and Bookmarked Notes showing no notes for a vault when any note's file name contains a backslash

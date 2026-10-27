@@ -9,7 +9,7 @@ to break silently.
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | `ray develop` — runs the extension in Raycast development mode |
-| `npm run build` | `ray build` — production build |
+| `npm run build` | `ray build` — the default bundle build |
 | `npm run lint` / `npm run fix-lint` | `ray lint`, optionally auto-fixing |
 | `npm run sync-runner` | Copies the downloader runner bundle into `assets/` (see below) |
 | `npm run publish` | Publishes to the Raycast Store |
@@ -37,7 +37,7 @@ views in `src/views/`, action panels in `src/actions/`.
 `src/lib/downloader.ts` is a **thin adapter over
 [`@chrismessina/raycast-downloader`](https://www.npmjs.com/package/@chrismessina/raycast-downloader)**.
 It does not spawn `curl` itself and does not parse `curl` output. The package owns
-the curl config file, the `fail` flag, resume via HTTP `Range`/`If-Range`, stall
+the curl configuration (handed to curl over stdin), the `fail` flag, resume via HTTP `Range`/`If-Range`, stall
 detection, and failure classification.
 
 `startDownload` spawns a **runner process that outlives the Raycast command**. It
@@ -46,7 +46,9 @@ Raycast window does not kill a transfer. The adapter keeps a
 `DownloadHandle { promise, cancel }` shape so callers did not have to change: the
 promise is synthesized by watching the runner's status file reach a terminal state.
 If the window closes, that promise simply never settles — the download continues and
-the runner's own completion notification reports the outcome.
+the runner's own notification reports success and transport failures. Some failure
+exits (an empty response, setup, a size mismatch, a failed rename) record the failure
+in the status file without a notification, so History is where those surface.
 
 Consequences worth knowing before you change anything here:
 
@@ -55,11 +57,18 @@ Consequences worth knowing before you change anything here:
 - **`startDownload` can throw `DownloadError` with code `"conflict"`** when another
   live attempt already holds the same `outputPath`. Surface it; never retry it in a
   loop.
-- A live download may have `.state`, `.claim`, and `.headers` sidecar files next to
-  its `.part`. Anything that lists a download directory must filter them out.
+- A live download may have `.state`, `.claim` and `.headers` sidecar files next to
+  its `.part`, plus short-lived `<name>.<pid>….tmp` files from atomic writes. Anything
+  that lists a download directory must filter them out by prefix, stale ones included.
+  Since 0.2.1 the URL and request headers reach the runner and curl over stdin, so no
+  file holds them.
 - The `defaultTimeout` preference is passed as `stallSeconds`, **not** a wall-clock
-  limit. A slow but progressing transfer is allowed to take as long as it takes; only
-  an idle one is abandoned. The UI copy says so — keep them in agreement.
+  limit. Once connected, a transfer is abandoned when its speed stays under 1 KiB/s
+  (the package's default `speedLimitBytes`, which Fetch does not override) for that
+  many seconds, so one at or above that rate takes as long as it takes. Connecting is
+  bounded separately, by curl's 30-second connect timeout. Nothing counts
+  this down in the UI: the status carries no deadline, and rebuilding curl's timer
+  from meter readings misfires (see the downloader's `TODO.md`).
 
 ### The runner asset is a hard shipping invariant
 
@@ -86,7 +95,9 @@ The two hashes must match.
 ### Path reservation — releasing is the caller's job
 
 `resolveOutputPath` reserves its result by creating a zero-byte `<path>.part`, so two
-concurrent callers can never be handed the same name. A reservation that is never
+concurrent callers can never be handed the same name. Overwrite mode is the exception:
+it hands back the direct path even when that `.part` already exists, and the package's
+`"conflict"` refusal is what stops a second live attempt there. A reservation that is never
 handed to a runner must be **explicitly released**, or later downloads silently shift
 onto ` (1)` names for files that were never written.
 
@@ -99,8 +110,12 @@ resolves an output and then bails, release it.
 ### Cross-command launching
 
 `src/download.ts` detects curl-style range patterns (`file[001-025].zip`) via
-`hasRangePattern`, expands them, and re-launches `download-batch` through
-`launchCommand` with `{ urls, outputDirectory }` in `launchContext`.
+`hasRangePattern`, expands them, and re-launches `download-batch` with
+`{ urls, outputDirectory }` in `launchContext`.
+
+Every launch goes through `launchOrShowError` in `src/lib/launch.ts`, never a bare
+`launchCommand`: the call rejects when Raycast cannot open the target, and the helper
+turns that into a failure toast with Copy Error instead of an unhandled rejection.
 `download-batch` inspects `launchContext` on mount and auto-starts; otherwise it
 renders a form that pre-fills from the clipboard and can import open tabs via
 `BrowserExtension.getTabs()`.
@@ -113,7 +128,7 @@ Any new "feed URLs into the batch" entry point should push into this same
 A retry starts its **own** single-item batch, which can run alongside the original.
 The views therefore receive a `BatchControls` fan-out (`cancel` / `cancelItem`) over
 every live batch, not one `BatchDownloadHandle`. Register any new batch with
-`trackBatch` — a handle kept out of that set cannot be cancelled from the UI.
+`trackBatch` — a handle kept out of that set cannot be canceled from the UI.
 
 ### URL and filename resolution
 
@@ -128,7 +143,8 @@ response block so redirects do not return intermediate headers.
 closing brackets — a URL legitimately ending in `)` survives.
 `extractUrlStringsFromText` handles markdown links and bare URLs with dedupe. Range
 expansion (`expandRangeUrl` / `expandAllRangeUrls`) infers zero-padding from the start
-value, supports descending ranges, and is capped at 500 URLs.
+value, supports descending ranges, and caps each range pattern at 500 URLs
+(`expandAllRangeUrls` concatenates patterns, so the total can exceed that).
 
 ### Preferences
 
@@ -148,10 +164,20 @@ avoids a circular import.
 `LocalStorage`, keeping the last 100 records. Records **must** be keyed on the
 runner's ticket id (`DownloadResult.id`) — `reconcileHistory` sweeps status files by
 that same id, so a different id produces a duplicate record instead of an update.
-Signed URLs are stripped by the `omit-signed` URL policy before storage.
+Recognized signed URLs (by their query parameter names) are stripped by the
+`omit-signed` URL policy before storage.
 
-History stores no resume state; "Retry Download" simply `launchCommand`s `download`
-with the URL again.
+History stores no resume state; "Retry Download" simply relaunches `download` with
+the URL again, through `launchOrShowError`.
+
+`reconcileHistory` REPLACES a row from its status file, and a status file carries no
+URL. So whenever a command records a row itself, `addToHistory` / `addBatchToHistory`
+clear that download's status at once; otherwise the next sweep strips the row's URL
+and with it Retry and Download Again. A batch retry records its own result for the
+same reason. What still reaches History through the sweep, without a URL: downloads
+that finished with no command open, and started batch items that were canceled.
+One race remains: a sweep already in progress when a row is written can still
+replace it, because the replace happens inside the package.
 
 ### UI conventions
 
@@ -159,12 +185,23 @@ with the URL again.
 These are **toasts, not HUDs, deliberately**: `showHUD` closes the main window, and
 `showToast` degrades to a non-interactive notification once the window is closed —
 so a HUD anywhere earlier in the flow silently strips the actions off the completion
-toast. Updates are throttled per filename, not globally.
+toast. Updates are throttled per filename, not globally, on `performance.now()`: a
+wall-clock step backward would otherwise suppress every update until it caught up.
 
 Every `Toast.Style.Failure` needs a way to copy the error; use `showError` from
 `@chrismessina/raycast-kit`, which supplies one. `Toast.Style.Animated` is only for
 work that is actually in flight — replace the toast rather than mutating `style`,
 since flipping it on a presented toast leaves the spinner running.
+
+Return runs the **first** action in an `ActionPanel`, in every state the row can be in.
+On a download row, a destructive action (Cancel, Delete) is never first: on an
+in-flight batch row, Copy URL comes before Cancel for that reason (Cancel is then
+⌘↵ as well as ⌃X). While filenames resolve there are no rows, so the empty view puts
+Open Download Folder ahead of Cancel All.
+
+Copy is US English ("Canceled"), but the status and error-code value is the
+package's `"cancelled"` and stays spelled that way: History stores it, and the
+downloader emits it.
 
 The extension is macOS-only (`platforms: ["macOS"]`), so plain `{ modifiers, key }`
 shortcuts are correct; prefer `Keyboard.Shortcut.Common` where a semantic match

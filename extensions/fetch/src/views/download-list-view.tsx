@@ -33,7 +33,7 @@ function getStatusText(item: BatchDownloadItem): string {
     case "failed":
       return item.error || "Failed";
     case "cancelled":
-      return "Cancelled";
+      return "Canceled";
   }
 }
 
@@ -48,6 +48,8 @@ interface DownloadListViewProps {
   onStartOver?: () => void;
   /** Abort filename resolution, which runs before any batch handle exists. */
   onCancelPreparation?: () => void;
+  /** Where this batch writes, offered while no rows exist yet. */
+  outputDirectory?: string;
   navigationTitle?: string;
 }
 
@@ -59,6 +61,7 @@ export function DownloadListView({
   isFinished = false,
   onStartOver,
   onCancelPreparation,
+  outputDirectory,
   navigationTitle = "Batch Download",
 }: DownloadListViewProps) {
   // Same tally the batch reports, so the header and the completion toast agree.
@@ -107,7 +110,16 @@ export function DownloadListView({
           description={
             isPreparing ? "Checking each URL for its filename and size." : "Downloads will appear here once started."
           }
-          actions={<ActionPanel>{globalActions}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {/* First, ahead of Cancel All: Return runs the first action, and while
+                  filenames resolve, Cancel All would otherwise be the only one. */}
+              {isPreparing && outputDirectory && (
+                <Action.Open title="Open Download Folder" icon={Icon.Folder} target={outputDirectory} />
+              )}
+              {globalActions}
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section

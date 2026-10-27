@@ -3,13 +3,14 @@ import { withAccessToken } from "@raycast/utils";
 import { linear } from "../api/linearClient";
 
 import { client, resolveIssue } from "./linearUtils";
+import { withLinear } from "./withLinear";
 
 type Input = {
   /** Issue ID or identifier (e.g. LIN-123). */
   id: string;
 };
 
-export default withAccessToken(linear)(async ({ id }: Input) => {
+export default withLinear(async ({ id }: Input) => {
   const issue = await resolveIssue(id);
   const result = await client().deleteIssue(issue.id);
 

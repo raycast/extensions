@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## [Fixed duplicate recurring meetings] - 2026-10-03
+
+- Fixed recurring Zoom meetings with no fixed time appearing twice in the upcoming list.
+
 ## [Meeting Prep Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

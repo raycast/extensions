@@ -183,7 +183,30 @@ export function formatPackageVersion(item: Cask | Formula): string {
  * Get the identifier for a package (token for casks, name for formulae).
  */
 export function brewIdentifier(item: Cask | Nameable): string {
-  return isCask(item) ? item.token : item.name;
+  const short = isCask(item) ? item.token : item.name;
+  // Qualified outside core and cask: unqualified, brew resolves homebrew/core
+  // first, so a tapped package sharing a core name installs the wrong software.
+  const tap = (item as { tap?: string | null }).tap;
+  return tap && isThirdPartyTap(tap) && !short.includes("/") ? `${tap}/${short}` : short;
+}
+
+/**
+ * The third-party tap a package comes from, or undefined for core, cask and
+ * tapless ones. Read from the `tap` field, or from a qualified name when there
+ * is none: `brew outdated --json=v2` reports a tapped formula as
+ * `steipete/tap/birdclaw` with no `tap`. An outdated CASK carries neither — its
+ * token is unqualified — so its tap cannot be known here.
+ */
+export function thirdPartyTapOf(item: Cask | Nameable): string | undefined {
+  const tap = (item as { tap?: string | null }).tap;
+  if (tap) return isThirdPartyTap(tap) ? tap : undefined;
+  const parts = (isCask(item) ? item.token : item.name).split("/");
+  return parts.length === 3 ? `${parts[0]}/${parts[1]}` : undefined;
+}
+
+/** Outside homebrew/core and homebrew/cask: qualified on the command line, and gated by `brew trust`. */
+export function isThirdPartyTap(tap: string): boolean {
+  return tap !== "homebrew/core" && tap !== "homebrew/cask";
 }
 
 /**
@@ -486,7 +509,7 @@ export function brewAdoptCaskArgs(token: string, appdir: string): string[] {
 }
 
 /** Single-quote a word for a POSIX shell, unless it needs none. */
-function shellQuote(word: string): string {
+export function shellQuote(word: string): string {
   return /^[\w@%+=:,./-]+$/.test(word) ? word : `'${word.replace(/'/g, "'\\''")}'`;
 }
 

@@ -1,5 +1,15 @@
 # LocalSend Changelog
 
+## [Fix Sending to Encrypted Devices] - 2026-10-24
+
+- Fixed transfers to devices with encryption enabled (HTTPS) failing with `DEPTH_ZERO_SELF_SIGNED_CERT` — LocalSend's self-signed certificates are now accepted for device connections ([#32695](https://github.com/raycast/extensions/issues/32695))
+- Fixed device info refresh and fallback discovery not using HTTPS for encrypted peers
+
+## [Fix Device Discovery Crash] - 2026-10-03
+
+- Fixed `Discover Devices` crashing with `Error: Not running` when the multicast socket was closed twice
+- Added a "Port 53317 is in use" failure toast when another app, such as the LocalSend desktop app, already holds the discovery port
+
 ## [Major Enhancement - Pending Transfer System] - 2026-01-24
 
 ### 🎯 Pending Transfer Notifications

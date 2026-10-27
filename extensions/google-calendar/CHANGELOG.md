@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Simplify OAuth Client Selection] - 2026-10-02
+
+- Simplify OAuth client selection to match the redirect schemes used by current Raycast versions.
+
 ## [Plan My Week Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.

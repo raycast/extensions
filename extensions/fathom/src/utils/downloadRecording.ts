@@ -41,7 +41,7 @@ import {
 } from "@chrismessina/raycast-downloader";
 import { showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
-import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Keyboard, open, showToast, Toast } from "@raycast/api";
 import {
   awaitDownloadReady,
   DownloadJobError,
@@ -330,6 +330,11 @@ export interface DownloadRecordingOptions {
   revealOnComplete?: boolean;
 }
 
+const CANCEL_SHORTCUT: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd"], key: "." },
+  Windows: { modifiers: ["ctrl"], key: "." },
+};
+
 /**
  * Start (or resume) a recording download.
  *
@@ -358,6 +363,11 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
   // which is the exact case it exists for.
   let generationToken: string | undefined;
 
+  // Declared outside the try so the catch can tell a Cancel from a failure: a
+  // request already in flight when Cancel is pressed can still reject (a 429, a
+  // dropped connection), and the user asked for a cancel, not that error.
+  const generation = new AbortController();
+
   try {
     // Adopt an existing transfer rather than starting a second one.
     //
@@ -380,7 +390,17 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
       return undefined;
     }
 
-    const media = await resolveMedia(recordingId, toast, meeting);
+    // Cancelable only while Fathom renders. Once the runner starts, the
+    // transfer's own Cancel (watchTransfer) replaces this one.
+    toast.primaryAction = {
+      title: "Cancel Download",
+      shortcut: CANCEL_SHORTCUT,
+      onAction: () => generation.abort(),
+    };
+    const media = await resolveMedia(recordingId, toast, meeting, generation.signal);
+    // A press that lands after the URL arrived must still win, not start 600 MB.
+    if (generation.signal.aborted) throw new DownloadJobError("canceled", "Download canceled.");
+    toast.primaryAction = undefined;
 
     const directory = resolveDirectory(getExportDirectory(), { onUnsafe: "fallback" });
     const filename = buildRecordingFilename(meeting, media);
@@ -514,7 +534,8 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     // Only ever removes a still-empty sidecar, so this can never delete bytes
     // a resumable download already wrote.
     if (reservedPath) releaseReservation(reservedPath);
-    await reportFailure(error, toast, { recordingId, title: meeting.title });
+    const outcome = generation.signal.aborted ? new DownloadJobError("canceled", "Download canceled.") : error;
+    await reportFailure(outcome, toast, { recordingId, title: meeting.title });
     return undefined;
   } finally {
     // Released on EVERY exit, not just the happy one: a claim left on disk
@@ -560,7 +581,7 @@ function findLiveTransfer(recordingId: string): DownloadStatus | undefined {
  * it would resume.
  *
  * `completed` is excluded: its output exists and must never be written over.
- * A cancelled transfer discards its partial in the runner, so it will not match.
+ * A canceled transfer discards its partial in the runner, so it will not match.
  */
 function findResumablePartial(recordingId: string): DownloadStatus | undefined {
   const candidates = listStatuses().filter((status) => {
@@ -671,7 +692,12 @@ async function adoptRunningTransfer(
  *
  * The resume path is what makes dismissal-during-generation survivable.
  */
-async function resolveMedia(recordingId: string, toast: Toast, meeting: Meeting): Promise<DownloadMedia> {
+async function resolveMedia(
+  recordingId: string,
+  toast: Toast,
+  meeting: Meeting,
+  signal: AbortSignal,
+): Promise<DownloadMedia> {
   const existing = await getJob(recordingId);
   const expectation = generationExpectation(meeting);
 
@@ -684,6 +710,7 @@ async function resolveMedia(recordingId: string, toast: Toast, meeting: Meeting)
     try {
       const media = await awaitDownloadReady(recordingId, {
         existingDownloadId: existing.downloadId,
+        signal,
         onProgress: (_job, elapsed) => updateGenerationToast(toast, elapsed, expectation),
       });
       if (isMediaFresh(media)) return media;
@@ -695,6 +722,7 @@ async function resolveMedia(recordingId: string, toast: Toast, meeting: Meeting)
       // transient network blip or rate limit says nothing about the job's
       // validity, and throwing the record away would lose the durable resume
       // path — the entire reason it is persisted.
+      if (error instanceof DownloadJobError && error.kind === "canceled") throw error;
       if (isJobUnusable(error)) {
         logger.warn(`[download] Job ${existing.downloadId} is unusable; requesting a new one:`, error);
         await forgetJob(recordingId);
@@ -709,6 +737,7 @@ async function resolveMedia(recordingId: string, toast: Toast, meeting: Meeting)
     // Awaited inside awaitDownloadReady before it ever sleeps, so the id is on
     // disk before the window in which the user is most likely to dismiss.
     onJobCreated: (job) => rememberJob({ recordingId, downloadId: job.downloadId, requestedAt: Date.now() }),
+    signal,
     onProgress: (_job, elapsed) => updateGenerationToast(toast, elapsed, expectation),
   });
 }
@@ -746,7 +775,10 @@ function isJobUnusable(error: unknown): boolean {
  * it. The `download_id` is persisted, and Fathom keeps rendering server-side
  * either way, so nothing is lost — but nothing finishes either, and the file
  * only starts transferring once someone re-fires the action and the rejoin path
- * picks up the completed job. "Safe to close" belongs on the DOWNLOADING toast,
+ * picks up the completed job. So the copy names that recovery step rather than
+ * ordering the user to keep Raycast open: closing does not kill the command at
+ * once (it was observed still counting at 31s), so "keep Raycast open"
+ * overstated it. "Safe to close" still belongs only on the DOWNLOADING toast,
  * where a detached process really is doing the work.
  *
  * And it says "Raycast", not "this window": a toast renders as a floating HUD
@@ -760,7 +792,7 @@ function updateGenerationToast(toast: Toast, elapsedMs: number, expectation?: st
   // The elapsed counter is the only honest motion available, and the
   // instruction is most useful before the user has decided to press Escape —
   // so both run from the first frame rather than fading in.
-  toast.message = `Rendering video${expectation ?? ""} · ${seconds}s · keep Raycast open`;
+  toast.message = `Rendering video${expectation ?? ""} · ${seconds}s · If Raycast closes, use Download again to resume`;
 }
 
 /**
@@ -852,10 +884,10 @@ function watchTransfer(ticket: DownloadTicket, toast: Toast, options: WatchOptio
     },
   });
 
-  // Cancelling stops the whole process group, not just the runner.
+  // Canceling stops the whole process group, not just the runner.
   toast.primaryAction = {
     title: "Cancel Download",
-    shortcut: { macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } },
+    shortcut: CANCEL_SHORTCUT,
     onAction: async () => {
       const signalled = await killDownload(ticket);
       if (signalled) {
@@ -925,10 +957,11 @@ async function presentOutcome(status: DownloadStatus, progressToast: Toast, reve
     return;
   }
 
+  // The package's own state name, which is spelled the British way.
   if (status.state === "cancelled") {
     // Deliberately no Copy Error action: the user asked for this, and there is
     // no error to hand them.
-    await showToast({ style: Toast.Style.Failure, title: "Download Cancelled" });
+    await showToast({ style: Toast.Style.Failure, title: "Download Canceled" });
     return;
   }
 
@@ -995,6 +1028,14 @@ function logDownloadFailure(error: unknown, context: Record<string, unknown>): v
 
 async function reportFailure(error: unknown, toast: Toast, context: Record<string, unknown> = {}): Promise<void> {
   await toast.hide();
+
+  if (error instanceof DownloadJobError && error.kind === "canceled") {
+    // Same outcome as canceling a transfer, and not logged as a failure. Fathom
+    // keeps the rendered job, so pressing Download again rejoins it.
+    await showToast({ style: Toast.Style.Failure, title: "Download Canceled" });
+    return;
+  }
+
   logDownloadFailure(error, context);
 
   // `conflict` is not a failure the user should retry: 0.1.4 refuses a second
@@ -1012,7 +1053,6 @@ async function reportFailure(error: unknown, toast: Toast, context: Record<strin
   }
 
   if (error instanceof DownloadJobError) {
-    if (error.kind === "cancelled") return;
     await showError(error, {
       title: error.kind === "no_media" ? "Nothing to Download" : "Could Not Prepare Download",
       message: error.message,

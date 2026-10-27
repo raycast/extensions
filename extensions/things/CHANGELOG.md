@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Tag Pills] - 2026-10-21
+
+- Show each to-do tag as its own tag pill in list rows instead of a single comma-separated label.
+- Fixed the build failing to extract AI tool schemas for `get-projects` and `get-areas`, whose return types referenced each other recursively.
+
 ## [Things 3.23 Compatibility] - 2026-08-29
 
 - Fixed Today and Anytime missing to-dos whose scheduled date had arrived when the Unofficial API preference is enabled. Things 3.23 leaves such a to-do marked as scheduled, so the extension has to decide list membership by date.

@@ -1,5 +1,9 @@
 # Groq Changelog
 
+## [Fix Crash on Launch] - 2026-10-14
+
+- Fix every command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7, which no longer self-references `_shims`
+
 ## [Raycast Model Provider] - 2026-09-24
 
 - Use available models directly in Raycast AI with streaming, conversation history, and supported model capabilities.

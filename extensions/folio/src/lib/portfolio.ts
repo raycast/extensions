@@ -17,6 +17,8 @@ export interface NetWorth {
   /** The currency holding the most value (what the menu bar shows). */
   primary: CurrencyTotal | null;
   accountCount: number;
+  /** Investment accounts SnapTrade reported no total for: left out of the sums, so the sums are incomplete. */
+  missing: number;
 }
 
 function accountTotal(account: Account): CurrencyTotal | null {
@@ -33,56 +35,90 @@ export function isInvestmentAccount(account: Account): boolean {
 export function netWorth(accounts: Account[]): NetWorth {
   const totals = new Map<string, number>();
   let count = 0;
+  let missing = 0;
   for (const account of accounts) {
     if (!isInvestmentAccount(account)) continue;
     const t = accountTotal(account);
-    if (!t) continue;
+    if (!t) {
+      missing += 1;
+      continue;
+    }
     count += 1;
     totals.set(t.currency, (totals.get(t.currency) ?? 0) + t.amount);
   }
   const byCurrency = [...totals.entries()]
     .map(([currency, amount]) => ({ currency, amount }))
     .sort((a, b) => b.amount - a.amount);
-  return { byCurrency, primary: byCurrency[0] ?? null, accountCount: count };
+  return { byCurrency, primary: byCurrency[0] ?? null, accountCount: count, missing };
 }
 
 export interface DayChange extends CurrencyTotal {
-  /** True when every account in this currency reported a change. Otherwise the sum only covers some accounts. */
+  /** True when every account in this currency reported a change over the same dates. Otherwise the sum only covers some accounts. */
   complete: boolean;
   /** Accounts in this currency with no balance history (SnapTrade doesn't return it on every plan/brokerage). */
   missing: number;
+  /** Accounts whose latest change covers different dates (older history, or a longer gap), left out of the sum. */
+  otherDates: number;
   covered: number;
+  /** The summed changes run from `from` to `asOf` (YYYY-MM-DD snapshot dates). */
+  asOf: string;
+  from?: string;
 }
 
 /**
  * Sums per-account day changes per currency and says whether the sum is complete.
+ * Only changes over the same dates are added up: brokerages' balance histories end on different days
+ * and some skip days, so a plain sum would mix one account's Sep 27→28 with another's Sep 29→Oct 1.
+ * The most recent period wins; accounts on other dates count as left out.
  * Never presents a partial sum as the portfolio's change: callers hide or label incomplete entries.
  * Null when no account reported a change at all.
  */
 export function dayChange(snapshots: AccountSnapshot[]): DayChange[] | null {
-  const byCurrency = new Map<string, { amount: number; covered: number; missing: number }>();
+  const byCurrency = new Map<string, { missing: number; periods: Map<string, { amount: number; count: number }> }>();
   for (const s of snapshots) {
     const currency = (s.dayChange?.currency ?? s.account.balance?.total?.currency)?.toUpperCase();
     if (!currency) continue;
-    const entry = byCurrency.get(currency) ?? { amount: 0, covered: 0, missing: 0 };
+    const entry = byCurrency.get(currency) ?? { missing: 0, periods: new Map() };
     if (s.dayChange) {
-      entry.amount += s.dayChange.amount;
-      entry.covered += 1;
+      const key = `${s.dayChange.asOf}|${s.dayChange.from ?? ""}`;
+      const period = entry.periods.get(key) ?? { amount: 0, count: 0 };
+      period.amount += s.dayChange.amount;
+      period.count += 1;
+      entry.periods.set(key, period);
     } else {
       entry.missing += 1;
     }
     byCurrency.set(currency, entry);
   }
-  const out = [...byCurrency.entries()]
-    .filter(([, e]) => e.covered > 0)
-    .map(([currency, e]) => ({
+  const out: DayChange[] = [];
+  for (const [currency, e] of byCurrency) {
+    // Latest end date first, then the period most accounts share, then the shorter period (later start),
+    // so the result doesn't depend on account order.
+    const ranked = [...e.periods.entries()].sort(([ka, a], [kb, b]) =>
+      ka.split("|")[0] !== kb.split("|")[0] ? (ka < kb ? 1 : -1) : b.count - a.count || (ka < kb ? 1 : -1),
+    );
+    if (ranked.length === 0) continue;
+    const [key, best] = ranked[0];
+    const [asOf, from] = key.split("|");
+    const total = ranked.reduce((n, [, p]) => n + p.count, 0);
+    out.push({
       currency,
-      amount: e.amount,
-      complete: e.missing === 0,
+      amount: best.amount,
+      complete: e.missing === 0 && total === best.count,
       missing: e.missing,
-      covered: e.covered,
-    }));
+      otherDates: total - best.count,
+      covered: best.count,
+      asOf,
+      from: from || undefined,
+    });
+  }
   return out.length > 0 ? out : null;
+}
+
+/** True when a balance snapshot date (YYYY-MM-DD) is within the last `days` days, so it can pass as "today's" change. */
+export function isRecentSnapshot(date: string, now: Date, days = 2): boolean {
+  const t = Date.parse(`${date}T00:00:00Z`);
+  return !Number.isNaN(t) && now.getTime() - t < (days + 1) * 86_400_000;
 }
 
 // ---------- Positions ----------
@@ -282,8 +318,12 @@ export const DEPOSIT_TYPES = new Set([
   "TRANSFER",
   "EXTERNAL_ASSET_TRANSFER_IN",
   "EXTERNAL_ASSET_TRANSFER_OUT",
+  // Cash moved between accounts at the same brokerage (e.g. Wealthsimple).
+  "INTERNAL_CASH_TRANSFER_IN",
+  "INTERNAL_CASH_TRANSFER_OUT",
 ]);
-export const CASH_IN_TYPES = new Set(["CONTRIBUTION", "EXTERNAL_ASSET_TRANSFER_IN"]);
+/** Money arriving in an account: what restarts Fog's idle clock alongside a buy. */
+export const CASH_IN_TYPES = new Set(["CONTRIBUTION", "EXTERNAL_ASSET_TRANSFER_IN", "INTERNAL_CASH_TRANSFER_IN"]);
 
 export type ActivityFilter = "all" | "trades" | "dividends" | "deposits";
 
@@ -302,6 +342,34 @@ export function activityDate(a: Activity): Date | null {
 
 export function sortActivitiesDesc(activities: Activity[]): Activity[] {
   return [...activities].sort((a, b) => (activityDate(b)?.getTime() ?? 0) - (activityDate(a)?.getTime() ?? 0));
+}
+
+function dayOf(a: Activity): string | undefined {
+  return activityDate(a)?.toISOString().slice(0, 10);
+}
+
+/**
+ * Drops internal transfers in that are matched by a transfer out of another listed account (same
+ * amount, same day). Moving cash between two accounts Folio already counts isn't new money, so it
+ * shouldn't restart Fog's idle clock; a transfer from an account Folio doesn't see still does.
+ */
+function withoutTrackedTransfers(activities: Activity[]): Activity[] {
+  const outs = activities.filter((a) => (a.type ?? "").toUpperCase() === "INTERNAL_CASH_TRANSFER_OUT");
+  if (outs.length === 0) return activities;
+  const used = new Set<Activity>();
+  return activities.filter((a) => {
+    if ((a.type ?? "").toUpperCase() !== "INTERNAL_CASH_TRANSFER_IN") return true;
+    const match = outs.find(
+      (o) =>
+        !used.has(o) &&
+        o.account?.id !== a.account?.id &&
+        dayOf(o) === dayOf(a) &&
+        Math.abs(Math.abs(o.amount ?? 0) - Math.abs(a.amount ?? 0)) < 0.005,
+    );
+    if (!match) return true;
+    used.add(match);
+    return false;
+  });
 }
 
 function daysBetween(from: Date, to: Date): number {
@@ -341,7 +409,7 @@ export interface Fog {
 export function computeFog(snapshots: AccountSnapshot[], activities: Activity[], now: Date, windowDays: number): Fog {
   const cash = cashBalances(snapshots);
   const lastBuy = latestOfType(activities, BUY_TYPES, now);
-  const lastDeposit = latestOfType(activities, CASH_IN_TYPES, now);
+  const lastDeposit = latestOfType(withoutTrackedTransfers(activities), CASH_IN_TYPES, now);
   const anchors = [lastBuy, lastDeposit].filter((d): d is Date => d !== null);
   let idleDays: number;
   let atLeast = false;

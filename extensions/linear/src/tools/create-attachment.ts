@@ -1,9 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { uploadFile } from "../api/attachments";
-import { linear } from "../api/linearClient";
 
 import { client, resolveIssue } from "./linearUtils";
+import { serializeAttachment } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type Input = {
   issue: string;
@@ -13,7 +12,7 @@ type Input = {
   subtitle?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const issue = await resolveIssue(input.issue);
   const file = await uploadFile(input.filePath);
   const result = await client().createAttachment({
@@ -23,5 +22,5 @@ export default withAccessToken(linear)(async (input: Input) => {
     subtitle: input.subtitle,
   });
   if (!result.success || !result.attachment) throw new Error("Failed to create attachment.");
-  return result.attachment;
+  return serializeAttachment(await result.attachment);
 });

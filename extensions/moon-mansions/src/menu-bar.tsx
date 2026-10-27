@@ -25,7 +25,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       title={`${m.emoji} ${m.illumPct.toFixed(0)}%${m.voc.isVoc ? " VOC" : ""}`}
-      tooltip={`${m.phaseName} · ${m.trend} · ${m.illumPct.toFixed(1)}% in ${m.zodiac}${
+      tooltip={`${m.phaseName} · ${m.trend} · ${m.illumPct.toFixed(1)}% in ${m.zodiac} ${m.deg} ${m.signMotion}${
         m.voc.isVoc ? ` · ${vocEndLabel(m.voc)}` : ""
       }`}
     >
@@ -68,15 +68,15 @@ export default function Command() {
         />
         <MenuBarExtra.Item
           icon={SYMBOL[m.zodiac]}
-          title={m.zodiac}
+          title={`${m.zodiac} ${m.deg} ${m.signMotion}`}
           subtitle="Zodiac (Tropical)"
-          onAction={copy(m.zodiac)}
+          onAction={copy(`${m.zodiac} ${m.deg} ${m.signMotion}`)}
         />
         <MenuBarExtra.Item
           icon={SYMBOL[m.siderealZodiac]}
-          title={m.siderealZodiac}
+          title={`${m.siderealZodiac} ${m.siderealDeg}`}
           subtitle="Zodiac (Sidereal Lahiri)"
-          onAction={copy(m.siderealZodiac)}
+          onAction={copy(`${m.siderealZodiac} ${m.siderealDeg}`)}
         />
         <MenuBarExtra.Item
           icon="📐"
@@ -136,10 +136,10 @@ export default function Command() {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Chinese lodge (approx)">
         <MenuBarExtra.Item
-          icon="🐉"
+          icon={m.xiu.emoji}
           title={`${m.xiu.name} ${m.xiu.zh}`}
-          subtitle={`Lodge ${m.xiu.n}`}
-          onAction={copy(`Xiu ${m.xiu.n} ${m.xiu.name} ${m.xiu.zh} (${m.xiu.group})`)}
+          subtitle={`Lodge ${m.xiu.n} · ${m.xiu.animal}`}
+          onAction={copy(`Xiu ${m.xiu.n} ${m.xiu.name} ${m.xiu.zh} (${m.xiu.group}, ${m.xiu.animal})`)}
         />
         <MenuBarExtra.Item icon="🏯" title={m.xiu.group} subtitle="Palace" onAction={copy(m.xiu.group)} />
         {splitTwoLines(m.xiu.theme).map((line, i) => (

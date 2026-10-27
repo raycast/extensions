@@ -1,28 +1,12 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Form,
-  Icon,
-  LaunchProps,
-  open,
-  PopToRootType,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getDefaultSearchEngine } from "./data/cache";
 import { getSearchEngine } from "./data/search-engines";
-import { isValidUrl } from "./utils";
-
-async function safeOpenUrl(url: string): Promise<void> {
-  if (!isValidUrl(url)) {
-    throw new Error(`Invalid URL: ${url}`);
-  }
-  return open(url);
-}
+import { getCustomSearchEngines } from "./data/custom-search-engines";
+import type { SearchEngine } from "./types";
+import { executeSearch } from "./execute-search";
+import { getEngineTriggerPreference } from "./preferences";
 
 type SearchProps = LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>;
 
@@ -30,9 +14,53 @@ type SearchFormValues = {
   query: string;
 };
 
+// Form.Description collapses ordinary newlines; Unicode line separators keep examples on separate lines.
+const lineSeparator = "\u2028";
+
+function formatSearchExamples(
+  examples: [string, string][],
+  customSearchEngines: SearchEngine[],
+  triggerPrefix: string,
+) {
+  return examples
+    .map(
+      ([trigger, query]) =>
+        `${triggerPrefix}${trigger} ${query} — ${getSearchEngine(trigger, customSearchEngines)?.s ?? trigger}`,
+    )
+    .join(lineSeparator);
+}
+
 export default function SearchTheWeb(props: SearchProps) {
   const initialQuery = props.arguments.query || props.fallbackText || "";
+  const { triggerPrefix, warning } = getEngineTriggerPreference();
   const didRunInitialQuery = useRef(false);
+  const examples = useMemo(() => {
+    if (initialQuery) return undefined;
+    const customSearchEngines = getCustomSearchEngines();
+    return {
+      everyday: formatSearchExamples(
+        [
+          ["g", "cats"],
+          ["yt", "guitar lessons"],
+          ["w", "Bangkok"],
+          ["gm", "coffee Bangkok"],
+          ["gi", "northern lights"],
+        ],
+        customSearchEngines,
+        triggerPrefix,
+      ),
+      forums: formatSearchExamples(
+        [
+          ["gh", "markdown parser"],
+          ["so", "typescript generics"],
+          ["r", "mechanical keyboards"],
+        ],
+        customSearchEngines,
+        triggerPrefix,
+      ),
+      siteName: getSearchEngine("gh", customSearchEngines)?.s ?? "GitHub",
+    };
+  }, [initialQuery, triggerPrefix]);
 
   useEffect(() => {
     if (!initialQuery || didRunInitialQuery.current) return;
@@ -53,7 +81,32 @@ export default function SearchTheWeb(props: SearchProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="query" title="Query" placeholder="Search with !bangs" defaultValue={initialQuery} />
+      <Form.TextField
+        id="query"
+        title="Query"
+        placeholder={`Search with ${triggerPrefix}yt`}
+        defaultValue={initialQuery}
+      />
+      {warning && <Form.Description title="Invalid Engine Trigger Prefix" text={warning} />}
+      {examples && (
+        <>
+          <Form.Separator />
+          <Form.Description title="Everyday" text={examples.everyday} />
+          <Form.Description title="Code & forums" text={examples.forums} />
+          <Form.Separator />
+          <Form.Description
+            title="Tips"
+            text={[
+              triggerPrefix
+                ? "Plain text uses your default search engine."
+                : "Bare triggers such as go can redirect plain text away from your default engine.",
+              "Legacy !bangs still work mid-query or at the end: cats !g",
+              `Search within ${examples.siteName}: markdown parser @gh`,
+              `A trigger alone opens its website: ${triggerPrefix}w`,
+            ].join(lineSeparator)}
+          />
+        </>
+      )}
     </Form>
   );
 }
@@ -70,33 +123,7 @@ async function runSearch(rawQuery: string) {
       return;
     }
 
-    if (!finalQuery) {
-      const url = new URL(searchEngine.u);
-      await safeOpenUrl(url.origin);
-    } else {
-      const urlsToOpen = searchEngine.urls && searchEngine.urls.length > 1 ? searchEngine.urls : [searchEngine.u];
-
-      for (const urlTemplate of urlsToOpen) {
-        const searchUrl = urlTemplate.replace("{{{s}}}", encodeURIComponent(finalQuery).replace(/%2F/g, "/"));
-
-        if (!isValidUrl(searchUrl)) {
-          throw new Error(`Invalid URL: ${searchUrl}`);
-        }
-
-        await safeOpenUrl(searchUrl);
-      }
-
-      if (urlsToOpen.length > 1) {
-        // A HUD rather than a toast: toasts are rendered inside the main window, so
-        // closing the window would tear the confirmation down before it can be read.
-        await showHUD(`Opened ${urlsToOpen.length} search tabs · ${finalQuery}`, {
-          popToRootType: PopToRootType.Immediate,
-        });
-        return;
-      }
-    }
-
-    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+    await executeSearch(searchEngine, finalQuery);
   } catch (error) {
     await showFailureToast(error);
   }
@@ -104,29 +131,46 @@ async function runSearch(rawQuery: string) {
 
 function processQuery(rawQuery: string) {
   let query = rawQuery?.trim() ?? "";
+  const customSearchEngines = getCustomSearchEngines();
+  const { triggerPrefix } = getEngineTriggerPreference();
 
-  const searchEngineKeyMatch = query.match(/!(\S+)/i);
-  const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();
-  const searchEngine = getSearchEngine(searchEngineKey);
+  const firstToken = query.split(/\s+/, 1)[0];
+  let searchEngineKey =
+    triggerPrefix !== "!" && firstToken.startsWith(triggerPrefix)
+      ? firstToken.slice(triggerPrefix.length).toLowerCase()
+      : undefined;
+  let searchEngine = getSearchEngine(searchEngineKey, customSearchEngines);
+  let legacyMatch = query.match(/(?:^|\s)!(\S+)/i);
+  const legacyEngine = getSearchEngine(legacyMatch?.[1], customSearchEngines);
 
-  if (query.includes("@")) {
-    const siteMatch = query.match(/@(\S+)/i);
-    const siteKey = siteMatch?.[1]?.toLowerCase();
-
-    if (siteKey) {
-      const siteEngine = getSearchEngine(siteKey);
-      if (siteEngine) {
-        query = query.replace(/@\S+\s*/i, "").trim();
-        query += ` site:${siteEngine.ad || siteEngine.d}`;
-      }
-    }
+  // Explicit bangs win over inferred bare triggers, not explicit custom prefixes.
+  if (searchEngine && (triggerPrefix !== "" || !legacyEngine)) {
+    query = query.slice(firstToken.length).trim();
+    legacyMatch = null;
+  } else {
+    searchEngineKey = legacyMatch?.[1]?.toLowerCase();
+    searchEngine = legacyEngine;
   }
 
-  const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+  // Use the first recognized standalone @token, leaving emails and unknown mentions intact.
+  for (const siteMatch of query.matchAll(/(^|\s)@(\S+)/g)) {
+    const siteEngine = getSearchEngine(siteMatch[2], customSearchEngines);
+    if (!siteEngine) continue;
+
+    query = (
+      query.slice(0, siteMatch.index) +
+      siteMatch[1] +
+      query.slice(siteMatch.index + siteMatch[0].length).trimStart()
+    ).trim();
+    query += ` site:${siteEngine.ad || siteEngine.d}`;
+    break;
+  }
+
+  const cleanQuery = (legacyMatch ? query.replace(/(^|\s)!\S+\s*/i, "$1") : query).trim();
   let finalQuery = cleanQuery;
   if (!searchEngine && searchEngineKey) {
     finalQuery = `${searchEngineKey} ${cleanQuery}`;
   }
 
-  return { searchEngine: searchEngine || getDefaultSearchEngine(), finalQuery, searchEngineKey };
+  return { searchEngine: searchEngine || getDefaultSearchEngine(customSearchEngines), finalQuery, searchEngineKey };
 }

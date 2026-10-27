@@ -79,3 +79,4 @@ mutedeck
 nocal
 openqr
 done-bear
+happy-squid

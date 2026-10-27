@@ -1,7 +1,5 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { resolveTeam } from "./linearUtils";
+import { serializeTeam } from "./serializers";
+import { withLinear } from "./withLinear";
 type Input = { /** Team UUID, key, or name */ query: string };
-export default withAccessToken(linear)(async ({ query }: Input) => resolveTeam(query));
+export default withLinear(async ({ query }: Input) => serializeTeam(await resolveTeam(query)));

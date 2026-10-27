@@ -1,0 +1,123 @@
+instructions: |
+  A Hue Bridge has rooms and zones. Each light is in at most one room; zones group lights across rooms. Each scene
+  belongs to one room or zone.
+  Tools take names as get-lights gives them. When unsure of a name, or asked about the lights, call get-lights.
+  Use control-group for whole rooms, zones or all lights, control-light for single lights and recall-scene for scenes.
+  Brightness is a percentage. White temperature is in Kelvin: about 2200K for candlelight, 2700K for warm white,
+  4000K for neutral and 6500K for daylight.
+  When a tool skips or fails lights, tell the user which and why.
+evals:
+  - input: "@hue turn off the living room"
+    mocks:
+      get-lights: &home
+        rooms:
+          - name: Kitchen
+            "on": false
+            brightness: 0
+            lights: [Kitchen pendant]
+            scenes: [{ name: Energize }]
+          - name: Living room
+            "on": true
+            brightness: 57
+            lights: [Living room floor lamp, Living room plug]
+            scenes: [{ name: Bright }, { name: Relax, active: true }]
+          - name: Office
+            "on": true
+            brightness: 56
+            lights: [Desk lamp]
+            scenes: [{ name: Relax, active: true }]
+          - name: Bedroom
+            "on": false
+            brightness: 0
+            lights: [Bedroom candle]
+            scenes: [{ name: Relax }]
+        zones: []
+        lights:
+          - name: Kitchen pendant
+            room: Kitchen
+            "on": false
+            brightness: 100
+            temperature: 2732
+            supports: [brightness, temperature]
+          - name: Living room floor lamp
+            room: Living room
+            "on": true
+            brightness: 57
+            temperature: 2237
+            supports: [brightness, temperature]
+          - name: Living room plug
+            room: Living room
+            "on": true
+            supports: []
+          - name: Desk lamp
+            room: Office
+            "on": true
+            brightness: 56
+            color: "#ff8800"
+            supports: [brightness, color, temperature]
+          - name: Bedroom candle
+            room: Bedroom
+            "on": false
+            brightness: 57
+            temperature: 2237
+            supports: [brightness, temperature]
+      control-group: Turned off Living room.
+    expected:
+      - callsTool:
+          name: control-group
+          arguments:
+            "on": false
+            groups.0: { includes: living room }
+  - input: "@hue dim the office to 30%"
+    mocks:
+      get-lights: *home
+      control-group: Set Office to 30%.
+    expected:
+      - callsTool:
+          name: control-group
+          arguments:
+            brightness: 30
+  - input: "@hue make the living room a bit warmer"
+    mocks:
+      get-lights: *home
+      control-group: Made Living room warmer.
+    expected:
+      - callsTool:
+          name: control-group
+          arguments:
+            temperatureChange: warmer
+  - input: "@hue turn off all lights"
+    mocks:
+      get-lights: *home
+      control-group: Turned off all lights.
+    expected:
+      - callsTool:
+          name: control-group
+          arguments:
+            allLights: true
+  - input: "@hue make the desk lamp red"
+    mocks:
+      get-lights: *home
+      control-light: Set Desk lamp to red.
+    expected:
+      - callsTool:
+          name: control-light
+          arguments:
+            color: { includes: red }
+  - input: "@hue set Relax in the bedroom"
+    mocks:
+      get-lights: *home
+      recall-scene: Set Relax in Bedroom.
+    expected:
+      - callsTool:
+          name: recall-scene
+          arguments:
+            scene: Relax
+            group: { includes: bedroom }
+  - input: "@hue which lights are on?"
+    mocks:
+      get-lights: *home
+    expected:
+      - callsTool: get-lights
+      - includes: Desk lamp
+      - includes: Living room plug

@@ -91,7 +91,7 @@ export interface AwaitDownloadOptions {
 }
 
 export class DownloadJobError extends Error {
-  readonly kind: "failed" | "expired" | "timeout" | "no_media" | "cancelled";
+  readonly kind: "failed" | "expired" | "timeout" | "no_media" | "canceled";
   readonly job?: DownloadJob;
 
   constructor(kind: DownloadJobError["kind"], message: string, job?: DownloadJob) {
@@ -117,6 +117,10 @@ export async function awaitDownloadReady(
   const { onJobCreated, onProgress, timeoutMs = 5 * 60 * 1000, existingDownloadId, signal } = options;
   const startedAt = Date.now();
 
+  // Before the first request: a Cancel pressed during the caller's own setup must
+  // not POST a new generation job.
+  if (signal?.aborted) throw new DownloadJobError("canceled", "Download canceled.");
+
   let job = existingDownloadId
     ? await getDownloadStatus(recordingId, existingDownloadId)
     : await requestDownload(recordingId);
@@ -139,7 +143,7 @@ export async function awaitDownloadReady(
   let delayMs = 1000;
 
   while (job.status === "processing") {
-    if (signal?.aborted) throw new DownloadJobError("cancelled", "Download cancelled.", job);
+    if (signal?.aborted) throw new DownloadJobError("canceled", "Download canceled.", job);
 
     const elapsed = Date.now() - startedAt;
     if (elapsed > timeoutMs) {
@@ -151,9 +155,9 @@ export async function awaitDownloadReady(
     }
 
     // Abort-aware: a plain sleep would keep the caller waiting up to 5s after
-    // they cancelled.
+    // they canceled.
     await sleep(delayMs, signal);
-    if (signal?.aborted) throw new DownloadJobError("cancelled", "Download cancelled.", job);
+    if (signal?.aborted) throw new DownloadJobError("canceled", "Download canceled.", job);
     delayMs = Math.min(delayMs * 1.5, 5000);
 
     job = await getDownloadStatus(recordingId, job.downloadId);

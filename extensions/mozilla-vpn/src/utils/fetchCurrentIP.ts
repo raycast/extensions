@@ -1,149 +1,130 @@
 // src/utils/fetchCurrentIP.ts
-import https from 'https';
-import http from 'http';
 
-interface GeolocationResponse {
-  query: string; // IP address
-  country: string;
-  city: string;
-  status: string;
+interface IpWhoIsResponse {
+  ip?: string;
+  success?: boolean;
+  city?: string;
+  region_code?: string;
+  country?: string;
   message?: string;
 }
 
-// Function to fetch data with retry capability
-const fetchWithRetry = (
+interface IpifyResponse {
+  ip?: string;
+}
+
+export interface IPInfo {
+  ip: string;
+  location?: string;
+}
+
+async function fetchWithTimeout(
   url: string,
-  isHttps = true,
-  maxRetries = 3
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    let retries = 0;
+  timeoutMs = 5000,
+  signal?: AbortSignal
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-    const makeRequest = () => {
-      const httpModule = isHttps ? https : http;
+  const onAbort = () => {
+    controller.abort();
+  };
 
-      const req = httpModule.get(url, { timeout: 8000 }, (res) => {
-        let data = '';
-
-        // Set a timeout on the response object too
-        res.setTimeout(8000, () => {
-          req.destroy();
-          if (retries < maxRetries) {
-            retries++;
-            console.log(
-              `Response timed out. Retrying ${retries}/${maxRetries}...`
-            );
-            setTimeout(makeRequest, 1500); // Increased wait time between retries
-          } else {
-            reject(new Error('Response timed out after multiple attempts'));
-          }
-        });
-
-        res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
-          // Check if we got a valid response
-          if (
-            res.statusCode &&
-            (res.statusCode < 200 || res.statusCode >= 300)
-          ) {
-            const error = new Error(`HTTP error ${res.statusCode}`);
-            if (retries < maxRetries) {
-              retries++;
-              console.log(
-                `Retry ${retries}/${maxRetries} after HTTP error ${res.statusCode}`
-              );
-              setTimeout(makeRequest, 1500); // Increased wait time
-            } else {
-              reject(error);
-            }
-            return;
-          }
-
-          try {
-            resolve(data);
-          } catch (error) {
-            console.error('Failed to parse response:', error);
-            reject(new Error('Failed to parse response'));
-          }
-        });
-      });
-
-      req.on('error', (error) => {
-        console.error(
-          `Request error (attempt ${retries + 1}/${maxRetries + 1}):`,
-          error
-        );
-        req.destroy(); // Ensure the request is destroyed
-
-        if (retries < maxRetries) {
-          retries++;
-          console.log(`Retrying ${retries}/${maxRetries}...`);
-          setTimeout(makeRequest, 1500); // Increased wait time
-        } else {
-          reject(error);
-        }
-      });
-
-      // Set a timeout for the request
-      req.setTimeout(8000, () => {
-        req.destroy();
-        if (retries < maxRetries) {
-          retries++;
-          console.log(
-            `Request timed out. Retrying ${retries}/${maxRetries}...`
-          );
-          setTimeout(makeRequest, 1500); // Increased wait time
-        } else {
-          reject(new Error('Request timed out after multiple attempts'));
-        }
-      });
-    };
-
-    makeRequest();
-  });
-};
-
-export async function fetchCurrentIP(): Promise<string> {
-  // First, try to get the external IP address using primary service
-  try {
-    const ipData = await fetchWithRetry(
-      'https://api.ipify.org?format=json',
-      true
-    );
-    const ipResult = JSON.parse(ipData);
-    const ip = ipResult.ip;
-
-    // Then fetch the geolocation data for the IP
-    try {
-      const geoData = await fetchWithRetry(
-        `http://ip-api.com/json/${ip}`,
-        false
-      );
-      const result: GeolocationResponse = JSON.parse(geoData);
-
-      if (result.status === 'success') {
-        return `${result.query} - ${result.city}, ${result.country}`;
-      } else {
-        console.error('Failed to fetch geolocation:', result.message);
-        return `${ip} - Location unavailable`;
-      }
-    } catch (geoError) {
-      console.error('Error fetching geolocation:', geoError);
-      return `${ip} - Location unavailable`;
-    }
-  } catch (ipError) {
-    console.error('Error fetching IP address:', ipError);
-
-    // Try an alternative IP service as fallback
-    try {
-      const ipData = await fetchWithRetry(
-        'https://api.ipify.org?format=text',
-        true
-      );
-      return `${ipData.trim()} - Location unavailable`;
-    } catch (fallbackError) {
-      console.error('Fallback IP lookup failed:', fallbackError);
-      return 'IP information unavailable';
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort();
+    } else {
+      signal.addEventListener('abort', onAbort);
     }
   }
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'Raycast-Mozilla-VPN/1.0',
+      },
+    });
+    return response;
+  } finally {
+    clearTimeout(timer);
+    if (signal) {
+      signal.removeEventListener('abort', onAbort);
+    }
+  }
+}
+
+export async function fetchCurrentIPInfo(
+  signal?: AbortSignal
+): Promise<IPInfo | null> {
+  // First attempt: HTTPS all-in-one geolocation from ipwho.is
+  try {
+    const response = await fetchWithTimeout('https://ipwho.is/', 5000, signal);
+    if (response.ok) {
+      const data = (await response.json()) as IpWhoIsResponse;
+      if (data.success && data.ip) {
+        const locationParts = [data.city, data.country].filter(Boolean);
+        const location =
+          locationParts.length > 0 ? locationParts.join(', ') : undefined;
+        return { ip: data.ip, location };
+      }
+    }
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    console.error('Error fetching geolocation from ipwho.is:', error);
+  }
+
+  // Fallback 1: ipify for IP only
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.ipify.org?format=json',
+      5000,
+      signal
+    );
+    if (response.ok) {
+      const data = (await response.json()) as IpifyResponse;
+      if (data.ip) {
+        return { ip: data.ip };
+      }
+    }
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    console.error('Error fetching fallback IP from ipify:', error);
+  }
+
+  // Fallback 2: text endpoint
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.ipify.org?format=text',
+      5000,
+      signal
+    );
+    if (response.ok) {
+      const text = (await response.text()).trim();
+      if (text) {
+        return { ip: text };
+      }
+    }
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    console.error('Text fallback IP lookup failed:', error);
+  }
+
+  return null;
+}
+
+export function formatIPInfo(info: IPInfo | null): string {
+  if (!info) {
+    return 'IP information unavailable';
+  }
+  if (info.location) {
+    return `${info.ip} - ${info.location}`;
+  }
+  return `${info.ip} - Location unavailable`;
+}
+
+export async function fetchCurrentIP(signal?: AbortSignal): Promise<string> {
+  const info = await fetchCurrentIPInfo(signal);
+  return formatIPInfo(info);
 }

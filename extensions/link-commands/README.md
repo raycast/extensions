@@ -55,6 +55,11 @@ The **Create Link Command** form offers the environments and categories already 
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Script Directories**      | The folders holding your Script Commands. Raycast keeps its own list in an encrypted database that no extension can read, so the paths have to be entered here as well. |
 | **Grouping**                | Read the convention out of titles and subtitles to build sections and filters. Off, everything is one flat list.                                                        |
+| **Titles**                  | Start web titles with their site — `claude.ai · Usage` instead of `Usage`. Off by default; http(s) targets only, filenames unchanged.                                   |
 | **Detail Pane**             | Show a link's source as well as its target. Off by default — a link command's body is a single `open` call and its header repeats the metadata beside it.               |
 | **Terminal**                | The application used by _Run in Terminal_, for when a command misbehaves and you need to see its errors.                                                                |
 | **Author** / **Author URL** | Written into the `@raycast.author` headers of commands you create.                                                                                                      |
+
+### Titles with the site
+
+Off by default, **Titles → Start titles with the site** writes web titles with their site first — `claude.ai · Usage` instead of `Usage`, the host alone when the name is empty or is only the brand. It applies to `http(s)` targets only, never folders or surface routers, and a name already starting with the host is left alone. The create form previews the written title, the filename still derives from the bare name so no file moves, and the search list keeps showing the name with the host in the subtitle.

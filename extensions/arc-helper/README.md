@@ -6,12 +6,12 @@ A Raycast extension for [Arc Raiders](https://www.arcraiders.com/) that lets you
 
 | Command | Description |
 |---------|-------------|
-| **Search Items** | Browse 500+ items with pagination and type filtering |
-| **Search ARCs** | View ARC enemy types and their descriptions |
-| **Search Quests** | Browse quests with objectives and rewards |
+| **Search Items** | Search 1,000+ items by name, type or rarity, with crafting recipes, recycling, mods, drops and trader prices |
+| **Search ARCs** | View ARC enemies, their descriptions and loot drops |
+| **Search Quests** | Browse quests by trader with objectives, required items and rewards |
 | **Event Timers** | View active/upcoming events sorted by time, filterable by map |
-| **Traders** | Browse trader inventories with prices |
-| **Open Map** | Quick access to interactive maps (Dam, Spaceport, Buried City, Blue Gate, Stella Montis) |
+| **Traders** | Browse trader inventories and Ermal's barter offers and services |
+| **Open Map** | Quick access to interactive maps (Dam, Spaceport, Buried City, Blue Gate, Stella Montis, Riven Tides, Pendola Pass) |
 | **My Blueprints** | Track your blueprint collection progress (mark obtained/needed, track duplicates) |
 
 ## API

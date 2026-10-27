@@ -143,7 +143,9 @@ function Monitor({ item, onDeleted }: { item: MonitorItem; onDeleted: () => void
         <ActionPanel>
           <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
           <ActionCopyUrl url={item.attributes.url} />
-          <ActionDeleteMonitor item={item} onDeleted={onDeleted} />
+          <ActionPanel.Section>
+            <ActionDeleteMonitor item={item} onDeleted={onDeleted} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

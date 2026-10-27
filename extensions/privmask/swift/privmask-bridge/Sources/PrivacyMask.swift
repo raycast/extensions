@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import PrivMask
 import RaycastSwiftMacros
@@ -48,6 +49,8 @@ struct DetectRequest: Decodable {
   let text: String
   let dictionaryPath: String?
   let useModel: Bool
+  let useNameModel: Bool
+  let nameModelPath: String?
 }
 
 struct DetectResponse: Encodable {
@@ -88,6 +91,66 @@ private func loadTerms(_ path: String?) throws -> TermList {
   return TermList(terms: try DictionaryFile.load(from: URL(fileURLWithPath: expanded)), notice: nil)
 }
 
+/// What the trained name model found, and anything the user needs to be told
+/// about running it.
+private struct NameModelRun {
+  let matches: [DetectedMatch]
+  let ran: Bool
+  let notice: String?
+
+  static let skipped = NameModelRun(matches: [], ran: false, notice: nil)
+}
+
+/// Where Homebrew puts the `privmask` CLI, on Apple silicon and on Intel. The
+/// name model is installed beside it, and the library finds the model relative
+/// to an executable — but the executable running here is this bridge, not the
+/// CLI, so the library is pointed at the CLI instead.
+private let homebrewCLIs = ["/opt/homebrew/bin/privmask", "/usr/local/bin/privmask"].map(URL.init(fileURLWithPath:))
+
+/// Runs the name model that comes with the `privmask` CLI, when it is installed.
+///
+/// The model is not shipped with the extension: it is tens of megabytes. With
+/// no path configured and no CLI installed, nothing is said, because that is
+/// the ordinary case and Apple Intelligence still looks for names. A configured
+/// path is used as given, never swapped for another, and said when empty — as
+/// the term list is.
+private func runNameModel(_ payload: DetectRequest) -> NameModelRun {
+  guard payload.useNameModel else { return .skipped }
+
+  let directory: URL
+  if let path = payload.nameModelPath, !path.trimmingCharacters(in: .whitespaces).isEmpty {
+    let expanded = (path as NSString).expandingTildeInPath
+    guard let found = NERResources.directory(environment: ["PRIVMASK_NER_DIR": expanded]) else {
+      return NameModelRun(
+        matches: [],
+        ran: false,
+        notice: "No name model at \(expanded) — names were not looked for by it."
+      )
+    }
+    directory = found
+  } else {
+    guard
+      let found = homebrewCLIs.lazy
+        .compactMap({ NERResources.directory(environment: [:], executable: $0) })
+        .first
+    else { return .skipped }
+    directory = found
+  }
+
+  // Fail open, as the language model does. Loading is inside the catch too: a
+  // model this macOS cannot compile fails there, not in detection.
+  do {
+    let matches = try NERDetector.load(from: directory).detect(in: payload.text)
+    return NameModelRun(matches: matches, ran: true, notice: nil)
+  } catch {
+    return NameModelRun(
+      matches: [],
+      ran: false,
+      notice: "The privmask name model failed (\(error)), so names were not looked for by it."
+    )
+  }
+}
+
 /// Everything that can be found without the language model. Returns immediately.
 @raycast func detectFast(payload: DetectRequest) throws -> DetectResponse {
   let list = try loadTerms(payload.dictionaryPath)
@@ -95,7 +158,7 @@ private func loadTerms(_ path: String?) throws -> TermList {
   return DetectResponse(
     findings: candidates.map(Finding.init),
     modelRan: false,
-    notices: [list.notice].compactMap { $0 } + ["Looking for personal names…"],
+    notices: [list.notice].compactMap { $0 },
     dictionaryTermCount: list.terms.count
   )
 }
@@ -105,31 +168,32 @@ private func loadTerms(_ path: String?) throws -> TermList {
   let list = try loadTerms(payload.dictionaryPath)
   let terms = list.terms
   let pipeline = DetectionPipeline(dictionaryTerms: terms)
-  var notices: [String] = [list.notice].compactMap { $0 }
+  let names = runNameModel(payload)
+  var notices: [String] = [list.notice, names.notice].compactMap { $0 }
 
   guard payload.useModel else {
     return DetectResponse(
-      findings: pipeline.detect(in: payload.text).map(Finding.init),
+      findings: pipeline.detect(in: payload.text, additional: names.matches).map(Finding.init),
       modelRan: false,
-      notices: notices + namelessNotices(reason: "the language model is turned off", terms: terms),
+      notices: notices + namelessNotices(reason: "the language model is turned off", terms: terms, nameModelRan: names.ran),
       dictionaryTermCount: terms.count
     )
   }
 
   guard #available(macOS 26.0, *) else {
     return DetectResponse(
-      findings: pipeline.detect(in: payload.text).map(Finding.init),
+      findings: pipeline.detect(in: payload.text, additional: names.matches).map(Finding.init),
       modelRan: false,
-      notices: notices + namelessNotices(reason: "this Mac runs macOS 13–25", terms: terms),
+      notices: notices + namelessNotices(reason: "this Mac runs macOS 13–25", terms: terms, nameModelRan: names.ran),
       dictionaryTermCount: terms.count
     )
   }
 
   guard FoundationModelDetector.isAvailable else {
     return DetectResponse(
-      findings: pipeline.detect(in: payload.text).map(Finding.init),
+      findings: pipeline.detect(in: payload.text, additional: names.matches).map(Finding.init),
       modelRan: false,
-      notices: notices + namelessNotices(reason: "Apple Intelligence is not available", terms: terms),
+      notices: notices + namelessNotices(reason: "Apple Intelligence is not available", terms: terms, nameModelRan: names.ran),
       dictionaryTermCount: terms.count
     )
   }
@@ -142,9 +206,9 @@ private func loadTerms(_ path: String?) throws -> TermList {
     // report it exactly as a model that never ran.
     if outcome.chunks > 0, outcome.failures.count == outcome.chunks {
       return DetectResponse(
-        findings: pipeline.detect(in: payload.text).map(Finding.init),
+        findings: pipeline.detect(in: payload.text, additional: names.matches).map(Finding.init),
         modelRan: false,
-        notices: notices + namelessNotices(reason: "the language model failed", terms: terms),
+        notices: notices + namelessNotices(reason: "the language model failed", terms: terms, nameModelRan: names.ran),
         dictionaryTermCount: terms.count
       )
     }
@@ -152,11 +216,11 @@ private func loadTerms(_ path: String?) throws -> TermList {
     // The whole input is read, a chunk at a time, so length no longer costs
     // coverage — but a chunk that failed is text nothing looked at for names,
     // and that is the one gap no other layer covers.
-    if let notice = unexaminedNotice(failures: outcome.failures, chunks: outcome.chunks) {
+    if let notice = unexaminedNotice(failures: outcome.failures, chunks: outcome.chunks, nameModelRan: names.ran) {
       notices.append(notice)
     }
     return DetectResponse(
-      findings: pipeline.detect(in: payload.text, additional: outcome.matches).map(Finding.init),
+      findings: pipeline.detect(in: payload.text, additional: names.matches + outcome.matches).map(Finding.init),
       modelRan: true,
       notices: notices,
       dictionaryTermCount: terms.count
@@ -165,9 +229,9 @@ private func loadTerms(_ path: String?) throws -> TermList {
     // Fail open. The model is an addition; losing it must not lose everything
     // the deterministic layers already found. The loss is reported, never hidden.
     return DetectResponse(
-      findings: pipeline.detect(in: payload.text).map(Finding.init),
+      findings: pipeline.detect(in: payload.text, additional: names.matches).map(Finding.init),
       modelRan: false,
-      notices: notices + namelessNotices(reason: "the language model failed", terms: terms),
+      notices: notices + namelessNotices(reason: "the language model failed", terms: terms, nameModelRan: names.ran),
       dictionaryTermCount: terms.count
     )
   }
@@ -181,25 +245,34 @@ private func loadTerms(_ path: String?) throws -> TermList {
 /// list of differing reasons is not a sentence.
 ///
 /// Only ever a partial loss — a run where every chunk failed is reported as a
-/// model that never ran, before this is reached.
+/// model that never ran, before this is reached. When the name model ran, it
+/// read the whole text, so that text was still looked at — by it alone.
 private func unexaminedNotice(
   failures: [BatchedNameRun.ChunkFailure],
-  chunks: Int
+  chunks: Int,
+  nameModelRan: Bool
 ) -> String? {
   guard !failures.isEmpty else { return nil }
   let reasons = Set(failures.map(\.reason))
   let because = reasons.count == 1 ? " (\(reasons.first!))" : ""
-  return "\(failures.count) of \(chunks) parts of the text could not be examined, "
-    + "so that text was not checked for names\(because)."
+  let consequence =
+    nameModelRan
+    ? "so that text was checked for names by the privmask name model alone"
+    : "so that text was not checked for names"
+  return "\(failures.count) of \(chunks) parts of the text could not be examined, \(consequence)\(because)."
 }
 
 /// What to say when the model did not run.
 ///
-/// Two capabilities depend on it and nothing else provides them: Japanese
-/// personal names, and matching a dictionary term written a different way from
-/// how it was registered.
-private func namelessNotices(reason: String, terms: [String]) -> [String] {
-  var notices = ["Japanese personal names were not looked for, because \(reason)."]
+/// Two capabilities depend on it: Japanese personal names, which the name model
+/// covers in part when it is installed, and matching a dictionary term written
+/// a different way from how it was registered, which nothing else provides.
+private func namelessNotices(reason: String, terms: [String], nameModelRan: Bool) -> [String] {
+  var notices = [
+    nameModelRan
+      ? "Japanese personal names were looked for by the privmask name model alone, because \(reason)."
+      : "Japanese personal names were not looked for, because \(reason)."
+  ]
   if !terms.isEmpty {
     notices.append("Your terms were matched exactly; spelling variants were not.")
   }
@@ -215,6 +288,8 @@ struct Replacement: Encodable {
   let original: String
   let placeholder: String
   let kind: String
+  let location: Int
+  let length: Int
 }
 
 struct MaskResponse: Encodable {
@@ -229,7 +304,34 @@ struct MaskResponse: Encodable {
   return MaskResponse(
     text: result.text,
     replacements: result.replacements.map {
-      Replacement(original: $0.original, placeholder: $0.placeholder, kind: $0.kind.rawValue)
+      Replacement(
+        original: $0.original,
+        placeholder: $0.placeholder,
+        kind: $0.kind.rawValue,
+        location: $0.range.location,
+        length: $0.range.length
+      )
     }
   )
+}
+
+/// Whether Raycast has a window on screen.
+///
+/// The extension copies on its own, and must not while the window is hidden:
+/// the user may be copying something else meanwhile, and would see neither
+/// the toast nor what it announces. The window list, not the frontmost
+/// application: the window can be up while another application is active,
+/// when it was opened by a deeplink, for one. Owners and bounds need no
+/// permission; only window names do, and those are not read.
+@raycast func isWindowOnScreen() -> Bool {
+  guard let windows = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] else {
+    // Fail open: a copy the user did not see beats one they never get.
+    return true
+  }
+  // Raycast also owns small windows — the HUD, the menu bar — so the width
+  // tells the main window apart.
+  return windows.contains { window in
+    (window[kCGWindowOwnerName as String] as? String) == "Raycast"
+      && ((window[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) > 400
+  }
 }

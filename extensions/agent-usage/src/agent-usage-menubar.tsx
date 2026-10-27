@@ -38,6 +38,7 @@ import {
   useMinimaxCNUsage,
   useOpencodegoUsage,
   useOpenRouterUsage,
+  useRaycastUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
@@ -60,6 +61,7 @@ import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
 import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
 import { getOpenRouterAccessory } from "./openrouter/renderer.tsx";
+import { getRaycastAccessory } from "./raycast/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
 
@@ -122,6 +124,7 @@ export default function MenuBarCommand() {
   const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
   const isOpenRouterVisible = Boolean(prefs.showOpenRouter);
+  const isRaycastVisible = Boolean(prefs.showRaycast);
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
@@ -142,6 +145,7 @@ export default function MenuBarCommand() {
   const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
   const openrouterState = useOpenRouterUsage(isOpenRouterVisible);
+  const raycastState = useRaycastUsage(isRaycastVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
@@ -275,6 +279,16 @@ export default function MenuBarCommand() {
         revalidate: openrouterState.revalidate,
         lastFetchedAt: openrouterState.lastFetchedAt,
       },
+      {
+        id: "raycast",
+        name: "Raycast",
+        icon: getThemeIcon("raycast-icon.svg"),
+        visible: isRaycastVisible,
+        isLoading: raycastState.isLoading,
+        accessory: getRaycastAccessory(raycastState.usage, raycastState.error, raycastState.isLoading),
+        revalidate: raycastState.revalidate,
+        lastFetchedAt: raycastState.lastFetchedAt,
+      },
     ],
     [
       isAihubmixVisible,
@@ -345,6 +359,12 @@ export default function MenuBarCommand() {
       openrouterState.error,
       openrouterState.revalidate,
       openrouterState.lastFetchedAt,
+      isRaycastVisible,
+      raycastState.isLoading,
+      raycastState.usage,
+      raycastState.error,
+      raycastState.revalidate,
+      raycastState.lastFetchedAt,
     ],
   );
 

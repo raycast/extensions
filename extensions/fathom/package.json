@@ -45,7 +45,7 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-downloader": "^0.1.5",
+    "@chrismessina/raycast-downloader": "^0.2.1",
     "@chrismessina/raycast-kit": "^0.2.0",
     "@chrismessina/raycast-logger": "^1.5.0",
     "@raycast/api": "^2.2.1",
@@ -86,12 +86,30 @@
       "default": "~/Downloads"
     },
     {
+      "name": "openMeetingsIn",
+      "type": "dropdown",
+      "required": false,
+      "title": "Open Meetings In",
+      "description": "Falls back to the web when the Fathom desktop app is not installed.",
+      "default": "desktop",
+      "data": [
+        {
+          "title": "Fathom Desktop",
+          "value": "desktop"
+        },
+        {
+          "title": "Fathom Web",
+          "value": "web"
+        }
+      ]
+    },
+    {
       "name": "notifyOnDownloadFinish",
       "type": "checkbox",
       "required": false,
       "title": "Download Notifications",
       "label": "Notify when a download finishes",
-      "description": "Downloads keep running after you close Raycast, so the progress toast is gone by the time they finish. This posts a desktop notification instead.",
+      "description": "Posts a desktop notification when a download finishes after Raycast closes.",
       "default": true
     },
     {
@@ -100,21 +118,30 @@
       "required": false,
       "title": "Notification Style",
       "label": "Send notifications through Raycast",
-      "description": "Shows the notification as Raycast instead of Script Editor. Requires the separate \"Raycast Notification\" extension by maxnyby — without it, notifications are silently dropped.",
+      "description": "Needs the Raycast Notification extension, or notifications are dropped.",
       "default": false
     },
     {
       "name": "verboseLogging",
-      "title": "Verbose Logging",
-      "description": "Enable detailed console logging for debugging purposes",
+      "title": "Debug Logging",
+      "description": "Show detailed logs in the console for debugging.",
       "type": "checkbox",
-      "label": "Enable Verbose Logging",
+      "label": "Enable extra diagnostics in the console",
       "default": false,
       "required": false
+    },
+    {
+      "name": "strictRedaction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Strict Redaction",
+      "label": "Also hide URL query strings and fragments in logs",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "default": false
     }
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }

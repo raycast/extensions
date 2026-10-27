@@ -8,20 +8,14 @@
  * OAuth.PKCEClient. Data requests go straight to SnapTrade with `Authorization: Bearer`.
  */
 import { OAuth } from "@raycast/api";
+import { AuthError } from "./auth-error";
 import { getDiscovery } from "./discovery";
 import { prefs } from "./preferences";
+import { createTokenManager, type GetAccessTokenOptions } from "./token-refresh";
+
+export { AuthError };
 
 export const SCOPES = "read openid email";
-
-export class AuthError extends Error {
-  constructor(
-    message: string,
-    public readonly reason: "not-configured" | "signed-out" | "refresh-failed" | "worker",
-  ) {
-    super(message);
-    this.name = "AuthError";
-  }
-}
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -96,48 +90,30 @@ export async function signIn(): Promise<void> {
   await client.setTokens(tokens);
 }
 
-let refreshInFlight: Promise<string> | null = null;
-
-/** Refresh tokens rotate: the worker returns a new pair and we replace both atomically. Single-flight per process. */
-async function refresh(refreshToken: string): Promise<string> {
-  if (!refreshInFlight) {
-    refreshInFlight = (async () => {
-      try {
-        const tokens = await workerPost<WorkerTokenResponse>("/oauth/refresh", { refresh_token: refreshToken });
-        if (!tokens.refresh_token) tokens.refresh_token = refreshToken;
-        await client.setTokens(tokens);
-        return tokens.access_token;
-      } catch (e) {
-        if (e instanceof AuthError && e.reason === "refresh-failed") {
-          // Refresh token is dead (rotated elsewhere or revoked). Only a new sign-in can fix this.
-          await client.removeTokens();
-          throw new AuthError("Session expired. Sign in again.", "signed-out");
-        }
-        throw e;
-      } finally {
-        refreshInFlight = null;
-      }
-    })();
-  }
-  return refreshInFlight;
-}
+/**
+ * Refresh tokens rotate: the worker returns a new pair and we replace both. The race between
+ * commands running in separate processes is handled in token-refresh.ts.
+ */
+const tokenManager = createTokenManager({
+  store: {
+    get: async () => {
+      const t = await client.getTokens();
+      return t
+        ? { accessToken: t.accessToken, refreshToken: t.refreshToken, expiresIn: t.expiresIn, updatedAt: t.updatedAt }
+        : undefined;
+    },
+    set: (tokens) => client.setTokens(tokens),
+    remove: () => client.removeTokens(),
+  },
+  exchange: (refreshToken) => workerPost<WorkerTokenResponse>("/oauth/refresh", { refresh_token: refreshToken }),
+});
 
 /**
- * Returns a usable access token, refreshing first when expired (or when `force` is set after a 401).
- * Throws AuthError("signed-out") when the user needs to sign in.
+ * Returns a usable access token, refreshing first when it expires within 5 minutes (or when `force`
+ * is set after a 401). Throws AuthError("signed-out") when the user needs to sign in.
  */
-export async function getAccessToken(opts?: { force?: boolean }): Promise<string> {
-  const tokens = await client.getTokens();
-  if (!tokens?.accessToken) throw new AuthError("Not signed in.", "signed-out");
-  const expired = tokens.expiresIn ? tokens.isExpired() : false;
-  if ((expired || opts?.force) && tokens.refreshToken) {
-    return refresh(tokens.refreshToken);
-  }
-  if (expired || opts?.force) {
-    await client.removeTokens();
-    throw new AuthError("Session expired. Sign in again.", "signed-out");
-  }
-  return tokens.accessToken;
+export function getAccessToken(opts?: GetAccessTokenOptions): Promise<string> {
+  return tokenManager.getAccessToken(opts);
 }
 
 export async function isSignedIn(): Promise<boolean> {

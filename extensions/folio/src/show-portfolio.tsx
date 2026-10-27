@@ -2,10 +2,26 @@ import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/
 import { useState } from "react";
 import { usePortfolio } from "./lib/hooks";
 import { usePrivacy } from "./lib/privacy";
-import { dayChange, flattenPositions, groupByInstitution, netWorth, withWeights } from "./lib/portfolio";
-import { formatDate, formatMoney, formatMoneyWithCode, formatSigned, mask } from "./lib/format";
+import {
+  dayChange,
+  flattenPositions,
+  groupByInstitution,
+  isRecentSnapshot,
+  netWorth,
+  withWeights,
+} from "./lib/portfolio";
+import {
+  formatAsOf,
+  formatMoney,
+  formatMoneyWithCode,
+  formatSigned,
+  formatSnapshotDate,
+  formatSnapshotPeriod,
+  mask,
+} from "./lib/format";
+import { oldDataAsOf } from "./lib/snapshot";
 import type { AccountSnapshot } from "./lib/types";
-import { NavigationActions, PrivacyAction, RefreshAction, TradeStubAction } from "./components/actions";
+import { launch, NavigationActions, PrivacyAction, RefreshAction, TradeStubAction } from "./components/actions";
 import { classifyError, ListEmpty } from "./components/empty";
 import { PositionItem } from "./components/PositionItem";
 
@@ -19,6 +35,16 @@ export default function ShowPortfolio() {
   const nw = netWorth(accounts.map((a) => a.account));
   const change = dayChange(accounts);
   const groups = groupByInstitution(accounts);
+  // When the data shown was fetched. After a failed refresh the previous data stays up, so say so.
+  // The session ended while older data is still on screen: say so and offer to sign in.
+  const signedOutWithData = Boolean(error) && accounts.length > 0 && classifyError(error) === "sign-in";
+  const updated = !snapshot
+    ? undefined
+    : isLoading
+      ? `Updating… · showing ${formatAsOf(snapshot.fetchedAt)}`
+      : error
+        ? `${signedOutWithData ? "Signed out" : "Couldn't refresh"} · showing ${formatAsOf(snapshot.fetchedAt)}`
+        : `Updated ${formatAsOf(snapshot.fetchedAt)}`;
   const commonActions = (
     <>
       <PrivacyAction privacy={privacy} onToggle={toggle} />
@@ -34,7 +60,31 @@ export default function ShowPortfolio() {
         <ListEmpty kind="connect" onRetry={refresh} />
       ) : (
         <>
-          <List.Section title="Net Worth">
+          {signedOutWithData && (
+            <List.Section title="Signed Out">
+              <List.Item
+                icon={{ source: Icon.Person, tintColor: Color.Orange }}
+                title="Sign In with SnapTrade"
+                subtitle="Your session ended; the numbers below are from before"
+                actions={
+                  <ActionPanel>
+                    <Action title="Sign in with SnapTrade" icon={Icon.Person} onAction={() => launch("sign-in")} />
+                    <NavigationActions />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          )}
+          <List.Section
+            title="Net Worth"
+            subtitle={[
+              updated,
+              // Here, not on a total's row, so it shows even when no account has a balance yet.
+              nw.missing ? `${nw.missing} account${nw.missing === 1 ? "" : "s"} without a balance, not included` : "",
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          >
             {nw.byCurrency.map((t, i) => (
               <List.Item
                 key={t.currency}
@@ -43,22 +93,28 @@ export default function ShowPortfolio() {
                 subtitle={i === 0 ? `${nw.accountCount} account${nw.accountCount === 1 ? "" : "s"}` : undefined}
                 accessories={(() => {
                   const c = change?.find((x) => x.currency === t.currency);
-                  return c
-                    ? [
-                        {
-                          tag: {
-                            value: mask(
-                              `${formatSigned(c.amount, c.currency)}${c.complete ? "" : " · partial"}`,
-                              privacy,
-                            ),
-                            color: c.amount >= 0 ? Color.Green : Color.Red,
-                          },
-                          tooltip: c.complete
-                            ? "Change vs previous SnapTrade balance snapshot (includes deposits)"
-                            : `Change for ${c.covered} of ${c.covered + c.missing} ${c.currency} accounts; ${c.missing} have no balance history`,
-                        },
-                      ]
-                    : [];
+                  if (!c) return [];
+                  const period = formatSnapshotPeriod(c);
+                  const left = [
+                    c.missing ? `${c.missing} have no balance history` : "",
+                    c.otherDates ? `${c.otherDates} have snapshots on other dates` : "",
+                  ].filter(Boolean);
+                  return [
+                    {
+                      tag: {
+                        value: mask(
+                          `${formatSigned(c.amount, c.currency)}${c.complete ? "" : " · partial"}${
+                            isRecentSnapshot(c.asOf, new Date()) ? "" : ` · ${formatSnapshotDate(c.asOf)}`
+                          }`,
+                          privacy,
+                        ),
+                        color: privacy ? Color.SecondaryText : c.amount >= 0 ? Color.Green : Color.Red,
+                      },
+                      tooltip: c.complete
+                        ? `Change ${period} between SnapTrade balance snapshots (includes deposits)`
+                        : `Change ${period} for ${c.covered} of ${c.covered + c.missing + c.otherDates} ${c.currency} accounts; ${left.join("; ")}`,
+                    },
+                  ];
                 })()}
                 actions={
                   <ActionPanel>
@@ -84,7 +140,7 @@ export default function ShowPortfolio() {
                   key={s.account.id}
                   snapshot={s}
                   privacy={privacy}
-                  onOpen={() => push(<AccountHoldings snapshot={s} />)}
+                  onOpen={() => push(<AccountHoldings accountId={s.account.id} initial={s} refresh={refresh} />)}
                   actions={commonActions}
                 />
               ))}
@@ -134,7 +190,21 @@ function AccountRow({
   const cash = (s.holdings.balances ?? []).filter((b) => typeof b.cash === "number");
   const positions = (s.holdings.positions ?? []).length + (s.holdings.option_positions ?? []).length;
   const synced = s.account.sync_status?.holdings?.last_successful_sync;
+  const oldData = oldDataAsOf(s);
   const accessories: List.Item.Accessory[] = [];
+  if (s.stale) {
+    accessories.push({
+      icon: { source: Icon.Warning, tintColor: Color.Orange },
+      text: `as of ${formatAsOf(s.stale.asOf)}`,
+      tooltip: `Couldn't refresh holdings (${s.stale.message}). Cash and positions are the last ones loaded, from ${formatAsOf(s.stale.asOf)}. The account total is current.`,
+    });
+  } else if (oldData) {
+    accessories.push({
+      icon: { source: Icon.Clock, tintColor: Color.SecondaryText },
+      text: `data from ${formatAsOf(oldData)}`,
+      tooltip: `SnapTrade's latest data for this account is from ${formatAsOf(oldData)}; it isn't being updated live.`,
+    });
+  }
   if (cash.length > 0) {
     accessories.push({
       tag: {
@@ -148,9 +218,9 @@ function AccountRow({
     accessories.push({
       tag: {
         value: mask(formatSigned(s.dayChange.amount, s.dayChange.currency), privacy),
-        color: s.dayChange.amount >= 0 ? Color.Green : Color.Red,
+        color: privacy ? Color.SecondaryText : s.dayChange.amount >= 0 ? Color.Green : Color.Red,
       },
-      tooltip: `Day change as of ${formatDate(s.dayChange.asOf)}`,
+      tooltip: `Change ${formatSnapshotPeriod(s.dayChange)} between SnapTrade balance snapshots`,
     });
   }
   if (total?.amount !== undefined)
@@ -184,13 +254,33 @@ function AccountRow({
   );
 }
 
-function AccountHoldings({ snapshot }: { snapshot: AccountSnapshot }) {
+/**
+ * One account's cash and positions. Reads the snapshot the list already loaded (no load of its own on
+ * open) and follows it, so ⌘R here updates what's shown.
+ */
+function AccountHoldings({
+  accountId,
+  initial,
+  refresh,
+}: {
+  accountId: string;
+  initial: AccountSnapshot;
+  /** The list's refresh, so ⌘R here reloads the list too and both show the result. */
+  refresh: () => Promise<void>;
+}) {
   const { privacy, toggle } = usePrivacy();
-  const { refresh } = usePortfolio();
+  const { snapshot: portfolio } = usePortfolio({ load: false });
   const [showDetail, setShowDetail] = useState(false);
+  const snapshot = portfolio?.accounts.find((a) => a.account.id === accountId) ?? initial;
   const positions = withWeights(flattenPositions([snapshot]));
   const cash = (snapshot.holdings.balances ?? []).filter((b) => typeof b.cash === "number");
   const title = `${snapshot.account.institution_name} · ${snapshot.account.name ?? snapshot.account.number}`;
+  const oldData = oldDataAsOf(snapshot);
+  const asOf = snapshot.stale
+    ? `as of ${formatAsOf(snapshot.stale.asOf)} (couldn't refresh)`
+    : oldData
+      ? `data from ${formatAsOf(oldData)}`
+      : undefined;
   return (
     <List
       navigationTitle={title}
@@ -198,7 +288,7 @@ function AccountHoldings({ snapshot }: { snapshot: AccountSnapshot }) {
       searchBarPlaceholder={`Search ${snapshot.account.name ?? "holdings"}…`}
     >
       {cash.length > 0 && (
-        <List.Section title="Cash">
+        <List.Section title="Cash" subtitle={asOf}>
           {cash.map((b) => (
             <List.Item
               key={b.currency?.code ?? "cash"}
@@ -227,7 +317,7 @@ function AccountHoldings({ snapshot }: { snapshot: AccountSnapshot }) {
           ))}
         </List.Section>
       )}
-      <List.Section title="Positions" subtitle={`${positions.length}`}>
+      <List.Section title="Positions" subtitle={asOf ? `${positions.length} · ${asOf}` : `${positions.length}`}>
         {positions.map((p) => (
           <PositionItem
             key={p.key}

@@ -12,7 +12,6 @@ import {
   showToast,
 } from "@raycast/api";
 import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
-import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
@@ -39,6 +38,7 @@ import useIslandBookmarks from "./hooks/useIslandBookmarks";
 import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
 import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useSearchBookmarks from "./hooks/useSearchBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
@@ -55,6 +55,7 @@ import {
 } from "./utils/browserOpening";
 import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { createBookmarkSearch } from "./utils/bookmarkSearch";
 import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -64,6 +65,7 @@ type Bookmark = {
   title: string;
   url: string;
   folder: string;
+  searchFolder?: string;
   domain: string;
   favicon?: string;
   bookmarkFrecency?: BookmarkFrecency;
@@ -165,7 +167,8 @@ export default function Command() {
   const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
   const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
-  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser, replaceCurrentTab, copyLinkShortcut, searchStrictness } =
+    getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -246,6 +249,7 @@ export default function Command() {
   const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
   const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasSearch = browsers.includes(BROWSERS_BUNDLE_ID.search) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
   const hasVivaldiSnapshot = browsers.includes(BROWSERS_BUNDLE_ID.vivaldiSnapshot) ?? false;
@@ -273,6 +277,7 @@ export default function Command() {
   const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
   const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
+  const searchBrowser = useSearchBookmarks(hasSearch);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
   const vivaldiSnapshot = useVivaldiSnapshotBookmarks(hasVivaldiSnapshot);
@@ -305,6 +310,7 @@ export default function Command() {
       ...libreWolf.bookmarks,
       ...prismaAccess.bookmarks,
       ...safari.bookmarks,
+      ...searchBrowser.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
       ...vivaldiSnapshot.bookmarks,
@@ -365,6 +371,7 @@ export default function Command() {
     libreWolf.bookmarks,
     prismaAccess.bookmarks,
     safari.bookmarks,
+    searchBrowser.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
     vivaldiSnapshot.bookmarks,
@@ -397,6 +404,7 @@ export default function Command() {
       ...libreWolf.folders,
       ...prismaAccess.folders,
       ...safari.folders,
+      ...searchBrowser.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
       ...vivaldiSnapshot.folders,
@@ -427,6 +435,7 @@ export default function Command() {
     libreWolf.folders,
     prismaAccess.folders,
     safari.folders,
+    searchBrowser.folders,
     sidekick.folders,
     vivaldi.folders,
     vivaldiSnapshot.folders,
@@ -451,18 +460,10 @@ export default function Command() {
     });
   }, [bookmarks, selectedFolderId, folders]);
 
-  const fuse = useMemo(() => {
-    return new Fuse(folderBookmarks, {
-      keys: [
-        { name: "title", weight: 3 },
-        { name: "domain", weight: 1 },
-        { name: "folder", weight: 0.5 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-      ignoreLocation: true,
-    });
-  }, [folderBookmarks]);
+  const fuse = useMemo(
+    () => createBookmarkSearch(folderBookmarks, Number(searchStrictness)),
+    [folderBookmarks, searchStrictness],
+  );
 
   // Limit display to 100 bookmarks to avoid heap memory errors
   // Use custom filtering instead of native filtering
@@ -570,6 +571,9 @@ export default function Command() {
     if (hasSafari) {
       safari.mutate();
     }
+    if (hasSearch) {
+      searchBrowser.mutate();
+    }
     if (hasSidekick) {
       sidekick.mutate();
     }
@@ -652,6 +656,7 @@ export default function Command() {
         libreWolf.isLoading ||
         prismaAccess.isLoading ||
         safari.isLoading ||
+        searchBrowser.isLoading ||
         sidekick.isLoading ||
         vivaldi.isLoading ||
         vivaldiSnapshot.isLoading ||
@@ -953,6 +958,16 @@ export default function Command() {
                     profiles={prismaAccess.profiles}
                     currentProfile={prismaAccess.currentProfile}
                     setCurrentProfile={prismaAccess.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.search}
+                    name="Search"
+                    icon="search.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                    profiles={searchBrowser.profiles}
+                    currentProfile={searchBrowser.currentProfile}
+                    setCurrentProfile={searchBrowser.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}

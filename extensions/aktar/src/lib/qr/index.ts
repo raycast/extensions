@@ -62,9 +62,14 @@ export async function saveQRCode(file: string, name: string): Promise<string> {
   }
 }
 
+/** Without the characters macOS or Windows don't allow in a file name. */
 function safeName(name: string) {
-  return name
-    .replace(/[/\\:]/g, "-")
-    .replace(/\.[^.]+$/, "")
-    .trim();
+  return (
+    name
+      // eslint-disable-next-line no-control-regex
+      .replace(/[/\\:*?"<>|\u0000-\u001f]/g, "-")
+      .replace(/\.[^.]+$/, "")
+      .replace(/[. ]+$/, "")
+      .trim()
+  );
 }

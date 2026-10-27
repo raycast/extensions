@@ -1,17 +1,18 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { extname, basename, join } from "node:path";
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { getPreferenceValues } from "@raycast/api";
+import { openRpc, RpcConnection } from "./rpc";
 
 const run = promisify(execFile);
 
 export type ModelSelection = {
   instanceId: string;
   model: string;
-  options?: { id: string; value: string }[];
+  options?: { id: string; value: string | boolean | number }[];
 };
 
 export type RuntimeMode =
@@ -67,6 +68,10 @@ export type Thread = {
     activeTurnId: string | null;
     lastError: string | null;
   } | null;
+  /** Protocol v2 replaced latestTurn and session with these. */
+  status?: string;
+  activeRunId?: string | null;
+  lastError?: string | null;
 };
 
 export type ShellSnapshot = {
@@ -74,6 +79,12 @@ export type ShellSnapshot = {
   projects: Project[];
   threads: Thread[];
   updatedAt: string;
+};
+
+type EnvironmentDescriptor = {
+  serverVersion?: string;
+  /** Absent on servers that predate protocol v2. */
+  orchestrationProtocolVersion?: number;
 };
 
 /** The server is unreachable, the token is rejected, or the request failed. Commands
@@ -148,10 +159,45 @@ export async function resolveOrigin(): Promise<string> {
   return "http://127.0.0.1:3773";
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const origin = await resolveOrigin();
+const PROTOCOL_HEADER = "x-t3-orchestration-protocol";
+
+const descriptors = new Map<string, Promise<EnvironmentDescriptor>>();
+
+/** The server describes itself once per command run. Cached per origin, so a server
+ * that restarts on another port or version is asked again. */
+function serverDescriptor(origin: string): Promise<EnvironmentDescriptor> {
+  let descriptor = descriptors.get(origin);
+  if (!descriptor) {
+    descriptor = request<EnvironmentDescriptor>(
+      "/.well-known/t3/environment",
+      undefined,
+      false,
+      origin,
+    ).catch((error) => {
+      descriptors.delete(origin);
+      throw error;
+    });
+    descriptors.set(origin, descriptor);
+  }
+  return descriptor;
+}
+
+/** v2 servers reject orchestration reads without the protocol header; older servers
+ * predate the field, so a missing value means v1. */
+async function serverProtocolVersion(origin: string): Promise<number> {
+  return (await serverDescriptor(origin)).orchestrationProtocolVersion ?? 1;
+}
+
+async function request<T>(
+  path: string,
+  init?: RequestInit,
+  versioned = true,
+  knownOrigin?: string,
+): Promise<T> {
+  const origin = knownOrigin ?? (await resolveOrigin());
   assertTokenSafeOrigin(origin);
   const { token } = preferences();
+  const version = versioned ? await serverProtocolVersion(origin) : 1;
   let response: Response;
   try {
     response = await fetch(`${origin}${path}`, {
@@ -159,6 +205,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(version >= 2 ? { [PROTOCOL_HEADER]: String(version) } : {}),
         ...(init?.headers ?? {}),
       },
     });
@@ -184,8 +231,43 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export const getShell = () =>
-  request<ShellSnapshot>("/api/orchestration/shell");
+/** v2 reports run state on the thread itself. Rebuild the v1 latestTurn so every
+ * consumer keeps reading one shape. */
+function normalizeThread(thread: Thread): Thread {
+  if (thread.latestTurn !== undefined || thread.status === undefined) {
+    return thread;
+  }
+  const state: LatestTurn["state"] | null =
+    thread.activeRunId || thread.status === "running"
+      ? "running"
+      : thread.status === "failed" || thread.status === "error"
+        ? "error"
+        : thread.status === "interrupted"
+          ? "interrupted"
+          : null;
+  return {
+    ...thread,
+    latestTurn: state && {
+      turnId: thread.activeRunId ?? "",
+      state,
+      requestedAt: thread.updatedAt,
+      startedAt: null,
+      completedAt: null,
+    },
+    session: thread.lastError
+      ? { status: "error", activeTurnId: null, lastError: thread.lastError }
+      : null,
+  };
+}
+
+export const getShell = async (): Promise<ShellSnapshot> => {
+  const snapshot = await request<ShellSnapshot>("/api/orchestration/shell");
+  return { ...snapshot, threads: snapshot.threads.map(normalizeThread) };
+};
+
+/** Protocol v2 creates threads over the WebSocket, v1 over HTTP dispatch. */
+export const getProtocolVersion = async (): Promise<number> =>
+  serverProtocolVersion(await resolveOrigin());
 
 export const dispatch = (command: Record<string, unknown>) =>
   request<{ sequence: number }>("/api/orchestration/dispatch", {
@@ -268,12 +350,31 @@ export function inheritedSettings(
 }
 
 /** Dropdown values have to be strings, so a selection round-trips through one. */
+/** Options that say nothing a missing option would not: fast mode off, the default
+ * service tier. Dropping them stops one model showing up several times. */
+const isNoiseOption = (option: { id: string; value: unknown }) =>
+  (option.id === "fastMode" && String(option.value) === "false") ||
+  (option.id === "serviceTier" && option.value === "default") ||
+  (option.id === "speed" && option.value === "standard") ||
+  option.id === "mode";
+
+/** Claude ids come both as "claude-fable-5-1" and "claude-fable-5.1" in old threads;
+ * the dashed form is the one the manifest lists. Other providers use dots for real. */
+const canonicalModel = (model: string) =>
+  model.startsWith("claude-") ? model.replace(/(\d)\.(\d)/g, "$1-$2") : model;
+
+/** Entries the server creates for its own bookkeeping, never a choice for a person. */
+export const isInternalModel = (model: string) => /^<.*>$/.test(model);
+
+const meaningfulOptions = (selection: ModelSelection) =>
+  (selection.options ?? []).filter((option) => !isNoiseOption(option));
+
 export function modelKey(selection: ModelSelection): string {
-  const options = (selection.options ?? [])
+  const options = meaningfulOptions(selection)
     .map((option) => `${option.id}=${option.value}`)
     .sort()
     .join(",");
-  return `${selection.instanceId}|${selection.model}|${options}`;
+  return `${selection.instanceId}|${canonicalModel(selection.model)}|${options}`;
 }
 
 export function parseModelKey(key: string): ModelSelection {
@@ -290,37 +391,147 @@ export function parseModelKey(key: string): ModelSelection {
     : { instanceId, model };
 }
 
-export function modelLabel(selection: ModelSelection): string {
-  const options = (selection.options ?? [])
-    .filter((option) => option.id !== "fastMode")
-    .map((option) => option.value);
-  return [selection.model, ...options].join(" · ");
+type ProviderInstance = {
+  driver?: string;
+  displayName?: string;
+  enabled?: boolean;
+  config?: { customModels?: string[] };
+};
+
+type T3Settings = {
+  providerInstances?: Record<string, ProviderInstance | undefined>;
+  favorites?: { provider: string; model: string }[];
+};
+
+const DRIVER_NAMES: Record<string, string> = {
+  claudeAgent: "Claude",
+  codex: "Codex",
+  antigravity: "Antigravity",
+  cursor: "Cursor",
+  grok: "Grok",
+  opencode: "OpenCode",
+};
+
+async function readSettings(): Promise<T3Settings> {
+  try {
+    return JSON.parse(
+      await readFile(join(RUNTIME_DIR, "settings.json"), "utf8"),
+    ) as T3Settings;
+  } catch {
+    return {};
+  }
 }
 
-type ProviderInstances = Record<string, { enabled?: boolean } | undefined>;
+/** The name T3 shows for each provider instance: the one you gave it, else its driver's. */
+export async function providerNames(): Promise<Record<string, string>> {
+  const { providerInstances = {} } = await readSettings();
+  const names: Record<string, string> = {};
+  for (const [id, instance] of Object.entries(providerInstances)) {
+    names[id] =
+      instance?.displayName ??
+      DRIVER_NAMES[instance?.driver ?? id] ??
+      instance?.driver ??
+      id;
+  }
+  return names;
+}
 
-/** Models the manifest lists for providers that are actually enabled. Read from disk
- * because the server publishes the manifest over the WebSocket only; a missing or
- * unreadable file just means the picker falls back to what threads already use. */
+/** Models starred in the T3 app, so the stars here match the ones in the sidebar. They
+ * match on provider and model alone, since a starred model carries no effort setting. */
+export async function t3Favorites(): Promise<string[]> {
+  const { favorites = [] } = await readSettings();
+  return favorites.map((favorite) => `${favorite.provider}|${favorite.model}`);
+}
+
+export const isFavoriteModel = (key: string, favorites: string[]) =>
+  favorites.some(
+    (favorite) => key === favorite || key.startsWith(`${favorite}|`),
+  );
+
+/** "claude-opus-5-5" reads as "Opus 5.5"; other models keep their own name with the
+ * dashes turned into spaces. */
+export function prettyModelName(model: string): string {
+  const spaced = model
+    .replace(/^claude-/, "")
+    .replace(/(\d)-(\d)/g, "$1.$2")
+    .replace(/-/g, " ")
+    .trim();
+  return model.startsWith("claude-")
+    ? spaced.replace(/^./, (letter) => letter.toUpperCase())
+    : spaced.replace(/^gpt/i, "GPT");
+}
+
+const EFFORT_OPTION_IDS = new Set([
+  "effort",
+  "reasoningEffort",
+  "thought_level",
+]);
+
+/** Provider, model, effort, then anything else that changes the run, each as its own
+ * part. Effort always appears for providers that have one, "default" when none is set,
+ * so two entries for one model never look the same. */
+export function modelParts(
+  selection: ModelSelection,
+  names: Record<string, string> = {},
+): string[] {
+  const options = meaningfulOptions(selection);
+  const effort = options.find((option) => EFFORT_OPTION_IDS.has(option.id));
+  const hasEffort =
+    effort !== undefined || /^(claudeAgent|codex)/.test(selection.instanceId);
+  const extras = options
+    .filter((option) => !EFFORT_OPTION_IDS.has(option.id))
+    .map((option) => {
+      if (option.id === "contextWindow") {
+        return String(option.value).toUpperCase();
+      }
+      if (option.id === "fastMode") {
+        return "fast";
+      }
+      return `${option.id} ${option.value}`;
+    });
+  return [
+    names[selection.instanceId],
+    prettyModelName(canonicalModel(selection.model)),
+    hasEffort ? String(effort?.value ?? "default") : undefined,
+    ...extras,
+  ].filter((part): part is string => Boolean(part));
+}
+
+export const modelLabel = (
+  selection: ModelSelection,
+  names: Record<string, string> = {},
+) => modelParts(selection, names).join(" · ");
+
+/** Models the manifest lists for providers that are actually enabled, plus the custom
+ * models an instance declares. A second instance of a driver with none of its own falls
+ * back to that driver's list. Read from disk because the server publishes the manifest
+ * over the WebSocket only; a missing or unreadable file just means the picker falls back
+ * to what threads already use. */
 async function manifestSelections(): Promise<ModelSelection[]> {
   try {
-    const [manifestRaw, settingsRaw] = await Promise.all([
+    const [manifestRaw, settings] = await Promise.all([
       readFile(join(RUNTIME_DIR, "model-manifest.json"), "utf8"),
-      readFile(join(RUNTIME_DIR, "settings.json"), "utf8"),
+      readSettings(),
     ]);
     const manifest = JSON.parse(manifestRaw) as {
       manifest?: { currentModels?: Record<string, string[]> };
     };
-    const settings = JSON.parse(settingsRaw) as {
-      providerInstances?: ProviderInstances;
-    };
-    const instances = settings.providerInstances ?? {};
     const current = manifest.manifest?.currentModels ?? {};
-    return Object.entries(current)
-      .filter(([instanceId]) => instances[instanceId]?.enabled === true)
-      .flatMap(([instanceId, models]) =>
-        models.map((model) => ({ instanceId, model })),
-      );
+    return Object.entries(settings.providerInstances ?? {})
+      .filter(([, instance]) => instance?.enabled === true)
+      .flatMap(([instanceId, instance]) => {
+        const custom = instance?.config?.customModels ?? [];
+        const listed =
+          current[instanceId] ??
+          (custom.length === 0 && instance?.driver
+            ? current[instance.driver]
+            : undefined) ??
+          [];
+        return [...new Set([...listed, ...custom])].map((model) => ({
+          instanceId,
+          model,
+        }));
+      });
   } catch {
     return [];
   }
@@ -330,24 +541,35 @@ async function manifestSelections(): Promise<ModelSelection[]> {
  * recently used first, then anything else the enabled providers currently support. */
 export async function modelChoices(
   snapshot: ShellSnapshot,
+  names: Record<string, string> = {},
 ): Promise<{ key: string; label: string; selection: ModelSelection }[]> {
   const seen = new Map<string, { selection: ModelSelection; at: number }>();
   for (const thread of snapshot.threads) {
-    if (!thread.modelSelection || thread.deletedAt) {
+    if (
+      !thread.modelSelection ||
+      thread.deletedAt ||
+      isInternalModel(thread.modelSelection.model)
+    ) {
       continue;
     }
     const key = modelKey(thread.modelSelection);
     const at = threadTimestamp(thread);
     const previous = seen.get(key);
     if (!previous || at > previous.at) {
-      seen.set(key, { selection: thread.modelSelection, at });
+      seen.set(key, {
+        selection: {
+          ...thread.modelSelection,
+          model: canonicalModel(thread.modelSelection.model),
+        },
+        at,
+      });
     }
   }
   const used = [...seen.entries()]
     .sort((a, b) => b[1].at - a[1].at)
     .map(([key, value]) => ({
       key,
-      label: modelLabel(value.selection),
+      label: modelLabel(value.selection, names),
       selection: value.selection,
     }));
 
@@ -355,7 +577,7 @@ export async function modelChoices(
     .filter((selection) => !seen.has(modelKey(selection)))
     .map((selection) => ({
       key: modelKey(selection),
-      label: modelLabel(selection),
+      label: modelLabel(selection, names),
       selection,
     }));
 
@@ -371,7 +593,49 @@ export function threadTitle(prompt: string): string {
   return firstLine.trim().slice(0, 60);
 }
 
-const appName = () => preferences().appName?.trim() || "T3 Code";
+// The preference used to default to this, which matches neither release bundle, so a
+// stored copy counts as unset unless an app with that exact name is installed.
+const LEGACY_APP_NAME = "T3 Code";
+const STABLE_APP = "T3 Code (Alpha)";
+const NIGHTLY_APP = "T3 Code (Nightly)";
+// Same pattern T3 uses to brand a build as Nightly. Preview builds share the branding.
+const NIGHTLY_VERSION = /^[^-+]+-(?:nightly|preview)\.\d{8}\.\d+$/;
+
+async function isInstalled(name: string): Promise<boolean> {
+  for (const dir of ["/Applications", join(homedir(), "Applications")]) {
+    try {
+      await access(join(dir, `${name}.app`));
+      return true;
+    } catch {
+      // not in this folder
+    }
+  }
+  return false;
+}
+
+/** The app bundle is named after its release channel, so a fixed name only fits one
+ * of them. The preference wins; otherwise follow the running server's version, and
+ * with no server running use whichever app is installed, stable first. */
+async function appName(): Promise<string> {
+  const configured = preferences().appName?.trim();
+  if (
+    configured &&
+    (configured !== LEGACY_APP_NAME || (await isInstalled(configured)))
+  ) {
+    return configured;
+  }
+  try {
+    const { serverVersion } = await serverDescriptor(await resolveOrigin());
+    if (serverVersion) {
+      return NIGHTLY_VERSION.test(serverVersion) ? NIGHTLY_APP : STABLE_APP;
+    }
+  } catch {
+    // the server is not running, so look at what is installed
+  }
+  return (await isInstalled(STABLE_APP)) || !(await isInstalled(NIGHTLY_APP))
+    ? STABLE_APP
+    : NIGHTLY_APP;
+}
 
 const escapeForAppleScript = (value: string) =>
   value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -437,7 +701,7 @@ export async function focusThread(
   target: PaletteThread,
 ): Promise<"opened" | "ambiguous" | "unfocused"> {
   const query = paletteQuery(target);
-  const name = appName();
+  const name = await appName();
   await run("/usr/bin/open", ["-a", name]);
   await run("/usr/bin/osascript", [
     "-e",
@@ -475,7 +739,7 @@ return "unfocused"`,
 }
 
 export async function launchApp(): Promise<void> {
-  await run("/usr/bin/open", ["-a", appName()]);
+  await run("/usr/bin/open", ["-a", await appName()]);
 }
 
 export function worktreePathFor(workspaceRoot: string, branch: string): string {
@@ -593,14 +857,17 @@ export async function removeWorktree(
 export async function startSession(input: {
   projectId: string;
   prompt: string;
+  /** Defaults to the first line of the prompt. */
+  title?: string;
   modelSelection: ModelSelection;
   runtimeMode: RuntimeMode;
   branch: string | null;
   worktreePath: string | null;
+  attachments?: AttachmentFile[];
 }): Promise<string> {
   const threadId = randomUUID();
   const createdAt = new Date().toISOString();
-  const title = threadTitle(input.prompt);
+  const title = input.title ?? threadTitle(input.prompt);
 
   await dispatch({
     type: "thread.create",
@@ -625,7 +892,9 @@ export async function startSession(input: {
         messageId: randomUUID(),
         role: "user",
         text: input.prompt,
-        attachments: [],
+        attachments: await Promise.all(
+          (input.attachments ?? []).map(inlineAttachment),
+        ),
       },
       modelSelection: input.modelSelection,
       titleSeed: title,
@@ -645,4 +914,199 @@ export async function startSession(input: {
   }
 
   return threadId;
+}
+
+export const IMAGE_MIME_TYPES: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
+const UPLOAD_TIMEOUT_MS = 5 * 60_000;
+const LAUNCH_TIMEOUT_MS = 5 * 60_000;
+export const MAX_ATTACHMENTS = 8;
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const MAX_FILE_BYTES = 50 * 1024 * 1024;
+
+/** What was checked about a file. The bytes are read only when it is sent, one file at a
+ * time, so eight 50 MB files never sit in memory together. */
+export type AttachmentFile = {
+  kind: "image" | "file";
+  name: string;
+  path: string;
+  mimeType: string;
+  sizeBytes: number;
+};
+
+/** The extension decides images, since T3 accepts only four types as images; anything
+ * else goes to `file` for its mime type, which the server stores and hands to the agent. */
+async function mimeTypeOf(path: string): Promise<string> {
+  const known = IMAGE_MIME_TYPES[extname(path).toLowerCase()];
+  if (known) {
+    return known;
+  }
+  try {
+    const { stdout } = await run("file", ["--brief", "--mime-type", path]);
+    return stdout.trim().slice(0, 100) || "application/octet-stream";
+  } catch {
+    return "application/octet-stream";
+  }
+}
+
+/** Reads a file the way T3 will accept it: images up to 10 MiB, other files up to 50 MiB. */
+export async function readAttachment(path: string): Promise<AttachmentFile> {
+  const name = basename(path);
+  const mimeType = await mimeTypeOf(path);
+  const kind = Object.values(IMAGE_MIME_TYPES).includes(mimeType)
+    ? "image"
+    : "file";
+  const limit = kind === "image" ? MAX_IMAGE_BYTES : MAX_FILE_BYTES;
+  const info = await stat(path);
+  if (!info.isFile()) {
+    throw new Error(`${name} is not a file.`);
+  }
+  if (info.size === 0 || info.size > limit) {
+    throw new Error(
+      `${name} must be between 1 byte and ${limit / 1024 / 1024} MB.`,
+    );
+  }
+  return { kind, name, path, mimeType, sizeBytes: info.size };
+}
+
+/** v1 servers take image bytes inside the turn itself and have no file attachments. */
+async function inlineAttachment(attachment: AttachmentFile) {
+  if (attachment.kind !== "image") {
+    throw new Error(
+      `${attachment.name} cannot be sent: this T3 Code server only accepts images. Update T3 Code to attach other files.`,
+    );
+  }
+  return {
+    type: "image",
+    name: attachment.name,
+    mimeType: attachment.mimeType,
+    sizeBytes: attachment.sizeBytes,
+    dataUrl: `data:${attachment.mimeType};base64,${(await readFile(attachment.path)).toString("base64")}`,
+  };
+}
+
+async function openServerRpc(): Promise<RpcConnection> {
+  const origin = await resolveOrigin();
+  const version = await serverProtocolVersion(origin);
+  const { ticket } = await request<{ ticket: string }>(
+    "/api/auth/websocket-ticket",
+    { method: "POST" },
+    true,
+    origin,
+  );
+  const url = new URL(origin);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = "/ws";
+  url.search = new URLSearchParams({
+    orchestrationProtocol: String(version),
+    wsTicket: ticket,
+  }).toString();
+  try {
+    return await openRpc(url.toString());
+  } catch (error) {
+    throw new T3Error(
+      "unreachable",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
+/** v2 servers hold uploads until a turn claims them: ask for a signed URL, post the
+ * bytes there, then reference the attachment by id. */
+async function uploadAttachments(
+  rpc: RpcConnection,
+  attachments: AttachmentFile[],
+) {
+  const origin = await resolveOrigin();
+  const uploaded = [];
+  for (const attachment of attachments) {
+    const slot = await rpc.call<{ attachmentId: string; relativeUrl: string }>(
+      "attachments.createUploadUrl",
+      {
+        type: attachment.kind,
+        name: attachment.name,
+        mimeType: attachment.mimeType,
+        sizeBytes: attachment.sizeBytes,
+      },
+    );
+    const response = await fetch(`${origin}${slot.relativeUrl}`, {
+      method: "POST",
+      headers: { "Content-Type": attachment.mimeType },
+      body: await readFile(attachment.path),
+      // The signed URL is the only thing authorising this upload, so a redirect to
+      // somewhere else is an error, and a stalled server cannot hang the command.
+      redirect: "error",
+      signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
+    });
+    if (!response.ok) {
+      throw new Error(
+        `Uploading ${attachment.name} failed with ${response.status}. ${(await response.text().catch(() => "")).slice(0, 200)}`,
+      );
+    }
+    uploaded.push({
+      type: attachment.kind,
+      id: slot.attachmentId,
+      name: attachment.name,
+      mimeType: attachment.mimeType,
+      sizeBytes: attachment.sizeBytes,
+    });
+  }
+  return uploaded;
+}
+
+/** The v2 path. One call creates the thread, prepares its worktree and sends the first
+ * message, so the extension no longer runs git itself. */
+export async function launchThread(input: {
+  projectId: string;
+  title: string;
+  prompt: string;
+  modelSelection: ModelSelection;
+  runtimeMode: RuntimeMode;
+  workspace:
+    | { type: "root" }
+    | {
+        type: "worktree";
+        baseRef: string;
+        branch: string;
+        startFromOrigin: boolean;
+      };
+  attachments: AttachmentFile[];
+}): Promise<string> {
+  const rpc = await openServerRpc();
+  try {
+    const attachments = await uploadAttachments(rpc, input.attachments);
+    const result = await rpc.call<{ threadId: string }>(
+      "orchestration.launchThread",
+      {
+        commandId: randomUUID(),
+        // Uploaded attachments are claimed by thread id, so it is fixed up front.
+        threadId: randomUUID(),
+        projectId: input.projectId,
+        title: input.title,
+        generateTitle: false,
+        modelSelection: input.modelSelection,
+        runtimeMode: input.runtimeMode,
+        interactionMode: "default",
+        workspaceStrategy: input.workspace,
+        initialMessage: {
+          messageId: randomUUID(),
+          text: input.prompt,
+          attachments,
+        },
+      },
+      LAUNCH_TIMEOUT_MS,
+    );
+    return result.threadId;
+  } finally {
+    rpc.close();
+  }
+}
+
+export async function hasOriginRemote(workspaceRoot: string): Promise<boolean> {
+  return hasOrigin(workspaceRoot);
 }

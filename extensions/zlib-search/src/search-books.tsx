@@ -19,6 +19,7 @@ import {
   resolveZlibPath,
   runBulkDownload,
   truncate,
+  websiteSearchUrl,
 } from "./lib/zlib";
 
 interface SearchResult {
@@ -158,94 +159,118 @@ export default function Command() {
           title="Search Z-Library"
           description="Type a title, author, or keyword to search."
         />
-      ) : books.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No results"
-          description={`No books found for "${searchText}"`}
-        />
       ) : (
-        books.map((book, i) => {
-          const selected = selectedBooks.has(book.id);
-          const queued = isQueued(book.id);
-          return (
-            <List.Item
-              key={`${book.id}-${i}`}
-              title={book.name}
-              subtitle={book.authors?.join(", ") ?? ""}
-              icon={
-                selected
-                  ? { source: Icon.CheckCircle, tintColor: Color.Blue }
-                  : Icon.Circle
-              }
-              accessories={[
-                queued
-                  ? { icon: Icon.Bookmark, tooltip: "In download queue" }
-                  : {},
-                book.extension ? { tag: book.extension } : {},
-                book.size ? { text: book.size } : {},
-                book.year ? { text: book.year } : {},
-              ]}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action
-                      title="Download"
-                      icon={Icon.Download}
-                      onAction={() => handleDownload(book)}
-                    />
-                    {book.url ? (
-                      <Action.OpenInBrowser
-                        url={book.url}
-                        title="Open in Browser"
-                      />
-                    ) : null}
-                    <Action.CopyToClipboard
-                      title="Copy to Clipboard"
-                      content={book.id}
-                    />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Selection">
-                    <Action
-                      title={selected ? "Deselect" : "Select"}
-                      icon={selected ? Icon.Circle : Icon.CheckCircle}
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "s" },
-                        Windows: { modifiers: ["ctrl"], key: "s" },
-                      }}
-                      onAction={() => toggleSelected(book)}
-                    />
-                    {selectedBooks.size > 0 ? (
+        <>
+          {books.map((book, i) => {
+            const selected = selectedBooks.has(book.id);
+            const queued = isQueued(book.id);
+            return (
+              <List.Item
+                key={`${book.id}-${i}`}
+                title={book.name}
+                subtitle={book.authors?.join(", ") ?? ""}
+                icon={
+                  selected
+                    ? { source: Icon.CheckCircle, tintColor: Color.Blue }
+                    : Icon.Circle
+                }
+                accessories={[
+                  queued
+                    ? { icon: Icon.Bookmark, tooltip: "In download queue" }
+                    : {},
+                  book.extension ? { tag: book.extension } : {},
+                  book.size ? { text: book.size } : {},
+                  book.year ? { text: book.year } : {},
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section>
                       <Action
-                        title={`Download Selected (${selectedBooks.size})`}
-                        icon={Icon.Tray}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd", "shift"], key: "d" },
-                          Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-                        }}
-                        onAction={handleDownloadSelected}
+                        title="Download"
+                        icon={Icon.Download}
+                        onAction={() => handleDownload(book)}
                       />
-                    ) : null}
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Download Queue">
-                    <Action
-                      title={queued ? "Remove from Queue" : "Add to Queue"}
-                      icon={
-                        queued
-                          ? { source: Icon.Bookmark, tintColor: Color.Blue }
-                          : Icon.Bookmark
-                      }
-                      shortcut={{
-                        macOS: { modifiers: ["cmd"], key: "b" },
-                        Windows: { modifiers: ["ctrl"], key: "b" },
-                      }}
-                      onAction={() => toggleQueued(book)}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
+                      {book.url ? (
+                        <Action.OpenInBrowser
+                          url={book.url}
+                          title="Open in Browser"
+                        />
+                      ) : null}
+                      <Action.CopyToClipboard
+                        title="Copy to Clipboard"
+                        content={book.id}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Selection">
+                      <Action
+                        title={selected ? "Deselect" : "Select"}
+                        icon={selected ? Icon.Circle : Icon.CheckCircle}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "s" },
+                          Windows: { modifiers: ["ctrl"], key: "s" },
+                        }}
+                        onAction={() => toggleSelected(book)}
+                      />
+                      {selectedBooks.size > 0 ? (
+                        <Action
+                          title={`Download Selected (${selectedBooks.size})`}
+                          icon={Icon.Tray}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                            Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                          }}
+                          onAction={handleDownloadSelected}
+                        />
+                      ) : null}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Download Queue">
+                      <Action
+                        title={queued ? "Remove from Queue" : "Add to Queue"}
+                        icon={
+                          queued
+                            ? { source: Icon.Bookmark, tintColor: Color.Blue }
+                            : Icon.Bookmark
+                        }
+                        shortcut={{
+                          macOS: { modifiers: ["cmd"], key: "b" },
+                          Windows: { modifiers: ["ctrl"], key: "b" },
+                        }}
+                        onAction={() => toggleQueued(book)}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+          {!isLoading ? (
+            <List.Section
+              title={
+                books.length === 0
+                  ? "No results in this list"
+                  : "Not finding it?"
               }
-            />
-          );
-        })
+            >
+              <List.Item
+                title={`Search "${searchText.trim()}" on the Z-Library website`}
+                subtitle="Opens in your browser. Results can differ from this list."
+                icon={Icon.Globe}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="Open Website Search"
+                      url={websiteSearchUrl(
+                        searchText,
+                        prefs.zlibDomain,
+                        books[0]?.url,
+                      )}
+                    />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          ) : null}
+        </>
       )}
     </List>
   );

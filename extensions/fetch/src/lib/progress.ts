@@ -29,8 +29,12 @@ export async function showDownloadStarted(filename: string): Promise<Toast> {
 }
 
 export async function showDownloadProgress(toast: Toast, filename: string, progress: DownloadProgress): Promise<void> {
-  const now = Date.now();
-  const last = lastUpdateTimeByKey.get(filename) ?? 0;
+  // Monotonic: if the wall clock stepped back, `now - last` would stay negative
+  // and suppress every update until it caught up.
+  const now = performance.now();
+  // -Infinity, not 0: `performance.now()` starts near zero, so a fresh command's
+  // first update would otherwise fall inside the throttle window.
+  const last = lastUpdateTimeByKey.get(filename) ?? -Infinity;
 
   // Throttle updates to avoid flickering
   if (now - last < UPDATE_THROTTLE_MS) {

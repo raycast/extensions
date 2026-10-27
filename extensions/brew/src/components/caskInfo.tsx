@@ -23,7 +23,7 @@ export function CaskInfo({
   const { pop } = useNavigation();
   // Fetched once here and shared by both metadata blocks below. Always executed:
   // unlike a list row, this view exists only because the user opened it.
-  const packageDetail = usePackageDetail(initialCask.token, true, true);
+  const packageDetail = usePackageDetail(initialCask, true);
   const [cask, setCask] = useState<Cask>(initialCask);
   const [isLoading, setIsLoading] = useState(false);
 

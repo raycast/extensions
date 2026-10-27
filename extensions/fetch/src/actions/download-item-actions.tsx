@@ -28,6 +28,9 @@ export function DownloadItemActions({ item, batchHandle, onRetry, globalActions 
           onAction={() => onRetry(item)}
         />
       )}
+      <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={Keyboard.Shortcut.Common.Copy} />
+      {/* After Copy URL, never first: Return runs the first action, and on an
+          in-flight row it would cancel the download. */}
       {item.status === "downloading" && batchHandle && (
         <Action
           title="Cancel"
@@ -37,7 +40,6 @@ export function DownloadItemActions({ item, batchHandle, onRetry, globalActions 
           onAction={() => batchHandle.cancelItem(item.id)}
         />
       )}
-      <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={Keyboard.Shortcut.Common.Copy} />
       {item.status === "failed" && item.error && (
         <Action.CopyToClipboard
           title="Copy Error"

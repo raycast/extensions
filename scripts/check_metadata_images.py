@@ -344,6 +344,30 @@ def extension_platforms(extension_dir: Path) -> tuple[str, ...]:
     return tuple(platform for platform in platforms if isinstance(platform, str))
 
 
+def extension_command_modes(extension_dir: Path) -> tuple[str, ...]:
+    try:
+        manifest = json.loads((extension_dir / "package.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return ()
+
+    commands = manifest.get("commands")
+    if not isinstance(commands, list):
+        return ()
+
+    modes: list[str] = []
+    for command in commands:
+        if not isinstance(command, dict):
+            continue
+        mode = command.get("mode")
+        if isinstance(mode, str):
+            modes.append(mode)
+    return tuple(modes)
+
+
+def extension_has_menu_bar_command(extension_dir: Path) -> bool:
+    return "menu-bar" in extension_command_modes(extension_dir)
+
+
 def validate_image_dimensions(images: Sequence[Path]) -> list[str]:
     from PIL import Image
 
@@ -419,10 +443,14 @@ def run(repo_root: Path, extension_dirs: Sequence[Path]) -> int:
         return 0
 
     images: list[Path] = []
+    images_by_extension: list[tuple[Path, list[Path], bool]] = []
     issues: list[str] = []
     for extension_dir in extension_dirs:
         extension_images, structure_issues = validate_extension_structure(extension_dir)
         images.extend(extension_images)
+        images_by_extension.append(
+            (extension_dir, extension_images, extension_has_menu_bar_command(extension_dir))
+        )
         issues.extend(structure_issues)
         issues.extend(validate_image_dimensions(extension_images))
         issues.extend(validate_image_set(extension_dir, extension_images))
@@ -436,17 +464,20 @@ def run(repo_root: Path, extension_dirs: Sequence[Path]) -> int:
         print_issues(issues)
 
     validator_result = 0
-    if images:
+    for _, extension_images, has_menu_bar_command in images_by_extension:
+        if not extension_images:
+            continue
         completed = subprocess.run(
             [
                 sys.executable,
                 str(validator),
-                *(str(image) for image in images),
+                *(["--has-menu-bar-command"] if has_menu_bar_command else []),
+                *(str(image) for image in extension_images),
             ],
             cwd=repo_root,
             check=False,
         )
-        validator_result = completed.returncode
+        validator_result = 1 if completed.returncode else validator_result
 
     return 1 if issues or validator_result else 0
 

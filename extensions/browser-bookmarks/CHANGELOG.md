@@ -1,5 +1,18 @@
 # Browser Bookmarks Changelog
 
+## [Search Profiles] - 2026-10-26
+
+- Search 1.0.7 added profiles: each one has its own bookmarks, pins and spaces, and can be picked from the Select Profile submenu
+
+## [Support for Search] - 2026-10-24
+
+- Added support for the `Search` browser on macOS: its bookmarks, its pinned tabs, and its tab groups
+
+## [Search Matching] - 2026-10-15
+
+- Stopped the root folder name of Chromium browsers (such as "Bookmarks Bar") from fuzzy-matching searches such as "board"
+- Added a Search Strictness preference so short queries such as "erp" can skip loose matches
+
 ## [Support for DuckDuckGo Browser] - 2026-10-01
 
 - Added support for the `DuckDuckGo` browser on macOS

@@ -356,14 +356,22 @@ Article content...
 
 ### Actions
 
-New actions when paywall is detected:
+When a page isn't readable (`src/actions/NotReadableActions.tsx`):
 
-| Action                    | Shortcut | Description                       |
-| ------------------------- | -------- | --------------------------------- |
-| Import from Browser Tab   | `⌘I`     | Use authenticated browser session |
-| Open in Browser & Import  | `⌘O`     | Open URL, then import             |
-| Try Paywall Hopper        | `⌘P`     | Attempt bypass methods            |
-| Copy URL to Archived Copy | `⌘⇧C`    | Copy archive.is URL               |
+| Action             | Shortcut | Description                                  |
+| ------------------ | -------- | -------------------------------------------- |
+| Try Anyway         | `⇧⌘↵`    | Parse the page despite the readability check |
+| Try Paywall Hopper | `⌘P`     | Attempt bypass methods                       |
+| Open in Browser    | `⌘O`     | Open the original URL                        |
+| Copy URL           | `⇧⌘C`    | Copy the original URL                        |
+
+On an article retrieved from an archive (`src/actions/ArticleActions.tsx`):
+
+| Action            | Shortcut | Description                     |
+| ----------------- | -------- | ------------------------------- |
+| Copy Archived URL | `⇧⌘A`    | Copy the archive.is/Wayback URL |
+
+On Windows, `Ctrl` replaces `⌘`.
 
 ### Toast Notifications
 

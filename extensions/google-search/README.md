@@ -5,6 +5,7 @@ Google search with autosuggestions is an extension for [Raycast](https://www.ray
 ## Features
 
 - Google search with autosuggestions
+- Optional query argument, and works as a Raycast fallback command
 - Search selected text directly
 - Search history management
 - Clipboard fallback when no text is selected

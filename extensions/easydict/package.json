@@ -43,6 +43,14 @@
       "mode": "no-view"
     },
     {
+      "name": "ocr-language",
+      "title": "Select OCR Language",
+      "subtitle": "Easydict",
+      "icon": "ocr.png",
+      "description": "Choose the installed Windows OCR language used by OCR Translate (Windows only).",
+      "mode": "view"
+    },
+    {
       "name": "favorites",
       "title": "Favorite Words",
       "subtitle": "Easydict",
@@ -72,16 +80,16 @@
   ],
   "dependencies": {
     "@deeplx/core": "^0.2.2",
-    "@raycast/api": "^2.4.1",
-    "@raycast/utils": "^2.3.1",
-    "@xsai/shared-chat": "^0.5.0",
-    "@xsai/stream-text": "^0.5.0",
+    "@raycast/api": "^2.6.1",
+    "@raycast/utils": "^2.3.2",
+    "@xsai/shared-chat": "^0.5.1",
+    "@xsai/stream-text": "^0.5.1",
     "franc": "^6.2.0",
     "google-translate-api-x": "10.7.3",
     "native-say": "^0.0.2",
     "node-html-parser": "^9.0.1",
     "ofetch": "^1.5.1",
-    "tinyexec": "^1.3.0"
+    "tinyexec": "^1.3.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
@@ -115,7 +123,8 @@
     "eslint": "eslint src/ --fix",
     "docs:gen": "automd",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:windows": "powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File tests/windows-native.ps1 -RequireOcr"
   },
   "simple-git-hooks": {
     "pre-commit": "./node_modules/.bin/nano-staged",
@@ -608,7 +617,7 @@
       "title": "Query Cache",
       "name": "queryCacheMode",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "off",
       "description": "Store completed dictionary and machine translation results locally. Cached words expire after up to 7 days; translations expire after 24 hours.",
       "data": [
@@ -630,7 +639,7 @@
       "title": "AI Query Cache",
       "name": "aiQueryCacheMode",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "off",
       "description": "Reuse completed AI translations and dictionary entries. Off by default because regenerating the same input can produce a different result.",
       "data": [
@@ -704,7 +713,7 @@
       "title": "Anki Deck",
       "name": "ankiDeckName",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "Easydict",
       "description": "Deck used when adding favorites to Anki. It is created in Anki if it does not exist."
     },
@@ -712,7 +721,7 @@
       "title": "AnkiConnect URL",
       "name": "ankiConnectUrl",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "http://127.0.0.1:8765",
       "description": "Address of the AnkiConnect add-on. Change it when AnkiConnect listens on a custom port or on another machine."
     },

@@ -2,6 +2,27 @@ import type { SlackMember } from "./slackTypes";
 import { toUserName } from "./member";
 import { CursorPage, foldForSearch, matchesAllWords, matchesVisibleName } from "./pagination";
 
+/** A later directory page failed after earlier pages had already contributed matches. */
+export class MemberDirectoryScanError<User> extends Error {
+  readonly failure: unknown;
+  readonly partial: { users: User[]; userNames: ReadonlyMap<string, string> };
+
+  constructor(failure: unknown, partial: { users: User[]; userNames: ReadonlyMap<string, string> }) {
+    super("Member directory scan failed");
+    this.name = "MemberDirectoryScanError";
+    this.failure = failure;
+    this.partial = partial;
+  }
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+export function isMemberDirectoryScanError<User>(error: unknown): error is MemberDirectoryScanError<User> {
+  return error instanceof MemberDirectoryScanError;
+}
+
 class Matches<T> {
   private entries: { value: T; preferred: boolean }[] = [];
   constructor(private limit: number) {}
@@ -27,12 +48,14 @@ export async function searchMemberDirectory<User>({
   loadPage,
   toUser,
   signal,
+  onProgress,
 }: {
   query: string;
   maxResults: number;
   loadPage: (cursor?: string) => Promise<CursorPage<SlackMember>>;
   toUser?: (member: SlackMember) => User | undefined;
   signal?: AbortSignal;
+  onProgress?: (partial: { users: User[]; userNames: ReadonlyMap<string, string> }) => void;
 }): Promise<{ users: User[]; userNames: ReadonlyMap<string, string> }> {
   const words = [...new Set(foldForSearch(query).split(/\s+/).filter(Boolean))];
   const users = new Matches<User>(maxResults);
@@ -41,11 +64,28 @@ export async function searchMemberDirectory<User>({
     matches: new Matches<readonly [string, string]>(maxResults),
   }));
   if (!toUser && !words.length) return { users: [], userNames: new Map() };
+  const collected = () => ({
+    users: users.values,
+    userNames: new Map(names.flatMap((bucket) => bucket.matches.values)),
+  });
+  const fail = (error: unknown): never => {
+    const partial = collected();
+    if (partial.users.length === 0 && partial.userNames.size === 0) throw error;
+    throw new MemberDirectoryScanError(error, partial);
+  };
   let cursor: string | undefined;
+  let started = false;
   do {
     signal?.throwIfAborted();
-    const page = await loadPage(cursor);
+    let page: CursorPage<SlackMember>;
+    try {
+      page = await loadPage(cursor);
+    } catch (error) {
+      if (!started || isAbortError(error) || signal?.aborted) throw error;
+      return fail(error);
+    }
     signal?.throwIfAborted();
+    started = true;
     for (const member of page.items) {
       const name = toUserName(member);
       if (!name) continue;
@@ -68,7 +108,10 @@ export async function searchMemberDirectory<User>({
       }
       if ((!toUser || users.full) && names.every((bucket) => bucket.matches.full)) break;
     }
+    const partial = collected();
+    onProgress?.(partial);
+    if (page.error) return fail(page.error);
     cursor = page.nextCursor || undefined;
   } while (cursor && words.length && !((!toUser || users.full) && names.every((bucket) => bucket.matches.full)));
-  return { users: users.values, userNames: new Map(names.flatMap((bucket) => bucket.matches.values)) };
+  return collected();
 }

@@ -28,7 +28,7 @@ type DuplicateAlias = {
 export type IconData = {
   title: string;
   hex: string;
-  source: string;
+  source?: string;
   slug?: string;
   guidelines?: string;
   license?: Omit<SpdxLicense, "url"> | CustomLicense;

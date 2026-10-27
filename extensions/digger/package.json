@@ -22,7 +22,7 @@
     {
       "name": "acceptLanguage",
       "title": "Page Language",
-      "description": "Sent as the Accept-Language header. Sites that serve more than one language use it to choose which version Digger analyses; without it they pick for you.",
+      "description": "Request content using a BCP 47 language tag (e.g. en-US).",
       "type": "textfield",
       "default": "en-US",
       "required": false
@@ -66,38 +66,52 @@
           "name": "url",
           "placeholder": "https://raycast.com",
           "type": "text",
-          "required": true
+          "required": false
         }
       ],
       "preferences": [
         {
-          "name": "autoLoadUrlFromClipboard",
-          "title": "Auto Load URL from Clipboard",
-          "description": "Automatically load the URL from the clipboard when the command is executed",
+          "name": "autoLoadUrlFromSelectedText",
+          "title": "Empty URL Fallback",
+          "description": "When no URL is typed, dig the URL in the selected text.",
           "type": "checkbox",
-          "label": "Enable",
-          "default": false,
+          "label": "Use Selected Text",
+          "default": true,
           "required": false
         },
         {
-          "name": "autoLoadUrlFromSelectedText",
-          "title": "Auto Load URL from Selected Text",
-          "description": "Automatically load the URL from the selected text when the command is executed",
+          "name": "autoLoadUrlFromClipboard",
+          "description": "When no URL is typed or selected, dig the URL on the clipboard.",
           "type": "checkbox",
-          "label": "Enable",
-          "default": false,
+          "label": "Use Clipboard",
+          "default": true,
           "required": false
         },
         {
           "name": "enableBrowserExtensionSupport",
-          "title": "Enable Browser Extension Support",
-          "description": "Automatically load the URL from the active browser tab when the command is executed",
+          "description": "Last fallback: the active browser tab. macOS only; needs the browser extension.",
           "type": "checkbox",
-          "label": "Enable",
+          "label": "Use Current Browser Tab",
           "default": false,
           "required": false
         }
       ]
+    },
+    {
+      "name": "open-current-tab",
+      "title": "Open Current Tab in Digger",
+      "subtitle": "Digger",
+      "description": "Dig the website in the active browser tab (macOS, needs the browser extension)",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-clipboard",
+      "title": "Open Clipboard in Digger",
+      "subtitle": "Digger",
+      "description": "Dig the URL on the clipboard",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

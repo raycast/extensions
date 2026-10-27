@@ -1,5 +1,32 @@
 # Slack Changelog
 
+## [Profile photos in Find Users] - 2026-10-22
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
+## [Added new screenshots] - 2026-10-13
+
+## [Rename Channel AI Tool] - 2026-10-12
+
+- Add a **Rename Channel** AI tool that renames a channel by ID after confirmation. Names are converted to Slack's format (lowercase, hyphens instead of spaces), and common errors such as a taken name or missing permission are explained.
+
+## [Fix user search stalling] - 2026-10-10
+
+- Fix searching for users in **Send Message** and **Open Channel** loading indefinitely in large workspaces.
+- Load the workspace member list once and cache it, instead of rescanning Slack on every keystroke.
+- Show the first page of people right away when opening the picker while the full list loads in the background.
+- Request smaller pages from Slack. Timeouts and server errors stop retrying after a few attempts so they show up instead of loading forever; rate limits still wait for Slack's retry delay.
+
+## [Add Canvas AI tools] - 2026-10-09
+
+- Add **Read Canvas** and **Edit Canvas** AI tools for existing Slack canvases.
+- Request Slack's `canvases:read` and `canvases:write` OAuth scopes.
+
+## [Archive Channels AI Tool] - 2026-10-05
+
+- Add an **Archive Channels** AI tool that archives one or more channels by ID after confirmation.
+
 ## [Fix Unread Messages configuration] - 2026-09-25
 
 - Fix selected conversations in the Unread Messages configuration sometimes being lost

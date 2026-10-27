@@ -33,6 +33,8 @@ pass-cli login
 
 This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
 
+You can also log in from Raycast, with the Login command or Login with Browser on the Not Logged In screen. The login keeps going if Raycast closes while you're in the browser, and the extension picks it up when you come back. After a login done elsewhere, such as in the terminal, Check Again (⌘R) picks up the new session. To log out, use Logout in the Login command.
+
 Optional: use terminal prompts with interactive login:
 
 ```bash
@@ -49,13 +51,38 @@ pass-cli vault list
 
 ## Preferences
 
-- **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Default Password Length**: Length for generated passwords (default: 20)
-- **Default Password Type**: Random characters or memorable passphrase
-- **Transient Clipboard**: Clear password from clipboard after pasting
-- **Background Refresh**: Automatically refresh cached vault and item data
-- **Cache Expiration**: How long cached metadata is considered fresh (5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days; default 5 minutes). Older data is still shown instantly while it refreshes in the background
-- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
+- **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
+- **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
+- **Fill Login**: Press Return after the password, to submit the login form (off by default)
+- **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
+- **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
+- **Item List**:
+  - Refresh items in the background, even when the cache is still fresh
+  - Suggest logins for the active browser tab (requires the Raycast browser extension)
+  - Show website icons instead of initials, from Raycast's favicon provider, which receives the domains (off by default)
+
+### Generate Password
+
+Generate Password has its own preferences for the settings it starts with. They can all still be changed while generating.
+
+- **Password Type**: Random password or passphrase (default: random)
+- **Password Length**: Characters in random passwords, from 8 to 128 (default: 20)
+- **Characters**: Uppercase letters, symbols and numbers, all on by default (numbers also apply to passphrases)
+- **Passphrase Words**: Number of words, from 3 to 10 (default: 4)
+- **Passphrase Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
+- **Capitalization**: Capitalize passphrase words (on by default)
+
+## Filling Logins (macOS)
+
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+
+Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
+
+Values go through the clipboard marked as concealed, so clipboard history skips them. Afterwards, the previous clipboard is restored as far as Raycast can read it (text, HTML or a file), and otherwise cleared. The first time, macOS asks to allow Raycast to control System Events, and Raycast needs Accessibility access (System Settings › Privacy & Security).
+
+To fill with Enter, set **Primary Action** to _Fill Login (macOS)_.
 
 ## Troubleshooting
 

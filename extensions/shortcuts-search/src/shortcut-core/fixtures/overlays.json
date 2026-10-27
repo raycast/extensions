@@ -1,0 +1,5 @@
+[
+  { "replacement": null, "cleared": false, "expected": "Original" },
+  { "replacement": "Changed", "cleared": false, "expected": "Changed" },
+  { "replacement": null, "cleared": true }
+]

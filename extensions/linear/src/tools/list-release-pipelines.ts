@@ -1,9 +1,8 @@
 import { LinearClient, PaginationOrderBy, ReleasePipelineType } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { afterDate, client, collect, PageInput, resolveTeam } from "./linearUtils";
+import { serializeReleasePipeline, serializeReleaseStage, teamRef } from "./serializers";
+import { withLinear } from "./withLinear";
 
 type ReleasePipelineFilter = NonNullable<Parameters<LinearClient["releasePipelines"]>[0]>["filter"];
 
@@ -22,7 +21,7 @@ interface Input extends PageInput {
   includeArchived?: boolean;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   const team = input.team ? await resolveTeam(input.team) : undefined;
   const createdAfter = afterDate(input.createdAt);
   const updatedAfter = afterDate(input.updatedAt);
@@ -49,9 +48,11 @@ export default withAccessToken(linear)(async (input: Input) => {
     ...result,
     nodes: await Promise.all(
       result.nodes.map(async (pipeline) => ({
-        ...pipeline,
-        stages: input.includeStages ? (await pipeline.stages({ first: 250 })).nodes : undefined,
-        teams: input.includeTeams ? (await pipeline.teams({ first: 250 })).nodes : undefined,
+        ...serializeReleasePipeline(pipeline),
+        stages: input.includeStages
+          ? (await pipeline.stages({ first: 250 })).nodes.map(serializeReleaseStage)
+          : undefined,
+        teams: input.includeTeams ? (await pipeline.teams({ first: 250 })).nodes.map(teamRef) : undefined,
       })),
     ),
   };

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webhook-sender",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Webhook Sender",
   "description": "Send HTTP webhooks instantly — with key-value or raw JSON body, automatic history, saved presets, and rich response inspection.",
   "icon": "icon.png",

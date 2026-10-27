@@ -77,6 +77,43 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-wallpaper-history",
+      "title": "Search Wallpaper History",
+      "description": "Search saved history by artwork words, artist, creation year, usage date range, or action type. Returns unique artworks and their matching events, newest first."
+    },
+    {
+      "name": "set-wallpaper-from-history",
+      "title": "Set Wallpaper from History",
+      "description": "Set a previously used artwork as the desktop wallpaper using its exact wallpaper ID from history search or listing. Records a new selection in history."
+    },
+    {
+      "name": "get-todays-wallpapers",
+      "title": "Get Today's Wallpapers",
+      "description": "Get today's featured artwork and two alternative wallpapers with their details. Does not change the desktop wallpaper."
+    },
+    {
+      "name": "get-random-wallpaper",
+      "title": "Get Random Wallpaper",
+      "description": "Get a random artwork with its wallpaper details. Does not change the desktop wallpaper."
+    },
+    {
+      "name": "get-wallpaper-history",
+      "title": "Get Wallpaper History",
+      "description": "Get previously selected, downloaded, and automatically switched wallpapers, grouped by artwork with every action and timestamp, newest first."
+    },
+    {
+      "name": "set-wallpaper",
+      "title": "Set Wallpaper",
+      "description": "Set an artwork as the desktop wallpaper and record it in history. Use wallpaper details returned by the browsing or history tools."
+    },
+    {
+      "name": "download-wallpaper",
+      "title": "Download Wallpaper",
+      "description": "Save an artwork to the Downloads folder and record it in history. Use wallpaper details returned by the browsing or history tools. Does not change the desktop wallpaper."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.7"
@@ -88,6 +125,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "ray build",
     "dev": "ray dev",
     "fix-lint": "ray lint --fix",

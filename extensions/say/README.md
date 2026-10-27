@@ -22,7 +22,7 @@ On Windows, open `Windows Settings -> Time & language -> Speech`.
 
 ## Recommended Voices on macOS
 
-Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Live Speech`. Pick your favorite Siri voice for the best experience.
+Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Live Speech (Read & Speak)`. Pick your favorite Siri voice for the best experience.
 
 ## API
 

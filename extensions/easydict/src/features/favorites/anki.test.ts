@@ -7,7 +7,7 @@ import type { DictionaryContent } from "@/core/content/types";
 import { DictionaryType, TranslationType } from "@/core/results/kinds";
 import type { QueryWordInfo } from "@/core/results/types";
 
-import { addFavoritesToAnki, buildAnkiNote, normalizeAnkiUrl } from "./anki";
+import { addFavoritesToAnki, buildAnkiNote, normalizeAnkiUrl, resolveAnkiDeckName } from "./anki";
 import { buildFavoriteWord, type FavoriteWord } from "./model";
 
 const timedFetch = vi.hoisted(() => vi.fn());
@@ -47,6 +47,20 @@ describe("normalizeAnkiUrl", () => {
 
   it("keeps an explicit address and drops a trailing slash", () => {
     expect(normalizeAnkiUrl("http://anki.local:8766/")).toBe("http://anki.local:8766");
+  });
+
+  it("falls back to the default address when the preference is empty", () => {
+    expect(normalizeAnkiUrl("")).toBe("http://127.0.0.1:8765");
+  });
+});
+
+describe("resolveAnkiDeckName", () => {
+  it("falls back to the default deck when the preference is empty", () => {
+    expect(resolveAnkiDeckName("  ")).toBe("Easydict");
+  });
+
+  it("keeps a custom deck name without surrounding whitespace", () => {
+    expect(resolveAnkiDeckName(" Japanese ")).toBe("Japanese");
   });
 });
 
@@ -147,5 +161,12 @@ describe("addFavoritesToAnki", () => {
     await expect(
       addFavoritesToAnki([favorite("one"), favorite("two")], { deckName: "Easydict", url }),
     ).resolves.toEqual({ added: 1, skipped: 0, failed: 1 });
+  });
+
+  it("uses the default endpoint and deck when the preferences are empty", async () => {
+    await addFavoritesToAnki([favorite("one")], { deckName: "", url: "" });
+
+    expect(timedFetch.mock.calls[0][0]).toBe("http://127.0.0.1:8765");
+    expect(timedFetch.mock.calls[0][1].body.params).toEqual({ deck: "Easydict" });
   });
 });

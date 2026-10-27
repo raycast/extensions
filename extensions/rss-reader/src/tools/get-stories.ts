@@ -1,4 +1,5 @@
 import { getFeeds } from "../feeds";
+import { getStoryGuid, getStoryLastRead } from "../utils";
 import Parser from "rss-parser";
 import { LocalStorage } from "@raycast/api";
 
@@ -42,8 +43,8 @@ export default async function (input: Input = {}) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
       for (const item of parsedFeed.items) {
-        const guid = item.guid || item.link || "";
-        const lastRead = storyLastRead[guid] || 0;
+        const guid = getStoryGuid(item, feed.url);
+        const lastRead = getStoryLastRead(storyLastRead, guid, item.link);
 
         if (unreadOnly && lastRead > 0) {
           continue;

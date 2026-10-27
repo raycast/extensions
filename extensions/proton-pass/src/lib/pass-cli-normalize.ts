@@ -51,6 +51,30 @@ export function normalizeVault(raw: unknown): Vault {
   };
 }
 
+/** The user's role on each share, by share ID, from `share list`. Custom roles, printed as objects, are left out. */
+export function normalizeShareRoles(rawShares: unknown[]): Map<string, VaultRole> {
+  const roles = new Map<string, VaultRole>();
+  for (const raw of rawShares) {
+    if (!isRecord(raw)) continue;
+    const shareId = trimOrUndefined(raw.id ?? raw.share_id);
+    const role = normalizeVaultRole(raw.share_role ?? raw.role);
+    if (shareId && role) roles.set(shareId, role);
+  }
+  return roles;
+}
+
+/** pass-cli prints timestamps without a zone ("2025-06-01T12:34:56"), which are treated as UTC. Unix seconds are accepted too. */
+function normalizeTimestamp(value: unknown): string | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Date(value < 1e12 ? value * 1000 : value).toISOString();
+  }
+  const raw = trimOrUndefined(value);
+  if (!raw) return undefined;
+  const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw);
+  const time = Date.parse(hasZone ? raw : `${raw}Z`);
+  return Number.isNaN(time) ? undefined : new Date(time).toISOString();
+}
+
 function getItemTypeFromContent(contentData: unknown): {
   type: ItemType;
   loginData: Record<string, unknown> | undefined;
@@ -106,6 +130,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
 
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
+  const hasPassword = loginData ? trimOrUndefined(loginData.password) !== undefined : undefined;
+  const modifiedAt = normalizeTimestamp(raw.modify_time ?? raw.modifyTime ?? raw.modified_at);
+  const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
 
@@ -123,6 +150,9 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     username,
     email,
     hasTotp,
+    hasPassword,
+    modifiedAt,
+    hasNote,
   };
 }
 
@@ -192,6 +222,7 @@ export function normalizeItemDetail(
   const typeData = getTypeSpecificData(raw);
 
   const password = typeData ? trimOrUndefined(typeData.password) : undefined;
+  const totpUri = typeData ? trimOrUndefined(typeData.totp_uri ?? typeData.totpUri) : undefined;
 
   const urls = typeData ? normalizeUrls(typeData.urls) : undefined;
 
@@ -209,5 +240,6 @@ export function normalizeItemDetail(
     urls,
     note,
     customFields,
+    totpUri,
   };
 }

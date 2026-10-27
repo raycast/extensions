@@ -1,7 +1,9 @@
-import { constants } from "ethers";
-import isEmpty from "lodash.isempty";
-import { ensClient } from "./apollo";
+import { getEnsAddress } from "@wagmi/core";
+import { zeroAddress } from "viem";
+import { mainnet } from "viem/chains";
 import gql from "graphql-tag";
+import { ensClient } from "./apollo";
+import { normalizeEnsName, wagmiConfig } from "./ens";
 
 const ENS_SUGGESTIONS = gql`
   query lookup($name: String!) {
@@ -12,11 +14,6 @@ const ENS_SUGGESTIONS = gql`
       orderDirection: asc
     ) {
       name
-      resolver {
-        addr {
-          id
-        }
-      }
       owner {
         id
       }
@@ -24,36 +21,37 @@ const ENS_SUGGESTIONS = gql`
   }
 `;
 
-export const fetchSuggestions = async (
-  recipient: string,
-  setSuggestions: (suggestions: string[]) => void,
-  setIsFetching: (arg: boolean) => void = () => null
-) => {
-  if (recipient.length > 2) {
-    setIsFetching(true);
-    const recpt = recipient.toLowerCase();
-    const result = await ensClient.query<{
-      domains: { name: string; owner: { id: string } }[];
-    }>({
-      query: ENS_SUGGESTIONS,
-      variables: {
-        amount: 75,
-        name: recpt,
-      },
-    });
+export const fetchSuggestions = async (recipient: string): Promise<string[]> => {
+  if (recipient.length <= 2) return [];
 
-    if (!isEmpty(result?.data?.domains)) {
-      const domains = result.data.domains;
-      const lookupResult = domains
-        ?.filter((domain) => domain.owner.id !== constants.AddressZero)
-        .map(({ name }) => name)
-        .sort((a, b) => a.length - b.length)
-        .slice(0, 40);
+  try {
+    const query = recipient.toLowerCase();
+    const exactLookup = async () => {
+      try {
+        const name = normalizeEnsName(recipient.includes(".") ? recipient : `${recipient}.eth`);
+        const address = await getEnsAddress(wagmiConfig, { name, chainId: mainnet.id });
+        return address ? name : null;
+      } catch {
+        return null;
+      }
+    };
+    const [subgraphResult, exactName] = await Promise.all([
+      ensClient
+        .query<{ domains: { name: string; owner: { id: string } }[] }>({
+          query: ENS_SUGGESTIONS,
+          variables: { name: query },
+        })
+        .catch(() => undefined),
+      exactLookup(),
+    ]);
 
-      setSuggestions(lookupResult);
-    }
-  } else {
-    setSuggestions([]);
+    const indexedNames = (subgraphResult?.data?.domains ?? [])
+      .filter((domain) => domain.owner.id !== zeroAddress)
+      .map(({ name }) => name)
+      .sort((a, b) => a.length - b.length)
+      .slice(0, 40);
+    return [...new Set(exactName ? [exactName, ...indexedNames] : indexedNames)];
+  } catch {
+    return [];
   }
-  setIsFetching(false);
 };

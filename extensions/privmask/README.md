@@ -15,8 +15,8 @@ from anywhere either.
 
 It handles Japanese properly, which is the part other tools miss. Japanese
 personal names, addresses and My Numbers cannot be found by pattern matching,
-so this extension uses macOS's own detectors and Apple Intelligence's on-device
-model instead:
+so this extension uses macOS's own detectors, Apple Intelligence's on-device
+model and, when it is installed, a name model trained for privmask instead:
 
 | What | Found by |
 |---|---|
@@ -25,7 +25,7 @@ model instead:
 | Email, postal codes | Patterns |
 | Credentials — API keys, tokens, secrets | A published prefix, or the name that introduces the value |
 | Your own terms | A term list you keep |
-| Japanese personal names | Apple Intelligence, on device |
+| Japanese personal names | Apple Intelligence, on device, and the privmask name model when installed |
 | English personal names | `NLTagger` |
 
 ## How it works
@@ -40,8 +40,16 @@ unexamined rather than letting it pass as clean. Each finding shows how
 confident the detection is, in red, orange or yellow, and which detector found
 it. Everything is selected by default; press `⌘T` to leave one alone.
 
-`↵` copies the masked text. `⌘⇧↵` pastes it straight into the app you came
-from.
+The masked text is on the clipboard as soon as it is ready, and follows every
+change you make, so switching back to the app you came from and pressing `⌘V`
+is all that is left. Nothing is copied while the Raycast window is hidden; the
+copy waits until the window is back on screen, so a copy you make elsewhere in
+the meantime is left alone. `↵` copies it and closes the window; `⌘⇧↵` pastes it
+straight into that app.
+
+To mask the next thing, copy it and press `⌘V` here: the window starts over on
+what is on the clipboard now. There is no need to close and reopen the command
+between texts.
 
 Values are replaced with numbered placeholders — `[NAME_1]`, `[EMAIL_2]` — and
 the same value always gets the same number, so a reader can still follow who is
@@ -66,15 +74,16 @@ letting you assume the list was fully applied.
 ## Requirements
 
 macOS 13 or later. **Japanese personal names additionally need macOS 26 with
-Apple Intelligence enabled** — they are found only by the on-device model, and
-nothing else can find them.
+Apple Intelligence enabled, or the privmask name model** — pattern matching
+cannot find them.
 
 The model runs **by default** wherever it is available. Where it is not, the
 extension tells you plainly that names were not looked for, rather than
 returning a clean-looking result: a gap you cannot see is worse than one you
 can. You can turn it off with the *Use the on-device language model* preference,
-which makes the extension fully deterministic and much faster, at the cost of
-Japanese names and of matching spelling variants of your own terms.
+which makes the extension much faster, at the cost of matching spelling
+variants of your own terms, and of Japanese names unless the name model is
+installed.
 
 | | 13 – 25 | 26, Apple Intelligence off | 26, Apple Intelligence on |
 |---|:--:|:--:|:--:|
@@ -82,8 +91,22 @@ Japanese names and of matching spelling variants of your own terms.
 | Email, postal codes, credentials, My Number | ✅ | ✅ | ✅ |
 | Your term list, matched exactly | ✅ | ✅ | ✅ |
 | English personal names | ✅ | ✅ | ✅ |
-| **Japanese personal names** | ❌ | ❌ | ✅ |
+| **Japanese personal names** | name model only | name model only | ✅ |
 | Spelling variants of your terms | ❌ | ❌ | ✅ |
+
+### The name model
+
+A small model trained to find Japanese personal names, run with Core ML on any
+Mac this extension supports. It is tens of megabytes, so it is not bundled with
+the extension; it comes with the privmask CLI:
+
+```sh
+brew install snaka/tap/privmask
+```
+
+The extension finds it there without any setup. To use a copy somewhere else,
+set the *Name Model* preference to the directory holding `ner.mlmodelc`. Turn
+off *Use the privmask name model when installed* to leave it out.
 
 ## Under the hood
 

@@ -1,12 +1,13 @@
 import { useFetch } from "@raycast/utils";
 import { getNotraRequestInit, NOTRA_API_URL } from "../lib/notra";
-import type { ListIntegrationsResponse } from "../types";
+import type { ListIntegrationsResponse, WorkspaceScopedOptions } from "../types";
 
-export function useIntegrations() {
+export function useIntegrations({ execute, organizationId }: WorkspaceScopedOptions = {}) {
   return useFetch<ListIntegrationsResponse, ListIntegrationsResponse, ListIntegrationsResponse>(
     `${NOTRA_API_URL}/v1/integrations`,
     {
-      ...getNotraRequestInit(),
+      ...getNotraRequestInit({ organizationId }),
+      execute,
       initialData: {
         github: [],
         slack: [],

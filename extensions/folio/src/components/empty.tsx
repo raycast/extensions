@@ -6,7 +6,11 @@ import { launch, NavigationActions } from "./actions";
 export type EmptyKind = "sign-in" | "not-configured" | "connect" | "no-data" | "error";
 
 export function classifyError(error: unknown): EmptyKind {
-  if (error instanceof AuthError) return error.reason === "not-configured" ? "not-configured" : "sign-in";
+  if (error instanceof AuthError) {
+    if (error.reason === "not-configured") return "not-configured";
+    // The auth worker failing (down, rate-limited) isn't a signed-out session; signing in again won't help.
+    return error.reason === "worker" ? "error" : "sign-in";
+  }
   if (error instanceof ApiError && error.status === 401) return "sign-in";
   return "error";
 }

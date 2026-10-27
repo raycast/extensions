@@ -66,7 +66,7 @@ export type SplitPackage = {
  * interprets a command on disk with it, and the create form runs what a person typed through it so that
  * `Linear · @work` — someone reaching for the Environment control through the wrong field — is taken as a
  * brand and a scope rather than as a brand named literally that, which would slug into a `linear-work.`
- * filename the convention has no name for.
+ * filename instead of keeping the scope on the subtitle.
  */
 export const splitPackage = (packageName: string | undefined): SplitPackage => {
   const fields = (clean(packageName) ?? "")

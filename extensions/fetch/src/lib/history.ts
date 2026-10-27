@@ -1,4 +1,5 @@
 import { createDownloadHistory, reconcileHistory, type DownloadRecord } from "@chrismessina/raycast-downloader/history";
+import { clearStatus } from "@chrismessina/raycast-downloader/status";
 import { LocalStorage } from "@raycast/api";
 import { logInfo } from "./logger";
 
@@ -34,10 +35,31 @@ export async function getDownloadHistory(): Promise<DownloadHistoryItem[]> {
 
 export async function addToHistory(item: Omit<DownloadHistoryItem, "timestamp">): Promise<void> {
   await history.add(item);
+  forgetStatuses([item.id]);
 }
 
 export async function addBatchToHistory(items: Array<Omit<DownloadHistoryItem, "timestamp">>): Promise<void> {
   await history.addMany(items);
+  forgetStatuses(items.map((item) => item.id));
+}
+
+/**
+ * Drop the runner status behind a row this command just recorded itself.
+ *
+ * `reconcileHistory` rewrites a row from its status file, and a status file has no
+ * URL (it is kept off disk on purpose). Left in place, the next sweep replaced
+ * this row with a URL-less copy, which hid Retry and Download Again on every entry.
+ * The sweep is for downloads no command recorded (one that finished with no command
+ * open, or a started batch item that was canceled).
+ */
+function forgetStatuses(ids: string[]): void {
+  for (const id of ids) {
+    try {
+      clearStatus(id);
+    } catch {
+      // Best effort: a status that cannot be cleared only costs that row its URL.
+    }
+  }
 }
 
 export async function removeFromHistory(id: string): Promise<void> {

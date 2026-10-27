@@ -1,4 +1,4 @@
-import { request, V3_BASE, BASE_URL } from "@/api/betterstack-client";
+import { fetchAllPages, request, V3_BASE, BASE_URL } from "@/api/betterstack-client";
 import { asOptional, Optional } from "@/common/utils/optional-utils";
 import { Incident, IncidentStatus } from "@/domain/incident";
 
@@ -22,14 +22,10 @@ export interface CreateIncidentInput {
   summary: string;
   description: Optional<string>;
   requesterEmail: Optional<string>;
+  teamId: Optional<string>;
   email: boolean;
   sms: boolean;
   call: boolean;
-}
-
-interface IncidentListResponse {
-  data: IncidentApiData[];
-  pagination?: { next?: string | null };
 }
 
 interface IncidentResponse {
@@ -52,6 +48,7 @@ export async function createIncident(input: CreateIncidentInput): Promise<Incide
     summary: input.summary,
     description: input.description,
     requester_email: input.requesterEmail,
+    better_stack_team_id: input.teamId,
     email: input.email,
     sms: input.sms,
     call: input.call,
@@ -66,14 +63,7 @@ export async function listIncidents(options: { activeOnly: boolean }): Promise<I
   const params = new URLSearchParams({ per_page: "50" });
   if (options.activeOnly) params.set("resolved", "false");
 
-  let url: Optional<string> = `${V3_BASE}/incidents?${params}`;
-  const allIncidents: IncidentApiData[] = [];
-
-  while (url) {
-    const page: IncidentListResponse = await request<IncidentListResponse>(url);
-    allIncidents.push(...page.data);
-    url = asOptional(page.pagination?.next);
-  }
+  const allIncidents = await fetchAllPages<IncidentApiData>(`${V3_BASE}/incidents?${params}`);
 
   return allIncidents.map(toIncident);
 }

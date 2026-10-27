@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/Raycast-Easydict/main/assets/extension-icon.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/Raycast-Easydict/main/assets/extension-icon.png" width="128">
 </p>
 
 <h1 align="center">Raycast Easydict</h1>
@@ -14,7 +14,7 @@
 
 <p align="center">
   <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
-    <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+    <img width="256" style="width: 256px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
   </a>
 </p>
 
@@ -29,7 +29,7 @@
 
 ## What is Raycast Easydict?
 
-**Raycast Easydict** is a simple, easy-to-use dictionary and translation extension for Raycast, supporting quick word lookups and text translation. In addition to traditional dictionary and translation services, it also supports AI-powered translation and lookup, including Raycast AI and OpenAI-compatible endpoints.
+**Raycast Easydict** is a simple, easy-to-use, **cross-platform** dictionary and translation extension for Raycast, supporting quick word lookups and text translation. In addition to traditional dictionary and translation services, it also supports AI-powered translation and lookup, including Raycast AI and OpenAI-compatible endpoints.
 
 Beyond quick lookups, Raycast Easydict also works as a lightweight language-learning tool: save results to review offline, view Chinese character stroke-order diagrams, and export them to [Anki](https://apps.ankiweb.net/) for spaced-repetition practice.
 
@@ -44,7 +44,7 @@ Beyond quick lookups, Raycast Easydict also works as a lightweight language-lear
 
 **Look up and translate**
 
-- 📦 **Out of the box**: look up words and translate text, with automatic language detection and a preferred target language; auto-queries selected text (on by default) and supports OCR screenshot translation (macOS only).
+- 📦 **Out of the box**: look up words and translate text, with automatic language detection and a preferred target language; auto-queries selected text (on by default) and supports OCR screenshot translation.
 - 🎨 **Rich results**: translations, pronunciations, exam coverage, parts of speech, tenses and word forms, web phrases.
 - 🌐 **Multiple services**: dictionary lookup with Youdao and Linguee; translation with 🍎 Apple System Translation, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun; 🤖 AI translation and lookup with Raycast AI or any OpenAI-compatible endpoint, including a dictionary mode that builds structured entries for words and terms.
 - 🔊 **Auto pronunciation**: plays the word audio automatically after a query, with Youdao TTS for other languages.
@@ -115,7 +115,7 @@ This is an extension of Raycast, so you need to install [Raycast](https://www.ra
 ### Install from Raycast Store
 
 <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
-  <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+  <img width="256" style="width: 256px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
 </a>
 
 ### Manually Install
@@ -256,6 +256,10 @@ These preferences control how Favorite Words are sent to [Anki](#anki).
 ### System Proxy
 
 `Easydict` supports system proxy. To use it, turn on `Use System Proxy Settings` in the Raycast extension settings. When enabled, all network requests will be sent through the system proxy. This is useful for services that require a proxy (e.g., Google Translate in China) or for counter IP blocking (some services such as Linguee have frequency restrictions on IPs). **Enabling proxy may slow down response time, so please enable it only when needed.**
+
+### Windows OCR Language
+
+On Windows, **OCR Translate** recognizes text with the built-in Windows OCR engine and the OCR language packs installed in Windows. Run **Select OCR Language** to see the installed languages and pin one; the default **Automatic (Windows profile)** creates the engine from the first OCR-capable language in your Windows language settings. Install more language packs under Windows Settings → Time & Language → Language & Region. This command does not affect macOS, where recognition uses Apple Vision and detects the language automatically.
 
 ## Integrations
 
@@ -457,7 +461,9 @@ The following tutorial (from [`Bob`](https://bobtranslate.com/guide/advance/serv
 ## Acknowledgements
 
 - This project was inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and [Bob](https://github.com/ripperhe/Bob), and its initial version was based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot). `Easydict` improves upon the original project by refining the UI, adding practical new features, removing overly complex operations, and heavily optimizing performance.
-- The OCR Translate feature is based on [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/). Special thanks to [aidevjoe](https://github.com/aidevjoe) for the PR: [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41).
+- The OCR Translate feature is based on [ScreenOCR](https://github.com/raycast/extensions/tree/main/extensions/screenocr).
+  - Special thanks to [@aidevjoe](https://github.com/aidevjoe) for the PR: [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41), the original macOS implementation.
+  - Special thanks to [@duckieeeduck](https://github.com/duckieeeduck) for the original Windows implementation ([raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884)).
 
 <p align="center">
   <a href="https://github.com/tisfeng/Raycast-Easydict/graphs/contributors">

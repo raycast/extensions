@@ -9,7 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.4"),
-    .package(url: "https://github.com/snaka/privmask", from: "0.3.1"),
+    .package(url: "https://github.com/snaka/privmask", from: "0.5.0"),
   ],
   targets: [
     .executableTarget(

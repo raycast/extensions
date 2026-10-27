@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type { FlatPosition } from "../lib/portfolio";
 import {
+  formatAsOf,
   formatMoney,
   formatMoneyWithCode,
   formatPercent,
@@ -20,6 +21,11 @@ interface Props {
   onRefresh: () => Promise<void>;
   /** Hide the account column when the list is already scoped to one account. */
   hideAccount?: boolean;
+  /**
+   * Set when this position's data isn't current: `at` is when it's from (ISO). `stale` means the
+   * account couldn't be refreshed; otherwise the brokerage's own data is behind.
+   */
+  asOf?: { at: string; stale: boolean };
 }
 
 function pnlColor(v: number | null): Color {
@@ -35,17 +41,34 @@ export function PositionItem({
   onTogglePrivacy,
   onRefresh,
   hideAccount,
+  asOf,
 }: Props) {
   const value = mask(formatMoney(p.marketValue, p.currency), privacy);
   const pnl = mask(formatSigned(p.openPnl, p.currency), privacy);
+  const stale: List.Item.Accessory[] = asOf
+    ? [
+        asOf.stale
+          ? {
+              icon: { source: Icon.Warning, tintColor: Color.Orange },
+              tooltip: `Couldn't refresh ${p.accountName}. Showing its positions from ${formatAsOf(asOf.at)}.`,
+            }
+          : {
+              icon: { source: Icon.Clock, tintColor: Color.SecondaryText },
+              tooltip: `SnapTrade's latest data for ${p.accountName} is from ${formatAsOf(asOf.at)}.`,
+            },
+      ]
+    : [];
   const accessories: List.Item.Accessory[] = showDetail
-    ? [{ text: value }]
+    ? [...stale, { text: value }]
     : [
+        ...stale,
         ...(hideAccount ? [] : [{ tag: p.accountName, tooltip: `${p.institution} · ${p.accountName}` }]),
         ...(p.weight !== null
           ? [{ text: formatPercent(p.weight), tooltip: `Weight within ${p.currency} positions` }]
           : []),
-        ...(p.openPnl !== null ? [{ tag: { value: pnl, color: pnlColor(p.openPnl) }, tooltip: "Open P&L" }] : []),
+        ...(p.openPnl !== null
+          ? [{ tag: { value: pnl, color: privacy ? Color.SecondaryText : pnlColor(p.openPnl) }, tooltip: "Open P&L" }]
+          : []),
         { text: value, tooltip: "Market value" },
       ];
 
@@ -69,7 +92,7 @@ export function PositionItem({
         title="Open P&L"
         text={{
           value: `${pnl}${p.openPnlRatio !== null ? ` (${formatSignedPercent(p.openPnlRatio)})` : ""}`,
-          color: pnlColor(p.openPnl),
+          color: privacy ? Color.SecondaryText : pnlColor(p.openPnl),
         }}
       />
       {p.weight !== null ? (
@@ -82,6 +105,16 @@ export function PositionItem({
       {p.securityType ? <List.Item.Detail.Metadata.Label title="Type" text={p.securityType} /> : null}
       {p.exchange ? <List.Item.Detail.Metadata.Label title="Exchange" text={p.exchange} /> : null}
       <List.Item.Detail.Metadata.Label title="Currency" text={p.currency} />
+      {asOf ? (
+        <List.Item.Detail.Metadata.Label
+          title="As Of"
+          text={
+            asOf.stale
+              ? { value: `${formatAsOf(asOf.at)} (couldn't refresh)`, color: Color.Orange }
+              : `${formatAsOf(asOf.at)} (SnapTrade's latest)`
+          }
+        />
+      ) : null}
     </List.Item.Detail.Metadata>
   );
 

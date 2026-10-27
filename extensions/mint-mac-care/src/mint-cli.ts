@@ -201,7 +201,9 @@ export function runMintSurface<T extends object>(
   request: Omit<MintSurfaceRequest, "schemaVersion">,
   timeout = 20 * 60_000,
 ): Promise<T & MintSurfaceResponse> {
-  const payload = JSON.stringify({ schemaVersion: 2, ...request });
+  // `client` lets Mint report what Raycast started as Raycast's (an older Mint
+  // ignores the field).
+  const payload = JSON.stringify({ schemaVersion: 2, client: "raycast", ...request });
   const requestKey = `${cliPath}\u0000${payload}`;
   const existing = inFlightSurfaceRequests.get(requestKey);
   if (existing) return existing as Promise<T & MintSurfaceResponse>;

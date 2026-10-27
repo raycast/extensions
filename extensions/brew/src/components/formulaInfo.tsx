@@ -19,7 +19,7 @@ export function FormulaInfo(props: {
   const { pop } = useNavigation();
   // Fetched once here and shared by both metadata blocks below. Always executed:
   // unlike a list row, this view exists only because the user opened it.
-  const packageDetail = usePackageDetail(props.formula.name, false, true);
+  const packageDetail = usePackageDetail(props.formula, true);
   const [formula, setFormula] = useState<Formula>(props.formula);
   const [isLoading, setIsLoading] = useState(false);
 

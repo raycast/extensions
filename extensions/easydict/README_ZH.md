@@ -3,18 +3,18 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/Raycast-Easydict/main/assets/extension-icon.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/Raycast-Easydict/main/assets/extension-icon.png" width="128">
 </p>
 
 <h1 align="center">Raycast Easydict</h1>
 
 <p align="center">
-  Easy to look up words or translate text
+  Easily look up words or translate text
 </p>
 
 <p align="center">
   <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
-    <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+    <img width="256" style="width: 256px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
   </a>
 </p>
 
@@ -29,7 +29,7 @@
 
 ## 简介
 
-**Raycast Easydict** 是一款简洁易用的 Raycast 词典与翻译扩展，支持快速查词和文本翻译。除了传统词典与翻译服务，还支持接入 AI 翻译与查词服务，包括 Raycast AI 和 OpenAI 兼容端点。
+**Raycast Easydict** 是一款简洁易用的**跨平台** Raycast 词典与翻译扩展，支持快速查词和文本翻译。除了传统词典与翻译服务，还支持接入 AI 翻译与查词服务，包括 Raycast AI 和 OpenAI 兼容端点。
 
 除了快速查词，Raycast Easydict 也可以作为一款轻量的语言学习工具：你可以将查询结果收藏，以便离线复习；查看汉字笔顺图；还可以导出到 [Anki](https://apps.ankiweb.net/)，通过间隔重复巩固记忆。
 
@@ -44,7 +44,7 @@
 
 **查词与翻译**
 
-- 📦 **开箱即用**：快速查词、翻译文本，自动识别输入语言并使用偏好目标语言；自动查询选中文本（默认开启），支持 OCR 截图翻译（目前仅 macOS）。
+- 📦 **开箱即用**：快速查词、翻译文本，自动识别输入语言并使用偏好目标语言；自动查询选中文本（默认开启），支持 OCR 截图翻译。
 - 🎨 **丰富的查询结果**：提供翻译、发音、考试词频、词性释义、时态与词形、网络短语。
 - 🌐 **多种服务支持**：词典支持有道和 Linguee；翻译支持 🍎 苹果系统翻译、DeepL、谷歌、Bing、百度、腾讯、火山、有道和彩云；🤖 AI 翻译与查词支持 Raycast AI 或任意 OpenAI 兼容端点，词典模式可为单词和词组生成结构化词条。
 - 🔊 **自动播放发音**：查询单词时自动朗读，其他语言使用有道 TTS。
@@ -113,7 +113,7 @@
 ### 从 Raycast 商店安装
 
 <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
-  <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
+  <img width="256" style="width: 256px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
 </a>
 
 ### 手动安装
@@ -253,6 +253,10 @@ npm install && npm run dev
 ### 系统代理
 
 `Easydict` 支持系统代理。在 Raycast 扩展设置中开启 `Use System Proxy Settings` 即可使用。开启后，所有网络请求将通过系统代理发送。适用于需要代理的服务（如国内使用 Google 翻译）或对抗 IP 封锁（某些服务如 Linguee 对 IP 有频率限制）。**开启代理可能会使请求响应速度变慢，因此请仅在有需要时启用。**
+
+### Windows OCR 语言
+
+在 Windows 上，**OCR Translate** 使用系统内置的 Windows OCR 引擎，并依赖 Windows 中安装的 OCR 语言包。运行 **Select OCR Language** 可查看本机已安装的 OCR 语言并固定其一；默认的 **Automatic (Windows profile)** 会使用 Windows 语言设置中第一个支持 OCR 的语言创建引擎。更多语言包可在 Windows 设置 → 时间和语言 → 语言和区域中安装。该命令不影响 macOS：macOS 使用 Apple Vision，并自动检测识别语言。
 
 ## 集成
 
@@ -466,7 +470,9 @@ Linguee 支持系统代理，需在 Raycast 扩展设置中开启 `Use System Pr
 ## 致谢
 
 - 本项目的灵感源于 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 和 [Bob](https://github.com/ripperhe/Bob)，其初始版本正是基于 [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) 开发的。`Easydict` 在原项目的基础上，重新打磨了 UI 交互，新增了更多实用功能，精简了部分复杂且不必要的操作，并进行了深度的性能优化与改进。
-- OCR 截图翻译功能的实现参考了 [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/)。特别感谢 [aidevjoe](https://github.com/aidevjoe) 提交的 PR：[feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41)。
+- OCR 截图翻译功能的实现参考了 [ScreenOCR](https://github.com/raycast/extensions/tree/main/extensions/screenocr)。
+  - 特别感谢 [@aidevjoe](https://github.com/aidevjoe) 的 PR：[feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41)（macOS 版原始实现）。
+  - 特别感谢 [@duckieeeduck](https://github.com/duckieeeduck) 的 Windows 版原始实现（[raycast/extensions#30884](https://github.com/raycast/extensions/pull/30884)）。
 
 <p align="center">
   <a href="https://github.com/tisfeng/Raycast-Easydict/graphs/contributors">

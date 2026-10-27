@@ -67,6 +67,15 @@
       "default": true
     },
     {
+      "name": "titleWithSite",
+      "title": "Titles",
+      "label": "Start titles with the site",
+      "description": "Start web titles with their site — `claude.ai · Usage` instead of `Usage`. Applies to http(s) targets only, never folders or surface routers; a name that is just the brand becomes the host alone. The filename stays derived from the bare name.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "terminalApplication",
       "title": "Terminal",
       "description": "The application used by the Run in Terminal action, which runs a script with its output left on screen — useful when a command misbehaves and you need to see its errors.",

@@ -1,5 +1,13 @@
 # HideMail - Email Relay Service Changelog
 
+## [Windows Support, Notes and Filters] - 2026-10-06
+
+- `Quick Create Random Email Alias` accepts an optional note argument
+- `List All Emails`: edit an alias note, filter by active/inactive, show creation date, toggle a details panel, open the dashboard and refresh
+- Windows support
+- Added optional `HideMail Host` preference to use a different HideMail server
+- Invalid or removed API key now offers "Open Settings" and "Create New Token" actions
+
 ## [Update Changelog] - 2026-08-09
 
 - Fix `CHANGELOG` not displaying properly in Store

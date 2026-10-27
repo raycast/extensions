@@ -2,25 +2,25 @@
 
 Reviewed against `package.json`, `ai.yaml`, and every file in `src/tools/` on September 24, 2026. There are 17 registered tools with 36 top-level inputs, plus the unregistered `message-signature.ts` helper. `?` means optional. These are the only tools available to the bundled skills; interactive commands do not add AI capabilities.
 
-| Tool | Inputs |
-| --- | --- |
-| [get-channels](../../src/tools/get-channels.ts) | None |
-| [get-channel-history](../../src/tools/get-channel-history.ts) | `text?: string`; `after?: string` |
-| [read-conversation](../../src/tools/read-conversation.ts) | `conversation: string`; `limit?: number`; `after?: string` |
-| [get-users](../../src/tools/get-users.ts) | None |
-| [find-users](../../src/tools/find-users.ts) | `query: string` |
-| [set-status](../../src/tools/set-status.ts) | `text?: string`; `emoji?: string`; `duration?: number`; `snoozeMinutes?: number` |
-| [get-emojis](../../src/tools/get-emojis.ts) | None |
-| [search-messages](../../src/tools/search-messages.ts) | `query: string`; `sort?: "timestamp" \| "score"` |
-| [read-thread](../../src/tools/read-thread.ts) | `channel: string`; `threadTs: string`; `limit?: number`; `cursor?: string` |
-| [open-group-dm](../../src/tools/open-group-dm.ts) | `userIds: string` |
-| [send-message](../../src/tools/send-message.ts) | `recipient: string`; `text: string` |
-| [update-message](../../src/tools/update-message.ts) | `channel: string`; `messageTs: string`; `text: string` |
-| [add-reaction](../../src/tools/add-reaction.ts) | `channel: string`; `messageTs: string`; `emoji: string` |
-| [reply-thread](../../src/tools/reply-thread.ts) | `channel: string`; `threadTs: string`; `text: string`; `replyBroadcast?: boolean` |
-| [get-huddle-link](../../src/tools/get-huddle-link.ts) | `conversation: string` |
-| [upload-files](../../src/tools/upload-files.ts) | `channel: string`; `filePaths: string`; `text?: string`; `threadTs?: string` |
-| [download-files](../../src/tools/download-files.ts) | `fileIds: string`; `destinationDir?: string` |
+| Tool                                                          | Inputs                                                                            |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [get-channels](../../src/tools/get-channels.ts)               | None                                                                              |
+| [get-channel-history](../../src/tools/get-channel-history.ts) | `text?: string`; `after?: string`                                                 |
+| [read-conversation](../../src/tools/read-conversation.ts)     | `conversation: string`; `limit?: number`; `after?: string`                        |
+| [get-users](../../src/tools/get-users.ts)                     | None                                                                              |
+| [find-users](../../src/tools/find-users.ts)                   | `query: string`                                                                   |
+| [set-status](../../src/tools/set-status.ts)                   | `text?: string`; `emoji?: string`; `duration?: number`; `snoozeMinutes?: number`  |
+| [get-emojis](../../src/tools/get-emojis.ts)                   | None                                                                              |
+| [search-messages](../../src/tools/search-messages.ts)         | `query: string`; `sort?: "timestamp" \| "score"`                                  |
+| [read-thread](../../src/tools/read-thread.ts)                 | `channel: string`; `threadTs: string`; `limit?: number`; `cursor?: string`        |
+| [open-group-dm](../../src/tools/open-group-dm.ts)             | `userIds: string`                                                                 |
+| [send-message](../../src/tools/send-message.ts)               | `recipient: string`; `text: string`                                               |
+| [update-message](../../src/tools/update-message.ts)           | `channel: string`; `messageTs: string`; `text: string`                            |
+| [add-reaction](../../src/tools/add-reaction.ts)               | `channel: string`; `messageTs: string`; `emoji: string`                           |
+| [reply-thread](../../src/tools/reply-thread.ts)               | `channel: string`; `threadTs: string`; `text: string`; `replyBroadcast?: boolean` |
+| [get-huddle-link](../../src/tools/get-huddle-link.ts)         | `conversation: string`                                                            |
+| [upload-files](../../src/tools/upload-files.ts)               | `channel: string`; `filePaths: string`; `text?: string`; `threadTs?: string`      |
+| [download-files](../../src/tools/download-files.ts)           | `fileIds: string`; `destinationDir?: string`                                      |
 
 ## Readers and search limits
 

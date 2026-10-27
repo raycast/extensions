@@ -1,7 +1,4 @@
 import { DateResolutionType } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import {
   applyPatch,
@@ -14,6 +11,8 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { serializeProject } from "./serializers";
+import { withLinear } from "./withLinear";
 type Input = {
   id?: string;
   name?: string;
@@ -51,7 +50,7 @@ type Input = {
 async function ids(values: string[] | undefined, resolve: (value: string) => Promise<{ id: string }>) {
   return values ? Promise.all(values.map(async (value) => (await resolve(value)).id)) : undefined;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withLinear(async (input: Input) => {
   if (input.description !== undefined && input.patch) throw new Error("Pass description or patch, not both.");
   if (input.setTeams && (input.addTeams || input.removeTeams))
     throw new Error("setTeams cannot be combined with addTeams or removeTeams.");
@@ -122,9 +121,5 @@ export default withAccessToken(linear)(async (input: Input) => {
     const result = await client().createEntityExternalLink({ projectId: saved.id, url: link.url, label: link.title });
     if (!result.success || !result.entityExternalLink) throw new Error("Failed to create project link.");
   }
-  return {
-    ...saved,
-    summary: saved.description,
-    description: saved.content,
-  };
+  return serializeProject(saved);
 });

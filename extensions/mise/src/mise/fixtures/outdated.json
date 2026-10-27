@@ -1,0 +1,49 @@
+{
+  "gh": {
+    "name": "gh",
+    "requested": "latest",
+    "current": "2.100.0",
+    "bump": null,
+    "latest": "2.101.0",
+    "release_url": "https://github.com/cli/cli/releases/tag/v2.101.0",
+    "source": {
+      "type": "mise.toml",
+      "path": "/Users/lachlan/.config/mise/config.local.toml"
+    }
+  },
+  "npm:wrangler": {
+    "name": "npm:wrangler",
+    "requested": "latest",
+    "current": "4.131.1",
+    "bump": null,
+    "latest": "4.131.2",
+    "source": {
+      "type": "mise.toml",
+      "path": "/Users/lachlan/.config/mise/config.local.toml"
+    }
+  },
+  "opencode": {
+    "name": "opencode",
+    "requested": "latest",
+    "current": "1.18.30",
+    "bump": null,
+    "latest": "1.18.31",
+    "release_url": "https://github.com/anomalyco/opencode/releases/tag/v1.18.31",
+    "source": {
+      "type": "mise.toml",
+      "path": "/Users/lachlan/.config/mise/config.local.toml"
+    }
+  },
+  "usage": {
+    "name": "usage",
+    "requested": "latest",
+    "current": "6.9.0",
+    "bump": null,
+    "latest": "6.9.1",
+    "release_url": "https://github.com/jdx/usage/releases/tag/v6.9.1",
+    "source": {
+      "type": "mise.toml",
+      "path": "/Users/lachlan/.config/mise/config.local.toml"
+    }
+  }
+}

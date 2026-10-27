@@ -1,93 +1,36 @@
 import { useEffect, useState } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, Detail, launchCommand, LaunchType } from "@raycast/api";
+import {
+  Keyboard,
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Detail,
+  launchCommand,
+  LaunchType,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { getSavedResumes, removeResume, SavedResume } from "./utils/storage";
 import { validateResume } from "./utils/validateResume";
-import { Resume, Profile, Skill, Work, Education, Language } from "./types/resume";
+import { Resume } from "./types/resume";
+import { makeMarkdownFromResume } from "./utils/renderResume";
+import { ResumeDocument, listResumeDocuments } from "./utils/resumeDocuments";
+import ResumeEditor from "./components/ResumeEditor";
+import LocalResumeDetail from "./components/LocalResumeDetail";
 
-function makeMarkdownFromResume(resume: Resume) {
-  const basics = resume?.basics || {};
-  const lines: string[] = [];
-
-  // Header with name and location
-  lines.push(`# ${basics.name || "(no name)"} ${basics.location?.address ? `- ${basics.location.address}` : ""}`);
-  if (basics.label) lines.push(`**${basics.label}**`);
-
-  const contact: string[] = [];
-  if (basics.email) contact.push(`Email: ${basics.email}`);
-  if (basics.phone) contact.push(`Phone: ${basics.phone}`);
-  if (basics.website) contact.push(`Website: ${basics.website}`);
-  if (contact.length) lines.push(contact.join(" • "));
-
-  // separator
-  if (basics.summary || contact.length || basics.label) lines.push("---");
-
-  if (basics.summary) {
-    lines.push(`${basics.summary}`);
-  }
-
-  // Profiles
-  const profiles = basics.profiles || [];
-  if (profiles.length) {
-    lines.push("---");
-    lines.push(`**Profiles**`);
-    profiles.forEach((p: Profile) => lines.push(`- ${p.network ? `${p.network}` : p.username || p.url}: ${p.url}`));
-  }
-
-  // Skills
-  const skills = resume?.skills || [];
-  if (skills.length) {
-    lines.push("---");
-    lines.push(`## Skills`);
-    skills.forEach((s: Skill) => {
-      const keywords = (s.keywords || []).slice(0, 8).join(", ");
-      lines.push(`- **${s.name || "Skill"}** — ${keywords}`);
-    });
-  }
-
-  // Work
-  const work = resume?.work || [];
-  if (work.length) {
-    lines.push("---");
-    lines.push(`## Work Experience`);
-    work.forEach((w: Work) => {
-      lines.push(`\n### ${w.position || "(position)"} — ${w.company || "(company)"}`);
-      const dates = `${w.startDate || ""}${w.endDate ? ` — ${w.endDate}` : ""}`.trim();
-      if (dates) lines.push(`*${dates}*`);
-      if (w.summary) lines.push(`\n${w.summary}`);
-      const highlights = w.highlights || [];
-      if (highlights.length) {
-        lines.push(`\n**Highlights**`);
-        highlights.forEach((h: string) => lines.push(`- ${h}`));
-      }
-    });
-  }
-
-  // Education
-  const education = resume?.education || [];
-  if (education.length) {
-    lines.push("---");
-    lines.push(`## Education`);
-    education.forEach((e: Education) => {
-      lines.push(`\n**${e.institution || "(institution)"}** — ${e.area || ""}`);
-      const edDates = `${e.startDate || ""}${e.endDate ? ` — ${e.endDate}` : ""}`.trim();
-      if (edDates) lines.push(`*${edDates}*`);
-      if (e.gpa) lines.push(`- GPA: ${e.gpa}`);
-    });
-  }
-
-  // Languages
-  const languages = resume?.languages || [];
-  if (languages.length) {
-    lines.push("---");
-    lines.push(`## Languages`);
-    languages.forEach((l: Language) => lines.push(`- ${l.language} — ${l.fluency || ""}`));
-  }
-
-  return lines.join("\n\n");
-}
-
-function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) {
+function ResumeDetail({
+  url,
+  onDelete,
+  onSaved,
+}: {
+  url: string;
+  onDelete: () => Promise<void>;
+  onSaved: () => Promise<void>;
+}) {
+  const { pop } = useNavigation();
   const [resume, setResume] = useState<Resume | null>(null);
   const [markdown, setMarkdown] = useState<string>("# Loading...");
   const [isValidating, setIsValidating] = useState(false);
@@ -102,6 +45,7 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
 
   // Validate and render
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
       if (!fetchedData) return;
       if (isFetching) return;
@@ -122,6 +66,7 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
         }
 
         const validationResult = await validateResume(resumeObj);
+        if (cancelled) return;
         if (!validationResult.valid) {
           await showToast({
             style: Toast.Style.Failure,
@@ -138,6 +83,7 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
         setResume(resumeObj);
         setMarkdown(makeMarkdownFromResume(resumeObj));
       } catch (err: unknown) {
+        if (cancelled) return;
         await showToast({
           style: Toast.Style.Failure,
           title: "Error Validating Resume",
@@ -146,9 +92,12 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
         setResume(null);
         setMarkdown("# Error");
       } finally {
-        setIsValidating(false);
+        if (!cancelled) setIsValidating(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [fetchedData, isFetching]);
 
   // Handle fetch errors
@@ -177,14 +126,39 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={url} icon={Icon.Globe} />
-            <Action.CopyToClipboard title="Copy URL" content={url} icon={Icon.Clipboard} />
+            {resume && !loading && (
+              <Action.Push
+                title="Save Local Copy"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                icon={Icon.SaveDocument}
+                target={<ResumeEditor initialResume={resume} sourceUrl={url} onSaved={onSaved} />}
+              />
+            )}
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              shortcut={Keyboard.Shortcut.Common.Open}
+              url={url}
+              icon={Icon.Globe}
+            />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              shortcut={Keyboard.Shortcut.Common.Copy}
+              content={url}
+              icon={Icon.Clipboard}
+            />
             <Action
-              title="Delete from Saved"
+              title="Remove Saved URL"
+              shortcut={Keyboard.Shortcut.Common.Remove}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={onDelete}
+              onAction={async () => {
+                try {
+                  await onDelete();
+                  pop();
+                } catch (error) {
+                  await showFailureToast(error, { title: "Could not remove URL" });
+                }
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -193,9 +167,41 @@ function ResumeDetail({ url, onDelete }: { url: string; onDelete: () => void }) 
   );
 }
 
+function CreateResumeAction({ onChanged }: { onChanged: () => Promise<void> }) {
+  return (
+    <Action.Push
+      title="Create Resume"
+      shortcut={Keyboard.Shortcut.Common.New}
+      icon={Icon.Plus}
+      target={<ResumeEditor onSaved={onChanged} />}
+      onPop={() => void onChanged()}
+    />
+  );
+}
+
+function OpenResumeAction() {
+  return (
+    <Action
+      title="Open Resume"
+      shortcut={Keyboard.Shortcut.Common.Open}
+      icon={Icon.Globe}
+      onAction={async () => {
+        try {
+          await launchCommand({ name: "open-resume", type: LaunchType.UserInitiated });
+        } catch (err) {
+          await showFailureToast(err, { title: "Failed to Open Resume command" });
+        }
+      }}
+    />
+  );
+}
+
 export default function Command() {
   const [items, setItems] = useState<SavedResume[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [documents, setDocuments] = useState<ResumeDocument[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState<string>();
 
   useEffect(() => {
     void load();
@@ -203,9 +209,18 @@ export default function Command() {
 
   async function load() {
     setIsLoading(true);
-    const list = await getSavedResumes();
-    setItems(list);
-    setIsLoading(false);
+    try {
+      const [list, local] = await Promise.all([getSavedResumes(), listResumeDocuments()]);
+      setItems(list);
+      setDocuments(local.documents);
+      setWarnings(local.warnings);
+      setLoadError(undefined);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : String(error));
+      await showFailureToast(error, { title: "Could not load saved resumes" });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleDelete(url: string) {
@@ -215,72 +230,154 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search saved resumes...">
-      {!isLoading && items.length === 0 && (
-        <List.EmptyView
-          icon={Icon.Person}
-          title="No Saved Resumes"
-          description="Open a resume first using the 'Open Resume' command to save it"
+      {loadError && (
+        <List.Item
+          title="Could Not Load Saved Resumes"
+          subtitle={loadError}
+          icon={Icon.Warning}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Resume"
-                icon={Icon.Globe}
-                onAction={async () => {
-                  try {
-                    await launchCommand({ name: "open-resume", type: LaunchType.UserInitiated });
-                  } catch (err) {
-                    await showFailureToast(err, { title: "Failed to Open Resume command" });
-                  }
-                }}
-              />
+              <Action title="Retry" shortcut={Keyboard.Shortcut.Common.Refresh} onAction={load} />
             </ActionPanel>
           }
         />
       )}
-      {items.map((item) => (
+      {warnings.map((warning) => (
         <List.Item
-          key={item.url}
-          title={item.title || "Untitled Resume"}
-          subtitle={item.title ? item.url : undefined}
-          icon={Icon.Person}
-          accessories={[
-            {
-              text: item.lastFetched ? new Date(item.lastFetched).toLocaleDateString() : "",
-              icon: Icon.Calendar,
-            },
-            { icon: Icon.Globe, tooltip: item.url },
-          ]}
+          key={warning}
+          title="Unreadable Saved Resume"
+          subtitle={warning}
+          icon={Icon.Warning}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Resume"
-                icon={Icon.Eye}
-                target={
-                  <ResumeDetail
-                    url={item.url}
-                    onDelete={async () => {
-                      await handleDelete(item.url);
-                    }}
-                  />
-                }
-              />
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={item.url}
-                shortcut={{ modifiers: ["cmd"], key: "b" }}
-              />
-              <Action.CopyToClipboard title="Copy URL" content={item.url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-              <Action
-                title="Delete"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => void handleDelete(item.url)}
-              />
+              <CreateResumeAction onChanged={load} />
+              <OpenResumeAction />
             </ActionPanel>
           }
         />
       ))}
+      {!isLoading && !loadError && items.length === 0 && documents.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="No Saved Resumes"
+          description="Create a local resume or open a JSON Resume URL"
+          actions={
+            <ActionPanel>
+              <CreateResumeAction onChanged={load} />
+              <OpenResumeAction />
+            </ActionPanel>
+          }
+        />
+      )}
+      {documents.length > 0 && (
+        <List.Section title="Local Resumes">
+          {documents.map((document) => (
+            <List.Item
+              key={document.id}
+              title={document.title}
+              subtitle={document.resume.basics?.name}
+              icon={Icon.Document}
+              keywords={[
+                document.resume.basics?.name ?? "",
+                document.resume.basics?.label ?? "",
+                document.sourceUrl ?? "",
+              ]}
+              accessories={[{ date: new Date(document.updatedAt) }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Resume"
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    icon={Icon.Eye}
+                    target={<LocalResumeDetail document={document} onChanged={load} />}
+                    onPop={() => void load()}
+                  />
+                  <Action.Push
+                    title="Edit Resume"
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    icon={Icon.Pencil}
+                    target={<ResumeEditor document={document} onSaved={load} />}
+                    onPop={() => void load()}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy JSON"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    content={JSON.stringify(document.resume, null, 2)}
+                  />
+                  <CreateResumeAction onChanged={load} />
+                  <Action
+                    title="Refresh"
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    icon={Icon.ArrowClockwise}
+                    onAction={load}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {items.length > 0 && (
+        <List.Section title="Saved URLs">
+          {items.map((item) => (
+            <List.Item
+              key={item.url}
+              title={item.title || "Untitled Resume"}
+              subtitle={item.title ? item.url : undefined}
+              icon={Icon.Person}
+              accessories={[
+                {
+                  text: item.lastFetched ? new Date(item.lastFetched).toLocaleDateString() : "",
+                  icon: Icon.Calendar,
+                },
+                { icon: Icon.Globe, tooltip: item.url },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Resume"
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    icon={Icon.Eye}
+                    target={
+                      <ResumeDetail
+                        url={item.url}
+                        onSaved={load}
+                        onDelete={async () => {
+                          await handleDelete(item.url);
+                        }}
+                      />
+                    }
+                  />
+                  <CreateResumeAction onChanged={load} />
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    shortcut={Keyboard.Shortcut.Common.Open}
+                    url={item.url}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy URL"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    content={item.url}
+                  />
+                  <Action
+                    title="Remove Saved URL"
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      try {
+                        await handleDelete(item.url);
+                      } catch (error) {
+                        await showFailureToast(error, { title: "Could not remove URL" });
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

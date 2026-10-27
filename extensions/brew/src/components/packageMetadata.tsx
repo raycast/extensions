@@ -49,6 +49,11 @@ export interface MetadataOptions {
    * minimal record from the list and fills in.
    */
   isLoading?: boolean;
+  /**
+   * Whether Homebrew will load this package without asking, for a view that
+   * knows (Manage Taps). Absent everywhere else, where no row is shown.
+   */
+  trust?: { text: string; icon: Image.ImageLike };
 }
 
 /// Row builders
@@ -162,6 +167,15 @@ function statisticsRows(options: MetadataOptions, tap: string | null | undefined
 }
 
 /** What an empty field shows: still arriving, or genuinely not set. */
+function trustRows(options: MetadataOptions): MetadataRow[] {
+  const trust = options.trust;
+  if (!trust) return [];
+  return [
+    { kind: "label", key: "trust", title: "Trust", text: trust.text, icon: trust.icon },
+    { kind: "separator", key: "trust-sep" },
+  ];
+}
+
 function missing(options: MetadataOptions): string {
   return options.isLoading ? "Loading…" : "—";
 }
@@ -191,6 +205,7 @@ export function formulaMetadataRows(formula: Formula, options: MetadataOptions):
     { kind: "separator", key: "homepage-sep" },
     { kind: "label", key: "tap", title: "Tap", text: formula.tap || missing(options) },
     { kind: "separator", key: "tap-sep" },
+    ...trustRows(options),
   ];
 
   if (formula.license) {
@@ -234,6 +249,7 @@ export function caskMetadataRows(cask: Cask, options: MetadataOptions): Metadata
     { kind: "separator", key: "homepage-sep" },
     { kind: "label", key: "tap", title: "Tap", text: cask.tap || missing(options) },
     { kind: "separator", key: "tap-sep" },
+    ...trustRows(options),
     { kind: "label", key: "version", title: "Version", text: formatPackageVersion(cask) },
   ];
 

@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Copy",
+    "key": "cmd+c",
+    "occurrence": 0,
+    "id": "[[[\"c\",[\"command down\"]]],\"Copy\",\"\",0]",
+    "legacyWindows": "[[[\"c\",[\"control down\"]]],\"Copy\",\"\",0]"
+  },
+  {
+    "title": "Copy",
+    "key": "cmd+c",
+    "occurrence": 1,
+    "id": "[[[\"c\",[\"command down\"]]],\"Copy\",\"\",1]"
+  },
+  {
+    "title": "Zoom",
+    "key": "cmd++",
+    "occurrence": 0,
+    "id": "[[[\"+\",[\"command down\"]]],\"Zoom\",\"\",0]",
+    "legacy": "[[[\"\",[\"command down\",null]]],\"Zoom\",\"\",0]",
+    "legacyWindows": "[[[\"\",[\"control down\",null]]],\"Zoom\",\"\",0]"
+  }
+]

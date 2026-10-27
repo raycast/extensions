@@ -1,5 +1,15 @@
 # Hacker News Top Stories Changelog
 
+## [Remove Mark as Read Tool] - 2026-10-06
+
+Removes the Raycast AI tool for marking stories as read.
+
+## [Raycast AI Tools] - 2026-10-05
+
+Adds Raycast AI tools to summarize your unread stories with their top comments and links, read a story's comments, search comments, read the linked article (from an open browser tab when there is one), and mark stories as read.
+Stories Raycast AI summarizes or reads are marked read. Turn this off with the Raycast AI preference, and set how many it summarizes at a time with Stories per Summary.
+Syncs read stories between your Macs through iCloud Drive. Turn it off with the iCloud Sync preference.
+
 ## [Add Notifications Support] - 2025-04-28
 
 Adds an option to show native Mac notifications for new stories.

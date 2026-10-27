@@ -10,6 +10,11 @@ import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
+// Storage writes run one after another across screen instances, so the newest selection is always written last
+// and a reopened configuration never races a write still in flight from the previous one.
+let storageQueue: Promise<void> = Promise.resolve();
+let saveCount = 0;
+
 function UnreadMessages() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
@@ -25,32 +30,42 @@ function UnreadMessages() {
   } = useUnreadConversations(selectedConversations);
 
   const setConversations = async () => {
-    const item = await LocalStorage.getItem(conversationsStorageKey);
-    const storedConversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
-    let conversations = storedConversations;
+    let conversations: string[] | undefined;
+    const apply = storageQueue.then(async () => {
+      const item = await LocalStorage.getItem(conversationsStorageKey);
+      const storedConversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+      let next = storedConversations;
 
-    // unselect conversations that don't exist anymore
-    if (users && channels && groups && !channelsError) {
-      conversations = conversations.filter(
-        (id: string) =>
-          !!users.find((user) => user.conversationId === id) ||
-          !!channels.find((channel) => channel.id === id) ||
-          !!groups.find((group) => group.id === id),
-      );
+      // unselect conversations that don't exist anymore
+      if (users && channels && groups && !channelsError) {
+        next = next.filter(
+          (id: string) =>
+            !!users.find((user) => user.conversationId === id) ||
+            !!channels.find((channel) => channel.id === id) ||
+            !!groups.find((group) => group.id === id),
+        );
 
-      // Only write back when something was removed, so a stale read can't overwrite a newer selection
-      if (conversations.length !== storedConversations.length) {
-        await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
+        // Only write back when something was removed, so a stale read can't overwrite a newer selection
+        if (next.length !== storedConversations.length) {
+          await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(next));
+        }
       }
-    }
 
+      conversations = next;
+    });
+    storageQueue = apply.catch(async (error) => {
+      await handleError(error, "Could not save the selected conversations");
+    });
+    await storageQueue;
+    if (!conversations) return false;
     if (!selectedConversations || !isEqual(selectedConversations, conversations)) {
       setSelectedConversations(conversations);
     }
+    return true;
   };
 
   const refreshConversations = async () => {
-    await setConversations();
+    if (!(await setConversations())) return;
     await mutate();
   };
 
@@ -215,20 +230,29 @@ type ConfigurationProps = {
 
 function Configuration({ data, refreshConversations }: ConfigurationProps) {
   const { pop } = useNavigation();
+  // Leave only after pending writes finish, so reopening configuration reads the latest selection
+  const done = async () => {
+    await storageQueue;
+    pop();
+  };
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
   // The latest selection, so toggles made before a re-render build on each other
   const latestSelection = useRef<string[]>([]);
-  // Saves run one after another, so the newest selection is always the last one written
-  const saveQueue = useRef<Promise<void>>(Promise.resolve());
+  const hasEdited = useRef(false);
   const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
-    LocalStorage.getItem(conversationsStorageKey).then((item) => {
-      if (item) {
+    let cancelled = false;
+    void storageQueue
+      .then(() => LocalStorage.getItem(conversationsStorageKey))
+      .then((item) => {
+        if (cancelled || hasEdited.current || !item) return;
         latestSelection.current = JSON.parse(item as string);
         setSelectedConversations(latestSelection.current);
-      }
-    });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleConversation = (id: string) => {
@@ -249,13 +273,25 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
     if (updatedSelectedConversations) {
       latestSelection.current = updatedSelectedConversations;
       setSelectedConversations(updatedSelectedConversations);
-      // Store the selection before refreshing, which reads it back from storage
+      hasEdited.current = true;
+      // Persist on its own queue. The Slack refresh reads that write back, but must not sit on the queue:
+      // Done waits for writes only, and a slow refresh must not delay the next selection.
       const selection = JSON.stringify(updatedSelectedConversations);
-      saveQueue.current = saveQueue.current
-        .then(() => LocalStorage.setItem(conversationsStorageKey, selection))
-        .then(() => refreshConversations())
+      const saveId = ++saveCount;
+      const write = storageQueue.then(() => LocalStorage.setItem(conversationsStorageKey, selection));
+      storageQueue = write.catch(async (error) => {
+        await handleError(error, "Could not save the selected conversations");
+      });
+      void write
+        .then(
+          () => {
+            if (saveId !== saveCount) return;
+            return refreshConversations();
+          },
+          () => undefined,
+        )
         .catch(async (error) => {
-          await handleError(error, "Could not save the selected conversations");
+          await handleError(error, "Could not refresh conversations");
         });
     }
   };
@@ -284,7 +320,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(conversationId)}
                   />
-                  <Action icon={Icon.Check} title="Done" onAction={pop} />
+                  <Action icon={Icon.Check} title="Done" onAction={done} />
                 </ActionPanel>
               }
             />
@@ -309,7 +345,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                       onAction={() => toggleConversation(id)}
                     />
-                    <Action icon={Icon.Check} title="Done" onAction={pop} />
+                    <Action icon={Icon.Check} title="Done" onAction={done} />
                   </ActionPanel>
                 }
               />
