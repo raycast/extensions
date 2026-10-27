@@ -1,6 +1,6 @@
 # Simulator Control Changelog
 
-## [Support Xcode 27 Device Hub] - {PR_MERGE_DATE}
+## [Support Xcode 27 Device Hub] - 2026-10-27
 
 - Open devices in Device Hub on Xcode 27 while keeping support for Simulator on older Xcode versions.
 - Fix a React Hooks error when the device list loads or changes.
