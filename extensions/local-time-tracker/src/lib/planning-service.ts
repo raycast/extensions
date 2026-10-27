@@ -10,7 +10,18 @@ import {
   replaceDayTasks,
 } from "./planning";
 import { withReminderOperation } from "./reminder-service";
-import { deletePlan, getActiveTimer, getPlan, getPlans, getProjects, savePlan, savePlanOrder } from "./storage";
+import {
+  deletePlan,
+  getActiveTimer,
+  getPlan,
+  getPlans,
+  getProjects,
+  savePlan,
+  savePlanOrder,
+  getPlanCarryover,
+  savePlanCarryover,
+  type PlanCarryover,
+} from "./storage";
 import type { SavedPlan, PlanReference } from "./types";
 
 export async function requirePlan(id: string): Promise<SavedPlan> {
@@ -47,34 +58,46 @@ export async function movePlannedItemToToday(
   });
 }
 
-export async function importLatestPlansToToday(expectedDate?: string): Promise<{ date: string; count: number }> {
+export async function carryOverPlansToToday(expectedToday: string): Promise<{ date: string; count: number }> {
   return withReminderOperation(async () => {
     const today = localDateKey(new Date());
+    if (expectedToday !== today) return { date: today, count: 0 };
+    let progress = await getPlanCarryover();
+    // A backwards clock must not repeat a previously completed day's carryover.
+    if (progress && (progress.date > today || (progress.date === today && progress.complete)))
+      return { date: today, count: 0 };
+    if (progress && progress.date < today && !progress.complete) await finishCarryover(progress);
     const goals = await getPlans();
-    const sourceDate = latestPlanDateBefore(goals, today);
-    if (!sourceDate && !expectedDate) return { date: today, count: 0 };
-    if (!sourceDate || sourceDate !== expectedDate)
-      throw new Error("The latest plan date has changed. Reload Today's Plan and try again.");
-    const source = (await getPlans(sourceDate)).filter((goal) => !isPlanComplete(goal));
-    if (!source.length) return { date: today, count: 0 };
-    const current = await getPlans(today);
-    // Reserve positions first: a failed write can be retried without losing plan order.
-    await savePlanOrder(today, [...new Set([...current.map((goal) => goal.id), ...source.map((goal) => goal.id)])]);
-    let count = 0;
-    try {
-      for (const visible of source) {
-        const goal = goals.find((item) => item.id === visible.id)!;
-        await savePlan(movedPlan(goal, visible, today));
-        count++;
-      }
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `${count} ${count === 1 ? "plan" : "plans"} imported from ${sourceDate}. Retry to import the remaining plans. ${reason}`,
-      );
+    if (!progress || progress.date !== today) {
+      const sourceDate = latestPlanDateBefore(goals, today);
+      const source = sourceDate ? (await getPlans(sourceDate)).filter((goal) => !isPlanComplete(goal)) : [];
+      progress = { date: today, sourceDate, goalIds: source.map((goal) => goal.id), complete: false };
+      // Persist the source before moving anything: retries must not reach older days.
+      await savePlanCarryover(progress);
     }
+    const count = await finishCarryover(progress);
     return { date: today, count };
   });
+}
+
+// Finish an interrupted day's move before starting the following day's carryover.
+async function finishCarryover(progress: PlanCarryover): Promise<number> {
+  const goals = await getPlans();
+  if (progress.goalIds.length) {
+    const current = await getPlans(progress.date);
+    await savePlanOrder(progress.date, [...new Set([...current.map((goal) => goal.id), ...progress.goalIds])]);
+  }
+  let count = 0;
+  for (const id of progress.goalIds) {
+    const goal = goals.find((item) => item.id === id);
+    const visible = goal && progress.sourceDate ? planForDate(goal, progress.sourceDate) : undefined;
+    if (goal && visible && !isPlanComplete(visible)) {
+      await savePlan(movedPlan(goal, visible, progress.date));
+      count++;
+    }
+  }
+  await savePlanCarryover({ ...progress, complete: true });
+  return count;
 }
 
 function movedPlan(goal: SavedPlan, visible: SavedPlan, today: string, taskId?: string): SavedPlan {

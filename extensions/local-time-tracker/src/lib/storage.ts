@@ -16,6 +16,40 @@ const WORK_LOG_KEY_PREFIX = "workLog:";
 // Keep the original on-disk keys when renaming goals to plans.
 const PLAN_KEY_PREFIX = "dailyGoal:";
 const PLAN_ORDER_KEY_PREFIX = "dailyGoalOrder:";
+const PLAN_CARRYOVER_KEY = "dailyPlanCarryover";
+
+export type PlanCarryover = {
+  date: string;
+  sourceDate?: string;
+  goalIds: string[];
+  complete: boolean;
+};
+
+export async function getPlanCarryover(): Promise<PlanCarryover | undefined> {
+  await initializeStorage();
+  const raw = await LocalStorage.getItem<string>(PLAN_CARRYOVER_KEY);
+  if (raw === undefined) return undefined;
+  const value = parseJson(raw, "plan carryover") as Partial<PlanCarryover> | null;
+  if (
+    !value ||
+    !isPlanDate(value.date) ||
+    (value.sourceDate !== undefined && (!isPlanDate(value.sourceDate) || value.sourceDate >= value.date!)) ||
+    !Array.isArray(value.goalIds) ||
+    !value.goalIds.every((id) => typeof id === "string" && id.length > 0) ||
+    new Set(value.goalIds).size !== value.goalIds.length ||
+    typeof value.complete !== "boolean" ||
+    (!value.sourceDate && value.goalIds.length > 0)
+  ) {
+    throw new StorageDataError("Saved plan carryover data is invalid. Existing data was not overwritten.");
+  }
+  return value as PlanCarryover;
+}
+
+// The caller holds the reminder-operation lock for carryover state writes.
+export async function savePlanCarryover(value: PlanCarryover): Promise<void> {
+  await initializeStorage();
+  await LocalStorage.setItem(PLAN_CARRYOVER_KEY, JSON.stringify(value));
+}
 
 export const SCHEMA_VERSION = 1;
 

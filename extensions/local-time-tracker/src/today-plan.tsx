@@ -7,9 +7,7 @@ import {
   Icon,
   Keyboard,
   List,
-  Toast,
   confirmAlert,
-  showToast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
@@ -18,17 +16,12 @@ import { formatDuration } from "./lib/duration";
 import { showFailure } from "./lib/errors";
 import { planDateLabel, planItemId, sortPlansForDisplay, type PlanItem } from "./lib/plan-model";
 import { planContent, planForDate, localDateKey, planMatches } from "./lib/planning";
-import {
-  importLatestPlansToToday,
-  movePlannedItemToToday,
-  removePlannedItem,
-  reorderPlannedItem,
-  savePlanDraft,
-} from "./lib/planning-service";
+import { movePlannedItemToToday, removePlannedItem, reorderPlannedItem, savePlanDraft } from "./lib/planning-service";
 import { sortProjectsByPreference } from "./lib/projects";
 import { completePlannedItem, startPlannedTimer, stopTimer } from "./lib/timer";
 import type { PlanReference } from "./lib/types";
 import ProjectsCommand from "./projects";
+import { WeeklyReviewAction } from "./weekly-review";
 
 type PlanState = ReturnType<typeof useDailyPlan>;
 
@@ -38,7 +31,7 @@ export default function TodayPlanCommand() {
   currentDate.current = date;
   const [selected, setSelected] = useState<string>();
   const [search, setSearch] = useState("");
-  const state = useDailyPlan(date);
+  const state = useDailyPlan(date, true);
   const { plan, busy, error, now, reload } = state;
   const previousToday = useRef(localDateKey(now));
   useEffect(() => {
@@ -88,7 +81,7 @@ export default function TodayPlanCommand() {
         plan && !error && !busy ? (
           <ActionPanel>
             {newPlan}
-            <ImportLatestPlanAction state={state} onImported={moved} />
+            <WeeklyReviewAction date={date} onPop={reload} />
           </ActionPanel>
         ) : undefined
       }
@@ -123,6 +116,7 @@ export default function TodayPlanCommand() {
           actions={
             <ActionPanel>
               <Action title="Reload Plan" onAction={reload} shortcut={Keyboard.Shortcut.Common.Refresh} />
+              <WeeklyReviewAction date={date} onPop={reload} />
             </ActionPanel>
           }
         />
@@ -131,16 +125,12 @@ export default function TodayPlanCommand() {
         <List.EmptyView
           icon={Icon.List}
           title={date === localDateKey(now) ? "What Will You Work on Today?" : "No Plan for This Date"}
-          description={
-            date === plan.today && plan.previousPlanDate
-              ? "⌘⇧I: import unfinished plans from the last day with tasks. Or create a new plan."
-              : "Choose about three goals. Enter a goal on the first line and subtasks on the following lines."
-          }
+          description="Choose about three goals. Enter a goal on the first line and subtasks on the following lines. Unfinished plans carry over automatically."
           actions={
             busy ? undefined : (
               <ActionPanel>
                 {newPlan}
-                <ImportLatestPlanAction state={state} onImported={moved} />
+                <WeeklyReviewAction date={date} onPop={reload} />
               </ActionPanel>
             )
           }
@@ -302,7 +292,6 @@ function TaskActions({
           target={<PlanEditor date={plan.date} onSaved={onSaved} />}
           onPop={reload}
         />
-        <ImportLatestPlanAction state={state} onImported={onMoved} />
         {plan.date < plan.today && !goal.complete ? (
           <Action
             title="Move Plan to Today"
@@ -342,6 +331,7 @@ function TaskActions({
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <WeeklyReviewAction date={plan.date} onPop={reload} />
         <Action
           title="Reload Plan"
           icon={Icon.ArrowClockwise}
@@ -350,42 +340,6 @@ function TaskActions({
         />
       </ActionPanel.Section>
     </ActionPanel>
-  );
-}
-
-function ImportLatestPlanAction({
-  state,
-  onImported,
-}: {
-  state: PlanState;
-  onImported: (result: { date: string }) => void;
-}) {
-  const { plan, busy, perform } = state;
-  if (!plan || busy || plan.date !== plan.today) return null;
-  const sourceDate = plan.previousPlanDate;
-  async function importLatest() {
-    const result = await perform("Could Not Import Latest Plan", () => importLatestPlansToToday(sourceDate));
-    if (!result) return;
-    onImported(result.value);
-    await showToast({
-      style: Toast.Style.Success,
-      title: result.value.count
-        ? "Imported Latest Plan"
-        : sourceDate
-          ? "No Unfinished Plans to Import"
-          : "No Past Plans to Import",
-      message: sourceDate
-        ? `${result.value.count} ${result.value.count === 1 ? "plan" : "plans"} from ${planDateLabel(sourceDate)}`
-        : "No tasks remain on earlier dates. They may already be in today's plan.",
-    });
-  }
-  return (
-    <Action
-      title="Import Latest Plan"
-      icon={Icon.ArrowDown}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-      onAction={importLatest}
-    />
   );
 }
 
