@@ -680,6 +680,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "just-domain",
+    title: "Just Domain.",
+    description: "Check a domain name, both prices and whether it can transfer in. You register it on justdomain.ai.",
+    icon: "https://justdomain.ai/just-icon-512.png",
+    homepage: "https://justdomain.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.justdomain.ai/"],
+    },
+    remoteUrl: "https://mcp.justdomain.ai/",
+  },
+  {
+    name: "just-publish",
+    title: "Just Publish.",
+    description: "Publish and update the website you built with AI at a live public URL. Sign-in required.",
+    icon: "https://justpublish.ai/icon.png",
+    homepage: "https://justpublish.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.justpublish.ai/"],
+    },
+    remoteUrl: "https://mcp.justpublish.ai/",
+  },
+  {
     name: "handoff",
     title: "handoff",
     description:
