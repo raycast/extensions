@@ -1,6 +1,6 @@
 # Dungeons & Dragons Changelog
 
-## [Fix spell damage details] - {PR_MERGE_DATE}
+## [Fix spell damage details] - 2026-10-27
 
 - Fix spell details failing to load when damage has no type, and display damage from the updated API response.
 
