@@ -1,11 +1,10 @@
 import { environment } from "@raycast/api";
-import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { promisify } from "node:util";
+import { generate } from "selfsigned";
 import { Agent } from "undici";
 
-const execFileAsync = promisify(execFile);
+const CLIENT_CERT_VALIDITY_YEARS = 10;
 
 /**
  * LocalSend receivers with encryption enabled request a client certificate
@@ -18,22 +17,16 @@ async function getClientCertificate(): Promise<{ cert: Buffer; key: Buffer }> {
   const keyPath = join(directory, "client-key.pem");
 
   if (!existsSync(certPath) || !existsSync(keyPath)) {
+    const notAfterDate = new Date();
+    notAfterDate.setFullYear(notAfterDate.getFullYear() + CLIENT_CERT_VALIDITY_YEARS);
+    const pems = await generate([{ name: "commonName", value: "LocalSend User" }], {
+      keySize: 2048,
+      algorithm: "sha256",
+      notAfterDate,
+    });
     mkdirSync(directory, { recursive: true });
-    await execFileAsync("/usr/bin/openssl", [
-      "req",
-      "-x509",
-      "-newkey",
-      "rsa:2048",
-      "-nodes",
-      "-keyout",
-      keyPath,
-      "-out",
-      certPath,
-      "-days",
-      "3650",
-      "-subj",
-      "/CN=LocalSend User",
-    ]);
+    writeFileSync(keyPath, pems.private, { mode: 0o600 });
+    writeFileSync(certPath, pems.cert);
   }
 
   return { cert: readFileSync(certPath), key: readFileSync(keyPath) };
