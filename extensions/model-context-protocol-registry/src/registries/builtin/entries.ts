@@ -19,6 +19,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "3dsellers",
+    title: "3Dsellers",
+    description:
+      "Run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant. Search and create products, publish listings, update inventory and prices, manage orders, run bulk edits and CSV imports, and answer buyer messages through your 3Dsellers account. 150+ tools. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/3dsellers/ebay-mcp-server/main/assets/logo.png",
+    homepage: "https://www.3dsellers.com/channel-integration/3dsellers-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.3dsellers.com/mcp"],
+    },
+    remoteUrl: "https://api.3dsellers.com/mcp",
+  },
+  {
     name: "60fps",
     title: "60fps",
     description:
@@ -70,15 +83,15 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://app.aggregate.finance/mcp",
   },
   {
-    name: "aiapplyd",
-    title: "AI Applyd",
+    name: "getmattered",
+    title: "GetMattered",
     description:
-      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: AI Applyd rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 34 hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
-    icon: "https://aiapplyd.com/apple-touch-icon.png",
-    homepage: "https://aiapplyd.com/mcps?source=raycast-mcp-registry",
+      "Auto-Apply That Ends on an Interview. Search jobs matched to your resume, then apply from Raycast: GetMattered rewrites your resume for the posting, writes the cover letter and submits the application on the employer's own hiring system. Works with 34 hiring systems, including Workday, Greenhouse, Lever and Ashby. Also scores your resume against any job and preps you for the interview. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://getmattered.com/apple-touch-icon.png",
+    homepage: "https://getmattered.com/mcps?source=raycast-mcp-registry",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://mcp.aiapplyd.com/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.getmattered.com/mcp"],
     },
   },
   {
@@ -230,6 +243,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "candor-finance",
+    title: "Candor Finance",
+    description:
+      "Reach your money goals with the AI agent you already use. Tell it what you want, like paying off the cards, buying the house or working four days a week, even if you haven't worked it out yet. With Candor, it breaks that into steps and sets up the plan from your real US bank, card and investment accounts: goals with a measure and a pace, a budget that pays for them, every charge sorted to match. Then it keeps you on it. Every week Candor reviews your whole financial life, from everyday spending to investments, and everything you and your agent have saved, and tells your agent what's worth talking through and why. Every figure comes from your records, and the plan, decisions and reasons stay saved when you switch agents. Read-only: Candor never moves money. Hosted remote personal finance MCP server over Streamable HTTP; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. Paid Candor plan with a 7-day free trial.",
+    icon: "https://candor.money/social/candor-facebook-logo.png",
+    homepage: "https://candor.money/mcp?utm_source=raycast&utm_medium=mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
+    },
+    remoteUrl: "https://api.candor.money/mcp",
+  },
+  {
     name: "chirpie",
     title: "Chirpie",
     description:
@@ -316,6 +342,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "codetrendy",
+    title: "CodeTrendy",
+    description:
+      "Search CodeTrendy, a curated directory of newly launched startups, SaaS products and AI tools: keyword search with category and pricing filters, full listing profiles, alternatives to a named product, categories, trending and the site of the day. 7 read-only tools. Remote Streamable HTTP server at https://codetrendy.com/api/mcp; no sign-in, no API key.",
+    icon: "https://codetrendy.com/android-icon-192x192.png",
+    homepage: "https://codetrendy.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://codetrendy.com/api/mcp"],
+    },
+    remoteUrl: "https://codetrendy.com/api/mcp",
+  },
+  {
     name: "codex-reset",
     title: "Codex Reset",
     description:
@@ -341,6 +380,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "csolar-energia",
+    title: "CSolar Energia",
+    description:
+      "Solar power estimates for homes and businesses in São Paulo state, Brazil, from CSolar Energia, a solar installer. From the monthly electricity bill in reais or the consumption in kWh, get the number of 630 W panels, installed power, monthly generation, estimated installed price, monthly savings and payback, and check whether CSolar serves a city (all 645 municipalities of São Paulo state). Estimates, not quotes; answers in Portuguese. Read-only, no personal data. Remote Streamable HTTP server at https://csolar.com.br/mcp; no sign-in, no API key.",
+    icon: "https://csolar.com.br/favicon.png",
+    homepage: "https://csolar.com.br/para-agentes#mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://csolar.com.br/mcp"],
+    },
+    remoteUrl: "https://csolar.com.br/mcp",
   },
   {
     name: "datacircle",
@@ -408,6 +460,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://dchub.cloud/mcp"],
     },
     remoteUrl: "https://dchub.cloud/mcp",
+  },
+  {
+    name: "deed-page",
+    title: "deed.page",
+    description:
+      "Publish static sites from your agent to a permanent public HTTPS URL at `<slug>.deed.page`: send a files map and a slug, then update, list, delete, roll back to a retained version, attach a custom domain and read cookieless analytics. 25 tools. Hosted remote Streamable HTTP server at https://deed.page/mcp; publishing needs no sign-in and no API key, and the first publish returns an owner token for later changes. Free sites are public.",
+    icon: "https://deed.page/icon.png",
+    homepage: "https://deed.page/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://deed.page/mcp"],
+    },
+    remoteUrl: "https://deed.page/mcp",
   },
   {
     name: "dropthehassle",
@@ -533,23 +598,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
-    name: "e2b",
-    title: "E2B Code Interpreter",
-    description: "A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).",
-    icon: {
-      source: "e2b.svg",
-      tintColor: Color.PrimaryText,
-    },
-    homepage: "https://github.com/e2b-dev/mcp-server/blob/main/packages/js/README.md",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@e2b/mcp-server"],
-      env: {
-        E2B_API_KEY: "YOUR_API_KEY_HERE",
-      },
-    },
-  },
-  {
     name: "edgepedia",
     title: "Edgepedia",
     description:
@@ -588,20 +636,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["exa-mcp-server"],
       env: {
         EXA_API_KEY: "YOUR_API_KEY_HERE",
-      },
-    },
-  },
-  {
-    name: "google-drive",
-    title: "Google Drive",
-    description: "This MCP server integrates with Google Drive to allow listing, reading, and searching over files.",
-    icon: "https://svgl.app/library/drive.svg",
-    homepage: "https://github.com/modelcontextprotocol/servers-archived/tree/main/src/gdrive",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-gdrive"],
-      env: {
-        GDRIVE_CREDENTIALS_PATH: "/path/to/.gdrive-server-credentials.json",
       },
     },
   },
@@ -738,6 +772,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kimiko",
+    title: "Kimiko",
+    description:
+      "Your meetings, notes and tasks from Kimiko, the private AI note taker, in Raycast AI and your other AI apps. Search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks; three prompts cover a weekly review, meeting prep and open loops. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp, so this entry is Mac only. No hosted endpoint and no API key: it reads Kimiko's database on your Mac, and it stays off until you turn on Allow AI apps in Kimiko → Settings → Connections. On the first connection, macOS asks you to allow Keychain access. An AI app may send what it reads to its own cloud service. Kimiko is a paid app with a free trial.",
+    icon: "https://kimiko.app/brand/kimiko-logo-dark-512.png",
+    homepage: "https://kimiko.app/#mcp-connector",
+    configuration: {
+      command: "/Applications/Kimiko.app/Contents/MacOS/kimiko-mcp",
+      args: [],
+    },
+  },
+  {
     name: "kolect",
     title: "Kolect Creator Search",
     description:
@@ -814,7 +860,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "local-commander",
     title: "Local Commander",
     description:
-      "Connects Raycast AI to Windows 11 computers you own. Your AI can read approved project files and Git state, run the checks and commands you authorize, and check local services; your workspace at localcmd.app shows which computer ran each request and how it ended. Once you approve a computer it can do what your Windows account can do; you can limit it to folders, block commands or switch it off at any time. Needs the Local Commander agent paired on each PC (`npx local-commander-agent@latest`). Free plan for up to 5 computers. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
+      "Remote control of all your computers from Raycast AI. Connect your Windows, Mac and Linux machines (work PC, home PC, servers) and ask in one chat: run commands and scripts, read and edit files, check services and logs, take a screenshot, work with Git. The same computers are reachable from ChatGPT, Claude and any AI app with remote MCP, including on your phone. You choose full access or only some folders, block commands and switch any computer off at any time. Needs the Local Commander agent on each computer (`npx local-commander-agent@latest`). Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration and PKCE, no API key to paste.",
     icon: "https://raw.githubusercontent.com/netbka/local-commander-plugins/main/assets/logo.png",
     homepage: "https://localcmd.app",
     remoteUrl: "https://localcmd.app/mcp",
@@ -850,6 +896,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "mcp-checkup",
+    title: "MCP Checkup",
+    description:
+      "Check a public MCP server before you connect it. Look up observed status and reports for servers MCP Checkup tracks, search them by what their tools do, see recent changes to a server's tool list, fetch the Ed25519-signed (DSSE) attestation behind a report, and request a one-off check of a server by URL. Attestations can be verified offline with the open-source verifier at github.com/mcpcheckup/checks (Apache-2.0). Hosted remote Streamable HTTP server at https://mcpcheckup.com/mcp; no sign-in, no API key.",
+    icon: "https://mcpcheckup.com/apple-touch-icon.png",
+    homepage: "https://mcpcheckup.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcpcheckup.com/mcp"],
+    },
+    remoteUrl: "https://mcpcheckup.com/mcp",
+  },
+  {
     name: "medbillanalyzer",
     title: "MedBillAnalyzer",
     description:
@@ -866,15 +925,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "mnemoverse",
     title: "Mnemoverse",
     description:
-      "Hosted persistent memory for AI agents over MCP. Tell it a recalled memory helped or misled, and it re-ranks what comes back next. Shared rooms for multi-agent work. One key or OAuth across Claude Code, Cursor, VS Code and ChatGPT. Local stdio server `@mnemoverse/mcp-memory-server` (MIT) through `npx`; it lists its ten tools without a key, and every tool call needs a free API key from console.mnemoverse.com, set as `MNEMOVERSE_API_KEY`.",
+      "Hosted persistent memory for AI agents over MCP. Rating a recalled memory as helpful or misleading re-ranks what comes back next. Shared rooms (beta) let several agents work from one memory. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. The free plan needs no credit card.",
     icon: "https://mnemoverse.com/apple-touch-icon.png",
-    homepage: "https://mnemoverse.com/docs/api/mcp-server",
+    homepage: "https://mnemoverse.com/docs/api/remote-mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "@mnemoverse/mcp-memory-server@latest"],
-      env: {
-        MNEMOVERSE_API_KEY: "mk_live_YOUR_KEY",
-      },
+      args: ["-y", "mcp-remote", "https://mcp.mnemoverse.com/mcp"],
     },
   },
   {
@@ -928,6 +984,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://netactuate.com/mcp"],
     },
     remoteUrl: "https://netactuate.com/mcp",
+  },
+  {
+    name: "neverapply",
+    title: "NeverApply",
+    description:
+      "AI job-search agent: search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. 15 tools. Official hosted remote Streamable HTTP server from Kasovy LLC; OAuth 2.1 sign-in with PKCE and dynamic client registration, no API key to paste.",
+    icon: "https://github.com/kasovy.png",
+    homepage: "https://neverapply.co/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://neverapply.co/mcp"],
+    },
+    remoteUrl: "https://neverapply.co/mcp",
   },
   {
     name: "new-term-radar",
@@ -1268,18 +1337,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
-    name: "shopify-dev",
-    title: "Shopify Dev",
-    description:
-      "MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs.",
-    icon: "shopify.svg",
-    homepage: "https://github.com/Shopify/dev-mcp",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@shopify/dev-mcp@latest"],
-    },
-  },
-  {
     name: "sitelemetry",
     title: "Sitelemetry",
     description:
@@ -1472,11 +1529,24 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "techfabric",
+    title: "TechFabric",
+    description:
+      "Lets TechFabric's engineers write blog posts and case studies for techfabric.com from the coding agent they already use, with its repository and context: today's brief, the site's checks, and a draft under their byline that only they publish. Anyone can also search and read the site. Hosted remote Streamable HTTP server; reading needs no sign-in and no API key, writing uses OAuth 2.1 sign-in with a TechFabric Microsoft account (dynamic client registration and PKCE).",
+    icon: "https://www.techfabric.com/brand/mcp/techfabric-icon-on-dark-512.png",
+    homepage: "https://www.techfabric.com/mcp-servers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.techfabric.com/mcp"],
+    },
+    remoteUrl: "https://www.techfabric.com/mcp",
+  },
+  {
     name: "terminal-tax",
     title: "Terminal Tax",
     description:
-      "E-file a 2025 US federal Form 1040 from your AI assistant. Four tools check the prepared return and return either the problems to fix or one link to a hosted filing page, where you review the complete return, type your Social Security number and PINs, sign and pay; Terminal Tax then e-files it. $19.99, charged only if the IRS accepts it. Federal only. Hosted remote Streamable HTTP server; no account, API key or OAuth.",
-    icon: "https://raw.githubusercontent.com/maxdhs/terminal-tax-mcp-server/main/logo.png",
+      "E-file a 2025 US federal Form 1040 from your AI assistant. Nothing to install or connect to file: any assistant that can run a shell command or make an HTTPS request sends JSON-RPC POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly, with no account, API key or OAuth. Three tools (create_filing_session, get_packet_schema, continue_filing_session) start a filing session, return the packet schema, and check the prepared packet, returning either the problems to correct or one link to a private filing page, where you review the complete return, sign it and authorize payment; Terminal Tax then e-files it with the IRS. $19.99 per federal return, charged only if the IRS accepts it. Federal only.",
+    icon: "https://raw.githubusercontent.com/terminaltax/terminal-tax-mcp-server/main/logo.png",
     homepage: "https://terminal.tax",
     configuration: {
       command: "npx",
@@ -1583,6 +1653,31 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "vomo",
+    title: "VOMO",
+    description:
+      "Find and read your VOMO meeting notes and original transcripts. List saved notes, search by keyword, and retrieve summaries or transcripts from your own account. Read-only notes:read access; no recording, uploads, edits, deletion, or purchases. Connects to VOMO's hosted server through mcp-remote with OAuth sign-in, dynamic client registration, and PKCE. Requires Node.js with npm and an existing VOMO account with saved notes.",
+    icon: "https://vomo.ai/icons/vomo-app-icon.svg",
+    homepage: "https://vomo.ai/cli",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.vomo.ai/mcp", "--host", "127.0.0.1"],
+    },
+  },
+  {
+    name: "watchgoose",
+    title: "Watchgoose",
+    description:
+      "Monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Connect one Watchgoose project to inspect checks and status history. Read-only access is the default. With explicit read-and-write consent, it can inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Watchgoose plan available, no API key to paste.",
+    icon: "https://watchgoose.com/static/img/watchgoose-icon-512.png",
+    homepage: "https://watchgoose.com/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.watchgoose.com/mcp"],
+    },
+    remoteUrl: "https://mcp.watchgoose.com/mcp",
+  },
+  {
     name: "wave-ai",
     title: "Wave AI",
     description:
@@ -1620,6 +1715,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://web3juice.com/api/mcp"],
     },
     remoteUrl: "https://web3juice.com/api/mcp",
+  },
+  {
+    name: "webly",
+    title: "Webly",
+    description:
+      "Website hosting for AI agents: publish a website, or share files and folders, at a live URL in seconds. Claim a site to keep it, edit it over MCP, publish drafts you approve, connect a custom domain and roll back with version history. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, or a bearer API key.",
+    icon: "https://raw.githubusercontent.com/Webly-AI/webly-plugin/main/assets/logo.svg",
+    homepage: "https://webly.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webly.ai/v1/mcp"],
+    },
+    remoteUrl: "https://api.webly.ai/v1/mcp",
   },
   {
     name: "xero",
@@ -1752,18 +1860,16 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "elevenlabs",
     title: "ElevenLabs",
     description:
-      "Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more.",
+      "Official hosted MCP server for managing ElevenLabs agents, tools, knowledge bases, conversations, tests, and audio generation through an OAuth-authenticated workspace connection.",
     icon: {
       source: "elevenlabs.svg",
       tintColor: Color.PrimaryText,
     },
-    homepage: "https://github.com/elevenlabs/elevenlabs-mcp",
+    homepage: "https://elevenlabs.io/docs/eleven-agents/operate/hosted-mcp",
+    remoteUrl: "https://api.elevenlabs.io/v1/mcp",
     configuration: {
-      command: "uvx",
-      args: ["elevenlabs-mcp"],
-      env: {
-        ELEVENLABS_API_KEY: "YOUR_API_KEY_HERE",
-      },
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.elevenlabs.io/v1/mcp"],
     },
   },
   {
