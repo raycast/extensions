@@ -61,15 +61,14 @@ export function getOpenTabs(): PdfFile[] {
   }
 }
 
-export function getRecentDocuments(): PdfFile[] {
-  if (!existsSync(SFL4_PATH)) return [];
+export function getRecentDocuments(sflPath: string = SFL4_PATH): PdfFile[] {
+  if (!existsSync(sflPath)) return [];
 
   const jxaScript = `
 ObjC.import("Foundation")
-var data = $.NSData.dataWithContentsOfFile("${SFL4_PATH}")
-if (!data || data.isEqualTo($()))  {
-  "[]"
-} else {
+function run(argv) {
+  var data = $.NSData.dataWithContentsOfFile(argv[0])
+  if (!data || data.isEqualTo($())) return "[]"
   var classes = $.NSSet.setWithArray($([$.NSDictionary.class, $.NSArray.class, $.NSString.class, $.NSNumber.class, $.NSData.class, $.NSDate.class, $.NSUUID.class]))
   var unarchiveError = Ref()
   var root = $.NSKeyedUnarchiver.unarchivedObjectOfClassesFromDataError(classes, data, unarchiveError)
@@ -89,13 +88,13 @@ if (!data || data.isEqualTo($()))  {
       }
     }
   }
-  JSON.stringify(results)
+  return JSON.stringify(results)
 }`;
 
   try {
     const output = execFileSync(
       "osascript",
-      ["-l", "JavaScript", "-e", jxaScript],
+      ["-l", "JavaScript", "-e", jxaScript, sflPath],
       {
         encoding: "utf-8",
         timeout: 5000,

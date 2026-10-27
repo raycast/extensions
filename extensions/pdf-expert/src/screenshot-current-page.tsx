@@ -40,7 +40,15 @@ export default async function ScreenshotCurrentPage() {
     return;
   }
 
-  const page = getCurrentPageNumber(doc.path) ?? 1;
+  const page = getCurrentPageNumber(doc.path);
+  if (page === null) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not determine the current page",
+      message: "Scroll the document in PDF Expert and try again",
+    });
+    return;
+  }
   const dpi =
     Number(getPreferenceValues<Preferences.ScreenshotCurrentPage>().dpi) || 216;
 
