@@ -23,8 +23,8 @@ This builds the production version straight into Raycast. It stays installed wit
 Every auth file grouped by provider, with:
 
 - status, cooldowns and request counts
-- live quota windows and their reset times (Codex and Claude)
-- bundled logos for Codex, Claude, Antigravity, Meta and xAI accounts
+- live quota windows and reset times for Codex, Claude, Antigravity, xAI, Meta, Kimi, Kimi AI and Devin, plus CPA quota plugins
+- bundled logos for Codex, Claude, Antigravity, Meta, xAI, Kimi and Devin accounts
 - available Codex reset credits and Claude reset grants
 
 Switch views from the search bar dropdown or the Switch View action, or cycle through them with ⌘D:
@@ -52,7 +52,7 @@ Switch views from the search bar dropdown or the Switch View action, or cycle th
 
 ## Screenshots
 
-The six Store screenshots in `metadata` show Details, Limits, Overview, Forecast, Drain Rate and Chart Options using sample accounts and history. Antigravity, Meta and xAI logos appear in the account views; quota charts currently support Codex and Claude.
+The six Store screenshots in `metadata` show Details, Limits, Overview, Forecast, Drain Rate and Chart Options using sample accounts and history. Overview demonstrates three accounts per provider. Every connected provider appears in the account views, Overview and Chart Options. Quota collection supports the built-in providers listed above and CPA-advertised quota plugins; providers without an exposed numeric quota remain visible with an explanation.
 
 ## Usage history and forecasts
 
@@ -62,7 +62,7 @@ History stays in local JSON files under the extension's support directory, separ
 
 Hourly averages are derived from the stored observations, so they survive restarts without accumulating errors from averaging averages. For each account and quota window, the extension divides the decrease in remaining percentage points by observed time, splitting intervals across clock hours in proportion to their duration. Refills, changed reset windows, unknown reset times and gaps over 90 minutes are excluded. Each plotted hourly provider total needs at least 15 minutes of observations for every included account; otherwise the line has a gap. A flat measured interval is zero usage; missing history is not.
 
-Forecasts use each account's time-weighted observed drain over the past seven days, not request or token counts. Each account needs at least one observed hour across three or more valid intervals before projection starts. The forecast applies that constant rate independently to each account, stops at zero, and assumes a full refill at its reported reset time. Known weekly and five-hour windows repeat on that schedule; other windows use only their next reported reset. Unknown reset times are projected without refills. No reset credits or grants are spent by the collector or forecast. Partial refreshes pause the projection.
+Forecasts use each account's time-weighted observed drain over the past seven days, not request or token counts. Each account needs at least one observed hour across three or more valid intervals before projection starts. The forecast applies that constant rate independently to each account, stops at zero, and assumes a full refill at its reported reset time. Windows with an explicit fixed duration repeat on that schedule; legacy Claude/Codex weekly and five-hour windows keep their known periods. Monthly or unknown-duration windows use only their next reported reset. Unknown reset times are projected without refills. No reset credits or grants are spent by the collector or forecast. Partial refreshes pause the projection.
 
 This is a usage estimate, not a guarantee. Changes in workload, provider quota policies and rolling-window recovery can differ from a constant drain and full-refill model. One account's capacity is 100 percentage points, so three accounts have 300% capacity. A rate of 3%/h means three percentage points of one account's capacity per hour across those accounts.
 
@@ -89,3 +89,11 @@ The following dark-theme chart screenshots use sample history. Real history star
 ![Hourly drain rate](media/drain.png)
 
 ![Chart Options](media/chart-options.png)
+
+## Provider quota collection
+
+The extension discovers all credentials from CPA, including custom providers, instead of limiting the provider list. It prefers v8 credential and quota-proxy routes and falls back for older CPA servers. Every enabled credential with an auth index is considered for collection. Disabled accounts remain visible and are not polled.
+
+Built-in readers follow the official Management Center: Antigravity quota groups, xAI weekly/monthly billing, Meta subscription windows, Kimi coding usage on both official domains, and Devin daily/weekly quota, alongside the existing Codex and Claude readers. A CPA-selected quota plugin takes precedence; custom providers use CPA's shared quota interface. Percentage-based windows enter local history and charts automatically, including model-specific groups. Plugin balance-only metrics appear as values rather than invented percentages.
+
+Some API-key plans and providers do not expose a numeric usage limit. Those accounts remain visible and show that quota is not reported. The extension never runs inference to test a quota. Meta's DCA token and credential contents needed for project/domain resolution stay request-local and are not written to history or quota caches.

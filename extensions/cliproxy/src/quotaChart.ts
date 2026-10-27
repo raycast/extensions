@@ -60,9 +60,12 @@ export function providerOverviewMarkdown(accounts: AccountWindows[], rows: Accou
     const nextReset = Math.min(...windows.map((w) => w.resetsAt ?? Infinity));
     return block(i * 124, theme, {
       label,
-      right: `${known.length} ${known.length === 1 ? "account" : "accounts"}`,
-      big: `${Math.round(known.reduce((sum, v) => sum + v, 0))}%`,
-      unit: `left of ${known.length * 100}%`,
+      right:
+        known.length === windows.length
+          ? `${known.length} ${known.length === 1 ? "account" : "accounts"}`
+          : `${known.length}/${windows.length} reporting`,
+      big: known.length ? `${Math.round(known.reduce((sum, v) => sum + v, 0))}%` : "?",
+      unit: known.length ? `left of ${known.length * 100}%` : "quota not reported",
       segments: lefts,
       footer: Number.isFinite(nextReset)
         ? `${untilLabel("Next reset", nextReset)}, ${dateLabel(nextReset)}`

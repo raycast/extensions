@@ -1,5 +1,13 @@
 # CLIProxyAPI Changelog
 
+## [Quota Collection Across Providers] - {PR_MERGE_DATE}
+
+- Show every connected provider in Overview and Chart Options, including custom providers.
+- Collect Antigravity, xAI, Meta, Kimi, Kimi AI and Devin quota alongside Codex and Claude.
+- Discover CPA quota plugins and record their percentage windows in usage history.
+- Preserve provider-specific periods and keep unavailable quota unknown.
+- Use green Antigravity charts and replace the six existing screenshots with multi-account examples.
+
 ## [Show Quota History Errors] - {PR_MERGE_DATE}
 
 - Show history read and write failures on quota charts, including when cached history is available.

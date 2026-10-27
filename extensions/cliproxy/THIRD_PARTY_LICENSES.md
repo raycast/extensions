@@ -1,6 +1,6 @@
-# Third-party assets
+# Third-party integrations and assets
 
-Provider logos are from [CLIProxyAPI Management Center](https://github.com/router-for-me/Cli-Proxy-API-Management-Center), licensed under the MIT license below. Brand names and marks belong to their respective owners.
+Provider quota integration behavior and bundled logos are based on [CLIProxyAPI Management Center](https://github.com/router-for-me/Cli-Proxy-API-Management-Center), licensed under the MIT license below. Brand names and marks belong to their respective owners.
 
 MIT License
 

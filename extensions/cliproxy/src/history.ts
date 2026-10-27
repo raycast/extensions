@@ -33,6 +33,7 @@ export function observations(accounts: QuotaAccount[], quotas: Record<string, Qu
               at: result.fetchedAt!,
               left,
               resetsAt: window.resetsAt,
+              periodMs: window.periodMs,
             },
           ];
     });

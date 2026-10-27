@@ -29,6 +29,7 @@ import {
 import { canUseReset, percentLeft, QuotaAccount, QuotaResult, spendReset, supportsQuota } from "./quota";
 import { fetchAllQuotas } from "./history";
 import { UsageView } from "./usageView";
+import { providerInfo, providerTitle } from "./providers";
 import { providerOverviewMarkdown, quotaChartMarkdown, remainingHex } from "./quotaChart";
 
 /**
@@ -59,7 +60,31 @@ function Accounts({ connection }: { connection: ConnectionId }) {
   // Key quota fetching on stable fields only, so status changes don't re-hit upstream.
   const quotaAccounts: QuotaAccount[] = (files.data ?? [])
     .filter(supportsQuota)
-    .map(({ id, auth_index, provider, id_token }) => ({ id, auth_index, provider, id_token }));
+    .map(
+      ({
+        id,
+        name,
+        auth_index,
+        provider,
+        id_token,
+        project_id,
+        runtime_only,
+        supports_quota,
+        quota_provider,
+        quota_plugin_id,
+      }) => ({
+        id,
+        name,
+        auth_index,
+        provider,
+        id_token,
+        project_id,
+        runtime_only,
+        supports_quota,
+        quota_provider,
+        quota_plugin_id,
+      }),
+    );
   const quotas = useCachedPromise(fetchAllQuotas, [connection, quotaAccounts], {
     execute: quotaAccounts.length > 0,
     keepPreviousData: true,
@@ -122,6 +147,7 @@ function Accounts({ connection }: { connection: ConnectionId }) {
         connection={connection}
         mode={view}
         accounts={quotaAccounts}
+        providers={Object.keys(byProvider)}
         quotas={quotas.data?.quotas ?? {}}
         historyError={quotas.data?.historyError ?? null}
         loading={files.isLoading || quotas.isLoading}
@@ -162,18 +188,16 @@ function Accounts({ connection }: { connection: ConnectionId }) {
         description="Log in to a provider in CLIProxyAPI first"
       />
       {view === "overview"
-        ? Object.entries(byProvider)
-            .filter(([, accounts]) => accounts.some(supportsQuota))
-            .map(([provider, accounts]) => (
-              <ProviderItem
-                key={provider}
-                provider={provider}
-                accounts={accounts}
-                quotas={quotas.data?.quotas}
-                loading={quotas.isLoading}
-                actions={actions}
-              />
-            ))
+        ? Object.entries(byProvider).map(([provider, accounts]) => (
+            <ProviderItem
+              key={provider}
+              provider={provider}
+              accounts={accounts}
+              quotas={quotas.data?.quotas}
+              loading={quotas.isLoading}
+              actions={actions}
+            />
+          ))
         : Object.entries(byProvider).map(([provider, accounts]) => (
             <List.Section
               key={provider}
@@ -396,7 +420,16 @@ function ProviderItem(props: {
     ? providerOverviewMarkdown(windowsPerAccount, rows)
     : props.loading
       ? "Loading quota…"
-      : "No quota data yet.";
+      : [
+          ...accounts.map(
+            (file) =>
+              `**${accountTitle(file) ?? file.name}**: ${file.disabled ? "Disabled" : (quotas?.[file.auth_index]?.error ?? quotas?.[file.auth_index]?.quota?.note ?? "Quota not reported by CPA.")}`,
+          ),
+          ...accounts.flatMap(
+            (file) =>
+              quotas?.[file.auth_index]?.quota?.metrics?.map((metric) => `${metric.label}: ${metric.value}`) ?? [],
+          ),
+        ].join("\n\n");
 
   return (
     <List.Item
@@ -418,8 +451,11 @@ function ProviderItem(props: {
 function accountLimitsSummary(file: AuthFile, result: QuotaResult | undefined): string {
   if (file.disabled) return "Disabled";
   const windows = result?.quota?.windows ?? [];
-  if (windows.length === 0) return result?.error ? "Quota unavailable" : "No data";
-  const parts = windows.map((w) => `${shortLabel(w.label)} ${Math.round(percentLeft(w) ?? 0)}%`);
+  if (windows.length === 0) return result?.error ? "Quota unavailable" : (result?.quota?.note ?? "Quota not reported");
+  const parts = windows.map((w) => {
+    const left = percentLeft(w);
+    return `${shortLabel(w.label)} ${left === null ? "?" : `${Math.round(left)}%`}`;
+  });
   return parts.join(", ") + (result?.error ? " (stale)" : "");
 }
 
@@ -441,6 +477,9 @@ function AccountDetail(props: AccountProps & { status: Status }) {
           </M.TagList>
           {file.status_message && status.label !== "Active" && <M.Label title="Message" text={file.status_message} />}
           {quota?.plan && <M.Label title="Plan" text={titleCase(quota.plan)} />}
+          {quota?.metrics?.map((metric, index) => (
+            <M.Label key={index} title={metric.label} text={metric.value} />
+          ))}
           {reset?.kind === "codex" && (
             <M.Label
               title="Reset Credits"
@@ -494,12 +533,15 @@ function activeCooldowns(file: AuthFile) {
 
 function quotaMarkdown(file: AuthFile, result: QuotaResult | undefined, loading: boolean): string {
   if (!supportsQuota(file)) {
-    return file.disabled ? "Account is disabled." : `${providerTitle(file.provider)} doesn't report quota.`;
+    return file.disabled
+      ? "Account is disabled."
+      : "This account has no enabled runtime credential for quota collection.";
   }
   if (!result) return loading ? "Loading quota…" : "";
   const { quota, error, fetchedAt } = result;
   if (!quota) return `**Quota unavailable**\n\n${error ?? "No data"}`;
-  const chart = quota.windows.length > 0 ? quotaChartMarkdown(quota.windows) : "No quota windows reported.";
+  const chart =
+    quota.windows.length > 0 ? quotaChartMarkdown(quota.windows) : (quota.note ?? "No quota windows reported.");
   if (!error) return chart;
   return `${chart}\n\n_Couldn't refresh (${error}). Showing data from ${relative(fetchedAt ?? NaN)}._`;
 }
@@ -556,7 +598,7 @@ function limitAccessories(
     accessories.push({ icon: Icon.Clock, text: relative(until), tooltip: "Until the exhausted limits reset" });
   }
 
-  if (accessories.length === 0 && !supportsQuota(file)) accessories.push({ text: "No quota info" });
+  if (accessories.length === 0) accessories.push({ text: "Quota not reported", tooltip: result?.quota?.note });
   return accessories;
 }
 
@@ -574,12 +616,8 @@ function sectionSubtitle(accounts: AuthFile[], quotas: Record<string, QuotaResul
 
 /** Bundled Management Center logos; monochrome marks follow Raycast’s text color. */
 function providerIcon(provider: string): Image.ImageLike {
-  if (provider === "claude") return { source: "claude.svg" };
-  if (provider === "codex") return { source: "openai.svg", tintColor: Color.PrimaryText };
-  if (provider === "antigravity") return { source: "antigravity.svg" };
-  if (provider === "meta") return { source: "meta.svg" };
-  if (provider === "xai") return { source: "xai.svg", tintColor: Color.PrimaryText };
-  return Icon.Person;
+  const info = providerInfo(provider);
+  return info.logo ? { source: info.logo, ...(info.monochrome ? { tintColor: Color.PrimaryText } : {}) } : Icon.Person;
 }
 
 function shortLabel(label: string): string {
@@ -591,16 +629,6 @@ function shortLabel(label: string): string {
 
 function accountTitle(file: AuthFile | undefined): string | undefined {
   return file?.email || file?.label || file?.name;
-}
-
-function providerTitle(provider: string): string {
-  return provider === "codex"
-    ? "Codex"
-    : provider === "claude"
-      ? "Claude"
-      : provider === "xai"
-        ? "xAI"
-        : titleCase(provider);
 }
 
 function titleCase(value: string): string {

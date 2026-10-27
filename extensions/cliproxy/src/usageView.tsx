@@ -1,16 +1,18 @@
-import { Action, ActionPanel, Detail, environment, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, environment, Icon, Keyboard, type Image } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
-import { chartChoices } from "./chartChoices";
+import { chartChoices, type ChartChoice } from "./chartChoices";
 import { ConnectionId } from "./api";
 import { accountKey, historyStore, observations } from "./history";
 import { QuotaAccount, QuotaResult } from "./quota";
 import { accountRates, DAY, drainHistory, forecast, HOUR, remainingHistory } from "./usageModel";
 import { usageChartSvg } from "./usageChart";
+import { providerInfo, providerTitle } from "./providers";
 
 export function UsageView(props: {
   connection: ConnectionId;
   mode: "forecast" | "drain";
   accounts: QuotaAccount[];
+  providers: string[];
   quotas: Record<string, QuotaResult>;
   historyError: string | null;
   loading: boolean;
@@ -30,7 +32,7 @@ export function UsageView(props: {
   const revision = Math.max(0, ...Object.values(props.quotas).map((q) => q.fetchedAt ?? 0));
   const history = usePromise(read, [props.connection, revision]);
   const latest = observations(props.accounts, props.quotas);
-  const providers = [...new Set(props.accounts.map((a) => a.provider))];
+  const providers = props.providers;
   const selectedProvider = providers.includes(provider) ? provider : (providers[0] ?? "claude");
   const enabledKeys = new Set(props.accounts.filter((a) => a.provider === selectedProvider).map(accountKey));
   const providerHistory = (history.data ?? []).filter(
@@ -42,7 +44,7 @@ export function UsageView(props: {
   const windows = [...new Set([...availableWindows, ...providerHistory.map((o) => o.label)])];
   const selectedWindow = windows.includes(window)
     ? window
-    : (windows.find((w) => w === "Weekly") ?? windows[0] ?? "Weekly");
+    : (windows.find((w) => w === "Weekly") ?? windows[0] ?? "Quota");
   const current = latest.filter((o) => o.provider === selectedProvider && o.label === selectedWindow);
   const all = providerHistory.filter((o) => o.label === selectedWindow);
   // A failed refresh must not shrink capacity or silently drop an account from the forecast.
@@ -61,6 +63,11 @@ export function UsageView(props: {
     ]),
   ];
   const fresh = keys.length === current.length;
+  const missingUsage = props.accounts.some(
+    (a) =>
+      a.provider === selectedProvider &&
+      props.quotas[a.auth_index]?.quota?.windows.some((w) => w.label === selectedWindow && w.usedPercent === null),
+  );
   const now = Date.now();
   const rates = accountRates(all, now - 7 * DAY, now);
   const complete =
@@ -75,7 +82,7 @@ export function UsageView(props: {
     provider: selectedProvider,
     label: selectedWindow,
     accounts: keys.length,
-    left: fresh ? current.reduce((s, o) => s + o.left, 0) : null,
+    left: keys.length > 0 && fresh ? current.reduce((s, o) => s + o.left, 0) : null,
     rate: mean,
     observedHours: keys.length
       ? keys.reduce((s, key) => s + (rates.find((r) => r.account === key)?.observedMs ?? 0), 0) / keys.length / HOUR
@@ -89,6 +96,13 @@ export function UsageView(props: {
     historyError: Boolean(historyMessage),
     message:
       historyMessage ??
+      (!keys.length
+        ? props.accounts
+            .filter((a) => a.provider === selectedProvider)
+            .map((a) => props.quotas[a.auth_index]?.quota?.note)
+            .find(Boolean)
+        : undefined) ??
+      (missingUsage ? "This provider has not reported numeric usage for this window." : undefined) ??
       (!fresh
         ? "Some accounts failed to refresh; projection is paused."
         : current.some((o) => !o.resetsAt || o.resetsAt <= now)
@@ -159,7 +173,7 @@ export function UsageView(props: {
                 <Action
                   key={choice.value}
                   title={choice.title}
-                  icon={choiceIcon[choice.icon]}
+                  icon={chartChoiceIcon(choice)}
                   onAction={() => applyChoice(choice.value)}
                 />
               ))}
@@ -173,7 +187,7 @@ export function UsageView(props: {
             <Action
               key={choice.value}
               title={choice.title}
-              icon={choiceIcon[choice.icon]}
+              icon={chartChoiceIcon(choice)}
               onAction={() => applyChoice(choice.value)}
             />
           ))}
@@ -182,7 +196,7 @@ export function UsageView(props: {
   );
   return (
     <Detail
-      navigationTitle={`${selectedProvider === "claude" ? "Claude" : "Codex"} / ${selectedWindow}`}
+      navigationTitle={`${providerTitle(selectedProvider)} / ${selectedWindow.split(" / ").at(-1)}`}
       isLoading={props.loading || history.isLoading}
       markdown={`![Quota chart](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`}
       actions={actions}
@@ -199,3 +213,9 @@ const choiceIcon = {
   provider: Icon.Person,
   window: Icon.Clock,
 };
+
+function chartChoiceIcon(choice: ChartChoice): Image.ImageLike {
+  if (choice.icon !== "provider") return choiceIcon[choice.icon];
+  const info = providerInfo(choice.value.slice("provider:".length));
+  return info.logo ? { source: info.logo, ...(info.monochrome ? { tintColor: Color.PrimaryText } : {}) } : Icon.Person;
+}

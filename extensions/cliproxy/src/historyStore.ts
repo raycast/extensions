@@ -66,6 +66,7 @@ function valid(value: unknown): value is Observation {
     Number.isFinite(o.left) &&
     o.left >= 0 &&
     o.left <= 100 &&
-    (o.resetsAt === null || Number.isFinite(o.resetsAt))
+    (o.resetsAt === null || Number.isFinite(o.resetsAt)) &&
+    (o.periodMs === undefined || o.periodMs === null || (Number.isFinite(o.periodMs) && o.periodMs > 0))
   );
 }

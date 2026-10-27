@@ -6,6 +6,7 @@ export type Observation = {
   at: number;
   left: number;
   resetsAt: number | null;
+  periodMs?: number | null;
 };
 export type Point = { at: number; value: number | null };
 export type Hour = { at: number; used: number; observedMs: number; rate: number };
@@ -149,7 +150,7 @@ export function forecast(current: Observation[], rates: AccountRate[], now: numb
     left: o.left,
     rate: rates.find((r) => r.account === o.account)!.rate,
     reset: o.resetsAt && o.resetsAt > now ? o.resetsAt : null,
-    period: resetPeriod(o.label),
+    period: o.periodMs === undefined ? resetPeriod(o.label) : o.periodMs,
   }));
   const end = now + days * DAY;
   const times = new Set<number>([now, end]);

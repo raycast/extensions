@@ -1,3 +1,4 @@
+import { providerTitle } from "./providers";
 export type ChartChoice = {
   value: string;
   title: string;
@@ -20,7 +21,7 @@ export function chartChoices(providers: string[], windows: string[]): ChartChoic
     })),
     ...providers.map((provider) => ({
       value: `provider:${provider}`,
-      title: provider === "claude" ? "Claude" : "Codex",
+      title: providerTitle(provider),
       group: "Provider",
       icon: "provider" as const,
     })),

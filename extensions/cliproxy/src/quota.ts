@@ -6,15 +6,24 @@ import {
   ConnectionChangedError,
   ConnectionId,
   isRecord,
+  downloadCredential,
+  pluginQuota,
+  ApiError,
   upstream,
   UpstreamResponse,
 } from "./api";
+import { fetchProviderQuota, parseGroups } from "./providerQuota";
 
 // Upstream quota for Codex and Claude accounts, fetched through CLIProxyAPI's /api-call proxy.
 // Endpoints and headers mirror the official Management Center (router-for-me/Cli-Proxy-API-Management-Center).
 
 /** `resetsAt` is epoch ms (plain numbers survive Raycast's JSON cache, Dates don't). */
-export type QuotaWindow = { label: string; usedPercent: number | null; resetsAt: number | null };
+export type QuotaWindow = {
+  label: string;
+  usedPercent: number | null;
+  resetsAt: number | null;
+  periodMs?: number | null;
+};
 
 /** Percent of the window still available (0-100), or null if upstream didn't say. */
 export function percentLeft(window: QuotaWindow): number | null {
@@ -26,13 +35,25 @@ export type ResetOffer =
   | { kind: "codex"; available: number }
   | { kind: "claude"; grantsLeft: number; grantId: string | null; blocker: string | null };
 
-export type Quota = { plan: string | null; windows: QuotaWindow[]; reset: ResetOffer | null };
+export type Quota = {
+  plan: string | null;
+  windows: QuotaWindow[];
+  reset: ResetOffer | null;
+  note?: string;
+  metrics?: { label: string; value: string }[];
+};
 
 /** The account fields quota fetching depends on; stable across routine status changes. */
-export type QuotaAccount = Pick<AuthFile, "auth_index" | "provider" | "id_token"> & { id?: string };
+export type QuotaAccount = Pick<AuthFile, "auth_index" | "provider" | "id_token"> &
+  Partial<
+    Pick<
+      AuthFile,
+      "id" | "name" | "project_id" | "runtime_only" | "supports_quota" | "quota_provider" | "quota_plugin_id"
+    >
+  >;
 
 export function supportsQuota(file: AuthFile): boolean {
-  return (file.provider === "codex" || file.provider === "claude") && !file.disabled && file.auth_index !== "";
+  return !file.disabled && file.auth_index !== "";
 }
 
 export function canUseReset(offer: ResetOffer | null | undefined): boolean {
@@ -40,8 +61,27 @@ export function canUseReset(offer: ResetOffer | null | undefined): boolean {
   return offer.kind === "codex" ? offer.available > 0 : offer.grantId !== null;
 }
 
-export function fetchQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
-  return file.provider === "codex" ? fetchCodexQuota(connection, file) : fetchClaudeQuota(connection, file);
+export async function fetchQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
+  if (file.provider === "codex" || file.provider === "claude") {
+    if (file.supports_quota || file.quota_plugin_id) {
+      const payload = await pluginQuota(connection, file);
+      if (payload !== null) return parseGroups(payload);
+    }
+    return file.provider === "codex" ? fetchCodexQuota(connection, file) : fetchClaudeQuota(connection, file);
+  }
+  return fetchProviderQuota(file, {
+    call: async (method, url, headers, body) => {
+      const response = await upstream(connection, file.auth_index, method, url, headers, body);
+      if (response.status < 200 || response.status >= 300)
+        throw new ApiError(`Quota endpoint returned HTTP ${response.status}`, response.status);
+      return response.body;
+    },
+    credential: async () => {
+      if (!file.name || file.runtime_only) throw new Error("Quota requires a downloadable CPA credential.");
+      return downloadCredential(connection, file.name);
+    },
+    plugin: () => pluginQuota(connection, file),
+  });
 }
 
 /** Latest quota for an account. On failure `quota` is the last good fetch (if any) and `error` says why it's stale. */
