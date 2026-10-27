@@ -70,17 +70,19 @@ var data = $.NSData.dataWithContentsOfFile("${SFL4_PATH}")
 if (!data || data.isEqualTo($()))  {
   "[]"
 } else {
-  var unarchiver = $.NSKeyedUnarchiver.alloc.initForReadingFromDataError(data, $())
-  unarchiver.requiresSecureCoding = false
-  var root = unarchiver.decodeObjectForKey("root")
-  var items = root.objectForKey("items")
+  var classes = $.NSSet.setWithArray($([$.NSDictionary.class, $.NSArray.class, $.NSString.class, $.NSNumber.class, $.NSData.class, $.NSDate.class, $.NSUUID.class]))
+  var unarchiveError = Ref()
+  var root = $.NSKeyedUnarchiver.unarchivedObjectOfClassesFromDataError(classes, data, unarchiveError)
+  var items = (root.isNil() || !root.isKindOfClass($.NSDictionary)) ? $() : root.objectForKey("items")
   var results = []
-  for (var i = 0; i < items.count; i++) {
+  for (var i = 0; !items.isNil() && i < items.count; i++) {
     var item = items.objectAtIndex(i)
     var bookmarkData = item.objectForKey("Bookmark")
     if (bookmarkData && !bookmarkData.isEqualTo($()))  {
+      var isStale = Ref()
+      var error = Ref()
       var url = $.NSURL.URLByResolvingBookmarkDataOptionsRelativeToURLBookmarkDataIsStaleError(
-        bookmarkData, 0x100, $(), $(), $()
+        bookmarkData, 0x100, $(), isStale, error
       )
       if (url && !url.isEqualTo($()))  {
         results.push(ObjC.unwrap(url.path))
