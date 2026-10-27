@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add NeverApply MCP Server] - {PR_MERGE_DATE}
+## [Add NeverApply MCP Server] - 2026-10-27
 
 - Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
 
