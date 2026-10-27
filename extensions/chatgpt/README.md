@@ -67,27 +67,31 @@ On first ChatGPT sign-in, the extension downloads the Codex runtime for your pla
 
 # Preferences
 
-All preferences properties list that can be customize through `Raycast Settings > Extensions > ChatGPT`
+Preferences can be customized through `Raycast Settings > Extensions > ChatGPT`.
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
+| `connectionMode`         | Preferred Connection   | `apiKey`, `chatgpt`                  | `true`   | `apiKey` | Prefer API billing or your ChatGPT account; use the other connection if the preferred one is unavailable          |
+| `apiKey`                 | API Key                | `string`                            | `false`  | `empty` | Your API key; optional when signed in with ChatGPT                                                               |
 | `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
 | `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
 | `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
-| `isAutoLoadText`         | Auto-load              | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
+| `isAutoLoadText`         | Auto-load Text         | `boolean`                           | `false`  | `false` | Load selected text from your frontmost application to the `question bar` or `full text input form` automatically |
 | `isAutoFullInput`        | Use Full Text Input    | `boolean`                           | `false`  | `false` | Switch to `full text input form` from `question bar` automatically whenever you want to ask or type a question   |
 | `isAutoTTS`              | Text-to-Speech         | `boolean`                           | `false`  | `false` | Enable auto text-to-speech everytime you get a generated answer                                                  |
 | `useApiEndpoint`         | Use API Endpoint       | `boolean`                           | `false`  | `false` | Change the OpenAI's default API endpoint to custom endpoint                                                      |
 | `apiEndpoint`            | API Endpoint           | `string`                            | `false`  | `empty` | Custom API endpoint                                                                                              |
-| `useProxy`               | Use Proxy              | `boolean`                           | `false`  | `false` | Each question request will be passed through the proxy                                                           |
+| `useVisionModel`         | Change Vision Model    | `boolean`                           | `false`  | `false` | Use the configured vision model for image commands                                                               |
+| `visionModelName`        | Vision Model Name      | `string`                            | `false`  | `empty` | Model ID to use when Change Vision Model is enabled                                                              |
+| `useProxy`               | Use Proxy              | `boolean`                           | `false`  | `false` | Proxy API requests, the Codex runtime download, and the Codex connection                                         |
 | `proxyProtocol`          | Proxy Protocol         | `http`, `https`, `socks4`, `socks5` | `false`  | `http`  | Proxy protocol option                                                                                            |
 | `proxyHost`              | Proxy Host             | `string`                            | `false`  | `empty` | Proxy host value                                                                                                 |
+| `proxyPort`              | Proxy Port             | `string`                            | `false`  | `empty` | Proxy port value                                                                                                 |
 | `proxyUsername`          | Proxy Username         | `string`                            | `false`  | `empty` | Proxy username value                                                                                             |
 | `proxyPassword`          | Proxy Password         | `string`                            | `false`  | `empty` | Proxy password value                                                                                             |
-| `useAzure`               | Use Azure OpenAI       | `boolean`                           | `true`   | `false` | Use Azure OPENAI rather than OPENAI                                                                              |
+| `useAzure`               | Use Azure OpenAI       | `boolean`                           | `false`  | `false` | Use Azure OpenAI for API-key requests                                                                            |
 | `azureEndpoint`          | Azure Endpoint         | `string`                            | `false`  | `empty` | Azure OpenAI resource endpoint                                                                                   |
-| `azureDeploymentName`    | Azure Deployment       | `string`                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
+| `azureDeployment`        | Azure Deployment       | `string`                            | `false`  | `empty` | Azure OpenAI resource deployment                                                                                 |
 
 ### How to use Azure OpenAI
 
@@ -95,6 +99,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 2. Copy and paste your Azure OpenAI `Endpoint` value to the `Azure Endpoint` field. Then, Tick the `Use Azure OpenAI` checkbox
 
 3. Copy and paste your Azure OpenAI `Model deployment name` value to the `Azure Deployment` field
+4. Set `Preferred Connection` to `Prefer OpenAI API Key` to use your Azure connection when also signed in with ChatGPT.
 
 # Support
 
