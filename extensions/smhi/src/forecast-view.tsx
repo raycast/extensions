@@ -115,29 +115,6 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
     );
   }
 
-  // Refresh lives on the forecast rows, so a failed first load would otherwise leave nothing to retry from.
-  if (error && !data) {
-    return (
-      <List isLoading={isLoading} navigationTitle={locationTitle(location)}>
-        <List.EmptyView
-          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
-          title="Could not load forecast"
-          description={error.message}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Retry"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={refresh}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
   // The current temperature rides along in the window title, so it's readable even with a day
   // expanded or the search bar focused.
   const current = view?.today[0]?.data.air_temperature;
@@ -151,6 +128,27 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
           {warnings.map((warning) => (
             <WarningItem key={`${warning.eventId}-${warning.areaId}`} warning={warning} common={common} />
           ))}
+        </List.Section>
+      )}
+      {/* Refresh lives on the forecast rows, so a failed first load needs a row of its own to retry from.
+          It sits in the list rather than replacing it, since warnings load separately and may well have arrived. */}
+      {error && !data && (
+        <List.Section title="Forecast">
+          <List.Item
+            title="Could not load forecast"
+            subtitle={error.message}
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Retry"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={refresh}
+                />
+              </ActionPanel>
+            }
+          />
         </List.Section>
       )}
       {snappedFar && (
