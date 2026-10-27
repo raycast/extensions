@@ -4,6 +4,27 @@
 
 - Add backlink-guard to the official registry: checks a link source before you submit your site to it and gives an action and a verdict with the evidence, against Google's link spam policies; it also verifies a listing once it is live and audits your own backlinks. Local stdio server `backlink-guard` from PyPI through `uvx --with mcp backlink-guard mcp`; GLASSER_API_KEY (or AISA_API_KEY) and GOANYAPI_API_KEY are optional and add the paid signals.
 
+## [Add NeverApply MCP Server] - 2026-10-27
+
+- Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
+
+## [Add deed.page MCP Server] - 2026-10-27
+
+- Add deed.page to the official registry: publish static sites from an agent to a permanent public HTTPS URL, then update, list, delete, roll back, attach custom domains and read analytics. Hosted Streamable HTTP server at https://deed.page/mcp with no sign-in and no API key to publish, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Kimiko MCP Server] - 2026-10-27
+
+- Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
+
+## [Add Watchgoose MCP Server] - 2026-10-27
+
+- Add Watchgoose to the official registry: monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Inspect checks and status history with read-only access by default; with explicit read-and-write consent, inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted Streamable HTTP server at https://mcp.watchgoose.com/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Refresh MCP Registry Entries] - 2026-10-27
+
+- Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
+- Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
+
 ## [Update Local Commander MCP Server] - 2026-10-26
 
 - Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.

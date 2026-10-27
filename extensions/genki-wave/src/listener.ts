@@ -89,7 +89,11 @@ export function readLastLines(path: string, count: number): string {
 
 const xml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-export function launchAgentPlist(helper: string, log: string): string {
+/**
+ * `extension`: the installed extension's folder. The helper removes the agent once that
+ * folder is gone, since Raycast doesn't tell an extension it's being uninstalled.
+ */
+export function launchAgentPlist(helper: string, log: string, extension?: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -99,7 +103,7 @@ export function launchAgentPlist(helper: string, log: string): string {
 	<key>ProgramArguments</key>
 	<array>
 		<string>${xml(helper)}</string>
-		<string>listen</string>
+		<string>listen</string>${extension ? `\n\t\t<string>--extension</string>\n\t\t<string>${xml(extension)}</string>` : ""}
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
@@ -196,11 +200,12 @@ export function agentIsCurrent(
   agentPlist = plistPath(),
   env: NodeJS.ProcessEnv = process.env,
   home = homedir(),
+  extension?: string,
 ): boolean {
   const installed = helperInstallPath(env, home);
   try {
     return (
-      readFileSync(agentPlist, "utf8") === launchAgentPlist(installed, logPath(env, home)) &&
+      readFileSync(agentPlist, "utf8") === launchAgentPlist(installed, logPath(env, home), extension) &&
       readFileSync(installed).equals(readFileSync(bundled))
     );
   } catch {
@@ -209,18 +214,19 @@ export function agentIsCurrent(
 }
 
 /** Reinstalls a running agent that is outdated (e.g. after a store update); otherwise does nothing. */
-export async function update(bundledHelper: string) {
-  if (!(await isRunning()) || agentIsCurrent(bundledHelper)) return;
+/** `extension`: the installed extension's folder (see `launchAgentPlist`). */
+export async function update(bundledHelper: string, extension?: string) {
+  if (!(await isRunning()) || agentIsCurrent(bundledHelper, undefined, undefined, undefined, extension)) return;
   await stop();
-  await start(bundledHelper);
+  await start(bundledHelper, extension);
 }
 
-export async function start(bundledHelper: string) {
+export async function start(bundledHelper: string, extension?: string) {
   const helper = installHelper(bundledHelper);
   const log = logPath();
   mkdirSync(dirname(log), { recursive: true });
   mkdirSync(dirname(plistPath()), { recursive: true });
-  writeFileSync(plistPath(), launchAgentPlist(helper, log));
+  writeFileSync(plistPath(), launchAgentPlist(helper, log, extension));
   await bootstrap();
 }
 

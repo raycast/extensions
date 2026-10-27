@@ -478,6 +478,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://dchub.cloud/mcp",
   },
   {
+    name: "deed-page",
+    title: "deed.page",
+    description:
+      "Publish static sites from your agent to a permanent public HTTPS URL at `<slug>.deed.page`: send a files map and a slug, then update, list, delete, roll back to a retained version, attach a custom domain and read cookieless analytics. 25 tools. Hosted remote Streamable HTTP server at https://deed.page/mcp; publishing needs no sign-in and no API key, and the first publish returns an owner token for later changes. Free sites are public.",
+    icon: "https://deed.page/icon.png",
+    homepage: "https://deed.page/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://deed.page/mcp"],
+    },
+    remoteUrl: "https://deed.page/mcp",
+  },
+  {
     name: "dropthehassle",
     title: "DropTheHassle",
     description:
@@ -601,23 +614,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
-    name: "e2b",
-    title: "E2B Code Interpreter",
-    description: "A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).",
-    icon: {
-      source: "e2b.svg",
-      tintColor: Color.PrimaryText,
-    },
-    homepage: "https://github.com/e2b-dev/mcp-server/blob/main/packages/js/README.md",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@e2b/mcp-server"],
-      env: {
-        E2B_API_KEY: "YOUR_API_KEY_HERE",
-      },
-    },
-  },
-  {
     name: "edgepedia",
     title: "Edgepedia",
     description:
@@ -656,20 +652,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["exa-mcp-server"],
       env: {
         EXA_API_KEY: "YOUR_API_KEY_HERE",
-      },
-    },
-  },
-  {
-    name: "google-drive",
-    title: "Google Drive",
-    description: "This MCP server integrates with Google Drive to allow listing, reading, and searching over files.",
-    icon: "https://svgl.app/library/drive.svg",
-    homepage: "https://github.com/modelcontextprotocol/servers-archived/tree/main/src/gdrive",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@modelcontextprotocol/server-gdrive"],
-      env: {
-        GDRIVE_CREDENTIALS_PATH: "/path/to/.gdrive-server-credentials.json",
       },
     },
   },
@@ -803,6 +785,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.keeploop.app/mcp"],
+    },
+  },
+  {
+    name: "kimiko",
+    title: "Kimiko",
+    description:
+      "Your meetings, notes and tasks from Kimiko, the private AI note taker, in Raycast AI and your other AI apps. Search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks; three prompts cover a weekly review, meeting prep and open loops. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp, so this entry is Mac only. No hosted endpoint and no API key: it reads Kimiko's database on your Mac, and it stays off until you turn on Allow AI apps in Kimiko → Settings → Connections. On the first connection, macOS asks you to allow Keychain access. An AI app may send what it reads to its own cloud service. Kimiko is a paid app with a free trial.",
+    icon: "https://kimiko.app/brand/kimiko-logo-dark-512.png",
+    homepage: "https://kimiko.app/#mcp-connector",
+    configuration: {
+      command: "/Applications/Kimiko.app/Contents/MacOS/kimiko-mcp",
+      args: [],
     },
   },
   {
@@ -1006,6 +1000,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://netactuate.com/mcp"],
     },
     remoteUrl: "https://netactuate.com/mcp",
+  },
+  {
+    name: "neverapply",
+    title: "NeverApply",
+    description:
+      "AI job-search agent: search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. 15 tools. Official hosted remote Streamable HTTP server from Kasovy LLC; OAuth 2.1 sign-in with PKCE and dynamic client registration, no API key to paste.",
+    icon: "https://github.com/kasovy.png",
+    homepage: "https://neverapply.co/features/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://neverapply.co/mcp"],
+    },
+    remoteUrl: "https://neverapply.co/mcp",
   },
   {
     name: "new-term-radar",
@@ -1346,18 +1353,6 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
-    name: "shopify-dev",
-    title: "Shopify Dev",
-    description:
-      "MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs.",
-    icon: "shopify.svg",
-    homepage: "https://github.com/Shopify/dev-mcp",
-    configuration: {
-      command: "npx",
-      args: ["-y", "@shopify/dev-mcp@latest"],
-    },
-  },
-  {
     name: "sitelemetry",
     title: "Sitelemetry",
     description:
@@ -1686,6 +1681,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "watchgoose",
+    title: "Watchgoose",
+    description:
+      "Monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Connect one Watchgoose project to inspect checks and status history. Read-only access is the default. With explicit read-and-write consent, it can inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Watchgoose plan available, no API key to paste.",
+    icon: "https://watchgoose.com/static/img/watchgoose-icon-512.png",
+    homepage: "https://watchgoose.com/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.watchgoose.com/mcp"],
+    },
+    remoteUrl: "https://mcp.watchgoose.com/mcp",
+  },
+  {
     name: "wave-ai",
     title: "Wave AI",
     description:
@@ -1868,18 +1876,16 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "elevenlabs",
     title: "ElevenLabs",
     description:
-      "Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more.",
+      "Official hosted MCP server for managing ElevenLabs agents, tools, knowledge bases, conversations, tests, and audio generation through an OAuth-authenticated workspace connection.",
     icon: {
       source: "elevenlabs.svg",
       tintColor: Color.PrimaryText,
     },
-    homepage: "https://github.com/elevenlabs/elevenlabs-mcp",
+    homepage: "https://elevenlabs.io/docs/eleven-agents/operate/hosted-mcp",
+    remoteUrl: "https://api.elevenlabs.io/v1/mcp",
     configuration: {
-      command: "uvx",
-      args: ["elevenlabs-mcp"],
-      env: {
-        ELEVENLABS_API_KEY: "YOUR_API_KEY_HERE",
-      },
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.elevenlabs.io/v1/mcp"],
     },
   },
   {
