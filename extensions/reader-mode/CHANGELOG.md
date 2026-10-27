@@ -1,6 +1,6 @@
 # Reader Mode Changelog
 
-## [Markdown from Servers] - {PR_MERGE_DATE}
+## [Markdown from Servers] - 2026-10-27
 
 ### Added
 
