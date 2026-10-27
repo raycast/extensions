@@ -7,7 +7,30 @@ export interface Reading {
   zone: string;
   computedAt: string;
   change7dPct: number | null;
+  usd: number | null;
+  change24hPct: number | null;
   methodologyUrl: string;
+}
+
+// Price is optional in the feed (omitted when the price source is down): absent or non-finite stays null, never a substitute number.
+function finiteOrNull(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+export function formatUsd(usd: number): string {
+  return `$${usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
+export function formatChange(pct: number): string {
+  return `${pct >= 0 ? "+" : "-"}${Math.abs(pct).toFixed(2)}%`;
+}
+
+// Price first, with the 24h change when the feed has it; null when there is no price.
+export function priceLine(r: Reading): string | null {
+  if (r.usd === null || r.usd <= 0) return null;
+  return r.change24hPct === null
+    ? formatUsd(r.usd)
+    : `${formatUsd(r.usd)} (${formatChange(r.change24hPct)} 24h)`;
 }
 
 export class BarometerError extends Error {
@@ -44,7 +67,7 @@ export async function fetchBarometer(): Promise<Reading> {
     score?: unknown;
     zone?: unknown;
     computedAt?: unknown;
-    price?: { change7dPct?: unknown };
+    price?: { usd?: unknown; change24hPct?: unknown; change7dPct?: unknown };
   } | null;
   let text: string;
   try {
@@ -84,6 +107,8 @@ export async function fetchBarometer(): Promise<Reading> {
     zone,
     computedAt,
     change7dPct: change ?? null,
+    usd: finiteOrNull(body.price?.usd),
+    change24hPct: finiteOrNull(body.price?.change24hPct),
     methodologyUrl: METHODOLOGY_URL,
   };
 }

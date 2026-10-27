@@ -1,6 +1,6 @@
 import { Detail, Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { describeError, fetchBarometer } from "./barometer";
+import { describeError, fetchBarometer, priceLine } from "./barometer";
 
 export default function Command() {
   const { data, error, isLoading, revalidate } = usePromise(fetchBarometer);
@@ -24,6 +24,7 @@ export default function Command() {
   if (!data) return <Detail isLoading={isLoading} markdown="Loading" />;
   const change =
     data.change7dPct === null ? "not available" : `${data.change7dPct}%`;
+  const priceHeadline = priceLine(data) ?? `${data.score}/100`;
   return (
     <Detail
       actions={
@@ -36,9 +37,15 @@ export default function Command() {
           />
         </ActionPanel>
       }
-      markdown={`# ${data.score}/100\n\nZone: ${data.zone}\n\nA description of the current reading against its history, not a forecast or investment advice.`}
+      markdown={`# ${priceHeadline}\n\nHeat score: ${data.score}/100\n\nZone: ${data.zone}\n\nA description of the current reading against its history, not a forecast or investment advice.`}
       metadata={
         <Detail.Metadata>
+          {priceLine(data) && (
+            <Detail.Metadata.Label
+              title="Bitcoin"
+              text={priceLine(data) ?? ""}
+            />
+          )}
           <Detail.Metadata.Label title="Score" text={`${data.score}/100`} />
           <Detail.Metadata.Label title="Zone" text={data.zone} />
           <Detail.Metadata.Label
