@@ -164,6 +164,22 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "backlink-guard",
+    title: "backlink-guard",
+    description:
+      "Check a link source (directory, awesome list, guest-post site) before you submit your site to it: each site gets an action (skip, look first, free only, low value or submit) and a verdict with the evidence, against Google's link spam policies. It also verifies a listing once it is live (followed or not, and where the link sits), audits your own backlinks, and finds the pages that rank for your keywords, the sites linking to your competitors and not to you, and who Google's AI Overviews and AI assistants cite. It never submits anything. Ten tools: verify, submissions and vet with free=True are free; the others buy data (vet about $0.01 a site plus $0.16 a batch). Local stdio server `backlink-guard` (MIT) from PyPI through `uvx`; every key is optional: GLASSER_API_KEY (or AISA_API_KEY, which questions and asked need) and GOANYAPI_API_KEY, so remove the ones you do not use.",
+    icon: "https://raw.githubusercontent.com/zhuyansen/backlink-guard/main/.claude-plugin/icon.png",
+    homepage: "https://github.com/zhuyansen/backlink-guard",
+    configuration: {
+      command: "uvx",
+      args: ["--with", "mcp", "backlink-guard", "mcp"],
+      env: {
+        GLASSER_API_KEY: "YOUR_API_KEY_HERE",
+        GOANYAPI_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "better-design",
     title: "Better Design",
     description:
@@ -664,6 +680,30 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "just-domain",
+    title: "Just Domain.",
+    description: "Check a domain name, both prices and whether it can transfer in. You register it on justdomain.ai.",
+    icon: "https://justdomain.ai/just-icon-512.png",
+    homepage: "https://justdomain.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.justdomain.ai/"],
+    },
+    remoteUrl: "https://mcp.justdomain.ai/",
+  },
+  {
+    name: "just-publish",
+    title: "Just Publish.",
+    description: "Publish and update the website you built with AI at a live public URL. Sign-in required.",
+    icon: "https://justpublish.ai/icon.png",
+    homepage: "https://justpublish.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.justpublish.ai/"],
+    },
+    remoteUrl: "https://mcp.justpublish.ai/",
+  },
+  {
     name: "handoff",
     title: "handoff",
     description:
@@ -855,6 +895,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://latchkey.dev/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
+  },
+  {
+    name: "levea",
+    title: "Levea AI Video Editor",
+    description:
+      "Prompt-first AI video editor. Describe the edit and get a finished MP4: viral clips from long videos, word-by-word animated captions, 9:16 reframe with face tracking, chroma key and background removal, B-roll, AI voiceover and music, silence removal and multi-platform export, plus projects, assets, brand kits and caption templates. 25 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/brajendrak00068/agentic-ai-video-production/main/assets/logo-icon-400.png",
+    homepage: "https://www.livecore.ai/?utm_source=raycast-mcp-registry&utm_medium=directory&utm_campaign=mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.livecore.ai/api/v1/misc/mcp"],
+    },
+    remoteUrl: "https://api.livecore.ai/api/v1/misc/mcp",
   },
   {
     name: "local-commander",
@@ -1051,6 +1104,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://parlor.sh/mcp"],
+    },
+  },
+  {
+    name: "paxa",
+    title: "Paxa Labs",
+    description:
+      "Thai, English and Mandarin speech AI. Speak text aloud through your speakers or save it as audio files with matching captions, using 50 voices that each speak all three languages, mixed sentences included, with direction tags like [whispering]. Design a new voice from a text description. Also speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server (`npx -y @paxalabs/mcp`) with a Paxa API key; new accounts get 100 free credits.",
+    icon: "https://raw.githubusercontent.com/paxalabs/mcp/main/assets/icon.png",
+    homepage: "https://paxalabs.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@paxalabs/mcp"],
+      env: {
+        PAXA_API_KEY: "YOUR_API_KEY_HERE",
+      },
     },
   },
   {

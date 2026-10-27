@@ -285,10 +285,21 @@ export async function fetchAndroidDevices() {
   }
 }
 
+// Xcode 27 replaced Simulator.app with Device Hub, which ignores Simulator's
+// -CurrentDeviceUDID argument and opens a device through a devices:// URL instead.
+async function openSimulatorApp(deviceId: string) {
+  try {
+    await execAsync(`open -b com.apple.dt.Devices "devices://device/open?id=${encodeURIComponent(deviceId)}"`);
+  } catch {
+    // Simulator.app (Xcode 26 and earlier)
+    await execAsync(`open -b com.apple.iphonesimulator --args -CurrentDeviceUDID ${deviceId}`);
+  }
+}
+
 export async function bootAndOpenSimulator(deviceId: string) {
   try {
     await execAsync(`xcrun simctl boot ${deviceId}`);
-    await execAsync(`open -a Simulator --args -CurrentDeviceUDID ${deviceId}`);
+    await openSimulatorApp(deviceId);
 
     showToast(TOAST_MESSAGES.SUCCESS.SIMULATOR_STARTED);
   } catch (error) {

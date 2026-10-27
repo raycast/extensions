@@ -4,6 +4,23 @@
 
 - Add Visualping to the official registry: website change monitoring for agents. Create, edit, run, pause and delete monitors, list monitors, read recently detected changes and read full monitor settings. Hosted Streamable HTTP server at https://visualping.io/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Public beta.
 
+## [Add Levea AI Video Editor MCP Server] - 2026-10-27
+
+- Add Levea AI Video Editor to the official registry: prompt-first AI video editor. Describe the edit and get a finished MP4: viral clips from long videos, word-by-word animated captions, 9:16 reframe with face tracking, chroma key and background removal, B-roll, AI voiceover and music, silence removal and multi-platform export, plus projects, assets, brand kits and caption templates. 25 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, no API key to paste. Hosted Streamable HTTP server at https://api.livecore.ai/api/v1/misc/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Paxa Labs MCP Server] - 2026-10-27
+
+- Add Paxa Labs to the official registry: Thai, English and Mandarin text-to-speech played through your speakers or saved to audio files with captions, voice design from a text description, speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server run with `npx -y @paxalabs/mcp` and a Paxa API key.
+
+## [Add Just Domain and Just Publish MCP Servers] - 2026-10-27
+
+- Add Just Domain. to the official registry: check a domain name, both prices and whether it can transfer in, then register it on justdomain.ai. Hosted remote Streamable HTTP server at https://mcp.justdomain.ai/ with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+- Add Just Publish. to the official registry: publish and update the website you built with AI at a live public URL. Hosted remote Streamable HTTP server at https://mcp.justpublish.ai/ with OAuth sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add backlink-guard MCP Server] - 2026-10-27
+
+- Add backlink-guard to the official registry: checks a link source before you submit your site to it and gives an action and a verdict with the evidence, against Google's link spam policies; it also verifies a listing once it is live and audits your own backlinks. Local stdio server `backlink-guard` from PyPI through `uvx --with mcp backlink-guard mcp`; GLASSER_API_KEY (or AISA_API_KEY) and GOANYAPI_API_KEY are optional and add the paid signals.
+
 ## [Add NeverApply MCP Server] - 2026-10-27
 
 - Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
