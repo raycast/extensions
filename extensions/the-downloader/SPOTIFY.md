@@ -2,7 +2,7 @@
 
 The Downloader uses [spotDL](https://github.com/spotDL/spotify-downloader) for Spotify links — pasted track, album, or playlist URLs get fetched as audio files (MP3, M4A, OPUS, or FLAC, your choice).
 
-spotDL needs Spotify API credentials to look up track metadata (title, artist, album, cover art). Without them it falls back to an anonymous flow that frequently fails with _"Could not get session auth tokens"_. The fix is your own Spotify Developer app — it takes about a minute, and you only do it once. Creating the app is free, but Spotify only lets an app in Development Mode work while its owner has **Spotify Premium**. Without Premium, leave the credentials empty: spotDL then uses its anonymous flow, which works only some of the time.
+spotDL needs Spotify API credentials to look up track metadata (title, artist, album, cover art). Its anonymous fallback fails too often to rely on (_"Could not get session auth tokens"_), so The Downloader asks for credentials before every Spotify download. They come from your own Spotify Developer app — it takes about a minute, and you only do it once. Creating the app is free, but Spotify only lets an app in Development Mode work while its owner has **Spotify Premium**, so Spotify downloads need a Premium account.
 
 ## One-time setup
 

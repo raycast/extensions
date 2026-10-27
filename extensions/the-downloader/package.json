@@ -607,7 +607,7 @@
     {
       "name": "spotifyClientId",
       "title": "Spotify: Client ID",
-      "description": "Needed for reliable Spotify downloads (anonymous ones often fail). One-time setup: see SPOTIFY.md.",
+      "description": "Needed for Spotify downloads; the app needs Spotify Premium. One-time setup: see SPOTIFY.md.",
       "placeholder": "Client ID from your Spotify app",
       "type": "textfield",
       "default": "",
