@@ -1,6 +1,6 @@
 # Paper Agent Changelog
 
-## [Installation status and updates] - {PR_MERGE_DATE}
+## [Installation status and updates] - 2026-10-27
 
 - Show installed core, Python, extension build, Raycast version, and installation source in Run Status.
 - Check for stable core updates on demand and open update instructions from the action menu.
