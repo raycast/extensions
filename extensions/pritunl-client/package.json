@@ -11,6 +11,9 @@
     "System"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "manage-connections",
