@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Refresh MCP Registry Entries] - {PR_MERGE_DATE}
+## [Refresh MCP Registry Entries] - 2026-10-27
 
 - Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
 - Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
