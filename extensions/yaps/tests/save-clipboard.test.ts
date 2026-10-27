@@ -18,6 +18,10 @@ mock.module("@raycast/api", () => ({
   }),
 }));
 
+mock.module("@raycast/utils", () => ({
+  showFailureToast: mock(async () => {}),
+}));
+
 mock.module("../src/lib/yaps-app", () => ({
   openYapsWithFallback: mock(async () => {}),
 }));
