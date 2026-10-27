@@ -30,9 +30,11 @@ export async function setAppMode(
   mode: AppRoutingMode,
   options: { appsEnabled: boolean },
 ): Promise<string> {
+  // Rule first: if the save fails, per-app routing must not already have been
+  // switched on with the previous rules taking effect.
   const enabling = !options.appsEnabled;
-  if (enabling) await api.setAppsEnabled(true);
   await api.setAppRule({ key: app.bundleId, keyKind: "BUNDLE", mode });
+  if (enabling) await api.setAppsEnabled(true);
 
   const message = `${app.name}: ${modeLabel(mode)}`;
   return enabling ? `Per-app routing on · ${message}` : message;

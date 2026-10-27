@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Color, Form, Icon, List, showHUD, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppModePrimary, AppModeSection } from "./components/app-mode-actions";
+import { ConnectionError } from "./components/connection-error";
 import { AppPicker } from "./components/app-picker";
 import * as api from "./lib/api";
 import { frontmostApp } from "./lib/context";
+import { connectionFailure, type ConnectionFailure } from "./lib/dashboard";
 import { openSettings, revealAppRule } from "./lib/navigation";
 import { keyKindLabel, modeColor, modeDescription, modeLabel } from "./lib/presentation";
 import { confirmDestructive, reportFailure } from "./lib/toast";
@@ -33,10 +35,40 @@ interface Loaded {
  * case — "route the app I was just in" — is one keystroke.
  */
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(load, [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(load, [], {
     failureToastOptions: { title: "Couldn't load app routing" },
   });
   const { pop } = useNavigation();
+  const [failure, setFailure] = useState<ConnectionFailure | null>(null);
+
+  // Same recovery as the hub: a dead socket must not leave a blank list.
+  useEffect(() => {
+    if (data) {
+      setFailure(null);
+      return;
+    }
+    if (!error) return;
+
+    let cancelled = false;
+    void connectionFailure(error).then((next) => {
+      if (!cancelled) setFailure(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [data, error]);
+
+  if (failure) {
+    return (
+      <ConnectionError
+        dashboard={failure}
+        onRetry={() => {
+          setFailure(null);
+          void revalidate();
+        }}
+      />
+    );
+  }
 
   async function run(action: () => Promise<unknown>, success: string) {
     try {
@@ -159,6 +191,18 @@ export default function Command() {
                       appsEnabled={apps.enabled}
                       frontmostBundleId={data.app?.bundleId}
                       onDone={revalidate}
+                    />
+                  }
+                />
+                <Action.Push
+                  title="Add by Path or Name…"
+                  icon={Icon.Pencil}
+                  target={
+                    <AppRuleForm
+                      onSaved={async () => {
+                        pop();
+                        await revalidate();
+                      }}
                     />
                   }
                 />

@@ -10,13 +10,15 @@ import {
 } from "./context";
 import { errorMessage } from "./control";
 import { matchingPattern } from "./host";
+import { siteDecision, type SiteState } from "./site";
 import type { AppRoutingMode, Preset, Status, Target } from "./types";
 
 export interface SiteRow {
   host: string;
   title: string | null;
-  /** The rule that already routes this host, when there is one. */
+  /** The enabled rule that matches this host, when there is one. */
   coveredBy: { pattern: string; id: string } | null;
+  state: SiteState;
 }
 
 export interface AppRow extends AppContext {
@@ -66,17 +68,28 @@ function writeDashboardCache(dashboard: Dashboard): void {
   cache.set(CACHE_KEY, JSON.stringify(dashboard));
 }
 
-function buildSiteRow(site: SiteContext, targets: Target[]): SiteRow {
-  const pattern = matchingPattern(
-    site.host,
-    targets.map((target) => target.pattern),
-  );
-  const match = pattern ? targets.find((target) => target.pattern === pattern) : undefined;
+function buildSiteRow(
+  site: SiteContext,
+  targets: Target[],
+  app: AppRow | null,
+  status: Status,
+): SiteRow {
+  const decision = siteDecision({
+    host: site.host,
+    targets,
+    appMode: app?.mode ?? null,
+    routingState: status.state,
+  });
+
+  const match = decision.coveredBy
+    ? targets.find((target) => target.pattern === decision.coveredBy)
+    : undefined;
 
   return {
     host: site.host,
     title: site.title,
     coveredBy: match ? { pattern: match.pattern, id: match.id } : null,
+    state: decision.state,
   };
 }
 
@@ -115,6 +128,18 @@ function appIsRunning(): Promise<boolean> {
   });
 }
 
+export type ConnectionFailure = Extract<Dashboard, { kind: "unavailable" }>;
+
+/** Turns any transport error into the one empty state, telling "closed" from "control off". */
+export async function connectionFailure(error: unknown): Promise<ConnectionFailure> {
+  const running = await appIsRunning();
+  return {
+    kind: "unavailable",
+    reason: running ? "no-control" : "not-running",
+    message: errorMessage(error),
+  };
+}
+
 /**
  * One round trip set: status first (it can raise the consent sheet), then the
  * reads and the local context in parallel. Failures become a value, not a throw,
@@ -130,8 +155,8 @@ export async function loadDashboard(): Promise<Dashboard> {
       activeSite(),
     ]);
 
-    const siteRow = site ? buildSiteRow(site, targets) : null;
     const appRow = app ? await buildAppRow(app) : null;
+    const siteRow = site ? buildSiteRow(site, targets, appRow, status) : null;
 
     const dashboard: Dashboard = {
       kind: "ready",
@@ -146,11 +171,6 @@ export async function loadDashboard(): Promise<Dashboard> {
     writeDashboardCache(dashboard);
     return dashboard;
   } catch (error) {
-    const running = await appIsRunning();
-    return {
-      kind: "unavailable",
-      reason: running ? "no-control" : "not-running",
-      message: errorMessage(error),
-    };
+    return connectionFailure(error);
   }
 }

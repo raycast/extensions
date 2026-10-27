@@ -12,6 +12,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { AppModePrimary, AppModeSection } from "./components/app-mode-actions";
 import { ConnectionError } from "./components/connection-error";
+import { SiteRow } from "./components/site-row";
 import { TargetForm } from "./components/target-form";
 import * as api from "./lib/api";
 import { loadDashboard, readDashboardCache } from "./lib/dashboard";
@@ -91,7 +92,6 @@ export default function Command() {
   );
   const showSuggestion = suggestion !== null && !suggestionDismissed;
   const showAppRow = app !== null && app.appsEnabled;
-  const siteCovered = site?.coveredBy ?? null;
 
   return (
     <List
@@ -191,66 +191,20 @@ export default function Command() {
       {site || showAppRow ? (
         <List.Section title="Right Now">
           {site ? (
-            siteCovered ? (
-              <List.Item
-                id="current-site"
-                icon={{ source: Icon.Globe, tintColor: Color.Green }}
-                title={site.host}
-                subtitle={`Tunneled by ${siteCovered.pattern}`}
-                accessories={[{ tag: { value: "Tunneled", color: Color.Green } }]}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Explain Routing"
-                      icon={Icon.QuestionMark}
-                      onAction={() => goToCommand("explain-host", { host: site.host })}
-                    />
-                    <ActionPanel.Section>
-                      <Action
-                        title="Disable This Target"
-                        icon={Icon.CircleDisabled}
-                        onAction={() =>
-                          run(
-                            () => api.updateTarget(siteCovered.id, { enabled: false }),
-                            `Disabled ${siteCovered.pattern}`,
-                          )
-                        }
-                      />
-                      <Action
-                        title="Reveal in Proxy Manager"
-                        icon={Icon.AppWindow}
-                        onAction={() => revealTarget(siteCovered.pattern)}
-                      />
-                      <Action.CopyToClipboard title="Copy Host" content={site.host} />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ) : (
-              <List.Item
-                id="current-site"
-                icon={{ source: Icon.Globe, tintColor: Color.Blue }}
-                title={`Add ${site.host}`}
-                subtitle={site.title ? `${site.title} — the tab you're on` : "The tab you're on"}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Add as Target"
-                      icon={Icon.Plus}
-                      onAction={() =>
-                        run(() => api.addTarget(site.host, true), `Routing ${site.host}`)
-                      }
-                    />
-                    <Action
-                      title="Explain Routing"
-                      icon={Icon.QuestionMark}
-                      onAction={() => goToCommand("explain-host", { host: site.host })}
-                    />
-                    <Action.CopyToClipboard title="Copy Host" content={site.host} />
-                  </ActionPanel>
-                }
-              />
-            )
+            <SiteRow
+              site={site}
+              appName={app?.name}
+              onAdd={() => run(() => api.addTarget(site.host, true), `Routing ${site.host}`)}
+              onExplain={() => goToCommand("explain-host", { host: site.host })}
+              onDisable={(target) =>
+                run(
+                  () => api.updateTarget(target.id, { enabled: false }),
+                  `Disabled ${target.pattern}`,
+                )
+              }
+              onTurnOn={() => run(() => api.setRouting(true), "Routing on")}
+              onReveal={(pattern) => revealTarget(pattern)}
+            />
           ) : null}
 
           {showAppRow && app ? (

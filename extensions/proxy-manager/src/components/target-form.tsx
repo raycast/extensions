@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showHUD } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import * as api from "../lib/api";
-import { normalizePattern } from "../lib/host";
+import { hostFromInput, normalizePattern } from "../lib/host";
 import { reportFailure } from "../lib/toast";
 import type { Target } from "../lib/types";
 
@@ -45,9 +45,11 @@ export function TargetForm({
   async function submit(values: Values, keepOpen: boolean) {
     if (busy) return;
 
-    const normalized = normalizePattern(values.pattern);
-    if (!normalized.ok) {
-      setError(normalized.error);
+    // Accept what people actually paste: a full URL, not just a bare host.
+    const parsed = hostFromInput(values.pattern);
+    if (!parsed) {
+      const detail = normalizePattern(values.pattern);
+      setError(detail.ok ? "Enter a host or paste a URL" : detail.error);
       return;
     }
 
@@ -55,25 +57,23 @@ export function TargetForm({
     setBusy(true);
     try {
       if (target) {
-        await api.updateTarget(target.id, { pattern: normalized.pattern, enabled: values.enabled });
+        await api.updateTarget(target.id, { pattern: parsed, enabled: values.enabled });
       } else {
-        const result = await api.addTarget(normalized.pattern, values.enabled);
-        if (result.pattern !== normalized.pattern) {
+        const result = await api.addTarget(parsed, values.enabled);
+        if (result.pattern !== parsed) {
           // The app canonicalises further; show what it actually stored.
           await showHUD(`Added ${result.pattern}`);
         }
       }
 
       await showHUD(
-        target
-          ? `Saved ${normalized.pattern}`
-          : `${values.enabled ? "Routing" : "Saved"} ${normalized.pattern}`,
+        target ? `Saved ${parsed}` : `${values.enabled ? "Routing" : "Saved"} ${parsed}`,
       );
 
       if (keepOpen) {
         setPattern("");
       } else {
-        await onSaved?.(target ? "updated" : "added", normalized.pattern);
+        await onSaved?.(target ? "updated" : "added", parsed);
       }
     } catch (submitError) {
       await reportFailure(
