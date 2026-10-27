@@ -28,9 +28,13 @@ Everything works out of the box. In Raycast Settings → Extensions → MuteDeck
 
 For hands-free control, assign global hotkeys to the toggle commands in Raycast Settings.
 
+## Approving Raycast in MuteDeck
+
+Newer MuteDeck versions ask you to approve each app that controls them. The first time you run a MuteDeck command, MuteDeck shows a prompt asking whether to allow Raycast. Approve it once and you're set. You can revoke Raycast's access under Settings in MuteDeck at any time; the next command will ask again. Older MuteDeck versions don't ask and work right away.
+
 ## How it works
 
-The extension talks to MuteDeck's local HTTP API (`http://localhost:3491`). Everything stays on your machine: no external API calls, no data collection, no tracking.
+The extension talks to MuteDeck's local HTTP API (`http://localhost:3491`) using the official MuteDeck plugin SDK. The approval token is stored in Raycast's local storage for this extension. Everything stays on your machine: no external API calls, no data collection, no tracking.
 
 ## Support
 
