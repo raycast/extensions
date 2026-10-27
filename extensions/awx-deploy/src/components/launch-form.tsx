@@ -67,6 +67,13 @@ export function LaunchForm({
   }
 
   async function submit(values: Form.Values) {
+    // Until the launch config and survey arrive, their fields aren't rendered, so
+    // launching now would silently use the template's saved settings.
+    if (isLoading) {
+      await showToast({ style: Toast.Style.Failure, title: "Still loading launch options" });
+      return;
+    }
+
     // Only send prompts the template accepts; AWX ignores the rest.
     const prompts: LaunchPrompts = {};
     if (config?.ask_job_type_on_launch) prompts.job_type = values[PROMPT_IDS.job_type];
