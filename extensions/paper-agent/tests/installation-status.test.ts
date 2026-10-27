@@ -42,9 +42,37 @@ test("release checks use the official release tag and reject failed or malformed
     return Response.json({ tag_name: "v0.4.2" });
   });
   const signal = new AbortController().signal;
-  assert.match(await checkCoreUpdate("0.4.1", signal), /Update available/);
+  assert.match(await checkCoreUpdate(Promise.resolve("0.4.1"), signal), /Update available/);
   fetchMock.mock.mockImplementation(async () => new Response("rate limited", { status: 403 }));
-  await assert.rejects(checkCoreUpdate("0.4.1", signal), /HTTP 403/);
+  await assert.rejects(checkCoreUpdate(Promise.resolve("0.4.1"), signal), /HTTP 403/);
   fetchMock.mock.mockImplementation(async () => Response.json({ tag_name: "unrecognized" }));
-  await assert.rejects(checkCoreUpdate("0.4.1", signal), /recognized stable release/);
+  await assert.rejects(checkCoreUpdate(Promise.resolve("0.4.1"), signal), /recognized stable release/);
+});
+
+test("an early update check waits for Python inspection before comparing versions", async (t) => {
+  let finishInspection!: (version: string | null) => void;
+  const installed = new Promise<string | null>((resolve) => {
+    finishInspection = resolve;
+  });
+  const request = t.mock.method(globalThis, "fetch", async () => Response.json({ tag_name: "v0.4.2" }));
+  const result = checkCoreUpdate(installed, new AbortController().signal);
+  await Promise.resolve();
+  assert.equal(request.mock.callCount(), 0);
+  finishInspection("0.4.1");
+  assert.match(await result, /Update available: 0.4.1 → 0.4.2/);
+  assert.equal(request.mock.callCount(), 1);
+});
+
+test("canceling while Python inspection is pending prevents the release request", async (t) => {
+  let finishInspection!: (version: string | null) => void;
+  const installed = new Promise<string | null>((resolve) => {
+    finishInspection = resolve;
+  });
+  const request = t.mock.method(globalThis, "fetch", async () => Response.json({ tag_name: "v0.4.2" }));
+  const controller = new AbortController();
+  const result = checkCoreUpdate(installed, controller.signal);
+  controller.abort();
+  finishInspection("0.4.1");
+  await assert.rejects(result, { name: "AbortError" });
+  assert.equal(request.mock.callCount(), 0);
 });

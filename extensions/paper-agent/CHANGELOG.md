@@ -4,6 +4,7 @@
 
 - Show installed core, Python, extension build, Raycast version, and installation source in Run Status.
 - Check for stable core updates on demand and open update instructions from the action menu.
+- Wait for Python inspection when checking updates immediately after opening or refreshing Run Status, and cancel the pending check when leaving or refreshing the command.
 - Update Raycast API to 2.9.0.
 
 ## [SDK maintenance] - 2026-10-17

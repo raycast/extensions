@@ -139,6 +139,7 @@ export default function Command() {
   const [retry, setRetry] = useState(0);
   const [installation, setInstallation] = useState<CoreInstallation>();
   const [installationError, setInstallationError] = useState<string>();
+  const installationVersion = useRef<Promise<string | null>>(Promise.resolve(null));
   const [updateStatus, setUpdateStatus] = useState("Not checked. Use Check Core Update to contact GitHub.");
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const updateController = useRef<AbortController | null>(null);
@@ -176,7 +177,12 @@ export default function Command() {
     setInstallationError(undefined);
     setUpdateStatus("Not checked. Use Check Core Update to contact GitHub.");
     setCheckingUpdate(false);
-    void readCoreInstallation(prefs, controller.signal).then(
+    const inspection = readCoreInstallation(prefs, controller.signal);
+    installationVersion.current = inspection.then(
+      (value) => value.version,
+      () => null,
+    );
+    void inspection.then(
       (value) => {
         if (!cancelled) setInstallation(value);
       },
@@ -202,9 +208,9 @@ export default function Command() {
     const controller = new AbortController();
     updateController.current = controller;
     setCheckingUpdate(true);
-    setUpdateStatus("Checking GitHub for the latest stable core release...");
+    setUpdateStatus("Checking the installed core and latest stable release...");
     try {
-      const result = await checkCoreUpdate(installation?.version ?? null, controller.signal);
+      const result = await checkCoreUpdate(installationVersion.current, controller.signal);
       if (!controller.signal.aborted) setUpdateStatus(result);
     } catch {
       if (!controller.signal.aborted)

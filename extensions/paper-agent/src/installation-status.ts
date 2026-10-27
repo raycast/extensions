@@ -2,7 +2,7 @@ import * as path from "node:path";
 import type { CoreCheckPrefs } from "./core-check";
 import { runCoreCommand } from "./core-process";
 
-export const EXTENSION_BUILD = "2026.10.26";
+export const EXTENSION_BUILD = "2026.10.26.1";
 export const CORE_RELEASES_URL = "https://github.com/galleonli/paper-agent/releases/latest";
 export const UPDATE_GUIDE_URL = "https://github.com/galleonli/paper-agent-raycast#updates";
 
@@ -65,7 +65,9 @@ export function describeCoreUpdate(installed: string | null, latest: string): st
   return `Up to date with the latest stable release (${latest}).`;
 }
 
-export async function checkCoreUpdate(installed: string | null, signal: AbortSignal): Promise<string> {
+export async function checkCoreUpdate(installed: Promise<string | null>, signal: AbortSignal): Promise<string> {
+  const installedVersion = await installed;
+  signal.throwIfAborted();
   const response = await fetch("https://api.github.com/repos/galleonli/paper-agent/releases/latest", {
     headers: { Accept: "application/vnd.github+json" },
     signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
@@ -81,5 +83,5 @@ export async function checkCoreUpdate(installed: string | null, signal: AbortSig
   ) {
     throw new Error("GitHub did not return a recognized stable release.");
   }
-  return describeCoreUpdate(installed, release.tag_name.slice(1));
+  return describeCoreUpdate(installedVersion, release.tag_name.slice(1));
 }
