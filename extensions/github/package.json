@@ -49,7 +49,8 @@
     "0xdhrv",
     "ernest0n",
     "raycast_0ukl",
-    "olafvanmidden"
+    "olafvanmidden",
+    "Berenger"
   ],
   "pastContributors": [
     "Lemon",
@@ -202,6 +203,13 @@
       "name": "create-branch",
       "title": "Create Branch",
       "description": "Create a branch in one of your GitHub repositories",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "create-repository",
+      "title": "Create Repository",
+      "description": "Create a repository on your GitHub account or in one of your organizations",
       "mode": "view",
       "disabledByDefault": true
     },
@@ -697,6 +705,11 @@
       "name": "get-pull-request-diff",
       "title": "Get Pull Request Diff",
       "description": "Get the files changed in a pull request along with their patches"
+    },
+    {
+      "name": "create-repository",
+      "title": "Create Repository",
+      "description": "Create a repository on the user's account or in one of their organizations"
     }
   ],
   "ai": {
