@@ -112,11 +112,11 @@ test("Keep moves on without changing the card", async () => {
   expect(requests.filter((request) => request.method !== "GET")).toEqual([]);
 });
 
-test("Archive Card archives it and drops it from the deck", async () => {
+test("Archive archives it and drops it from the deck", async () => {
   serve([card(idA, "First card"), card(idB, "Second card")]);
   await act(async () => root.render(createElement(RandomCardsCommand)));
   await settle();
-  await press("Archive Card");
+  await press("Archive");
   const patch = requests.find((request) => request.method === "PATCH");
   expect(patch?.body).toEqual({ isArchived: true });
   expect(patch?.url.pathname).toBe(`/api/v1/cards/${idA}`);
@@ -132,4 +132,12 @@ test("Shuffle Again deals a new set with a new seed", async () => {
   const secondSeed = requests.at(-1)?.url.searchParams.get("shuffleSeed");
   expect(requests).toHaveLength(2);
   expect(secondSeed).not.toBe(firstSeed);
+});
+
+test("an empty vault isn't a finished shuffle", async () => {
+  serve([]);
+  await act(async () => root.render(createElement(RandomCardsCommand)));
+  await settle();
+  expect(container.textContent).toContain("No cards to shuffle yet");
+  expect(container.textContent).not.toContain("Nothing left to revisit");
 });

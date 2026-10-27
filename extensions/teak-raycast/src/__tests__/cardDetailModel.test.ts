@@ -53,7 +53,14 @@ describe("card detail model", () => {
       id: "card_abcdef",
       type: "text",
     };
-    expect(getCardTitle(fallbackCard)).toBe("TEXT Card");
+    expect(getCardTitle(fallbackCard)).toBe("Untitled text");
+    expect(
+      getCardTitle({
+        ...fallbackCard,
+        fileName: "moodboard.jpg",
+        type: "image",
+      }),
+    ).toBe("moodboard.jpg");
   });
 
   test("chooses hero media with deterministic global priority", () => {
@@ -91,26 +98,14 @@ describe("card detail model", () => {
     ).toBeNull();
   });
 
-  test("builds status chips for type, favorite and AI signals", () => {
+  test("builds status chips for the type and only the states that are true", () => {
     expect(getDetailStatusChips(baseCard)).toEqual([
-      { kind: "type", text: "link" },
-      { kind: "favorite", text: "Favorited" },
-      { kind: "aiSummary", text: "Teak Summary" },
-      { kind: "aiTags", text: "Teak Tags" },
+      { kind: "type", text: "Link" },
+      { kind: "favorite", text: "Favorite" },
     ]);
 
-    expect(
-      getDetailStatusChips({
-        ...baseCard,
-        isFavorited: false,
-        aiSummary: null,
-        aiTags: [],
-      }),
-    ).toEqual([
-      { kind: "type", text: "link" },
-      { kind: "favorite", text: "Not Favorited" },
-      { kind: "aiSummary", text: "No Teak Summary" },
-      { kind: "aiTags", text: "No Teak Tags" },
+    expect(getDetailStatusChips({ ...baseCard, isFavorited: false })).toEqual([
+      { kind: "type", text: "Link" },
     ]);
   });
 });
@@ -147,6 +142,26 @@ describe("card detail markdown", () => {
       fileName: "notes.pdf",
     });
     expect(markdown).not.toContain("## Content");
+  });
+
+  test("skips content that only repeats the title", () => {
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      content: "Citrus",
+      metadataTitle: null,
+      type: "palette",
+      url: null,
+    });
+    expect(markdown).toContain("# Citrus");
+    expect(markdown).not.toContain("## Content");
+  });
+
+  test("skips a link's content when it is only the link's address", () => {
+    const link = { ...baseCard, content: baseCard.url ?? "", type: "link" };
+    expect(getDetailMarkdown(link)).not.toContain("## Content");
+    expect(
+      getDetailMarkdown({ ...link, content: "Read the pricing section" }),
+    ).toContain("## Content\n\nRead the pricing section");
   });
 
   test.each([

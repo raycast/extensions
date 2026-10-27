@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-uptime",
-  "title": "Better Uptime",
-  "description": "Check on your Better Uptime monitors, incidents and heartbeats.",
+  "title": "Better Stack",
+  "description": "Check on your Better Stack monitors, incidents and heartbeats.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [
@@ -17,43 +17,61 @@
     {
       "name": "monitors",
       "title": "Show Monitors",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing monitors.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-monitor",
       "title": "Add Monitor",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new monitor.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "incidents",
       "title": "Show Incidents",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing incidents.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-incident",
       "title": "Add Incident",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new incident.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "heartbeats",
       "title": "Show Heartbeats",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing heartbeats.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-heartbeat",
       "title": "Add Heartbeat",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new heartbeat.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     }
   ],
@@ -739,7 +757,7 @@
                   "sun"
                 ],
                 "status": "pending",
-                "url": "https://betteruptime.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
+                "url": "https://incidents.betterstack.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
                 "call": false,
                 "team_name": "Your team",
                 "paused": false,
@@ -781,7 +799,7 @@
                   "sun"
                 ],
                 "status": "down",
-                "url": "https://betteruptime.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
+                "url": "https://incidents.betterstack.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
                 "call": false,
                 "team_name": "Your team",
                 "paused": false,
@@ -825,8 +843,8 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "Better Uptime API Key",
-      "description": "You can find this API Key in the Better Uptime dashboard."
+      "title": "Better Stack API Token",
+      "description": "Find it in Better Stack under API tokens → Team-based tokens → Incidents API tokens."
     }
   ],
   "dependencies": {
