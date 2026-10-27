@@ -1,6 +1,6 @@
 # SVG.new Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-27
 
 - Convert the image selected in Finder to an SVG saved next to it.
 - Convert the image on the clipboard (a copied image file, a screenshot or a browser image) to an SVG. The SVG is saved to Downloads and copied to the clipboard.
