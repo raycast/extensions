@@ -25,7 +25,7 @@ function light(name = "Test light", address = "192.168.1.50") {
 // Run the production class with isolated network, timer, cache and Raycast boundaries.
 function setup(interfaces, { failOnFind = -1 } = {}) {
   const clients = [];
-  const timers = new Set();
+  const timers = new Map();
   const cache = new Map();
   class Bonjour {
     constructor(options) {
@@ -77,8 +77,8 @@ function setup(interfaces, { failOnFind = -1 } = {}) {
       assert.ok(name in dependencies, `Unexpected dependency: ${name}`);
       return dependencies[name];
     },
-    setTimeout: (callback) => {
-      timers.add(callback);
+    setTimeout: (callback, delay) => {
+      timers.set(callback, delay);
       return callback;
     },
     clearTimeout: (callback) => timers.delete(callback),
@@ -87,7 +87,7 @@ function setup(interfaces, { failOnFind = -1 } = {}) {
     KeyLight: exports.KeyLight,
     clients,
     timers,
-    finish: () => [...timers].forEach((callback) => callback()),
+    finish: () => [...timers.keys()].forEach((callback) => callback()),
   };
 }
 
@@ -134,9 +134,31 @@ test("queries Wi-Fi alongside Ethernet and VPN, ignores loopback/IPv6 and dedupl
     assert.equal(client.options.bind, "0.0.0.0");
     assert.equal(client.options.port, 5353);
   }
+  assert.deepEqual([...run.timers.values()], [5000]);
+  let settled = false;
+  discovery.then(
+    () => {
+      settled = true;
+    },
+    () => {
+      settled = true;
+    },
+  );
+  const assertCollecting = () => {
+    assert.equal(settled, false, "discovery must keep collecting until the timeout");
+    assert.equal(run.timers.size, 1);
+    for (const client of run.clients) {
+      assert.equal(client.destroyed, false);
+      assert.notEqual(client.stopped, true);
+    }
+  };
   run.clients[1].onService(light());
+  await new Promise(setImmediate);
+  assertCollecting();
   run.clients[0].onService(light());
   run.clients[1].onService(light("Second light", "192.168.1.51"));
+  await new Promise(setImmediate);
+  assertCollecting();
   run.finish();
   await discovery;
   assert.equal(run.KeyLight.getDiscoveredLights().length, 2);
