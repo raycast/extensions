@@ -1,6 +1,6 @@
 # Better Stack Changelog
 
-## [Rebrand to Better Stack] - {PR_MERGE_DATE}
+## [Rebrand to Better Stack] - 2026-10-27
 
 - Rename the extension from Better Uptime to Better Stack and use Better Stack's icon
 - Keep the commands showing up when searching for "Better Uptime"
