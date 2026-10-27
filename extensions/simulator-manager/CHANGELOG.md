@@ -1,6 +1,6 @@
 # Simulator Manager Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-27
 
 - Fix booting iOS simulators on Xcode 27, where Simulator.app was replaced by Device Hub
 
