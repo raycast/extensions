@@ -167,17 +167,23 @@ export function buildPostArgs(url: string, cookiesFromBrowser?: string): string[
   ];
 }
 
+/** gallery-dl's extractors for short links: each stands for exactly one post. */
+const SHORT_LINK_EXTRACTORS = new Set(["pinterest/pinit", "reddit/redirect"]);
+
 /**
  * A short link (pin.it, a Reddit share link) prints no post, only a queue
  * record naming the link it stands for. That link, when the output holds
- * nothing else and it passes the checks a pasted link gets: an http(s) link to
- * a gallery site. Anything else — a local address, another kind of site — is
- * never read.
+ * nothing else, it comes from a short-link extractor, and it passes the checks
+ * a pasted link gets: an http(s) link to a gallery site. A profile also prints
+ * only queue records (its boards or sections), but its first board isn't the
+ * profile, so it stays "found nothing". A local address or another kind of
+ * site is never read.
  */
 function queuedPostUrl(json: unknown): string | undefined {
   const records = Array.isArray(json) ? (json as unknown[][]).filter(Array.isArray) : [];
-  if (records.some((r) => r[0] === 2 || r[0] === 3 || r[0] === -1)) return undefined;
-  const target = records.find((r) => r[0] === 6)?.[1];
+  if (records.length !== 1 || records[0][0] !== 6) return undefined;
+  const [, target, meta] = records[0] as [number, unknown, Meta | undefined];
+  if (!SHORT_LINK_EXTRACTORS.has(`${str(meta?.category)}/${str(meta?.subcategory)}`)) return undefined;
   if (typeof target !== "string" || !isValidUrl(target)) return undefined;
   const url = new URL(normalizeUrl(target)).href;
   return detectSource(url) === "gallery" ? url : undefined;

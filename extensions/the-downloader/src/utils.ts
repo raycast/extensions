@@ -73,6 +73,20 @@ export function getHomebrewPath(): string {
   return findHomebrewPath();
 }
 
+/**
+ * True when `p` is on disk. winget is an app execution alias, a reparse point
+ * Node can't stat (existsSync is false, statSync throws EACCES), so the entry
+ * itself is checked with lstat.
+ */
+function isOnDisk(p: string): boolean {
+  try {
+    fs.lstatSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function getWingetPath() {
   // PATH lookup first — it's fast and authoritative when winget's directory
   // is on PATH (the normal case in a shell). `where` prints one path per line
@@ -83,7 +97,7 @@ export async function getWingetPath() {
       .toString()
       .split("\n")
       .map(sanitizeWindowsPath)
-      .find((line) => line && fs.existsSync(line));
+      .find((line) => line && isOnDisk(line));
     if (found) return found;
   } catch {
     /* fall through to the canonical-install-location fallback */
@@ -93,7 +107,7 @@ export async function getWingetPath() {
   // into a stable WindowsApps launcher dir regardless of which version is
   // on PATH, so checking that dir directly recovers the common case.
   const canonical = windowsWingetPath();
-  if (canonical && fs.existsSync(canonical)) return canonical;
+  if (canonical && isOnDisk(canonical)) return canonical;
   throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
 }
 
