@@ -1,5 +1,10 @@
 # Google Chrome Changelog
 
+## [Fix Search History AI Tool] - {PR_MERGE_DATE}
+
+- Return visit times from the Search History AI tool as ISO 8601 dates instead of raw Chrome timestamps.
+- Fix the tool returning no results when the query contains an apostrophe.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Sort Bookmarks by Frecency] - 2026-09-14
