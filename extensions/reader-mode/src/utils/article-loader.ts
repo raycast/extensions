@@ -40,7 +40,7 @@ import {
   trimToArticle,
 } from "./markdown-source";
 import { ExtractedMetadata, extractMetadata } from "./metadata-extractor";
-import { detectPaywall, PaywallDetectionResult } from "./paywall-detector";
+import { detectPaywall, PaywallDetectionResult, UNLIMITED_ACCESS } from "./paywall-detector";
 import { createArchiveSource, PaywallHopperResult, tryBypassPaywall } from "./paywall-hopper";
 import { ArticleContent, parseArticle } from "./readability";
 
@@ -262,7 +262,8 @@ type MarkdownReason = "too-short" | "paywalled" | "no-html" | "components" | "ht
  * over the Markdown for a reason it names, which is logged:
  *
  * - `too-short`: almost no text, so a broken or empty conversion.
- * - `paywalled`: its prose says it is withholding the story.
+ * - `paywalled`: its prose says it is withholding the story ("unlimited access" counts only in a
+ *   teaser-length Markdown, since a product page says it too).
  * - `no-html`: taken. With nothing to compare against, it is the only article there is.
  * - `components`: MDX components (`<Steps>`, `<Card>`), which Raycast shows as markup.
  * - `html-paywalled`: the HTML page is paywalled. Reading the HTML lets the Paywall Hopper look
@@ -281,7 +282,12 @@ export function judgeMarkdown(
   const length = textLength(markdown.textContent);
   if (length < MIN_MARKDOWN_TEXT_LENGTH) return { useMarkdown: false, reason: "too-short" };
   // Its prose only: a code example quoting "Unlimited access" isn't the page withholding the story.
-  if (detectPaywall({ textContent: proseText(markdown.body) }, url).isPaywalled) {
+  // Markdown past teaser length (its text, code included) may say "unlimited access" about a
+  // product, so there that phrase alone doesn't count; "subscribe to continue reading" still does.
+  const prose = proseText(markdown.body);
+  const evidence =
+    length < FULL_ARTICLE_TEXT_FLOOR ? prose : prose.replace(new RegExp(UNLIMITED_ACCESS.source, "gi"), "");
+  if (detectPaywall({ textContent: evidence }, url).isPaywalled) {
     return { useMarkdown: false, reason: "paywalled" };
   }
   if (!page) return { useMarkdown: true, reason: "no-html" };

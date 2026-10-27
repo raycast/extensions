@@ -2199,6 +2199,20 @@ describe("markdown articles", () => {
       ],
       ["markdown when the HTML is unavailable", essay, null, true, "no-html"],
       [
+        "a long markdown teaser padded with page chrome that says it is withholding the story",
+        `# Tidy\n\n${prose(2, "Teaser").join("\n\n")}\n\nSubscribe to continue reading. Already a subscriber? Sign in.\n\n${prose(16, "Footer link").join("\n\n")}`,
+        null,
+        false,
+        "paywalled",
+      ],
+      [
+        "a full markdown article that mentions unlimited access, as a pricing page does",
+        `# Plans\n\n${prose(16, "Pricing").join("\n\n")}\n\nThe Pro plan gives you unlimited access to every feature for $20 a month.`,
+        null,
+        true,
+        "no-html",
+      ],
+      [
         "markdown whose code example mentions unlimited access",
         `${essay}\n\n\`\`\`json\n{"plan": "Unlimited access", "price": 20}\n\`\`\`\n`,
         null,
