@@ -1,4 +1,4 @@
-# Claude Writing Assistant Changelog
+# Claude Writing Tools Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

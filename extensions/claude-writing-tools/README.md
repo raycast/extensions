@@ -1,12 +1,16 @@
-# Claude Writing Assistant
+# Claude Writing Tools
 
 Translate, fix and rewrite the text you select in any app, ask questions, read screenshots and summarize web pages with Claude, using your own Anthropic API key.
 
+This is an unofficial extension. It is not affiliated with or endorsed by Anthropic.
+
 ## Setup
 
-1. Create an API key in the [Claude Console](https://console.anthropic.com) under **API Keys**.
-2. Open any command of this extension. Raycast asks for the key and your **Second Language**.
+1. Sign in to the [Claude Console](https://console.anthropic.com), open **API Keys** and create a key.
+2. Open any command of this extension. Raycast asks for the key and your **Second Language**: text written in your primary language (English unless you change it) is translated into your second language, and text in any other language is translated into your primary language.
 3. Optional: set your **Primary Language**, the models and other options in the extension preferences.
+
+Usage is billed to your Anthropic account. You can follow it with the **Show Usage and Cost** command.
 
 ## Commands
 
@@ -34,7 +38,7 @@ Translate, fix and rewrite the text you select in any app, ask questions, read s
 ## Tips
 
 - Give **Translate and Replace**, **Translate Selection** and **Fix Spelling and Grammar** a hotkey in Raycast Settings → Extensions to use them from anywhere in one keystroke.
-- For the fastest in-place edits, choose Claude Haiku 5.5 as **Model for Quick Edits**.
+- In-place edits and the live translator use Claude Haiku 5.5 by default, the fastest model. For the main model's quality instead, set **Model for Quick Edits** to **Same as Model**.
 - If nothing is selected, the clipboard text is used and the result is copied back to the clipboard. After pasting over a selection, your previous clipboard content is restored.
 
 ## Privacy and Costs

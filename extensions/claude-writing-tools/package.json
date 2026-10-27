@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "claude-writing-assistant",
-  "title": "Claude Writing Assistant",
+  "name": "claude-writing-tools",
+  "title": "Claude Writing Tools",
   "description": "Translate, fix and rewrite selected text in any app with Claude, plus chat, screenshot and web page tools, using your own Anthropic API key.",
   "icon": "icon.png",
   "author": "cofie",
@@ -814,16 +814,16 @@
       "type": "dropdown",
       "required": false,
       "title": "Model for Quick Edits",
-      "description": "Used by in-place edits and the live translator. Claude Haiku 5.5 is the fastest.",
-      "default": "same",
+      "description": "Used by in-place edits and the live translator. Claude Haiku 5.5 keeps them fast and cheap.",
+      "default": "claude-haiku-5-5",
       "data": [
-        {
-          "title": "Same as Model",
-          "value": "same"
-        },
         {
           "title": "Claude Haiku 5.5 · fastest",
           "value": "claude-haiku-5-5"
+        },
+        {
+          "title": "Same as Model",
+          "value": "same"
         },
         {
           "title": "Claude Sonnet 5.5",
@@ -904,12 +904,10 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.39.5",
     "prettier": "^3.9.10",
-    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -917,8 +915,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "tsx --test test/*.test.ts",
-    "icons": "node scripts/icons.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }
