@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Watchgoose MCP Server] - {PR_MERGE_DATE}
+## [Add Watchgoose MCP Server] - 2026-10-27
 
 - Add Watchgoose to the official registry: monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Inspect checks and status history with read-only access by default; with explicit read-and-write consent, inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted Streamable HTTP server at https://mcp.watchgoose.com/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
