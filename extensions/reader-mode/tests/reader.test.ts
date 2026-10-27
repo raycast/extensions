@@ -26,7 +26,7 @@ import {
   referencedModels,
 } from "../scripts/summary-models.mjs";
 import { DEFAULT_SUMMARY_MODEL, getAIConfigForStyle, SUMMARY_MODELS } from "../src/config/ai";
-import { loadArticleFromUrl, loadArticleViaPaywallHopper } from "../src/utils/article-loader";
+import { judgeMarkdown, loadArticleFromUrl, loadArticleViaPaywallHopper } from "../src/utils/article-loader";
 import { findPayloadArticles } from "../src/utils/data-payload";
 import {
   BINGBOT_USER_AGENT,
@@ -35,7 +35,13 @@ import {
   GOOGLEBOT_USER_AGENT,
 } from "../src/utils/fetcher";
 import { preCleanHtml } from "../src/utils/html-cleaner";
-import { findMarkdownAlternate, isMarkdownResponse, parseMarkdownArticle } from "../src/utils/markdown-source";
+import {
+  findMarkdownAlternate,
+  isMarkdownResponse,
+  parseMarkdownArticle,
+  stripPageChrome,
+  trimToArticle,
+} from "../src/utils/markdown-source";
 import { detectPaywall } from "../src/utils/paywall-detector";
 import { tryBypassPaywall } from "../src/utils/paywall-hopper";
 import { parseArticle } from "../src/utils/readability";
@@ -1860,6 +1866,389 @@ describe("markdown articles", () => {
     assert.doesNotMatch(textContent, /\*\*|##|\]\(|https:\/\//);
   });
 
+  // Shaped like Cloudflare's conversion of a whole page for `Accept: text/markdown`, captured
+  // 2026-10-26 from blog.cloudflare.com and developers.cloudflare.com: the page around the
+  // article comes along with it.
+  const chromed = [
+    "---",
+    "title: Networks Are Tidy",
+    "---",
+    "",
+    "[Skip to content](#main-content)",
+    "",
+    "> Documentation Index  ",
+    "> Fetch the complete documentation index at: https://example.test/llms.txt",
+    "",
+    "[Example Lab](https://example.test/)",
+    "",
+    "[Example Lab](https://example.test/)",
+    "",
+    essay,
+    "",
+    "LightDark",
+    "",
+    "## On this page",
+    "",
+    "[![](https://example.test/logo.svg)Docs](/)",
+    "",
+    "```json",
+    '{"@context":"https://schema.org","@type":"BlogPosting","headline":"Networks Are Tidy"}',
+    "```",
+    "",
+  ].join("\n");
+
+  const jsonLd = '{"@context":"https://schema.org","@type":"BlogPosting","headline":"Networks Are Tidy"}';
+  const chromedPage = page.replace("</head>", `<script type="application/ld+json">${jsonLd}</script></head>`);
+
+  it("removes the page around the article from a converted page", () => {
+    const stripped = stripPageChrome(chromed, "https://example.test/essays/tidy", chromedPage);
+    assert.match(stripped, /^## The Short Version/m);
+    assert.match(stripped, /^## Details/m);
+    for (const chrome of [/Skip to content/, /llms\.txt/, /\]\(https:\/\/example\.test\/\)/, /LightDark/]) {
+      assert.doesNotMatch(stripped, chrome);
+    }
+    assert.doesNotMatch(stripped, /@context/);
+    assert.doesNotMatch(stripped, /On this page/);
+    assert.doesNotMatch(stripped, /logo\.svg/);
+  });
+
+  it("keeps lines that only look like page chrome", () => {
+    const article = [
+      "# Title",
+      "",
+      "[The appendix](https://example.test/appendix)",
+      "",
+      "> A quotation from the paper.",
+      "",
+      "Dark light, the poet wrote, is still light.",
+      "",
+      "[Example Lab](https://example.test/)",
+      "",
+      "> Agents read llms.txt before the page itself.",
+      "",
+      "```json",
+      '{"@context":"https://schema.org","@type":"Article","headline":"An example of JSON-LD"}',
+      "```",
+      "",
+      "```md",
+      "[Skip to content](#main-content)",
+      "LightDark",
+      "```",
+      "",
+      "```json",
+      '{"name":"reader","version":"1.0.0"}',
+      "```",
+      "",
+      "## Last section",
+      "",
+      "Closing words.",
+    ].join("\n");
+    assert.equal(stripPageChrome(article, "https://example.test/post"), article);
+  });
+
+  it("removes a docs feedback widget from the end of a converted page", () => {
+    // As developers.cloudflare.com pages end, 2026-10-27.
+    const page = "# Tiered Cache\n\nThe article.\n\nWas this helpful?\n\nYesNo\n";
+    assert.equal(stripPageChrome(page, "https://example.test/post"), "# Tiered Cache\n\nThe article.\n");
+    const asked = "# FAQ\n\nWas this helpful?\n\nIt was, and here is why.";
+    assert.equal(stripPageChrome(asked, "https://example.test/post"), asked);
+  });
+
+  it("keeps a closing JSON-LD example that isn't the page's own", () => {
+    const tutorial = [
+      "# Structured data",
+      "",
+      "Add this to the page:",
+      "",
+      "```json",
+      '{"@context":"https://schema.org","@type":"Recipe","name":"Soup"}',
+      "```",
+    ].join("\n");
+    assert.equal(stripPageChrome(tutorial, "https://example.test/post", chromedPage), tutorial);
+    assert.equal(stripPageChrome(tutorial, "https://example.test/post"), tutorial);
+  });
+
+  it("resolves a reference definition whose URL is on the next line", () => {
+    const { body } = parseMarkdownArticle("See the [guide][g].\n\n[g]:\n  ../guide", "https://example.test/docs/a.md");
+    assert.match(body, /^ {2}https:\/\/example\.test\/guide$/m);
+  });
+
+  it("leaves a code block that runs to the end alone", () => {
+    const article = "Install it:\n\n```sh\nnpm install\n# done";
+    assert.equal(stripPageChrome(article, "https://example.test/post"), article);
+  });
+
+  it("keeps code fenced with Windows line endings out of the prose rewrites", () => {
+    const { body } = parseMarkdownArticle(
+      "Intro.\r\n\r\n```md\r\n[Figure: kept]\r\n```\r\n",
+      "https://example.test/a.md",
+    );
+    assert.match(body, /\[Figure: kept\]/);
+  });
+
+  describe("cutting a converted page down to the article Readability found", () => {
+    // Sized like the real pages: the chrome is a small share of the whole.
+    const paragraphs = Array.from(
+      { length: 12 },
+      (_, i) =>
+        `Paragraph ${i + 1} of the article explains how a cache serves part of a large file when a video player seeks.`,
+    );
+    const footer = [
+      "## Subscribe to receive notifications of new posts",
+      "",
+      "Email address",
+      "",
+      "We'll never share your email address.",
+      "",
+      '- <a href="https://example.test/de-de/">Deutsch</a>',
+      '- <a href="https://example.test/fr-fr/">Français</a>',
+    ];
+
+    it("cuts the page around the article when Readability found all of it", () => {
+      const markdown = [
+        "Last updated Oct 8, 2026 | Copy as Markdown | [View as Markdown](https://example.test/index.md)",
+        "",
+        ...paragraphs.flatMap((p) => [p, ""]),
+        ...footer,
+      ].join("\n");
+      const trimmed = trimToArticle(markdown, paragraphs.join("\n\n"));
+      for (const p of paragraphs) assert.ok(trimmed.includes(p), p);
+      assert.doesNotMatch(trimmed, /Copy as Markdown|Subscribe|Email address|Deutsch/);
+    });
+
+    it("never cuts inside a code block", () => {
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        "```bash",
+        'curl "https://api.example.test/zones/$ZONE/cache" \\',
+        "\t--json '{",
+        '\t\t"region": "us-east-1"',
+        "\t}'",
+        "```",
+        "",
+        "Was this helpful?",
+        "",
+        "YesNo",
+      ].join("\n");
+      const article = `${paragraphs.join("\n\n")}\ncurl "https://api.example.test/zones/$ZONE/cache" \\\n--json '{"region": "us-east-1"}'`;
+      const trimmed = trimToArticle(markdown, article);
+      assert.match(trimmed, /"region": "us-east-1"\n\t\}'\n```/);
+      assert.doesNotMatch(trimmed, /Was this helpful/);
+    });
+
+    it("keeps a short closing code block and a closing diagram", () => {
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        "To install:",
+        "",
+        "```sh",
+        "npm install",
+        "```",
+        "",
+        "![](figures/diagram.svg)",
+        "",
+        ...footer,
+      ].join("\n");
+      const articleText = `${paragraphs.join("\n\n")}\nTo install:\nnpm install`;
+      const articleHtml = `${paragraphs.map((p) => `<p>${p}</p>`).join("")}<p>To install:</p><pre>npm install</pre><img src="https://example.test/figures/diagram.svg">`;
+      const trimmed = trimToArticle(markdown, articleText, articleHtml);
+      assert.match(trimmed, /```sh\nnpm install\n```/);
+      assert.match(trimmed, /diagram\.svg/);
+      assert.doesNotMatch(trimmed, /Email address/);
+    });
+
+    it("keeps a section Readability left out of its article", () => {
+      const callout =
+        "Custom settings take precedence over the hints. If you have configured your own topology, the hint will not override it, and requests keep following the path you set.";
+      const markdown = [...paragraphs.flatMap((p) => [p, ""]), callout, "", ...footer].join("\n");
+      const trimmed = trimToArticle(markdown, paragraphs.join("\n\n"));
+      assert.ok(trimmed.includes(callout));
+    });
+
+    it("still cuts a footer list whose short items add up to a paragraph's worth of letters", () => {
+      // As blog.cloudflare.com's language picker ends a converted post, 2026-10-27.
+      const languages = [
+        "English",
+        "Deutsch",
+        "Español",
+        "Español (Latinoamérica)",
+        "Français",
+        "Italiano",
+        "日本語",
+        "한국어",
+        "繁體中文",
+        "简体中文",
+        "Português",
+        "Русский",
+        "Bahasa Indonesia",
+        "ภาษาไทย",
+        "Tiếng Việt",
+        "Polski",
+        "العربية",
+        "עברית",
+        "Svenska",
+        "Nederlands",
+        "Türkçe",
+      ];
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        "<details>",
+        "",
+        "<summary>",
+        "",
+        "English",
+        "",
+        "</summary>",
+        "",
+        ...languages.map((l) => `- <a href="https://example.test/${l}/">${l}</a>`),
+        "</details>",
+      ].join("\n");
+      const trimmed = trimToArticle(markdown, paragraphs.join("\n\n"));
+      assert.doesNotMatch(trimmed, /Deutsch|<details>/);
+    });
+
+    it("keeps closing images that have alt text or are written as references", () => {
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        "![Architecture diagram](figures/diagram.svg)",
+        "",
+        "![Request flow][flow]",
+        "",
+        "![sequence]",
+        "",
+        "Was this helpful?",
+        "",
+        "[flow]: figures/flow.png",
+        "[sequence]: figures/sequence.png",
+      ].join("\n");
+      const articleHtml = `${paragraphs.map((p) => `<p>${p}</p>`).join("")}<img src="https://example.test/figures/diagram.svg"><img src="https://example.test/figures/flow.png"><img src="https://example.test/figures/sequence.png">`;
+      const trimmed = trimToArticle(markdown, paragraphs.join("\n\n"), articleHtml);
+      assert.match(trimmed, /diagram\.svg/);
+      assert.match(trimmed, /!\[Request flow\]\[flow\]/);
+      assert.match(trimmed, /^!\[sequence\]$/m);
+      assert.doesNotMatch(trimmed, /Was this helpful/);
+    });
+
+    it("keeps an article's short last lines and its reference definitions", () => {
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        "See the [docs][ref] and [more][ref2].",
+        "",
+        "## Requirements",
+        "",
+        "- macOS 14+",
+        "- Raycast",
+        "",
+        ...footer,
+        "",
+        "[ref]: https://example.test/docs",
+        "[ref2]:",
+        "  https://example.test/more",
+      ].join("\n");
+      const article = `${paragraphs.join("\n\n")}\nSee the docs and more.\nRequirements\nmacOS 14+\nRaycast`;
+      const trimmed = trimToArticle(markdown, article);
+      assert.match(trimmed, /- Raycast/);
+      assert.match(trimmed, /^\[ref\]: https:\/\/example\.test\/docs$/m);
+      assert.match(trimmed, /^\[ref2\]:\n {2}https:\/\/example\.test\/more$/m);
+      assert.doesNotMatch(trimmed, /Email address|Deutsch/);
+    });
+
+    it("keeps everything when Readability found only part of the page", () => {
+      const markdown = [
+        ...paragraphs.flatMap((p) => [p, ""]),
+        ...footer,
+        "",
+        "## Payment options",
+        "",
+        "Accept payments online with a prebuilt form or build your own.",
+      ].join("\n");
+      assert.equal(trimToArticle(markdown, paragraphs[0]), markdown);
+    });
+  });
+
+  describe("choosing between a page's markdown and its HTML", () => {
+    const url = "https://example.test/essays/tidy";
+    const prose = (count: number, marker: string) =>
+      Array.from(
+        { length: count },
+        (_, i) =>
+          `${marker} paragraph ${i + 1} carries enough ordinary prose about networks, neurons, and their building blocks for Readability to keep it.`,
+      );
+    const htmlPage = (paragraphs: string[]) =>
+      "<!doctype html><html><head><title>Networks Are Tidy</title></head><body><main><article>" +
+      `<h1>Networks Are Tidy</h1>${paragraphs.map((p) => `<p>${p}</p>`).join("")}</article></main></body></html>`;
+    const pageOf = (html: string) => {
+      const parsed = parseArticle(html, url, { skipPreCheck: true, forceParse: true });
+      assert.ok(parsed.success);
+      return { article: parsed.article, html };
+    };
+    const markdownOf = (text: string) => parseMarkdownArticle(text, url);
+    const teaserHtml = loadFixture("paywalled-vanityfair-style.html").replace(
+      /<p>\s*The opening[\s\S]*?<\/p>/,
+      `<p>${prose(2, "HTML teaser").join(" ")}</p>`,
+    );
+
+    for (const [label, markdown, html, useMarkdown, reason] of [
+      ["markdown with almost no text", "# Tidy\n\nShort.", null, false, "too-short"],
+      [
+        "markdown that says it is withholding the story",
+        `# Tidy\n\n${prose(3, "Teaser").join("\n\n")}\n\nSubscribe to continue reading. Already a subscriber? Sign in.`,
+        null,
+        false,
+        "paywalled",
+      ],
+      ["markdown when the HTML is unavailable", essay, null, true, "no-html"],
+      [
+        "markdown whose code example mentions unlimited access",
+        `${essay}\n\n\`\`\`json\n{"plan": "Unlimited access", "price": 20}\n\`\`\`\n`,
+        null,
+        true,
+        "no-html",
+      ],
+      [
+        "markdown with a component written on one line",
+        `${essay}\n\n<Note>Restart the application after changing this setting.</Note>\n`,
+        htmlPage(prose(2, "HTML")),
+        false,
+        "components",
+      ],
+      [
+        "markdown full of unrendered components",
+        `${essay}\n\n<Steps>\n  <Step title="Read">\n    Read the essay.\n  </Step>\n</Steps>\n`,
+        htmlPage(prose(2, "HTML")),
+        false,
+        "components",
+      ],
+      [
+        "markdown with components written inline",
+        `${essay}\n\n<Card title="Setup">Install it first.</Card>\n<Card\n  title="Use"\n/>\n`,
+        htmlPage(prose(2, "HTML")),
+        false,
+        "components",
+      ],
+      [
+        "markdown holding part of the article",
+        `# Tidy\n\n${prose(2, "Markdown").join("\n\n")}`,
+        htmlPage(prose(12, "HTML")),
+        false,
+        "partial",
+      ],
+      [
+        "markdown of any length when the HTML is paywalled, since it may be the teaser and the page's chrome",
+        `# Tidy\n\n${prose(8, "Markdown").join("\n\n")}`,
+        teaserHtml,
+        false,
+        "html-paywalled",
+      ],
+      ["markdown as complete as the HTML", essay, page, true, "markdown"],
+    ] as const) {
+      it(`${useMarkdown ? "takes" : "passes over"} ${label}`, () => {
+        const verdict = judgeMarkdown(markdownOf(markdown), html === null ? null : pageOf(html), url);
+        assert.deepEqual(verdict, { useMarkdown, reason });
+      });
+    }
+  });
+
   describe("loading", () => {
     let base = "";
     let server: ReturnType<typeof createServer>;
@@ -1868,11 +2257,110 @@ describe("markdown articles", () => {
       res.end(body);
     };
 
+    const plainPage = page.replace(/<link[^>]*text\/markdown[^>]*>/, "");
+    const longPage = plainPage.replace(
+      /<main>[\s\S]*<\/main>/,
+      `<main><article><h1>Networks Are Tidy</h1>${"<p>This HTML body is the whole article, long enough that a short markdown version is plainly part of it.</p>".repeat(12)}</article></main>`,
+    );
+    const teaserPage = loadFixture("paywalled-vanityfair-style.html").replace(
+      /<p>\s*The opening[\s\S]*?<\/p>/,
+      `<p>${"This HTML teaser opens the story and stops where the barrier begins, as metered pages do. ".repeat(3)}</p>`,
+    );
+    /** `html` with its markdown link, if any, pointing at /alt/<name>.md. */
+    const linking = (html: string, name: string) =>
+      html
+        .replace(/<link[^>]*text\/markdown[^>]*>/, "")
+        .replace("</head>", `<link rel="alternate" type="text/markdown" href="/alt/${name}.md"></head>`);
+    const excerpt = `# Networks Are Tidy\n\n${"A markdown excerpt that stops early. ".repeat(8)}`;
+    type Reply = [status: number, type: string, body: string, location?: string];
+    const md = (body: string): Reply => [200, "text/markdown", body];
+    const htmlReply = (body: string): Reply => [200, "text/html; charset=utf-8", body];
+    const negotiated: Record<string, (wantsMarkdown: boolean, userAgent: string) => Reply> = {
+      "/negotiated/full": (m) =>
+        m ? md(chromed) : htmlReply(chromedPage.replace(/<link[^>]*text\/markdown[^>]*>/, "")),
+      "/negotiated/old.md": () => [301, "text/plain", "", "/negotiated/partial"],
+      "/negotiated/partial": (m) => (m ? md(excerpt) : htmlReply(longPage)),
+      "/negotiated/components": (m) =>
+        m
+          ? md(`${essay}\n\n<Steps>\n  <Step title="Read">\n    Read the essay.\n  </Step>\n</Steps>\n`)
+          : htmlReply(plainPage),
+      "/negotiated/html-fails": (m) => (m ? md(essay) : [500, "text/plain", "server error"]),
+      "/negotiated/second-md": (m) => md(m ? "" : essay),
+      "/negotiated/strict": (m) => (m ? [406, "text/plain", "not acceptable"] : htmlReply(plainPage)),
+      "/negotiated/redirect": (m) => (m ? [302, "text/plain", "", "/negotiated/redirect.md"] : htmlReply(longPage)),
+      "/negotiated/redirect.md": () => md(excerpt),
+      "/negotiated/alternate": (m) =>
+        m
+          ? md(`${essay}\n\n<Steps>\n  <Step title="Read">\n    Read the essay.\n  </Step>\n</Steps>\n`)
+          : htmlReply(page.replace('href="essay.md"', 'href="/negotiated/essay.md"')),
+      "/negotiated/essay.md": () => md(essay),
+      "/negotiated/bad-json-ld": (m) =>
+        m
+          ? md(essay)
+          : htmlReply(
+              '<html><head><title>Tidy</title><script type="application/ld+json">[null,{"@type":"Article"}]</script></head><body><p>Hi.</p></body></html>',
+            ),
+      "/negotiated/challenge": (m) =>
+        m
+          ? md(essay)
+          : htmlReply(
+              "<html><head><title>Just a moment...</title></head><body><p>Checking your browser.</p></body></html>",
+            ),
+      "/alt/components": () => htmlReply(linking(page, "components")),
+      "/alt/components.md": () =>
+        md(`${essay}\n\n<Steps>\n  <Step title="Read">\n    Read the essay.\n  </Step>\n</Steps>\n`),
+      "/alt/partial": () => htmlReply(linking(longPage, "partial")),
+      "/alt/partial.md": () => md(excerpt),
+      "/alt/unreadable": () =>
+        htmlReply(linking(page, "unreadable").replace(/<main>[\s\S]*<\/main>/, "<main><p>Hi.</p></main>")),
+      "/alt/unreadable.md": () => md(essay),
+      "/alt/chromed": () => htmlReply(linking(chromedPage, "chromed")),
+      "/alt/chromed.md": () => md(chromed),
+      "/alt/paywalled-full": () => htmlReply(linking(teaserPage, "paywalled-full")),
+      "/alt/paywalled-full.md": () => md(essay),
+      "/alt/paywalled-teaser": () => htmlReply(linking(teaserPage, "paywalled-teaser")),
+      // Googlebot, the Paywall Hopper's first method, gets a partial article without the barrier.
+      "/alt/hopper-short": (_m, ua) =>
+        htmlReply(
+          /Googlebot/.test(ua)
+            ? plainPage.replace(
+                /<main>[\s\S]*<\/main>/,
+                `<main><article><h1>Networks Are Tidy</h1>${"<p>This crawler copy holds a little more of the story than the teaser, then stops short.</p>".repeat(5)}</article></main>`,
+              )
+            : linking(teaserPage, "hopper-short"),
+        ),
+      "/alt/hopper-short.md": () =>
+        md(`${essay}\n\n${"The full article goes on for many more paragraphs than any partial copy. ".repeat(30)}`),
+      "/negotiated/huge": (m) =>
+        m
+          ? md(essay)
+          : htmlReply(
+              plainPage.replace(
+                /<main>[\s\S]*<\/main>/,
+                "<p>This HTML body paragraph is long enough to count as article prose when Readability checks it.</p>".repeat(
+                  21_000,
+                ),
+              ),
+            ),
+      "/alt/paywalled-teaser.md": () =>
+        md(`# Networks Are Tidy\n\n${"A markdown teaser opens the story and stops at the barrier. ".repeat(5)}`),
+    };
+    const accepts: { path: string; accept: string }[] = [];
+
     // Routes: /essay.md is markdown; /post advertises it. Under /broken/ the alternate 404s,
     // and under /spa/ it answers with an HTML app shell, as a catch-all route would.
     const ready = new Promise<void>((resolve) => {
       server = createServer((req, res) => {
         const path = req.url ?? "/";
+        const route = negotiated[path];
+        if (route) {
+          const accept = req.headers.accept ?? "";
+          accepts.push({ path, accept });
+          const [status, type, body, location] = route(/^text\/markdown/.test(accept), req.headers["user-agent"] ?? "");
+          if (location) res.setHeader("Location", location);
+          return send(res, status, type, body);
+        }
+        if (path === "/home-link.md") return send(res, 200, "text/markdown", `${essay}\n\n[Example Lab](/)\n`);
         if (path === "/essay.md") return send(res, 200, "text/markdown; charset=utf-8", essay);
         if (path === "/spa/essay.md")
           return send(res, 200, "text/html", "<html><body><div id=app></div></body></html>");
@@ -1960,6 +2448,169 @@ describe("markdown articles", () => {
         assert.match(result.article.bodyMarkdown, /This HTML body/);
       });
     }
+
+    it("asks for markdown first, then fetches the HTML to compare it with", async () => {
+      await ready;
+      accepts.length = 0;
+      const result = await loadArticleFromUrl(`${base}/negotiated/full`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.doesNotMatch(result.article.bodyMarkdown, /This HTML body|Skip to content|LightDark|@context|llms\.txt/);
+      assert.equal(result.article.title, "Networks Are Tidy");
+      assert.equal(result.article.siteName, "Example Lab");
+      assert.equal(accepts.length, 2, JSON.stringify(accepts));
+      assert.match(accepts[0].accept, /^text\/markdown,/);
+      assert.doesNotMatch(accepts[1].accept, /markdown/);
+    });
+
+    for (const [label, path] of [
+      ["holds only part of the article", "/negotiated/partial"],
+      ["is full of components Raycast can't render", "/negotiated/components"],
+    ] as const) {
+      it(`shows the HTML article when the page's markdown ${label}`, async () => {
+        await ready;
+        const result = await loadArticleFromUrl(`${base}${path}`, "test", options);
+        assert.equal(result.status, "success", JSON.stringify(result));
+        if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+      });
+    }
+
+    it("shows the markdown when the HTML can't be fetched to compare", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/html-fails`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+    });
+
+    it("leaves a markdown file as its author wrote it", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/home-link.md`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /\[Example Lab\]/);
+    });
+
+    it("reads a page that answers the request for HTML with markdown too, using that second response", async () => {
+      await ready;
+      accepts.length = 0;
+      const result = await loadArticleFromUrl(`${base}/negotiated/second-md`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.equal(accepts.length, 2, "one fetch asks for markdown, one for HTML; both get markdown");
+    });
+
+    it("asks again for HTML when a site refuses the request for markdown", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/strict`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+    });
+
+    it("compares markdown it was redirected to with the page, as for any other markdown it asked for", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/redirect`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+    });
+
+    it("compares the markdown when an old .md link redirects to the page", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/old.md`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+    });
+
+    it("judges the markdown a page sent, instead of reading the markdown version it links to unchecked", async () => {
+      await ready;
+      accepts.length = 0;
+      const result = await loadArticleFromUrl(`${base}/negotiated/alternate`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+      assert.ok(!accepts.some((a) => a.path === "/negotiated/essay.md"), JSON.stringify(accepts));
+    });
+
+    it("shows the markdown when the page's JSON-LD is malformed", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/bad-json-ld`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+    });
+
+    it("titles the markdown from the markdown when the page it came with isn't the article", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/negotiated/challenge`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.equal(result.article.title, "Networks Are Tidy");
+    });
+
+    for (const [label, path] of [
+      ["is full of components Raycast can't render", "/alt/components"],
+      ["holds only part of the article", "/alt/partial"],
+    ] as const) {
+      it(`shows the HTML article when the markdown version a page links to ${label}`, async () => {
+        await ready;
+        const result = await loadArticleFromUrl(`${base}${path}`, "test", options);
+        assert.equal(result.status, "success", JSON.stringify(result));
+        if (result.status === "success") assert.match(result.article.bodyMarkdown, /This HTML body/);
+      });
+    }
+
+    it("names the article from the page's <head> when the page links its markdown version but can't be parsed", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/alt/unreadable`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.equal(result.article.siteName, "Example Lab");
+    });
+
+    it("removes a converter's page chrome from the markdown version a page links to", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/alt/chromed`, "test", options);
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+      assert.doesNotMatch(result.article.bodyMarkdown, /This HTML body|Skip to content|LightDark|@context|llms\.txt/);
+      assert.equal(result.article.siteName, "Example Lab");
+    });
+
+    it("shows a paywalled page's markdown version when it holds more than the teaser", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/alt/paywalled-full`, "test", { ...options, skipPreCheck: true });
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+    });
+
+    it("shows a paywalled page's HTML teaser when its markdown version is no longer", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/alt/paywalled-teaser`, "test", {
+        ...options,
+        skipPreCheck: true,
+      });
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status !== "success") return;
+      assert.match(result.article.bodyMarkdown, /This HTML teaser/);
+      assert.doesNotMatch(result.article.bodyMarkdown, /markdown teaser/);
+    });
+
+    it("shows a paywalled page's markdown version over a shorter copy the Paywall Hopper found", async () => {
+      await ready;
+      const result = await loadArticleFromUrl(`${base}/alt/hopper-short`, "test", {
+        ...options,
+        skipPreCheck: true,
+        enablePaywallHopper: true,
+      });
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /many more paragraphs/);
+    });
+
+    it("doesn't parse a page too large to compare with the markdown it sent", async () => {
+      await ready;
+      // skipPreCheck: the repeated paragraphs would fail Readability's precheck, which isn't the guard under test.
+      const result = await loadArticleFromUrl(`${base}/negotiated/huge`, "test", { ...options, skipPreCheck: true });
+      assert.equal(result.status, "success", JSON.stringify(result));
+      if (result.status === "success") assert.match(result.article.bodyMarkdown, /^## The Short Version/m);
+    });
 
     it("closes the server", async () => {
       await ready;
