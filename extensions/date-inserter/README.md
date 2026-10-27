@@ -72,7 +72,3 @@ Wrap literal text in single quotes. If a format is invalid, the calendar shows "
 - Dates can be selected from the year 1000 to 9999.
 - If text is selected in the target app, it is replaced by the date, like a normal paste.
 - Fields that block pasting, such as password fields, cannot receive the date.
-
-## Development checks
-
-Run `npm test`, `npm run typecheck` (generates the preference types before type-checking), and `npm run lint` before submitting changes.
