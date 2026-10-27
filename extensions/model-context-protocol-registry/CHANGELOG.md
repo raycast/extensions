@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Kimiko MCP Server] - {PR_MERGE_DATE}
+## [Add Kimiko MCP Server] - 2026-10-27
 
 - Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
 
