@@ -285,21 +285,15 @@ export async function fetchAndroidDevices() {
   }
 }
 
-// Xcode 27 replaced Simulator.app with Device Hub (com.apple.dt.Devices).
-// Earlier Xcode versions only have Simulator.app (com.apple.iphonesimulator).
-const SIMULATOR_APP_BUNDLE_IDS = ["com.apple.dt.Devices", "com.apple.iphonesimulator"];
-
+// Xcode 27 replaced Simulator.app with Device Hub, which ignores Simulator's
+// -CurrentDeviceUDID argument and opens a device through a devices:// URL instead.
 async function openSimulatorApp(deviceId: string) {
-  let lastError: unknown;
-  for (const bundleId of SIMULATOR_APP_BUNDLE_IDS) {
-    try {
-      await execAsync(`open -b ${bundleId} --args -CurrentDeviceUDID ${deviceId}`);
-      return;
-    } catch (error) {
-      lastError = error;
-    }
+  try {
+    await execAsync(`open -b com.apple.dt.Devices "devices://device/open?id=${encodeURIComponent(deviceId)}"`);
+  } catch {
+    // Simulator.app (Xcode 26 and earlier)
+    await execAsync(`open -b com.apple.iphonesimulator --args -CurrentDeviceUDID ${deviceId}`);
   }
-  throw lastError;
 }
 
 export async function bootAndOpenSimulator(deviceId: string) {
