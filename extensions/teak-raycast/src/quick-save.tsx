@@ -17,7 +17,7 @@ import {
   getUserFacingErrorMessage,
   quickSaveCard,
 } from "./lib/api";
-import { parseCaptureExtras } from "./lib/capture";
+import { parseCaptureExtras, savedToastText } from "./lib/capture";
 import { useTeakAuth } from "./lib/useTeakAuth";
 
 interface FormValues {
@@ -107,8 +107,10 @@ export default function QuickSaveCommand() {
         "interactive",
       );
       addSuccessActions(toast, result);
+      const { message, title } = savedToastText(result);
       toast.style = Toast.Style.Success;
-      toast.title = "Saved to Teak";
+      toast.title = title;
+      toast.message = message;
 
       setContent("");
       setTags("");
