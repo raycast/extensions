@@ -1,6 +1,6 @@
 # Prayer Times Changelog
 
-## [Menu Bar Clears After the End] - {PR_MERGE_DATE}
+## [Menu Bar Clears After the End] - 2026-10-27
 
 - The menu bar clears once a prayer's time ends, instead of showing `Dhuhr ended`
 
