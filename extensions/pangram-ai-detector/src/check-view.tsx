@@ -123,7 +123,6 @@ export function CheckView({ readSource }: { readSource: () => Promise<string> })
   const words = data.result.segments.reduce((sum, segment) => sum + segment.wordCount, 0);
   return (
     <Detail
-      navigationTitle={data.result.headline}
       markdown={resultMarkdown(data.result, preferences.literalSegmentText)}
       metadata={
         <ResultMetadata
@@ -173,7 +172,7 @@ function ResultMetadata({
 }
 
 /**
- * Each Segment's text under its label; the headline is the navigation title.
+ * Each Segment's text under its label.
  * Multi-line Markdown (code fences, comments, math) can leak across Segments: https://github.com/mygirleatsmayo/pangram-raycast/issues/1
  */
 function resultMarkdown(result: CheckResult, literalSegmentText: boolean): string {

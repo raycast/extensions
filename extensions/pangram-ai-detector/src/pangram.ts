@@ -16,7 +16,6 @@ export interface Segment {
 /** The outcome of one Check, in the extension's domain language. */
 export interface CheckResult {
   verdict: Verdict;
-  headline: string;
   breakdown: { ai: number; aiAssisted: number; human: number };
   modelVersion: string;
   segments: Segment[];
@@ -118,7 +117,6 @@ function isTemporary(error: unknown): boolean {
 function toCheckResult(task: Task): CheckResult {
   return {
     verdict: task.prediction_short,
-    headline: task.headline,
     breakdown: { ai: task.fraction_ai, aiAssisted: task.fraction_ai_assisted, human: task.fraction_human },
     modelVersion: task.version,
     segments: task.windows.map((window) => ({

@@ -22,7 +22,7 @@ A Cached Result for the same text and Model costs no credits. **Refresh (Spends 
 
 ## Results and Preferences
 
-The Verdict tag reads AI-Generated, Mixed, or Human. The Breakdown shows AI (AI-Generated), Assisted (AI-Assisted), and Human (Human Written) percentages. Each Segment shows its label and Pangram's confidence. Pangram's headline appears as the navigation title.
+The Verdict tag reads AI-Generated, Mixed, or Human. The Breakdown shows AI (AI-Generated), Assisted (AI-Assisted), and Human (Human Written) percentages. Each Segment shows its label and Pangram's confidence.
 
 **Result** shows **Cached · $0** or **New Check · ≈ $0.05**. The cost is an estimate from Pangram's word count, because Pangram's API does not return the cost.
 
