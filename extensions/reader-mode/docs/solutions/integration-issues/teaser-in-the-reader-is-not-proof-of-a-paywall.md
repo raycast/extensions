@@ -18,7 +18,7 @@ related_components:
   - src/utils/readability.ts (MIN_CONTINUATION_SHARE, parseArticle)
   - src/utils/browser-extension.ts (getContentFromTab)
 tags: [paywall, next-js, nuxt, __NEXT_DATA__, urql, browser-extension, teaser, payload]
-pull_request: "raycast/extensions#32483, open and unmerged as of 2026-10-17"
+shipped: "raycast/extensions#32483 (merged 2026-10-18)"
 ---
 
 # A teaser in the reader is not proof of a paywall
@@ -82,4 +82,4 @@ Next.js and Nuxt pages ship the data they render from as JSON in a script tag. A
 
 - [paywall-detection-is-not-content-usability.md](paywall-detection-is-not-content-usability.md): a different problem in the same area. That doc is about good bypass candidates being rejected; this one is about a teaser that needed no bypass at all.
 - Still open: when the direct fetch is blocked, the open-tab result is returned without a paywall check (`src/utils/article-loader.ts:293`). A tab that really holds only a teaser, with no payload to recover, is shown as the article.
-- Proposed in raycast/extensions#32483, open and unmerged as of 2026-10-17.
+- Shipped in raycast/extensions#32483, merged 2026-10-18.
