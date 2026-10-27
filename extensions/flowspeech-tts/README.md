@@ -95,18 +95,3 @@ never cancels a server job. No bulk operation deletes unresolved IDs.
 The client validates all required result metadata, correlated normalized UUIDs,
 and complete nonempty, frame-aligned PCM WAV chunks. Retry-After remains effective
 even when reading a response body fails. Unsupported input fields are rejected.
-
-## Development
-
-Run `npm ci`, `npm test`, `npm run lint`, and `npm run test:build` with Node 24.
-Tests can run directly after installation without opening Raycast. `npm test`
-first runs the official distribution build to generate `raycast-env.d.ts` from
-the manifest, then type-checks and runs the tests using those preference types.
-`npm run build` writes a distribution build to local `.build/` without installing
-or launching the extension. Contract, React component, and wrapper tests mock HTTP,
-native Raycast APIs, and playback. The test renderer matches the host API's React
-19.0.0 dependency; its deprecation warning is expected and it is not used in the
-runtime bundle. A child-process test simulates abrupt host termination; it is not
-an actual Raycast UI test. Built-command tests exercise the generated JavaScript.
-No production credits are used. Application testing in Raycast is still required
-before store approval.
