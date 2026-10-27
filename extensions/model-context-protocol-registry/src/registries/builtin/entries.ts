@@ -164,6 +164,22 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "backlink-guard",
+    title: "backlink-guard",
+    description:
+      "Check a link source (directory, awesome list, guest-post site) before you submit your site to it: each site gets an action (skip, look first, free only, low value or submit) and a verdict with the evidence, against Google's link spam policies. It also verifies a listing once it is live (followed or not, and where the link sits), audits your own backlinks, and finds the pages that rank for your keywords, the sites linking to your competitors and not to you, and who Google's AI Overviews and AI assistants cite. It never submits anything. Ten tools: verify, submissions and vet with free=True are free; the others buy data (vet about $0.01 a site plus $0.16 a batch). Local stdio server `backlink-guard` (MIT) from PyPI through `uvx`; every key is optional: GLASSER_API_KEY (or AISA_API_KEY, which questions and asked need) and GOANYAPI_API_KEY, so remove the ones you do not use.",
+    icon: "https://raw.githubusercontent.com/zhuyansen/backlink-guard/main/.claude-plugin/icon.png",
+    homepage: "https://github.com/zhuyansen/backlink-guard",
+    configuration: {
+      command: "uvx",
+      args: ["--with", "mcp", "backlink-guard", "mcp"],
+      env: {
+        GLASSER_API_KEY: "YOUR_API_KEY_HERE",
+        GOANYAPI_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "better-design",
     title: "Better Design",
     description:
