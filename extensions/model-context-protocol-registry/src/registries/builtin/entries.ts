@@ -1627,6 +1627,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "watchgoose",
+    title: "Watchgoose",
+    description:
+      "Monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Connect one Watchgoose project to inspect checks and status history. Read-only access is the default. With explicit read-and-write consent, it can inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, free Watchgoose plan available, no API key to paste.",
+    icon: "https://watchgoose.com/static/img/watchgoose-icon-512.png",
+    homepage: "https://watchgoose.com/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.watchgoose.com/mcp"],
+    },
+    remoteUrl: "https://mcp.watchgoose.com/mcp",
+  },
+  {
     name: "wave-ai",
     title: "Wave AI",
     description:
