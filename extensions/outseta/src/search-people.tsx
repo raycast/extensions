@@ -1,6 +1,6 @@
 import { Icon, Image, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PersonActions, PersonMetadata, usePerson } from "./components/details";
 import { formatDate, personName } from "./lib/outseta/format";
 import { Person } from "./lib/outseta/types";
@@ -11,13 +11,17 @@ export default function Command() {
   const [showingDetail, setShowingDetail] = useCachedState("people-showing-detail", true);
   const [selectedUid, setSelectedUid] = useState<string>();
 
+  const abortable = useRef<AbortController>(null);
   const { data, isLoading, pagination } = useCachedPromise(
     (query: string) => async (options: { page: number }) => {
-      const page = await getClient().searchPeople({ query: query.trim() || undefined, page: options.page });
+      const page = await getClient().searchPeople(
+        { query: query.trim() || undefined, page: options.page },
+        { signal: abortable.current?.signal },
+      );
       return { data: page.items, hasMore: page.hasMore };
     },
     [searchText],
-    { keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search people") },
+    { abortable, keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search people") },
   );
   const settledPagination = useSettledPagination(pagination, isLoading);
 

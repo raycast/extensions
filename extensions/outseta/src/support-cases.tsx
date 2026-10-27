@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, environment, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState, useLocalStorage } from "@raycast/utils";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { PersonView } from "./components/details";
 import { ReplyForm } from "./components/reply-form";
 import { canReply, CaseFilter } from "./lib/outseta/client";
@@ -82,17 +82,18 @@ export default function Command() {
   } = useLocalStorage<string>(`my-agent-uid:${getSubdomain()}`);
   const effectiveFilter = filter === "mine" && !myUid ? "unassigned" : filter;
 
+  const abortable = useRef<AbortController>(null);
   const { data, isLoading, pagination, revalidate } = useCachedPromise(
     (query: string, activeFilter: Filter, me: string | undefined) => async (options: { page: number }) => {
-      const page = await getClient().searchCases({
-        query: query.trim() || undefined,
-        page: options.page,
-        filter: caseFilter(activeFilter, me),
-      });
+      const page = await getClient().searchCases(
+        { query: query.trim() || undefined, page: options.page, filter: caseFilter(activeFilter, me) },
+        { signal: abortable.current?.signal },
+      );
       return { data: page.items, hasMore: page.hasMore };
     },
     [searchText, effectiveFilter, myUid],
     {
+      abortable,
       execute: !isLoadingMe,
       keepPreviousData: true,
       onError: (error) => showErrorToast(error, "Couldn't load cases"),
@@ -164,14 +165,21 @@ function CaseItem(props: {
   filterActions: React.ReactNode;
 }) {
   const { supportCase, myUid } = props;
+  // Cancels the request when the selection moves on, as in usePerson.
+  const detailAbortable = useRef<AbortController>(null);
   const {
     data: detail,
     isLoading,
     revalidate,
-  } = useCachedPromise((uid: string) => getClient().getCase(uid), [supportCase.Uid], {
-    execute: props.selected,
-    onError: (error) => showErrorToast(error, "Couldn't load case"),
-  });
+  } = useCachedPromise(
+    (uid: string) => getClient().getCase(uid, { signal: detailAbortable.current?.signal }),
+    [supportCase.Uid],
+    {
+      abortable: detailAbortable,
+      execute: props.selected,
+      onError: (error) => showErrorToast(error, "Couldn't load case"),
+    },
+  );
   const full = detail ?? supportCase;
   const assignedToMe = !!myUid && supportCase.AssignedToPersonClientIdentifier === myUid;
   const lastActivity = parseDate(supportCase.LastActivity ?? supportCase.SubmittedDateTime);

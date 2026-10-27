@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AccountActions, AccountMetadata, useAccount } from "./components/details";
 import { accountStageColor } from "./lib/outseta/format";
 import { Account } from "./lib/outseta/types";
@@ -11,13 +11,17 @@ export default function Command() {
   const [showingDetail, setShowingDetail] = useCachedState("accounts-showing-detail", true);
   const [selectedUid, setSelectedUid] = useState<string>();
 
+  const abortable = useRef<AbortController>(null);
   const { data, isLoading, pagination } = useCachedPromise(
     (query: string) => async (options: { page: number }) => {
-      const page = await getClient().searchAccounts({ query: query.trim() || undefined, page: options.page });
+      const page = await getClient().searchAccounts(
+        { query: query.trim() || undefined, page: options.page },
+        { signal: abortable.current?.signal },
+      );
       return { data: page.items, hasMore: page.hasMore };
     },
     [searchText],
-    { keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search accounts") },
+    { abortable, keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search accounts") },
   );
   const settledPagination = useSettledPagination(pagination, isLoading);
 

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
 import {
   accountStageColor,
   adminUrl,
@@ -148,18 +149,32 @@ function MembersSubmenu({ account }: { account: Account }) {
   );
 }
 
+// Each row loads its details when selected. The abortable ref cancels the request when the
+// selection moves on, so rows the user has left don't hold up the request queue.
 export function usePerson(uid: string | undefined) {
-  return useCachedPromise((id: string) => getClient().getPerson(id), [uid ?? ""], {
-    execute: !!uid,
-    onError: (error) => showErrorToast(error, "Couldn't load person"),
-  });
+  const abortable = useRef<AbortController>(null);
+  return useCachedPromise(
+    (id: string) => getClient().getPerson(id, { signal: abortable.current?.signal }),
+    [uid ?? ""],
+    {
+      abortable,
+      execute: !!uid,
+      onError: (error) => showErrorToast(error, "Couldn't load person"),
+    },
+  );
 }
 
 export function useAccount(uid: string | undefined) {
-  return useCachedPromise((id: string) => getClient().getAccount(id), [uid ?? ""], {
-    execute: !!uid,
-    onError: (error) => showErrorToast(error, "Couldn't load account"),
-  });
+  const abortable = useRef<AbortController>(null);
+  return useCachedPromise(
+    (id: string) => getClient().getAccount(id, { signal: abortable.current?.signal }),
+    [uid ?? ""],
+    {
+      abortable,
+      execute: !!uid,
+      onError: (error) => showErrorToast(error, "Couldn't load account"),
+    },
+  );
 }
 
 export function PersonView({ uid }: { uid: string }) {

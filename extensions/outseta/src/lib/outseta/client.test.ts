@@ -109,6 +109,24 @@ describe("createClient", () => {
       expect(fetchMock).toHaveBeenCalledTimes(3);
     });
 
+    it("lets requests that were cancelled while waiting give up their place", async () => {
+      vi.useFakeTimers();
+      const fetchMock = stubFetch();
+      const client = createClient(credentials, { fetch: fetchMock });
+      const sent = Array.from({ length: 7 }, (_, i) => client.getPerson(`p${i}`));
+      // Rows the user moved past, then the row they stopped on.
+      const left = Array.from({ length: 12 }, () => new AbortController());
+      const stale = left.map((c, i) => client.getPerson(`left${i}`, { signal: c.signal }));
+      const current = client.getPerson("current");
+      for (const controller of left) controller.abort();
+
+      await Promise.all(stale.map((p) => expect(p).rejects.toMatchObject({ name: "AbortError" })));
+      await vi.advanceTimersByTimeAsync(5_000);
+      await Promise.all([...sent, current]);
+      expect(fetchMock).toHaveBeenCalledTimes(8);
+      expect(requestedUrl(fetchMock, 7).pathname).toBe("/api/v1/crm/people/current");
+    });
+
     it("doesn't pace requests when rateLimit is null", async () => {
       vi.useFakeTimers();
       const fetchMock = stubFetch();

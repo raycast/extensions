@@ -75,11 +75,28 @@ export function retryAfterMs(header: string | null, now = Date.now()): number | 
   return Number.isNaN(date) ? undefined : Math.max(0, date - now);
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** Resolves after ms, or as soon as the signal aborts. */
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener("abort", done, { once: true });
+  });
+}
+
+/** Lets a caller cancel a read it no longer needs, such as the details of a row the user has left. */
+export interface RequestOptions {
+  signal?: AbortSignal;
+}
 
 /**
  * Spaces requests so a burst (moving quickly through list rows loads each row's details) stays
- * inside the limit, and holds every request while Outseta asks to wait after a 429.
+ * inside the limit, and holds every request while Outseta asks to wait after a 429. A request
+ * cancelled while it waits gives up its place without using a slot.
  */
 function createPacer(limit: RateLimit) {
   const sent: number[] = [];
@@ -87,21 +104,22 @@ function createPacer(limit: RateLimit) {
   let queue = Promise.resolve();
 
   return {
-    /** Resolves when the next request may go out. Requests go out in the order they asked. */
-    wait(): Promise<void> {
+    /** Resolves when the next request may go out, in the order they asked. Rejects if the signal aborts first. */
+    wait(signal?: AbortSignal): Promise<void> {
       const turn = queue.then(async () => {
         for (;;) {
+          signal?.throwIfAborted();
           const now = Date.now();
           while (sent[0] !== undefined && now - sent[0] >= limit.windowMs) sent.shift();
           const oldest = sent[0];
           const windowFull = oldest !== undefined && sent.length >= limit.requests ? oldest + limit.windowMs - now : 0;
           const delay = Math.max(pausedUntil - now, windowFull);
           if (delay <= 0) break;
-          await sleep(delay);
+          await sleep(delay, signal);
         }
         sent.push(Date.now());
       });
-      queue = turn;
+      queue = turn.catch(() => undefined);
       return turn;
     },
     pause(ms: number) {
@@ -168,10 +186,17 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
   const rateLimit = options.rateLimit === undefined ? OUTSETA_RATE_LIMIT : options.rateLimit;
   const pacer = rateLimit ? createPacer(rateLimit) : undefined;
 
-  async function request<T>(method: string, path: string, body?: unknown, retried = false): Promise<T> {
-    await pacer?.wait();
+  async function request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    { signal }: RequestOptions = {},
+    retried = false,
+  ): Promise<T> {
+    await pacer?.wait(signal);
     const response = await doFetch(baseUrl + path, {
       method,
+      signal,
       headers: {
         Authorization: authorization,
         Accept: "application/json",
@@ -185,8 +210,8 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
       if (retried) throw new RateLimitError();
       const delay = retryAfterMs(response.headers.get("Retry-After")) ?? retryDelayMs;
       if (pacer) pacer.pause(delay);
-      else await sleep(delay);
-      return request<T>(method, path, body, true);
+      else await sleep(delay, signal);
+      return request<T>(method, path, body, { signal }, true);
     }
     if (!response.ok) {
       throw new OutsetaError(
@@ -199,7 +224,7 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
     return (text ? JSON.parse(text) : undefined) as T;
   }
 
-  async function list<T>(path: string, params: ListParams): Promise<Page<T>> {
+  async function list<T>(path: string, params: ListParams, requestOptions?: RequestOptions): Promise<Page<T>> {
     const pageSize = params.pageSize ?? 25;
     const search = new URLSearchParams({ limit: String(pageSize), offset: String(params.page ?? 0) });
     if (params.query) search.set("q", params.query);
@@ -210,6 +235,8 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
     const result = await request<{ items?: T[]; metadata?: { total?: number; limit?: number; offset?: number } }>(
       "GET",
       `${path}?${search}`,
+      undefined,
+      requestOptions,
     );
     const items = result.items ?? [];
     const total = result.metadata?.total ?? items.length;
@@ -224,24 +251,43 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
   }
 
   return {
-    searchPeople: (params: SearchParams) =>
-      list<Person>("/crm/people", { ...params, fields: PERSON_LIST_FIELDS, pageSize: 100 }),
-    searchAccounts: (params: SearchParams) =>
-      list<Account>("/crm/accounts", { ...params, fields: ACCOUNT_LIST_FIELDS, pageSize: 100 }),
-    searchCases: ({ filter, ...params }: SearchParams & { filter?: CaseFilter }) =>
-      list<Case>("/support/cases", {
-        ...params,
-        fields: CASE_LIST_FIELDS,
-        orderBy: "LastActivity DESC",
-        filters: caseFilterParams(filter ?? {}),
-      }),
+    searchPeople: (params: SearchParams, requestOptions?: RequestOptions) =>
+      list<Person>("/crm/people", { ...params, fields: PERSON_LIST_FIELDS, pageSize: 100 }, requestOptions),
+    searchAccounts: (params: SearchParams, requestOptions?: RequestOptions) =>
+      list<Account>("/crm/accounts", { ...params, fields: ACCOUNT_LIST_FIELDS, pageSize: 100 }, requestOptions),
+    searchCases: ({ filter, ...params }: SearchParams & { filter?: CaseFilter }, requestOptions?: RequestOptions) =>
+      list<Case>(
+        "/support/cases",
+        {
+          ...params,
+          fields: CASE_LIST_FIELDS,
+          orderBy: "LastActivity DESC",
+          filters: caseFilterParams(filter ?? {}),
+        },
+        requestOptions,
+      ),
 
-    getPerson: (uid: string) =>
-      request<Person>("GET", `/crm/people/${encodeURIComponent(uid)}?fields=${PERSON_DETAIL_FIELDS}`),
-    getAccount: (uid: string) =>
-      request<Account>("GET", `/crm/accounts/${encodeURIComponent(uid)}?fields=${ACCOUNT_DETAIL_FIELDS}`),
-    getCase: (uid: string) =>
-      request<Case>("GET", `/support/cases/${encodeURIComponent(uid)}?fields=${CASE_DETAIL_FIELDS}`),
+    getPerson: (uid: string, requestOptions?: RequestOptions) =>
+      request<Person>(
+        "GET",
+        `/crm/people/${encodeURIComponent(uid)}?fields=${PERSON_DETAIL_FIELDS}`,
+        undefined,
+        requestOptions,
+      ),
+    getAccount: (uid: string, requestOptions?: RequestOptions) =>
+      request<Account>(
+        "GET",
+        `/crm/accounts/${encodeURIComponent(uid)}?fields=${ACCOUNT_DETAIL_FIELDS}`,
+        undefined,
+        requestOptions,
+      ),
+    getCase: (uid: string, requestOptions?: RequestOptions) =>
+      request<Case>(
+        "GET",
+        `/support/cases/${encodeURIComponent(uid)}?fields=${CASE_DETAIL_FIELDS}`,
+        undefined,
+        requestOptions,
+      ),
 
     /** Posts the plain text as a reply. Outseta emails it to the customer with agentName, or the company name, as the sender name. */
     async replyToCase(supportCase: Pick<Case, "Uid" | "Status">, text: string) {
