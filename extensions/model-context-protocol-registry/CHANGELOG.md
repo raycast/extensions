@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Paxa Labs MCP Server] - {PR_MERGE_DATE}
+## [Add Paxa Labs MCP Server] - 2026-10-27
 
 - Add Paxa Labs to the official registry: Thai, English and Mandarin text-to-speech played through your speakers or saved to audio files with captions, voice design from a text description, speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server run with `npx -y @paxalabs/mcp` and a Paxa API key.
 
