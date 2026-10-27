@@ -7,6 +7,53 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "wine-labs",
+    title: "Wine Labs",
+    description:
+      "Fine-wine matching, market pricing, auctions, merchant offers and portfolio intelligence. Hosted Streamable HTTP server with browser OAuth; account plans or credits apply. Public connection documentation is MIT licensed; the hosted implementation and data are proprietary.",
+    icon: "https://winelabs.ai/apple-touch-icon.png",
+    homepage: "https://winelabs.ai/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chat.wine-labs.com/mcp"],
+    },
+    remoteUrl: "https://chat.wine-labs.com/mcp",
+  },
+  {
+    name: "rentreboot",
+    title: "RentReboot",
+    description:
+      "NYC apartment search, renter guides and rent data. Public tools work without an account; personal alerts, saved searches and housing lottery status use scoped OAuth. Website alert plans are separate. Public connection documentation is MIT licensed; the hosted implementation is proprietary.",
+    icon: "https://rentreboot.com/favicon-256x256.png",
+    homepage: "https://rentreboot.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rentreboot.com/api/mcp"],
+    },
+    remoteUrl: "https://rentreboot.com/api/mcp",
+  },
+  {
+    name: "pennyocr",
+    title: "PennyOCR",
+    description:
+      "Read PDFs and images as Markdown or text, estimate costs, check credits and enforce per-request spend caps. MIT server. Processing requires your own PennyOCR API key and credits. Replace YOUR_PENNYOCR_API_KEY in PENNYOCR_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://pennyocr.com/icon.svg?icon.33yg1dkff50x-.svg",
+    homepage: "https://pennyocr.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.pennyocr.com",
+        "--header",
+        "Authorization:${PENNYOCR_AUTH_HEADER}",
+      ],
+      env: {
+        PENNYOCR_AUTH_HEADER: "Bearer YOUR_PENNYOCR_API_KEY",
+      },
+    },
+  },
+  {
     name: "blindpay",
     title: "BlindPay",
     description:
