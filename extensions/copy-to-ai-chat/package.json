@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-to-ai-chat",
+  "title": "Copy to AI Chat",
+  "description": "Open Claude, Gemini, ChatGPT, or Grok in Chrome with a typed query or clipboard text.",
+  "icon": "extension-icon.png",
+  "author": "noah-jacksonn",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "cla",
+      "title": "Open Claude",
+      "description": "Open Claude in Chrome, optionally filling the prompt with a typed query without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "cla",
+        "claude"
+      ],
+      "icon": "claude.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Query (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "cla-clipboard",
+      "title": "Open Claude with Clipboard",
+      "description": "Open Claude in Chrome and fill the prompt with clipboard text without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "cla c",
+        "claude",
+        "clipboard"
+      ],
+      "icon": "claude.png"
+    },
+    {
+      "name": "gem",
+      "title": "Open Gemini",
+      "description": "Open Gemini in Chrome, optionally filling the prompt with a typed query without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "gem",
+        "gemini"
+      ],
+      "icon": "gemini.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Query (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "gem-clipboard",
+      "title": "Open Gemini with Clipboard",
+      "description": "Open Gemini in Chrome and fill the prompt with clipboard text without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "gem c",
+        "gemini",
+        "clipboard"
+      ],
+      "icon": "gemini.png"
+    },
+    {
+      "name": "gpt",
+      "title": "Open ChatGPT",
+      "description": "Open ChatGPT in Chrome, optionally filling the prompt with a typed query without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "gpt",
+        "chatgpt"
+      ],
+      "icon": "chatgpt.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Query (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "gpt-clipboard",
+      "title": "Open ChatGPT with Clipboard",
+      "description": "Open ChatGPT in Chrome and fill the prompt with clipboard text without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "gpt c",
+        "chatgpt",
+        "clipboard"
+      ],
+      "icon": "chatgpt.png"
+    },
+    {
+      "name": "grok",
+      "title": "Open Grok",
+      "description": "Open Grok in Chrome, optionally filling the prompt with a typed query without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "grok"
+      ],
+      "icon": "grok.png",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Query (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "grok-clipboard",
+      "title": "Open Grok with Clipboard",
+      "description": "Open Grok in Chrome and fill the prompt with clipboard text without sending.",
+      "mode": "no-view",
+      "keywords": [
+        "grok c",
+        "grok",
+        "clipboard"
+      ],
+      "icon": "grok.png"
+    }
+  ],
+  "scripts": {
+    "build:native": "bash scripts/build-native.sh",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "npm run verify:native && npx @raycast/api@latest publish",
+    "test": "node --test scripts/test-commands.cjs",
+    "verify:native": "node scripts/verify-native.cjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.0"
+  }
+}
