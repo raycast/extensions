@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Paxa Labs MCP Server] - {PR_MERGE_DATE}
+
+- Add Paxa Labs to the official registry: Thai, English and Mandarin text-to-speech played through your speakers or saved to audio files with captions, voice design from a text description, speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server run with `npx -y @paxalabs/mcp` and a Paxa API key.
+
 ## [Add Just Domain and Just Publish MCP Servers] - 2026-10-27
 
 - Add Just Domain. to the official registry: check a domain name, both prices and whether it can transfer in, then register it on justdomain.ai. Hosted remote Streamable HTTP server at https://mcp.justdomain.ai/ with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
