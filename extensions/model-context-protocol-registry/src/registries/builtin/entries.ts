@@ -985,7 +985,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
     remoteUrl: "https://neverapply.co/mcp",
   },
-    {
+  {
     name: "new-term-radar",
     title: "New-Term Radar",
     description:
