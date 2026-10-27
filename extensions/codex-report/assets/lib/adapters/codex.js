@@ -121,9 +121,12 @@ export async function parseSessionFile(filePath, parents, start = null, end = nu
     cwd: label(meta.cwd),
     repositoryUrl: typeof meta.git?.repository_url === "string" ? meta.git.repository_url : null,
     provider: label(meta.model_provider), source: label(meta.originator ?? meta.source),
-    insightsVersion: INSIGHTS_CACHE_VERSION, days,
+    insightsVersion: INSIGHTS_CACHE_VERSION, timeZone: localTimeZone(), days,
   };
 }
+
+// Parsed days are local dates, so a cached session is only valid in the time zone it was grouped in.
+const localTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 // Subagent threads, including Guardian reviews, belong to their root session like Claude
 // subagents; user forks stay separate sessions. Orphans keep the recorded root ID.
@@ -162,6 +165,7 @@ export function codexAdapter() {
     discover: () => sessionFiles(path.join(home, "sessions")),
     parse: parseSessionFile,
     reconcile: reconcileCodexSessions,
+    cacheValid: (parsed) => parsed.timeZone === localTimeZone(),
     createdAt,
     fileId: threadId,
     // Forks replay parent turns with new timestamps; parent turn IDs identify that history.

@@ -10,6 +10,8 @@ import { serial } from "./serial";
 const snapshots = createReportCache(new Cache({ namespace: "reports-v1" }));
 // One CLI run at a time: a cold scan takes about a minute, and killing it on every switch would discard the cache it builds.
 const enqueue = serial();
+// Bumped on refresh; scans started before it finish but must not refill the cleared caches.
+let generation = 0;
 
 /** Runs the bundled CLI on Raycast's own Node runtime, so it needs no separate installation. */
 function runCli(args: string[]): Promise<string> {
@@ -47,6 +49,7 @@ export function useReport(
       return;
     }
     let cancelled = false;
+    const startedIn = generation;
     setState((current) => ({ key, report: current.key === key ? current.report : snapshots.read(key), loading: true }));
     void enqueue(async () => {
       // Reports superseded while waiting never start; a running one finishes, so its result and cache are kept.
@@ -64,8 +67,10 @@ export function useReport(
         ];
         const report = JSON.parse(await runCli(args)) as Report;
         if (report.schemaVersion !== 1) throw new Error("Unsupported report format");
-        snapshots.write(key, report);
-        reports.current.set(key, report);
+        if (startedIn === generation) {
+          snapshots.write(key, report);
+          reports.current.set(key, report);
+        }
         if (!cancelled) setState({ key, report, loading: false });
       } catch (reason) {
         if (cancelled) return;
@@ -86,6 +91,7 @@ export function useReport(
 
   function refresh() {
     // Every agent view must be refreshed after new activity, not just the visible one.
+    generation += 1;
     snapshots.clear();
     reports.current.clear();
     setRevision((value) => value + 1);
