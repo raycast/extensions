@@ -30,7 +30,7 @@
 - Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
 - Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
 
-## [Update Local Commander MCP Server] - 2026-10-26
+## [Update Local Commander MCP Server] - {PR_MERGE_DATE}
 
 - Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
 
