@@ -1107,6 +1107,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "paxa",
+    title: "Paxa Labs",
+    description:
+      "Thai, English and Mandarin speech AI. Speak text aloud through your speakers or save it as audio files with matching captions, using 50 voices that each speak all three languages, mixed sentences included, with direction tags like [whispering]. Design a new voice from a text description. Also speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server (`npx -y @paxalabs/mcp`) with a Paxa API key; new accounts get 100 free credits.",
+    icon: "https://raw.githubusercontent.com/paxalabs/mcp/main/assets/icon.png",
+    homepage: "https://paxalabs.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@paxalabs/mcp"],
+      env: {
+        PAXA_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "perplexity",
     title: "Perplexity",
     description:
