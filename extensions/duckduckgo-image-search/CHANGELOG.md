@@ -1,6 +1,6 @@
 # DuckDuckGo Image Search Changelog
 
-## [Blocked Search Recovery] - {PR_MERGE_DATE}
+## [Blocked Search Recovery] - 2026-10-27
 
 - Replaced the rejected Chrome/131 request profile with a Firefox profile verified against first-page and paginated image searches.
 - Recognize DuckDuckGo's `botnet_challenge` response explicitly and pause requests for one minute across queries and pagination.
