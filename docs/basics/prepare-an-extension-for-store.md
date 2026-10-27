@@ -129,9 +129,7 @@ Use Raycast's built-in **Capture Window** command to take screenshots of your ex
 4. Press the hotkey, tick **Save to Metadata**, and capture the screenshot.
 
 {% hint style="info" %}
-Capture Window composes the screenshot on a background of its own rather than using your desktop wallpaper. You can choose a custom background in the command settings; pick one with good contrast so the extension stands out.
-
-Capture Window warns you if the capture won't meet the Store's requirements, for example if Raycast is too close to a screen edge.
+Capture Window uses your desktop wallpaper, or the Custom Wallpaper set in the command's settings. Choose a wallpaper with good contrast so the extension stands out. You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers).
 {% endhint %}
 
 ### Specifications
