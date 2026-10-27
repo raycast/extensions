@@ -1,5 +1,9 @@
 # code-saver Changelog
 
+## [Node 22 and Node 26 compatibility] - {PR_MERGE_DATE}
+
+- Use matching, verified SQLite downloads with separate caches for each runtime.
+
 ## [Minor Change] - 2025-06-11
 - Make sure we can download `better-sqlite3-multiple-ciphers` as needed.
 
