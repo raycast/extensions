@@ -12,7 +12,8 @@ import {
   type QuotaClient,
 } from "../src/providerQuota";
 import { chartChoices } from "../src/chartChoices";
-import { usageChartSvg } from "../src/usageChart";
+import { chartTitle, usageChartSvg } from "../src/usageChart";
+import { ApiError } from "../src/api";
 import { accountRates, forecast, HOUR, DAY, type Observation } from "../src/usageModel";
 
 const end = "2026-11-01T00:00:00Z",
@@ -153,6 +154,50 @@ test("paid xAI fallback never runs an inference or invents a remaining percentag
   assert.ok(!calls.some((url) => url.includes("chat/completions")));
 });
 
+test("any failed xAI billing read rejects the whole quota without falling back to the profile", async () => {
+  const xai = (billing: (url: string) => unknown) => {
+    const calls: string[] = [];
+    const quota = fetchProviderQuota(
+      { provider: "xai", auth_index: "xai" },
+      client({
+        call: async (_method, url) => {
+          calls.push(url);
+          return url.endsWith("/me") ? { plan: "paid" } : billing(url);
+        },
+      }),
+    );
+    return { quota, calls };
+  };
+  const weekly = { config: { creditUsagePercent: 30, currentPeriod: { type: "weekly", end } } };
+  const fail = (status: number) => {
+    throw new ApiError(`Quota endpoint returned HTTP ${status}`, status);
+  };
+  // 403/404 don't prove an account has no billing, so they fail like any other status.
+  for (const status of [401, 403, 404, 429, 503]) {
+    // One failure must not report the surviving window as a complete quota.
+    const partial = xai((url) => (url.includes("format=credits") ? weekly : fail(status)));
+    await assert.rejects(partial.quota, new RegExp(`HTTP ${status}`));
+    // Total failure must not fall through to the profile and report "no numeric quota".
+    const total = xai(() => fail(status));
+    await assert.rejects(total.quota, new RegExp(`HTTP ${status}`));
+    assert.ok(![...partial.calls, ...total.calls].some((url) => url.endsWith("/me")));
+  }
+  await assert.rejects(xai(() => Promise.reject(new Error("socket hang up"))).quota, /socket hang up/);
+});
+
+test("chart titles drop the quota group unless another window of the provider shares its suffix", () => {
+  assert.equal(chartTitle("antigravity", "Gemini Pro / Weekly", ["Gemini Pro / Weekly"]), "Antigravity / Weekly");
+  assert.equal(
+    chartTitle("antigravity", "Gemini Pro / 5h", ["Gemini Pro / 5h", "Gemini Pro / Weekly"]),
+    "Antigravity / 5h",
+  );
+  assert.equal(
+    chartTitle("antigravity", "Gemini Flash / 5h", ["Gemini Pro / 5h", "Gemini Flash / 5h"]),
+    "Antigravity / Gemini Flash / 5h",
+  );
+  assert.equal(chartTitle("codex", "Weekly", ["5-Hour", "Weekly"]), "Codex / Weekly");
+});
+
 test("Kimi selects only official quota hosts with canonical credential fields taking precedence", () => {
   assert.equal(kimiQuotaUrl({ domain: "ai" }, { provider: "kimi" }), "https://api.kimi.ai/coding/v1/usages");
   assert.equal(
@@ -274,7 +319,7 @@ test("unknown and model-specific providers get their own chart identities and na
   const svg = usageChartSvg({
     mode: "forecast",
     provider: "antigravity",
-    label: "Gemini Pro / 5h",
+    title: chartTitle("antigravity", "Gemini Pro / 5h", ["Gemini Pro / 5h", "Gemini Pro / Weekly"]),
     accounts: 1,
     left: 60,
     rate: null,

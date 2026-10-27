@@ -5,8 +5,8 @@ import { ConnectionId } from "./api";
 import { accountKey, historyStore, observations } from "./history";
 import { QuotaAccount, QuotaResult } from "./quota";
 import { accountRates, DAY, drainHistory, forecast, HOUR, remainingHistory } from "./usageModel";
-import { usageChartSvg } from "./usageChart";
-import { providerInfo, providerTitle } from "./providers";
+import { chartTitle, usageChartSvg } from "./usageChart";
+import { providerInfo } from "./providers";
 
 export function UsageView(props: {
   connection: ConnectionId;
@@ -77,10 +77,11 @@ export function UsageView(props: {
   const since = props.mode === "forecast" ? now - DAY : now - days * DAY;
   const data = props.mode === "forecast" ? remainingHistory(all, keys, since) : drainHistory(all, keys, since, now);
   const historyMessage = history.error ? "Couldn't read history. Reload to try again." : props.historyError;
+  const title = chartTitle(selectedProvider, selectedWindow, windows);
   const svg = usageChartSvg({
     mode: props.mode,
     provider: selectedProvider,
-    label: selectedWindow,
+    title,
     accounts: keys.length,
     left: keys.length > 0 && fresh ? current.reduce((s, o) => s + o.left, 0) : null,
     rate: mean,
@@ -196,7 +197,7 @@ export function UsageView(props: {
   );
   return (
     <Detail
-      navigationTitle={`${providerTitle(selectedProvider)} / ${selectedWindow.split(" / ").at(-1)}`}
+      navigationTitle={title}
       isLoading={props.loading || history.isLoading}
       markdown={`![Quota chart](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`}
       actions={actions}

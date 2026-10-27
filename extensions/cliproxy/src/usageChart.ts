@@ -4,7 +4,8 @@ import { providerInfo, providerTitle } from "./providers";
 export type ChartInput = {
   mode: "forecast" | "drain";
   provider: string;
-  label: string;
+  /** From `chartTitle`, shared with the navigation title. */
+  title: string;
   accounts: number;
   days?: number;
   left: number | null;
@@ -19,9 +20,19 @@ export type ChartInput = {
   historyError?: boolean;
 };
 
+/**
+ * "Antigravity / 5h" for quota window "Gemini Pro / 5h". Keeps the group only when another selectable window of the
+ * provider shares the suffix, e.g. "Gemini Flash / 5h". Full labels stay the window identity everywhere else.
+ */
+export function chartTitle(provider: string, label: string, labels: string[]): string {
+  const suffix = label.split(" / ").at(-1);
+  const shared = labels.some((other) => other !== label && other.split(" / ").at(-1) === suffix);
+  return `${providerTitle(provider)} / ${shared ? label : suffix}`;
+}
+
 /** Compact, borderless chart content. All controls live in native actions. */
 export function usageChartSvg(input: ChartInput): string {
-  const { mode, provider, label, now, since } = input;
+  const { mode, provider, title, now, since } = input;
   const text = input.dark ? "#EDEDEF" : "#1D1D1F";
   const muted = input.dark ? "#96969E" : "#6E6E73";
   const grid = input.dark ? "#FFFFFF" : "#000000";
@@ -38,7 +49,7 @@ export function usageChartSvg(input: ChartInput): string {
   const y = (value: number) => 254 - (value / maximum) * (254 - plotTop);
   const pieces: string[] = [
     `<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${accent}" stop-opacity="0.22"/><stop offset="100%" stop-color="${accent}" stop-opacity="0.02"/></linearGradient></defs>`,
-    svgText(0, 18, `${providerTitle(provider)} / ${label.split(" / ").at(-1)}`, 16, text, "600"),
+    svgText(0, 18, title, 16, text, "600"),
     `<text x="0" y="57" fill="${text}"><tspan font-size="30" font-weight="600">${escape(mode === "forecast" ? (input.left === null ? "Unavailable" : `${Math.round(input.left)}%`) : input.rate === null ? (input.historyError ? "Unavailable" : "Learning") : `${number(input.rate)}%/h`)}</tspan><tspan dx="6" font-size="13" fill="${muted}">${escape(mode === "forecast" ? (input.accounts ? `/ ${input.accounts * 100}% remaining` : "quota not reported") : "observed mean")}</tspan></text>`,
     svgText(
       680,

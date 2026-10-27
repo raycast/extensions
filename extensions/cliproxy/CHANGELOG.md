@@ -6,6 +6,9 @@
 - Collect Antigravity, xAI, Meta, Kimi, Kimi AI and Devin quota alongside Codex and Claude.
 - Discover CPA quota plugins and record their percentage windows in usage history.
 - Preserve provider-specific periods and keep unavailable quota unknown.
+- Keep Codex and Claude reset credits and grants available when a CPA quota plugin reports their windows.
+- Keep the last complete xAI quota, marked stale, when a billing request fails.
+- Name the quota group in chart titles only when two groups share a window, e.g. Gemini Pro and Gemini Flash 5h.
 - Use green Antigravity charts and replace the six existing screenshots with multi-account examples.
 
 ## [Show Quota History Errors] - {PR_MERGE_DATE}

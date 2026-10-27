@@ -23,7 +23,7 @@ try {
           }));
           build.onLoad({ filter: /.*/, namespace: "test" }, () => ({
             contents:
-              "export const getPreferenceValues = () => globalThis.__quotaTestPreferences; export class Cache { get() {} set() {} } export const environment = {appearance: 'dark'};",
+              "export const getPreferenceValues = () => globalThis.__quotaTestPreferences; const caches = new Map(); export class Cache { constructor(options = {}) { this.store = caches.get(options.namespace) ?? new Map(); caches.set(options.namespace, this.store); } get(key) { return this.store.get(key); } set(key, value) { this.store.set(key, value); } } export const environment = {appearance: 'dark'};",
             loader: "js",
           }));
         },

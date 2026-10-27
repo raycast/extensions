@@ -65,7 +65,7 @@ export async function fetchQuota(connection: ConnectionId, file: QuotaAccount): 
   if (file.provider === "codex" || file.provider === "claude") {
     if (file.supports_quota || file.quota_plugin_id) {
       const payload = await pluginQuota(connection, file);
-      if (payload !== null) return parseGroups(payload);
+      if (payload !== null) return { ...parseGroups(payload), reset: await readResetOffer(connection, file) };
     }
     return file.provider === "codex" ? fetchCodexQuota(connection, file) : fetchClaudeQuota(connection, file);
   }
@@ -116,6 +116,22 @@ export async function spendReset(connection: ConnectionId, file: QuotaAccount): 
   return "Rate limits reset";
 }
 
+/**
+ * Plugin quota reports windows but not reset credits/grants, so read those alone (read-only, never spends).
+ * A failed read leaves the offer unknown rather than claiming none or some are available.
+ */
+async function readResetOffer(connection: ConnectionId, file: QuotaAccount): Promise<ResetOffer | null> {
+  try {
+    if (file.provider === "claude") return await readClaudeGrants(connection, file);
+    const credits = expectOk(
+      await upstream(connection, file.auth_index, "GET", CODEX_CREDITS_URL, codexCreditHeaders(file)),
+    );
+    return { kind: "codex", available: codexCredits(credits) ?? 0 };
+  } catch {
+    return null;
+  }
+}
+
 // MARK: Codex
 
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
@@ -133,17 +149,19 @@ function codexHeaders(file: QuotaAccount): Record<string, string> {
   return headers;
 }
 
+function codexCreditHeaders(file: QuotaAccount): Record<string, string> {
+  return { ...codexHeaders(file), Accept: "application/json", "OpenAI-Beta": "codex-1", Originator: "Codex Desktop" };
+}
+
+/** Available reset credits in a credits response, or null if it doesn't say. */
+function codexCredits(body: Record<string, unknown>): number | null {
+  return num(body.available_count) ?? (Array.isArray(body.credits) ? body.credits.length : null);
+}
+
 async function fetchCodexQuota(connection: ConnectionId, file: QuotaAccount): Promise<Quota> {
-  const headers = codexHeaders(file);
-  const creditHeaders = {
-    ...headers,
-    Accept: "application/json",
-    "OpenAI-Beta": "codex-1",
-    Originator: "Codex Desktop",
-  };
   const [usage, credits] = await Promise.all([
-    upstream(connection, file.auth_index, "GET", CODEX_USAGE_URL, headers),
-    upstream(connection, file.auth_index, "GET", CODEX_CREDITS_URL, creditHeaders).catch(() => null),
+    upstream(connection, file.auth_index, "GET", CODEX_USAGE_URL, codexHeaders(file)),
+    upstream(connection, file.auth_index, "GET", CODEX_CREDITS_URL, codexCreditHeaders(file)).catch(() => null),
   ]);
   const payload = expectOk(usage);
 
@@ -164,7 +182,8 @@ async function fetchCodexQuota(connection: ConnectionId, file: QuotaAccount): Pr
   const available =
     num(creditBody.available_count) ??
     num(record(payload.rate_limit_reset_credits).available_count) ??
-    (Array.isArray(creditBody.credits) ? creditBody.credits.length : 0);
+    codexCredits(creditBody) ??
+    0;
 
   return {
     plan: str(payload.plan_type) ?? file.id_token?.plan_type ?? null,
@@ -258,7 +277,7 @@ function claudeFableLimit(payload: Record<string, unknown>): QuotaWindow | null 
 
 type ClaudeGrantStatus = Extract<ResetOffer, { kind: "claude" }>;
 
-/** Fresh read of the reset-grant program, used right before spending one. */
+/** Read-only fetch of the reset-grant program, used for plugin quota and right before spending one. */
 async function readClaudeGrants(connection: ConnectionId, file: QuotaAccount): Promise<ClaudeGrantStatus> {
   const res = await upstream(
     connection,

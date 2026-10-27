@@ -84,7 +84,7 @@ test("history writes survive concurrent samplers, malformed files, restart and r
 });
 
 test("chart output marks the forecast as dashed and preserves missing-data gaps", () => {
-  const svg = usageChartSvg({ mode: "forecast", provider: "codex", label: "Weekly", accounts: 1, left: 80, rate: 2, observedHours: 5, history: [{ at: start, value: 80 }], projection: [{ at: start, value: 80 }, { at: start + DAY, value: 32 }], now: start, since: start - DAY, dark: true });
+  const svg = usageChartSvg({ mode: "forecast", provider: "codex", title: "Codex / Weekly", accounts: 1, left: 80, rate: 2, observedHours: 5, history: [{ at: start, value: 80 }], projection: [{ at: start, value: 80 }, { at: start + DAY, value: 32 }], now: start, since: start - DAY, dark: true });
   assert.match(svg, /stroke-dasharray="5 4"/);
   assert.ok(!svg.includes("NaN") && !svg.includes("Infinity"));
 });
@@ -102,7 +102,7 @@ test("forecast marks exhaustion before an hourly endpoint", () => {
 
 test("history write failures stay visible over cached history in both graph modes", () => {
   for (const mode of ["forecast", "drain"] as const) {
-    const svg = usageChartSvg({mode,provider:"codex",label:"Weekly",accounts:1,left:80,rate:2,observedHours:5,history:[{at:start-HOUR,value:82},{at:start,value:80}],projection:[{at:start,value:80},{at:start+DAY,value:32}],now:start,since:start-DAY,dark:true,historyError:true,message:"Couldn't save history: disk <full> & unavailable."});
+    const svg = usageChartSvg({mode,provider:"codex",title:"Codex / Weekly",accounts:1,left:80,rate:2,observedHours:5,history:[{at:start-HOUR,value:82},{at:start,value:80}],projection:[{at:start,value:80},{at:start+DAY,value:32}],now:start,since:start-DAY,dark:true,historyError:true,message:"Couldn't save history: disk <full> & unavailable."});
     assert.ok(svg.includes("Couldn't save history: disk &lt;full&gt; &amp; unavailable."));
     assert.ok(svg.includes('<path d="M'));
     assert.ok(svg.includes('height="298"'));
@@ -111,7 +111,7 @@ test("history write failures stay visible over cached history in both graph mode
 
 test("history read failures explain unavailability instead of asking for more samples", () => {
   for (const mode of ["forecast", "drain"] as const) {
-    const svg = usageChartSvg({mode,provider:"codex",label:"Weekly",accounts:1,left:80,rate:null,observedHours:0,history:[],projection:null,now:start,since:start-DAY,dark:false,historyError:true,message:"Couldn't read history. Reload to try again."});
+    const svg = usageChartSvg({mode,provider:"codex",title:"Codex / Weekly",accounts:1,left:80,rate:null,observedHours:0,history:[],projection:null,now:start,since:start-DAY,dark:false,historyError:true,message:"Couldn't read history. Reload to try again."});
     assert.ok(svg.includes("Couldn't read history. Reload to try again."));
     assert.ok(svg.includes("History unavailable"));
     assert.ok(!svg.includes("Collect at least 1 observed hour") && !svg.includes("Learning your usage") && !svg.includes(">Learning<"));

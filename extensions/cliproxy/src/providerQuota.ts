@@ -74,11 +74,14 @@ export async function fetchProviderQuota(file: QuotaAccount, client: QuotaClient
         "x-grok-client-version": "1.0.46",
         "User-Agent": "grok-pager/1.0.46 grok-shell/1.0.46 (macos; aarch64)",
       };
-      const results = await Promise.allSettled([
-        client.call("GET", "https://cli-chat-proxy.grok.com/v1/billing?format=credits", headers),
-        client.call("GET", "https://cli-chat-proxy.grok.com/v1/billing", headers),
-      ]);
-      const quotas = results.flatMap((r) => (r.status === "fulfilled" ? [parseXai(r.value)] : []));
+      // All or nothing: any failed billing read throws, so the cached quota stays whole and is marked stale.
+      // No HTTP status proves an account lacks billing, so 403/404 are failures too.
+      const quotas = (
+        await Promise.all([
+          client.call("GET", "https://cli-chat-proxy.grok.com/v1/billing?format=credits", headers),
+          client.call("GET", "https://cli-chat-proxy.grok.com/v1/billing", headers),
+        ])
+      ).map(parseXai);
       const windows = [...new Map(quotas.flatMap((q) => q.windows).map((w) => [w.label, w])).values()];
       if (windows.length) return { plan: quotas.find((q) => q.plan)?.plan ?? null, windows, reset: null };
       // Paid API-key accounts need not expose subscription percentages. A profile read does not spend credits.
