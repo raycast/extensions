@@ -1,36 +1,27 @@
 import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ForecastView } from "./forecast-view";
 import { geocode, type GeocodeResult } from "./nominatim";
 import { RenameFavoriteForm } from "./rename-favorite-form";
 import { SHORTCUTS } from "./shortcuts";
 import { locationId, locationTitle, makeLocation, useFavorites, useRecents, type SavedLocation } from "./storage";
 
-// Nominatim allows at most one request per second and no search-as-you-type, so wait until the
-// user has paused for about that long.
-const DEBOUNCE_MS = 1000;
-const MIN_QUERY_LENGTH = 3;
 const RECENTS_VISIBLE = 8;
 
 export default function SearchWeather() {
   const [text, setText] = useState("");
-  const [debounced, setDebounced] = useState("");
+  // Nominatim's usage policy forbids search-as-you-type, so a lookup only runs once the user
+  // submits the query with the Search action. Typing just filters the saved places.
+  const [submitted, setSubmitted] = useState("");
+  const query = text.trim();
+  const showSearchResults = query.length > 0 && query === submitted;
 
-  useEffect(() => {
-    const handle = setTimeout(() => setDebounced(text.trim()), DEBOUNCE_MS);
-    return () => clearTimeout(handle);
-  }, [text]);
-
-  const showSearchResults = debounced.length >= MIN_QUERY_LENGTH;
   const abortable = useRef<AbortController>(null);
   const { data: results, isLoading } = useCachedPromise(
-    async (query: string) => {
-      if (query.length < MIN_QUERY_LENGTH) return [];
-      return geocode(query, abortable.current?.signal);
-    },
-    [debounced],
-    { keepPreviousData: true, abortable },
+    async (submittedQuery: string) => geocode(submittedQuery, abortable.current?.signal),
+    [submitted],
+    { keepPreviousData: true, abortable, execute: submitted.length > 0 },
   );
 
   const { favorites, addFavorite, removeFavorite, moveFavorite, renameFavorite } = useFavorites();
@@ -42,7 +33,10 @@ export default function SearchWeather() {
     [recents, favorites],
   );
   const { data: sortedRecents, visitItem, resetRanking } = useFrecencySorting(recentsExcludingPinned);
-  const visibleRecents = sortedRecents.slice(0, RECENTS_VISIBLE);
+  const matchingFavorites = favorites.filter((favorite) => matchesQuery(favorite, query));
+  const visibleRecents = sortedRecents.filter((recent) => matchesQuery(recent, query)).slice(0, RECENTS_VISIBLE);
+  // Reordering a filtered list would move favorites past neighbours the user can't see.
+  const canReorder = query.length === 0;
 
   // Why: visiting a forecast both adds the location to recents (storage) and bumps frecency.
   const onVisit = useCallback(
@@ -59,9 +53,21 @@ export default function SearchWeather() {
       searchBarPlaceholder="Search a place − Stockholm, Göteborg, Tromsø…"
       onSearchTextChange={setText}
     >
-      {!showSearchResults && favorites.length > 0 && (
+      {!showSearchResults && query.length > 0 && (
+        <List.Item
+          title={`Search for “${query}”`}
+          icon={Icon.MagnifyingGlass}
+          actions={
+            <ActionPanel>
+              <Action title="Search" icon={Icon.MagnifyingGlass} onAction={() => setSubmitted(query)} />
+            </ActionPanel>
+          }
+        />
+      )}
+
+      {!showSearchResults && matchingFavorites.length > 0 && (
         <List.Section title="Favorites">
-          {favorites.map((favorite, index) => (
+          {matchingFavorites.map((favorite, index) => (
             <SavedLocationItem
               key={favorite.id}
               location={favorite}
@@ -71,10 +77,14 @@ export default function SearchWeather() {
               removeFavorite={removeFavorite}
               renameFavorite={renameFavorite}
               onVisit={onVisit}
-              reorder={{
-                moveUp: index > 0 ? () => moveFavorite(favorite.id, -1) : undefined,
-                moveDown: index < favorites.length - 1 ? () => moveFavorite(favorite.id, 1) : undefined,
-              }}
+              reorder={
+                canReorder
+                  ? {
+                      moveUp: index > 0 ? () => moveFavorite(favorite.id, -1) : undefined,
+                      moveDown: index < favorites.length - 1 ? () => moveFavorite(favorite.id, 1) : undefined,
+                    }
+                  : undefined
+              }
             />
           ))}
         </List.Section>
@@ -99,11 +109,11 @@ export default function SearchWeather() {
         </List.Section>
       )}
 
-      {!showSearchResults && favorites.length === 0 && visibleRecents.length === 0 && (
+      {query.length === 0 && favorites.length === 0 && visibleRecents.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Type a place name"
-          description="Star a forecast (⌘F) to pin it here for next time."
+          description="Press ↵ to search. Star a forecast (⌘F) to pin it here for next time."
         />
       )}
 
@@ -125,6 +135,11 @@ export default function SearchWeather() {
         ))}
     </List>
   );
+}
+
+function matchesQuery(location: SavedLocation, query: string): boolean {
+  const needle = query.toLowerCase();
+  return [location.nickname, location.label].some((name) => name?.toLowerCase().includes(needle));
 }
 
 interface ItemActionDeps {
@@ -170,7 +185,7 @@ function SavedLocationItem({
             title="Show Forecast"
             icon={Icon.Cloud}
             onPush={() => onVisit(location)}
-            target={<ForecastView lat={location.lat} lon={location.lon} label={title} />}
+            target={<ForecastView lat={location.lat} lon={location.lon} label={location.label} />}
           />
           <Action
             title={pinned ? "Remove from Favorites" : "Add to Favorites"}

@@ -115,6 +115,29 @@ export function ForecastView({ lat, lon, label }: ForecastViewProps) {
     );
   }
 
+  // Refresh lives on the forecast rows, so a failed first load would otherwise leave nothing to retry from.
+  if (error && !data) {
+    return (
+      <List isLoading={isLoading} navigationTitle={locationTitle(location)}>
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          title="Could not load forecast"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   // The current temperature rides along in the window title, so it's readable even with a day
   // expanded or the search bar focused.
   const current = view?.today[0]?.data.air_temperature;

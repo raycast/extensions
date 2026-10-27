@@ -4,7 +4,7 @@ Raycast weather forecasts from [SMHI](https://www.smhi.se/) − no API key requi
 
 ## Commands
 
-- **Search Weather** − type a place name, get hourly + multi-day forecasts. ⌘D opens a detail pane: humidity, wind, gust, pressure, visibility, cloud cover by layer, precipitation probability/amount/type and more.
+- **Search Weather** − type a place name and press ↵, get hourly + multi-day forecasts. Typing also filters your favorites and recents. ⌘D opens a detail pane: humidity, wind, gust, pressure, visibility, cloud cover by layer, precipitation probability/amount/type and more.
 
 ## How it works
 

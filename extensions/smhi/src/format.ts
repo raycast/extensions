@@ -4,19 +4,19 @@ import type { SmhiTimeEntry } from "./smhi";
 // Hardcoding avoids dragging in a tz library and is correct for the target audience.
 export const DISPLAY_TZ = "Europe/Stockholm";
 
-// Why: SMHI's own UI uses Swedish locale conventions (comma decimal separator). Numbers in the
-// extension follow the same convention so they read naturally to the Nordic audience.
-const NUMBER_LOCALE = "sv-SE";
+// Raycast only supports US English, so numbers use its conventions (period decimals). Times stay
+// on a 24-hour clock via `hourCycle`, which is what the Nordic forecasts are read in.
+const LOCALE = "en-US";
 
 export function formatDecimal(n: number, decimals: number = 1): string {
-  return roundedWithoutNegativeZero(n, decimals).toLocaleString(NUMBER_LOCALE, {
+  return roundedWithoutNegativeZero(n, decimals).toLocaleString(LOCALE, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
 }
 
 // Rounding a small negative number leaves a signed zero, and the formatter spells that out:
-// -0.4 °C becomes "−0°" and -0.04 °C becomes "−0,0 °C", both of which read as a glitch. Adding
+// -0.4 °C becomes "-0°" and -0.04 °C becomes "-0.0 °C", both of which read as a glitch. Adding
 // zero collapses -0 back to 0. Hovering either side of freezing is the normal state of a Nordic
 // forecast, so this is a common case rather than a corner one.
 function roundedWithoutNegativeZero(n: number, decimals: number): number {
@@ -24,19 +24,18 @@ function roundedWithoutNegativeZero(n: number, decimals: number): number {
   return Math.round(n * factor) / factor + 0;
 }
 
-// Whole numbers with no thousands separator: sv-SE would group 1034 hPa as "1 034 hPa".
+// Whole numbers with no thousands separator: grouping would render 1034 hPa as "1,034 hPa".
 export function formatInteger(n: number): string {
-  return n.toLocaleString(NUMBER_LOCALE, { maximumFractionDigits: 0, useGrouping: false });
+  return n.toLocaleString(LOCALE, { maximumFractionDigits: 0, useGrouping: false });
 }
 
-// Routed through the locale formatter rather than a template so a sub-zero temperature gets the
-// same U+2212 minus as the detail pane, instead of an ASCII hyphen: "−6°", not "-6°".
+// Routed through formatDecimal rather than Math.round so a temperature just below freezing reads
+// "0°", not "-0°".
 export function formatTemp(c: number): string {
   return `${formatDecimal(c, 0)}°`;
 }
 
-// Full-precision temperature with unit, for the detail pane. Uses the same comma decimal as every
-// other number in the extension, since `toFixed` would render a dot and break the convention.
+// Full-precision temperature with unit, for the detail pane.
 export function formatTempExact(c: number): string {
   return `${formatDecimal(c)} °C`;
 }
@@ -62,7 +61,7 @@ export function formatWind(speedMs: number, fromDegrees: number, gustMs?: number
   return `${label} ${arrow} ${speed}${gust}`;
 }
 
-// Compact precipitation amount string used in row accessories: comma decimal, minus-sign range,
+// Compact precipitation amount string used in row accessories: minus-sign range,
 // no `mm` suffix (the accompanying probability pill makes the column's meaning unambiguous).
 // SMHI shows the range from the ensemble's min to max.
 export function formatPrecipAmount(minMm: number, maxMm: number): string {
@@ -88,15 +87,16 @@ export function feelsLike(tempC: number, windMs: number, humidityPct: number): n
 }
 
 export function formatTime(iso: string, timeZone: string = DISPLAY_TZ): string {
-  return new Date(iso).toLocaleTimeString(NUMBER_LOCALE, { hour: "2-digit", minute: "2-digit", timeZone });
+  return new Date(iso).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone });
 }
 
-// Same clock time with the zone spelled out ("01:00 CEST"), so a reader outside the Nordics knows
+// Same clock time with the zone spelled out ("01:00 GMT+2"), so a reader outside the Nordics knows
 // which wall clock the forecast is on without a separate row for it.
 export function formatTimeZoned(iso: string, timeZone: string = DISPLAY_TZ): string {
-  return new Date(iso).toLocaleTimeString(NUMBER_LOCALE, {
+  return new Date(iso).toLocaleTimeString(LOCALE, {
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
     timeZone,
     timeZoneName: "short",
   });
@@ -105,7 +105,7 @@ export function formatTimeZoned(iso: string, timeZone: string = DISPLAY_TZ): str
 // Hour-only time, used for row titles where the entry is always on the hour and SMHI shows
 // just "16" rather than "16:00".
 export function formatHour(iso: string, timeZone: string = DISPLAY_TZ): string {
-  return new Date(iso).toLocaleTimeString(NUMBER_LOCALE, { hour: "2-digit", timeZone });
+  return new Date(iso).toLocaleTimeString(LOCALE, { hour: "2-digit", hourCycle: "h23", timeZone });
 }
 
 export function formatDay(iso: string, timeZone: string = DISPLAY_TZ): string {
