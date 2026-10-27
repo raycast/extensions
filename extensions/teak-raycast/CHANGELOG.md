@@ -1,6 +1,6 @@
 # Changelog
 
-## [Saving again, cleaner lists and fixes] - {PR_MERGE_DATE}
+## [Saving again, cleaner lists and fixes] - 2026-10-27
 
 - Saving a link that's already in Teak moves that card to the top of your library, and back from Archive, instead of stopping at "Already saved"
 - A type menu beside the search bar filters by Links, Text, Quotes, Images and more, in step with `type:`
