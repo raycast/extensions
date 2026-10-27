@@ -15,6 +15,7 @@ export type ChartInput = {
   since: number;
   dark: boolean;
   message?: string;
+  historyError?: boolean;
 };
 
 /** Compact, borderless chart content. All controls live in native actions. */
@@ -30,11 +31,14 @@ export function usageChartSvg(input: ChartInput): string {
       ? Math.max(100, input.accounts * 100)
       : Math.max(1, ...input.history.map((p) => p.value ?? 0)) * 1.2;
   const x = (at: number) => 50 + ((at - since) / (end - since)) * 610;
-  const y = (value: number) => 254 - (value / maximum) * 166;
+  const message = input.message?.trim();
+  // Reserve a warning row inside the existing canvas, even when cached data is still plotted.
+  const plotTop = message ? 108 : 88;
+  const y = (value: number) => 254 - (value / maximum) * (254 - plotTop);
   const pieces: string[] = [
     `<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${accent}" stop-opacity="0.22"/><stop offset="100%" stop-color="${accent}" stop-opacity="0.02"/></linearGradient></defs>`,
     svgText(0, 18, `${provider === "claude" ? "Claude" : "Codex"} / ${label}`, 16, text, "600"),
-    `<text x="0" y="57" fill="${text}"><tspan font-size="30" font-weight="600">${escape(mode === "forecast" ? (input.left === null ? "Unavailable" : `${Math.round(input.left)}%`) : input.rate === null ? "Learning" : `${number(input.rate)}%/h`)}</tspan><tspan dx="6" font-size="13" fill="${muted}">${escape(mode === "forecast" ? `/ ${input.accounts * 100}% remaining` : "observed mean")}</tspan></text>`,
+    `<text x="0" y="57" fill="${text}"><tspan font-size="30" font-weight="600">${escape(mode === "forecast" ? (input.left === null ? "Unavailable" : `${Math.round(input.left)}%`) : input.rate === null ? (input.historyError ? "Unavailable" : "Learning") : `${number(input.rate)}%/h`)}</tspan><tspan dx="6" font-size="13" fill="${muted}">${escape(mode === "forecast" ? `/ ${input.accounts * 100}% remaining` : "observed mean")}</tspan></text>`,
     svgText(
       680,
       55,
@@ -46,10 +50,11 @@ export function usageChartSvg(input: ChartInput): string {
       "500",
       "end",
     ),
-    svgText(50, 87, mode === "forecast" ? "Remaining" : "Drain rate / 1-hour averages", 12, accent),
+    svgText(50, plotTop - 1, mode === "forecast" ? "Remaining" : "Drain rate / 1-hour averages", 12, accent),
   ];
-  pieces.push(svgText(660, 87, "100% = 1 account", 11, muted, "400", "end"));
-  if (mode === "forecast") pieces.push(svgText(150, 87, "··· Projected", 12, muted));
+  pieces.push(svgText(660, plotTop - 1, "100% = 1 account", 11, muted, "400", "end"));
+  if (mode === "forecast") pieces.push(svgText(150, plotTop - 1, "··· Projected", 12, muted));
+  if (message) pieces.push(svgText(0, 80, message, 11, input.historyError ? "#E8A23A" : muted));
   for (let i = 0; i <= 4; i++) {
     const value = (maximum * i) / 4;
     pieces.push(`<line x1="50" y1="${y(value)}" x2="660" y2="${y(value)}" stroke="${grid}" stroke-opacity="0.08"/>`);
@@ -90,8 +95,10 @@ export function usageChartSvg(input: ChartInput): string {
   };
   draw(input.history, false);
   if (mode === "forecast") {
-    pieces.push(`<line x1="${x(now)}" y1="88" x2="${x(now)}" y2="254" stroke="${muted}" stroke-dasharray="2 4"/>`);
-    pieces.push(svgText(x(now) + 5, 117, "Now", 11, muted));
+    pieces.push(
+      `<line x1="${x(now)}" y1="${plotTop}" x2="${x(now)}" y2="254" stroke="${muted}" stroke-dasharray="2 4"/>`,
+    );
+    pieces.push(svgText(x(now) + 5, plotTop + 29, "Now", 11, muted));
     if (input.projection) draw(input.projection, true);
   }
   const hasData = input.history.some((p) => p.value !== null) || (mode === "forecast" && input.projection);
@@ -100,7 +107,13 @@ export function usageChartSvg(input: ChartInput): string {
       svgText(
         mode === "forecast" ? 390 : 355,
         185,
-        input.left === null ? "Quota refresh incomplete" : input.accounts ? "Learning your usage" : "No quota data",
+        input.historyError
+          ? "History unavailable"
+          : input.left === null
+            ? "Quota refresh incomplete"
+            : input.accounts
+              ? "Learning your usage"
+              : "No quota data",
         17,
         text,
         "500",
@@ -111,11 +124,13 @@ export function usageChartSvg(input: ChartInput): string {
       svgText(
         mode === "forecast" ? 390 : 355,
         208,
-        input.left === null
-          ? "Reload quota to include every account"
-          : input.accounts
-            ? "Collect at least 1 observed hour per account"
-            : "Reload quota to collect the first sample",
+        input.historyError
+          ? "Reload quota to try again."
+          : input.left === null
+            ? "Reload quota to include every account"
+            : input.accounts
+              ? "Collect at least 1 observed hour per account"
+              : "Reload quota to collect the first sample",
         12,
         muted,
         "400",

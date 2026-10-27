@@ -1,5 +1,9 @@
 # CLIProxyAPI Changelog
 
+## [Show Quota History Errors] - {PR_MERGE_DATE}
+
+- Show history read and write failures on quota charts, including when cached history is available.
+
 ## [Usage Charts and Forecasts] - {PR_MERGE_DATE}
 
 - Add bundled Antigravity, Meta and xAI icons to account and provider views.

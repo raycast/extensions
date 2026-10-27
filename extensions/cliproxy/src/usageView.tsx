@@ -69,6 +69,7 @@ export function UsageView(props: {
   const mean = complete ? keys.reduce((s, key) => s + rates.find((r) => r.account === key)!.rate, 0) : null;
   const since = props.mode === "forecast" ? now - DAY : now - days * DAY;
   const data = props.mode === "forecast" ? remainingHistory(all, keys, since) : drainHistory(all, keys, since, now);
+  const historyMessage = history.error ? "Couldn't read history. Reload to try again." : props.historyError;
   const svg = usageChartSvg({
     mode: props.mode,
     provider: selectedProvider,
@@ -85,15 +86,14 @@ export function UsageView(props: {
     now,
     since,
     dark: environment.appearance === "dark",
+    historyError: Boolean(historyMessage),
     message:
-      props.historyError ??
-      (history.error
-        ? "Couldn't read history. Reload to try again."
-        : !fresh
-          ? "Some accounts failed to refresh; projection is paused."
-          : current.some((o) => !o.resetsAt || o.resetsAt <= now)
-            ? "Unknown reset times are projected without refills."
-            : undefined),
+      historyMessage ??
+      (!fresh
+        ? "Some accounts failed to refresh; projection is paused."
+        : current.some((o) => !o.resetsAt || o.resetsAt <= now)
+          ? "Unknown reset times are projected without refills."
+          : undefined),
   });
   const choices = chartChoices(providers, windows);
   const applyChoice = (value: string) => {

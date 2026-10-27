@@ -99,3 +99,21 @@ test("forecast marks exhaustion before an hourly endpoint", () => {
  const points = forecast([sample(0,10,"a",start+2*HOUR)],[{account:"a",rate:20,observedMs:HOUR,intervals:4}],start,1)!;
  assert.ok(points.some(p=>p.at===start+HOUR/2 && p.value===0));
 });
+
+test("history write failures stay visible over cached history in both graph modes", () => {
+  for (const mode of ["forecast", "drain"] as const) {
+    const svg = usageChartSvg({mode,provider:"codex",label:"Weekly",accounts:1,left:80,rate:2,observedHours:5,history:[{at:start-HOUR,value:82},{at:start,value:80}],projection:[{at:start,value:80},{at:start+DAY,value:32}],now:start,since:start-DAY,dark:true,historyError:true,message:"Couldn't save history: disk <full> & unavailable."});
+    assert.ok(svg.includes("Couldn't save history: disk &lt;full&gt; &amp; unavailable."));
+    assert.ok(svg.includes('<path d="M'));
+    assert.ok(svg.includes('height="298"'));
+  }
+});
+
+test("history read failures explain unavailability instead of asking for more samples", () => {
+  for (const mode of ["forecast", "drain"] as const) {
+    const svg = usageChartSvg({mode,provider:"codex",label:"Weekly",accounts:1,left:80,rate:null,observedHours:0,history:[],projection:null,now:start,since:start-DAY,dark:false,historyError:true,message:"Couldn't read history. Reload to try again."});
+    assert.ok(svg.includes("Couldn't read history. Reload to try again."));
+    assert.ok(svg.includes("History unavailable"));
+    assert.ok(!svg.includes("Collect at least 1 observed hour") && !svg.includes("Learning your usage") && !svg.includes(">Learning<"));
+  }
+});
