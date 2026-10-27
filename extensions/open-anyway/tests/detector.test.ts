@@ -30,6 +30,19 @@ describe("parseGatekeeperEvents", () => {
     assert.equal(result.timestamp, "2026-10-27 15:51:58.008784+0530");
   });
 
+  it("rejects denial breadcrumbs with (bundle_id: (null)) as invalid bundle ID", () => {
+    const events: UnifiedLogEvent[] = [
+      {
+        timestamp: "2026-10-27 15:51:58.008784+0530",
+        eventMessage:
+          "Adding Gatekeeper denial breadcrumb (open): PST: (path: (null)), (team: (null)), (id: (null)), (bundle_id: (null))",
+      },
+    ];
+
+    const result = parseGatekeeperEvents(events);
+    assert.equal(result, null);
+  });
+
   it("returns null if the denial breadcrumb was subsequently cleared", () => {
     const events: UnifiedLogEvent[] = [
       {
@@ -108,26 +121,56 @@ describe("resolveAppNameFromBundleId", () => {
     assert.equal(resolved.appPath, "/Applications/AwesomeTool.app");
   });
 
-  it("falls back to bundle id suffix when no .app is found", async () => {
+  it("returns null when no .app is found in Spotlight (never guesses from bundle ID suffix)", async () => {
     const mockRunner = async () => {
       return { stdout: "", stderr: "" };
     };
 
     const resolved = await resolveAppNameFromBundleId("com.company.GreatUtility", mockRunner);
-    assert.ok(resolved);
-    assert.equal(resolved.displayName, "GreatUtility");
+    assert.equal(resolved, null);
   });
 
-  it("sanitizes dangerous characters in bundleId before query execution", async () => {
-    let capturedArgs: string[] = [];
+  it("returns null for null, empty, nil, or malformed bundle identifiers", async () => {
+    const mockRunner = async () => {
+      return { stdout: "", stderr: "" };
+    };
+
+    assert.equal(await resolveAppNameFromBundleId("(null)", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("(null", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("null", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("nil", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("   ", mockRunner), null);
+    assert.equal(await resolveAppNameFromBundleId("singleword", mockRunner), null);
+  });
+
+  it("correctly resolves display name differing from bundle ID suffix when Spotlight succeeds", async () => {
     const mockRunner = async (file: string, args: string[]) => {
-      capturedArgs = args;
+      if (file === "mdfind") {
+        return { stdout: "/Applications/VLC.app\n", stderr: "" };
+      }
+      if (file === "mdls") {
+        return { stdout: "VLC media player\n", stderr: "" };
+      }
+      return { stdout: "", stderr: "" };
+    };
+
+    const resolved = await resolveAppNameFromBundleId("org.videolan.vlc", mockRunner);
+    assert.ok(resolved);
+    assert.equal(resolved.displayName, "VLC media player");
+    assert.equal(resolved.appPath, "/Applications/VLC.app");
+  });
+
+  it("rejects dangerous or command-injection characters in bundleId without invoking runner", async () => {
+    let runnerCalled = false;
+    const mockRunner = async () => {
+      runnerCalled = true;
       return { stdout: "", stderr: "" };
     };
 
     const resolved = await resolveAppNameFromBundleId('com.test.app"; rm -rf /; "', mockRunner);
-    assert.ok(resolved);
-    assert.equal(capturedArgs[0], 'kMDItemCFBundleIdentifier == "com.test.apprm-rf"');
+    assert.equal(resolved, null);
+    assert.equal(runnerCalled, false);
   });
 
   it("returns null for empty or all-special-character bundleId", async () => {
@@ -135,7 +178,7 @@ describe("resolveAppNameFromBundleId", () => {
       return { stdout: "", stderr: "" };
     };
 
-    const resolved = await resolveAppNameFromBundleId('!@#$%^&*()', mockRunner);
+    const resolved = await resolveAppNameFromBundleId("!@#$%^&*()", mockRunner);
     assert.equal(resolved, null);
   });
 });

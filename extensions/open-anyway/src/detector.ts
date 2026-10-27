@@ -26,6 +26,26 @@ export interface UnifiedLogEvent {
 }
 
 /**
+ * Validates that a string is a legitimate reverse-DNS bundle identifier.
+ * Rejects null/nil representations from logs, empty values, or malformed strings.
+ */
+export function isValidBundleId(id?: string | null): boolean {
+  if (!id) return false;
+  let trimmed = id.trim();
+  if (trimmed.startsWith("(") && trimmed.endsWith(")")) {
+    trimmed = trimmed.slice(1, -1).trim();
+  }
+  if (!trimmed) return false;
+
+  const lower = trimmed.toLowerCase();
+  if (lower === "null" || lower === "(null" || lower === "null)" || lower === "nil" || lower === "unknown") {
+    return false;
+  }
+
+  return /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/.test(trimmed);
+}
+
+/**
  * Parses unified log events from syspolicyd to identify active Gatekeeper denial breadcrumbs.
  * When macOS blocks an untrusted app, syspolicyd writes:
  *   "Adding Gatekeeper denial breadcrumb (open): PST: (path: ...), (team: ...), (id: <bundle_id>), (bundle_id: <bundle_id>)"
@@ -46,20 +66,36 @@ export function parseGatekeeperEvents(events: UnifiedLogEvent[]): BlockedAppCand
 
     // Extract path key if present: e.g. "(path: 9ecfec0bb6ea4594)"
     const pathMatch = msg.match(/\(path:\s*([^)]+)\)/);
-    const pathKey = pathMatch ? pathMatch[1].trim() : undefined;
+    let rawPath = pathMatch ? pathMatch[1].trim() : undefined;
+    if (rawPath?.startsWith("(")) rawPath = rawPath.slice(1).trim();
+    if (rawPath?.endsWith(")")) rawPath = rawPath.slice(0, -1).trim();
+    const pathKey =
+      rawPath && rawPath.toLowerCase() !== "null" && rawPath !== "(null)" && rawPath !== "nil" && rawPath !== "unknown"
+        ? rawPath
+        : undefined;
 
     if (msg.includes("Adding Gatekeeper denial breadcrumb")) {
-      // Extract bundle ID or id: e.g. "(bundle_id: com.example.app)"
+      // Extract bundle ID or id: e.g. "(bundle_id: com.example.app)" or "(bundle_id: (null))"
+      let bundleId: string | undefined;
       const bundleMatch = msg.match(/\(bundle_id:\s*([^)]+)\)/) || msg.match(/\(id:\s*([^)]+)\)/);
-      const rawId = bundleMatch ? bundleMatch[1].trim() : undefined;
-      const bundleId = rawId && rawId !== "(null)" ? rawId : undefined;
+      if (bundleMatch) {
+        let raw = bundleMatch[1].trim();
+        if (raw.startsWith("(") && raw.endsWith(")")) {
+          raw = raw.slice(1, -1).trim();
+        }
+        if (isValidBundleId(raw)) {
+          bundleId = raw;
+        }
+      }
 
-      const key = pathKey || bundleId || `unknown-${ev.timestamp || Math.random()}`;
-      activeBreadcrumbs.set(key, {
-        bundleId,
-        pathKey,
-        timestamp: ev.timestamp,
-      });
+      const key = pathKey || bundleId;
+      if (key) {
+        activeBreadcrumbs.set(key, {
+          bundleId,
+          pathKey,
+          timestamp: ev.timestamp,
+        });
+      }
     } else if (msg.includes("Clearing Gatekeeper denial breadcrumb")) {
       if (pathKey && activeBreadcrumbs.has(pathKey)) {
         activeBreadcrumbs.delete(pathKey);
@@ -91,18 +127,19 @@ export type CommandRunner = (
 /**
  * Resolves a human-readable application display name from a bundle identifier.
  * Uses Spotlight metadata (mdfind and mdls) which requires no elevated permissions.
+ * Never guesses an application name from bundle ID suffixes.
  */
 export async function resolveAppNameFromBundleId(
   bundleId: string,
   runner: CommandRunner = execFileAsync,
 ): Promise<{ displayName: string; appPath?: string } | null> {
-  if (!bundleId || bundleId === "(null)") {
+  if (!isValidBundleId(bundleId)) {
     return null;
   }
 
   // Sanitize bundleId to prevent malformed query expression syntax
   const sanitizedBundleId = bundleId.replace(/[^a-zA-Z0-9.-]/g, "");
-  if (!sanitizedBundleId) {
+  if (!isValidBundleId(sanitizedBundleId)) {
     return null;
   }
 
@@ -111,12 +148,13 @@ export async function resolveAppNameFromBundleId(
       timeout: 1000,
     });
 
-    const firstPath = findOutput
+    const candidatePaths = findOutput
       .split("\n")
       .map((p) => p.trim())
-      .find((p) => p.endsWith(".app"));
+      .filter((p) => p.endsWith(".app"));
 
-    if (firstPath) {
+    if (candidatePaths.length > 0) {
+      const firstPath = candidatePaths[0];
       try {
         const { stdout: nameOutput } = await runner("mdls", ["-name", "kMDItemDisplayName", "-raw", firstPath], {
           timeout: 1000,
@@ -133,16 +171,16 @@ export async function resolveAppNameFromBundleId(
       }
 
       const basename = path.basename(firstPath, ".app");
-      return { displayName: basename, appPath: firstPath };
+      if (basename && basename !== "(null)") {
+        return { displayName: basename, appPath: firstPath };
+      }
     }
   } catch {
-    // If Spotlight search fails, fallback below
+    // Spotlight failure
   }
 
-  // If no .app path was found via Spotlight, derive a clean name from the bundle ID
-  const parts = bundleId.split(".").filter(Boolean);
-  const fallbackName = parts.length > 0 ? parts[parts.length - 1] : bundleId;
-  return { displayName: fallbackName };
+  // Do not guess display names from bundle ID suffixes
+  return null;
 }
 
 export interface DetectionOptions {
@@ -154,7 +192,7 @@ export interface DetectionOptions {
 /**
  * Attempts to detect the most recent application blocked by macOS Gatekeeper.
  * Employs a strict timeout to ensure the user interaction is never blocked or delayed.
- * Returns null if no app is detected, if timed out, or if an error occurs.
+ * Returns null if no app is detected, if timed out, or if reliable display name identification fails.
  */
 export async function detectRecentBlockedApp(options: DetectionOptions = {}): Promise<DetectedAppInfo | null> {
   const timeoutMs = options.timeoutMs ?? DETECTION_TIMEOUT_MS;
@@ -175,17 +213,14 @@ export async function detectRecentBlockedApp(options: DetectionOptions = {}): Pr
     const events: UnifiedLogEvent[] = JSON.parse(stdout);
     const candidate = parseGatekeeperEvents(events);
 
-    if (!candidate || !candidate.bundleId) {
+    if (!candidate || !candidate.bundleId || !isValidBundleId(candidate.bundleId)) {
       return null;
     }
 
     const resolved = await resolveAppNameFromBundleId(candidate.bundleId, runner);
-    if (!resolved) {
-      return {
-        name: candidate.bundleId,
-        bundleId: candidate.bundleId,
-        timestamp: candidate.timestamp,
-      };
+    if (!resolved || !resolved.displayName) {
+      // Do not guess or pass unverified bundle ID as target name
+      return null;
     }
 
     return {
@@ -195,7 +230,7 @@ export async function detectRecentBlockedApp(options: DetectionOptions = {}): Pr
       timestamp: candidate.timestamp,
     };
   } catch {
-    // Fail silently without guessing; returning null triggers safe generic instructions
+    // Fail silently without guessing; returning null triggers safe manual navigation
     return null;
   }
 }

@@ -54,7 +54,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "tsx --test tests/**/*.test.ts",
-    "compile-helper": "swiftc -O src/gatekeeper_helper.swift -o assets/gatekeeper-helper",
+    "compile-helper": "bash scripts/compile-helper.sh",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

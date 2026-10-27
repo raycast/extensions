@@ -1,6 +1,6 @@
 # Open Anyway Changelog
 
-## [Initial Version] - 2026-10-27
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of Open Anyway for Raycast.
 - Added automatic detection of Gatekeeper denial breadcrumbs from `syspolicyd`.

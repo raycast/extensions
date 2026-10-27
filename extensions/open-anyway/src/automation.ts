@@ -12,15 +12,43 @@ export interface GatekeeperHelperResult {
     | "confirmation_pending"
     | "not_found"
     | "permission_denied"
+    | "target_mismatch"
+    | "target_unresolved"
+    | "target_missing"
+    | "activation_failed"
     | "trusted"
     | "untrusted"
+    | "match"
+    | "mismatch"
     | "error";
   appName?: string;
   message: string;
   trusted: boolean;
 }
 
-export type HelperCommand = "--activate" | "--detect" | "--check-permission";
+export type HelperCommand = "--activate" | "--detect" | "--check-permission" | "--test-target";
+
+/**
+ * Deterministically checks if a candidate display name matches a target application.
+ * Normalizes case, trims whitespace, and ignores .app suffix.
+ * Prevents substring false positives (e.g. 'Example' matching 'Example Helper').
+ */
+export function isTargetMatching(target?: string, detected?: string): boolean {
+  if (!target || !detected) return false;
+  const t = target.trim();
+  const d = detected.trim();
+  if (!t || !d) return false;
+
+  const normalize = (name: string) => {
+    let n = name.trim().toLowerCase();
+    if (n.endsWith(".app")) {
+      n = n.slice(0, -4);
+    }
+    return n;
+  };
+
+  return normalize(t) === normalize(d);
+}
 
 /**
  * Safely determines the assets directory across Raycast runtime and standalone test environments.
@@ -77,11 +105,15 @@ export async function runGatekeeperHelper(
   mode: HelperCommand = "--activate",
   targetApp?: string,
   timeoutMs = 8000,
+  extraArgs: string[] = [],
 ): Promise<GatekeeperHelperResult> {
   const { file, baseArgs } = resolveHelperExecution();
   const args = [...baseArgs, mode];
   if (targetApp) {
     args.push("--target", targetApp);
+  }
+  if (extraArgs.length > 0) {
+    args.push(...extraArgs);
   }
 
   try {

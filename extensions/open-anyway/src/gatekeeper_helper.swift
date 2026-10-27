@@ -31,15 +31,15 @@ func detectCoreServicesDialog() -> (element: AXUIElement, appName: String, hasOp
     let apps = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.coreservices.uiagent")
     guard let app = apps.first else { return nil }
     let appElement = AXUIElementCreateApplication(app.processIdentifier)
-    
+
     var windowsRef: CFTypeRef?
     guard AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef) == .success,
           let windows = windowsRef as? [AXUIElement] else { return nil }
-    
+
     for window in windows {
         var foundName: String?
         var hasOpenAnyway = false
-        
+
         func inspect(_ elem: AXUIElement) {
             var roleRef: CFTypeRef?
             var titleRef: CFTypeRef?
@@ -49,12 +49,12 @@ func detectCoreServicesDialog() -> (element: AXUIElement, appName: String, hasOp
             AXUIElementCopyAttributeValue(elem, kAXTitleAttribute as CFString, &titleRef)
             AXUIElementCopyAttributeValue(elem, kAXValueAttribute as CFString, &valRef)
             AXUIElementCopyAttributeValue(elem, kAXDescriptionAttribute as CFString, &descRef)
-            
+
             let role = roleRef as? String ?? ""
             let title = titleRef as? String ?? ""
             let val = valRef as? String ?? ""
             let desc = descRef as? String ?? ""
-            
+
             if role == "AXStaticText" && (val.contains("“") || val.contains("blocked") || val.contains("malware") || val.contains("developer") || title.contains("“")) {
                 let text = !val.isEmpty ? val : title
                 if let start = text.firstIndex(of: "“"), let end = text.firstIndex(of: "”"), start < end {
@@ -63,11 +63,11 @@ func detectCoreServicesDialog() -> (element: AXUIElement, appName: String, hasOp
                     foundName = text
                 }
             }
-            
+
             if role == "AXButton" && (title == "Open Anyway" || desc == "Open Anyway") {
                 hasOpenAnyway = true
             }
-            
+
             var childrenRef: CFTypeRef?
             if AXUIElementCopyAttributeValue(elem, kAXChildrenAttribute as CFString, &childrenRef) == .success,
                let children = childrenRef as? [AXUIElement] {
@@ -76,13 +76,13 @@ func detectCoreServicesDialog() -> (element: AXUIElement, appName: String, hasOp
                 }
             }
         }
-        
+
         inspect(window)
         if let name = foundName {
             return (window, name, hasOpenAnyway)
         }
     }
-    
+
     return nil
 }
 
@@ -91,11 +91,11 @@ func findSystemSettingsOpenAnyway() -> (btn: AXUIElement, appName: String?)? {
     let apps = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.systempreferences")
     guard let app = apps.first else { return nil }
     let appElement = AXUIElementCreateApplication(app.processIdentifier)
-    
+
     var windowsRef: CFTypeRef?
     guard AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef) == .success,
           let windows = windowsRef as? [AXUIElement] else { return nil }
-    
+
     func searchBtn(_ elem: AXUIElement) -> (AXUIElement, String?)? {
         var descRef: CFTypeRef?
         var titleRef: CFTypeRef?
@@ -103,7 +103,7 @@ func findSystemSettingsOpenAnyway() -> (btn: AXUIElement, appName: String?)? {
         AXUIElementCopyAttributeValue(elem, kAXTitleAttribute as CFString, &titleRef)
         let desc = descRef as? String ?? ""
         let title = titleRef as? String ?? ""
-        
+
         if desc == "Open Anyway" || title == "Open Anyway" {
             var extractedName: String?
             var parentRef: CFTypeRef?
@@ -128,7 +128,7 @@ func findSystemSettingsOpenAnyway() -> (btn: AXUIElement, appName: String?)? {
             }
             return (elem, extractedName)
         }
-        
+
         var childrenRef: CFTypeRef?
         if AXUIElementCopyAttributeValue(elem, kAXChildrenAttribute as CFString, &childrenRef) == .success,
            let children = childrenRef as? [AXUIElement] {
@@ -140,7 +140,7 @@ func findSystemSettingsOpenAnyway() -> (btn: AXUIElement, appName: String?)? {
         }
         return nil
     }
-    
+
     for w in windows {
         if let res = searchBtn(w) {
             return res
@@ -149,20 +149,52 @@ func findSystemSettingsOpenAnyway() -> (btn: AXUIElement, appName: String?)? {
     return nil
 }
 
+func matchesTarget(target: String?, detected: String?) -> Bool {
+    guard let t = target?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty,
+          let d = detected?.trimmingCharacters(in: .whitespacesAndNewlines), !d.isEmpty else {
+        return false
+    }
+
+    func normalize(_ name: String) -> String {
+        var n = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if n.hasSuffix(".app") {
+            n = String(n.dropLast(4))
+        }
+        return n
+    }
+
+    return normalize(t) == normalize(d)
+}
+
 // Parse Command Line Arguments
 var mode = "--activate"
 var targetApp: String? = nil
+var detectedArg: String? = nil
 
 var argIdx = 1
 while argIdx < CommandLine.arguments.count {
     let arg = CommandLine.arguments[argIdx]
-    if arg == "--check-permission" || arg == "--detect" || arg == "--activate" {
+    if arg == "--check-permission" || arg == "--detect" || arg == "--activate" || arg == "--test-target" {
         mode = arg
     } else if (arg == "--target" || arg == "--app") && argIdx + 1 < CommandLine.arguments.count {
         argIdx += 1
         targetApp = CommandLine.arguments[argIdx]
+    } else if (arg == "--detected") && argIdx + 1 < CommandLine.arguments.count {
+        argIdx += 1
+        detectedArg = CommandLine.arguments[argIdx]
     }
     argIdx += 1
+}
+
+// Mode: Test Target Matching (Pure logic test mode for verification)
+if mode == "--test-target" {
+    let match = matchesTarget(target: targetApp, detected: detectedArg)
+    printResult(
+        status: match ? "match" : "mismatch",
+        appName: detectedArg,
+        message: match ? "Target matches detected application." : "Target does not match detected application."
+    )
+    exit(0)
 }
 
 // Mode: Check Permission
@@ -198,7 +230,7 @@ if mode == "--detect" {
         )
         exit(0)
     }
-    
+
     if let ssMatch = findSystemSettingsOpenAnyway() {
         printResult(
             status: "detected",
@@ -207,7 +239,7 @@ if mode == "--detect" {
         )
         exit(0)
     }
-    
+
     printResult(
         status: "not_found",
         message: "No application currently waiting for Gatekeeper approval."
@@ -239,33 +271,49 @@ NSWorkspace.shared.open(settingsUrl, configuration: config) { _, _ in
 }
 _ = openSemaphore.wait(timeout: .now() + 1.0)
 
-var activated = false
+var foundButton = false
+var buttonPressSucceeded = false
 var detectedName: String? = nil
 
 for _ in 0..<15 {
     Thread.sleep(forTimeInterval: 0.2)
     if let match = findSystemSettingsOpenAnyway() {
+        foundButton = true
         detectedName = match.appName
-        
-        // Safety check: if targetApp was specified, ensure it matches before activating
-        if let target = targetApp, let detected = detectedName {
-            let normTarget = target.lowercased().replacingOccurrences(of: ".app", with: "")
-            let normDetected = detected.lowercased().replacingOccurrences(of: ".app", with: "")
-            if !normDetected.contains(normTarget) && !normTarget.contains(normDetected) {
-                // Mismatch, do not activate unintended application
-                printResult(
-                    status: "error",
-                    appName: detectedName,
-                    message: "Blocked app in Settings (\"\(detected)\") does not match target (\"\(target)\")."
-                )
-                exit(1)
-            }
+
+        // Safety check: require a known, matching name before pressing a targeted control.
+        // Never press an approval control when the target is missing, unknown, ambiguous, or mismatched.
+        guard let target = targetApp, !target.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            printResult(
+                status: "target_missing",
+                appName: detectedName,
+                message: "No specific target application was specified. Manual approval in System Settings is required to prevent approving unintended items."
+            )
+            exit(0)
         }
-        
+
+        guard let detected = detectedName, !detected.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            printResult(
+                status: "target_unresolved",
+                appName: nil,
+                message: "Approval control was found, but the application name could not be verified in System Settings."
+            )
+            exit(0)
+        }
+
+        if !matchesTarget(target: target, detected: detected) {
+            printResult(
+                status: "target_mismatch",
+                appName: detected,
+                message: "Blocked app in Settings (\"\(detected)\") does not match target (\"\(target)\")."
+            )
+            exit(0)
+        }
+
         // Activate via accessibility semantic action (no synthetic mouse click or scrolling)
         let axResult = AXUIElementPerformAction(match.btn, kAXPressAction as CFString)
         if axResult == .success {
-            activated = true
+            buttonPressSucceeded = true
         }
         break
     }
@@ -277,7 +325,7 @@ for app in apps {
     app.hide()
 }
 
-if activated {
+if buttonPressSucceeded {
     let nameMsg = detectedName != nil ? "for \"\(detectedName!)\"" : ""
     printResult(
         status: "success",
@@ -287,8 +335,18 @@ if activated {
     exit(0)
 }
 
+if foundButton {
+    printResult(
+        status: "activation_failed",
+        appName: detectedName,
+        message: "Found 'Open Anyway' button in System Settings, but could not activate it via Accessibility."
+    )
+    exit(0)
+}
+
 // Step 4: If no button found in System Settings
 printResult(
     status: "not_found",
     message: "No blocked application currently waiting for 'Open Anyway' approval."
 )
+exit(0)
