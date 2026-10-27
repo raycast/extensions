@@ -6,22 +6,13 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { parseTools } from "./parse-tools.mjs";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 const appRepo = path.resolve(process.argv[2] ?? "../devtools");
-const registry = readFileSync(path.join(appRepo, "src/app/toolRegistry.ts"), "utf8");
-const entry =
-  /\{\s*icon:\s*\w+,\s*name:\s*"([^"]+)",\s*id:\s*"([^"]+)",\s*category:\s*"([^"]+)"(?:,\s*keywords:\s*\[([^\]]*)\])?\s*\}/g;
-const tools = [...registry.matchAll(entry)].map(([, name, id, category, keywords = ""]) => ({
-  id,
-  name,
-  category,
-  keywords: [...keywords.matchAll(/"([^"]+)"/g)].map(([, keyword]) => keyword),
-}));
-
-if (tools.length === 0) {
-  throw new Error(`No tools found in ${appRepo}/src/app/toolRegistry.ts. Check the path.`);
-}
+const registryPath = path.join(appRepo, "src/app/toolRegistry.ts");
+const tools = parseTools(readFileSync(registryPath, "utf8"), registryPath);
 
 const toolsJson = path.join(root, "src/tools.json");
 writeFileSync(toolsJson, `${JSON.stringify(tools, null, 2)}\n`);

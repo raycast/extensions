@@ -1,9 +1,13 @@
 import { LaunchProps, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { SCHEME, isDevToolsInstalled, openLink, searchLink } from "./devtools";
+import { DOWNLOAD_URL, SCHEME, isDevToolsInstalled, openLink, searchLink } from "./devtools";
 
 export default async function OpenDevTools(props: LaunchProps<{ arguments: Arguments.OpenDevtools }>) {
   if (!(await isDevToolsInstalled())) {
-    await showToast({ style: Toast.Style.Failure, title: "DevTools is not installed" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "DevTools is not installed",
+      primaryAction: { title: "Download DevTools", onAction: () => openLink(DOWNLOAD_URL) },
+    });
     return;
   }
   const query = props.arguments.query?.trim() ?? "";

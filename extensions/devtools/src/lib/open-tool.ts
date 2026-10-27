@@ -1,5 +1,5 @@
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
-import { isDevToolsInstalled, openLink, toolLink } from "../devtools";
+import { DOWNLOAD_URL, isDevToolsInstalled, openLink, toolLink } from "../devtools";
 
 /** Opens one DevTools tool. Each per-tool command calls this with its tool id. */
 export async function openTool(toolId: string) {
@@ -8,6 +8,7 @@ export async function openTool(toolId: string) {
       style: Toast.Style.Failure,
       title: "DevTools is not installed",
       message: "Install DevTools 2.1 or later.",
+      primaryAction: { title: "Download DevTools", onAction: () => openLink(DOWNLOAD_URL) },
     });
     return;
   }
