@@ -12,7 +12,7 @@ const nativeRequire = createRequire(import.meta.url);
 
 // Loads real modules from src. Stubs are keyed by src-relative path ("lib/fetchProviderJson") or
 // package name, so the same stub applies no matter which file imports it.
-function load(entry, stubs = {}) {
+function load(entry, stubs = {}, globals = {}) {
   const cache = new Map();
 
   function resolve(fromDir, specifier) {
@@ -33,7 +33,7 @@ function load(entry, stubs = {}) {
       if (key in stubs) return stubs[key];
       return target ? loadFile(target) : nativeRequire(specifier);
     };
-    runInNewContext(outputText, { module, exports: module.exports, require, URL, console });
+    runInNewContext(outputText, { module, exports: module.exports, require, URL, console, ...globals });
     return module.exports;
   }
 
@@ -302,4 +302,81 @@ test("Klipy Stickers, Clips and Memes resolve from their page URLs", () => {
   assert.equal(getServiceFromUrl(gif("https://klipy.com/clips/a")), "klipy-clips");
   assert.equal(getServiceFromUrl(gif("https://klipy.com/static-memes/a")), "klipy-memes");
   assert.equal(getServiceFromUrl(gif("https://klipy.com/gifs/a")), "klipy");
+});
+
+test("square copies read the GIF rendition, since a Clip's download is an MP4", async () => {
+  const fetched = [];
+  const { default: resolveSquareGifFile } = load(
+    "lib/resolveSquareGifFile",
+    {
+      "@raycast/api": { environment: { supportPath: "/support" } },
+      tempy: { write: async () => "/tmp/in.gif", file: () => "/tmp/out.gif" },
+      child_process: { execFile: (_cmd, _args, callback) => callback(null, "", "") },
+      fs: { existsSync: () => true, mkdirSync() {} },
+      "fs/promises": { readFile: async () => "", writeFile: async () => {}, unlink: async () => {} },
+      "lib/cachedGifs": { getDisplayName: () => "clip.gif" },
+    },
+    {
+      Buffer,
+      process: { platform: "darwin" },
+      fetch: async (url) => {
+        fetched.push(url);
+        return { ok: true, arrayBuffer: async () => new ArrayBuffer(0) };
+      },
+    },
+  );
+
+  const file = await resolveSquareGifFile({
+    download_url: "https://static.klipy.com/clip.mp4",
+    download_name: "clip.mp4",
+    gif_url: "https://static.klipy.com/clip.gif",
+  });
+
+  assert.equal(file, "/tmp/out.gif");
+  assert.deepEqual(fetched, ["https://static.klipy.com/clip.gif"]);
+});
+
+test("an All Sources search that finishes after a newer one doesn't report its failures", async () => {
+  const searches = [];
+  const reported = [];
+  const ref = { current: undefined };
+  const { default: useAllSourcesSearch } = load("hooks/useAllSourcesSearch", {
+    react: {
+      useState: (initial) => [initial, (value) => reported.push(value)],
+      useRef: (initial) => {
+        ref.current ??= initial;
+        return ref;
+      },
+    },
+    "@raycast/utils": {
+      useCachedPromise: (fn, args) => {
+        searches.push({ fn, args });
+        return { data: [] };
+      },
+    },
+    "hooks/useSearchAPI": {
+      getAPIByServiceName: async (service) => ({
+        search: async () => {
+          if (service === "giphy") throw new Error("offline");
+          return { results: [], next: "" };
+        },
+      }),
+    },
+    preferences: { getServiceTitle: (service) => service },
+  });
+
+  const params = { services: ["giphy", "klipy"], limit: 2, execute: true };
+  useAllSourcesSearch({ ...params, term: "cat" });
+  useAllSourcesSearch({ ...params, term: "dog" });
+  const [stale, current] = searches;
+
+  await stale.fn(...stale.args)({ page: 0 });
+  assert.equal(reported.length, 0);
+
+  await current.fn(...current.args)({ page: 0 });
+  assert.equal(reported.length, 1);
+  assert.deepEqual(
+    [...reported[0]].map((failure) => failure.service),
+    ["giphy"],
+  );
 });
