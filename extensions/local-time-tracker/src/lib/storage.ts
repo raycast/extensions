@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { copyMissingLegacyWorkLogs } from "./storage-migration";
 import { planForDate, isSavedPlan, isPlanDate, isPlanReference } from "./planning";
-import type { ActiveTimer, SavedPlan, Project, ProjectCategory, WorkLog } from "./types";
+import type { ActiveTimer, SavedPlan, Project, ProjectCategory, WorkLog, PlanTemplate } from "./types";
 
 export const STORAGE_KEYS = {
   schemaVersion: "schemaVersion",
@@ -17,6 +17,21 @@ const WORK_LOG_KEY_PREFIX = "workLog:";
 const PLAN_KEY_PREFIX = "dailyGoal:";
 const PLAN_ORDER_KEY_PREFIX = "dailyGoalOrder:";
 const PLAN_CARRYOVER_KEY = "dailyPlanCarryover";
+const PLAN_TEMPLATES_KEY = "planTemplates";
+
+export async function getPlanTemplates(): Promise<PlanTemplate[]> {
+  await initializeStorage();
+  const templates = await readArray(PLAN_TEMPLATES_KEY, isPlanTemplate, "plan templates");
+  if (new Set(templates.map((item) => item.id)).size !== templates.length)
+    throw new StorageDataError("Saved plan templates contain duplicate IDs. Existing data was not overwritten.");
+  return templates;
+}
+
+// Template mutations share the reminder-operation lock with other plan writes.
+export async function savePlanTemplates(templates: PlanTemplate[]): Promise<void> {
+  await initializeStorage();
+  await LocalStorage.setItem(PLAN_TEMPLATES_KEY, JSON.stringify(templates));
+}
 
 export type PlanCarryover = {
   date: string;
@@ -274,6 +289,19 @@ function isProject(value: unknown): value is Project {
     isNonEmptyString(value.name) &&
     isNonEmptyString(value.type) &&
     typeof value.isActive === "boolean" &&
+    isIsoDate(value.createdAt) &&
+    isIsoDate(value.updatedAt)
+  );
+}
+
+function isPlanTemplate(value: unknown): value is PlanTemplate {
+  return (
+    isRecord(value) &&
+    isNonEmptyString(value.id) &&
+    isNonEmptyString(value.name) &&
+    isNonEmptyString(value.projectId) &&
+    typeof value.content === "string" &&
+    value.content.split(/\r?\n/)[0].trim().length > 0 &&
     isIsoDate(value.createdAt) &&
     isIsoDate(value.updatedAt)
   );

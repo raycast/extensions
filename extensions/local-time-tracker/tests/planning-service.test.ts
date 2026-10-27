@@ -41,6 +41,7 @@ test("daily planning integrates with existing timers, logs and recoverable stora
     const load = createRequire(join(process.cwd(), "tests/planning-service.test.ts"));
     const storage = load("../src/lib/storage.ts") as typeof import("../src/lib/storage");
     const service = load("../src/lib/planning-service.ts") as typeof import("../src/lib/planning-service");
+    const templates = load("../src/lib/plan-template-service.ts") as typeof import("../src/lib/plan-template-service");
     const timer = load("../src/lib/timer.ts") as typeof import("../src/lib/timer");
     const { getPomodoro } = load("../src/lib/reminder-service.ts") as typeof import("../src/lib/reminder-service");
     const { planContent, isPlanComplete, localDateKey } = load(
@@ -911,6 +912,155 @@ test("daily planning integrates with existing timers, logs and recoverable stora
         previousItems.forEach((value, key) => items.set(key, value));
       }
     });
+    async function withTemplateFixture(run: () => Promise<void>) {
+      const previousItems = new Map(items);
+      items.clear();
+      try {
+        await storage.saveProjects([project]);
+        await run();
+      } finally {
+        failWrite = undefined;
+        items.clear();
+        previousItems.forEach((value, key) => items.set(key, value));
+      }
+    }
+
+    await t.test(
+      "templates reuse plan text and project while creating fresh task identities, completion states, and time totals",
+      async () => {
+        await withTemplateFixture(async () => {
+          let source = await service.savePlanDraft({
+            date,
+            content: "Daily work\nReview\nImplement",
+            projectId: project.id,
+          });
+          await timer.completePlannedItem({ goalId: source.id }, true, date);
+          source = (await storage.getPlan(source.id))!;
+          const log = {
+            id: "template-source-time",
+            projectId: project.id,
+            description: "Review",
+            plan: { goalId: source.id, taskId: source.tasks[0].id },
+            startedAt: new Date(Date.now() - 60000).toISOString(),
+            endedAt: new Date().toISOString(),
+            createdAt: now,
+            updatedAt: now,
+          };
+          await storage.upsertWorkLog(log);
+          const saved = await templates.savePlanTemplate({
+            name: " Daily development ",
+            projectId: source.projectId,
+            content: planContent(source),
+          });
+          assert.equal(saved.name, "Daily development");
+          assert.equal(saved.content, "Daily work\nReview\nImplement");
+          assert.deepEqual(
+            Object.keys(saved).sort(),
+            ["id", "name", "projectId", "content", "createdAt", "updatedAt"].sort(),
+          );
+          const first = await service.savePlanDraft({ date, projectId: saved.projectId, content: saved.content });
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const second = await service.savePlanDraft({
+            date: localDateKey(tomorrow),
+            projectId: saved.projectId,
+            content: saved.content,
+          });
+          const ids = [source, first, second].flatMap((goal) => [goal.id, ...goal.tasks.map((task) => task.id)]);
+          assert.equal(new Set(ids).size, ids.length);
+          assert.ok(
+            [first, second].every(
+              (goal) => !goal.completedAt && goal.tasks.every((task) => !task.completedAt && !task.date),
+            ),
+          );
+          const { readDailyPlan } = load("../src/lib/plan-state.ts") as typeof import("../src/lib/plan-state");
+          assert.equal((await readDailyPlan(date)).goals.find((goal) => goal.id === first.id)!.seconds, 0);
+          assert.deepEqual(await storage.getPlan(source.id), source);
+          assert.deepEqual(await storage.getWorkLogs(), [log]);
+          await service.savePlanDraft({
+            ...first,
+            expectedUpdatedAt: first.updatedAt,
+            content: "Only this instance\nChanged",
+          });
+          assert.deepEqual((await storage.getPlanTemplates())[0], saved);
+          assert.deepEqual(await storage.getPlan(source.id), source);
+        });
+      },
+    );
+
+    await t.test(
+      "template edits and deletion reject stale changes and never modify plans already created",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const saved = await templates.savePlanTemplate(draft);
+          const added = await service.savePlanDraft({ date, projectId: saved.projectId, content: saved.content });
+          const snapshot = await storage.getPlan(added.id);
+          const edited = await templates.savePlanTemplate({
+            ...saved,
+            expectedUpdatedAt: saved.updatedAt,
+            content: "New routine\nNew step",
+          });
+          assert.ok(edited.updatedAt > saved.updatedAt);
+          await assert.rejects(templates.savePlanTemplate({ ...saved, expectedUpdatedAt: saved.updatedAt }), /changed/);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /changed/);
+          await templates.deletePlanTemplate(edited.id, edited.updatedAt);
+          assert.deepEqual(await storage.getPlanTemplates(), []);
+          assert.deepEqual(await storage.getPlan(added.id), snapshot);
+        });
+      },
+    );
+
+    await t.test(
+      "templates require valid names, content, and projects, and adding a plan requires an active project",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const before = new Map(items);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, name: " " }), /template name/);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, content: "\nMissing goal" }), /first line/);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, projectId: "deleted" }), /existing project/);
+          assert.deepEqual(items, before);
+          const saved = await templates.savePlanTemplate(draft);
+          await storage.saveProjects([{ ...project, isActive: false }]);
+          await assert.rejects(
+            service.savePlanDraft({ date, content: saved.content, projectId: saved.projectId }),
+            /active project/,
+          );
+          assert.deepEqual(await storage.getPlans(), []);
+          await storage.saveProjects([]);
+          assert.deepEqual((await storage.getPlanTemplates())[0], saved);
+          await assert.rejects(
+            service.savePlanDraft({ date, content: saved.content, projectId: saved.projectId }),
+            /active project/,
+          );
+        });
+      },
+    );
+
+    await t.test(
+      "corrupt templates, duplicate identities, and failed writes preserve saved templates and work data",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const saved = await templates.savePlanTemplate(draft);
+          const before = new Map(items);
+          failWrite = "planTemplates";
+          await assert.rejects(templates.savePlanTemplate({ ...draft, name: "Second" }), /disk full/);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /disk full/);
+          assert.deepEqual(items, before);
+          failWrite = undefined;
+          items.set("planTemplates", "{broken");
+          const broken = new Map(items);
+          await assert.rejects(templates.savePlanTemplate(draft), /Could not parse/);
+          assert.deepEqual(items, broken);
+          items.set("planTemplates", JSON.stringify([saved, saved]));
+          const duplicates = new Map(items);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /duplicate IDs/);
+          assert.deepEqual(items, duplicates);
+        });
+      },
+    );
   } finally {
     hooks.deregister();
     delete globals.planningTestAPI;

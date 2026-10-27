@@ -71,6 +71,14 @@ When a goal has children on multiple dates, each date shows its own children. Ed
 
 Times are split at local midnight, consistent with Reports; totals include work started from other commands. Tracked time refreshes while the view is open, and today's list rolls over to the new day at local midnight.
 
+## Plan Templates
+
+Choose **Save as Template** on any plan to save its goal, subtasks for the selected date, and project under a reusable name. Completed plans can also become templates. Completion state, dates, task IDs, and recorded time are not stored in the template.
+
+Choose **New from Template** (**⌘⇧N**) in Today's Plan, including its empty view. Select a template with **Return**, adjust the goal, subtasks, or project in the preview, then choose **Save Plan**. The form shows the selected plan date. Every addition creates a separate plan and fresh subtask IDs, with no completion state or tracked time. The source plan and template stay unchanged. After adding, the template list stays open so you can add another plan; **Escape** returns to Today's Plan.
+
+The template list offers **New Template** (**⌘N**), **Edit Template** (**⌘E**), and **Delete Template**. Deleting a template leaves previously added plans and their work logs intact. If a template's project has been deactivated or deleted, select an active project before adding the plan. Templates remain local to this Mac.
+
 ## Weekly Review
 
 From **Today's Plan**, choose **Open Weekly Review** (**⌘⇧W**) to review the selected date's week in side-by-side columns starting on Monday. This week shows Monday through today, with the columns expanding to fill the available width; earlier weeks show Monday through Sunday. Future days and weeks are not shown. Long task names wrap within their day; scroll down to see all activity. The action is also available when the daily plan is empty. Use **Previous Week** (**⌘←**), **Next Week** (**⌘→**, until this week), or **This Week** (**⌘T**) in Actions to navigate. Each day shows work items with their parent plan, project, tracked time, and completions; empty days show **No Work Recorded**. Work without a description uses the project name, or **Work session** if the project is unavailable.
@@ -99,7 +107,7 @@ Editing work time leaves Pomodoro's remaining time, current interval, and comple
 
 ## Storage and Privacy
 
-Projects, daily goals and subtasks, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
+Projects, daily goals and subtasks, plan templates, work logs, and the active timer are stored as JSON in Raycast `LocalStorage`.
 
 - Work data never leaves the Mac through this extension.
 - No analytics, network requests, or external services are used.

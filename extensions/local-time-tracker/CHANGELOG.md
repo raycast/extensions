@@ -2,6 +2,7 @@
 
 ## [Weekly Review and Automatic Carryover] - {PR_MERGE_DATE}
 
+- Save reusable plan templates, preview and add them as fresh plans, and create, edit, or delete templates without changing previously recorded work.
 - Automatically show completed plans after unfinished plans in Today's Plan, keeping each plan's subtasks together and preserving manual order within each group.
 - Show Reports weekly bars in fixed Monday-to-Sunday order with weekday and date labels, leaving future days empty and highlighting today's tracked time.
 - Open Weekly Review from Today's Plan to browse work and completions in columns starting on Monday and ending today, navigate earlier weeks, and review live tracked time. Past weeks show all seven days.

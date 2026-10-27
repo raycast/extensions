@@ -7,7 +7,9 @@ import {
   Icon,
   Keyboard,
   List,
+  Toast,
   confirmAlert,
+  showToast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
@@ -19,8 +21,9 @@ import { planContent, planForDate, localDateKey, planMatches } from "./lib/plann
 import { movePlannedItemToToday, removePlannedItem, reorderPlannedItem, savePlanDraft } from "./lib/planning-service";
 import { sortProjectsByPreference } from "./lib/projects";
 import { completePlannedItem, startPlannedTimer, stopTimer } from "./lib/timer";
-import type { PlanReference } from "./lib/types";
+import type { PlanReference, PlanTemplate } from "./lib/types";
 import ProjectsCommand from "./projects";
+import { PlanTemplates, PlanTemplateEditor } from "./plan-templates";
 import { WeeklyReviewAction } from "./weekly-review";
 
 type PlanState = ReturnType<typeof useDailyPlan>;
@@ -81,6 +84,7 @@ export default function TodayPlanCommand() {
         plan && !error && !busy ? (
           <ActionPanel>
             {newPlan}
+            <NewFromTemplateAction date={date} onSaved={saved} onPop={reload} />
             <WeeklyReviewAction date={date} onPop={reload} />
           </ActionPanel>
         ) : undefined
@@ -130,6 +134,7 @@ export default function TodayPlanCommand() {
             busy ? undefined : (
               <ActionPanel>
                 {newPlan}
+                <NewFromTemplateAction date={date} onSaved={saved} onPop={reload} />
                 <WeeklyReviewAction date={date} onPop={reload} />
               </ActionPanel>
             )
@@ -292,6 +297,8 @@ function TaskActions({
           target={<PlanEditor date={plan.date} onSaved={onSaved} />}
           onPop={reload}
         />
+        <NewFromTemplateAction date={plan.date} onSaved={onSaved} onPop={reload} />
+        <Action.Push title="Save as Template" icon={Icon.Document} target={<PlanTemplateEditor source={goal} />} />
         {plan.date < plan.today && !goal.complete ? (
           <Action
             title="Move Plan to Today"
@@ -343,20 +350,52 @@ function TaskActions({
   );
 }
 
+function NewFromTemplateAction({
+  date,
+  onSaved,
+  onPop,
+}: {
+  date: string;
+  onSaved: (reference: PlanReference) => void;
+  onPop: () => void;
+}) {
+  return (
+    <Action.Push
+      title="New from Template"
+      icon={Icon.Document}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+      target={
+        <PlanTemplates
+          renderUseAction={(template) => (
+            <Action.Push
+              title="Use Template"
+              icon={Icon.Plus}
+              target={<PlanEditor date={date} template={template} onSaved={onSaved} />}
+            />
+          )}
+        />
+      }
+      onPop={onPop}
+    />
+  );
+}
+
 function PlanEditor({
   date,
   goal,
+  template,
   onSaved,
 }: {
   date: string;
   goal?: PlanItem;
+  template?: PlanTemplate;
   onSaved: (reference: PlanReference) => void;
 }) {
   const state = useDailyPlan(date);
   const { pop } = useNavigation();
   const [editing, setEditing] = useState(goal);
-  const [content, setContent] = useState(goal ? planContent(goal) : "");
-  const [projectId, setProjectId] = useState(goal?.projectId ?? "");
+  const [content, setContent] = useState(goal ? planContent(goal) : (template?.content ?? ""));
+  const [projectId, setProjectId] = useState(goal?.projectId ?? template?.projectId ?? "");
   const [saving, setSaving] = useState(false);
   const submitting = useRef(false);
   const projects = sortProjectsByPreference(
@@ -386,6 +425,12 @@ function PlanEditor({
       });
       const firstTask = planForDate(saved, date)?.tasks[0];
       onSaved({ goalId: saved.id, ...(firstTask ? { taskId: firstTask.id } : {}) });
+      if (template)
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Plan Added",
+          message: `Added to ${planDateLabel(date)}`,
+        });
       pop();
     } catch (error) {
       await showFailure("Could Not Save Plan", error);
@@ -437,7 +482,7 @@ function PlanEditor({
   return (
     <Form
       isLoading={saving || (!state.plan && !state.error)}
-      navigationTitle={editing ? "Edit Plan" : "New Plan"}
+      navigationTitle={editing ? "Edit Plan" : template ? "New Plan from Template" : "New Plan"}
       actions={
         saving || state.error ? undefined : (
           <ActionPanel>
@@ -451,12 +496,19 @@ function PlanEditor({
       }
     >
       {state.error ? <Form.Description title="Could Not Load Plan" text={state.error} /> : null}
-      <Form.Dropdown id="plan" title="Plan" value={editing?.id ?? "new"} onChange={choose}>
-        <Form.Dropdown.Item value="new" title="New Plan" />
-        {state.plan?.goals.map((item) => (
-          <Form.Dropdown.Item key={item.id} value={item.id} title={item.title} />
-        ))}
-      </Form.Dropdown>
+      {template ? (
+        <Form.Description
+          title="Template"
+          text={`${template.name} · ${planDateLabel(date)}. Creates a separate plan with new tasks; the template stays unchanged.`}
+        />
+      ) : (
+        <Form.Dropdown id="plan" title="Plan" value={editing?.id ?? "new"} onChange={choose}>
+          <Form.Dropdown.Item value="new" title="New Plan" />
+          {state.plan?.goals.map((item) => (
+            <Form.Dropdown.Item key={item.id} value={item.id} title={item.title} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TextArea
         id="content"
         title="Plan and Subtasks"
@@ -467,7 +519,12 @@ function PlanEditor({
         info="First line: your goal. Following lines: one subtask per line. A single line is also fine."
       />
       <Form.Dropdown id="project" title="Project" value={projectId} onChange={setProjectId}>
-        {!projects.length ? <Form.Dropdown.Item value="" title="Add an Active Project First" /> : null}
+        {!projects.some((project) => project.id === projectId) ? (
+          <Form.Dropdown.Item
+            value={projectId}
+            title={projects.length ? "Choose an Active Project" : "Add an Active Project First"}
+          />
+        ) : null}
         {projects.map((project) => (
           <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
         ))}
