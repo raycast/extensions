@@ -8,6 +8,15 @@ const CONNECT_TIMEOUT_MS = 30_000;
 const SSO_TIMEOUT_MS = 120_000;
 const DISCONNECT_TIMEOUT_MS = 10_000;
 
+// Profiles this extension asked to stop. A connect that is still waiting checks it to tell a
+// cancel from a connection that failed on its own.
+const stopRequested = new Set<string>();
+
+function stop(id: string): Promise<void> {
+  stopRequested.add(id);
+  return disconnect(id);
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -15,6 +24,7 @@ function errorMessage(error: unknown): string {
 export async function connectProfile(profile: Profile): Promise<void> {
   const name = displayName(profile);
   const toast = await showToast({ style: Toast.Style.Animated, title: `Connecting to ${name}` });
+  stopRequested.delete(profile.id);
 
   try {
     const { ssoUrl } = await connect(profile.id);
@@ -28,8 +38,14 @@ export async function connectProfile(profile: Profile): Promise<void> {
     const connected = await waitForConnection(profile.id, true, ssoUrl ? SSO_TIMEOUT_MS : CONNECT_TIMEOUT_MS);
     toast.primaryAction = undefined;
     if (connected && !connected.connected) {
-      // Cancelled. Whatever stopped it shows its own message.
-      await toast.hide();
+      if (stopRequested.delete(profile.id)) {
+        // Cancelled here. The disconnect shows its own message.
+        await toast.hide();
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = `Couldn't connect to ${name}`;
+        toast.message = "The connection stopped. The logs might say why.";
+      }
     } else if (connected) {
       toast.style = Toast.Style.Success;
       toast.title = `Connected to ${name}`;
@@ -51,7 +67,7 @@ export async function disconnectProfile(profile: Profile): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Disconnecting from ${name}` });
 
   try {
-    await disconnect(profile.id);
+    await stop(profile.id);
     if (!(await waitForConnection(profile.id, false, DISCONNECT_TIMEOUT_MS))) {
       throw new Error("Timed out waiting for the VPN to disconnect");
     }
@@ -104,7 +120,7 @@ export async function confirmRemoveProfile(profile: Profile): Promise<boolean> {
   try {
     if (running) {
       toast.message = "Disconnecting";
-      await disconnect(profile.id);
+      await stop(profile.id);
       if (!(await waitForConnection(profile.id, false, DISCONNECT_TIMEOUT_MS))) {
         throw new Error("It didn't disconnect, so it was left in place");
       }
