@@ -17,7 +17,7 @@ import { ProfileLogs } from "./components/profile-logs";
 import { confirmRemoveProfile, disconnectProfile, toggleAutostart, toggleConnection } from "./lib/connection";
 import { displayName, formatUptime } from "./lib/format";
 import { PritunlError } from "./lib/pritunl";
-import { readProfileInfo } from "./lib/profile-info";
+import { readProfileInfos } from "./lib/profile-info";
 import { Profile } from "./lib/types";
 import { useProfiles } from "./lib/use-profiles";
 import { useTraffic } from "./lib/use-traffic";
@@ -59,14 +59,17 @@ function toggleTitle(profile: Profile, pending?: Pending): string {
 export default function Command() {
   const { data, isLoading, error, revalidate } = useProfiles(REFRESH_MS);
   const profiles = data ?? [];
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showingDetail, setShowingDetail] = useCachedState("showing-detail", true);
   const [windowMs, setWindowMs] = useCachedState("window-ms", 60_000);
   const [pending, setPending] = useState<Record<string, Pending>>({});
   // Set after an import, so the list moves to the new profile.
   const [focusId, setFocusId] = useState<string>();
 
-  const { data: selectedInfo } = useCachedPromise(readProfileInfo, [selectedId ?? ""], { execute: !!selectedId });
+  // Loaded for every profile up front, so the panel doesn't redraw once more after each selection.
+  const profileIds = profiles.map((p) => p.id).join(",");
+  const { data: infos } = useCachedPromise((ids: string) => readProfileInfos(ids ? ids.split(",") : []), [profileIds], {
+    keepPreviousData: true,
+  });
   // Every connected profile is sampled, so switching between profiles keeps each chart's history.
   const monitorFor = useTraffic(profiles.filter((p) => p.connected).map((p) => p.client_address));
 
@@ -144,7 +147,7 @@ export default function Command() {
           monitor={profile.connected ? monitorFor(profile.client_address) : undefined}
           windowMs={windowMs}
           uptime={uptimeOf(profile)}
-          info={profile.id === selectedId ? selectedInfo : undefined}
+          info={infos?.[profile.id]}
         />
       }
       actions={
@@ -236,7 +239,6 @@ export default function Command() {
       isShowingDetail={showingDetail && profiles.length > 0}
       searchBarPlaceholder="Search profiles"
       selectedItemId={focusId}
-      onSelectionChange={setSelectedId}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Traffic History"

@@ -34,3 +34,9 @@ export async function readProfileInfo(id: string): Promise<ProfileInfo> {
     return {};
   }
 }
+
+/** Reads every profile's info at once, so switching between profiles never waits on a file. */
+export async function readProfileInfos(ids: string[]): Promise<Record<string, ProfileInfo>> {
+  const infos = await Promise.all(ids.map(readProfileInfo));
+  return Object.fromEntries(ids.map((id, index) => [id, infos[index]]));
+}
