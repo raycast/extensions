@@ -108,12 +108,7 @@ function exchange(payload: Buffer, timeoutMs: number): Promise<Buffer> {
           break;
         case "EACCES":
         case "EPERM":
-          finish(
-            new ProxyManagerError(
-              "forbidden",
-              "Raycast cannot reach Proxy Manager's control socket.",
-            ),
-          );
+          finish(new ProxyManagerError("forbidden", "Raycast cannot reach Proxy Manager's control socket."));
           break;
         default:
           finish(new ProxyManagerError("unavailable", error.message));
@@ -181,10 +176,7 @@ async function send(
   try {
     parsed = JSON.parse(response.toString("utf8"));
   } catch {
-    throw new ProxyManagerError(
-      "unavailable",
-      "Proxy Manager sent a reply Raycast could not read.",
-    );
+    throw new ProxyManagerError("unavailable", "Proxy Manager sent a reply Raycast could not read.");
   }
 
   const result = parsed.result;

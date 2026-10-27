@@ -43,15 +43,9 @@ export function SiteRow({
     );
   }
 
-  const tint =
-    site.state === "tunneled"
-      ? Color.Green
-      : site.state === "bypassed"
-        ? Color.Orange
-        : Color.SecondaryText;
+  const tint = site.state === "tunneled" ? Color.Green : site.state === "bypassed" ? Color.Orange : Color.SecondaryText;
 
-  const tag =
-    site.state === "tunneled" ? "Tunneled" : site.state === "bypassed" ? "Bypassed" : "Routing off";
+  const tag = site.state === "tunneled" ? "Tunneled" : site.state === "bypassed" ? "Bypassed" : "Routing off";
 
   const subtitle =
     site.state === "tunneled"
@@ -72,20 +66,12 @@ export function SiteRow({
           <Action title="Explain Routing" icon={Icon.QuestionMark} onAction={onExplain} />
           <ActionPanel.Section>
             {site.state === "tunneled" ? (
-              <Action
-                title="Disable This Target"
-                icon={Icon.CircleDisabled}
-                onAction={() => onDisable(covered)}
-              />
+              <Action title="Disable This Target" icon={Icon.CircleDisabled} onAction={() => onDisable(covered)} />
             ) : null}
             {site.state === "routing-off" ? (
               <Action title="Turn Routing On" icon={Icon.Play} onAction={onTurnOn} />
             ) : null}
-            <Action
-              title="Reveal in Proxy Manager"
-              icon={Icon.AppWindow}
-              onAction={() => onReveal(covered.pattern)}
-            />
+            <Action title="Reveal in Proxy Manager" icon={Icon.AppWindow} onAction={() => onReveal(covered.pattern)} />
             <Action.CopyToClipboard title="Copy Host" content={site.host} />
           </ActionPanel.Section>
         </ActionPanel>

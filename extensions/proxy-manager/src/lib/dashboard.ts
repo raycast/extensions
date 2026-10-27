@@ -1,13 +1,7 @@
 import { Cache } from "@raycast/api";
 import { execFile } from "node:child_process";
 import * as api from "./api";
-import {
-  activeSite,
-  clipboardHost,
-  frontmostApp,
-  type AppContext,
-  type SiteContext,
-} from "./context";
+import { activeSite, clipboardHost, frontmostApp, type AppContext, type SiteContext } from "./context";
 import { errorMessage } from "./control";
 import { matchingPattern } from "./host";
 import { siteDecision, type SiteState } from "./site";
@@ -68,12 +62,7 @@ function writeDashboardCache(dashboard: Dashboard): void {
   cache.set(CACHE_KEY, JSON.stringify(dashboard));
 }
 
-function buildSiteRow(
-  site: SiteContext,
-  targets: Target[],
-  app: AppRow | null,
-  status: Status,
-): SiteRow {
+function buildSiteRow(site: SiteContext, targets: Target[], app: AppRow | null, status: Status): SiteRow {
   const decision = siteDecision({
     host: site.host,
     targets,
@@ -81,9 +70,7 @@ function buildSiteRow(
     routingState: status.state,
   });
 
-  const match = decision.coveredBy
-    ? targets.find((target) => target.pattern === decision.coveredBy)
-    : undefined;
+  const match = decision.coveredBy ? targets.find((target) => target.pattern === decision.coveredBy) : undefined;
 
   return {
     host: site.host,
@@ -95,10 +82,7 @@ function buildSiteRow(
 
 async function buildAppRow(app: AppContext): Promise<AppRow | null> {
   try {
-    const [apps, resolution] = await Promise.all([
-      api.getApps(),
-      api.resolveApp({ bundleID: app.bundleId }),
-    ]);
+    const [apps, resolution] = await Promise.all([api.getApps(), api.resolveApp({ bundleID: app.bundleId })]);
     return {
       ...app,
       mode: resolution.mode,

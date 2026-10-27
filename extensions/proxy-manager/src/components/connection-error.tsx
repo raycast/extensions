@@ -9,13 +9,7 @@ type Unavailable = Extract<Dashboard, { kind: "unavailable" }>;
  * One empty state for both causes of "no control socket": the app is closed, or
  * external control is off. Each renders exactly the action that fixes it.
  */
-export function ConnectionError({
-  dashboard,
-  onRetry,
-}: {
-  dashboard: Unavailable;
-  onRetry: () => void;
-}) {
+export function ConnectionError({ dashboard, onRetry }: { dashboard: Unavailable; onRetry: () => void }) {
   const notRunning = dashboard.reason === "not-running";
 
   return (

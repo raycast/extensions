@@ -11,12 +11,14 @@ export type PatternResult = { ok: true; pattern: string } | { ok: false; error: 
 const ALLOWED_CHARACTERS = /^[a-z0-9.:_*-]+$/;
 const SCHEME = /^[a-z][a-z0-9+.-]*:\/\//i;
 
-/** Removes wrapping quotes/brackets and the punctuation that rides along with a copied link. */
+/** Removes wrapping quotes/angle brackets and the punctuation that rides along with a copied link. */
 function unwrap(raw: string): string {
+  // Brackets are NOT stripped here: `[2001:db8::1]:8080` needs them intact so the
+  // IPv6 address can be told apart from its port.
   return raw
     .trim()
-    .replace(/^[<("'`[]+/, "")
-    .replace(/[>)"'`\].,;:!?]+$/, "")
+    .replace(/^[<("'`]+/, "")
+    .replace(/[>)"'`.,;:!?]+$/, "")
     .trim();
 }
 

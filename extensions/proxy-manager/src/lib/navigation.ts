@@ -44,10 +44,8 @@ export function openSettings(section?: string): Promise<void> {
 }
 
 export function revealTarget(pattern: string): Promise<void> {
-  return openInApp(
-    "ui/open",
-    { pane: "settings", section: "targets", revealPattern: pattern },
-    () => api.openPane("settings", { section: "targets", revealPattern: pattern }),
+  return openInApp("ui/open", { pane: "settings", section: "targets", revealPattern: pattern }, () =>
+    api.openPane("settings", { section: "targets", revealPattern: pattern }),
   );
 }
 

@@ -58,17 +58,9 @@ export default function ExplainHost(props: LaunchProps<{ arguments: { host?: str
         markdown={`# ${host}\n\n${errorMessage(error)}`}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Proxy Manager"
-              icon={Icon.AppWindow}
-              onAction={() => openDashboard()}
-            />
+            <Action title="Open Proxy Manager" icon={Icon.AppWindow} onAction={() => openDashboard()} />
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
-            <Action
-              title="Explain Another Host"
-              icon={Icon.MagnifyingGlass}
-              onAction={() => setManual(null)}
-            />
+            <Action title="Explain Another Host" icon={Icon.MagnifyingGlass} onAction={() => setManual(null)} />
           </ActionPanel>
         }
       />
@@ -102,28 +94,34 @@ export default function ExplainHost(props: LaunchProps<{ arguments: { host?: str
           <Detail.Metadata.Label title="Matched target" text={matchedPattern ?? "None"} />
           {app ? <Detail.Metadata.Label title="App" text={app.name} /> : null}
           <Detail.Metadata.Label title="Per-app default" text={modeLabel(explanation.appMode)} />
-          {explanation.appRuleKey ? (
-            <Detail.Metadata.Label title="App rule" text={explanation.appRuleKey} />
-          ) : null}
+          {explanation.appRuleKey ? <Detail.Metadata.Label title="App rule" text={explanation.appRuleKey} /> : null}
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             {explanation.decision === "direct" && !matchedPattern ? (
-              <Action
-                title="Add as Target"
-                icon={Icon.Plus}
-                onAction={async () => {
-                  try {
-                    await api.addTarget(explanation.host, true);
-                    await showHUD(`Routing ${explanation.host}`);
-                    await revalidate();
-                  } catch (addError) {
-                    await reportFailure(addError, "Couldn't add the target");
-                  }
-                }}
-              />
+              explanation.appMode === "DIRECT" ? (
+                <Action
+                  title="Open App Routing"
+                  icon={Icon.AppWindowSidebarLeft}
+                  onAction={() => goToCommand("app-routing")}
+                />
+              ) : (
+                <Action
+                  title="Add as Target"
+                  icon={Icon.Plus}
+                  onAction={async () => {
+                    try {
+                      await api.addTarget(explanation.host, true);
+                      await showHUD(`Routing ${explanation.host}`);
+                      await revalidate();
+                    } catch (addError) {
+                      await reportFailure(addError, "Couldn't add the target");
+                    }
+                  }}
+                />
+              )
             ) : null}
             {matchedId ? (
               <Action
@@ -150,11 +148,7 @@ export default function ExplainHost(props: LaunchProps<{ arguments: { host?: str
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action
-              title="Explain Another Host"
-              icon={Icon.MagnifyingGlass}
-              onAction={() => setManual(null)}
-            />
+            <Action title="Explain Another Host" icon={Icon.MagnifyingGlass} onAction={() => setManual(null)} />
             <Action
               title="Add Target…"
               icon={Icon.Plus}
@@ -162,11 +156,7 @@ export default function ExplainHost(props: LaunchProps<{ arguments: { host?: str
               onAction={() => goToCommand("add-target", { host: explanation.host })}
             />
             <Action.CopyToClipboard title="Copy Host" content={explanation.host} />
-            <Action
-              title="Open Proxy Manager"
-              icon={Icon.AppWindow}
-              onAction={() => openDashboard()}
-            />
+            <Action title="Open Proxy Manager" icon={Icon.AppWindow} onAction={() => openDashboard()} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -238,11 +228,15 @@ function explanationMarkdown(explanation: Explanation, status: Status): string {
   } else {
     lines.push("## Direct", "");
     if (explanation.matchedPattern) {
-      lines.push(
-        `The target \`${explanation.matchedPattern}\` matches, but a per-app rule bypasses the tunnel.`,
-      );
+      lines.push(`The target \`${explanation.matchedPattern}\` matches, but a per-app rule bypasses the tunnel.`);
     } else {
       lines.push("No target matches this host, so requests leave without the tunnel.");
+      if (explanation.appMode === "DIRECT") {
+        lines.push(
+          "",
+          "Per-app routing sends this app direct, so adding a target would not change this host. Change the app's mode in App Routing first.",
+        );
+      }
     }
   }
 

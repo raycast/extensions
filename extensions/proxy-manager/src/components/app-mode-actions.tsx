@@ -82,12 +82,7 @@ export function AppModeSection({ app, onDone }: { app: AppModeTarget; onDone?: D
       {modes
         .filter((entry) => entry.mode !== primary)
         .map((entry) => (
-          <Action
-            key={entry.mode}
-            title={entry.title}
-            icon={entry.icon}
-            onAction={() => apply(entry.mode)}
-          />
+          <Action key={entry.mode} title={entry.title} icon={entry.icon} onAction={() => apply(entry.mode)} />
         ))}
       {app.ruleId ? (
         <Action

@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  getApplications,
-  showHUD,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getApplications, showHUD, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { setAppMode } from "../lib/app-mode";
 import { reportFailure } from "../lib/toast";

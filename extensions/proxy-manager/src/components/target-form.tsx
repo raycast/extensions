@@ -66,9 +66,7 @@ export function TargetForm({
         }
       }
 
-      await showHUD(
-        target ? `Saved ${parsed}` : `${values.enabled ? "Routing" : "Saved"} ${parsed}`,
-      );
+      await showHUD(target ? `Saved ${parsed}` : `${values.enabled ? "Routing" : "Saved"} ${parsed}`);
 
       if (keepOpen) {
         setPattern("");
@@ -76,10 +74,7 @@ export function TargetForm({
         await onSaved?.(target ? "updated" : "added", parsed);
       }
     } catch (submitError) {
-      await reportFailure(
-        submitError,
-        editing ? "Couldn't update the target" : "Couldn't add the target",
-      );
+      await reportFailure(submitError, editing ? "Couldn't update the target" : "Couldn't add the target");
     } finally {
       setBusy(false);
     }

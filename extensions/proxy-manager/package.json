@@ -152,6 +152,6 @@
     "lint": "ray lint",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "lint:code": "eslint src tests --ext .ts,.tsx && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json"
+    "lint:code": "eslint src tests --ext .ts,.tsx --no-error-on-unmatched-pattern && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json --no-error-on-unmatched-pattern"
   }
 }

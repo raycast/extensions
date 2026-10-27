@@ -15,11 +15,7 @@ export function getStatus(): Promise<Status> {
 }
 
 export function setRouting(enabled: boolean): Promise<{ state: string }> {
-  return call<{ state: string }>(
-    enabled ? "routing.enable" : "routing.disable",
-    {},
-    { policy: true },
-  );
+  return call<{ state: string }>(enabled ? "routing.enable" : "routing.disable", {}, { policy: true });
 }
 
 export function toggleRouting(): Promise<{ state: string }> {
@@ -35,15 +31,8 @@ export async function listTargets(): Promise<Target[]> {
   return data.targets;
 }
 
-export function addTarget(
-  pattern: string,
-  enabled = true,
-): Promise<{ id: string; pattern: string }> {
-  return call<{ id: string; pattern: string }>(
-    "targets.add",
-    { pattern, enabled },
-    { policy: true },
-  );
+export function addTarget(pattern: string, enabled = true): Promise<{ id: string; pattern: string }> {
+  return call<{ id: string; pattern: string }>("targets.add", { pattern, enabled }, { policy: true });
 }
 
 export function removeTarget(id: string): Promise<{ removed: number }> {
@@ -54,11 +43,7 @@ export function updateTarget(
   id: string,
   patch: { pattern?: string; enabled?: boolean },
 ): Promise<{ id: string; pattern: string; enabled: boolean }> {
-  return call<{ id: string; pattern: string; enabled: boolean }>(
-    "targets.update",
-    { id, ...patch },
-    { policy: true },
-  );
+  return call<{ id: string; pattern: string; enabled: boolean }>("targets.update", { id, ...patch }, { policy: true });
 }
 
 export async function listPresets(): Promise<Preset[]> {

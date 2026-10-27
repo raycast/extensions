@@ -10,13 +10,7 @@ import { connectionFailure, type ConnectionFailure } from "./lib/dashboard";
 import { openSettings, revealAppRule } from "./lib/navigation";
 import { keyKindLabel, modeColor, modeDescription, modeLabel } from "./lib/presentation";
 import { confirmDestructive, reportFailure } from "./lib/toast";
-import type {
-  AppRule,
-  AppResolution,
-  AppRoutingMode,
-  AppRuleKeyKind,
-  AppsSnapshot,
-} from "./lib/types";
+import type { AppRule, AppResolution, AppRoutingMode, AppRuleKeyKind, AppsSnapshot } from "./lib/types";
 import type { AppContext } from "./lib/context";
 
 const MODES: AppRoutingMode[] = ["TUNNEL", "TARGETS", "DIRECT"];
@@ -107,11 +101,7 @@ export default function Command() {
       : null;
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search app rules…"
-      navigationTitle="App Routing"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search app rules…" navigationTitle="App Routing">
       {frontmost ? (
         <List.Section title="This App">
           <List.Item
@@ -126,9 +116,7 @@ export default function Command() {
                   color: modeColor(frontmost.mode),
                 },
               },
-              ...(frontmost.ruleId
-                ? []
-                : [{ tag: { value: "No rule", color: Color.SecondaryText } }]),
+              ...(frontmost.ruleId ? [] : [{ tag: { value: "No rule", color: Color.SecondaryText } }]),
             ]}
             actions={
               <ActionPanel>
@@ -141,10 +129,7 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     onAction={() => openSettings("apps")}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy Bundle Identifier"
-                    content={frontmost.bundleId}
-                  />
+                  <Action.CopyToClipboard title="Copy Bundle Identifier" content={frontmost.bundleId} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
@@ -161,14 +146,8 @@ export default function Command() {
               : { source: Icon.Circle, tintColor: Color.SecondaryText }
           }
           title={apps.enabled ? "Per-app routing is on" : "Per-app routing is off"}
-          subtitle={
-            apps.enabled
-              ? "A matching rule wins over the target list"
-              : "Every app follows the target list"
-          }
-          accessories={[
-            { text: `${apps.rules.length} ${apps.rules.length === 1 ? "rule" : "rules"}` },
-          ]}
+          subtitle={apps.enabled ? "A matching rule wins over the target list" : "Every app follows the target list"}
+          accessories={[{ text: `${apps.rules.length} ${apps.rules.length === 1 ? "rule" : "rules"}` }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -187,11 +166,7 @@ export default function Command() {
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   target={
-                    <AppPicker
-                      appsEnabled={apps.enabled}
-                      frontmostBundleId={data.app?.bundleId}
-                      onDone={revalidate}
-                    />
+                    <AppPicker appsEnabled={apps.enabled} frontmostBundleId={data.app?.bundleId} onDone={revalidate} />
                   }
                 />
                 <Action.Push
@@ -234,20 +209,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <DefaultModeSubmenu current={apps.defaultMode} run={run} />
-              <Action
-                title="Reveal in Proxy Manager"
-                icon={Icon.AppWindow}
-                onAction={() => openSettings("apps")}
-              />
+              <Action title="Reveal in Proxy Manager" icon={Icon.AppWindow} onAction={() => openSettings("apps")} />
             </ActionPanel>
           }
         />
       </List.Section>
 
-      <List.Section
-        title="Rules"
-        subtitle={apps.rules.length > 0 ? `${apps.rules.length}` : undefined}
-      >
+      <List.Section title="Rules" subtitle={apps.rules.length > 0 ? `${apps.rules.length}` : undefined}>
         {apps.rules.map((rule) => (
           <List.Item
             key={rule.id}
@@ -329,9 +297,7 @@ export default function Command() {
             icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
             title="No app rules yet"
             subtitle={
-              apps.enabled
-                ? "Every app follows the default mode"
-                : "Turn per-app routing on to make rules apply"
+              apps.enabled ? "Every app follows the default mode" : "Turn per-app routing on to make rules apply"
             }
             actions={
               <ActionPanel>
@@ -339,11 +305,7 @@ export default function Command() {
                   title="Add App Rule…"
                   icon={Icon.Plus}
                   target={
-                    <AppPicker
-                      appsEnabled={apps.enabled}
-                      frontmostBundleId={data.app?.bundleId}
-                      onDone={revalidate}
-                    />
+                    <AppPicker appsEnabled={apps.enabled} frontmostBundleId={data.app?.bundleId} onDone={revalidate} />
                   }
                 />
                 <Action.Push
@@ -390,9 +352,7 @@ function DefaultModeSubmenu({
           key={mode}
           title={modeLabel(mode)}
           icon={mode === current ? Icon.CheckCircle : Icon.Circle}
-          onAction={() =>
-            run(() => api.setAppsDefaultMode(mode), `Undefined apps: ${modeLabel(mode)}`)
-          }
+          onAction={() => run(() => api.setAppsDefaultMode(mode), `Undefined apps: ${modeLabel(mode)}`)}
         />
       ))}
     </ActionPanel.Submenu>
@@ -456,12 +416,7 @@ function AppRuleForm({ onSaved }: { onSaved: () => void | Promise<void> }) {
         <Form.Dropdown.Item value="EXECUTABLE" title="Executable path" />
         <Form.Dropdown.Item value="EXECUTABLE_NAME" title="Executable name" />
       </Form.Dropdown>
-      <Form.Dropdown
-        id="mode"
-        title="Mode"
-        value={mode}
-        onChange={(next) => setMode(next as AppRoutingMode)}
-      >
+      <Form.Dropdown id="mode" title="Mode" value={mode} onChange={(next) => setMode(next as AppRoutingMode)}>
         {MODES.map((candidate) => (
           <Form.Dropdown.Item key={candidate} value={candidate} title={modeLabel(candidate)} />
         ))}

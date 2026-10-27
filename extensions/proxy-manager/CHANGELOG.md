@@ -1,6 +1,6 @@
 # Proxy Manager Changelog
 
-## [Initial Version] - 2026-10-27
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add `Proxy Manager`: routing state, the site in the active browser tab, the app
   you came from, and the target list in one place

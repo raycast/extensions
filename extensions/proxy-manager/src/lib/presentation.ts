@@ -53,11 +53,7 @@ export function listener(status: Status): string {
 }
 
 /** One line that explains the state in the HUD / toast. */
-export function statusSummary(
-  status: Status,
-  enabledTargets: number,
-  totalTargets: number,
-): string {
+export function statusSummary(status: Status, enabledTargets: number, totalTargets: number): string {
   const targets = `${enabledTargets}/${totalTargets} ${totalTargets === 1 ? "target" : "targets"}`;
   if (status.state === "degraded") return "DEGRADED — tunnel down";
   if (status.state === "starting") return "starting…";

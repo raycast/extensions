@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  List,
-  showHUD,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showHUD, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { AppModePrimary, AppModeSection } from "./components/app-mode-actions";
@@ -18,15 +9,7 @@ import * as api from "./lib/api";
 import { loadDashboard, readDashboardCache } from "./lib/dashboard";
 import { isWildcard, wildcardBase } from "./lib/host";
 import { goToCommand, openDashboard, openSettings, revealTarget } from "./lib/navigation";
-import {
-  isOn,
-  listener,
-  modeColor,
-  modeLabel,
-  presentation,
-  targetIcon,
-  tunnelIcon,
-} from "./lib/presentation";
+import { isOn, listener, modeColor, modeLabel, presentation, targetIcon, tunnelIcon } from "./lib/presentation";
 import { confirmDestructive, reportFailure } from "./lib/toast";
 import type { Status, Target } from "./lib/types";
 
@@ -96,22 +79,13 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={
-        targets.length > 0 ? `Search ${targets.length} targets…` : "Search targets…"
-      }
+      searchBarPlaceholder={targets.length > 0 ? `Search ${targets.length} targets…` : "Search targets…"}
       searchBarAccessory={
         targets.length > 1 ? (
-          <List.Dropdown
-            tooltip="Filter targets"
-            value={filter}
-            onChange={(value) => setFilter(value as Filter)}
-          >
+          <List.Dropdown tooltip="Filter targets" value={filter} onChange={(value) => setFilter(value as Filter)}>
             <List.Dropdown.Item title={`All (${targets.length})`} value="all" />
             <List.Dropdown.Item title={`Enabled (${enabledTargets.length})`} value="enabled" />
-            <List.Dropdown.Item
-              title={`Disabled (${targets.length - enabledTargets.length})`}
-              value="disabled"
-            />
+            <List.Dropdown.Item title={`Disabled (${targets.length - enabledTargets.length})`} value="disabled" />
           </List.Dropdown>
         ) : null
       }
@@ -134,11 +108,7 @@ export default function Command() {
             subtitle="Finish the first-run setup so routing has a tunnel and targets"
             actions={
               <ActionPanel>
-                <Action
-                  title="Finish Setup"
-                  icon={Icon.AppWindow}
-                  onAction={() => openDashboard()}
-                />
+                <Action title="Finish Setup" icon={Icon.AppWindow} onAction={() => openDashboard()} />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
               </ActionPanel>
             }
@@ -153,11 +123,7 @@ export default function Command() {
             subtitle="Proxy Manager could not apply the system proxy without it"
             actions={
               <ActionPanel>
-                <Action
-                  title="Open Proxy Manager"
-                  icon={Icon.AppWindow}
-                  onAction={() => openDashboard()}
-                />
+                <Action title="Open Proxy Manager" icon={Icon.AppWindow} onAction={() => openDashboard()} />
                 <Action
                   title="Try Again"
                   icon={Icon.ArrowClockwise}
@@ -177,11 +143,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Error" content={status.lastError} />
-                <Action
-                  title="Open Proxy Manager"
-                  icon={Icon.AppWindow}
-                  onAction={() => openDashboard()}
-                />
+                <Action title="Open Proxy Manager" icon={Icon.AppWindow} onAction={() => openDashboard()} />
               </ActionPanel>
             }
           />
@@ -197,10 +159,7 @@ export default function Command() {
               onAdd={() => run(() => api.addTarget(site.host, true), `Routing ${site.host}`)}
               onExplain={() => goToCommand("explain-host", { host: site.host })}
               onDisable={(target) =>
-                run(
-                  () => api.updateTarget(target.id, { enabled: false }),
-                  `Disabled ${target.pattern}`,
-                )
+                run(() => api.updateTarget(target.id, { enabled: false }), `Disabled ${target.pattern}`)
               }
               onTurnOn={() => run(() => api.setRouting(true), "Routing on")}
               onReveal={(pattern) => revealTarget(pattern)}
@@ -224,11 +183,7 @@ export default function Command() {
                       icon={Icon.AppWindowSidebarLeft}
                       onAction={() => goToCommand("app-routing")}
                     />
-                    <Action
-                      title="Reveal in Proxy Manager"
-                      icon={Icon.Gear}
-                      onAction={() => openSettings("apps")}
-                    />
+                    <Action title="Reveal in Proxy Manager" icon={Icon.Gear} onAction={() => openSettings("apps")} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -249,37 +204,26 @@ export default function Command() {
                 <Action
                   title="Add as Target"
                   icon={Icon.Plus}
-                  onAction={() =>
-                    run(() => api.addTarget(suggestion, true), `Routing ${suggestion}`)
-                  }
+                  onAction={() => run(() => api.addTarget(suggestion, true), `Routing ${suggestion}`)}
                 />
                 <Action
                   title="Explain Routing"
                   icon={Icon.QuestionMark}
                   onAction={() => goToCommand("explain-host", { host: suggestion })}
                 />
-                <Action
-                  title="Dismiss"
-                  icon={Icon.XMarkCircle}
-                  onAction={() => setSuggestionDismissed(true)}
-                />
+                <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => setSuggestionDismissed(true)} />
               </ActionPanel>
             }
           />
         </List.Section>
       ) : null}
 
-      <List.Section
-        title="Targets"
-        subtitle={targets.length > 0 ? `${visibleTargets.length} shown` : undefined}
-      >
+      <List.Section title="Targets" subtitle={targets.length > 0 ? `${visibleTargets.length} shown` : undefined}>
         <List.Item
           id="add-target"
           icon={{ source: Icon.Plus, tintColor: Color.Green }}
           title="Add Target…"
-          subtitle={
-            site?.host ? `Starts with ${site.host}` : "Route a host or wildcard through the tunnel"
-          }
+          subtitle={site?.host ? `Starts with ${site.host}` : "Route a host or wildcard through the tunnel"}
           actions={
             <ActionPanel>
               <Action.Push
@@ -353,9 +297,7 @@ export default function Command() {
                   <Action
                     title={isWildcard(target.pattern) ? "Explain Base Host" : "Explain This Host"}
                     icon={Icon.QuestionMark}
-                    onAction={() =>
-                      goToCommand("explain-host", { host: wildcardBase(target.pattern) })
-                    }
+                    onAction={() => goToCommand("explain-host", { host: wildcardBase(target.pattern) })}
                   />
                   <Action
                     title="Reveal in Proxy Manager"
@@ -397,11 +339,7 @@ export default function Command() {
                   }
                 />
                 <PresetSubmenu presets={presets} run={run} />
-                <Action
-                  title="Show All Targets"
-                  icon={Icon.List}
-                  onAction={() => setFilter("all")}
-                />
+                <Action title="Show All Targets" icon={Icon.List} onAction={() => setFilter("all")} />
               </ActionPanel>
             }
           />
@@ -447,21 +385,14 @@ function RoutingActions({
           <Action
             title={on ? "Turn Routing Off" : "Turn Routing On"}
             icon={on ? Icon.Circle : Icon.Play}
-            onAction={() =>
-              run(
-                () => api.setRouting(!on),
-                on ? "Routing off — traffic goes direct" : "Routing on",
-              )
-            }
+            onAction={() => run(() => api.setRouting(!on), on ? "Routing off — traffic goes direct" : "Routing on")}
           />
         )}
         <Action
           title="Toggle Routing"
           icon={Icon.Switch}
           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={() =>
-            run(() => api.toggleRouting(), on ? "Routing off — traffic goes direct" : "Routing on")
-          }
+          onAction={() => run(() => api.toggleRouting(), on ? "Routing off — traffic goes direct" : "Routing on")}
         />
       </ActionPanel.Section>
 
@@ -498,11 +429,7 @@ function RoutingActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           onAction={() => goToCommand("explain-host")}
         />
-        <Action
-          title="App Routing…"
-          icon={Icon.AppWindowSidebarLeft}
-          onAction={() => goToCommand("app-routing")}
-        />
+        <Action title="App Routing…" icon={Icon.AppWindowSidebarLeft} onAction={() => goToCommand("app-routing")} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -518,11 +445,7 @@ function PresetSubmenu({
   if (presets.length === 0) return null;
 
   return (
-    <ActionPanel.Submenu
-      title="Add a Preset…"
-      icon={Icon.Star}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-    >
+    <ActionPanel.Submenu title="Add a Preset…" icon={Icon.Star} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
       {presets.map((preset) => (
         <Action
           key={preset.id}
