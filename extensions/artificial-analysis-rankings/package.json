@@ -20,6 +20,7 @@
     {
       "name": "ai-model-rankings",
       "title": "AI Model Rankings",
+      "subtitle": "Artificial Analysis",
       "description": "Discover the top five distinct AI models with quick access to all rankings.",
       "mode": "view",
       "keywords": [
@@ -34,6 +35,7 @@
     {
       "name": "all-ai-models",
       "title": "All AI Models",
+      "subtitle": "Artificial Analysis",
       "description": "Browse every evaluated configuration ranked by intelligence.",
       "mode": "view",
       "keywords": [
@@ -46,6 +48,7 @@
     {
       "name": "best-coding-models",
       "title": "Best Coding Models",
+      "subtitle": "Artificial Analysis",
       "description": "Find the strongest coding models by Coding Index.",
       "mode": "view",
       "keywords": [
@@ -57,6 +60,7 @@
     {
       "name": "fastest-ai-models",
       "title": "Fastest AI Models",
+      "subtitle": "Artificial Analysis",
       "description": "Rank models by median output tokens per second.",
       "mode": "view",
       "keywords": [
@@ -68,6 +72,7 @@
     {
       "name": "model-pricing",
       "title": "Model Pricing",
+      "subtitle": "Artificial Analysis",
       "description": "Compare input or output token prices, lowest first.",
       "mode": "view",
       "keywords": [
@@ -80,6 +85,7 @@
     {
       "name": "lowest-latency-models",
       "title": "Lowest Latency Models",
+      "subtitle": "Artificial Analysis",
       "description": "Rank models by time to first token, lowest first.",
       "mode": "view",
       "keywords": [
@@ -91,6 +97,7 @@
     {
       "name": "compare-models",
       "title": "Compare Models",
+      "subtitle": "Artificial Analysis",
       "description": "Compare up to four AI models side by side, with the better values highlighted.",
       "mode": "view",
       "keywords": [
@@ -142,7 +149,6 @@
     "build": "ray build -e dist",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "publish": "npx @raycast/api@latest publish"
@@ -156,7 +162,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^10.5.0",
     "prettier": "^3.8.5",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "typescript": "^6.0.3"
   }
 }

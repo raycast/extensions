@@ -83,17 +83,6 @@ Open **Compare Models**, or the **Compare** tile on the dashboard. Each model ge
 
 Your API key is stored by Raycast and sent only to Artificial Analysis. Rankings are cached locally and refreshed when they are more than an hour old.
 
-## Development
-
-Requires Node.js 22.22.2 or later.
-
-```sh
-npm install
-npm run dev     # load the extension in Raycast
-npm test        # run unit tests
-npm run lint    # check code style
-```
-
 ## Credits
 
 Data from [Artificial Analysis](https://artificialanalysis.ai/). This is an independent project, not affiliated with Artificial Analysis. Provider logos from [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT). Released under the [MIT License](LICENSE).
