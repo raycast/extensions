@@ -22,7 +22,7 @@ declare module "bonjour-service" {
   }
 
   class Bonjour {
-    constructor();
+    constructor(options?: { interface: string; bind: string; port: number });
     find(query: { type: string }, callback: (service: BonjourService) => void): BonjourBrowser;
     destroy(): void;
   }
