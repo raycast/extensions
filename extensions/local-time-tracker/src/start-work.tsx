@@ -46,6 +46,19 @@ export default function StartWorkCommand({
   const [usePomodoro, setUsePomodoro] = useState(false);
   const pomodoroEnabled = getReminderSettings().pomodoroEnabled;
   const projectDropdownRef = useRef<Form.Dropdown>(null);
+  const openPlanAction = (
+    <Action
+      title="Open Today's Plan"
+      icon={Icon.List}
+      onAction={() =>
+        launchWithFailure(
+          () => launchCommand({ name: "today-plan", type: LaunchType.UserInitiated }),
+          "Could not open Today's Plan",
+          showFailure,
+        )
+      }
+    />
+  );
 
   async function load() {
     try {
@@ -138,6 +151,7 @@ export default function StartWorkCommand({
             />
             <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => closeMainWindow()} />
             {editStartAction}
+            {openPlanAction}
           </ActionPanel>
         }
       />
@@ -152,6 +166,7 @@ export default function StartWorkCommand({
           <ActionPanel>
             <Action title="Dismiss" icon={Icon.XMarkCircle} onAction={() => closeMainWindow()} />
             {editStartAction}
+            {openPlanAction}
           </ActionPanel>
         }
       />
@@ -216,6 +231,7 @@ export default function StartWorkCommand({
               }
             />
             {editStartAction}
+            {openPlanAction}
           </ActionPanel>
         }
       />
@@ -293,6 +309,7 @@ export default function StartWorkCommand({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Work" icon={Icon.Play} onSubmit={submit} />
+          {openPlanAction}
           {pomodoroEnabled ? (
             <Action
               title={usePomodoro ? "Disable Pomodoro" : "Enable Pomodoro"}

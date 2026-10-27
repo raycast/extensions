@@ -44,13 +44,24 @@ export const CRAWLER_TIMEOUT_MS = 15000;
 /** Timeout for WallHopper re-fetch attempts */
 export const WALLHOPPER_TIMEOUT_MS = 15000;
 
+const ACCEPT_HTML = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8";
+
 /**
- * Fetches HTML content from a URL with error handling and logging
+ * The same, with Markdown first. A server that can send the article as Markdown does (Cloudflare
+ * converts any page it serves, and documentation sites publish their own); the rest ignore it.
+ */
+const ACCEPT_MARKDOWN =
+  "text/markdown,text/html;q=0.9,application/xhtml+xml;q=0.9,application/xml;q=0.8,image/avif,image/webp,image/apng,*/*;q=0.7";
+
+/**
+ * Fetches HTML content from a URL with error handling and logging. With `preferMarkdown`, the
+ * response may be Markdown instead.
  */
 export async function fetchHtml(
   url: string,
+  { preferMarkdown = false }: { preferMarkdown?: boolean } = {},
 ): Promise<{ success: true; data: FetchResult } | { success: false; error: FetchError }> {
-  fetchLog.log("fetch:start", { url });
+  fetchLog.log("fetch:start", { url, preferMarkdown });
 
   try {
     const controller = new AbortController();
@@ -66,7 +77,7 @@ export async function fetchHtml(
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        Accept: preferMarkdown ? ACCEPT_MARKDOWN : ACCEPT_HTML,
         "Accept-Language": "en-US,en;q=0.9",
         "Cache-Control": "max-age=0",
         Connection: "keep-alive",

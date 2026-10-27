@@ -1,5 +1,10 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Windows support] - 2026-10-26
+- Add Windows support
+- Default Android SDK path on Windows is `~\AppData\Local\Android\Sdk` (Android Studio's default). Update the `Android SDK` preference if your SDK is installed elsewhere
+- Screenshots are saved to `Pictures/adb-screenshots` in your home directory on all platforms
+
 ## [Add uninstall command] - 2025-04-15
 - Add `uninstall` command to uninstall an app, disabled by default
 

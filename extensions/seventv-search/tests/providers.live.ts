@@ -36,7 +36,7 @@ for (const provider of PROVIDERS) {
     );
     assert.ok(result.items.length > 0);
     assert.ok(result.items.every((e) => e.animated));
-    const file = getEmoteFile(result.items[0]);
+    const file = getEmoteFile(result.items[0], 4);
     assert.equal(file.ext, "gif");
     const response = await fetch(file.url, {
       signal: AbortSignal.timeout(20000),

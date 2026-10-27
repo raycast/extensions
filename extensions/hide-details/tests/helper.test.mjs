@@ -333,9 +333,10 @@ test("generated Swift review binding rerenders only selected masks from its encr
     "updateReviewImage",
     path.join(directory, "source.sealed"),
     initial.reviewKey,
-    JSON.stringify(selected.map((hit) => hit.box)),
+    JSON.stringify(selected.map(({ kind, box }) => ({ kind, box }))),
     "blackout",
     output,
+    false,
   );
   assert.equal(count, 1);
   const reportFile = path.join(directory, "review-selected.json");
