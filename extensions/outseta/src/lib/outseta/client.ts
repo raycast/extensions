@@ -17,7 +17,17 @@ export interface ClientOptions {
   guardWrite?: (description: string, caseUid: string) => void | Promise<void>;
   /** Delay before retrying a 429 that has no Retry-After header, in ms. */
   retryDelayMs?: number;
+  /** Requests allowed per window. null turns pacing off (demo data has no limit). */
+  rateLimit?: RateLimit | null;
 }
+
+export interface RateLimit {
+  requests: number;
+  windowMs: number;
+}
+
+// Outseta allows 7 requests per 5 seconds per API key.
+export const OUTSETA_RATE_LIMIT: RateLimit = { requests: 7, windowMs: 5000 };
 
 export class OutsetaError extends Error {
   constructor(
@@ -63,6 +73,41 @@ export function retryAfterMs(header: string | null, now = Date.now()): number | 
   if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
   const date = Date.parse(header);
   return Number.isNaN(date) ? undefined : Math.max(0, date - now);
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Spaces requests so a burst (moving quickly through list rows loads each row's details) stays
+ * inside the limit, and holds every request while Outseta asks to wait after a 429.
+ */
+function createPacer(limit: RateLimit) {
+  const sent: number[] = [];
+  let pausedUntil = 0;
+  let queue = Promise.resolve();
+
+  return {
+    /** Resolves when the next request may go out. Requests go out in the order they asked. */
+    wait(): Promise<void> {
+      const turn = queue.then(async () => {
+        for (;;) {
+          const now = Date.now();
+          while (sent[0] !== undefined && now - sent[0] >= limit.windowMs) sent.shift();
+          const oldest = sent[0];
+          const windowFull = oldest !== undefined && sent.length >= limit.requests ? oldest + limit.windowMs - now : 0;
+          const delay = Math.max(pausedUntil - now, windowFull);
+          if (delay <= 0) break;
+          await sleep(delay);
+        }
+        sent.push(Date.now());
+      });
+      queue = turn;
+      return turn;
+    },
+    pause(ms: number) {
+      pausedUntil = Math.max(pausedUntil, Date.now() + ms);
+    },
+  };
 }
 
 export interface SearchParams {
@@ -120,8 +165,11 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
   const retryDelayMs = options.retryDelayMs ?? 1000;
   const baseUrl = `https://${credentials.subdomain}.outseta.com/api/v1`;
   const authorization = `Outseta ${credentials.apiKey}:${credentials.secretKey}`;
+  const rateLimit = options.rateLimit === undefined ? OUTSETA_RATE_LIMIT : options.rateLimit;
+  const pacer = rateLimit ? createPacer(rateLimit) : undefined;
 
   async function request<T>(method: string, path: string, body?: unknown, retried = false): Promise<T> {
+    await pacer?.wait();
     const response = await doFetch(baseUrl + path, {
       method,
       headers: {
@@ -136,7 +184,8 @@ export function createClient(credentials: Credentials, options: ClientOptions = 
     if (response.status === 429) {
       if (retried) throw new RateLimitError();
       const delay = retryAfterMs(response.headers.get("Retry-After")) ?? retryDelayMs;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (pacer) pacer.pause(delay);
+      else await sleep(delay);
       return request<T>(method, path, body, true);
     }
     if (!response.ok) {

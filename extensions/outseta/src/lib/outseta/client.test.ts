@@ -80,6 +80,42 @@ describe("createClient", () => {
       expect((await person).Uid).toBe("p1");
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
+
+    it("sends at most 7 requests per 5 seconds", async () => {
+      vi.useFakeTimers();
+      const fetchMock = stubFetch();
+      const client = createClient(credentials, { fetch: fetchMock });
+      const people = Array.from({ length: 8 }, (_, i) => client.getPerson(`p${i}`));
+
+      await vi.advanceTimersByTimeAsync(4_999);
+      expect(fetchMock).toHaveBeenCalledTimes(7);
+      await vi.advanceTimersByTimeAsync(1);
+      await Promise.all(people);
+      expect(fetchMock).toHaveBeenCalledTimes(8);
+    });
+
+    it("holds every request while Outseta asks to wait after a 429", async () => {
+      vi.useFakeTimers();
+      const fetchMock = stubFetch({ status: 429, headers: { "Retry-After": "10" } });
+      const client = createClient(credentials, { fetch: fetchMock });
+      const first = client.getPerson("p1");
+      await vi.advanceTimersByTimeAsync(0);
+      const second = client.getPerson("p2");
+
+      await vi.advanceTimersByTimeAsync(9_999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await Promise.all([first, second]);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it("doesn't pace requests when rateLimit is null", async () => {
+      vi.useFakeTimers();
+      const fetchMock = stubFetch();
+      const client = createClient(credentials, { fetch: fetchMock, rateLimit: null });
+      await Promise.all(Array.from({ length: 8 }, (_, i) => client.getPerson(`p${i}`)));
+      expect(fetchMock).toHaveBeenCalledTimes(8);
+    });
   });
 
   it("gives up after a second 429", async () => {

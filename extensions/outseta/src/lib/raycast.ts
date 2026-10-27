@@ -33,7 +33,7 @@ export function getClient(): OutsetaClient {
     const agentName = getAgentName();
     // Demo replies stay in memory, so they need no guard.
     client = isDemo()
-      ? createClient(credentials, { agentName, fetch: createDemoFetch() })
+      ? createClient(credentials, { agentName, fetch: createDemoFetch(), rateLimit: null })
       : createClient(credentials, { agentName, guardWrite });
   }
   return client;

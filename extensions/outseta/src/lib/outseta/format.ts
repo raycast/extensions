@@ -138,10 +138,28 @@ export function caseTitle(supportCase: Case): string {
   return supportCase.Subject?.trim() || "(no subject)";
 }
 
-/** Outseta stores messages as HTML; Raycast renders markdown, so reduce them to plain text. */
+// Only links that are safe to open from Raycast keep their destination.
+const LINK_SCHEMES = /^(https?:|mailto:)/i;
+
+function markdownLink(href: string, innerHtml: string): string {
+  const text = innerHtml.replace(/<[^>]+>/g, "").trim();
+  const url = href.trim().replace(/&amp;/g, "&");
+  if (!LINK_SCHEMES.test(url)) return text;
+  if (!text || text === url) return url;
+  const label = text.replace(/[[\]]/g, "\\$&");
+  return `[${label}](${url.replace(/[ ()]/g, encodeURIComponent)})`;
+}
+
+/**
+ * Outseta stores messages as HTML; Raycast renders markdown, so reduce them to text and keep links
+ * as markdown links.
+ */
 export function htmlToText(html: string | null | undefined): string {
   if (!html) return "";
   return html
+    .replace(/<a\s[^>]*?href\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/gi, (_, _quote, href, inner) =>
+      markdownLink(href, inner),
+    )
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|div|li|h\d)>/gi, "\n\n")
     .replace(/<li[^>]*>/gi, "- ")

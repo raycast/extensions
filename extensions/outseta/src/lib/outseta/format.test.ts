@@ -119,6 +119,26 @@ describe("htmlToText", () => {
   it("returns empty text for missing html", () => {
     expect(htmlToText(null)).toBe("");
   });
+
+  it("keeps links as markdown links", () => {
+    expect(
+      htmlToText('<p>See <a href="https://example.com/report?a=1&amp;b=2" target="_blank">the report</a></p>'),
+    ).toBe("See [the report](https://example.com/report?a=1&b=2)");
+    expect(htmlToText('<a href="https://example.com">https://example.com</a>')).toBe("https://example.com");
+    expect(htmlToText("<a href='mailto:help@example.com'>Email <b>us</b></a>")).toBe(
+      "[Email us](mailto:help@example.com)",
+    );
+  });
+
+  it("escapes brackets in link text and spaces in link addresses", () => {
+    expect(htmlToText('<a href="https://example.com/a b">[draft]</a>')).toBe(
+      "[\\[draft\\]](https://example.com/a%20b)",
+    );
+  });
+
+  it("keeps only the text of links that aren't web or email links", () => {
+    expect(htmlToText('<a href="javascript:alert(1)">click</a>')).toBe("click");
+  });
 });
 
 describe("caseMarkdown", () => {
