@@ -1,6 +1,6 @@
 # FlowSpeech TTS Changelog
 
-## [Public API v1] - {PR_MERGE_DATE}
+## [Public API v1] - 2026-10-27
 
 - Migrate generation to asynchronous jobs and credential-free WAV downloads
 - Preserve request IDs on retry and honor Retry-After and operation deadlines
