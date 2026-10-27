@@ -1,0 +1,157 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proxy-manager",
+  "title": "Proxy Manager",
+  "description": "Control Proxy Manager without leaving Raycast: routing on/off, targets, and per-app rules.",
+  "icon": "extension-icon.png",
+  "author": "chaim-chv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "proxy",
+    "tunnel",
+    "socks5",
+    "routing",
+    "targets"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Proxy Manager",
+      "subtitle": "Routing status & targets",
+      "description": "See the routing state, the app and the site in front of you, and manage the target list.",
+      "mode": "view",
+      "keywords": [
+        "status",
+        "tunnel",
+        "targets",
+        "route",
+        "on",
+        "off"
+      ]
+    },
+    {
+      "name": "toggle-routing",
+      "title": "Toggle Routing",
+      "subtitle": "Turn the tunnel on or off",
+      "description": "Flips routing and reports the result in a HUD. Built for a hotkey.",
+      "mode": "no-view",
+      "hotkey": {
+        "modifiers": [
+          "ctrl",
+          "opt"
+        ],
+        "key": "p"
+      },
+      "keywords": [
+        "proxy",
+        "tunnel",
+        "enable",
+        "disable",
+        "switch"
+      ]
+    },
+    {
+      "name": "add-target",
+      "title": "Add Target",
+      "description": "Route a host or wildcard through the tunnel. Prefills the tab you are on.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "host",
+          "type": "text",
+          "placeholder": "api.example.com",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "host",
+        "domain",
+        "allow",
+        "allowlist",
+        "whitelist"
+      ]
+    },
+    {
+      "name": "explain-host",
+      "title": "Explain Host Routing",
+      "description": "Show why a host goes through the tunnel or direct — the tab you are on, or one you name.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "host",
+          "type": "text",
+          "placeholder": "example.com or a URL",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "explain",
+        "why",
+        "match",
+        "decision",
+        "debug"
+      ]
+    },
+    {
+      "name": "app-routing",
+      "title": "App Routing",
+      "description": "Per-app rules: send an app through the tunnel, its targets, or direct. Starts with the app you are in.",
+      "mode": "view",
+      "keywords": [
+        "apps",
+        "per-app",
+        "rules",
+        "bundle",
+        "exceptions"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appPath",
+      "title": "Proxy Manager App",
+      "description": "The app to launch when Proxy Manager is not running.",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/ProxyManager.app",
+      "placeholder": "/Applications/ProxyManager.app"
+    },
+    {
+      "name": "supportDirectory",
+      "title": "Support Folder",
+      "description": "Folder that holds control.sock and control.token. Only change it if you moved Proxy Manager's data.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Library/Application Support/ProxyManager",
+      "placeholder": "~/Library/Application Support/ProxyManager"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.9.0",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "8.57.1",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint:code": "eslint src tests --ext .ts,.tsx && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json"
+  }
+}
