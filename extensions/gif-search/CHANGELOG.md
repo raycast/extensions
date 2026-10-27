@@ -1,11 +1,11 @@
 # GIF Search Changelog
 
-## [Add stickers, clips, memes and All Sources] - {PR_MERGE_DATE}
+## [Add GIPHY Stickers and All Sources] - {PR_MERGE_DATE}
 
 - Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
-- Add Klipy Stickers, Klipy Clips and Klipy Memes. They need a free Klipy API key in the extension preferences.
 - Add an All Sources option that mixes GIPHY and Klipy results into one grid that keeps loading as you scroll.
-- Fix the README note that said Klipy GIFs need a personal API key.
+- Remove the outdated note that Klipy needs a personal API key.
+- Fix Copy GIF Square and Paste GIF Square on GIPHY Clips, which failed because they read the MP4 instead of the GIF.
 
 ## [Fix search pagination with invalid preferences] - 2026-09-30
 

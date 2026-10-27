@@ -1,26 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export type ServiceName =
-  | "giphy"
-  | "giphy-clips"
-  | "giphy-stickers"
-  | "klipy"
-  | "klipy-stickers"
-  | "klipy-clips"
-  | "klipy-memes"
-  | "finergifs"
-  | "favorites"
-  | "recents"
-  | "all";
+  "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs" | "favorites" | "recents" | "all";
 
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   GIPHY_CLIPS: "giphy-clips",
   GIPHY_STICKERS: "giphy-stickers",
   KLIPY: "klipy",
-  KLIPY_STICKERS: "klipy-stickers",
-  KLIPY_CLIPS: "klipy-clips",
-  KLIPY_MEMES: "klipy-memes",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
   RECENTS: "recents",
@@ -52,12 +39,6 @@ export function getServiceTitle(service?: ServiceName) {
       return "GIPHY Stickers";
     case GIF_SERVICE.KLIPY:
       return "Klipy";
-    case GIF_SERVICE.KLIPY_STICKERS:
-      return "Klipy Stickers";
-    case GIF_SERVICE.KLIPY_CLIPS:
-      return "Klipy Clips";
-    case GIF_SERVICE.KLIPY_MEMES:
-      return "Klipy Memes";
     case GIF_SERVICE.FINER_GIFS:
       return "Finer Gifs Club";
     case GIF_SERVICE.ALL:
@@ -102,8 +83,4 @@ export function getGiphyLocale(): string {
 
 export function getKlipyLocale(): string {
   return preferences.klipyLocale;
-}
-
-export function getKlipyApiKey(): string {
-  return preferences.klipyApiKey?.trim() ?? "";
 }

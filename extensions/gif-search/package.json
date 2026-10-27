@@ -199,14 +199,6 @@
       "label": "Hide Filename"
     },
     {
-      "name": "klipyApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Klipy API Key",
-      "placeholder": "Paste your Klipy API key",
-      "description": "Unlocks Klipy Stickers, Clips and Memes. Get a free key at partner.klipy.com"
-    },
-    {
       "name": "giphyLocale",
       "type": "dropdown",
       "required": false,
