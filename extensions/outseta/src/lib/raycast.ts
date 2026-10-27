@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { useRef } from "react";
 import { createDemoFetch } from "./demo/fetch";
 import { AuthError, createClient, OutsetaClient } from "./outseta/client";
 import { StatusColor } from "./outseta/format";
@@ -59,6 +60,26 @@ export async function allowDevWrites(caseUid: string) {
   const allowlist = new Set(await devWriteAllowlist());
   allowlist.add(caseUid);
   await LocalStorage.setItem(DEV_WRITE_ALLOWLIST_KEY, JSON.stringify([...allowlist]));
+}
+
+// useCachedPromise reports hasMore for a cached first page, so Raycast asks for the next page while
+// the first is still loading. Only the latest request is kept, so an empty next page then replaces
+// the whole list. Ignore those requests: the ref sees loading that started after the last render.
+export function useSettledPagination<T extends { hasMore: boolean; onLoadMore: () => void }>(
+  pagination: T | undefined,
+  isLoading: boolean,
+) {
+  const loading = useRef(isLoading);
+  loading.current = isLoading;
+  return (
+    pagination && {
+      ...pagination,
+      hasMore: pagination.hasMore && !isLoading,
+      onLoadMore: () => {
+        if (!loading.current) pagination.onLoadMore();
+      },
+    }
+  );
 }
 
 export function toRaycastColor(color: StatusColor): Color {

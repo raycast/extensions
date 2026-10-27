@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AccountActions, AccountMetadata, useAccount } from "./components/details";
 import { accountStageColor } from "./lib/outseta/format";
 import { Account } from "./lib/outseta/types";
-import { getClient, showErrorToast, toRaycastColor } from "./lib/raycast";
+import { getClient, showErrorToast, toRaycastColor, useSettledPagination } from "./lib/raycast";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -19,6 +19,7 @@ export default function Command() {
     [searchText],
     { keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search accounts") },
   );
+  const settledPagination = useSettledPagination(pagination, isLoading);
 
   return (
     <List
@@ -28,7 +29,7 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedUid(id ?? undefined)}
       searchBarPlaceholder="Search accounts"
       throttle
-      pagination={pagination}
+      pagination={settledPagination}
     >
       <List.EmptyView
         icon={Icon.Building}

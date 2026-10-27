@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PersonActions, PersonMetadata, usePerson } from "./components/details";
 import { formatDate, personName } from "./lib/outseta/format";
 import { Person } from "./lib/outseta/types";
-import { getClient, showErrorToast } from "./lib/raycast";
+import { getClient, showErrorToast, useSettledPagination } from "./lib/raycast";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -19,6 +19,7 @@ export default function Command() {
     [searchText],
     { keepPreviousData: true, onError: (error) => showErrorToast(error, "Couldn't search people") },
   );
+  const settledPagination = useSettledPagination(pagination, isLoading);
 
   return (
     <List
@@ -28,7 +29,7 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedUid(id ?? undefined)}
       searchBarPlaceholder="Search people by name or email"
       throttle
-      pagination={pagination}
+      pagination={settledPagination}
     >
       <List.EmptyView
         icon={Icon.Person}

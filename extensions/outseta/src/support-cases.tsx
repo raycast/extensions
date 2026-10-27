@@ -6,7 +6,7 @@ import { ReplyForm } from "./components/reply-form";
 import { canReply, CaseFilter } from "./lib/outseta/client";
 import { adminUrl, caseMarkdown, caseStatusLabel, caseTitle, parseDate } from "./lib/outseta/format";
 import { Case, CaseSource, CaseStatus } from "./lib/outseta/types";
-import { allowDevWrites, getClient, getSubdomain, showErrorToast } from "./lib/raycast";
+import { allowDevWrites, getClient, getSubdomain, showErrorToast, useSettledPagination } from "./lib/raycast";
 
 type Filter = "unassigned" | "mine" | "open" | "closed";
 
@@ -98,6 +98,7 @@ export default function Command() {
       onError: (error) => showErrorToast(error, "Couldn't load cases"),
     },
   );
+  const settledPagination = useSettledPagination(pagination, isLoading);
 
   async function rememberMe(supportCase: Case) {
     const uid = supportCase.AssignedToPersonClientIdentifier;
@@ -115,7 +116,7 @@ export default function Command() {
       onSelectionChange={(id) => setSelectedUid(id ?? undefined)}
       searchBarPlaceholder="Search cases"
       throttle
-      pagination={pagination}
+      pagination={settledPagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter cases" value={effectiveFilter} onChange={(v) => setFilter(v as Filter)}>
           <List.Dropdown.Item title={dropdownTitle("unassigned")} value="unassigned" icon={Icon.Tray} />
