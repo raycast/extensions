@@ -1,8 +1,13 @@
 node_modules/
 dist/
-raycast-env.d.ts
-.raycast-swift-build/
 .DS_Store
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
 
 # Store preview screenshots are release metadata, not generated build output.
 !assets/

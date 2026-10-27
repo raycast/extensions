@@ -33,7 +33,7 @@
     {
       "name": "search-memory",
       "title": "Search Yaps Memory",
-      "subtitle": "Local Vault",
+      "subtitle": "Yaps",
       "keywords": [
         "search",
         "find",
@@ -50,7 +50,7 @@
     {
       "name": "save-clipboard",
       "title": "Save Clipboard to Yaps",
-      "subtitle": "Quick Capture",
+      "subtitle": "Yaps",
       "keywords": [
         "save",
         "capture",
@@ -76,7 +76,7 @@
     {
       "name": "open-yaps",
       "title": "Open Yaps",
-      "subtitle": "Desktop App",
+      "subtitle": "Yaps",
       "keywords": [
         "launch",
         "desktop app",
