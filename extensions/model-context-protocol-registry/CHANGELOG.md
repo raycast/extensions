@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Crevio MCP Server] - {PR_MERGE_DATE}
+
+- Add Crevio to the official registry: delegate work to an AI agent that runs your small business (products, orders, customers, email, sites), or run scripts against the Crevio API and 3,000+ connected apps. Hosted Streamable HTTP server at https://mcp.crevio.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Visualping MCP Server] - 2026-10-27
 
 - Add Visualping to the official registry: website change monitoring for agents. Create, edit, run, pause and delete monitors, list monitors, read recently detected changes and read full monitor settings. Hosted Streamable HTTP server at https://visualping.io/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Public beta.
