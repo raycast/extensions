@@ -15,13 +15,12 @@ type UseAllSourcesSearchParams = {
 
 export default function useAllSourcesSearch({ term, services, limit, execute }: UseAllSourcesSearchParams) {
   const [failures, setFailures] = useState<SourceFailure[]>([]);
-  const searchKey = `${term}|${services.join(",")}`;
-  const latestSearchKey = useRef(searchKey);
-  latestSearchKey.current = searchKey;
+  const latestRequest = useRef(0);
 
   const search = useCachedPromise(
     (term: string, servicesKey: string) =>
       async ({ page, cursor }: { page: number; cursor?: AllSourcesCursor }) => {
+        const request = ++latestRequest.current;
         const result = await fetchAllSourcesPage(
           servicesKey.split(",") as ServiceName[],
           page === 0 ? {} : (cursor ?? {}),
@@ -38,8 +37,8 @@ export default function useAllSourcesSearch({ term, services, limit, execute }: 
           throw new Error(result.failures.map((f) => `${getServiceTitle(f.service)}: ${f.error.message}`).join("\n"));
         }
 
-        // An older search can finish after a newer one starts, so only the current search may report failures.
-        if (latestSearchKey.current === `${term}|${servicesKey}`) setFailures(result.failures);
+        // An older request can finish after a newer one starts, even for the same term, so only the newest may report failures.
+        if (request === latestRequest.current) setFailures(result.failures);
         return { data: result.results, hasMore: result.hasMore, cursor: result.cursor };
       },
     [term, services.join(",")],

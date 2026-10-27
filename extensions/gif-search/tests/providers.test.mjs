@@ -336,27 +336,28 @@ test("square copies read the GIF rendition, since a Clip's download is an MP4", 
   assert.deepEqual(fetched, ["https://static.klipy.com/clip.gif"]);
 });
 
-test("an All Sources search that finishes after a newer one doesn't report its failures", async () => {
-  const searches = [];
+test("an All Sources request that finishes after a newer one doesn't report its failures", async () => {
   const reported = [];
-  const ref = { current: undefined };
+  let loadPage;
+  let release;
+  const stalled = new Promise((resolve) => (release = resolve));
+  let calls = 0;
   const { default: useAllSourcesSearch } = load("hooks/useAllSourcesSearch", {
     react: {
       useState: (initial) => [initial, (value) => reported.push(value)],
-      useRef: (initial) => {
-        ref.current ??= initial;
-        return ref;
-      },
+      useRef: (initial) => ({ current: initial }),
     },
     "@raycast/utils": {
       useCachedPromise: (fn, args) => {
-        searches.push({ fn, args });
+        loadPage = fn(...args);
         return { data: [] };
       },
     },
     "hooks/useSearchAPI": {
       getAPIByServiceName: async (service) => ({
         search: async () => {
+          // The first request's two provider calls wait, so it finishes after the second request.
+          if (calls++ < 2) await stalled;
           if (service === "giphy") throw new Error("offline");
           return { results: [], next: "" };
         },
@@ -365,18 +366,18 @@ test("an All Sources search that finishes after a newer one doesn't report its f
     preferences: { getServiceTitle: (service) => service },
   });
 
-  const params = { services: ["giphy", "klipy"], limit: 2, execute: true };
-  useAllSourcesSearch({ ...params, term: "cat" });
-  useAllSourcesSearch({ ...params, term: "dog" });
-  const [stale, current] = searches;
+  useAllSourcesSearch({ term: "cat", services: ["giphy", "klipy"], limit: 2, execute: true });
+  const stale = loadPage({ page: 0 });
+  const current = loadPage({ page: 0 });
 
-  await stale.fn(...stale.args)({ page: 0 });
-  assert.equal(reported.length, 0);
-
-  await current.fn(...current.args)({ page: 0 });
+  await current;
   assert.equal(reported.length, 1);
   assert.deepEqual(
     [...reported[0]].map((failure) => failure.service),
     ["giphy"],
   );
+
+  release();
+  await stale;
+  assert.equal(reported.length, 1);
 });
