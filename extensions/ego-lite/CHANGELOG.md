@@ -1,4 +1,4 @@
-## [Fixed] - 2026-10-26
+## [Fixed] - {PR_MERGE_DATE}
 
 - Prevent bookmark search from exceeding Raycast's extension memory limit as the browser favicon database grows.
 - Load only matching favicon images, reuse shared bitmaps, and fall back to generated icons when image limits are reached.
