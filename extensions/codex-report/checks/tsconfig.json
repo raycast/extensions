@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../src",
+    "outDir": "../.test-build",
+    "noEmit": false
+  },
+  "include": [
+    "../src/heatmap-data.ts",
+    "../src/heatmap-chart.ts",
+    "../src/svg.ts",
+    "../src/report-cache.ts",
+    "../src/cli-error.ts",
+    "../src/serial.ts"
+  ]
+}

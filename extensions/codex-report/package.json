@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-report",
+  "title": "Codex Report",
+  "description": "Usage history, activity heatmap, and estimated API costs from local Codex and Claude Code sessions",
+  "icon": "icon.png",
+  "author": "flk",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "claude",
+    "claude code",
+    "codex",
+    "anthropic",
+    "openai",
+    "usage",
+    "tokens",
+    "cost",
+    "heatmap",
+    "ai"
+  ],
+  "commands": [
+    {
+      "name": "report",
+      "title": "Show Codex Report",
+      "description": "Daily, weekly, and monthly Codex and Claude Code usage with models, costs, and projects",
+      "mode": "view",
+      "keywords": [
+        "claude",
+        "usage",
+        "tokens",
+        "cost"
+      ]
+    },
+    {
+      "name": "heatmap",
+      "title": "Show Activity Heatmap",
+      "description": "Six-month and yearly heatmap of Codex and Claude Code activity",
+      "mode": "view",
+      "keywords": [
+        "claude",
+        "codex",
+        "usage",
+        "calendar"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "sync-cli": "node sync-cli.mjs",
+    "sync-cli-dev": "node sync-cli.mjs --dev",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc -p checks/tsconfig.json && node --test checks/*.cjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "codex-report": "0.9.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.8.2"
+  }
+}
