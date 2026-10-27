@@ -1,6 +1,6 @@
 # Obsidian Bookmarks Changelog
 
-## [Dia Support] - {PR_MERGE_DATE}
+## [Dia Support] - 2026-10-27
 
 - Fill in the page title when saving a bookmark from Dia. Only the URL used to be detected.
 
