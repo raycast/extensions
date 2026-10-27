@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-interface Preferences {
-  appPath?: string;
-  supportDirectory?: string;
-}
-
 export function expandHome(path: string): string {
   if (path === "~") return homedir();
   if (path.startsWith("~/")) return join(homedir(), path.slice(2));
@@ -14,6 +9,7 @@ export function expandHome(path: string): string {
 }
 
 function readPreferences(): Preferences {
+  // `Preferences` is generated from package.json into raycast-env.d.ts.
   return getPreferenceValues<Preferences>();
 }
 

@@ -8,7 +8,7 @@ import { hostFromInput } from "./lib/host";
  * Exists as its own command for deeplinks, hotkeys and `?arguments=` — the
  * dashboard pushes the same form, so there is only one implementation.
  */
-export default function AddTarget(props: LaunchProps<{ arguments: { host?: string } }>) {
+export default function AddTarget(props: LaunchProps<{ arguments: Arguments.AddTarget }>) {
   const { data: prefill } = usePromise(() => preferredHost(props.arguments.host), []);
 
   return (

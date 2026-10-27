@@ -151,7 +151,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
-    "lint:code": "eslint src tests --ext .ts,.tsx --no-error-on-unmatched-pattern && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json --no-error-on-unmatched-pattern"
+    "typecheck": "test -f raycast-env.d.ts || ray build -e dist -o .raycast-types > /dev/null; tsc --noEmit",
+    "lint:code": "eslint src tests --ext .ts,.tsx --no-error-on-unmatched-pattern && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json --no-error-on-unmatched-pattern",
+    "pretypecheck": "test -f raycast-env.d.ts || ray build -e dist -o .raycast-types"
   }
 }

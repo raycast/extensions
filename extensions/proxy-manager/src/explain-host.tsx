@@ -17,7 +17,7 @@ type Values = { host: string };
  * command argument, then the tab the user is on, then the clipboard, then a
  * form — so the command is never a dead end.
  */
-export default function ExplainHost(props: LaunchProps<{ arguments: { host?: string } }>) {
+export default function ExplainHost(props: LaunchProps<{ arguments: Arguments.ExplainHost }>) {
   const [manual, setManual] = useState<string | null | undefined>(undefined);
 
   const { data: detected, isLoading: detecting } = usePromise(async () => {
