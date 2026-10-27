@@ -8,6 +8,9 @@ import { Profile } from "./types";
 
 const DEFAULT_CLI_PATH = "/Applications/Pritunl.app/Contents/Resources/pritunl-client";
 const COMMAND_TIMEOUT_MS = 30_000;
+// execFile's own default. Logs keep growing across connections and need more.
+const DEFAULT_MAX_BUFFER = 1024 * 1024;
+const LOGS_MAX_BUFFER = 64 * 1024 * 1024;
 
 export class PritunlError extends Error {
   constructor(
@@ -30,15 +33,17 @@ function cleanError(stderr: string): string {
   return firstLine.replace(/^Error:\s*/, "");
 }
 
-function run(args: string[]): Promise<string> {
+function run(args: string[], { maxBuffer = DEFAULT_MAX_BUFFER } = {}): Promise<string> {
   const path = cliPath();
 
   return new Promise((resolve, reject) => {
-    const child = execFile(path, args, { timeout: COMMAND_TIMEOUT_MS }, (error, stdout, stderr) => {
+    const child = execFile(path, args, { timeout: COMMAND_TIMEOUT_MS, maxBuffer }, (error, stdout, stderr) => {
       if (!error) {
         resolve(stdout);
       } else if ("code" in error && error.code === "ENOENT") {
         reject(new PritunlError(`Couldn't find pritunl-client at ${path}`, true));
+      } else if ("code" in error && error.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER") {
+        reject(new PritunlError(`pritunl-client ${args[0]} printed more than ${maxBuffer / 1024 / 1024} MB`));
       } else if (error.killed) {
         reject(new PritunlError(`pritunl-client ${args[0]} took too long to respond`));
       } else {
@@ -82,7 +87,7 @@ export async function disconnect(id: string): Promise<void> {
 }
 
 export async function getLogs(id: string): Promise<string> {
-  return run(["logs", id]);
+  return run(["logs", id], { maxBuffer: LOGS_MAX_BUFFER });
 }
 
 // Profile links carry the key that downloads the profile, so they never appear in messages.

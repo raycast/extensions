@@ -52,7 +52,9 @@ export async function disconnectProfile(profile: Profile): Promise<void> {
 
   try {
     await disconnect(profile.id);
-    await waitForConnection(profile.id, false, DISCONNECT_TIMEOUT_MS);
+    if (!(await waitForConnection(profile.id, false, DISCONNECT_TIMEOUT_MS))) {
+      throw new Error("Timed out waiting for the VPN to disconnect");
+    }
     toast.style = Toast.Style.Success;
     toast.title = `Disconnected from ${name}`;
   } catch (error) {

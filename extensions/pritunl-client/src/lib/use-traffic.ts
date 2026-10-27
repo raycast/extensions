@@ -35,16 +35,15 @@ function record(track: Track, reading: TunnelReading, time: number): MonitorStat
   }
 
   const { baseline } = track;
-  if (baseline && baseline.iface !== reading.iface) {
-    track.samples = [];
-  } else if (
+  const continues =
     baseline &&
+    baseline.iface === reading.iface &&
     time - baseline.time <= MAX_SAMPLE_GAP_MS &&
-    // Counters going down means the interface was recreated. Skip instead of
-    // reporting a negative rate.
+    // Counters going down means the interface was recreated.
     reading.rx >= baseline.rx &&
-    reading.tx >= baseline.tx
-  ) {
+    reading.tx >= baseline.tx;
+
+  if (continues) {
     const seconds = (time - baseline.time) / 1000;
     track.samples = [
       ...track.samples,
@@ -52,6 +51,10 @@ function record(track: Track, reading: TunnelReading, time: number): MonitorStat
     ]
       .filter((sample) => sample.time > time - HISTORY_MS)
       .slice(-MAX_SAMPLES);
+  } else {
+    // A fresh baseline means a new tunnel, a reset one, or a long pause. Earlier samples
+    // belong to something else, so the chart starts over.
+    track.samples = [];
   }
   track.baseline = { ...reading, time };
   return { status: "live", iface: reading.iface, samples: track.samples };
