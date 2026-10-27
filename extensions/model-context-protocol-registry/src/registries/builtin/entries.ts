@@ -41,13 +41,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://pennyocr.com/mcp/",
     configuration: {
       command: "npx",
-      args: [
-        "-y",
-        "mcp-remote",
-        "https://mcp.pennyocr.com",
-        "--header",
-        "Authorization:${PENNYOCR_AUTH_HEADER}",
-      ],
+      args: ["-y", "mcp-remote", "https://mcp.pennyocr.com", "--header", "Authorization:${PENNYOCR_AUTH_HEADER}"],
       env: {
         PENNYOCR_AUTH_HEADER: "Bearer YOUR_PENNYOCR_API_KEY",
       },
