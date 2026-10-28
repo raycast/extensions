@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 
 /** Long enough to outlast any real read-modify-write here; short enough that a crash self-heals */
 const LOCK_STALE_MS = 10_000;
-// Refresh well before the stale threshold, so a slow but live holder is never mistaken for a crashed one
+// Refresh well before the stale threshold, so a slow holder isn't reclaimed while its event loop keeps running
 const LOCK_HEARTBEAT_MS = 1_000;
 const LOCK_RETRY_MS = 20;
 const LOCK_ATTEMPTS = 250;
@@ -16,9 +16,8 @@ const LOCK_ATTEMPTS = 250;
  *
  * `open(path, "wx")` is the primitive: creating a file exclusively is atomic, so exactly one process wins.
  * Every lock carries an ownership token, so a process only ever removes its own lock, and a heartbeat keeps a live
- * holder younger than the stale threshold, so only a crashed holder's lock is reclaimed. Node's portable fs has no
- * conditional unlink, so two processes reclaiming the same crashed lock keep a very small race; see
- * `removeStaleLock`.
+ * holder younger than the stale threshold, so a lock is reclaimed only when its holder crashed or stalled past it.
+ * Node's portable fs has no conditional unlink, so reclaiming keeps a small race; see `removeStaleLock`.
  */
 export async function withFileLock<T>(resource: string, operation: () => Promise<T>): Promise<T> {
   const lockPath = `${resource}.lock`;
@@ -106,11 +105,11 @@ async function breakLockIfStale(lockPath: string) {
 }
 
 /**
- * Reclaim a crashed holder's lock, re-checking token and age right before the unlink. That narrows, but can't close,
- * one race: two waiters both re-check the crashed lock, one unlinks it and takes a new lock, and the other's unlink,
- * already decided, removes that new lock. Portable Node fs has no conditional unlink, so closing it needs an OS
- * advisory lock. It takes a crashed holder plus two waiters landing in a window of a few syscalls, and costs at most
- * one lost update; writes stay whole JSON either way.
+ * Reclaim a stale lock (mtime older than LOCK_STALE_MS), re-checking token and age right before the unlink. That
+ * narrows, but can't close, one race: a reclaimer that passed both checks can unlink a lock someone else created after
+ * them, whether that's another reclaimer that got there first, or a stalled holder that woke, released, and was
+ * succeeded. Portable Node fs has no conditional unlink, so closing it needs an OS advisory lock. If it fires, two
+ * saves overlap and updates can be lost (not just one); the file stays whole JSON either way.
  */
 async function removeStaleLock(lockPath: string, staleToken: string) {
   try {
