@@ -15,6 +15,14 @@ export interface RecoveryRecord {
 }
 
 export async function saveRecovery(record: RecoveryRecord): Promise<void> {
+  return writeRecovery(record, false);
+}
+
+export async function updateRecovery(record: RecoveryRecord): Promise<void> {
+  return writeRecovery(record, true);
+}
+
+async function writeRecovery(record: RecoveryRecord, existingOnly: boolean): Promise<void> {
   const requestId = validateId(record.requestId);
   if (!Number.isFinite(Date.parse(record.createdAt)) || !["pending", "completed", "interrupted"].includes(record.state))
     throw new Error("Invalid recovery record");
@@ -22,6 +30,8 @@ export async function saveRecovery(record: RecoveryRecord): Promise<void> {
     const records = await recoveryRecords();
     check();
     const existing = records.some((value) => value.requestId === requestId);
+    // Forgetting wins over later status updates, including their retention cleanup.
+    if (existingOnly && !existing) return;
     // Completed means playback finished. Pending and interrupted IDs are never pruned.
     const completed = records.filter((value) => value.state === "completed" && value.requestId !== requestId);
     const keep = Math.min(
