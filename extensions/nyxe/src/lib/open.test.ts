@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseOpenTarget, threadWebUrl } from "./open";
+import { chooseOpenTarget, signInLinkUrl, threadWebUrl } from "./open";
 
 describe("chooseOpenTarget", () => {
   it("uses the app when it's installed and nothing overrides", () => {
@@ -28,5 +28,18 @@ describe("chooseOpenTarget", () => {
 
   it("uses the deployment's web app", () => {
     expect(threadWebUrl("T1", "http://localhost:5178/")).toBe("http://localhost:5178/m?thread=T1");
+  });
+});
+
+describe("signInLinkUrl", () => {
+  it("accepts an https link", () => {
+    expect(signInLinkUrl("https://example.com/verify?t=1")?.hostname).toBe("example.com");
+  });
+
+  it("refuses any other scheme, or a value that isn't a URL", () => {
+    expect(signInLinkUrl("http://example.com/verify")).toBeUndefined();
+    expect(signInLinkUrl("file:///etc/passwd")).toBeUndefined();
+    expect(signInLinkUrl("javascript:alert(1)")).toBeUndefined();
+    expect(signInLinkUrl("not a url")).toBeUndefined();
   });
 });

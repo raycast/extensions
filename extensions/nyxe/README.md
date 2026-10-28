@@ -8,6 +8,8 @@ Search, triage and send your Nyxe mail without leaving the keyboard. Grab sign-i
 2. Copy the token (it starts with `nyxe_pat_`). You only see it once.
 3. Run any Nyxe Mail command in Raycast and paste the token when asked.
 
+When creating the token you choose what it may do (**Read mail**, **Triage**, **Send**) and when it expires (30 days, 90 days or 1 year). If a command says the token isn't working, it has expired or been revoked: create a new one and paste it in. A password reset revokes every token. Each token works for one Nyxe workspace, and you can revoke it any time from the same settings page.
+
 ## Commands
 
 | Command | What it does |
@@ -32,17 +34,3 @@ With Raycast AI you can ask `@nyxe` to search, read and summarize threads, draft
 
 - **API Token**: required.
 - **Open Messages In**: Automatic (the Nyxe app if installed, else the browser), Nyxe App, or Browser.
-- **API Base URL**: leave the default unless you were asked to point at another Nyxe deployment.
-
-## Development
-
-```sh
-npm install
-npm run dev     # load the extension in Raycast
-npm test        # unit tests for the pure modules
-npm run lint
-npm run build
-NYXE_API_TOKEN=… NYXE_API_BASE_URL=https://convex-site-dev.nyxe.app npm run smoke
-```
-
-The extension talks only to Nyxe's versioned HTTP API (`/api/v1`). The contract lives in the Nyxe repo at `convex/features/api/README.md`.

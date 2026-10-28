@@ -6,13 +6,12 @@ import {
   type Application,
   getApplications,
   getPreferenceValues,
-  LocalStorage,
   open,
   openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
-import { createClient, DEFAULT_API_BASE_URL, normalizeBaseUrl, type NyxeClient } from "./api";
+import { createClient, type NyxeClient } from "./api";
 import { describeError } from "./errors";
 import { chooseOpenTarget, DEFAULT_WEB_URL, NYXE_DESKTOP_BUNDLE_ID } from "./open";
 
@@ -21,23 +20,7 @@ function preferences(): Preferences {
 }
 
 export function nyxe(): NyxeClient {
-  const { apiToken, apiBaseUrl } = preferences();
-  return createClient({ token: apiToken, baseUrl: apiBaseUrl });
-}
-
-/**
- * The web app for the configured deployment. Production is known; any other
- * base URL asks `/me` once and remembers the answer.
- */
-export async function webUrl(): Promise<string> {
-  const base = normalizeBaseUrl(preferences().apiBaseUrl);
-  if (base === DEFAULT_API_BASE_URL) return DEFAULT_WEB_URL;
-  const key = `webUrl:${base}`;
-  const cached = await LocalStorage.getItem<string>(key);
-  if (cached) return cached;
-  const me = await nyxe().me();
-  await LocalStorage.setItem(key, me.webUrl);
-  return me.webUrl;
+  return createClient({ token: preferences().apiToken });
 }
 
 async function desktopApp(): Promise<Application | undefined> {
@@ -55,7 +38,6 @@ export async function openThreadInNyxe(threadId: string): Promise<void> {
   const target = chooseOpenTarget(threadId, {
     preference,
     appInstalled: preference === "browser" ? false : (await desktopApp()) !== undefined,
-    webUrl: preference === "app" ? DEFAULT_WEB_URL : await webUrl(),
   });
   await open(target.url);
 }
@@ -68,7 +50,7 @@ export async function openInboxInNyxe(): Promise<void> {
     await open(app.path);
     return;
   }
-  await open(`${await webUrl()}/m`);
+  await open(`${DEFAULT_WEB_URL}/m`);
 }
 
 /** Show a failure as a toast, with the way out when the token is the problem. */
@@ -84,7 +66,7 @@ export async function showApiError(err: unknown, fallbackTitle?: string): Promis
             title: "Open API Tokens",
             onAction: async (toast) => {
               await toast.hide();
-              await open(`${await webUrl().catch(() => DEFAULT_WEB_URL)}/m/settings?tab=api-tokens`);
+              await open(`${DEFAULT_WEB_URL}/m/settings?tab=api-tokens`);
             },
           },
           secondaryAction: {

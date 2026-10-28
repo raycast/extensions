@@ -35,3 +35,14 @@ export function chooseOpenTarget(
     ? { kind: "app", url: `nyxe://thread/${threadId}` }
     : { kind: "browser", url: threadWebUrl(threadId, webUrl) };
 }
+
+/** A sign-in link worth opening: https only, so a bad API answer can never
+ *  launch another app's URL scheme. */
+export function signInLinkUrl(link: string): URL | undefined {
+  try {
+    const url = new URL(link);
+    return url.protocol === "https:" ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}

@@ -262,14 +262,6 @@
         { "title": "Nyxe App", "value": "app" },
         { "title": "Browser", "value": "browser" }
       ]
-    },
-    {
-      "name": "apiBaseUrl",
-      "title": "API Base URL",
-      "description": "Leave as is unless you were asked to point the extension at another Nyxe deployment.",
-      "type": "textfield",
-      "required": false,
-      "default": "https://convex-site.nyxe.app"
     }
   ],
   "dependencies": {

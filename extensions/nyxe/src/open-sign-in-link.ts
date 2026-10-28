@@ -1,4 +1,5 @@
 import { open, showHUD } from "@raycast/api";
+import { signInLinkUrl } from "./lib/open";
 import { nyxe, showApiError } from "./lib/raycast";
 import { displayAddress } from "./lib/text";
 
@@ -13,9 +14,14 @@ export default async function OpenSignInLink() {
       await showHUD(`No sign-in link in the last ${WINDOW_MINUTES} minutes`);
       return;
     }
-    await open(match.link);
+    const url = signInLinkUrl(match.link);
+    if (!url) {
+      await showHUD("The newest sign-in link isn't a secure web link, so it wasn't opened");
+      return;
+    }
+    await open(url.href);
     // Name where it went, not just who sent it.
-    await showHUD(`Opened ${new URL(match.link).hostname} from ${displayAddress(match.from)}`);
+    await showHUD(`Opened ${url.hostname} from ${displayAddress(match.from)}`);
   } catch (err) {
     await showApiError(err, "Couldn't check for a link");
   }

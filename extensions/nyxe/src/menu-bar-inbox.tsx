@@ -1,5 +1,5 @@
 import { Icon, Keyboard, launchCommand, LaunchType, MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { describeError } from "./lib/errors";
 import { nyxe, openInboxInNyxe, openThreadInNyxe, showApiError } from "./lib/raycast";
 import { displayAddress } from "./lib/text";
@@ -61,7 +61,13 @@ export default function MenuBarInbox() {
           title="Compose"
           icon={Icon.Pencil}
           shortcut={Keyboard.Shortcut.Common.New}
-          onAction={() => launchCommand({ name: "send-email", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "send-email", type: LaunchType.UserInitiated });
+            } catch (error) {
+              await showFailureToast(error, { title: "Could not open Send Email" });
+            }
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
