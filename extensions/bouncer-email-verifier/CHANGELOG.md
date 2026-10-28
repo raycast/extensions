@@ -1,6 +1,6 @@
 # Bouncer Deliverability Changelog
 
-## [Domain Jump, Signal Guide, and Credits in Root Search] - {PR_MERGE_DATE}
+## [Domain Jump, Signal Guide, and Credits in Root Search] - 2026-10-28
 
 - Check the domain behind any email result with `⌘⇧D` (`Ctrl+Shift+D` on Windows), without retyping it. It is saved to history like any other domain check.
 - Added **What the Signals Mean** to every result: what each status and signal measures, with a link to Bouncer's terminology. It describes the fields; what to do with an address stays your call.
