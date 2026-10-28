@@ -1,5 +1,11 @@
 # Google Meet Changelog
 
+## [Helium Support & Meet Link Detection Fix] - {PR_MERGE_DATE}
+
+- Add Helium as a supported browser. Helium is Chromium-based, so meeting links are read from its tabs the same way as Chrome, Brave, and Edge. Previously, Helium as the default browser failed with "isn't a supported browser".
+- Fix meeting links never being copied once Meet redirects `/new` through `/meet/new` to `/meet/<code>`. Only `/<code>` was accepted, so detection timed out on a meeting that had already opened. Both forms are now accepted, and the link is still copied as `https://meet.google.com/<code>`.
+- Fix an older meeting's link being copied instead of the new one in Chromium-based browsers other than Arc and Dia. Every tab was searched for a meeting link, so a meeting tab left open from an earlier call, or restored by the browser, matched first. These browsers now open the meeting in a tab of their own and read the link only from that tab.
+
 ## [Safari Web App Support & Per-Profile Open In] - 2026-10-13
 
 - Create meetings directly inside a Google Meet Safari web app (File → Add to Dock) when "Open Meetings In" is set to the PWA. The meeting link is read from the web app's window title ("Meet - <code>") through System Events, so no browser tab is opened and neither the preferred nor the default browser is consulted. A default browser that isn't a supported browser, such as a link router like Finicky, no longer causes "isn't a supported browser" in this mode.
