@@ -14,6 +14,17 @@ function load(file, mocks = {}) {
   return exports;
 }
 const formatting = load("src/utils/path-format.ts");
+test("separator preferences preserve newlines, including previously saved values", () => {
+  const manifest = require("../package.json");
+  const preference = manifest.preferences.find((p) => p.name === "multiPathSeparator");
+  for (const separator of [preference.default, ...preference.data.map((item) => item.value), "\n"]) {
+    const preferences = load("src/types/preferences.ts", {
+      "@raycast/api": { getPreferenceValues: () => ({ multiPathSeparator: separator }) },
+    });
+    const expected = separator === "\\n" ? "\n" : separator;
+    assert.equal(["/tmp/a", "/tmp/b"].join(preferences.multiPathSeparator), "/tmp/a" + expected + "/tmp/b");
+  }
+});
 test("HUD indicates the additional count, including when emoji is hidden", () => {
   assert.equal(formatting.formatPathHUD(["/tmp/a"], "📄"), "📄 /tmp/a");
   assert.equal(formatting.formatPathHUD(["/tmp/a", "/tmp/b", "/tmp/c"], "📄"), "📑 /tmp/a (+2)");

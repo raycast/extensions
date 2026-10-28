@@ -1,21 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  showCopyTip: boolean;
-  showHudEmoji: boolean;
-  showLastCopy: boolean;
-  showTabTitle: boolean;
-  multiPathSeparator: string;
-  copyUrlContent: string;
-  copyWhenUnSupported: string;
-}
-
 export const {
   showHudEmoji,
   showCopyTip,
   showLastCopy,
   showTabTitle,
-  multiPathSeparator,
+  multiPathSeparator: separator,
   copyUrlContent,
   copyWhenUnSupported,
 } = getPreferenceValues<Preferences>();
+
+// Escape the manifest value for Raycast's type generator; older saved values already contain a newline.
+export const multiPathSeparator = separator.replace("\\n", "\n");

@@ -79,11 +79,11 @@
       "required": false,
       "title": "Multi-path Separator",
       "description": "The separator between paths when copying multiple file paths.",
-      "default": "\n",
+      "default": "\\n",
       "data": [
         {
           "title": "⏎",
-          "value": "\n"
+          "value": "\\n"
         },
         {
           "title": "␣",

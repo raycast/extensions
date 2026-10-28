@@ -47,6 +47,45 @@ function selectedPath(el,depth) {
   }
   return "";
 }
+function pathsFromSelection(el) {
+  const selected=list(el,"AXSelectedChildren").concat(list(el,"AXSelectedRows"));
+  const paths=selected.map(function(item) { return selectedPath(item,0); });
+  // Never copy a partial selection if one selected item's URL is unreadable.
+  return paths.every(Boolean) ? paths.filter(function(path,i) { return paths.indexOf(path)===i; }) : [];
+}
+function selectionWithin(container) {
+  const queue=[{el:container,depth:0}];
+  let visited=0;
+  while (queue.length && visited++<30) {
+    const item=queue.shift();
+    const role=text(attr(item.el,"AXRole"));
+    if (role === "AXList" || role === "AXOutline" || role === "AXTable") return pathsFromSelection(item.el);
+    if (item.depth<4) list(item.el,"AXChildren").forEach(function(el) { queue.push({el:el,depth:item.depth+1}); });
+  }
+  return [];
+}
+function columnSelection(browser) {
+  const explicit=list(browser,"AXColumns");
+  if (explicit.length) return selectionWithin(explicit[explicit.length-1]);
+
+  // Some panels expose columns through scroll-area wrappers instead of AXColumns.
+  const stack=list(browser,"AXChildren").reverse().map(function(el) { return {el:el,depth:0}; });
+  const columns=[];
+  const lists=[];
+  let visited=0;
+  while (stack.length && visited++<40) {
+    const item=stack.pop();
+    const role=text(attr(item.el,"AXRole"));
+    if (role === "AXColumn") { columns.push(item.el); continue; }
+    if (role === "AXList" || role === "AXOutline" || role === "AXTable") { lists.push(item.el); continue; }
+    if (item.depth<4) list(item.el,"AXChildren").reverse().forEach(function(el) { stack.push({el:el,depth:item.depth+1}); });
+  }
+  if (stack.length) return [];
+  const containers=columns.length ? columns : lists;
+  // Earlier columns retain selected ancestor folders even with no file selected.
+  // Only the final column can supply the selection; never fall back to an ancestor.
+  return containers.length ? selectionWithin(containers[containers.length-1]) : pathsFromSelection(browser);
+}
 const apps=$.NSRunningApplication.runningApplicationsWithBundleIdentifier(${JSON.stringify(bundleId)});
 let result=[];
 if (apps.count) {
@@ -63,17 +102,11 @@ if (apps.count) {
       if (/sidebar|favorite/i.test(id) || role === "AXWebArea") continue;
       const isFileList=["IconView","ListView","ColumnView"].indexOf(id)>=0 || role === "AXBrowser";
       if (isFileList) {
-        const selected=list(item.el,"AXSelectedChildren").concat(list(item.el,"AXSelectedRows"));
-        if (selected.length) {
-          const paths=selected.map(function(el) { return selectedPath(el,0); });
-          // Do not silently copy a partial selection.
-          if (paths.every(Boolean)) result=paths.filter(function(path,i) { return paths.indexOf(path)===i; });
-          break;
-        }
+        result=role === "AXBrowser" || id === "ColumnView" ? columnSelection(item.el) : selectionWithin(item.el);
+        break;
       }
       // Never enumerate the entire contents of a file list or sidebar outline.
       if ((role === "AXList" || role === "AXOutline" || role === "AXTable") && !isFileList) continue;
-      if (isFileList && role !== "AXBrowser" && id !== "ColumnView") continue;
       if (item.depth<8) list(item.el,"AXChildren").forEach(function(el) { queue.push({el:el,depth:item.depth+1}); });
     }
   }

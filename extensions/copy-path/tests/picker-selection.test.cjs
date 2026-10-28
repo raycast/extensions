@@ -23,6 +23,9 @@ function inspect(id, selected, visible = [item("file:///tmp/not-selected.png")])
     AXIdentifier: id,
     AXChildren: [el({ AXIdentifier: "IconView", AXRole: "AXList", AXSelectedChildren: selected, AXChildren: visible })],
   });
+  return inspectPanel(panel);
+}
+function inspectPanel(panel) {
   const root = el({ AXFocusedWindow: panel });
   const array = (values) => ({ count: values.length, objectAtIndex: (i) => values[i] });
   const $ = (v) => v;
@@ -129,4 +132,104 @@ test("native JXA syntax parses without inspecting apps", { skip: process.platfor
     { encoding: "utf8" },
   );
   assert.equal(r.status, 0, r.stderr);
+});
+
+const openPanel = (children) => el({ AXIdentifier: "open-panel", AXChildren: children });
+const column = (selected, attribute = "AXSelectedChildren") =>
+  el({
+    AXRole: "AXColumn",
+    AXChildren: [el({ AXRole: "AXScrollArea", AXChildren: [el({ AXRole: "AXList", [attribute]: selected })] })],
+  });
+test("list view reads AXSelectedRows through row cells", () => {
+  const row = el({
+    AXRole: "AXRow",
+    AXChildren: [el({ AXRole: "AXCell", AXChildren: [item("file:///tmp/list.png")] })],
+  });
+  assert.deepEqual(
+    inspectPanel(openPanel([el({ AXIdentifier: "ListView", AXRole: "AXOutline", AXSelectedRows: [row] })])),
+    ["/tmp/list.png"],
+  );
+});
+test("list view supports AXSelectedChildren and deduplicates overlapping selection attributes", () => {
+  const row = item("file:///tmp/list.png");
+  assert.deepEqual(
+    inspectPanel(
+      openPanel([
+        el({ AXIdentifier: "ListView", AXRole: "AXTable", AXSelectedRows: [row], AXSelectedChildren: [row] }),
+      ]),
+    ),
+    ["/tmp/list.png"],
+  );
+});
+test("column view reads the rightmost AXColumns selection, not an earlier folder", () => {
+  const columns = [column([item("file:///tmp/parent-folder")]), column([item("file:///tmp/child.png")])];
+  assert.deepEqual(
+    inspectPanel(openPanel([el({ AXIdentifier: "ColumnView", AXRole: "AXBrowser", AXColumns: columns })])),
+    ["/tmp/child.png"],
+  );
+});
+test("nested AXBrowser column wrappers support multiple selected rows", () => {
+  const columns = [
+    column([item("file:///tmp/parent-folder")]),
+    column([item("file:///tmp/a.png"), item("file:///tmp/b.png")], "AXSelectedRows"),
+  ];
+  const browser = el({ AXRole: "AXBrowser", AXChildren: [el({ AXRole: "AXScrollArea", AXChildren: columns })] });
+  assert.deepEqual(inspectPanel(openPanel([browser])), ["/tmp/a.png", "/tmp/b.png"]);
+});
+test("AXBrowser ignores its ancestor selection when the last column has a file", () => {
+  const browser = el({
+    AXRole: "AXBrowser",
+    AXSelectedChildren: [item("file:///tmp/parent-folder")],
+    AXColumns: [column([item("file:///tmp/child.png")])],
+  });
+  assert.deepEqual(inspectPanel(openPanel([browser])), ["/tmp/child.png"]);
+});
+test("column order is preserved when wrappers have different nesting depths", () => {
+  const parent = column([item("file:///tmp/parent-folder")]);
+  const child = column([item("file:///tmp/child.png")]);
+  const browser = el({
+    AXRole: "AXBrowser",
+    AXChildren: [el({ AXRole: "AXScrollArea", AXChildren: [parent] }), child],
+  });
+  assert.deepEqual(inspectPanel(openPanel([browser])), ["/tmp/child.png"]);
+});
+test("an incomplete column scan does not return an earlier folder", () => {
+  const browser = el({
+    AXRole: "AXBrowser",
+    AXChildren: [
+      column([item("file:///tmp/parent-folder")]),
+      ...Array.from({ length: 40 }, () => el({ AXRole: "AXGroup" })),
+      column([item("file:///tmp/child.png")]),
+    ],
+  });
+  assert.deepEqual(inspectPanel(openPanel([browser])), []);
+});
+test("empty rightmost column does not copy a parent folder selection", () => {
+  const browser = el({
+    AXRole: "AXBrowser",
+    AXSelectedChildren: [item("file:///tmp/parent-folder")],
+    AXColumns: [column([item("file:///tmp/parent-folder")]), column([])],
+  });
+  assert.deepEqual(inspectPanel(openPanel([browser])), []);
+});
+test("unreadable last-column selection does not fall back to an earlier folder", () => {
+  const browser = el({
+    AXRole: "AXBrowser",
+    AXColumns: [column([item("file:///tmp/parent-folder")]), column([item("file:///tmp/a"), el({ AXRole: "AXRow" })])],
+  });
+  assert.deepEqual(inspectPanel(openPanel([browser])), []);
+});
+test("sidebar selection cannot override the content list", () => {
+  const sidebar = el({
+    AXIdentifier: "sidebar",
+    AXChildren: [el({ AXIdentifier: "ListView", AXRole: "AXOutline", AXSelectedRows: [item("file:///tmp/favourite")] })],
+  });
+  const content = el({ AXIdentifier: "ListView", AXRole: "AXOutline", AXSelectedRows: [item("file:///tmp/actual.png")] });
+  assert.deepEqual(inspectPanel(openPanel([sidebar, content])), ["/tmp/actual.png"]);
+});
+
+test("list-view wrappers expose selected rows on their inner outline", () => {
+  const outline = el({ AXRole: "AXOutline", AXSelectedRows: [item("file:///tmp/nested-list.png")] });
+  const wrapper = el({ AXIdentifier: "ListView", AXRole: "AXScrollArea", AXChildren: [outline] });
+  assert.deepEqual(inspectPanel(openPanel([wrapper])), ["/tmp/nested-list.png"]);
 });
