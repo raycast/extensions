@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chinese-meme-search",
+  "title": "Meme Search",
+  "description": "搜索腾讯／搜狗输入法表情，支持 Raycast 后备搜索和回车复制。",
+  "icon": "icon.png",
+  "author": "uncaughtape",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun",
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Memes",
+      "description": "搜索中文表情包并复制图片",
+      "mode": "view",
+      "keywords": [
+        "meme",
+        "表情包",
+        "斗图"
+      ],
+      "arguments": [
+        {
+          "name": "keyword",
+          "type": "text",
+          "placeholder": "表情关键词",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.9.0",
+    "react": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.9.0"
+  },
+  "preferences": [
+    {
+      "name": "customSource",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Source JSON",
+      "description": "留空使用腾讯／搜狗；配置格式见 README。不要在此填写密钥。"
+    }
+  ]
+}
