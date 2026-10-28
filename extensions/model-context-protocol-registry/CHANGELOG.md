@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Recued MCP Server] - {PR_MERGE_DATE}
+## [Add Recued MCP Server] - 2026-10-28
 
 - Add Recued to the official registry: the server you run yourself between AI apps and your mail, calendar, files and CRM records. An app sees only the tools its contract grants, and by default anything that writes or deletes waits for your approval. Local stdio server run with `recued --mcp` on the computer Recued runs on, with a contract key as `RECUED_MCP_TOKEN`.
 
