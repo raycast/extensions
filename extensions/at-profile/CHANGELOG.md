@@ -1,6 +1,6 @@
 # @ Profile Changelog
 
-## [Open counts, History of 100, and Import/Export fixes] - {PR_MERGE_DATE}
+## [Open counts, History of 100, and Import/Export fixes] - 2026-10-28
 
 - History shows how many times you've opened each profile, and keeps your last 100 profiles instead of 20
 - Stars are now Favorites: "Add to Favorites" in History, shown with a star in the extension's colors
