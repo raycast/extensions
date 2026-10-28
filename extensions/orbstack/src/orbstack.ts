@@ -44,6 +44,10 @@ export const ORB_CTL = "orbctl";
 
 export const DOCKER = "docker";
 
+// Without a pinned context, `docker` targets whatever engine the user last
+// selected (Docker Desktop, Colima, remote) — list and mutations would hit it.
+export const DOCKER_CONTEXT_ARGS = ["--context", "orbstack"];
+
 export interface OrbContainer {
   ID: string;
   Names: string;

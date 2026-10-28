@@ -8,7 +8,7 @@ import { execAsync } from "../utils";
  * @returns output of shell command
  */
 export default async function tool(): Promise<string> {
-  const { stdout, stderr } = await execAsync(`${DOCKER} container ls -a`);
+  const { stdout, stderr } = await execAsync(`${DOCKER} --context orbstack container ls -a`);
   if (stderr) {
     throw new Error(stderr);
   }

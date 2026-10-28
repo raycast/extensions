@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { getStatusIcon } from "./utils";
 import CommandExecute from "./command_execute";
 import { useContainerList, useContainerAction } from "./hooks";
-import { DOCKER } from "./orbstack";
+import { DOCKER, DOCKER_CONTEXT_ARGS } from "./orbstack";
 
 function containerStatusIcon(state: string) {
   if (state === "running" || state === "paused") {
@@ -77,6 +77,30 @@ export default function ContainerList() {
                           runAction("restart", container.Names);
                         }}
                       />
+                      <Action
+                        title="Pause"
+                        icon={Icon.Pause}
+                        onAction={() => {
+                          runAction("pause", container.Names);
+                        }}
+                      />
+                    </>
+                  ) : container.State === "paused" ? (
+                    <>
+                      <Action
+                        title="Unpause"
+                        icon={Icon.Play}
+                        onAction={() => {
+                          runAction("unpause", container.Names);
+                        }}
+                      />
+                      <Action
+                        title="Stop"
+                        icon={Icon.Stop}
+                        onAction={() => {
+                          runAction("stop", container.Names);
+                        }}
+                      />
                     </>
                   ) : (
                     <Action
@@ -95,7 +119,8 @@ export default function ContainerList() {
                         name={container.Names}
                         title="Logs"
                         bin={DOCKER}
-                        command={["container", "logs", "--tail", "200", container.Names]}
+                        mergeStreams={true}
+                        command={[...DOCKER_CONTEXT_ARGS, "container", "logs", "--tail", "200", container.Names]}
                       />
                     }
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
@@ -108,7 +133,7 @@ export default function ContainerList() {
                         name={container.Names}
                         title="Inspect"
                         bin={DOCKER}
-                        command={["container", "inspect", container.Names]}
+                        command={[...DOCKER_CONTEXT_ARGS, "container", "inspect", container.Names]}
                       />
                     }
                     shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -129,7 +154,7 @@ export default function ContainerList() {
                         name={container.Names}
                         title="Remove Container"
                         bin={DOCKER}
-                        command={["container", "rm", "-f", container.Names]}
+                        command={[...DOCKER_CONTEXT_ARGS, "container", "rm", "-f", container.Names]}
                         markdown={`WARNING: This will PERMANENTLY REMOVE the following container:\n\n>\`${container.Names}\`\n\nYou cannot undo this action.`}
                         requireConfirmation={true}
                         refresh={revalidateContainerList}

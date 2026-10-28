@@ -8,6 +8,7 @@ import {
   ContainerSection,
   ORB_CTL,
   DOCKER,
+  DOCKER_CONTEXT_ARGS,
   CONTAINER_LS_FORMAT,
 } from "./orbstack";
 
@@ -145,7 +146,7 @@ export function useContainerList() {
     data: containerListData,
     isLoading: isLoadingContainerList,
     revalidate: revalidateContainerList,
-  } = useExec(DOCKER, ["container", "ls", "-a", "--format", CONTAINER_LS_FORMAT], {
+  } = useExec(DOCKER, [...DOCKER_CONTEXT_ARGS, "container", "ls", "-a", "--format", CONTAINER_LS_FORMAT], {
     onError: (e) => handleCommandError(e, "Container List"),
   });
 
@@ -207,8 +208,8 @@ export function useContainerAction(onComplete?: () => void) {
     },
   });
 
-  const runAction = (verb: "start" | "stop" | "restart", name: string) => {
-    setActionCommand(["container", verb, name]);
+  const runAction = (verb: "start" | "stop" | "restart" | "pause" | "unpause", name: string) => {
+    setActionCommand([...DOCKER_CONTEXT_ARGS, "container", verb, name]);
   };
 
   return { isRunningAction, runAction };
