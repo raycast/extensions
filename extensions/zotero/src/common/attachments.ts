@@ -1,9 +1,20 @@
-import { dirname, join } from "path";
-import { existsSync, readFileSync, readdirSync } from "fs";
+import { dirname, join, resolve } from "path";
+import { existsSync, readFileSync, readdirSync, realpathSync } from "fs";
 import { resolveHome } from "./paths";
 import type { Attachment, RefData } from "./zoteroApi";
 
-const basePaths = new Map<string, string | null>();
+const basePaths = new Map<string, { base: string | null; expiresAt: number }>();
+const BASE_PATH_CACHE_MS = 5_000;
+
+function normalizeDirectory(value: string): string {
+  const expanded = resolve(resolveHome(value));
+  try {
+    return realpathSync(expanded);
+  } catch {
+    // Missing/unavailable directories can still match their configured paths.
+    return expanded;
+  }
+}
 
 function stringPreference(prefs: string, name: string): string | null {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -22,10 +33,10 @@ export function getLinkedAttachmentBasePath(
   zoteroPath: string,
   profilesRoot = join(process.env.HOME || "", "Library", "Application Support", "Zotero", "Profiles"),
 ): string | null {
-  const normalize = (value: string) => resolveHome(value).replace(/\/+$/, "");
-  const dataDir = normalize(dirname(resolveHome(zoteroPath)));
+  const dataDir = normalizeDirectory(dirname(resolveHome(zoteroPath)));
   const cacheKey = `${profilesRoot}\0${dataDir}`;
-  if (basePaths.has(cacheKey)) return basePaths.get(cacheKey) ?? null;
+  const cached = basePaths.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.base;
   const matches = new Set<string>();
   try {
     for (const profile of readdirSync(profilesRoot)) {
@@ -35,7 +46,7 @@ export function getLinkedAttachmentBasePath(
         const prefs = readFileSync(prefsPath, "utf8");
         const base = stringPreference(prefs, "extensions.zotero.baseAttachmentPath");
         const profileDir = stringPreference(prefs, "extensions.zotero.dataDir") || "~/Zotero";
-        if (base && normalize(profileDir) === dataDir) matches.add(normalize(base));
+        if (base && normalizeDirectory(profileDir) === dataDir) matches.add(normalizeDirectory(base));
       } catch {
         // An unreadable profile must not suppress another matching profile.
       }
@@ -44,7 +55,9 @@ export function getLinkedAttachmentBasePath(
     // Missing/unavailable profiles leave linked attachments unresolved.
   }
   const base = matches.size === 1 ? [...matches][0] : null;
-  basePaths.set(cacheKey, base);
+  // Bound both successful and unavailable results so later searches recover
+  // from edited settings or temporary profile read failures.
+  basePaths.set(cacheKey, { base, expiresAt: Date.now() + BASE_PATH_CACHE_MS });
   return base;
 }
 

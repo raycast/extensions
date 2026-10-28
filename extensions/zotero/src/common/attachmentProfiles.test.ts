@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync, symlinkSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { getLinkedAttachmentBasePath } from "./attachments";
@@ -17,6 +17,7 @@ function profiles(entries: { name: string; base: string; dataDir?: string }[]): 
   return root;
 }
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
@@ -46,4 +47,58 @@ it("supports Zotero's default data directory when the preference is absent", () 
   vi.stubEnv("HOME", "/test-home");
   const root = profiles([{ name: "default", base: "/papers" }]);
   expect(getLinkedAttachmentBasePath("/test-home/Zotero/zotero.sqlite", root)).toBe("/papers");
+});
+
+it("matches symlinked data directories to the same physical folder", () => {
+  const root = profiles([]);
+  const data = join(root, "real-data");
+  const link = join(root, "linked-data");
+  mkdirSync(data);
+  symlinkSync(data, link, "dir");
+  const profileRoot = profiles([{ name: "match", base: "/papers", dataDir: data }]);
+  expect(getLinkedAttachmentBasePath(join(link, "zotero.sqlite"), profileRoot)).toBe("/papers");
+  const reverseRoot = profiles([{ name: "match", base: "/papers", dataDir: link }]);
+  expect(getLinkedAttachmentBasePath(join(data, "zotero.sqlite"), reverseRoot)).toBe("/papers");
+});
+
+it("treats symlinked base directories pointing to the same folder as unambiguous", () => {
+  const root = profiles([]);
+  const papers = join(root, "papers");
+  const link = join(root, "linked-papers");
+  mkdirSync(papers);
+  symlinkSync(papers, link, "dir");
+  const profileRoot = profiles([
+    { name: "one", base: papers, dataDir: "/data" },
+    { name: "two", base: link, dataDir: "/data" },
+  ]);
+  expect(getLinkedAttachmentBasePath("/data/zotero.sqlite", profileRoot)).toBe(realpathSync(papers));
+});
+
+it("refreshes successful lookups after profile settings change", () => {
+  vi.useFakeTimers();
+  const root = profiles([{ name: "match", base: "/old-papers", dataDir: "/data" }]);
+  expect(getLinkedAttachmentBasePath("/data/zotero.sqlite", root)).toBe("/old-papers");
+  writeFileSync(
+    join(root, "match", "prefs.js"),
+    'user_pref("extensions.zotero.baseAttachmentPath", "/new-papers");\nuser_pref("extensions.zotero.dataDir", "/data");',
+  );
+  vi.advanceTimersByTime(5_001);
+  expect(getLinkedAttachmentBasePath("/data/zotero.sqlite", root)).toBe("/new-papers");
+});
+
+it("retries unavailable profile reads instead of caching null for the command lifetime", () => {
+  vi.useFakeTimers();
+  const root = profiles([{ name: "match", base: "/papers", dataDir: "/data" }]);
+  const prefsPath = join(root, "match", "prefs.js");
+  // Reading a directory as a file fails consistently, even with elevated test permissions.
+  rmSync(prefsPath);
+  mkdirSync(prefsPath);
+  expect(getLinkedAttachmentBasePath("/data/zotero.sqlite", root)).toBeNull();
+  rmSync(prefsPath, { recursive: true });
+  writeFileSync(
+    prefsPath,
+    'user_pref("extensions.zotero.baseAttachmentPath", "/papers");\nuser_pref("extensions.zotero.dataDir", "/data");',
+  );
+  vi.advanceTimersByTime(5_001);
+  expect(getLinkedAttachmentBasePath("/data/zotero.sqlite", root)).toBe("/papers");
 });
