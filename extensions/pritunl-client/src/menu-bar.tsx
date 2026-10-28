@@ -26,7 +26,11 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading || busy}
-      icon={connected.length > 0 ? Icon.Lock : Icon.LockUnlocked}
+      icon={{
+        source: connected.length > 0 ? "menu-bar-connected.png" : "menu-bar-disconnected.png",
+        // Tinted like a template image, so it follows the menu bar's light or dark appearance.
+        tintColor: Color.PrimaryText,
+      }}
       tooltip={connected.length > 0 ? `Connected: ${connected.map(displayName).join(", ")}` : "Pritunl: not connected"}
     >
       {error ? (
