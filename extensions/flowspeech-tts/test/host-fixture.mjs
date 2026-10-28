@@ -89,6 +89,7 @@ function frame(name) {
 }
 function execFile(file, args, options, callback) {
   host.played.push({ file, args, options, audio: readFileSync(args[0]) });
+  if (host.onPlayback) return host.onPlayback(options, callback);
   if (host.holdPlayback) {
     options.signal.addEventListener("abort", () => callback(new Error("Playback aborted")), { once: true });
     return;
@@ -106,6 +107,7 @@ export const { toWav } = require("../.test-dist/audio.js");
 export const {
   recoveryRecords,
   saveRecovery,
+  updateRecovery,
   errorJobId,
   clearCompletedRecovery,
   forgetRecovery,

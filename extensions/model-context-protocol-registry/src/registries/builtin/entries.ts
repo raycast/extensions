@@ -7,6 +7,47 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "wine-labs",
+    title: "Wine Labs",
+    description:
+      "Fine-wine matching, market pricing, auctions, merchant offers and portfolio intelligence. Hosted Streamable HTTP server with browser OAuth; account plans or credits apply. Public connection documentation is MIT licensed; the hosted implementation and data are proprietary.",
+    icon: "https://winelabs.ai/apple-touch-icon.png",
+    homepage: "https://winelabs.ai/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://chat.wine-labs.com/mcp"],
+    },
+    remoteUrl: "https://chat.wine-labs.com/mcp",
+  },
+  {
+    name: "rentreboot",
+    title: "RentReboot",
+    description:
+      "NYC apartment search, renter guides and rent data. Public tools work without an account; personal alerts, saved searches and housing lottery status use scoped OAuth. Website alert plans are separate. Public connection documentation is MIT licensed; the hosted implementation is proprietary.",
+    icon: "https://rentreboot.com/favicon-256x256.png",
+    homepage: "https://rentreboot.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rentreboot.com/api/mcp"],
+    },
+    remoteUrl: "https://rentreboot.com/api/mcp",
+  },
+  {
+    name: "pennyocr",
+    title: "PennyOCR",
+    description:
+      "Read PDFs and images as Markdown or text, estimate costs, check credits and enforce per-request spend caps. MIT server. Processing requires your own PennyOCR API key and credits. Replace YOUR_PENNYOCR_API_KEY in PENNYOCR_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://pennyocr.com/icon.svg?icon.33yg1dkff50x-.svg",
+    homepage: "https://pennyocr.com/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pennyocr.com", "--header", "Authorization:${PENNYOCR_AUTH_HEADER}"],
+      env: {
+        PENNYOCR_AUTH_HEADER: "Bearer YOUR_PENNYOCR_API_KEY",
+      },
+    },
+  },
+  {
     name: "blindpay",
     title: "BlindPay",
     description:
@@ -259,6 +300,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "buy-box",
+    title: "Buy-Box",
+    description:
+      "Save your buying criteria for homes, cars or any other category (budget, must-haves, nice-to-haves, dealbreakers) so your AI agent loads them before it searches. Score and rank up to 100 listings at a time against a saved buy box, with rule breakers sorted last and unstated facts marked unknown, and export a box as Markdown. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with Google and dynamic client registration, no API key to paste; free during early access.",
+    icon: "https://buybox.agentconsult.ai/icon.png",
+    homepage: "https://buybox.agentconsult.ai",
+    remoteUrl: "https://buybox.agentconsult.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://buybox.agentconsult.ai/mcp"],
+    },
+  },
+  {
     name: "candor-finance",
     title: "Candor Finance",
     description:
@@ -396,6 +450,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@upstash/context7-mcp@latest"],
     },
+  },
+  {
+    name: "crevio",
+    title: "Crevio",
+    description:
+      "Delegate work to an AI agent that runs your small business (products, orders, customers, email, sites), or run scripts against the Crevio API and 3,000+ connected apps. 20 tools, including starting and following agent runs, approving gated actions and reading the audit log. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; works on the free plan, or use an API token on the Business plan.",
+    icon: "https://crevio.co/icon-512.png",
+    homepage: "https://crevio.co/docs/developer/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.crevio.co/mcp"],
+    },
+    remoteUrl: "https://mcp.crevio.co/mcp",
   },
   {
     name: "csolar-energia",
@@ -627,6 +694,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "eventsend",
+    title: "EventSend",
+    description:
+      "Ask your AI about your product's events, delivery health and usage. Search events, follow one customer's timeline, see why a Slack, Discord, Telegram or webhook notification failed, and check daily stats and quota. Read-only, 9 tools. Hosted remote Streamable HTTP server at https://eventsend.io/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free plan available.",
+    icon: "https://eventsend.io/images/pwa/icon-512.png",
+    homepage: "https://eventsend.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://eventsend.io/mcp"],
+    },
+    remoteUrl: "https://eventsend.io/mcp",
+  },
+  {
     name: "evolink",
     title: "EvoLink",
     description:
@@ -654,6 +734,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         EXA_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
+  },
+  {
+    name: "fotofoto",
+    title: "foto foto",
+    description:
+      "Turn your photos or a public iCloud Shared Album into a printed hardcover photo book. Attach photos, give image links, or paste a public iCloud Shared Album link, and foto foto designs every spread of a hardcover photo book and returns a preview link. The person saves it with their email on fotofoto.app to edit and order it. Also compares photo book prices across services. English and Dutch. Hosted remote Streamable HTTP server at https://fotofoto.app/mcp; no sign-in, no API key.",
+    icon: "https://fotofoto.app/icon-512.png",
+    homepage: "https://fotofoto.app/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://fotofoto.app/mcp"],
+    },
+    remoteUrl: "https://fotofoto.app/mcp",
   },
   {
     name: "janction-render",
@@ -1082,6 +1175,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "noonlaunch",
+    title: "Noonlaunch",
+    description:
+      "Launch a product on Noonlaunch, search its product directory and weekly winners, check plans and submission status, and find 333 startup launch directories filtered by category, cost and domain authority. Nothing is published until the maker confirms the listing through a private claim link. Hosted remote Streamable HTTP server at https://noonlaunch.com/mcp; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/mukund1158/noonlaunch-mcp/main/logo.png",
+    homepage: "https://noonlaunch.com/launch-with-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://noonlaunch.com/mcp"],
+    },
+    remoteUrl: "https://noonlaunch.com/mcp",
+  },
+  {
     name: "overlayqa",
     title: "OverlayQA",
     description:
@@ -1282,6 +1388,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "recued",
+    title: "Recued",
+    description:
+      "Connect your AI apps to Recued, the server you run yourself between AI and your mail, calendar, files and CRM records. An app sees only the tools its contract grants: reads run at once, and by default anything that writes or deletes waits for your approval in the Recued web app, with every call recorded. Local stdio server: the `recued` command (`recued --mcp`) on the computer Recued runs on, with the key of a contract you make in the Recued web app (Contracts) as `RECUED_MCP_TOKEN`. If an app cannot find the command, set it to the full path that `which recued` prints. Free and open source (AGPL-3.0); install Recued first.",
+    icon: "https://raw.githubusercontent.com/recued/recued/main/.github/assets/recued-logo-400x400.png",
+    homepage: "https://recued.com/docs/guides/connect-to-recued/",
+    configuration: {
+      command: "recued",
+      args: ["--mcp"],
+      env: {
+        RECUED_MCP_TOKEN: "YOUR_CONTRACT_KEY",
+      },
+    },
+  },
+  {
     name: "removeduplicates",
     title: "RemoveDuplicates.org",
     description:
@@ -1382,6 +1503,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "scoopkit",
+    title: "Scoopkit",
+    description:
+      "AI-industry news for agents: each story returned once as a structured event classified against a published taxonomy (10 categories, 57 subcategories), with its sources and correction history. List, filter and fetch events, browse the taxonomy, and (Pro) run semantic search. Read-only hosted Streamable HTTP server; no account or API key needed to start (45 days, 100 calls a day), optional X-Api-Key for a free or Pro key.",
+    icon: "https://raw.githubusercontent.com/nateslabach/scoopkit-mcp/main/logo.png",
+    homepage: "https://github.com/nateslabach/scoopkit-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.scoopkit.dev/mcp"],
+    },
+    remoteUrl: "https://api.scoopkit.dev/mcp",
+  },
+  {
     name: "scout7",
     title: "Scout7",
     description:
@@ -1416,6 +1550,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.sentry.dev/sse"],
     },
+  },
+  {
+    name: "shipmail",
+    title: "Shipmail",
+    description:
+      "Business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, or a Shipmail API key as a Bearer header.",
+    icon: "https://raw.githubusercontent.com/shipmail-to/shipmail-mcp/main/assets/shipmail-mark-400.png",
+    homepage: "https://shipmail.to/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shipmail.to/api/mcp"],
+    },
+    remoteUrl: "https://shipmail.to/api/mcp",
   },
   {
     name: "sitelemetry",

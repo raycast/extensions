@@ -1346,7 +1346,7 @@
 /extensions/input-source-switcher                                   @danulqua
 /extensions/inspire-search                                          @errepuntopenco
 /extensions/instabox-manager                                        @ridemountainpig
-/extensions/instagram-media-downloader                              @ridemountainpig
+/extensions/instagram-media-downloader                              @ridemountainpig @chrismessina
 /extensions/install-fonts                                           @sharksharkco
 /extensions/installed-extensions                                    @pernielsentikaer @erics118 @tonka3000 @LitoMore @ridemountainpig @xmok @gfazioli @tofrankie
 /extensions/instant-domain-search                                   @astoilkov @astoilkov
@@ -1591,6 +1591,7 @@
 /extensions/loan-calculator                                         @kylinwowo
 /extensions/lobehub-icons                                           @ridemountainpig
 /extensions/lobsters                                                @dev99problems
+/extensions/local-content-search                                    @sushilk1991
 /extensions/local-time-tracker                                      @yoshinyan
 /extensions/localcan                                                @ajzbc
 /extensions/localsend                                               @kud
@@ -2751,6 +2752,7 @@
 /extensions/smart-calendars-ai-create-events-using-ai               @jlohmeier
 /extensions/smart-reply                                             @kawamataryo @ridemountainpig
 /extensions/smartthings-connector                                   @4IngoJ
+/extensions/smhi                                                    @niklaslavrell
 /extensions/smry                                                    @mrmps
 /extensions/smultron                                                @blackspike
 /extensions/snake                                                   @tonka3000
@@ -2857,6 +2859,7 @@
 /extensions/strftime-cheatsheet                                     @antonengelhardt
 /extensions/string-formatter                                        @fireice009
 /extensions/stripe                                                  @pradeepb28 @farisaziz12 @bradgarropy @remorses @pernielsentikaer
+/extensions/style-dictionary                                        @ars2062
 /extensions/subflow                                                 @ridemountainpig
 /extensions/sublime                                                 @phgn0
 /extensions/subnets                                                 @k1rk

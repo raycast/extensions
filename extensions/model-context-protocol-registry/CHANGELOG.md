@@ -4,6 +4,43 @@
 
 - Add MEDIAPRONET to the official registry: search a directory of newly launched startups, websites, SaaS and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://mediapronet.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
+## [Add Buy-Box MCP Server] - 2026-10-28
+
+- Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add EventSend MCP Server] - 2026-10-28
+
+- Add EventSend to the official registry: ask your AI about your product's events, delivery health and usage. Search events, follow one customer's timeline, see why a Slack, Discord, Telegram or webhook notification failed, and check daily stats and quota. Read-only, 9 tools. Hosted Streamable HTTP server at https://eventsend.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Noonlaunch MCP Server] - 2026-10-28
+
+- Add Noonlaunch to the official registry: launch a product on Noonlaunch, search its product directory and weekly winners, and find 333 startup launch directories. Hosted Streamable HTTP server at https://noonlaunch.com/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Recued MCP Server] - 2026-10-28
+
+- Add Recued to the official registry: the server you run yourself between AI apps and your mail, calendar, files and CRM records. An app sees only the tools its contract grants, and by default anything that writes or deletes waits for your approval. Local stdio server run with `recued --mcp` on the computer Recued runs on, with a contract key as `RECUED_MCP_TOKEN`.
+
+## [Add Scoopkit MCP Server] - 2026-10-28
+
+- Add Scoopkit to the official registry: AI-industry news as structured, taxonomy-classified events with sources and correction history. Hosted Streamable HTTP server at https://api.scoopkit.dev/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; no account or API key needed to start.
+
+## [Add Wine Labs, RentReboot and PennyOCR] - 2026-10-28
+
+- Add Wine Labs and RentReboot with direct hosted HTTP connections and an mcp-remote fallback. Disclose OAuth and service plan requirements.
+- Add PennyOCR through mcp-remote with an environment-variable reference for its Bearer header; disclose API-key and processing-credit requirements.
+
+## [Add Crevio MCP Server] - 2026-10-28
+
+- Add Crevio to the official registry: delegate work to an AI agent that runs your small business (products, orders, customers, email, sites), or run scripts against the Crevio API and 3,000+ connected apps. Hosted Streamable HTTP server at https://mcp.crevio.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add foto foto MCP Server] - 2026-10-28
+
+- Add foto foto to the official registry: turn your photos or a public iCloud Shared Album into a printed hardcover photo book, and compare photo book prices across services. Hosted Streamable HTTP server at https://fotofoto.app/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Shipmail MCP Server] - 2026-10-28
+
+- Add Shipmail to the official registry: business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted Streamable HTTP server at https://shipmail.to/api/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; OAuth 2.1 sign-in or a Shipmail API key.
+
 ## [Add Worthbase MCP Server] - 2026-10-28
 
 - Add Worthbase to the official registry: a household net worth and portfolio tracker. Shares, ETFs, crypto, metals, super and retirement accounts, property, cash and loans, owned by people, trusts or companies, priced daily with exact cost bases, gains, performance, goals and history; ask questions or record a statement, previewed and undoable. Hosted remote Streamable HTTP server at https://worthbase.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, Worthbase account (7-day free trial), no API key.
