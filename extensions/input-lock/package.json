@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "input-lock",
   "title": "Input Lock",
-  "description": "Lock the keyboard and trackpad, and unlock only by typing a secret key sequence.",
+  "description": "Lock the keyboard and trackpad, and unlock with Touch ID or a secret key sequence.",
   "icon": "extension-icon.png",
   "author": "dharun",
   "categories": [
@@ -16,7 +16,6 @@
     {
       "name": "lock",
       "title": "Lock Keyboard & Trackpad",
-      "subtitle": "Input Lock",
       "description": "Block all keyboard and trackpad input until the unlock sequence is typed.",
       "mode": "no-view",
       "keywords": [
@@ -50,7 +49,6 @@
     {
       "name": "lock-keyboard",
       "title": "Lock Keyboard Only",
-      "subtitle": "Input Lock",
       "description": "Block keyboard input but keep the trackpad working — handy for wiping the keys.",
       "mode": "no-view",
       "keywords": [
@@ -71,25 +69,49 @@
   ],
   "preferences": [
     {
+      "name": "unlockMethod",
+      "title": "Unlock Method",
+      "description": "Touch ID shows the system Touch ID prompt while locked. After too many failed fingerprints it asks for your Mac password instead.",
+      "type": "dropdown",
+      "required": false,
+      "default": "touchid",
+      "data": [
+        {
+          "title": "Touch ID",
+          "value": "touchid"
+        },
+        {
+          "title": "Typed Sequence",
+          "value": "sequence"
+        },
+        {
+          "title": "Touch ID or Typed Sequence",
+          "value": "either"
+        }
+      ]
+    },
+    {
       "name": "unlockSequence",
       "title": "Unlock Sequence",
-      "description": "Type these characters (case-insensitive, at least 3) while locked to unlock. Only the sequence matters — other keys typed before it are ignored.",
+      "description": "Characters to type to unlock (case-insensitive, at least 3), when Unlock Method uses a sequence. Other keys typed before it are ignored.",
       "type": "password",
-      "required": true
+      "required": false,
+      "placeholder": "e.g. letmein"
     },
     {
       "name": "autoUnlockMinutes",
-      "title": "Auto-Unlock After (minutes)",
+      "title": "Auto-Unlock After (Minutes)",
       "description": "Safety net in case you forget the sequence. 0 disables it. Override per lock with the duration argument (e.g. 5m, 90s, 1h30m).",
       "type": "textfield",
       "required": false,
-      "default": "10"
+      "default": "10",
+      "placeholder": "10"
     },
     {
       "name": "showOverlay",
       "title": "Overlay",
       "label": "Show lock overlay",
-      "description": "Show a small on-screen panel while locked, with progress dots as you type the sequence.",
+      "description": "Show a small on-screen panel while locked, with how to unlock and the auto-unlock countdown. Key presses are never shown.",
       "type": "checkbox",
       "required": false,
       "default": true

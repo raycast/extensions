@@ -12,7 +12,7 @@ const BUNDLED_HELPER = path.join(environment.assetsPath, HELPER_NAME);
 const HELPER_SOURCE = path.join(environment.assetsPath, `${HELPER_NAME}.swift`);
 const HELPER_BINARY = path.join(environment.supportPath, HELPER_NAME);
 const HELPER_HASH = `${HELPER_BINARY}.sha256`;
-const PID_FILE = path.join(environment.supportPath, `${HELPER_NAME}.pid`);
+const LOCK_FILE = path.join(environment.supportPath, `${HELPER_NAME}.lock`);
 
 const ACCESSIBILITY_SETTINGS = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
 
@@ -25,13 +25,18 @@ export type LockOptions = {
 
 export async function lockInput({ blockPointer, duration }: LockOptions) {
   const prefs = getPreferenceValues<ExtensionPreferences>();
-  const sequence = prefs.unlockSequence.trim();
+  const method = prefs.unlockMethod ?? "touchid";
+  const sequence = (prefs.unlockSequence ?? "").trim();
   const timeoutSeconds = duration?.trim()
     ? parseDuration(duration)
     : parseDuration(prefs.autoUnlockMinutes || "0", "m");
 
-  if (sequence.length < 3) {
-    await showToast({ style: Toast.Style.Failure, title: "Unlock sequence must be at least 3 characters" });
+  if (method !== "touchid" && sequence.length < 3) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Set an unlock sequence of at least 3 characters",
+      message: "Or switch Unlock Method to Touch ID in the extension preferences",
+    });
     return;
   }
   if (timeoutSeconds === undefined) {
@@ -42,11 +47,6 @@ export async function lockInput({ blockPointer, duration }: LockOptions) {
     });
     return;
   }
-  if (await isAlreadyLocked()) {
-    await showHUD("Input is already locked");
-    return;
-  }
-
   try {
     await ensureHelper();
   } catch (error) {
@@ -60,11 +60,13 @@ export async function lockInput({ blockPointer, duration }: LockOptions) {
   }
 
   const result = await startHelper({
-    INPUT_LOCK_SEQUENCE: sequence,
+    INPUT_LOCK_METHOD: method,
+    INPUT_LOCK_SEQUENCE: method === "touchid" ? "" : sequence,
     INPUT_LOCK_TIMEOUT: String(timeoutSeconds),
     INPUT_LOCK_BLOCK_POINTER: blockPointer ? "1" : "0",
     INPUT_LOCK_OVERLAY: prefs.showOverlay ? "1" : "0",
     INPUT_LOCK_SOUND: prefs.playUnlockSound ? "1" : "0",
+    INPUT_LOCK_LOCKFILE: LOCK_FILE,
   });
 
   if (result.ok) {
@@ -76,7 +78,15 @@ export async function lockInput({ blockPointer, duration }: LockOptions) {
     return;
   }
 
-  if (result.code === "accessibility" || result.code === "tap") {
+  if (result.code === "already-locked") {
+    await showHUD("Input is already locked");
+  } else if (result.code === "touchid-unavailable") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Touch ID isn't available",
+      message: "Open the lid or set up a fingerprint, or switch Unlock Method to include the typed sequence",
+    });
+  } else if (result.code === "accessibility" || result.code === "tap") {
     await showToast({
       style: Toast.Style.Failure,
       title: "Permission needed",
@@ -91,21 +101,30 @@ export async function lockInput({ blockPointer, duration }: LockOptions) {
 /**
  * Parses "5m", "90s", "1h30m" or a bare number (in `bareUnit`) into seconds.
  * Returns undefined for anything it doesn't understand; 0 means "never".
+ * Positive values round up, so a short duration never becomes 0 ("never").
  */
 export function parseDuration(input: string, bareUnit: "s" | "m" = "m"): number | undefined {
   const text = input.trim().toLowerCase().replace(/\s+/g, "");
-  if (/^\d+(\.\d+)?$/.test(text)) return Math.round(Number(text) * (bareUnit === "m" ? 60 : 1));
+  if (/^\d+(\.\d+)?$/.test(text)) return roundUpSeconds(Number(text) * (bareUnit === "m" ? 60 : 1));
 
   const parts = [...text.matchAll(/(\d+(?:\.\d+)?)(h|m|s)/g)];
   if (parts.length === 0 || parts.map((p) => p[0]).join("") !== text) return undefined;
   const unitSeconds = { h: 3600, m: 60, s: 1 } as const;
-  return Math.round(parts.reduce((total, [, n, unit]) => total + Number(n) * unitSeconds[unit as "h" | "m" | "s"], 0));
+  return roundUpSeconds(
+    parts.reduce((total, [, n, unit]) => total + Number(n) * unitSeconds[unit as "h" | "m" | "s"], 0),
+  );
+}
+
+/** Rounds up to whole seconds, tolerating float noise such as 1.1 * 60 = 66.00000000000001. */
+function roundUpSeconds(seconds: number) {
+  return seconds > 0 ? Math.ceil(seconds - 1e-9) : 0;
 }
 
 /**
  * Installs the helper into the support directory. Uses the prebuilt universal binary from
  * assets when present, otherwise compiles the Swift source (needs Xcode Command Line Tools).
- * Re-installs whenever the bundled binary or source changes.
+ * Re-installs whenever the bundled binary or source changes. Installs go to a temp file and are
+ * renamed into place, so a helper that is already running keeps its own (old) file intact.
  */
 async function ensureHelper() {
   const bundled = fs.existsSync(BUNDLED_HELPER);
@@ -115,19 +134,23 @@ async function ensureHelper() {
   if (installedHash === hash && fs.existsSync(HELPER_BINARY)) return;
 
   await fs.promises.mkdir(environment.supportPath, { recursive: true });
-  if (bundled) {
-    await fs.promises.copyFile(BUNDLED_HELPER, HELPER_BINARY);
-    await fs.promises.chmod(HELPER_BINARY, 0o755);
-    await fs.promises.writeFile(HELPER_HASH, hash);
-    return;
+  const temp = `${HELPER_BINARY}.${process.pid}.tmp`;
+  try {
+    if (bundled) {
+      await fs.promises.copyFile(BUNDLED_HELPER, temp);
+    } else {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Building lock helper (first run)…" });
+      await execFileAsync("/usr/bin/xcrun", ["swiftc", "-O", "-swift-version", "5", "-o", temp, HELPER_SOURCE], {
+        timeout: 180_000,
+      });
+      toast.hide();
+    }
+    await fs.promises.chmod(temp, 0o755);
+    await fs.promises.rename(temp, HELPER_BINARY);
+  } finally {
+    await fs.promises.rm(temp, { force: true });
   }
-
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Building lock helper (first run)…" });
-  await execFileAsync("/usr/bin/xcrun", ["swiftc", "-O", "-swift-version", "5", "-o", HELPER_BINARY, HELPER_SOURCE], {
-    timeout: 180_000,
-  });
   await fs.promises.writeFile(HELPER_HASH, hash);
-  toast.hide();
 }
 
 type StartResult = { ok: true } | { ok: false; code: string; message: string };
@@ -151,10 +174,7 @@ function startHelper(config: Record<string, string>): Promise<StartResult> {
       clearTimeout(timer);
       child.stdout.destroy();
       child.stderr.destroy();
-      if (result.ok) {
-        fs.writeFileSync(PID_FILE, String(child.pid));
-        child.unref();
-      }
+      if (result.ok) child.unref();
       resolve(result);
     };
 
@@ -180,15 +200,4 @@ function startHelper(config: Record<string, string>): Promise<StartResult> {
       finish({ ok: false, code: "exit", message: stderr.trim() || `Lock helper exited with code ${code}` }),
     );
   });
-}
-
-async function isAlreadyLocked() {
-  const pid = Number(await fs.promises.readFile(PID_FILE, "utf8").catch(() => ""));
-  if (!pid) return false;
-  try {
-    const { stdout } = await execFileAsync("/bin/ps", ["-p", String(pid), "-o", "comm="]);
-    return stdout.trim().endsWith(HELPER_NAME);
-  } catch {
-    return false;
-  }
 }
