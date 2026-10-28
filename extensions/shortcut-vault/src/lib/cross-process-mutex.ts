@@ -4,10 +4,6 @@ import path from "node:path";
 
 export interface MutexOptions {
   acquireTimeoutMs?: number;
-  onBeforeReclaimForTesting?: () => void | Promise<void>;
-  onBeforeRenameForTesting?: () => void | Promise<void>;
-  onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
-  onBeforeHeartbeatWriteForTesting?: () => void;
 }
 
 interface StaleLockSnapshot {
@@ -22,10 +18,6 @@ export class CrossProcessMutex {
   private readonly lockFile: string;
   private readonly reclaimDir: string;
   private readonly acquireTimeoutMs: number;
-  private readonly onBeforeReclaimForTesting?: () => void | Promise<void>;
-  private readonly onBeforeRenameForTesting?: () => void | Promise<void>;
-  private readonly onBeforeWriteLockContentForTesting?: () => void | Promise<void>;
-  private readonly onBeforeHeartbeatWriteForTesting?: () => void;
   private static readonly HEARTBEAT_INTERVAL_MS = 1000;
   private static readonly STALE_THRESHOLD_MS = 6000;
   private static readonly DEFAULT_ACQUIRE_TIMEOUT_MS = 10000;
@@ -38,10 +30,6 @@ export class CrossProcessMutex {
       this.acquireTimeoutMs = options;
     } else {
       this.acquireTimeoutMs = options?.acquireTimeoutMs ?? CrossProcessMutex.DEFAULT_ACQUIRE_TIMEOUT_MS;
-      this.onBeforeReclaimForTesting = options?.onBeforeReclaimForTesting;
-      this.onBeforeRenameForTesting = options?.onBeforeRenameForTesting;
-      this.onBeforeWriteLockContentForTesting = options?.onBeforeWriteLockContentForTesting;
-      this.onBeforeHeartbeatWriteForTesting = options?.onBeforeHeartbeatWriteForTesting;
     }
   }
 
@@ -65,9 +53,6 @@ export class CrossProcessMutex {
         try {
           const dirStat = fs.statSync(this.lockDir);
           createdDirIno = dirStat.ino;
-          if (this.onBeforeWriteLockContentForTesting) {
-            await this.onBeforeWriteLockContentForTesting();
-          }
           this.writeLockContent(token, createdDirIno);
         } catch (writeErr) {
           if (createdDirIno !== undefined) {
@@ -161,9 +146,6 @@ export class CrossProcessMutex {
         return;
       }
       try {
-        if (this.onBeforeHeartbeatWriteForTesting) {
-          this.onBeforeHeartbeatWriteForTesting();
-        }
         this.writeLockContent(token, acquiredDirIno);
       } catch {
         if (!isOwnershipValid()) {
@@ -275,9 +257,6 @@ export class CrossProcessMutex {
               dirIno: dirStat.ino,
               hasFile: false,
             };
-            if (this.onBeforeReclaimForTesting) {
-              await this.onBeforeReclaimForTesting();
-            }
             return await this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
@@ -303,9 +282,6 @@ export class CrossProcessMutex {
               fileIno: fileStat.ino,
               content,
             };
-            if (this.onBeforeReclaimForTesting) {
-              await this.onBeforeReclaimForTesting();
-            }
             return await this.tryReclaimStaleLockDir(snapshot);
           }
         } catch {
@@ -328,9 +304,6 @@ export class CrossProcessMutex {
           fileIno: fileStat.ino,
           content,
         };
-        if (this.onBeforeReclaimForTesting) {
-          await this.onBeforeReclaimForTesting();
-        }
         return await this.tryReclaimStaleLockDir(snapshot);
       } catch {
         return false;
@@ -349,10 +322,6 @@ export class CrossProcessMutex {
     try {
       if (!this.isSnapshotMatch(this.lockDir, snapshot)) {
         return false;
-      }
-
-      if (this.onBeforeRenameForTesting) {
-        await this.onBeforeRenameForTesting();
       }
 
       const parentDir = path.dirname(this.lockDir);

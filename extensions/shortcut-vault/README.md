@@ -92,42 +92,6 @@ Shortcut Vault performs no automatic network calls, telemetry, or remote data sy
 
 ---
 
-## Development & Contribution
-
-### Local Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Run development mode in Raycast
-npm run dev
-```
-
-### Verification & Build
-
-```bash
-# Validate dataset JSON files
-npm run validate-data
-
-# Typecheck TypeScript
-npm run typecheck
-
-# Run unit tests
-npm run test
-
-# Lint & format check
-npm run lint
-
-# Build extension dist
-npm run build
-
-# Run complete verification pipeline
-npm run verify
-```
-
----
-
 ## License
 
 [MIT](LICENSE) © Hyder

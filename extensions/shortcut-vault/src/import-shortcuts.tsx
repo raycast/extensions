@@ -149,7 +149,6 @@ function ImportForm() {
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle="Import JSON"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Import Shortcuts" icon={Icon.Upload} onSubmit={handleSubmit} />
