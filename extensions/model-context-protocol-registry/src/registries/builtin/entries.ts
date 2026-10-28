@@ -1436,6 +1436,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "scoopkit",
+    title: "Scoopkit",
+    description:
+      "AI-industry news for agents: each story returned once as a structured event classified against a published taxonomy (10 categories, 57 subcategories), with its sources and correction history. List, filter and fetch events, browse the taxonomy, and (Pro) run semantic search. Read-only hosted Streamable HTTP server; no account or API key needed to start (45 days, 100 calls a day), optional X-Api-Key for a free or Pro key.",
+    icon: "https://raw.githubusercontent.com/nateslabach/scoopkit-mcp/main/logo.png",
+    homepage: "https://github.com/nateslabach/scoopkit-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.scoopkit.dev/mcp"],
+    },
+    remoteUrl: "https://api.scoopkit.dev/mcp",
+  },
+  {
     name: "scout7",
     title: "Scout7",
     description:

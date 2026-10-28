@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Scoopkit MCP Server] - 2026-10-28
+
+- Add Scoopkit to the official registry: AI-industry news as structured, taxonomy-classified events with sources and correction history. Hosted Streamable HTTP server at https://api.scoopkit.dev/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; no account or API key needed to start.
+
 ## [Add Wine Labs, RentReboot and PennyOCR] - 2026-10-28
 
 - Add Wine Labs and RentReboot with direct hosted HTTP connections and an mcp-remote fallback. Disclose OAuth and service plan requirements.
