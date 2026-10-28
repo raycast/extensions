@@ -1,5 +1,12 @@
 # GitHub Changelog
 
+## [Mentions in AI Chat] - 2026-10-29
+
+- Add **Issues**, **Pull Requests**, and **Repositories** mention searches to the AI Chat composer's `@` menu. Without a query they list open issues and pull requests you're involved in, and your most recently pushed repositories.
+- Look up an exact issue or pull request from `owner/repo#123` or a GitHub URL.
+- Read the mentioned item's current details when sending: status, author, assignees, labels, branches and diff size for pull requests, and the description (up to 8,000 characters).
+- Update to Raycast API 2.10.0, Node 26 types, React 19.3, and TypeScript 5.9.
+
 ## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.

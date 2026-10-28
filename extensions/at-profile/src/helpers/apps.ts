@@ -1,267 +1,184 @@
-import { LocalStorage, Icon } from "@raycast/api";
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
+import { Icon, Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { App, AppSetting, UsageHistoryItem } from "../types";
+import { App, AppEntry, CustomAppInput } from "../types";
 import { defaultApps } from "../utils/default-apps";
+import {
+  getAppSettings,
+  getCustomApps,
+  getReferencedAppIds,
+  setAppSettings,
+  setCustomApps,
+  withStorageLock,
+} from "./storage";
+import { generateAppValue, getTemplateOrigin, normalizeUrlTemplate, validateUrlTemplate } from "./url";
 
-/**
- * Get the base domain URL for favicon fetching from a URL template
- */
-function getBaseUrlFromTemplate(urlTemplate: string): string {
-  try {
-    // Replace {profile} with a dummy value to create a valid URL
-    const testUrl = urlTemplate.replace(/{profile}/g, "test");
-    const url = new URL(testUrl);
-    return `${url.protocol}//${url.hostname}`;
-  } catch {
-    // Fallback for malformed URLs
-    return "https://example.com";
-  }
+export function getAppFavicon(app: Pick<App, "urlTemplate">) {
+  const origin = getTemplateOrigin(app.urlTemplate);
+  return origin ? getFavicon(origin, { fallback: Icon.Globe, mask: Image.Mask.RoundedRectangle }) : Icon.Globe;
 }
 
 /**
- * Get favicon for an app using Raycast's getFavicon utility
+ * Every app, default and custom, with its visibility. Apps without a stored setting are visible.
  */
-export function getAppFavicon(app: App) {
-  const baseUrl = getBaseUrlFromTemplate(app.urlTemplate);
-  return getFavicon(baseUrl, { fallback: Icon.Globe });
-}
-
-// LocalStorage Schema Keys
-export const STORAGE_KEYS = {
-  USAGE_HISTORY: "usageHistory",
-  STARRED_HISTORY_ITEMS: "starredHistoryItems",
-  APP_SETTINGS: "appSettings",
-  CUSTOM_APPS: "customApps",
-} as const;
-
-function normalizeApp(app: string): string {
-  return app.trim().toLowerCase();
-}
-
-function normalizeProfile(profile: string): string {
-  const trimmed = profile.trim();
-  return (trimmed.startsWith("@") ? trimmed.slice(1) : trimmed).toLowerCase();
-}
-
-export function getHistoryPairKey(profile: string, app: string): string {
-  return `${normalizeApp(app)}::${normalizeProfile(profile)}`;
-}
-
-async function setStarredHistoryPairs(pairs: string[]): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEYS.STARRED_HISTORY_ITEMS, JSON.stringify(pairs));
+export async function getAppEntries(): Promise<AppEntry[]> {
+  const [customApps, settings] = await Promise.all([getCustomApps(), getAppSettings()]);
+  const visibility = new Map(settings.map((setting) => [setting.value, setting.visible]));
+  return [
+    ...defaultApps.map((app) => ({ ...app, isDefault: true, visible: visibility.get(app.value) ?? true })),
+    ...customApps.map((app) => ({ ...app, isDefault: false, visible: visibility.get(app.value) ?? true })),
+  ];
 }
 
 /**
- * Get all starred history app+profile pair keys from local storage
- * @returns Promise<string[]> Array of normalized app+profile pair keys
+ * Find an app by ID, shown or hidden
  */
-export async function getStarredHistoryPairs(): Promise<string[]> {
-  const starredJson = await LocalStorage.getItem<string>(STORAGE_KEYS.STARRED_HISTORY_ITEMS);
-  return starredJson ? JSON.parse(starredJson) : [];
+export async function findApp(value: string): Promise<App | undefined> {
+  return defaultApps.find((app) => app.value === value) ?? (await getCustomApps()).find((app) => app.value === value);
+}
+
+export async function setAppVisibility(value: string, visible: boolean): Promise<void> {
+  await mergeAppVisibility(new Map([[value, visible]]));
 }
 
 /**
- * Check whether a specific app+profile history pair is starred
- * @param profile - Profile name
- * @param app - App value/identifier
+ * Find a shown app by ID or name, ignoring case
  */
-export async function isHistoryItemStarred(profile: string, app: string): Promise<boolean> {
-  const starredPairs = await getStarredHistoryPairs();
-  const key = getHistoryPairKey(profile, app);
-  return starredPairs.includes(key);
+export async function findVisibleApp(query: string): Promise<AppEntry | undefined> {
+  const normalized = query.trim().toLowerCase();
+  const visible = (await getAppEntries()).filter((entry) => entry.visible);
+  // An exact ID wins over a display name, so a custom app named like another app's ID can't shadow it
+  return (
+    visible.find((entry) => entry.value.toLowerCase() === normalized) ??
+    visible.find((entry) => entry.name.toLowerCase() === normalized)
+  );
 }
 
 /**
- * Toggle starred state for a specific app+profile history pair
- * @param profile - Profile name
- * @param app - App value/identifier
- * @returns Promise<boolean> New starred state (true when starred)
+ * Set several apps' visibility in one write, keeping every other stored setting
  */
-export async function toggleStarredHistoryItem(profile: string, app: string): Promise<boolean> {
-  const starredPairs = await getStarredHistoryPairs();
-  const key = getHistoryPairKey(profile, app);
-
-  if (starredPairs.includes(key)) {
-    const filtered = starredPairs.filter((pair) => pair !== key);
-    await setStarredHistoryPairs(filtered);
-    return false;
-  }
-
-  await setStarredHistoryPairs([...starredPairs, key]);
-  return true;
-}
-
 /**
- * Remove all starred app+profile history pairs
+ * @returns how many apps this showed and hid, counting only changes; an app with no stored setting is visible
  */
-export async function clearStarredHistoryItems(): Promise<void> {
-  await setStarredHistoryPairs([]);
-}
-
-/**
- * Get starred usage history items, optionally filtered by app and limited
- * @param app - Optional app value/name filter
- * @param limit - Optional max number of items (most recent first)
- */
-export async function getStarredUsageHistory(app?: string, limit?: number): Promise<UsageHistoryItem[]> {
-  const [usageHistory, starredPairs] = await Promise.all([getUsageHistory(), getStarredHistoryPairs()]);
-  const starredSet = new Set(starredPairs);
-
-  let filtered = usageHistory.filter((item) => starredSet.has(getHistoryPairKey(item.profile, item.app)));
-
-  if (app) {
-    const appLower = app.toLowerCase();
-    filtered = filtered.filter(
-      (item) => item.app.toLowerCase() === appLower || item.appName.toLowerCase().includes(appLower),
-    );
-  }
-
-  const sorted = filtered.sort((a, b) => b.timestamp - a.timestamp);
-  return limit !== undefined ? sorted.slice(0, limit) : sorted;
-}
-
-/**
- * Get all apps including custom apps, filtered by visibility settings
- * @returns Promise<App[]> Array of visible apps
- */
-export async function getAllApps(): Promise<App[]> {
-  const customApps = await getCustomApps();
-  const appSettings = await getAppSettings();
-
-  // Create a map for quick lookup of app settings
-  const settingsMap = new Map<string, AppSetting>();
-  appSettings.forEach((setting) => {
-    settingsMap.set(setting.value, setting);
+export async function mergeAppVisibility(updates: Map<string, boolean>): Promise<{ shown: number; hidden: number }> {
+  const changes = { shown: 0, hidden: 0 };
+  if (updates.size === 0) return changes;
+  await withStorageLock(async () => {
+    const merged = new Map((await getAppSettings()).map((setting) => [setting.value, setting.visible]));
+    updates.forEach((visible, value) => {
+      if ((merged.get(value) ?? true) !== visible) changes[visible ? "shown" : "hidden"]++;
+      merged.set(value, visible);
+    });
+    await setAppSettings(Array.from(merged, ([value, visible]) => ({ value, visible })));
   });
+  return changes;
+}
 
-  // Filter apps based on visible flag (default to visible when no settings entry)
+function findSameService(urlTemplate: string, apps: App[], excludeValue?: string): App | undefined {
+  const normalized = normalizeUrlTemplate(urlTemplate);
+  return apps.find((app) => app.value !== excludeValue && normalizeUrlTemplate(app.urlTemplate) === normalized);
+}
+
+function uniqueValue(base: string, taken: Set<string>): string {
+  let value = base;
+  for (let suffix = 2; taken.has(value); suffix++) {
+    value = `${base}-${suffix}`;
+  }
+  return value;
+}
+
+/**
+ * @throws when the input is invalid; the message is written for the user
+ */
+function validateInput(input: CustomAppInput, apps: App[], excludeValue?: string) {
+  if (!input.name.trim()) {
+    throw new Error("App name is required");
+  }
+  const templateError = validateUrlTemplate(input.urlTemplate);
+  if (templateError) {
+    throw new Error(templateError);
+  }
+  const existing = findSameService(input.urlTemplate, apps, excludeValue);
+  if (existing) {
+    throw new Error(`"${existing.name}" already opens profiles on this site`);
+  }
+}
+
+export function addCustomApp(input: CustomAppInput): Promise<App> {
+  return withStorageLock(() => addCustomAppLocked(input));
+}
+
+async function addCustomAppLocked(input: CustomAppInput): Promise<App> {
+  const customApps = await getCustomApps();
   const allApps = [...defaultApps, ...customApps];
-  return allApps.filter((app) => {
-    const setting = settingsMap.get(app.value);
-    return setting ? setting.visible : true; // Default to visible when no settings entry
-  });
-}
+  validateInput(input, allApps);
 
-/**
- * Get all apps without filtering by enabled status
- * Used for Quick Open where we want to bypass manage apps settings
- */
-export async function getAllAppsUnfiltered(): Promise<App[]> {
-  const customApps = await getCustomApps();
-  return [...defaultApps, ...customApps];
-}
-
-/**
- * Get custom apps from local storage
- * @returns Promise<App[]> Array of custom apps
- */
-export async function getCustomApps(): Promise<App[]> {
-  const customAppsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.CUSTOM_APPS);
-  return customAppsJson ? JSON.parse(customAppsJson) : [];
-}
-
-/**
- * Get usage history from local storage (tracks profile + app combinations)
- * @returns Promise<UsageHistoryItem[]> Array of usage history items
- */
-export async function getUsageHistory(): Promise<UsageHistoryItem[]> {
-  const historyJson = await LocalStorage.getItem<string>(STORAGE_KEYS.USAGE_HISTORY);
-  return historyJson ? JSON.parse(historyJson) : [];
-}
-
-/**
- * Add a profile + app combination to usage history
- * @param profile - Profile name
- * @param app - App value/identifier
- * @param appName - Human-readable app name
- */
-export async function addToUsageHistory(profile: string, app: string, appName: string): Promise<void> {
-  const history = await getUsageHistory();
-
-  // Remove if already exists to avoid duplicates
-  const filtered = history.filter((item) => !(item.profile === profile && item.app === app));
-
-  // Add new entry to beginning of array
-  const newItem: UsageHistoryItem = {
-    profile,
-    app,
-    appName,
-    timestamp: Date.now(),
+  const base = generateAppValue(input.urlTemplate);
+  if (!base) {
+    throw new Error("Couldn't make an ID from this URL template");
+  }
+  const app: App = {
+    name: input.name.trim(),
+    value: uniqueValue(base, new Set([...allApps.map((existing) => existing.value), ...(await getReferencedAppIds())])),
+    urlTemplate: input.urlTemplate.trim(),
+    placeholder: "username",
   };
-  const updated = [newItem, ...filtered].slice(0, 20); // Keep max 20 items
 
-  await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(updated));
+  await setCustomApps([...customApps, app]);
+  return app;
 }
 
 /**
- * Remove a specific profile + app combination from usage history
- * @param profile - Profile name to remove
- * @param app - App value/identifier to remove
+ * Edit a custom app. Its ID stays the same, so History, stars and the remembered dropdown choice stay attached.
  */
-export async function removeUsageHistoryItem(profile: string, app: string): Promise<void> {
-  const history = await getUsageHistory();
-
-  // Filter out the matching record
-  const filtered = history.filter((item) => !(item.profile === profile && item.app === app));
-
-  // Write back the updated list
-  await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(filtered));
+export function updateCustomApp(value: string, input: CustomAppInput): Promise<App> {
+  return withStorageLock(() => updateCustomAppLocked(value, input));
 }
 
-/**
- * Update a profile name in usage history while preserving the app association
- * @param oldProfile - Current profile name
- * @param oldApp - App value/identifier
- * @param newProfile - New profile name
- */
-export async function updateUsageHistoryItem(oldProfile: string, oldApp: string, newProfile: string): Promise<void> {
-  const history = await getUsageHistory();
-
-  // Find and update the matching record
-  const updated = history.map((item) => {
-    if (item.profile === oldProfile && item.app === oldApp) {
-      return { ...item, profile: newProfile, timestamp: Date.now() };
-    }
-    return item;
-  });
-
-  // Write back the updated list
-  await LocalStorage.setItem(STORAGE_KEYS.USAGE_HISTORY, JSON.stringify(updated));
-}
-
-/**
- * Get app settings from local storage
- * @returns Promise<AppSetting[]> Array of app visibility settings
- */
-export async function getAppSettings(): Promise<AppSetting[]> {
-  const settingsJson = await LocalStorage.getItem<string>(STORAGE_KEYS.APP_SETTINGS);
-  return settingsJson ? JSON.parse(settingsJson) : [];
-}
-
-/**
- * Update app settings in local storage
- * @param settings - Array of app settings to save
- */
-export async function updateAppSettings(settings: AppSetting[]): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEYS.APP_SETTINGS, JSON.stringify(settings));
-}
-
-/**
- * Add a new custom app to local storage
- * @param app - Custom app to add
- */
-export async function addCustomApp(app: App): Promise<void> {
+async function updateCustomAppLocked(value: string, input: CustomAppInput): Promise<App> {
   const customApps = await getCustomApps();
-  const updated = [...customApps, app];
-  await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_APPS, JSON.stringify(updated));
+  const current = customApps.find((app) => app.value === value);
+  if (!current) {
+    throw new Error("App not found");
+  }
+  validateInput(input, [...defaultApps, ...customApps], value);
+
+  const updated: App = { ...current, name: input.name.trim(), urlTemplate: input.urlTemplate.trim() };
+  await setCustomApps(customApps.map((app) => (app.value === value ? updated : app)));
+  return updated;
 }
 
-/**
- * Remove a custom app from local storage
- * @param value - App value/identifier to remove
- */
 export async function removeCustomApp(value: string): Promise<void> {
-  const customApps = await getCustomApps();
-  const updated = customApps.filter((p) => p.value !== value);
-  await LocalStorage.setItem(STORAGE_KEYS.CUSTOM_APPS, JSON.stringify(updated));
+  await withStorageLock(async () => {
+    // Settings first, so a view reloading between the two writes never sees a setting without its app
+    await setAppSettings((await getAppSettings()).filter((setting) => setting.value !== value));
+    await setCustomApps((await getCustomApps()).filter((app) => app.value !== value));
+  });
+}
+
+export type ImportedAppResult =
+  | { status: "added"; value: string }
+  | { status: "present"; value: string }
+  | { status: "invalid"; error: string };
+
+/**
+ * Add an app from an import file. An app for a site that is already set up resolves to the existing app.
+ */
+export function importCustomApp(input: CustomAppInput): Promise<ImportedAppResult> {
+  return withStorageLock(async () => {
+    const templateError = validateUrlTemplate(input.urlTemplate);
+    if (templateError) {
+      return { status: "invalid", error: templateError };
+    }
+    const existing = findSameService(input.urlTemplate, [...defaultApps, ...(await getCustomApps())]);
+    if (existing) {
+      return { status: "present", value: existing.value };
+    }
+    try {
+      const app = await addCustomAppLocked(input);
+      return { status: "added", value: app.value };
+    } catch (error) {
+      return { status: "invalid", error: getErrorMessage(error) };
+    }
+  });
 }
