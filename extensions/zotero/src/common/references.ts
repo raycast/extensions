@@ -1,7 +1,20 @@
-import { getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { Preferences, resolveHome } from "./zoteroApi";
 import { readFile } from "fs/promises";
 import Cite = require("citation-js");
+import path = require("path");
+import { formatReference, getReferenceTemplate } from "./referenceStyle";
+
+let customLocales: Promise<Record<string, string>> | undefined;
+
+function loadCustomLocales(): Promise<Record<string, string>> {
+  return (customLocales ??= Promise.all(
+    ["zh-CN", "ja-JP"].map(async (locale) => [
+      locale,
+      await readFile(path.join(environment.assetsPath, "locales", `locales-${locale}.xml`), "utf8"),
+    ]),
+  ).then(Object.fromEntries));
+}
 
 async function read(path: string, missingHint: string): Promise<string> {
   try {
@@ -37,18 +50,21 @@ async function findEntry(key: string): Promise<unknown> {
 
 export async function generateReference(key: string): Promise<string> {
   const preferences: Preferences = getPreferenceValues();
-  const templateName = preferences.csl_style;
-  const templatePath = preferences.zotero_path.replace("/zotero.sqlite", `/styles/${templateName}.csl`);
-  const template = await read(templatePath, `Install the ${templateName} style in Zotero, or pick another CSL format.`);
+  const selection = getReferenceTemplate(preferences);
+  const template = await read(
+    selection.path,
+    selection.custom
+      ? 'Update "Custom CSL File" in the extension settings, or switch "CSL Source" to Installed Style.'
+      : `Install the ${selection.name} style in Zotero, or pick another CSL format.`,
+  );
+  const entry = await findEntry(key);
+  const locales = selection.custom ? await loadCustomLocales() : {};
 
-  Cite.CSL.register.addTemplate(templateName, template);
-
-  const cite = new Cite(JSON.stringify([await findEntry(key)]));
-
-  return cite.format("bibliography", {
-    template: templateName,
-    lang: "en-US",
-  });
+  try {
+    return formatReference(entry, template, selection, preferences.reference_output, locales);
+  } catch (error) {
+    throw new Error(`Could not format reference with ${selection.path}: ${(error as Error).message}`);
+  }
 }
 
 export async function generateBibtexReference(key: string): Promise<string> {

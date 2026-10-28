@@ -20,6 +20,9 @@ export interface Preferences {
   bibtex_search?: boolean;
   bibtex_path?: string;
   csl_style?: string;
+  csl_source?: string;
+  custom_csl_path?: string;
+  reference_output?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
   order_by_opens?: boolean;
