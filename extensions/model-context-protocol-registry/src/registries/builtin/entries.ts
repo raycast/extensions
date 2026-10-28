@@ -1795,6 +1795,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "timesheet",
+    title: "Timesheet",
+    description:
+      "Track time with Timesheet from your AI assistant. Start, pause and stop the timer, log past work, edit time entries, manage projects, todos, tags, expenses and absences, and pull statistics, reports and Excel, CSV or PDF exports. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Timesheet API key as a bearer token. Needs a Timesheet Pro plan, which starts with a 30-day free trial.",
+    icon: "https://timesheet.io/android-chrome-512x512.png",
+    homepage: "https://docs.timesheet.io/integrations/mcp-server/",
+    remoteUrl: "https://mcp.timesheet.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.timesheet.io"],
+    },
+  },
+  {
     name: "topxai-models",
     title: "TopxAI Models",
     description:

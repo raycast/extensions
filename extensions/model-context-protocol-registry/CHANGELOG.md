@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Timesheet MCP Server] - {PR_MERGE_DATE}
+
+- Add Timesheet to the official registry: start, pause and stop the timer, log past work, manage projects, todos, expenses and absences, and pull statistics, reports and exports. Hosted Streamable HTTP server at https://mcp.timesheet.io with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Timesheet API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Buy-Box MCP Server] - 2026-10-28
 
 - Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
