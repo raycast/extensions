@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Wine Labs, RentReboot and PennyOCR] - 2026-10-28
+
+- Add Wine Labs and RentReboot with direct hosted HTTP connections and an mcp-remote fallback. Disclose OAuth and service plan requirements.
+- Add PennyOCR through mcp-remote with an environment-variable reference for its Bearer header; disclose API-key and processing-credit requirements.
+
 ## [Add Crevio MCP Server] - 2026-10-28
 
 - Add Crevio to the official registry: delegate work to an AI agent that runs your small business (products, orders, customers, email, sites), or run scripts against the Crevio API and 3,000+ connected apps. Hosted Streamable HTTP server at https://mcp.crevio.co/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
