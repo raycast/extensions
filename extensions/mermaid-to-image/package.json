@@ -115,6 +115,7 @@
     "test:run": "vitest run",
     "spike:ondine": "node scripts/ondine-spike/run.mjs",
     "spike:ondine:build": "node scripts/ondine-spike/build-probes.mjs",
+    "pretypecheck": "ray build --exit-on-error",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run test:run && npm run lint && npm run build",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",

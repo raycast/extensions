@@ -157,7 +157,17 @@ export function ImagePreview({
   }
 
   if (imageError) {
-    return <Detail markdown={`# Image loading failed\n\n${imageError}`} />;
+    return (
+      <Detail
+        markdown={`# Image loading failed\n\n${imageError}`}
+        actions={
+          <ActionPanel>
+            {renderCommonFileActions()}
+            {renderCopySvgCodeAction()}
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   const items = buildImagePreviewItems({
@@ -203,6 +213,29 @@ export function ImagePreview({
           }}
         />
       </>
+    );
+  }
+
+  function renderCopySvgCodeAction() {
+    if (format !== "svg") return null;
+
+    return (
+      <Action
+        title="Copy SVG Code"
+        icon={Icon.Code}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        onAction={async () => {
+          try {
+            await copySvgCode({
+              imagePath,
+              copyText: Clipboard.copy,
+            });
+            await showSuccessToast("SVG code copied");
+          } catch (error) {
+            await showActionFailureToast(error, "Copy failed");
+          }
+        }}
+      />
     );
   }
 
@@ -262,24 +295,7 @@ export function ImagePreview({
           }}
         />
         <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
-        {format === "svg" && (
-          <Action
-            title="Copy SVG Code"
-            icon={Icon.Code}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-            onAction={async () => {
-              try {
-                await copySvgCode({
-                  imagePath,
-                  copyText: Clipboard.copy,
-                });
-                await showSuccessToast("SVG code copied");
-              } catch (error) {
-                await showActionFailureToast(error, "Copy failed");
-              }
-            }}
-          />
-        )}
+        {renderCopySvgCodeAction()}
         {renderCommonFileActions()}
       </ActionPanel>
     );
