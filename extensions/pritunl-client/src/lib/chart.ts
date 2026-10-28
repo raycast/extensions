@@ -206,7 +206,10 @@ function card(
 <text x="${left}" y="${valueBaseline}" fill="${rate === undefined ? c.faint : c.text}"><tspan font-size="26" font-weight="700" letter-spacing="-0.8">${value}</tspan><tspan dx="4" font-size="12" font-weight="500" fill="${c.muted}">${unit}</tspan></text>`;
 }
 
-/** Section title. The legend and range only show while there's a chart for them to describe. */
+/**
+ * Section title. The range only shows while there's a chart for it to describe. The rate cards
+ * above the chart name each line's color, so there's no separate legend.
+ */
 function toolbar(minutes: boolean | undefined, c: Palette): string {
   const center = TOOLBAR.top + TOOLBAR.height / 2;
   const labelBaseline = (size: number) => center + (size * CAP) / 2;
@@ -220,24 +223,9 @@ function toolbar(minutes: boolean | undefined, c: Palette): string {
 
   const range = minutes ? "Last 5 minutes" : "Last minute";
   const rangeX = keycapX - 6;
-  // Legend, laid out right to left so it keeps the same gap to the control.
-  const items = [
-    { label: "Upload", color: c.up },
-    { label: "Download", color: c.down },
-  ];
-  let right = rangeX - textWidth(range, 10) - 16;
-  const legend = items
-    .map(({ label, color }) => {
-      const textX = right - textWidth(label, 10);
-      const dotX = textX - 8;
-      right = dotX - 3 - 14;
-      return `<circle cx="${dotX}" cy="${center}" r="3" fill="${color}"/><text x="${textX}" y="${labelBaseline(10)}" font-size="10" fill="${c.muted}">${label}</text>`;
-    })
-    .join("");
 
   return `
 ${title}
-${legend}
 <text x="${rangeX}" y="${labelBaseline(10)}" font-size="10" text-anchor="end" fill="${c.muted}">${range}</text>
 <rect x="${keycapX + 0.5}" y="${center - keycap.height / 2 + 0.5}" width="${keycap.width - 1}" height="${keycap.height - 1}" rx="4" fill="${c.key}" stroke="${c.border}"/>
 <text x="${keycapX + keycap.width / 2}" y="${labelBaseline(9.5)}" font-size="9.5" font-weight="500" text-anchor="middle" fill="${c.muted}">⌘T</text>`;
