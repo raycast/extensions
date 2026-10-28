@@ -95,9 +95,10 @@ advertised or required by the current Store package.
 ## Before a public Store submission
 
 - Confirm that `author` in `package.json` is the exact Raycast publisher username before publishing.
-- Use the three checked-in Store screenshots in `metadata/` as the starting submission
-  set. Raycast allows up to six; use 2000 × 1250 PNGs in a consistent 16:10 presentation, with one
-  consistent background and no sensitive data or screenshots of other applications.
+- Retake Store screenshots with Raycast's **Capture Window** command and **Save to Metadata**.
+  Keep the native 2000 × 1250 PNG frame with approximately 12% padding, one consistent wallpaper,
+  and no development badge. Use synthetic notes and exclude sensitive data or other applications.
+  The three checked-in screenshots are in `metadata/`; Raycast allows up to six.
 - Run every command against the current production Yaps build.
 - Run `bun run lint:store` and `bun run build` locally. Linting is local; publisher authentication
   is required when you publish.
