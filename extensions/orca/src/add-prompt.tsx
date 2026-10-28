@@ -6,11 +6,10 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { createDeeplink, useCachedPromise } from "@raycast/utils";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { useState } from "react";
 
 import { AGENTS, agentInfo } from "./agents.ts";
+import { execOrca } from "./orca.ts";
 import type { ExtraSource, PromptSpec, PromptTarget } from "./prompt.ts";
 import {
   COMMAND_PREFIX,
@@ -20,8 +19,6 @@ import {
   slugify,
   withExtraArgument,
 } from "./prompt.ts";
-
-const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const { orcaPath } = getPreferenceValues<Preferences.AddPrompt>();
@@ -36,7 +33,7 @@ export default function Command() {
   const [prompt, setPrompt] = useState("");
 
   const { isLoading, data: projects } = useCachedPromise(
-    (path: string) => loadProjects(path, execFileAsync),
+    (path: string) => loadProjects(path, execOrca),
     [orcaPath],
     {
       initialData: [],
