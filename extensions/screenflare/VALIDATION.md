@@ -49,7 +49,14 @@ Reference: [CleanShot X extension at c33bf4cb4b9ad70c2b93432ee713ffb7486ed331](h
 - Updated to Raycast API 2.10.0 and aligned Node/React type packages with its declared versions. `npm run build` now performs the distribution build.
 - Normalized the entry title to All in One for Store naming rules and removed the redundant root navigation title. Consolidated the first-release changelog.
 - Distribution build, lint (without the former title-case warning), and all 5 tests passed. The optimized build opened correctly in Raycast; pin/unpin and opening Screenflare Screenshot History were exercised again.
-- Captured three real Raycast views: overview, a pinned action, and history search. Exported them as 2000 × 1250 PNGs in `metadata/`, preserving aspect ratio with narrow side padding, and visually inspected each. These are UI captures, not generated mockups.
+- Captured three real Raycast views: overview, a pinned action, and history search. Exported them as 2000 × 1250 PNGs in `metadata/`, preserving aspect ratio, and visually inspected each. These are UI captures, not generated mockups.
 - Removed temporary pins after capture. No Screenflare media or unrelated app content is included in Store screenshots.
 - Full recording/pause/resume output, OCR output, and scrolling-image stitching remain manual checks; this submission does not claim those output checks passed.
 - Raycast CLI login was not completed. Submission uses the officially supported GitHub fork-and-PR route with the already authenticated GitHub account.
+
+## Submission and metadata correction
+
+- Created [raycast/extensions#32890](https://github.com/raycast/extensions/pull/32890) as a non-draft submission. The fork branch contains only the 37 files under `extensions/screenflare/`; upstream workflows are unchanged.
+- The first upstream metadata check rejected insufficient screenshot margins. All three real UI captures were re-exported on the same warm background with approximately 12.5% balanced padding.
+- Ran the upstream `check_metadata_images.py` and `check_raycast_images.py` scripts in an isolated Python 3.12 environment with Pillow and NumPy: **3 passed, 0 failed**. Every image is PNG, 2000 × 1250; measured padding is 12.5% horizontally and 12.6% vertically.
+- Store publication remains subject to Raycast review and merge.
