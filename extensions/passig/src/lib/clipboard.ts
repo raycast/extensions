@@ -11,8 +11,9 @@
  * confronta solo l'hash del contenuto corrente.
  */
 import { Clipboard, LocalStorage } from "@raycast/api";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
+/** Prefisso delle chiavi dei marker: una chiave distinta per ogni copia. */
 export const CLIPBOARD_MARKER_KEY = "passig.clipboardMarker";
 export const CLIPBOARD_CLEAR_AFTER_MS = 30_000;
 
@@ -25,10 +26,17 @@ function hashOf(text: string): string {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
 
+/**
+ * Ogni copia scrive un marker con una chiave PROPRIA (`passig.clipboardMarker.<id>`):
+ * la pulizia rimuove solo le chiavi che ha letto ed elaborato, quindi una copia
+ * fatta nel frattempo da un altro comando non può mai perdere il proprio marker
+ * (niente read-modify-write su una chiave condivisa).
+ */
 export async function copySecret(text: string): Promise<void> {
-  await Clipboard.copy(text, { concealed: true });
   const marker: ClipboardMarker = { hash: hashOf(text), at: Date.now() };
-  await LocalStorage.setItem(CLIPBOARD_MARKER_KEY, JSON.stringify(marker));
+  const key = `${CLIPBOARD_MARKER_KEY}.${marker.at}.${randomUUID()}`;
+  await LocalStorage.setItem(key, JSON.stringify(marker));
+  await Clipboard.copy(text, { concealed: true });
   const timer = setTimeout(() => {
     void clearIfStillSecret();
   }, CLIPBOARD_CLEAR_AFTER_MS);
@@ -36,23 +44,37 @@ export async function copySecret(text: string): Promise<void> {
   timer.unref?.();
 }
 
-/** Svuota gli appunti se contengono ancora il segreto copiato (e sono passati ≥ 30 s). */
+/**
+ * Svuota gli appunti se contengono ancora un segreto copiato da almeno 30 s
+ * (con `force`, indipendentemente dall'età: usato dal blocco). Rimuove solo i
+ * marker scaduti/elaborati; quelli più recenti restano per la pulizia successiva.
+ */
 export async function clearIfStillSecret(force = false): Promise<boolean> {
-  const raw = await LocalStorage.getItem<string>(CLIPBOARD_MARKER_KEY);
-  if (!raw) return false;
-  let marker: ClipboardMarker;
-  try {
-    marker = JSON.parse(raw) as ClipboardMarker;
-  } catch {
-    await LocalStorage.removeItem(CLIPBOARD_MARKER_KEY);
-    return false;
+  const all = await LocalStorage.allItems<Record<string, string>>();
+  const now = Date.now();
+  const due: { key: string; marker: ClipboardMarker | null }[] = [];
+  for (const [key, raw] of Object.entries(all)) {
+    if (key !== CLIPBOARD_MARKER_KEY && !key.startsWith(`${CLIPBOARD_MARKER_KEY}.`)) continue;
+    let marker: ClipboardMarker | null = null;
+    try {
+      marker = JSON.parse(String(raw)) as ClipboardMarker;
+    } catch {
+      marker = null; // marker corrotto: va solo rimosso
+    }
+    if (marker && !force && now - marker.at < CLIPBOARD_CLEAR_AFTER_MS) continue;
+    due.push({ key, marker });
   }
-  if (!force && Date.now() - marker.at < CLIPBOARD_CLEAR_AFTER_MS) return false;
-  await LocalStorage.removeItem(CLIPBOARD_MARKER_KEY);
+  if (due.length === 0) return false;
+
+  let cleared = false;
   const current = await Clipboard.readText();
-  if (current && hashOf(current) === marker.hash) {
-    await Clipboard.clear();
-    return true;
+  if (current) {
+    const h = hashOf(current);
+    if (due.some((d) => d.marker?.hash === h)) {
+      await Clipboard.clear();
+      cleared = true;
+    }
   }
-  return false;
+  for (const d of due) await LocalStorage.removeItem(d.key);
+  return cleared;
 }

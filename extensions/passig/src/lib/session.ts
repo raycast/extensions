@@ -24,13 +24,17 @@ import {
   type Tokens,
 } from "../vendor/client-core/index.js";
 import { initCrypto } from "../vendor/shared/index.js";
+import { acceptLanguage } from "../i18n";
+import { clearIfStillSecret } from "./clipboard";
 import { autoLockMs, getPrefs } from "./preferences";
 
 const LS_REFRESH_TOKEN = "passig.refreshToken";
 const CACHE_SESSION = "session";
 
 interface CachedSession {
-  v: 1;
+  v: 2;
+  /** Email (normalizzata) dell'account a cui appartiene lo snapshot. */
+  email: string;
   expiresAt: number;
   accessToken: string;
   snapshot: SessionSnapshot;
@@ -42,12 +46,22 @@ async function readRefreshToken(): Promise<string | null> {
   return (await LocalStorage.getItem<string>(LS_REFRESH_TOKEN)) ?? null;
 }
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/**
+ * Legge lo snapshot in cache. Lo scarta (e lo cancella) se è scaduto, se ha un
+ * formato vecchio o se appartiene a un account diverso da quello configurato
+ * nelle preferenze: cambiando email non si devono mai vedere/scrivere i vault
+ * dell'account precedente.
+ */
 function readCached(): CachedSession | null {
   const raw = cache.get(CACHE_SESSION);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as CachedSession;
-    if (parsed.v !== 1 || parsed.expiresAt <= Date.now()) {
+    if (parsed.v !== 2 || parsed.expiresAt <= Date.now() || parsed.email !== normalizeEmail(getPrefs().email)) {
       cache.remove(CACHE_SESSION);
       return null;
     }
@@ -58,21 +72,33 @@ function readCached(): CachedSession | null {
   }
 }
 
-function writeCached(session: VaultSession, accessToken: string): void {
+function writeCached(session: VaultSession, accessToken: string, expiresAt: number): void {
   const payload: CachedSession = {
-    v: 1,
-    expiresAt: Date.now() + autoLockMs(),
+    v: 2,
+    email: normalizeEmail(getPrefs().email),
+    expiresAt,
     accessToken,
     snapshot: session.exportSnapshot(),
   };
   cache.set(CACHE_SESSION, JSON.stringify(payload));
 }
 
+/**
+ * `fetch` che aggiunge `Accept-Language` con la lingua attiva: l'API traduce i
+ * messaggi d'errore in base a questo header (client-core non lo imposta da solo).
+ */
+const localizedFetch: typeof fetch = (input, init) => {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("Accept-Language")) headers.set("Accept-Language", acceptLanguage());
+  return fetch(input, { ...init, headers });
+};
+
 /** Crea l'ApiClient con persistenza del refresh token (rotazione) su LocalStorage. */
 async function makeApi(tokens: Tokens | null): Promise<ApiClient> {
   const prefs = getPrefs();
   return new ApiClient({
     baseUrl: prefs.serverUrl,
+    fetch: localizedFetch,
     tokens,
     onTokensChanged: async (t) => {
       if (t) await LocalStorage.setItem(LS_REFRESH_TOKEN, t.refreshToken);
@@ -84,24 +110,41 @@ async function makeApi(tokens: Tokens | null): Promise<ApiClient> {
 export interface ActiveSession {
   api: ApiClient;
   vault: VaultSession;
-  /** Salva lo snapshot aggiornato (dopo load/create/update) e rinnova il TTL. */
+  /** Istante (ms epoch) dell'auto-lock: fissato allo sblocco, NON rinnovato dall'uso. */
+  expiresAt: number;
+  /** true se l'auto-lock è scaduto (o la sessione è stata bloccata). */
+  isExpired: () => boolean;
+  /** Salva lo snapshot aggiornato (dopo load/create/update) mantenendo la scadenza. */
   persist: () => void;
   /** Ricarica vault e item dal server e aggiorna la cache. */
   refresh: () => Promise<void>;
+  /** Blocca: cancella la cache, azzera le chiavi in memoria e svuota gli appunti se contengono un segreto. */
+  lock: () => Promise<void>;
 }
 
-function wrap(api: ApiClient, vault: VaultSession): ActiveSession {
+function wrap(api: ApiClient, vault: VaultSession, expiresAt: number): ActiveSession {
+  let locked = false;
+  const isExpired = () => locked || Date.now() >= expiresAt;
   const persist = () => {
+    if (isExpired()) return;
     const t = api.getTokens();
-    if (t) writeCached(vault, t.accessToken);
+    if (t) writeCached(vault, t.accessToken, expiresAt);
   };
   return {
     api,
     vault,
+    expiresAt,
+    isExpired,
     persist,
     refresh: async () => {
       await vault.load();
       persist();
+    },
+    lock: async () => {
+      locked = true;
+      lockSession();
+      vault.lock();
+      await clearIfStillSecret(true);
     },
   };
 }
@@ -118,7 +161,7 @@ export async function getActiveSession(): Promise<ActiveSession | null> {
   }
   const api = await makeApi({ accessToken: cached.accessToken, refreshToken });
   const vault = VaultSession.fromSnapshot(api, cached.snapshot);
-  return wrap(api, vault);
+  return wrap(api, vault, cached.expiresAt);
 }
 
 /**
@@ -155,7 +198,7 @@ export async function unlock(masterPassword: string): Promise<ActiveSession> {
   }
 
   await vault.load();
-  const active = wrap(api, vault);
+  const active = wrap(api, vault, Date.now() + autoLockMs());
   active.persist();
   return active;
 }
