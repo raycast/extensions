@@ -1,5 +1,9 @@
 # FlowSpeech TTS Changelog
 
+## [Fix Forgotten Recovery] - {PR_MERGE_DATE}
+
+- Keep explicitly forgotten recovery IDs removed when running speech finishes or is interrupted
+
 ## [Public API v1] - 2026-10-27
 
 - Migrate generation to asynchronous jobs and credential-free WAV downloads
