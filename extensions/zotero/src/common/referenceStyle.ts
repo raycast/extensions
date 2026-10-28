@@ -2,13 +2,8 @@ import path = require("path");
 import { createHash } from "crypto";
 import Cite = require("citation-js");
 
-export interface ReferenceStylePreferences {
-  zotero_path: string;
-  csl_style?: string;
-  csl_source?: string;
-  custom_csl_path?: string;
-  reference_output?: string;
-}
+type ReferenceStylePreferences = Pick<Preferences, "zotero_path"> &
+  Partial<Pick<Preferences, "csl_style" | "csl_source" | "custom_csl_path">>;
 
 export function getReferenceTemplate(preferences: ReferenceStylePreferences) {
   if (preferences.csl_source === "custom") {
@@ -31,7 +26,7 @@ export function formatReference(
   entry: unknown,
   template: string,
   selection: ReturnType<typeof getReferenceTemplate>,
-  output = "bibliography",
+  output: Preferences["reference_output"] = "bibliography",
   customLocales: Record<string, string> = {},
 ): string {
   const note = output === "note";

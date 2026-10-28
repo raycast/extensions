@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { Preferences, resolveHome } from "./zoteroApi";
+import { resolveHome } from "./zoteroApi";
 import { readFile } from "fs/promises";
 import Cite = require("citation-js");
 import path = require("path");
