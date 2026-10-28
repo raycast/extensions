@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Awaken Tax MCP Server] - {PR_MERGE_DATE}
+
+- Add Awaken Tax to the official registry: crypto tax accounting in your Awaken account. Review and fix transactions, investigate cost basis and tax lots, summarize gains and income, reconcile 1099-DA forms and generate tax reports and CSV exports. Hosted Streamable HTTP server at https://mcp.awaken.tax/mcp through `mcp-remote`, with an `Authorization: Bearer <portfolioId>:<apiKey>` header from the `AWAKEN_AUTH_HEADER` environment variable; API keys need an Awaken Dolphin or Whale plan.
+
 ## [Add Buy-Box MCP Server] - 2026-10-28
 
 - Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
