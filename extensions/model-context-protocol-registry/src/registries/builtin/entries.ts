@@ -398,6 +398,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "crevio",
+    title: "Crevio",
+    description:
+      "Delegate work to an AI agent that runs your small business (products, orders, customers, email, sites), or run scripts against the Crevio API and 3,000+ connected apps. 20 tools, including starting and following agent runs, approving gated actions and reading the audit log. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; works on the free plan, or use an API token on the Business plan.",
+    icon: "https://crevio.co/icon-512.png",
+    homepage: "https://crevio.co/docs/developer/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.crevio.co/mcp"],
+    },
+    remoteUrl: "https://mcp.crevio.co/mcp",
+  },
+  {
     name: "csolar-energia",
     title: "CSolar Energia",
     description:
