@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "ignav-flights",
+    title: "Ignav Flights",
+    description:
+      "Live flight search, cheapest-date comparisons, airport lookup, and booking links. Hosted Streamable HTTP with OAuth and dynamic client registration; verified Ignav account required. Includes 1,000 free successful requests, then $2 per 1,000. Public MIT repo contains connection metadata and examples; hosted implementation is proprietary.",
+    icon: "https://raw.githubusercontent.com/gusgordon/ignav-skill/main/assets/logo.png",
+    homepage: "https://ignav.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ignav.com/mcp"],
+    },
+    remoteUrl: "https://ignav.com/mcp",
+  },
+  {
     name: "wine-labs",
     title: "Wine Labs",
     description:
