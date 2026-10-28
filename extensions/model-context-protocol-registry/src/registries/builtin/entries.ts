@@ -193,6 +193,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://ausca.com/mcp",
   },
   {
+    name: "awaken",
+    title: "Awaken Tax",
+    description:
+      "Crypto tax accounting in your Awaken account: search and review transactions from your connected wallets and exchanges, label, split, merge and correct them with undo, investigate missing cost basis and trace tax lots, summarize realized gains, income and top P&L assets, reconcile 1099-DA forms, and generate tax reports and CSV exports. Write tools only run with read + write access. Hosted remote Streamable HTTP server through `mcp-remote`; Awaken API key as an `Authorization: Bearer <portfolioId>:<apiKey>` header (Settings -> API Keys; Dolphin or Whale plan). Replace YOUR_PORTFOLIO_ID and YOUR_API_KEY in AWAKEN_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://awaken.tax/512.png",
+    homepage: "https://awaken.tax/docs/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.awaken.tax/mcp", "--header", "Authorization:${AWAKEN_AUTH_HEADER}"],
+      env: {
+        AWAKEN_AUTH_HEADER: "Bearer YOUR_PORTFOLIO_ID:YOUR_API_KEY",
+      },
+    },
+  },
+  {
     name: "award-travel-finder",
     title: "Award Travel Finder",
     description:
