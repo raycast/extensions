@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add NebenkostenPro MCP Server] - {PR_MERGE_DATE}
+
+- Add NebenkostenPro to the official registry: free German utility cost (Nebenkosten) data. Property tax rates for all 10,304 German municipalities, utility costs of the 400 largest cities, housing benefit rent levels, billing and objection deadlines, operating cost types and links to check or create a utility bill. Read-only, 9 tools. Hosted Streamable HTTP server at https://nebenkostenpro.de/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Buy-Box MCP Server] - 2026-10-28
 
 - Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
