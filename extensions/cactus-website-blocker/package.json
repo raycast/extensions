@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "cactus",
-  "title": "Cactus",
+  "name": "cactus-website-blocker",
+  "title": "Cactus - Website Blocker",
   "description": "Cactus for Mac is a scheduled website blocker. See when protection is on and edit your next recurring block.",
   "icon": "icon.png",
   "author": "onmax",
@@ -24,7 +24,8 @@
       "name": "edit-schedule",
       "title": "Edit Next Schedule",
       "description": "Edit the schedule Cactus applies to the next block",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Cactus"
     }
   ],
   "dependencies": {

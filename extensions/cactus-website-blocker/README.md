@@ -1,4 +1,4 @@
-# Cactus
+# Cactus - Website Blocker
 
 See when Cactus protects your attention, then edit the recurring schedule for your next block without leaving Raycast.
 
