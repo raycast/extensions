@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add AyHire MCP Server] - {PR_MERGE_DATE}
+## [Add AyHire MCP Server] - 2026-10-28
 
 - Add AyHire to the official registry: describe a role and AyHire finds developers from their public GitHub work, judges each one against the role's criteria with links to the evidence, and keeps roles and a shortlist. Hosted Streamable HTTP server at https://ayhire.com/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
