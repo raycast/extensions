@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { Email, IsoDate, Pagination, Uuid } from "./common.js";
 import { UserRole, UserStatus } from "./auth.js";
+import { PlanId, PlanSource } from "./billing.js";
 
 export const AdminStats = z.object({
   users: z.number().int(),
@@ -11,6 +12,7 @@ export const AdminStats = z.object({
   vaults: z.number().int(),
   items: z.number().int(),
   activeSessions: z.number().int(),
+  premiumUsers: z.number().int(),
   loginsLast24h: z.number().int(),
   failedLoginsLast24h: z.number().int(),
 });
@@ -26,6 +28,8 @@ export const AdminUser = z.object({
   lastLoginAt: IsoDate.nullable(),
   sessionCount: z.number().int(),
   vaultCount: z.number().int(),
+  plan: PlanId,
+  planSource: PlanSource,
 });
 export const AdminUsersQuery = Pagination.extend({
   query: z.string().trim().max(200).optional(),
@@ -101,6 +105,11 @@ export const AuditAction = z.enum([
   "admin.user_sessions_revoked",
   "admin.user_invited",
   "admin.setting_updated",
+  "admin.premium_granted",
+  "billing.checkout_started",
+  "billing.subscription_updated",
+  "billing.store_purchase_verified",
+  "billing.store_subscription_updated",
 ]);
 export type AuditAction = z.infer<typeof AuditAction>;
 
@@ -122,6 +131,28 @@ export const AuditQuery = Pagination.extend({
   to: IsoDate.optional(),
 });
 
-export const SettingKey = z.enum(["smtp.host", "smtp.port", "smtp.user", "smtp.password", "smtp.from", "app.name", "app.url"]);
+export const SettingKey = z.enum([
+  "smtp.host",
+  "smtp.port",
+  "smtp.user",
+  "smtp.password",
+  "smtp.from",
+  "app.name",
+  "app.url",
+  "stripe.secret_key",
+  "stripe.webhook_secret",
+  "stripe.price_id",
+  "appstore.issuer_id",
+  "appstore.key_id",
+  "appstore.private_key",
+  "appstore.bundle_id",
+  "appstore.product_id",
+  "appstore.mac_bundle_id",
+  "appstore.mac_product_id",
+  "playstore.package_name",
+  "playstore.service_account_json",
+  "playstore.product_id",
+  "playstore.rtdn_token",
+]);
 export const AdminSetting = z.object({ key: SettingKey, configured: z.boolean(), updatedAt: IsoDate.nullable() });
 export const AdminUpdateSettingRequest = z.object({ key: SettingKey, value: z.string().max(10_000) });
