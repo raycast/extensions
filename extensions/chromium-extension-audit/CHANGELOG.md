@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## Initial Version - 2026-10-29
 
 - Discover extensions across Chrome, Dia, Arc, Brave, Edge, Vivaldi, Chromium, Chrome Beta, and Chrome Canary profiles, and inspect requested, approved, active, withheld, and observable effective access.
 - Explain sensitive capabilities, installation sources, disabled states, and incomplete evidence.
