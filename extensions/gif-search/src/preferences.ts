@@ -1,13 +1,26 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export type ServiceName =
-  "giphy" | "giphy-clips" | "giphy-stickers" | "klipy" | "finergifs" | "favorites" | "recents" | "all";
+  | "giphy"
+  | "giphy-clips"
+  | "giphy-stickers"
+  | "klipy"
+  | "klipy-stickers"
+  | "klipy-clips"
+  | "klipy-memes"
+  | "finergifs"
+  | "favorites"
+  | "recents"
+  | "all";
 
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   GIPHY_CLIPS: "giphy-clips",
   GIPHY_STICKERS: "giphy-stickers",
   KLIPY: "klipy",
+  KLIPY_STICKERS: "klipy-stickers",
+  KLIPY_CLIPS: "klipy-clips",
+  KLIPY_MEMES: "klipy-memes",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
   RECENTS: "recents",
@@ -24,9 +37,15 @@ export function getServices() {
   });
 }
 
-// Clips and stickers are different media, and Finer Gifs only covers The Office, so All Sources skips them.
+// GIPHY Clips and Stickers are a different kind of media, and Finer Gifs only covers The Office, so All Sources skips them.
 export function getAllSourcesServices(): ServiceName[] {
-  return [GIF_SERVICE.GIPHY, GIF_SERVICE.KLIPY];
+  return [
+    GIF_SERVICE.GIPHY,
+    GIF_SERVICE.KLIPY,
+    GIF_SERVICE.KLIPY_STICKERS,
+    GIF_SERVICE.KLIPY_CLIPS,
+    GIF_SERVICE.KLIPY_MEMES,
+  ];
 }
 
 export function getServiceTitle(service?: ServiceName) {
@@ -39,6 +58,12 @@ export function getServiceTitle(service?: ServiceName) {
       return "GIPHY Stickers";
     case GIF_SERVICE.KLIPY:
       return "Klipy";
+    case GIF_SERVICE.KLIPY_STICKERS:
+      return "Klipy Stickers";
+    case GIF_SERVICE.KLIPY_CLIPS:
+      return "Klipy Clips";
+    case GIF_SERVICE.KLIPY_MEMES:
+      return "Klipy Memes";
     case GIF_SERVICE.FINER_GIFS:
       return "Finer Gifs Club";
     case GIF_SERVICE.ALL:

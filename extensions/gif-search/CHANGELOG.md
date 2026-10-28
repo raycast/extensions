@@ -1,9 +1,10 @@
 # GIF Search Changelog
 
-## [Add GIPHY Stickers and All Sources] - {PR_MERGE_DATE}
+## [Add stickers, clips, memes and All Sources] - {PR_MERGE_DATE}
 
 - Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
-- Add an All Sources option that mixes GIPHY and Klipy results into one grid that keeps loading as you scroll.
+- Add Klipy Stickers, Klipy Clips and Klipy Memes. All Klipy content works out of the box.
+- Add an All Sources option that mixes GIPHY GIFs with Klipy GIFs, Stickers, Clips and Memes into one grid that keeps loading as you scroll.
 - Remove the outdated note that Klipy needs a personal API key.
 - Fix Copy GIF Square and Paste GIF Square on GIPHY Clips, which failed because they read the MP4 instead of the GIF.
 

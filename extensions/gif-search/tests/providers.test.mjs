@@ -116,10 +116,15 @@ test("favorites and recents include GIPHY Stickers", () => {
   assert.ok(!getServices().includes("recents"));
 });
 
-test("All Sources searches GIF providers only and is never stored as a provider", () => {
+test("All Sources includes GIPHY and every Klipy catalog and is never stored as a provider", () => {
   const { getAllSourcesServices, getServices, isServiceName } = load("preferences", { "@raycast/api": raycastApi() });
+  const sources = [...getAllSourcesServices()];
 
-  assert.deepEqual([...getAllSourcesServices()], ["giphy", "klipy"]);
+  assert.deepEqual(sources, ["giphy", "klipy", "klipy-stickers", "klipy-clips", "klipy-memes"]);
+  assert.ok(!sources.includes("giphy-clips"));
+  assert.ok(!sources.includes("giphy-stickers"));
+  assert.ok(!sources.includes("finergifs"));
+  assert.ok(getServices().includes("klipy-stickers"));
   assert.ok(isServiceName("all"));
   assert.ok(!getServices().includes("all"));
 });
@@ -217,6 +222,144 @@ test("All Sources reports a failure, not an empty search, when every provider fa
   assert.equal(page.allFailed, true);
   assert.equal(page.hasMore, false);
   assert.deepEqual([...page.failures.map((failure) => failure.service)], ["giphy", "klipy"]);
+});
+
+function klipyMedia(slug, formats) {
+  const file = (size) =>
+    Object.fromEntries(
+      formats.map((format) => [
+        format,
+        { url: `https://static.klipy.com/${slug}-${size}.${format}`, width: 100, height: 90, size: 1234 },
+      ]),
+    );
+  return {
+    id: 1,
+    slug,
+    title: `${slug} title`,
+    type: "sticker",
+    tags: ["t"],
+    file: { hd: file("hd"), md: file("md"), sm: file("sm"), xs: file("xs") },
+  };
+}
+
+function klipyPage(items, { page = 1, hasNext = true } = {}) {
+  return { result: true, data: { data: items, current_page: page, per_page: 24, has_next: hasNext } };
+}
+
+function loadKlipyContent(responder) {
+  const { requests, stub } = withFetch(responder);
+  const module = load("models/klipyContent", { "@raycast/api": raycastApi(), "lib/fetchProviderJson": stub });
+  return { requests, klipyContent: module.default };
+}
+
+function assertListParams(url, { page, perPage }) {
+  assert.equal(url.searchParams.get("page"), page);
+  assert.equal(url.searchParams.get("per_page"), perPage);
+  assert.equal(url.searchParams.get("customer_id"), "raycast-gif-search");
+  assert.equal(url.searchParams.get("content_filter"), "low");
+}
+
+test("Klipy Stickers searches the proxy catalog and skips ads", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() =>
+    klipyPage([{ type: "ad" }, klipyMedia("grr", ["gif", "webp"])], { page: 2 }),
+  );
+
+  const { results, next } = await klipyContent("stickers").search("grr", { limit: 5, next: "2" });
+  const url = requests[0].url;
+
+  assert.equal(url.origin + url.pathname, "https://gif-search.raycast.com/api/klipy/stickers");
+  assert.equal(url.searchParams.get("q"), "grr");
+  assert.equal(url.searchParams.get("slugs"), null);
+  assertListParams(url, { page: "2", perPage: "8" });
+  assert.equal(requests[0].options.provider, "Klipy Stickers");
+  assert.equal(next, "3");
+  assert.equal(results.length, 1);
+  assert.equal(results[0].id, "grr");
+  assert.equal(results[0].url, "https://klipy.com/stickers/grr");
+  assert.equal(results[0].gif_url, "https://static.klipy.com/grr-hd.gif");
+  assert.equal(results[0].small_preview_gif_url, "https://static.klipy.com/grr-sm.gif");
+  assert.equal(results[0].download_name, "grr-title.gif");
+});
+
+test("Klipy Memes trending uses the memes path and keeps PNG files", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() =>
+    klipyPage([klipyMedia("meme", ["png", "webp"])], { hasNext: false }),
+  );
+
+  const { results, next } = await klipyContent("memes").trending({ limit: 20 });
+  const url = requests[0].url;
+
+  assert.equal(url.origin + url.pathname, "https://gif-search.raycast.com/api/klipy/memes");
+  assert.equal(url.searchParams.get("q"), null);
+  assert.equal(url.searchParams.get("slugs"), null);
+  assertListParams(url, { page: "1", perPage: "20" });
+  assert.equal(next, "");
+  assert.equal(results[0].url, "https://klipy.com/static-memes/meme");
+  assert.equal(results[0].download_name, "meme-title.png");
+});
+
+test("Klipy Clips download the MP4 and preview the GIF", async () => {
+  const clip = {
+    url: "https://klipy.com/clips/they-love-me",
+    slug: "they-love-me",
+    title: "They love me",
+    type: "clip",
+    file: {
+      mp4: "https://static.klipy.com/c.mp4",
+      gif: "https://static.klipy.com/c.gif",
+      webp: "https://static.klipy.com/c.webp",
+    },
+    file_meta: { mp4: { width: 640, height: 360 } },
+  };
+  const { requests, klipyContent } = loadKlipyContent(() => klipyPage([clip]));
+
+  const [result] = (await klipyContent("clips").search("love")).results;
+  const url = requests[0].url;
+
+  assert.equal(url.origin + url.pathname, "https://gif-search.raycast.com/api/klipy/clips");
+  assert.equal(url.searchParams.get("q"), "love");
+  assert.equal(url.searchParams.get("slugs"), null);
+  assert.equal(result.download_url, "https://static.klipy.com/c.mp4");
+  assert.equal(result.download_name, "they-love-me.mp4");
+  assert.equal(result.small_preview_gif_url, "https://static.klipy.com/c.gif");
+  assert.equal(result.metadata.width, 640);
+});
+
+test("Klipy content looks favorites up by slug on the proxy", async () => {
+  const { requests, klipyContent } = loadKlipyContent(() => klipyPage([klipyMedia("a", ["gif"])]));
+  const results = await klipyContent("stickers").gifs(["a", "b"]);
+  const url = requests[0].url;
+
+  assert.equal(url.origin + url.pathname, "https://gif-search.raycast.com/api/klipy/stickers");
+  assert.equal(url.searchParams.get("slugs"), "a,b");
+  assert.equal(url.searchParams.get("q"), null);
+  assert.equal(results[0].id, "a");
+});
+
+test("a Klipy proxy error surfaces as a ProviderRequestError", async () => {
+  const { default: klipyContent } = load(
+    "models/klipyContent",
+    { "@raycast/api": raycastApi() },
+    {
+      fetch: async () => ({ ok: false, status: 502, statusText: "Bad Gateway" }),
+      AbortSignal,
+    },
+  );
+
+  await assert.rejects(klipyContent("clips").search("x"), (error) => {
+    assert.equal(error.name, "ProviderRequestError");
+    assert.match(error.message, /Klipy Clips search failed \(502 Bad Gateway\)/);
+    return true;
+  });
+});
+
+test("Klipy Stickers, Clips and Memes resolve from their page URLs", () => {
+  const { getServiceFromUrl } = load("lib/getServiceFromUrl");
+  const gif = (url) => ({ url, download_url: "" });
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/stickers/a")), "klipy-stickers");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/clips/a")), "klipy-clips");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/static-memes/a")), "klipy-memes");
+  assert.equal(getServiceFromUrl(gif("https://klipy.com/gifs/a")), "klipy");
 });
 
 test("square copies read the GIF rendition, since a Clip's download is an MP4", async () => {
