@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { nyxe } from "../lib/raycast";
-import { displayAddress, plainTextToMarkdown } from "../lib/text";
+import { displayAddress, messageDate, plainTextToMarkdown } from "../lib/text";
 
 /**
  * The thread as plain text in the list's detail pane — never HTML. Fetches
@@ -31,7 +31,7 @@ export function ThreadPreview({
         .reverse()
         .map((m) => {
           const from = m.from.map(displayAddress).join(", ") || "Unknown sender";
-          const when = new Date(m.receivedAt).toLocaleString();
+          const when = messageDate(m.receivedAt);
           const body = plainTextToMarkdown(m.text.trim() || "(no text)");
           const truncated = m.textTruncated ? "\n\n_Message truncated. Open it in Nyxe to read the rest._" : "";
           const files = m.attachments.length

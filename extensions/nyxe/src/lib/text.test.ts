@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   displayAddress,
+  messageDate,
   looksLikeSecret,
   mimeTypeFor,
   parseRecipients,
@@ -93,5 +94,22 @@ describe("looksLikeSecret", () => {
     "ada@example.com",
   ])("treats %s as text", (text) => {
     expect(looksLikeSecret(text)).toBe(false);
+  });
+});
+
+describe("messageDate", () => {
+  const now = new Date("2026-10-28T12:00:00Z");
+  const opts = { now, locale: "en-GB", timeZone: "UTC" };
+
+  it("drops the seconds and, this year, the year", () => {
+    expect(messageDate("2026-10-21T20:56:25Z", opts)).toBe("Wed 21 Oct, 20:56");
+  });
+
+  it("keeps the year for older mail", () => {
+    expect(messageDate("2025-12-30T09:05:00Z", opts)).toBe("Tue, 30 Dec 2025, 9:05");
+  });
+
+  it("follows the locale", () => {
+    expect(messageDate("2026-10-21T20:56:25Z", { ...opts, locale: "en-US" })).toBe("Wed, Oct 21, 8:56 PM");
   });
 });

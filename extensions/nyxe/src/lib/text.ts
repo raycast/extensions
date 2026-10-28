@@ -126,3 +126,23 @@ export function mimeTypeFor(fileName: string): string {
   const ext = /\.([A-Za-z0-9]+)$/.exec(fileName)?.[1]?.toLowerCase();
   return (ext && MIME[ext]) || "application/octet-stream";
 }
+
+/** When a message arrived, the way a mail client says it: weekday, day,
+ *  month and time in the reader's locale, no seconds, and the year only when
+ *  it isn't this one. */
+export function messageDate(
+  date: number | string | Date,
+  { now = new Date(), locale, timeZone }: { now?: Date; locale?: string; timeZone?: string } = {},
+): string {
+  const d = new Date(date);
+  const year = (x: Date) => new Intl.DateTimeFormat("en", { year: "numeric", timeZone }).format(x);
+  return d.toLocaleString(locale, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    ...(year(d) === year(now) ? {} : { year: "numeric" }),
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+  });
+}
