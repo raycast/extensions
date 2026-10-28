@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-28
 
 - Fixed "Couldn't check versions" in Update Libraries when yt-dlp or ffmpeg has an update. `brew outdated` exits with code 1 whenever something is outdated, and that was treated as a failure, so the check failed exactly when there was something to upgrade.
 - Update Libraries now shows the installed version instead of the latest version in Homebrew.
