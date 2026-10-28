@@ -585,8 +585,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.16",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^9.22.0",
     "eslint-plugin-import": "^2.31.0",
