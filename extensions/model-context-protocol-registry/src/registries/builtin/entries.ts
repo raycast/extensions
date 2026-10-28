@@ -1082,6 +1082,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "noonlaunch",
+    title: "Noonlaunch",
+    description:
+      "Launch a product on Noonlaunch, search its product directory and weekly winners, check plans and submission status, and find 333 startup launch directories filtered by category, cost and domain authority. Nothing is published until the maker confirms the listing through a private claim link. Hosted remote Streamable HTTP server at https://noonlaunch.com/mcp; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/mukund1158/noonlaunch-mcp/main/logo.png",
+    homepage: "https://noonlaunch.com/launch-with-ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://noonlaunch.com/mcp"],
+    },
+    remoteUrl: "https://noonlaunch.com/mcp",
+  },
+  {
     name: "overlayqa",
     title: "OverlayQA",
     description:

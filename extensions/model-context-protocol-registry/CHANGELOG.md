@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Noonlaunch MCP Server] - {PR_MERGE_DATE}
+
+- Add Noonlaunch to the official registry: launch a product on Noonlaunch, search its product directory and weekly winners, and find 333 startup launch directories. Hosted Streamable HTTP server at https://noonlaunch.com/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add foto foto MCP Server] - 2026-10-28
 
 - Add foto foto to the official registry: turn your photos or a public iCloud Shared Album into a printed hardcover photo book, and compare photo book prices across services. Hosted Streamable HTTP server at https://fotofoto.app/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
