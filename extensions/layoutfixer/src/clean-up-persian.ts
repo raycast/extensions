@@ -23,6 +23,6 @@ export default async function Command() {
   }
 
   await replaceSelection(cleaned, prefs.restoreClipboard);
-  await remember(engine, "cleanup", selection.text, cleaned);
+  await remember(engine, "cleanup", selection.text, cleaned, { undoable: true });
   await showHUD(prefs.showPreview ? `Cleaned up: ${cleaned.trim().slice(0, 60)}` : "Cleaned up");
 }

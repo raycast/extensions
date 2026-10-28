@@ -9,6 +9,7 @@ import {
   groupDigits,
   numberToWords,
   parseDate,
+  parseNumber,
   SimpleDate,
   today,
   toGregorian,
@@ -51,6 +52,12 @@ function rowsFor(input: string): Row[] {
     rows.push({ title: "به حروف", value: words, icon: Icon.Text });
     rows.push({ title: "With separators", value: groupDigits(text, false) ?? text, icon: Icon.Hashtag });
     rows.push({ title: "با جداکننده", value: groupDigits(text, true) ?? text, icon: Icon.Hashtag });
+  } else if (parseNumber(text)) {
+    rows.push({
+      title: "به حروف",
+      value: "This number is too large or too precise to write in words",
+      icon: Icon.Warning,
+    });
   }
   const persian = toPersianDigits(text);
   const latin = toLatinDigits(text);

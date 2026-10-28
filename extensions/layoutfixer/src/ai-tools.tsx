@@ -88,6 +88,7 @@ function prompt(task: Task, text: string): string {
 function Result({ task, source }: { task: Task; source: TextSource }) {
   const [output, setOutput] = useState("");
   const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,9 +104,9 @@ function Result({ task, source }: { task: Task; source: TextSource }) {
       if (!cancelled) {
         setOutput(full.trim());
         setDone(true);
-        await remember(engine, "ai", source.text, full.trim());
       }
     })().catch((error: Error) => {
+      setFailed(true);
       setDone(true);
       showToast({ style: Toast.Style.Failure, title: "AI request failed", message: error.message });
     });
@@ -118,16 +119,19 @@ function Result({ task, source }: { task: Task; source: TextSource }) {
     const engine = await loadEngine();
     if (source.from === "selection") await replaceSelection(output, engine.prefs.restoreClipboard);
     else await Clipboard.copy(output);
+    await remember(engine, "ai", source.text, output, { undoable: source.from === "selection" });
     await popToRoot();
   }
+
+  const canReplace = done && !failed && output;
 
   return (
     <Detail
       isLoading={!done}
       navigationTitle={task.title}
-      markdown={`${output || "…"}\n\n---\n\n**Original** (${source.from})\n\n${source.text}`}
+      markdown={`${failed ? "The request failed. Try again." : output || "…"}\n\n---\n\n**Original** (${source.from})\n\n${source.text}`}
       actions={
-        done && output ? (
+        canReplace ? (
           <ActionPanel>
             <Action
               title={source.from === "selection" ? "Replace Selection" : "Copy Result"}

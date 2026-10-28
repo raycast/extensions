@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { selectLayout, pressUndo } from "./lib/macos";
+import { getFrontmostApp, pressUndo, selectLayout } from "./lib/macos";
 import { clearLastFix, getLastFix } from "./lib/storage";
 
 /** Undo only makes sense right after a fix; after that, ⌘Z would undo something else. */
@@ -10,6 +10,12 @@ export default async function Command() {
   const last = await getLastFix();
   if (!last || Date.now() - last.date > MAX_AGE_MS) {
     await showHUD("No recent fix to undo");
+    return;
+  }
+
+  const app = await getFrontmostApp().catch(() => null);
+  if (last.app && app && last.app !== app) {
+    await showHUD("Switch back to the app you fixed, then undo");
     return;
   }
 

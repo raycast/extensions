@@ -31,6 +31,6 @@ export default async function Command() {
 
   await replaceSelection(persian, prefs.restoreClipboard);
   const switched = await switchTo(engine, "fa");
-  await remember(engine, "finglish", selection.text, persian, switched);
+  await remember(engine, "finglish", selection.text, persian, { switched, undoable: true });
   await showHUD(prefs.showPreview ? `→ فارسی: ${persian.trim().slice(0, 60)}` : "→ فارسی");
 }

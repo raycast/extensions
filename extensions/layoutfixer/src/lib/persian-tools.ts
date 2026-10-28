@@ -5,7 +5,7 @@ const TEENS = ["ده", "یازده", "دوازده", "سیزده", "چهارده
 const TENS = ["", "", "بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود"];
 const HUNDREDS = ["", "صد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد"];
 const SCALES = ["", "هزار", "میلیون", "میلیارد", "تریلیون", "کوادریلیون"];
-const FRACTIONS = ["", "دهم", "صدم", "هزارم"];
+const FRACTIONS = ["", "دهم", "صدم", "هزارم", "ده‌هزارم", "صدهزارم", "میلیونیم"];
 
 function belowThousand(n: number): string {
   const parts: string[] = [];
@@ -19,12 +19,12 @@ function belowThousand(n: number): string {
   return parts.join(" و ");
 }
 
-function integerToWords(digits: string): string {
+function integerToWords(digits: string): string | null {
   const trimmed = digits.replace(/^0+(?=\d)/, "");
   if (/^0+$/.test(trimmed)) return "صفر";
   const groups: number[] = [];
   for (let end = trimmed.length; end > 0; end -= 3) groups.unshift(Number(trimmed.slice(Math.max(0, end - 3), end)));
-  if (groups.length > SCALES.length) throw new Error("Number is too large");
+  if (groups.length > SCALES.length) return null;
   return groups
     .map((group, i) => {
       if (!group) return "";
@@ -50,11 +50,16 @@ export function parseNumber(text: string): { negative: boolean; integer: string;
 export function numberToWords(text: string): string | null {
   const n = parseNumber(text);
   if (!n) return null;
-  let words = integerToWords(n.integer);
+  const integerWords = integerToWords(n.integer);
+  if (integerWords == null) return null;
+  let words = integerWords;
   if (n.fraction && /[1-9]/.test(n.fraction)) {
-    const fraction = n.fraction.slice(0, 3).replace(/0+$/, "");
-    const fractionWords = `${integerToWords(fraction)} ${FRACTIONS[fraction.length]}`;
-    words = n.integer.replace(/0/g, "") ? `${words} و ${fractionWords}` : fractionWords;
+    const fraction = n.fraction.replace(/0+$/, "");
+    if (fraction.length >= FRACTIONS.length) return null;
+    const fractionWords = integerToWords(fraction);
+    if (fractionWords == null) return null;
+    const named = `${fractionWords} ${FRACTIONS[fraction.length]}`;
+    words = n.integer.replace(/0/g, "") ? `${words} و ${named}` : named;
   }
   return n.negative ? `منفی ${words}` : words;
 }
@@ -143,13 +148,27 @@ export function weekdayFa(d: SimpleDate): string {
   return utc(d).toLocaleDateString("fa-IR", { weekday: "long", timeZone: "UTC" });
 }
 
+function daysInGregorianMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function daysInJalaliMonth(year: number, month: number): number {
+  if (month <= 6) return 31;
+  if (month <= 11) return 30;
+  return toGregorian({ year, month: 12, day: 30 }) ? 30 : 29;
+}
+
 /** Reads 1405/08/06, ۱۴۰۵-۸-۶ or 2026-10-28. Years below 1700 are taken as Jalali. */
 export function parseDate(text: string): { date: SimpleDate; calendar: "jalali" | "gregorian" } | null {
   const match = toLatinDigits(text.trim()).match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})$/);
   if (!match) return null;
   const date = { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
-  if (date.month < 1 || date.month > 12 || date.day < 1 || date.day > 31) return null;
-  return { date, calendar: date.year < 1700 ? "jalali" : "gregorian" };
+  if (date.month < 1 || date.month > 12 || date.day < 1) return null;
+  const calendar = date.year < 1700 ? "jalali" : "gregorian";
+  const lastDay =
+    calendar === "jalali" ? daysInJalaliMonth(date.year, date.month) : daysInGregorianMonth(date.year, date.month);
+  if (date.day > lastDay) return null;
+  return { date, calendar };
 }
 
 export function today(): SimpleDate {

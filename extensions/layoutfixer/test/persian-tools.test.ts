@@ -10,7 +10,11 @@ describe("number to words", () => {
     expect(numberToWords("-17")).toBe("منفی هفده");
     expect(numberToWords("2.5")).toBe("دو و پنج دهم");
     expect(numberToWords("0.25")).toBe("بیست و پنج صدم");
+    expect(numberToWords("0.1234")).toBe("هزار و دویست و سی و چهار ده‌هزارم");
+    expect(numberToWords("0.0001")).toBe("یک ده‌هزارم");
     expect(numberToWords("hello")).toBeNull();
+    expect(numberToWords("1234567890123456789")).toBeNull();
+    expect(numberToWords("0.1234567")).toBeNull();
   });
 
   it("groups digits", () => {
@@ -38,6 +42,8 @@ describe("dates", () => {
   it("parses dates in both calendars", () => {
     expect(parseDate("۱۴۰۵/۰۸/۰۶")).toEqual({ date: { year: 1405, month: 8, day: 6 }, calendar: "jalali" });
     expect(parseDate("2026-10-28")?.calendar).toBe("gregorian");
+    expect(parseDate("2026-02-30")).toBeNull();
+    expect(parseDate("2026-04-31")).toBeNull();
     expect(parseDate("not a date")).toBeNull();
   });
 });

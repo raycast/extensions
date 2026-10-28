@@ -81,6 +81,8 @@ export interface LastFix {
   previousLang: "en" | "fa" | null;
   /** Whether the fix switched the layout. */
   switched: boolean;
+  /** Bundle id of the app that received the edit. Undo only sends ⌘Z there. */
+  app: string | null;
 }
 
 export async function getLastFix(): Promise<LastFix | null> {

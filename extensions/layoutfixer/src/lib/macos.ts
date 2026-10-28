@@ -127,6 +127,22 @@ export async function selectBackwards(what: Exclude<AutoSelect, "none">): Promis
   await appleScript(SELECT_SCRIPTS[what]);
 }
 
+const FRONTMOST = `
+ObjC.import("AppKit");
+function run() {
+  const app = $.NSWorkspace.sharedWorkspace.frontmostApplication;
+  const id = app.bundleIdentifier;
+  if (!id || (id.isNil && id.isNil())) return "";
+  const bid = id.js || String(id);
+  return bid === "com.raycast.macos" ? "" : bid;
+}`;
+
+/** Bundle id of the frontmost app, ignoring Raycast itself. */
+export async function getFrontmostApp(): Promise<string | null> {
+  const id = await jxa(FRONTMOST);
+  return id || null;
+}
+
 /** Presses ⌘Z in the frontmost app. */
 export async function pressUndo(): Promise<void> {
   await appleScript('tell application "System Events" to keystroke "z" using {command down}');

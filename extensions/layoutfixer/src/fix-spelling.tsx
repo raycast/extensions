@@ -60,7 +60,7 @@ export default function Command() {
       await Clipboard.copy(corrected);
       await showHUD("Copied corrected text");
     }
-    await remember(engine, "spelling", source.text, corrected);
+    await remember(engine, "spelling", source.text, corrected, { undoable: source.from === "selection" });
     await popToRoot();
   }
 

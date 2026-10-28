@@ -32,6 +32,6 @@ export default async function Command() {
 
   await replaceSelection(fixed.text, prefs.restoreClipboard);
   const switched = await switchTo(engine, fixed.target);
-  await remember(engine, "layout", selection.text, fixed.text, switched);
+  await remember(engine, "layout", selection.text, fixed.text, { switched, undoable: true });
   await showHUD(describeFix(fixed, prefs.showPreview));
 }

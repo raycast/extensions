@@ -66,6 +66,11 @@ describe("fallback and options", () => {
     const d = Dictionaries.load(join(__dirname, "..", "assets"));
     d.setPersonalWords(["sghl"]);
     expect(fixText("sghl", d, pair).text).toBe("sghl");
+    expect(fixText("sghl", d, pair, { fallbackToAll: true }).text).toBe("sghl");
+  });
+
+  it("still fixes Caps Lock when falling back", () => {
+    expect(fixText("hELLO", dicts, pair, { fallbackToAll: true }).text).toBe("Hello");
   });
 });
 

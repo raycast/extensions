@@ -7,6 +7,7 @@ import { detectLang, Lang, LayoutPair, layouts, PersianLayout } from "./layouts"
 import {
   AutoSelect,
   deselect,
+  getFrontmostApp,
   getInputSources,
   InputSources,
   macSpellCheck,
@@ -203,21 +204,24 @@ export async function checkSpelling(engine: Engine, text: string): Promise<Missp
   return result;
 }
 
-/** Saves a fix for Undo Last Fix, and to the history when it's turned on. */
+/** Saves a fix to the history, and to Undo only when the frontmost app was actually edited. */
 export async function remember(
   engine: Engine,
   kind: HistoryKind,
   original: string,
   fixed: string,
-  switched = false,
+  opts: { switched?: boolean; undoable?: boolean } = {},
 ): Promise<void> {
   if (original === fixed) return;
-  await setLastFix({
-    original,
-    fixed,
-    date: Date.now(),
-    previousLang: engine.sources?.current?.lang ?? null,
-    switched,
-  });
+  if (opts.undoable) {
+    await setLastFix({
+      original,
+      fixed,
+      date: Date.now(),
+      previousLang: engine.sources?.current?.lang ?? null,
+      switched: opts.switched ?? false,
+      app: await getFrontmostApp().catch(() => null),
+    });
+  }
   if (engine.prefs.history) await addHistory(kind, original, fixed);
 }
