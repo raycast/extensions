@@ -2,7 +2,7 @@
 
 ## [Node 22 and Node 26 native support] - {PR_MERGE_DATE}
 
-- Package verified Sharp binaries and libraries for both Mac architectures so image processing works in installed command bundles.
+- Package verified Sharp binaries and libraries for Apple Silicon so image processing works in installed command bundles. Requires Raycast 2.
 
 All notable changes to the Cloudflare Images extension live here. The Raycast
 Store displays the latest section as the extension's "What's New" copy on the

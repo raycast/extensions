@@ -40,55 +40,53 @@ try {
     cpSync(source, join(staging, "node_modules", name), { recursive: true });
   }
 
-  // Include both Mac architectures regardless of the build machine. These N-API
-  // binaries are shared by Node 22 and ordinary Node 26.
-  for (const arch of ["arm64", "x64"]) {
-    for (const name of [
-      `@img/sharp-darwin-${arch}`,
-      `@img/sharp-libvips-darwin-${arch}`,
-    ]) {
-      const entry = lock.packages[`node_modules/${name}`];
-      if (
-        !entry?.resolved?.startsWith("https://registry.npmjs.org/") ||
-        !entry.integrity?.startsWith("sha512-")
-      ) {
-        throw new Error(`Missing verified npm artifact for ${name}.`);
-      }
-      const response = await fetch(entry.resolved, {
-        signal: AbortSignal.timeout(60_000),
-      });
-      if (!response.ok)
-        throw new Error(`Failed to download ${name}: HTTP ${response.status}`);
-      const bytes = Buffer.from(await response.arrayBuffer());
-      const integrity = `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
-      if (integrity !== entry.integrity)
-        throw new Error(`Integrity mismatch for ${name}.`);
-      const archive = join(staging, "package.tgz");
-      writeFileSync(archive, bytes);
-      const entries = execFileSync("tar", ["-tzf", archive], {
-        encoding: "utf8",
-      })
-        .trim()
-        .split("\n");
-      if (
-        entries.some(
-          (path) =>
-            !path.startsWith("package/") || path.split("/").includes(".."),
-        )
-      ) {
-        throw new Error(`Unexpected archive layout for ${name}.`);
-      }
-      const destination = join(staging, "node_modules", name);
-      mkdirSync(destination, { recursive: true });
-      execFileSync("tar", [
-        "-xzf",
-        archive,
-        "--strip-components=1",
-        "-C",
-        destination,
-      ]);
-      rmSync(archive);
+  // Raycast 2 supports Apple Silicon only. These N-API binaries are shared by
+  // Node 22 and ordinary Node 26.
+  for (const name of [
+    "@img/sharp-darwin-arm64",
+    "@img/sharp-libvips-darwin-arm64",
+  ]) {
+    const entry = lock.packages[`node_modules/${name}`];
+    if (
+      !entry?.resolved?.startsWith("https://registry.npmjs.org/") ||
+      !entry.integrity?.startsWith("sha512-")
+    ) {
+      throw new Error(`Missing verified npm artifact for ${name}.`);
     }
+    const response = await fetch(entry.resolved, {
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!response.ok)
+      throw new Error(`Failed to download ${name}: HTTP ${response.status}`);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const integrity = `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
+    if (integrity !== entry.integrity)
+      throw new Error(`Integrity mismatch for ${name}.`);
+    const archive = join(staging, "package.tgz");
+    writeFileSync(archive, bytes);
+    const entries = execFileSync("tar", ["-tzf", archive], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n");
+    if (
+      entries.some(
+        (path) =>
+          !path.startsWith("package/") || path.split("/").includes(".."),
+      )
+    ) {
+      throw new Error(`Unexpected archive layout for ${name}.`);
+    }
+    const destination = join(staging, "node_modules", name);
+    mkdirSync(destination, { recursive: true });
+    execFileSync("tar", [
+      "-xzf",
+      archive,
+      "--strip-components=1",
+      "-C",
+      destination,
+    ]);
+    rmSync(archive);
   }
   writeFileSync(
     join(staging, "package.json"),

@@ -376,7 +376,7 @@
   ],
   "dependencies": {
     "@mcdays/cloudflare-images-core": "^0.1.0",
-    "@raycast/api": "^1.104.0"
+    "@raycast/api": "^2.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
