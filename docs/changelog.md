@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.10.0 - 2026-10-21
+
+### ✨ New
+
+- **Clipboard**: Added a `closeMainWindow` option to `Clipboard.paste`. Set it to `false` to keep the main window open while pasting into the frontmost application.
+- **AI Mentions**: Extensions can now offer items such as issues, notes, and documents in the AI Chat composer's `@` menu. Declare tools with the `AI mention search` functionality to provide searches or fixed lists of items. Return item content directly, or declare a `resourceProvider` entry point in your manifest to read items by URI. See [Composer Mentions](./api-reference/tool.md#composer-mentions).
+
+### 💎 Improvements
+
+- **Runtime**: Updated the extension runtime to Node.js 26.12.1. The CLI now targets Node.js 26.12.1 when the minimum version allowed by the extension's `@raycast/api` dependency is 2.10 or later.
+- **React**: Updated the extension runtime to React 19.3.1 and [React Developer Tools](./basics/debug-an-extension.md#react-developer-tools) to 8.0.0.
+- **TypeScript Definitions**: Updated `@types/node` to 26.6.5 and `@types/react` to 19.3.0 in the API and extension template.
+
 ## 2.9.0 - 2026-10-21
 
 ### ✨ New
