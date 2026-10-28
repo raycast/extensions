@@ -10,7 +10,7 @@ import { getHistoryPairKey, MAX_HISTORY_ITEMS, sortHistory } from "./helpers/his
 import { getUsageHistory, isValidTimestamp, setUsageHistory, toOpenCount, withStorageLock } from "./helpers/storage";
 import { UsageHistoryItem, YAMLSettings } from "./types";
 import { isDefaultApp } from "./utils/default-apps";
-import { validateAndSanitizeFilename, validateSecurePath } from "./utils/file-security";
+import { validateAndSanitizeFilename, validatePathInDirectory } from "./utils/file-security";
 
 /**
  * Export all settings to YAML format
@@ -44,6 +44,9 @@ export interface ImportSummary {
   historySkipped: number;
   /** Rows from the file that were older than everything History keeps */
   historyTooOld: number;
+  /** Apps the import showed or hid, counting only real changes */
+  appsShown: number;
+  appsHidden: number;
   /** The file's version, when it isn't one this version of @ Profile writes */
   unknownVersion?: string;
   firstError?: string;
@@ -89,6 +92,8 @@ async function importLocked(yamlContent: string): Promise<ImportSummary> {
     historyUpdated: 0,
     historySkipped: 0,
     historyTooOld: 0,
+    appsShown: 0,
+    appsHidden: 0,
     // A file from a newer @ Profile still imports, but fields this version doesn't know are dropped; say so
     // An unquoted `version: 1.0` reads as the number 1
     unknownVersion: ["1", "1.0"].includes(String(settings.version)) ? undefined : String(settings.version),
@@ -141,7 +146,9 @@ async function importLocked(yamlContent: string): Promise<ImportSummary> {
       visibilityUpdates.set(resolved, visible);
     }
   }
-  await mergeAppVisibility(visibilityUpdates);
+  const visibilityChanges = await mergeAppVisibility(visibilityUpdates);
+  summary.appsShown = visibilityChanges.shown;
+  summary.appsHidden = visibilityChanges.hidden;
 
   // 3. Usage history, keyed by profile + app. An imported entry replaces a stored one for the same pair, keeping
   // the larger open count; when the file holds the same pair twice (e.g. "Alice" and "alice"), the newer wins.
@@ -251,10 +258,16 @@ export function describeImportSummary(summary: ImportSummary): string {
   if (summary.historyTooOld > 0) notKept.push(`${summary.historyTooOld} older than the ${MAX_HISTORY_ITEMS} kept`);
   if (notKept.length > 0) history += ` (${notKept.join(", ")})`;
 
-  const description = `${apps} · ${history}`;
-  return summary.unknownVersion
-    ? `${description} · From a newer version: some settings may not import`
-    : description;
+  const visibility: string[] = [];
+  if (summary.appsHidden > 0) visibility.push(`${countOf(summary.appsHidden, "app")} hidden`);
+  if (summary.appsShown > 0) {
+    visibility.push(
+      summary.appsHidden > 0 ? `${summary.appsShown} shown` : `${countOf(summary.appsShown, "app")} shown`,
+    );
+  }
+
+  const description = [apps, visibility.join(", "), history].filter(Boolean).join(" · ");
+  return summary.unknownVersion ? `${description} · From a newer version: some settings may not import` : description;
 }
 
 /**
@@ -282,7 +295,7 @@ export async function exportSettingsToFile(filename?: string): Promise<string> {
   const base = fileName.slice(0, fileName.length - extension.length);
   for (let copy = 1; ; copy++) {
     const filePath = join(directory, copy === 1 ? fileName : `${base} ${copy}${extension}`);
-    validateSecurePath(filePath);
+    validatePathInDirectory(filePath, directory);
     try {
       // "wx" fails instead of overwriting, without the race an existsSync check would have
       await writeFile(filePath, yamlContent, { encoding: "utf8", flag: "wx" });

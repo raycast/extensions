@@ -7,7 +7,7 @@
 - Export Apps saves right away and tells you where, with Show in Finder and Copy Path
 - New Export Directory preference sets where exports go (Downloads by default), and an export never replaces an existing file
 - Import Apps opens a file picker, pre-filled with the file selected in Finder, and imports only when you press Import
-- Import keeps open counts and says what changed, e.g. "No apps added (2 already set up) · History unchanged", including when the file comes from a newer version
+- Import keeps open counts and says what changed, including apps it showed or hid, e.g. "No apps added (2 already set up) · History unchanged", including when the file comes from a newer version
 - Import and Export moved into the Manage Apps action menu (⌘⇧I and ⌘⇧E)
 - Editing a custom app's URL keeps its History, favorites and visibility
 - Copy Profile URL no longer doubles the @ on Threads, TikTok and YouTube Brand profiles

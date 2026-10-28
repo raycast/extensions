@@ -90,6 +90,16 @@ describe("import", () => {
     expect(entry).toMatchObject({ count: 3, timestamp: 1700000000200 });
   });
 
+  it("counts the apps it shows or hides", async () => {
+    const file = "version: '1.0'\nvisible:\n  github: false\n  x: true\n  facebook: false\n";
+    expect(await importSettingsFromYAML(file)).toMatchObject({ appsHidden: 2, appsShown: 0 });
+    expect(await importSettingsFromYAML(file)).toMatchObject({ appsHidden: 0, appsShown: 0 });
+    expect(await importSettingsFromYAML("version: '1.0'\nvisible:\n  github: true\n")).toMatchObject({
+      appsHidden: 0,
+      appsShown: 1,
+    });
+  });
+
   it("rejects a file that isn't an export", async () => {
     await expect(importSettingsFromYAML("just: text")).rejects.toThrow("Missing version field");
   });
@@ -104,6 +114,8 @@ describe("describeImportSummary", () => {
     historyUpdated: 0,
     historySkipped: 0,
     historyTooOld: 0,
+    appsShown: 0,
+    appsHidden: 0,
     ...overrides,
   });
 
@@ -118,6 +130,9 @@ describe("describeImportSummary", () => {
       "No apps added · 3 profiles added to History, 2 updated (1 skipped)",
     ],
     [{ historyUpdated: 1, appsFailed: 1 }, "No apps added, 1 rejected · 1 History profile updated"],
+    [{ appsHidden: 1 }, "No apps added · 1 app hidden · History unchanged"],
+    [{ appsHidden: 2, appsShown: 1 }, "No apps added · 2 apps hidden, 1 shown · History unchanged"],
+    [{ appsShown: 3 }, "No apps added · 3 apps shown · History unchanged"],
   ])("%o", (overrides, text) => {
     expect(describeImportSummary(summary(overrides))).toBe(text);
   });

@@ -57,13 +57,21 @@ export async function findVisibleApp(query: string): Promise<AppEntry | undefine
 /**
  * Set several apps' visibility in one write, keeping every other stored setting
  */
-export async function mergeAppVisibility(updates: Map<string, boolean>): Promise<void> {
-  if (updates.size === 0) return;
+/**
+ * @returns how many apps this showed and hid, counting only changes; an app with no stored setting is visible
+ */
+export async function mergeAppVisibility(updates: Map<string, boolean>): Promise<{ shown: number; hidden: number }> {
+  const changes = { shown: 0, hidden: 0 };
+  if (updates.size === 0) return changes;
   await withStorageLock(async () => {
     const merged = new Map((await getAppSettings()).map((setting) => [setting.value, setting.visible]));
-    updates.forEach((visible, value) => merged.set(value, visible));
+    updates.forEach((visible, value) => {
+      if ((merged.get(value) ?? true) !== visible) changes[visible ? "shown" : "hidden"]++;
+      merged.set(value, visible);
+    });
     await setAppSettings(Array.from(merged, ([value, visible]) => ({ value, visible })));
   });
+  return changes;
 }
 
 function findSameService(urlTemplate: string, apps: App[], excludeValue?: string): App | undefined {
