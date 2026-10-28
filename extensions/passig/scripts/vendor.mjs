@@ -1,7 +1,13 @@
 // Copia @passig/shared e @passig/client-core in src/vendor/ e riscrive gli import,
 // così l'estensione è autonoma (npm, senza workspace:*) come richiesto dal Raycast Store.
-// Eseguire con `npm run vendor` (o `pnpm vendor`) ogni volta che cambiano i pacchetti condivisi.
-import { cpSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+//
+// È un passo ESPLICITO e manuale, solo per chi lavora nel monorepo Passig:
+// `npm run vendor` ogni volta che cambiano i pacchetti condivisi. NON è agganciato
+// a build/dev: nel repository raycast/extensions `src/vendor` è versionato e la
+// cartella `packages/` non esiste. Se i sorgenti non ci sono lo script esce
+// senza toccare nulla.
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,9 +40,25 @@ function rewrite(file, header) {
   if (out !== src) writeFileSync(file, out);
 }
 
+const sources = [join(pkgs, "shared/src"), join(pkgs, "client-core/src")];
+const missing = sources.filter((p) => !existsSync(p));
+if (missing.length) {
+  console.error(`vendor: sorgenti non trovati (${missing.join(", ")}). Questo script va eseguito solo dal monorepo Passig; src/vendor lasciato invariato.`);
+  process.exit(1);
+}
+
+// Copia prima in una cartella temporanea e sostituisce src/vendor solo a copia riuscita.
+const staging = mkdtempSync(join(tmpdir(), "passig-vendor-"));
+cpSync(sources[0], join(staging, "shared"), { recursive: true });
+cpSync(sources[1], join(staging, "client-core"), { recursive: true });
 rmSync(vendor, { recursive: true, force: true });
-cpSync(join(pkgs, "shared/src"), join(vendor, "shared"), { recursive: true });
-cpSync(join(pkgs, "client-core/src"), join(vendor, "client-core"), { recursive: true });
+try {
+  renameSync(staging, vendor);
+} catch {
+  // rename tra filesystem diversi (EXDEV): copia e poi rimuove la cartella temporanea
+  cpSync(staging, vendor, { recursive: true });
+  rmSync(staging, { recursive: true, force: true });
+}
 
 for (const f of walk(vendor)) rewrite(f, true);
 for (const f of walk(join(root, "src"))) if (!f.startsWith(vendor)) rewrite(f, false);
