@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support native Open and Save dialogs] - {PR_MERGE_DATE}
+
+- Read native file pickers before the host app’s document or browser tab, and avoid copying the underlying window when a picker path is unavailable.
+
 ## [Support Little Arc and Peek] - 2026-09-19
 
 - Fix Arc: copy the URL of a focused Little Arc window or Peek preview instead of the underlying tab of the main window (#12677)

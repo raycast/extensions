@@ -10,6 +10,13 @@ Copy path of the selected file or the current Finder window.
 - If no files are detected, detect the path of the window where the Finder currently gets focus.
 - Support QSpace Pro, including selected items on QSpace Desktop and the current QSpace location.
 
+## Native Open and Save dialogs
+
+- Check the focused macOS file picker before the host app’s document or browser URL.
+- Copy selected file paths when exposed by the picker, otherwise its current folder URL.
+- If a native picker is detected but its path is unavailable, leave the clipboard unchanged instead of copying the window behind it.
+- Uses Raycast’s Accessibility permission. Custom file dialogs and virtual locations such as Recents may not expose a filesystem path.
+
 ## ✨Feature 2
 
 Copy the URL of the current tab of the browser or web app.

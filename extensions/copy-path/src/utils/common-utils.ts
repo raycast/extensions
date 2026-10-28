@@ -32,6 +32,7 @@ import {
   showTabTitle,
 } from "../types/preferences";
 import parseUrl from "parse-url";
+import { getFileDialogPaths } from "./file-dialog";
 import * as os from "node:os";
 import { arcBundleId, firefoxBrowsers, vsCodeBundleIds } from "./constants";
 
@@ -94,6 +95,33 @@ export const copyQSpacePath = async () => {
   await showSuccessHUD(hud);
   await customUpdateCommandMetadata(path.replace(os.homedir(), "~"));
   return path;
+};
+
+// A detected picker must never fall through to the document or browser behind it.
+export const copyFileDialogPath = async (app: Application) => {
+  let result;
+  try {
+    result = await getFileDialogPaths(app);
+  } catch {
+    await showFailureHUD({ title: "Could Not Read File Dialog", style: Toast.Style.Failure });
+    return true;
+  }
+  if (!result.detected) return false;
+  if (!result.paths.length) {
+    await showFailureHUD({ title: "Could Not Read File Dialog Path", style: Toast.Style.Failure });
+    return true;
+  }
+  const { useTildeForHome } = getPreferenceValues();
+  const paths = result.paths.map((path) =>
+    useTildeForHome && (path === os.homedir() || path.startsWith(os.homedir() + "/"))
+      ? "~" + path.slice(os.homedir().length)
+      : path,
+  );
+  const content = paths.join(multiPathSeparator);
+  await Clipboard.copy(content);
+  await showSuccessHUD("📂 " + paths[0]);
+  await customUpdateCommandMetadata(content);
+  return true;
 };
 
 export const copyFinderPath = async () => {

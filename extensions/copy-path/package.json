@@ -73,11 +73,11 @@
       "default": "\n",
       "data": [
         {
-          "title": "⏎",
+          "title": "\u23ce",
           "value": "\n"
         },
         {
-          "title": "␣",
+          "title": "\u2423",
           "value": " "
         },
         {
@@ -168,7 +168,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

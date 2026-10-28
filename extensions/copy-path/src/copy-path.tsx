@@ -8,12 +8,16 @@ import {
   copyUnSupportedAppContent,
   copyWindowPath,
   copyQSpacePath,
+  copyFileDialogPath,
 } from "./utils/common-utils";
 
 export default async () => {
   await closeMainWindow();
   await showLoadingHUD("Copying...");
   const frontmostApp = await getFrontmostApplication();
+  if (await copyFileDialogPath(frontmostApp)) {
+    return;
+  }
   if (frontmostApp.bundleId === finderBundleId) {
     // get finder path
     await copyFinderPath();
