@@ -23,7 +23,7 @@
     "@raycast/api": "^1.65.1",
     "@raycast/utils": "^1.12.5",
     "dedent": "^1.5.1",
-    "openai": "^4.47.1",
+    "openai": "^7.45.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
