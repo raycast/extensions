@@ -157,3 +157,7 @@ which groups to include. Your personal library is always searched.
 References from a group library show the group name after the title, for example
 "Title · Group Name", and a `**Library:**` line in the detail view. The "Open in Zotero"
 action opens them in the Zotero app.
+
+## Relative Linked Attachments
+
+PDFs stored relative to Zotero’s **Linked Attachment Base Directory** are resolved automatically for both primary and secondary attachments. The extension reads that setting from the Zotero profile matching the configured Zotero data directory. If no matching profile is available, or matching profiles specify conflicting base directories, the relative file remains unresolved. Imported `storage:` attachments and absolute linked paths retain their existing behavior.
