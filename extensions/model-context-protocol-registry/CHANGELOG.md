@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add RecordHTML MCP Server] - {PR_MERGE_DATE}
+## [Add RecordHTML MCP Server] - 2026-10-28
 
 - Add RecordHTML to the official registry: record web pages and HTML5 creatives (banners, ads, animations, landing pages) to MP4, WebM or GIF in a real browser and get a signed video link back. 5 tools. Hosted Streamable HTTP server at https://mcp.recordhtml.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; free plan available.
 
