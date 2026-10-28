@@ -1,5 +1,9 @@
 # Send to Kindle Changelog
 
+## [Node.js 26 Compatibility] - {PR_MERGE_DATE}
+
+- Support TLS connections to IP addresses on Node.js 26 without sending an invalid SNI hostname.
+
 ## [Skills Import and Export] - 2026-05-15
 
 - Added bulk skills import and export, so you can back up or restore all skills at once instead of managing them one by one.
