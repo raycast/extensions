@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Shipmail MCP Server] - {PR_MERGE_DATE}
+## [Add Shipmail MCP Server] - 2026-10-28
 
 - Add Shipmail to the official registry: business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted Streamable HTTP server at https://shipmail.to/api/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; OAuth 2.1 sign-in or a Shipmail API key.
 
