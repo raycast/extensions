@@ -46,7 +46,28 @@ export default function Command() {
       ) : hasNoAccounts ? (
         <NoAccountsView onRetry={reload} />
       ) : workers.data?.length === 0 ? (
-        <List.EmptyView icon={Icon.Code} title="No Workers" description="This Account has no Workers yet." />
+        <List.EmptyView
+          icon={Icon.Code}
+          title="No Workers"
+          description="This Account has no Workers yet."
+          actions={
+            // The rows' actions, so a first Worker can be refreshed in and the connection still changed.
+            <ActionPanel>
+              <Action
+                title="Open in MFlare"
+                icon={Icon.AppWindow}
+                onAction={() => openMFlare(accountId ? { page: "deployments", accountId } : undefined)}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={reload}
+              />
+              <ConnectionActions onChange={reload} />
+            </ActionPanel>
+          }
+        />
       ) : (
         // A section only to say the list can't be refreshed until the User signs in again.
         <List.Section subtitle={needsReauthorization ? REAUTHORIZE_NOTE : undefined}>
@@ -256,10 +277,13 @@ function firstLine(text: string | null): string | undefined {
 }
 
 // Commit messages are plain text: keep Markdown from reading `*`, `_` or a leading `#` or `-` as formatting, and keep
-// their line breaks. Parentheses and brackets stay as they are, since Raycast reads `\(` and `\[` as LaTeX.
+// their line breaks. Anyone who can push writes them, so an image (`![…](…)`, `<img>`) shows as text: loading it
+// would tell its host who opened the history, and when. Parentheses and brackets stay as they are, since Raycast
+// reads `\(` and `\[` as LaTeX.
 function escapeMarkdown(text: string): string {
   return text
-    .replace(/([\\`*_~|])/g, "\\$1")
+    .replace(/([\\`*_~|<])/g, "\\$1")
+    .replace(/!\[/g, "\\![")
     .replace(/^(\s*)([#>+-])/gm, "$1\\$2")
     .replace(/^(\s*\d+)\./gm, "$1\\.")
     .replace(/\n/g, "  \n");

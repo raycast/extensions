@@ -18,9 +18,13 @@ export default function BuildLog({ worker, build, accountId }: { worker: string;
   const [error, setError] = useState<Error>();
   const [filter, setFilter] = useState<Filter>("all");
   const cursor = useRef<string | undefined>(undefined);
+  // A read in progress: another one would start from the same cursor and add the same lines twice.
+  const isReading = useRef(false);
 
-  // Reads the lines after the last ones read.
+  // Reads the lines after the last ones read, unless a read is already on its way.
   const readOn = useCallback(async () => {
+    if (isReading.current) return;
+    isReading.current = true;
     setIsLoading(true);
     try {
       const page = await getBuildLog(worker, build.id, accountId, cursor.current);
@@ -33,6 +37,7 @@ export default function BuildLog({ worker, build, accountId }: { worker: string;
     } catch (readError) {
       setError(readError instanceof Error ? readError : new Error(String(readError)));
     } finally {
+      isReading.current = false;
       setIsLoading(false);
     }
   }, [worker, build.id, accountId]);
