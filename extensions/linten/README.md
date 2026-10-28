@@ -100,4 +100,4 @@ Linten communicates with Linten Cloud (`https://linten.apps.loopstates.com`) ove
 
 ## License
 
-MIT © [Loopstates](https://loopstates.com). All rights reserved.
+MIT © [Loopstates](https://loopstates.com)

@@ -11,6 +11,9 @@
     "Developer Tools",
     "Productivity"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "homepage": "https://loopstates.com",
   "commands": [
