@@ -16,7 +16,8 @@
     "yusifaliyevpro",
     "xilopaint",
     "chrismessina",
-    "showbiz0"
+    "showbiz0",
+    "nengqi"
   ],
   "categories": [
     "Applications",
@@ -167,6 +168,14 @@
           "value": "vivaldi"
         }
       ]
+    },
+    {
+      "name": "firefoxContainer",
+      "title": "Firefox Container",
+      "description": "Optional Firefox Multi-Account Container name when 'Use Cookies from Browser' is set to Firefox (passed to yt-dlp as firefox::ContainerName).",
+      "placeholder": "Personal",
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "fastRemux",

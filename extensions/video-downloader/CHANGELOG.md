@@ -1,5 +1,9 @@
 # Video Downloader Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add "Firefox Container" preference to support importing cookies from a specific Firefox Multi-Account Container (`--cookies-from-browser firefox::ContainerName`)
+
 ## [Improvement] - 2026-10-09
 
 - Add "Fast Remux" preference (enabled by default) to package streams directly into the target container (`--remux-video`) instead of re-encoding (`--recode-video`), delivering near-instant downloads with zero CPU transcoding overhead and no quality loss
