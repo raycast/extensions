@@ -7,7 +7,9 @@ import {
   showToast,
   Toast,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { execFile } from "child_process";
 import * as fs from "fs";
@@ -70,12 +72,7 @@ export default function Command() {
       }
     };
     const failed = (e: Error) => {
-      if (alive)
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Index build failed",
-          message: e.message,
-        });
+      if (alive) showFailureToast(e, { title: "Index build failed" });
     };
     ensureIndex(scope, prefs, false, true, changed, failed)
       .then(() => {
@@ -84,11 +81,7 @@ export default function Command() {
       .catch((e) => {
         if (alive) {
           setIndexing(false);
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Index build failed",
-            message: String(e?.message || e),
-          });
+          showFailureToast(e, { title: "Index build failed" });
         }
       });
     return () => {
@@ -128,11 +121,7 @@ export default function Command() {
       } catch (e) {
         if (mySeq !== seq.current) return;
         setResults([]);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: String(e?.message || e),
-        });
+        showFailureToast(e, { title: "Search failed" });
       } finally {
         if (mySeq === seq.current) setSearching(false);
       }
@@ -181,11 +170,7 @@ export default function Command() {
       })
       .catch((e) => {
         setIndexing(false);
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Rebuild failed",
-          message: String(e?.message || e),
-        });
+        showFailureToast(e, { title: "Rebuild failed" });
       });
   };
 
@@ -215,7 +200,6 @@ export default function Command() {
       searchText={query}
       onSearchTextChange={setQuery}
       onSelectionChange={setSelected}
-      navigationTitle="Find Everything"
       searchBarPlaceholder="Find every file on your Mac — instantly…"
       searchBarAccessory={
         <List.Dropdown
@@ -261,7 +245,7 @@ export default function Command() {
             <Action
               title="Rebuild Index"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={refresh}
             />
           </ActionPanel>
@@ -347,12 +331,12 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy File Name"
                     content={path.basename(p)}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                   <Action
                     title="Copy File"
                     icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.CopyName}
                     onAction={() => Clipboard.copy({ file: p })}
                   />
                 </ActionPanel.Section>
@@ -366,7 +350,7 @@ export default function Command() {
                   <Action
                     title="Rebuild Index"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={refresh}
                   />
                 </ActionPanel.Section>

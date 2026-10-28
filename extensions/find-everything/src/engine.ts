@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import { spawn, execFile, ChildProcess } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
@@ -9,7 +10,7 @@ const execFileAsync = promisify(execFile);
 
 export const HOME = os.homedir();
 export const IS_MAC = process.platform === "darwin";
-export const INDEX_DIR = path.join(HOME, ".cache", "hypersearch");
+export const INDEX_DIR = environment.supportPath;
 
 // Homebrew first, then system paths, then PATH lookup as last resort.
 const BIN_DIRS = [
@@ -39,7 +40,6 @@ export const findBin = (name: string): string => {
 export const FD = findBin("fd") === "fd" ? findBin("fdfind") : findBin("fd");
 export const FZF = findBin("fzf");
 export const RG = findBin("rg");
-export const OPEN_CMD = IS_MAC ? findBin("open") : findBin("xdg-open");
 
 export const BASE_EXCLUDES = [
   ".git",
@@ -115,12 +115,7 @@ export const ALL_EXCLUDES = [
 ];
 
 export type Scope =
-  | "home"
-  | "downloads"
-  | "documents"
-  | "applications"
-  | "all"
-  | "custom";
+  "home" | "downloads" | "documents" | "applications" | "all" | "custom";
 export const SCOPES: Scope[] = [
   "home",
   "downloads",
@@ -491,7 +486,7 @@ const DM_DAYS: Record<string, number> = {
 };
 export function parseQuery(q: string): ParsedQuery {
   const pq: ParsedQuery = { fuzzy: [], constraints: [] };
-  let rest = q.replace(/"([^"]+)"/g, (_, s) => {
+  const rest = q.replace(/"([^"]+)"/g, (_, s) => {
     pq.fuzzy.push(`'${s}`); // fzf exact-substring marker
     return " ";
   });
@@ -822,9 +817,3 @@ export const prettyPath = (p: string) => {
   const parts = s.split("/").filter(Boolean);
   return `${parts.slice(0, 2).join("/")}/…/${parts.slice(-2).join("/")}`;
 };
-
-export function openPath(p: string): void {
-  spawn(OPEN_CMD, [p], { stdio: "ignore", detached: true })
-    .on("error", () => {})
-    .unref();
-}
