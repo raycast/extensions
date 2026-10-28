@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ISMS Copilot MCP Server] - 2026-10-28
+
+- Add ISMS Copilot to the official registry: the compliance specialist your AI calls, for ISO 27001, SOC 2, GDPR, NIS 2, DORA and more. Hosted Streamable HTTP server at https://account.ismscopilot.com/v1/account/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Timesheet MCP Server] - 2026-10-28
 
 - Add Timesheet to the official registry: start, pause and stop the timer, log past work, manage projects, todos, expenses and absences, and pull statistics, reports and exports. Hosted Streamable HTTP server at https://mcp.timesheet.io with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Timesheet API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
