@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AyHire MCP Server] - 2026-10-28
+
+- Add AyHire to the official registry: describe a role and AyHire finds developers from their public GitHub work, judges each one against the role's criteria with links to the evidence, and keeps roles and a shortlist. Hosted Streamable HTTP server at https://ayhire.com/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Awaken Tax MCP Server] - 2026-10-28
 
 - Add Awaken Tax to the official registry: crypto tax accounting in your Awaken account. Review and fix transactions, investigate cost basis and tax lots, summarize gains and income, reconcile 1099-DA forms and generate tax reports and CSV exports. Hosted Streamable HTTP server at https://mcp.awaken.tax/mcp through `mcp-remote`, with an `Authorization: Bearer <portfolioId>:<apiKey>` header from the `AWAKEN_AUTH_HEADER` environment variable; API keys need an Awaken Dolphin or Whale plan.
