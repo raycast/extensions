@@ -1,6 +1,14 @@
-# Chromium Extensions Audit
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/extension_icon.png" alt="Chromium Extensions Audit" width="100"/>
+    <h3>Chromium Extensions Audit</h3>
+    <p>Audit browser extensions and track permission changes</p>
+    <br/>
+    <br/>
+</div>
 
-Inspect Chromium browser extensions across local browsers and profiles, understand their recorded permissions, and review changes from Raycast. All scanning and history storage stay on your Mac.
+Chromium Extensions Audit is a Raycast extension that helps you inspect installed Chromium browser extensions, understand their permissions, and track changes across browsers and profiles. All scanning and history storage stay on your Mac.
 
 ## Browsers
 
@@ -68,7 +76,7 @@ Search, homepage, and startup-page overrides apply without a permission prompt, 
 - **Large encoded data** (Informational): long high-entropy strings that are not image or font data.
 - **Referenced remote hosts**: hosts found in code, excluding common specification and documentation hosts. A referenced host is not proof of a connection.
 
-Code findings use partial confidence because patterns can match unused library code. With analysis enabled, a scan also records a hash of every file. Code that changes without a version increment is flagged for prompt review, as are new remote-code or obfuscation patterns after an update; new referenced hosts are flagged for review. Turning analysis on for the first time never creates change events.
+Code findings use partial confidence because patterns can match unused library code. With analysis enabled, a scan also records a hash of every file. Code that changes without a version increment is flagged for prompt review, as are new remote-code or obfuscation patterns after an update; new referenced hosts are flagged for review. Comparisons use the last successful code analysis, even across failed or partial scans. Turning analysis on for the first time never creates change events.
 
 ## Privacy and storage
 
@@ -77,6 +85,7 @@ The scanner reads each browser's `Local State`, `Last Version`, extension portio
 Audit data is stored in the extension-owned Raycast support directory under `audit/`, with private filesystem modes. Writes use a cross-process lock, schema validation, and an atomic file replacement. Unreadable manifests keep the affected extension's previous observation while healthy entries remain usable. Invalid profile preferences preserve the whole profile snapshot; a missing profile never implies that all of its extensions were removed.
 
 - Original baselines: until explicitly reset.
+- Last successful code analysis: until the extension is removed or the baseline is reset.
 - Changed snapshots: 90 days.
 - Reviewed and informational events: 180 days.
 - Unreviewed actionable events: retained until reviewed.

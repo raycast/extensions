@@ -57,7 +57,7 @@ export const CodeAnalysisSchema = z.object({
   files: z.number(),
   bytes: z.number(),
   hash: z.string(),
-  // Per-file hashes are kept only on the latest observation; snapshots and baselines drop them.
+  // Per-file hashes are kept on the latest observation and code reference; history drops them.
   fileHashes: z.record(z.string(), z.string()).optional(),
   hosts: z.array(z.string()),
   signals: z.array(CodeSignalSchema),
@@ -65,6 +65,8 @@ export const CodeAnalysisSchema = z.object({
   skipped: z.array(z.string()).default([]),
 });
 export type CodeAnalysis = z.infer<typeof CodeAnalysisSchema>;
+const CodeReferenceSchema = z.object({ version: z.string(), code: CodeAnalysisSchema });
+export type CodeReference = z.infer<typeof CodeReferenceSchema>;
 export const ExtensionSchema = z.object({
   key: z.string(),
   browser: z.string(),
@@ -151,6 +153,7 @@ export const StoreSchema = z.object({
   revision: z.number().int().nonnegative(),
   baselines: z.record(z.string(), ProfileSnapshotSchema),
   latest: z.record(z.string(), ProfileSnapshotSchema),
+  codeReferences: z.record(z.string(), CodeReferenceSchema).optional(),
   snapshots: z.array(ProfileSnapshotSchema),
   events: z.array(EventSchema),
   lastAttempt: z.string().optional(),
@@ -165,6 +168,7 @@ export const emptyStore = (): AuditStore => ({
   revision: 0,
   baselines: {},
   latest: {},
+  codeReferences: {},
   snapshots: [],
   events: [],
   diagnostics: [],

@@ -11,18 +11,34 @@ const withoutFileHashes = (profile: ProfileSnapshot): ProfileSnapshot => ({
   ...profile,
   extensions: profile.extensions.map((e) => (e.code ? { ...e, code: { ...e.code, fileHashes: undefined } } : e)),
 });
-function lastComplete(state: AuditStore, profileKey: string, extensionKey: string): Extension | undefined {
+function lastComplete(
+  state: AuditStore,
+  profileKey: string,
+  extensionKey: string,
+  field: "access" | "code" = "access",
+): Extension | undefined {
   const history = [
     ...state.snapshots.filter((s) => s.key === profileKey).reverse(),
     ...(state.baselines[profileKey] ? [state.baselines[profileKey]] : []),
   ];
   for (const snapshot of history) {
     const extension = snapshot.extensions.find((e) => e.key === extensionKey);
-    if (extension?.access.complete) return extension;
+    if (field === "code" && !extension) return;
+    if (extension?.[field]?.complete) return extension;
   }
 }
 export function reconcile(state: AuditStore, scan: Scan): AuditStore {
   const result = structuredClone(state);
+  const codeReferences = (result.codeReferences ??= {});
+  // Seed older stores from successful code observations, independently of access quality.
+  if (!state.codeReferences)
+    for (const profile of Object.values(state.latest))
+      for (const extension of profile.extensions) {
+        const reference = extension.code?.complete
+          ? extension
+          : lastComplete(state, profile.key, extension.key, "code");
+        if (reference?.code) codeReferences[extension.key] = { version: reference.version, code: reference.code };
+      }
   result.revision++;
   result.lastAttempt = scan.at;
   result.diagnostics = [...scan.diagnostics];
@@ -73,9 +89,18 @@ export function reconcile(state: AuditStore, scan: Scan): AuditStore {
     if (previous) {
       const ids = new Set(result.events.map((e) => e.id));
       const reference = (key: string) => lastComplete(result, profile.key, key);
-      result.events.push(...compareProfiles(previous, current, reference).filter((e) => !ids.has(e.id)));
+      result.events.push(
+        ...compareProfiles(previous, current, reference, (key) => codeReferences[key]).filter((e) => !ids.has(e.id)),
+      );
       if (signature(previous) !== signature(current)) result.snapshots.push(withoutFileHashes(previous));
+      const currentKeys = new Set(current.extensions.map((e) => e.key));
+      for (const extension of previous.extensions)
+        if (!currentKeys.has(extension.key)) delete codeReferences[extension.key];
     }
+    // Keep the comparison point through failed/partial scans and history expiry.
+    for (const extension of current.extensions)
+      if (extension.code?.complete)
+        codeReferences[extension.key] = { version: extension.version, code: extension.code };
     result.latest[profile.key] = current;
   }
   if (scan.discoveryComplete && scan.profiles.length > 0 && scan.profiles.every((p) => p.complete))

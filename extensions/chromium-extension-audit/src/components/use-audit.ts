@@ -40,7 +40,7 @@ export function useAudit(monitoring = false, autoScan = true) {
       try {
         const previous = await repository.read();
         update({ state: previous });
-        const { analyzeCode } = getPreferenceValues<{ analyzeCode?: boolean }>();
+        const { analyzeCode } = getPreferenceValues<Preferences>();
         const result = await repository.scan(
           () => scanBrowsers(browsers, undefined, { analyzeCode: analyzeCode === true }),
           monitoring,

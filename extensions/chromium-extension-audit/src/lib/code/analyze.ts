@@ -65,23 +65,33 @@ function signalCount(id: CodeSignal["id"], text: string): number {
   }
   return id === "obfuscation" && count < OBFUSCATION_MIN ? 0 : count;
 }
-// Returns the file hash, plus its contents when small enough to pattern-match.
-async function readRegular(file: string, keep: boolean): Promise<{ hash: string; size: number; content?: Buffer }> {
+// A missing hash means the file could not be fully read within the remaining byte budget.
+async function readRegular(
+  file: string,
+  keep: boolean,
+  budget: number,
+): Promise<{ hash?: string; size: number; content?: Buffer }> {
   const handle = await fs.open(file, constants.O_RDONLY | constants.O_NOFOLLOW);
   try {
     const stat = await handle.stat();
     if (!stat.isFile()) throw new Error("File is not regular");
-    if (keep && stat.size <= CODE_LIMITS.match) {
-      const content = await handle.readFile();
-      return { hash: createHash("sha256").update(content).digest("hex"), size: content.length, content };
-    }
+    if (stat.size > budget) return { size: 0 };
     const digest = createHash("sha256");
+    const buffer = Buffer.alloc(Math.min(64 * 1024, budget));
+    let contents: Buffer[] | undefined = keep && stat.size <= CODE_LIMITS.match ? [] : undefined;
     let size = 0;
-    for await (const chunk of handle.createReadStream({ autoClose: false }) as AsyncIterable<Buffer>) {
+    while (size < budget) {
+      const { bytesRead } = await handle.read(buffer, 0, Math.min(buffer.length, budget - size), null);
+      if (!bytesRead) break;
+      const chunk = buffer.subarray(0, bytesRead);
       digest.update(chunk);
-      size += chunk.length;
+      size += bytesRead;
+      if (size > CODE_LIMITS.match) contents = undefined;
+      contents?.push(Buffer.from(chunk));
     }
-    return { hash: digest.digest("hex"), size };
+    // Recheck at the boundary: a file can grow after the initial stat, even when initially small.
+    if (size === budget && (await handle.stat()).size > size) return { size };
+    return { hash: digest.digest("hex"), size, content: contents ? Buffer.concat(contents) : undefined };
   } finally {
     await handle.close();
   }
@@ -117,9 +127,9 @@ export async function analyzeCode(root: string): Promise<CodeAnalysis> {
         break walk;
       }
       const matchable = SCRIPT.test(name) || MARKUP.test(name);
-      const file = await readRegular(path.join(root, name), matchable);
+      const file = await readRegular(path.join(root, name), matchable, CODE_LIMITS.bytes - bytes);
       bytes += file.size;
-      if (bytes > CODE_LIMITS.bytes) {
+      if (!file.hash) {
         limits.push(`Size limit of ${CODE_LIMITS.bytes / 1024 / 1024} MB reached`);
         break walk;
       }

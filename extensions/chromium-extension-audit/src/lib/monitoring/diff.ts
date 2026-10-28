@@ -1,11 +1,17 @@
 import { canonical, hash, unique } from "../json";
-import { Attention, ChangeEvent, Extension, ProfileSnapshot } from "../model";
+import { Attention, ChangeEvent, CodeReference, Extension, ProfileSnapshot } from "../model";
 import { uncovered } from "../permissions/patterns";
 import { SENSITIVE_APIS } from "../rules/evaluate";
 
 // `reference` is the latest observation with complete access, used when `previous` was incomplete so that
 // access gained across an incomplete scan is still reported.
-export function compareExtension(previous: Extension, current: Extension, reference?: Extension): ChangeEvent[] {
+// Code has an independent reference because access and code analysis can fail separately.
+export function compareExtension(
+  previous: Extension,
+  current: Extension,
+  reference?: Extension,
+  codeReference?: CodeReference,
+): ChangeEvent[] {
   const events: ChangeEvent[] = [];
   function change(type: string, title: string, before: string[], after: string[], attention: Attention) {
     if (canonical(before) === canonical(after)) return;
@@ -179,9 +185,10 @@ export function compareExtension(previous: Extension, current: Extension, refere
     ["Browser page override added", "Browser page override removed"],
     "Review",
   );
-  const [oldCode, newCode] = [previous.code, current.code];
+  const codeBefore = previous.code?.complete ? previous : codeReference;
+  const [oldCode, newCode] = [codeBefore?.code, current.code];
   if (oldCode?.complete && newCode?.complete) {
-    if (previous.version === current.version && oldCode.hash !== newCode.hash)
+    if (codeBefore?.version === current.version && oldCode.hash !== newCode.hash)
       change(
         "CHG-019",
         "Extension code changed without a version increment",
@@ -262,13 +269,15 @@ export function compareProfiles(
   previous: ProfileSnapshot,
   current: ProfileSnapshot,
   reference: (key: string) => Extension | undefined = () => undefined,
+  codeReference: (key: string) => CodeReference | undefined = () => undefined,
 ): ChangeEvent[] {
   const old = new Map(previous.extensions.map((e) => [e.key, e]));
   const next = new Map(current.extensions.map((e) => [e.key, e]));
   const events: ChangeEvent[] = [];
   for (const extension of current.extensions) {
     const before = old.get(extension.key);
-    if (before) events.push(...compareExtension(before, extension, reference(extension.key)));
+    if (before)
+      events.push(...compareExtension(before, extension, reference(extension.key), codeReference(extension.key)));
     else if (!previous.inventoryIds?.includes(extension.id))
       events.push(
         makeEvent(

@@ -10,5 +10,6 @@
 - Group findings into Security, Privacy, and Trust layers with High, Medium, Low, or None risk per layer and overall, and export Markdown or JSON audit reports.
 - Detect search, homepage, startup-page, and browser-page overrides, cosmetic extensions with unrelated capabilities, blocklist states, and failed file verification.
 - Optionally analyze installed extension code locally for remote code loading, obfuscation, dynamic code, encoded payloads, and referenced hosts, and flag code that changes without a version update.
-- Prevent code analysis from stalling on large bundles and extensions containing many files.
+- Prevent code analysis from stalling on large bundles and extensions containing many files, and enforce the read budget for oversized files.
+- Preserve code-change detection across failed or partial scans.
 - Filter by browser and profile, keep each browser's history separate, and open settings in the correct browser with store-specific listing links.
