@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Worthbase MCP Server] - {PR_MERGE_DATE}
+## [Add Worthbase MCP Server] - 2026-10-28
 
 - Add Worthbase to the official registry: a household net worth and portfolio tracker. Shares, ETFs, crypto, metals, super and retirement accounts, property, cash and loans, owned by people, trusts or companies, priced daily with exact cost bases, gains, performance, goals and history; ask questions or record a statement, previewed and undoable. Hosted remote Streamable HTTP server at https://worthbase.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, Worthbase account (7-day free trial), no API key.
 
