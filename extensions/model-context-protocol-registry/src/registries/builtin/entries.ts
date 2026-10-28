@@ -1483,6 +1483,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "relaticle",
+    title: "Relaticle",
+    description:
+      "Open-source CRM your AI agents can read and update: companies, people, opportunities, tasks, notes and custom fields. Hosted Streamable HTTP server with OAuth sign-in; 14-day free trial, or self-host with Docker.",
+    icon: "https://relaticle.com/apple-touch-icon.png",
+    homepage: "https://relaticle.com/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.relaticle.com"],
+    },
+    remoteUrl: "https://mcp.relaticle.com",
+  },
+  {
     name: "removeduplicates",
     title: "RemoveDuplicates.org",
     description:
