@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-10-28
 
 - Carousel downloads now show which item is downloading ("Media 2 of 4") with its progress, and finish with a summary of how many files were saved.
 - Downloaded files are named after the post, numbered for carousels (`<shortcode>-1.jpg`, `<shortcode>-2.jpg`, …), instead of an opaque downloader ID.
