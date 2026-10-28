@@ -88,6 +88,16 @@ export function buildItemSearchQuery(type: "issue" | "pr", query: string): strin
   return `is:${type} archived:false ${text}`;
 }
 
+/**
+ * Repository search omits forks unless the query sets `fork:`. The default mention list includes them, so a
+ * typed query includes forks too unless the user already supplied a fork qualifier.
+ */
+export function buildRepositorySearchQuery(query: string): string {
+  const text = query.trim();
+  if (!text || /(?:^|\s)-?fork:/i.test(text)) return text;
+  return `${text} fork:true`;
+}
+
 function compact(value: string | null | undefined, length = 120) {
   const text = (value ?? "").replace(/\s+/g, " ").trim();
   return text.length > length ? `${text.slice(0, length - 1).trimEnd()}…` : text;
@@ -186,6 +196,7 @@ function truncateBody(body: string | null | undefined) {
 }
 
 type RestUser = { login?: string } | null | undefined;
+type RestTeam = { slug?: string } | null | undefined;
 type RestLabel = string | { name?: string };
 
 export type RestIssue = {
@@ -219,6 +230,7 @@ export type RestPullRequest = {
   user?: RestUser;
   assignees?: RestUser[] | null;
   requested_reviewers?: RestUser[] | null;
+  requested_teams?: RestTeam[] | null;
   labels?: RestLabel[];
   milestone?: { title?: string } | null;
   base: { ref: string };
@@ -254,6 +266,8 @@ export type RestRepository = {
 
 const logins = (users: RestUser[] | null | undefined) =>
   (users ?? []).flatMap((user) => (user?.login ? [user.login] : []));
+const teamSlugs = (teams: RestTeam[] | null | undefined) =>
+  (teams ?? []).flatMap((team) => (team?.slug ? [team.slug] : []));
 const labelNames = (labels: RestLabel[] | undefined) =>
   (labels ?? []).flatMap((label) => {
     const name = typeof label === "string" ? label : label.name;
@@ -299,7 +313,7 @@ export function serializePullRequest(repository: string, pullRequest: RestPullRe
     head: pullRequest.head.ref,
     mergeableState: pullRequest.mergeable_state,
     assignees: logins(pullRequest.assignees),
-    requestedReviewers: logins(pullRequest.requested_reviewers),
+    requestedReviewers: [...logins(pullRequest.requested_reviewers), ...teamSlugs(pullRequest.requested_teams)],
     labels: labelNames(pullRequest.labels),
     milestone: pullRequest.milestone?.title,
     commits: pullRequest.commits,

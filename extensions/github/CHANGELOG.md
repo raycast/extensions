@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Mentions in AI Chat] - {PR_MERGE_DATE}
+## [Mentions in AI Chat] - 2026-10-29
 
 - Add **Issues**, **Pull Requests**, and **Repositories** mention searches to the AI Chat composer's `@` menu. Without a query they list open issues and pull requests you're involved in, and your most recently pushed repositories.
 - Look up an exact issue or pull request from `owner/repo#123` or a GitHub URL.

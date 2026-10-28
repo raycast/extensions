@@ -96,6 +96,17 @@ test("an empty query lists open items you're involved in, a typed query searches
   assert.equal(buildItemSearchQuery("pr", "is:merged mentions"), "is:pr archived:false is:merged mentions");
 });
 
+test("typed repository search includes forks unless the query already sets fork:", async () => {
+  const { buildRepositorySearchQuery } = await load();
+
+  assert.equal(buildRepositorySearchQuery("raycast"), "raycast fork:true");
+  assert.equal(buildRepositorySearchQuery("  raycast/extensions  "), "raycast/extensions fork:true");
+  assert.equal(buildRepositorySearchQuery("gitx fork:true"), "gitx fork:true");
+  assert.equal(buildRepositorySearchQuery("gitx fork:only"), "gitx fork:only");
+  assert.equal(buildRepositorySearchQuery("gitx fork:false"), "gitx fork:false");
+  assert.equal(buildRepositorySearchQuery("-fork:true gitx"), "-fork:true gitx");
+});
+
 test("references and GitHub URLs resolve to an exact item", async () => {
   const { parseItemReference } = await load();
   const expected = { owner: "raycast", name: "extensions", number: 32894 };
@@ -213,4 +224,21 @@ test("the resource provider returns compact JSON with a bounded body", async () 
       stars: 1,
     },
   );
+});
+
+test("a pull request waiting only on a team lists that team as a reviewer", async () => {
+  const { serializePullRequest } = await load();
+
+  const parsed = JSON.parse(
+    serializePullRequest("raycast/extensions", {
+      number: 9,
+      title: "Wait on a team",
+      state: "open",
+      html_url: "https://github.com/raycast/extensions/pull/9",
+      base: { ref: "main" },
+      head: { ref: "team-review" },
+      requested_teams: [{ slug: "raycast" }, null, {}],
+    }).text,
+  );
+  assert.deepEqual(parsed.requestedReviewers, ["raycast"]);
 });

@@ -541,12 +541,7 @@ export type SearchIssueMentionsQuery = {
           stateReason: Types.IssueStateReason | null;
           repository: { nameWithOwner: string };
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         }
       | Record<PropertyKey, never>
       | null
@@ -570,12 +565,7 @@ export type SearchPullRequestMentionsQuery = {
           isDraft: boolean;
           repository: { nameWithOwner: string };
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         }
       | Record<PropertyKey, never>
       | null
@@ -600,12 +590,7 @@ export type IssueOrPullRequestMentionQuery = {
           stateReason: Types.IssueStateReason | null;
           repository: { nameWithOwner: string };
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         }
       | {
           __typename: "PullRequest";
@@ -616,12 +601,7 @@ export type IssueOrPullRequestMentionQuery = {
           isDraft: boolean;
           repository: { nameWithOwner: string };
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         }
       | null;
   } | null;
@@ -1390,12 +1370,7 @@ export type CommentsForPullRequestQuery = {
         nodes: Array<{
           body: string;
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         } | null> | null;
       };
     } | null;

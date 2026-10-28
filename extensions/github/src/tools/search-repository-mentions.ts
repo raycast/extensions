@@ -2,6 +2,7 @@ import { getGitHubClient } from "../api/githubClient";
 import {
   MENTION_SEARCH_SIZE,
   type RepositoryMention,
+  buildRepositorySearchQuery,
   mentionNodes,
   toMentions,
   toRepositoryMention,
@@ -23,6 +24,9 @@ export default withGitHubClient(async ({ query }: Input) => {
     return toMentions(result.viewer.repositories.nodes?.flatMap((node) => node ?? []) ?? [], toRepositoryMention);
   }
 
-  const result = await github.searchRepositoryMentions({ query: text, numberOfItems: MENTION_SEARCH_SIZE });
+  const result = await github.searchRepositoryMentions({
+    query: buildRepositorySearchQuery(text),
+    numberOfItems: MENTION_SEARCH_SIZE,
+  });
   return toMentions(mentionNodes<RepositoryMention>(result.search.nodes, "nameWithOwner"), toRepositoryMention);
 });
