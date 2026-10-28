@@ -11,12 +11,11 @@ interface CommandConfirmProps {
   requireConfirmation?: boolean;
   refresh?: () => void;
   bin?: string;
-  mergeStreams?: boolean;
 }
 
 export default function CommandExecute(props: CommandConfirmProps) {
   const { pop } = useNavigation();
-  const { name, command, title, markdown, requireConfirmation, refresh, bin = ORB_CTL, mergeStreams } = props;
+  const { name, command, title, markdown, requireConfirmation, refresh, bin = ORB_CTL } = props;
   const [shouldExecute, setShouldExecute] = useState(!requireConfirmation);
   const {
     data: commandOutput,
@@ -24,11 +23,6 @@ export default function CommandExecute(props: CommandConfirmProps) {
     error,
     revalidate,
   } = useExec(bin, command, {
-    // `docker logs` writes the container's stderr lines to stderr; without
-    // merging, log views would show only half the output.
-    ...(mergeStreams
-      ? { parseOutput: ({ stdout, stderr }: { stdout: string; stderr: string }) => stdout + stderr }
-      : {}),
     execute: shouldExecute,
     onData: () => {
       showToast({

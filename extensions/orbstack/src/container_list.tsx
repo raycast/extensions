@@ -118,9 +118,13 @@ export default function ContainerList() {
                       <CommandExecute
                         name={container.Names}
                         title="Logs"
-                        bin={DOCKER}
-                        mergeStreams={true}
-                        command={[...DOCKER_CONTEXT_ARGS, "container", "logs", "--tail", "200", container.Names]}
+                        // Merged at capture time via sh: `docker logs` splits the
+                        // container's stdout/stderr and post-hoc concat loses ordering.
+                        bin="/bin/sh"
+                        command={[
+                          "-c",
+                          `docker ${DOCKER_CONTEXT_ARGS.join(" ")} container logs --tail 200 ${container.Names} 2>&1`,
+                        ]}
                       />
                     }
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
