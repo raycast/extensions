@@ -1405,6 +1405,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "shipmail",
+    title: "Shipmail",
+    description:
+      "Business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, or a Shipmail API key as a Bearer header.",
+    icon: "https://raw.githubusercontent.com/shipmail-to/shipmail-mcp/main/assets/shipmail-mark-400.png",
+    homepage: "https://shipmail.to/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shipmail.to/api/mcp"],
+    },
+    remoteUrl: "https://shipmail.to/api/mcp",
+  },
+  {
     name: "sitelemetry",
     title: "Sitelemetry",
     description:
