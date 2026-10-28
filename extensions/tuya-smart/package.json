@@ -19,6 +19,38 @@
       "title": "Tuya Smart",
       "description": "Manage all available devices",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Tuya Smart Menu Bar",
+      "description": "Toggle your pinned switches from the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "control-device",
+      "title": "Control Device",
+      "description": "Turn a device on or off from a deeplink, for Shortcuts and Siri",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "turn on kitchen lamp",
+          "required": true
+        },
+        {
+          "name": "action",
+          "type": "text",
+          "placeholder": "on, off, stop or toggle",
+          "required": false
+        },
+        {
+          "name": "switchName",
+          "type": "text",
+          "placeholder": "which switch, for a multi-gang device",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -71,22 +103,41 @@
           "value": "https://openapi-ueaz.tuyaus.com"
         }
       ]
+    },
+    {
+      "name": "temperatureUnit",
+      "type": "dropdown",
+      "required": false,
+      "default": "device",
+      "title": "Temperature Unit",
+      "description": "How temperatures are shown. Following the device matches what the Tuya app displays; pick a unit to override devices that do not report one.",
+      "data": [
+        {
+          "title": "Follow the device",
+          "value": "device"
+        },
+        {
+          "title": "Celsius",
+          "value": "c"
+        },
+        {
+          "title": "Fahrenheit",
+          "value": "f"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16",
-    "@tuya/tuya-connector-nodejs": "^2.1.2"
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
+    "@tuya/tuya-connector-nodejs": "^2.1.2",
+    "tuyapi": "^7.7.1"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -99,6 +150,26 @@
     "macOS"
   ],
   "overrides": {
-    "axios": "0.31.1"
+    "axios": "^1.20.0"
+  },
+  "tools": [
+    {
+      "name": "list-devices",
+      "title": "List Devices",
+      "description": "List the Tuya devices on the account with their current state: switches, sensor readings, battery level and anything needing attention"
+    },
+    {
+      "name": "toggle-switch",
+      "title": "Toggle Switch",
+      "description": "Turn a switch on a Tuya device on or off"
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set the brightness or colour temperature of a Tuya light as a percentage"
+    }
+  ],
+  "ai": {
+    "instructions": "When the user asks to turn something on or off, or to set a brightness, call the matching tool straight away. Do not list devices first and ask which one they meant unless the name genuinely matches nothing. Device names come from the Tuya app and are matched loosely, so a partial name is usually enough. Names overlap heavily, so a tool may report that a name matches several devices or several switches and list them: ask the user which one they meant instead of retrying or guessing, because acting on the wrong one switches real hardware. list-devices returns each device already described: a summary sentence, its state, switches, battery as batteryPercent, and every non-sensitive data point under readings. Each reading has a formatted value and a raw value; quote the formatted one to the user and use raw only for comparisons. Answer questions about readings, battery and device details from that data rather than replying that you only know whether a device is online. An offline device still reports its last known readings. Say that they are the last known values instead of refusing to answer. Lock credentials and the home address are deliberately withheld and will never appear; do not tell the user to look for them. Only mention battery levels when asked about them, or when a device is actually flagged under needsAttention."
   }
 }

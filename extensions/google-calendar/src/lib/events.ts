@@ -157,6 +157,26 @@ function addUtcDays(date: string, days: number) {
   return result.toISOString().slice(0, 10);
 }
 
+function calendarDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Converts date-picker values into Google Calendar's all-day date range.
+ * The UI end date is inclusive; Google's end.date is exclusive.
+ */
+export function buildAllDayDateRange(start: Date, end?: Date) {
+  const startDate = calendarDate(start);
+  const endDate = calendarDate(end ?? start);
+  if (endDate < startDate) {
+    throw new Error("All-day end date cannot be before the start date.");
+  }
+  return { start: { date: startDate }, end: { date: addUtcDays(endDate, 1) } };
+}
+
 function dateDurationDays(start: string, end: string) {
   return Math.max(1, Math.round((Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000));
 }

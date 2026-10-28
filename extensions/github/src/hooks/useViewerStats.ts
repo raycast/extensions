@@ -29,9 +29,12 @@ export function useViewerStats() {
   const cache = useMemo(() => new Cache({ namespace: getCacheNamespace(token) }), [token]);
 
   const fetchFresh = async () => {
-    const { viewer, rateLimit } = await github.getViewerStats({ repositoriesCount: 100 });
+    const [{ viewer, rateLimit }, { viewer: details }] = await Promise.all([
+      github.getViewerStats(),
+      github.getViewerStatsDetails({ repositoriesCount: 100 }),
+    ]);
 
-    const ownedRepos = viewer.ownedRepositories.nodes ?? [];
+    const ownedRepos = details.ownedRepositories.nodes ?? [];
     const starsReceived = ownedRepos.reduce((sum, repo) => sum + (repo?.stargazerCount ?? 0), 0);
     const forksReceived = ownedRepos.reduce((sum, repo) => sum + (repo?.forkCount ?? 0), 0);
     const hasMoreRepos = viewer.ownedRepositories.totalCount > ownedRepos.length;
@@ -83,15 +86,15 @@ export function useViewerStats() {
         publicRepos: viewer.publicRepos.totalCount,
         ownedRepos: viewer.ownedRepositories.totalCount,
       },
-      organizations: viewer.organizations.nodes?.filter((org) => org != null) ?? [],
+      organizations: details.organizations.nodes?.filter((org) => org != null) ?? [],
       ownedReposBreakdown,
       recent: {
-        pullRequests: (viewer.recentPullRequests.nodes ?? []).filter((pr): pr is NonNullable<typeof pr> => pr != null),
-        openPullRequests: (viewer.recentOpenPullRequests.nodes ?? []).filter(
+        pullRequests: (details.recentPullRequests.nodes ?? []).filter((pr): pr is NonNullable<typeof pr> => pr != null),
+        openPullRequests: (details.recentOpenPullRequests.nodes ?? []).filter(
           (pr): pr is NonNullable<typeof pr> => pr != null,
         ),
-        issues: (viewer.recentIssues.nodes ?? []).filter((iss): iss is NonNullable<typeof iss> => iss != null),
-        openIssues: (viewer.recentOpenIssues.nodes ?? []).filter((iss): iss is NonNullable<typeof iss> => iss != null),
+        issues: (details.recentIssues.nodes ?? []).filter((iss): iss is NonNullable<typeof iss> => iss != null),
+        openIssues: (details.recentOpenIssues.nodes ?? []).filter((iss): iss is NonNullable<typeof iss> => iss != null),
       },
       rateLimit: rateLimit
         ? {

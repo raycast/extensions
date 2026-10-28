@@ -1,6 +1,5 @@
 import useSWR from "swr";
 import { ISite } from "../types";
-import fetch from "node-fetch";
 import { findValidUrlsFromSite } from "../lib/url";
 import { USE_FAKE_DATA } from "../config";
 
@@ -10,7 +9,7 @@ const fetcher = async (site: ISite) => {
   // Grab the first url to respond
   const res = await Promise.any(
     // http will redirect
-    urls.map((url) => fetch(`http://${url}`, { method: "HEAD" }))
+    urls.map((url) => fetch(`http://${url}`, { method: "HEAD" })),
   );
   return res?.url;
 };

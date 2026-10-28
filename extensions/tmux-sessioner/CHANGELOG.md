@@ -1,5 +1,23 @@
 # Tmux Sessioner Changelog
 
+## [Fix Save Tmux Sessions getting stuck] - 2026-10-14
+
+### Fixed
+
+- **Save Tmux Sessions** no longer waits on (and can get stuck reporting "Waiting for an in-progress save…" against) a slow or piled-up save. Serializing saves is the save script's responsibility — `tmux-resurrect` and `prefix + Ctrl-s` run it with no cross-process lock, and heavy auto-savers wrap it in their own mutex — so the command now just invokes the configured save script and lets it decide, while still nudging `tmux-continuum` to back off to avoid a competing automatic save.
+
+## [Save Tmux Sessions on demand] - 2026-09-16
+
+### Added
+
+- **Save Tmux Sessions** command: forces a `tmux-resurrect` save immediately (reading `@resurrect-save-script-path`), so you can be sure every session is persisted before shutting down without waiting for `tmux-continuum`'s next interval. To avoid corrupting the snapshot, it coordinates with continuum (marking a save via `@continuum-save-last-timestamp` so the auto-saver backs off) and waits for any in-progress save to finish before starting, then reports when the save completes.
+
+## [Search Session Output] - 2026-08-22
+
+### Added
+
+- **Search Session Output** command: full-text search across the scrollback of every pane in every tmux session — commands you ran and the output they printed. Results are grouped by session (one entry per distinct line, newest first) with the surrounding lines shown in the detail pane; `⏎` switches to the matching session and window, `⌘T` / `⇧⌘T` open it in a new terminal tab/window, `⇧⌘C` copies the line, `⌘R` reloads the scrollback.
+
 ## [Open sessions in a new terminal tab or window] - 2026-08-04
 
 ### Added

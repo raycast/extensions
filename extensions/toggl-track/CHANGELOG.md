@@ -1,5 +1,22 @@
 # Toggl Track Changelog
 
+## [Quickstop Timer] - 2026-09-16
+
+- Added a "Quickstop Timer" command that stops the running time entry with no UI, so it can be bound to a global hotkey
+- In Low Data Mode the command confirms the running entry against the API before stopping, so it never acts on a stale cached timer
+
+## [Back-date a New Timer] - 2026-09-13
+
+- Added a "Start Time" option to the new time entry form to start a timer as of 5, 10 or 15 minutes ago, or a custom number of minutes, for when you remember to start tracking after you began working
+
+## [Fix Negative Running Durations] - 2026-09-13
+
+- Clamped elapsed-time calculations for the running entry to zero, so a start time in the future no longer renders a garbled negative duration in the list and menu bar, or subtracts from today's total
+
+## [Fix Duplicate Billable Checkbox] - 2026-09-11
+
+- Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
+
 ## [Show total duration of current project] - 2026-06-18
 
 - In the menu bar, show the total time of all time entries of the current project in addition to the total time of all entries.

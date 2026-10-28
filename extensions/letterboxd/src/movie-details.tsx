@@ -1,16 +1,15 @@
 import React from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { AsyncStatus, fetchMovieDetails } from "./letterboxd-api";
-import { Action, ActionPanel, Color, Detail } from "@raycast/api";
+import { fetchMovieDetails } from "./letterboxd-api";
+import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { STRINGS } from "./strings";
-import type { MovieDetails, Review } from "./types";
+import type { Movie, MovieDetails, NamedLink, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
 import { convertHtmlToCommonMark, humanizeInteger } from "./utils";
 import { getFullURL } from "./letterboxd-api";
 
 interface MovieDetailsProps {
-  movieTitle: string;
-  qualifier: string;
+  movie: Movie;
 }
 
 const HTML_ATTRIBUTE_ESCAPES: Record<string, string> = {
@@ -25,30 +24,45 @@ const escapeHtmlAttribute = (value: string): string =>
   value.replace(/[&<>"']/g, (character) => HTML_ATTRIBUTE_ESCAPES[character]);
 
 export default function MovieDetails(props: MovieDetailsProps) {
-  const { movieTitle, qualifier } = props;
-  const { data, isLoading, revalidate } = useCachedPromise(
-    fetchMovieDetails,
-    [qualifier],
-    { keepPreviousData: true },
-  );
+  const { movie } = props;
+  const {
+    data: details,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(fetchMovieDetails, [movie.detailsPage], {
+    keepPreviousData: true,
+  });
 
-  const status = data?.status;
-  if (status === AsyncStatus.Error && !isLoading) {
+  if (error && !isLoading) {
     return <ErrorScreen retry={revalidate} />;
   }
 
-  const details = data?.data;
   const markdown = isLoading || !details ? "" : getMarkdown(details);
 
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={movieTitle}
+      navigationTitle={movie.title}
       markdown={markdown}
       metadata={<Metadata show={true} movie={details} />}
       actions={
         <ActionPanel>
-          {details?.url && <Action.OpenInBrowser url={details.url} />}
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            title="Open in Letterboxd"
+            url={movie.links.letterboxd}
+          />
+          {movie.links.imdb ? (
+            <Action.OpenInBrowser title="Open in IMDb" url={movie.links.imdb} />
+          ) : null}
+          {movie.links.tmdb ? (
+            <Action.OpenInBrowser title="Open in TMDB" url={movie.links.tmdb} />
+          ) : null}
+          <Action.CopyToClipboard
+            title={STRINGS.copyMarkdownLink}
+            content={getMarkdownLink(movie)}
+          />
         </ActionPanel>
       }
     />
@@ -68,10 +82,32 @@ const getMarkdown = (data: MovieDetails): string => {
 
   ${convertHtmlToCommonMark(data.description)}
 
+  ${getNamedLinksMarkdown(STRINGS.castLabel, data.cast, 10)}
+
+  ${getNamedLinksMarkdown(STRINGS.productionCompaniesLabel, data.productionCompanies)}
+
   ${ratingHistogramMarkdown ? `##\n\n${ratingHistogramMarkdown}\n\n##\n---\n##` : ""}
 
   ${data.reviews?.map((review) => getReviewsMarkdown(review)).join("")}
   `;
+};
+
+const getMarkdownLink = (movie: Movie): string => {
+  const year = movie.released ? ` (${movie.released})` : "";
+  return `[${movie.title}${year}](${movie.links.letterboxd})`;
+};
+
+const getNamedLinksMarkdown = (
+  title: string,
+  values?: NamedLink[],
+  limit = values?.length ?? 0,
+): string => {
+  if (!values?.length) return "";
+  const links = values
+    .slice(0, limit)
+    .map(({ name, url }) => (url ? `[${name}](${url})` : name))
+    .join(", ");
+  return `## ${title}\n\n${links}`;
 };
 
 const getRatingsHistogramMarkdown = (data: MovieDetails): string => {
@@ -99,11 +135,11 @@ const getHistogramBar = (count: number): string => {
 };
 
 const getReviewsMarkdown = (review: Review): string => {
-  let reviewMarkdown = `### ${review.reviewerName}`;
+  let reviewMarkdown = `### ${review.reviewerName ?? "Letterboxd Member"}`;
   if (review.rating) {
     reviewMarkdown += " &nbsp; &nbsp; ";
     reviewMarkdown += review.rating.replaceAll("★", "⭐️");
-    if (review.commentCount) {
+    if (review.commentCount !== undefined) {
       reviewMarkdown += " &nbsp; &nbsp; ";
       reviewMarkdown += `💬 ${review.commentCount}`;
     }
@@ -137,14 +173,21 @@ function Metadata(props: MetadataProps) {
 
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Link
-        title={STRINGS.directorLabel}
-        text={movie.director}
-        target={movie.directorDetailsPageUrl}
-      />
+      {movie.directorDetailsPageUrl ? (
+        <Detail.Metadata.Link
+          title={STRINGS.directorLabel}
+          text={movie.director}
+          target={movie.directorDetailsPageUrl}
+        />
+      ) : (
+        <Detail.Metadata.Label
+          title={STRINGS.directorLabel}
+          text={movie.director}
+        />
+      )}
       <Detail.Metadata.Label
         title={STRINGS.releasedLabel}
-        text={movie.released}
+        text={movie.releaseDate ?? movie.released}
       />
 
       {movie.runtime ? (
@@ -154,11 +197,17 @@ function Metadata(props: MetadataProps) {
         />
       ) : null}
 
-      {movie.stats ? (
-        <Detail.Metadata.Link
-          title={STRINGS.stats}
-          text={`👁️ ${humanizeInteger(movie.stats.watches ?? 0)} 🗒️ ${humanizeInteger(movie.stats.lists ?? 0)} ❤️ ${humanizeInteger(movie.stats.likes ?? 0)}`}
-          target={getFullURL(`/film/${movie.id}/members`)}
+      {movie.languages?.length ? (
+        <Detail.Metadata.Label
+          title={STRINGS.languageLabel}
+          text={movie.languages.join(", ")}
+        />
+      ) : null}
+
+      {movie.countries?.length ? (
+        <Detail.Metadata.Label
+          title={STRINGS.countriesLabel}
+          text={movie.countries.join(", ")}
         />
       ) : null}
 

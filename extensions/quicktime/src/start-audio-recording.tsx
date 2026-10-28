@@ -1,11 +1,10 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
+import { runQuickTimeScript } from "./quicktime";
 
 export default async () => {
   try {
-    await runAppleScript(
-      'tell application "System Events" \n tell application "QuickTime Player" to activate frontmost \n tell application "QuickTime Player" to start (new audio recording) \n end tell'
-    );
+    await runQuickTimeScript('tell application "QuickTime Player"\n activate\n start (new audio recording)\nend tell');
     await closeMainWindow();
     await showHUD("Started audio recording");
   } catch (error) {

@@ -9,7 +9,8 @@
     "wattmalsh",
     "samuelkraft",
     "sacha_crispin",
-    "chihkang"
+    "chihkang",
+    "tomjohn"
   ],
   "categories": [
     "Productivity",
@@ -68,7 +69,7 @@
       "name": "edit",
       "title": "Edit Media",
       "subtitle": "Media Converter",
-      "description": "Resize, crop, change speed, extract audio, normalize loudness, or edit subtitles",
+      "description": "Resize, crop, change speed or frame rate, remove or extract audio, normalize loudness, or edit subtitles",
       "mode": "view"
     }
   ],

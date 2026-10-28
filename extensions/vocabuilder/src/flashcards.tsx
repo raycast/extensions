@@ -1,5 +1,6 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import PronounceAction from "./components/PronounceAction";
+import { DetailMetadata } from "./components/DetailMetadata";
 import { useEffect, useReducer } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
 import LanguagePairDropdown from "./components/LanguagePairDropdown";
@@ -7,6 +8,7 @@ import { useLanguagePair } from "./hooks/useLanguagePair";
 import { LanguagePair, storageKeyPrefix } from "./lib/languages";
 import { languagePairTitle, languagePairValue, swapLanguagePair } from "./lib/languageSession";
 import { buildFlashcardDetailMarkdown } from "./lib/markdown";
+import { SHORTCUTS } from "./lib/shortcuts";
 import { getSessionCards, saveFlashcardProgress } from "./lib/storage";
 import { FlashcardProgress, Rating, Translation } from "./lib/types";
 
@@ -127,12 +129,7 @@ const initialState: StudyState = {
 
 function ToggleLanguagesAction({ onAction }: { onAction: () => void }) {
   return (
-    <Action
-      title="Toggle Languages"
-      icon={Icon.Switch}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-      onAction={onAction}
-    />
+    <Action title="Toggle Languages" icon={Icon.Switch} shortcut={SHORTCUTS.toggleLanguages} onAction={onAction} />
   );
 }
 
@@ -274,18 +271,7 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
         subtitle={state.revealed ? undefined : "···"}
         accessories={[isNew ? { tag: { value: "New", color: Color.Green } } : {}, { text: position }]}
         detail={
-          <List.Item.Detail
-            markdown={detailMarkdown}
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title=""
-                  text={state.revealed ? "⌘O to pronounce · ⌘⇧O for translation" : "⌘O to pronounce"}
-                  icon={Icon.SpeakerHigh}
-                />
-              </List.Item.Detail.Metadata>
-            }
-          />
+          <List.Item.Detail markdown={detailMarkdown} metadata={<DetailMetadata languagePair={languagePair} />} />
         }
         actions={
           <ActionPanel>
@@ -296,25 +282,25 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
                   word={card.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
               </>
             ) : (
               <>
                 <Action title="Good" onAction={() => handleRate("good")} />
-                <Action title="Again" shortcut={{ modifiers: [], key: "1" }} onAction={() => handleRate("again")} />
-                <Action title="Easy" shortcut={{ modifiers: [], key: "2" }} onAction={() => handleRate("easy")} />
+                <Action title="Again" shortcut={SHORTCUTS.rateAgain} onAction={() => handleRate("again")} />
+                <Action title="Easy" shortcut={SHORTCUTS.rateEasy} onAction={() => handleRate("easy")} />
                 <PronounceAction
                   word={card.word}
                   languageCode={languagePair.source.code}
                   title="Pronounce Word"
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceWord}
                 />
                 <PronounceAction
                   word={card.translation}
                   languageCode={languagePair.target.code}
                   title="Pronounce Translation"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  shortcut={SHORTCUTS.pronounceTranslation}
                 />
               </>
             )}

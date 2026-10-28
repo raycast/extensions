@@ -1,8 +1,26 @@
 # Raycast Fork Extensions Changelog
 
-## [Fix Concurrent Git Operations] - 2026-06-02
+## [Improvement] - 2026-09-21
 
-- Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running.
+- Separate repository initialization from extension list refresh
+
+## [Improvement] - 2026-09-20
+
+- Add notes about the side effects of Git blame
+
+## [Enhancement] - 2026-09-20
+
+- Disable merge diffstat during Sync Remote and Pull Changes to avoid downloading changed files outside the sparse checkout
+- Disable submodule recursion during synchronization fetches to avoid fetching historical trees for submodule discovery
+
+## [Enhancement] - 2026-08-12
+
+- Add a "Clean Up Repository" manager action with confirmation and before-and-after pack statistics
+- Run Git maintenance in the foreground without scheduling background jobs
+
+## [Bugfix] - 2026-06-02
+
+- Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running
 
 ## [Improvements] - 2026-04-11
 

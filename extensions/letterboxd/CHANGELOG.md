@@ -1,5 +1,13 @@
 # letterboxd Changelog
 
+## [Enhancements] - 2026-08-23
+
+- Added paginated movie search with recent searches and clearer empty states
+- Added ratings, runtimes, Top 250 positions, genres, and IMDb/TMDB actions to search results
+- Added cast, production companies, languages, countries, and exact release dates to movie details
+- Added read-only AI tools for movie search and detailed public movie information
+- Improved cache recovery, request retries, number formatting, parser coverage, and dependency compatibility
+
 ## [Fix] - 2026-07-27
 
 - Fixed movie search after Letterboxd retired the previous search endpoint

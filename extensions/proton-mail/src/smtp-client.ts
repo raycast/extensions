@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 // Check if host is localhost (safe for unencrypted local connections)
@@ -10,9 +10,9 @@ function isLocalhostHost(host: string): boolean {
 // Track if we've shown the security warning this session
 let smtpSecurityWarningShown = false;
 
-let transporterInstance: nodemailer.Transporter | null = null;
+let transporterInstance: Transporter | null = null;
 
-function getTransporter(): nodemailer.Transporter {
+function getTransporter(): Transporter {
   const prefs = getPreferenceValues<Preferences>();
 
   // Warn user if connecting to non-localhost (potential security risk)

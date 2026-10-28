@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Icon, List, LaunchProps, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isMac, isTahoe, readFnState, setFnState } from "./lib/utils";
 
 interface Duration {
   display: string;
-  seconds: number;
+  seconds?: number;
   icon: string;
 }
 
@@ -46,16 +46,20 @@ const durations: Duration[] = [
   },
   {
     display: "Forever",
-    seconds: Infinity,
     icon: "🤯",
   },
 ];
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: { durationSeconds: number } }>) {
+  const { defaultDuration } = getPreferenceValues<Preferences.CleanKeyboard>();
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
   const savedFnState = useRef<boolean | null>(null);
+  const autoLockStarted = useRef(false);
+
+  // "0" is Forever, matching how the duration list treats a missing `seconds`
+  const defaultSeconds = defaultDuration && defaultDuration !== "always-ask" ? Number(defaultDuration) : undefined;
 
   useEffect(() => {
     return () => {
@@ -85,8 +89,8 @@ export default function Command() {
     }
   }, [isRunning]);
 
-  const lockAction = async (duration: Duration) => {
-    let handler: (duration: number) => void;
+  const lockAction = useCallback(async (duration: Duration) => {
+    let handler: (duration: number | null) => Promise<void>;
     if (isMac) {
       const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
       handler = handlerSwift;
@@ -105,19 +109,36 @@ export default function Command() {
       }
     }
 
-    setTimeLeft(duration.seconds);
-    setIcon(duration.icon);
-    setIsRunning(true);
-    await showToast({ title: "Keyboard locked" });
+    const durationSeconds = duration.seconds ?? null;
+    const handlerPromise = handler(durationSeconds);
 
-    Promise.resolve(handler(duration.seconds)).catch(async (err) => {
+    handlerPromise.catch(async (err) => {
       // Roll back UI if hook installation failed
       setIsRunning(false);
       setTimeLeft(null);
       setIcon(null);
       await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
     });
-  };
+
+    setTimeLeft(durationSeconds);
+    setIcon(duration.icon);
+    setIsRunning(true);
+    await showToast({ title: "Keyboard locked" });
+  }, []);
+
+  useEffect(() => {
+    const seconds = props.launchContext?.durationSeconds ?? defaultSeconds;
+    if (seconds === undefined || autoLockStarted.current) return;
+    const duration =
+      durations.find((item) => (item.seconds ?? 0) === seconds) ??
+      (Number.isInteger(seconds) && seconds > 0 ? { display: `${seconds} seconds`, seconds, icon: "🧼" } : undefined);
+    if (duration) {
+      autoLockStarted.current = true;
+      lockAction(duration).catch((error) => {
+        showToast({ title: "Failed to lock keyboard", message: String(error), style: Toast.Style.Failure });
+      });
+    }
+  }, [defaultSeconds, lockAction, props.launchContext?.durationSeconds]);
 
   const unlockAction = async () => {
     let stopHandler: () => Promise<void>;
@@ -159,7 +180,7 @@ export default function Command() {
           title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
-              <Action title={"Back"} onAction={() => setIsRunning(false)} />
+              {timeLeft !== null && <Action title={"Back"} onAction={() => setIsRunning(false)} />}
               <Action
                 autoFocus={false}
                 title={"Unlock Keyboard"}

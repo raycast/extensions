@@ -8,7 +8,7 @@ import type { Mirror } from "./utils/api/mirrors";
 import { mirrors } from "./utils/api/mirrors";
 
 const MirrorItem = ({ mirror }: { mirror: Mirror }) => {
-  const { data, error, isLoading } = useTimingFetch(`${mirror.baseUrl}/json.php?ids=1&fields=*`);
+  const { data, error, isLoading } = useTimingFetch(mirror.baseUrl);
 
   const subTitle = useMemo(() => {
     if (isLoading || !data || !data.startTime || !data.endTime) {
@@ -39,6 +39,7 @@ const MirrorItem = ({ mirror }: { mirror: Mirror }) => {
 
   return (
     <List.Item
+      id={mirror.baseUrl}
       title={mirror.baseUrl}
       subtitle={subTitle}
       icon={icon}

@@ -33,14 +33,18 @@ export default function ShowTodayInMenuBar() {
   }
 
   async function completeTodo(todo: Todo) {
-    await mutate(setTodoProperty(todo.id, 'status', 'completed'), {
-      optimisticUpdate(data) {
-        if (!data) return;
-        return data.filter((t) => t.id !== todo.id);
-      },
-      shouldRevalidateAfter: false,
-    });
-    await showToast({ style: Toast.Style.Success, title: 'Marked as Completed' });
+    try {
+      await mutate(setTodoProperty(todo.id, 'status', 'completed'), {
+        optimisticUpdate(data) {
+          if (!data) return;
+          return data.filter((t) => t.id !== todo.id);
+        },
+        shouldRevalidateAfter: false,
+      });
+      await showToast({ style: Toast.Style.Success, title: 'Marked as Completed' });
+    } catch (error) {
+      await handleError(error);
+    }
   }
 
   async function schedule(todo: Todo, when: string) {

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "frp-client-manager",
+  "title": "Frp Client Manager",
+  "description": "Manage a local frp client (frpc): service control, proxies, logs, config hot-reload, and version upgrades.",
+  "icon": "icon.png",
+  "author": "DanielZHAO",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "View Status",
+      "subtitle": "frp",
+      "description": "Dashboard for the frpc process, admin API, proxies, and version updates.",
+      "mode": "view"
+    },
+    {
+      "name": "proxies",
+      "title": "Manage Proxies",
+      "subtitle": "frp",
+      "description": "List frpc proxies from the config with live admin API status.",
+      "mode": "view"
+    },
+    {
+      "name": "logs",
+      "title": "View Logs",
+      "subtitle": "frp",
+      "description": "Read the frpc log with level filters.",
+      "mode": "view"
+    },
+    {
+      "name": "edit-config",
+      "title": "Edit Config",
+      "subtitle": "frp",
+      "description": "View, verify, and hot-reload frpc.toml.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Frp Menu Bar",
+      "description": "Menu bar extra showing frpc status and proxy counts.",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "frpDir",
+      "title": "Frp Directory",
+      "description": "Root directory that contains frpc.toml, logs, and versioned frpc binaries.",
+      "type": "textfield",
+      "required": true,
+      "default": "~/frp",
+      "placeholder": "~/frp"
+    },
+    {
+      "name": "launchdLabel",
+      "title": "Launchd Label",
+      "description": "Label of the LaunchAgent that runs frpc (e.g. com.user.frpc). Leave empty if frpc is not managed by launchd.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "com.user.frpc"
+    },
+    {
+      "name": "adminAddr",
+      "title": "Admin API Address",
+      "description": "Host:port of the frpc admin (webServer) API.",
+      "type": "textfield",
+      "required": false,
+      "default": "127.0.0.1:7400",
+      "placeholder": "127.0.0.1:7400"
+    },
+    {
+      "name": "adminUser",
+      "title": "Admin Username",
+      "description": "Basic Auth username for the frpc admin API.",
+      "type": "textfield",
+      "required": false,
+      "default": "admin",
+      "placeholder": "admin"
+    },
+    {
+      "name": "adminPassword",
+      "title": "Admin Password",
+      "description": "Basic Auth password for the frpc admin API. Leave empty to skip live status.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1",
+    "smol-toml": "^1.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

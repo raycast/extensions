@@ -2,6 +2,7 @@ import {
   MenuBarExtra,
   Icon,
   getPreferenceValues,
+  openExtensionPreferences,
   open,
   Clipboard,
   showHUD,
@@ -14,6 +15,7 @@ import {
 } from "./api/launchd";
 import { getLogTail } from "./api/logs";
 import { timeAgo, timeUntil, formatDateTime } from "./utils/time";
+import { parseLaunchdLabels } from "./utils/labels";
 import {
   getOverallStatus,
   getMenuBarIcon,
@@ -24,10 +26,7 @@ import {
 
 export default function Command() {
   const { launchdLabels } = getPreferenceValues<Preferences.Menubar>();
-  const labels = launchdLabels
-    .split(",")
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const labels = parseLaunchdLabels(launchdLabels);
 
   const {
     data: jobs,
@@ -37,8 +36,23 @@ export default function Command() {
   } = useCachedPromise(
     (labelList: string[]) => getAllJobStatuses(labelList),
     [labels],
-    { initialData: undefined },
+    { initialData: undefined, execute: labels.length > 0 },
   );
+
+  if (labels.length === 0) {
+    return (
+      <MenuBarExtra
+        icon={Icon.Warning}
+        title="Setup Required"
+        tooltip="Add launchd job labels to monitor"
+      >
+        <MenuBarExtra.Item
+          title="Configure Launchd Job Labels"
+          onAction={openExtensionPreferences}
+        />
+      </MenuBarExtra>
+    );
+  }
 
   if (error) {
     return (

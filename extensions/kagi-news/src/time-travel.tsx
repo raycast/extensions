@@ -1,11 +1,13 @@
 // time-travel.tsx
 // Time Travel command - browse Kagi News archives by selecting a specific date
 
-import { List, Action, ActionPanel, Icon, getPreferenceValues, Form } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues, Form, Color } from "@raycast/api";
 import { useState } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useBatchesByDate } from "./hooks/useBatchesByDate";
+import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
+import { FavoritesAction } from "./components/FavoritesAction";
 import type { BatchItem } from "./interfaces";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
@@ -15,6 +17,7 @@ import { CategoryItem } from "./interfaces";
 
 interface BatchCategoryResponse {
   id: string;
+  categoryId: string;
   categoryName: string;
 }
 
@@ -81,7 +84,7 @@ function BatchSelectorScreen({
     <List isLoading={loadingBatches}>
       {batchesError ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Failed to Load Batches" description={batchesError} />
-      ) : batches.length === 0 ? (
+      ) : batches.length === 0 && !loadingBatches ? (
         <List.EmptyView
           icon={Icon.Calendar}
           title="No Batches Found"
@@ -114,7 +117,10 @@ function BatchSelectorScreen({
 // Article List Component
 function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: string; onBackToBatches: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
-  const [selectedCategory, setSelectedCategory] = useCachedState<string>("time-travel-selected-category", "");
+  // Only what the user explicitly picked. Not persisted across sessions: category ids are scoped to
+  // a batch, so a value cached from a previous batch would be stale for this one.
+  const [pickedCategory, setPickedCategory] = useState<string>("");
+  const { isFavorite } = useFavoriteCategories();
 
   const { data: categoriesData, isLoading: loadingCategories } = useFetch<BatchCategoriesData>(
     selectedBatch
@@ -125,37 +131,40 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
         if (!response.ok) throw new Error("Failed to load categories");
         return response.json() as Promise<BatchCategoriesData>;
       },
-      onData: (data) => {
-        const worldCategory = data?.categories?.find(
-          (cat: BatchCategoryResponse) => cat.categoryName.toLowerCase() === "world",
-        );
-        if (worldCategory) {
-          setSelectedCategory(worldCategory.id);
-        }
-      },
       execute: !!selectedBatch,
     },
   );
 
-  const categories: CategoryItem[] =
-    categoriesData?.categories?.map((cat: BatchCategoryResponse) => ({
-      id: cat.id,
-      name: cat.categoryName,
-    })) || [];
+  // Empty until the batch's categories have loaded, so the dropdown never shows a lone "Chaos Index"
+  // entry (and its "No Chaos Index Data" view) while the real categories are still on their way.
+  const categories: CategoryItem[] = categoriesData
+    ? [
+        ...(categoriesData.categories ?? []).map((cat: BatchCategoryResponse) => ({
+          id: cat.id,
+          name: cat.categoryName,
+          categoryId: cat.categoryId,
+        })),
+        ...(categoriesData.hasOnThisDay
+          ? [{ id: "onthisday", name: "Today in History", categoryId: "onthisday" }]
+          : []),
+        { id: "chaos", name: "Chaos Index", categoryId: "chaos" },
+      ]
+    : [];
 
-  if (categoriesData?.hasOnThisDay) {
-    categories.push({
-      id: "onthisday",
-      name: "Today in History",
-    });
-  }
+  // Sort categories: favorites first (alphabetically), then others (alphabetically), matching Daily News
+  const sortedCategories = [
+    ...categories.filter((cat) => isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => !isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
 
-  categories.push({
-    id: "chaos",
-    name: "Chaos Index",
-  });
+  // World until the user picks something else. Computed while rendering rather than set from an effect, so the
+  // dropdown value always matches one of its items (Raycast leaves a non-matching value undefined).
+  const selectedCategory =
+    pickedCategory ||
+    (sortedCategories.find((cat) => cat.name.toLowerCase() === "world") ?? sortedCategories[0])?.id ||
+    "";
 
-  const sortedCategories = categories.sort((a, b) => a.name.localeCompare(b.name));
+  const currentCategory = sortedCategories.find((cat) => cat.id === selectedCategory);
 
   const {
     articles,
@@ -174,10 +183,17 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
         <List.Dropdown
           tooltip="Select Category"
           value={selectedCategory}
-          onChange={(newValue) => setSelectedCategory(newValue)}
+          onChange={(newValue) => setPickedCategory(newValue)}
         >
           {sortedCategories.map((category) => (
-            <List.Dropdown.Item key={category.id} title={category.name} value={category.id} />
+            <List.Dropdown.Item
+              key={category.id}
+              title={category.name}
+              icon={
+                isFavorite(category.categoryId) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled
+              }
+              value={category.id}
+            />
           ))}
         </List.Dropdown>
       }
@@ -207,10 +223,11 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                   icon={Icon.Eye}
                   target={<ChaosIndexDetail score={chaosIndex.score} description={chaosIndex.description} />}
                 />
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />
-        ) : (
+        ) : loadingContent ? null : (
           <List.EmptyView icon={Icon.ExclamationMark} title="No Chaos Index Data" />
         )
       ) : isOnThisDay ? (
@@ -229,6 +246,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -245,6 +263,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -252,7 +271,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
             </List.Section>
           </>
         )
-      ) : articles.length === 0 && !loadingContent ? (
+      ) : articles.length === 0 && !loadingContent && !loadingCategories ? (
         <List.EmptyView icon={Icon.Document} title="No Articles Found" />
       ) : (
         articles.map((article) => (
@@ -264,6 +283,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
             actions={
               <ActionPanel>
                 <Action.Push title="View Article" icon={Icon.Eye} target={<ArticleDetail article={article} />} />
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />

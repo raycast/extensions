@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pwpush",
+  "title": "PwPush",
+  "description": "Create secure, expiring password pushes with PwPush. Supports the public service and self-hosted instances.",
+  "icon": "extension-icon.png",
+  "author": "mouxy",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "password",
+    "security",
+    "secrets",
+    "share",
+    "pwpush"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "npx tsc --noEmit",
+    "test": "node --test --require tsx test/*.test.ts"
+  },
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "The URL of your PwPush server. Leave empty to use the public https://eu.pwpush.com service.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://eu.pwpush.com"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your PwPush API key. Required for paid or self-hosted instances with authentication.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Enter your API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-push",
+      "title": "Create Push",
+      "description": "Create a new PwPush secret link.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "push-history",
+      "title": "Push History",
+      "description": "View recent PwPush secret links.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.12",
+    "typescript": "^5.6.3"
+  }
+}

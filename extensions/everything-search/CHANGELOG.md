@@ -1,5 +1,17 @@
 # Everything Search Changelog
 
+## [Fix] - 2026-10-26
+- Fixed searches that contain `&`, `|`, `<`, `>`, `^` or `%`, or start with `-`, failing with "Error Searching Files" or returning wrong results
+
+## [Fix] - 2026-10-15
+- Fixed long and cut-off error message when Everything app is not running ([#32381](https://github.com/raycast/extensions/issues/32381))
+
+## [Fix] - 2026-09-23
+- Fixed `Show in Explorer` opening the Documents folder when the file name contains a comma
+
+## [Fix] - 2026-09-11
+- Fixed `Show in Explorer` opening the containing folder without selecting the file
+
 ## [Added SDK support for ARM64] - 2026-03-02
 - Added support for the Everything SDK on ARM64 architecture.
 

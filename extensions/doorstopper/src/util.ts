@@ -8,6 +8,8 @@ type Updates = {
   status: boolean;
 };
 
+const optionalUpdateCommands = new Set(["statusmenu"]);
+
 async function update(updates: Updates, enabled: boolean) {
   if (updates.menubar) {
     await tryLaunchCommand("statusmenu", { enabled });
@@ -21,6 +23,10 @@ async function tryLaunchCommand(commandName: string, context: { enabled: boolean
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch (error) {
+    if (optionalUpdateCommands.has(commandName)) {
+      return;
+    }
+
     await showFailureToast(error, { title: `Failed to launch command ${commandName}` });
   }
 }

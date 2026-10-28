@@ -1,29 +1,11 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 
 import { GalleryActionSection } from "../actions/gallery";
 import { RevealInFinderAction } from "../actions/reveal-in-finder";
+import { HookSetupDetail } from "./hook-setup";
+import { SETUP_DOCS_URL, SETUP_PROMPT } from "../utils/hook-status";
 import { INDEX_PATH } from "../utils/index-file";
 import type { IndexProblem } from "../types/artifact";
-
-const SETUP_DOCS_URL = "https://github.com/chrismessina/raycast-claude-artifacts#setup";
-
-/**
- * The `PostToolUse` hook entry the user must add to enable the index.
- *
- * Offered as a clipboard copy rather than written for them: `settings.json` is
- * hand-curated, and an extension that rewrites it would be editing config the
- * user owns.
- */
-const HOOK_SNIPPET = `{
-  "matcher": "Artifact",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "$HOME/.claude/hooks/record-artifact.sh",
-      "timeout": 10
-    }
-  ]
-}`;
 
 /**
  * `List.EmptyView` descriptions must stay ONE short line — the component
@@ -35,11 +17,32 @@ export function NotInstalledEmptyView() {
     <List.EmptyView
       icon={Icon.Plug}
       title="Artifact Index Not Found"
-      description="Install the Claude Code hook to start recording artifacts as you publish them."
+      description="Install the Claude Code hook to start tracking artifacts as you publish them."
       actions={
         <ActionPanel>
+          {/*
+            "View Setup Instructions" stays FIRST, and therefore stays the
+            Enter default, because it was the default before this state gained
+            any setup actions. The new ones are appended rather than inserted.
+
+            The in-app screen below is the better destination and it would be
+            tempting to promote it — but silently repointing the default action
+            of an already-shipped surface is a change users did not ask for,
+            and one keystroke is a cheap price for not making it.
+          */}
           <Action.OpenInBrowser title="View Setup Instructions" icon={Icon.Book} url={SETUP_DOCS_URL} />
-          <Action.CopyToClipboard title="Copy Hook Configuration" icon={Icon.Clipboard} content={HOOK_SNIPPET} />
+          {/*
+            Same destination as the warning row's: first run and
+            silently-broken are the same problem at different times, and the
+            two must not drift into different instructions.
+          */}
+          <Action.Push title="Set up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
+          <Action.CopyToClipboard
+            title="Copy Setup Prompt"
+            icon={Icon.Clipboard}
+            content={SETUP_PROMPT}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.CopyToClipboard title="Copy Index Path" icon={Icon.Finder} content={INDEX_PATH} />
           <GalleryActionSection />
         </ActionPanel>
@@ -58,7 +61,7 @@ export function MalformedEmptyView({ errorMessage }: { errorMessage?: string }) 
       description="The index file exists but could not be parsed as JSON."
       actions={
         <ActionPanel>
-          <RevealInFinderAction title="Reveal Index File" path={INDEX_PATH} />
+          <RevealInFinderAction title="Show Index File" path={INDEX_PATH} />
           <Action.CopyToClipboard title="Copy Error" icon={Icon.Clipboard} content={detail} />
           <Action.CopyToClipboard title="Copy Index Path" icon={Icon.Document} content={INDEX_PATH} />
           <GalleryActionSection />
@@ -73,7 +76,7 @@ export function NoArtifactsEmptyView() {
   return (
     <List.EmptyView
       icon={Icon.Document}
-      title="No Artifacts Recorded Yet"
+      title="No Artifacts Tracked Yet"
       description="Publish an artifact in Claude Code and it will appear here."
       actions={
         <ActionPanel>
@@ -108,6 +111,14 @@ export function NoMatchesEmptyView() {
   );
 }
 
-export function emptyViewForProblem(problem: IndexProblem, errorMessage?: string) {
-  return problem === "missing" ? <NotInstalledEmptyView /> : <MalformedEmptyView errorMessage={errorMessage} />;
+export function emptyViewForProblem(problem: IndexProblem, errorMessage?: string, hookRegistered = false) {
+  if (problem === "malformed") return <MalformedEmptyView errorMessage={errorMessage} />;
+
+  // The index file does not exist yet. That looks like "the hook was never
+  // installed" — but only if it wasn't. When a recorder IS registered, the
+  // file is simply absent until the first publish writes it, which is the
+  // ordinary "nothing recorded yet" state and needs no setup instructions.
+  // Routing here regardless sent a correctly configured user to reinstall
+  // something that was already working.
+  return hookRegistered ? <NoArtifactsEmptyView /> : <NotInstalledEmptyView />;
 }

@@ -210,7 +210,8 @@ export default function DocCheckPage(props: DocCheckPageProps) {
           })
         )
       : props.query != ""
-      ? `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=` + encodeURI(query)
+      ? `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon?fallbackText=` +
+        encodeURI(query)
       : `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/doccheck-flexikon`;
   const forwardTarget =
     nexturl != undefined && nexturl != ""
@@ -400,7 +401,14 @@ export default function DocCheckPage(props: DocCheckPageProps) {
                 query: props.query,
               };
               const query = encodeURIComponent(JSON.stringify(args));
-              return "[" + p1 + "](" + `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` + query + ")";
+              return (
+                "[" +
+                p1 +
+                "](" +
+                `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/spacedog/doccheck/open-page?arguments=` +
+                query +
+                ")"
+              );
             })
       }
       actions={EntryActions(

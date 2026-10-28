@@ -3,10 +3,11 @@ import * as Enum from "./enum";
 import * as Errors from "./errors";
 import { EventEmitter } from "stream";
 
+const REQUEST_TIMEOUT_MS = 10_000;
+
 export class Ollama {
   private _server: string;
   private _headers: HeadersInit | undefined;
-  private _signal: AbortSignal;
 
   private _RouteApiVersion = `/api/version`;
   private _RouteApiTags = `/api/tags`;
@@ -22,7 +23,6 @@ export class Ollama {
    * @param server - Ollama Server Route, default value: { url: "http://127.0.0.1:11434" }.
    */
   constructor(server = { url: "http://127.0.0.1:11434" } as Types.OllamaServer) {
-    this._signal = AbortSignal.timeout(1800);
     this._server = server.url;
     if (server.auth && server.auth.mode === Enum.OllamaServerAuthorizationMethod.BASIC)
       this._headers = {
@@ -102,7 +102,7 @@ export class Ollama {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
-      signal: this._signal,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
     const data = await fetch(url, req)
       .then((response) => response.json())
@@ -128,7 +128,7 @@ export class Ollama {
     const url = `${this._server}${route}`;
     const req: RequestInit = {
       headers: this._headers,
-      signal: this._signal,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
     const data = await fetch(url, req)
       .then(async (response) => {
@@ -165,6 +165,7 @@ export class Ollama {
       body: JSON.stringify({
         name: model,
       }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
 
     const data = await fetch(url, req)
@@ -565,7 +566,6 @@ export class Ollama {
         let lastEmitTime = Date.now();
 
         try {
-          // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -657,7 +657,6 @@ export class Ollama {
         let textThinkingBuffer = "";
 
         try {
-          // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -672,10 +671,7 @@ export class Ollama {
                 if (j.trim() === "") continue;
 
                 let json:
-                  | Types.OllamaApiChatResponse
-                  | Types.OllamaApiGenerateResponse
-                  | Types.OllamaErrorResponse
-                  | undefined;
+                  Types.OllamaApiChatResponse | Types.OllamaApiGenerateResponse | Types.OllamaErrorResponse | undefined;
                 try {
                   json = JSON.parse(j);
                 } catch (err) {
@@ -887,31 +883,26 @@ export class Ollama {
     const req: RequestInit = {
       method: "GET",
       headers: this._headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     };
-    let ps: Types.OllamaApiPsResponse | undefined;
+    const data = await fetch(url, req)
+      .then(async (response) => {
+        if (!response.ok) {
+          const message = (await response.json()) as Types.OllamaErrorResponse;
+          this._ErrorHandlerOllamaServer(route, response.status, message, req);
+        }
+        return response.json();
+      })
+      .then((output): Types.OllamaApiPsResponse => {
+        return output as Types.OllamaApiPsResponse;
+      })
+      .catch((err: Error | Error) => {
+        this._ErrorLogger(err);
+        if (err instanceof TypeError && err.cause && (err.cause as NodeJS.ErrnoException).code === "ECONNREFUSED")
+          throw Errors.OllamaNotInstalledOrRunning;
+        throw err;
+      });
 
-    while (ps === undefined) {
-      ps = await fetch(url, req)
-        .then(async (response) => {
-          if (!response.ok) {
-            const message = (await response.json()) as Types.OllamaErrorResponse;
-            this._ErrorHandlerOllamaServer(route, response.status, message, req);
-          }
-          return response.json();
-        })
-        .then(async (response) => {
-          if (response === undefined) {
-            return undefined;
-          }
-          return response as Types.OllamaApiPsResponse;
-        })
-        .catch((err: Error | Error) => {
-          this._ErrorLogger(err);
-          if (err instanceof TypeError && err.cause && (err.cause as NodeJS.ErrnoException).code === "ECONNREFUSED")
-            throw Errors.OllamaNotInstalledOrRunning;
-          throw err;
-        });
-    }
-    return ps;
+    return data;
   }
 }

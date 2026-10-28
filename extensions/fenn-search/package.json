@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fenn-search",
+  "title": "Fenn Search",
+  "description": "Search text in videos, spoken words in audio, and content inside Sketch files and documents with Fenn.",
+  "icon": "icon.png",
+  "author": "thoddnn",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "keywords": [
+    "file search",
+    "semantic search",
+    "OCR",
+    "video",
+    "audio",
+    "transcription",
+    "Sketch",
+    "PDF",
+    "documents"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Fenn",
+      "description": "Find content inside videos, audio, Sketch files, and documents. Switch search modes and filter file types. Requires Fenn 1.3.3 or newer and a valid Fenn license.",
+      "keywords": [
+        "files",
+        "documents",
+        "audio",
+        "video",
+        "sketch"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Fenn API Token",
+      "description": "Leave empty for normal setup. Open Fenn 1.3.3 or newer and the connection is configured automatically. This is not your Fenn license key.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1",
+    "image-dimensions": "^2.5.1",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.5.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3"
+  }
+}

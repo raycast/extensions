@@ -1,16 +1,23 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { failureToastOptions } from "../utils/aerospace";
-import { loadConfig, extractShortcuts } from "../utils/config";
+import { extractShortcuts, loadConfig, loadConfigSnapshot } from "../utils/config";
 
-export function useConfig() {
-  return useCachedPromise(loadConfig, [], {
-    failureToastOptions: failureToastOptions("Failed to load Aerospace config"),
+export function useConfigSnapshot() {
+  return useCachedPromise(loadConfigSnapshot, [], {
+    failureToastOptions: failureToastOptions("Failed to Load AeroSpace Config"),
   });
 }
 
 export function useShortcuts() {
-  const { data: config, isLoading, error } = useConfig();
+  const {
+    data: config,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(loadConfig, [], {
+    failureToastOptions: failureToastOptions("Failed to Load AeroSpace Shortcuts"),
+  });
   const shortcuts = useMemo(() => (config ? extractShortcuts(config) : []), [config]);
-  return { shortcuts, isLoading, error };
+  return { shortcuts, isLoading, error, revalidate };
 }

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "digikey",
+  "title": "DigiKey",
+  "description": "Get product details from DigiKey",
+  "icon": "digikey.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "client_id",
+      "title": "Client ID",
+      "type": "textfield",
+      "description": "The client ID for your DigiKey account",
+      "required": true,
+      "placeholder": "XXX...xXX"
+    },
+    {
+      "name": "client_secret",
+      "title": "Client Secret",
+      "type": "password",
+      "description": "The client secret for your DigiKey account",
+      "required": true,
+      "placeholder": "xXX...xXX"
+    },
+    {
+      "name": "account_id",
+      "title": "Account ID",
+      "type": "textfield",
+      "description": "The account ID for your DigiKey account",
+      "required": true,
+      "placeholder": "00000000"
+    },
+    {
+      "name": "is_sandbox",
+      "label": "Is Sandbox",
+      "type": "checkbox",
+      "description": "Is this a sandbox account?",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-product-details",
+      "title": "Get Product Details",
+      "description": "Get product details from DigiKey",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "product_number",
+          "type": "text",
+          "placeholder": "PRODUCT-NUMBER",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -13,6 +13,32 @@ const DB_PATHS = {
 // Core Foundation epoch: 2001-01-01 00:00:00 UTC
 const CF_EPOCH = 978307200;
 
+// The columns each field has lived in, most recent first. VoiceInk renamed
+// powerModeName/powerModeEmoji to modeName/modeEmoji, which SwiftData applies
+// to the store as a column rename, so the same install can use either name
+// depending on the version that last migrated it. VoiceInk CE uses modeName.
+const COLUMN_CANDIDATES = {
+  id: ["ZID"],
+  text: ["ZTEXT"],
+  enhancedText: ["ZENHANCEDTEXT"],
+  timestamp: ["ZTIMESTAMP"],
+  duration: ["ZDURATION"],
+  modelName: ["ZTRANSCRIPTIONMODELNAME"],
+  powerModeName: ["ZMODENAME", "ZPOWERMODENAME"],
+  powerModeEmoji: ["ZMODEEMOJI", "ZPOWERMODEEMOJI"],
+  status: ["ZTRANSCRIPTIONSTATUS"],
+} as const;
+
+type Field = keyof typeof COLUMN_CANDIDATES;
+
+// Lists the columns of the transcription table so the history query can be
+// built from what the database actually has.
+export const SCHEMA_QUERY = "SELECT name FROM pragma_table_info('ZTRANSCRIPTION')";
+
+export interface SchemaColumn {
+  name: string;
+}
+
 export interface DatabaseInfo {
   path: string;
   available: boolean;
@@ -47,15 +73,10 @@ export function getDatabaseInfo(): DatabaseInfo {
     case "custom":
       if (prefs.customDatabasePath) {
         const customPath = expandTilde(prefs.customDatabasePath);
-        const customSource = customPath.includes("com.prakashjoshipax.VoiceInk")
-          ? "official"
-          : customPath.includes("com.metrovoc.VoiceInk")
-            ? "ce"
-            : "custom";
         return {
           path: customPath,
           available: existsSync(customPath),
-          source: customSource,
+          source: "custom",
         };
       }
       return { path: "", available: false, source: "none" };
@@ -104,40 +125,62 @@ export function formatDuration(seconds: number): string {
   return `${mins}m ${secs}s`;
 }
 
-export function buildQuery(limit: number, searchTerm?: string, source: DatabaseInfo["source"] = "custom"): string {
-  const modeColumns =
-    source === "official"
-      ? "ZPOWERMODENAME as powerModeName, ZPOWERMODEEMOJI as powerModeEmoji"
-      : source === "ce"
-        ? "ZMODENAME as powerModeName, ZMODEEMOJI as powerModeEmoji"
-        : "NULL as powerModeName, NULL as powerModeEmoji";
+function resolveColumns(columns: string[]): Partial<Record<Field, string>> {
+  const available = new Set(columns);
+  const resolved: Partial<Record<Field, string>> = {};
+
+  for (const field of Object.keys(COLUMN_CANDIDATES) as Field[]) {
+    resolved[field] = COLUMN_CANDIDATES[field].find((candidate) => available.has(candidate));
+  }
+
+  return resolved;
+}
+
+function selectAs(column: string | undefined, alias: string): string {
+  return `${column ?? "NULL"} as ${alias}`;
+}
+
+export function buildQuery(limit: number, searchTerm: string | undefined, columns: string[]): string {
+  const resolved = resolveColumns(columns);
+
+  // Z_PK is Core Data's own primary key, so it is there even if ZID is not.
+  const idColumn = resolved.id ? `hex(${resolved.id})` : "CAST(Z_PK AS TEXT)";
+  const selectList = [
+    `${idColumn} as id`,
+    selectAs(resolved.text, "text"),
+    selectAs(resolved.enhancedText, "enhancedText"),
+    selectAs(resolved.timestamp, "timestamp"),
+    selectAs(resolved.duration, "duration"),
+    selectAs(resolved.modelName, "modelName"),
+    selectAs(resolved.powerModeName, "powerModeName"),
+    selectAs(resolved.powerModeEmoji, "powerModeEmoji"),
+  ].join(",\n      ");
 
   const baseQuery = `
     SELECT
-      hex(ZID) as id,
-      ZTEXT as text,
-      ZENHANCEDTEXT as enhancedText,
-      ZTIMESTAMP as timestamp,
-      ZDURATION as duration,
-      ZTRANSCRIPTIONMODELNAME as modelName,
-      ${modeColumns}
+      ${selectList}
     FROM ZTRANSCRIPTION
-    WHERE ZTRANSCRIPTIONSTATUS = 'completed'
+    WHERE ${resolved.status ? `${resolved.status} = 'completed'` : "1 = 1"}
   `;
 
+  const searchableColumns = [resolved.text, resolved.enhancedText].filter((column): column is string =>
+    Boolean(column)
+  );
+
   let searchClause = "";
-  if (searchTerm) {
+  if (searchTerm && searchableColumns.length > 0) {
     const words = searchTerm.trim().split(/\s+/).filter(Boolean);
     if (words.length > 0) {
       const conditions = words.map((word) => {
         const escaped = escapeSqlString(word);
-        return `(ZTEXT LIKE '%${escaped}%' ESCAPE '\\' OR ZENHANCEDTEXT LIKE '%${escaped}%' ESCAPE '\\')`;
+        const matches = searchableColumns.map((column) => `${column} LIKE '%${escaped}%' ESCAPE '\\'`);
+        return `(${matches.join(" OR ")})`;
       });
       searchClause = ` AND ${conditions.join(" AND ")}`;
     }
   }
 
-  return `${baseQuery}${searchClause} ORDER BY ZTIMESTAMP DESC LIMIT ${limit}`;
+  return `${baseQuery}${searchClause} ORDER BY ${resolved.timestamp ?? "Z_PK"} DESC LIMIT ${limit}`;
 }
 
 function escapeSqlString(str: string): string {

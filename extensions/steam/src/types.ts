@@ -1,6 +1,12 @@
 export type GameSimple = {
   appid?: number;
   name?: string;
+  icon?: string;
+};
+export type SteamGameHit = {
+  appid: number;
+  name: string;
+  icon?: string;
 };
 export type GameDataResponse = {
   [appid: number]: {
@@ -13,6 +19,7 @@ export type GameDataSimple = {
   name: string;
   playtime_forever: number;
   img_icon_url: string;
+  rtime_last_played?: number;
 };
 export type GameDataSimpleResponse = {
   [response: string]: {

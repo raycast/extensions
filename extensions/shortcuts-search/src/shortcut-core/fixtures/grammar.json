@@ -1,0 +1,26 @@
+[
+  { "key": "+", "sequence": [{ "base": "+", "modifiers": [] }] },
+  { "key": "cmd++", "sequence": [{ "base": "+", "modifiers": ["cmd"] }] },
+  {
+    "key": "cmd++ cmd+c",
+    "sequence": [
+      { "base": "+", "modifiers": ["cmd"] },
+      { "base": "c", "modifiers": ["cmd"] }
+    ]
+  },
+  {
+    "key": "  ctrl+alt+k   cmd+c  ",
+    "sequence": [
+      { "base": "k", "modifiers": ["ctrl", "opt"] },
+      { "base": "c", "modifiers": ["cmd"] }
+    ]
+  },
+  { "sequence": [] },
+  { "key": "shift", "sequence": [{ "base": "shift", "modifiers": [] }] },
+  { "key": "meta+k", "invalid": true },
+  { "key": "ctrl+ctrl+k", "invalid": true },
+  { "key": "opt+alt+k", "invalid": true },
+  { "key": "cmd+", "invalid": true },
+  { "key": "unknown-key", "invalid": true },
+  { "key": "", "invalid": true }
+]

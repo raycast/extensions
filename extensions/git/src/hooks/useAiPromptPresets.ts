@@ -112,6 +112,24 @@ Output only the commit message, no markdown or extra text.
 };
 
 /**
+ * Prompt used when generating a commit message from the repository's commit history.
+ */
+export const HISTORY_STYLE_PROMPT = `
+You are a Git commit message generator.
+
+Infer the commit message template from the recent commit history.
+Match the repository's existing style: title format (type, scope, ticket, emoji, prefix), capitalization, and whether a body is used.
+
+Write a commit message for the staged diff that looks like it belongs in this history.
+
+Rules:
+- Output only the commit message, no markdown or extra text
+- Use imperative mood
+- Focus on WHAT changed
+- Omit a body if recent commits usually omit it
+`.trim();
+
+/**
  * Hook for managing AI commit message prompt presets in persistent storage.
  * Presets are global for the extension (not per repository).
  */

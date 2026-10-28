@@ -605,5 +605,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/shadeov/dtf-raycast.git"
+  },
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "js-yaml@4": "4.3.2"
   }
 }

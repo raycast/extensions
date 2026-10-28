@@ -63,6 +63,28 @@
       "type": "checkbox"
     },
     {
+      "default": "newWindow",
+      "description": "Choose how folders open in Finder: a new window, a new tab of the frontmost window, or the current tab of the frontmost window",
+      "name": "openBehaviour",
+      "required": false,
+      "title": "Open Behavior",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open in New Finder Window",
+          "value": "newWindow"
+        },
+        {
+          "title": "Open in New Finder Tab",
+          "value": "newTab"
+        },
+        {
+          "title": "Open in Current Finder Tab",
+          "value": "currentTab"
+        }
+      ]
+    },
+    {
       "default": false,
       "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
       "label": "Enabled",

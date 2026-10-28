@@ -27,10 +27,6 @@ fragment ExtendedRepositoryFields on Repository {
     avatarUrl(size: 64)
   }
   url
-  mergeCommitAllowed
-  squashMergeAllowed
-  rebaseMergeAllowed
-  autoMergeAllowed
   updatedAt
   pushedAt
   stargazerCount
@@ -43,32 +39,38 @@ fragment ExtendedRepositoryFields on Repository {
     name
     color
   }
-  hasIssuesEnabled
-  hasWikiEnabled
-  hasProjectsEnabled
-  hasDiscussionsEnabled
-  releases {
-    totalCount
-  }
 }
 
-query searchRepositories($query: String!, $numberOfItems: Int!) {
-  search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) {
+  search(query: $query, first: $numberOfItems, after: $after, type: REPOSITORY) {
     nodes {
       ...ExtendedRepositoryFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
 }
 
 query myLatestRepositories(
   $numberOfItems: Int!
+  $after: String
   $orderByField: RepositoryOrderField!
   $orderByDirection: OrderDirection!
 ) {
   viewer {
-    repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+    repositories(
+      first: $numberOfItems
+      after: $after
+      orderBy: { field: $orderByField, direction: $orderByDirection }
+    ) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -104,6 +106,10 @@ query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
 
 query dataForRepository($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
+    mergeCommitAllowed
+    squashMergeAllowed
+    rebaseMergeAllowed
+    autoMergeAllowed
     defaultBranchRef {
       id
       name
@@ -160,6 +166,7 @@ query dataForRepository($owner: String!, $name: String!) {
       }
     }
     owner {
+      __typename
       ... on Organization {
         projectsV2(first: 50) {
           totalCount
@@ -224,12 +231,16 @@ fragment ReleaseFields on Release {
   url
 }
 
-query repositoryReleases($name: String!, $owner: String!) {
+query repositoryReleases($name: String!, $owner: String!, $numberOfItems: Int!, $after: String) {
   repository(name: $name, owner: $owner) {
     ... on Repository {
-      releases(first: 30, orderBy: { field: CREATED_AT, direction: DESC }) {
+      releases(first: $numberOfItems, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
         nodes {
           ...ReleaseFields
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }

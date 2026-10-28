@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 
 const log = logger.child("[useConfig]");
-import { Config, Preferences } from "../types";
+import { Config } from "../types";
 
 const getConfig = (): Config => {
   try {

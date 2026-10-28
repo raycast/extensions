@@ -49,24 +49,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "^2.6.0",
     "@raycast/eslint-config": "^2.2.0",
-    "@raycast/utils": "^2.2.7",
-    "local-devices": "github:timrogers/local-devices",
+    "@raycast/utils": "^2.3.2",
+    "local-devices": "4.0.0",
     "tp-link-tapo-connect": "^2.0.15"
   },
   "devDependencies": {
-    "@types/node": "^22.20.1",
+    "@types/node": "^22.20.4",
     "@types/react": "^19.2.17",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.6",
-    "typescript": "^5.8.2"
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }

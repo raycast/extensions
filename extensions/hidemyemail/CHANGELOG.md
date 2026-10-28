@@ -1,5 +1,16 @@
 # HideMyEmail Changelog
 
+## [Update] - 2026-09-22
+
+- Added informative error message when user needs to update iCloud terms otherwise session can't be established
+- Dependency version update
+- Fixed some bugs
+
+
+## [Windows Support] - 2026-09-02
+
+- Added support for Raycast on Windows and update shortcuts
+
 ## [Update] - 2026-03-17
 
 - Updated response message upon failed login

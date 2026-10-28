@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("extractGeminiOAuthClientCredentials parses oauth2.js constants", async () => {
-  const { extractGeminiOAuthClientCredentials } = await import("./auth");
+  const { extractGeminiOAuthClientCredentials } = await import("./auth.ts");
 
   const credentials = extractGeminiOAuthClientCredentials(`
     const OAUTH_CLIENT_ID = "client-id-123";
@@ -16,7 +16,7 @@ test("extractGeminiOAuthClientCredentials parses oauth2.js constants", async () 
 });
 
 test("resolveGeminiOAuthClientCredentials falls back to env credentials when oauth2.js content is unavailable", async () => {
-  const { resolveGeminiOAuthClientCredentials } = await import("./auth");
+  const { resolveGeminiOAuthClientCredentials } = await import("./auth.ts");
 
   const originalClientId = process.env.GEMINI_OAUTH_CLIENT_ID;
   const originalClientSecret = process.env.GEMINI_OAUTH_CLIENT_SECRET;
@@ -47,7 +47,7 @@ test("resolveGeminiOAuthClientCredentials falls back to env credentials when oau
 });
 
 test("resolveGeminiOAuthClientCredentials returns null when neither oauth2.js nor env credentials are available", async () => {
-  const { resolveGeminiOAuthClientCredentials } = await import("./auth");
+  const { resolveGeminiOAuthClientCredentials } = await import("./auth.ts");
 
   const originalClientId = process.env.GEMINI_OAUTH_CLIENT_ID;
   const originalClientSecret = process.env.GEMINI_OAUTH_CLIENT_SECRET;
@@ -75,7 +75,7 @@ test("resolveGeminiOAuthClientCredentials returns null when neither oauth2.js no
 });
 
 test("resolveGeminiAuthType supports nested settings.security.auth.selectedType", async () => {
-  const { resolveGeminiAuthType } = await import("./auth");
+  const { resolveGeminiAuthType } = await import("./auth.ts");
 
   const authType = resolveGeminiAuthType({
     security: {

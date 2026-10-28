@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "neovim",
+  "title": "Neovim",
+  "description": "Manage Neovim sessions, plugins, and keymaps from Raycast",
+  "icon": "icon.png",
+  "author": "RG-IL",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "neovim",
+    "nvim",
+    "lazyvim",
+    "terminal",
+    "editor",
+    "sessions",
+    "keymaps",
+    "plugins"
+  ],
+  "commands": [
+    {
+      "name": "search-recent-sessions",
+      "title": "Search Recent Sessions",
+      "description": "Search and open recent Neovim sessions",
+      "mode": "view"
+    },
+    {
+      "name": "open-with-neovim",
+      "title": "Open with Neovim",
+      "description": "Open selected Finder items in Neovim",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "description": "Open a new Neovim window",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-plugins",
+      "title": "Show Installed Plugins",
+      "description": "List installed Neovim plugins",
+      "mode": "view"
+    },
+    {
+      "name": "neovim-commands",
+      "title": "Neovim Commands",
+      "description": "Search keymaps from your running Neovim config",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "default": "auto",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Terminal app to launch Neovim in (auto-detects best available)",
+      "data": [
+        {
+          "value": "auto",
+          "title": "Auto-detect"
+        },
+        {
+          "value": "iTerm2",
+          "title": "iTerm2"
+        },
+        {
+          "value": "Ghostty",
+          "title": "Ghostty"
+        },
+        {
+          "value": "kitty",
+          "title": "kitty"
+        },
+        {
+          "value": "Alacritty",
+          "title": "Alacritty"
+        },
+        {
+          "value": "WezTerm",
+          "title": "WezTerm"
+        },
+        {
+          "value": "Terminal",
+          "title": "Terminal.app"
+        }
+      ]
+    },
+    {
+      "name": "nvimPath",
+      "type": "textfield",
+      "default": "nvim",
+      "required": false,
+      "title": "Nvim Path",
+      "description": "Path to the nvim binary (uses PATH by default)"
+    },
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "default": "list",
+      "required": false,
+      "title": "View Layout",
+      "description": "List or Grid layout",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.4",
+    "react": "^19.2.7",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,5 +1,76 @@
 # Attio Changelog
 
+## [Create Records + AI Tools] - 2026-09-12
+
+### Create People, Companies, and Deals
+
+- Dedicated Create Person / Create Company / Create Deal commands with Raycast draft support — dismiss mid-entry and pick the form back up later
+- New Record (`⌘N`) from every record list — the standard objects open their Create command; custom objects get the same schema-driven form inline
+- Schema-driven form: writable attributes from your workspace schema (multi-value record links, locations, and interactions stay Attio-only), inline required/invalid validation, tag-style entry for multi-value fields with TLD-validated domains, split first/last name fields, record links with live search, deal owners picked from workspace members, and untouched checkboxes leaving workspace defaults intact
+- Success toast offers Open in Attio for the record you just created
+- Record action panels reordered: open/pin/new up top, edit and copy together, view controls, then export with delete always last
+
+### Editing
+
+- The Edit form now covers names (split First/Last, like Attio), owners, and single record links — associate a person with a company via live record search, right from Raycast
+- Fields follow your workspace's schema order, required fields validate inline, and everything saves in one request
+
+### AI Extension
+
+- Talk to Attio from Raycast AI (`@attio`): Search Records, Create Person, Create Company, and Create Deal tools, with confirmation before any write
+- Create Deal resolves stage names case-insensitively against your pipeline and matches owners by member name or email
+
+## [Task Edit Fix] - 2026-09-09
+
+- Fixed a React state-update warning when returning from the task edit or new-task form
+
+## [2.0.0] - 2026-09-08
+
+Full rewrite. Same commands, new engine — plus a set of new commands.
+
+### Permissions & safety
+
+- Scope-aware capability detection: the extension reads your token's granted scopes and shows only actions it can perform; read-only tokens see no write actions
+- Per-command scope guidance in the README, with lock screens that name the exact missing scope (Try Again picks up scope edits without relaunching)
+- Failure screens for every error class (network, invalid token, missing scope, rate limit, API errors) — no more silent blank lists
+- All error copy actions redact secrets before they reach the clipboard
+
+### New commands
+
+- Search People, Search Companies, Search Deals — standalone commands with real workspace search (not just loaded-page filtering), server-side sorting, and per-object icons (company favicons included)
+- My Tasks — your assigned tasks, pre-filtered
+
+### Records
+
+- Real titles, metadata sidebar with display names, resolved record references, friendly dates, colored status/category tags
+- Schema-driven record editing (writable attributes only, diff-only saves, confirmation before clearing values) and record deletion
+- Record screens carry the full action panel everywhere — related People/Companies traversal opens records in their home command via deeplinks
+- Pin records (⌘⇧P) to float them above the list; Toggle Sidebar (⌘⇧D)
+- Export any list as CSV, Markdown, or plain text
+
+### Tasks
+
+- Filter (All / Mine / Open / Completed), sort by due date, group by due date, edit tasks, assignee avatars
+- New Task reachable from the empty list; clearer validation messages
+
+### Notes
+
+- No more blank rows (titles fall back to content), parent records shown and openable, markdown rendering, author avatars, newest-first, edit notes, copy as Markdown or plain text
+
+### Webhooks
+
+- Create and edit webhooks with an event-type picker (27 event types); subscriptions, status, and creation date shown in a detail pane; the one-time signing secret is offered for copy at creation
+
+### Lists
+
+- List deep links open the actual list view in Attio; instant loading
+
+### Under the hood
+
+- Replaced the SDK with a thin typed client generated from Attio's OpenAPI spec (−22 MB installed)
+- Removed the Workspace Slug preference (derived from the API); added optional Verbose Logging
+- Full unit-test suite plus import-cycle and Rules-of-Hooks lint gates
+
 ## [Edit Task] - 2026-01-21
 
 - Edit Tasks

@@ -5,18 +5,18 @@ import { useEffect, useState } from "react";
 import { getRatingColor, paginateSmart } from "../utils/helpers";
 import { setTimeout } from "node:timers/promises";
 import {
-  ActionCopyPoster,
-  ActionDownloadPoster,
-  ActionNextPage,
-  ActionOpenImdbPage,
-  ActionOpenSeriesGraphPage,
-  ActionOpenTmdbPage,
-  ActionPrevPage,
-  ActionReload,
+  CopyPosterAction,
+  DownloadPosterAction,
+  NextPageAction,
+  OpenImdbPageAction,
+  OpenSeriesGraphPageAction,
+  OpenTmdbPageAction,
+  PrevPageAction,
+  ReloadAction,
 } from "./Actions";
 import { getApiBaseUrl } from "../utils/api";
 
-export default function ShowDetail({ show, originalTitle }: { show: SearchResult; originalTitle: string }) {
+export default function ShowDetail({ show }: { show: SearchResult }) {
   const preferences = getPreferenceValues<Preferences>();
   const preferredWebsite = preferences.preferredWebsite;
   const apiBaseUrl = getApiBaseUrl();
@@ -26,7 +26,7 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
   });
 
   const [isSeasonsCountLoading, setIsSeasonsCountLoading] = useState(false);
-  const [seasonsCount, setSeasonsCount] = useState(0);
+  const [seasonsCount, setSeasonsCount] = useState<number | null>(null);
 
   useEffect(() => {
     setIsSeasonsCountLoading(true);
@@ -37,7 +37,7 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
         };
         setSeasonsCount(seasonsRes?.seasons?.length);
       } catch {
-        setSeasonsCount(0);
+        setSeasonsCount(null);
         showToast({
           style: Toast.Style.Failure,
           title: "Could not get seasons data",
@@ -161,15 +161,24 @@ ${(() => {
   return (
     <Detail
       isLoading={isAnyLoading}
+      navigationTitle={details.data?.primaryTitle ?? details.data?.originalTitle ?? undefined}
       markdown={
         details.data
           ? `
-<img src="${details.data?.primaryImage?.url}" height="290" />
+<table>
+  <tr>
+    <td width="180" valign="top">
+      <img src="${details.data?.primaryImage?.url}" height="300" />
+    </td>
+    <td valign="top">
 
 # ${details.data?.primaryTitle}
-${details.data?.primaryTitle === originalTitle || !originalTitle ? "" : `> ### _${originalTitle}_`}
 
-### 📺 Seasons: _${seasonsCount ?? "N/A"}_
+${details.data?.primaryTitle === details.data?.originalTitle || !details.data?.originalTitle ? "" : `> ### _${details.data?.originalTitle}_`}
+
+---
+
+### 📺 Seasons: _${isSeasonsCountLoading ? "…" : (seasonsCount ?? "N/A")}_
 
 ### 📅 Release Date: _${details.data?.startYear ?? "N/A"}–${details.data?.endYear ?? "now"}_
 
@@ -179,12 +188,16 @@ ${details.data?.primaryTitle === originalTitle || !originalTitle ? "" : `> ### _
 
 ${details.data?.plot}
 
+  </td>
+  </tr>
+</table>
+
 ${
   isEpsLoading
     ? `
 ---
 
-> ### Loading episodes graph...
+> ### Loading episodes graph…
 `
     : allSeasons.length > 0
       ? paginatedTables[tablePageIndex]
@@ -192,7 +205,7 @@ ${
 }
 `
           : isAnyLoading
-            ? "## Loading..."
+            ? "## _Loading…_"
             : details.error
               ? `# Failed to fetch data\n\n${details.error.message}`
               : "# No data found"
@@ -201,21 +214,21 @@ ${
         <ActionPanel>
           {preferredWebsite === "imdb" ? (
             <ActionPanel.Section>
-              <ActionOpenImdbPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenTmdbPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
+              <OpenImdbPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenTmdbPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
             </ActionPanel.Section>
           ) : preferredWebsite === "tmdb" ? (
             <ActionPanel.Section>
-              <ActionOpenTmdbPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenImdbPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
+              <OpenTmdbPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenImdbPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
             </ActionPanel.Section>
           ) : (
             <ActionPanel.Section>
-              <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenImdbPage imdbId={show?.id} shortcut={undefined} />
-              <ActionOpenTmdbPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
+              <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenImdbPageAction imdbId={show?.id} shortcut={undefined} />
+              <OpenTmdbPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
             </ActionPanel.Section>
           )}
 
@@ -223,16 +236,16 @@ ${
             !isEpsLoading ? (
               tablePageIndex >= paginatedTables.length - 1 ? (
                 <ActionPanel.Section>
-                  <ActionPrevPage tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
+                  <PrevPageAction tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
                 </ActionPanel.Section>
               ) : tablePageIndex === 0 ? (
                 <ActionPanel.Section>
-                  <ActionNextPage tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
+                  <NextPageAction tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
                 </ActionPanel.Section>
               ) : (
                 <ActionPanel.Section>
-                  <ActionPrevPage tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
-                  <ActionNextPage tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
+                  <PrevPageAction tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
+                  <NextPageAction tablePageIndex={tablePageIndex} setTablePageIndex={setTablePageIndex} />
                 </ActionPanel.Section>
               )
             ) : (
@@ -242,10 +255,10 @@ ${
             <></>
           )}
           <ActionPanel.Section>
-            <ActionCopyPoster posterUrl={show?.primaryImage?.url} />
-            <ActionDownloadPoster posterUrl={show?.primaryImage?.url} />
+            <CopyPosterAction posterUrl={show?.primaryImage?.url} />
+            <DownloadPosterAction posterUrl={show?.primaryImage?.url} />
           </ActionPanel.Section>
-          <ActionReload revalidate={details.revalidate} />
+          <ReloadAction revalidate={details.revalidate} />
         </ActionPanel>
       }
     />

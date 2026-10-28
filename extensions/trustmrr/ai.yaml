@@ -1,0 +1,67 @@
+instructions: |
+  Use TrustMRR tools for questions about startups and their metrics. The list tool returns one page of up to 10 startups; use another page if needed. Use the get-startup tool for detailed metrics when you have a startup slug. Monetary filter inputs and all monetary amounts returned by the tools are in USD cents. Multiply dollar thresholds by 100 for tool inputs and divide returned amounts by 100 when reporting dollars. Report figures from tool results and do not guess missing values.
+
+evals:
+  - input: "@trustmrr Which SaaS startups are for sale?"
+    mocks:
+      list-startups:
+        data:
+          - name: Example SaaS
+            slug: example-saas
+            category: saas
+            onSale: true
+            revenue:
+              last30Days: 1200000
+              mrr: 1200000
+              total: 9000000
+        meta:
+          total: 1
+          page: 1
+          limit: 10
+          hasMore: false
+    expected:
+      - callsTool:
+          name: list-startups
+          arguments:
+            category: saas
+            onSale: true
+      - includes: Example SaaS
+      - includes: "12,000"
+
+  - input: "@trustmrr What is the 30-day revenue of datafast?"
+    mocks:
+      get-startup:
+        name: DataFast
+        slug: datafast
+        revenue:
+          last30Days: 420000
+          mrr: 400000
+          total: 5000000
+    expected:
+      - callsTool:
+          name: get-startup
+          arguments:
+            slug: datafast
+      - includes: "4,200"
+
+  - input: "@trustmrr Find SaaS startups earning at least $10,000 in the last 30 days."
+    mocks:
+      list-startups:
+        data:
+          - name: Growing SaaS
+            slug: growing-saas
+            category: saas
+            revenue:
+              last30Days: 1500000
+        meta:
+          total: 1
+          page: 1
+          limit: 10
+          hasMore: false
+    expected:
+      - callsTool:
+          name: list-startups
+          arguments:
+            category: saas
+            minRevenue: 1000000
+      - includes: "15,000"

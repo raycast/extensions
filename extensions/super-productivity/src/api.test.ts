@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // vi.hoisted ensures mock fns are created before the mock factory runs
 const mockShowToast = vi.hoisted(() => vi.fn());
 const mockShowHUD = vi.hoisted(() => vi.fn());
-const mockPreferences = vi.hoisted(() => ({ apiBaseUrl: "http://test:3876" }));
+const mockPreferences = vi.hoisted(() => ({
+  apiBaseUrl: "http://test:3876",
+  accessToken: "xXXxxxXXxXXXXXXxXXXxxXxxxxxXxXXX",
+}));
 
 vi.mock("@raycast/api", () => ({
   getPreferenceValues: () => mockPreferences,
@@ -82,9 +85,39 @@ function apiErrorResponse(message: string) {
 
 beforeEach(() => {
   mockPreferences.apiBaseUrl = "http://test:3876";
+  mockPreferences.accessToken = "xXXxxxXXxXXXXXXxXXXxxXxxxxxXxXXX";
   mockFetch.mockReset();
   mockShowToast.mockReset();
   mockShowHUD.mockReset();
+});
+
+describe("request authentication", () => {
+  it("sends Authorization Bearer header when access token is set", async () => {
+    mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
+
+    await checkHealth();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://test:3876/health",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${mockPreferences.accessToken}`,
+          "Content-Type": "application/json",
+        }),
+      }),
+    );
+  });
+
+  it("omits Authorization header when access token is empty", async () => {
+    mockPreferences.accessToken = "";
+    mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
+
+    await checkHealth();
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(headers["Authorization"]).toBeUndefined();
+    expect(headers["Content-Type"]).toBe("application/json");
+  });
 });
 
 describe("checkHealth", () => {

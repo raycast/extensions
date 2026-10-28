@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { agentIcon } from "../lib/agent-appearance";
+import { agentIcon, agentName } from "../lib/agent-appearance";
 import { addPromptHistory, clearPromptHistory, getPromptHistory } from "../lib/prompt-history";
 import { getAgentTarget, sendAgentPrompt } from "../lib/herdr";
 import { getHerdrPreferences } from "../lib/preferences";
@@ -96,7 +96,10 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
     () => agents.find((agent) => agent.pane_id === initialAgentId)?.pane_id || agents[0]?.pane_id || "",
     [agents, initialAgentId],
   );
-  const [targetPane, setTargetPane] = useState(initial);
+  // Derived at render: the agents list refreshes while the form is open, and
+  // state seeded at mount can go stale and route the prompt to the wrong agent.
+  const [selectedPane, setSelectedPane] = useState<string>();
+  const targetPane = selectedPane && agents.some((agent) => agent.pane_id === selectedPane) ? selectedPane : initial;
   const [prompt, setPrompt] = useState(initialPrompt);
   const [error, setError] = useState<string>();
   const { pop } = useNavigation();
@@ -113,15 +116,13 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
       return;
     }
     const target = getAgentTarget(agent);
-    const sent = await runAction(
-      `Prompting ${agent.name || agent.display_agent || agent.agent}`,
-      async () => {
-        await sendAgentPrompt(target, text);
-        await addPromptHistory(agent, target, text);
-      },
-      { success: "Prompt Sent", onSuccess: onSent },
-    );
+    const sent = await runAction(`Prompting ${agentName(agent)}`, () => sendAgentPrompt(target, text), {
+      success: "Prompt Sent",
+      onSuccess: onSent,
+    });
     if (!sent) return;
+    // A history write failure must not report the delivered prompt as failed.
+    await addPromptHistory(agent, target, text).catch(() => undefined);
 
     if (getHerdrPreferences().closeAfterPrompt !== false) {
       await closeMainWindow({ clearRootSearch: true });
@@ -173,13 +174,13 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="agent" title="Agent" value={targetPane} onChange={setTargetPane}>
+      <Form.Dropdown id="agent" title="Agent" value={targetPane} onChange={setSelectedPane}>
         {agents.map((agent) => (
           <Form.Dropdown.Item
             key={agent.pane_id}
             value={agent.pane_id}
-            title={`${agent.name || agent.display_agent || agent.agent} — ${statusTitle(agent.agent_status)}`}
-            icon={agentIcon(agent.agent || agent.display_agent)}
+            title={`${agentName(agent)} — ${statusTitle(agent.agent_status)}`}
+            icon={agentIcon(agent.agent)}
           />
         ))}
       </Form.Dropdown>

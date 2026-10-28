@@ -24,7 +24,7 @@ interface AskAgentQuestionFormValues {
   question: string;
 }
 
-function useAgents(dustApi: DustAPI) {
+export function useAgents(dustApi: DustAPI) {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const {

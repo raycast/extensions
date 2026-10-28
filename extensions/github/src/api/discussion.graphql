@@ -25,15 +25,14 @@ fragment DiscussionFields on Discussion {
   }
 }
 
-query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
-  openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+query searchDiscussions($query: String!, $numberOfItems: Int!, $after: String) {
+  searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfItems, after: $after) {
     nodes {
       ...DiscussionFields
     }
-  }
-  searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
-    nodes {
-      ...DiscussionFields
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
 }

@@ -23,17 +23,25 @@ export const usePreferences = () => {
   return React.useMemo(() => getPreferenceValues<Preferences.Translate>(), []);
 };
 
-export const useTextState = () => {
+export const useTextState = (launchInput?: { text: string; requestId: string }) => {
   const preferences = usePreferences();
-  const [text, setText] = React.useState("");
+  const inputText = launchInput?.text;
+  const requestId = launchInput?.requestId;
+  const [text, setText] = React.useState(inputText ?? "");
   const textRef = React.useRef(text);
   textRef.current = text;
 
   React.useEffect(() => {
+    if (inputText !== undefined) {
+      setText((current) => (current === inputText ? current : inputText));
+      return;
+    }
+
+    let cancelled = false;
     if (preferences.autoInput) {
       getSelectedText()
         .then((cbText) => {
-          if (!textRef.current) {
+          if (!cancelled && !textRef.current) {
             setText(cbText ?? "");
           }
         })
@@ -41,7 +49,10 @@ export const useTextState = () => {
           console.log("Error:", err);
         });
     }
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [inputText, requestId]);
 
   return [text, setText] as const;
 };

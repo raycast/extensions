@@ -1,5 +1,10 @@
 # WeChat DevTool Changelog
 
+## [1.4.1] - 2026-10-06
+
+- Update Action Keybindings on Windows
+- Update dependencies
+
 ## [1.4.0] - 2025-11-14
 
 ### Features

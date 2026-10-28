@@ -1,25 +1,30 @@
-import { Action, ActionPanel, Icon, List, Color, Image } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, Image, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { isFuture, isPast } from "date-fns";
+import type { InstanceState } from "@/lib/types/instance";
 import type { WantedMissingEpisode } from "@/lib/types/wanted";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { useWantedMissing, searchEpisode } from "@/lib/hooks/useSonarrAPI";
 import {
   formatAirDate,
   formatEpisodeNumber,
   formatOverview,
+  getSearchPlaceholder,
   getSeriesPoster,
   getRatingDisplay,
   formatRelativeTime,
-  getSonarrUrl,
 } from "@/lib/utils/formatting";
+import { InstanceActions } from "@/lib/components/InstanceActions";
+import { Shortcuts } from "@/lib/utils/shortcuts";
 
 type FilterStatus = "all" | "missing" | "upcoming" | "unreleased";
 
 export default function Command() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading, mutate } = useWantedMissing(1, 100);
+  const instanceState = useInstance();
+  const { data, isLoading, mutate } = useWantedMissing(instanceState.instance, 1, 100);
 
   const filteredEpisodes = useMemo(() => {
     if (!data || !data.records) return [];
@@ -45,10 +50,19 @@ export default function Command() {
     });
   }, [data, filterStatus, searchText]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <List
-      searchBarPlaceholder="Search missing episodes..."
-      isLoading={isLoading}
+      actions={instancePanel}
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search missing episodes")}
+      isLoading={isLoading || instanceState.isLoading}
       isShowingDetail
       filtering={false}
       onSearchTextChange={setSearchText}
@@ -70,19 +84,28 @@ export default function Command() {
           title="No Missing Episodes"
           description={filterStatus === "all" ? "All monitored episodes have files" : "No episodes match this filter"}
           icon={Icon.Check}
+          actions={instancePanel}
         />
       )}
       <List.Section title="Missing Episodes" subtitle={`${filteredEpisodes.length} episodes`}>
         {filteredEpisodes.map((episode) => (
-          <MissingEpisodeListItem key={episode.id} episode={episode} onRefresh={mutate} />
+          <MissingEpisodeListItem key={episode.id} episode={episode} onRefresh={mutate} instanceState={instanceState} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissingEpisode; onRefresh: () => void }) {
-  const sonarrUrl = getSonarrUrl();
+function MissingEpisodeListItem({
+  episode,
+  onRefresh,
+  instanceState,
+}: {
+  episode: WantedMissingEpisode;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
+  const sonarrUrl = instanceState.instance?.url ?? "";
 
   const poster = episode.series ? getSeriesPoster(episode.series.images) : undefined;
   const airDate = new Date(episode.airDateUtc);
@@ -146,7 +169,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
 
   const handleSearchEpisode = async () => {
     try {
-      await searchEpisode([episode.id]);
+      await searchEpisode(instanceState.instance, [episode.id]);
       onRefresh();
     } catch (error) {
       showFailureToast("Failed to search episode", {
@@ -182,7 +205,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
                 title="Search Episode"
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearchEpisode}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Shortcuts.searchEpisode}
               />
             )}
           </ActionPanel.Section>
@@ -194,7 +217,7 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
                   title="Open in Sonarr"
                   url={`${sonarrUrl}/series/${episode.series.titleSlug}`}
                   icon={Icon.Globe}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 {episode.series.tvdbId && (
                   <Action.OpenInBrowser
@@ -219,9 +242,11 @@ function MissingEpisodeListItem({ episode, onRefresh }: { episode: WantedMissing
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

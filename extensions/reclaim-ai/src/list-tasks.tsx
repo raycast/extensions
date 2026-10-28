@@ -1,6 +1,7 @@
 import "./initSentry";
 
 import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
+import { ReclaimTaskList } from "./components/ReclaimTaskList";
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
@@ -499,7 +500,17 @@ function TaskList() {
 }
 
 function Command() {
-  return <TaskList />;
+  const { currentUser, isLoading, isAssistantEnabled } = useUser();
+
+  // We need the user loaded to know which task view to show — otherwise we'd
+  // flash the 1.0 list for 2.0 users before the flag resolves. Only block on
+  // the initial load: a cached user is populated synchronously, so we render
+  // the correct view immediately even while a background refresh runs.
+  if (!currentUser && isLoading) {
+    return <List isLoading navigationTitle="Search Tasks" searchBarPlaceholder="Search tasks" />;
+  }
+
+  return isAssistantEnabled ? <ReclaimTaskList /> : <TaskList />;
 }
 
 export default withRAIErrorBoundary(Command);

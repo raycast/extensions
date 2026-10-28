@@ -1,4 +1,4 @@
-import { closeMainWindow, Color, Icon, LocalStorage, Cache } from "@raycast/api";
+import { closeMainWindow, Color, Icon, LocalStorage } from "@raycast/api";
 import { exec } from "child_process";
 import { GROUP, NOTEBOOK, OneNoteItem, PAGE, SECTION } from "./types";
 import dateFormat from "dateformat";
@@ -6,6 +6,7 @@ import { readdirSync } from "fs";
 import { runAppleScript } from "run-applescript";
 import { resolve } from "path";
 import { homedir } from "os";
+import { splitGrandparentIds } from "./search";
 
 const ONENOTE_USER_INFO_CACHE = resolve(
   homedir(),
@@ -46,9 +47,8 @@ export async function openNote(item: OneNoteItem) {
 }
 
 async function getUrl(item: OneNoteItem) {
-  const userid: string = await get_user_uid();
-
   if (item.Type == PAGE) return `onenote:#page-id=${item.GUID}`;
+  const userid: string = await get_user_uid();
   if (item.Type == SECTION)
     return `onenote:https://d.docs.live.net/${userid}/Documents/${getAncestorsStr(item, "/", true)}.one`;
   if (item.Type == GROUP)
@@ -60,10 +60,11 @@ export function getAncestorsStr(item: OneNoteItem | undefined, separator: string
   // TODO BUG HERE: WEIRD ORDER WITH NESTED SECTION GROUPS
   if (item == undefined) return "";
   const gpGOIDs: string[] = split_grandparents(item);
-  const ancestors: string[] = gpGOIDs.map((x) => getCachedTitle(x));
+  const titles: Record<string, string | null> = JSON.parse(item.GrandparentTitles ?? "{}");
+  const ancestors = gpGOIDs.map((id) => titles[id] ?? "");
   if (item.ParentGOID) ancestors.push(getParentTitle(item));
   if (includeSelf) ancestors.push(item.Title);
-  return ancestors.join(separator);
+  return ancestors.filter(Boolean).join(separator);
 }
 
 export function parseDatetime(datetime: number): string {
@@ -104,22 +105,9 @@ async function get_user_uid(): Promise<string> {
 }
 
 export function split_grandparents(item: OneNoteItem) {
-  const parts = item.GrandparentGOIDs?.split("}");
-  const newIds = [];
-  let i = 0;
-  while (i < parts?.length - 1) {
-    newIds.push(`${parts[i]}}${parts[i + 1]}}`);
-    i += 2;
-  }
-  return newIds;
-}
-
-export function getCachedTitle(GOID: string): string {
-  const cache = new Cache();
-  return String(cache.get(GOID));
+  return splitGrandparentIds(item.GrandparentGOIDs);
 }
 
 export function getParentTitle(item: OneNoteItem): string {
-  if (item.ParentGOID) return getCachedTitle(item.ParentGOID);
-  else return "";
+  return item.ParentTitle ?? "";
 }

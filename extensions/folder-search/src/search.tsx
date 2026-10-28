@@ -12,7 +12,15 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import React, { useRef } from "react";
-import { folderName, copyFolderToClipboard, maybeMoveResultToTrash, log, logDiagnostics } from "./utils";
+import {
+  folderName,
+  copyFolderToClipboard,
+  maybeMoveResultToTrash,
+  log,
+  logDiagnostics,
+  openNewFinderTab,
+  openInCurrentFinderTab,
+} from "./utils";
 import { runAppleScript } from "run-applescript";
 import { SpotlightSearchResult, SpotlightSearchPreferences } from "./types";
 import { useFolderSearch } from "./hooks/useFolderSearch";
@@ -92,14 +100,64 @@ function Command(props: LaunchProps) {
   // Render actions for the folder list items
   const renderFolderActions = (result: SpotlightSearchResult, resultIndex: number, isPinnedSection = false) => {
     const enclosingFolder = path.dirname(result.path);
+    const { openBehaviour } = getPreferenceValues<SpotlightSearchPreferences>();
+
+    const openInNewWindowAction = (
+      <Action.Open
+        title="Open in New Finder Window"
+        icon={Icon.Folder}
+        target={result.path}
+        onOpen={() => popToRoot({ clearSearchBar: true })}
+      />
+    );
+
+    const openInNewTabAction = (
+      <Action
+        title="Open in New Finder Tab"
+        icon={Icon.Finder}
+        onAction={async () => {
+          try {
+            await closeMainWindow();
+            await openNewFinderTab(result.path);
+            popToRoot({ clearSearchBar: true });
+          } catch (error) {
+            showFailureToast(error, { title: "Could not open folder in Finder" });
+          }
+        }}
+      />
+    );
+
+    const openInCurrentTabAction = (
+      <Action
+        title="Open in Current Finder Tab"
+        icon={Icon.AppWindow}
+        onAction={async () => {
+          try {
+            await closeMainWindow();
+            await openInCurrentFinderTab(result.path);
+            popToRoot({ clearSearchBar: true });
+          } catch (error) {
+            showFailureToast(error, { title: "Could not open folder in Finder" });
+          }
+        }}
+      />
+    );
+
+    const openActions = {
+      newWindow: openInNewWindowAction,
+      newTab: openInNewTabAction,
+      currentTab: openInCurrentTabAction,
+    };
+    const orderedOpenActions = [
+      openBehaviour,
+      ...(Object.keys(openActions) as (keyof typeof openActions)[]).filter((key) => key !== openBehaviour),
+    ];
+
     return (
       <ActionPanel title={folderName(result)}>
-        <Action.Open
-          title="Open in Finder"
-          icon={Icon.Folder}
-          target={result.path}
-          onOpen={() => popToRoot({ clearSearchBar: true })}
-        />
+        {openActions[orderedOpenActions[0]]}
+        {openActions[orderedOpenActions[1]]}
+        {openActions[orderedOpenActions[2]]}
         <Action
           title="Move Finder Selection"
           icon={Icon.NewFolder}

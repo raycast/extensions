@@ -1,9 +1,9 @@
 import { updateCommandMetadata } from "@raycast/api";
-import { runDesktopRenamerCommand } from "./utils";
+import { getCurrentSpaceName } from "./utils";
 
 export default async function Command() {
   try {
-    const result = await runDesktopRenamerCommand("get current space name");
+    const result = await getCurrentSpaceName();
 
     if (result) {
       const name = result.trim();

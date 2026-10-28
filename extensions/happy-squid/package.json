@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "happy-squid",
+  "title": "Happy Squid",
+  "description": "Start and manage your Happy Squid tasks without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "happysquid",
+  "owner": "happy-squid",
+  "access": "public",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "tasks",
+      "title": "Current Task",
+      "subtitle": "Happy Squid",
+      "description": "Open your current task, or choose what to work on next.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "manage-tasks",
+      "title": "Manage Tasks",
+      "subtitle": "Happy Squid",
+      "description": "Start, review and manage your Happy Squid tasks.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist --exit-on-error",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.5.2",
+    "@supabase/supabase-js": "^2.110.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "^19.0.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "react": "19.0.0",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^5.5.3",
+    "vitest": "^4.1.6"
+  }
+}

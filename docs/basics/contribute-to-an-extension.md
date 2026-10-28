@@ -8,7 +8,7 @@ All published extensions are open-source and can be found in [this repository](h
 
 ## Get source code
 
-First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action in the Raycast's root search.
+First, you need to find the source code of the extension. The easiest way to do this is to use the `Fork Extension` action on a command of the extension in the Raycast's root search.
 
 ![Fork an extension](../.gitbook/assets/fork-extension.webp)
 

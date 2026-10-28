@@ -9,10 +9,15 @@ import {
   createProgressBar,
 } from "../utils/usage-limits-formatter";
 import { formatDuration } from "../utils/data-formatter";
+import { getLimitRows } from "../utils/limit-rows";
 import { showRemainingUsage } from "../preferences";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
+import { capitalize } from "es-toolkit";
+
+const rowTitle = (label: string, period: string | null): string =>
+  period ? `${label} ${capitalize(period)} Limit` : `${label} Usage Limit`;
 
 export function UsageLimits() {
   const {
@@ -35,7 +40,6 @@ export function UsageLimits() {
   }
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
-  const sevenDayUtil = data?.seven_day?.utilization ?? 0;
   const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
@@ -85,20 +89,6 @@ export function UsageLimits() {
       return <ErrorMetadata noDataMessage="Loading usage limits..." noDataSubMessage="Fetching data from Claude API" />;
     }
 
-    const fiveHourColor = getUtilizationColor(fiveHourUtil);
-    const sevenDayColor = getUtilizationColor(sevenDayUtil);
-
-    const fiveHourAverage = calculateAverageUsage(data.five_hour.resets_at, 5);
-    const sevenDayAverage = calculateAverageUsage(data.seven_day.resets_at, 7 * 24);
-
-    const fiveHourEstimate = calculateEstimatedUsage(fiveHourUtil, data.five_hour.resets_at, 5);
-    const sevenDayEstimate = calculateEstimatedUsage(sevenDayUtil, data.seven_day.resets_at, 7 * 24);
-
-    const fiveHourEstimateColor =
-      fiveHourEstimate !== null ? getUtilizationColor(fiveHourEstimate) : Color.SecondaryText;
-    const sevenDayEstimateColor =
-      sevenDayEstimate !== null ? getUtilizationColor(sevenDayEstimate) : Color.SecondaryText;
-
     return (
       <List.Item.Detail.Metadata>
         {lastFetched && (
@@ -112,68 +102,50 @@ export function UsageLimits() {
           </>
         )}
 
-        <List.Item.Detail.Metadata.Label title="5-Hour Usage Limit" icon={Icon.Clock} />
-        <List.Item.Detail.Metadata.Label
-          title="Utilization"
-          text={`${fiveHourUtil.toFixed(1)}%`}
-          icon={{ source: Icon.BarChart, tintColor: fiveHourColor }}
-        />
-        <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(fiveHourUtil)} />
-        {fiveHourAverage !== null && (
-          <List.Item.Detail.Metadata.Label
-            title="Average Usage"
-            text={`${fiveHourAverage.toFixed(1)}%`}
-            icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-          />
-        )}
-        {fiveHourEstimate !== null && (
-          <List.Item.Detail.Metadata.Label
-            title="Estimated Usage"
-            text={`${fiveHourEstimate.toFixed(1)}%`}
-            icon={{ source: Icon.LineChart, tintColor: fiveHourEstimateColor }}
-          />
-        )}
-        <List.Item.Detail.Metadata.Label
-          title="Resets in"
-          text={
-            data.five_hour.resets_at
-              ? `${formatTimeRemaining(data.five_hour.resets_at)} · ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`
-              : "N/A"
-          }
-          icon={Icon.ArrowClockwise}
-        />
-        <List.Item.Detail.Metadata.Separator />
+        {getLimitRows(data).map((row, index) => {
+          const average = row.windowHours === null ? null : calculateAverageUsage(row.resets_at, row.windowHours);
+          const estimate =
+            row.windowHours === null ? null : calculateEstimatedUsage(row.utilization, row.resets_at, row.windowHours);
 
-        <List.Item.Detail.Metadata.Label title="7-Day Usage Limit" icon={Icon.Calendar} />
-        <List.Item.Detail.Metadata.Label
-          title="Utilization"
-          text={`${sevenDayUtil.toFixed(1)}%`}
-          icon={{ source: Icon.BarChart, tintColor: sevenDayColor }}
-        />
-        <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(sevenDayUtil)} />
-        {sevenDayAverage !== null && (
-          <List.Item.Detail.Metadata.Label
-            title="Average Usage"
-            text={`${sevenDayAverage.toFixed(1)}%`}
-            icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-          />
-        )}
-        {sevenDayEstimate !== null && (
-          <List.Item.Detail.Metadata.Label
-            title="Estimated Usage"
-            text={`${sevenDayEstimate.toFixed(1)}%`}
-            icon={{ source: Icon.LineChart, tintColor: sevenDayEstimateColor }}
-          />
-        )}
-        <List.Item.Detail.Metadata.Label
-          title="Resets in"
-          text={
-            data.seven_day.resets_at
-              ? `${formatTimeRemaining(data.seven_day.resets_at)} · ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`
-              : "N/A"
-          }
-          icon={Icon.ArrowClockwise}
-        />
+          return (
+            <React.Fragment key={row.key}>
+              {index > 0 && <List.Item.Detail.Metadata.Separator />}
+              <List.Item.Detail.Metadata.Label
+                title={rowTitle(row.label, row.period)}
+                icon={row.windowHours !== null && row.windowHours <= 24 ? Icon.Clock : Icon.Calendar}
+              />
+              <List.Item.Detail.Metadata.Label
+                title="Utilization"
+                text={`${row.utilization.toFixed(row.decimals)}%`}
+                icon={{ source: Icon.BarChart, tintColor: getUtilizationColor(row.utilization) }}
+              />
+              <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(row.utilization)} />
+              {average !== null && (
+                <List.Item.Detail.Metadata.Label
+                  title="Average Usage"
+                  text={`${average.toFixed(1)}%`}
+                  icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
+                />
+              )}
+              {estimate !== null && (
+                <List.Item.Detail.Metadata.Label
+                  title="Estimated Usage"
+                  text={`${estimate.toFixed(1)}%`}
+                  icon={{ source: Icon.LineChart, tintColor: getUtilizationColor(estimate) }}
+                />
+              )}
+              <List.Item.Detail.Metadata.Label
+                title="Resets in"
+                text={
+                  row.resets_at
+                    ? `${formatTimeRemaining(row.resets_at)} · ${new Date(row.resets_at).toLocaleString("en-US", { hour12: false })}`
+                    : "N/A"
+                }
+                icon={Icon.ArrowClockwise}
+              />
+            </React.Fragment>
+          );
+        })}
 
         {isStale && !isLoading && (
           <>

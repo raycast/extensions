@@ -1,4 +1,4 @@
-import { Article, Source } from "./interfaces";
+import { Article, BatchItem, CategoryItem, Source } from "./interfaces";
 
 const API_BASE_URL = "https://kite.kagi.com";
 
@@ -85,6 +85,88 @@ export async function getLatestBatch(lang: string = "default"): Promise<BatchLat
     throw new Error(`Failed to fetch latest batch: ${response.status}`);
   }
   return response.json() as Promise<BatchLatestResponse>;
+}
+
+// Fetch the categories available in a batch (used by the AI tools, which can't use the useCategories hook)
+export async function getBatchCategories(
+  batchId: string,
+  lang: string,
+): Promise<{ categories: CategoryItem[]; hasOnThisDay?: boolean }> {
+  const url = `${API_BASE_URL}/api/batches/${encodeURIComponent(batchId)}/categories?lang=${encodeURIComponent(lang)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch categories: ${response.status}`);
+  }
+  const json = (await response.json()) as {
+    categories: { id: string; categoryId: string; categoryName: string }[];
+    hasOnThisDay?: boolean;
+  };
+  return {
+    categories: json.categories.map((cat) => ({ id: cat.id, categoryId: cat.categoryId, name: cat.categoryName })),
+    hasOnThisDay: json.hasOnThisDay,
+  };
+}
+
+// Fetch the batch(es) published on a given date (YYYY-MM-DD), for browsing a past day like the Time Travel command
+export async function getBatchesByDate(dateString: string, lang: string): Promise<BatchItem[]> {
+  const url = `${API_BASE_URL}/api/batches?from=${encodeURIComponent(dateString)}T00:00:00Z&to=${encodeURIComponent(
+    dateString,
+  )}T23:59:59Z&lang=${encodeURIComponent(lang)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch batches for ${dateString}: ${response.status}`);
+  }
+  const data = (await response.json()) as { batches: BatchItem[] };
+  return data.batches || [];
+}
+
+// Fetch stories for a specific category within a batch (used by the AI tools)
+export async function getCategoryStories(
+  batchId: string,
+  categoryId: string,
+  lang: string,
+  limit: number,
+): Promise<StoryResponse[]> {
+  const url = `${API_BASE_URL}/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
+    categoryId,
+  )}/stories?lang=${encodeURIComponent(lang)}&limit=${limit}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch stories: ${response.status}`);
+  }
+  const data = (await response.json()) as { stories?: StoryResponse[] };
+  return data.stories || [];
+}
+
+export interface SearchResult {
+  story: StoryResponse;
+  categoryName: string;
+  batchDate: string;
+}
+
+// Full-text search across all stories, newest first, with an optional upper date bound (same endpoint that
+// powers the search on news.kagi.com). Unlike category browsing, this already spans every date, not just today.
+// The API rejects a lower bound (`from`), so callers must filter that side themselves on `batchDate`.
+export async function searchStories(
+  query: string,
+  lang: string,
+  limit: number,
+  to?: string,
+): Promise<{ results: SearchResult[]; totalCount: number; hasMore: boolean }> {
+  let url = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&limit=${limit}&lang=${encodeURIComponent(lang)}`;
+  if (to) url += `&to=${encodeURIComponent(to)}`;
+  const response = await fetch(url);
+  const data = (await response.json().catch(() => ({}))) as {
+    results?: SearchResult[];
+    totalCount?: number;
+    hasMore?: boolean;
+    message?: string;
+  };
+  // The API can answer with an error message instead of results, sometimes even with a 200 status
+  if (!response.ok || !data.results) {
+    throw new Error(data.message ?? `Search failed: ${response.status}`);
+  }
+  return { results: data.results, totalCount: data.totalCount ?? data.results.length, hasMore: data.hasMore ?? false };
 }
 
 // ============================================================================
@@ -253,4 +335,31 @@ export function storiesToArticles(stories: StoryResponse[]): Article[] {
       userExperienceImpact: typeof story.user_experience_impact === "string" ? story.user_experience_impact : undefined,
     };
   });
+}
+
+// ============================================================================
+// AI Tools
+// ============================================================================
+
+export interface AIStorySummary {
+  title: string;
+  category: string;
+  summary: string;
+  sources: Source[];
+}
+
+// Strip [hostname#count] reference markers; AI tools list sources separately instead of linkifying them inline
+function stripReferenceMarkers(text: string): string {
+  return text.replace(/\[([^\]#]+)#(\d+)\]\s*/g, "").trim();
+}
+
+// Compact story representation for AI tools, keeping their context usage small
+export function toAIStorySummary(article: Article, maxSummaryLength: number = 500): AIStorySummary {
+  const summary = stripReferenceMarkers(article.summary);
+  return {
+    title: article.title,
+    category: article.category,
+    summary: summary.length > maxSummaryLength ? `${summary.slice(0, maxSummaryLength)}…` : summary,
+    sources: (article.sources || []).slice(0, 3),
+  };
 }

@@ -22,9 +22,8 @@ describe("iconForList", () => {
     ).toEqual({ source: "Clipboard", tintColor: "#1d9bf0" });
   });
 
-  it("honors keyword-rule ordering (first match wins)", () => {
-    // "test" appears in the medical rule; a name matching an earlier rule
-    // should still take the earlier rule. "code" → terminal/purple.
+  it("resolves a keyword rule with its own color", () => {
+    // "code" → terminal/purple. Nothing longer competes in this name.
     expect(
       iconForList({ icon: null, color: null, name: "Code Notes", id: 1 }),
     ).toEqual({ source: "Terminal", tintColor: "#8b5cf6" });
@@ -66,6 +65,112 @@ describe("iconForList", () => {
     // Unknown explicit icon isn't a valid glyph, so tier 1 fails and it
     // resolves via the id fallback path, landing on the default list glyph.
     expect(result.source).toBe("List");
+  });
+});
+
+// Parity block mirroring the web's tests/listIconCatalog.test.js and the
+// mobile app's test/list_icon_catalog_test.dart. All three assert the same
+// cases on purpose: lists.icon / lists.color are shared keys, and a list
+// created before the web started persisting its resolved appearance stores
+// icon = null and is re-resolved independently on each client, so a divergence
+// here renders the same list differently per platform. Change one, change all.
+describe("keyword resolution parity with the web catalog", () => {
+  // No rule targets the `list` key, so a "List" source means "no keyword match"
+  // and the resolver fell through to the default glyph.
+  const srcFor = (name: string) =>
+    iconForList({ icon: null, color: null, name, id: 0 }).source;
+
+  it("does not match terms mid-word", () => {
+    expect(srcFor("Labels & Tags")).toBe("List"); // `lab`
+    expect(srcFor("Collaboration Glossary")).toBe("List"); // `lab`
+    expect(srcFor("Devotional Terms")).toBe("List"); // `dev`
+    expect(srcFor("Latest Releases")).toBe("List"); // `test`
+    expect(srcFor("Selfish Behaviour")).toBe("List"); // `fish`
+    expect(srcFor("Facebook Ads")).toBe("List"); // `book`
+    expect(srcFor("Catalog Numbers")).toBe("List"); // `cat`
+    expect(srcFor("Taxonomy Basics")).toBe("List"); // `tax`
+    expect(srcFor("Employee Training")).toBe("List"); // `train`
+    expect(srcFor("Carbon Credits")).toBe("List"); // `car`
+    expect(srcFor("Portfolio Theory")).toBe("List"); // `port`
+    expect(srcFor("Digital Transition")).toBe("List"); // `transit`
+  });
+
+  it("still matches the short terms standing alone", () => {
+    expect(srcFor("Lab Results")).toBe("MedicalSupport");
+    expect(srcFor("Dev Tools")).toBe("Terminal");
+    expect(srcFor("Pet Care")).toBe("Footprints");
+    expect(srcFor("Train")).toBe("Train");
+    expect(srcFor("Labor Law")).toBe("Building"); // `law` beats a stale `lab`
+  });
+
+  it("keeps stem inflections working", () => {
+    expect(srcFor("Q3 Planning")).toBe("Clipboard");
+    expect(srcFor("Computing Terms")).toBe("Terminal");
+    expect(srcFor("Flowering Plants")).toBe("Leaf");
+    expect(srcFor("Recipes")).toBe("MugSteam");
+  });
+
+  it("scores by specificity, not rule order", () => {
+    // `plant` (leaf, 5) beats `plan` (clipboard, 4) despite clipboard being
+    // the earlier rule — first-match-wins made this a clipboard.
+    expect(srcFor("Plant Taxonomy")).toBe("Leaf");
+    // Equal lengths still fall back to rule order: `plan` and `city` both 4.
+    expect(srcFor("City Planning")).toBe("Clipboard");
+  });
+
+  it("resolves the subject, not the product's own domain nouns", () => {
+    expect(srcFor("Fish Glossary")).toBe("Anchor");
+    expect(srcFor("Medical Glossary")).toBe("MedicalSupport");
+  });
+
+  it("covers the widened domains", () => {
+    expect(srcFor("Fish")).toBe("Anchor"); // no fish in the enum; marine stand-in
+    expect(srcFor("Dog Breeds")).toBe("Footprints");
+    expect(srcFor("Banking Terms")).toBe("BankNote");
+    expect(srcFor("Legal Terms")).toBe("Building");
+    expect(srcFor("Accounting Standards")).toBe("Calculator");
+    expect(srcFor("Machine Learning")).toBe("MemoryChip");
+    expect(srcFor("Kubernetes Terms")).toBe("Network");
+    expect(srcFor("Security Terms")).toBe("Shield");
+    expect(srcFor("Transport")).toBe("Car");
+    expect(srcFor("Railway Terms")).toBe("Train");
+    expect(srcFor("Freight Terms")).toBe("Lorry");
+    expect(srcFor("Maritime Vocabulary")).toBe("Boat");
+    expect(srcFor("Physics Terms")).toBe("Dna");
+    expect(srcFor("Chemistry")).toBe("EyeDropper");
+    expect(srcFor("Crypto Terms")).toBe("Crypto");
+    expect(srcFor("Ham Radio")).toBe("Waveform");
+    expect(srcFor("Fashion Terms")).toBe("Swatch");
+    expect(srcFor("OAuth Scopes")).toBe("Key");
+    expect(srcFor("Mobile Apps")).toBe("Mobile");
+    expect(srcFor("Football Terms")).toBe("SoccerBall");
+    expect(srcFor("School Subjects")).toBe("Pencil");
+  });
+
+  // Three near-collisions that resolve only because a longer, more specific
+  // term out-scores a shorter one in a DIFFERENT rule.
+  it("resolves the crypto / radio / atom near-collisions", () => {
+    expect(srcFor("Cryptography")).toBe("Shield"); // cryptograph > crypto
+    expect(srcFor("Radiology")).toBe("MedicalSupport"); // radiolog > radio
+    expect(srcFor("Atomic Design")).toBe("Brush"); // atom is exact
+  });
+
+  it("renders the extended glyph keys the web can store", () => {
+    // The gap this port closes: before it, any of these fell back to Icon.List.
+    for (const [key, source] of [
+      ["fish", "Anchor"],
+      ["train-front", "Train"],
+      ["banknote", "BankNote"],
+      ["gem", "Crypto"],
+      ["flask-conical", "EyeDropper"],
+      ["radio-tower", "Waveform"],
+      ["shirt", "Swatch"],
+      ["atom", "Dna"],
+    ] as const) {
+      expect(
+        iconForList({ icon: key, color: "blue", name: "x", id: 1 }).source,
+      ).toBe(source);
+    }
   });
 });
 

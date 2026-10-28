@@ -1,5 +1,16 @@
 # Todo List Changelog
 
+## [Windows Shortcuts, Backups, and AI Tools] - 2026-09-26
+
+- Reload newer task data after conflicting saves and close stale tag/date forms so editing can continue from the refreshed list.
+- Show an error when opening the todo list or backup commands fails.
+- Fixed action shortcuts and search-mode switching on Windows. The menu-bar command is now explicitly macOS-only.
+- Fixed filtering by a tag named "All" and added an existing-tag picker when editing tags.
+- Fixed sorted and limited menu-bar lists changing the wrong task.
+- Added JSON backup export and import, including support for the original todo file format.
+- Preserve the previous saved list as a backup, report unreadable data, and reject saves from a command with an outdated list.
+- Added AI tools to search todos and summarize tasks, tags, priorities, and deadlines.
+
 ## [New Preference Option: Group by priority] - 2026-07-22
 
 - Added preference option to group tasks by priority in both Todo and Completed sections.

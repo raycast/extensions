@@ -1,0 +1,67 @@
+instructions: |
+  Use list-audio-devices before switching to a named device. Pass its exact ID to set-audio-device.
+  Input devices are microphones. Output devices are speakers and headphones.
+  Use get-audio-volume to read the current input or output volume.
+evals:
+  - input: "@audio-device Which output devices are available?"
+    mocks:
+      list-audio-devices:
+        - id: "speaker-1"
+          name: "MacBook Pro Speakers"
+          isDefault: true
+        - id: "headphones-2"
+          name: "Headphones"
+          isDefault: false
+    expected:
+      - callsTool:
+          name: list-audio-devices
+          arguments:
+            type: output
+      - includes: "Headphones"
+  - input: "@audio-device Switch my output to Headphones"
+    mocks:
+      list-audio-devices:
+        - id: "speaker-1"
+          name: "MacBook Pro Speakers"
+          isDefault: true
+        - id: "headphones-2"
+          name: "Headphones"
+          isDefault: false
+      set-audio-device: "Active output device set to Headphones."
+    expected:
+      - callsTool:
+          name: set-audio-device
+          arguments:
+            type: output
+            deviceId: headphones-2
+  - input: "@audio-device Set my microphone volume to 40%"
+    mocks:
+      list-audio-devices:
+        - id: "microphone-1"
+          name: "Built-in Microphone"
+          isDefault: true
+      set-audio-volume: "Built-in Microphone input volume set to 40%."
+    expected:
+      - callsTool:
+          name: set-audio-volume
+          arguments:
+            type: input
+            volume: 40
+  - input: "@audio-device What is my speaker volume?"
+    mocks:
+      get-audio-volume: "MacBook Pro Speakers output volume is 65%."
+    expected:
+      - callsTool:
+          name: get-audio-volume
+          arguments:
+            type: output
+      - includes: "65%"
+  - input: "@audio-device What is my microphone volume?"
+    mocks:
+      get-audio-volume: "Built-in Microphone input volume is 40%."
+    expected:
+      - callsTool:
+          name: get-audio-volume
+          arguments:
+            type: input
+      - includes: "40%"

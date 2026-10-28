@@ -1,5 +1,17 @@
 # Flighty Changelog
 
+## [AI Flight Lookup] - 2026-10-23
+
+- Add AI tools to search saved flights and retrieve flight details
+- Support flight number, airline, route, departure date, and upcoming/past filters
+- Return airport-local times, Flighty links, and paginated results
+- Show Full Disk Access guidance when Flighty's database cannot be read
+
+## [Fix Airline Logos] - 2026-09-20
+
+- Load airline logos from the current Flighty UUID endpoint
+- Bump package dependencies
+
 ## [Copy Flight Number Action] - 2026-05-22
 
 - Add action to copy flight number

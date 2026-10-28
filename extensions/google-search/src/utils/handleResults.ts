@@ -1,8 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
-import { Preferences, SearchResult } from "./types";
-import fetch from "node-fetch";
-import iconv from "iconv-lite";
+import { SearchResult } from "./types";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -18,7 +16,17 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   }
 
   const items: SearchResult[] = JSON.parse(historyString);
-  return items;
+  const seenUrls = new Set<string>();
+  // Older "Search Selected Text" entries were stored without the flag and untrimmed;
+  // rebuild them so they match the same search typed in the list.
+  return items
+    .filter((item) => item.isNavigation || item.query?.trim())
+    .map((item) =>
+      item.isNavigation
+        ? { ...item, isHistory: true }
+        : { ...getStaticResult(item.query.trim())[0], id: item.id, isHistory: true },
+    )
+    .filter((item) => !seenUrls.has(item.url) && seenUrls.add(item.url));
 }
 
 export function getStaticResult(searchText: string): SearchResult[] {
@@ -38,31 +46,30 @@ export function getStaticResult(searchText: string): SearchResult[] {
   return result;
 }
 
+// [query, suggestions, descriptions, unused, { "google:suggesttype": types, ... }]
+type SuggestResponse = [string, string[]?, string[]?, unknown?, { "google:suggesttype"?: string[] }?];
+
 export async function getAutoSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+  // `oe=utf-8` makes Google answer in UTF-8; without it the body is ISO-8859-1.
   const response = await fetch(
-    `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
-    {
-      method: "get",
-      signal: signal,
-      headers: {
-        "Content-Type": "text/plain; charset=UTF-8",
-      },
-    },
+    `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&ie=utf-8&oe=utf-8&q=${encodeURIComponent(searchText)}`,
+    { signal },
   );
 
   if (!response.ok) {
-    return Promise.reject(response.statusText);
+    throw new Error(`Google suggestions returned ${response.status} ${response.statusText}`);
   }
 
-  const buffer = await response.arrayBuffer();
-  const text = iconv.decode(Buffer.from(buffer), "iso-8859-1");
-  const json = JSON.parse(text);
+  const json = (await response.json()) as SuggestResponse;
+  const suggestions = json[1] ?? [];
+  const descriptions = json[2] ?? [];
+  const types = json[4]?.["google:suggesttype"] ?? [];
 
   const results: SearchResult[] = [];
 
-  json[1].map((item: string, i: number) => {
-    const type = json[4]["google:suggesttype"][i];
-    const description = json[2][i];
+  suggestions.forEach((item, i) => {
+    const type = types[i];
+    const description = descriptions[i] ?? "";
 
     if (type === "NAVIGATION") {
       results.push({

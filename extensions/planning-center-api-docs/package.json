@@ -25,6 +25,24 @@
   ],
   "preferences": [
     {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The primary action when pressing Enter on a documentation page",
+      "type": "dropdown",
+      "required": false,
+      "default": "open-in-browser",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "open-in-browser"
+        },
+        {
+          "title": "Copy Docs as Markdown",
+          "value": "copy-markdown"
+        }
+      ]
+    },
+    {
       "name": "apiVersion",
       "title": "API Version",
       "description": "API version",

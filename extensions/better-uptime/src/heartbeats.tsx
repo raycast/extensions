@@ -125,9 +125,10 @@ function Heartbeat({ item, onDeleted }: { item: HeartbeatItem; onDeleted: () => 
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
           <ActionCopyHeartbeatUrl url={item.attributes.url} />
-          <ActionDeleteHeartbeat item={item} onDeleted={onDeleted} />
+          <ActionPanel.Section>
+            <ActionDeleteHeartbeat item={item} onDeleted={onDeleted} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

@@ -1,26 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-
-interface Account {
-  id: string;
-  name: string;
-  nickname: string | null;
-  currentBalance: number;
-  availableBalance: number;
-  kind: string;
-  status: string;
-  createdAt: string;
-  legalBusinessName: string;
-}
-
-interface Transaction {
-  id: string;
-  amount: number;
-  counterpartyName: string;
-  createdAt: string;
-  status: string;
-  kind: string;
-}
+import { loadEachLogin } from "../logins";
+import { Account, getAccounts, getAllPages, log, Transaction } from "../mercury";
 
 type Input = {
   /**
@@ -29,35 +8,14 @@ type Input = {
   period?: "month" | "quarter" | "year";
 };
 
-const API_BASE_URL = "https://api.mercury.com/api/v1/";
-
 /**
  * Analyzes financial data from Mercury accounts and provides insights.
  * Calculates metrics like cash flow, top expenses, and income sources for the specified period.
  */
 export default async function (input: Input = {}) {
-  const { apiKey } = getPreferenceValues<Preferences>();
   const { period = "month" } = input;
 
   try {
-    // Fetch accounts
-    const accountsResponse = await fetch(`${API_BASE_URL}/accounts`, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
-
-    if (!accountsResponse.ok) {
-      throw new Error(`Failed to fetch accounts: ${accountsResponse.statusText}`);
-    }
-
-    const accountsData = (await accountsResponse.json()) as {
-      accounts: Account[];
-    };
-    const accounts = accountsData.accounts;
-
     // Calculate date range based on period
     const startDate = new Date();
 
@@ -73,29 +31,21 @@ export default async function (input: Input = {}) {
         break;
     }
 
-    // Fetch transactions for each account within date range
-    const allTransactions: Transaction[] = [];
-    for (const account of accounts) {
-      const txResponse = await fetch(
-        `${API_BASE_URL}/account/${account.id}/transactions?limit=500&start=${startDate.toISOString().split("T")[0]}`,
-        {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${apiKey}`,
-          },
-        },
-      );
-
-      if (txResponse.ok) {
-        const txData = (await txResponse.json()) as {
-          transactions: Transaction[];
-        };
-        allTransactions.push(...txData.transactions);
-      } else {
-        throw new Error(`Failed to fetch transactions for account ${account.id}: ${txResponse.statusText}`);
-      }
-    }
+    // Fetch accounts and every transaction in the period, for each connected Mercury account.
+    // An organization that can't be reached is reported in `unavailable` rather than failing the rest.
+    const { results, unavailable } = await loadEachLogin(async (login) => {
+      const [accounts, transactions] = await Promise.all([
+        getAccounts(login.token),
+        getAllPages<Transaction>(
+          login.token,
+          `/transactions?limit=1000&start=${startDate.toISOString().split("T")[0]}`,
+          "transactions",
+        ),
+      ]);
+      return { accounts, transactions };
+    });
+    const accounts: Account[] = results.flatMap(({ value }) => value.accounts);
+    const allTransactions: Transaction[] = results.flatMap(({ value }) => value.transactions);
 
     // Calculate financial metrics
     const totalBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
@@ -147,6 +97,18 @@ export default async function (input: Input = {}) {
       .slice(0, 5)
       .map(([name, data]) => ({ name, amount: data.total, count: data.count }));
 
+    const largestTransactions = [...allTransactions]
+      .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+      .slice(0, 5)
+      .map(({ counterpartyName, amount, createdAt, kind, status, accountId }) => ({
+        counterpartyName,
+        amount,
+        date: createdAt.split("T")[0],
+        kind,
+        status,
+        account: accounts.find((account) => account.id === accountId)?.name ?? accountId,
+      }));
+
     return {
       period,
       accounts: {
@@ -162,9 +124,11 @@ export default async function (input: Input = {}) {
       transactionsByType,
       topExpenses,
       topIncome,
+      largestTransactions,
+      unavailable,
     };
   } catch (error) {
-    console.error("Error analyzing finances:", error);
+    log.error("Error analyzing finances:", error);
     throw new Error(`Error analyzing finances: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

@@ -151,3 +151,33 @@ export function getZoomUrlForPlatform(zoomUrl: string): string {
 export function getZoomUrlForMeetingId(meetingId: string): string {
   return isWindows ? `zoommtg://zoom.us/join?confno=${meetingId}` : `https://zoom.us/j/${meetingId}`;
 }
+
+/**
+ * Gets the canonical shareable HTTPS join URL for a meeting ID.
+ * Unlike {@link getZoomUrlForMeetingId}, this always returns an HTTPS URL
+ * so it can be shared with participants on any platform.
+ * @param meetingId - The Zoom meeting ID
+ * @returns The shareable HTTPS join URL
+ */
+export function getZoomJoinUrlForMeetingId(meetingId: string): string {
+  return `https://zoom.us/j/${meetingId}`;
+}
+
+/**
+ * Normalizes a Zoom meeting ID by removing whitespace and dashes.
+ * Users often format their ID like "123 456 7891" or "123-456-7891".
+ * @param id - The raw meeting ID value
+ * @returns The normalized meeting ID
+ */
+export function normalizeZoomMeetingId(id: string): string {
+  return id.replace(/[\s-]/g, "");
+}
+
+/**
+ * Checks whether a value is a valid Zoom meeting ID.
+ * @param id - The value to check
+ * @returns Whether the value is a valid meeting ID
+ */
+export function isValidZoomMeetingId(id: string): boolean {
+  return /^\d{9,11}$/.test(id);
+}

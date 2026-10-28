@@ -55,6 +55,21 @@ export type PrActivityFieldsFragment = {
     | { login: string; avatarUrl: string }
     | { login: string; avatarUrl: string }
     | null;
+  assignees: {
+    totalCount: number;
+    nodes: Array<{ login: string; avatarUrl: string } | null> | null;
+  };
+  reviewRequests: {
+    totalCount: number;
+    nodes: Array<{
+      requestedReviewer: { __typename: "Team" } | { __typename: "User"; login: string; avatarUrl: string } | null;
+    } | null> | null;
+  } | null;
+  labels: {
+    totalCount: number;
+    nodes: Array<{ name: string; color: string } | null> | null;
+  } | null;
+  isDraft: boolean;
   comments: {
     totalCount: number;
     nodes: Array<{

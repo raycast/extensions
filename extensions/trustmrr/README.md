@@ -6,6 +6,7 @@
 
 - `List Startups`: List all startups with pagination and filtering. Sort by revenue, price, multiple, growth, recently listed, oldest listings, and best deal. Filter by category.
 - `Get Startup`: Get full startup details by slug.
+- `Ask TrustMRR`: Ask Raycast AI about startups, sale listings, and metrics using TrustMRR data.
 
 ## Setup
 

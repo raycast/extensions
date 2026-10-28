@@ -1,6 +1,7 @@
 import { NoteWithContent } from "@/obsidian";
+import { Media } from "../utils/interfaces";
 import { describe, it, expect, beforeEach } from "vitest";
-import { filterNotesFuzzy } from "../api/search/search.service";
+import { filterMedia, filterNotesFuzzy } from "../api/search/search.service";
 
 describe("search", () => {
   describe("filterNotesFuzzy", () => {
@@ -110,6 +111,26 @@ describe("search", () => {
     it("should handle partial word matches", () => {
       const result = filterNotesFuzzy(testNotes, "prog");
       expect(result.some((note) => note.title.includes("Programming"))).toBe(true);
+    });
+  });
+
+  describe("filterMedia", () => {
+    const testMedia: Media[] = [
+      { title: "Diagram.png", path: "attachments/Diagram.png" },
+      { title: "Recording.mp3", path: "audio/Recording.mp3" },
+    ];
+
+    it("should return all media when input is undefined", () => {
+      expect(filterMedia(testMedia, undefined)).toEqual(testMedia);
+    });
+
+    it("should return all media when input is empty", () => {
+      expect(filterMedia(testMedia, "")).toEqual(testMedia);
+    });
+
+    it("should filter media by title or path case-insensitively", () => {
+      expect(filterMedia(testMedia, "DIAGRAM")).toEqual([testMedia[0]]);
+      expect(filterMedia(testMedia, "audio/")).toEqual([testMedia[1]]);
     });
   });
 });

@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Preferences } from "../types";
 import { Language, translations } from "./index";
 import { translate } from "./translate";
 

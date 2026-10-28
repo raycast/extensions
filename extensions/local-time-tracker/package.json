@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-time-tracker",
+  "title": "Local Time Tracker",
+  "description": "Track project work locally in Raycast",
+  "icon": "extension-icon.png",
+  "author": "yoshinyan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today-plan",
+      "title": "Today's Plan",
+      "subtitle": "Plan tasks and track work",
+      "description": "Plan daily goals and subtasks in a single text field and track time against tasks",
+      "mode": "view"
+    },
+    {
+      "name": "start-work",
+      "title": "Start Work",
+      "subtitle": "Start a project timer",
+      "description": "Start tracking work",
+      "mode": "view"
+    },
+    {
+      "name": "stop-work",
+      "title": "Stop Work",
+      "subtitle": "Stop the active timer",
+      "description": "Stop the active timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Timer",
+      "subtitle": "View the running timer",
+      "description": "Show the active timer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15s"
+    },
+    {
+      "name": "work-logs",
+      "title": "Work Logs",
+      "subtitle": "Review and edit time entries",
+      "description": "View and edit work logs",
+      "mode": "view"
+    },
+    {
+      "name": "reports",
+      "title": "Reports",
+      "subtitle": "Analyze tracked time",
+      "description": "View work-time reports",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "Manage projects and project groups",
+      "description": "Manage projects",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}' && prettier --check 'src/**/*.{ts,tsx}' 'tests/**/*.ts' README.md package.json tsconfig.json",
+    "lint:ray": "ray lint",
+    "publish": "ray publish",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  },
+  "preferences": [
+    {
+      "name": "timerAlertEnabled",
+      "type": "checkbox",
+      "title": "Work Timer Alert",
+      "required": false,
+      "default": false,
+      "description": "Notify once per work timer when elapsed time reaches the threshold.",
+      "label": "Enable alert"
+    },
+    {
+      "name": "timerAlertMinutes",
+      "type": "textfield",
+      "title": "Timer Alert (Minutes)",
+      "required": false,
+      "default": "480",
+      "description": "Positive whole minutes; invalid values use 480."
+    },
+    {
+      "name": "pomodoroEnabled",
+      "type": "checkbox",
+      "title": "Pomodoro",
+      "label": "Enable Pomodoro",
+      "required": false,
+      "default": true,
+      "description": "Allow Pomodoro alongside work tracking. Disabling ends the Pomodoro session on the next menu bar refresh; work tracking continues."
+    },
+    {
+      "name": "workMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Work (Minutes)",
+      "required": false,
+      "default": "25",
+      "description": "Positive whole minutes; invalid values use 25."
+    },
+    {
+      "name": "shortBreakMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Short Break (Minutes)",
+      "required": false,
+      "default": "5",
+      "description": "Positive whole minutes; invalid values use 5."
+    },
+    {
+      "name": "longBreakMinutes",
+      "type": "textfield",
+      "title": "Pomodoro Long Break (Minutes)",
+      "required": false,
+      "default": "15",
+      "description": "Positive whole minutes; invalid values use 15."
+    },
+    {
+      "name": "longBreakEvery",
+      "type": "textfield",
+      "title": "Work Intervals Before Long Break",
+      "required": false,
+      "default": "4",
+      "description": "Positive whole number; invalid values use 4."
+    }
+  ]
+}

@@ -61,11 +61,11 @@ const CreateProject = () => {
           title: "Project created",
         });
         await popToRoot();
-      } catch (error) {
+      } catch {
         await showToast({
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: "Check your connection and try again. Your project details are still here.",
           style: Toast.Style.Failure,
-          title: "Failed to create project",
+          title: "Project not created",
         });
       } finally {
         setIsSubmitting(false);

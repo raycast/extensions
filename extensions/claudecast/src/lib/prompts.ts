@@ -2128,7 +2128,7 @@ After completing this guide:
     name: "Ralph Loop",
     category: "advanced",
     description:
-      "Autonomous agentic loop that breaks down tasks and executes them with fresh context per iteration. Touch .ralph/stop to halt gracefully.",
+      "Autonomous agentic loop that breaks down tasks and executes them with fresh context per iteration. Create .ralph/stop to halt gracefully.",
     prompt: "RALPH_FRESH_LOOP", // Special marker - handled by launchRalphFreshLoop()
     variables: [
       {
@@ -2155,7 +2155,7 @@ After completing this guide:
       {
         name: "maxIterations",
         description:
-          "Maximum iterations before stopping (safety limit). Can resume with .ralph/resume.sh",
+          "Maximum iterations before stopping (safety limit). Use the platform resume script in .ralph to continue.",
         default: "20",
         type: "text",
       },

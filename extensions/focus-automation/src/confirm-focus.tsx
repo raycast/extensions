@@ -17,6 +17,12 @@ type Context = {
 };
 
 const TIMED_OUT = Symbol("TIMED_OUT");
+// Gap between the stop and start deeplinks (iteration-8, decisions.md 2026-07-30).
+const STOP_START_GAP_MS = 400;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args; launchContext: Context }>) {
   const { title, duration, categories } = props.arguments;
@@ -25,6 +31,10 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
   const logPath = ctx.logPath ?? "";
   const timeoutMs = Math.max(1, Number.parseInt(ctx.timeoutSeconds ?? "30", 10)) * 1000;
   const startDate = ctx.startIso ? new Date(ctx.startIso) : new Date();
+  // Reference clock for the stale-yes guard. Captures when this command
+  // started executing, not the event's calendar start time — so a late daemon
+  // fire (e.g. after macOS sleep/wake) doesn't falsely trip the guard when the
+  // user clicks Start promptly. See decisions.md 2026-05-22 (stale-yes fix).
   const invokedAt = Date.now();
 
   const durationSeconds = Number.parseInt(duration, 10);
@@ -34,6 +44,8 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
   }
   const durationMinutes = Math.round(durationSeconds / 60);
 
+  // Race confirmAlert against the configured timeout. Default-to-Skip on timeout
+  // matches the locked decision (decisions.md 2026-04-22).
   const timeoutPromise = new Promise<typeof TIMED_OUT>((resolve) => setTimeout(() => resolve(TIMED_OUT), timeoutMs));
   const alertPromise = confirmAlert({
     title,
@@ -51,11 +63,18 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
 
   if (result === TIMED_OUT) {
     appendLog(logPath, "SKIPPED_USER_TIMEOUT", eventId, title, startDate, durationMinutes);
+    // Promise.race doesn't cancel confirmAlert — the modal stays on screen until
+    // the user clicks something. Force-dismiss the Raycast UI so it disappears.
     await closeMainWindow();
     return;
   }
 
   if (result === true) {
+    // Stale-launch guard: catches the case where the modal was queued while
+    // Raycast was backgrounded and the user clicks Yes long after the timeout
+    // window. Compared against `invokedAt` (when this command started), NOT
+    // the event's calendar start time — otherwise a daemon late-fire after
+    // macOS sleep/wake would falsely reject a prompt click.
     const elapsedMs = Date.now() - invokedAt;
     if (elapsedMs > timeoutMs) {
       appendLog(logPath, "SKIPPED_STALE_YES", eventId, title, startDate, durationMinutes);
@@ -66,12 +85,25 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
     const cats = categories ? `&categories=${encodeURIComponent(categories)}` : "";
     const focusUrl = `raycast://focus/start?goal=${goal}&duration=${durationSeconds}${cats}`;
     try {
+      // Idempotent: stop any running Focus session before starting a new one.
+      // Raycast no-ops if nothing is active. Failure to stop must not block the start.
       try {
         await open("raycast://focus/complete");
       } catch (e) {
         console.warn(`[confirm-focus] focus/stop deeplink failed (continuing): ${e}`);
       }
+      // `open()` only confirms the URL was dispatched, not that Raycast finished
+      // processing it — without this gap `complete` can land after `start` and
+      // instantly end the session it just opened (iteration-8, live 2026-07-30).
+      // Logged so a recurrence is diagnosable from logs alone (was the gap too
+      // short, or did it never run?) instead of looking identical to the original bug.
+      appendLog(logPath, `STOP_START_GAP_${STOP_START_GAP_MS}MS`, eventId, title, startDate, durationMinutes);
+      await sleep(STOP_START_GAP_MS);
       await open(focusUrl);
+      // A real Focus session just started, so model its window for the watcher's
+      // skip-if-running guard. Written ONLY on an actual Start — never on
+      // Skip/timeout/decline/stale — which is the confirm-mode fix: a declined
+      // prompt no longer leaves a stale window that suppresses later events.
       const endIso = new Date(Date.now() + durationSeconds * 1000).toISOString();
       await saveActiveSession({ eventId, endIso });
       appendLog(logPath, "TRIGGERED", eventId, title, startDate, durationMinutes);
@@ -79,6 +111,8 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
       console.error(`[confirm-focus] Failed to fire focus deeplink: ${e}`);
       appendLog(logPath, "TRIGGER_FAILED", eventId, title, startDate, durationMinutes);
     }
+    // Close the Raycast launcher so the user isn't left with it visible
+    // after the modal resolves. Matches the timeout/stale-yes branches above.
     await closeMainWindow();
   } else {
     appendLog(logPath, "SKIPPED_USER_DECLINED", eventId, title, startDate, durationMinutes);
@@ -86,6 +120,9 @@ export default async function ConfirmFocus(props: LaunchProps<{ arguments: Args;
   }
 }
 
+// Match Python's logger format exactly so `grep <event_id> logs/*.log` works
+// across both files.
+//   [2026-04-27 17:32:32] TRIGGERED                  event_id="..." title="..." start="HH:MM" duration=Nmin
 function appendLog(
   logPath: string,
   action: string,

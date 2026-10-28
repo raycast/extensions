@@ -2228,6 +2228,39 @@
       "icon": {
         "path": "./aws-icons/healthlake.png"
       }
+    },
+    {
+      "id": "securityagent",
+      "title": "AWS Security Agent",
+      "subtitle": "Frontier agent for security reviews, threat models, and penetration testing",
+      "match": "securityagent AWS Security Agent frontier continuum",
+      "arg": "/securityagent",
+      "autocomplete": "AWS Security Agent",
+      "icon": {
+        "path": "./aws-icons/securityagent.png"
+      }
+    },
+    {
+      "id": "aidevops",
+      "title": "AWS DevOps Agent",
+      "subtitle": "Frontier agent for release management and production operations",
+      "match": "aidevops AWS DevOps Agent frontier",
+      "arg": "/aidevops/home",
+      "autocomplete": "AWS DevOps Agent",
+      "icon": {
+        "path": "./aws-icons/aidevops.png"
+      }
+    },
+    {
+      "id": "finops-agent",
+      "title": "AWS FinOps Agent",
+      "subtitle": "Frontier agent that investigates cost anomalies and answers cost questions",
+      "match": "finops-agent AWS FinOps Agent frontier",
+      "arg": "https://us-east-1.console.aws.amazon.com/finops-agent/home?region=us-east-1",
+      "autocomplete": "AWS FinOps Agent",
+      "icon": {
+        "path": "./aws-icons/finops-agent.png"
+      }
     }
   ]
 }

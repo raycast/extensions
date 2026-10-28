@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
 import { File } from "../api/getFiles";
-import { downloadFile, getFileIconLink, getMimeTypeLabel, humanFileSize } from "../helpers/files";
+import { downloadFile, getDownloadOptions, getFileIconLink, getMimeTypeLabel, humanFileSize } from "../helpers/files";
 import { formatDateTime, formatDuration } from "../helpers/formatters";
 
 type FileListItemProps = {
@@ -10,6 +10,8 @@ type FileListItemProps = {
   onEnterDirectory?: (file: File) => void;
   goToParent?: () => void;
   currentParentId?: string | undefined;
+  // Makes downloading the primary action instead of opening in the browser
+  downloadFirst?: boolean;
 };
 
 export default function FileListItem({
@@ -19,7 +21,22 @@ export default function FileListItem({
   onEnterDirectory,
   goToParent,
   currentParentId,
+  downloadFirst,
 }: FileListItemProps) {
+  const downloadActions = getDownloadOptions(file).map((option, index) => (
+    <Action
+      key={option.title}
+      title={option.title}
+      icon={Icon.Download}
+      onAction={() => downloadFile(file, option.format)}
+      shortcut={
+        index === 0
+          ? { macOS: { modifiers: ["shift", "cmd"], key: "d" }, Windows: { modifiers: ["shift", "ctrl"], key: "d" } }
+          : undefined
+      }
+    />
+  ));
+
   const createdTime = file.createdTime ? new Date(file.createdTime) : null;
   const modifiedByMeTime = file.modifiedByMeTime ? new Date(file.modifiedByMeTime) : null;
   const viewedByMeTime = file.viewedByMeTime ? new Date(file.viewedByMeTime) : null;
@@ -152,6 +169,7 @@ export default function FileListItem({
       detail={detail}
       actions={
         <ActionPanel title={file.name}>
+          {downloadFirst && downloadActions}
           <Action
             title="Open in Browser"
             icon={Icon.Globe}
@@ -209,17 +227,7 @@ export default function FileListItem({
             </ActionPanel.Section>
           )}
 
-          {file.webContentLink && (
-            <Action
-              title="Download File"
-              icon={Icon.Download}
-              onAction={() => downloadFile(file)}
-              shortcut={{
-                macOS: { modifiers: ["shift", "cmd"], key: "d" },
-                Windows: { modifiers: ["shift", "ctrl"], key: "d" },
-              }}
-            />
-          )}
+          {!downloadFirst && downloadActions}
 
           <ActionPanel.Section>
             <Action.CopyToClipboard

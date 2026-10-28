@@ -1,9 +1,9 @@
 import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
-import { homedir } from "os";
-import { resolve } from "path";
 import { checkAntinoteInstalled } from "./utils";
 import { useEffect, useState } from "react";
+import { existsSync } from "fs";
+import { STABLE_DB_PATH, BETA_DB_PATH, SETAPP_DB_PATH, DATABASE_NOT_FOUND } from "./constants";
 
 type Note = {
   id: string;
@@ -12,17 +12,24 @@ type Note = {
   lastModified: string;
 };
 
-const DB_PATH = resolve(homedir(), "Library/Containers/com.chabomakers.Antinote/Data/Documents/notes.sqlite3");
-const SETAPP_DB_PATH = resolve(
-  homedir(),
-  "Library/Containers/com.chabomakers.Antinote-setapp/Data/Documents/notes.sqlite3",
-);
-
 const query = `
   SELECT id, content, created, lastModified
   FROM notes
   WHERE content IS NOT ''
   ORDER BY lastModified DESC
+`;
+
+const beta_query = `
+SELECT upper(
+    substr(hex(ZID), 1, 8)  || '-' ||
+    substr(hex(ZID), 9, 4)  || '-' ||
+    substr(hex(ZID), 13, 4) || '-' ||
+    substr(hex(ZID), 17, 4) || '-' ||
+    substr(hex(ZID), 21, 12)
+) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified
+  FROM ZNOTE
+  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 0 AND ZSOFTDELETED = 0
+  ORDER BY ZLASTMODIFIED DESC
 `;
 
 function getTitle(content: string) {
@@ -54,33 +61,8 @@ async function openInAntinote(noteId: string) {
   }
 }
 
-export default function Command() {
-  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
-  const [version, setVersion] = useState<string | null>(null);
-
-  const {
-    isLoading,
-    data: notes,
-    permissionView,
-  } = useSQL<Note>(version === "setapp" ? SETAPP_DB_PATH : DB_PATH, query);
-
-  useEffect(() => {
-    async function checkInstallation() {
-      const { installed, version } = await checkAntinoteInstalled();
-      setIsInstalled(installed);
-      setVersion(version);
-    }
-
-    checkInstallation();
-  }, []);
-
-  if (isInstalled === null) {
-    return <List isLoading={true} />;
-  }
-
-  if (isInstalled === false) {
-    return <Detail markdown="Antinote is not installed." />;
-  }
+function NotesList({ dbPath, version }: { dbPath: string; version: string | null }) {
+  const { isLoading, data: notes, permissionView } = useSQL<Note>(dbPath, version === "beta" ? beta_query : query);
 
   if (permissionView) {
     return permissionView;
@@ -116,7 +98,7 @@ export default function Command() {
               <Action
                 title="Find in Antinote"
                 onAction={async () => {
-                  openInAntinote(item.id);
+                  await openInAntinote(item.id);
                 }}
               />
             </ActionPanel>
@@ -125,4 +107,35 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+export default function Command() {
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function checkInstallation() {
+      const { installed, version } = await checkAntinoteInstalled();
+      setIsInstalled(installed);
+      setVersion(version);
+    }
+
+    checkInstallation();
+  }, []);
+
+  if (isInstalled === null) {
+    return <List isLoading={true} />;
+  }
+
+  if (isInstalled === false) {
+    return <Detail markdown="Antinote is not installed." />;
+  }
+
+  // useSQL throws when the file is missing, so only open a database that exists
+  const dbPath = version === "setapp" ? SETAPP_DB_PATH : version === "beta" ? BETA_DB_PATH : STABLE_DB_PATH;
+  if (!existsSync(dbPath)) {
+    return <Detail markdown={DATABASE_NOT_FOUND} />;
+  }
+
+  return <NotesList dbPath={dbPath} version={version} />;
 }

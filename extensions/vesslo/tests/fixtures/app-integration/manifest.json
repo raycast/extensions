@@ -1,0 +1,211 @@
+{
+  "contractDocument": "../../RaycastIntegration.md",
+  "entries": [
+    {
+      "expected": "acceptSchema2; visibleCount=2; HomebrewReviewMayBeOffered",
+      "file": "ready.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "visibleCount=2; pastSkipDoesNotHideNewTarget",
+      "file": "ready-past-skip-new-target.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "visibleCount=1; firstTargetHiddenAndHandoffRejected=currentTargetSkipped",
+      "file": "ready-current-target-skipped.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "countStill2; unknownActionMustNotEnableExecution",
+      "file": "unknown-action.json",
+      "kind": "export",
+      "producerPossible": false
+    },
+    {
+      "expected": "preserveTwoRowsAndExactPaths; neverSelectFirstBundleMatch",
+      "file": "duplicate-bundle-different-paths.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "showChecking; noNewExecutionFromThisSnapshot; priorTimestampIsNotCurrentCompletion",
+      "file": "checking.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "showFailed; loopCompletionTimestampDoesNotImplySourceSuccessOrReviewReadiness",
+      "file": "failed.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "cacheInventoryHasNoCheckCompletion; handoffRejected=checkIncomplete",
+      "file": "unverified-startup.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "firstSnapshot",
+      "file": "same-mtime-different-revision-a.json",
+      "kind": "export",
+      "pairedWith": "same-mtime-different-revision-b.json",
+      "producerPossible": true,
+      "simulatedMtime": "2026-09-10T12:00:00Z"
+    },
+    {
+      "expected": "mustObserveRevision101DespiteSameMtimeAndExportedAt; checkTimestampUnchanged",
+      "file": "same-mtime-different-revision-b.json",
+      "kind": "export",
+      "pairedWith": "same-mtime-different-revision-a.json",
+      "producerPossible": true,
+      "simulatedMtime": "2026-09-10T12:00:00Z"
+    },
+    {
+      "expected": "rejectCountMismatch; SwiftSchema2DecoderThrows",
+      "file": "count-mismatch.json",
+      "kind": "export",
+      "producerPossible": false
+    },
+    {
+      "expected": "visibleCount=1; firstTargetRejected=deleted; deletionTimeReasonAndRecoverabilityUnknown",
+      "file": "deleted.json",
+      "kind": "export",
+      "producerPossible": true
+    },
+    {
+      "expected": "rejectUnsupportedExplicitSchema",
+      "file": "unsupported-export-schema.json",
+      "kind": "export",
+      "producerPossible": false
+    },
+    {
+      "clock": "2026-09-10T12:00:00Z",
+      "expected": "acceptForReviewAtFixtureClockWithReadyInventoryAndInjectedAuthorization; noExecutionBeforeConfirm",
+      "file": "request-valid.json",
+      "inventory": "ready.json",
+      "kind": "request"
+    },
+    {
+      "clock": "2026-09-10T12:00:00Z",
+      "expected": "rejected=staleSession; neverExecute",
+      "file": "request-stale-session.json",
+      "inventory": "ready.json",
+      "kind": "request"
+    },
+    {
+      "clock": "2026-09-10T12:00:00Z",
+      "expected": "rejected=expired; neverExecute",
+      "file": "request-expired.json",
+      "inventory": "ready.json",
+      "kind": "request"
+    },
+    {
+      "clock": "2026-09-10T12:00:00Z",
+      "expected": "rejected=futureRequest; neverExecute",
+      "file": "request-future.json",
+      "inventory": "ready.json",
+      "kind": "request"
+    },
+    {
+      "clock": "2026-09-10T12:00:00Z",
+      "expected": "rejected=duplicate; neverExecute",
+      "file": "request-duplicate-cask.json",
+      "inventory": "ready.json",
+      "kind": "request"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "acceptedOnly; noExecutionOrCompletionClaim",
+      "file": "receipt-accepted.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "confirmedAndRunning; secondTargetStillQueued",
+      "file": "receipt-running.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "terminalWaitingIsRunning; noCompletionClaim",
+      "file": "receipt-terminal-waiting.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "authoritativeVerificationPendingForExactRecords; processExitDoesNotComplete",
+      "file": "receipt-verification-pending.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "bothTargetsAuthoritativelyVerified; aggregateCompleted",
+      "file": "receipt-completed.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "firstCompletedSecondFailed; aggregateFailed; mustRenderPerTargetResults",
+      "file": "receipt-partial-failure.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "allOrNoneAdmission; neitherTargetExecuted",
+      "file": "receipt-partial-rejection.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "cancelledBeforeConfirmation; neverExecuted",
+      "file": "receipt-cancelled.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "clock": "2026-09-10T12:00:30Z",
+      "expected": "uncertainOldRunRetainedAcrossRestart; noAutomaticReplay",
+      "file": "receipt-restarted.json",
+      "kind": "receiptEnvelope",
+      "lineageRequest": "request-valid.json"
+    },
+    {
+      "expected": "rejectMalformedOrTruncatedInput; retainPriorValidViewWithExplicitReadFailure; noHandoff",
+      "file": "malformed-truncated.input",
+      "kind": "invalidJSON"
+    },
+    {
+      "expected": "injectIOFailuresAndLifecycleEventsInIsolatedTests; doNotChangeRealPermissionsOrApps",
+      "file": "io-scenarios.json",
+      "kind": "scenarioManifest"
+    }
+  ],
+  "fixtureClock": "2026-09-10T12:00:00Z",
+  "fixtureSessionId": "11111111-1111-1111-1111-111111111111",
+  "mtimeNote": "Git does not preserve file mtime. The paired case requires the harness to apply the same simulated mtime; both JSON exportedAt values are intentionally equal.",
+  "normalReceiptSequence": [
+    "receipt-accepted.json",
+    "receipt-running.json",
+    "receipt-terminal-waiting.json",
+    "receipt-verification-pending.json",
+    "receipt-completed.json"
+  ],
+  "producerMetadata": "Version/build are synthetic fixture values matching source settings; not a release or installed-app attestation.",
+  "provenance": "Authored from current Swift Codable contracts; Swift decoding and TypeScript consumer validation are separate checks, not asserted by fixture creation.",
+  "receiptSnapshotsAreAlternatives": true,
+  "safety": "Do not open request URLs against an installed app. Inject the fixture clock, inventory, authorizer and executor. IO failures are simulated; no real permission mutation is required.",
+  "schemaVersion": 1,
+  "synthetic": true
+}

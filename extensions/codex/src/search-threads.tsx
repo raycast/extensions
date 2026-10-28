@@ -13,6 +13,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import {
   showFailureToast,
@@ -21,28 +22,42 @@ import {
   useForm,
   usePromise,
 } from "@raycast/utils";
+import { pathToFileURL } from "node:url";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   archiveThread,
   buildResumeCommand,
   type CodexThread,
   type CodexThreadLatestMessages,
+  type CodexThreadSearchHit,
   forkThread,
+  getCodexHome,
   listThreads,
   readLatestThreadMessages,
+  readThreads,
   searchThreads,
   type SetThreadNameResult,
   setThreadName,
-  threadListLookbackDays,
   threadListMaxResults,
   unarchiveThread,
 } from "./utils/app-server";
 import {
+  agentColor,
+  getBranchSubtitle,
   getCodexSourceDescriptor,
-  getCodexStatusDescriptor,
+  automationColor,
+  automationIcon,
+  getModelTag,
+  getStatusAccessory,
+  getThreadIconAccessory,
+  getUpdatedAtAccessory,
+  maintenanceColor,
+  subagentIcon,
 } from "./utils/display";
+import { probeThreadWriterLock } from "./utils/thread-writer-lock";
+import { getChildThreadKind } from "./utils/threads";
 import {
-  mapNativeThreadSearchResults,
+  mapTranscriptSearchResults,
   mergeThreadSearchResults,
   searchThreadMetadata,
   type CodexThreadSearchMatch,
@@ -59,23 +74,29 @@ import {
 } from "./utils/rename";
 import { exportThreadToMarkdown } from "./utils/export";
 import {
-  formatTimestampSeconds,
+  formatCount,
   getErrorMessage,
   getProjectName,
+  getThreadAgentLabel,
   getThreadDisplayTitle,
   tildeifyPath,
   truncate,
 } from "./utils/format";
 import {
   getLatestTurnsLoadingOrErrorMarkdown,
-  type LatestTurn,
   renderLatestTurnsMarkdown,
 } from "./utils/latest-turns";
 import { buildWorkingDirectoryOptionsFromThreads } from "./utils/projects";
 import { cleanCodexUserMessage } from "./utils/message-cleaning";
 import { removeLegacyThreadSearchCache } from "./utils/legacy-thread-search-cache";
-import { runNoViewCommand } from "./utils/raycast";
+import {
+  runNoViewActionWithFailureToast,
+  validateOnSubmitOnly,
+} from "./utils/raycast";
 import { openTerminalAtPathWithCommand } from "./utils/terminal";
+import { buildCodexThreadUrl, openCodexThread } from "./utils/launch";
+import { ThreadSubagentsList } from "./thread-subagents";
+import { RefreshAction, ToggleDetailAction } from "./thread-actions";
 
 type ThreadScope = "active" | "archived";
 type WorkingDirectoryFilter = {
@@ -83,35 +104,27 @@ type WorkingDirectoryFilter = {
   setCwd: (cwd: string | null) => Promise<void> | void;
 };
 
-type ThreadSearchResponse = {
-  query: string;
-  results: CodexThreadSearchResult[];
-  transcriptSearchWarning: string | null;
-};
-
 type ThreadResultSection = {
   title: "Needs Attention" | "Active Threads" | "Archived Threads";
   results: CodexThreadSearchResult[];
 };
 
-const latestTurnPresentation = {
-  user: {
-    detailHeading: "User",
-    fallback: "No user message found.",
-  },
-  agent: {
-    detailHeading: "Codex",
-    fallback: "No agent message found.",
-  },
-} as const;
-
-const subagentColor = "#94D2BC";
-const mainBranchColor = "#4A78A4";
-const featureBranchColor = "#FF7F7F";
 const autoRenameBatchSizes = [5, 10, 25, 50] as const;
 const latestTurnPreviewMaxLength = 1500;
 const allProjectsFilterValue = "__all_projects__";
 const emptyThreads: CodexThread[] = [];
+const emptyThreadIds: string[] = [];
+
+type DirectChildCounts = {
+  subagents: number;
+  automations: number;
+  maintenance: number;
+};
+const noChildren: DirectChildCounts = {
+  subagents: 0,
+  automations: 0,
+  maintenance: 0,
+};
 
 export default function CodexThreadsCommand() {
   const [threadScope, setThreadScope] = useCachedState<ThreadScope>(
@@ -122,7 +135,7 @@ export default function CodexThreadsCommand() {
     "codex-threads-show-detail",
     false,
   );
-  const [showSubagents, setShowSubagents] = useCachedState(
+  const [showChildThreads, setShowChildThreads] = useCachedState(
     "codex-threads-show-subagents",
     false,
   );
@@ -144,25 +157,74 @@ export default function CodexThreadsCommand() {
       {
         archived,
         maxResults: threadListMaxResults,
-        windowDays: threadListLookbackDays,
       },
     ],
     [archived],
   );
   const {
-    data: allThreads,
+    data: fetchedThreads,
     error,
     isLoading,
     revalidate,
   } = useCachedPromise(listThreads, threadListArgs, {
     keepPreviousData: true,
   });
+  // Codex leaves a thread out of thread/list until it has its first message, so
+  // a fork made here is read by id until the list starts returning it.
+  const [forkedThreadIds, setForkedThreadIds] = useState<string[]>([]);
+  const listedThreadIds = useMemo(
+    () => new Set((fetchedThreads ?? emptyThreads).map((thread) => thread.id)),
+    [fetchedThreads],
+  );
+  useEffect(() => {
+    setForkedThreadIds((current) => {
+      const remaining = current.filter((id) => !listedThreadIds.has(id));
+      return remaining.length === current.length ? current : remaining;
+    });
+  }, [listedThreadIds]);
+  const unlistedForkIds = useMemo(() => {
+    if (archived || forkedThreadIds.length === 0) {
+      return emptyThreadIds;
+    }
 
-  const threads = useMemo(
+    return forkedThreadIds.filter((id) => !listedThreadIds.has(id));
+  }, [archived, forkedThreadIds, listedThreadIds]);
+  const { data: unlistedForks, revalidate: revalidateUnlistedForks } =
+    usePromise(
+      async (ids: string[]) => (await readThreads(ids)).threads,
+      [unlistedForkIds],
+      { execute: unlistedForkIds.length > 0 },
+    );
+  // A read result outlives the ids that produced it, so the overlay is filtered
+  // again here rather than trusted.
+  const allThreads = useMemo(() => {
+    const listed = fetchedThreads ?? emptyThreads;
+    const eligibleIds = new Set(unlistedForkIds);
+    const stillUnlisted = (unlistedForks ?? emptyThreads).filter((fork) =>
+      eligibleIds.has(fork.id),
+    );
+    if (stillUnlisted.length === 0) {
+      return listed;
+    }
+
+    return [...listed, ...stillUnlisted].sort(
+      (left, right) => right.updatedAt - left.updatedAt,
+    );
+  }, [fetchedThreads, unlistedForkIds, unlistedForks]);
+  // Both reloads report failure by resolving with the error, so surface the
+  // first one for revalidateWithToast instead of discarding it.
+  const revalidateThreads = async () => {
+    const results = await Promise.all([
+      revalidate(),
+      revalidateUnlistedForks(),
+    ]);
+    return results.find((result) => result instanceof Error);
+  };
+
+  const cwdThreads = useMemo(
     () =>
-      filterThreadsByWorkingDirectory(
-        allThreads ?? emptyThreads,
-        workingDirectoryFilterPath,
+      (allThreads ?? emptyThreads).filter((thread) =>
+        matchesWorkingDirectory(thread, workingDirectoryFilterPath),
       ),
     [allThreads, workingDirectoryFilterPath],
   );
@@ -174,47 +236,75 @@ export default function CodexThreadsCommand() {
       ),
     [allThreads, workingDirectoryFilterPath],
   );
-  const subagentCounts = useMemo(
-    () => getDirectSubagentCounts(threads),
-    [threads],
+  // Counted across every thread, not just the filtered folder, so the badge
+  // always agrees with the list behind it.
+  const childCounts = useMemo(
+    () => getDirectChildCounts(allThreads ?? emptyThreads),
+    [allThreads],
   );
   const visibleThreads = useMemo(
-    () =>
-      threads.filter((thread) => showSubagents || !isSubagentThread(thread)),
-    [showSubagents, threads],
+    () => (showChildThreads ? cwdThreads : cwdThreads.filter(isRootThread)),
+    [cwdThreads, showChildThreads],
   );
   const trimmedSearchText = searchText.trim();
+  const shouldSearchTranscripts = trimmedSearchText.length >= 3;
+  const metadataResults = useMemo(
+    () =>
+      trimmedSearchText
+        ? searchThreadMetadata(visibleThreads, trimmedSearchText)
+        : [],
+    [trimmedSearchText, visibleThreads],
+  );
+  const [transcriptSearch, setTranscriptSearch] = useState<{
+    query: string;
+    archived: boolean;
+    hits: CodexThreadSearchHit[];
+  }>({ query: "", archived: false, hits: [] });
   const searchAbortable = useRef<AbortController>(undefined);
-  const {
-    data: searchResponse,
-    error: searchError,
-    isLoading: isSearching,
-  } = usePromise(
-    // Read the signal at call time: usePromise swaps in a fresh controller
-    // right before invoking the function, so a render-time arg would be stale.
-    (threads: CodexThread[], query: string, isArchived: boolean) =>
-      searchVisibleThreads(
-        threads,
+  const { error: searchError, isLoading: isSearching } = usePromise(
+    (query: string, isArchived: boolean) =>
+      searchThreads(
         query,
-        isArchived,
-        searchAbortable.current?.signal,
+        { archived: isArchived, maxResults: threadListMaxResults },
+        {
+          signal: searchAbortable.current?.signal,
+          onPage: (hits) => {
+            setTranscriptSearch({
+              query,
+              archived: isArchived,
+              hits: [...hits],
+            });
+          },
+        },
       ),
-    [visibleThreads, trimmedSearchText, archived],
+    [trimmedSearchText, archived],
     {
-      execute: Boolean(trimmedSearchText),
+      execute: shouldSearchTranscripts,
       abortable: searchAbortable,
       failureToastOptions: { title: "Unable to search Codex threads" },
     },
   );
-  const currentSearchResponse =
-    searchResponse?.query === trimmedSearchText ? searchResponse : undefined;
-  const transcriptSearchWarning = trimmedSearchText
-    ? (currentSearchResponse?.transcriptSearchWarning ?? null)
-    : null;
+  const currentTranscriptHits =
+    shouldSearchTranscripts &&
+    transcriptSearch.query === trimmedSearchText &&
+    transcriptSearch.archived === archived
+      ? transcriptSearch.hits
+      : [];
+  const transcriptSearchWarning =
+    shouldSearchTranscripts && searchError
+      ? getErrorMessage(searchError)
+      : null;
 
   const displayedThreadResults = useMemo<CodexThreadSearchResult[]>(() => {
     if (trimmedSearchText) {
-      return currentSearchResponse?.results ?? [];
+      const transcriptResults = mapTranscriptSearchResults(
+        currentTranscriptHits.filter(
+          ({ thread }) =>
+            matchesWorkingDirectory(thread, workingDirectoryFilterPath) &&
+            (showChildThreads || isRootThread(thread)),
+        ),
+      );
+      return mergeThreadSearchResults(metadataResults, transcriptResults);
     }
 
     return visibleThreads.map((thread) => ({
@@ -222,7 +312,14 @@ export default function CodexThreadsCommand() {
       match: null,
       score: thread.updatedAt,
     }));
-  }, [currentSearchResponse, trimmedSearchText, visibleThreads]);
+  }, [
+    currentTranscriptHits,
+    metadataResults,
+    showChildThreads,
+    trimmedSearchText,
+    visibleThreads,
+    workingDirectoryFilterPath,
+  ]);
   const displayedThreads = useMemo(
     () => displayedThreadResults.map((result) => result.thread),
     [displayedThreadResults],
@@ -245,13 +342,15 @@ export default function CodexThreadsCommand() {
     execute: isShowingDetail && Boolean(effectiveSelectedThreadId),
   });
   const refreshThreadsAndSelectedMessages = async () => {
-    revalidate();
+    const threadsResult = await revalidateThreads();
     if (isShowingDetail && effectiveSelectedThreadId) {
-      await revalidateLatestSelectedThreadMessages();
+      const messagesResult = await revalidateLatestSelectedThreadMessages();
+      return threadsResult ?? messagesResult;
     }
+    return threadsResult;
   };
 
-  if (!allThreads?.length && error) {
+  if (!fetchedThreads?.length && error) {
     return (
       <Detail
         markdown={`Failed to load Codex threads.\n\n${error.message}`}
@@ -271,7 +370,7 @@ export default function CodexThreadsCommand() {
 
   return (
     <List
-      isLoading={isLoading || (Boolean(trimmedSearchText) && isSearching)}
+      isLoading={isLoading || (shouldSearchTranscripts && isSearching)}
       isShowingDetail={isShowingDetail}
       filtering={false}
       onSelectionChange={setSelectedThreadId}
@@ -279,8 +378,8 @@ export default function CodexThreadsCommand() {
       searchText={searchText}
       searchBarPlaceholder={
         workingDirectoryFilterPath
-          ? `Search ${getProjectName(workingDirectoryFilterPath)} names, paths, and transcripts`
-          : `Search last ${threadListLookbackDays} days by name, path, or transcript`
+          ? `Search ${getProjectName(workingDirectoryFilterPath)} threads and transcripts`
+          : "Search threads and transcripts"
       }
       searchBarAccessory={
         <List.Dropdown
@@ -293,7 +392,7 @@ export default function CodexThreadsCommand() {
           }}
         >
           <List.Dropdown.Item
-            title="All Folders"
+            title="All"
             value={allProjectsFilterValue}
             icon={Icon.Folder}
           />
@@ -320,7 +419,7 @@ export default function CodexThreadsCommand() {
           }
         >
           {section.results.map(({ thread, match }) => {
-            const directSubagentCount = subagentCounts.get(thread.id) ?? 0;
+            const threadChildCounts = childCounts.get(thread.id) ?? noChildren;
             const isSelected = thread.id === effectiveSelectedThreadId;
             const selectedLatestMessages = isSelected
               ? latestSelectedThreadMessages
@@ -333,20 +432,19 @@ export default function CodexThreadsCommand() {
                 id={thread.id}
                 title={{ value: displayTitle, tooltip: displayTitle }}
                 subtitle={getThreadSubtitle(thread, match, isShowingDetail)}
-                icon={{
-                  value: getThreadIcon(thread),
-                  tooltip: getCodexSourceDescriptor(thread.source).tooltip,
-                }}
+                icon={getThreadIconAccessory(thread)}
                 accessories={getThreadAccessories(
                   thread,
-                  directSubagentCount,
+                  threadChildCounts.subagents,
                   isShowingDetail,
+                  workingDirectoryFilterPath,
                 )}
                 detail={
                   isShowingDetail && isSelected
                     ? buildThreadDetail(
                         thread,
-                        directSubagentCount,
+                        threadChildCounts,
+                        match,
                         selectedLatestMessages,
                         isLatestSelectedThreadMessagesLoading,
                         latestSelectedThreadMessagesError,
@@ -357,15 +455,27 @@ export default function CodexThreadsCommand() {
                   <ThreadActions
                     archived={archived}
                     isShowingDetail={isShowingDetail}
-                    showSubagents={showSubagents}
+                    showChildThreads={showChildThreads}
                     onArchiveFilterChange={setThreadScope}
                     onRefresh={refreshThreadsAndSelectedMessages}
-                    onThreadsChanged={revalidate}
+                    onForkCreated={(threadId) => {
+                      setForkedThreadIds((current) =>
+                        current.includes(threadId)
+                          ? current
+                          : [...current, threadId],
+                      );
+                    }}
+                    onThreadArchived={(threadId) => {
+                      setForkedThreadIds((current) =>
+                        current.filter((id) => id !== threadId),
+                      );
+                    }}
+                    onThreadsChanged={revalidateThreads}
                     onToggleDetail={() => {
                       setIsShowingDetail(!isShowingDetail);
                     }}
                     onToggleShowSubagents={() => {
-                      setShowSubagents(!showSubagents);
+                      setShowChildThreads(!showChildThreads);
                     }}
                     autoRenameCandidates={displayedThreads}
                     projectFilter={projectFilter}
@@ -378,24 +488,34 @@ export default function CodexThreadsCommand() {
           })}
         </List.Section>
       ))}
-      {!isLoading && !isSearching && displayedThreadResults.length === 0 ? (
+      {!isLoading &&
+      !(shouldSearchTranscripts && isSearching) &&
+      displayedThreadResults.length === 0 ? (
         <List.EmptyView
           title={getEmptyViewTitle(
             archived,
-            threads.length,
+            cwdThreads.length,
             Boolean(trimmedSearchText),
           )}
           description={getEmptyViewDescription({
             archived,
             workingDirectoryFilterPath,
             searchError,
-            transcriptSearchWarning,
+            didSearchTranscripts: shouldSearchTranscripts,
             searchText: trimmedSearchText,
-            unfilteredCount: threads.length,
+            unfilteredCount: cwdThreads.length,
           })}
           actions={
-            workingDirectoryFilterPath ? (
-              <ActionPanel>
+            <ActionPanel>
+              {!showChildThreads && cwdThreads.length > 0 ? (
+                <Action
+                  title="Show Child Threads"
+                  icon={subagentIcon}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  onAction={() => setShowChildThreads(true)}
+                />
+              ) : null}
+              {workingDirectoryFilterPath ? (
                 <Action
                   title="Clear Folder Filter"
                   icon={Icon.XMarkCircle}
@@ -403,8 +523,8 @@ export default function CodexThreadsCommand() {
                     await projectFilter.setCwd(null);
                   }}
                 />
-              </ActionPanel>
-            ) : undefined
+              ) : null}
+            </ActionPanel>
           }
         />
       ) : null}
@@ -432,14 +552,14 @@ function buildThreadResultSections(
     ({ thread }) => getAttentionPriority(thread) === 0,
   );
 
-  return [
-    ...(needsAttention.length > 0
-      ? ([{ title: "Needs Attention", results: needsAttention }] as const)
-      : []),
-    ...(activeThreads.length > 0
-      ? ([{ title: "Active Threads", results: activeThreads }] as const)
-      : []),
-  ];
+  const sections: ThreadResultSection[] = [];
+  if (needsAttention.length > 0) {
+    sections.push({ title: "Needs Attention", results: needsAttention });
+  }
+  if (activeThreads.length > 0) {
+    sections.push({ title: "Active Threads", results: activeThreads });
+  }
+  return sections;
 }
 
 function getAttentionPriority(thread: CodexThread): number {
@@ -454,69 +574,15 @@ function getAttentionPriority(thread: CodexThread): number {
   return thread.status.activeFlags.includes("waitingOnUserInput") ? 1 : 0;
 }
 
-async function searchVisibleThreads(
-  threads: CodexThread[],
-  query: string,
-  archived: boolean,
-  signal?: AbortSignal,
-): Promise<ThreadSearchResponse> {
-  const metadataResults = searchThreadMetadata(threads, query);
-  // Skip the transcript search entirely when local matches already cover
-  // every visible thread; there is nothing more it could add.
-  if (threads.length === 0 || metadataResults.length === threads.length) {
-    return { query, results: metadataResults, transcriptSearchWarning: null };
-  }
-
-  try {
-    const hits = await searchThreads(
-      query,
-      {
-        archived,
-        maxResults: threadListMaxResults,
-        windowDays: threadListLookbackDays,
-      },
-      signal,
-    );
-    const nativeResults = mapNativeThreadSearchResults(threads, hits);
-
-    return {
-      query,
-      results: mergeThreadSearchResults(metadataResults, nativeResults),
-      transcriptSearchWarning: null,
-    };
-  } catch (error) {
-    // A superseded search is cancelled, not failed: let usePromise swallow it.
-    if (isAbortError(error)) {
-      throw error;
-    }
-
-    // Transcript search failed, but the local matches are still good.
-    return {
-      query,
-      results: metadataResults,
-      transcriptSearchWarning: getErrorMessage(error),
-    };
-  }
-}
-
-function isAbortError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "name" in error &&
-    (error as { name: unknown }).name === "AbortError"
-  );
-}
-
-function filterThreadsByWorkingDirectory(
-  threads: CodexThread[],
+function matchesWorkingDirectory(
+  thread: CodexThread,
   projectCwd: string | null,
-): CodexThread[] {
-  if (!projectCwd) {
-    return threads;
-  }
+): boolean {
+  return !projectCwd || thread.cwd === projectCwd;
+}
 
-  return threads.filter((thread) => thread.cwd === projectCwd);
+function isRootThread(thread: CodexThread): boolean {
+  return thread.parentThreadId === null;
 }
 
 function getThreadSubtitle(
@@ -531,12 +597,12 @@ function getThreadSubtitle(
   const projectName = getProjectName(thread.cwd);
   if (match?.snippet) {
     return {
-      value: `${projectName} • ${match.snippet}`,
+      value: match.snippet,
       tooltip: `${projectName}: ${match.snippet}`,
     };
   }
 
-  return { value: projectName, tooltip: thread.cwd };
+  return getBranchSubtitle(thread);
 }
 
 function getEmptyViewTitle(
@@ -545,65 +611,65 @@ function getEmptyViewTitle(
   isSearching: boolean,
 ): string {
   if (isSearching) {
-    return "No matching threads";
+    return "No Matching Threads";
   }
 
-  if (archived) {
-    return "No archived threads";
+  if (unfilteredCount > 0) {
+    return "Child Threads Hidden";
   }
 
-  return unfilteredCount > 0 ? "Subagent threads hidden" : "No threads found";
+  return archived ? "No Archived Threads" : "No Threads Found";
 }
 
 function getEmptyViewDescription({
   archived,
   workingDirectoryFilterPath,
+  didSearchTranscripts,
   searchError,
-  transcriptSearchWarning,
   searchText,
   unfilteredCount,
 }: {
   archived: boolean;
   workingDirectoryFilterPath: string | null;
+  didSearchTranscripts: boolean;
   searchError?: Error;
-  transcriptSearchWarning: string | null;
   searchText: string;
   unfilteredCount: number;
 }): string {
   if (searchText) {
-    if (searchError) {
-      return `Search failed: ${getErrorMessage(searchError)}`;
+    if (didSearchTranscripts && searchError) {
+      return `No names or paths match "${searchText}", and transcript search is unavailable: ${getErrorMessage(searchError)}`;
     }
 
-    if (transcriptSearchWarning) {
-      return `No names or paths match "${searchText}", and transcript search is unavailable: ${transcriptSearchWarning}`;
+    if (didSearchTranscripts) {
+      return `No names, paths, previews, or transcripts match "${searchText}".`;
     }
 
-    return `No names, paths, previews, or transcripts match "${searchText}".`;
-  }
-
-  if (workingDirectoryFilterPath) {
-    return `No ${archived ? "archived" : "active"} threads updated in the last ${
-      threadListLookbackDays
-    } days were found in ${tildeifyPath(workingDirectoryFilterPath)}.`;
-  }
-
-  if (archived) {
-    return `Archived Codex threads updated in the last ${threadListLookbackDays} days will appear here.`;
+    return `No names, paths, or previews match "${searchText}". Type at least 3 characters to search transcripts.`;
   }
 
   if (unfilteredCount > 0) {
-    return "Press ⌘⇧S to show subagent threads.";
+    return "Press ⌘⇧S to show child threads.";
   }
 
-  return `Start or resume a Codex thread and it will appear here for ${threadListLookbackDays} days.`;
+  if (workingDirectoryFilterPath) {
+    return `No ${archived ? "archived" : "active"} threads were found in ${tildeifyPath(workingDirectoryFilterPath)}.`;
+  }
+
+  if (archived) {
+    return "Archived Codex threads will appear here.";
+  }
+
+  return "Start or resume a Codex thread and it will appear here.";
 }
 
 function ThreadActions({
   archived,
   isShowingDetail,
-  showSubagents,
+  showChildThreads,
   onArchiveFilterChange,
+  onForkCreated,
+  onThreadArchived,
   onRefresh,
   onThreadsChanged,
   onToggleDetail,
@@ -615,9 +681,11 @@ function ThreadActions({
 }: {
   archived: boolean;
   isShowingDetail: boolean;
-  showSubagents: boolean;
+  showChildThreads: boolean;
   onArchiveFilterChange: (scope: ThreadScope) => Promise<void> | void;
-  onRefresh: () => Promise<void>;
+  onForkCreated: (threadId: string) => void;
+  onThreadArchived: (threadId: string) => void;
+  onRefresh: () => Promise<unknown>;
   onThreadsChanged: () => Promise<unknown> | void;
   onToggleDetail: () => void;
   onToggleShowSubagents: () => void;
@@ -635,7 +703,11 @@ function ThreadActions({
           await openThreadInCodexApp(thread);
         }}
       />
-      <Action.ShowInFinder title="Show Directory in Finder" path={thread.cwd} />
+      <Action.ShowInFinder
+        title="Open in Finder"
+        path={thread.cwd}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
+      />
       <Action
         title="Resume in Terminal"
         icon={Icon.Terminal}
@@ -644,29 +716,15 @@ function ThreadActions({
           await resumeThreadInTerminal(thread);
         }}
       />
-      <Action
-        title={isShowingDetail ? "Hide Details" : "Show Details"}
-        icon={isShowingDetail ? Icon.AppWindowList : Icon.AppWindowSidebarRight}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-        onAction={onToggleDetail}
+      <ToggleDetailAction
+        isShowingDetail={isShowingDetail}
+        onToggleDetail={onToggleDetail}
       />
-      <Action
+      <RefreshAction
         title="Refresh Threads"
-        icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={async () => {
-          try {
-            await onRefresh();
-            await showToast({
-              style: Toast.Style.Success,
-              title: "Threads Refreshed",
-            });
-          } catch (refreshError) {
-            await showFailureToast(refreshError, {
-              title: "Unable to refresh threads",
-            });
-          }
-        }}
+        successTitle="Threads Refreshed"
+        failureTitle="Couldn't refresh threads"
+        onRefresh={onRefresh}
       />
 
       <ActionPanel.Section>
@@ -681,6 +739,14 @@ function ThreadActions({
               onRenameSuccess={onThreadsChanged}
             />
           }
+        />
+        <Action
+          title="Auto Rename"
+          icon={Icon.Wand}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          onAction={async () => {
+            await autoRenameThread(thread, archived, onThreadsChanged);
+          }}
         />
         <Action.Push
           title="Summarize"
@@ -712,7 +778,7 @@ function ThreadActions({
                   ? truncate(`Rename Failed: ${result.renameWarning}`, 110)
                   : getThreadToastLabel(result.thread),
               {
-                failureTitle: "Fork Failed",
+                failureTitle: "Couldn't fork thread",
                 primaryAction: {
                   title: "Open Thread",
                   shortcut: { modifiers: ["cmd"], key: "t" },
@@ -722,13 +788,7 @@ function ThreadActions({
             );
 
             if (forkResult) {
-              try {
-                await onThreadsChanged();
-              } catch (refreshError) {
-                await showFailureToast(refreshError, {
-                  title: "Thread forked, unable to refresh threads",
-                });
-              }
+              onForkCreated(forkResult.thread.id);
             }
           }}
         />
@@ -749,7 +809,7 @@ function ThreadActions({
               const unarchivedThread = await performThreadMutation({
                 loadingTitle: "Unarchiving Thread",
                 successTitle: "Thread Restored",
-                failureTitle: "Restore Failed",
+                failureTitle: "Couldn't restore thread",
                 mutate: async () => {
                   await unarchiveThread(thread.id);
                   return thread;
@@ -771,7 +831,7 @@ function ThreadActions({
               const archivedThread = await performThreadMutation({
                 loadingTitle: "Archiving Thread",
                 successTitle: "Thread Archived",
-                failureTitle: "Archive Failed",
+                failureTitle: "Couldn't archive thread",
                 mutate: async () => {
                   await archiveThread(thread.id);
                   return thread;
@@ -779,16 +839,17 @@ function ThreadActions({
               });
 
               if (archivedThread) {
+                onThreadArchived(archivedThread.id);
                 await onThreadsChanged();
               }
             }}
           />
         )}
-        <ActionPanel.Submenu title="Bulk Rename" icon={Icon.TextCursor}>
+        <ActionPanel.Submenu title="Bulk Auto Rename" icon={Icon.TextCursor}>
           {autoRenameBatchSizes.map((batchSize) => (
             <Action
               key={batchSize}
-              title={`Rename Latest ${batchSize} Visible Threads`}
+              title={`Auto Rename Latest ${batchSize} Visible Threads`}
               icon={Icon.Text}
               onAction={async () => {
                 await autoRenameVisibleThreads(
@@ -811,13 +872,13 @@ function ThreadActions({
         />
         <Action.CopyToClipboard
           title="Copy Thread Deeplink"
-          content={buildThreadDeeplink(thread)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          content={buildCodexThreadUrl(thread.id)}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
         <Action.CopyToClipboard
           title="Copy Working Directory"
           content={thread.cwd}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
         <Action
           title="Copy Last User Turn"
@@ -864,9 +925,14 @@ function ThreadActions({
             }}
           />
         )}
+        <Action.Push
+          title="Browse Child Threads"
+          icon={subagentIcon}
+          target={<ThreadSubagentsList parent={thread} archived={archived} />}
+        />
         <Action
-          title={showSubagents ? "Hide Subagents" : "Show Subagents"}
-          icon={showSubagents ? Icon.EyeDisabled : Icon.Livestream}
+          title={showChildThreads ? "Hide Child Threads" : "Show Child Threads"}
+          icon={showChildThreads ? Icon.EyeDisabled : subagentIcon}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={onToggleShowSubagents}
         />
@@ -928,12 +994,12 @@ function RenameThreadForm({
         </ActionPanel>
       }
     >
-      <Form.Description title="Thread ID" text={thread.id} />
       <Form.TextField
         title="Name"
         placeholder="Enter a semantic thread name"
-        {...itemProps.name}
+        {...validateOnSubmitOnly(itemProps.name)}
       />
+      <Form.Description title="Thread ID" text={thread.id} />
     </Form>
   );
 }
@@ -1067,6 +1133,51 @@ async function renameThreadWithFeedback(
   }
 }
 
+async function autoRenameThread(
+  thread: CodexThread,
+  archived: boolean,
+  onThreadsChanged: () => Promise<unknown> | void,
+) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Auto Renaming Thread",
+    message: truncate(getThreadDisplayTitle(thread), 110),
+  });
+  const [result] = await autoRenameCodexThreads({
+    archived,
+    threads: [thread],
+  });
+
+  if (!result || result.status === "failed") {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Auto Rename Failed";
+    toast.message = result?.error ?? "The thread could not be renamed.";
+    return;
+  }
+
+  if (result.status === "skipped") {
+    toast.style = Toast.Style.Success;
+    toast.title = "Thread Name Unchanged";
+    toast.message = truncate(result.previousTitle, 110);
+    return;
+  }
+
+  try {
+    await onThreadsChanged();
+  } catch (error) {
+    await showFailureToast(error, {
+      title: "Thread renamed, unable to refresh threads",
+    });
+  }
+
+  toast.style = Toast.Style.Success;
+  toast.title = "Thread Renamed";
+  toast.message =
+    result.renameStrategy === "archivedFallback"
+      ? `Used archived fallback: ${truncate(result.nextTitle ?? result.previousTitle, 86)}`
+      : truncate(result.nextTitle ?? result.previousTitle, 110);
+}
+
 async function autoRenameVisibleThreads(
   candidates: CodexThread[],
   requestedCount: number,
@@ -1100,7 +1211,7 @@ async function autoRenameVisibleThreads(
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Auto-renaming Threads",
+    title: "Auto Renaming Threads",
     message: `0/${targets.length}`,
   });
   const results = await autoRenameCodexThreads({
@@ -1189,13 +1300,9 @@ async function openThreadInCodexApp(thread: CodexThread) {
   await runNoViewActionWithFailureToast(
     "Unable to open thread in Codex",
     async () => {
-      await open(buildThreadDeeplink(thread));
+      await openCodexThread(thread.id);
     },
   );
-}
-
-function buildThreadDeeplink(thread: CodexThread): string {
-  return `codex://threads/${thread.id}`;
 }
 
 async function copyLatestThreadTurn(
@@ -1227,23 +1334,26 @@ async function copyLatestThreadTurn(
 }
 
 async function resumeThreadInTerminal(thread: CodexThread) {
+  // Check at press time: another Codex session may have opened the thread
+  // since the list loaded. "unknown" falls through to Codex's own error.
+  const lockState = await probeThreadWriterLock(
+    await getCodexHome(),
+    thread.id,
+  );
+  if (lockState === "locked") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Thread is already open in another Codex session",
+    });
+    return;
+  }
+
   await runNoViewActionWithFailureToast("Unable to resume thread", async () => {
     await openTerminalAtPathWithCommand(
       thread.cwd,
       buildResumeCommand(thread.id),
     );
   });
-}
-
-async function runNoViewActionWithFailureToast(
-  failureTitle: string,
-  action: () => Promise<void>,
-) {
-  try {
-    await runNoViewCommand(action, { popToRoot: true });
-  } catch (error) {
-    await showFailureToast(error, { title: failureTitle });
-  }
 }
 
 async function runThreadMutation<T>(
@@ -1318,22 +1428,11 @@ async function performThreadMutation(opts: {
   );
 }
 
-function getThreadIcon(thread: CodexThread) {
-  const sourceDescriptor = getCodexSourceDescriptor(thread.source);
-  const statusDescriptor = getCodexStatusDescriptor(thread.status);
-
-  return {
-    source: sourceDescriptor.icon,
-    ...(statusDescriptor.label
-      ? { tintColor: statusDescriptor.tintColor }
-      : {}),
-  };
-}
-
 function getThreadAccessories(
   thread: CodexThread,
   directSubagentCount: number,
   isShowingDetail: boolean,
+  projectCwd: string | null,
 ): List.Item.Accessory[] {
   if (isShowingDetail) {
     return [];
@@ -1341,7 +1440,13 @@ function getThreadAccessories(
 
   const accessories: List.Item.Accessory[] = [];
   const statusAccessory = getStatusAccessory(thread);
-  const branchAccessory = getBranchAccessory(thread);
+
+  if (!projectCwd && thread.cwd.trim()) {
+    accessories.push({
+      tag: { value: getProjectName(thread.cwd), color: Color.Blue },
+      tooltip: thread.cwd,
+    });
+  }
 
   if (statusAccessory) {
     accessories.push(statusAccessory);
@@ -1349,141 +1454,108 @@ function getThreadAccessories(
 
   if (directSubagentCount > 0) {
     accessories.push({
-      icon: Icon.Livestream,
       tag: {
-        value: formatSubagentCount(directSubagentCount),
-        color: subagentColor,
+        value: formatCount(directSubagentCount, "subagent"),
+        color: agentColor,
       },
-      tooltip: `${formatSubagentCount(directSubagentCount)} spawned from this thread`,
+      tooltip: `${formatCount(directSubagentCount, "subagent")} started from this thread`,
     });
   }
 
-  if (branchAccessory) {
-    accessories.push(branchAccessory);
-  }
-
-  accessories.push({
-    date: new Date(thread.updatedAt * 1000),
-    tooltip: `Updated ${formatTimestampSeconds(thread.updatedAt)}`,
-  });
+  accessories.push(getUpdatedAtAccessory(thread));
 
   return accessories;
 }
 
 function buildThreadDetail(
   thread: CodexThread,
-  directSubagentCount: number,
+  childCounts: DirectChildCounts,
+  match: CodexThreadSearchMatch | null,
   latestMessages?: CodexThreadLatestMessages,
   isLatestMessagesLoading = false,
   latestMessagesError?: Error,
 ) {
-  const statusDescriptor = getCodexStatusDescriptor(thread.status);
   const sourceDescriptor = getCodexSourceDescriptor(thread.source);
-  const agentLabel = [thread.agentNickname, thread.agentRole]
-    .filter(Boolean)
-    .join(" • ");
-
+  const agentLabel = getThreadAgentLabel(thread);
+  const latestTurnsMarkdown = getLatestTurnsMarkdown(
+    latestMessages,
+    isLatestMessagesLoading,
+    latestMessagesError,
+  );
+  const searchMatchMarkdown = match?.snippet
+    ? `### Search Match\n\n> ${match.snippet}`
+    : null;
   return (
     <List.Item.Detail
-      markdown={getLatestTurnsMarkdown(
-        latestMessages,
-        isLatestMessagesLoading,
-        latestMessagesError,
-      )}
+      markdown={[searchMatchMarkdown, latestTurnsMarkdown]
+        .filter(Boolean)
+        .join("\n\n---\n\n")}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Thread"
-            icon={sourceDescriptor.icon}
-            text={getThreadDisplayTitle(thread)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.TagList title="Signals">
-            {statusDescriptor.label ? (
+          <List.Item.Detail.Metadata.TagList title="Overview">
+            {sourceDescriptor.isSubagent && agentLabel ? null : (
               <List.Item.Detail.Metadata.TagList.Item
-                text={statusDescriptor.label}
-                color={statusDescriptor.tintColor}
+                text={sourceDescriptor.label}
+                color={sourceDescriptor.color}
               />
-            ) : null}
-            <List.Item.Detail.Metadata.TagList.Item
-              text={sourceDescriptor.label}
-              color={Color.Blue}
-            />
+            )}
             {agentLabel ? (
               <List.Item.Detail.Metadata.TagList.Item
-                text={`🤖 ${agentLabel}`}
-                color={Color.Magenta}
-              />
-            ) : null}
-            {directSubagentCount > 0 ? (
-              <List.Item.Detail.Metadata.TagList.Item
-                text={`🧬 ${formatSubagentCount(directSubagentCount)}`}
-                color={subagentColor}
+                text={agentLabel}
+                color={agentColor}
               />
             ) : null}
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.TagList title="Working Directory">
-            <List.Item.Detail.Metadata.TagList.Item
-              icon={Icon.Folder}
-              text={tildeifyPath(thread.cwd)}
-              color={Color.Blue}
-              onAction={() => {
-                void showInFinder(thread.cwd);
-              }}
-            />
-            {thread.gitInfo?.branch ? (
-              <List.Item.Detail.Metadata.TagList.Item
-                icon={
-                  thread.gitInfo.branch === "main"
-                    ? Icon.House
-                    : Icon.WrenchScrewdriver
-                }
-                text={thread.gitInfo.branch}
-                color={
-                  thread.gitInfo.branch === "main"
-                    ? mainBranchColor
-                    : featureBranchColor
-                }
-                onAction={() => {
-                  void Clipboard.copy(thread.gitInfo?.branch ?? "");
-                }}
-              />
-            ) : null}
-            {thread.gitInfo?.sha ? (
-              <List.Item.Detail.Metadata.TagList.Item
-                icon={Icon.Code}
-                text={thread.gitInfo.sha.slice(0, 8)}
-                color={Color.SecondaryText}
-                onAction={() => {
-                  void Clipboard.copy(thread.gitInfo?.sha ?? "");
-                }}
-              />
-            ) : null}
-          </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.Link
+            title="Working Directory"
+            target={pathToFileURL(thread.cwd).href}
+            text={tildeifyPath(thread.cwd)}
+          />
+          {thread.model ||
+          Object.values(childCounts).some((count) => count > 0) ? (
+            <List.Item.Detail.Metadata.TagList title="Model & Threads">
+              {thread.model ? (
+                <List.Item.Detail.Metadata.TagList.Item
+                  {...getModelTag(thread.model, thread.reasoningEffort)}
+                />
+              ) : null}
+              {childCounts.subagents > 0 ? (
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={formatCount(childCounts.subagents, "subagent")}
+                  color={agentColor}
+                />
+              ) : null}
+              {childCounts.automations > 0 ? (
+                <List.Item.Detail.Metadata.TagList.Item
+                  icon={automationIcon}
+                  text={formatCount(childCounts.automations, "automation")}
+                  color={automationColor}
+                />
+              ) : null}
+              {childCounts.maintenance > 0 ? (
+                <List.Item.Detail.Metadata.TagList.Item
+                  icon={Icon.Gear}
+                  text={formatCount(
+                    childCounts.maintenance,
+                    "maintenance thread",
+                  )}
+                  color={maintenanceColor}
+                />
+              ) : null}
+            </List.Item.Detail.Metadata.TagList>
+          ) : null}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Activity">
             <List.Item.Detail.Metadata.TagList.Item
               icon={Icon.Clock}
-              text={`Updated ${formatActivityTimestamp(thread.updatedAt)}`}
-              color={Color.Green}
+              text={`Created ${formatActivityTimestamp(thread.createdAt)}`}
             />
             <List.Item.Detail.Metadata.TagList.Item
-              icon={Icon.Calendar}
-              text={`Created ${formatActivityTimestamp(thread.createdAt)}`}
-              color={Color.SecondaryText}
+              icon={Icon.Clock}
+              text={`Updated ${formatActivityTimestamp(thread.updatedAt)}`}
             />
           </List.Item.Detail.Metadata.TagList>
-          {thread.forkedFromId ? (
-            <>
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title="Forked From"
-                icon={Icon.Duplicate}
-                text={thread.forkedFromId.slice(0, 8)}
-              />
-            </>
-          ) : null}
         </List.Item.Detail.Metadata>
       }
     />
@@ -1491,13 +1563,17 @@ function buildThreadDetail(
 }
 
 function formatActivityTimestamp(seconds: number): string {
-  return new Date(seconds * 1000).toLocaleString(undefined, {
-    month: "short",
+  const date = new Date(seconds * 1000);
+  const day = date.toLocaleDateString(undefined, {
+    month: "numeric",
     day: "numeric",
-    year: "numeric",
+    year: "2-digit",
+  });
+  const time = date.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
   });
+  return `${day} ${time}`;
 }
 
 function getLatestTurnsMarkdown(
@@ -1512,113 +1588,39 @@ function getLatestTurnsMarkdown(
   if (loadingOrError !== null) {
     return loadingOrError;
   }
-  return renderLatestTurnsMarkdown(
-    getOrderedLatestTurns(latestMessages as CodexThreadLatestMessages),
-  );
+  return renderLatestTurnsMarkdown({
+    response: latestMessages?.lastAgentMessage
+      ? truncate(latestMessages.lastAgentMessage, latestTurnPreviewMaxLength)
+      : "No Codex response yet.",
+    userMessage: latestMessages?.lastUserMessage
+      ? truncate(
+          cleanCodexUserMessage(latestMessages.lastUserMessage, "compact"),
+          latestTurnPreviewMaxLength,
+        )
+      : "No message from you yet.",
+  });
 }
 
-function getOrderedLatestTurns(
-  latestMessages: CodexThreadLatestMessages,
-): LatestTurn[] {
-  return [
-    {
-      heading: latestTurnPresentation.user.detailHeading,
-      body: latestMessages.lastUserMessage
-        ? truncate(
-            cleanCodexUserMessage(latestMessages.lastUserMessage, "compact"),
-            latestTurnPreviewMaxLength,
-          )
-        : latestTurnPresentation.user.fallback,
-      order: latestMessages.lastUserMessageOrder ?? Number.POSITIVE_INFINITY,
-    },
-    {
-      heading: latestTurnPresentation.agent.detailHeading,
-      body: latestMessages.lastAgentMessage
-        ? truncate(latestMessages.lastAgentMessage, latestTurnPreviewMaxLength)
-        : latestTurnPresentation.agent.fallback,
-      order: latestMessages.lastAgentMessageOrder ?? Number.POSITIVE_INFINITY,
-    },
-  ].sort((left, right) => right.order - left.order);
-}
-
-function getDirectSubagentCounts(threads: CodexThread[]): Map<string, number> {
-  const counts = new Map<string, number>();
+function getDirectChildCounts(
+  threads: CodexThread[],
+): Map<string, DirectChildCounts> {
+  const counts = new Map<string, DirectChildCounts>();
 
   for (const thread of threads) {
-    if (!isThreadSpawnSubagent(thread)) {
-      continue;
-    }
+    const parentThreadId = thread.parentThreadId;
+    if (!parentThreadId) continue;
 
-    const parentThreadId = thread.source.subAgent.thread_spawn.parent_thread_id;
-    counts.set(parentThreadId, (counts.get(parentThreadId) ?? 0) + 1);
+    const parentCounts = counts.get(parentThreadId) ?? { ...noChildren };
+    const kind = getChildThreadKind(thread.source);
+    if (kind === "subagent") {
+      parentCounts.subagents += 1;
+    } else if (kind === "automation") {
+      parentCounts.automations += 1;
+    } else {
+      parentCounts.maintenance += 1;
+    }
+    counts.set(parentThreadId, parentCounts);
   }
 
   return counts;
-}
-
-function isSubagentThread(thread: CodexThread): thread is CodexThread & {
-  source: Extract<CodexThread["source"], { subAgent: unknown }>;
-} {
-  return typeof thread.source === "object" && "subAgent" in thread.source;
-}
-
-function isThreadSpawnSubagent(thread: CodexThread): thread is CodexThread & {
-  source: {
-    subAgent: {
-      thread_spawn: {
-        parent_thread_id: string;
-        depth: number;
-        agent_path: string | null;
-        agent_nickname: string | null;
-        agent_role: string | null;
-      };
-    };
-  };
-} {
-  return (
-    typeof thread.source === "object" &&
-    "subAgent" in thread.source &&
-    typeof thread.source.subAgent === "object" &&
-    "thread_spawn" in thread.source.subAgent
-  );
-}
-
-function formatSubagentCount(count: number): string {
-  return `${count} subagent${count === 1 ? "" : "s"}`;
-}
-
-function getStatusAccessory(
-  thread: CodexThread,
-): List.Item.Accessory | undefined {
-  const statusDescriptor = getCodexStatusDescriptor(thread.status);
-
-  if (!statusDescriptor.label || statusDescriptor.label === "Active") {
-    return undefined;
-  }
-
-  return {
-    tag: {
-      value: statusDescriptor.label,
-      color: statusDescriptor.tintColor,
-    },
-    tooltip: statusDescriptor.tooltip,
-  };
-}
-
-function getBranchAccessory(
-  thread: CodexThread,
-): List.Item.Accessory | undefined {
-  const branch = thread.gitInfo?.branch?.trim();
-  if (!branch) {
-    return undefined;
-  }
-
-  return {
-    icon: branch === "main" ? Icon.House : Icon.WrenchScrewdriver,
-    tag: {
-      value: branch,
-      color: branch === "main" ? mainBranchColor : featureBranchColor,
-    },
-    tooltip: `Git branch: ${branch}`,
-  };
 }

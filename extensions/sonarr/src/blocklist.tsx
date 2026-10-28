@@ -1,8 +1,11 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { InstanceActions } from "@/lib/components/InstanceActions";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { useBlocklist } from "@/lib/hooks/useSonarrAPI";
 import type { BlocklistRecord } from "@/lib/types/blocklist";
-import { formatAirDate, formatQualityProfile, getSeriesPoster, getSonarrUrl } from "@/lib/utils/formatting";
+import type { InstanceState } from "@/lib/types/instance";
+import { formatAirDate, formatQualityProfile, getSearchPlaceholder, getSeriesPoster } from "@/lib/utils/formatting";
 
 function normalizeProtocol(protocol?: string): string {
   if (!protocol) return "Unknown";
@@ -25,7 +28,8 @@ function getProtocolColor(protocol?: string): Color {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [protocolFilter, setProtocolFilter] = useState("all");
-  const { data, isLoading, mutate } = useBlocklist(1, 100);
+  const instanceState = useInstance();
+  const { data, isLoading, mutate } = useBlocklist(instanceState.instance, 1, 100);
 
   const records = data?.records || [];
 
@@ -56,12 +60,21 @@ export default function Command() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [records, protocolFilter, searchText]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <List
-      isLoading={isLoading}
+      actions={instancePanel}
+      isLoading={isLoading || instanceState.isLoading}
       isShowingDetail
       filtering={false}
-      searchBarPlaceholder="Search blocked releases..."
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search blocked releases")}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Protocol" value={protocolFilter} onChange={setProtocolFilter}>
@@ -77,20 +90,29 @@ export default function Command() {
           title="Blocklist is Empty"
           description={searchText ? "No blocklist entries matched your search" : "No blocked releases found"}
           icon={Icon.CheckCircle}
+          actions={instancePanel}
         />
       )}
 
       <List.Section title="Blocked Releases" subtitle={`${filteredRecords.length} items`}>
         {filteredRecords.map((record) => (
-          <BlocklistItem key={record.id} record={record} onRefresh={mutate} />
+          <BlocklistItem key={record.id} record={record} onRefresh={mutate} instanceState={instanceState} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function BlocklistItem({ record, onRefresh }: { record: BlocklistRecord; onRefresh: () => void }) {
-  const sonarrUrl = getSonarrUrl();
+function BlocklistItem({
+  record,
+  onRefresh,
+  instanceState,
+}: {
+  record: BlocklistRecord;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
+  const sonarrUrl = instanceState.instance?.url ?? "";
   const poster = record.series?.images ? getSeriesPoster(record.series.images) : undefined;
 
   const seriesTitle = record.series?.title || "Unknown Series";
@@ -194,9 +216,11 @@ function BlocklistItem({ record, onRefresh }: { record: BlocklistRecord; onRefre
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

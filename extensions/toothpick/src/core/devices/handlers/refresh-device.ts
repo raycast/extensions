@@ -10,7 +10,7 @@ export async function refreshDevice(device: Device): Promise<boolean> {
 
   if (disconnected) {
     await showAnimatedMessage("Reconnecting...");
-    await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS));
+    if (process.platform !== "win32") await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS));
   } else {
     await showWarningMessage("Failed to disconnect. Reconnecting anyway…");
   }

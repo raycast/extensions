@@ -3,7 +3,7 @@ import { getPerformanceRecords } from "../api";
 import { EmptyView } from "../components/empty-view";
 import { PerformanceRecord, Site } from "../interface";
 
-export default function PerformanceRecordsCommand({ item }: { item: Site }): JSX.Element {
+export default function PerformanceRecordsCommand({ item }: { item: Site }) {
   const { data, isLoading } = getPerformanceRecords(item);
 
   return (
