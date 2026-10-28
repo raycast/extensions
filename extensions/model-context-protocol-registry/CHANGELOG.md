@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MEDIAPRONET MCP Server] - 2026-10-28
+
+- Add MEDIAPRONET to the official registry: search a directory of newly launched startups, websites, SaaS and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://mediapronet.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Buy-Box MCP Server] - 2026-10-28
 
 - Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
