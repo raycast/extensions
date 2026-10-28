@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brewpage",
+  "title": "BrewPage Publisher",
+  "description": "Publish selected HTML or Markdown and pasted reports as shareable BrewPage links.",
+  "icon": "icon.png",
+  "author": "maksim_kochetkov",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "publish",
+      "title": "Publish Report",
+      "description": "Publish an explicitly selected file or pasted HTML or Markdown report.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.9.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.4",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "format": "prettier --write ."
+  }
+}
