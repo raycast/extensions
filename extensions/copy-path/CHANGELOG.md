@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Improve picker copying and copy feedback] - {PR_MERGE_DATE}
+## [Improve picker copying and copy feedback] - 2026-10-28
 
 - Copy selected item paths from focused native Open panels, preserving the existing fallback when no readable selection exists.
 - Show an additional-item count in multi-path copy tips and shorten long display paths while retaining filename endings.
