@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "passig",
   "title": "Passig",
-  "description": "Cerca, copia, incolla e salva le password del tuo vault Passig (zero-knowledge) direttamente da Raycast.",
+  "description": "Search, copy, paste and save passwords from your zero-knowledge Passig vault, right from Raycast.",
   "icon": "icon.png",
   "author": "igsolutions",
   "categories": [
@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "search",
-      "title": "Cerca Password",
+      "title": "Search Passwords",
       "subtitle": "Passig",
-      "description": "Cerca un elemento nel vault e copia/incolla username, password o codice TOTP.",
+      "description": "Search your vault and copy or paste a username, password or TOTP code.",
       "mode": "view",
       "keywords": [
         "password",
@@ -27,20 +27,19 @@
     },
     {
       "name": "create",
-      "title": "Salva Password",
+      "title": "Save Password",
       "subtitle": "Passig",
-      "description": "Crea un nuovo elemento di tipo login in un vault.",
+      "description": "Create a new login item in one of your vaults.",
       "mode": "view"
     },
     {
       "name": "import",
-      "title": "Importa Password",
+      "title": "Import Passwords",
       "subtitle": "Passig",
-      "description": "Importa le password da Bitwarden, 1Password, LastPass, Chrome, Firefox, Safari, KeePass, Dashlane, Keeper, NordPass, Proton Pass, Enpass, RoboForm o da un CSV.",
+      "description": "Import passwords from Bitwarden, 1Password, LastPass, Chrome, Firefox, Safari, KeePass, Dashlane, Keeper, NordPass, Proton Pass, Enpass, RoboForm or a CSV file.",
       "mode": "view",
       "keywords": [
         "import",
-        "importa",
         "bitwarden",
         "1password",
         "lastpass",
@@ -50,23 +49,23 @@
     },
     {
       "name": "generate",
-      "title": "Genera Password",
+      "title": "Generate Password",
       "subtitle": "Passig",
-      "description": "Genera una password robusta e copiala negli appunti.",
+      "description": "Generate a strong password and copy it to the clipboard.",
       "mode": "view"
     },
     {
       "name": "lock",
-      "title": "Blocca Passig",
+      "title": "Lock Passig",
       "subtitle": "Passig",
-      "description": "Cancella le chiavi sbloccate e la sessione locale.",
+      "description": "Clear the unlocked keys and the local session.",
       "mode": "no-view"
     },
     {
       "name": "clear-clipboard",
-      "title": "Pulizia Appunti Passig",
+      "title": "Clear Passig Clipboard",
       "subtitle": "Passig",
-      "description": "Comando in background: svuota gli appunti 30 secondi dopo una copia se contengono ancora il segreto.",
+      "description": "Background command: clears the clipboard 30 seconds after a copy if it still contains the secret.",
       "mode": "no-view",
       "interval": "1m",
       "disabledByDefault": false
@@ -76,52 +75,94 @@
     {
       "name": "email",
       "title": "Email",
-      "description": "Email dell'account Passig",
+      "description": "Email address of your Passig account",
       "type": "textfield",
       "required": true,
-      "placeholder": "nome@esempio.it"
+      "placeholder": "name@example.com"
     },
     {
       "name": "autoLockMinutes",
-      "title": "Auto-lock (minuti)",
-      "description": "Dopo quanti minuti dall'ultimo sblocco richiedere di nuovo la master password",
+      "title": "Auto-Lock (Minutes)",
+      "description": "How many minutes after the last unlock the master password is required again",
       "type": "dropdown",
       "required": false,
       "default": "15",
       "data": [
         {
-          "title": "1 minuto",
+          "title": "1 Minute",
           "value": "1"
         },
         {
-          "title": "5 minuti",
+          "title": "5 Minutes",
           "value": "5"
         },
         {
-          "title": "15 minuti",
+          "title": "15 Minutes",
           "value": "15"
         },
         {
-          "title": "30 minuti",
+          "title": "30 Minutes",
           "value": "30"
         },
         {
-          "title": "1 ora",
+          "title": "1 Hour",
           "value": "60"
         },
         {
-          "title": "4 ore",
+          "title": "4 Hours",
           "value": "240"
         }
       ]
     },
     {
       "name": "deviceName",
-      "title": "Nome dispositivo",
-      "description": "Nome mostrato nell'elenco sessioni (es. 'Raycast MacBook')",
+      "title": "Device Name",
+      "description": "Name shown in the sessions list (e.g. 'Raycast MacBook')",
       "type": "textfield",
       "required": false,
       "default": "Raycast"
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language of the extension's interface. 'System' follows the language of your Mac.",
+      "type": "dropdown",
+      "required": false,
+      "default": "system",
+      "data": [
+        {
+          "title": "System",
+          "value": "system"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Italiano",
+          "value": "it"
+        },
+        {
+          "title": "Español",
+          "value": "es"
+        },
+        {
+          "title": "Deutsch",
+          "value": "de"
+        },
+        {
+          "title": "Français",
+          "value": "fr"
+        },
+        {
+          "title": "Português (Brasil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "日本語",
+          "value": "ja"
+        }
+      ]
     }
   ],
   "scripts": {
@@ -129,10 +170,9 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
-    "gen-icon": "cp ../../packages/brand/icons/mark-512.png assets/icon.png",
     "vendor": "node scripts/vendor.mjs",
-    "prebuild": "node scripts/vendor.mjs",
-    "predev": "node scripts/vendor.mjs"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs",
+    "check-i18n": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-i18n.mjs"
   },
   "dependencies": {
     "@raycast/api": "^1.80.0",
@@ -143,8 +183,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
     "typescript": "^5.6.3"
   }
 }

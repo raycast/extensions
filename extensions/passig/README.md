@@ -1,52 +1,50 @@
-# Passig per Raycast
+# Passig for Raycast
 
-Estensione Raycast per il password manager zero-knowledge **Passig**. Tutta la crittografia avviene sul Mac con la stessa libreria condivisa (`@passig/shared`, libsodium): il server riceve e restituisce solo blob cifrati.
+Raycast extension for **[Passig](https://passig.app)**, the zero-knowledge password manager. All cryptography runs locally on your Mac (libsodium): the Passig server only ever receives and returns encrypted blobs.
 
-## Comandi
+## Commands
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| **Cerca password** | Ricerca fuzzy per titolo, username, sito e vault (raggruppata per vault). Azioni: copia password (nascosta, cancellata dopo 30 s), incolla password nell'app in primo piano, copia username, copia/incolla codice TOTP, apri sito, dettagli (password nascosta con toggle `⌘⇧P`), aggiorna dal server, blocca. |
-| **Salva password** | Crea un elemento di tipo login in un vault scrivibile (titolo, username, password con generatore `⌘G`, URL, TOTP, note). |
-| **Genera password** | Generatore con lunghezza e set di caratteri; copia o incolla. Non richiede lo sblocco. |
-| **Blocca Passig** | Cancella le chiavi in cache e svuota gli appunti se contengono un segreto copiato. |
-| **Pulizia appunti Passig** | Comando in background (ogni minuto) che svuota gli appunti se contengono ancora un segreto copiato da almeno 30 s. |
+| **Search Passwords** | Fuzzy search by title, username, website and vault. Copy the password (concealed, cleared after 30 s), paste it into the frontmost app, copy the username, copy/paste the TOTP code, open the website, show details (password hidden, toggle with `⌘⇧P`), refresh from the server, lock. |
+| **Save Password** | Create a login item in a writable vault (title, username, password with generator `⌘G`, URL, TOTP, notes). |
+| **Import Passwords** | Import an export from Bitwarden, 1Password, LastPass, Chrome, Firefox, Safari, KeePass, Dashlane, Keeper, NordPass, Proton Pass, Enpass, RoboForm or a CSV file. Items are encrypted locally before upload. |
+| **Generate Password** | Password generator with length and character sets; copy or paste. Does not require unlocking. |
+| **Lock Passig** | Clears the unlocked keys and the clipboard if it still holds a copied secret. |
+| **Clear Passig Clipboard** | Background command (every minute) that clears the clipboard if it still holds a secret copied at least 30 s ago. |
 
-## Installazione (sviluppo)
+## Setup
 
-Richiede macOS con Raycast e Node ≥ 20.
+You need a Passig account (create one for free at [passig.app](https://passig.app)). On first launch Raycast asks for:
+
+- **Email** – the email of your Passig account
+- **Auto-Lock (Minutes)** – how long after unlocking the master password is required again (default 15 minutes)
+- **Device Name** – shown in the sessions list of your account
+- **Language** – interface language (defaults to the language of your Mac)
+
+## Development
 
 ```bash
-# dal root del monorepo
-pnpm install
-pnpm --filter @passig/shared build
-pnpm --filter @passig/client-core build
-cd apps/raycast
-pnpm dev          # = ray develop: importa l'estensione in Raycast in modalità sviluppo
+npm install
+npm run dev        # ray develop
+npm run build      # ray build
+npm run lint
+npm test           # i18n dictionary checks
 ```
 
-Al primo avvio Raycast chiede le preferenze: **Email**, **Auto-lock** (default 15 minuti) e **Nome dispositivo**. Il server è fisso (`https://passig.igsolutions.it`) e non configurabile.
+`src/vendor/` contains a copy of Passig's shared client libraries and is committed as-is. It is regenerated only from the Passig monorepo with `npm run vendor`; the script refuses to run (and leaves `src/vendor` untouched) when the monorepo sources are not available.
 
-`pnpm typecheck` esegue `tsc --noEmit`; `pnpm build` (`ray build`) funziona solo su macOS. L'icona in `assets/icon.png` è generata con `pnpm gen-icon` (script zero-dipendenze in `packages/client-core/scripts/gen-icon.mjs`).
+## Security model
 
-## Flusso di sblocco
+Every Raycast command runs in a separate, short-lived Node process and Raycast does not expose the macOS Keychain to extensions. Therefore:
 
-1. Primo utilizzo: `POST /auth/prelogin` → derivazione Argon2id della master password → `POST /auth/login` → sblocco di `userKey` e `privateKey` → `GET /vaults` + item, apertura delle `vaultKey` con sealed box e decifratura in memoria.
-2. Sblocchi successivi (dopo l'auto-lock): se esiste un refresh token viene riusata la stessa sessione server (`POST /auth/refresh` → `GET /me`) e la master password serve solo a derivare la `stretchKey`; non si crea una nuova sessione a ogni sblocco.
+- **The master password is never stored.**
+- **Raycast `LocalStorage`** (persistent) only holds the refresh token and the clipboard-cleanup markers (SHA-256 hashes, never the secret itself). The refresh token alone cannot decrypt anything.
+- **Raycast `Cache`** holds the unlocked session snapshot (keys in base64 plus still-encrypted items) until the auto-lock time chosen in the preferences. The snapshot is bound to the configured account email and expires at the auto-lock time measured from the unlock; open views lock themselves when it expires. Use **Lock Passig** (or a 1-minute auto-lock) if you prefer a shorter window.
+- **Clipboard**: passwords are copied with `concealed: true` (not stored in Raycast's clipboard history) and cleared after 30 s if still present; locking clears them immediately.
+- The server never sees titles, usernames, passwords, URLs or notes.
 
-## Modello di sicurezza e compromessi
+## Limitations
 
-Ogni comando Raycast gira in un processo Node separato e di breve durata: non esiste memoria condivisa fra un'invocazione e l'altra e **Raycast non espone il Keychain di macOS**. Per questo:
-
-- **La master password non viene mai salvata.**
-- **`LocalStorage` di Raycast (persistente)**: contiene **solo il refresh token** (e il marker hash degli appunti). Da solo non permette di decifrare nulla: senza master password non si ottiene la `stretchKey` e quindi né `userKey` né `vaultKey`. Chi lo rubasse potrebbe però ottenere i blob cifrati; la sessione va revocata da «Sessioni» nel backoffice/app.
-- **`Cache` di Raycast con TTL = auto-lock** (default 15 min): contiene lo snapshot della sessione sbloccata, cioè `userKey`, `privateKey` e le `vaultKey` in base64 **in chiaro su disco** (`~/Library/Application Support/com.raycast.macos/extensions/...`), insieme agli item ancora cifrati e all'access token. È il compromesso che consente di non reinserire la master password a ogni comando. Il file è protetto solo dai permessi dell'utente macOS e da FileVault; scaduto il TTL viene cancellato alla prima lettura e si richiede la master password. Chi non accetta questo compromesso può impostare l'auto-lock a 1 minuto o usare **Blocca Passig** dopo l'uso.
-- **Appunti**: la password è copiata con `concealed: true` (non finisce nella cronologia degli appunti di Raycast) e viene cancellata dopo 30 s se ancora presente: subito se il processo del comando è ancora vivo, altrimenti dal comando in background (granularità 1 minuto, quindi in pratica entro 30-90 s). Il confronto usa l'hash SHA-256 del segreto, mai il segreto stesso.
-- Il server non vede mai titoli, username, password, URL o note (vedi `docs/ARCHITECTURE.md`).
-
-## Limiti e TODO
-
-- Nessun supporto biometrico (Touch ID) per lo sblocco: Raycast non espone LocalAuthentication/Keychain alle estensioni.
-- Non è possibile modificare o eliminare elementi esistenti dal comando «Cerca» (solo creazione); si usa l'app macOS/backoffice.
-- Il cestino (`includeDeleted`) non è esposto.
-- Il filtro pnpm dell'estensione è `pnpm --filter ./apps/raycast …` (il nome `passig` è imposto dallo schema Raycast e coincide con il nome del package root).
+- No Touch ID unlock: Raycast does not expose LocalAuthentication/Keychain to extensions.
+- Existing items cannot be edited or deleted from Raycast; use the Passig apps.
