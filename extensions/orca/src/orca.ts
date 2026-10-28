@@ -450,11 +450,13 @@ export function unwrap<T>(stdout: string): T | undefined {
  * prompt included.
  */
 export function orcaError(error: unknown): Error {
-  const { code, path, stdout, stderr } = error as {
-    code?: number | string;
+  const { code, signal, path, stdout, stderr, message } = error as {
+    code?: number | string | null;
+    signal?: string | null;
     path?: string;
     stdout?: string;
     stderr?: string;
+    message?: string;
   };
 
   if (code === "ENOENT") {
@@ -470,11 +472,16 @@ export function orcaError(error: unknown): Error {
     // Not Orca's envelope: fall through to whatever the process printed.
   }
 
+  if (stderr?.trim()) return new Error(stderr.trim());
+  if (signal) return new Error(`Orca CLI was stopped by ${signal}`);
+  if (typeof code === "number") {
+    return new Error(`Orca CLI exited with code ${code}`);
+  }
+  // "Command failed: …" is the command line, prompt and all.
   return new Error(
-    stderr?.trim() ||
-      (typeof code === "number"
-        ? `Orca CLI exited with code ${code}`
-        : String((error as Error)?.message ?? error)),
+    message && !message.startsWith("Command failed")
+      ? message
+      : "Orca CLI failed",
   );
 }
 

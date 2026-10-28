@@ -158,6 +158,13 @@ test("output that is not Orca's envelope still hides the prompt", () => {
   assert.equal(orcaError(cliFailure("not json")).message, "Orca CLI exited with code 1");
 });
 
+test("a CLI killed by a signal does not fall back to the command line", () => {
+  const killed = Object.assign(cliFailure(""), { code: null, signal: "SIGTERM", killed: true });
+
+  assert.equal(orcaError(killed).message, "Orca CLI was stopped by SIGTERM");
+  assert.doesNotMatch(orcaError(killed).message, /secret prompt/);
+});
+
 test("a title Orca could not generate is replaced by the prompt", () => {
   const row = {
     title: "✳ Claude Code",
