@@ -1962,6 +1962,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.unblockingapi.com/mcp",
   },
   {
+    name: "vectosolve",
+    title: "VectoSolve",
+    description:
+      "Turn PNG, JPG, WebP or GIF images into vector files: SVG for design tools and Cricut Design Space, DXF for laser cutters, CNC routers and CAD (R12 polylines, millimetres) or EPS for print and sign-making. Tracing modes for logos and illustrations, closed laser cut paths, cutting machines and centerline (one path per stroke for line art and scanned drawings). Returns a PNG preview and the complete file from a public image link. One read-only tool. Hosted remote Streamable HTTP server at https://vectosolve.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://vectosolve.com/favicon-512.png",
+    homepage: "https://vectosolve.com/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://vectosolve.com/api/mcp"],
+    },
+    remoteUrl: "https://vectosolve.com/api/mcp",
+  },
+  {
     name: "visualping",
     title: "Visualping",
     description:
