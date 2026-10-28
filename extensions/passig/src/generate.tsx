@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, closeMainWindow, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, closeMainWindow, showHUD, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { generatePassword, initCrypto, passwordStrength } from "./vendor/shared/index.js";
+import { t } from "./i18n";
 import { copySecret } from "./lib/clipboard";
-
-const STRENGTH_LABEL = ["molto debole", "debole", "discreta", "buona", "ottima"];
+import { strengthLabel } from "./lib/plan";
 
 /** Generatore password: non richiede lo sblocco del vault. */
 export default function GenerateCommand() {
@@ -21,37 +21,53 @@ export default function GenerateCommand() {
     initCrypto().then(() => setReady(true));
   }, []);
 
-  function regenerate(): string | null {
+  /** Lunghezza valida (8-128) e almeno un set di caratteri: altrimenti null. */
+  function validLength(): number | null {
     const n = Number(length);
-    if (!Number.isInteger(n) || n < 8 || n > 128) {
-      setLengthError("Lunghezza tra 8 e 128");
+    if (!Number.isInteger(n) || n < 8 || n > 128) return null;
+    if (!lowercase && !uppercase && !digits && !symbols) return null;
+    return n;
+  }
+
+  /** Genera con le impostazioni correnti; con impostazioni non valide azzera la password mostrata. */
+  function regenerate(): string | null {
+    const n = validLength();
+    if (n === null) {
+      if (!Number.isInteger(Number(length)) || Number(length) < 8 || Number(length) > 128)
+        setLengthError(t("generate.lengthError"));
+      setPassword("");
       return null;
     }
-    if (!lowercase && !uppercase && !digits && !symbols) return null;
     try {
       const pw = generatePassword({ length: n, lowercase, uppercase, digits, symbols, excludeAmbiguous });
       setPassword(pw);
       return pw;
     } catch {
+      setPassword("");
       return null;
     }
+  }
+
+  /** Password da copiare/incollare: solo se le impostazioni CORRENTI sono valide (mai una vecchia). */
+  function currentPassword(): string | null {
+    if (validLength() === null) return regenerate();
+    return password || regenerate();
   }
 
   // rigenera ad ogni cambio di opzione
   useEffect(() => {
     if (ready) regenerate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, length, lowercase, uppercase, digits, symbols, excludeAmbiguous]);
 
   async function copy() {
-    const pw = password || regenerate();
+    const pw = currentPassword();
     if (!pw) return;
     await copySecret(pw);
-    await showHUD("Password copiata (si cancella tra 30 s)");
+    await showHUD(t("search.passwordCopied"));
   }
 
   async function paste() {
-    const pw = password || regenerate();
+    const pw = currentPassword();
     if (!pw) return;
     await closeMainWindow();
     await Clipboard.paste(pw);
@@ -60,21 +76,34 @@ export default function GenerateCommand() {
   return (
     <Form
       isLoading={!ready}
-      navigationTitle="Genera password"
+      navigationTitle={t("generate.navTitle")}
       actions={
         <ActionPanel>
-          <Action title="Copia password" icon={Icon.Clipboard} onAction={copy} />
-          <Action title="Incolla password" icon={Icon.Text} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} onAction={paste} />
-          <Action title="Rigenera" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => regenerate()} />
+          <Action title={t("action.copyPassword")} icon={Icon.Clipboard} onAction={copy} />
+          <Action
+            title={t("action.pastePassword")}
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            onAction={paste}
+          />
+          <Action
+            title={t("generate.regenerate")}
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={() => regenerate()}
+          />
         </ActionPanel>
       }
     >
-      <Form.Description title="Password" text={password || "—"} />
-      <Form.Description title="Robustezza" text={password ? STRENGTH_LABEL[passwordStrength(password)]! : "—"} />
+      <Form.Description title={t("common.password")} text={password || "—"} />
+      <Form.Description
+        title={t("generate.strength")}
+        text={password ? strengthLabel(passwordStrength(password)) : "—"}
+      />
       <Form.Separator />
       <Form.TextField
         id="length"
-        title="Lunghezza"
+        title={t("generate.length")}
         value={length}
         error={lengthError}
         onChange={(v) => {
@@ -82,11 +111,16 @@ export default function GenerateCommand() {
           setLengthError(undefined);
         }}
       />
-      <Form.Checkbox id="lowercase" label="Minuscole (a-z)" value={lowercase} onChange={setLowercase} />
-      <Form.Checkbox id="uppercase" label="Maiuscole (A-Z)" value={uppercase} onChange={setUppercase} />
-      <Form.Checkbox id="digits" label="Cifre (0-9)" value={digits} onChange={setDigits} />
-      <Form.Checkbox id="symbols" label="Simboli (!@#$…)" value={symbols} onChange={setSymbols} />
-      <Form.Checkbox id="excludeAmbiguous" label="Escludi caratteri ambigui (l, I, O, 0, 1)" value={excludeAmbiguous} onChange={setExcludeAmbiguous} />
+      <Form.Checkbox id="lowercase" label={t("generate.lowercase")} value={lowercase} onChange={setLowercase} />
+      <Form.Checkbox id="uppercase" label={t("generate.uppercase")} value={uppercase} onChange={setUppercase} />
+      <Form.Checkbox id="digits" label={t("generate.digits")} value={digits} onChange={setDigits} />
+      <Form.Checkbox id="symbols" label={t("generate.symbols")} value={symbols} onChange={setSymbols} />
+      <Form.Checkbox
+        id="excludeAmbiguous"
+        label={t("generate.excludeAmbiguous")}
+        value={excludeAmbiguous}
+        onChange={setExcludeAmbiguous}
+      />
     </Form>
   );
 }

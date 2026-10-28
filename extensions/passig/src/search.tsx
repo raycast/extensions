@@ -9,18 +9,31 @@ import {
   closeMainWindow,
   showHUD,
   showToast,
+  useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { displayHost, generateTotp, type DecryptedItem } from "./vendor/client-core/index.js";
+import {
+  displayHost,
+  generateTotp,
+  isTotpAllowed,
+  itemUsageLevel,
+  shouldOfferUpgrade,
+  type DecryptedItem,
+} from "./vendor/client-core/index.js";
+import type { BillingStatus } from "./vendor/shared/index.js";
 import { UnlockForm } from "./components/UnlockForm";
+import { formatDateTime, t } from "./i18n";
 import { copySecret } from "./lib/clipboard";
 import { describeError } from "./lib/errors";
-import { lockSession, type ActiveSession } from "./lib/session";
+import { BillingActions, PlanDetail, openCheckout, useBilling } from "./lib/billing";
+import { planLabel, upgradeCta } from "./lib/plan";
+import type { ActiveSession } from "./lib/session";
 import { useSession } from "./lib/useSession";
 
 export default function SearchCommand() {
   const { session, setSession, loading } = useSession();
-  if (loading) return <List isLoading searchBarPlaceholder="Caricamento…" />;
+  if (loading) return <List isLoading searchBarPlaceholder={t("common.loading")} />;
   if (!session) return <UnlockForm onUnlocked={setSession} />;
   return <SearchList session={session} onLock={() => setSession(null)} />;
 }
@@ -31,6 +44,9 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [tick, setTick] = useState(0); // forza il re-render dopo refresh
   const [refreshing, setRefreshing] = useState(false);
+  const { billing } = useBilling(session);
+  const totpAllowed = isTotpAllowed(billing);
+  const usageLevel = billing ? itemUsageLevel(billing) : "ok";
 
   // Aggiorna dal server in background all'apertura (gli item in cache si vedono subito).
   useEffect(() => {
@@ -38,7 +54,9 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
     setRefreshing(true);
     session
       .refresh()
-      .catch((err) => showToast({ style: Toast.Style.Failure, title: "Aggiornamento fallito", message: describeError(err) }))
+      .catch((err) =>
+        showToast({ style: Toast.Style.Failure, title: t("search.refreshFailed"), message: describeError(err) }),
+      )
       .finally(() => {
         if (!cancelled) {
           setRefreshing(false);
@@ -50,8 +68,29 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
     };
   }, [session]);
 
+  /** Aggiornamento manuale: ricarica dal server e ricalcola i risultati (tick). */
+  async function refresh() {
+    if (session.isExpired()) {
+      onLock();
+      return;
+    }
+    setRefreshing(true);
+    try {
+      await session.refresh();
+      setTick((t) => t + 1);
+      await showToast({ style: Toast.Style.Success, title: t("search.vaultRefreshed") });
+    } catch (err) {
+      await showToast({ style: Toast.Style.Failure, title: t("search.refreshFailed"), message: describeError(err) });
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   const results = useMemo(() => session.vault.search(query, 200), [session, query, tick]);
   const byVault = useMemo(() => {
+    // Con una ricerca attiva i risultati restano in un'unica sezione, nell'ordine di
+    // rilevanza (prima i match sul nome): raggrupparli per vault romperebbe l'ordine.
+    if (query.trim()) return results.length > 0 ? [[t("common.results"), results] as [string, DecryptedItem[]]] : [];
     const groups = new Map<string, DecryptedItem[]>();
     for (const item of results) {
       const list = groups.get(item.vaultName) ?? [];
@@ -59,7 +98,7 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
       groups.set(item.vaultName, list);
     }
     return [...groups.entries()];
-  }, [results]);
+  }, [results, query]);
 
   function toggleReveal(id: string) {
     setRevealed((prev) => {
@@ -73,17 +112,39 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
   return (
     <List
       isLoading={refreshing}
-      searchBarPlaceholder="Cerca per titolo, username o sito…"
+      searchBarPlaceholder={t("search.placeholder")}
       onSearchTextChange={setQuery}
       filtering={false}
       isShowingDetail={showDetail}
       throttle
     >
+      {!query.trim() && billing && usageLevel !== "ok" && billing.limits.maxItems !== null && (
+        <List.Section title={t("search.planSection")}>
+          <List.Item
+            icon={{ source: Icon.Star, tintColor: usageLevel === "full" ? Color.Red : Color.Yellow }}
+            title={t("search.freeUsage", { used: billing.usage.items, max: billing.limits.maxItems })}
+            subtitle={shouldOfferUpgrade(billing) ? t("plan.upgrade") : undefined}
+            detail={<List.Item.Detail markdown={`**${planLabel(billing)}**`} />}
+            actions={
+              <ActionPanel>
+                {shouldOfferUpgrade(billing) && (
+                  <Action title={upgradeCta(billing)} icon={Icon.Star} onAction={() => openCheckout(session)} />
+                )}
+                <Action.Push
+                  title={t("common.planDetail")}
+                  icon={Icon.Info}
+                  target={<PlanDetail session={session} initial={billing} />}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {byVault.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title={query ? "Nessun risultato" : "Nessun elemento nel vault"}
-          description={query ? "Prova con un altro termine" : "Usa il comando «Salva password» per crearne uno"}
+          title={query ? t("search.noResults") : t("search.emptyVault")}
+          description={query ? t("search.tryAnother") : t("search.createHint")}
         />
       )}
       {byVault.map(([vaultName, items]) => (
@@ -93,11 +154,14 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
               key={item.id}
               item={item}
               session={session}
+              billing={billing}
+              totpAllowed={totpAllowed}
               showDetail={showDetail}
               revealed={revealed.has(item.id)}
               onToggleDetail={() => setShowDetail((v) => !v)}
               onToggleReveal={() => toggleReveal(item.id)}
               onLock={onLock}
+              onRefresh={refresh}
             />
           ))}
         </List.Section>
@@ -109,11 +173,15 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
 interface RowProps {
   item: DecryptedItem;
   session: ActiveSession;
+  billing: BillingStatus | null;
+  /** false con il piano Free: il codice TOTP non viene generato (il segreto resta nell'item). */
+  totpAllowed: boolean;
   showDetail: boolean;
   revealed: boolean;
   onToggleDetail: () => void;
   onToggleReveal: () => void;
   onLock: () => void;
+  onRefresh: () => Promise<void>;
 }
 
 const TYPE_ICON: Record<DecryptedItem["data"]["type"], Icon> = {
@@ -123,97 +191,154 @@ const TYPE_ICON: Record<DecryptedItem["data"]["type"], Icon> = {
   identity: Icon.Person,
 };
 
-function ItemRow({ item, session, showDetail, revealed, onToggleDetail, onToggleReveal, onLock }: RowProps) {
+function ItemRow({
+  item,
+  session,
+  billing,
+  totpAllowed,
+  showDetail,
+  revealed,
+  onToggleDetail,
+  onToggleReveal,
+  onLock,
+  onRefresh,
+}: RowProps) {
+  const { push } = useNavigation();
   const d = item.data;
   const host = d.urls[0] ? displayHost(d.urls[0]) : undefined;
 
+  /** Le azioni sui segreti non funzionano mai oltre l'auto-lock, anche con la vista ancora aperta. */
+  async function ensureUnlocked(): Promise<boolean> {
+    if (!session.isExpired()) return true;
+    await session.lock();
+    onLock();
+    await showToast({ style: Toast.Style.Failure, title: t("common.locked") });
+    return false;
+  }
+
   async function copyPassword() {
+    if (!(await ensureUnlocked())) return;
     if (!d.password) {
-      await showToast({ style: Toast.Style.Failure, title: "Nessuna password" });
+      await showToast({ style: Toast.Style.Failure, title: t("search.noPassword") });
       return;
     }
     await copySecret(d.password);
-    await showHUD("Password copiata (si cancella tra 30 s)");
+    await showHUD(t("search.passwordCopied"));
   }
 
   async function pastePassword() {
+    if (!(await ensureUnlocked())) return;
     if (!d.password) return;
     await closeMainWindow();
     await Clipboard.paste(d.password);
   }
 
   async function copyUsername() {
+    if (!(await ensureUnlocked())) return;
     if (!d.username) return;
     await Clipboard.copy(d.username);
-    await showHUD("Username copiato");
+    await showHUD(t("search.usernameCopied"));
   }
 
   async function copyTotp() {
+    if (!(await ensureUnlocked())) return;
     if (!d.totp) return;
+    if (!totpAllowed) {
+      await showTotpLocked();
+      return;
+    }
     try {
       const { code, remaining } = await generateTotp(d.totp);
       await copySecret(code);
-      await showHUD(`Codice ${code} copiato (valido ${remaining} s)`);
+      await showHUD(t("search.totpCopied", { code, seconds: remaining }));
     } catch (err) {
-      await showToast({ style: Toast.Style.Failure, title: "TOTP non valido", message: describeError(err) });
+      await showToast({ style: Toast.Style.Failure, title: t("search.totpInvalid"), message: describeError(err) });
     }
   }
 
+  async function showTotpLocked() {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: t("search.totpPremiumTitle"),
+      message: t("search.totpPremiumMessage"),
+      primaryAction:
+        billing && shouldOfferUpgrade(billing)
+          ? { title: upgradeCta(billing), onAction: () => void openCheckout(session) }
+          : { title: t("common.planDetail"), onAction: () => push(<PlanDetail session={session} initial={billing} />) },
+    });
+  }
+
   async function pasteTotp() {
+    if (!(await ensureUnlocked())) return;
     if (!d.totp) return;
+    if (!totpAllowed) {
+      await showTotpLocked();
+      return;
+    }
     try {
       const { code } = await generateTotp(d.totp);
       await closeMainWindow();
       await Clipboard.paste(code);
     } catch (err) {
-      await showToast({ style: Toast.Style.Failure, title: "TOTP non valido", message: describeError(err) });
+      await showToast({ style: Toast.Style.Failure, title: t("search.totpInvalid"), message: describeError(err) });
     }
   }
 
   async function lock() {
-    lockSession();
-    session.vault.lock();
+    await session.lock(); // come il comando «Lock Passig»: svuota anche gli appunti
     onLock();
-    await showToast({ style: Toast.Style.Success, title: "Passig bloccato" });
+    await showToast({ style: Toast.Style.Success, title: t("common.locked") });
   }
 
   return (
     <List.Item
       icon={{ source: TYPE_ICON[d.type], tintColor: d.favorite ? Color.Yellow : Color.PrimaryText }}
-      title={d.title || "(senza titolo)"}
+      title={d.title || t("common.untitled")}
       subtitle={showDetail ? undefined : d.username}
       keywords={[d.username, ...d.urls.map(displayHost)].filter(Boolean)}
       accessories={
         showDetail
           ? undefined
           : [
-              ...(d.totp ? [{ icon: Icon.Clock, tooltip: "TOTP disponibile" }] : []),
+              ...(d.totp
+                ? [
+                    {
+                      icon: Icon.Clock,
+                      tooltip: totpAllowed ? t("search.totpAvailable") : t("search.totpPremiumTooltip"),
+                    },
+                  ]
+                : []),
               ...(host ? [{ text: host, tooltip: d.urls.join("\n") }] : []),
             ]
       }
-      detail={<ItemDetail item={item} revealed={revealed} />}
+      detail={<ItemDetail item={item} revealed={revealed} totpAllowed={totpAllowed} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={d.title}>
-            <Action title="Copia password" icon={Icon.Clipboard} onAction={copyPassword} />
+            <Action title={t("action.copyPassword")} icon={Icon.Clipboard} onAction={copyPassword} />
             <Action
-              title="Incolla password"
+              title={t("action.pastePassword")}
               icon={Icon.Text}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={pastePassword}
             />
             <Action
-              title="Copia username"
+              title={t("action.copyUsername")}
               icon={Icon.Person}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
               onAction={copyUsername}
             />
             {d.totp && (
-              <Action title="Copia codice TOTP" icon={Icon.Clock} shortcut={{ modifiers: ["cmd"], key: "t" }} onAction={copyTotp} />
-            )}
-            {d.totp && (
               <Action
-                title="Incolla codice TOTP"
+                title={totpAllowed ? t("action.copyTotp") : t("action.totpPremium")}
+                icon={Icon.Clock}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                onAction={copyTotp}
+              />
+            )}
+            {d.totp && totpAllowed && (
+              <Action
+                title={t("action.pasteTotp")}
                 icon={Icon.Clock}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                 onAction={pasteTotp}
@@ -221,39 +346,46 @@ function ItemRow({ item, session, showDetail, revealed, onToggleDetail, onToggle
             )}
             {d.urls[0] && (
               <Action.OpenInBrowser
-                title="Apri sito"
+                title={t("action.openWebsite")}
                 url={/^[a-z]+:\/\//i.test(d.urls[0]) ? d.urls[0] : `https://${d.urls[0]}`}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title={showDetail ? "Nascondi dettagli" : "Mostra dettagli"}
+              title={showDetail ? t("action.hideDetails") : t("action.showDetails")}
               icon={Icon.Sidebar}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={onToggleDetail}
             />
             <Action
-              title={revealed ? "Nascondi password" : "Mostra password"}
+              title={revealed ? t("action.hidePassword") : t("action.showPassword")}
               icon={revealed ? Icon.EyeDisabled : Icon.Eye}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              onAction={onToggleReveal}
-            />
-            <Action
-              title="Aggiorna dal server"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={async () => {
-                try {
-                  await session.refresh();
-                  await showToast({ style: Toast.Style.Success, title: "Vault aggiornato" });
-                } catch (err) {
-                  await showToast({ style: Toast.Style.Failure, title: "Aggiornamento fallito", message: describeError(err) });
-                }
+                if (await ensureUnlocked()) onToggleReveal();
               }}
             />
-            <Action title="Blocca Passig" icon={Icon.Lock} shortcut={{ modifiers: ["cmd", "shift"], key: "l" }} onAction={lock} />
+            <Action
+              title={t("action.refreshFromServer")}
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={onRefresh}
+            />
+            <Action.Push
+              title={t("common.planDetail")}
+              icon={Icon.Star}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+              target={<PlanDetail session={session} initial={billing} />}
+            />
+            <BillingActions session={session} billing={billing} />
+            <Action
+              title={t("common.lock")}
+              icon={Icon.Lock}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={lock}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -261,13 +393,13 @@ function ItemRow({ item, session, showDetail, revealed, onToggleDetail, onToggle
   );
 }
 
-function ItemDetail({ item, revealed }: { item: DecryptedItem; revealed: boolean }) {
+function ItemDetail({ item, revealed, totpAllowed }: { item: DecryptedItem; revealed: boolean; totpAllowed: boolean }) {
   const d = item.data;
   const [totp, setTotp] = useState<{ code: string; remaining: number } | null>(null);
 
   // Aggiorna il codice TOTP ogni secondo quando il dettaglio è visibile.
   useEffect(() => {
-    if (!d.totp) return;
+    if (!d.totp || !totpAllowed) return;
     let active = true;
     const update = () =>
       generateTotp(d.totp!)
@@ -279,35 +411,50 @@ function ItemDetail({ item, revealed }: { item: DecryptedItem; revealed: boolean
       active = false;
       clearInterval(timer);
     };
-  }, [d.totp]);
+  }, [d.totp, totpAllowed]);
 
   const masked = d.password ? "•".repeat(Math.min(d.password.length, 16)) : "—";
   return (
     <List.Item.Detail
-      markdown={d.notes ? `### Note\n\n${d.notes}` : undefined}
+      markdown={d.notes ? `### ${t("detail.notes")}\n\n${d.notes}` : undefined}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Titolo" text={d.title} />
-          <List.Item.Detail.Metadata.Label title="Vault" text={item.vaultName} />
-          <List.Item.Detail.Metadata.Label title="Username" text={d.username || "—"} />
-          <List.Item.Detail.Metadata.Label title="Password" text={revealed ? d.password || "—" : masked} icon={revealed ? Icon.Eye : Icon.EyeDisabled} />
+          <List.Item.Detail.Metadata.Label title={t("common.title")} text={d.title} />
+          <List.Item.Detail.Metadata.Label title={t("common.vault")} text={item.vaultName} />
+          <List.Item.Detail.Metadata.Label title={t("common.username")} text={d.username || "—"} />
+          <List.Item.Detail.Metadata.Label
+            title={t("common.password")}
+            text={revealed ? d.password || "—" : masked}
+            icon={revealed ? Icon.Eye : Icon.EyeDisabled}
+          />
           {d.totp && (
             <List.Item.Detail.Metadata.Label
               title="TOTP"
-              text={totp ? `${totp.code}  (${totp.remaining} s)` : "non valido"}
+              text={
+                !totpAllowed
+                  ? t("search.totpPremiumTitle")
+                  : totp
+                    ? t("detail.totpCode", { code: totp.code, seconds: totp.remaining })
+                    : t("detail.totpInvalid")
+              }
               icon={Icon.Clock}
             />
           )}
           {d.urls.length > 0 && <List.Item.Detail.Metadata.Separator />}
           {d.urls.map((u, i) => (
-            <List.Item.Detail.Metadata.Link key={i} title={i === 0 ? "URL" : ""} text={displayHost(u)} target={/^[a-z]+:\/\//i.test(u) ? u : `https://${u}`} />
+            <List.Item.Detail.Metadata.Link
+              key={i}
+              title={i === 0 ? t("common.url") : ""}
+              text={displayHost(u)}
+              target={/^[a-z]+:\/\//i.test(u) ? u : `https://${u}`}
+            />
           ))}
           {d.fields.length > 0 && <List.Item.Detail.Metadata.Separator />}
           {d.fields.map((f, i) => (
             <List.Item.Detail.Metadata.Label key={i} title={f.name} text={f.hidden && !revealed ? "••••••" : f.value} />
           ))}
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Aggiornato" text={new Date(item.updatedAt).toLocaleString("it-IT")} />
+          <List.Item.Detail.Metadata.Label title={t("detail.updated")} text={formatDateTime(item.updatedAt)} />
         </List.Item.Detail.Metadata>
       }
     />

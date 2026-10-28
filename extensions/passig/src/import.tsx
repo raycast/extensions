@@ -25,6 +25,7 @@ import { useMemo, useState } from "react";
 import {
   IMPORT_FORMATS,
   ImportFailedError,
+  PlanLimitError,
   detectFormat,
   guessCsvMapping,
   isUsableMapping,
@@ -35,30 +36,48 @@ import {
   type CsvMapping,
   type CsvTarget,
   type ImportFormatId,
+  type ImportFormatInfo,
   type ImportPlan,
   type ImportReport,
   type ImportResult,
 } from "./vendor/client-core/index.js";
-import type { ItemData } from "./vendor/shared/index.js";
+import type { BillingStatus, ItemData } from "./vendor/shared/index.js";
 import { UnlockForm } from "./components/UnlockForm";
+import { formatNumber, t, type MessageKey } from "./i18n";
+import { BillingActions, fetchBilling, personalVaultIds } from "./lib/billing";
 import { describeError } from "./lib/errors";
+import { checkImportAgainstPlan } from "./lib/plan";
 import type { ActiveSession } from "./lib/session";
 import { useSession } from "./lib/useSession";
 
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
-const TARGET_LABELS: Record<CsvTarget, string> = {
-  title: "Titolo",
-  username: "Username",
-  password: "Password",
-  url: "URL",
-  notes: "Note",
-  totp: "TOTP",
-  folder: "Cartella",
-  favorite: "Preferito",
-  field: "Campo personalizzato",
-  ignore: "Ignorata",
+const TARGET_LABELS: Record<CsvTarget, MessageKey> = {
+  title: "import.target.title",
+  username: "import.target.username",
+  password: "import.target.password",
+  url: "import.target.url",
+  notes: "import.target.notes",
+  totp: "import.target.totp",
+  folder: "import.target.folder",
+  favorite: "import.target.favorite",
+  field: "import.target.field",
+  ignore: "import.target.ignore",
 };
+
+/** Nome del password manager di origine (i nomi propri restano, le voci generiche sono tradotte). */
+function formatSource(f: ImportFormatInfo): string {
+  if (f.id === "generic-csv") return t("import.source.generic");
+  if (f.id === "safari-csv") return t("import.source.safari");
+  return f.source;
+}
+
+/** Istruzioni di export localizzate (`import.howTo.<id>`), con fallback al testo del catalogo. */
+function formatHowTo(f: ImportFormatInfo): string {
+  const key = `import.howTo.${f.id}` as MessageKey;
+  const text = t(key);
+  return text === key ? f.howTo : text;
+}
 
 interface FormValues {
   file: string[];
@@ -80,10 +99,6 @@ function md(text: string): string {
   return text.replace(/([\\`*_[\]<>#|])/g, "\\$1");
 }
 
-function plural(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`;
-}
-
 function ImportForm({ session }: { session: ActiveSession }) {
   const { push } = useNavigation();
   const vaults = useMemo(() => session.vault.listWritableVaults(), [session]);
@@ -95,29 +110,28 @@ function ImportForm({ session }: { session: ActiveSession }) {
   async function submit(values: FormValues) {
     const path = values.file[0];
     if (!path) {
-      setFileError("Scegli il file di export");
+      setFileError(t("import.chooseFile"));
       return;
     }
     if (!values.vault) {
-      await showToast({ style: Toast.Style.Failure, title: "Nessun vault scrivibile" });
+      await showToast({ style: Toast.Style.Failure, title: t("common.noWritableVault") });
       return;
     }
     setBusy(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Lettura del file…" });
+    const toast = await showToast({ style: Toast.Style.Animated, title: t("import.readingFile") });
     let bytes: Uint8Array | null = null;
     try {
-      if (statSync(path).size > MAX_FILE_BYTES) throw new Error("File troppo grande (massimo 100 MB)");
+      if (statSync(path).size > MAX_FILE_BYTES) throw new Error(t("import.fileTooLarge"));
       bytes = new Uint8Array(readFileSync(path));
       const file = { name: basename(path), bytes };
-      const resolved: ImportFormatId = values.format === "auto" ? detectFormat(file) : (values.format as ImportFormatId);
+      const resolved: ImportFormatId =
+        values.format === "auto" ? detectFormat(file) : (values.format as ImportFormatId);
 
       let mapping: CsvMapping | undefined;
       if (resolved === "generic-csv") {
         mapping = guessCsvMapping(previewCsv(file, 0).headers);
         if (!isUsableMapping(mapping)) {
-          throw new Error(
-            "Non riesco a capire le colonne del CSV: rinomina le intestazioni (es. title, username, password, url) oppure usa l'estensione Chrome per la mappatura manuale.",
-          );
+          throw new Error(t("import.csvMappingFailed"));
         }
       }
       const result = parseImport(file, { format: resolved, ...(mapping ? { mapping } : {}) });
@@ -137,14 +151,29 @@ function ImportForm({ session }: { session: ActiveSession }) {
       if (mapping) {
         await showToast({
           style: Toast.Style.Success,
-          title: "CSV generico",
-          message: "Colonne mappate automaticamente: controlla l'anteprima",
+          title: t("import.genericCsv"),
+          message: t("import.columnsMapped"),
         });
       }
-      push(<ImportPreview session={session} path={path} result={result} plan={plan} mapping={mapping} />);
+      // controllo preventivo del piano: un import che sfora viene rifiutato per intero dal server (402)
+      const billing = await fetchBilling(session);
+      const check = billing
+        ? checkImportAgainstPlan(billing, plan, personalVaultIds(session.vault))
+        : ({ ok: true } as const);
+      push(
+        <ImportPreview
+          session={session}
+          path={path}
+          result={result}
+          plan={plan}
+          mapping={mapping}
+          billing={billing}
+          blocked={check.ok ? null : check.message}
+        />,
+      );
     } catch (err) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Impossibile leggere il file";
+      toast.title = t("import.readFailed");
       toast.message = describeError(err);
     } finally {
       // i byte del file non servono più: il risultato in chiaro vive solo nell'anteprima
@@ -156,56 +185,64 @@ function ImportForm({ session }: { session: ActiveSession }) {
   return (
     <Form
       isLoading={busy}
-      navigationTitle="Importa password"
+      navigationTitle={t("import.navTitle")}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Anteprima" icon={Icon.Eye} onSubmit={submit} />
+          <Action.SubmitForm title={t("import.preview")} icon={Icon.Eye} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <Form.Description text="Il file viene letto e convertito su questo Mac; ogni elemento è cifrato prima di essere inviato al server." />
+      <Form.Description text={t("import.description")} />
       <Form.FilePicker
         id="file"
-        title="File di export"
+        title={t("import.file")}
         allowMultipleSelection={false}
         canChooseDirectories={false}
         error={fileError}
         onChange={() => setFileError(undefined)}
       />
-      <Form.Dropdown id="format" title="Formato" value={format} onChange={setFormat}>
-        <Form.Dropdown.Item value="auto" title="Riconoscimento automatico" icon={Icon.MagnifyingGlass} />
+      <Form.Dropdown id="format" title={t("import.format")} value={format} onChange={setFormat}>
+        <Form.Dropdown.Item value="auto" title={t("import.autoDetect")} icon={Icon.MagnifyingGlass} />
         {IMPORT_FORMATS.map((f) => (
-          <Form.Dropdown.Item key={f.id} value={f.id} title={`${f.source} — ${f.label}`} />
+          <Form.Dropdown.Item key={f.id} value={f.id} title={`${formatSource(f)} — ${f.label}`} />
         ))}
       </Form.Dropdown>
-      {info && <Form.Description title="Come esportare" text={info.howTo} />}
+      {info && <Form.Description title={t("import.howTo")} text={formatHowTo(info)} />}
       <Form.Separator />
       {vaults.length === 0 ? (
-        <Form.Description title="Destinazione" text="Non hai vault con permesso di scrittura." />
+        <Form.Description title={t("import.destination")} text={t("common.noWritableVaultText")} />
       ) : (
-        <Form.Dropdown id="vault" title="Vault di destinazione" defaultValue={vaults[0]?.id}>
+        <Form.Dropdown id="vault" title={t("import.targetVault")} defaultValue={vaults[0]?.id}>
           {vaults.map((v) => (
-            <Form.Dropdown.Item key={v.id} value={v.id} title={v.name} icon={v.organizationId ? Icon.TwoPeople : Icon.Person} />
+            <Form.Dropdown.Item
+              key={v.id}
+              value={v.id}
+              title={v.name}
+              icon={v.organizationId ? Icon.TwoPeople : Icon.Person}
+            />
           ))}
         </Form.Dropdown>
       )}
       <Form.Checkbox
         id="perFolder"
-        label="Un vault per ogni cartella"
+        label={t("import.perFolder")}
         defaultValue={false}
-        info="Ogni cartella del file diventa un vault (riusato se ne esiste già uno con lo stesso nome); gli elementi senza cartella vanno nel vault scelto."
+        info={t("import.perFolderInfo")}
       />
       <Form.Checkbox
         id="skipDuplicates"
-        label="Salta i duplicati"
+        label={t("import.skipDuplicates")}
         defaultValue={true}
-        info="Non importa gli elementi già presenti nel vault di destinazione o ripetuti nel file."
+        info={t("import.skipDuplicatesInfo")}
       />
     </Form>
   );
 }
 
-type Phase = { kind: "preview" } | { kind: "running" } | { kind: "done"; report: ImportReport; error?: string };
+type Phase =
+  | { kind: "preview" }
+  | { kind: "running" }
+  | { kind: "done"; report: ImportReport; error?: string; planLimit?: boolean };
 
 function ImportPreview(props: {
   session: ActiveSession;
@@ -213,8 +250,11 @@ function ImportPreview(props: {
   result: ImportResult;
   plan: ImportPlan;
   mapping?: CsvMapping;
+  billing: BillingStatus | null;
+  /** messaggio se l'import supera il piano (nessun caricamento possibile) */
+  blocked: string | null;
 }) {
-  const { session, path } = props;
+  const { session, path, billing, blocked } = props;
   // risultato e piano contengono dati in chiaro: li teniamo in stato e li azzeriamo a import concluso
   const [data, setData] = useState<{ result: ImportResult; plan: ImportPlan; mapping?: CsvMapping } | null>({
     result: props.result,
@@ -226,26 +266,31 @@ function ImportPreview(props: {
   const vaultNames = useMemo(() => new Map(session.vault.listVaults().map((v) => [v.id, v.name])), [session]);
 
   async function run() {
-    if (!data || data.plan.total === 0) return;
+    if (!data || data.plan.total === 0 || blocked) return;
     const plan = data.plan;
     setPhase({ kind: "running" });
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Importazione…", message: `0 di ${plan.total}` });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: t("import.running"),
+      message: t("import.progress", { done: 0, total: plan.total }),
+    });
     try {
       const report = await session.vault.importPlan(plan, (p) => {
-        toast.message = `${p.done} di ${p.total} · ${p.vaultName}`;
+        toast.message = t("import.progressVault", { done: p.done, total: p.total, vault: p.vaultName });
       });
       session.persist();
       toast.style = Toast.Style.Success;
-      toast.title = "Importazione completata";
-      toast.message = plural(report.created, "elemento importato", "elementi importati");
+      toast.title = t("import.completed");
+      toast.message = t("import.itemsImported", { count: report.created });
       setPhase({ kind: "done", report });
     } catch (err) {
       session.persist(); // i blocchi già caricati restano: aggiorna la cache
       const report = err instanceof ImportFailedError ? err.report : { created: 0, vaultsCreated: [] };
+      const cause = err instanceof ImportFailedError ? err.cause : err;
       toast.style = Toast.Style.Failure;
-      toast.title = "Importazione interrotta";
-      toast.message = describeError(err instanceof ImportFailedError ? err.cause : err);
-      setPhase({ kind: "done", report, error: describeError(err) });
+      toast.title = t("import.interrupted");
+      toast.message = describeError(cause);
+      setPhase({ kind: "done", report, error: describeError(err), planLimit: cause instanceof PlanLimitError });
     } finally {
       plan.batches.length = 0;
       setData(null);
@@ -254,50 +299,51 @@ function ImportPreview(props: {
 
   async function trashExport() {
     const ok = await confirmAlert({
-      title: "Spostare il file di export nel Cestino?",
+      title: t("import.trashConfirm"),
       message: basename(path),
-      primaryAction: { title: "Sposta nel Cestino", style: Alert.ActionStyle.Destructive },
+      primaryAction: { title: t("import.trashAction"), style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
     try {
       await trash(path);
       await showToast({
         style: Toast.Style.Success,
-        title: "File spostato nel Cestino",
-        message: "Ricorda di svuotare il Cestino",
+        title: t("import.trashed"),
+        message: t("import.emptyTrash"),
       });
     } catch (err) {
-      await showToast({ style: Toast.Style.Failure, title: "Impossibile spostare il file", message: describeError(err) });
+      await showToast({ style: Toast.Style.Failure, title: t("import.trashFailed"), message: describeError(err) });
     }
   }
 
-  const deleteReminder =
-    "> **Elimina il file di export:** contiene tutte le tue password in chiaro. Spostalo nel Cestino (⌘⌫) e svuota il Cestino.";
-
   if (phase.kind === "done") {
     const { report, error } = phase;
+    const imported = t("import.itemsImported", { count: report.created });
     const lines = [
-      error ? `# Importazione interrotta` : `# Importazione completata`,
+      error ? `# ${t("import.interrupted")}` : `# ${t("import.completed")}`,
       "",
       error ? `${md(error)}\n` : "",
-      `**${plural(report.created, "elemento importato", "elementi importati")}**${error && report.created ? " prima dell'errore: restano nel vault. Se riprovi, lascia attivo «Salta i duplicati»." : "."}`,
+      error && report.created ? t("import.importedBeforeError", { imported }) : t("import.importedLine", { imported }),
       "",
-      report.vaultsCreated.length ? `Vault creati: ${report.vaultsCreated.map(md).join(", ")}\n` : "",
-      deleteReminder,
+      report.vaultsCreated.length
+        ? `${t("import.vaultsCreated", { names: report.vaultsCreated.map(md).join(", ") })}\n`
+        : "",
+      t("import.deleteReminder"),
     ];
     return (
       <Detail
-        navigationTitle="Importa password"
+        navigationTitle={t("import.navTitle")}
         markdown={lines.join("\n")}
         actions={
           <ActionPanel>
             <Action
-              title="Sposta il file nel Cestino"
+              title={t("import.trashFile")}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={trashExport}
             />
-            <Action title="Chiudi" icon={Icon.Checkmark} onAction={() => popToRoot()} />
+            <Action title={t("common.close")} icon={Icon.Checkmark} onAction={() => popToRoot()} />
+            {phase.planLimit && <BillingActions session={session} billing={billing} />}
           </ActionPanel>
         }
       />
@@ -309,51 +355,61 @@ function ImportPreview(props: {
   const { result, plan, mapping } = data;
   const s = summarizeImport(result.items);
   const fmt = IMPORT_FORMATS.find((f) => f.id === result.format);
+  const n = formatNumber;
   const md_ = [
-    `# Anteprima import`,
+    `# ${t("import.previewTitle")}`,
     "",
-    `**File:** ${md(basename(path))} · **Formato:** ${md(fmt ? `${fmt.source} (${fmt.label})` : result.format)}`,
+    t("import.fileAndFormat", {
+      file: md(basename(path)),
+      format: md(fmt ? `${formatSource(fmt)} (${fmt.label})` : result.format),
+    }),
     "",
-    "| Login | Note | Carte | Identità | Cartelle | Scartati |",
+    t("import.tableHeader"),
     "|---:|---:|---:|---:|---:|---:|",
-    `| ${s.login} | ${s.note} | ${s.card} | ${s.identity} | ${s.folders} | ${result.skipped} |`,
+    `| ${n(s.login)} | ${n(s.note)} | ${n(s.card)} | ${n(s.identity)} | ${n(s.folders)} | ${n(result.skipped)} |`,
     "",
-    `Verranno creati **${plural(plan.total, "elemento", "elementi")}**${plan.duplicates ? ` · ${plural(plan.duplicates, "duplicato saltato", "duplicati saltati")}` : ""}.`,
+    `${t("import.willCreate", { count: plan.total })}${plan.duplicates ? ` · ${t("import.duplicatesSkipped", { count: plan.duplicates })}` : ""}.`,
     "",
     ...plan.batches.map(
       (b) =>
-        `- ${md(b.vaultId ? (vaultNames.get(b.vaultId) ?? b.vaultId) : (b.newVaultName ?? "Importati"))}${b.vaultId ? "" : " _(nuovo vault)_"}: ${b.items.length}`,
+        `- ${md(b.vaultId ? (vaultNames.get(b.vaultId) ?? b.vaultId) : (b.newVaultName ?? t("import.defaultVaultName")))}${b.vaultId ? "" : ` _${t("import.newVault")}_`}: ${n(b.items.length)}`,
     ),
     "",
   ];
   if (mapping) {
     md_.push(
-      "## Colonne del CSV (mappatura automatica)",
+      `## ${t("import.csvColumnsTitle")}`,
       "",
-      "| Colonna | Campo |",
+      t("import.csvTableHeader"),
       "|---|---|",
-      ...mapping.headers.map((h, i) => `| ${md(h || `Colonna ${i + 1}`)} | ${TARGET_LABELS[mapping.columns[i] ?? "ignore"]} |`),
+      ...mapping.headers.map(
+        (h, i) =>
+          `| ${md(h || t("import.columnN", { n: i + 1 }))} | ${t(TARGET_LABELS[mapping.columns[i] ?? "ignore"])} |`,
+      ),
       "",
-      "Se la mappatura non è corretta, rinomina le intestazioni del CSV oppure usa l'estensione Chrome per sceglierla a mano.",
+      t("import.csvMappingHint"),
       "",
     );
   }
-  if (result.warnings.length) md_.push("## Avvisi", "", ...result.warnings.map((w) => `- ${md(w)}`), "");
-  if (plan.total === 0) md_.push("**Niente da importare:** tutti gli elementi sono già presenti.", "");
+  if (result.warnings.length)
+    md_.push(`## ${t("import.warnings")}`, "", ...result.warnings.map((w) => `- ${md(w)}`), "");
+  if (plan.total === 0) md_.push(t("import.nothing"), "");
+  if (blocked) md_.splice(2, 0, t("import.overPlan", { message: md(blocked) }), "");
 
   return (
     <Detail
-      navigationTitle="Importa password"
+      navigationTitle={t("import.navTitle")}
       isLoading={phase.kind === "running"}
       markdown={md_.join("\n")}
       actions={
         phase.kind === "preview" ? (
           <ActionPanel>
-            {plan.total > 0 && (
-              <Action title={`Importa ${plural(plan.total, "elemento", "elementi")}`} icon={Icon.Download} onAction={run} />
+            {blocked && <BillingActions session={session} billing={billing} />}
+            {plan.total > 0 && !blocked && (
+              <Action title={t("import.run", { count: plan.total })} icon={Icon.Download} onAction={run} />
             )}
             <Action
-              title="Annulla"
+              title={t("common.cancel")}
               icon={Icon.XMarkCircle}
               onAction={() => {
                 setData(null);
