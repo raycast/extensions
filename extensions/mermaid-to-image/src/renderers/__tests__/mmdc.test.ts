@@ -19,7 +19,7 @@ describe("mapMmdcError", () => {
 });
 
 describe("renderWithMmdc", () => {
-  it("passes a puppeteer config file with the resolved executablePath", async () => {
+  it.each(["svg", "png"] as const)("uses the resolved browser and preserves the %s output format", async (format) => {
     const tempFiles = new Map<string, string>();
     const createTempFile = vi.fn((content: string, extension: string) => {
       const tempPath = `/tmp/test-${tempFiles.size}.${extension}`;
@@ -29,20 +29,18 @@ describe("renderWithMmdc", () => {
     const cleanupTempFile = vi.fn();
     const execFile = vi.fn().mockResolvedValue({ stdout: "", stderr: "" });
 
-    const outputPath = "/tmp/output.png";
+    const outputPath = `/tmp/output.${format}`;
     const request = {
       code: "flowchart TD\nA-->B",
-      format: "png" as const,
+      format,
       requestedEngine: "compatible" as const,
       outputPath,
     };
 
-    await renderWithMmdc(
+    const result = await renderWithMmdc(
       request,
       {
         preferences: {
-          outputFormat: "png",
-          renderEngine: "compatible",
           theme: "default",
         },
         timeoutMs: 5_000,
@@ -72,6 +70,12 @@ describe("renderWithMmdc", () => {
     expect(JSON.parse(tempFiles.get(puppeteerConfigPath!) ?? "")).toEqual({
       executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     });
+    expect(result).toEqual({
+      engine: "mmdc",
+      format,
+      outputPath,
+      svgRasterStrategy: format === "svg" ? "browser" : undefined,
+    });
     expect(cleanupTempFile).toHaveBeenCalledWith("/tmp/test-0.mmd");
     expect(cleanupTempFile).toHaveBeenCalledWith(puppeteerConfigPath);
   });
@@ -87,8 +91,6 @@ describe("renderWithMmdc", () => {
         },
         {
           preferences: {
-            outputFormat: "png",
-            renderEngine: "compatible",
             theme: "default",
           },
           timeoutMs: 5_000,

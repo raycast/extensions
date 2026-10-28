@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import path from "path";
 import { Detail, List, Icon, Clipboard, ActionPanel, Action, open, getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../types";
-import { ResolvedEngine, SvgRasterStrategy } from "../renderers/types";
+import { ResolvedEngine, SvgRasterStrategy, RendererMetadata } from "../renderers/types";
 import { cleanupTempFile } from "../utils/files";
 import { buildImagePreviewItems, type ImagePreviewItemModel } from "../utils/image-preview-model";
 import { supportsBeautifulMermaidSyntax } from "../renderers/select-renderer";
@@ -30,9 +29,17 @@ interface ImagePreviewProps {
   engineLabel?: ResolvedEngine | null;
   svgRasterStrategy?: SvgRasterStrategy | null;
   mermaidCode?: string | null;
+  rendererMetadata?: RendererMetadata;
 }
 
-export function ImagePreview({ imagePath, format, engineLabel, svgRasterStrategy, mermaidCode }: ImagePreviewProps) {
+export function ImagePreview({
+  imagePath,
+  format,
+  engineLabel,
+  svgRasterStrategy,
+  mermaidCode,
+  rendererMetadata,
+}: ImagePreviewProps) {
   const preferences = getPreferenceValues<Preferences>();
 
   const [imageContent, setImageContent] = useState<string>("");
@@ -114,11 +121,13 @@ export function ImagePreview({ imagePath, format, engineLabel, svgRasterStrategy
     const loadImage = async () => {
       try {
         setIsLoading(true);
+        setImageError(null);
         cleanupPreviewTemp();
 
         const asset = await loadPreviewAsset({
           format,
           imagePath,
+          requireRaster: engineLabel === "ondine" || svgRasterStrategy === "browser",
           baseName: `mermaid-svg-preview-${Date.now()}`,
           renderSvgPreview: ({ materializedSvgContent, baseName }) =>
             renderSvgPreview(materializedSvgContent, baseName),
@@ -141,7 +150,7 @@ export function ImagePreview({ imagePath, format, engineLabel, svgRasterStrategy
     return () => {
       cleanupPreviewTemp();
     };
-  }, [imagePath, format]);
+  }, [imagePath, format, engineLabel, svgRasterStrategy]);
 
   if (isLoading) {
     return <Detail markdown="# Loading image..." isLoading={true} />;
@@ -155,6 +164,7 @@ export function ImagePreview({ imagePath, format, engineLabel, svgRasterStrategy
     imagePath,
     imageContent,
     engineLabel,
+    rendererMetadata,
     asciiContent,
     beautifulMermaidSourceLabel,
   });
