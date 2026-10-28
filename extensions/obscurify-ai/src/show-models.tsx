@@ -17,6 +17,13 @@ export default function Command() {
     }
   }
 
+  async function reload() {
+    setModels(undefined);
+    setError(undefined);
+    await load();
+    await AI.refreshModels();
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -24,7 +31,16 @@ export default function Command() {
   return (
     <List isLoading={!models && !error} searchBarPlaceholder="Search Obscurify.ai models">
       {error && !models ? (
-        <List.EmptyView icon={Icon.Warning} title="Could not load models" description={error} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load models"
+          description={error}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={reload} />
+            </ActionPanel>
+          }
+        />
       ) : null}
       {models?.map((model) => (
         <List.Item
@@ -41,15 +57,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy Model ID" content={model.id} />
-              <Action
-                title="Refresh Models"
-                icon={Icon.ArrowClockwise}
-                onAction={async () => {
-                  setModels(undefined);
-                  await load();
-                  await AI.refreshModels();
-                }}
-              />
+              <Action title="Refresh Models" icon={Icon.ArrowClockwise} onAction={reload} />
               <Action.OpenInBrowser
                 title="Open Model Prices"
                 url="https://obscurify.ai/model_cards?utm_source=raycast"
