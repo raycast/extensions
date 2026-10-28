@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add **Create Repository** command (disabled by default) to create a repository on your account or in one of your organizations.
+- AI: Add a **Create Repository** tool, which always asks for confirmation before creating the repository.
+
 ## [Open Created Issue in Browser] - 2026-10-14
 
 - Create Issue: Add an **Open issue in browser** preference to open newly created issues in your default browser.
