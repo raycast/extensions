@@ -1,8 +1,12 @@
+# Model Context Protocol Registry Changelog
+
+## [Add Awaken Tax MCP Server] - 2026-10-28
+
+- Add Awaken Tax to the official registry: crypto tax accounting in your Awaken account. Review and fix transactions, investigate cost basis and tax lots, summarize gains and income, reconcile 1099-DA forms and generate tax reports and CSV exports. Hosted Streamable HTTP server at https://mcp.awaken.tax/mcp through `mcp-remote`, with an `Authorization: Bearer <portfolioId>:<apiKey>` header from the `AWAKEN_AUTH_HEADER` environment variable; API keys need an Awaken Dolphin or Whale plan.
+
 ## [Add Paper Plane Post] - 2026-10-28
 
 - Add Paper Plane Post to the official registry: turn a photo into an unpaid postcard draft, then review and pay for printing and mailing on the website. No account or API key is required. Connect directly over HTTP in Raycast, with an `mcp-remote` fallback for other clients.
-
-# Model Context Protocol Registry Changelog
 
 ## [Add MEDIAPRONET MCP Server] - 2026-10-28
 
