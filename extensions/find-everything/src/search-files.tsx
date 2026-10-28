@@ -8,6 +8,7 @@ import {
   Toast,
   Clipboard,
   Keyboard,
+  Detail,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +26,62 @@ import {
   prettyPath,
   scopePaths,
 } from "./engine";
+import { NaturalSearchForm } from "./natural-search-form";
+import type { NaturalSearch } from "./natural-language";
+
+const SEARCH_HELP = `# Search Files
+
+Type at least two characters. Fuzzy words match file paths; quoted phrases match literally.
+
+| Filter | Example |
+| --- | --- |
+| File extension | invoice ext:pdf |
+| Folder | invoice in:downloads |
+| File type | type:image screenshot |
+| Exclude paths | readme !node |
+| Literal phrase | "release notes" |
+| Modified recently | report dm:7d |
+| File size | size:>10m |
+| Sort | readme sort:new |
+
+Select **Search with AI** to describe files in your own words, for example “PDFs from Downloads modified in the last week”. It requires Raycast AI access and sends only the description you submit. The generated query remains editable.
+
+Size, date and sort filters apply to the candidate set. This command searches file names and paths, not file contents.
+
+Use Command-D for details and Command-R to rebuild the index.
+`;
+
+function SearchTools({
+  query,
+  scope,
+  onSearch,
+}: {
+  query: string;
+  scope: Scope;
+  onSearch: (search: NaturalSearch) => void;
+}) {
+  return (
+    <ActionPanel.Section>
+      <Action.Push
+        title="Search with AI"
+        icon={Icon.Stars}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        target={
+          <NaturalSearchForm
+            initialPrompt={query}
+            scope={scope}
+            onSearch={onSearch}
+          />
+        }
+      />
+      <Action.Push
+        title="Search Help"
+        icon={Icon.QuestionMark}
+        target={<Detail markdown={SEARCH_HELP} />}
+      />
+    </ActionPanel.Section>
+  );
+}
 
 interface Meta {
   size?: number;
@@ -61,6 +118,13 @@ export default function Command() {
   const [selected, setSelected] = useState<string | null>(null);
   const seq = useRef(0);
   const limit = Math.max(10, parseInt(prefs.resultLimit || "300", 10) || 300);
+  const applyNaturalSearch = ({
+    query: translated,
+    scope: translatedScope,
+  }: NaturalSearch) => {
+    setScope(translatedScope);
+    setQuery(translated);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -248,6 +312,11 @@ export default function Command() {
               shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={refresh}
             />
+            <SearchTools
+              query={query}
+              scope={scope}
+              onSearch={applyNaturalSearch}
+            />
           </ActionPanel>
         }
       />
@@ -322,6 +391,11 @@ export default function Command() {
                     }
                   />
                 </ActionPanel.Section>
+                <SearchTools
+                  query={query}
+                  scope={scope}
+                  onSearch={applyNaturalSearch}
+                />
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy Path"
