@@ -120,6 +120,7 @@ export const ProfileSnapshotSchema = z.object({
   observedAt: z.string(),
   extensions: z.array(ExtensionSchema),
   inventoryIds: z.array(z.string()).optional(),
+  pendingInstallIds: z.array(z.string()).optional(),
   complete: z.boolean().optional(),
 });
 export type ProfileSnapshot = z.infer<typeof ProfileSnapshotSchema>;
@@ -153,6 +154,7 @@ export const StoreSchema = z.object({
   revision: z.number().int().nonnegative(),
   baselines: z.record(z.string(), ProfileSnapshotSchema),
   latest: z.record(z.string(), ProfileSnapshotSchema),
+  accessReferences: z.record(z.string(), AccessSchema).optional(),
   codeReferences: z.record(z.string(), CodeReferenceSchema).optional(),
   snapshots: z.array(ProfileSnapshotSchema),
   events: z.array(EventSchema),
@@ -168,6 +170,7 @@ export const emptyStore = (): AuditStore => ({
   revision: 0,
   baselines: {},
   latest: {},
+  accessReferences: {},
   codeReferences: {},
   snapshots: [],
   events: [],

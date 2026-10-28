@@ -23,13 +23,21 @@ function lastComplete(
   ];
   for (const snapshot of history) {
     const extension = snapshot.extensions.find((e) => e.key === extensionKey);
-    if (field === "code" && !extension) return;
+    if (!extension) return;
     if (extension?.[field]?.complete) return extension;
   }
 }
 export function reconcile(state: AuditStore, scan: Scan): AuditStore {
   const result = structuredClone(state);
+  const accessReferences = (result.accessReferences ??= {});
   const codeReferences = (result.codeReferences ??= {});
+  // Seed older stores before successful access observations can expire from history.
+  if (!state.accessReferences)
+    for (const profile of Object.values(state.latest))
+      for (const extension of profile.extensions) {
+        const reference = extension.access.complete ? extension : lastComplete(state, profile.key, extension.key);
+        if (reference) accessReferences[extension.key] = reference.access;
+      }
   // Seed older stores from successful code observations, independently of access quality.
   if (!state.codeReferences)
     for (const profile of Object.values(state.latest))
@@ -56,8 +64,17 @@ export function reconcile(state: AuditStore, scan: Scan): AuditStore {
     );
     if (!(profile.inventoryComplete ?? profile.complete)) continue;
     const previous = result.latest[profile.key];
+    const baseline = result.baselines[profile.key];
     const present = new Set(profile.inventoryIds ?? profile.extensions.map((e) => e.id));
     const observed = new Set(profile.extensions.map((e) => e.id));
+    const previousIds = new Set(previous?.inventoryIds ?? previous?.extensions.map((e) => e.id));
+    // Older stores can distinguish unreported additions from entries in the initial inventory.
+    if (previous && !previous.pendingInstallIds && baseline) {
+      const baselineIds = new Set(baseline.inventoryIds ?? baseline.extensions.map((e) => e.id));
+      previous.pendingInstallIds = [...previousIds].filter(
+        (id) => !baselineIds.has(id) && !previous.extensions.some((e) => e.id === id),
+      );
+    }
     const retained = previous?.extensions.filter((e) => present.has(e.id) && !observed.has(e.id)) ?? [];
     const current: ProfileSnapshot = {
       key: profile.key,
@@ -70,9 +87,14 @@ export function reconcile(state: AuditStore, scan: Scan): AuditStore {
           : (previous?.observedAt ?? profile.observedAt),
       extensions: [...profile.extensions, ...retained].sort((a, b) => a.key.localeCompare(b.key)),
       inventoryIds: [...present].sort(),
+      // Initial inventory entries belong to the baseline. Later unreadable additions still need an install event.
+      pendingInstallIds: [...present]
+        .filter(
+          (id) => !observed.has(id) && previous && (previous.pendingInstallIds?.includes(id) || !previousIds.has(id)),
+        )
+        .sort(),
       complete: profile.complete,
     };
-    const baseline = result.baselines[profile.key];
     if (!baseline && (current.extensions.length || profile.complete))
       result.baselines[profile.key] = withoutFileHashes(current);
     else if (baseline) {
@@ -88,19 +110,28 @@ export function reconcile(state: AuditStore, scan: Scan): AuditStore {
     }
     if (previous) {
       const ids = new Set(result.events.map((e) => e.id));
-      const reference = (key: string) => lastComplete(result, profile.key, key);
       result.events.push(
-        ...compareProfiles(previous, current, reference, (key) => codeReferences[key]).filter((e) => !ids.has(e.id)),
+        ...compareProfiles(
+          previous,
+          current,
+          (key) => accessReferences[key],
+          (key) => codeReferences[key],
+        ).filter((e) => !ids.has(e.id)),
       );
       if (signature(previous) !== signature(current)) result.snapshots.push(withoutFileHashes(previous));
       const currentKeys = new Set(current.extensions.map((e) => e.key));
       for (const extension of previous.extensions)
-        if (!currentKeys.has(extension.key)) delete codeReferences[extension.key];
+        if (!currentKeys.has(extension.key)) {
+          delete accessReferences[extension.key];
+          delete codeReferences[extension.key];
+        }
     }
-    // Keep the comparison point through failed/partial scans and history expiry.
-    for (const extension of current.extensions)
+    // Keep comparison points through failed/partial scans and history expiry.
+    for (const extension of current.extensions) {
+      if (extension.access.complete) accessReferences[extension.key] = extension.access;
       if (extension.code?.complete)
         codeReferences[extension.key] = { version: extension.version, code: extension.code };
+    }
     result.latest[profile.key] = current;
   }
   if (scan.discoveryComplete && scan.profiles.length > 0 && scan.profiles.every((p) => p.complete))

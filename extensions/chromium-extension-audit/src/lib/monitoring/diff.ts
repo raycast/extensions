@@ -1,5 +1,5 @@
 import { canonical, hash, unique } from "../json";
-import { Attention, ChangeEvent, CodeReference, Extension, ProfileSnapshot } from "../model";
+import { Access, Attention, ChangeEvent, CodeReference, Extension, ProfileSnapshot } from "../model";
 import { uncovered } from "../permissions/patterns";
 import { SENSITIVE_APIS } from "../rules/evaluate";
 
@@ -9,7 +9,7 @@ import { SENSITIVE_APIS } from "../rules/evaluate";
 export function compareExtension(
   previous: Extension,
   current: Extension,
-  reference?: Extension,
+  reference?: Access,
   codeReference?: CodeReference,
 ): ChangeEvent[] {
   const events: ChangeEvent[] = [];
@@ -27,9 +27,9 @@ export function compareExtension(
       next.unknown,
       "Review",
     );
-  const known = old.complete ? previous : reference?.access.complete ? reference : undefined;
+  const known = old.complete ? old : reference?.complete ? reference : undefined;
   if (known && next.complete) {
-    const effective = known.access.effective;
+    const effective = known.effective;
     const expanded = [
       ...uncovered(next.effective.hosts, effective.hosts),
       ...uncovered(next.effective.scripts, effective.scripts, true),
@@ -38,24 +38,18 @@ export function compareExtension(
       ...uncovered(effective.hosts, next.effective.hosts),
       ...uncovered(effective.scripts, next.effective.scripts, true),
     ];
-    const describe = (extension: Extension) => [
-      ...extension.access.effective.hosts.map((p) => `Host: ${p}`),
-      ...extension.access.effective.scripts.map((p) => `Content script: ${p}`),
+    const describe = (access: Access) => [
+      ...access.effective.hosts.map((p) => `Host: ${p}`),
+      ...access.effective.scripts.map((p) => `Content script: ${p}`),
     ];
     if (expanded.length)
-      change(
-        "CHG-001",
-        "Observable persistent website access expanded",
-        describe(known),
-        describe(current),
-        "Review now",
-      );
+      change("CHG-001", "Observable persistent website access expanded", describe(known), describe(next), "Review now");
     if (narrowed.length)
       change(
         "CHG-013",
         "Observable persistent website access narrowed",
         describe(known),
-        describe(current),
+        describe(next),
         "Informational",
       );
     const added = next.effective.api.filter((p) => SENSITIVE_APIS.includes(p) && !effective.api.includes(p));
@@ -268,7 +262,7 @@ function makeEvent(
 export function compareProfiles(
   previous: ProfileSnapshot,
   current: ProfileSnapshot,
-  reference: (key: string) => Extension | undefined = () => undefined,
+  reference: (key: string) => Access | undefined = () => undefined,
   codeReference: (key: string) => CodeReference | undefined = () => undefined,
 ): ChangeEvent[] {
   const old = new Map(previous.extensions.map((e) => [e.key, e]));
@@ -278,7 +272,7 @@ export function compareProfiles(
     const before = old.get(extension.key);
     if (before)
       events.push(...compareExtension(before, extension, reference(extension.key), codeReference(extension.key)));
-    else if (!previous.inventoryIds?.includes(extension.id))
+    else if (previous.pendingInstallIds?.includes(extension.id) || !previous.inventoryIds?.includes(extension.id))
       events.push(
         makeEvent(
           extension,

@@ -69,7 +69,7 @@ function extension(code, at, overrides) {
     ...overrides,
   });
 }
-function scan(state, code, day, overrides = {}) {
+function scan(state, code, day, overrides = {}, profileOverrides = {}) {
   const at = new Date(Date.UTC(2026, 0, day)).toISOString();
   const extensions = code === null ? [] : [extension(code, at, overrides)];
   // Every step exercises persistence and validation, as the repository does between scans.
@@ -89,6 +89,7 @@ function scan(state, code, day, overrides = {}) {
               inventoryIds: extensions.map((e) => e.id),
               complete: true,
               diagnostics: [],
+              ...profileOverrides,
             },
           ],
           diagnostics: [],
@@ -99,6 +100,101 @@ function scan(state, code, day, overrides = {}) {
   );
 }
 const codeEvents = (state) => state.events.filter((e) => ["CHG-019", "CHG-020", "CHG-021"].includes(e.type));
+const accessEvents = (state) => state.events.filter((e) => ["CHG-001", "CHG-002"].includes(e.type));
+const initialAccess = extension(undefined, "unused").access;
+const uncertainAccess = { ...initialAccess, complete: false, unknown: ["Access could not be determined"] };
+const expandedAccess = {
+  ...initialAccess,
+  effective: { api: ["cookies"], hosts: ["https://example.test/*"], scripts: ["https://example.test/*"] },
+};
+const unreadableProfile = { complete: false, inventoryComplete: true, inventoryIds: [id] };
+
+test("a new unreadable installation is reported once inspection succeeds", () => {
+  let state = scan(emptyStore(), null, 1);
+  state = scan(state, null, 2, {}, unreadableProfile);
+  state = scan(state, null, 3, {}, unreadableProfile);
+  state = scan(state, null, 100, {}, unreadableProfile);
+  assert.equal(state.events.length, 0);
+  assert.equal(state.snapshots.length, 0);
+  state = scan(state, undefined, 101);
+  assert.deepEqual(state.events.map((e) => e.type), ["CHG-008"]);
+  assert.equal(scan(state, undefined, 102).events.length, 1);
+});
+
+test("unreadable entries in the initial inventory do not create installation alerts on recovery", () => {
+  let state = scan(emptyStore(), null, 1, {}, unreadableProfile);
+  state = scan(state, null, 2, {}, unreadableProfile);
+  state = scan(state, undefined, 3);
+  assert.deepEqual(state.events, []);
+  assert.deepEqual(state.baselines[profileKey].extensions.map((e) => e.id), [id]);
+});
+
+test("recovering an unreadable entry completes an existing partial baseline without an install alert", () => {
+  const otherId = "b".repeat(32);
+  const other = { id: otherId, key: `${profileKey}:${otherId}` };
+  let state = scan(emptyStore(), undefined, 1, other, {
+    ...unreadableProfile,
+    inventoryIds: [id, otherId],
+  });
+  state = scan(state, undefined, 2, {}, {
+    inventoryIds: [id, otherId],
+    extensions: [
+      extension(undefined, "2026-01-02T00:00:00.000Z"),
+      extension(undefined, "2026-01-02T00:00:00.000Z", other),
+    ],
+  });
+  assert.deepEqual(state.events, []);
+  assert.deepEqual(state.baselines[profileKey].extensions.map((e) => e.id).sort(), [id, otherId]);
+});
+
+test("legacy stores recover pending installations outside the initial baseline inventory", () => {
+  let state = scan(emptyStore(), null, 1);
+  state = scan(state, null, 2, {}, unreadableProfile);
+  delete state.latest[profileKey].pendingInstallIds;
+  state = scan(state, undefined, 3);
+  assert.deepEqual(state.events.map((e) => e.type), ["CHG-008"]);
+});
+
+test("an unreadable reinstall is reported after the original baseline installation was removed", () => {
+  let state = scan(emptyStore(), undefined, 1);
+  state = scan(state, null, 2);
+  state = scan(state, null, 3, {}, unreadableProfile);
+  state = scan(state, undefined, 4);
+  assert.deepEqual(state.events.map((e) => e.type), ["CHG-016", "CHG-008"]);
+});
+
+test("successful access observations survive uncertain scans and history expiry", () => {
+  let state = scan(emptyStore(), undefined, 1, { access: uncertainAccess });
+  state = scan(state, undefined, 2);
+  state = scan(state, undefined, 3, { access: uncertainAccess });
+  state = scan(state, undefined, 100, { access: uncertainAccess });
+  assert.equal(state.snapshots.length, 0);
+  state = scan(state, undefined, 101, { access: expandedAccess });
+  assert.deepEqual(accessEvents(state).map((e) => e.type), ["CHG-001", "CHG-002"]);
+  state = scan(state, undefined, 102, { access: uncertainAccess });
+  state = scan(state, undefined, 200, { access: uncertainAccess });
+  state = scan(state, undefined, 201, { access: expandedAccess });
+  assert.equal(accessEvents(state).length, 2);
+});
+
+test("legacy stores preserve their last successful access observation before history expires", () => {
+  let state = scan(emptyStore(), undefined, 1, { access: uncertainAccess });
+  state = scan(state, undefined, 2);
+  state = scan(state, undefined, 3, { access: uncertainAccess });
+  delete state.accessReferences;
+  state = scan(state, undefined, 100, { access: uncertainAccess });
+  assert.equal(state.snapshots.length, 0);
+  state = scan(state, undefined, 101, { access: expandedAccess });
+  assert.deepEqual(accessEvents(state).map((e) => e.type), ["CHG-001", "CHG-002"]);
+});
+
+test("removal starts a new access reference for an initially uncertain reinstall", () => {
+  let state = scan(emptyStore(), undefined, 1);
+  state = scan(state, null, 2);
+  state = scan(state, undefined, 3, { access: uncertainAccess });
+  state = scan(state, undefined, 4, { access: expandedAccess });
+  assert.deepEqual(accessEvents(state), []);
+});
 
 for (const [name, failed] of [
   ["missing", undefined],

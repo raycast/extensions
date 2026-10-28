@@ -85,6 +85,7 @@ The scanner reads each browser's `Local State`, `Last Version`, extension portio
 Audit data is stored in the extension-owned Raycast support directory under `audit/`, with private filesystem modes. Writes use a cross-process lock, schema validation, and an atomic file replacement. Unreadable manifests keep the affected extension's previous observation while healthy entries remain usable. Invalid profile preferences preserve the whole profile snapshot; a missing profile never implies that all of its extensions were removed.
 
 - Original baselines: until explicitly reset.
+- Last successful access observation: until the extension is removed or the baseline is reset.
 - Last successful code analysis: until the extension is removed or the baseline is reset.
 - Changed snapshots: 90 days.
 - Reviewed and informational events: 180 days.
