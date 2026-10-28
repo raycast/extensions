@@ -26,7 +26,9 @@ export default function CommandExecute(props: CommandConfirmProps) {
   } = useExec(bin, command, {
     // `docker logs` writes the container's stderr lines to stderr; without
     // merging, log views would show only half the output.
-    ...(mergeStreams ? { parseOutput: ({ stdout, stderr }: { stdout: string; stderr: string }) => stdout + stderr } : {}),
+    ...(mergeStreams
+      ? { parseOutput: ({ stdout, stderr }: { stdout: string; stderr: string }) => stdout + stderr }
+      : {}),
     execute: shouldExecute,
     onData: () => {
       showToast({
