@@ -18,6 +18,8 @@
 - Add search keywords and declare macOS platform support
 - Document the full transliteration scheme and its known collisions in the
   README
+- Add a "Fix Spelling With AI" action that asks Raycast AI to correct scheme
+  mistakes and typos in the transliterated text (requires Raycast Pro)
 
 ## [Added Translit] - 2025-03-31
 

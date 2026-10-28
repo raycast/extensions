@@ -15,6 +15,19 @@ perfect for when you need to write in Russian but are using a Latin keyboard.
 - All-caps aware: uppercase input produces uppercase Cyrillic, including the
   hard and soft signs (`OB#EKT` → `ОБЪЕКТ`)
 
+## Fix Spelling With AI
+
+When transliterated output contains a scheme mistake or typo, the **Fix
+Spelling With AI** action asks Raycast AI to correct it. It sends the Latin
+input together with the current Cyrillic output and replaces the preview (and
+the Copy/Paste actions) with the corrected text; typing in the input field
+reverts to the live transliteration.
+
+This action needs Raycast Pro: the extension AI API is Pro-gated, and users
+without an active Pro subscription get an access prompt instead. It uses your
+default Raycast AI model, which can also be a model from a custom provider
+configured in Raycast.
+
 ## Note
 
 This initial release supports only Russian Cyrillic alphabet transliteration.
