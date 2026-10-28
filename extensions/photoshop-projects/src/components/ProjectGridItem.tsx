@@ -9,7 +9,7 @@ interface ProjectGridItemProps {
   viewMode: ViewMode;
   onToggleViewMode: () => void;
   onRefresh?: () => void;
-  onRenamed?: (newPath: string) => void;
+  onFileRenamed?: (oldPath: string, newPath: string) => void;
 }
 
 export function ProjectGridItem({
@@ -18,7 +18,7 @@ export function ProjectGridItem({
   viewMode,
   onToggleViewMode,
   onRefresh,
-  onRenamed,
+  onFileRenamed,
 }: ProjectGridItemProps) {
   const relativeDate = formatRelativeDate(file.lastOpenedDate || file.lastModifiedDate);
   const dimensionsStr = formatDimensions(file.dimensions);
@@ -33,7 +33,7 @@ export function ProjectGridItem({
       subtitle={subtitle}
       content={{ source: thumbnailPath || "extension-icon.png" }}
       quickLook={{
-        path: file.path,
+        path: thumbnailPath || file.path,
         name: file.name,
       }}
       actions={
@@ -42,7 +42,7 @@ export function ProjectGridItem({
           viewMode={viewMode}
           onToggleViewMode={onToggleViewMode}
           onRefresh={onRefresh}
-          onRenamed={onRenamed}
+          onFileRenamed={onFileRenamed}
         />
       }
     />

@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import path from "node:path";
 import { useState } from "react";
 import { PhotoshopFile } from "../types";
 import { renamePhotoshopFile } from "../utils/fileAttributes";
@@ -34,16 +33,15 @@ export function RenameForm({ file, onRenamed }: RenameFormProps) {
 
     try {
       const newPath = await renamePhotoshopFile(file.path, trimmed);
-      const renamedFilename = path.basename(newPath);
       toast.style = Toast.Style.Success;
       toast.title = "Document renamed";
-      toast.message = renamedFilename;
+      toast.message = `${trimmed}.${file.extension}`;
       if (onRenamed) onRenamed(newPath);
       pop();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Rename failed";
-      toast.message = error instanceof Error ? error.message : String(error);
+      toast.message = String(error);
     } finally {
       setIsSubmitting(false);
     }

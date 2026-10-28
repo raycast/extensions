@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
-import { runAppleScript } from "./osascript";
+import { escapeAppleScriptString, executeAppleScript } from "./osascript";
 
 const execFileAsync = promisify(execFile);
 
@@ -24,9 +24,11 @@ export async function updateFileDate(filePath: string, targetDate: Date, updateC
   if (!fs.existsSync(filePath)) {
     throw new Error("Target file does not exist");
   }
+  if (isNaN(targetDate.getTime())) {
+    throw new Error("Invalid target date provided");
+  }
 
-  const stats = await fs.promises.stat(filePath);
-  await fs.promises.utimes(filePath, stats.atime, targetDate);
+  await fs.promises.utimes(filePath, targetDate, targetDate);
 
   if (updateCreationDate) {
     const formatted = formatSetFileDate(targetDate);
@@ -34,9 +36,9 @@ export async function updateFileDate(filePath: string, targetDate: Date, updateC
       await execFileAsync("/usr/bin/SetFile", ["-d", formatted, "-m", formatted, filePath], {
         timeout: 4000,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to update creation date with SetFile: ${msg}`);
+      throw new Error(`Failed to update creation date via SetFile: ${msg}`);
     }
   }
 }
@@ -50,8 +52,11 @@ export async function renamePhotoshopFile(filePath: string, newTitle: string): P
   if (cleanTitle.length === 0) {
     throw new Error("Document name cannot be empty");
   }
-  if (cleanTitle.includes("/") || cleanTitle.includes(":")) {
-    throw new Error("Document name cannot contain slashes or colons");
+  if (cleanTitle.includes("/") || cleanTitle.includes(":") || cleanTitle.includes("\\") || cleanTitle.includes("\0")) {
+    throw new Error("Document name cannot contain slashes, backslashes, colons, or null bytes");
+  }
+  if (cleanTitle === ".." || cleanTitle === "." || cleanTitle.includes("..")) {
+    throw new Error("Document name cannot contain relative path segments");
   }
 
   const dir = path.dirname(filePath);
@@ -63,67 +68,63 @@ export async function renamePhotoshopFile(filePath: string, newTitle: string): P
     return filePath;
   }
 
-  try {
-    await fs.promises.link(filePath, targetPath);
-    await fs.promises.unlink(filePath);
-    return targetPath;
-  } catch (err: unknown) {
-    const nodeErr = err as NodeJS.ErrnoException;
-    if (nodeErr.code === "EEXIST") {
+  const isCaseOnlyRename = targetPath.toLowerCase() === filePath.toLowerCase();
+
+  if (!isCaseOnlyRename) {
+    if (fs.existsSync(targetPath)) {
       throw new Error(`A file named "${targetName}" already exists in this folder`);
     }
 
-    if (nodeErr.code === "EXDEV" || nodeErr.code === "EPERM") {
-      try {
-        await fs.promises.copyFile(filePath, targetPath, fs.constants.COPYFILE_EXCL);
-        await fs.promises.unlink(filePath);
-        return targetPath;
-      } catch (copyErr: unknown) {
-        const copyNodeErr = copyErr as NodeJS.ErrnoException;
-        if (copyNodeErr.code === "EEXIST") {
-          throw new Error(`A file named "${targetName}" already exists in this folder`);
-        }
-        throw copyErr;
+    try {
+      await fs.promises.link(filePath, targetPath);
+      await fs.promises.unlink(filePath);
+      return targetPath;
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "code" in error && (error as { code: string }).code === "EEXIST") {
+        throw new Error(`A file named "${targetName}" already exists in this folder`);
       }
+      await fs.promises.rename(filePath, targetPath);
+      return targetPath;
     }
-
-    throw err;
+  } else {
+    const tempPath = path.join(dir, `.tmp_rename_${Date.now()}_${path.basename(targetPath)}`);
+    await fs.promises.rename(filePath, tempPath);
+    await fs.promises.rename(tempPath, targetPath);
+    return targetPath;
   }
-}
-
-function escapeAppleScriptString(str: string): string {
-  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export async function openInNewFinderWindow(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
   const safeDir = escapeAppleScriptString(dir);
   const safeFile = escapeAppleScriptString(filePath);
-  const script = `tell application "Finder"
-activate
-set targetFolder to (POSIX file "${safeDir}" as alias)
-set newWin to make new Finder window to targetFolder
-select (POSIX file "${safeFile}")
+  const script = `
+tell application "Finder"
+  activate
+  set targetFolder to (POSIX file "${safeDir}" as alias)
+  set newWin to make new Finder window to targetFolder
+  select (POSIX file "${safeFile}")
 end tell`;
-  await runAppleScript(script, 4000);
+  await executeAppleScript(script, 4000);
 }
 
 export async function openInNewFinderTab(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
   const safeDir = escapeAppleScriptString(dir);
   const safeFile = escapeAppleScriptString(filePath);
-  const script = `tell application "Finder"
-activate
-if (count of windows) > 0 then
-tell application "System Events" to tell process "Finder" to keystroke "t" using command down
-delay 0.1
-set target of front Finder window to (POSIX file "${safeDir}" as alias)
-select (POSIX file "${safeFile}")
-else
-set targetFolder to (POSIX file "${safeDir}" as alias)
-set newWin to make new Finder window to targetFolder
-select (POSIX file "${safeFile}")
-end tell
-end if`;
-  await runAppleScript(script, 4000);
+  const script = `
+tell application "Finder"
+  activate
+  if (count of windows) > 0 then
+    tell application "System Events" to tell process "Finder" to keystroke "t" using command down
+    delay 0.1
+    set target of front Finder window to (POSIX file "${safeDir}" as alias)
+    select (POSIX file "${safeFile}")
+  else
+    set targetFolder to (POSIX file "${safeDir}" as alias)
+    set newWin to make new Finder window to targetFolder
+    select (POSIX file "${safeFile}")
+  end if
+end tell`;
+  await executeAppleScript(script, 4000);
 }

@@ -1,11 +1,11 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ViewMode } from "../types";
+import { ExtensionPreferences, ViewMode } from "../types";
 
 const STORAGE_KEY = "photoshop_projects_view_mode";
 
 export function useViewMode() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
   const [viewMode, setViewMode] = useState<ViewMode>(prefs.defaultViewMode || "grid");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -16,8 +16,8 @@ export function useViewMode() {
         if (saved === "grid" || saved === "list") {
           setViewMode(saved);
         }
-      } catch {
-        // Fallback to default
+      } catch (error) {
+        void error;
       } finally {
         setIsLoading(false);
       }

@@ -1,6 +1,5 @@
-import { getPreferenceValues, Grid, List, LocalStorage } from "@raycast/api";
-import path from "node:path";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { getPreferenceValues, Grid, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyView } from "./components/EmptyView";
 import { ProjectGridItem } from "./components/ProjectGridItem";
 import { ProjectListItem } from "./components/ProjectListItem";
@@ -8,18 +7,16 @@ import { SortAndFilterDropdown } from "./components/SortAndFilterDropdown";
 import { useThumbnails } from "./hooks/useThumbnails";
 import { useViewMode } from "./hooks/useViewMode";
 import { searchPhotoshopProjects, sortPhotoshopFiles } from "./services/search";
-import { PhotoshopFile, SortOption } from "./types";
-import { createPhotoshopFile } from "./utils/spotlight";
+import { ExtensionPreferences, PhotoshopFile, SortOption } from "./types";
 
 const SEARCH_SORT_STORAGE_KEY = "photoshop_search_sort_by";
 
 export default function SearchProjectsCommand() {
-  const prefs = getPreferenceValues<Preferences.SearchProjects>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
   const [files, setFiles] = useState<PhotoshopFile[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const searchIdRef = useRef<number>(0);
 
   const { viewMode, setViewMode, toggleViewMode, columns } = useViewMode();
   const thumbnails = useThumbnails(files);
@@ -31,8 +28,8 @@ export default function SearchProjectsCommand() {
         if (saved) {
           setSortBy(saved as SortOption);
         }
-      } catch {
-        // Fallback to name-asc
+      } catch (error) {
+        void error;
       }
     }
     loadSavedSort();
@@ -43,50 +40,62 @@ export default function SearchProjectsCommand() {
     await LocalStorage.setItem(SEARCH_SORT_STORAGE_KEY, newSort);
   };
 
-  const performSearch = async (query: string) => {
-    const currentSearchId = ++searchIdRef.current;
-    setIsLoading(true);
-    try {
-      const results = await searchPhotoshopProjects(query, prefs.searchScope || "home");
-      if (currentSearchId === searchIdRef.current) {
-        setFiles(results);
-      }
-    } catch {
-      if (currentSearchId === searchIdRef.current) {
-        setFiles([]);
-      }
-    } finally {
-      if (currentSearchId === searchIdRef.current) {
-        setIsLoading(false);
-      }
-    }
-  };
+  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
   useEffect(() => {
-    performSearch(searchText);
-  }, [searchText]);
+    let cancelled = false;
+    setIsLoading(true);
 
-  const handleRenamed = async (oldPath: string, newPath: string) => {
-    const updatedFile = await createPhotoshopFile(newPath);
-    setFiles((prev) => {
-      const normalizedOld = path.resolve(oldPath);
-      return prev.map((f) => {
-        if (path.resolve(f.path) === normalizedOld) {
-          return (
-            updatedFile ?? {
-              ...f,
-              id: newPath,
-              path: newPath,
-              name: path.basename(newPath),
-              title: path.basename(newPath, path.extname(newPath)),
-              directory: path.dirname(newPath),
-              directoryName: path.basename(path.dirname(newPath)),
-            }
-          );
+    searchPhotoshopProjects(searchText, prefs.searchScope || "home")
+      .then((results) => {
+        if (!cancelled) {
+          setFiles(results);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setFiles([]);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Search failed",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchText, prefs.searchScope, refreshTrigger]);
+
+  const handleRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleFileRenamed = (oldPath: string, newPath: string) => {
+    setFiles((prev) =>
+      prev.map((f) => {
+        if (f.path === oldPath) {
+          const slashIdx = newPath.lastIndexOf("/");
+          const newName = slashIdx >= 0 ? newPath.slice(slashIdx + 1) : newPath;
+          const dotIdx = newName.lastIndexOf(".");
+          const newTitle = dotIdx > 0 ? newName.slice(0, dotIdx) : newName;
+          return {
+            ...f,
+            id: newPath,
+            path: newPath,
+            name: newName,
+            title: newTitle,
+          };
         }
         return f;
-      });
-    });
+      }),
+    );
   };
 
   const sortedFiles = useMemo(() => {
@@ -110,7 +119,7 @@ export default function SearchProjectsCommand() {
         inset={Grid.Inset.Small}
         isLoading={isLoading}
         searchBarAccessory={accessory}
-        searchBarPlaceholder="Search Photoshop projects by name, folder, or layer..."
+        searchBarPlaceholder="Search Photoshop projects by name or layer..."
         searchText={searchText}
         onSearchTextChange={setSearchText}
         throttle
@@ -131,8 +140,8 @@ export default function SearchProjectsCommand() {
             thumbnailPath={thumbnails[file.path]}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
-            onRefresh={() => performSearch(searchText)}
-            onRenamed={(newPath) => handleRenamed(file.path, newPath)}
+            onRefresh={handleRefresh}
+            onFileRenamed={handleFileRenamed}
           />
         ))}
       </Grid>
@@ -144,7 +153,7 @@ export default function SearchProjectsCommand() {
       isShowingDetail={sortedFiles.length > 0}
       isLoading={isLoading}
       searchBarAccessory={accessory}
-      searchBarPlaceholder="Search Photoshop projects by name, folder, or layer..."
+      searchBarPlaceholder="Search Photoshop projects by name or layer..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
@@ -164,8 +173,8 @@ export default function SearchProjectsCommand() {
           thumbnailPath={thumbnails[file.path]}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
-          onRefresh={() => performSearch(searchText)}
-          onRenamed={(newPath) => handleRenamed(file.path, newPath)}
+          onRefresh={handleRefresh}
+          onFileRenamed={handleFileRenamed}
         />
       ))}
     </List>

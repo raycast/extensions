@@ -5,26 +5,17 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { PhotoshopFile } from "../types";
 import { isValidPhotoshopExtension } from "../utils/format";
-import { getRunningPhotoshopName, runAppleScript } from "../utils/osascript";
+import { escapeAppleScriptString, getRunningPhotoshopName, runAppleScript } from "../utils/osascript";
 import { createPhotoshopFile, runMdfind } from "../utils/spotlight";
 
 const execFileAsync = promisify(execFile);
-
-function decodeXmlEntities(str: string): string {
-  return str
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&#39;/g, "'");
-}
 
 async function getRunningPhotoshopRecents(): Promise<string[]> {
   const appName = await getRunningPhotoshopName();
   if (!appName) return [];
 
-  const script = `tell application "${appName}" to do javascript "var files = []; try { for (var i = 0; i < app.recentFiles.length; i++) { files.push(app.recentFiles[i].fsName); } } catch(e) {} files.join(String.fromCharCode(10));"`;
+  const safeApp = escapeAppleScriptString(appName);
+  const script = `tell application "${safeApp}" to do javascript "var files = []; try { for (var i = 0; i < app.recentFiles.length; i++) { files.push(app.recentFiles[i].fsName); } } catch(e) {} files.join(String.fromCharCode(10));"`;
   const result = await runAppleScript(script, 3000);
   if (!result) return [];
 
@@ -49,7 +40,7 @@ async function getMediaBrowserRecents(): Promise<string[]> {
     let match: RegExpExecArray | null;
 
     while ((match = regex.exec(stdout)) !== null) {
-      const candidatePath = decodeXmlEntities(match[1].trim());
+      const candidatePath = match[1].trim();
       if (candidatePath && fs.existsSync(candidatePath)) {
         paths.push(candidatePath);
       }
@@ -78,27 +69,22 @@ async function getMachinePrefsRecents(): Promise<string[]> {
       if (fs.existsSync(machinePrefsFile)) {
         try {
           const buffer = await fs.promises.readFile(machinePrefsFile);
-          const text = buffer.toString("utf8", 0, Math.min(buffer.length, 4 * 1024 * 1024));
-          const matches = text.match(/\/Users\/[^\r\n"':<>|*?]+\.(?:psd|psb|psdt|pdd)/gi);
+          const text = buffer.toString("utf8", 0, Math.min(buffer.length, 2 * 1024 * 1024));
+          const matches = text.match(/\/Users\/[^\s"']+\.(psd|psb|psdt|pdd)/gi);
           if (matches) {
             for (const matchedPath of matches) {
-              const cleaned = matchedPath
-                .split("")
-                .filter((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) !== 127)
-                .join("")
-                .trim();
-              if (cleaned && fs.existsSync(cleaned)) {
-                paths.push(cleaned);
+              if (fs.existsSync(matchedPath)) {
+                paths.push(matchedPath);
               }
             }
           }
-        } catch {
-          // Ignore parse errors on corrupted prefs
+        } catch (error) {
+          void error;
         }
       }
     }
-  } catch {
-    // Ignore reading error
+  } catch (error) {
+    void error;
   }
 
   return paths;
@@ -106,26 +92,11 @@ async function getMachinePrefsRecents(): Promise<string[]> {
 
 async function getSpotlightRecents(limit = 40): Promise<string[]> {
   const query =
-    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c || kMDItemFSName == '*.psdt'c || kMDItemFSName == '*.pdd'c) && kMDItemLastUsedDate != null";
+    "(kMDItemContentType == 'com.adobe.photoshop-image' || kMDItemFSName == '*.psd'c || kMDItemFSName == '*.psb'c) && kMDItemLastUsedDate != null";
   return runMdfind(query, undefined, limit);
 }
 
-async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let index = 0;
-
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (index < items.length) {
-      const currentIndex = index++;
-      results[currentIndex] = await fn(items[currentIndex]);
-    }
-  });
-
-  await Promise.all(workers);
-  return results;
-}
-
-export async function getRecentPhotoshopProjects(maxCount = 80): Promise<PhotoshopFile[]> {
+export async function getRecentPhotoshopProjects(maxCount = 60): Promise<PhotoshopFile[]> {
   const seenPaths = new Set<string>();
   const orderedPaths: string[] = [];
 
@@ -152,7 +123,7 @@ export async function getRecentPhotoshopProjects(maxCount = 80): Promise<Photosh
   for (const p of spotlightRecents) addPath(p);
 
   const slice = orderedPaths.slice(0, maxCount);
-  const hydrated = await mapConcurrent(slice, 8, (p) => createPhotoshopFile(p));
+  const hydrated = await Promise.all(slice.map((p) => createPhotoshopFile(p)));
 
   return hydrated.filter((f): f is PhotoshopFile => f !== null);
 }

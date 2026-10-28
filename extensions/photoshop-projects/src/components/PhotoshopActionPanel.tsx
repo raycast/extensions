@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { clearPhotoshopCaches } from "../services/automation";
 import { PhotoshopFile, ViewMode } from "../types";
 import { openInNewFinderTab, openInNewFinderWindow } from "../utils/fileAttributes";
@@ -10,7 +10,7 @@ interface PhotoshopActionPanelProps {
   viewMode: ViewMode;
   onToggleViewMode: () => void;
   onRefresh?: () => void;
-  onRenamed?: (newPath: string) => void;
+  onFileRenamed?: (oldPath: string, newPath: string) => void;
 }
 
 export function PhotoshopActionPanel({
@@ -18,43 +18,27 @@ export function PhotoshopActionPanel({
   viewMode,
   onToggleViewMode,
   onRefresh,
-  onRenamed,
+  onFileRenamed,
 }: PhotoshopActionPanelProps) {
   const handleClearCache = async () => {
-    const confirmed = await confirmAlert({
-      title: "Clear Photoshop Cache",
-      message:
-        "Purging Photoshop memory will clear the clipboard and undo history for any open documents in Photoshop. Scratch and thumbnail caches will also be removed. Are you sure you want to proceed?",
-      primaryAction: {
-        title: "Clear Cache",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (!confirmed) {
-      return;
-    }
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Purging Photoshop caches...",
     });
     try {
-      const res = await clearPhotoshopCaches(true);
-      if (res.errors.length > 0) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Cache partially cleared";
-        toast.message = `Freed ${res.formattedFreedSpace}, but ${res.errors.length} item(s) failed to delete.`;
+      const res = await clearPhotoshopCaches();
+      toast.style = Toast.Style.Success;
+      toast.title = "Photoshop cache cleared";
+      if (res.memoryPurgeError) {
+        toast.message = `Freed ${res.formattedFreedSpace} on disk (memory purge failed: ${res.memoryPurgeError})`;
       } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "Photoshop cache cleared";
         toast.message = `Freed ${res.formattedFreedSpace}${res.purgedMemory ? " & purged memory" : ""}`;
       }
       if (onRefresh) onRefresh();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to purge caches";
-      toast.message = error instanceof Error ? error.message : String(error);
+      toast.message = String(error);
     }
   };
 
@@ -78,7 +62,15 @@ export function PhotoshopActionPanel({
           icon={Icon.Finder}
           shortcut={{ modifiers: ["shift", "cmd"], key: "return" }}
           onAction={async () => {
-            await openInNewFinderWindow(file.path);
+            try {
+              await openInNewFinderWindow(file.path);
+            } catch {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to open Finder window",
+                message: "Ensure Raycast has Automation permission for Finder in System Settings.",
+              });
+            }
           }}
         />
         <Action
@@ -86,7 +78,15 @@ export function PhotoshopActionPanel({
           icon={Icon.Finder}
           shortcut={{ modifiers: ["opt", "shift"], key: "t" }}
           onAction={async () => {
-            await openInNewFinderTab(file.path);
+            try {
+              await openInNewFinderTab(file.path);
+            } catch {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to open Finder tab",
+                message: "Ensure Raycast has Automation & Accessibility permissions in System Settings.",
+              });
+            }
           }}
         />
       </ActionPanel.Section>
@@ -102,14 +102,22 @@ export function PhotoshopActionPanel({
           title="Rename Document"
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["opt", "cmd"], key: "r" }}
-          target={<RenameForm file={file} onRenamed={onRenamed ?? onRefresh} />}
+          target={
+            <RenameForm
+              file={file}
+              onRenamed={(newPath) => {
+                if (onFileRenamed) onFileRenamed(file.path, newPath);
+                if (onRefresh) onRefresh();
+              }}
+            />
+          }
         />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="View">
         <Action
           title={viewMode === "grid" ? "Switch to List View" : "Switch to Grid View"}
-          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid}
+          icon={viewMode === "grid" ? Icon.List : Icon.AppWindowGrid3x3}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onAction={onToggleViewMode}
         />

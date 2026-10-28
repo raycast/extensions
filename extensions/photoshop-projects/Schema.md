@@ -80,11 +80,6 @@ export interface PhotoshopFile {
 export type ViewMode = "grid" | "list";
 
 /**
- * Sorting options for recent and search listings.
- */
-export type SortOption = "name-asc" | "name-desc" | "recent" | "date-desc" | "date-asc" | "size-desc" | "size-asc";
-
-/**
  * Result of Photoshop cache purging routine.
  */
 export interface CacheClearResult {
@@ -93,6 +88,16 @@ export interface CacheClearResult {
   diskBytesFreed: number;
   formattedFreedSpace: string;
   clearedPaths: string[];
-  errors: string[];
+  error?: string;
+}
+
+/**
+ * Extension preferences configured in Raycast settings.
+ */
+export interface ExtensionPreferences {
+  defaultViewMode: ViewMode;
+  gridColumns: "3" | "4" | "5" | "6" | "8";
+  searchScope: "home" | "system";
+  showLayersInList: boolean;
 }
 ```

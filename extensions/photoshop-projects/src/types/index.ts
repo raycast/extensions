@@ -37,5 +37,12 @@ export interface CacheClearResult {
   diskBytesFreed: number;
   formattedFreedSpace: string;
   clearedPaths: string[];
-  errors: string[];
+  error?: string;
+  memoryPurgeError?: string;
+}
+
+export interface ExtensionPreferences {
+  defaultViewMode: ViewMode;
+  gridColumns: "3" | "4" | "5" | "6" | "8";
+  searchScope: "home" | "all";
 }

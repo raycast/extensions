@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -17,36 +17,78 @@ export interface RawMetadata {
 }
 
 export async function runMdfind(query: string, scope?: string, maxResults = 100): Promise<string[]> {
-  try {
+  return new Promise((resolve, reject) => {
     const args: string[] = [];
     if (scope && scope.trim().length > 0) {
       args.push("-onlyin", scope);
     }
     args.push(query);
 
-    const { stdout } = await execFileAsync("/usr/bin/mdfind", args, {
-      timeout: 8000,
-      encoding: "utf8",
-      maxBuffer: 20 * 1024 * 1024,
+    const child = spawn("/usr/bin/mdfind", args, {
+      stdio: ["ignore", "pipe", "pipe"],
     });
 
-    const lines = stdout.split("\n");
     const paths: string[] = [];
-    for (const rawLine of lines) {
-      const trimmed = rawLine.trim();
-      if (trimmed.length > 0 && fs.existsSync(trimmed)) {
-        paths.push(trimmed);
-        if (paths.length >= maxResults) break;
+    let remainder = "";
+    let closed = false;
+
+    const timeout = setTimeout(() => {
+      if (!closed) {
+        closed = true;
+        child.kill();
+        resolve(paths);
       }
-    }
-    return paths;
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    if (msg.includes("maxBuffer") || msg.includes("timed out")) {
-      throw new Error(`Spotlight search query exceeded resource limits: ${msg}`);
-    }
-    return [];
-  }
+    }, 6000);
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      if (closed) return;
+      remainder += chunk.toString("utf8");
+      const lines = remainder.split("\n");
+      remainder = lines.pop() || "";
+
+      for (const rawLine of lines) {
+        const trimmed = rawLine.trim();
+        if (trimmed.length > 0 && fs.existsSync(trimmed)) {
+          paths.push(trimmed);
+          if (paths.length >= maxResults) {
+            closed = true;
+            clearTimeout(timeout);
+            child.kill();
+            resolve(paths);
+            return;
+          }
+        }
+      }
+    });
+
+    let stderr = "";
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    child.on("error", (err) => {
+      clearTimeout(timeout);
+      if (!closed) {
+        closed = true;
+        reject(err);
+      }
+    });
+
+    child.on("close", (code) => {
+      clearTimeout(timeout);
+      if (!closed) {
+        closed = true;
+        if (code !== 0 && code !== null && paths.length === 0) {
+          reject(new Error(stderr.trim() || `mdfind exited with code ${code}`));
+        } else {
+          if (remainder.trim().length > 0 && paths.length < maxResults && fs.existsSync(remainder.trim())) {
+            paths.push(remainder.trim());
+          }
+          resolve(paths);
+        }
+      }
+    });
+  });
 }
 
 export async function getFileMetadata(filePath: string): Promise<RawMetadata> {
@@ -87,13 +129,10 @@ export async function getFileMetadata(filePath: string): Promise<RawMetadata> {
     const colorMatch = stdout.match(/kMDItemColorSpace\s*=\s*"([^"]+)"/);
     if (colorMatch) metadata.colorSpace = colorMatch[1];
 
-    const lastUsedMatch = stdout.match(/kMDItemLastUsedDate\s*=\s*([0-9-]+)\s+([0-9:]+)\s+([+-]\d{2})(\d{2})/);
+    const lastUsedMatch = stdout.match(/kMDItemLastUsedDate\s*=\s*([0-9-]+\s+[0-9:]+\s+\+[0-9]+)/);
     if (lastUsedMatch) {
-      const [, datePart, timePart, tzHours, tzMinutes] = lastUsedMatch;
-      const parsedDate = new Date(`${datePart}T${timePart}${tzHours}:${tzMinutes}`);
-      if (!isNaN(parsedDate.getTime())) {
-        metadata.lastUsedDate = parsedDate;
-      }
+      const parsedDate = new Date(lastUsedMatch[1]);
+      if (!isNaN(parsedDate.getTime())) metadata.lastUsedDate = parsedDate;
     }
 
     const layerBlock = stdout.match(/kMDItemLayerNames\s*=\s*\(([\s\S]*?)\)/);
@@ -105,37 +144,6 @@ export async function getFileMetadata(filePath: string): Promise<RawMetadata> {
     return metadata;
   } catch {
     return {};
-  }
-}
-
-export function createPhotoshopFileFast(filePath: string): PhotoshopFile | null {
-  try {
-    if (!fs.existsSync(filePath)) return null;
-
-    const stats = fs.statSync(filePath);
-    const fileName = path.basename(filePath);
-    const ext = path.extname(filePath).replace(".", "").toLowerCase();
-
-    if (!isValidPhotoshopExtension(ext)) return null;
-
-    const directory = path.dirname(filePath);
-    const directoryName = path.basename(directory);
-
-    return {
-      id: filePath,
-      name: fileName,
-      title: stripExtension(fileName),
-      path: filePath,
-      directory,
-      directoryName,
-      extension: ext,
-      sizeInBytes: stats.size,
-      formattedSize: formatBytes(stats.size),
-      lastModifiedDate: stats.mtime,
-      exists: true,
-    };
-  } catch {
-    return null;
   }
 }
 
