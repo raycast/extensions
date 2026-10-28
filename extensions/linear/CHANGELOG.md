@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [User and Issue Mentions in AI Chat] - 2026-10-28
+
+- Add **Users** and **Issues** mention searches in AI Chat, with active user search and full-text issue search.
+- Show recently updated issues for an empty search and load current profiles or issue details when sending mentions.
+
 ## [Fix Issue Template Description Prefill] - 2026-10-24
 
 - Fix issue description not being pre-filled when selecting an issue template whose description is stored on the template object rather than nested under `templateData`.

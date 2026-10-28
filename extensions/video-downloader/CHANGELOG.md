@@ -1,5 +1,10 @@
 # Video Downloader Changelog
 
+## [Fix] - 2026-10-28
+
+- Fixed "Couldn't check versions" in Update Libraries when yt-dlp or ffmpeg has an update. `brew outdated` exits with code 1 whenever something is outdated, and that was treated as a failure, so the check failed exactly when there was something to upgrade.
+- Update Libraries now shows the installed version instead of the latest version in Homebrew.
+
 ## [Improvement] - 2026-10-09
 
 - Add "Fast Remux" preference (enabled by default) to package streams directly into the target container (`--remux-video`) instead of re-encoding (`--recode-video`), delivering near-instant downloads with zero CPU transcoding overhead and no quality loss

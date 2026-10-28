@@ -4,6 +4,22 @@
 
 - Add RecordHTML to the official registry: record web pages and HTML5 creatives (banners, ads, animations, landing pages) to MP4, WebM or GIF in a real browser and get a signed video link back. 5 tools. Hosted Streamable HTTP server at https://mcp.recordhtml.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; free plan available.
 
+## [Add AyHire MCP Server] - 2026-10-28
+
+- Add AyHire to the official registry: describe a role and AyHire finds developers from their public GitHub work, judges each one against the role's criteria with links to the evidence, and keeps roles and a shortlist. Hosted Streamable HTTP server at https://ayhire.com/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Awaken Tax MCP Server] - 2026-10-28
+
+- Add Awaken Tax to the official registry: crypto tax accounting in your Awaken account. Review and fix transactions, investigate cost basis and tax lots, summarize gains and income, reconcile 1099-DA forms and generate tax reports and CSV exports. Hosted Streamable HTTP server at https://mcp.awaken.tax/mcp through `mcp-remote`, with an `Authorization: Bearer <portfolioId>:<apiKey>` header from the `AWAKEN_AUTH_HEADER` environment variable; API keys need an Awaken Dolphin or Whale plan.
+
+## [Add Paper Plane Post] - 2026-10-28
+
+- Add Paper Plane Post to the official registry: turn a photo into an unpaid postcard draft, then review and pay for printing and mailing on the website. No account or API key is required. Connect directly over HTTP in Raycast, with an `mcp-remote` fallback for other clients.
+
+## [Add MEDIAPRONET MCP Server] - 2026-10-28
+
+- Add MEDIAPRONET to the official registry: search a directory of newly launched startups, websites, SaaS and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://mediapronet.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Buy-Box MCP Server] - 2026-10-28
 
 - Add Buy-Box to the official registry: save your buying criteria for homes, cars or any other category so your AI agent loads them before it searches, and score listings against them. Hosted Streamable HTTP server at https://buybox.agentconsult.ai/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
