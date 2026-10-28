@@ -4,20 +4,19 @@ import { execFile } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
-import { parseNotes, renderHtml } from "./lib/html";
+import { localImages, parseNotes, renderHtml } from "./lib/html";
 import { strings } from "./lib/strings";
 import { activeSession, recordingUrl, Session, setRecordingUrl } from "./lib/session";
 
 const run = promisify(execFile);
 
 export async function build(session: Session, url: string | undefined): Promise<string> {
-  const notes = parseNotes(readFileSync(session.notesPath, "utf8"), session.name);
+  const markdown = readFileSync(session.notesPath, "utf8");
+  const notes = parseNotes(markdown, session.name);
   writeFileSync(join(session.dir, "index.html"), renderHtml(notes, url));
 
-  // Only frames referenced by notes go into the archive.
-  const images = [
-    ...new Set(notes.entries.flatMap((entry) => (entry.kind === "note" && entry.image ? [entry.image] : []))),
-  ].filter((image) => existsSync(join(session.dir, image)));
+  // Only images referenced in notes.md go into the archive.
+  const images = localImages(markdown).filter((image) => existsSync(join(session.dir, image)));
   const zipPath = join(dirname(session.dir), `${session.name}.zip`);
   rmSync(zipPath, { force: true });
   await run("/usr/bin/zip", ["-q", "-X", zipPath, "index.html", ...images], { cwd: session.dir });

@@ -64,18 +64,20 @@ async function captureIina(): Promise<Capture> {
   const path = await mpv(["get_property", "path"]).catch(() => null);
   if (!path) throw new Error(strings.iinaNoVideo);
   const wasPaused = (await mpv(["get_property", "pause"])) === true;
-  await mpv(["set_property", "pause", true]);
-  const seconds = Number(await mpv(["get_property", "time-pos"]));
-  const framePath = tempFrame();
-  await mpv(["screenshot-to-file", framePath, "video"]);
-  if (!existsSync(framePath)) throw new Error(strings.iinaNoFrame);
-  return {
-    seconds,
-    framePath,
-    resume: async () => {
-      if (!wasPaused) await mpv(["set_property", "pause", false]);
-    },
+  const resume = async () => {
+    if (!wasPaused) await mpv(["set_property", "pause", false]);
   };
+  await mpv(["set_property", "pause", true]);
+  try {
+    const seconds = Number(await mpv(["get_property", "time-pos"]));
+    const framePath = tempFrame();
+    await mpv(["screenshot-to-file", framePath, "video"]);
+    if (!existsSync(framePath)) throw new Error(strings.iinaNoFrame);
+    return { seconds, framePath, resume };
+  } catch (error) {
+    await resume().catch(() => undefined);
+    throw error;
+  }
 }
 
 // Take the largest video on the page and remember it so the same one is resumed later.
@@ -90,8 +92,15 @@ const CAPTURE_JS = `(() => {
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
   let frame;
-  try { frame = canvas.toDataURL('image/jpeg', 0.9); } catch (e) { return JSON.stringify({ error: 'no-frame', detail: e.message }); }
-  return JSON.stringify({ seconds: video.currentTime, url: location.origin + location.pathname, frame });
+  try {
+    frame = canvas.toDataURL('image/jpeg', 0.9);
+  } catch (e) {
+    if (!window.__videoNote.wasPaused) video.play();
+    return JSON.stringify({ error: 'no-frame', detail: e.message });
+  }
+  const url = new URL(location.href);
+  url.searchParams.delete('t');
+  return JSON.stringify({ seconds: video.currentTime, url: url.href, frame });
 })()`;
 
 const RESUME_JS = `(() => {

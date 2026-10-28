@@ -1,12 +1,7 @@
-import { Application, LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "node:fs";
 import { basename, join } from "node:path";
 import { strings } from "./strings";
-
-type Preferences = {
-  notesDir: string;
-  editor?: Application;
-};
 
 export function preferences(): Preferences {
   return getPreferenceValues<Preferences>();

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { GENERAL_HEADING } from "./lib/html";
 import { strings } from "./lib/strings";
 import { Capture, capture } from "./lib/players";
-import { activeSession, Session, setRecordingUrl } from "./lib/session";
+import { activeSession, recordingUrl, Session, setRecordingUrl } from "./lib/session";
 import { formatTimecode, timecodeSlug } from "./lib/timecode";
 
 type State = { session: Session; capture: Capture } | { error: string } | null;
@@ -29,11 +29,18 @@ function appendBlock(session: Session, block: string) {
 export function appendNote(session: Session, captured: Capture, comment: string) {
   mkdirSync(session.shotsDir, { recursive: true });
   const shot = freeShotName(session, captured.seconds);
-  copyFileSync(captured.framePath, join(session.shotsDir, shot));
-  rmSync(captured.framePath, { force: true });
+  const shotPath = join(session.shotsDir, shot);
+  copyFileSync(captured.framePath, shotPath);
 
   const body = comment.trim();
-  appendBlock(session, `## ${formatTimecode(captured.seconds)}\n![](shots/${shot})\n${body ? `\n${body}\n` : ""}\n`);
+  try {
+    appendBlock(session, `## ${formatTimecode(captured.seconds)}\n![](shots/${shot})\n${body ? `\n${body}\n` : ""}\n`);
+  } catch (error) {
+    // Keep the temp frame so the note can be saved again.
+    rmSync(shotPath, { force: true });
+    throw error;
+  }
+  rmSync(captured.framePath, { force: true });
 }
 
 export function appendGeneralNote(session: Session, text: string) {
@@ -71,16 +78,24 @@ export default function Command() {
     const { session, capture: captured } = state;
     const text = values.comment.trim();
     let hud: string;
-    if (text.startsWith(GENERAL_PREFIX)) {
-      rmSync(captured.framePath, { force: true });
-      const body = text.slice(GENERAL_PREFIX.length).trim();
-      if (body) appendGeneralNote(session, body);
-      hud = body ? strings.generalAdded : strings.emptyNote;
-    } else {
-      appendNote(session, captured, text);
-      hud = strings.noteAdded(timecode);
+    try {
+      if (text.startsWith(GENERAL_PREFIX)) {
+        const body = text.slice(GENERAL_PREFIX.length).trim();
+        if (body) appendGeneralNote(session, body);
+        rmSync(captured.framePath, { force: true });
+        hud = body ? strings.generalAdded : strings.emptyNote;
+      } else {
+        appendNote(session, captured, text);
+        hud = strings.noteAdded(timecode);
+      }
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: strings.failed, message: String(error) });
+      return;
     }
-    if (captured.recordingUrl) await setRecordingUrl(session, captured.recordingUrl);
+    // Do not overwrite a link the user has corrected in Build Video Notes HTML.
+    if (captured.recordingUrl && !(await recordingUrl(session))) {
+      await setRecordingUrl(session, captured.recordingUrl);
+    }
     await captured.resume().catch(() => undefined);
     // Otherwise Raycast keeps the form alive and the next hotkey shows the old text and frame.
     await showHUD(hud, { popToRootType: PopToRootType.Immediate });

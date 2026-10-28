@@ -24,14 +24,44 @@ export const GENERAL_HEADING = "## --";
 const HEADING = /^##\s+(\d{1,2}(?::\d{2}){1,2})\s*(.*)$/;
 const SECTION = /^##\s/;
 const IMAGE = /^!\[[^\]]*\]\(([^)\s]+)\)\s*$/;
+const ANY_IMAGE = /!\[[^\]]*\]\(([^)\s]+)/g;
+const FENCE = /^\s{0,3}(`{3,}|~{3,})/;
+
+// A literal "%" in a file name is not valid percent-encoding.
+function decodePath(path: string): string {
+  try {
+    return decodeURI(path);
+  } catch {
+    return path;
+  }
+}
+
+// Relative image paths referenced anywhere in notes.md, for the archive.
+export function localImages(markdown: string): string[] {
+  const paths = [...markdown.matchAll(ANY_IMAGE)].map((match) => decodePath(match[1]));
+  return [...new Set(paths)].filter(
+    (path) => !/^[a-z][a-z\d+.-]*:/i.test(path) && !path.startsWith("/") && !path.split("/").includes(".."),
+  );
+}
 
 export function parseNotes(markdown: string, fallbackTitle: string): Notes {
   let title = fallbackTitle;
   const intro: string[] = [];
   const entries: { lines: string[]; note?: Note }[] = [];
   let current: { lines: string[]; note?: Note } | undefined;
+  // Fence character of an open code block: headings inside it are plain text.
+  let fence: string | undefined;
 
   for (const line of markdown.split("\n")) {
+    const fenceMatch = line.match(FENCE);
+    if (fenceMatch) {
+      const char = fenceMatch[1][0];
+      if (fence === undefined) fence = char;
+      else if (fence === char) fence = undefined;
+    } else if (fence !== undefined) {
+      (current ? current.lines : intro).push(line);
+      continue;
+    }
     const heading = line.match(HEADING);
     if (heading) {
       // Keep text after the timecode in the heading as the first line of the comment.
@@ -52,7 +82,7 @@ export function parseNotes(markdown: string, fallbackTitle: string): Notes {
       continue;
     }
     const image = current.note && !current.note.image && line.match(IMAGE);
-    if (image && current.note) current.note.image = decodeURI(image[1]);
+    if (image && current.note) current.note.image = decodePath(image[1]);
     else current.lines.push(line);
   }
 

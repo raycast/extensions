@@ -62,7 +62,7 @@
   "preferences": [
     {
       "name": "notesDir",
-      "title": "Reviews folder",
+      "title": "Reviews Folder",
       "description": "Review folders are created here",
       "type": "directory",
       "required": true
