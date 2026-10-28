@@ -7,7 +7,16 @@
  * funzione; le chiavi sbloccate restituite vanno tenute in memoria (o in uno
  * storage effimero) dal chiamante.
  */
-import { computeAuthKey, memzero, unlockUserKeys, type UnlockedKeys, type UserSelf } from "../shared/index.js";
+import {
+  KEY_BYTES,
+  computeAuthKey,
+  decryptBytes,
+  fromB64,
+  memzero,
+  unlockUserKeys,
+  type UnlockedKeys,
+  type UserSelf,
+} from "../shared/index.js";
 import { ApiClient, type Tokens } from "./api.js";
 import { ApiError, InvalidCredentialsError, SessionExpiredError } from "./errors.js";
 
@@ -80,4 +89,35 @@ export async function resumeWithMasterPassword(
   } finally {
     memzero(stretchKey);
   }
+}
+
+/**
+ * Sblocco biometrico con un refresh token già salvato: la userKey arriva da una fonte locale
+ * protetta (passkey con PRF, app desktop con Touch ID), la privateKey si decifra dal profilo.
+ *   refresh → GET /me → decryptBytes(encryptedPrivateKey, userKey).
+ * La `userKey` passata resta di proprietà del chiamante (viene copiata).
+ * Lancia `SessionExpiredError` se il refresh token non è più valido o appartiene a un altro
+ * account e `InvalidCredentialsError` se la userKey non decifra la privateKey (chiave obsoleta).
+ */
+export async function resumeWithUserKey(api: ApiClient, userKey: Uint8Array, expectedEmail?: string): Promise<LoginResult> {
+  if (userKey.length !== KEY_BYTES) throw new InvalidCredentialsError("userKey non valida");
+  const tokens = await api.refresh();
+  const me = await api.me();
+  if (expectedEmail && me.email !== expectedEmail.trim().toLowerCase()) {
+    await api.setTokens(null);
+    throw new SessionExpiredError("La sessione appartiene a un altro account");
+  }
+  const ownKey = userKey.slice();
+  let privateKey: Uint8Array;
+  try {
+    privateKey = decryptBytes(me.encryptedPrivateKey, ownKey);
+    if (privateKey.length !== KEY_BYTES) {
+      memzero(privateKey);
+      throw new Error("privateKey non valida");
+    }
+  } catch {
+    memzero(ownKey);
+    throw new InvalidCredentialsError("Chiave di sblocco non più valida");
+  }
+  return { tokens, user: me, keys: { userKey: ownKey, privateKey, publicKey: fromB64(me.publicKey) } };
 }

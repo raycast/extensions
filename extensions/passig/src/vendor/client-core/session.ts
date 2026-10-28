@@ -121,6 +121,66 @@ export function scoreMatch(haystack: string, needle: string): number {
   return 10;
 }
 
+/**
+ * Qualità di un match per sottostringa: esatto (4) > prefisso (3) >
+ * inizio di parola (2) > sottostringa (1). 0 = nessun match.
+ */
+function substringQuality(haystack: string, needle: string): { quality: number; index: number } {
+  const h = normalizeQuery(haystack);
+  if (!h || !needle) return { quality: 0, index: -1 };
+  if (h === needle) return { quality: 4, index: 0 };
+  if (h.startsWith(needle)) return { quality: 3, index: 0 };
+  const first = h.indexOf(needle);
+  if (first < 0) return { quality: 0, index: -1 };
+  for (let i = first; i >= 0; i = h.indexOf(needle, i + 1)) {
+    if (!/[\p{L}\p{N}]/u.test(h[i - 1] ?? "")) return { quality: 2, index: i };
+  }
+  return { quality: 1, index: first };
+}
+
+function isSubsequence(haystack: string, needle: string): boolean {
+  const h = normalizeQuery(haystack);
+  let hi = 0;
+  for (const ch of needle) {
+    hi = h.indexOf(ch, hi);
+    if (hi < 0) return false;
+    hi++;
+  }
+  return h.length > 0;
+}
+
+/**
+ * Punteggio di ricerca di un item a livelli: un match sul titolo batte sempre
+ * un match su username, che batte URL, note, campi personalizzati e vault.
+ * Dentro lo stesso campo: esatto > prefisso > inizio parola > sottostringa
+ * (prima compare, meglio è). I match "fuzzy" (sottosequenza di caratteri) su
+ * titolo/username/URL vengono dopo tutti i match per sottostringa.
+ * `query` deve essere già normalizzata. 0 = nessun match.
+ */
+export function searchScore(item: DecryptedItem, query: string): number {
+  const d = item.data;
+  const groups: string[][] = [
+    [d.title],
+    [d.username],
+    d.urls,
+    [d.notes],
+    d.fields.flatMap((f) => (f.hidden ? [f.name] : [f.name, f.value])),
+    [item.vaultName],
+  ];
+  for (let rank = 0; rank < groups.length; rank++) {
+    let best = 0;
+    for (const text of groups[rank]!) {
+      const m = substringQuality(text, query);
+      if (m.quality > 0) best = Math.max(best, m.quality * 100 - Math.min(m.index, 99));
+    }
+    if (best > 0) return 10_000 - rank * 1_000 + best;
+  }
+  for (let rank = 0; rank < 3; rank++) {
+    if (groups[rank]!.some((text) => isSubsequence(text, query))) return 1_000 - rank * 100;
+  }
+  return 0;
+}
+
 export class VaultSession {
   readonly api: ApiClient;
   readonly keys: UnlockedKeys;
@@ -230,23 +290,26 @@ export class VaultSession {
     return this.items.get(id);
   }
 
-  /** Ricerca su titolo, username, URL (hostname) e nome del vault. */
+  /**
+   * Ricerca con priorità al nome dell'elemento: prima tutti i match sul titolo,
+   * poi username, URL, note, campi personalizzati e nome del vault.
+   * Vedi `searchScore`.
+   */
   search(query: string, limit = 50): DecryptedItem[] {
     this.assertUnlocked();
     const q = normalizeQuery(query);
     if (!q) return this.listItems().slice(0, limit);
     const scored: Array<{ item: DecryptedItem; score: number }> = [];
     for (const item of this.items.values()) {
-      const candidates = [
-        scoreMatch(item.data.title, q) * 3,
-        scoreMatch(item.data.username, q) * 2,
-        ...item.data.urls.map((u) => scoreMatch(u, q)),
-        scoreMatch(item.vaultName, q) * 0.5,
-      ];
-      const score = Math.max(...candidates);
+      const score = searchScore(item, q);
       if (score > 0) scored.push({ item, score });
     }
-    scored.sort((a, b) => b.score - a.score || a.item.data.title.localeCompare(b.item.data.title));
+    scored.sort(
+      (a, b) =>
+        b.score - a.score ||
+        Number(b.item.data.favorite) - Number(a.item.data.favorite) ||
+        a.item.data.title.localeCompare(b.item.data.title),
+    );
     return scored.slice(0, limit).map((s) => s.item);
   }
 

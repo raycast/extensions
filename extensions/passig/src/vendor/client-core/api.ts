@@ -12,6 +12,8 @@
  */
 import { z } from "zod";
 import {
+  BillingStatus,
+  BillingUrlResponse,
   CreateItemsBulkResponse,
   ErrorResponse,
   Item,
@@ -23,7 +25,7 @@ import {
   UserSelf,
   Vault,
 } from "../shared/index.js";
-import { ApiError, NetworkError, ResponseFormatError, SessionExpiredError } from "./errors.js";
+import { ApiError, NetworkError, PlanLimitError, ResponseFormatError, SessionExpiredError } from "./errors.js";
 
 export interface Tokens {
   accessToken: string;
@@ -39,6 +41,13 @@ export interface ApiClientOptions {
   onTokensChanged?: (tokens: Tokens | null) => void | Promise<void>;
   /** Timeout per singola richiesta in millisecondi (default 20 s). */
   timeoutMs?: number;
+  /**
+   * Header aggiuntivi inviati con ogni richiesta (es. `Accept-Language` con la
+   * lingua attiva del client). Una funzione viene valutata a ogni richiesta, così
+   * il valore segue i cambi di lingua senza ricreare il client. `Accept`,
+   * `Content-Type` e `Authorization` restano gestiti dal client.
+   */
+  headers?: Record<string, string> | (() => Record<string, string>);
 }
 
 interface RequestOptions<T> {
@@ -69,6 +78,7 @@ export class ApiClient {
   private readonly fetchImpl: typeof fetch;
   private readonly onTokensChanged?: ApiClientOptions["onTokensChanged"];
   private readonly timeoutMs: number;
+  private readonly extraHeaders?: ApiClientOptions["headers"];
   private refreshInFlight: Promise<Tokens> | null = null;
 
   constructor(opts: ApiClientOptions) {
@@ -77,6 +87,7 @@ export class ApiClient {
     this.fetchImpl = opts.fetch ?? globalThis.fetch.bind(globalThis);
     this.onTokensChanged = opts.onTokensChanged;
     this.timeoutMs = opts.timeoutMs ?? 20_000;
+    this.extraHeaders = opts.headers;
   }
 
   getTokens(): Tokens | null {
@@ -105,7 +116,8 @@ export class ApiClient {
       }
     }
 
-    const headers: Record<string, string> = { Accept: "application/json" };
+    const extra = typeof this.extraHeaders === "function" ? this.extraHeaders() : this.extraHeaders;
+    const headers: Record<string, string> = { ...extra, Accept: "application/json" };
     if (opts.body !== undefined) headers["Content-Type"] = "application/json";
     if (auth && this.tokens) headers.Authorization = `Bearer ${this.tokens.accessToken}`;
 
@@ -153,6 +165,9 @@ export class ApiClient {
       payload = undefined;
     }
     const parsed = ErrorResponse.safeParse(payload);
+    if (parsed.success && res.status === 402) {
+      return new PlanLimitError(parsed.data.error.code, parsed.data.error.message, parsed.data.error.details);
+    }
     if (parsed.success) {
       return new ApiError(res.status, parsed.data.error.code, parsed.data.error.message, parsed.data.error.details);
     }
@@ -257,5 +272,21 @@ export class ApiClient {
 
   restoreItem(itemId: string) {
     return this.request("POST", `/items/${encodeURIComponent(itemId)}/restore`, { schema: Item });
+  }
+
+  // ---------- piano e pagamenti ----------
+
+  billingStatus() {
+    return this.request("GET", "/billing/status", { schema: BillingStatus });
+  }
+
+  /** URL di Stripe Checkout da aprire nel browser di sistema. */
+  createCheckout() {
+    return this.request("POST", "/billing/checkout", { schema: BillingUrlResponse });
+  }
+
+  /** URL del Customer Portal di Stripe (pagamento, fatture, disdetta). */
+  createBillingPortal() {
+    return this.request("POST", "/billing/portal", { schema: BillingUrlResponse });
   }
 }

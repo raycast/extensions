@@ -37,6 +37,24 @@ export class ApiError extends PassigError {
   }
 }
 
+/**
+ * 402: l'operazione supera il piano (Free). `code` è uno dei `PlanErrorCode`
+ * e `limit/current/requested` arrivano da `details`.
+ */
+export class PlanLimitError extends ApiError {
+  readonly limit: number | null;
+  readonly current: number;
+  readonly requested: number;
+
+  constructor(code: string, message: string, details?: unknown) {
+    super(402, code, message, details);
+    const d = (details ?? {}) as { limit?: unknown; current?: unknown; requested?: unknown };
+    this.limit = typeof d.limit === "number" ? d.limit : null;
+    this.current = typeof d.current === "number" ? d.current : 0;
+    this.requested = typeof d.requested === "number" ? d.requested : 0;
+  }
+}
+
 /** Impossibile raggiungere il server (DNS, TLS, offline...). */
 export class NetworkError extends PassigError {
   readonly cause?: unknown;
