@@ -180,7 +180,7 @@ function header(panel: MonitorPanel, c: Palette): string {
 function card(
   x: number,
   width: number,
-  arrow: string,
+  icon: "download" | "upload",
   color: string,
   title: string,
   rate: number | undefined,
@@ -192,10 +192,17 @@ function card(
   // The title's cap top sits CARDS.padding from the top, the value's baseline CARDS.padding from the bottom.
   const titleBaseline = CARDS.top + CARDS.padding + 11 * CAP;
   const valueBaseline = CARDS.top + CARDS.height - CARDS.padding;
+  // A tinted badge on the right, centered on the card so it balances the title and value.
+  const badge = 32;
+  const glyph = 18;
+  const badgeX = x + width - CARDS.padding - badge;
+  const badgeY = CARDS.top + (CARDS.height - badge) / 2;
 
   return `
 <rect x="${x + 0.5}" y="${CARDS.top + 0.5}" width="${width - 1}" height="${CARDS.height - 1}" rx="12" fill="${c.card}" stroke="${c.border}"/>
-<text x="${left}" y="${titleBaseline}" font-size="11" font-weight="500" fill="${c.muted}"><tspan fill="${color}" font-weight="700">${arrow}</tspan><tspan dx="4">${title}</tspan></text>
+<rect x="${badgeX}" y="${badgeY}" width="${badge}" height="${badge}" rx="9" fill="${color}" fill-opacity="0.14"/>
+<g transform="translate(${badgeX + (badge - glyph) / 2} ${badgeY + (badge - glyph) / 2}) scale(${glyph / 24})" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[icon]}</g>
+<text x="${left}" y="${titleBaseline}" font-size="11" font-weight="500" fill="${c.muted}">${title}</text>
 <text x="${left}" y="${valueBaseline}" fill="${rate === undefined ? c.faint : c.text}"><tspan font-size="26" font-weight="700" letter-spacing="-0.8">${value}</tspan><tspan dx="4" font-size="12" font-weight="500" fill="${c.muted}">${unit}</tspan></text>`;
 }
 
@@ -329,6 +336,8 @@ const ICONS = {
   shield: `<path d="M12 2 4 6v6c0 5.5 3.3 8.5 8 10 4.7-1.5 8-4.5 8-10V6l-8-4Z"/><path d="M9 12h6"/>`,
   warning: `<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.5"/>`,
   progress: `<circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><path d="M12 8v4l3 2"/>`,
+  download: `<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>`,
+  upload: `<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/>`,
 };
 
 function emptyState(empty: NonNullable<MonitorPanel["empty"]>, c: Palette): string {
@@ -375,8 +384,8 @@ export function monitorPanel(panel: MonitorPanel, dark: boolean): string {
 <g font-family="${FONT}">
 ${header(panel, c)}
 ${toolbar(panel.traffic ? panel.windowMs >= 120_000 : undefined, c)}
-${panel.traffic ? card(0, half, "↓", c.down, "Download", panel.down, c) : ""}
-${panel.traffic ? card(half + gutter, half, "↑", c.up, "Upload", panel.up, c) : ""}
+${panel.traffic ? card(0, half, "download", c.down, "Download", panel.down, c) : ""}
+${panel.traffic ? card(half + gutter, half, "upload", c.up, "Upload", panel.up, c) : ""}
 ${panel.traffic ? chart(panel, panel.traffic, c) : ""}
 ${panel.empty ? emptyState(panel.empty, c) : ""}
 ${details(panel.details, c)}
