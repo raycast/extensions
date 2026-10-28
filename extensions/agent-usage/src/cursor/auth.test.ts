@@ -29,6 +29,17 @@ test("isCursorAccessTokenUsable rejects expired or malformed Cursor app tokens",
   assert.equal(isCursorAccessTokenUsable(makeJwt({ sub: 123, exp: now / 1000 + 120 }), now), false);
 });
 
+test("isCursorAccessTokenJwt detects JWT and non-JWT tokens", async () => {
+  const { isCursorAccessTokenJwt } = await import("./auth.ts");
+  const now = Date.UTC(2026, 0, 1);
+
+  assert.equal(isCursorAccessTokenJwt(makeJwt({ sub: "auth0|user", exp: now / 1000 + 120 })), true);
+  assert.equal(isCursorAccessTokenJwt("not-a-jwt"), false);
+  assert.equal(isCursorAccessTokenJwt(""), false);
+  // Cursor 3.27+ access tokens are not JWTs (no dot separators)
+  assert.equal(isCursorAccessTokenJwt("YWJjOjEyMzp4eXo6dG9rZW4="), false);
+});
+
 test("Cursor discovers the Windows auth file using APPDATA or the roaming home fallback", async () => {
   const { resolveCursorAuthFilePath } = await import("./auth.ts");
   assert.equal(
