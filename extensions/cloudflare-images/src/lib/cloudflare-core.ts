@@ -9,11 +9,11 @@ export type * from "@mcdays/cloudflare-images-core";
 const requireFromAssets = createRequire(
   join(environment.assetsPath, "native", "sharp", "package.json"),
 );
-const core =
-  requireFromAssets("@mcdays/cloudflare-images-core") as typeof import("@mcdays/cloudflare-images-core");
+const core = requireFromAssets(
+  "@mcdays/cloudflare-images-core",
+) as typeof import("@mcdays/cloudflare-images-core");
 
-type Core =
-  typeof import("@mcdays/cloudflare-images-core");
+type Core = typeof import("@mcdays/cloudflare-images-core");
 
 export const calculateFileHash: Core["calculateFileHash"] =
   core.calculateFileHash;

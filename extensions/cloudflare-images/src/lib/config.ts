@@ -1,8 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import type {
-  CloudflareConfig,
-  CompressionConfig,
-} from "./cloudflare-core.js";
+import type { CloudflareConfig, CompressionConfig } from "./cloudflare-core.js";
 
 /**
  * The preference shape comes from `raycast-env.d.ts`, which Raycast
