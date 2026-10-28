@@ -52,6 +52,8 @@ export interface RaycastCard {
   metadataTitle: string | null;
   mimeType?: string | null;
   notes: string | null;
+  /** When the card was last saved: `createdAt`, or later when its link was saved again. */
+  savedAt?: number;
   screenshotUrl: string | null;
   sourceTitle?: string | null;
   sourceUrl?: string | null;
@@ -109,7 +111,11 @@ export interface QuickSaveResponse {
   appUrl: string | null;
   card: RaycastCard | null;
   cardId: string;
+  /** The link was already in Teak: that card moved to the top instead. */
+  resaved?: true;
   status: "created";
+  /** The re-saved card came back from Archive. */
+  wasArchived?: true;
 }
 
 type JsonObject = Record<string, unknown>;
@@ -200,6 +206,7 @@ const withOptionalFields = (card: RaycastCard): RaycastCard => ({
   linkPublisher: optionalNullableString(card.linkPublisher),
   linkSiteName: optionalNullableString(card.linkSiteName),
   links: optionalCardLinks(card.links),
+  savedAt: typeof card.savedAt === "number" ? card.savedAt : undefined,
   sourceTitle: optionalNullableString(card.sourceTitle),
   sourceUrl: optionalNullableString(card.sourceUrl),
 });
@@ -380,6 +387,10 @@ export const parseQuickSaveResponse = (payload: unknown): QuickSaveResponse => {
     card,
     cardId,
     status: resolvedStatus,
+    ...(payload.resaved === true ? { resaved: true as const } : {}),
+    ...(payload.resaved === true && payload.wasArchived === true
+      ? { wasArchived: true as const }
+      : {}),
   };
 };
 

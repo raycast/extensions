@@ -1,40 +1,5 @@
 import type { RaycastCard } from "./api";
-
-// What a link's done state is called, by the kind of link. Raycast can't
-// import the workspace at publish time, so this copies Teak's own table
-// (`LINK_CATEGORY_DONE_VERB`) and a test keeps the two in step.
-export type DoneVerb =
-  | "bought"
-  | "cooked"
-  | "done"
-  | "listened"
-  | "played"
-  | "read"
-  | "watched";
-
-export const DONE_VERB_BY_CATEGORY: Record<string, DoneVerb> = {
-  app: "done",
-  article: "read",
-  book: "read",
-  course: "done",
-  design_portfolio: "done",
-  event: "done",
-  game: "played",
-  movie: "watched",
-  music: "listened",
-  news: "read",
-  other: "done",
-  place: "done",
-  podcast: "listened",
-  product: "bought",
-  recipe: "cooked",
-  repo: "done",
-  research: "read",
-  social_post: "done",
-  software: "done",
-  tv: "watched",
-  typeface: "done",
-};
+import { DONE_VERB_BY_CATEGORY, type DoneVerb } from "./doneVerbs";
 
 export const doneVerb = (category?: string | null): DoneVerb =>
   (category && DONE_VERB_BY_CATEGORY[category]) || "done";
