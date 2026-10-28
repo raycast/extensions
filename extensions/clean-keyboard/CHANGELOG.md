@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Optional Mouse Click Lock] - {PR_MERGE_DATE}
+## [Optional Mouse Click Lock] - 2026-10-28
 
 - Added an optional macOS mouse-click lock to the existing Lock Keyboard command and Ask AI tool, using the same duration and preference flow
 - Unlock mouse-click locks with Touch ID after Ctrl+U or a Command triple tap, or hold both Command keys for eight seconds to force release
