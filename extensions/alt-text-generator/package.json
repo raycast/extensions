@@ -12,7 +12,7 @@
   "dependencies": {
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.15.0",
-    "openai": "^4.40.2",
+    "openai": "^7.45.1",
     "parse-url": "^9.2.0"
   },
   "devDependencies": {
