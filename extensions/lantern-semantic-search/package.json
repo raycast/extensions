@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lantern-semantic-search",
   "title": "Lantern – Semantic Search",
-  "description": "Search your Mac by meaning with Lantern: files, code, PDFs, photos and the moment in a recording, entirely on your Mac.",
+  "description": "Search your Mac by meaning with Lantern: files, code, PDFs, photos and the moment in a recording, entirely on your Mac. Requires the free Lantern app.",
   "icon": "icon.png",
   "author": "kacper_piotrowski",
   "categories": ["Productivity", "Developer Tools"],
