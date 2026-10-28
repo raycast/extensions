@@ -1,19 +1,23 @@
-import { ActionPanel, Action, Icon, Clipboard, Keyboard } from "@raycast/api";
-import { HistoryItem } from "../types";
+import { Action, ActionPanel, Icon, Image, Keyboard } from "@raycast/api";
+import OpenProfileForm from "../forms/open-profile-form";
+import { FAVORITE_COLOR, HISTORY_FILTER } from "../helpers/history";
 import { EditProfileForm } from "./EditProfile";
-import { safeAsyncOperation, showSuccess } from "../utils/errors";
 
 interface HistoryActionPanelsProps {
-  item: HistoryItem;
-  onOpenProfile: (profile: string, app: string) => void;
-  onDeleteHistoryItem: (profile: string, app: string) => void;
-  onToggleStar: (profile: string, app: string) => void;
+  item: {
+    profile: string;
+    app: string;
+    appName: string;
+    url: string;
+    favicon: Image.ImageLike;
+    isStarred: boolean;
+  };
+  onOpenProfile: () => void;
+  onDeleteHistoryItem: () => void;
+  onToggleStar: () => void;
   onClearStarredProfiles: () => void;
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
-  onFilterByApp: (app: string) => void;
-  onRefreshHistory: () => void;
-  OpenProfileCommand: React.ComponentType<{ arguments: { profile: string } }>;
 }
 
 export function HistoryActionPanels({
@@ -24,68 +28,45 @@ export function HistoryActionPanels({
   onClearStarredProfiles,
   onSetSearchText,
   onSetAppFilter,
-  onFilterByApp,
-  onRefreshHistory,
-  OpenProfileCommand,
 }: HistoryActionPanelsProps) {
   return (
     <ActionPanel>
-      <Action
-        title={`Open @${item.profile} on ${item.appName}`}
-        icon={Icon.Globe}
-        onAction={() => onOpenProfile(item.profile, item.app)}
-      />
+      <Action title={`Open @${item.profile} on ${item.appName}`} icon={item.favicon} onAction={onOpenProfile} />
       <Action.Push
         title={`Edit @${item.profile}`}
         icon={Icon.Pencil}
-        target={
-          <EditProfileForm
-            originalProfile={item.profile}
-            app={item.app}
-            appName={item.appName}
-            onUpdate={onRefreshHistory}
-          />
-        }
+        target={<EditProfileForm originalProfile={item.profile} app={item.app} appName={item.appName} />}
         shortcut={Keyboard.Shortcut.Common.Edit}
       />
       <Action.Push
         title={`Open @${item.profile} on…`}
-        icon={Icon.Terminal}
-        target={<OpenProfileCommand arguments={{ profile: item.profile }} />}
+        icon={Icon.PersonCircle}
+        target={<OpenProfileForm initialProfile={item.profile} />}
         shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
+      {item.url && (
+        <Action.CopyToClipboard
+          title="Copy Profile URL"
+          content={item.url}
+          shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+        />
+      )}
       <Action
-        title={`Copy Profile URL`}
-        icon={Icon.Clipboard}
-        onAction={async () => {
-          await safeAsyncOperation(
-            async () => {
-              const url = item.url.toString();
-              await Clipboard.copy(url);
-              await showSuccess("Copied to Clipboard", url);
-            },
-            "Copy profile URL to clipboard",
-            { toastTitle: "Error" },
-          );
-        }}
-        shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
-      />
-      <Action
-        title={item.isStarred ? `Unstar Profile on ${item.appName}` : `Star Profile on ${item.appName}`}
-        icon={item.isStarred ? Icon.XMarkCircle : Icon.Star}
-        onAction={() => onToggleStar(item.profile, item.app)}
+        title={item.isStarred ? "Remove from Favorites" : "Add to Favorites"}
+        icon={item.isStarred ? Icon.StarDisabled : { source: Icon.Star, tintColor: FAVORITE_COLOR }}
+        onAction={onToggleStar}
         shortcut={Keyboard.Shortcut.Common.Pin}
       />
       <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        onAction={() => onDeleteHistoryItem(item.profile, item.app)}
+        onAction={onDeleteHistoryItem}
         shortcut={Keyboard.Shortcut.Common.Remove}
       />
       <Action
-        title="Clear Starred Profiles"
-        icon={Icon.Star}
+        title="Clear Favorites"
+        icon={Icon.StarDisabled}
         style={Action.Style.Destructive}
         onAction={onClearStarredProfiles}
       />
@@ -95,14 +76,14 @@ export function HistoryActionPanels({
           icon={Icon.Filter}
           onAction={() => {
             onSetSearchText(item.profile);
-            onSetAppFilter("__all__");
+            onSetAppFilter(HISTORY_FILTER.ALL);
           }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         />
         <Action
           title={`Show Only ${item.appName}`}
-          icon={item.favicon || Icon.Filter}
-          onAction={() => onFilterByApp(item.app)}
+          icon={item.favicon}
+          onAction={() => onSetAppFilter(item.app)}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
         />
         <Action
@@ -114,7 +95,7 @@ export function HistoryActionPanels({
         <Action
           title="Clear App Filter"
           icon={Icon.XMarkCircle}
-          onAction={() => onSetAppFilter("__all__")}
+          onAction={() => onSetAppFilter(HISTORY_FILTER.ALL)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
         />
       </ActionPanel.Section>
