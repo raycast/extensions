@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Scoopkit MCP Server] - {PR_MERGE_DATE}
+## [Add Scoopkit MCP Server] - 2026-10-28
 
 - Add Scoopkit to the official registry: AI-industry news as structured, taxonomy-classified events with sources and correction history. Hosted Streamable HTTP server at https://api.scoopkit.dev/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; no account or API key needed to start.
 
