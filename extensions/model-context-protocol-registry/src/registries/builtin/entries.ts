@@ -1375,6 +1375,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "recordhtml",
+    title: "RecordHTML",
+    description:
+      "Record web pages and HTML5 creatives to MP4, WebM or GIF in a real browser. Record a public URL, or an HTML document your AI writes (banners, ads, animations, landing pages), and get a signed video link back. Pages can mark the exact start and end of an animation with trim_start() and trim_end(), and each recording reports dropped frames, page errors and failed requests. 5 tools: record, check a recording, estimate a request without using quota, list and delete recordings. Hosted remote Streamable HTTP server at https://mcp.recordhtml.com with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a RecordHTML API key as a Bearer header; free plan with 10 credits a month (1 credit is up to 60 seconds of video). The hosted implementation is proprietary.",
+    icon: "https://recordhtml.com/logo.png",
+    homepage: "https://recordhtml.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.recordhtml.com"],
+    },
+    remoteUrl: "https://mcp.recordhtml.com",
+  },
+  {
     name: "recued",
     title: "Recued",
     description:
