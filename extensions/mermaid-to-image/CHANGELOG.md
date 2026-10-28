@@ -1,5 +1,38 @@
 # Mermaid to Image Changelog
 
+## [Ondine Experimental Renderer & SVG Fidelity Fixes] - 2026-10-28
+
+### Added
+
+- `Ondine Experimental (SVG Only)` mode for manual SVG generation with bundled `ondine` version `0.0.3`
+- `Use Ondine in Auto` preference, disabled by default, for eligible SVG and PNG diagrams in the manual command
+- Ondine renderer version, bundled theme, and theme-directive warnings in the manual result screen
+- Ondine syntax and semantic diagnostics in the manual error screen without exposing diagram source in operational logs or failure toasts
+- Regression coverage for Ondine runtime initialization, theme materialization, Auto fallback, PNG validation, and post-render action isolation
+
+### Changed
+
+- Opt-in Auto routing now tries Ondine for reviewed diagram families outside the existing Beautiful route, falling back once to `Compatible (mmdc)` on Ondine rendering failure
+- Existing Beautiful SVG routing and its families' compatible PNG routing remain unchanged; the AI tool does not use the Ondine opt-in
+- Auto bypasses Ondine when the original or cleaned diagram source contains embedded directives or frontmatter configuration
+- Ondine reuses bundled colors from the existing `Beautiful Theme` preference; explicit Ondine mode warns when embedded theme settings may not be honored
+- Ondine SVG preview, `Copy Image`, and Auto PNG output use Chrome/Chromium-backed rasterization without silently falling back to the native macOS rasterizer
+- Ondine Auto PNG output uses 3× rasterization with a 4096 px longest-edge limit, independently of `Compatible Scale`, and reuses the generated PNG for preview and copying
+- Explicit Ondine mode remains SVG-only and reports errors directly without compatible fallback
+
+### Improved
+
+- Bounded Ondine CSS variable and color materialization preserves bundled theme colors, font settings, and explicit SVG styles
+- Ondine Auto PNG generation validates the PNG header and expected dimensions, applies the configured browser subprocess timeout, and cleans temporary or partial output on failure
+- Source-free Auto fallback logging records only renderer identifiers, reviewed diagram family, and bounded error codes
+
+### Fixed
+
+- Fixed npm installation conflicts with Vite 8 and Vitest 5 by aligning the development esbuild and Node.js type dependencies
+- Fixed compatible SVG previews and copied images showing displaced Chinese labels, black fills, or incorrect colors in affected diagrams by using browser-backed rasterization without changing the original SVG
+- Prevented browser-required SVG previews from silently falling back to raw SVG when rasterization fails
+- Prevented `Copy Image`, `Save Image`, or `Open in Default App` failures after successful rendering from triggering a render fallback or repeating the action
+
 ## [Hybrid Renderer & Raycast Preview Improvements] - 2026-03-10
 
 ### Added
