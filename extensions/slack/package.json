@@ -160,7 +160,16 @@
       "default": true
     }
   ],
+  "resourceProvider": "read-user",
   "tools": [
+    {
+      "title": "Users",
+      "name": "search-user-mentions",
+      "description": "Search workspace members by name, username, email, or job title to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "title": "Read Canvas",
       "name": "read-canvas",
@@ -284,7 +293,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",
