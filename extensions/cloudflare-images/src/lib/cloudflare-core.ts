@@ -6,11 +6,11 @@ export type * from "@mcdays/cloudflare-images-core";
 
 // Preserve the core package's dependency layout in assets. Bundling its JavaScript
 // alone separates Sharp from the native packages and libraries it needs to load.
-const require = createRequire(
+const requireFromAssets = createRequire(
   join(environment.assetsPath, "native", "sharp", "package.json"),
 );
 const core =
-  require("@mcdays/cloudflare-images-core") as typeof import("@mcdays/cloudflare-images-core");
+  requireFromAssets("@mcdays/cloudflare-images-core") as typeof import("@mcdays/cloudflare-images-core");
 
 type Core =
   typeof import("@mcdays/cloudflare-images-core");
