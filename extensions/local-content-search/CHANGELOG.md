@@ -1,6 +1,6 @@
 # Local Content Search Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-28
 
 - Search documents, images, audio, and video locally with EmbeddingGemma 2.
 - Keep selected folders indexed through an independent macOS login service.
