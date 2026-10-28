@@ -1,6 +1,6 @@
 # Orca Changelog
 
-## [Reliable Prompt Delivery] - {PR_MERGE_DATE}
+## [Reliable Prompt Delivery] - 2026-10-28
 
 - A saved prompt that starts a new agent is now submitted by Orca once the agent is up, instead of being typed in while it starts — it no longer sits in the input without Enter, or lands in the shell
 - Errors from Orca show what Orca said, not the command line with the whole prompt in it
