@@ -1,6 +1,6 @@
 # FlowSpeech TTS Changelog
 
-## [Fix Forgotten Recovery] - {PR_MERGE_DATE}
+## [Fix Forgotten Recovery] - 2026-10-28
 
 - Keep explicitly forgotten recovery IDs removed when running speech finishes or is interrupted
 
