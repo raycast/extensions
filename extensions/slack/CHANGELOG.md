@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Cache channel directory for instant local search] - {PR_MERGE_DATE}
+
+- Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
+
 ## [Profile photos in Find Users] - 2026-10-22
 
 - Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
