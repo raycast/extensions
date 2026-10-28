@@ -656,6 +656,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "fotofoto",
+    title: "foto foto",
+    description:
+      "Turn your photos or a public iCloud Shared Album into a printed hardcover photo book. Attach photos, give image links, or paste a public iCloud Shared Album link, and foto foto designs every spread of a hardcover photo book and returns a preview link. The person saves it with their email on fotofoto.app to edit and order it. Also compares photo book prices across services. English and Dutch. Hosted remote Streamable HTTP server at https://fotofoto.app/mcp; no sign-in, no API key.",
+    icon: "https://fotofoto.app/icon-512.png",
+    homepage: "https://fotofoto.app/developers",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://fotofoto.app/mcp"],
+    },
+    remoteUrl: "https://fotofoto.app/mcp",
+  },
+  {
     name: "janction-render",
     title: "JANCTION Render",
     description:
