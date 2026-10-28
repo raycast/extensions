@@ -9,7 +9,7 @@ export default function FindSimilarCommand(
 
   if (!cardId) {
     return (
-      <List navigationTitle="Find Similar Cards">
+      <List navigationTitle="More Like This">
         <List.EmptyView
           description="Paste a card ID, or a link copied with Copy Teak Link."
           icon={Icon.Stars}

@@ -4,6 +4,80 @@
 
 - Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
 
+## [Add Visualping MCP Server] - 2026-10-27
+
+- Add Visualping to the official registry: website change monitoring for agents. Create, edit, run, pause and delete monitors, list monitors, read recently detected changes and read full monitor settings. Hosted Streamable HTTP server at https://visualping.io/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Public beta.
+
+## [Add Levea AI Video Editor MCP Server] - 2026-10-27
+
+- Add Levea AI Video Editor to the official registry: prompt-first AI video editor. Describe the edit and get a finished MP4: viral clips from long videos, word-by-word animated captions, 9:16 reframe with face tracking, chroma key and background removal, B-roll, AI voiceover and music, silence removal and multi-platform export, plus projects, assets, brand kits and caption templates. 25 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, no API key to paste. Hosted Streamable HTTP server at https://api.livecore.ai/api/v1/misc/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Paxa Labs MCP Server] - 2026-10-27
+
+- Add Paxa Labs to the official registry: Thai, English and Mandarin text-to-speech played through your speakers or saved to audio files with captions, voice design from a text description, speech-to-text with subtitles (research preview), translation into Thai, and OCR and field extraction for PDFs and images. Local stdio server run with `npx -y @paxalabs/mcp` and a Paxa API key.
+
+## [Add Just Domain and Just Publish MCP Servers] - 2026-10-27
+
+- Add Just Domain. to the official registry: check a domain name, both prices and whether it can transfer in, then register it on justdomain.ai. Hosted remote Streamable HTTP server at https://mcp.justdomain.ai/ with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+- Add Just Publish. to the official registry: publish and update the website you built with AI at a live public URL. Hosted remote Streamable HTTP server at https://mcp.justpublish.ai/ with OAuth sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add backlink-guard MCP Server] - 2026-10-27
+
+- Add backlink-guard to the official registry: checks a link source before you submit your site to it and gives an action and a verdict with the evidence, against Google's link spam policies; it also verifies a listing once it is live and audits your own backlinks. Local stdio server `backlink-guard` from PyPI through `uvx --with mcp backlink-guard mcp`; GLASSER_API_KEY (or AISA_API_KEY) and GOANYAPI_API_KEY are optional and add the paid signals.
+
+## [Add NeverApply MCP Server] - 2026-10-27
+
+- Add NeverApply to the official registry: an AI job-search agent to search and match jobs, tailor resumes, answer screening questions, prepare for interviews, and apply with your approval. Official hosted Streamable HTTP server at https://neverapply.co/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), plus an `mcp-remote` fallback.
+
+## [Add deed.page MCP Server] - 2026-10-27
+
+- Add deed.page to the official registry: publish static sites from an agent to a permanent public HTTPS URL, then update, list, delete, roll back, attach custom domains and read analytics. Hosted Streamable HTTP server at https://deed.page/mcp with no sign-in and no API key to publish, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add Kimiko MCP Server] - 2026-10-27
+
+- Add Kimiko to the official registry: meetings, notes and tasks from Kimiko, the private AI note taker, with tools to search meetings, notes and transcripts, read a meeting's summary, and list, add or update tasks, plus three prompts. Local stdio server that ships inside the Kimiko desktop app at /Applications/Kimiko.app/Contents/MacOS/kimiko-mcp (Mac only), with no arguments, environment variables or API key; it stays off until Allow AI apps is turned on in Kimiko.
+
+## [Add Watchgoose MCP Server] - 2026-10-27
+
+- Add Watchgoose to the official registry: monitor cron jobs and recurring work through a project-scoped Watchgoose connection. Inspect checks and status history with read-only access by default; with explicit read-and-write consent, inspect recent signals and integrations and create, update, pause, resume, or delete checks. Hosted Streamable HTTP server at https://mcp.watchgoose.com/mcp with OAuth 2.1 sign-in (PKCE and dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Refresh MCP Registry Entries] - 2026-10-27
+
+- Connect ElevenLabs through its maintained hosted MCP endpoint with OAuth sign-in.
+- Remove the archived E2B and Google Drive listings and the unavailable Shopify Dev listing.
+
+## [Update Local Commander MCP Server] - 2026-10-26
+
+- Update the Local Commander entry's description: it now connects Windows, macOS and Linux computers, many at once, and can take screenshots. The connection is unchanged.
+
+## [Update Terminal Tax MCP Server] - 2026-10-26
+
+- Update Terminal Tax: three tools (was four); nothing to install or connect to file, since an assistant sends JSON-RPC HTTPS POST requests to https://mcp.terminal.tax/v1/hosted-mcp directly; the person reviews and signs on one private filing page; the icon now loads from github.com/terminaltax/terminal-tax-mcp-server.
+
+## [Add Webly MCP Server] - 2026-10-26
+
+- Add Webly to the official registry: website hosting for AI agents. Publish a website or share files and folders at a live URL in seconds, claim it, edit it over MCP, publish drafts you approve, connect custom domains and roll back with version history. Hosted Streamable HTTP server at https://api.webly.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration) or a bearer API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Rename the GetMattered entry] - 2026-10-26
+
+- Rename the job search entry to GetMattered (id `getmattered`) and move its homepage, icon and remote server to getmattered.com.
+
+## [Update Mnemoverse MCP Server] - 2026-10-26
+
+- Mnemoverse now connects to its hosted Streamable HTTP server at https://mcp.mnemoverse.com/mcp through mcp-remote, with OAuth 2.1 sign-in (dynamic client registration and PKCE) instead of an API key, and the description no longer counts tools.
+
+## [Add 3Dsellers MCP Server] - 2026-10-26
+
+- Add 3Dsellers to the official registry: run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant (products, listings, inventory, prices, orders, bulk edits, CSV imports and buyer messages, 150+ tools). Hosted Streamable HTTP server at https://api.3dsellers.com/mcp with OAuth 2.0 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add CodeTrendy MCP Server] - 2026-10-25
+
+- Add CodeTrendy to the official registry: search a curated directory of newly launched startups, SaaS products and AI tools, read full listing profiles, find alternatives to a product and see what is trending. 7 read-only tools. Hosted Streamable HTTP server at https://codetrendy.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Add VOMO MCP Server] - 2026-10-25
+
+- Add VOMO through mcp-remote. Search and read saved meeting notes and transcripts with OAuth and read-only access. Requires Node.js with npm.
+
 ## [Add CSolar Energia MCP Server] - 2026-10-25
 
 - Add CSolar Energia to the official registry: solar power estimates from the electricity bill or consumption (panels, installed power, generation, estimated price, savings and payback) and the service area check for São Paulo state, Brazil. Read-only, answers in Portuguese. Remote Streamable HTTP server with no sign-in and no API key. Direct HTTP connection in Raycast at https://csolar.com.br/mcp.

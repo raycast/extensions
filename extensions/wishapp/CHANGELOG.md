@@ -1,5 +1,9 @@
 # WishApp Changelog
 
+## [Currency List Update] - 2026-10-27
+
+- The currency picker now lists the same currencies as the WishApp website. Retired codes such as HRK and BGN are gone, and current ones such as MRU, VES and ZWG are added
+
 ## [Fixes and Cleanup] - 2026-07-10
 
 - Item previews no longer name who reserved an item, matching the website and the mobile app, which only ever show how many are reserved

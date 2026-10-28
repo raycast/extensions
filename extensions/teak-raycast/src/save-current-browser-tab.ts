@@ -2,7 +2,6 @@ import { BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import {
   ensureCredentialsForNoViewCommand,
   saveCardWithFeedback,
-  showIfAlreadySaved,
 } from "./lib/capture";
 
 const isHttpUrl = (value: string): boolean => {
@@ -40,13 +39,11 @@ export default async function SaveCurrentBrowserTabCommand() {
     return;
   }
 
-  if (await showIfAlreadySaved(activeTab.url)) {
-    return;
-  }
-
+  // The link alone, so a tab already in Teak moves that card to the top
+  // instead of making a second one ("Already saved").
   await saveCardWithFeedback(
     {
-      content: activeTab.title?.trim() || activeTab.url,
+      content: activeTab.url,
       source: "raycast_browser_tab",
       url: activeTab.url,
     },
