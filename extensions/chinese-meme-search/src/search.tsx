@@ -121,6 +121,7 @@ function Results({ keyword }: { keyword: string }) {
       isLoading={loading}
       filtering={false}
       searchText=""
+      onSearchTextChange={() => {}}
       navigationTitle={`${keyword} · ${sourceName} · 第 ${pages.length || 1} 页`}
       searchBarPlaceholder="方向键选图，回车复制；Esc 返回 Raycast 搜索"
     >
