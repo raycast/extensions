@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [Ondine Experimental Renderer & SVG Fidelity Fixes] - {PR_MERGE_DATE}
+## [Ondine Experimental Renderer & SVG Fidelity Fixes] - 2026-10-28
 
 ### Added
 
