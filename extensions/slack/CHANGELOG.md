@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [User Mentions in AI Chat] - 2026-10-28
+
+- Add a **Users** mention search to find workspace members by name, username, email, or job title.
+- Read the selected person's current profile when sending a mention, including their Slack user ID and workspace.
+
 ## [Profile photos in Find Users] - 2026-10-22
 
 - Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
