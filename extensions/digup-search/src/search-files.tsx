@@ -16,7 +16,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -40,7 +40,10 @@ type Ready = Extract<Readiness, { state: "ready" }>;
 const HOME = homedir();
 const PLACEHOLDER = "Describe what you're looking for";
 
-/** For working on the extension: ~/.config/digup-raycast/dev-settings.json points it at a test index (see README). */
+/**
+ * For working on the extension: ~/.config/digup-raycast/dev-settings.json points it at a test index (see
+ * docs/DEVELOPMENT.md in github.com/roy-jiang/digup-raycast).
+ */
 async function developmentOverride() {
   if (!environment.isDevelopment) return {};
   try {
@@ -178,7 +181,7 @@ function Search(props: {
   }, [state.warning]);
 
   useEffect(() => {
-    if (state.error) showToast({ style: Toast.Style.Failure, title: "Search Failed", message: state.error });
+    if (state.error) showFailureToast(state.error, { title: "Search Failed" });
   }, [state.error]);
 
   const hits = state.reply?.hits ?? [];

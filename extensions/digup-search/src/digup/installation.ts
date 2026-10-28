@@ -96,7 +96,10 @@ export function parseSettings(xml: string, home: string): DigUpSettings {
   return settings;
 }
 
-/** `~/.config/digup-raycast/dev-settings.json`, honored in development only (see the README). */
+/**
+ * `~/.config/digup-raycast/dev-settings.json`, honored in development only (see docs/DEVELOPMENT.md in
+ * github.com/roy-jiang/digup-raycast).
+ */
 export function parseOverride(json: string, home: string): SettingsOverride {
   let value: unknown;
   try {

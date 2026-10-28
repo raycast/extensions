@@ -53,8 +53,6 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "typecheck": "ray build -e dist && tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
-    "smoke": "tsx scripts/smoke.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -67,7 +65,6 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.5",
     "prettier": "^3.9.10",
-    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   }
 }

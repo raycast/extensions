@@ -20,18 +20,6 @@ index; this extension searches it.
 
 DigUp doesn't need to be running while you search.
 
-## Install from source
-
-You need Node.js 22.22.2 or newer.
-
-```bash
-git clone https://github.com/roy-jiang/digup-raycast && cd digup-raycast
-npm install && npm run dev
-```
-
-Once "Search Files" shows up in Raycast you can stop `npm run dev` with ⌃C: the extension stays installed. To
-update, `git pull` and run the same two commands again.
-
 ## Use
 
 Open **Search Files** and describe what you're looking for:
@@ -110,29 +98,6 @@ The extension reads DigUp's settings (which folders, where the index is) and nev
 | "Meaning Search Is Off" | Open DigUp and let the model finish downloading; word matches still work |
 | DigUp Stopped Responding | Choose Retry. If it happens again, Copy Error Log and report it |
 | Results are missing | Check the folder is indexed in DigUp, and that Raycast may read it (see above) |
-
-## Development
-
-```bash
-npm test          # unit tests
-npm run lint      # Raycast's checks, ESLint and Prettier
-npm run build     # a distribution build, with type checking
-npm run smoke     # the real helper against your own DigUp index; prints counts, never file names
-```
-
-In development mode (`npm run dev`) the extension reads `~/.config/digup-raycast/dev-settings.json`, if it exists,
-to search another index instead of DigUp's own, for example a small folder indexed just for testing:
-
-```json
-{ "indexDir": "~/Samples-index", "roots": ["~/Samples"], "codeRoots": ["~/Samples/code"] }
-```
-
-DigUp's helper builds such an index:
-`/Applications/DigUp.app/Contents/Helpers/digup index ~/Samples --index ~/Samples-index` (add `--code` for the code
-folder). The Store build ignores the file; `npm run smoke` reads it too.
-
-The helper's protocol is described at the top of DigUp's
-[`SearchService.swift`](https://github.com/ARahim3/DigUp/blob/main/Sources/digup/SearchService.swift).
 
 ## License
 
