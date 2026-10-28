@@ -205,6 +205,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "ayhire",
+    title: "AyHire",
+    description:
+      "Hire engineers by what they shipped. Describe a role and AyHire finds developers from their public GitHub work, judges each one against the role's criteria with links to the evidence, says who is open to work, and keeps roles and a shortlist shared with the AyHire web app. 35+ tools; analyses that cost money are marked. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; 14-day free trial.",
+    icon: "https://ayhire.com/icon.svg",
+    homepage: "https://ayhire.com/agents.md",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://ayhire.com/mcp"],
+    },
+    remoteUrl: "https://ayhire.com/mcp",
+  },
+  {
     name: "backlink-guard",
     title: "backlink-guard",
     description:
