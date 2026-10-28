@@ -1,5 +1,5 @@
 import { Action, ActionPanel, AI, environment, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { type ReactElement, useState } from "react";
+import { type ReactElement, useRef, useState } from "react";
 import { transliterateLatinToCyrillic } from "./translit";
 
 interface Preferences {
@@ -43,6 +43,9 @@ export default function Command() {
   const [input, setInput] = useState("");
   // Corrected text from the AI action, if any; takes precedence over the live transliteration
   const [aiOverride, setAiOverride] = useState<string | null>(null);
+  // Bumped whenever the input changes or a new fix starts, so an in-flight AI
+  // response for old input never overwrites the current text (stale-results race)
+  const fixEpochRef = useRef(0);
   const { primaryAction, clearOnAction } = getPreferenceValues<Preferences>();
 
   const cyrillicOutput = aiOverride ?? transliterateLatinToCyrillic(input);
@@ -51,15 +54,19 @@ export default function Command() {
   const clearInput = () => {
     setInput("");
     setAiOverride(null);
+    fixEpochRef.current += 1;
   };
 
   const handleInputChange = (value: string) => {
     setInput(value);
     // Live typing invalidates any AI correction, so stale fixes never stick
     setAiOverride(null);
+    fixEpochRef.current += 1;
   };
 
   const fixSpellingWithAI = async () => {
+    const fixEpoch = ++fixEpochRef.current;
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: UI_TEXT.TOASTS.AI_LOADING_TITLE,
@@ -68,6 +75,15 @@ export default function Command() {
     try {
       const prompt = buildFixSpellingPrompt(input, cyrillicOutput);
       const fixed = (await AI.ask(prompt, { creativity: "none" })).trim();
+      if (!fixed) {
+        // An empty correction must not blank the output and hide the actions
+        throw new Error("AI returned an empty response");
+      }
+      if (fixEpochRef.current !== fixEpoch) {
+        // The input changed while fixing; keep the freshly typed transliteration
+        toast.hide();
+        return;
+      }
       setAiOverride(fixed);
       toast.style = Toast.Style.Success;
       toast.title = UI_TEXT.TOASTS.AI_SUCCESS_TITLE;

@@ -15,6 +15,10 @@ const CASES: Array<[string, string]> = [
   ["Ob'ekt", "Обьект"],
   // explicit uppercase soft-sign marker in an all-caps word
   ["OB''EKT", "ОБЬЕКТ"],
+  // explicit uppercase sign markers keep their case even without letter context
+  ["##", "Ъ"],
+  ["''", "Ь"],
+  ["##EKT", "ЪЕКТ"],
   // Documented collision: "it's" intends "ит'с"-ish input, maps to итьс
   ["it's", "итьс"],
   ["", ""],
