@@ -1418,6 +1418,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "shipmail",
+    title: "Shipmail",
+    description:
+      "Business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in in the browser, or a Shipmail API key as a Bearer header.",
+    icon: "https://raw.githubusercontent.com/shipmail-to/shipmail-mcp/main/assets/shipmail-mark-400.png",
+    homepage: "https://shipmail.to/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://shipmail.to/api/mcp"],
+    },
+    remoteUrl: "https://shipmail.to/api/mcp",
+  },
+  {
     name: "sitelemetry",
     title: "Sitelemetry",
     description:
@@ -1822,6 +1835,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.webly.ai/v1/mcp"],
     },
     remoteUrl: "https://api.webly.ai/v1/mcp",
+  },
+  {
+    name: "worthbase",
+    title: "Worthbase",
+    description:
+      "Your household's net worth in Raycast: shares, ETFs, crypto, gold and silver, super and retirement accounts, property, cash and loans, owned by people, trusts or companies, priced daily with exact cost bases, gains, performance (XIRR), goals and history. Ask what you're worth, how your shares did or what selling would make; hand it a statement to record, previewed before anything is saved and undoable. Hosted remote Streamable HTTP server through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, Worthbase account (7-day free trial), no API key to paste.",
+    icon: "https://worthbase.app/icon-512.png",
+    homepage: "https://worthbase.app/claude/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://worthbase.app/mcp"],
+    },
   },
   {
     name: "xero",

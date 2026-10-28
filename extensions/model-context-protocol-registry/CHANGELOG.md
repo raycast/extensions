@@ -4,6 +4,14 @@
 
 - Add EventSend to the official registry: ask your AI about your product's events, delivery health and usage. Search events, follow one customer's timeline, see why a Slack, Discord, Telegram or webhook notification failed, and check daily stats and quota. Read-only, 9 tools. Hosted Streamable HTTP server at https://eventsend.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add Shipmail MCP Server] - 2026-10-28
+
+- Add Shipmail to the official registry: business email on your own domain for people and AI agents. Read, search, send and reply in mailboxes, and manage domains, mailboxes, forwarding, inbox rules, calendars, booking pages, newsletters and webhooks. Hosted Streamable HTTP server at https://shipmail.to/api/mcp with a direct HTTP connection in Raycast and an mcp-remote fallback for other clients; OAuth 2.1 sign-in or a Shipmail API key.
+
+## [Add Worthbase MCP Server] - 2026-10-28
+
+- Add Worthbase to the official registry: a household net worth and portfolio tracker. Shares, ETFs, crypto, metals, super and retirement accounts, property, cash and loans, owned by people, trusts or companies, priced daily with exact cost bases, gains, performance, goals and history; ask questions or record a statement, previewed and undoable. Hosted remote Streamable HTTP server at https://worthbase.app/mcp through `mcp-remote`; OAuth 2.1 sign-in with dynamic client registration and PKCE, Worthbase account (7-day free trial), no API key.
+
 ## [Add Visualping MCP Server] - 2026-10-27
 
 - Add Visualping to the official registry: website change monitoring for agents. Create, edit, run, pause and delete monitors, list monitors, read recently detected changes and read full monitor settings. Hosted Streamable HTTP server at https://visualping.io/mcp with OAuth 2.0 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an mcp-remote fallback for other clients. Public beta.
