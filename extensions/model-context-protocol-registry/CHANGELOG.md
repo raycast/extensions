@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Noonlaunch MCP Server] - 2026-10-28
+
+- Add Noonlaunch to the official registry: launch a product on Noonlaunch, search its product directory and weekly winners, and find 333 startup launch directories. Hosted Streamable HTTP server at https://noonlaunch.com/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Recued MCP Server] - 2026-10-28
 
 - Add Recued to the official registry: the server you run yourself between AI apps and your mail, calendar, files and CRM records. An app sees only the tools its contract grants, and by default anything that writes or deletes waits for your approval. Local stdio server run with `recued --mcp` on the computer Recued runs on, with a contract key as `RECUED_MCP_TOKEN`.
