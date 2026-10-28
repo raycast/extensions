@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useState } from "react";
+import { t } from "../i18n";
 import { getPrefs } from "../lib/preferences";
 import { unlock, type ActiveSession } from "../lib/session";
 import { describeError } from "../lib/errors";
@@ -17,20 +18,20 @@ export function UnlockForm({ onUnlocked }: Props) {
 
   async function submit() {
     if (!password) {
-      setError("Inserisci la master password");
+      setError(t("unlock.required"));
       return;
     }
     setBusy(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Sblocco in corso…" });
+    const toast = await showToast({ style: Toast.Style.Animated, title: t("unlock.inProgress") });
     try {
       const session = await unlock(password);
       setPassword("");
       toast.style = Toast.Style.Success;
-      toast.title = "Vault sbloccato";
+      toast.title = t("unlock.success");
       onUnlocked(session);
     } catch (err) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Sblocco fallito";
+      toast.title = t("unlock.failed");
       toast.message = describeError(err);
       setError(describeError(err));
     } finally {
@@ -41,18 +42,18 @@ export function UnlockForm({ onUnlocked }: Props) {
   return (
     <Form
       isLoading={busy}
-      navigationTitle="Sblocca Passig"
+      navigationTitle={t("unlock.navTitle")}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Sblocca" icon={Icon.LockUnlocked} onSubmit={submit} />
-          <Action title="Apri preferenze" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <Action.SubmitForm title={t("unlock.action")} icon={Icon.LockUnlocked} onSubmit={submit} />
+          <Action title={t("common.openPreferences")} icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
-      <Form.Description title="Account" text={`${prefs.email} · ${prefs.serverUrl}`} />
+      <Form.Description title={t("unlock.account")} text={`${prefs.email} · ${prefs.serverUrl}`} />
       <Form.PasswordField
         id="masterPassword"
-        title="Master password"
+        title={t("unlock.masterPassword")}
         value={password}
         error={error}
         onChange={(v) => {
@@ -61,7 +62,7 @@ export function UnlockForm({ onUnlocked }: Props) {
         }}
         autoFocus
       />
-      <Form.Description text={`Le chiavi restano sbloccate per ${prefs.autoLockMinutes} minuti (preferenza Auto-lock).`} />
+      <Form.Description text={t("unlock.autoLockInfo", { minutes: Number(prefs.autoLockMinutes) })} />
     </Form>
   );
 }
