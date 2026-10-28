@@ -14,6 +14,7 @@ import {
 import he from "he";
 import React from "react";
 import { Preferences, PrimaryAction, ViewLayout } from "../lib/types";
+import { channelUrl } from "../lib/urls";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
@@ -64,7 +65,7 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
             <Detail.Metadata.Separator />
             <Detail.Metadata.Link
               title="Open Channel in Browser"
-              target={`https://youtube.com/channel/${channel.id}`}
+              target={channelUrl(channel.id)}
               text={channel.title}
             />
           </Detail.Metadata>
