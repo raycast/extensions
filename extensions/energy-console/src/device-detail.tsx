@@ -6,11 +6,7 @@ import { useDeviceProperties } from "./hooks/useDeviceProperties";
 import { useDevices } from "./hooks/useDevices";
 import { escapeMarkdownInline } from "./utils/formatters";
 
-interface DeviceDetailArguments {
-  device?: string;
-}
-
-export default function DeviceDetailCommand(props: { arguments: DeviceDetailArguments }) {
+export default function DeviceDetailCommand(props: { arguments: Arguments.DeviceDetail }) {
   const identifier = props.arguments.device?.trim();
   return identifier ? <DirectDevice identifier={identifier} /> : <DevicePicker />;
 }
