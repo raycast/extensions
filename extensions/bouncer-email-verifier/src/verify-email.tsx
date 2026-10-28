@@ -19,7 +19,7 @@ import { useCachedPromise, useFrecencySorting, usePromise } from "@raycast/utils
 import { useEffect, useRef, useState } from "react";
 import { DomainDetail, DomainRecordDetail } from "./components/domain-detail";
 import { RecordDetail, ResultDetail } from "./components/result-detail";
-import { fetchCredits, hasApiKey, type BouncerStatus } from "./lib/bouncer";
+import { fetchCredits, hasApiKey, type BouncerStatus, type DomainRecord, type EmailRecord } from "./lib/bouncer";
 import { isValidDomain, normalizeDomain } from "./lib/domain";
 import { extractEmail, isValidEmail, normalizeEmail } from "./lib/email";
 import { formatVerifiedAt, useHistory, type HistoryEntry } from "./lib/history";
@@ -63,6 +63,13 @@ function resolveTarget(input: string): Target {
   return { kind: "none", value: trimmed };
 }
 
+/** Shown as the command's subtitle in root search, so the balance is visible before opening it. */
+function showCreditsInRootSearch(credits: number | undefined) {
+  const subtitle =
+    credits === undefined ? "Bouncer" : `Bouncer · ${credits.toLocaleString()} ${credits === 1 ? "credit" : "credits"}`;
+  updateCommandMetadata({ subtitle }).catch(() => undefined);
+}
+
 export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.VerifyEmail }>) {
   const history = useHistory();
 
@@ -70,12 +77,24 @@ export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.
   // argument, so both have to be read. Either way the user picked this command on purpose.
   const launched = resolveTarget(props.arguments?.query || props.fallbackText || "");
 
+  // Launched straight into a result, the list never opens to refresh the balance, so each
+  // completed check re-reads it here instead.
+  const syncCredits = () => fetchCredits().then(showCreditsInRootSearch, () => showCreditsInRootSearch(undefined));
+  const addEmail = async (record: EmailRecord) => {
+    await history.addEmail(record);
+    await syncCredits();
+  };
+  const addDomain = async (record: DomainRecord) => {
+    await history.addDomain(record);
+    await syncCredits();
+  };
+
   // Launched with something usable: skip the list and go straight to the result.
   if (launched.kind === "email") {
-    return <ResultDetail email={launched.value} onVerified={history.addEmail} onDomainChecked={history.addDomain} />;
+    return <ResultDetail email={launched.value} onVerified={addEmail} onDomainChecked={addDomain} />;
   }
   if (launched.kind === "domain") {
-    return <DomainDetail domain={launched.value} onChecked={history.addDomain} />;
+    return <DomainDetail domain={launched.value} onChecked={addDomain} />;
   }
 
   return <SearchView history={history} initialText={launched.value} />;
@@ -84,6 +103,7 @@ export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.
 function SearchView({ history: stored, initialText }: { history: History; initialText: string }) {
   const [searchText, setSearchText] = useState(initialText);
   const touched = useRef(false);
+  const edits = useRef(0);
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [seeded, setSeeded] = useState(initialText.length > 0);
@@ -115,7 +135,7 @@ function SearchView({ history: stored, initialText }: { history: History; initia
     onData: () => setCreditsFailed(false),
     onError: () => {
       setCreditsFailed(true);
-      updateCommandMetadata({ subtitle: "Bouncer" }).catch(() => undefined);
+      showCreditsInRootSearch(undefined);
     },
   });
   const credits = creditsFailed ? undefined : cachedCredits;
@@ -133,12 +153,8 @@ function SearchView({ history: stored, initialText }: { history: History; initia
     },
   };
 
-  // Shown as the command's subtitle in root search, so the balance is visible before opening it.
   useEffect(() => {
-    if (credits === undefined) return;
-    updateCommandMetadata({
-      subtitle: `Bouncer · ${credits.toLocaleString()} ${credits === 1 ? "credit" : "credits"}`,
-    }).catch(() => undefined);
+    if (credits !== undefined) showCreditsInRootSearch(credits);
   }, [credits]);
 
   // Even the free sandbox check needs a key, so without one the empty view leads to preferences.
@@ -195,6 +211,7 @@ function SearchView({ history: stored, initialText }: { history: History; initia
       isLoading={history.isLoading}
       searchText={searchText}
       onSearchTextChange={(text) => {
+        edits.current += 1;
         if (text !== initialText) touched.current = true;
         setSearchText(text);
       }}
@@ -256,7 +273,10 @@ function SearchView({ history: stored, initialText }: { history: History; initia
                 title="Paste from Clipboard"
                 icon={Icon.Clipboard}
                 onAction={async () => {
+                  // Anything typed while the clipboard is read wins over what the read returns.
+                  const editsBefore = edits.current;
                   const text = await Clipboard.readText().catch(() => undefined);
+                  if (edits.current !== editsBefore) return;
                   const found = resolveTarget(text ?? "");
                   if (found.kind === "none") {
                     await showToast({
