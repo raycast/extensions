@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add NebenkostenPro MCP Server] - {PR_MERGE_DATE}
+## [Add NebenkostenPro MCP Server] - 2026-10-28
 
 - Add NebenkostenPro to the official registry: free German utility cost (Nebenkosten) data. Property tax rates for all 10,304 German municipalities, utility costs of the 400 largest cities, housing benefit rent levels, billing and objection deadlines, operating cost types and links to check or create a utility bill. Read-only, 9 tools. Hosted Streamable HTTP server at https://nebenkostenpro.de/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
