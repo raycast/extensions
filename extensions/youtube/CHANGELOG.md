@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Add Ask AI Raycast Command] - {PR_MERGE_DATE}
+## [Add Ask AI Raycast Command] - 2026-10-28
 
 - Added Ask YouTube support for finding videos, channels, live streams, and popular videos through Raycast AI
 - Added AI instructions and evals in `ai.yaml`
