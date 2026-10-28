@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join, extname } from "node:path";
+import { join } from "node:path";
 import {
   downloadImage,
   searchPage,
@@ -29,12 +29,11 @@ async function copyImage(item: Meme) {
     title: "正在复制图片…",
   });
   try {
-    const bytes = await downloadImage(item.url);
+    const { bytes, extension } = await downloadImage(item.url);
     await mkdir(join(environment.supportPath, "images"), { recursive: true });
     const file = join(
       join(environment.supportPath, "images"),
-      createHash("sha256").update(item.url).digest("hex") +
-        extname(new URL(item.url).pathname),
+      createHash("sha256").update(item.url).digest("hex") + extension,
     );
     await writeFile(file, bytes);
     await Clipboard.copy({ file });
@@ -48,14 +47,14 @@ async function copyImage(item: Meme) {
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: { keyword: string } }>,
+  props: LaunchProps<{ arguments: Arguments.Search }>,
 ) {
   const keyword = (props.fallbackText || props.arguments.keyword || "").trim();
   return <Results keyword={keyword} />;
 }
 
 function Results({ keyword }: { keyword: string }) {
-  const { customSource } = getPreferenceValues<{ customSource?: string }>();
+  const { customSource } = getPreferenceValues<Preferences>();
   const sourceName = customSource?.trim() ? "自定义源" : "腾讯／搜狗";
   const [pages, setPages] = useState<string[]>([]);
   const [result, setResult] = useState<SearchPage>({ items: [] });
