@@ -219,3 +219,99 @@ test("DM messages read one conversation by username or conversation ID", async (
   await assert.rejects(client.directMessages({ conversationId: "100-200", username: "casey" }), /exactly one/);
   await assert.rejects(client.directMessages({ conversationId: "../me" }), /conversation ID/);
 });
+
+function dmPage(id, text) {
+  const events = [
+    {
+      id,
+      event_type: "MessageCreate",
+      text,
+      dm_conversation_id: "100-200",
+      sender_id: "100",
+      created_at: "2026-10-28T00:00:00Z",
+    },
+  ];
+  return {
+    events,
+    includes: new TwitterV2IncludesHelper({
+      data: events,
+      includes: { users: [{ id: "100", name: "Me", username: "me" }] },
+    }),
+    meta: {},
+  };
+}
+
+function cacheFixture() {
+  const store = new Map();
+  const calls = { messages: 0 };
+  let releaseStalePage;
+  let markPageEntered;
+  const pageEntered = new Promise((resolve) => {
+    markPageEntered = resolve;
+  });
+  const stalePage = new Promise((resolve) => {
+    releaseStalePage = resolve;
+  });
+  const v2 = {
+    me: async () => ({ data: { id: "100", name: "Me", username: "me" } }),
+    listDmEventsOfConversation: async () => {
+      calls.messages += 1;
+      if (calls.messages === 1) {
+        markPageEntered();
+        await stalePage;
+        return dmPage("old", "before");
+      }
+      return dmPage("new", "sent");
+    },
+    sendDmToParticipant: async () => ({ dm_conversation_id: "100-200", dm_event_id: "sent-event" }),
+  };
+  class TwitterApi {
+    constructor(token) {
+      this.token = token;
+      this.v2 = v2;
+    }
+    getActiveTokens() {
+      return { type: "oauth2", bearerToken: this.token };
+    }
+  }
+  const { ClientV2 } = load("src/v2/lib/twitterapi_v2.ts", {
+    "./oauth": {
+      authorize: async () => "token",
+      getOAuthTokens: async () => ({ accessToken: "token" }),
+      resetOAuthTokens: async () => {},
+    },
+    "./read_cache": {
+      readCache: {
+        get: (key) => store.get(key),
+        set: (key, value) => store.set(key, value),
+        remove: (key) => store.delete(key),
+        clear: () => store.clear(),
+      },
+    },
+    "../../utils": { getErrorMessage: (error) => error.message, sleep: async () => {} },
+    "twitter-api-v2": { TwitterApi, ApiResponseError: class ApiResponseError extends Error {} },
+  });
+  return {
+    client: new ClientV2(),
+    calls,
+    pageEntered,
+    releaseStalePage: () => releaseStalePage(),
+  };
+}
+
+test("a DM read that started before sending cannot put the old page back", async () => {
+  const { client, calls, pageEntered, releaseStalePage } = cacheFixture();
+  const staleRead = client.directMessages({ conversationId: "100-200" });
+  await pageEntered;
+  await client.sendDirectMessage(["200"], "hello");
+  releaseStalePage();
+
+  const stale = await staleRead;
+  assert.equal(stale.items[0].text, "before");
+  const fresh = await client.directMessages({ conversationId: "100-200" });
+  assert.equal(fresh.items[0].text, "sent");
+  assert.equal(calls.messages, 2);
+  const cached = await client.directMessages({ conversationId: "100-200" });
+  assert.equal(cached.items[0].text, "sent");
+  assert.equal(calls.messages, 2);
+});

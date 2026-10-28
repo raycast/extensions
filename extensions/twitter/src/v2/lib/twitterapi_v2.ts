@@ -362,6 +362,9 @@ function normalizeTwitterError(error: ApiResponseError): TwitterAPIError {
   }
 }
 
+// Bumped on every clear so a read that already started cannot save its page afterward.
+let readCacheGeneration = 0;
+
 function getCached<T>(key: string): T | undefined {
   const cached = readCache.get(key);
   if (!cached) return undefined;
@@ -559,12 +562,18 @@ export class ClientV2 {
     const cached = getCached<T>(key);
     if (cached !== undefined) return cached;
 
-    const value = await this.request(operation);
-    if ((await getOAuthTokens())?.accessToken === token) setCached(key, value);
+    let generation = readCacheGeneration;
+    const value = await this.request(async (api) => {
+      generation = readCacheGeneration;
+      return await operation(api);
+    });
+    const tokenUnchanged = (await getOAuthTokens())?.accessToken === token;
+    if (generation === readCacheGeneration && tokenUnchanged) setCached(key, value);
     return value;
   }
 
   clearCache(): void {
+    readCacheGeneration += 1;
     readCache.clear();
   }
 
