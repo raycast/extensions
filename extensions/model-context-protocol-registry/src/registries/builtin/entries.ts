@@ -1336,6 +1336,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "recued",
+    title: "Recued",
+    description:
+      "Connect your AI apps to Recued, the server you run yourself between AI and your mail, calendar, files and CRM records. An app sees only the tools its contract grants: reads run at once, and by default anything that writes or deletes waits for your approval in the Recued web app, with every call recorded. Local stdio server: the `recued` command (`recued --mcp`) on the computer Recued runs on, with the key of a contract you make in the Recued web app (Contracts) as `RECUED_MCP_TOKEN`. If an app cannot find the command, set it to the full path that `which recued` prints. Free and open source (AGPL-3.0); install Recued first.",
+    icon: "https://raw.githubusercontent.com/recued/recued/main/.github/assets/recued-logo-400x400.png",
+    homepage: "https://recued.com/docs/guides/connect-to-recued/",
+    configuration: {
+      command: "recued",
+      args: ["--mcp"],
+      env: {
+        RECUED_MCP_TOKEN: "YOUR_CONTRACT_KEY",
+      },
+    },
+  },
+  {
     name: "removeduplicates",
     title: "RemoveDuplicates.org",
     description:
