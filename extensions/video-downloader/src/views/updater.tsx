@@ -122,8 +122,14 @@ export default function Updater() {
 async function getVersions() {
   if (isMac) {
     const { stdout: infoOutput } = await execa(homebrewPath, ["info", "--json=v2", "yt-dlp", "ffmpeg"]);
-    const info = JSON.parse(infoOutput) as { formulae: { name: string; versions: { stable: string } }[] };
-    const versions = Object.fromEntries(info.formulae.map(({ name, versions }) => [name, versions.stable]));
+    const info = JSON.parse(infoOutput) as {
+      formulae: { name: string; versions: { stable: string }; installed: { version: string }[] }[];
+    };
+    // Show the installed version. `versions.stable` is the latest one in Homebrew,
+    // which is the same as the "update available" version when an update exists.
+    const versions = Object.fromEntries(
+      info.formulae.map(({ name, versions, installed }) => [name, installed.at(-1)?.version ?? versions.stable]),
+    );
     return versions;
   } else if (isWindows) {
     const wingetPath = await getWingetPath();
@@ -159,7 +165,16 @@ function parseWingetVersion(output: string): string {
 
 async function getOutdated() {
   if (isMac) {
-    const { stdout: outdatedOutput } = await execa(homebrewPath, ["outdated", "--json=v2", "yt-dlp", "ffmpeg"]);
+    // `brew outdated` exits with code 1 whenever something is outdated, so don't
+    // treat a non-zero exit as a failure if it still printed the JSON report.
+    const {
+      stdout: outdatedOutput,
+      stderr,
+      exitCode,
+    } = await execa(homebrewPath, ["outdated", "--json=v2", "yt-dlp", "ffmpeg"], { reject: false });
+    if (exitCode !== 0 && !outdatedOutput.trim().startsWith("{")) {
+      throw new Error(stderr.trim() || `brew outdated exited with code ${exitCode}`);
+    }
     const outdated = JSON.parse(outdatedOutput) as { formulae: { name: string; current_version: string }[] };
     const versions = Object.fromEntries(outdated.formulae.map(({ name, current_version }) => [name, current_version]));
     return versions;
