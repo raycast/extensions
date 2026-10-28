@@ -283,7 +283,24 @@
       "mode": "view"
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "name": "search-user-mentions",
+      "title": "Users",
+      "description": "Search active Linear users by name, display name, or email to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-issue-mentions",
+      "title": "Issues",
+      "description": "Search Linear issues by identifier or text to mention in AI Chat. Shows recently updated issues when the query is empty.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "full-text-search-issues",
       "title": "Full Text Search Issues",
@@ -557,7 +574,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^91.0.0",
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.23",
@@ -568,8 +585,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.16",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^9.22.0",
     "eslint-plugin-import": "^2.31.0",
@@ -581,7 +598,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/favorites.test.mts tests/issueTemplates.test.mts",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/favorites.test.mts tests/issueTemplates.test.mts tests/mentions.test.mts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

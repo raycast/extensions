@@ -1,3 +1,5 @@
+import { materializeOndineSvg } from "./ondine-svg-materialization";
+
 function normalizeHexColor(color: string | undefined, fallback: string): string {
   if (!color) return fallback;
   const normalized = color.trim().toLowerCase();
@@ -61,6 +63,7 @@ function resolveCssVariableExpression(
 }
 
 export function materializeSvgColorsForPreview(svgContent: string): string {
+  if (/<svg\b[^>]*class="[^"]*\bondine\b/.test(svgContent)) return materializeOndineSvg(svgContent);
   const rootStyleMatch = svgContent.match(/<svg[^>]*style="([^"]*)"/i);
   const rootStyle = rootStyleMatch?.[1] ?? "";
 

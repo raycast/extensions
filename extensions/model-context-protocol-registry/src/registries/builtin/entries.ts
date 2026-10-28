@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "paper-plane-post",
+    title: "Paper Plane Post",
+    description:
+      "Turn a photo into a printed postcard. Create an unpaid draft with an optional note and recipient address, then review, finish, and pay for printing and mailing on the website. Tool calls never charge money or mail a card. Hosted Streamable HTTP server with no account or API key; direct HTTP in Raycast and an mcp-remote fallback for other clients.",
+    icon: "https://paperplanepost.com/icon.png",
+    homepage: "https://paperplanepost.com/for/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.paperplanepost.com/v1/mcp"],
+    },
+    remoteUrl: "https://api.paperplanepost.com/v1/mcp",
+  },
+  {
     name: "wine-labs",
     title: "Wine Labs",
     description:
@@ -1081,6 +1094,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://app.medbillanalyzer.com/mcp/apps"],
     },
+  },
+  {
+    name: "mediapronet",
+    title: "MEDIAPRONET",
+    description:
+      "Search MEDIAPRONET, a directory where builders launch and get discovered: newly launched startups, websites, SaaS and AI tools. Keyword search with category and pricing filters, full listing profiles, alternatives to a named product, categories, trending and the site of the day. 7 read-only tools. Remote Streamable HTTP server at https://mediapronet.com/api/mcp; no sign-in, no API key.",
+    icon: "https://mediapronet.com/android-icon-192x192.png",
+    homepage: "https://mediapronet.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mediapronet.com/api/mcp"],
+    },
+    remoteUrl: "https://mediapronet.com/api/mcp",
   },
   {
     name: "mnemoverse",

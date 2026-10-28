@@ -4,6 +4,7 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 
 - Quickly open Slack channels
 - Search for messages
+- Mention workspace members in AI Chat
 - See unread messages,
 - Snooze notifications
 - Set your presence status

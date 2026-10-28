@@ -10,6 +10,7 @@ export interface PreviewAsset {
 
 interface LoadPreviewAssetOptions {
   format: string;
+  requireRaster?: boolean;
   imagePath: string;
   baseName: string;
   renderSvgPreview: (options: { materializedSvgContent: string; baseName: string }) => Promise<SvgRasterizationResult>;
@@ -27,6 +28,7 @@ export async function loadPreviewAsset({
   imagePath,
   baseName,
   renderSvgPreview,
+  requireRaster = false,
 }: LoadPreviewAssetOptions): Promise<PreviewAsset> {
   if (format !== "svg") {
     const imageBuffer = fs.readFileSync(imagePath);
@@ -52,7 +54,8 @@ export async function loadPreviewAsset({
       previewRasterPath: raster.path,
       tempPaths: raster.tempPaths,
     };
-  } catch {
+  } catch (error) {
+    if (requireRaster) throw error;
     return {
       imageContent: `data:image/svg+xml;base64,${Buffer.from(materializedSvgContent, "utf-8").toString("base64")}`,
       previewRasterPath: null,
