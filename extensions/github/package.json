@@ -617,7 +617,32 @@
       "mode": "view"
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "name": "search-issue-mentions",
+      "title": "Issues",
+      "description": "Search issues to mention in AI Chat, listing open issues you're involved in by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-pull-request-mentions",
+      "title": "Pull Requests",
+      "description": "Search pull requests to mention in AI Chat, listing open pull requests you're involved in by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "name": "search-repository-mentions",
+      "title": "Repositories",
+      "description": "Search repositories to mention in AI Chat, listing your most recently pushed repositories by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "get-notifications",
       "title": "Get Notifications",
@@ -1218,7 +1243,7 @@
   ],
   "dependencies": {
     "@octokit/rest": "^21.0.1",
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
@@ -1235,16 +1260,16 @@
     "@parcel/watcher": "^2.4.1",
     "@raycast/eslint-config": "^2.1.1",
     "@types/lodash": "^4.17.5",
-    "@types/node": "^22.1.0",
-    "@types/react": "^19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "graphql": "^16.8.2",
     "prettier": "^3.3.2",
-    "react": "^18.3.1",
-    "typescript": "^5.4.5"
+    "react": "19.3.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -1253,7 +1278,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
-    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/api/viewerStats.test.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts src/helpers/repository-filter.test.ts src/helpers/mentions.test.ts src/api/viewerStats.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [

@@ -499,6 +499,153 @@ export type CreateIssueMutation = {
   } | null;
 };
 
+export type IssueMentionFieldsFragment = {
+  number: number;
+  title: string;
+  closed: boolean;
+  stateReason: Types.IssueStateReason | null;
+  repository: { nameWithOwner: string };
+  author: { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+};
+
+export type PullRequestMentionFieldsFragment = {
+  number: number;
+  title: string;
+  closed: boolean;
+  merged: boolean;
+  isDraft: boolean;
+  repository: { nameWithOwner: string };
+  author: { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+};
+
+export type RepositoryMentionFieldsFragment = {
+  nameWithOwner: string;
+  description: string | null;
+  isPrivate: boolean;
+  isArchived: boolean;
+  owner: { avatarUrl: any } | { avatarUrl: any };
+};
+
+export type SearchIssueMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchIssueMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          number: number;
+          title: string;
+          closed: boolean;
+          stateReason: Types.IssueStateReason | null;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type SearchPullRequestMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchPullRequestMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          number: number;
+          title: string;
+          closed: boolean;
+          merged: boolean;
+          isDraft: boolean;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type IssueOrPullRequestMentionQueryVariables = Exact<{
+  owner: string;
+  name: string;
+  number: number;
+}>;
+
+export type IssueOrPullRequestMentionQuery = {
+  repository: {
+    issueOrPullRequest:
+      | {
+          __typename: "Issue";
+          number: number;
+          title: string;
+          closed: boolean;
+          stateReason: Types.IssueStateReason | null;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | {
+          __typename: "PullRequest";
+          number: number;
+          title: string;
+          closed: boolean;
+          merged: boolean;
+          isDraft: boolean;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | null;
+  } | null;
+};
+
+export type SearchRepositoryMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchRepositoryMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          nameWithOwner: string;
+          description: string | null;
+          isPrivate: boolean;
+          isArchived: boolean;
+          owner: { avatarUrl: any } | { avatarUrl: any };
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type ViewerRepositoryMentionsQueryVariables = Exact<{
+  numberOfItems: number;
+}>;
+
+export type ViewerRepositoryMentionsQuery = {
+  viewer: {
+    repositories: {
+      nodes: Array<{
+        nameWithOwner: string;
+        description: string | null;
+        isPrivate: boolean;
+        isArchived: boolean;
+        owner: { avatarUrl: any } | { avatarUrl: any };
+      } | null> | null;
+    };
+  };
+};
+
 export type ChangeProjectStatusMutationVariables = Exact<{
   projectId: string | number;
   closed: boolean;
@@ -1223,12 +1370,7 @@ export type CommentsForPullRequestQuery = {
         nodes: Array<{
           body: string;
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         } | null> | null;
       };
     } | null;
@@ -1788,6 +1930,46 @@ export const IssueDetailFieldsFragmentDoc = gql`
   ${ShortRepositoryFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
+export const IssueMentionFieldsFragmentDoc = gql`
+  fragment IssueMentionFields on Issue {
+    number
+    title
+    closed
+    stateReason
+    repository {
+      nameWithOwner
+    }
+    author {
+      login
+    }
+  }
+`;
+export const PullRequestMentionFieldsFragmentDoc = gql`
+  fragment PullRequestMentionFields on PullRequest {
+    number
+    title
+    closed
+    merged
+    isDraft
+    repository {
+      nameWithOwner
+    }
+    author {
+      login
+    }
+  }
+`;
+export const RepositoryMentionFieldsFragmentDoc = gql`
+  fragment RepositoryMentionFields on Repository {
+    nameWithOwner
+    description
+    isPrivate
+    isArchived
+    owner {
+      avatarUrl(size: 64)
+    }
+  }
+`;
 export const ProjectViewerFieldsFragmentDoc = gql`
   fragment ProjectViewerFields on ProjectV2View {
     id
@@ -2278,6 +2460,75 @@ export const CreateIssueDocument = gql`
     }
   }
   ${IssueFieldsFragmentDoc}
+`;
+export const SearchIssueMentionsDocument = gql`
+  query searchIssueMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: ISSUE, first: $numberOfItems) {
+      nodes {
+        ... on Issue {
+          ...IssueMentionFields
+        }
+      }
+    }
+  }
+  ${IssueMentionFieldsFragmentDoc}
+`;
+export const SearchPullRequestMentionsDocument = gql`
+  query searchPullRequestMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: ISSUE, first: $numberOfItems) {
+      nodes {
+        ... on PullRequest {
+          ...PullRequestMentionFields
+        }
+      }
+    }
+  }
+  ${PullRequestMentionFieldsFragmentDoc}
+`;
+export const IssueOrPullRequestMentionDocument = gql`
+  query issueOrPullRequestMention($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      issueOrPullRequest(number: $number) {
+        __typename
+        ... on Issue {
+          ...IssueMentionFields
+        }
+        ... on PullRequest {
+          ...PullRequestMentionFields
+        }
+      }
+    }
+  }
+  ${IssueMentionFieldsFragmentDoc}
+  ${PullRequestMentionFieldsFragmentDoc}
+`;
+export const SearchRepositoryMentionsDocument = gql`
+  query searchRepositoryMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: REPOSITORY, first: $numberOfItems) {
+      nodes {
+        ... on Repository {
+          ...RepositoryMentionFields
+        }
+      }
+    }
+  }
+  ${RepositoryMentionFieldsFragmentDoc}
+`;
+export const ViewerRepositoryMentionsDocument = gql`
+  query viewerRepositoryMentions($numberOfItems: Int!) {
+    viewer {
+      repositories(
+        first: $numberOfItems
+        orderBy: { field: PUSHED_AT, direction: DESC }
+        ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+      ) {
+        nodes {
+          ...RepositoryMentionFields
+        }
+      }
+    }
+  }
+  ${RepositoryMentionFieldsFragmentDoc}
 `;
 export const ChangeProjectStatusDocument = gql`
   mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
@@ -3233,6 +3484,96 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
           }),
         "createIssue",
         "mutation",
+        variables,
+      );
+    },
+    searchIssueMentions(
+      variables: SearchIssueMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchIssueMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchIssueMentionsQuery>({
+            document: SearchIssueMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchIssueMentions",
+        "query",
+        variables,
+      );
+    },
+    searchPullRequestMentions(
+      variables: SearchPullRequestMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchPullRequestMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchPullRequestMentionsQuery>({
+            document: SearchPullRequestMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchPullRequestMentions",
+        "query",
+        variables,
+      );
+    },
+    issueOrPullRequestMention(
+      variables: IssueOrPullRequestMentionQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<IssueOrPullRequestMentionQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<IssueOrPullRequestMentionQuery>({
+            document: IssueOrPullRequestMentionDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "issueOrPullRequestMention",
+        "query",
+        variables,
+      );
+    },
+    searchRepositoryMentions(
+      variables: SearchRepositoryMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchRepositoryMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchRepositoryMentionsQuery>({
+            document: SearchRepositoryMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchRepositoryMentions",
+        "query",
+        variables,
+      );
+    },
+    viewerRepositoryMentions(
+      variables: ViewerRepositoryMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<ViewerRepositoryMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ViewerRepositoryMentionsQuery>({
+            document: ViewerRepositoryMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "viewerRepositoryMentions",
+        "query",
         variables,
       );
     },
