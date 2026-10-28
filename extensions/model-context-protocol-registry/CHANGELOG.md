@@ -1,4 +1,4 @@
-## [Add Paper Plane Post] - {PR_MERGE_DATE}
+## [Add Paper Plane Post] - 2026-10-28
 
 - Add Paper Plane Post to the official registry: turn a photo into an unpaid postcard draft, then review and pay for printing and mailing on the website. No account or API key is required. Connect directly over HTTP in Raycast, with an `mcp-remote` fallback for other clients.
 
