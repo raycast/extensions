@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   showCopyTip: boolean;
+  showHudEmoji: boolean;
   showLastCopy: boolean;
   showTabTitle: boolean;
   multiPathSeparator: string;
@@ -9,5 +10,12 @@ interface Preferences {
   copyWhenUnSupported: string;
 }
 
-export const { showCopyTip, showLastCopy, showTabTitle, multiPathSeparator, copyUrlContent, copyWhenUnSupported } =
-  getPreferenceValues<Preferences>();
+export const {
+  showHudEmoji,
+  showCopyTip,
+  showLastCopy,
+  showTabTitle,
+  multiPathSeparator,
+  copyUrlContent,
+  copyWhenUnSupported,
+} = getPreferenceValues<Preferences>();
