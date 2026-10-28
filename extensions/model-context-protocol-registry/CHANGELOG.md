@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AgenticWebScore MCP Server] - {PR_MERGE_DATE}
+
+- Add AgenticWebScore to the official registry: scan a public website for AI agent readiness with 60 checks, a score, and the evidence for each, read stored records and list the rubric. 4 tools. Hosted Streamable HTTP server at https://agenticwebscore.com/mcp with no sign-up and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
 ## [Add Timesheet MCP Server] - 2026-10-28
 
 - Add Timesheet to the official registry: start, pause and stop the timer, log past work, manage projects, todos, expenses and absences, and pull statistics, reports and exports. Hosted Streamable HTTP server at https://mcp.timesheet.io with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a Timesheet API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
