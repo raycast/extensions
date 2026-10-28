@@ -336,6 +336,27 @@ test("Klipy content looks favorites up by slug on the proxy", async () => {
   assert.equal(results[0].id, "a");
 });
 
+test("a Klipy search result keeps the slug its favorites lookup returns", async () => {
+  const sticker = klipyMedia("happy-cat-sticker-1tq--khkHIpbtP", ["gif"]);
+  const clip = {
+    slug: "cat-kiss--kJZO0tnib",
+    title: "Cat kiss",
+    type: "clip",
+    file: { mp4: "https://static.klipy.com/c.mp4", gif: "https://static.klipy.com/c.gif" },
+  };
+  const { klipyContent } = loadKlipyContent((url) =>
+    klipyPage([url.pathname.endsWith("/clips") ? clip : sticker]),
+  );
+
+  const [stickerResult] = (await klipyContent("stickers").search("cat")).results;
+  const [clipResult] = (await klipyContent("clips").search("cat")).results;
+
+  assert.equal(stickerResult.id, "happy-cat-sticker-1tq");
+  assert.equal(stickerResult.url, "https://klipy.com/stickers/happy-cat-sticker-1tq");
+  assert.equal(clipResult.id, "cat-kiss");
+  assert.equal(clipResult.url, "https://klipy.com/clips/cat-kiss");
+});
+
 test("a Klipy proxy error surfaces as a ProviderRequestError", async () => {
   const { default: klipyContent } = load(
     "models/klipyContent",

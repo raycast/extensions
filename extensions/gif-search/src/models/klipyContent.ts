@@ -76,6 +76,11 @@ export function mapKlipyPage(type: KlipyContentType, page: KlipyPage) {
   return { results: results.filter((gif): gif is IGif => gif !== null), next };
 }
 
+// Search appends a new token to each slug on every request, so drop it or saved favorites never match again.
+function stableSlug(slug: string) {
+  return slug.replace(/--[A-Za-z0-9]+$/, "");
+}
+
 export function mapKlipyItem(type: KlipyContentType, item: KlipyMediaItem | KlipyClipItem): IGif | null {
   return type === "clips" ? mapClip(item as KlipyClipItem) : mapMedia(type, item as KlipyMediaItem);
 }
@@ -97,12 +102,13 @@ function mapMedia(type: Exclude<KlipyContentType, "clips">, item: KlipyMediaItem
 
   const small = pickFile(item, ["sm", "xs", "md", "hd"], formats) ?? full;
   const large = pickFile(item, ["md", "sm", "hd"], formats) ?? full;
-  const slug = slugify(item.title) || item.slug;
+  const id = stableSlug(item.slug);
+  const slug = slugify(item.title) || id;
 
   return {
-    id: item.slug,
+    id,
     title: item.title,
-    url: `https://klipy.com/${SEGMENTS[type]}/${item.slug}`,
+    url: `https://klipy.com/${SEGMENTS[type]}/${id}`,
     slug,
     download_url: full.url,
     download_name: `${slug}.${full.format}`,
@@ -119,14 +125,15 @@ function mapClip(item: KlipyClipItem): IGif | null {
   const download = item.file.mp4 ?? preview;
   if (!preview || !download) return null;
 
-  const slug = slugify(item.title) || item.slug;
+  const id = stableSlug(item.slug);
+  const slug = slugify(item.title) || id;
   const isMP4 = download === item.file.mp4;
   const dims = item.file_meta?.mp4 ?? item.file_meta?.gif;
 
   return {
-    id: item.slug,
+    id,
     title: item.title,
-    url: `https://klipy.com/clips/${item.slug}`,
+    url: `https://klipy.com/clips/${id}`,
     slug,
     download_url: download,
     download_name: `${slug}.${isMP4 ? "mp4" : "gif"}`,
