@@ -68,29 +68,76 @@ export async function renamePhotoshopFile(filePath: string, newTitle: string): P
     return filePath;
   }
 
-  const isCaseOnlyRename = targetPath.toLowerCase() === filePath.toLowerCase();
+  const srcStat = await fs.promises.stat(filePath);
+  let targetExists = false;
+  let isSameFile = false;
 
-  if (!isCaseOnlyRename) {
-    if (fs.existsSync(targetPath)) {
+  try {
+    const targetStat = await fs.promises.stat(targetPath);
+    targetExists = true;
+    if (srcStat.dev === targetStat.dev && srcStat.ino === targetStat.ino) {
+      isSameFile = true;
+    }
+  } catch (err: unknown) {
+    const nodeErr = err as NodeJS.ErrnoException;
+    if (nodeErr.code !== "ENOENT") {
+      throw err;
+    }
+  }
+
+  if (targetExists && !isSameFile) {
+    throw new Error(`A file named "${targetName}" already exists in this folder`);
+  }
+
+  if (isSameFile) {
+    const tempName = `.tmp_rename_${Date.now()}_${Math.random().toString(36).slice(2)}_${path.basename(targetPath)}`;
+    const tempPath = path.join(dir, tempName);
+    await fs.promises.rename(filePath, tempPath);
+    try {
+      try {
+        await fs.promises.link(tempPath, targetPath);
+        await fs.promises.unlink(tempPath);
+      } catch (linkErr: unknown) {
+        const linkNodeErr = linkErr as NodeJS.ErrnoException;
+        if (linkNodeErr.code === "EEXIST") {
+          throw new Error(`A file named "${targetName}" already exists in this folder`);
+        }
+        await fs.promises.rename(tempPath, targetPath);
+      }
+      return targetPath;
+    } catch (err) {
+      if (fs.existsSync(tempPath) && !fs.existsSync(filePath)) {
+        await fs.promises.rename(tempPath, filePath).catch(() => {});
+      }
+      throw err;
+    }
+  }
+
+  try {
+    await fs.promises.link(filePath, targetPath);
+    await fs.promises.unlink(filePath);
+    return targetPath;
+  } catch (err: unknown) {
+    const nodeErr = err as NodeJS.ErrnoException;
+    if (nodeErr.code === "EEXIST") {
       throw new Error(`A file named "${targetName}" already exists in this folder`);
     }
 
-    try {
-      await fs.promises.link(filePath, targetPath);
-      await fs.promises.unlink(filePath);
-      return targetPath;
-    } catch (error: unknown) {
-      if (error && typeof error === "object" && "code" in error && (error as { code: string }).code === "EEXIST") {
-        throw new Error(`A file named "${targetName}" already exists in this folder`);
+    if (nodeErr.code === "EXDEV" || nodeErr.code === "EPERM") {
+      try {
+        await fs.promises.copyFile(filePath, targetPath, fs.constants.COPYFILE_EXCL);
+        await fs.promises.unlink(filePath);
+        return targetPath;
+      } catch (copyErr: unknown) {
+        const copyNodeErr = copyErr as NodeJS.ErrnoException;
+        if (copyNodeErr.code === "EEXIST") {
+          throw new Error(`A file named "${targetName}" already exists in this folder`);
+        }
+        throw copyErr;
       }
-      await fs.promises.rename(filePath, targetPath);
-      return targetPath;
     }
-  } else {
-    const tempPath = path.join(dir, `.tmp_rename_${Date.now()}_${path.basename(targetPath)}`);
-    await fs.promises.rename(filePath, tempPath);
-    await fs.promises.rename(tempPath, targetPath);
-    return targetPath;
+
+    throw err;
   }
 }
 

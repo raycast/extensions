@@ -16,6 +16,50 @@ export interface RawMetadata {
   lastUsedDate?: Date;
 }
 
+export async function processMdfindStream(
+  stdout: NodeJS.ReadableStream,
+  maxResults = 100,
+  pathFilter: (p: string) => boolean = (p) => fs.existsSync(p),
+): Promise<string[]> {
+  return new Promise((resolve) => {
+    stdout.setEncoding("utf8");
+
+    const paths: string[] = [];
+    let remainder = "";
+    let closed = false;
+
+    stdout.on("data", (chunk: string) => {
+      if (closed) return;
+      remainder += chunk;
+      const lines = remainder.split("\n");
+      remainder = lines.pop() || "";
+
+      for (const rawLine of lines) {
+        const trimmed = rawLine.trim();
+        if (trimmed.length > 0 && pathFilter(trimmed)) {
+          paths.push(trimmed);
+          if (paths.length >= maxResults) {
+            closed = true;
+            resolve(paths);
+            return;
+          }
+        }
+      }
+    });
+
+    stdout.on("end", () => {
+      if (!closed) {
+        closed = true;
+        const trimmed = remainder.trim();
+        if (trimmed.length > 0 && paths.length < maxResults && pathFilter(trimmed)) {
+          paths.push(trimmed);
+        }
+        resolve(paths);
+      }
+    });
+  });
+}
+
 export async function runMdfind(query: string, scope?: string, maxResults = 100): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const args: string[] = [];
@@ -27,6 +71,9 @@ export async function runMdfind(query: string, scope?: string, maxResults = 100)
     const child = spawn("/usr/bin/mdfind", args, {
       stdio: ["ignore", "pipe", "pipe"],
     });
+
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
 
     const paths: string[] = [];
     let remainder = "";
@@ -40,9 +87,9 @@ export async function runMdfind(query: string, scope?: string, maxResults = 100)
       }
     }, 6000);
 
-    child.stdout.on("data", (chunk: Buffer) => {
+    child.stdout.on("data", (chunk: string) => {
       if (closed) return;
-      remainder += chunk.toString("utf8");
+      remainder += chunk;
       const lines = remainder.split("\n");
       remainder = lines.pop() || "";
 
@@ -62,8 +109,8 @@ export async function runMdfind(query: string, scope?: string, maxResults = 100)
     });
 
     let stderr = "";
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString("utf8");
+    child.stderr.on("data", (chunk: string) => {
+      stderr += chunk;
     });
 
     child.on("error", (err) => {

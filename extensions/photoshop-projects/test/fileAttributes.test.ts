@@ -99,9 +99,11 @@ describe("fileAttributes utilities", () => {
       testPsdFile = newPath;
     });
 
-    it("rejects renaming if target file already exists", async () => {
+    it("rejects renaming if target file already exists and preserves contents", async () => {
       const existingConflict = path.join(tempDir, "existing-conflict.psd");
-      await fs.promises.writeFile(existingConflict, "other psd content");
+      await fs.promises.writeFile(existingConflict, "conflict destination content");
+
+      const sourceContentBefore = await fs.promises.readFile(testPsdFile, "utf8");
 
       await assert.rejects(
         async () => {
@@ -109,6 +111,12 @@ describe("fileAttributes utilities", () => {
         },
         { message: 'A file named "existing-conflict.psd" already exists in this folder' },
       );
+
+      // Verify both source and destination contents are completely preserved
+      const destContentAfter = await fs.promises.readFile(existingConflict, "utf8");
+      const sourceContentAfter = await fs.promises.readFile(testPsdFile, "utf8");
+      assert.equal(destContentAfter, "conflict destination content");
+      assert.equal(sourceContentAfter, sourceContentBefore);
     });
 
     it("supports case-only renaming on APFS disks without false collision error", async () => {
@@ -120,6 +128,69 @@ describe("fileAttributes utilities", () => {
       assert.equal(path.basename(renamed), upperCased);
       assert.equal(fs.existsSync(renamed), true);
       testPsdFile = renamed;
+    });
+
+    it("rejects renaming if another distinct file exists matching target name on case-sensitive filesystem", async () => {
+      // Simulate filesystem where destination stat returns different inode/device
+      const statOrig = fs.promises.stat;
+      try {
+        const dummyTarget = path.join(tempDir, "distinct-case.psd");
+        (fs.promises as { stat: typeof fs.promises.stat }).stat = (async (p: fs.PathLike) => {
+          if (p.toString().includes("distinct-case.psd")) {
+            return {
+              dev: 1,
+              ino: 999999, // Different inode simulates distinct file
+            } as fs.Stats;
+          }
+          return statOrig(p);
+        }) as typeof fs.promises.stat;
+
+        await assert.rejects(
+          async () => {
+            await renamePhotoshopFile(testPsdFile, "distinct-case.psd");
+          },
+          { message: 'A file named "distinct-case.psd" already exists in this folder' },
+        );
+      } finally {
+        (fs.promises as { stat: typeof fs.promises.stat }).stat = statOrig;
+      }
+    });
+
+    it("recovers and cleans up if intermediate rename fails", async () => {
+      const linkOrig = fs.promises.link;
+      const renameOrig = fs.promises.rename;
+      try {
+        (fs.promises as { link: typeof fs.promises.link }).link = async () => {
+          throw new Error("Simulated link failure");
+        };
+        let step = 0;
+        (fs.promises as { rename: typeof fs.promises.rename }).rename = async (oldP: fs.PathLike, newP: fs.PathLike) => {
+          step++;
+          // Step 1: rename(filePath, tempPath) succeeds
+          // Step 2: rename(tempPath, targetPath) fails
+          // Step 3: recovery rename(tempPath, filePath) succeeds
+          if (step === 2) {
+            throw new Error("Simulated intermediate failure");
+          }
+          return renameOrig(oldP, newP);
+        };
+
+        const currentName = path.basename(testPsdFile);
+        const targetCaseName = currentName === currentName.toLowerCase() ? currentName.toUpperCase() : currentName.toLowerCase();
+
+        await assert.rejects(
+          async () => {
+            await renamePhotoshopFile(testPsdFile, targetCaseName);
+          },
+          /Simulated intermediate failure/,
+        );
+
+        // Verify original file was restored
+        assert.equal(fs.existsSync(testPsdFile), true);
+      } finally {
+        (fs.promises as { link: typeof fs.promises.link }).link = linkOrig;
+        (fs.promises as { rename: typeof fs.promises.rename }).rename = renameOrig;
+      }
     });
   });
 

@@ -107,4 +107,50 @@ describe("search and sort utilities", () => {
     assert.ok(Array.isArray(paths));
     assert.ok(paths.length <= 3);
   });
+
+  describe("UTF-8 chunk splitting in stream processing", () => {
+    it("preserves multibyte UTF-8 characters when split across separate stream chunks", async () => {
+      const { Readable } = await import("node:stream");
+      const { processMdfindStream } = await import("../src/utils/spotlight");
+
+      const stdout = new Readable({ read() {} });
+
+      // Chunk 1: "/dummy/path/caf" + first byte of "é" (0xc3)
+      stdout.push(Buffer.from([0x2f, 0x64, 0x75, 0x6d, 0x6d, 0x79, 0x2f, 0x70, 0x61, 0x74, 0x68, 0x2f, 0x63, 0x61, 0x66, 0xc3]));
+      // Chunk 2: second byte of "é" (0xa9) + "-project.psd\n"
+      stdout.push(Buffer.from([0xa9, 0x2d, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x2e, 0x70, 0x73, 0x64, 0x0a]));
+      stdout.push(null);
+
+      const paths = await processMdfindStream(stdout, 100, () => true);
+      assert.equal(paths.length, 1);
+      assert.equal(paths[0], "/dummy/path/café-project.psd");
+    });
+
+    it("handles multiple paths delivered across multiple chunks and unterminated final line", async () => {
+      const { Readable } = await import("node:stream");
+      const { processMdfindStream } = await import("../src/utils/spotlight");
+
+      const stdout = new Readable({ read() {} });
+
+      // Path 1 split across chunks: "/first/path.psd\n/second/"
+      stdout.push(Buffer.from("/first/path.psd\n/second/"));
+      // Path 2 continuation without trailing newline: "unterminated.psd"
+      stdout.push(Buffer.from("unterminated.psd"));
+      stdout.push(null);
+
+      const paths = await processMdfindStream(stdout, 100, () => true);
+      assert.deepEqual(paths, ["/first/path.psd", "/second/unterminated.psd"]);
+    });
+
+    it("handles empty stream gracefully", async () => {
+      const { Readable } = await import("node:stream");
+      const { processMdfindStream } = await import("../src/utils/spotlight");
+
+      const stdout = new Readable({ read() {} });
+      stdout.push(null);
+
+      const paths = await processMdfindStream(stdout, 100, () => true);
+      assert.deepEqual(paths, []);
+    });
+  });
 });
