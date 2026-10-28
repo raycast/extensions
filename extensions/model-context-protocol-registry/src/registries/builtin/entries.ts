@@ -1160,6 +1160,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "monito",
+    title: "Monito",
+    description:
+      "Check a deployed URL in a real browser and get a verdict with evidence. Describe in plain English what should happen; Monito runs the check in a cloud browser and returns passed, failed or cannot verify with screenshots, network and console logs, and can save the check as a reusable test. Runs use Monito credits; the free plan includes 50 a month. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key in the `x-api-key` header.",
+    icon: "https://www.monito.dev/brand/monito-app-icon-512.png",
+    homepage: "https://www.monito.dev/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.monito.dev/api/mcp"],
+    },
+    remoteUrl: "https://www.monito.dev/api/mcp",
+  },
+  {
     name: "multi-calendar",
     title: "Multi Calendar",
     description:

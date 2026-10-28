@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Monito MCP Server] - {PR_MERGE_DATE}
+
+- Add Monito to the official registry: check a deployed URL in a real browser from a plain-English expectation and get passed, failed or cannot verify with screenshots, network and console logs. Hosted Streamable HTTP server at https://www.monito.dev/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add ISMS Copilot MCP Server] - 2026-10-28
 
 - Add ISMS Copilot to the official registry: the compliance specialist your AI calls, for ISO 27001, SOC 2, GDPR, NIS 2, DORA and more. Hosted Streamable HTTP server at https://account.ismscopilot.com/v1/account/mcp with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
