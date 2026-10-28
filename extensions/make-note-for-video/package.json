@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "make-note-for-video",
+  "title": "Video Notes",
+  "description": "Take notes with a timecode and frame from IINA or a browser video, and export them to an HTML table",
+  "icon": "icon.png",
+  "author": "mikeozornin",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "new-session",
+      "title": "New Video Review",
+      "description": "Create a review folder with notes.md and make it active",
+      "mode": "view",
+      "keywords": [
+        "новый",
+        "разбор",
+        "заметки"
+      ]
+    },
+    {
+      "name": "continue-session",
+      "title": "Continue Video Review",
+      "description": "Pick an existing review and make it active",
+      "mode": "view",
+      "keywords": [
+        "продолжить",
+        "разбор",
+        "выбрать"
+      ]
+    },
+    {
+      "name": "add-note",
+      "title": "Video Note",
+      "description": "Pause, capture timecode and frame, add a comment to notes.md. Start with -- for a general note",
+      "mode": "view",
+      "keywords": [
+        "заметка",
+        "таймкод",
+        "кадр"
+      ]
+    },
+    {
+      "name": "build-html",
+      "title": "Build Video Notes HTML",
+      "description": "Build index.html from notes.md and zip it",
+      "mode": "view",
+      "keywords": [
+        "собрать",
+        "экспорт",
+        "html",
+        "zip"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notesDir",
+      "title": "Reviews folder",
+      "description": "Review folders are created here",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "editor",
+      "title": "Editor",
+      "description": "App that opens notes.md",
+      "type": "appPicker",
+      "default": "Sublime Text",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3",
+    "marked": "^18.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
