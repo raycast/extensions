@@ -1,224 +1,182 @@
-import React from "react";
-import { List, Icon } from "@raycast/api";
-import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { countOf, showError } from "@chrismessina/raycast-kit";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon, List } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import { HistoryActionPanels } from "./components";
+import { getAppFavicon } from "./helpers/apps";
 import {
-  getUsageHistory,
-  getAppFavicon,
-  removeUsageHistoryItem,
-  getStarredHistoryPairs,
-  getHistoryPairKey,
-  toggleStarredHistoryItem,
   clearStarredHistoryItems,
-} from "./helpers/apps";
-import { openProfile } from "./helpers/open-profile";
-import { getAppByValue } from "./helpers/custom-app-utils";
-import { safeAsyncOperation } from "./utils/errors";
+  describeOpens,
+  FAVORITE_COLOR,
+  getHistoryPairKey,
+  HISTORY_FILTER,
+  removeHistoryItem,
+  toggleStarredHistoryItem,
+} from "./helpers/history";
+import { openProfileWithFeedback } from "./helpers/open-profile";
+import { getMigratedAppId, saveHistorySearchText, STORAGE_KEYS } from "./helpers/storage";
+import { buildProfileUrl } from "./helpers/url";
+import { useApps } from "./hooks/useApps";
+import { useHistory } from "./hooks/useHistory";
 import { formatRelativeDate } from "./utils/date";
-import OpenProfileCommand from "./open-profile";
 
-export default function HistoryCommand() {
-  const {
-    data: historyItems,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(
-    async () => {
-      const [usageHistory, starredPairs] = await Promise.all([getUsageHistory(), getStarredHistoryPairs()]);
-      const starredSet = new Set(starredPairs);
+const { ALL, STARRED } = HISTORY_FILTER;
 
-      // Load favicons for each history item and generate URLs
-      const itemsWithFavicons = await Promise.all(
-        usageHistory.map(async (item) => {
-          const app = await getAppByValue(item.app);
-          const favicon = app ? getAppFavicon(app) : Icon.Globe;
+const SEARCH_SAVE_DELAY_MS = 400;
 
-          // Generate URL for the history item
-          let url = "";
-          if (app) {
-            const requiresAtSymbol = app.urlTemplate.includes("@{profile}");
-            const hasAtSymbol = item.profile.startsWith("@");
-            let profileToUse = item.profile;
-            if (requiresAtSymbol && !hasAtSymbol) {
-              profileToUse = `@${item.profile}`;
-            } else if (!requiresAtSymbol && hasAtSymbol) {
-              profileToUse = item.profile.slice(1);
-            }
-            url = app.urlTemplate.replace("{profile}", profileToUse);
-          }
+/**
+ * The search text, remembered between launches. Typing updates the list at once and saves once typing pauses,
+ * instead of writing to LocalStorage on every keystroke.
+ */
+function useRememberedSearchText(): [string, (text: string) => void] {
+  const { value: stored } = useLocalStorage<string>(STORAGE_KEYS.HISTORY_SEARCH_TEXT, "");
+  const [typed, setTyped] = useState<string>();
+  const unsaved = useRef<string | undefined>(undefined);
 
-          return {
-            ...item,
-            favicon,
-            url,
-            isStarred: starredSet.has(getHistoryPairKey(item.profile, item.app)),
-          };
-        }),
-      );
+  useEffect(() => {
+    if (typed === undefined) return;
+    unsaved.current = typed;
+    const timer = setTimeout(() => {
+      unsaved.current = undefined;
+      void saveHistorySearchText(typed);
+    }, SEARCH_SAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [typed]);
 
-      return itemsWithFavicons;
+  // Closing the command inside the delay still saves what was typed last
+  useEffect(
+    () => () => {
+      if (unsaved.current !== undefined) void saveHistorySearchText(unsaved.current);
     },
     [],
-    { keepPreviousData: true },
   );
 
-  const { value: searchText = "", setValue: setSearchText } = useLocalStorage<string>("history-search-text", "");
-  const { value: appFilter = "__all__", setValue: setAppFilter } = useLocalStorage<string>(
-    "history-app-filter",
-    "__all__",
+  return [typed ?? stored ?? "", setTyped];
+}
+
+/**
+ * The profile's URL, or "" when the template no longer builds a valid one (Copy Profile URL is then hidden)
+ */
+function profileUrlOrEmpty(urlTemplate: string, profile: string): string {
+  try {
+    return buildProfileUrl(urlTemplate, profile);
+  } catch {
+    return "";
+  }
+}
+
+export default function HistoryCommand() {
+  const { history, isLoading: isLoadingHistory } = useHistory();
+  const { entries, isLoading: isLoadingApps } = useApps();
+
+  const [searchText, setSearchText] = useRememberedSearchText();
+  const { value: appFilter = ALL, setValue: setAppFilter } = useLocalStorage<string>(
+    STORAGE_KEYS.HISTORY_APP_FILTER,
+    ALL,
   );
 
-  // Compute unique apps from historyItems (including "Show All")
-  const uniqueApps = React.useMemo(() => {
-    const items = historyItems ?? [];
-    const appSet = new Set(items.map((item) => item.app));
-    const apps = Array.from(appSet).map((appValue) => {
-      const item = items.find((h) => h.app === appValue);
-      return {
-        value: appValue,
-        name: item?.appName || appValue,
-        favicon: item?.favicon,
-      };
+  // A filter remembered before this process migrated app IDs still holds the old ID; follow it to the new one
+  useEffect(() => {
+    if (appFilter === ALL || appFilter === STARRED) return;
+    let canceled = false;
+    getMigratedAppId(appFilter)
+      .then((migrated) => {
+        if (!canceled && migrated !== appFilter) void setAppFilter(migrated);
+      })
+      // A failed migration already shows a failure toast from the History load; try again on the next reload
+      .catch(() => undefined);
+    return () => {
+      canceled = true;
+    };
+  }, [appFilter, history]);
+
+  const items = useMemo(() => {
+    const apps = new Map(entries.map((entry) => [entry.value, entry]));
+    return history.map((item) => {
+      const app = apps.get(item.app);
+      const url = app ? profileUrlOrEmpty(app.urlTemplate, item.profile) : "";
+      return { ...item, appName: app?.name ?? item.appName, favicon: app ? getAppFavicon(app) : Icon.Globe, url };
     });
-    // Sort apps alphabetically by name
-    apps.sort((a, b) => a.name.localeCompare(b.name));
-    return [
-      { value: "__all__", name: "Show All", favicon: undefined },
-      { value: "__starred__", name: "Starred Profiles", favicon: Icon.Star },
-      ...apps,
-    ];
-  }, [historyItems]);
+  }, [history, entries]);
 
-  // Filter items - first by appFilter (unless "all"), then by searchText
-  const filteredItems = (historyItems ?? []).filter((item) => {
-    // Filter by app or starred mode
-    if (appFilter === "__starred__") {
-      if (!item.isStarred) return false;
-    } else if (appFilter !== "__all__" && item.app !== appFilter) {
-      return false;
-    }
+  const appOptions = useMemo(() => {
+    const seen = new Map<string, (typeof items)[number]>();
+    items.forEach((item) => seen.set(item.app, seen.get(item.app) ?? item));
+    return Array.from(seen.values()).sort((a, b) => a.appName.localeCompare(b.appName));
+  }, [items]);
 
-    // Then filter by search text
-    if (searchText.trim() === "") {
-      return true;
-    }
-
-    const searchLower = searchText.toLowerCase();
+  const query = searchText.trim().toLowerCase();
+  const filteredItems = items.filter((item) => {
+    if (appFilter === STARRED ? !item.isStarred : appFilter !== ALL && item.app !== appFilter) return false;
     return (
-      item.profile.toLowerCase().includes(searchLower) ||
-      item.appName.toLowerCase().includes(searchLower) ||
-      item.app.toLowerCase().includes(searchLower)
+      !query ||
+      item.profile.toLowerCase().includes(query) ||
+      item.appName.toLowerCase().includes(query) ||
+      item.app.toLowerCase().includes(query)
     );
   });
 
-  // Handle opening a profile from history
-  const handleOpenProfile = async (profile: string, appValue: string) => {
-    // Don't pop to root to keep history intact, and bypass app settings since this is a direct action from history
-    await openProfile(profile, appValue, false, true);
-  };
-
-  // Filter by specific app
-  const filterByApp = (appValue: string) => {
-    setAppFilter(appValue);
-  };
-
-  // Handle deleting a history item
-  const handleDeleteHistoryItem = async (profile: string, app: string) => {
-    await safeAsyncOperation(
-      async () => {
-        await removeUsageHistoryItem(profile, app);
-        // Refresh cached history after deletion
-        await revalidate();
-      },
-      "deleting history item",
-      {
-        showToastOnError: true,
-        rethrow: false,
-      },
-    );
-  };
-
-  const handleToggleStar = async (profile: string, app: string) => {
-    await safeAsyncOperation(
-      async () => {
-        await toggleStarredHistoryItem(profile, app);
-        revalidate();
-      },
-      "toggling starred history item",
-      {
-        showToastOnError: true,
-        rethrow: false,
-      },
-    );
-  };
-
-  const handleClearStarredProfiles = async () => {
-    await safeAsyncOperation(
-      async () => {
-        await clearStarredHistoryItems();
-        await revalidate();
-      },
-      "clearing starred history items",
-      {
-        showToastOnError: true,
-        rethrow: false,
-      },
-    );
+  const run = (title: string, operation: () => Promise<unknown>) => async () => {
+    try {
+      await operation();
+    } catch (error) {
+      await showError(error, { title });
+    }
   };
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingHistory || isLoadingApps}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by profile or app..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by App"
-          storeValue={true}
-          value={appFilter}
-          onChange={(newValue) => setAppFilter(newValue || "__all__")}
-        >
-          {uniqueApps.map((app) => (
-            <List.Dropdown.Item key={app.value} title={app.name} value={app.value} icon={app.favicon || Icon.Globe} />
+        <List.Dropdown tooltip="Filter by App" value={appFilter} onChange={(value) => setAppFilter(value || ALL)}>
+          <List.Dropdown.Item title="Show All" value={ALL} icon={Icon.Globe} />
+          <List.Dropdown.Item
+            title="Favorites"
+            value={STARRED}
+            icon={{ source: Icon.Star, tintColor: FAVORITE_COLOR }}
+          />
+          {appOptions.map((item) => (
+            <List.Dropdown.Item key={item.app} title={item.appName} value={item.app} icon={item.favicon} />
           ))}
         </List.Dropdown>
       }
     >
-      <List.Section title="Recent Profile History" subtitle={`${filteredItems.length} items`}>
+      <List.Section title="Recent Profile History" subtitle={countOf(filteredItems.length, "item")}>
         {filteredItems.length === 0 ? (
           <List.Item title="No History Found" subtitle="No profile history matches your search" icon={Icon.Info} />
         ) : (
-          filteredItems.map((item, index) => (
+          filteredItems.map((item) => (
             <List.Item
-              key={`${item.profile}-${item.app}-${item.timestamp}-${index}`}
+              key={getHistoryPairKey(item.profile, item.app)}
               title={`@${item.profile}`}
               subtitle={item.appName}
-              icon={item.favicon || Icon.Globe}
+              icon={item.favicon}
               accessories={[
-                ...(item.isStarred ? [{ icon: Icon.Star }] : []),
-                { text: formatRelativeDate(item.timestamp) },
+                ...(item.isStarred
+                  ? [{ icon: { source: Icon.Star, tintColor: FAVORITE_COLOR }, tooltip: "Favorite" }]
+                  : []),
+                { text: `${item.count}×`, tooltip: `Opened ${describeOpens(item.count)}` },
+                {
+                  text: formatRelativeDate(item.timestamp),
+                  tooltip: `Last opened ${new Date(item.timestamp).toLocaleString()}`,
+                },
               ]}
               actions={
                 <HistoryActionPanels
-                  item={{
-                    profile: item.profile,
-                    app: item.app,
-                    appName: item.appName,
-                    favicon: typeof item.favicon === "string" ? item.favicon : undefined,
-                    url: item.url || "",
-                    isStarred: item.isStarred,
-                    timestamp: item.timestamp,
-                  }}
-                  onOpenProfile={handleOpenProfile}
-                  onDeleteHistoryItem={handleDeleteHistoryItem}
-                  onToggleStar={handleToggleStar}
-                  onClearStarredProfiles={handleClearStarredProfiles}
+                  item={item}
+                  onOpenProfile={() => openProfileWithFeedback(item.profile, item.app)}
+                  onDeleteHistoryItem={run("Couldn't Delete History Item", () =>
+                    removeHistoryItem(item.profile, item.app),
+                  )}
+                  onToggleStar={run("Couldn't Update Favorites", () =>
+                    toggleStarredHistoryItem(item.profile, item.app),
+                  )}
+                  onClearStarredProfiles={run("Couldn't Clear Favorites", clearStarredHistoryItems)}
                   onSetSearchText={setSearchText}
                   onSetAppFilter={setAppFilter}
-                  onFilterByApp={filterByApp}
-                  onRefreshHistory={revalidate}
-                  OpenProfileCommand={OpenProfileCommand}
                 />
               }
             />
