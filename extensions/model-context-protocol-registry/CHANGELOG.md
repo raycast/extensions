@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add EventSend MCP Server] - 2026-10-28
+
+- Add EventSend to the official registry: ask your AI about your product's events, delivery health and usage. Search events, follow one customer's timeline, see why a Slack, Discord, Telegram or webhook notification failed, and check daily stats and quota. Read-only, 9 tools. Hosted Streamable HTTP server at https://eventsend.io/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Noonlaunch MCP Server] - 2026-10-28
 
 - Add Noonlaunch to the official registry: launch a product on Noonlaunch, search its product directory and weekly winners, and find 333 startup launch directories. Hosted Streamable HTTP server at https://noonlaunch.com/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

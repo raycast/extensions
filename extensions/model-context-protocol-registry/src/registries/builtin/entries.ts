@@ -681,6 +681,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "eventsend",
+    title: "EventSend",
+    description:
+      "Ask your AI about your product's events, delivery health and usage. Search events, follow one customer's timeline, see why a Slack, Discord, Telegram or webhook notification failed, and check daily stats and quota. Read-only, 9 tools. Hosted remote Streamable HTTP server at https://eventsend.io/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free plan available.",
+    icon: "https://eventsend.io/images/pwa/icon-512.png",
+    homepage: "https://eventsend.io/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://eventsend.io/mcp"],
+    },
+    remoteUrl: "https://eventsend.io/mcp",
+  },
+  {
     name: "evolink",
     title: "EvoLink",
     description:
