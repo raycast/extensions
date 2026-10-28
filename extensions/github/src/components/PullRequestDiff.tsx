@@ -84,14 +84,20 @@ export default function PullRequestDiff({ pullRequest }: PullRequestDiffProps) {
                     <Action.CopyToClipboard
                       content={file.filename}
                       title="Copy File Path"
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "." },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                      }}
                     />
 
                     {file.patch ? (
                       <Action.CopyToClipboard
                         content={file.patch}
                         title="Copy Patch"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "," },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                        }}
                       />
                     ) : null}
                   </ActionPanel.Section>
