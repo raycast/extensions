@@ -72,6 +72,10 @@ describe("fallback and options", () => {
   it("still fixes Caps Lock when falling back", () => {
     expect(fixText("hELLO", dicts, pair, { fallbackToAll: true }).text).toBe("Hello");
   });
+
+  it("converts numbers and punctuation with the surrounding language", () => {
+    expect(fixText("github 2024 ?", dicts, pair, { fallbackToAll: true }).text).toBe("لهفاعذ ۲۰۲۴ ؟");
+  });
 });
 
 describe("spelling", () => {

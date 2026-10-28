@@ -21,6 +21,7 @@ interface Row {
   title: string;
   value: string;
   icon: Icon;
+  warning?: boolean;
 }
 
 function dateRows(jalali: SimpleDate, gregorian: SimpleDate): Row[] {
@@ -57,7 +58,12 @@ function rowsFor(input: string): Row[] {
       title: "به حروف",
       value: "This number is too large or too precise to write in words",
       icon: Icon.Warning,
+      warning: true,
     });
+    const latinGrouped = groupDigits(text, false);
+    const persianGrouped = groupDigits(text, true);
+    if (latinGrouped) rows.push({ title: "With separators", value: latinGrouped, icon: Icon.Hashtag });
+    if (persianGrouped) rows.push({ title: "با جداکننده", value: persianGrouped, icon: Icon.Hashtag });
   }
   const persian = toPersianDigits(text);
   const latin = toLatinDigits(text);
@@ -102,10 +108,12 @@ export default function Command() {
           subtitle={row.title}
           icon={row.icon}
           actions={
-            <ActionPanel>
-              <Action.Paste content={row.value} />
-              <Action.CopyToClipboard content={row.value} />
-            </ActionPanel>
+            row.warning ? undefined : (
+              <ActionPanel>
+                <Action.Paste content={row.value} />
+                <Action.CopyToClipboard content={row.value} />
+              </ActionPanel>
+            )
           }
         />
       ))}

@@ -117,11 +117,16 @@ export function fixText(
   }
 
   if (opts.fallbackToAll && !convertFrom.some(Boolean)) {
+    const nearbyLang = (i: number): Lang | null => {
+      for (let j = i - 1; j >= 0; j--) if (langs[j]) return langs[j];
+      for (let j = i + 1; j < langs.length; j++) if (langs[j]) return langs[j];
+      return detectLang(text);
+    };
     for (let i = 0; i < words.length; i++) {
-      if (!langs[i]) continue;
       if (dicts.isPersonal(words[i])) continue;
       if (opts.capsLock && INVERTED_CASE.test(words[i]) && dicts.isWord(words[i], "en")) continue;
-      convertFrom[i] = langs[i];
+      const lang = langs[i] ?? nearbyLang(i);
+      if (lang) convertFrom[i] = lang;
     }
   }
 
