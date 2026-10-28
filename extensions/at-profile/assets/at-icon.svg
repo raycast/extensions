@@ -1,1 +1,28 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class=""><rect id="«r9»" width="512" height="512" x="0" y="0" rx="128" fill="url(#«ra»)" stroke="#FFFFFF" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect><clipPath id="clip"><use xlink:href="#«r9»"></use></clipPath><defs><radialGradient id="«ra»" cx="50%" cy="50%" r="100%" fx="50%" fy="0%" gradientUnits="objectBoundingBox"><stop stop-color="#FC4FFE"></stop><stop offset="1" stop-color="#0E18B8"></stop></radialGradient><radialGradient id="«rb»" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256) rotate(90) scale(512)"><stop stop-color="white"></stop><stop offset="1" stop-color="white" stop-opacity="0"></stop></radialGradient></defs><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" width="352" height="352" x="80" y="80" alignment-baseline="middle" style="color: rgb(255, 255, 255);"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 14.25c-3.75 0-6.5-2.798-6.5-6.25A6.25 6.25 0 0 1 8 1.75c5 0 6.25 3.25 6.25 6.25v.25a2 2 0 0 1-2 2v0a2 2 0 0 1-2-2v-2.5m0 2.25a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"></path></svg></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>At Profile</title>
+  <desc>A flowing white at sign on an orchid, violet, and indigo rounded square.</desc>
+  <defs>
+    <linearGradient id="base" x1="70" y1="12" x2="438" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#BD24FA"/>
+      <stop offset=".45" stop-color="#7114F5"/>
+      <stop offset="1" stop-color="#17039B"/>
+    </linearGradient>
+    <radialGradient id="orchid" cx="0" cy="0" r="1" gradientTransform="translate(112 37) rotate(44) scale(408 300)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB0FA"/>
+      <stop offset=".29" stop-color="#EE54F7" stop-opacity=".96"/>
+      <stop offset=".66" stop-color="#CE2BFA" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#B522FA" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blue" cx="0" cy="0" r="1" gradientTransform="translate(67 462) rotate(-45) scale(345 260)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4014ED" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#4014ED" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#base)"/>
+  <rect width="512" height="512" rx="100" fill="url(#orchid)"/>
+  <rect width="512" height="512" rx="100" fill="url(#blue)"/>
+  <g stroke="#FFFFFF" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M287 400 C180 403 104 365 104 274 C104 178 176 109 270 109 C353 109 404 166 404 251 C404 298 384 318 356 318 C323 318 312 294 318 262 L331 199"/>
+    <path d="M315 247 C320 215 299 197 271 197 C238 197 210 218 198 248 C184 283 199 315 231 316 C267 319 306 287 315 247 Z"/>
+  </g>
+</svg>

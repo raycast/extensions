@@ -1,239 +1,88 @@
-import { List, Icon, confirmAlert, Alert, Color, Clipboard, LaunchProps } from "@raycast/api";
-import { useEffect } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { showSuccess, withErrorHandling, safeAsyncOperation } from "../utils/errors";
-import { getCustomApps, getAppSettings, updateAppSettings, getAppFavicon } from "../helpers/apps";
-import { defaultApps } from "../utils/default-apps";
-import { removeCustomApp } from "../helpers/custom-app-utils";
-import { AppManagementActionPanels, UtilityActionPanels } from "../components";
-import { exportSettingsToFile, importSettingsFromFile } from "../yaml-settings";
-import { AppItem, ManageAppsArguments, App } from "../types";
+import { showError } from "@chrismessina/raycast-kit";
+import { Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { getAppFavicon, removeCustomApp, setAppVisibility } from "../helpers/apps";
+import { useApps } from "../hooks/useApps";
+import { AppEntry } from "../types";
+import { AppManagementActionPanels } from "./AppManagementActionPanels";
 
-export default function ManageAppsCommand(props: LaunchProps<{ arguments: ManageAppsArguments }>) {
-  const { action } = props.arguments;
-  const {
-    data: apps,
-    isLoading,
-    revalidate,
-  } = useCachedPromise(
-    async () => {
-      const [customApps, appSettings] = await Promise.all([getCustomApps(), getAppSettings()]);
+const byName = (a: AppEntry, b: AppEntry) => a.name.localeCompare(b.name);
 
-      // Convert app settings to a map for quick lookup
-      const settingsMap = new Map<string, boolean>();
-      appSettings.forEach((setting) => {
-        settingsMap.set(setting.value, setting.visible);
+export default function ManageAppsCommand() {
+  const { entries, isLoading } = useApps();
+
+  const toggleVisible = async (app: AppEntry) => {
+    const visible = !app.visible;
+    try {
+      await setAppVisibility(app.value, visible);
+      await showToast({
+        style: Toast.Style.Success,
+        title: visible ? "App Shown" : "App Hidden",
+        message: `${app.name} is now ${visible ? "shown" : "hidden"} in Open Profile`,
       });
-
-      // Combine default and custom apps
-      const allApps: AppItem[] = [
-        // Default apps
-        ...defaultApps.map((app) => ({
-          id: app.value,
-          name: app.name,
-          value: app.value,
-          url: app.urlTemplate,
-          urlTemplate: app.urlTemplate,
-          visible: settingsMap.get(app.value) ?? true, // Default to visible
-          isDefault: true,
-          icon: getAppFavicon(app),
-        })),
-        // Custom apps (they don't have separate IDs in apps.ts, use value as ID)
-        ...customApps.map((app) => ({
-          id: app.value,
-          name: app.name,
-          value: app.value,
-          url: app.urlTemplate,
-          urlTemplate: app.urlTemplate,
-          visible: settingsMap.get(app.value) ?? true, // Default to visible
-          isDefault: false,
-          icon: getAppFavicon(app),
-        })),
-      ];
-
-      return allApps;
-    },
-    [],
-    { keepPreviousData: true },
-  );
-
-  const handleExportApps = withErrorHandling(
-    async () => {
-      const filePath = await exportSettingsToFile();
-      await Clipboard.copy(filePath);
-      await showSuccess("Apps Exported", "File path copied to clipboard");
-    },
-    "exporting apps",
-    true,
-    "Export Failed",
-  );
-
-  const handleImportApps = withErrorHandling(
-    async () => {
-      await importSettingsFromFile();
-      await revalidate(); // Reload the apps after import
-    },
-    "importing apps",
-    true,
-    "Import Failed",
-  );
-
-  useEffect(() => {
-    // Handle command line arguments for import/export
-    if (action === "import") {
-      handleImportApps();
-    } else if (action === "export") {
-      handleExportApps();
+    } catch (error) {
+      await showError(error, { title: "Couldn't Update App" });
     }
-  }, [action]);
+  };
 
-  const toggleAppVisible = withErrorHandling(
-    async (appId: string, visible: boolean) => {
-      const currentSettings = await getAppSettings();
-
-      // Update or add app setting
-      const existingSettingIndex = currentSettings.findIndex((s) => s.value === appId);
-      if (existingSettingIndex >= 0) {
-        currentSettings[existingSettingIndex].visible = visible;
-      } else {
-        currentSettings.push({ value: appId, visible });
-      }
-
-      await updateAppSettings(currentSettings);
-
-      // Refresh list after update
-      await revalidate();
-
-      await showSuccess(
-        visible ? "App Shown" : "App Hidden",
-        `${(apps ?? []).find((p) => p.id === appId)?.name} is now ${visible ? "shown" : "hidden"} in Open Profile`,
-      );
-    },
-    "updating app visibility",
-    true,
-    "Failed to Update App",
-  );
-
-  const handleDeleteCustomApp = async (app: AppItem) => {
-    if (app.isDefault) return; // Safety check
-
+  const deleteCustomApp = async (app: AppEntry) => {
     const confirmed = await confirmAlert({
       title: "Delete Custom App",
       message: `Are you sure you want to delete "${app.name}"? This action cannot be undone.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
-
     if (!confirmed) return;
 
-    await safeAsyncOperation(
-      async () => {
-        const result = await removeCustomApp(app.id);
-        if (result?.success) {
-          await revalidate();
-        }
-      },
-      "deleting custom app",
-      {
-        showToastOnError: false, // removeCustomApp already shows toasts
-        rethrow: false,
-      },
-    );
+    try {
+      await removeCustomApp(app.value);
+      await showToast({ style: Toast.Style.Success, title: "App Deleted", message: app.name });
+    } catch (error) {
+      await showError(error, { title: "Couldn't Delete App" });
+    }
   };
 
-  const defaultAppList = (apps ?? []).filter((p) => p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
-  const customAppList = (apps ?? []).filter((p) => !p.isDefault).sort((a, b) => a.name.localeCompare(b.name));
+  const renderApp = (app: AppEntry) => (
+    <List.Item
+      key={app.value}
+      title={app.name}
+      subtitle={app.urlTemplate}
+      icon={getAppFavicon(app)}
+      accessories={[
+        {
+          icon: {
+            source: app.visible ? Icon.CheckCircle : Icon.Circle,
+            tintColor: app.visible ? Color.Green : Color.SecondaryText,
+          },
+          tooltip: app.visible ? "Shown" : "Hidden",
+        },
+      ]}
+      actions={
+        <AppManagementActionPanels app={app} onToggleVisible={toggleVisible} onDeleteCustomApp={deleteCustomApp} />
+      }
+    />
+  );
+
+  const customApps = entries.filter((app) => !app.isDefault).sort(byName);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search social apps...">
       <List.Section title="Default Apps">
-        {defaultAppList.map((app) => (
-          <List.Item
-            key={app.id}
-            title={app.name}
-            subtitle={app.url}
-            icon={getAppFavicon({
-              name: app.name,
-              value: app.value,
-              urlTemplate: app.urlTemplate,
-            } as App)}
-            accessories={[
-              {
-                icon: {
-                  source: app.visible ? Icon.CheckCircle : Icon.Circle,
-                  tintColor: app.visible ? Color.Green : Color.SecondaryText,
-                },
-                tooltip: app.visible ? "Shown" : "Hidden",
-              },
-            ]}
-            actions={
-              <AppManagementActionPanels
-                type="default"
-                app={app}
-                onToggleVisible={toggleAppVisible}
-                onSave={revalidate}
-              />
-            }
-          />
-        ))}
+        {entries
+          .filter((app) => app.isDefault)
+          .sort(byName)
+          .map(renderApp)}
       </List.Section>
 
       <List.Section title="Custom Apps">
-        {customAppList.length === 0 ? (
+        {customApps.length === 0 ? (
           <List.Item
             title="No Custom Apps"
             subtitle="Add custom social apps to extend the available options"
             icon={Icon.Info}
-            actions={<AppManagementActionPanels type="empty" onSave={revalidate} />}
+            actions={<AppManagementActionPanels />}
           />
         ) : (
-          customAppList.map((app) => (
-            <List.Item
-              key={app.id}
-              title={app.name}
-              subtitle={app.url}
-              icon={getAppFavicon({
-                name: app.name,
-                value: app.value,
-                urlTemplate: app.urlTemplate,
-              } as App)}
-              accessories={[
-                {
-                  icon: {
-                    source: app.visible ? Icon.CheckCircle : Icon.Circle,
-                    tintColor: app.visible ? Color.Green : Color.SecondaryText,
-                  },
-                  tooltip: app.visible ? "Shown" : "Hidden",
-                },
-              ]}
-              actions={
-                <AppManagementActionPanels
-                  type="custom"
-                  app={app}
-                  onToggleVisible={toggleAppVisible}
-                  onDeleteCustomApp={handleDeleteCustomApp}
-                  onSave={revalidate}
-                />
-              }
-            />
-          ))
+          customApps.map(renderApp)
         )}
-      </List.Section>
-      <List.Section title="App Management">
-        <List.Item
-          title="Export Apps"
-          subtitle="Export all app settings and custom apps to YAML file"
-          icon={Icon.Download}
-          actions={<UtilityActionPanels type="export-management" />}
-        />
-        <List.Item
-          title="Import Apps"
-          subtitle="Import app settings and custom apps from YAML file"
-          icon={Icon.Upload}
-          actions={<UtilityActionPanels type="import-management" />}
-        />
       </List.Section>
     </List>
   );

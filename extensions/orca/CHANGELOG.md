@@ -1,5 +1,11 @@
 # Orca Changelog
 
+## [Reliable Prompt Delivery] - 2026-10-28
+
+- A saved prompt that starts a new agent is now submitted by Orca once the agent is up, instead of being typed in while it starts — it no longer sits in the input without Enter, or lands in the shell
+- Errors from Orca show what Orca said, not the command line with the whole prompt in it
+- An Orca too old for a command asks you to update it; the extension now needs Orca 1.4.229 or later
+
 ## [Finished Agents and Grouping by Status] - 2026-10-22
 
 - Agents that finished but you have not looked at yet get their own section under the waiting ones

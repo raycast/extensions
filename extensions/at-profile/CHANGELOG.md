@@ -1,5 +1,22 @@
 # @ Profile Changelog
 
+## [Open counts, History of 100, and Import/Export fixes] - 2026-10-28
+
+- History shows how many times you've opened each profile, and keeps your last 100 profiles instead of 20
+- Stars are now Favorites: "Add to Favorites" in History, shown with a star in the extension's colors
+- Export Apps saves right away and tells you where, with Show in Finder and Copy Path
+- New Export Directory preference sets where exports go (Downloads by default), and an export never replaces an existing file
+- Import Apps opens a file picker, pre-filled with the file selected in Finder, and imports only when you press Import
+- Import keeps open counts and says what changed, including apps it showed or hid, e.g. "No apps added (2 already set up) · History unchanged", including when the file comes from a newer version
+- Import and Export moved into the Manage Apps action menu (⌘⇧I and ⌘⇧E)
+- Editing a custom app's URL keeps its History, favorites and visibility
+- Copy Profile URL no longer doubles the @ on Threads, TikTok and YouTube Brand profiles
+- Opens, favorites and imports made at the same moment from different commands or AI tools no longer overwrite each other
+- A damaged saved setting no longer breaks every command
+- Open Profile picks up apps you add, edit or hide in Manage Apps without relaunching
+- Edit Profile returns to History instead of closing the extension
+- History's actions show the service's icon on "Open @profile on …"
+
 ## [Added starring and YouTube brand profiles] - 2026-02-16
 
 - Added starring functionality for profile history
