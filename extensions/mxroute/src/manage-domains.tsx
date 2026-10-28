@@ -21,6 +21,7 @@ import EmailForwarders from "./email-forwarders";
 import Advanced from "./advanced";
 import DNSInfo from "./dns-info";
 import { Domain, DomainVerificationKey } from "./types";
+import { filesize } from "filesize";
 
 const { server } = getPreferenceValues<Preferences>();
 
@@ -40,6 +41,8 @@ export default function ManageDomains() {
       initialData: [],
     },
   );
+
+  const { isLoading: isLoadingDiskUsage, data: diskUsage } = useCachedPromise(mxroute.getDiskUsage);
 
   const toggleMailHostingStatus = async (domain: Domain) => {
     const toast = await showToast(Toast.Style.Animated, "Toggling");
@@ -88,8 +91,10 @@ export default function ManageDomains() {
     });
   };
 
+  const numToFilesize = (num: number) => filesize(num, { standard: "jedec" });
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter domains">
+    <List isLoading={isLoading || isLoadingDiskUsage} searchBarPlaceholder="Filter domains">
       {domains.map((domain) => (
         <List.Item
           key={domain.domain}
@@ -132,6 +137,7 @@ export default function ManageDomains() {
               </ActionPanel.Submenu>
               <ActionPanel.Submenu icon={Icon.Window} title="Email Clients">
                 <Action.OpenInBrowser title="Webmail (No DNS Required)" url={`https://${server}/webmail`} />
+                <Action.OpenInBrowser title="Webmail (Requires MX Records)" url="https://webmail.mxroute.com/" />
               </ActionPanel.Submenu>
               <ActionPanel.Section>
                 <Action.Push
@@ -153,6 +159,27 @@ export default function ManageDomains() {
           }
         />
       ))}
+      <List.Section title="Disk Usage">
+        {diskUsage && (
+          <List.Item
+            icon={Icon.PieChart}
+            title={`${numToFilesize(diskUsage.total_used)} / ${numToFilesize(diskUsage.total_limit)} (${diskUsage.percent_used.toFixed(1)}%)`}
+            subtitle={`Last updated: ${diskUsage.updated_at}`}
+            accessories={[
+              {
+                icon: { source: Icon.CircleFilled, tintColor: Color.Blue },
+                text: "Email",
+                tooltip: `${numToFilesize(diskUsage.breakdown.email)}`,
+              },
+              {
+                icon: { source: Icon.CircleFilled, tintColor: Color.Purple },
+                text: "Web",
+                tooltip: `${numToFilesize(diskUsage.breakdown.web)}`,
+              },
+            ]}
+          />
+        )}
+      </List.Section>
     </List>
   );
 }

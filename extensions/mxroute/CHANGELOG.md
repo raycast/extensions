@@ -1,5 +1,10 @@
 # MXroute Changelog
 
+## [Show Disk Usage + More Clients] - {PR_MERGE_DATE}
+
+- Show total Disk Usage in apex view
+- Show more email client options
+
 ## [Remove Domain] - 2026-06-08
 
 - Add "Remove Domain" `Action`
