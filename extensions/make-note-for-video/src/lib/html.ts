@@ -24,7 +24,6 @@ export const GENERAL_HEADING = "## --";
 const HEADING = /^##\s+(\d{1,2}(?::\d{2}){1,2})\s*(.*)$/;
 const SECTION = /^##\s/;
 const IMAGE = /^!\[[^\]]*\]\(([^)\s]+)\)\s*$/;
-const ANY_IMAGE = /!\[[^\]]*\]\(([^)\s]+)/g;
 const FENCE = /^\s{0,3}(`{3,}|~{3,})/;
 
 // A literal "%" in a file name is not valid percent-encoding.
@@ -36,9 +35,12 @@ function decodePath(path: string): string {
   }
 }
 
-// Relative image paths referenced anywhere in notes.md, for the archive.
+// Relative image paths that the page shows, for the archive; code examples are skipped.
 export function localImages(markdown: string): string[] {
-  const paths = [...markdown.matchAll(ANY_IMAGE)].map((match) => decodePath(match[1]));
+  const paths: string[] = [];
+  marked.walkTokens(marked.lexer(markdown), (token) => {
+    if (token.type === "image") paths.push(decodePath(token.href));
+  });
   return [...new Set(paths)].filter(
     (path) => !/^[a-z][a-z\d+.-]*:/i.test(path) && !path.startsWith("/") && !path.split("/").includes(".."),
   );

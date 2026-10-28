@@ -1,6 +1,6 @@
 import { getFrontmostApplication } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -20,6 +20,7 @@ export type Capture = {
 };
 
 export async function capture(): Promise<Capture> {
+  removeStaleFrames();
   const front = await getFrontmostApplication();
   if (front.bundleId && BROWSERS.includes(front.bundleId)) return captureBrowser(front.bundleId);
   if (front.bundleId === IINA_BUNDLE || existsSync(IINA_SOCKET)) return captureIina();
@@ -27,6 +28,13 @@ export async function capture(): Promise<Capture> {
 }
 
 const tempFrame = () => join(tmpdir(), `video-note-${Date.now()}.jpg`);
+
+// A note cancelled with Esc leaves its frame behind; only one note form is open at a time.
+function removeStaleFrames() {
+  for (const name of readdirSync(tmpdir())) {
+    if (/^video-note-\d+\.jpg$/.test(name)) rmSync(join(tmpdir(), name), { force: true });
+  }
+}
 
 function mpv(command: unknown[]): Promise<unknown> {
   return new Promise((resolve, reject) => {
