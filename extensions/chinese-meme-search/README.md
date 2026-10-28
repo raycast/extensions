@@ -35,7 +35,7 @@ npm test
 
 2026-10-28：使用当前实现连续查询「大胆」「开心」「熊猫头」「打工」，分别得到 19、18、20、19 张图片，首图均下载成功；「大胆」第二页返回19张且首图不同。本轮没有遇到429，不代表未来不会限流。此前也验证过该接口 GIF 下载成功。
 
-构建、TypeScript 检查及4项回归测试通过。支持 fallbackText 和根搜索关键词参数，复制为首个默认操作。未自动验证本机 Raycast 后备命令开关、键盘操作及微信/大象中的实际粘贴效果。
+构建、TypeScript 检查及4项回归测试通过。支持 fallbackText 和根搜索关键词参数，复制为首个默认操作。已在本机 Raycast 2.9.0 上验收关键词参数输入后回车搜索、图片网格、下一页/上一页、JPG/GIF 回车复制以及自定义 JSON 源。复制后的 JPG 文件与原图逐字节一致，GIF 文件保留 GIF89a 签名。后备命令开关和微信/大象中的实际粘贴未验证。
 
 接口每页可能少于请求数量，是否继续翻页按 hasMore/endFlag 判断。HTTP或接口错误明确显示，不自动重试。
 
@@ -52,9 +52,30 @@ npm test
 在扩展设置的 Custom Source JSON 填入配置，留空恢复默认源。支持无需认证的 GET JSON 接口；不执行脚本，不支持 HTML 抓取或自定义认证头。不要在配置中填写密钥。
 
 ```json
-{"url":"https://example.com/search?q={query}&page={page}","results":"data.items","image":"url","title":"title","hasMore":"data.hasMore"}
+{
+  "url": "https://example.com/search?q={query}&page={page}",
+  "results": "data.items",
+  "image": "url",
+  "title": "title",
+  "hasMore": "data.hasMore"
+}
 ```
 
 `{query}` 自动 URL 编码；`{page}` 从1开始。results 是结果数组的点分路径，image/title 是每项中的字段路径。数组在根节点时 results 填空字符串；数组项本身为图片 URL 时 image 填空字符串。title 和 hasMore 可省略。只有 hasMore 指向 true 或数字1且 URL 包含 {page} 时提供下一页。
 
 命令名称为 Search Memes，已索引关键词 meme。若希望输入 meme 后直接进入参数栏，请在 Raycast 设置中把该命令的 Alias 设为 meme；扩展无法在 manifest 中替你设定用户别名。
+
+## 手动验收记录（2026-10-28）
+
+使用发行构建（`ray build -e dist`），在 Raycast 2.9.0 的实际窗口操作：
+
+- 在主搜索选择 Search Memes，Tab 进入关键词参数，输入「开心」，按 Enter 显示图片结果。
+- 「大胆」第一页显示19张；⌘] 到第二页后图片编号从21开始且图片不同；⌘[ 返回第一页。
+- 选图后按 Enter 复制 JPG，系统剪贴板包含本地文件 URL；该文件7788字节，与源站原图逐字节一致。
+- 在「开心」结果中右移选择 GIF 后按 Enter，剪贴板指向 .gif 文件。
+- 在实际设置页填写自定义 JSON 源，查询「熊猫头」成功，页脚显示「自定义源」。
+- 配置恢复默认的最后一步尚待解锁电脑后完成；非法配置的原生界面错误验证尚未完成，不据自动化测试冒充手动验收。
+
+四张商店截图保存在 metadata/，均来自实际 Raycast 窗口。仅遮去窗口外圆角区域、置于统一背景，未重绘或替换界面内容；尺寸2000×1250。
+
+CI 使用 Node 22.22.2 / npm 10.9.7。本地已用相同版本完成公开 registry 的 npm ci、Lint、发行构建、类型检查和6项测试。锁文件全部204个下载地址已改为 registry.npmjs.org，避免公共 CI 依赖内网 npm 地址。
