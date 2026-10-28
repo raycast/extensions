@@ -14,7 +14,7 @@ export function EmptyView({
   return (
     <List.EmptyView
       icon={error ? Icon.ExclamationMark : Icon.Battery}
-      title={error ? "Could Not Load EcoFlow Devices" : "No EcoFlow Devices"}
+      title={error ? "Could Not Load Devices" : "No Connected Devices"}
       description={
         error
           ? error.message

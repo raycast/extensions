@@ -3,7 +3,7 @@ import { createEcoFlowService } from "../devices/runtime";
 import type { DeviceCommandRequest } from "../types/device";
 
 export async function sendDeviceCommand(request: DeviceCommandRequest, onSuccess?: () => void): Promise<boolean> {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Sending EcoFlow control" });
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Sending device control" });
 
   try {
     const result = await createEcoFlowService().executeCommand(request);
@@ -14,7 +14,7 @@ export async function sendDeviceCommand(request: DeviceCommandRequest, onSuccess
     return true;
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "EcoFlow control failed";
+    toast.title = "Device control failed";
     toast.message = error instanceof Error ? error.message : "Unknown error";
     return false;
   }

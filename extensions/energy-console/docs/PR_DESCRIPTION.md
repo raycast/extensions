@@ -1,8 +1,8 @@
-# EcoFlow
+# Energy Console
 
 ## Description
 
-Monitor EcoFlow batteries, power stations, solar systems, smart plugs, appliances, and whole-home systems from Raycast. The extension provides normalized device status, raw readings for unknown hardware, a menu-bar summary, and a conservative set of documented controls with confirmation.
+Energy Console is an unofficial community extension for compatible EcoFlow batteries, power stations, solar systems, smart plugs, appliances, and whole-home systems. It provides normalized device status, raw readings for unknown hardware, a menu-bar summary, and documented controls with confirmation. It is not affiliated with or endorsed by EcoFlow.
 
 ## Features
 
@@ -23,6 +23,7 @@ Monitor EcoFlow batteries, power stations, solar systems, smart plugs, appliance
 ## Notes for Reviewers
 
 - Credentials use Raycast password preferences.
-- Requests go only to `https://api.ecoflow.com`.
+- Each user supplies their own Developer Platform access and secret keys. Requests go directly from their Mac to `https://api.ecoflow.com`, with no shared server.
 - The extension contains no analytics.
 - Unknown devices and undocumented control payloads remain read-only.
+- The extension uses an independent, generic icon; no EcoFlow logo or other brand asset is included.

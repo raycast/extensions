@@ -1,4 +1,4 @@
-# EcoFlow Changelog
+# Energy Console Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

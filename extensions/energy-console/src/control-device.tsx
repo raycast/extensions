@@ -46,7 +46,7 @@ export default function ControlDeviceCommand() {
         <List.EmptyView
           icon={Icon.Lock}
           title="No Controllable Devices"
-          description="No online device has a verified public control profile. Monitoring and raw readings remain available in the EcoFlow Dashboard."
+          description="No online device has a verified public control profile. Monitoring and raw readings remain available in the device dashboard."
           actions={
             <ActionPanel>
               <Action title="Refresh Devices" icon={Icon.ArrowClockwise} onAction={refresh} />

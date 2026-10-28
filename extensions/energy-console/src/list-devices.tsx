@@ -8,7 +8,7 @@ import type { DeviceCategory } from "./types/device";
 
 type Filter = "all" | "online" | DeviceCategory;
 
-export default function EcoFlowDashboardCommand() {
+export default function EnergyConsoleDashboardCommand() {
   const { data = [], error, isLoading, revalidate } = useDevices();
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -65,7 +65,7 @@ export default function EcoFlowDashboardCommand() {
         <List.EmptyView
           icon={Icon.Filter}
           title="No Matching Devices"
-          description="No EcoFlow devices match the selected filter."
+          description="No devices match the selected filter."
           actions={
             <ActionPanel>
               <Action title="Show All Devices" icon={Icon.Globe} onAction={() => setFilter("all")} />

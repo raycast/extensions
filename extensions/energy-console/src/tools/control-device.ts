@@ -46,7 +46,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   if (formattedValue !== undefined) info.push({ name: "Value", value: formattedValue });
 
   return {
-    message: "EcoFlow will change this physical device after you confirm.",
+    message: "This action will change the physical device after you confirm.",
     info,
   };
 };
@@ -69,7 +69,7 @@ export default async function tool(input: Input) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "The EcoFlow control failed.",
+      error: error instanceof Error ? error.message : "The device control failed.",
     };
   }
 }

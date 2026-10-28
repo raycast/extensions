@@ -10,7 +10,7 @@ vi.mock("../src/devices/runtime", () => ({
   createEcoFlowService: () => mocked,
 }));
 
-import controlEcoFlowDevice, { confirmation } from "../src/tools/control-ecoflow-device";
+import controlDevice, { confirmation } from "../src/tools/control-device";
 
 describe("confirmed AI device controls", () => {
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe("confirmed AI device controls", () => {
     const input = { deviceIdentifier: "Bedroom", command: "set_temperature", value: 22 };
 
     await confirmation(input);
-    await controlEcoFlowDevice(input);
+    await controlDevice(input);
 
     expect(mocked.executeCommand).toHaveBeenCalledWith({
       serialNumber: confirmedDevice.serialNumber,
@@ -35,13 +35,13 @@ describe("confirmed AI device controls", () => {
       value: 22,
     });
 
-    const replay = await controlEcoFlowDevice(input);
+    const replay = await controlDevice(input);
     expect(replay).toMatchObject({ success: false, error: expect.stringMatching(/confirm/i) });
     expect(mocked.executeCommand).toHaveBeenCalledTimes(1);
   });
 
   it("fails closed when execution has no matching confirmation", async () => {
-    const result = await controlEcoFlowDevice({
+    const result = await controlDevice({
       deviceIdentifier: "Unconfirmed WAVE",
       command: "set_temperature",
       value: 22,

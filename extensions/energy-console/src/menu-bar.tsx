@@ -4,7 +4,7 @@ import { useDevices } from "./hooks/useDevices";
 import type { DeviceSnapshot } from "./types/device";
 import { formatBatteryLevel, formatWatts } from "./utils/formatters";
 
-export default function EcoFlowMenuBarCommand() {
+export default function EnergyConsoleMenuBarCommand() {
   const { data = [], error, isLoading, revalidate } = useDevices();
   const online = data.filter((device) => device.online);
   const batteryDevices = online.filter(
@@ -20,7 +20,7 @@ export default function EcoFlowMenuBarCommand() {
     <MenuBarExtra
       icon={{ source: "extension-icon-v2.png" }}
       {...(title ? { title } : {})}
-      tooltip={error ? `EcoFlow: ${error.message}` : menuBarTooltip(online)}
+      tooltip={error ? `Energy Console: ${error.message}` : menuBarTooltip(online)}
       isLoading={isLoading}
     >
       {online.length > 0 && (
@@ -55,9 +55,9 @@ export default function EcoFlowMenuBarCommand() {
 
       <MenuBarExtra.Section>
         {error && (
-          <MenuBarExtra.Item title="Could Not Refresh EcoFlow" subtitle={error.message} icon={Icon.ExclamationMark} />
+          <MenuBarExtra.Item title="Could Not Refresh Devices" subtitle={error.message} icon={Icon.ExclamationMark} />
         )}
-        <MenuBarExtra.Item title="Open EcoFlow Dashboard" icon={Icon.AppWindow} onAction={openDashboard} />
+        <MenuBarExtra.Item title="Open Device Dashboard" icon={Icon.AppWindow} onAction={openDashboard} />
         <MenuBarExtra.Item
           title="Refresh"
           icon={Icon.ArrowClockwise}
@@ -81,9 +81,9 @@ function deviceSubtitle(device: DeviceSnapshot): string {
 }
 
 function menuBarTooltip(devices: DeviceSnapshot[]): string {
-  if (devices.length === 0) return "EcoFlow: no online devices";
-  if (devices.length === 1 && devices[0]) return `EcoFlow: ${devices[0].name} is online`;
-  return `EcoFlow: ${devices.length} devices online`;
+  if (devices.length === 0) return "Energy Console: no online devices";
+  if (devices.length === 1 && devices[0]) return `Energy Console: ${devices[0].name} is online`;
+  return `Energy Console: ${devices.length} devices online`;
 }
 
 function openDashboard(): void {

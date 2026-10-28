@@ -1,8 +1,8 @@
-# EcoFlow for Raycast
+# Energy Console
 
-Monitor EcoFlow devices from Raycast, keep battery status in the menu bar, and run a conservative set of documented controls. The extension uses EcoFlow's official developer API and stores credentials in Raycast preferences.
+Monitor compatible EcoFlow devices from Raycast, keep battery status in the menu bar, and run a conservative set of documented controls. Energy Console uses each user's own Developer Platform access and secret keys to call EcoFlow's public API directly from their Mac.
 
-This is an unofficial community extension. It is not affiliated with, endorsed by, or sponsored by EcoFlow. EcoFlow and its product names are trademarks of their respective owner.
+This is an unofficial community extension. It is not affiliated with or endorsed by EcoFlow. The extension does not use EcoFlow's logo or other brand assets. EcoFlow and its product names are trademarks of their respective owner.
 
 ## What it does
 
