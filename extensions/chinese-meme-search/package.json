@@ -3,7 +3,7 @@
   "name": "chinese-meme-search",
   "title": "Meme Search",
   "description": "搜索腾讯／搜狗输入法表情，支持 Raycast 后备搜索和回车复制。",
-  "icon": "icon.png",
+  "icon": "meme-icon-transparent.png",
   "author": "uncaughtape",
   "license": "MIT",
   "platforms": [
