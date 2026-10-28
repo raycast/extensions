@@ -837,6 +837,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "insertchat",
+    title: "InsertChat",
+    description:
+      "AI receptionist and AI chatbot: triage calls and chats that need you, draft replies, look up leads, review reports, and train your assistant on web pages. Replies are drafts only; it never sends messages, places calls, or books. Hosted remote Streamable HTTP server at https://api.insertchat.com/v2/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste; free trial available.",
+    icon: "https://raw.githubusercontent.com/MindCraftersGroup/claude-plugin/main/assets/logo.png",
+    homepage: "https://insertchat.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.insertchat.com/v2/mcp"],
+    },
+    remoteUrl: "https://api.insertchat.com/v2/mcp",
+  },
+  {
     name: "quantral",
     title: "Quantral",
     description:
