@@ -1848,7 +1848,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
     },
   },
-    {
+  {
     name: "suprsend",
     title: "SuprSend",
     description:
