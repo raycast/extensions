@@ -708,6 +708,7 @@ fn handle_request(
     pending: &mut Option<PendingLoad>,
     envelope: Envelope,
 ) -> Result<(), String> {
+    reconcile_state(root, mixer, pending)?;
     let kind = envelope.action["type"].as_str();
     let result = if envelope.deadline <= now() {
         Err("Mixer request expired. Try again.".into())
@@ -739,7 +740,11 @@ fn handle_request(
     reply(root, envelope.id, result)
 }
 
-fn tick(root: &Path, mixer: &mut Mixer, pending: &mut Option<PendingLoad>) -> Result<(), String> {
+fn reconcile_state(
+    root: &Path,
+    mixer: &mut Mixer,
+    pending: &mut Option<PendingLoad>,
+) -> Result<(), String> {
     let timer_expired = mixer
         .mix
         .timer
@@ -755,6 +760,11 @@ fn tick(root: &Path, mixer: &mut Mixer, pending: &mut Option<PendingLoad>) -> Re
             "Preset loading was cancelled by the sleep timer",
         )?;
     }
+    Ok(())
+}
+
+fn tick(root: &Path, mixer: &mut Mixer, pending: &mut Option<PendingLoad>) -> Result<(), String> {
+    reconcile_state(root, mixer, pending)?;
     if let Some(load) = pending.as_mut() {
         let result = match load.poll() {
             Ok(false) => return Ok(()),
@@ -1028,6 +1038,65 @@ mod tests {
         assert!(mixer.mix.sounds.values().all(|sound| sound.pid.is_none()));
         assert!(pending.is_none());
         assert!(fixture.reply("load").error.unwrap().contains("sleep timer"));
+    }
+
+    #[test]
+    fn get_reconciles_expired_timer_and_cancels_pending_load_before_reply() {
+        let fixture = Fixture::new();
+        let mut mixer = mixer();
+        mixer.start("old", fixture.sound()).unwrap();
+        mixer.mix.timer = Some(Timer {
+            ends_at: now(),
+            minutes: 1,
+        });
+        let mut pending = Some(fixture.pending());
+        handle_request(
+            &fixture.root,
+            &mut mixer,
+            &mut pending,
+            fixture.envelope("get", json!({"type":"get"})),
+        )
+        .unwrap();
+        let result = fixture.reply("get").result.unwrap();
+        assert!(result["mix"]["timer"].is_null());
+        assert!(result["mix"]["sounds"]["old"]["pid"].is_null());
+        assert!(mixer.players.is_empty());
+        assert!(pending.is_none());
+        assert!(fixture.reply("load").error.unwrap().contains("sleep timer"));
+    }
+
+    #[test]
+    fn get_reconciles_failed_sound_before_reply_without_blocking_pending_load() {
+        let fixture = Fixture::new();
+        let mut mixer = mixer();
+        let (failed, failures) = mpsc::channel();
+        mixer.players.insert(
+            "failed".into(),
+            Player {
+                media: MediaPlayer::new().unwrap(),
+                failures,
+            },
+        );
+        mixer.mix.sounds.insert(
+            "failed".into(),
+            Sound {
+                pid: Some(std::process::id()),
+                ..fixture.sound()
+            },
+        );
+        failed.send("Decoder failed".into()).unwrap();
+        let mut pending = Some(fixture.pending());
+        handle_request(
+            &fixture.root,
+            &mut mixer,
+            &mut pending,
+            fixture.envelope("get", json!({"type":"get"})),
+        )
+        .unwrap();
+        let result = fixture.reply("get").result.unwrap();
+        assert!(result["mix"]["sounds"]["failed"]["pid"].is_null());
+        assert!(mixer.players.is_empty());
+        assert!(pending.is_some());
     }
 
     #[test]
