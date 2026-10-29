@@ -5,6 +5,9 @@
   "description": "Look up amino acids by one-letter code, three-letter code or full name, and convert whole peptide sequences between notations.",
   "icon": "extension-icon.png",
   "author": "andreas_zankl",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Data",
     "Developer Tools"
