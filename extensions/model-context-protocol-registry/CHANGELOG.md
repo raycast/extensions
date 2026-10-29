@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add VectoSolve MCP Server] - {PR_MERGE_DATE}
+## [Add VectoSolve MCP Server] - 2026-10-29
 
 - Add VectoSolve to the official registry: image to SVG, DXF and EPS vector files, with machine-ready output for laser cutters, CNC routers and Cricut cutting machines. One read-only tool. Hosted Streamable HTTP server at https://vectosolve.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
