@@ -1,5 +1,10 @@
 # Sunsama Changelog
 
+## [Fix Sign-In Crash] - {PR_MERGE_DATE}
+
+- Fixed every command failing with "crypto is not defined" on some Macs when
+  signing in to Sunsama.
+
 ## [Fix Store Publish] - 2026-09-25
 
 - Fixed the store build failing on the AI tools' subtask lists. The AI now
