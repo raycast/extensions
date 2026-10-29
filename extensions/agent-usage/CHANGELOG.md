@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add Claude API and OpenAI API credit balances] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show the Claude Console prepaid API credit balance, month-to-date spend, and next expiring credit grant as a **Claude API** row, separate from the Claude subscription. Add a **Claude Console Session Cookie** preference for the `platform.claude.com` session
+- Show the OpenAI platform prepaid API credit balance and next expiring grant as an **OpenAI API** row, separate from Codex. Add an **OpenAI Platform Session Token** preference for the `platform.openai.com` session
+
 ## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback

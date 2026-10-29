@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic and z.ai",
+  "description": "Monitor AI coding agent usage across AIHubMix, Amp, Antigravity, Claude, Claude API, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenAI API, OpenCode Go, OpenRouter, Raycast, Synthetic and z.ai",
   "categories": [
     "Productivity"
   ],
@@ -16,7 +16,8 @@
     "jalenzz",
     "Jakoss",
     "laughing",
-    "ridemountainpig"
+    "ridemountainpig",
+    "igorabramkin"
   ],
   "type": "module",
   "scripts": {
@@ -122,6 +123,21 @@
       "title": "Additional Claude Homes (Optional)",
       "placeholder": "~/.claude-personal, ~/.claude-work",
       "description": "Comma-separated CLAUDE_CONFIG_DIR directories to include in addition to the default Claude home",
+      "required": false
+    },
+    {
+      "name": "showAnthropicApi",
+      "type": "checkbox",
+      "label": "Show Claude API",
+      "description": "Show the Claude Console prepaid API credit balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "anthropicConsoleCookie",
+      "type": "password",
+      "title": "Claude Console Session Cookie (Optional)",
+      "description": "Sign in at https://platform.claude.com/settings/billing, then paste the sessionKey cookie value (or a Cookie header containing it) from your browser's developer tools. Include lastActiveOrg to pick which organization is shown.",
       "required": false
     },
     {
@@ -260,6 +276,21 @@
       "type": "password",
       "title": "MinimaxCN API Token (Optional)",
       "description": "Optional fallback token. Usually auto-detected from MINIMAX_CN_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "showOpenAIApi",
+      "type": "checkbox",
+      "label": "Show OpenAI API",
+      "description": "Show the OpenAI platform prepaid API credit balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "openaiPlatformSessionToken",
+      "type": "password",
+      "title": "OpenAI Platform Session Token (Optional)",
+      "description": "API keys cannot read the balance. Open https://platform.openai.com/settings/organization/billing/overview, find a request to api.openai.com in your browser's developer tools (Network tab), and paste the Bearer token from its Authorization header.",
       "required": false
     },
     {

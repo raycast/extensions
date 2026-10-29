@@ -120,6 +120,7 @@ src/
     opencode-active.ts     # Shared OpenCode active-account helpers
   amp/                     # Amp provider (fetcher/parser/renderer/types)
   aihubmix/                # AIHubMix provider
+  anthropic-api/           # Claude API — Claude Console prepaid credit balance via pasted sessionKey cookie
   antigravity/             # Antigravity provider
   claude/                  # Claude provider
   clinepass/               # ClinePass limits, Cline credits, credential discovery/refresh, and account helpers
@@ -130,6 +131,7 @@ src/
   grok/                    # Grok (xAI) provider — auth.json + grok.com billing
   kimi/                    # Kimi provider
   minimax/                 # MiniMax provider
+  openai-api/              # OpenAI API — platform prepaid credit balance via pasted session token
   opencode-go/             # OpenCode Go provider
   raycast/                 # Raycast AI credits — website session cookie + unofficial credits API
   synthetic/               # Synthetic provider
@@ -171,6 +173,8 @@ Key imports from `@raycast/utils`:
 - Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useClinePassAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
 - ClinePass auto-detection reads shared auth from `~/.cline/data/settings/providers.json` (`providers.cline.settings.auth`) before the legacy `~/.cline/data/secrets.json` entry. File-backed sessions may be refreshed and must be persisted atomically with an optimistic credential check so concurrent Cline writes and unrelated provider settings are not overwritten. Manual ClinePass accounts require both a `usr-` user ID and an `sk_` API key.
 - Raycast AI credits come from the unofficial website endpoint `GET https://www.raycast.com/frontend_api/current_user/ai_credits`, authenticated with the `__raycast_session` cookie pasted into `raycastCookieHeader` (only `__raycast_session` and `csrf_token` are forwarded; a bare value is treated as the session). The desktop app's `backend.raycast.com/api/v1/ai/credits` needs the app's OAuth bearer, which extensions cannot read, and rejects website cookies. Chrome cookie auto-import (as CodexBar does) is intentionally not implemented to avoid Keychain prompts and browser-specific decryption.
+- Claude API (`anthropic-api`) reads the undocumented Console endpoints `GET https://platform.claude.com/api/organizations`, then `/api/organizations/{uuid}/prepaid/credits` (required; amounts in minor units scaled by `balance.credits.exponent`, default 2) and `/current_spend` (optional) for the first `api`-capable organization whose billing is readable. A 403 on the organization list means the session is invalid; a 403 on credits moves to the next organization. Only `sessionKey` and `lastActiveOrg` are forwarded from the `anthropicConsoleCookie` preference. Its id is `anthropic-api`, not `claude-api`, so it never prefix-matches `claude-<accountId>` rows in `resolveProviderId`.
+- OpenAI API (`openai-api`) reads the undocumented `GET https://api.openai.com/v1/dashboard/billing/credit_grants` (USD amounts, unix-second expiries) with the platform.openai.com browser session token from `openaiPlatformSessionToken`. The endpoint rejects every `sk-` key, so those are refused locally with guidance instead of being sent.
 - Reuse shared UI helpers from `src/agents/ui.tsx` for error/loading/empty states before adding custom UI.
 - Reuse shared formatting, HTTP, JWT, and OpenCode helpers from `src/agents` before adding provider-local duplicates.
 - Provider `fetcher`/`auth`/`parser` modules must not import `@raycast/api` or `src/agents/hooks.ts` (directly or transitively) — the package has no runtime entry outside Raycast, so any such import breaks the Node test runner. Hook wiring, preference reads, and caching live in `src/agents/provider-hooks.ts` and `src/agents/hooks.ts` instead.

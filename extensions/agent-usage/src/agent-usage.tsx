@@ -29,6 +29,7 @@ import {
 import {
   useAihubmixUsage,
   useAmpUsage,
+  useAnthropicApiUsage,
   useAntigravityUsage,
   useClaudeAccounts,
   useClinePassAccounts,
@@ -42,6 +43,7 @@ import {
   useKimiAccounts,
   useMiniMaxUsage,
   useMinimaxCNUsage,
+  useOpenAIApiUsage,
   useOpencodegoUsage,
   useOpenRouterUsage,
   useRaycastUsage,
@@ -54,6 +56,12 @@ import { formatAihubmixUsageText, getAihubmixAccessory, renderAihubmixDetail } f
 import type { AihubmixError, AihubmixUsage } from "./aihubmix/types.ts";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
 import type { AmpError, AmpUsage } from "./amp/types.ts";
+import {
+  formatAnthropicApiUsageText,
+  getAnthropicApiAccessory,
+  renderAnthropicApiDetail,
+} from "./anthropic-api/renderer.tsx";
+import type { AnthropicApiError, AnthropicApiUsage } from "./anthropic-api/types.ts";
 import {
   formatAntigravityUsageText,
   getAntigravityAccessory,
@@ -85,6 +93,8 @@ import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types.ts";
 import { formatMinimaxCNUsageText, getMinimaxCNAccessory, renderMinimaxCNDetail } from "./minimaxcn/renderer.tsx";
 import type { MinimaxCNError, MinimaxCNUsage } from "./minimaxcn/types.ts";
+import { formatOpenAIApiUsageText, getOpenAIApiAccessory, renderOpenAIApiDetail } from "./openai-api/renderer.tsx";
+import type { OpenAIApiError, OpenAIApiUsage } from "./openai-api/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
 import { formatOpenRouterUsageText, getOpenRouterAccessory, renderOpenRouterDetail } from "./openrouter/renderer.tsx";
@@ -112,6 +122,7 @@ type MultiAccountAgentId = "claude" | "clinepass" | "codex" | "copilot" | "kimi"
 interface AgentUsageById {
   aihubmix: AihubmixUsage;
   amp: AmpUsage;
+  "anthropic-api": AnthropicApiUsage;
   claude: ClaudeUsage;
   clinepass: ClinePassUsage;
   codex: CodexUsage;
@@ -127,6 +138,7 @@ interface AgentUsageById {
   zai: ZaiUsage;
   minimax: MiniMaxUsage;
   minimaxcn: MinimaxCNUsage;
+  "openai-api": OpenAIApiUsage;
   "opencode-go": OpencodegoUsage;
   openrouter: OpenRouterUsage;
   raycast: RaycastUsage;
@@ -135,6 +147,7 @@ interface AgentUsageById {
 interface AgentErrorById {
   aihubmix: AihubmixError;
   amp: AmpError;
+  "anthropic-api": AnthropicApiError;
   claude: ClaudeError;
   clinepass: ClinePassError;
   codex: CodexError;
@@ -150,6 +163,7 @@ interface AgentErrorById {
   zai: ZaiError;
   minimax: MiniMaxError;
   minimaxcn: MinimaxCNError;
+  "openai-api": OpenAIApiError;
   "opencode-go": OpencodegoError;
   openrouter: OpenRouterError;
   raycast: RaycastError;
@@ -227,6 +241,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderAmpDetail,
     getAccessory: getAmpAccessory,
     formatUsageText: formatAmpUsageText,
+  },
+  "anthropic-api": {
+    id: "anthropic-api",
+    name: "Claude API",
+    icon: "claude-icon.svg",
+    description: "Claude Console API Credit Balance",
+    isSupported: true,
+    settingsUrl: "https://platform.claude.com/settings/billing",
+    useUsage: useAnthropicApiUsage,
+    renderDetail: renderAnthropicApiDetail,
+    getAccessory: getAnthropicApiAccessory,
+    formatUsageText: formatAnthropicApiUsageText,
   },
   claude: {
     id: "claude",
@@ -399,6 +425,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getMinimaxCNAccessory,
     formatUsageText: formatMinimaxCNUsageText,
   },
+  "openai-api": {
+    id: "openai-api",
+    name: "OpenAI API",
+    icon: "codex-icon.svg",
+    description: "OpenAI API Credit Balance",
+    isSupported: true,
+    settingsUrl: "https://platform.openai.com/settings/organization/billing/overview",
+    useUsage: useOpenAIApiUsage,
+    renderDetail: renderOpenAIApiDetail,
+    getAccessory: getOpenAIApiAccessory,
+    formatUsageText: formatOpenAIApiUsageText,
+  },
   "opencode-go": {
     id: "opencode-go",
     name: "OpenCode Go",
@@ -527,6 +565,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Hooks must be called unconditionally at top level (React rules)
   const aihubmixState = AGENT_REGISTRY.aihubmix.useUsage(Boolean(prefs.showAihubmix));
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
+  const anthropicApiState = AGENT_REGISTRY["anthropic-api"].useUsage(Boolean(prefs.showAnthropicApi));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
@@ -535,6 +574,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
   const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
   const minimaxcnState = AGENT_REGISTRY.minimaxcn.useUsage(Boolean(prefs.showMinimaxCN));
+  const openaiApiState = AGENT_REGISTRY["openai-api"].useUsage(Boolean(prefs.showOpenAIApi));
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
   const openrouterState = AGENT_REGISTRY.openrouter.useUsage(Boolean(prefs.showOpenRouter));
   const raycastState = AGENT_REGISTRY.raycast.useUsage(Boolean(prefs.showRaycast));
@@ -551,6 +591,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
     aihubmix: createAgentView(AGENT_REGISTRY.aihubmix, aihubmixState, Boolean(prefs.showAihubmix)),
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
+    "anthropic-api": createAgentView(
+      AGENT_REGISTRY["anthropic-api"],
+      anthropicApiState,
+      Boolean(prefs.showAnthropicApi),
+    ),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
@@ -559,6 +604,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
     minimaxcn: createAgentView(AGENT_REGISTRY.minimaxcn, minimaxcnState, Boolean(prefs.showMinimaxCN)),
+    "openai-api": createAgentView(AGENT_REGISTRY["openai-api"], openaiApiState, Boolean(prefs.showOpenAIApi)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
     openrouter: createAgentView(AGENT_REGISTRY.openrouter, openrouterState, Boolean(prefs.showOpenRouter)),
     raycast: createAgentView(AGENT_REGISTRY.raycast, raycastState, Boolean(prefs.showRaycast)),
