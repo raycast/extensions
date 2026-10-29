@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - View live per-app download and upload rates with helper processes grouped under their app.
 - Inspect traffic charts with optional sample transitions, session usage, and contributing processes.
