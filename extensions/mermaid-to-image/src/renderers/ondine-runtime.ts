@@ -17,9 +17,17 @@ export function createOndineRuntimeLoader<T>(initialize: () => Promise<T>): () =
   };
 }
 
+export function resolveOndineWasm(module: unknown): string | WebAssembly.Module {
+  const exports = module as { wasm?: unknown; default?: { wasm?: unknown } } | null | undefined;
+  // Store-packaged CommonJS dependencies expose their exports under `default` on native import().
+  const wasm = exports?.wasm ?? exports?.default?.wasm;
+  if ((typeof wasm === "string" && wasm.length > 0) || wasm instanceof WebAssembly.Module) return wasm;
+  throw new Error("Ondine compiler module is missing or invalid (expected wasm or default.wasm).");
+}
+
 export const getOndineRuntime = createOndineRuntimeLoader(async () => {
-  const { wasm } = await import("ondine/compiler/wasm/all");
-  return create({ modules: { all: wasm } });
+  const module = await import("ondine/compiler/wasm/all");
+  return create({ modules: { all: resolveOndineWasm(module) } });
 });
 
 export function getOndineDiagnostic(error: unknown) {

@@ -7,6 +7,7 @@ export const supportedBrowsers = [
   "Firefox",
   "Firefox Developer Edition",
   "Google Chrome",
+  "Helium",
   "Microsoft Edge",
   "Mozilla Firefox",
   "Opera",
@@ -22,16 +23,20 @@ export const supportedBrowsers = [
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];
 
+// Bundle identifiers are interpolated into AppleScript, so anything outside
+// the characters a real identifier can contain is rejected up front.
+export const BUNDLE_ID_PATTERN = /^[A-Za-z0-9.-]+$/;
+
 /** Marks a window that couldn't be scripted for its active tab's URL (e.g. a Little Arc window). */
 export const UNSCRIPTABLE_WINDOW_MARKER = "UNSCRIPTABLE_WINDOW";
+export const BROWSER_NOT_RUNNING_MARKER = "BROWSER_NOT_RUNNING";
 
 /**
- * Both Safari and Chromium-family browsers expose `tabs of window` in their
- * AppleScript dictionaries, so every window and every tab can be enumerated
- * with one script shape instead of only reading the active tab of the front
- * window. Windows are returned frontmost-first; a window without tabs (rare,
- * but possible for utility/popup windows) is skipped rather than aborting
- * the whole script.
+ * Safari exposes `tabs of window` in its AppleScript dictionary, so every
+ * window and every tab can be enumerated instead of only reading the active
+ * tab of the front window. Windows are returned frontmost-first; a window
+ * without tabs (rare, but possible for utility/popup windows) is skipped
+ * rather than aborting the whole script.
  */
 export function getStandardTabsScript(appName: string): string {
   return `
@@ -50,6 +55,55 @@ export function getStandardTabsScript(appName: string): string {
       set candidateString to candidateList as string
       set AppleScript's text item delimiters to ""
       return candidateString
+    end tell
+  `;
+}
+
+export function getOpenChromiumTabScript(bundleId: string, markerUrl: string, url: string): string {
+  return `
+    tell application id "${bundleId}"
+      set normalWindows to every window whose mode is "normal"
+      if normalWindows is {} then
+        set URL of active tab of (make new window) to "${markerUrl}"
+      else
+        make new tab at end of tabs of (item 1 of normalWindows) with properties {URL:"${markerUrl}"}
+      end if
+
+      repeat with w in (get windows)
+        repeat with candidateTabId in (get id of every tab of w)
+          set tabId to contents of candidateTabId
+          try
+            set isCreatedTab to (URL of tab id tabId of w) is "${markerUrl}"
+          on error
+            set isCreatedTab to false
+          end try
+          if isCreatedTab then
+            set URL of tab id tabId of w to "${url}"
+            try
+              set index of w to 1
+            end try
+            activate
+            return tabId
+          end if
+        end repeat
+      end repeat
+      error "The new tab wasn't found."
+    end tell
+  `;
+}
+
+export function getChromiumTabUrlScript(bundleId: string, tabId: string): string {
+  return `
+    if application id "${bundleId}" is not running then return "${BROWSER_NOT_RUNNING_MARKER}"
+    tell application id "${bundleId}"
+      try
+        repeat with w in (get windows)
+          try
+            return URL of (tab id "${tabId}" of w)
+          end try
+        end repeat
+      end try
+      return ""
     end tell
   `;
 }
