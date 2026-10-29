@@ -6,7 +6,7 @@ import type { RegistryEntry } from "./types";
 const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
-    {
+  {
     name: "industrylens",
     title: "IndustryLens",
     description:
