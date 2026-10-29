@@ -17,21 +17,25 @@ import { currencyCode2Name, currencyCode2CountryAndRegion } from "./currency";
 const STORAGE_KEY_FROM_CURRENCY_CODE = "fromCurrencyCode";
 const STORAGE_KEY_PINNED_CURRENCY_CODE = "pinnedCurrencyCode";
 
-type Provider = "exchangerate-api" | "unirate";
+type Provider = "exchangerate-api" | "unirate" | "allratestoday";
 
 const PROVIDER_LABELS: Record<Provider, string> = {
   "exchangerate-api": "exchangerate-api.com",
   unirate: "unirateapi.com",
+  allratestoday: "allratestoday.com",
 };
 
 function getProvider(): Provider {
   const { provider } = getPreferenceValues<Preferences>();
-  return provider === "unirate" ? "unirate" : "exchangerate-api";
+  if (provider === "unirate") return "unirate";
+  if (provider === "allratestoday") return "allratestoday";
+  return "exchangerate-api";
 }
 
 const PROVIDER_DOC_URLS: Record<Provider, string> = {
   "exchangerate-api": "https://www.exchangerate-api.com/docs/standard-requests",
   unirate: "https://unirateapi.com/docs",
+  allratestoday: "https://allratestoday.com/central-bank-rates-api/ecb/",
 };
 
 function cacheKey(provider: Provider, historyDate: Date | null): string {
@@ -422,6 +426,15 @@ async function performExchange(
       })
       .then((currencyData: CurrencyResult | void) => {
         if (currencyData) {
+          // The keyless ECB table covers ~30 currencies; don't divide by a missing source rate
+          if (!currencyData.conversion_rates[fromCode]) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: `${PROVIDER_LABELS[provider]} has no rate for ${fromCode}`,
+            });
+            return;
+          }
           return enrichExchangeData(currencyData, amount, fromCode, filter.toLocaleLowerCase(), pinned);
         }
       });
@@ -435,7 +448,68 @@ function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Res
   if (provider === "unirate") {
     return uniRateAPI(historyDate, signal);
   }
+  if (provider === "allratestoday") {
+    return allRatesTodayAPI(historyDate, signal);
+  }
   return exchangeRateAPI(historyDate, signal);
+}
+
+interface AllRatesTodayTableResponse {
+  bank?: string;
+  rate_date?: string;
+  rates?: Array<{ base: string; quote: string; value: number }>;
+  error?: string;
+}
+
+// Keyless provider: the European Central Bank's daily reference rates, served by
+// allratestoday.com without an API key. The table is EUR-based (~30 currencies);
+// enrichExchangeData() already divides by conversion_rates[fromCode], so any
+// cross rate is derived as table[target] / table[source]. No historical endpoint.
+async function allRatesTodayAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
+  const fail = (errorType: string): Response =>
+    new Response(
+      JSON.stringify({ base_code: "EUR", result: "error", ["error-type"]: errorType, conversion_rates: {} }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  if (historyDate) {
+    return fail("historical rates are not available from the keyless AllRatesToday provider");
+  }
+
+  const url = "https://allratestoday.com/api/open/central-bank/ecb";
+  console.log(`make API call to ${url}`);
+  const upstream = await fetch(url, { signal: signal, method: "GET", headers: { Accept: "application/json" } });
+
+  let upstreamJson: AllRatesTodayTableResponse;
+  try {
+    upstreamJson = (await upstream.json()) as AllRatesTodayTableResponse;
+  } catch {
+    upstreamJson = { error: `HTTP ${upstream.status}` };
+  }
+  if (!upstream.ok || !upstreamJson.rates) {
+    return fail(upstreamJson.error || `HTTP ${upstream.status}`);
+  }
+
+  const conversion_rates: { [key: string]: number } = { EUR: 1 };
+  for (const row of upstreamJson.rates) {
+    if (row.base === "EUR" && typeof row.value === "number" && row.value > 0) {
+      conversion_rates[row.quote] = row.value;
+    }
+  }
+
+  // ECB publishes once per business day (~16:00 CET); refresh daily like the other providers.
+  const nowSec = Math.round(Date.now() / 1000);
+  const rateDate = upstreamJson.rate_date ? new Date(`${upstreamJson.rate_date}T15:00:00Z`) : new Date();
+  const mapped: CurrencyResult = {
+    base_code: "EUR",
+    result: "success",
+    ["error-type"]: "",
+    conversion_rates,
+    time_last_update_unix: Math.round(rateDate.getTime() / 1000),
+    time_next_update_unix: nowSec + 86400,
+    time_last_update_utc: rateDate.toUTCString(),
+  };
+  return new Response(JSON.stringify(mapped), { status: 200, headers: { "Content-Type": "application/json" } });
 }
 
 function exchangeRateAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
@@ -470,7 +544,7 @@ async function uniRateAPI(historyDate: Date | null, signal: AbortSignal): Promis
         historyDate.getDate(),
       ).padStart(2, "0")}`
     : "";
-  const url = `https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=${encodeURIComponent(api_key)}`;
+  const url = `https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=${encodeURIComponent(api_key ?? "")}`;
   console.log(`make API call to https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=***`);
 
   const upstream = await fetch(url, {
@@ -578,6 +652,7 @@ function enrichExchangeData(
   currencyData.conversion_rate_pin_exchanged = pinned
     ?.filter(
       (it) =>
+        currencyData.conversion_rates[it] !== undefined &&
         currencyCode2CountryAndRegion[it] !== undefined &&
         currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
