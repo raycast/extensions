@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Relaticle MCP Server] - {PR_MERGE_DATE}
+## [Add Relaticle MCP Server] - 2026-10-29
 
 - Add Relaticle, an open-source CRM your AI agents can read and update, as a remote server at https://mcp.relaticle.com with OAuth sign-in.
 
