@@ -38,7 +38,7 @@
       "description": "Open Claude in Chrome and fill the prompt with clipboard text without sending.",
       "mode": "no-view",
       "keywords": [
-        "cla c",
+        "clac",
         "claude",
         "clipboard"
       ],
@@ -69,7 +69,7 @@
       "description": "Open Gemini in Chrome and fill the prompt with clipboard text without sending.",
       "mode": "no-view",
       "keywords": [
-        "gem c",
+        "gemc",
         "gemini",
         "clipboard"
       ],
@@ -100,7 +100,7 @@
       "description": "Open ChatGPT in Chrome and fill the prompt with clipboard text without sending.",
       "mode": "no-view",
       "keywords": [
-        "gpt c",
+        "gptc",
         "chatgpt",
         "clipboard"
       ],
@@ -130,7 +130,7 @@
       "description": "Open Grok in Chrome and fill the prompt with clipboard text without sending.",
       "mode": "no-view",
       "keywords": [
-        "grok c",
+        "grokc",
         "grok",
         "clipboard"
       ],

@@ -11,10 +11,10 @@ it. No API key is needed.
 
 | Destination | Open or type a query | Fill from clipboard |
 | --- | --- | --- |
-| Claude | `cla` — Open Claude | `cla c` — Open Claude with Clipboard |
-| Gemini | `gem` — Open Gemini | `gem c` — Open Gemini with Clipboard |
-| ChatGPT | `gpt` — Open ChatGPT | `gpt c` — Open ChatGPT with Clipboard |
-| Grok | `grok` — Open Grok | `grok c` — Open Grok with Clipboard |
+| Claude | `cla` — Open Claude | `clac` — Open Claude with Clipboard |
+| Gemini | `gem` — Open Gemini | `gemc` — Open Gemini with Clipboard |
+| ChatGPT | `gpt` — Open ChatGPT | `gptc` — Open ChatGPT with Clipboard |
+| Grok | `grok` — Open Grok | `grokc` — Open Grok with Clipboard |
 
 For predictable shortcuts, assign these aliases to their corresponding commands
 in **Raycast Settings → Extensions**. Aliases are personal Raycast settings and
@@ -24,9 +24,10 @@ are not installed automatically. You can also search for the full command name.
 **Enter**. Claude opens with the question in its chat box. The same flow works
 with `gem`, `gpt`, and `grok`.
 
-**Use your clipboard:** copy some text and run `cla c` (or the equivalent for
+**Use your clipboard:** copy some text and run `clac` (or the equivalent for
 another destination). Clipboard commands are separate commands and do not need
-an argument or Tab.
+an argument or Tab. These shortcuts have no spaces, so they do not trigger
+Raycast’s alias-plus-Space behavior for typed queries.
 
 **Just open the site:** run an open command without entering a query. The
 clipboard is used as the prompt only by commands named “with Clipboard.” Blank queries and
