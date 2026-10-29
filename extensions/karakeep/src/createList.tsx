@@ -7,12 +7,12 @@ import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { List } from "./types";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
 import { labelLists } from "./utils/listLabels";
 import { ensureReachable } from "./utils/submitGuard";
 import { useApiReachable } from "./hooks/useApiReachable";
-import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineFormNotice";
+import { OfflineFormNotice, OpenSettingsAction, StartKarakeepAction } from "./components/OfflineFormNotice";
 
 const log = logger.child("[CreateList]");
 
@@ -33,7 +33,7 @@ interface CreateListViewProps {
 export default function CreateListView({ onListCreated, showSuccessHUD = true }: CreateListViewProps = {}) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
-  const { state: reachability, reachable, offline, isRecovering, canStart, start } = useApiReachable();
+  const { state: reachability, reachable, offline, unauthorized, isRecovering, canStart, start } = useApiReachable();
   const { lists } = useGetAllLists(reachable);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
@@ -48,7 +48,7 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
 
       // Same pre-flight as the other create forms — don't write into a dead
       // server and lose the filled-in list definition.
-      if ((await ensureReachable(values.name)) === "unreachable") return;
+      if ((await ensureReachable(values.name)) !== "ok") return;
 
       const payload = {
         name: values.name.trim(),
@@ -88,16 +88,16 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
       actions={
         <ActionPanel>
           {/* First = bound to ↵ while offline; see OfflineFormNotice. */}
+          <OpenSettingsAction unauthorized={unauthorized} />
           <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
         </ActionPanel>
       }
     >
-      <OfflineFormNotice offline={offline} canStart={canStart} />
+      <OfflineFormNotice offline={offline} canStart={canStart} unauthorized={unauthorized} />
 
       <Form.TextField
         {...itemProps.name}

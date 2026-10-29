@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 
 /**
@@ -11,6 +11,8 @@ export enum ErrorType {
   NETWORK = "NETWORK",
   NOT_FOUND = "NOT_FOUND",
   PERMISSION = "PERMISSION",
+  NO_MEDIA = "NO_MEDIA",
+  DOWNLOAD_FAILED = "DOWNLOAD_FAILED",
   FILE_SYSTEM = "FILE_SYSTEM",
   VALIDATION = "VALIDATION",
   UNKNOWN = "UNKNOWN",
@@ -43,6 +45,14 @@ const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string }> = {
   [ErrorType.PERMISSION]: {
     title: "Permission Denied",
     message: "You don't have permission to access this resource.",
+  },
+  [ErrorType.NO_MEDIA]: {
+    title: "Nothing to Download",
+    message: "This recording has no downloadable media.",
+  },
+  [ErrorType.DOWNLOAD_FAILED]: {
+    title: "Download Failed",
+    message: "The recording could not be downloaded. The partial file was kept, so it can resume.",
   },
   [ErrorType.FILE_SYSTEM]: {
     title: "File System Error",
@@ -98,6 +108,16 @@ export function classifyError(error: unknown): ErrorType {
     return ErrorType.NETWORK;
   }
 
+  // Download-specific conditions. These are checked BEFORE the generic matches
+  // below, because "no downloadable media" contains "download" and would
+  // otherwise be swallowed by a broader rule.
+  if (message.includes("no_media") || message.includes("no downloadable media")) {
+    return ErrorType.NO_MEDIA;
+  }
+  if (message.includes("download_failed") || message.includes("generation_failed")) {
+    return ErrorType.DOWNLOAD_FAILED;
+  }
+
   // Not found
   if (message.includes("not found") || message.includes("404")) {
     return ErrorType.NOT_FOUND;
@@ -136,14 +156,19 @@ export function getUserFriendlyError(error: unknown): { title: string; message: 
 
 /**
  * Show a user-friendly error toast
+ *
+ * Routed through `showError` from `@chrismessina/raycast-kit` so every failure
+ * carries a "Copy Error" action — House Style, and a Store review requirement.
+ * An error the user cannot copy is an error they cannot report.
  */
 export async function showErrorToast(error: unknown, customTitle?: string): Promise<void> {
   const { title, message } = getUserFriendlyError(error);
 
-  await showToast({
-    style: Toast.Style.Failure,
+  await showError(error, {
     title: customTitle || title,
-    message: message,
+    // The classified message is friendlier than the raw text; the true cause
+    // still reaches the clipboard via the Error's own stack.
+    message,
   });
 
   // Log the actual error for debugging
@@ -171,10 +196,12 @@ export async function showContextualError(
   // For unknown errors, use the fallback message if provided
   const finalMessage = errorType === ErrorType.UNKNOWN && context.fallbackMessage ? context.fallbackMessage : message;
 
-  await showToast({
-    style: Toast.Style.Failure,
+  await showError(error, {
     title: finalTitle,
     message: finalMessage,
+    // Names the operation on the clipboard so a bug report says which action
+    // failed, without lengthening the toast.
+    copyContext: `Action: ${context.action}`,
   });
 
   // Log the actual error for debugging

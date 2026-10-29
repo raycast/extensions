@@ -1,3 +1,5 @@
+import { sysUptime } from "os-utils";
+
 import { ProcessInfo } from "../Interfaces";
 import { getTopProcesses } from "../lib/process-list";
 
@@ -27,3 +29,6 @@ export const getRelativeTime = (uptime: number): string => {
 
   return "Unknown";
 };
+
+/** "1 day ago"-style label for the system uptime, shared by the CPU and System Info panes. */
+export const getUptimeLabel = (): string => getRelativeTime(sysUptime());

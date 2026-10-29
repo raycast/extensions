@@ -1,5 +1,22 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [Stop Speaking] - 2026-09-25
+
+### Added
+
+- Stop Speaking command to stop playback without re-running a speak command
+
+### Fixed
+
+- Stopping playback now also stops generating the rest of the audio, so long texts no longer keep using credits after they are stopped
+- Speaking again while playback is running now reports when playback could not be stopped, instead of claiming it is already reading
+
+## [Fix Repeated Already Reading] - 2026-08-17
+
+### Fixed
+
+- Speech commands never finishing after playback because the final stream marker was ignored, leaving every next run reporting "Already reading" until the command was launched twice
+
 ## [Fix Stuck Playback Sessions] - 2026-08-10
 
 ### Fixed

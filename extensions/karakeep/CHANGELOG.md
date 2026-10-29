@@ -1,5 +1,38 @@
 # Karakeep Changelog
 
+## [2.4.6] - 2026-10-24
+
+- Fixed screenshot previews being blank on self-hosted Karakeep v0.33.x. The extension was fetching images through the Next.js image optimizer route (`/_next/image`), which returns HTTP 400 in v0.33.x. It now fetches directly from `/api/assets/{id}`, which returns the image with HTTP 200 on all supported server versions.
+
+## [2.4.5] - 2026-08-29
+
+- A rejected API key now says so. Every command used to fail with a bare "HTTP 401" and no way to act on it — the lists showed "Couldn't load bookmarks", the forms showed "Couldn't create bookmark", and nothing pointed at the setting that was actually wrong. Bookmarks, Lists, Tags, Highlights, Backups and Stats now show an "Invalid API key" screen with Open Extension Settings as the default action, and every error toast in the extension offers the same
+- One bad key no longer produces a pile of unrelated errors. Opening Search Bookmarks reported "Couldn't load lists", from a request the command only makes to populate its filter dropdown. The key is now checked once before any dependent request runs, and the rest of a command's requests stop after the first rejection instead of each failing separately
+- Opening Extension Settings from the "Invalid API key" screen now closes the command. Raycast keeps the preferences a command started with, so a corrected key cannot take effect until the command is run again — the screen used to leave you retrying against a key it could no longer change
+- Create Bookmark, Create Note, Create List and the edit forms now stop before writing when the key has been rejected, rather than attempting the save and failing partway through
+- Error messages now carry what the server actually said — "HTTP 401 — Unauthorized" instead of a bare status code — with any credentials in the response redacted before they reach a toast or your clipboard
+- Refreshing a view no longer reports success when the refresh actually failed
+- The Backups view no longer retries every few seconds behind an error screen when the API key is what is wrong, and creating or deleting a backup that was rejected no longer follows the failure with a second, duplicate error
+- Copy URL is available again on a bookmark. It shared a condition with Open URL — which is hidden when it is already the ↵ action — so anyone using the default "Open in Browser" setting never saw Copy at all. The action panel is also ordered more usefully: whichever action you have bound to ↵ stays first, and the rest now put what you do with the bookmark's content ahead of what you do to the record — so with the default setting a link reads Open URL, Copy URL, Edit, View Detail
+- The interface says URL rather than Link throughout, matching Raycast's own wording and the detail pane, which already said URL next to an action that said Link
+- The list icon field now uses Raycast's own emoji picker instead of one bundled into the extension. [Raycast 2.1](https://www.raycast.com/changelog/macos/2-1) added an inline picker to every text field — type `:` followed by a name — which searches every emoji and follows your skin tone preference. The ⌘I grid it replaces has been removed, and the extension is a good deal smaller for it
+- Upgraded to Raycast API 2.1
+
+## [2.4.4] - 2026-08-17
+
+- Fixed a custom title being applied to an existing bookmark even when the rest of the submission failed. Adding a bookmark whose URL is already saved renames it, and that rename now happens only after the list and tag steps have succeeded, so a failure leaves the existing bookmark untouched
+- Create Bookmark no longer reports "Creation failed" when the bookmark was saved and only a later step failed. The toast now says which part didn't apply (the list, the tags, or the title) and the form stays open so you can retry without retyping anything
+- Fixed the Update Karakeep command offering to copy a Docker command for a previously-detected instance after a re-check had failed, and carrying the earlier result's state into the next check
+- Added a "Use Page Title" action (⌘T) to Create Bookmark, which fills the Title field from the active browser tab. It appears only when the Raycast browser extension is available, since that is the only source of a page title. The field is still empty by default, because a title you set overrides the one Karakeep reads from the page and keeps it from ever updating
+- Fixed the Safari entry under "Add to Browser" opening an App Store listing that no longer exists. It now opens the Karakeep app
+- Keyboard shortcuts now follow Raycast's standard bindings, so they match what you already know from other extensions. Delete moved to ⌃D, Edit to ⌘E, Open to ⌘O, Copy ID to ⌘⇧C, and Clear Cache to ⌃⇧D; every shortcut also declares an explicit Windows binding
+- Backing out of the "Delete list" confirmation no longer shows a red "Delete cancelled" error, matching every other confirmation in the extension
+- Error toasts that report a failure with no underlying exception — a browser tab that couldn't be read, a bookmark the server returned empty, a backup that failed on its own — now let you copy the details, so every error toast can be turned into a bug report
+
+## [2.4.3] - 2026-08-13
+
+- Added an optional Title field to Create Bookmark. Leave it empty to use the page title detected by Karakeep. Custom titles are also applied when the submitted URL already exists in Karakeep.
+
 ## [2.4.2] - 2026-08-12
 
 - Added an "Add to List" action to the Bookmarks and Bookmark Detail views, as a submenu you can filter by typing (⌘⇧L)

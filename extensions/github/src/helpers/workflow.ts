@@ -6,14 +6,7 @@ import { WorkflowRun } from "../components/WorkflowRunListItem";
 type Status = "queued" | "in_progress" | "completed";
 
 type Conclusion =
-  | "success"
-  | "failure"
-  | "neutral"
-  | "cancelled"
-  | "skipped"
-  | "timed_out"
-  | "action_required"
-  | "startup_failure";
+  "success" | "failure" | "neutral" | "cancelled" | "skipped" | "timed_out" | "action_required" | "startup_failure";
 
 export function getWorkflowStatus(workflow_run: WorkflowRun): List.Item.Props["icon"] {
   const status = workflow_run.status as Status;

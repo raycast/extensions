@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 
@@ -250,7 +250,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: pr
               <Action.CopyToClipboard
                 content={bookmark.content.url}
                 title={t("bookmark.actions.copyLink")}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               />
             </>
           )}
@@ -282,7 +282,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: pr
               title={t("bookmark.actions.aiSummary")}
               onAction={handleSummarize}
               icon={Icon.Wand}
-              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+              shortcut={{ macOS: { modifiers: ["ctrl"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
           )}
           {lists.length > 0 && <AddToListSubmenu bookmarkId={bookmark.id} lists={lists} isLoading={isLoadingLists} />}
@@ -290,13 +290,13 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: pr
             title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
             onAction={() => handleUpdate({ favourited: !bookmark.favourited })}
             icon={bookmark.favourited ? Icon.StarCircle : Icon.Star}
-            shortcut={{ modifiers: ["ctrl"], key: "f" }}
+            shortcut={{ macOS: { modifiers: ["ctrl"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
           />
           <Action
             title={bookmark.archived ? t("bookmark.actions.unarchive") : t("bookmark.actions.archive")}
             onAction={() => handleUpdate({ archived: !bookmark.archived })}
             icon={bookmark.archived ? Icon.BlankDocument : Icon.SaveDocument}
-            shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            shortcut={{ macOS: { modifiers: ["ctrl"], key: "a" }, Windows: { modifiers: ["ctrl"], key: "a" } }}
           />
         </ActionPanel.Section>
 
@@ -305,14 +305,14 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: pr
             title={t("bookmark.actions.edit")}
             onAction={handleEdit}
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["ctrl"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
           />
           <Action
             title={t("bookmark.actions.delete")}
             style={Action.Style.Destructive}
             onAction={handleDelete}
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel.Section>
       </ActionPanel>

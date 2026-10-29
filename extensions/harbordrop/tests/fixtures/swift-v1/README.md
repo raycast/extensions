@@ -1,0 +1,5 @@
+These files were encoded by the actual Swift `RaycastIntegrationContract` Codable types on 2026-09-28, with sorted keys and unescaped slashes. The timestamp and URL are synthetic fixtures. `request.json` is a byte-exact canonical hash vector; do not reformat it. It is not a template for a live request.
+
+The TypeScript tests read the app-produced descriptor, snapshot, and receipt directly. They compare the shape of a TypeScript-produced request with the Swift request, while allowing the independently versioned client version. UUID casing is normalized by the reader. The app owns payload hash generation; the extension does not use a hash as caller authentication.
+
+The descriptor and snapshot were regenerated with the actual Swift encoder after adding `accessPolicyVersion: 1` and a synthetic licensed `access` decision. Its `validUntil` is fixture data, not a real credential or server entitlement. The request and receipt bytes were preserved; the additive policy does not change their format or the schema version.

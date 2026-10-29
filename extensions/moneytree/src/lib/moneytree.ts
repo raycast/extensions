@@ -20,6 +20,8 @@ export type TransactionQueryOptions = {
   startDate?: string;
   endDate?: string;
   page?: number;
+  /** Treat the query as filtered when choosing default dates, e.g. when results are filtered locally. */
+  filtered?: boolean;
 };
 
 export function getCredentialName(credential: CredentialWithAccounts): string {
@@ -147,7 +149,7 @@ export async function getCachedAccounts(options?: { includeUnsupported?: boolean
 export async function fetchTransactionPage(options: TransactionQueryOptions): Promise<TransactionsResponse> {
   await getAccessToken();
   const { startDate, endDate } = getTransactionDateRange({
-    hasFilter: Boolean(options.query || options.accountId),
+    hasFilter: Boolean(options.filtered || options.query || options.accountId),
     startDate: options.startDate,
     endDate: options.endDate,
   });

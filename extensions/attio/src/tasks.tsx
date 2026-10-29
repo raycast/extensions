@@ -1,5 +1,7 @@
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { attio, parseErrorMessage } from "./attio";
+import { failToast } from "@chrismessina/raycast-kit";
+import { countOf } from "@chrismessina/raycast-kit/plural";
+import { differenceInDays, format, formatDistanceToNow, isBefore, isToday } from "date-fns";
+import { useMemo, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -8,21 +10,39 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Image,
   Keyboard,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { Task } from "attio-js/dist/commonjs/models/components/task";
-import { differenceInDays, format, formatDistanceToNow, isBefore, isToday } from "date-fns";
-import { useMemo } from "react";
+import { useCachedState, useForm } from "@raycast/utils";
+import { createTask, deleteTask, listTasks, updateTask } from "./api/endpoints";
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE, satisfied } from "./api/operations";
+import type { Task } from "./api/types";
+import ExportActions from "./components/ExportActions";
+import { guard } from "./components/Guard";
+import TaskEditForm from "./components/TaskEditForm";
+import { useAttio } from "./hooks/useAttio";
+import { useMembers } from "./hooks/useMembers";
+import { friendlyDay } from "./lib/friendly-date";
 
-const buildAccessories = (task: Task, currentDate: Date) => {
+type Filter = "all" | "mine" | "open" | "completed";
+type TaskSort = "deadline-asc" | "deadline-desc" | "created-desc";
+
+const MAX_ASSIGNEE_AVATARS = 2;
+
+const buildAccessories = (
+  task: Task,
+  currentDate: Date,
+  members: { nameFor: (actorId: string) => string | undefined; avatarFor: (actorId: string) => string | undefined },
+  showDueDate: boolean,
+) => {
   const accessories: List.Item.Accessory[] = [];
-  const { deadlineAt, linkedRecords, assignees } = task;
-  if (deadlineAt) {
-    const date = new Date(deadlineAt);
+  const { deadline_at, linked_records, assignees } = task;
+  if (deadline_at && showDueDate) {
+    const date = new Date(deadline_at);
     let value = "Due ";
     const color = !isToday(date) && isBefore(date, currentDate) ? Color.Red : Color.Orange;
 
@@ -38,58 +58,126 @@ const buildAccessories = (task: Task, currentDate: Date) => {
   }
   accessories.push({
     icon: Icon.Document,
-    text: linkedRecords.length.toString(),
-    tooltip: `${linkedRecords.length} records`,
+    text: linked_records.length.toString(),
+    tooltip: countOf(linked_records.length, "record"),
   });
-  accessories.push({
-    icon: Icon.TwoPeople,
-    text: assignees.length.toString(),
-    tooltip: `${assignees.length} assignees`,
+  assignees.slice(0, MAX_ASSIGNEE_AVATARS).forEach((a) => {
+    accessories.push({
+      icon: members.avatarFor(a.referenced_actor_id)
+        ? { source: members.avatarFor(a.referenced_actor_id)!, mask: Image.Mask.RoundedRectangle }
+        : Icon.Person,
+      tooltip: members.nameFor(a.referenced_actor_id) ?? "Assignee",
+    });
   });
+  if (assignees.length > MAX_ASSIGNEE_AVATARS) {
+    accessories.push({ text: `+${assignees.length - MAX_ASSIGNEE_AVATARS}` });
+  }
   return accessories;
 };
-export default function Tasks() {
-  const {
-    isLoading,
-    data: tasks,
-    error,
-    mutate,
-  } = useCachedPromise(
-    async () => {
-      const { data } = await attio.tasks.list({});
-      return data;
-    },
-    [],
-    { initialData: [] },
+
+export default function Tasks({ initialFilter = "all" }: { initialFilter?: Filter } = {}) {
+  const [sort, setSort] = useCachedState<TaskSort>("tasks-sort", "deadline-asc");
+  const h = useAttio(
+    "listTasks",
+    // The API defaults to created_at:asc (oldest first), so "Created ↓" must
+    // ask for the reverse server-side; sort is a dep so pagination restarts.
+    (taskSort: TaskSort) =>
+      async ({ page }: { page: number }) => {
+        const { data } = await listTasks({
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE,
+          sort: taskSort === "created-desc" ? "created_at:desc" : undefined,
+        });
+        return { data, hasMore: data.length === PAGE_SIZE };
+      },
+    [sort],
   );
+  const { isLoading, data, pagination, error, revalidate, mutate, self } = h;
+  // Raycast invokes Action.Push's onPop DURING the navigation re-render, so a
+  // bare `revalidate` there setStates Tasks mid-render ("Cannot update a
+  // component (Tasks) while rendering InternalNavigationRoot", live 2026-09-08).
+  // Defer it out of the render pass.
+  const revalidateAfterPop = () => setTimeout(revalidate, 0);
+  const members = useMembers();
+  const allTasks: Task[] = data ?? [];
   const currentDate = useMemo(() => new Date(), []);
+  const canWrite = satisfied(self.granted, "task:read-write");
+  const [filter, setFilter] = useState<Filter>(initialFilter);
+  const [groupByDue, setGroupByDue] = useCachedState<boolean>("tasks-group-by-due", false);
+
+  const filteredTasks = allTasks.filter((task) => {
+    switch (filter) {
+      case "mine":
+        return task.assignees.some((a) => a.referenced_actor_id === self.memberId);
+      case "open":
+        return !task.is_completed;
+      case "completed":
+        return task.is_completed;
+      default:
+        return true;
+    }
+  });
+
+  // "created-desc" is served newest-first by the API (sort=created_at:desc in
+  // the hook) — the no-op comparator just preserves that server order.
+  const tasks = [...filteredTasks].sort((a, b) => {
+    if (sort === "created-desc") return 0;
+    if (!a.deadline_at && !b.deadline_at) return 0;
+    if (!a.deadline_at) return 1;
+    if (!b.deadline_at) return -1;
+    const diff = new Date(a.deadline_at).getTime() - new Date(b.deadline_at).getTime();
+    return sort === "deadline-desc" ? -diff : diff;
+  });
+
+  // Group-by-due-date sections: friendly day label as section title, insertion
+  // order follows `tasks` (already sorted), "No Due Date" bucket last.
+  // When not filtering by completed, separate completed tasks into final section.
+  const dueDateSections = useMemo(() => {
+    if (!groupByDue) return [];
+    const isCompletedFilter = filter === "completed";
+    const tasksToGroup = isCompletedFilter ? tasks : tasks.filter((t) => !t.is_completed);
+    const completedTasks = isCompletedFilter ? [] : tasks.filter((t) => t.is_completed);
+
+    const order: string[] = [];
+    const buckets = new Map<string, Task[]>();
+    const noDue: Task[] = [];
+    for (const task of tasksToGroup) {
+      if (!task.deadline_at) {
+        noDue.push(task);
+        continue;
+      }
+      const dayKey = task.deadline_at.includes("T") ? task.deadline_at.slice(0, 10) : task.deadline_at;
+      const label = friendlyDay(dayKey);
+      if (!buckets.has(label)) {
+        buckets.set(label, []);
+        order.push(label);
+      }
+      buckets.get(label)!.push(task);
+    }
+    const sections = order.map((label) => ({ title: label, tasks: buckets.get(label)! }));
+    if (noDue.length) sections.push({ title: "No Due Date", tasks: noDue });
+    if (completedTasks.length > 0) sections.push({ title: "Completed", tasks: completedTasks });
+    return sections;
+  }, [groupByDue, tasks, filter]);
+
+  const g = guard(h.guardInput(tasks.length > 0));
+  if (g) return g;
+
   const toggleTask = async (task: Task) => {
-    const { taskId } = task.id;
-    const toast = await showToast(Toast.Style.Animated, "Toggling", taskId);
+    const { task_id } = task.id;
+    const toast = await showToast(Toast.Style.Animated, "Toggling", task_id);
     try {
-      const { isCompleted } = task;
-      await mutate(
-        attio.tasks.update({
-          taskId,
-          requestBody: {
-            data: {
-              isCompleted: !isCompleted,
-            },
-          },
-        }),
-        {
-          optimisticUpdate(data) {
-            return data.map((t) => (t.id.taskId === taskId ? { ...t, isCompleted: !isCompleted } : t));
-          },
-          shouldRevalidateAfter: false,
+      const { is_completed } = task;
+      await mutate(updateTask(task_id, { is_completed: !is_completed }), {
+        optimisticUpdate(data: Task[] | undefined) {
+          return (data ?? []).map((t) => (t.id.task_id === task_id ? { ...t, is_completed: !is_completed } : t));
         },
-      );
+        shouldRevalidateAfter: false,
+      });
       toast.style = Toast.Style.Success;
       toast.title = "Toggled";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = parseErrorMessage(error);
+      failToast(toast, error, { title: "Failed" });
     }
   };
   const confirmAndDelete = async (task: Task) => {
@@ -102,50 +190,118 @@ export default function Tasks() {
       },
     };
     if (!(await confirmAlert(options))) return;
-    const { taskId } = task.id;
-    const toast = await showToast(Toast.Style.Animated, "Deleting", taskId);
+    const { task_id } = task.id;
+    const toast = await showToast(Toast.Style.Animated, "Deleting", task_id);
     try {
-      await mutate(attio.tasks.delete({ taskId }), {
-        optimisticUpdate(data) {
-          return data.filter((t) => t.id.taskId !== taskId);
+      await mutate(deleteTask(task_id), {
+        optimisticUpdate(data: Task[] | undefined) {
+          return (data ?? []).filter((t) => t.id.task_id !== task_id);
         },
         shouldRevalidateAfter: false,
       });
       toast.style = Toast.Style.Success;
       toast.title = "Deleted";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
-      toast.message = parseErrorMessage(error);
+      failToast(toast, error, { title: "Failed" });
     }
   };
+
+  const newTaskAction = canWrite ? (
+    <Action.Push
+      icon={Icon.Plus}
+      title="New Task"
+      target={<NewTask />}
+      onPop={revalidateAfterPop}
+      shortcut={Keyboard.Shortcut.Common.New}
+    />
+  ) : null;
+
+  // CURRENTLY LOADED rows only (the filtered+sorted `tasks` list), not a re-fetch.
+  const exportAction = (
+    <ExportActions
+      filenameBase="tasks"
+      columns={["Content", "Due", "Completed", "Assignees"]}
+      rows={tasks.map((t) => [
+        t.content_plaintext,
+        t.deadline_at ?? "",
+        t.is_completed ? "Yes" : "No",
+        t.assignees.map((a) => members.nameFor(a.referenced_actor_id) ?? a.referenced_actor_id).join(", "),
+      ])}
+    />
+  );
+
+  const sortSubmenu = (
+    <ActionPanel.Submenu title="Sort by" icon={Icon.ChevronUpDown}>
+      <Action
+        title="Due Date ↑"
+        icon={sort === "deadline-asc" ? Icon.Check : undefined}
+        onAction={() => setSort("deadline-asc")}
+      />
+      <Action
+        title="Due Date ↓"
+        icon={sort === "deadline-desc" ? Icon.Check : undefined}
+        onAction={() => setSort("deadline-desc")}
+      />
+      <Action
+        title="Created ↓"
+        icon={sort === "created-desc" ? Icon.Check : undefined}
+        onAction={() => setSort("created-desc")}
+      />
+    </ActionPanel.Submenu>
+  );
+
+  const viewActionsSection = (
+    <ActionPanel.Section title="View">
+      {sortSubmenu}
+      <Action title="Toggle Group by Due Date" icon={Icon.Calendar} onAction={() => setGroupByDue((v) => !v)} />
+    </ActionPanel.Section>
+  );
+
   const TaskItem = ({ task }: { task: Task }) => (
     <List.Item
-      icon={task.isCompleted ? Icon.CheckCircle : Icon.Circle}
-      title={task.contentPlaintext}
-      accessories={buildAccessories(task, currentDate)}
+      icon={task.is_completed ? Icon.CheckCircle : Icon.Circle}
+      title={task.content_plaintext}
+      accessories={buildAccessories(task, currentDate, members, !groupByDue)}
       actions={
         <ActionPanel>
-          <Action
-            icon={task.isCompleted ? Icon.Circle : Icon.CheckCircle}
-            title={task.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
-            onAction={() => toggleTask(task)}
-          />
-          <Action.Push icon={Icon.Pencil} title="Update Task" target={<UpdateTask task={task} />} onPop={mutate} />
-          <Action.Push
-            icon={Icon.Plus}
-            title="New Task"
-            target={<NewTask />}
-            onPop={mutate}
-            shortcut={Keyboard.Shortcut.Common.New}
-          />
-          <Action
-            icon={Icon.Trash}
-            title="Delete Task"
-            onAction={() => confirmAndDelete(task)}
-            style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-          />
+          <ActionPanel.Section>
+            {canWrite && (
+              <Action
+                icon={task.is_completed ? Icon.Circle : Icon.CheckCircle}
+                title={task.is_completed ? "Mark as Incomplete" : "Mark as Complete"}
+                onAction={() => toggleTask(task)}
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Edit">
+            {canWrite && (
+              <Action.Push
+                icon={Icon.Pencil}
+                title="Edit Task"
+                target={<TaskEditForm task={task} />}
+                onPop={revalidateAfterPop}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+            )}
+            {newTaskAction}
+            {canWrite && (
+              <Action
+                icon={Icon.Trash}
+                title="Delete Task"
+                onAction={() => confirmAndDelete(task)}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Task Content" content={task.content_plaintext} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="View">
+            {sortSubmenu}
+            <Action title="Toggle Group by Due Date" icon={Icon.Calendar} onAction={() => setGroupByDue((v) => !v)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>{exportAction}</ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -153,9 +309,13 @@ export default function Tasks() {
 
   const groupedTasks = tasks.reduce(
     (acc, task) => {
-      if (task.isCompleted) {
+      if (task.is_completed) {
         acc.completed.push(task);
-      } else if (!task.deadlineAt || isToday(task.deadlineAt) || isBefore(task.deadlineAt, currentDate)) {
+      } else if (
+        !task.deadline_at ||
+        isToday(new Date(task.deadline_at)) ||
+        isBefore(new Date(task.deadline_at), currentDate)
+      ) {
         acc.today.push(task);
       } else {
         acc.upcoming.push(task);
@@ -165,25 +325,71 @@ export default function Tasks() {
     { today: [], upcoming: [], completed: [] } as { today: Task[]; upcoming: Task[]; completed: Task[] },
   );
 
+  const filterDropdown = (
+    <List.Dropdown
+      tooltip="Filter"
+      {...(initialFilter === "all" ? { storeValue: true } : { defaultValue: initialFilter })}
+      onChange={(v) => setFilter(v as Filter)}
+    >
+      <List.Dropdown.Item title="All Tasks" value="all" />
+      <List.Dropdown.Item title="My Tasks" value="mine" />
+      <List.Dropdown.Item title="Open" value="open" />
+      <List.Dropdown.Item title="Completed" value="completed" />
+    </List.Dropdown>
+  );
+
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarAccessory={filterDropdown}
+      actions={
+        <ActionPanel>
+          {newTaskAction}
+          {exportAction}
+          {viewActionsSection}
+        </ActionPanel>
+      }
+    >
       {!isLoading && !tasks.length && !error ? (
-        <List.EmptyView icon="empty/task.svg" title="Tasks" description="No tasks yet!" />
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title={
+            filter === "mine" ? "No tasks assigned to you" : filter === "completed" ? "No completed tasks" : "Tasks"
+          }
+          description={filter === "mine" ? "Tasks assigned to you will appear here." : "No tasks yet!"}
+          actions={
+            <ActionPanel>
+              {newTaskAction}
+              {viewActionsSection}
+            </ActionPanel>
+          }
+        />
+      ) : groupByDue ? (
+        <>
+          {dueDateSections.map((section) => (
+            <List.Section key={section.title} title={section.title} subtitle={section.tasks.length.toString()}>
+              {section.tasks.map((task) => (
+                <TaskItem key={task.id.task_id} task={task} />
+              ))}
+            </List.Section>
+          ))}
+        </>
       ) : (
         <>
           <List.Section title="Today" subtitle={groupedTasks.today.length.toString()}>
             {groupedTasks.today.map((task) => (
-              <TaskItem key={task.id.taskId} task={task} />
+              <TaskItem key={task.id.task_id} task={task} />
             ))}
           </List.Section>
           <List.Section title="Upcoming" subtitle={groupedTasks.upcoming.length.toString()}>
             {groupedTasks.upcoming.map((task) => (
-              <TaskItem key={task.id.taskId} task={task} />
+              <TaskItem key={task.id.task_id} task={task} />
             ))}
           </List.Section>
           <List.Section title="Completed" subtitle={groupedTasks.completed.length.toString()}>
             {groupedTasks.completed.map((task) => (
-              <TaskItem key={task.id.taskId} task={task} />
+              <TaskItem key={task.id.task_id} task={task} />
             ))}
           </List.Section>
         </>
@@ -192,84 +398,34 @@ export default function Tasks() {
   );
 }
 
-function UpdateTask({ task }: { task: Task }) {
+function NewTask() {
   type FormValues = {
-    deadlineAt: Date | null;
-    isCompleted: boolean;
+    content: string;
+    deadline_at: Date | null;
+    is_completed: boolean;
   };
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      const toast = await showToast(Toast.Style.Animated, "Updating");
-      try {
-        await attio.tasks.update({
-          taskId: task.id.taskId,
-          requestBody: {
-            data: {
-              isCompleted: values.isCompleted,
-              deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
-            },
-          },
-        });
-        toast.style = Toast.Style.Success;
-        toast.title = "Updated";
-        pop();
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = parseErrorMessage(error);
-      }
-    },
-    initialValues: {
-      deadlineAt: task.deadlineAt ? new Date(task.deadlineAt) : null,
-      isCompleted: task.isCompleted,
-    },
-  });
-  return (
-    <Form
-      navigationTitle={`Tasks / ${task.id.taskId} / Update`}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm icon={Icon.Check} title="Update Task" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description title="Content" text={task.contentPlaintext} />
-      <Form.DatePicker title="Deadline" {...itemProps.deadlineAt} />
-      <Form.Checkbox label="Completed" {...itemProps.isCompleted} />
-    </Form>
-  );
-}
-
-function NewTask() {
-  type FormValues = {
-    content: string;
-    deadlineAt: Date | null;
-    isCompleted: boolean;
-  };
-  const { handleSubmit, itemProps } = useForm<FormValues>({
-    async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating");
       try {
-        await attio.tasks.create({
-          data: {
-            ...values,
-            deadlineAt: values.deadlineAt ? values.deadlineAt.toISOString() : null,
-            format: "plaintext",
-            linkedRecords: [],
-            assignees: [],
-          },
+        await createTask({
+          content: values.content,
+          format: "plaintext",
+          deadline_at: values.deadline_at ? values.deadline_at.toISOString() : null,
+          is_completed: values.is_completed,
+          linked_records: [],
+          assignees: [],
         });
         toast.style = Toast.Style.Success;
         toast.title = "Created";
+        pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed";
-        toast.message = parseErrorMessage(error);
+        failToast(toast, error, { title: "Failed" });
       }
     },
     validation: {
-      content: FormValidation.Required,
+      content: (v) => (v?.trim() ? undefined : "Task content is required"),
     },
   });
   return (
@@ -282,8 +438,8 @@ function NewTask() {
       }
     >
       <Form.TextArea title="Content" placeholder="Tweet about @Attio" {...itemProps.content} />
-      <Form.DatePicker title="Deadline" {...itemProps.deadlineAt} />
-      <Form.Checkbox label="Completed" {...itemProps.isCompleted} />
+      <Form.DatePicker title="Deadline" {...itemProps.deadline_at} />
+      <Form.Checkbox label="Completed" {...itemProps.is_completed} />
     </Form>
   );
 }

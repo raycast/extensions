@@ -1,0 +1,168 @@
+{
+  "ownerName": "Notes",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/notes/keyboard-shortcuts-and-gestures-apd46c25187e/mac",
+  "shortcuts": [
+    {
+      "id": "new-note",
+      "commandName": "Create New Note",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "quick-note",
+      "commandName": "Create Quick Note",
+      "modifiers": ["fn"],
+      "key": "Q",
+      "scope": "global"
+    },
+    {
+      "id": "duplicate-note",
+      "commandName": "Duplicate Note",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "new-folder",
+      "commandName": "Create New Folder",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "main-window",
+      "commandName": "Show Main Notes Window",
+      "modifiers": ["command"],
+      "key": "0",
+      "scope": "app"
+    },
+    {
+      "id": "list-view",
+      "commandName": "Show Notes in List",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "gallery-view",
+      "commandName": "Show Notes in Gallery View",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "show-attachments",
+      "commandName": "Show Attachments",
+      "modifiers": ["command"],
+      "key": "3",
+      "scope": "app"
+    },
+    {
+      "id": "search-all-notes",
+      "commandName": "Search All Notes",
+      "modifiers": ["command", "option"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "print-note",
+      "commandName": "Print Note",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "attach-file",
+      "commandName": "Attach File",
+      "modifiers": ["command", "shift"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "create-link",
+      "commandName": "Create Link to Webpage",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "insert-table",
+      "commandName": "Insert Table",
+      "modifiers": ["command", "option"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "title-format",
+      "commandName": "Apply Title Format",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "heading-format",
+      "commandName": "Apply Heading Format",
+      "modifiers": ["command", "shift"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "subheading-format",
+      "commandName": "Apply Subheading Format",
+      "modifiers": ["command", "shift"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "monostyled-format",
+      "commandName": "Apply Monostyled Format",
+      "modifiers": ["command", "shift"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "bulleted-list",
+      "commandName": "Apply Bulleted List",
+      "modifiers": ["command", "shift"],
+      "key": "7",
+      "scope": "app"
+    },
+    {
+      "id": "numbered-list",
+      "commandName": "Apply Numbered List",
+      "modifiers": ["command", "shift"],
+      "key": "9",
+      "scope": "app"
+    },
+    {
+      "id": "checklist",
+      "commandName": "Apply Checklist",
+      "modifiers": ["command", "shift"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "mark-checklist-item",
+      "commandName": "Mark or Unmark Checklist Item",
+      "modifiers": ["command", "shift"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "move-list-item-up",
+      "commandName": "Move List or Checklist Item Up",
+      "modifiers": ["control", "command"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "move-list-item-down",
+      "commandName": "Move List or Checklist Item Down",
+      "modifiers": ["control", "command"],
+      "key": "Down",
+      "scope": "app"
+    }
+  ]
+}

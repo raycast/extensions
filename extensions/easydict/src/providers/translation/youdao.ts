@@ -3,15 +3,18 @@
 import crypto from "node:crypto";
 
 import { userAgent } from "@/consts";
+import type { TranslationContent } from "@/core/content/types";
 import { getLanguageOfTwoExceptChinese } from "@/core/language/utils";
-import { TranslationType } from "@/types/api";
-import type { QueryInput, RequestOptions } from "@/types/query";
-import { md5 } from "@/utils/crypto";
-import { RequestError } from "@/utils/errors";
-import { timedFetch } from "@/utils/http";
-import { logError, logWarn } from "@/utils/logger";
+import { TranslationType } from "@/core/results/kinds";
+import type { QueryInput, RequestOptions } from "@/core/results/types";
+import { md5 } from "@/shared/crypto";
+import { RequestError } from "@/shared/errors";
+import { timedFetch } from "@/shared/http";
+import { logError, logWarn } from "@/shared/logger";
+import { isRecord } from "@/shared/validation";
 
 import { BaseNonStreamingTranslateProvider } from "./base";
+import { invalidResponse } from "./response";
 
 interface TranslateParams {
   keyid: string;
@@ -29,20 +32,10 @@ interface TranslateParams {
   dictResult?: string;
 }
 
-interface YoudaoTranslateResponse {
-  code: number;
-  translateResult: { tgt: string; src: string }[][];
-  type: string;
-}
-
 interface YoudaoKey {
-  data: {
-    secretKey: string;
-    aesKey: string;
-    aesIv: string;
-  };
-  code: number;
-  msg: string;
+  secretKey: string;
+  aesKey: string;
+  aesIv: string;
 }
 
 /**
@@ -65,7 +58,7 @@ function isValidYoudaoWebTranslateLanguage(queryTextInfo: QueryInput): boolean {
 export class YoudaoTranslateProvider extends BaseNonStreamingTranslateProvider {
   type = TranslationType.Youdao;
 
-  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}) {
+  protected async doTranslate(queryWordInfo: QueryInput, { signal }: RequestOptions = {}): Promise<TranslationContent> {
     const { fromLanguage, toLanguage, word } = queryWordInfo;
 
     const isValidLanguage = isValidYoudaoWebTranslateLanguage(queryWordInfo);
@@ -81,17 +74,8 @@ export class YoudaoTranslateProvider extends BaseNonStreamingTranslateProvider {
       );
     }
 
-    const translateResponse = await webTranslate(word, fromLanguage, toLanguage, youdaoKey, signal);
-    const translations = translateResponse.translateResult.map((e: Array<{ tgt: string }>) =>
-      e.map((t) => t.tgt).join(""),
-    );
-
-    return {
-      type: TranslationType.Youdao,
-      result: translateResponse,
-      translations,
-      queryWordInfo,
-    };
+    const paragraphs = await webTranslate(word, fromLanguage, toLanguage, youdaoKey, signal);
+    return { kind: "translation", query: queryWordInfo, paragraphs };
   }
 }
 
@@ -110,14 +94,17 @@ async function getYoudaoKey(): Promise<YoudaoKey> {
     sign: md5(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=asdjnjfenknafdfsdfsd`),
   };
 
-  const response = await timedFetch<YoudaoKey>("https://dict.youdao.com/webtranslate/key", {
+  const response = await timedFetch<unknown>("https://dict.youdao.com/webtranslate/key", {
     params,
     headers: {
       Origin: "https://fanyi.youdao.com",
     },
   });
 
+  if (!isRecord(response) || typeof response.code !== "number" || !Number.isFinite(response.code))
+    throw invalidResponse(TranslationType.Youdao);
   if (response.code !== 0) {
+    if (typeof response.msg !== "string") throw invalidResponse(TranslationType.Youdao);
     throw new RequestError(
       TranslationType.Youdao,
       `Failed to get Youdao key: code=${response.code}, msg=${response.msg}`,
@@ -125,7 +112,18 @@ async function getYoudaoKey(): Promise<YoudaoKey> {
     );
   }
 
-  return response;
+  const data = response.data;
+  if (
+    !isRecord(data) ||
+    typeof data.secretKey !== "string" ||
+    !data.secretKey.trim() ||
+    typeof data.aesKey !== "string" ||
+    !data.aesKey.trim() ||
+    typeof data.aesIv !== "string" ||
+    !data.aesIv.trim()
+  )
+    throw invalidResponse(TranslationType.Youdao);
+  return { secretKey: data.secretKey, aesKey: data.aesKey, aesIv: data.aesIv };
 }
 
 /// New Youdao web translate function, 2025.1.12
@@ -135,8 +133,8 @@ async function webTranslate(
   to: string,
   youdaoKey: YoudaoKey,
   signal?: AbortSignal,
-): Promise<YoudaoTranslateResponse> {
-  const { secretKey, aesKey, aesIv } = youdaoKey.data;
+): Promise<string[]> {
+  const { secretKey, aesKey, aesIv } = youdaoKey;
 
   const ts: string = String(new Date().getTime());
   const sign = md5(`client=fanyideskweb&mysticTime=${ts}&product=webfanyi&key=${secretKey}`);
@@ -155,7 +153,7 @@ async function webTranslate(
     to: to,
   };
 
-  const response = await timedFetch("https://dict.youdao.com/webtranslate", {
+  const response: unknown = await timedFetch("https://dict.youdao.com/webtranslate", {
     method: "POST",
     params,
     headers: {
@@ -167,12 +165,23 @@ async function webTranslate(
     signal,
   });
 
+  if (typeof response !== "string") throw invalidResponse(TranslationType.Youdao);
   const decryptedData = decryptAES(response, aesKey, aesIv);
   if (!decryptedData) {
     throw new RequestError(TranslationType.Youdao, "Failed to decrypt response data", "DECRYPT_ERROR");
   }
 
-  return JSON.parse(decryptedData);
+  const decoded: unknown = JSON.parse(decryptedData);
+  if (!isRecord(decoded) || !Array.isArray(decoded.translateResult)) throw invalidResponse(TranslationType.Youdao);
+  return decoded.translateResult.map((paragraph: unknown) => {
+    if (!Array.isArray(paragraph)) throw invalidResponse(TranslationType.Youdao);
+    return paragraph
+      .map((cell: unknown) => {
+        if (!isRecord(cell) || typeof cell.tgt !== "string") throw invalidResponse(TranslationType.Youdao);
+        return cell.tgt;
+      })
+      .join("");
+  });
 }
 
 function decryptAES(text: string, key: string, iv: string): string | null {

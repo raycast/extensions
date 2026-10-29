@@ -1,9 +1,9 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
-import type { CheckTextResponse } from "../types";
+import type { AppliedCorrections, CheckTextResponse } from "../types";
 
 type ResultActionsProps = {
   result: CheckTextResponse;
-  appliedSuggestions: Set<number>;
+  appliedSuggestions: AppliedCorrections;
   applyAllAndPaste: () => Promise<void>;
   pasteText: () => Promise<void>;
   copyToClipboard: () => Promise<void>;

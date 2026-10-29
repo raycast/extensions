@@ -1,0 +1,51 @@
+instructions: |
+  Use List Fx Sessions to discover real fx session IDs. Never invent a session ID or substitute a title for an ID.
+  Use Inspect Fx Session when the user asks about the contents, progress, or history of an existing session. Listing sessions returns summaries only.
+  Use Ask fx only when the user explicitly asks to delegate a coding task or question to fx. Ask fx may inspect or modify files in the selected workspace and therefore requires Raycast confirmation.
+  Always pass a specific workspace to Ask fx unless the user has clearly established that the configured default workspace is the intended target. Never guess a workspace path.
+  Keep delegated prompts faithful to the user's request. Do not add --yolo or claim that fx bypassed its own permission rules. Ask fx deliberately retains fx's configured permissions.
+  To continue prior work, first obtain the exact ID through List Fx Sessions, then pass it as resumeSessionId. Omit resumeSessionId for a new session.
+  If a tool reports that fx is not installed, tell the user to run `curl -fsSL https://fx.sh/setup.sh | bash` or configure the full executable path in the extension preferences.
+  Never claim a delegated task succeeded unless Ask fx returns exit_code 0. Report its error and any unresolved permission request when it does not.
+evals:
+  - input: "@fx-coding-agent List my recent fx sessions."
+    mocks:
+      list-fx-sessions:
+        kind: "sessions"
+        count: 1
+        sessions:
+          - id: "session-123"
+            title: "Improve cache handling"
+            workspace_root: "/Users/example/project"
+            updated_at_ms: 1787529600000
+    expected:
+      - callsTool: "list-fx-sessions"
+  - input: "@fx-coding-agent What happened in my fx session about cache handling?"
+    mocks:
+      list-fx-sessions:
+        sessions:
+          - id: "session-123"
+            title: "Improve cache handling"
+      inspect-fx-session:
+        kind: "session_detail"
+        id: "session-123"
+        history: []
+    expected:
+      - callsTool: "list-fx-sessions"
+      - callsTool:
+          name: "inspect-fx-session"
+          arguments:
+            sessionId: "session-123"
+  - input: "@fx-coding-agent Ask fx to run the focused tests in /Users/example/project and fix any failures."
+    mocks:
+      ask-fx:
+        output: "Fixed the failing test and reran it successfully."
+        exit_code: 0
+        session_id: "session-456"
+    expected:
+      - callsTool:
+          name: "ask-fx"
+          arguments:
+            workspace: "/Users/example/project"
+            prompt:
+              includes: "tests"

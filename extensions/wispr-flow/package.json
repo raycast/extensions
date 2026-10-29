@@ -5,12 +5,21 @@
   "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
   "icon": "icon.png",
   "author": "carterm",
-  "contributors": ["christi4nity", "mattiacolombomc", "yonn", "traviscooksfdc"],
+  "contributors": [
+    "christi4nity",
+    "mattiacolombomc",
+    "yonn",
+    "traviscooksfdc",
+    "tim_gailey"
+  ],
   "categories": [
     "Productivity",
     "Applications"
   ],
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "preferences": [
     {

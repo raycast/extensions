@@ -1,8 +1,9 @@
 import type { GenerateContext } from "automd";
 import { defineGenerator } from "automd";
 
+import { languageCatalog } from "./src/core/language/catalog";
 import { languageItemList } from "./src/core/language/consts";
-import type { LanguageItem } from "./src/core/language/types";
+import type { LanguageDefinition, LanguageItem, SourceLanguage } from "./src/core/language/types";
 
 const getYesNo = (condition: unknown) => {
   if (condition) return "✅";
@@ -29,13 +30,18 @@ const getDisplayNames = (locale: string) => {
   return dn;
 };
 
+const catalog: Record<SourceLanguage, LanguageDefinition> = languageCatalog;
+
+/** Provider codes live in the language catalog; language items only carry names. */
+const codesOf = (lang: LanguageItem) => catalog[lang.youdaoLangCode].codes;
+
 const getLangName = (lang: LanguageItem, locale: string) => {
-  const code = lang.googleLangCode;
+  const code = codesOf(lang).googleLangCode;
   if (code === "auto") return locale === "zh" ? "自动识别" : "Auto";
 
-  const normalized = codeMap[code] || code;
+  const normalized = code ? (codeMap[code] ?? code) : undefined;
   const displayNames = getDisplayNames(locale);
-  const name = displayNames.of(normalized);
+  const name = normalized ? displayNames.of(normalized) : undefined;
   if (!name || name === normalized) {
     return locale === "zh" ? lang.langChineseName : lang.langEnglishName;
   }
@@ -45,14 +51,14 @@ const getLangName = (lang: LanguageItem, locale: string) => {
   return name;
 };
 
-const getBaseCode = (code: string) => code.split("-")[0];
+const getBaseCode = (code?: string) => (code ?? "").split("-")[0];
 
 const getFilteredLangs = () =>
   languageItemList
     .filter((l) => l.langEnglishName !== "Auto")
     .sort((a, b) => {
-      const baseA = getBaseCode(a.googleLangCode);
-      const baseB = getBaseCode(b.googleLangCode);
+      const baseA = getBaseCode(codesOf(a).googleLangCode);
+      const baseB = getBaseCode(codesOf(b).googleLangCode);
       if (baseA === "zh" && baseB === "zh") return 0;
       if (baseA === "zh") return -1;
       if (baseB === "zh") return 1;
@@ -94,12 +100,13 @@ const generateEasydictDetectionTable = ({ args }: GenerateContext) => {
 
   for (const lang of getFilteredLangs()) {
     const name = getLangName(lang, locale);
+    const codes = codesOf(lang);
     rows.push([
       name,
-      getYesNo(lang.bingLangCode),
-      getYesNo(lang.baiduLangCode),
-      getYesNo(lang.volcanoLangCode),
-      getYesNo(lang.tencentDetectCode),
+      getYesNo(codes.bingLangCode),
+      getYesNo(codes.baiduLangCode),
+      getYesNo(codes.volcanoLangCode),
+      getYesNo(codes.tencentDetectCode),
     ]);
   }
 
@@ -129,17 +136,18 @@ const generateEasydictTranslationTable = ({ args }: GenerateContext) => {
 
   for (const lang of getFilteredLangs()) {
     const name = getLangName(lang, locale);
+    const codes = codesOf(lang);
     const cols = [
       name,
       getYesNo(lang.youdaoLangCode),
-      getYesNo(lang.deepLSourceId),
-      getYesNo(lang.googleLangCode),
-      getYesNo(lang.bingLangCode),
-      getYesNo(lang.appleLangCode),
-      getYesNo(lang.baiduLangCode),
-      getYesNo(lang.volcanoLangCode),
-      getYesNo(lang.tencentLangCode),
-      getYesNo(lang.caiyunLangCode),
+      getYesNo(codes.deepLSourceId),
+      getYesNo(codes.googleLangCode),
+      getYesNo(codes.bingLangCode),
+      getYesNo(codes.appleLangCode),
+      getYesNo(codes.baiduLangCode),
+      getYesNo(codes.volcanoLangCode),
+      getYesNo(codes.tencentLangCode),
+      getYesNo(codes.caiyunLangCode),
     ];
 
     rows.push(cols);
@@ -150,7 +158,7 @@ const generateEasydictTranslationTable = ({ args }: GenerateContext) => {
 
 /** @type {import("automd").Config} */
 export default {
-  input: ["README.md", "docs/README_ZH.md"],
+  input: ["README.md", "README_ZH.md"],
   generators: {
     easydictLanguages: defineGenerator({
       name: "easydictLanguages",

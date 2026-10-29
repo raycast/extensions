@@ -34,7 +34,7 @@ export function EditNote(props: {
 
       // Update cache and notify parent
       const stats = fs.statSync(note.path);
-      const updates = { lastModified: stats.mtime };
+      const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
       logger.info(`Updating cache and notifying parent for: ${note.path}`);
       updateNoteInCache(vault.path, note.path, updates);
       onNoteUpdated?.(note.path, updates);

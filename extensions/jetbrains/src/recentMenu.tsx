@@ -1,17 +1,21 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { JetBrainsIcon, recentEntry, toolsInstall, supportedMajorVersions } from "./util";
+import { Icon, MenuBarExtra, open, showToast, Toast } from "@raycast/api";
+import { isWin, JetBrainsIcon, recentEntry, resolveLaunchTarget, toolsInstall, supportedMajorVersions } from "./util";
 import { openInApp } from "./components/OpenInJetBrainsApp";
 import { useAppHistory } from "./useAppHistory";
 import { openToolbox } from "./components/OpenJetBrainsToolbox";
 import React from "react";
 
 const maxTitleLength = 32;
-const menuIcon = {
-  source: {
-    dark: `${toolsInstall}/Contents/Resources/toolbox-tray-dark@2x.png`,
-    light: `${toolsInstall}/Contents/Resources/toolbox-tray@2x.png`,
-  },
-};
+// The tray icons live inside the macOS app bundle — fall back to the
+// extension icon on Windows where that layout doesn't exist.
+const menuIcon = isWin
+  ? JetBrainsIcon
+  : {
+      source: {
+        dark: `${toolsInstall}/Contents/Resources/toolbox-tray-dark@2x.png`,
+        light: `${toolsInstall}/Contents/Resources/toolbox-tray@2x.png`,
+      },
+    };
 
 function buildSubtitle(entry: recentEntry): string {
   const branchSuffix = entry.branch ? `  ⎇ ${entry.branch}` : "";
@@ -105,7 +109,15 @@ export default function ProjectList(): React.JSX.Element {
                 <MenuBarExtra.Item
                   icon={app.icon}
                   title={`Open ${app.title}`}
-                  onAction={() => open(app.app?.path ?? "")}
+                  onAction={() =>
+                    resolveLaunchTarget(app.app?.path, app.toolName).then(async (target) => {
+                      if (target) {
+                        await open(target);
+                      } else {
+                        await showToast(Toast.Style.Failure, "Failed", "No app path");
+                      }
+                    })
+                  }
                 />
                 <MenuBarExtra.Section>
                   {app.entries

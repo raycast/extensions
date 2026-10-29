@@ -1,5 +1,28 @@
 # Is It Alive? Changelog
 
+## [Rootly, Datadog, and Faster Refresh] - 2026-10-22
+
+- Add Rootly status pages (e.g. status.mistral.ai) through `/api/v1/status.json`
+- Add Datadog status pages (e.g. status.openrouter.ai) through `/config.json`, with 90-day bars and uptime from the incident timelines
+- Detect the platform again when a saved site fails to load, and save the new platform
+- Load only the overall status and active incidents in the list. Statuspage list refresh goes from up to 29 s to less than 0.5 s
+- Read Statuspage 90-day uptime from the `/uptime_showcase` API in batches of 60 components
+- Fix Checkly status pages for the v3 payload
+- Fix false RSS incidents on feeds with HTML entities (e.g. status.deepseek.com)
+- Remove Replicate from the suggested sites
+
+## [Suggested Sites, OnlineOrNot, and FireHydrant] - 2026-08-29
+
+- Add OnlineOrNot status pages through the public summary API. Look up hosted pages by subdomain and custom domains such as status.openrouter.ai by hostname
+- Add FireHydrant status pages (e.g. status.redis.io) via `/data/payload.json`
+- Follow incident.io status-page redirects so URLs like status.linear.app resolve to the canonical proxy JSON API
+- Add Developer Tools, Data, and Auth & Payments sections to the suggested sites list, along with more infrastructure and AI status pages
+- Fetch two status pages at a time and store compact list snapshots to stay under Raycast's memory limit. Fetch full history only in the detail view
+
+## [OutageDeck Support] - 2026-08-21
+
+- Add OutageDeck provider URLs for normalized vendor-published status, service details, and active incidents across cloud and SaaS providers
+
 ## [Statuspage Uptime Accuracy] - 2026-07-26
 
 - Fix Statuspage 90-day uptime drift (e.g. claude.ai showing ~59% vs the site's ~99.4%) by using Statuspage's embedded per-second outage data instead of counting any incident day as full downtime

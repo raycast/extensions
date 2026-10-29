@@ -5,15 +5,22 @@ export const allModels = [
   { name: "GPT OSS 120B 131k", id: "openai/gpt-oss-120b" },
   { name: "GPT OSS 20B 131k", id: "openai/gpt-oss-20b" },
   { name: "Qwen 3.6 27B 131k", id: "qwen/qwen3.6-27b" },
+  { name: "Qwen 3.8 27B 131k", id: "qwen/qwen3.8-27b" },
 ];
 
 const MODEL_RATES: Record<string, { input: number; output: number }> = {
   "openai/gpt-oss-120b": { input: 0.15, output: 0.6 },
   "openai/gpt-oss-20b": { input: 0.075, output: 0.3 },
   "qwen/qwen3.6-27b": { input: 0.6, output: 3 },
+  "qwen/qwen3.8-27b": { input: 0.8, output: 4 },
 };
 
-export const THINKING_MODELS = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.6-27b"] as const;
+export const THINKING_MODELS = [
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "qwen/qwen3.6-27b",
+  "qwen/qwen3.8-27b",
+] as const;
 
 export function isThinkingModel(model: string): boolean {
   return THINKING_MODELS.includes(model as (typeof THINKING_MODELS)[number]);

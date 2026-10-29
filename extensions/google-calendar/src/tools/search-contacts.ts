@@ -24,24 +24,24 @@ type Input = {
   query: string;
 };
 
-const tool = async (input: Input) => {
-  const cachedSearchContacts = withCache(
-    async () => {
-      const contacts = await searchContacts(input.query);
-      return contacts.map((contact) => ({
-        name: contact.names?.[0]?.displayName,
-        email: contact.emailAddresses?.[0]?.value,
-      }));
+const cachedSearchContacts = withCache(
+  async (query: string) => {
+    const contacts = await searchContacts(query);
+    return contacts.map((contact) => ({
+      name: contact.names?.[0]?.displayName,
+      email: contact.emailAddresses?.[0]?.value,
+    }));
+  },
+  {
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    validate(data) {
+      return data.length > 0; // Retry empty results rather than treating them as valid cached data
     },
-    {
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
-      validate(data) {
-        return !data.length; // If no contacts are found, invalidate the cache
-      },
-    },
-  );
+  },
+);
 
-  return await cachedSearchContacts();
+const tool = async (input: Input) => {
+  return await cachedSearchContacts(input.query);
 };
 
 export default withGoogleAPIs(tool);

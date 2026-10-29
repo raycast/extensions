@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ticker-bar",
+  "title": "Ticker Bar",
+  "description": "Track stocks, crypto, tokens, perpetual futures, and prediction markets from the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "kays0x",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "stocks",
+    "crypto",
+    "bitcoin",
+    "ethereum",
+    "ticker",
+    "watchlist",
+    "menu bar",
+    "yahoo finance",
+    "coingecko",
+    "binance",
+    "polymarket",
+    "dexscreener"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Ticker Bar",
+      "description": "Show market status in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "search-market",
+      "title": "Browse Markets",
+      "description": "Search stocks, crypto, tokens, perpetual futures, and prediction markets",
+      "mode": "view"
+    },
+    {
+      "name": "manage-watchlist",
+      "title": "Manage Watchlist",
+      "description": "Manage Ticker Bar watchlist and configuration",
+      "mode": "view"
+    },
+    {
+      "name": "configure-ticker-bar",
+      "title": "Advanced Watchlist Editor",
+      "description": "Bulk edit the Ticker Bar watchlist by asset ID",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-prices",
+      "title": "Update Market Data",
+      "description": "Fetch fresh quotes and update the Ticker Bar cache",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Display currency for CoinGecko crypto quotes. Exchange, stock, token, and prediction-market quotes remain in USD.",
+      "type": "dropdown",
+      "required": false,
+      "default": "usd",
+      "data": [
+        {
+          "title": "USD",
+          "value": "usd"
+        },
+        {
+          "title": "CAD",
+          "value": "cad"
+        },
+        {
+          "title": "EUR",
+          "value": "eur"
+        },
+        {
+          "title": "GBP",
+          "value": "gbp"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.23.1",
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "@raycast/api": {
+      "esbuild": "0.28.1"
+    }
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "publish": "ray publish"
+  }
+}

@@ -1,6 +1,6 @@
 import {MenuBarExtra} from "@raycast/api"
-import {Task} from "api/types"
-import {FC, useCallback} from "react"
+import {Task} from "../../api/types"
+import {FC} from "react"
 import {openTask, raycastIconFromTask} from "../../helpers/focustask"
 
 export const TaskItem: FC<{task: Task}> = ({task}) => {

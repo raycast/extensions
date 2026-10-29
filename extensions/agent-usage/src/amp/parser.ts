@@ -1,6 +1,20 @@
-import type { AmpUsage, AmpError } from "./types.ts";
+import type { AmpError, AmpFreeUsage, AmpSubscriptionUsage, AmpUsage } from "./types.ts";
 
 const NOT_LOGGED_IN_SIGNALS = ["not logged in", "please sign in", "unauthenticated", "login required"];
+
+const PARSE_ERROR: AmpError = {
+  type: "unknown",
+  message: "Failed to parse Amp output. Please check if the format has changed.",
+};
+
+const AMP_FREE_PATTERN = /Amp Free:\s*([\d.]+)%\s*remaining(?:\s+today)?(?:\s+\(([^)]+)\))?/i;
+const SUBSCRIPTION_PATTERNS = [
+  /Amp\s+(.+?)\s+Subscription:\s*([\d.]+)%\s+other\s+usage\s+and\s+([\d.]+)%\s+orb\s+usage\s+remaining(?:\s+-\s+(.+))?/i,
+  /Subscription\s+(.+?):\s*([\d.]+)%\s+other\s+usage\s+and\s+([\d.]+)%\s+orb\s+usage\s+remaining(?:\s+-\s+(.+))?/i,
+];
+const TRAILING_URL_PATTERN = /\s+-\s+https?:\/\/\S+\s*$/i;
+const CREDITS_PATTERN = /Individual credits:\s*\$([\d.]+)/i;
+const SIGNED_IN_PATTERN = /Signed in as\s+(\S+)\s+\(([^)]+)\)/;
 
 // 检测错误类型
 export function detectAmpError(output: string): AmpError | null {
@@ -22,60 +36,65 @@ function clampPercent(value: number): number {
   return Math.min(100, Math.max(0, value));
 }
 
+function normalizeAmpOutput(output: string): string {
+  // Non-TTY `amp usage` wraps labels in markdown bold: **Amp Free:**
+  return output.replaceAll("**", "");
+}
+
+function parseAmpFree(text: string): AmpFreeUsage | undefined {
+  const match = text.match(AMP_FREE_PATTERN);
+  if (!match) return undefined;
+  return {
+    percentRemaining: clampPercent(parseFloat(match[1])),
+    resetNote: match[2]?.trim() || undefined,
+  };
+}
+
+function parseResetNote(value: string | undefined): string | undefined {
+  const note = value?.replace(TRAILING_URL_PATTERN, "").trim();
+  return note || undefined;
+}
+
+function parseSubscription(text: string): AmpSubscriptionUsage | undefined {
+  for (const pattern of SUBSCRIPTION_PATTERNS) {
+    const match = text.match(pattern);
+    if (!match) continue;
+    return {
+      plan: match[1].trim(),
+      otherPercentRemaining: clampPercent(parseFloat(match[2])),
+      orbPercentRemaining: clampPercent(parseFloat(match[3])),
+      resetNote: parseResetNote(match[4]),
+    };
+  }
+  return undefined;
+}
+
 export function parseAmpUsage(output: string): { usage: AmpUsage | null; error: AmpError | null } {
-  // 首先检测错误
   const detectedError = detectAmpError(output);
   if (detectedError) {
     return { usage: null, error: detectedError };
   }
 
-  const lines = output.trim().split("\n");
-
-  // Parse first line: Signed in as apple@example.com (nickname)
-  const firstLine = lines[0] || "";
-  const emailMatch = firstLine.match(/Signed in as\s+([^\s]+)\s+\(([^)]+)\)/);
-
+  const text = normalizeAmpOutput(output);
+  const emailMatch = text.match(SIGNED_IN_PATTERN);
   if (!emailMatch) {
-    return {
-      usage: null,
-      error: {
-        type: "unknown",
-        message: "Failed to parse Amp output. Please check if the format has changed.",
-      },
-    };
+    return { usage: null, error: PARSE_ERROR };
   }
 
-  const email = emailMatch[1];
-  const nickname = emailMatch[2] || "";
-
-  // Amp Free: 100% remaining today (resets daily) - https://...
-  const ampFreeLine = lines.find((line) => line.includes("Amp Free:")) || "";
-  const ampFreeMatch = ampFreeLine.match(/Amp Free:\s*([\d.]+)%\s*remaining(?:\s+today)?(?:\s+\(([^)]+)\))?/i);
-  if (!ampFreeMatch) {
-    return {
-      usage: null,
-      error: {
-        type: "unknown",
-        message: "Failed to parse Amp Free usage. Please check if the format has changed.",
-      },
-    };
+  const ampFree = parseAmpFree(text);
+  const subscription = parseSubscription(text);
+  if (!ampFree && !subscription) {
+    return { usage: null, error: PARSE_ERROR };
   }
 
-  const percentRemaining = clampPercent(parseFloat(ampFreeMatch[1]));
-  const resetNote = ampFreeMatch[2]?.trim() || undefined;
-
-  // Individual credits: $10 remaining ...
-  const creditsLine = lines.find((line) => line.includes("Individual credits:")) || "";
-  const creditsMatch = creditsLine.match(/Individual credits:\s*\$([\d.]+)/);
+  const creditsMatch = text.match(CREDITS_PATTERN);
   const creditsRemaining = creditsMatch?.[1] ? parseFloat(creditsMatch[1]) : 0;
 
   const usage: AmpUsage = {
-    email,
-    nickname,
-    ampFree: {
-      percentRemaining,
-      resetNote,
-    },
+    email: emailMatch[1],
+    nickname: emailMatch[2] || "",
+    ampFree,
+    subscription,
     individualCredits: {
       remaining: creditsRemaining,
       unit: "$",

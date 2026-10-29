@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { isEqual } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { convertSlackEmojiToUnicode } from "./shared/utils";
 
 import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
@@ -9,6 +9,11 @@ import { handleError, timeDifference } from "./shared/utils";
 import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
+
+// Storage writes run one after another across screen instances, so the newest selection is always written last
+// and a reopened configuration never races a write still in flight from the previous one.
+let storageQueue: Promise<void> = Promise.resolve();
+let saveCount = 0;
 
 function UnreadMessages() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
@@ -25,28 +30,42 @@ function UnreadMessages() {
   } = useUnreadConversations(selectedConversations);
 
   const setConversations = async () => {
-    const item = await LocalStorage.getItem(conversationsStorageKey);
-    let conversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+    let conversations: string[] | undefined;
+    const apply = storageQueue.then(async () => {
+      const item = await LocalStorage.getItem(conversationsStorageKey);
+      const storedConversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
+      let next = storedConversations;
 
-    // unselect conversations that don't exist anymore
-    if (users && channels && groups && !channelsError) {
-      conversations = conversations.filter(
-        (id: string) =>
-          !!users.find((user) => user.conversationId === id) ||
-          !!channels.find((channel) => channel.id === id) ||
-          !!groups.find((group) => group.id === id),
-      );
+      // unselect conversations that don't exist anymore
+      if (users && channels && groups && !channelsError) {
+        next = next.filter(
+          (id: string) =>
+            !!users.find((user) => user.conversationId === id) ||
+            !!channels.find((channel) => channel.id === id) ||
+            !!groups.find((group) => group.id === id),
+        );
 
-      await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
-    }
+        // Only write back when something was removed, so a stale read can't overwrite a newer selection
+        if (next.length !== storedConversations.length) {
+          await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(next));
+        }
+      }
 
+      conversations = next;
+    });
+    storageQueue = apply.catch(async (error) => {
+      await handleError(error, "Could not save the selected conversations");
+    });
+    await storageQueue;
+    if (!conversations) return false;
     if (!selectedConversations || !isEqual(selectedConversations, conversations)) {
       setSelectedConversations(conversations);
     }
+    return true;
   };
 
   const refreshConversations = async () => {
-    await setConversations();
+    if (!(await setConversations())) return;
     await mutate();
   };
 
@@ -206,27 +225,43 @@ function UnreadMessagesConversation({
 
 type ConfigurationProps = {
   data: ReturnType<typeof useChannels>["data"];
-  refreshConversations: () => void;
+  refreshConversations: () => Promise<void>;
 };
 
 function Configuration({ data, refreshConversations }: ConfigurationProps) {
+  const { pop } = useNavigation();
+  // Leave only after pending writes finish, so reopening configuration reads the latest selection
+  const done = async () => {
+    await storageQueue;
+    pop();
+  };
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
+  // The latest selection, so toggles made before a re-render build on each other
+  const latestSelection = useRef<string[]>([]);
+  const hasEdited = useRef(false);
   const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
-    LocalStorage.getItem(conversationsStorageKey).then((item) => {
-      if (item) {
-        setSelectedConversations(JSON.parse(item as string));
-      }
-    });
+    let cancelled = false;
+    void storageQueue
+      .then(() => LocalStorage.getItem(conversationsStorageKey))
+      .then((item) => {
+        if (cancelled || hasEdited.current || !item) return;
+        latestSelection.current = JSON.parse(item as string);
+        setSelectedConversations(latestSelection.current);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleConversation = (id: string) => {
+    const currentSelection = latestSelection.current;
     let updatedSelectedConversations: string[] | undefined;
-    if (selectedConversations.includes(id)) {
-      updatedSelectedConversations = selectedConversations.filter((x) => x !== id);
-    } else if (selectedConversations.length < 30) {
-      updatedSelectedConversations = [...selectedConversations, id];
+    if (currentSelection.includes(id)) {
+      updatedSelectedConversations = currentSelection.filter((x) => x !== id);
+    } else if (currentSelection.length < 30) {
+      updatedSelectedConversations = [...currentSelection, id];
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -236,9 +271,28 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
     }
 
     if (updatedSelectedConversations) {
+      latestSelection.current = updatedSelectedConversations;
       setSelectedConversations(updatedSelectedConversations);
-      LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
-      refreshConversations();
+      hasEdited.current = true;
+      // Persist on its own queue. The Slack refresh reads that write back, but must not sit on the queue:
+      // Done waits for writes only, and a slow refresh must not delay the next selection.
+      const selection = JSON.stringify(updatedSelectedConversations);
+      const saveId = ++saveCount;
+      const write = storageQueue.then(() => LocalStorage.setItem(conversationsStorageKey, selection));
+      storageQueue = write.catch(async (error) => {
+        await handleError(error, "Could not save the selected conversations");
+      });
+      void write
+        .then(
+          () => {
+            if (saveId !== saveCount) return;
+            return refreshConversations();
+          },
+          () => undefined,
+        )
+        .catch(async (error) => {
+          await handleError(error, "Could not refresh conversations");
+        });
     }
   };
 
@@ -266,6 +320,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(conversationId)}
                   />
+                  <Action icon={Icon.Check} title="Done" onAction={done} />
                 </ActionPanel>
               }
             />
@@ -290,6 +345,7 @@ function Configuration({ data, refreshConversations }: ConfigurationProps) {
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                       onAction={() => toggleConversation(id)}
                     />
+                    <Action icon={Icon.Check} title="Done" onAction={done} />
                   </ActionPanel>
                 }
               />

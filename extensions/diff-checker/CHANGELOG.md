@@ -1,5 +1,9 @@
 # Changelog
 
+## [Use standard diff markers] - 2026-10-01
+
+- Check Diff now uses `+`/`-` markers and a `diff` code fence for syntax highlighting
+
 ## [Add Compare JSON] - 2026-03-10
 
 - Add new command to compare two JSON objects with a git-style diff view

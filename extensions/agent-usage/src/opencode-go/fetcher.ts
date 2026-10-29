@@ -1,94 +1,83 @@
-import { parseOpencodegoHtml } from "./parser.ts";
-import type { OpencodegoUsage, OpencodegoError } from "./types.ts";
+import { httpFetch } from "../agents/http.ts";
+import type { OpencodegoUsage, OpencodegoError, OpencodegoWindowUsage } from "./types.ts";
 
-function buildUrl(workspaceId: string): string {
-  const id = workspaceId.trim();
-  const fullId = id.startsWith("wrk_") ? id : `wrk_${id}`;
-  return `https://opencode.ai/workspace/${fullId}/go`;
+// Only the "opencode-go" auth entry is accepted: a bare "opencode" Zen key may not
+// have Go entitlement, and would skip the not_configured state and fail with an opaque 403.
+export const OPENCODEGO_OPENCODE_KEY = "opencode-go";
+
+const OPENCODEGO_USAGE_API = "https://opencode.ai/zen/go/v1/usage";
+
+const USAGE_WINDOWS = ["rolling", "weekly", "monthly"] as const;
+
+function validateWindow(value: unknown): value is Record<string, unknown> {
+  if (!value || typeof value !== "object") return false;
+  const window = value as Record<string, unknown>;
+  return (
+    typeof window.status === "string" &&
+    typeof window.percent === "number" &&
+    Number.isFinite(window.percent) &&
+    (window.resetsAt === undefined || window.resetsAt === null || typeof window.resetsAt === "string")
+  );
 }
 
-async function fetchOpencodegoPage(
-  url: string,
-  authCookie: string,
-): Promise<{ html: string | null; error: OpencodegoError | null }> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+function normalizeWindow(value: unknown): OpencodegoWindowUsage {
+  const window = value as Record<string, unknown>;
+  return {
+    status: window.status as string,
+    percent: Math.min(100, Math.max(0, window.percent as number)),
+    resetsAt: typeof window.resetsAt === "string" ? window.resetsAt : null,
+  };
+}
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Cookie: `auth=${authCookie.trim()}`,
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-      redirect: "follow",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401 || response.status === 403) {
-      return {
-        html: null,
-        error: {
-          type: "unauthorized",
-          message:
-            "OpenCode Go session expired or invalid. Please update your auth cookie in extension settings (Cmd+,).",
-        },
-      };
-    }
-
-    if (response.redirected && response.url.includes("/login")) {
-      return {
-        html: null,
-        error: {
-          type: "unauthorized",
-          message: "OpenCode Go session expired. Please update your auth cookie in extension settings (Cmd+,).",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        html: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const html = await response.text();
-    return { html, error: null };
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === "AbortError") {
-      return {
-        html: null,
-        error: { type: "network_error", message: "Request timeout. Please check your network connection." },
-      };
-    }
-    return {
-      html: null,
-      error: {
-        type: "network_error",
-        message: err instanceof Error ? err.message : "Network request failed",
-      },
-    };
+export function parseOpencodegoUsageResponse(data: unknown): {
+  usage: OpencodegoUsage | null;
+  error: OpencodegoError | null;
+} {
+  const usageContainer = data && typeof data === "object" ? (data as Record<string, unknown>).usage : null;
+  if (!usageContainer || typeof usageContainer !== "object") {
+    return { usage: null, error: { type: "parse_error", message: "Invalid API response format" } };
   }
+
+  const container = usageContainer as Record<string, unknown>;
+  for (const window of USAGE_WINDOWS) {
+    if (!validateWindow(container[window])) {
+      return {
+        usage: null,
+        error: { type: "parse_error", message: `Missing or invalid usage data from OpenCode Zen API (${window})` },
+      };
+    }
+  }
+
+  return {
+    usage: {
+      rolling: normalizeWindow(container.rolling),
+      weekly: normalizeWindow(container.weekly),
+      monthly: normalizeWindow(container.monthly),
+    },
+    error: null,
+  };
 }
 
-export async function fetchOpencodegoUsage(
-  workspaceId: string,
-  authCookie: string,
-): Promise<{ usage: OpencodegoUsage | null; error: OpencodegoError | null }> {
-  const url = buildUrl(workspaceId);
-  const { html, error: fetchError } = await fetchOpencodegoPage(url, authCookie);
+const OPENCODEGO_FORBIDDEN_MESSAGE =
+  "OpenCode Go subscription not found for this API key. Please use the key of the account with a Go subscription in extension settings (Cmd+,).";
 
-  if (fetchError) return { usage: null, error: fetchError };
-  if (!html) return { usage: null, error: { type: "unknown", message: "No HTML response received" } };
+export async function fetchOpencodegoUsage(apiKey: string): Promise<{
+  usage: OpencodegoUsage | null;
+  error: OpencodegoError | null;
+}> {
+  const { data, error, status } = await httpFetch({
+    url: OPENCODEGO_USAGE_API,
+    token: apiKey.trim(),
+    unauthorizedMessage: "OpenCode Zen API key invalid or expired. Please update it in extension settings (Cmd+,).",
+    forbiddenMessage: OPENCODEGO_FORBIDDEN_MESSAGE,
+  });
 
-  return parseOpencodegoHtml(html);
+  if (error) {
+    // A 403 means the key is valid but has no Go subscription — distinct from an expired key.
+    if (error.type === "unauthorized" && status === 403) {
+      return { usage: null, error: { type: "forbidden", message: OPENCODEGO_FORBIDDEN_MESSAGE } };
+    }
+    return { usage: null, error };
+  }
+  return parseOpencodegoUsageResponse(data);
 }

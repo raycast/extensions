@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "convt",
+  "title": "Convt",
+  "description": "Convert images, videos, audio, PDFs, and documents locally with Convt.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convt",
+      "title": "Convert Files",
+      "subtitle": "Convt",
+      "description": "Convert selected Finder files or choose files to convert locally with Convt.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-targets",
+      "title": "Get Conversion Formats",
+      "description": "Identify file types and find supported and suggested output formats using Convt."
+    },
+    {
+      "name": "convert-files",
+      "title": "Convert Files",
+      "description": "Convert local files with Convt and return the actual output paths and per-file errors."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Convt CLI Path",
+      "description": "Optional absolute path to the convt executable. Leave blank to detect the installed app, Homebrew, or PATH automatically.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "ray.dhruv"
+  ]
+}

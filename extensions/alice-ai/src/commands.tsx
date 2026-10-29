@@ -1,22 +1,20 @@
 import { Detail, LaunchProps } from "@raycast/api";
 import "./lib/OpenAI";
 import { useActionsAreReady } from "./store/actions";
+import { ItemLaunchContext } from "./types";
 import CommandExecute from "./views/CommandExecute";
 import CommandList from "./views/CommandList";
 
-interface Arguments {
-  id?: string;
-}
-
-export default function ActionsCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function ActionsCommand(props: LaunchProps<{ arguments: ItemLaunchContext; launchContext: ItemLaunchContext }>) {
   const ready = useActionsAreReady();
 
   if (!ready) {
     return <Detail />;
   }
 
-  if (props.arguments.id !== undefined) {
-    return <CommandExecute id={props.arguments.id} />;
+  const id = props.launchContext?.id ?? props.arguments?.id;
+  if (id !== undefined) {
+    return <CommandExecute id={id} />;
   }
 
   return <CommandList />;

@@ -1,5 +1,16 @@
 # Terminal Finder Changelog
 
+## [Add Tern Support] - 2026-10-14
+
+- Added support for [Tern](https://stencil.so/tern)
+- `Tern → Finder` reads the focused block's working directory with Tern's bundled CLI instead of typing into the terminal
+- Fixed `cmux → Finder` opening Finder's AirDrop window instead of the directory
+- Commands that open a directory in a terminal pass the app's path, so Raycast can't pick another app with a similar name
+
+## [Fix Crash With No Terminal Window] - 2026-09-11
+
+- Show a friendly error instead of crashing when Terminal is running with no open windows (ref: [Issue #30965](https://github.com/raycast/extensions/issues/30965))
+
 ## [Bugfix] - 2026-05-27
 
 - Show a helpful recovery message when cmux reports a broken automation socket.

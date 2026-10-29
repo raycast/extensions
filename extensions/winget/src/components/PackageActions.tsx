@@ -22,6 +22,7 @@ interface PackageActionsProps {
   gate: OperationGate;
   ops: Pick<UseOperationResult, "launchDetached" | "runInline" | "cancelActive">;
   onUpdateIndex: () => void;
+  onCleanIndex: () => void;
   homepage?: string;
   moniker?: string;
   /** Upgradable view: all non-pinned upgradable targets for Upgrade All. */
@@ -50,6 +51,7 @@ function PackageActions({
   gate,
   ops,
   onUpdateIndex,
+  onCleanIndex,
   homepage,
   moniker,
   upgradeAllTargets,
@@ -82,6 +84,17 @@ function PackageActions({
         ...singleRequest("uninstall", pkg),
         version: versioned,
       });
+    }
+  };
+  const cleanIndex = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clean the index?",
+      message: "The cached package index and every downloaded icon are discarded, then rebuilt from winget.",
+      icon: Icon.Trash,
+      primaryAction: { title: "Clean", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) {
+      onCleanIndex();
     }
   };
   const upgradeAll = () => {
@@ -126,9 +139,12 @@ function PackageActions({
       return <Action title="Install" icon={Icon.Plus} onAction={install} />;
     }
     if (pkg.isInstalled && pkg.hasUpdate && !pkg.isPinned) {
-      return (
-        <Action title="Upgrade" icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={upgrade} />
-      );
+      // No explicit shortcut: Upgrade only ever exists as the primary action,
+      // so Enter is its shortcut — an explicit one would replace the ↵ hint
+      // in the action panel. (Uninstall keeps its shortcut even when primary:
+      // it also appears as a secondary action, and the binding must not
+      // depend on the row's state.)
+      return <Action title="Upgrade" icon={Icon.ArrowUp} onAction={upgrade} />;
     }
     if (pkg.isInstalled && pkg.isPinned) {
       return <Action title="Unpin" icon={Icon.PinDisabled} onAction={unpin} />;
@@ -224,6 +240,12 @@ function PackageActions({
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={onUpdateIndex}
+        />
+        <Action
+          title="Clean Index"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => void cleanIndex()}
         />
       </ActionPanel.Section>
 

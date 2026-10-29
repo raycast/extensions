@@ -9,7 +9,11 @@ import { useFavicon } from "./utils/toolHelpers";
 import { formatCompanyMeetingDate, sortCompanies, type CompanySortOption } from "./utils/searchUtils";
 import { mapColorToHex } from "./utils/iconMapper";
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const { companies, isLoading, hasError, error } = usePeople();
   const [sortBy, setSortBy] = useState<CompanySortOption>("meeting-count");
 

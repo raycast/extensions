@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mealie",
+  "title": "Mealie",
+  "description": "Manage Mealie shopping lists and meal plans, import recipes and search your recipe collection.",
+  "icon": "extension-icon.png",
+  "author": "joschka_rick",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-recipes",
+      "title": "Search Recipes",
+      "subtitle": "Mealie",
+      "description": "Search your Mealie recipes and open them in the browser.",
+      "mode": "view"
+    },
+    {
+      "name": "add-to-shopping-list",
+      "title": "Add to Shopping List",
+      "subtitle": "Mealie",
+      "description": "Quickly add an item to a Mealie shopping list.",
+      "mode": "view"
+    },
+    {
+      "name": "shopping-lists",
+      "title": "Shopping Lists",
+      "subtitle": "Mealie",
+      "description": "Browse and manage your Mealie shopping lists.",
+      "mode": "view"
+    },
+    {
+      "name": "meal-plan",
+      "title": "Meal Plan",
+      "subtitle": "Mealie",
+      "description": "View and edit your Mealie meal plan for the week.",
+      "mode": "view"
+    },
+    {
+      "name": "import-recipe",
+      "title": "Import Recipe",
+      "subtitle": "Mealie",
+      "description": "Import a recipe into Mealie from a URL.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "mealieUrl",
+      "title": "Mealie URL",
+      "description": "Base URL of your Mealie instance, for example https://mealie.example.org",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://mealie.example.org"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Mealie API token. Create one in Mealie under Settings, API Tokens.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "allowInsecureHttp",
+      "title": "Insecure Connections",
+      "label": "Allow plain HTTP outside localhost",
+      "description": "Only enable this if your Mealie instance is reachable over HTTP inside a trusted network. Your API token is sent unencrypted.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.3",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.3.0",
+    "typescript": "5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

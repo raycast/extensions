@@ -264,6 +264,76 @@ test("parseAntigravityUserStatusResponse accepts quota groups without legacy mod
   assert.equal(result.usage?.quotaGroups?.[0].buckets[0].percentLeft, 31);
 });
 
+test("parseAntigravityQuotaSummaryResponse accepts Cloud Code top-level groups", async () => {
+  const { parseAntigravityQuotaSummaryResponse } = await import("./parser.ts");
+
+  const cloudCodeResponse = {
+    groups: [
+      {
+        displayName: "Gemini Models",
+        description: "Models within this group: Gemini Flash, Gemini Pro",
+        buckets: [
+          {
+            bucketId: "gemini-weekly",
+            displayName: "Weekly Limit Remaining",
+            window: "weekly",
+            remainingFraction: 0.8789438,
+            resetTime: "2099-12-24T12:00:00Z",
+          },
+          {
+            bucketId: "gemini-5h",
+            displayName: "Five Hour Limit Remaining",
+            window: "5h",
+            remainingFraction: 1,
+            resetTime: "2099-12-24T10:00:00Z",
+          },
+        ],
+      },
+      {
+        displayName: "Claude and GPT models",
+        description: "Models within this group: Claude Opus, Claude Sonnet, GPT-OSS",
+        buckets: [
+          {
+            bucketId: "3p-weekly",
+            displayName: "Weekly Limit Remaining",
+            window: "weekly",
+            remainingFraction: 1,
+            resetTime: "2099-12-24T12:00:00Z",
+          },
+        ],
+      },
+    ],
+    description: "Within each group, models share a weekly limit and a 5-hour limit.",
+  };
+
+  const result = parseAntigravityQuotaSummaryResponse(cloudCodeResponse, {
+    email: "user@example.com",
+    plan: "Google AI Pro",
+  });
+
+  assert.equal(result.error, null);
+  assert.equal(result.usage?.quotaGroups?.length, 2);
+  assert.equal(result.usage?.quotaGroups?.[0].displayName, "Gemini Models");
+  assert.equal(result.usage?.quotaGroups?.[0].buckets[0].percentLeft, 88);
+  assert.equal(result.usage?.quotaGroups?.[0].buckets[1].percentLeft, 100);
+  assert.equal(result.usage?.primaryModel, null);
+  assert.equal(result.usage?.accountEmail, "user@example.com");
+  assert.equal(result.usage?.accountPlan, "Google AI Pro");
+});
+
+test("extractAntigravityPlanFromLoadCodeAssist prefers paidTier name", async () => {
+  const { extractAntigravityPlanFromLoadCodeAssist } = await import("./parser.ts");
+
+  assert.equal(
+    extractAntigravityPlanFromLoadCodeAssist({
+      currentTier: { name: "Antigravity" },
+      paidTier: { name: "Google AI Pro" },
+    }),
+    "Google AI Pro",
+  );
+  assert.equal(extractAntigravityPlanFromLoadCodeAssist({ currentTier: { name: "Antigravity" } }), "Antigravity");
+});
+
 test("parseAntigravityUserStatusResponse ignores quota groups without usable buckets", async () => {
   const { parseAntigravityUserStatusResponse } = await import("./parser.ts");
 

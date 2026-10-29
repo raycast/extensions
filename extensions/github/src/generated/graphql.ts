@@ -65,46 +65,11 @@ export type DiscussionFieldsFragment = {
 
 export type SearchDiscussionsQueryVariables = Exact<{
   query: string;
-  numberOfOpenItems: number;
+  numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchDiscussionsQuery = {
-  openDiscussions: {
-    nodes: Array<
-      | {
-          id: string;
-          title: string;
-          bodyText: string;
-          publishedAt: any;
-          url: any;
-          upvoteCount: number;
-          repository: {
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            autoMergeAllowed: boolean;
-            defaultBranchRef: { target: { oid: any } | { oid: any } | { oid: any } | { oid: any } | null } | null;
-            owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
-          };
-          category: { name: string; emoji: string; emojiHTML: any };
-          comments: { totalCount: number };
-          answer: { bodyText: string } | null;
-          author:
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | { login: string; avatarUrl: any }
-            | null;
-        }
-      | Record<PropertyKey, never>
-      | null
-    > | null;
-  };
   searchDiscussions: {
     nodes: Array<
       | {
@@ -140,6 +105,7 @@ export type SearchDiscussionsQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -325,6 +291,7 @@ export type IssueDetailsQuery = {
 export type SearchIssuesQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchIssuesQuery = {
@@ -378,7 +345,64 @@ export type SearchIssuesQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
+};
+
+export type IssueByNumberQueryVariables = Exact<{
+  owner: string;
+  name: string;
+  issueNumber: number;
+}>;
+
+export type IssueByNumberQuery = {
+  repository: {
+    issue: {
+      id: string;
+      url: any;
+      title: string;
+      number: number;
+      closed: boolean;
+      state: Types.IssueState;
+      stateReason: Types.IssueStateReason | null;
+      updatedAt: any;
+      author:
+        | { id: string; login: string; avatarUrl: any }
+        | { id: string; login: string; name: string | null; avatarUrl: any }
+        | { id: string; login: string; avatarUrl: any }
+        | { id: string; login: string; name: string | null; avatarUrl: any }
+        | { id: string; avatarUrl: any; name: string | null; login: string; isViewer: boolean }
+        | null;
+      linkedBranches: {
+        totalCount: number;
+        nodes: Array<{ id: string; ref: { id: string; name: string } | null } | null> | null;
+      };
+      milestone: { id: string; title: string } | null;
+      repository: {
+        id: string;
+        nameWithOwner: string;
+        name: string;
+        url: any;
+        mergeCommitAllowed: boolean;
+        squashMergeAllowed: boolean;
+        rebaseMergeAllowed: boolean;
+        autoMergeAllowed: boolean;
+        defaultBranchRef: { target: { oid: any } | { oid: any } | { oid: any } | { oid: any } | null } | null;
+        owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
+      };
+      comments: { totalCount: number };
+      assignees: {
+        totalCount: number;
+        nodes: Array<{
+          id: string;
+          avatarUrl: any;
+          name: string | null;
+          login: string;
+          isViewer: boolean;
+        } | null> | null;
+      };
+    } | null;
+  } | null;
 };
 
 export type CloseIssueMutationVariables = Exact<{
@@ -473,6 +497,153 @@ export type CreateIssueMutation = {
       };
     } | null;
   } | null;
+};
+
+export type IssueMentionFieldsFragment = {
+  number: number;
+  title: string;
+  closed: boolean;
+  stateReason: Types.IssueStateReason | null;
+  repository: { nameWithOwner: string };
+  author: { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+};
+
+export type PullRequestMentionFieldsFragment = {
+  number: number;
+  title: string;
+  closed: boolean;
+  merged: boolean;
+  isDraft: boolean;
+  repository: { nameWithOwner: string };
+  author: { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+};
+
+export type RepositoryMentionFieldsFragment = {
+  nameWithOwner: string;
+  description: string | null;
+  isPrivate: boolean;
+  isArchived: boolean;
+  owner: { avatarUrl: any } | { avatarUrl: any };
+};
+
+export type SearchIssueMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchIssueMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          number: number;
+          title: string;
+          closed: boolean;
+          stateReason: Types.IssueStateReason | null;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type SearchPullRequestMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchPullRequestMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          number: number;
+          title: string;
+          closed: boolean;
+          merged: boolean;
+          isDraft: boolean;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type IssueOrPullRequestMentionQueryVariables = Exact<{
+  owner: string;
+  name: string;
+  number: number;
+}>;
+
+export type IssueOrPullRequestMentionQuery = {
+  repository: {
+    issueOrPullRequest:
+      | {
+          __typename: "Issue";
+          number: number;
+          title: string;
+          closed: boolean;
+          stateReason: Types.IssueStateReason | null;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | {
+          __typename: "PullRequest";
+          number: number;
+          title: string;
+          closed: boolean;
+          merged: boolean;
+          isDraft: boolean;
+          repository: { nameWithOwner: string };
+          author:
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
+        }
+      | null;
+  } | null;
+};
+
+export type SearchRepositoryMentionsQueryVariables = Exact<{
+  query: string;
+  numberOfItems: number;
+}>;
+
+export type SearchRepositoryMentionsQuery = {
+  search: {
+    nodes: Array<
+      | {
+          nameWithOwner: string;
+          description: string | null;
+          isPrivate: boolean;
+          isArchived: boolean;
+          owner: { avatarUrl: any } | { avatarUrl: any };
+        }
+      | Record<PropertyKey, never>
+      | null
+    > | null;
+  };
+};
+
+export type ViewerRepositoryMentionsQueryVariables = Exact<{
+  numberOfItems: number;
+}>;
+
+export type ViewerRepositoryMentionsQuery = {
+  viewer: {
+    repositories: {
+      nodes: Array<{
+        nameWithOwner: string;
+        description: string | null;
+        isPrivate: boolean;
+        isArchived: boolean;
+        owner: { avatarUrl: any } | { avatarUrl: any };
+      } | null> | null;
+    };
+  };
 };
 
 export type ChangeProjectStatusMutationVariables = Exact<{
@@ -589,6 +760,7 @@ export type PullRequestFieldsFragment = {
 export type SearchPullRequestsQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchPullRequestsQuery = {
@@ -652,6 +824,7 @@ export type SearchPullRequestsQuery = {
         | Record<PropertyKey, never>
         | null;
     } | null> | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -868,11 +1041,14 @@ export type PullRequestCommitFieldsFragment = {
         statusCheckRollup: { state: Types.StatusState } | null;
       };
     } | null> | null;
+    pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
   };
 };
 
 export type PullRequestCommitsQueryVariables = Exact<{
   nodeId: string | number;
+  numberOfItems: number;
+  before?: string | null | undefined;
 }>;
 
 export type PullRequestCommitsQuery = {
@@ -893,6 +1069,7 @@ export type PullRequestCommitsQuery = {
               statusCheckRollup: { state: Types.StatusState } | null;
             };
           } | null> | null;
+          pageInfo: { hasPreviousPage: boolean; startCursor: string | null };
         };
       }
     | Record<PropertyKey, never>
@@ -1094,10 +1271,6 @@ export type ExtendedRepositoryFieldsFragment = {
   nameWithOwner: string;
   name: string;
   url: any;
-  mergeCommitAllowed: boolean;
-  squashMergeAllowed: boolean;
-  rebaseMergeAllowed: boolean;
-  autoMergeAllowed: boolean;
   updatedAt: any;
   pushedAt: any;
   stargazerCount: number;
@@ -1105,18 +1278,14 @@ export type ExtendedRepositoryFieldsFragment = {
   isFork: boolean;
   isPrivate: boolean;
   viewerHasStarred: boolean;
-  hasIssuesEnabled: boolean;
-  hasWikiEnabled: boolean;
-  hasProjectsEnabled: boolean;
-  hasDiscussionsEnabled: boolean;
   owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
   primaryLanguage: { id: string; name: string; color: string | null } | null;
-  releases: { totalCount: number };
 };
 
 export type SearchRepositoriesQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchRepositoriesQuery = {
@@ -1127,10 +1296,6 @@ export type SearchRepositoriesQuery = {
           nameWithOwner: string;
           name: string;
           url: any;
-          mergeCommitAllowed: boolean;
-          squashMergeAllowed: boolean;
-          rebaseMergeAllowed: boolean;
-          autoMergeAllowed: boolean;
           updatedAt: any;
           pushedAt: any;
           stargazerCount: number;
@@ -1138,22 +1303,19 @@ export type SearchRepositoriesQuery = {
           isFork: boolean;
           isPrivate: boolean;
           viewerHasStarred: boolean;
-          hasIssuesEnabled: boolean;
-          hasWikiEnabled: boolean;
-          hasProjectsEnabled: boolean;
-          hasDiscussionsEnabled: boolean;
           owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
           primaryLanguage: { id: string; name: string; color: string | null } | null;
-          releases: { totalCount: number };
         }
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
 export type MyLatestRepositoriesQueryVariables = Exact<{
   numberOfItems: number;
+  after?: string | null | undefined;
   orderByField: Types.RepositoryOrderField;
   orderByDirection: Types.OrderDirection;
 }>;
@@ -1166,10 +1328,6 @@ export type MyLatestRepositoriesQuery = {
         nameWithOwner: string;
         name: string;
         url: any;
-        mergeCommitAllowed: boolean;
-        squashMergeAllowed: boolean;
-        rebaseMergeAllowed: boolean;
-        autoMergeAllowed: boolean;
         updatedAt: any;
         pushedAt: any;
         stargazerCount: number;
@@ -1177,14 +1335,10 @@ export type MyLatestRepositoriesQuery = {
         isFork: boolean;
         isPrivate: boolean;
         viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
-        hasDiscussionsEnabled: boolean;
         owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
         primaryLanguage: { id: string; name: string; color: string | null } | null;
-        releases: { totalCount: number };
       } | null> | null;
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
     };
   };
 };
@@ -1216,12 +1370,7 @@ export type CommentsForPullRequestQuery = {
         nodes: Array<{
           body: string;
           author:
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | { login: string }
-            | null;
+            { login: string } | { login: string } | { login: string } | { login: string } | { login: string } | null;
         } | null> | null;
       };
     } | null;
@@ -1235,6 +1384,10 @@ export type DataForRepositoryQueryVariables = Exact<{
 
 export type DataForRepositoryQuery = {
   repository: {
+    mergeCommitAllowed: boolean;
+    squashMergeAllowed: boolean;
+    rebaseMergeAllowed: boolean;
+    autoMergeAllowed: boolean;
     defaultBranchRef: {
       id: string;
       name: string;
@@ -1367,6 +1520,8 @@ export type ReleaseFieldsFragment = {
 export type RepositoryReleasesQueryVariables = Exact<{
   name: string;
   owner: string;
+  numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type RepositoryReleasesQuery = {
@@ -1381,6 +1536,7 @@ export type RepositoryReleasesQuery = {
         tagName: string;
         url: any;
       } | null> | null;
+      pageInfo: { endCursor: string | null; hasNextPage: boolean };
     };
   } | null;
 };
@@ -1412,10 +1568,6 @@ export type MyStarredRepositoriesQuery = {
         nameWithOwner: string;
         name: string;
         url: any;
-        mergeCommitAllowed: boolean;
-        squashMergeAllowed: boolean;
-        rebaseMergeAllowed: boolean;
-        autoMergeAllowed: boolean;
         updatedAt: any;
         pushedAt: any;
         stargazerCount: number;
@@ -1423,13 +1575,8 @@ export type MyStarredRepositoriesQuery = {
         isFork: boolean;
         isPrivate: boolean;
         viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
-        hasDiscussionsEnabled: boolean;
         owner: { login: string; avatarUrl: any } | { login: string; avatarUrl: any };
         primaryLanguage: { id: string; name: string; color: string | null } | null;
-        releases: { totalCount: number };
       } | null> | null;
       pageInfo: { hasNextPage: boolean; endCursor: string | null };
     };
@@ -1496,9 +1643,7 @@ export type GetViewerQuery = {
   };
 };
 
-export type GetViewerStatsQueryVariables = Exact<{
-  repositoriesCount?: number | null | undefined;
-}>;
+export type GetViewerStatsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetViewerStatsQuery = {
   viewer: {
@@ -1521,6 +1666,19 @@ export type GetViewerStatsQuery = {
     pullRequestsOpen: { totalCount: number };
     issuesAuthored: { totalCount: number };
     issuesOpen: { totalCount: number };
+    contributionsCollection: { totalCommitContributions: number };
+    publicRepos: { totalCount: number };
+    ownedRepositories: { totalCount: number };
+  };
+  rateLimit: { remaining: number; limit: number; used: number; resetAt: any } | null;
+};
+
+export type GetViewerStatsDetailsQueryVariables = Exact<{
+  repositoriesCount?: number | null | undefined;
+}>;
+
+export type GetViewerStatsDetailsQuery = {
+  viewer: {
     recentPullRequests: {
       nodes: Array<{
         id: string;
@@ -1559,10 +1717,7 @@ export type GetViewerStatsQuery = {
         repository: { nameWithOwner: string };
       } | null> | null;
     };
-    contributionsCollection: { totalCommitContributions: number };
-    publicRepos: { totalCount: number };
     ownedRepositories: {
-      totalCount: number;
       nodes: Array<{
         id: string;
         nameWithOwner: string;
@@ -1572,11 +1727,9 @@ export type GetViewerStatsQuery = {
       } | null> | null;
     };
     organizations: {
-      totalCount: number;
       nodes: Array<{ id: string; login: string; name: string | null; avatarUrl: any; url: any } | null> | null;
     };
   };
-  rateLimit: { remaining: number; limit: number; used: number; resetAt: any } | null;
 };
 
 export const ShortRepositoryFieldsFragmentDoc = gql`
@@ -1776,6 +1929,46 @@ export const IssueDetailFieldsFragmentDoc = gql`
   ${AuthorFieldsFragmentDoc}
   ${ShortRepositoryFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
+`;
+export const IssueMentionFieldsFragmentDoc = gql`
+  fragment IssueMentionFields on Issue {
+    number
+    title
+    closed
+    stateReason
+    repository {
+      nameWithOwner
+    }
+    author {
+      login
+    }
+  }
+`;
+export const PullRequestMentionFieldsFragmentDoc = gql`
+  fragment PullRequestMentionFields on PullRequest {
+    number
+    title
+    closed
+    merged
+    isDraft
+    repository {
+      nameWithOwner
+    }
+    author {
+      login
+    }
+  }
+`;
+export const RepositoryMentionFieldsFragmentDoc = gql`
+  fragment RepositoryMentionFields on Repository {
+    nameWithOwner
+    description
+    isPrivate
+    isArchived
+    owner {
+      avatarUrl(size: 64)
+    }
+  }
 `;
 export const ProjectViewerFieldsFragmentDoc = gql`
   fragment ProjectViewerFields on ProjectV2View {
@@ -1998,7 +2191,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
 `;
 export const PullRequestCommitFieldsFragmentDoc = gql`
   fragment PullRequestCommitFields on PullRequest {
-    commits(last: 100) {
+    commits(last: $numberOfItems, before: $before) {
       totalCount
       nodes {
         commit {
@@ -2017,6 +2210,10 @@ export const PullRequestCommitFieldsFragmentDoc = gql`
           url
           treeUrl
         }
+      }
+      pageInfo {
+        hasPreviousPage
+        startCursor
       }
     }
   }
@@ -2038,10 +2235,6 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
       avatarUrl(size: 64)
     }
     url
-    mergeCommitAllowed
-    squashMergeAllowed
-    rebaseMergeAllowed
-    autoMergeAllowed
     updatedAt
     pushedAt
     stargazerCount
@@ -2053,13 +2246,6 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
       id
       name
       color
-    }
-    hasIssuesEnabled
-    hasWikiEnabled
-    hasProjectsEnabled
-    hasDiscussionsEnabled
-    releases {
-      totalCount
     }
   }
 `;
@@ -2106,15 +2292,14 @@ export const DeleteLinkedBranchDocument = gql`
   }
 `;
 export const SearchDiscussionsDocument = gql`
-  query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
-    openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+  query searchDiscussions($query: String!, $numberOfItems: Int!, $after: String) {
+    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfItems, after: $after) {
       nodes {
         ...DiscussionFields
       }
-    }
-    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
-      nodes {
-        ...DiscussionFields
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2186,9 +2371,23 @@ export const IssueDetailsDocument = gql`
   ${IssueDetailFieldsFragmentDoc}
 `;
 export const SearchIssuesDocument = gql`
-  query searchIssues($query: String!, $numberOfItems: Int!) {
-    search(query: $query, type: ISSUE, first: $numberOfItems) {
+  query searchIssues($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
       nodes {
+        ...IssueFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+  ${IssueFieldsFragmentDoc}
+`;
+export const IssueByNumberDocument = gql`
+  query issueByNumber($owner: String!, $name: String!, $issueNumber: Int!) {
+    repository(owner: $owner, name: $name) {
+      issue(number: $issueNumber) {
         ...IssueFields
       }
     }
@@ -2262,6 +2461,75 @@ export const CreateIssueDocument = gql`
   }
   ${IssueFieldsFragmentDoc}
 `;
+export const SearchIssueMentionsDocument = gql`
+  query searchIssueMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: ISSUE, first: $numberOfItems) {
+      nodes {
+        ... on Issue {
+          ...IssueMentionFields
+        }
+      }
+    }
+  }
+  ${IssueMentionFieldsFragmentDoc}
+`;
+export const SearchPullRequestMentionsDocument = gql`
+  query searchPullRequestMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: ISSUE, first: $numberOfItems) {
+      nodes {
+        ... on PullRequest {
+          ...PullRequestMentionFields
+        }
+      }
+    }
+  }
+  ${PullRequestMentionFieldsFragmentDoc}
+`;
+export const IssueOrPullRequestMentionDocument = gql`
+  query issueOrPullRequestMention($owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+      issueOrPullRequest(number: $number) {
+        __typename
+        ... on Issue {
+          ...IssueMentionFields
+        }
+        ... on PullRequest {
+          ...PullRequestMentionFields
+        }
+      }
+    }
+  }
+  ${IssueMentionFieldsFragmentDoc}
+  ${PullRequestMentionFieldsFragmentDoc}
+`;
+export const SearchRepositoryMentionsDocument = gql`
+  query searchRepositoryMentions($query: String!, $numberOfItems: Int!) {
+    search(query: $query, type: REPOSITORY, first: $numberOfItems) {
+      nodes {
+        ... on Repository {
+          ...RepositoryMentionFields
+        }
+      }
+    }
+  }
+  ${RepositoryMentionFieldsFragmentDoc}
+`;
+export const ViewerRepositoryMentionsDocument = gql`
+  query viewerRepositoryMentions($numberOfItems: Int!) {
+    viewer {
+      repositories(
+        first: $numberOfItems
+        orderBy: { field: PUSHED_AT, direction: DESC }
+        ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]
+      ) {
+        nodes {
+          ...RepositoryMentionFields
+        }
+      }
+    }
+  }
+  ${RepositoryMentionFieldsFragmentDoc}
+`;
 export const ChangeProjectStatusDocument = gql`
   mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
     updateProjectV2(input: { projectId: $projectId, closed: $closed }) {
@@ -2278,12 +2546,16 @@ export const ProjectDetailsDocument = gql`
   ${ProjectFieldsFragmentDoc}
 `;
 export const SearchPullRequestsDocument = gql`
-  query searchPullRequests($query: String!, $numberOfItems: Int!) {
-    search(query: $query, type: ISSUE, first: $numberOfItems) {
+  query searchPullRequests($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
       edges {
         node {
           ...PullRequestFields
         }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2348,7 +2620,7 @@ export const RepositoryProjectsForPullRequestsDocument = gql`
   }
 `;
 export const PullRequestCommitsDocument = gql`
-  query pullRequestCommits($nodeId: ID!) {
+  query pullRequestCommits($nodeId: ID!, $numberOfItems: Int!, $before: String) {
     node(id: $nodeId) {
       ...PullRequestCommitFields
     }
@@ -2517,10 +2789,14 @@ export const InitPullRequestDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const SearchRepositoriesDocument = gql`
-  query searchRepositories($query: String!, $numberOfItems: Int!) {
-    search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+  query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, first: $numberOfItems, after: $after, type: REPOSITORY) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2529,13 +2805,22 @@ export const SearchRepositoriesDocument = gql`
 export const MyLatestRepositoriesDocument = gql`
   query myLatestRepositories(
     $numberOfItems: Int!
+    $after: String
     $orderByField: RepositoryOrderField!
     $orderByDirection: OrderDirection!
   ) {
     viewer {
-      repositories(first: $numberOfItems, orderBy: { field: $orderByField, direction: $orderByDirection }) {
+      repositories(
+        first: $numberOfItems
+        after: $after
+        orderBy: { field: $orderByField, direction: $orderByDirection }
+      ) {
         nodes {
           ...ExtendedRepositoryFields
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
         }
       }
     }
@@ -2575,6 +2860,10 @@ export const CommentsForPullRequestDocument = gql`
 export const DataForRepositoryDocument = gql`
   query dataForRepository($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
+      mergeCommitAllowed
+      squashMergeAllowed
+      rebaseMergeAllowed
+      autoMergeAllowed
       defaultBranchRef {
         id
         name
@@ -2693,12 +2982,16 @@ export const RepositoryIssuesDocument = gql`
   ${IssueFieldsFragmentDoc}
 `;
 export const RepositoryReleasesDocument = gql`
-  query repositoryReleases($name: String!, $owner: String!) {
+  query repositoryReleases($name: String!, $owner: String!, $numberOfItems: Int!, $after: String) {
     repository(name: $name, owner: $owner) {
       ... on Repository {
-        releases(first: 30, orderBy: { field: CREATED_AT, direction: DESC }) {
+        releases(first: $numberOfItems, after: $after, orderBy: { field: CREATED_AT, direction: DESC }) {
           nodes {
             ...ReleaseFields
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
           }
         }
       }
@@ -2768,7 +3061,7 @@ export const GetViewerDocument = gql`
   ${ProjectFieldsFragmentDoc}
 `;
 export const GetViewerStatsDocument = gql`
-  query getViewerStats($repositoriesCount: Int = 100) {
+  query getViewerStats {
     viewer {
       ...UserFields
       bio
@@ -2801,6 +3094,28 @@ export const GetViewerStatsDocument = gql`
       issuesOpen: issues(states: [OPEN]) {
         totalCount
       }
+      contributionsCollection {
+        totalCommitContributions
+      }
+      publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+        totalCount
+      }
+      ownedRepositories: repositories(ownerAffiliations: OWNER) {
+        totalCount
+      }
+    }
+    rateLimit {
+      remaining
+      limit
+      used
+      resetAt
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const GetViewerStatsDetailsDocument = gql`
+  query getViewerStatsDetails($repositoriesCount: Int = 100) {
+    viewer {
       recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
         nodes {
           id
@@ -2847,18 +3162,11 @@ export const GetViewerStatsDocument = gql`
           }
         }
       }
-      contributionsCollection {
-        totalCommitContributions
-      }
-      publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
-        totalCount
-      }
       ownedRepositories: repositories(
         first: $repositoriesCount
         ownerAffiliations: OWNER
         orderBy: { field: STARGAZERS, direction: DESC }
       ) {
-        totalCount
         nodes {
           id
           nameWithOwner
@@ -2868,7 +3176,6 @@ export const GetViewerStatsDocument = gql`
         }
       }
       organizations(first: 20) {
-        totalCount
         nodes {
           id
           login
@@ -2878,14 +3185,7 @@ export const GetViewerStatsDocument = gql`
         }
       }
     }
-    rateLimit {
-      remaining
-      limit
-      used
-      resetAt
-    }
   }
-  ${UserFieldsFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -3061,6 +3361,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
         variables,
       );
     },
+    issueByNumber(
+      variables: IssueByNumberQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<IssueByNumberQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<IssueByNumberQuery>({
+            document: IssueByNumberDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "issueByNumber",
+        "query",
+        variables,
+      );
+    },
     closeIssue(
       variables: CloseIssueMutationVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -3166,6 +3484,96 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
           }),
         "createIssue",
         "mutation",
+        variables,
+      );
+    },
+    searchIssueMentions(
+      variables: SearchIssueMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchIssueMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchIssueMentionsQuery>({
+            document: SearchIssueMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchIssueMentions",
+        "query",
+        variables,
+      );
+    },
+    searchPullRequestMentions(
+      variables: SearchPullRequestMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchPullRequestMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchPullRequestMentionsQuery>({
+            document: SearchPullRequestMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchPullRequestMentions",
+        "query",
+        variables,
+      );
+    },
+    issueOrPullRequestMention(
+      variables: IssueOrPullRequestMentionQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<IssueOrPullRequestMentionQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<IssueOrPullRequestMentionQuery>({
+            document: IssueOrPullRequestMentionDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "issueOrPullRequestMention",
+        "query",
+        variables,
+      );
+    },
+    searchRepositoryMentions(
+      variables: SearchRepositoryMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<SearchRepositoryMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchRepositoryMentionsQuery>({
+            document: SearchRepositoryMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "searchRepositoryMentions",
+        "query",
+        variables,
+      );
+    },
+    viewerRepositoryMentions(
+      variables: ViewerRepositoryMentionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<ViewerRepositoryMentionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ViewerRepositoryMentionsQuery>({
+            document: ViewerRepositoryMentionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "viewerRepositoryMentions",
+        "query",
         variables,
       );
     },
@@ -3795,6 +4203,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             signal,
           }),
         "getViewerStats",
+        "query",
+        variables,
+      );
+    },
+    getViewerStatsDetails(
+      variables?: GetViewerStatsDetailsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<GetViewerStatsDetailsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GetViewerStatsDetailsQuery>({
+            document: GetViewerStatsDetailsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "getViewerStatsDetails",
         "query",
         variables,
       );

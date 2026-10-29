@@ -1,391 +1,368 @@
-# Chrome URLs
+# Internal URL census
 
-chrome://access-code-cast
-chrome://accessibility
-chrome://actor-overlay
-chrome://app-service-internals
-chrome://app-settings
-chrome://apps
-chrome://assistant
-chrome://attribution-internals
-chrome://autofill-internals
-chrome://batch-upload
-chrome://blob-internals
-chrome://bluetooth-internals
-chrome://bookmarks
-chrome://bookmarks-side-panel.top-chrome
-chrome://browser-switch
-chrome://certificate-manager
-chrome://chrome
-chrome://chrome-signin
-chrome://chrome-urls
-chrome://comments-side-panel.top-chrome
-chrome://compare
-chrome://components
-chrome://connection-help
-chrome://connection-monitoring-detected
-chrome://connectors-internals
-chrome://crashes
-chrome://credits
-chrome://customize-chrome-side-panel.top-chrome
-chrome://debug-webuis-disabled
-chrome://device-log
-chrome://dino
-chrome://downloads
-chrome://extensions
-chrome://extensions-internals
-chrome://extensions-zero-state
-chrome://feedback
-chrome://flags
-chrome://gcm-internals
-chrome://gpu
-chrome://histograms
-chrome://history
-chrome://history-clusters-side-panel.top-chrome
-chrome://history-side-panel.top-chrome
-chrome://history-sync-optin
-chrome://indexeddb-internals
-chrome://inspect
-chrome://internals
-chrome://intro
-chrome://managed-user-profile-notice
-chrome://management
-chrome://media-engagement
-chrome://media-internals
-chrome://metrics-internals
-chrome://native-bookmarks
-chrome://net-export
-chrome://net-internals
-chrome://new-tab-page
-chrome://new-tab-page-third-party
-chrome://newtab
-chrome://newtab-footer
-chrome://ntp-tiles-internals
-chrome://omnibox-popup.top-chrome
-chrome://on-device-translation-internals
-chrome://password-manager
-chrome://password-manager-internals
-chrome://policy
-chrome://predictors
-chrome://print
-chrome://privacy-sandbox-base-dialog
-chrome://privacy-sandbox-dialog
-chrome://privacy-sandbox-internals
-chrome://private-aggregation-internals
-chrome://process-internals
-chrome://profile-customization
-chrome://profile-internals
-chrome://profile-picker
-chrome://quota-internals
-chrome://read-later.top-chrome
-chrome://reset-password
-chrome://saved-tab-groups-unsupported
-chrome://search-engine-choice
-chrome://segmentation-internals
-chrome://serviceworker-internals
-chrome://settings
-chrome://shopping-insights-side-panel.top-chrome
-chrome://signin-dice-web-intercept.top-chrome
-chrome://signin-email-confirmation
-chrome://signin-error
-chrome://signin-internals
-chrome://signout-confirmation
-chrome://site-engagement
-chrome://skills-manager
-chrome://start-page
-chrome://suggest-internals
-chrome://support-tool
-chrome://sync-confirmation
-chrome://sync-internals
-chrome://system
-chrome://tab-group-home
-chrome://tab-search.top-chrome
-chrome://terms
-chrome://topics-internals
-chrome://translate-internals
-chrome://usb-internals
-chrome://version
-chrome://view-cert
-chrome://watermark
-chrome://web-app-internals
-chrome://webrtc-internals
-chrome://whats-new
-chrome-untrusted://compose
-chrome-untrusted://data-sharing
-chrome-untrusted://ntp-microsoft-auth
-chrome-untrusted://print
-chrome-untrusted://privacy-sandbox-dialog
-chrome-untrusted://read-anything-side-panel.top-chrome
+Every URL below was read from the browser's own `chrome://chrome-urls` page, with
+_Internal debugging pages_ enabled, over the DevTools Protocol on **2026-09-09**.
+This file is generated from that census — it is the source of `supportedBrowsers`
+in `src/data/paths.ts`, not a hand-maintained list.
 
-## Internal Debugging Page URLs
+| Browser          | Scheme       | Version                | URLs listed |
+| ---------------- | ------------ | ---------------------- | ----------- |
+| Google Chrome    | `chrome://`  | 152.0.7977.83          | 198         |
+| Brave            | `brave://`   | 152.1.94.121           | 219         |
+| Microsoft Edge   | `edge://`    | 152.0.4191.66          | 124         |
+| Vivaldi          | `vivaldi://` | 8.2.4133.47            | 193         |
+| Opera            | `opera://`   | 135.0 (Chromium 151)   | 127         |
+| Perplexity Comet | `comet://`   | 145.2.7632.5934        | 174         |
+| Arc              | `arc://`     | 1.161.1 (Chromium 152) | 193         |
+| Dia              | `dia://`     | 1.48.0 (Chromium 152)  | 193         |
 
-chrome://actor-internals
-chrome://autofill-ml-internals
-chrome://color-pipeline-internals
-chrome://commerce-internals
-chrome://data-sharing-internals
-chrome://discards
-chrome://download-internals
-chrome://family-link-user-internals
-chrome://history-clusters-internals
-chrome://infobar-internals
-chrome://interstitials
-chrome://local-state
-chrome://location-internals
-chrome://media-router-internals
-chrome://memory-internals
-chrome://network-errors
-chrome://omnibox
-chrome://on-device-internals
-chrome://optimization-guide-internals
-chrome://profile-internals
-chrome://safe-browsing
-chrome://tab-strip-internals
-chrome://traces
-chrome://traces-internals
-chrome://tracing
-chrome://ukm
-chrome://user-actions
-chrome://user-education-internals
-chrome://webrtc-logs
-chrome://webui-gallery
-chrome://webuijserror
+ChatGPT Atlas is not listed: the app bundle at `/Applications/ChatGPT Atlas.app` is an
+empty stub with no binary, so it could not be censused. It was dropped from the extension in 1.2.0.
 
-## Command URLs for Debug
+## Compatibility matrix
 
-The following URLs are for debugging purposes only. Because they crash or hang the renderer, they're not linked directly; you can type them into the address bar if you need them.
+`•` = advertised by that browser's own URL list.
 
-chrome://badcastcrash
-chrome://inducebrowsercrashforrealz
-chrome://inducebrowserdcheckforrealz
-chrome://crash
-chrome://crash/rust
-chrome://crashdump
-chrome://kill
-chrome://hang
-chrome://shorthang
-chrome://gpuclean
-chrome://gpucrash
-chrome://gpuhang
-chrome://memory-exhaust
-chrome://memory-pressure-critical
-chrome://memory-pressure-moderate
-chrome://webuijserror
-chrome://quit
-chrome://restart
+| URL                                                      | Kind                | Chrome | Brave | Edge | Vivaldi | Opera | Comet | Arc | Dia |
+| -------------------------------------------------------- | ------------------- | ------ | ----- | ---- | ------- | ----- | ----- | --- | --- |
+| `1js-internals`                                          | Standard            |        |       | •    |         |       |       |     |     |
+| `about`                                                  | Standard            |        |       | •    |         | •     |       |     |     |
+| `access-code-cast`                                       | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `accessibility`                                          | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `activity`                                               | Standard            |        |       |      |         | •     |       |     |     |
+| `actor-internals`                                        | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `actor-overlay`                                          | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `adblock`                                                | Standard            |        | •     |      |         |       |       |     |     |
+| `adblock-internals`                                      | Standard            |        | •     |      |         |       |       |     |     |
+| `adblock-popup`                                          | Standard            |        |       |      |         |       | •     |     |     |
+| `address-bar-dropdown`                                   | Standard            |        |       |      |         | •     |       |     |     |
+| `agent-internals`                                        | Standard            |        |       | •    |         |       |       |     |     |
+| `ai-mode-bar`                                            | Standard            |        |       |      |         | •     |       |     |     |
+| `app-service-internals`                                  | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `app-settings`                                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `application-guard-internals`                            | Standard            |        |       | •    |         |       |       |     |     |
+| `apps`                                                   | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `assistant`                                              | Standard            |        |       |      |         |       |       |     | •   |
+| `attribution-internals`                                  | Standard            |        |       |      |         | •     | •     | •   |     |
+| `autofill-internals`                                     | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `autofill-ml-internals`                                  | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `badcastcrash`                                           | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `batch-upload`                                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `blob-internals`                                         | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `bluetooth-internals`                                    | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `bookmarks`                                              | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `bookmarks-panel`                                        | Standard            |        |       |      |         | •     |       |     |     |
+| `bookmarks-side-panel.top-chrome`                        | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `boost`                                                  | Internal debugging  |        |       |      |         |       |       | •   |     |
+| `brave-shields.top-chrome`                               | Standard            |        | •     |      |         |       |       |     |     |
+| `brave-speedreader.top-chrome`                           | Standard            |        | •     |      |         |       |       |     |     |
+| `browser-switch`                                         | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `browserjs`                                              | Standard            |        |       |      |         | •     |       |     |     |
+| `cast-feedback`                                          | Standard            | •      |       |      |         |       |       |     |     |
+| `certificate-manager`                                    | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `chrome`                                                 | Standard            |        |       |      |         |       | •     |     |     |
+| `chrome-finds-internals`                                 | Internal debugging  | •      | •     | •    | •       |       |       | •   | •   |
+| `chrome-signin`                                          | Standard            |        |       |      |         |       | •     |     |     |
+| `chrome-untrusted://ai-overlay-dialog`                   | Untrusted context   | •      | •     |      | •       |       |       | •   | •   |
+| `chrome-untrusted://aichat-chart-display`                | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://aichat-code-sandbox`                 | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://compose`                             | Untrusted context   | •      | •     |      | •       |       | •     | •   | •   |
+| `chrome-untrusted://data-sharing`                        | Untrusted context   | •      | •     |      | •       |       | •     | •   | •   |
+| `chrome-untrusted://dia-artifacts`                       | Untrusted context   |        |       |      |         |       |       | •   | •   |
+| `chrome-untrusted://drive-picker-host`                   | Untrusted context   | •      | •     |      | •       |       |       | •   | •   |
+| `chrome-untrusted://glic`                                | Untrusted context   | •      | •     |      |         |       |       |     |     |
+| `chrome-untrusted://ledger-bridge`                       | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://lens`                                | Untrusted context   | •      | •     |      | •       |       | •     |     |     |
+| `chrome-untrusted://lens-overlay`                        | Untrusted context   | •      | •     |      | •       |       | •     |     |     |
+| `chrome-untrusted://leo-ai-conversation-entries`         | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://line-chart-display`                  | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://market-display`                      | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://news`                                | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://nft-display`                         | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://ntp-microsoft-auth`                  | Untrusted context   | •      | •     |      | •       |       | •     | •   | •   |
+| `chrome-untrusted://print`                               | Untrusted context   | •      | •     |      | •       | •     | •     | •   | •   |
+| `chrome-untrusted://privacy-sandbox-dialog`              | Untrusted context   |        |       |      |         |       | •     |     |     |
+| `chrome-untrusted://read-anything-side-panel.top-chrome` | Untrusted context   | •      | •     |      | •       |       | •     | •   | •   |
+| `chrome-untrusted://trezor-bridge`                       | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-untrusted://vpn-panel.top-chrome`                | Untrusted context   |        | •     |      |         |       |       |     |     |
+| `chrome-urls`                                            | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `color-pipeline-internals`                               | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `comments-side-panel.top-chrome`                         | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `commerce-internals`                                     | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `compare`                                                | Standard            |        |       |      |         |       | •     |     |     |
+| `compat`                                                 | Standard            |        |       | •    |         |       |       |     |     |
+| `components`                                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `connection-help`                                        | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `connection-monitoring-detected`                         | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `connectors-internals`                                   | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `consent-flow-dialog`                                    | Standard            |        |       |      |         | •     |       |     |     |
+| `constrained-test`                                       | Standard            | •      | •     |      | •       | •     |       | •   | •   |
+| `content-annotator-internals`                            | Internal debugging  | •      | •     |      | •       |       |       | •   | •   |
+| `content-settings`                                       | Internal debugging  |        |       |      |         |       |       |     | •   |
+| `context-hub`                                            | Internal debugging  | •      | •     |      | •       |       |       | •   | •   |
+| `contextual-cueing-internals`                            | Internal debugging  | •      | •     | •    | •       |       |       | •   | •   |
+| `contextual-tasks`                                       | Standard            | •      | •     |      | •       |       | •     |     |     |
+| `crash`                                                  | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `crash/browser/heap-overflow`                            | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/browser/heap-underflow`                           | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/browser/member-dereference-after-free`            | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/browser/use-after-free`                           | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/gpu/heap-overflow`                                | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/gpu/heap-underflow`                               | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/gpu/member-dereference-after-free`                | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/gpu/use-after-free`                               | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/renderer/heap-overflow`                           | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/renderer/heap-underflow`                          | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/renderer/member-dereference-after-free`           | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/renderer/use-after-free`                          | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `crash/rust`                                             | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `crashdump`                                              | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `crashes`                                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `credits`                                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `cross-device-signin-qr-bubble`                          | Standard            | •      | •     | •    | •       |       |       | •   | •   |
+| `customize-chrome-side-panel.top-chrome`                 | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `data-sharing-internals`                                 | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `data-viewer`                                            | Standard            |        |       | •    |         |       |       |     |     |
+| `debug-webuis-disabled`                                  | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `default-browser-modal`                                  | Standard            | •      | •     |      |         |       |       | •   | •   |
+| `device-log`                                             | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `dino`                                                   | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `discards`                                               | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `download-internals`                                     | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `downloads`                                              | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `drive-picker-host`                                      | Standard            | •      | •     |      | •       |       |       | •   | •   |
+| `easy-files`                                             | Standard            |        |       |      |         | •     |       |     |     |
+| `easy-setup`                                             | Standard            |        |       |      |         | •     |       |     |     |
+| `edge-dlp-internals`                                     | Standard            |        |       | •    |         |       |       |     |     |
+| `edge-urls`                                              | Standard            |        |       | •    |         |       |       |     |     |
+| `emoji-picker`                                           | Standard            |        |       |      |         | •     |       |     |     |
+| `enp`                                                    | Standard            |        |       | •    |         |       |       |     |     |
+| `eppo-features`                                          | Standard            |        |       |      |         |       | •     |     |     |
+| `extensions`                                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `extensions-internals`                                   | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `extensions-zero-state`                                  | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `family-link-user-internals`                             | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `favorites`                                              | Standard            |        |       | •    |         |       |       |     |     |
+| `feature-showcase`                                       | Standard            | •      | •     |      | •       |       |       | •   | •   |
+| `feedback`                                               | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `flags`                                                  | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `gcm-internals`                                          | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `getting-started`                                        | Standard            |        | •     |      |         |       |       |     |     |
+| `glic`                                                   | Standard            | •      | •     |      |         |       | •     |     |     |
+| `glic-experimental-opt-in`                               | Standard            | •      | •     |      |         |       |       |     |     |
+| `glic-fre`                                               | Standard            |        |       |      |         |       | •     |     |     |
+| `gpu`                                                    | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `gpuclean`                                               | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `gpucrash`                                               | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `gpuhang`                                                | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `hang`                                                   | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `help`                                                   | Standard            |        |       | •    |         |       |       |     |     |
+| `histograms`                                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `history`                                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `history-clusters-internals`                             | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `history-clusters-side-panel.top-chrome`                 | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `history-panel`                                          | Standard            |        |       |      |         | •     |       |     |     |
+| `history-side-panel.top-chrome`                          | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `history-sync-optin`                                     | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `indexeddb-internals`                                    | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `indigo-internals`                                       | Internal debugging  | •      | •     |      | •       |       |       | •   | •   |
+| `inducebrowsercrashforrealz`                             | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `inducebrowserdcheckforrealz`                            | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `infobar-internals`                                      | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `injection-protection`                                   | Standard            |        |       |      |         | •     |       |     |     |
+| `inspect`                                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `internals`                                              | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `interstitials`                                          | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `intro`                                                  | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `iwa-dev`                                                | Standard            | •      | •     | •    | •       |       |       |     | •   |
+| `kill`                                                   | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `legion-internals`                                       | Internal debugging  |        |       |      |         |       | •     |     |     |
+| `leo-ai`                                                 | Standard            |        | •     |      |         |       |       |     |     |
+| `local-state`                                            | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `location-internals`                                     | Internal debugging  | •      | •     |      | •       | •     | •     | •   | •   |
+| `mam-internals`                                          | Standard            |        |       | •    |         |       |       |     |     |
+| `managed-user-profile-notice`                            | Standard            | •      | •     |      | •       |       |       | •   | •   |
+| `management`                                             | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `media-engagement`                                       | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `media-internals`                                        | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `media-router-internals`                                 | Internal debugging  | •      | •     |      | •       | •     | •     | •   | •   |
+| `memory-exhaust`                                         | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `memory-internals`                                       | Internal debugging  | •      | •     |      | •       | •     | •     | •   | •   |
+| `memory-pressure-critical`                               | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `memory-pressure-moderate`                               | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `metrics-internals`                                      | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `mods`                                                   | Standard            |        |       |      |         | •     |       |     |     |
+| `multistep-filter-internals`                             | Internal debugging  | •      | •     |      | •       |       |       | •   | •   |
+| `native-bookmarks`                                       | Standard            |        |       |      |         |       |       |     | •   |
+| `net-export`                                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `net-internals`                                          | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `network-errors`                                         | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `new-tab-page`                                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `new-tab-page-third-party`                               | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `news`                                                   | Standard            |        |       |      |         | •     |       |     |     |
+| `newtab`                                                 | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `newtab-footer`                                          | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `notebooks-internals`                                    | Internal debugging  | •      | •     |      | •       |       |       |     | •   |
+| `ntp-tiles-internals`                                    | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `omnibox`                                                | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `omnibox-everywhere.top-chrome`                          | Standard            | •      | •     |      | •       |       |       | •   | •   |
+| `omnibox-popup.top-chrome`                               | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `on-device-internals`                                    | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `on-device-translation-internals`                        | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `opera-account`                                          | Standard            |        |       |      |         | •     |       |     |     |
+| `opera-diagnostics`                                      | Standard            |        |       |      |         | •     |       |     |     |
+| `optimization-guide-internals`                           | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `organizer-panel.top-chrome`                             | Standard            |        |       |      |         |       |       |     | •   |
+| `password-manager`                                       | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `password-manager-internals`                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `perplexity-onboarding`                                  | Standard            |        |       |      |         |       | •     |     |     |
+| `perplexity-spotlight`                                   | Standard            |        |       |      |         |       | •     |     |     |
+| `personal-context-internals`                             | Internal debugging  | •      | •     |      | •       |       |       | •   |     |
+| `personal-context-notice`                                | Standard            | •      | •     |      | •       |       |       | •   |     |
+| `player-service`                                         | Standard            |        |       |      |         | •     |       |     |     |
+| `policy`                                                 | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `predictors`                                             | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `prefs-internals`                                        | Standard            | •      | •     | •    | •       | •     |       | •   | •   |
+| `print`                                                  | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `privacy-sandbox-dialog`                                 | Standard            |        |       |      |         |       | •     |     |     |
+| `privacy-sandbox-internals`                              | Standard            |        |       |      |         |       | •     |     |     |
+| `private-aggregation-internals`                          | Standard            |        |       |      |         | •     | •     | •   |     |
+| `private-ai-internals`                                   | Internal debugging  | •      | •     |      | •       |       |       | •   | •   |
+| `process-internals`                                      | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `profile-customization`                                  | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `profile-internals`                                      | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `profile-picker`                                         | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `psst`                                                   | Standard            |        | •     |      |         |       |       |     |     |
+| `push-internals`                                         | Standard            |        |       | •    |         |       |       |     |     |
+| `quit`                                                   | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `quota-internals`                                        | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `read-later.top-chrome`                                  | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `regional-capabilities-internals`                        | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `reset-password`                                         | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `restart`                                                | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `rewards.top-chrome`                                     | Standard            |        | •     |      |         |       |       |     |     |
+| `rich-hints-console`                                     | Standard            |        |       |      |         | •     |       |     |     |
+| `rich-wallpaper`                                         | Standard            |        |       |      |         | •     |       |     |     |
+| `safe-browsing`                                          | Internal debugging  | •      | •     |      | •       | •     | •     | •   | •   |
+| `saved-tab-groups-unsupported`                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `search-engine-choice`                                   | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `security-diagnostics`                                   | Standard            |        |       | •    |         |       |       |     |     |
+| `segmentation-internals`                                 | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `serviceworker-internals`                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `settings`                                               | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `settings-one`                                           | Standard            |        |       |      |         | •     |       |     |     |
+| `sharing-point`                                          | Standard            |        |       |      |         | •     |       |     |     |
+| `shopping-insights-side-panel.top-chrome`                | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `shorthang`                                              | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `sidebar`                                                | Standard            |        |       |      |         |       | •     |     |     |
+| `sidebar-setup`                                          | Standard            |        |       |      |         | •     |       |     |     |
+| `signin-dice-web-intercept.top-chrome`                   | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `signin-email-confirmation`                              | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `signin-error`                                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `signin-internals`                                       | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `signin-qrcode-bar`                                      | Standard            |        |       |      |         |       |       | •   |     |
+| `signout-confirmation`                                   | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `site-engagement`                                        | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `skills`                                                 | Standard            | •      | •     | •    | •       |       |       |     |     |
+| `snapshot-selfie`                                        | Standard            |        |       |      |         | •     |       |     |     |
+| `start-page`                                             | Standard            |        |       |      |         |       |       |     | •   |
+| `startpage`                                              | Standard            |        |       |      |         | •     |       |     |     |
+| `startpageshared`                                        | Standard            |        |       |      |         | •     |       |     |     |
+| `styleguide`                                             | Standard            |        |       |      |         | •     |       |     |     |
+| `subresource-filter-internals`                           | Internal debugging  | •      | •     | •    | •       |       |       | •   | •   |
+| `suggest-internals`                                      | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `support-tool`                                           | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `sync-confirmation`                                      | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `sync-internals`                                         | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `sync-login`                                             | Standard            |        |       |      |         | •     |       |     |     |
+| `system`                                                 | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `tab-group-home`                                         | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `tab-search.top-chrome`                                  | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `tab-strip-internals`                                    | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `tabs-from-other-devices.top-chrome`                     | Standard            | •      | •     | •    | •       |       |       | •   | •   |
+| `terms`                                                  | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `themes`                                                 | Standard            |        |       |      |         | •     |       |     |     |
+| `topics-internals`                                       | Standard            |        |       |      |         |       | •     | •   |     |
+| `traces`                                                 | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `traces-internals`                                       | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `tracing`                                                | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `translate-internals`                                    | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `uithreadhang`                                           | Crash/debug command | •      | •     | •    | •       | •     |       | •   | •   |
+| `ukm`                                                    | Internal debugging  | •      | •     | •    | •       | •     | •     | •   | •   |
+| `unexportable-keys-internals`                            | Internal debugging  | •      | •     |      | •       | •     | •     | •   | •   |
+| `update`                                                 | Standard            |        |       |      |         | •     |       |     |     |
+| `updater`                                                | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `usb-internals`                                          | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `user-actions`                                           | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `user-education-internals`                               | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `version`                                                | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `video-conference-detached`                              | Standard            |        |       |      |         | •     |       |     |     |
+| `view-cert`                                              | Standard            | •      | •     |      | •       | •     | •     | •   | •   |
+| `vpn-pro`                                                | Standard            |        |       |      |         | •     |       |     |     |
+| `wallet`                                                 | Standard            |        | •     | •    |         |       |       |     |     |
+| `wallet-panel.top-chrome`                                | Standard            |        | •     |      |         |       |       |     |     |
+| `wallet/passwords`                                       | Standard            |        |       | •    |         |       |       |     |     |
+| `watermark`                                              | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `web-app-internals`                                      | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `web3-selector`                                          | Standard            |        |       |      |         | •     |       |     |     |
+| `webcompat`                                              | Standard            |        | •     |      |         |       |       |     |     |
+| `webnn-internals`                                        | Standard            | •      | •     | •    | •       | •     |       | •   | •   |
+| `webrtc-internals`                                       | Standard            | •      | •     | •    | •       | •     | •     | •   | •   |
+| `webrtc-logs`                                            | Internal debugging  | •      | •     | •    | •       |       | •     | •   | •   |
+| `webui-browser`                                          | Standard            | •      | •     | •    | •       |       | •     |     |     |
+| `webui-gallery`                                          | Internal debugging  | •      | •     |      | •       |       | •     | •   | •   |
+| `webui-toolbar.top-chrome`                               | Standard            | •      | •     | •    | •       |       | •     | •   | •   |
+| `webuijserror`                                           | Crash/debug command | •      | •     | •    | •       | •     | •     | •   | •   |
+| `welcome-new`                                            | Standard            |        | •     |      |         |       |       |     |     |
+| `whats-new`                                              | Standard            | •      | •     |      | •       |       | •     | •   | •   |
+| `workspaces-internals`                                   | Standard            |        |       | •    |         |       |       |     |     |
+| `wormhole`                                               | Standard            |        |       |      |         |       | •     |     |     |
 
-[Source](https://source.chromium.org/chromium/chromium/src/+/main:chrome/browser/ui/webui/chrome_url_data_manager_browsertest.cc?q=media-engagement&ss=chromium/chromium/src)
+## Removed URLs
 
-```cpp
-#if !BUILDFLAG(IS_CHROMEOS)
-    "chrome://app-service-internals",
-#endif
-    "chrome://attribution-internals",
-    "chrome://autofill-internals",
-    "chrome://bookmarks",
-    "chrome://bookmarks-side-panel.top-chrome",
-    "chrome://comments-side-panel.top-chrome",
-    "chrome://chrome-urls",
-    "chrome://components",
-    "chrome://connection-help",
-    "chrome://connection-monitoring-detected",
-// TODO(crbug.com/40913109): Re-enable this test
-#if !BUILDFLAG(IS_LINUX) && !BUILDFLAG(IS_CHROMEOS)
-    "chrome://credits",
-#endif
-    "chrome://customize-chrome-side-panel.top-chrome",
-    "chrome://debug-webuis-disabled",
-    "chrome://device-log",
-    // TODO(crbug.com/40710256): Test failure due to excessive output.
-    // "chrome://discards",
-    "chrome://download-internals",
-    "chrome://downloads",
-    "chrome://extensions",
-    "chrome://extensions-internals",
-    "chrome://flags",
-    "chrome://gcm-internals",
-    "chrome://gpu",
-    "chrome://histograms",
-    "chrome://history",
-    "chrome://history-clusters-side-panel.top-chrome",
-    "chrome://indexeddb-internals",
-    "chrome://inspect",
-    "chrome://internals/session-service",
-    "chrome://interstitials/ssl",
-    "chrome://local-state",
-    "chrome://management",
-    "chrome://media-engagement",
-    "chrome://media-internals",
-    "chrome://media-router-internals",
-    "chrome://metrics-internals",
-    // TODO(crbug.com/40185163): DCHECK failure
-    // "chrome://memory-internals",
-    "chrome://net-export",
-    "chrome://net-internals",
-    "chrome://network-errors",
-    "chrome://new-tab-page",
-    "chrome://new-tab-page-third-party",
-    "chrome://newtab",
-    "chrome://ntp-tiles-internals",
-    "chrome://omnibox",
-    "chrome://password-manager",
-    "chrome://password-manager-internals",
-    "chrome://policy",
-    "chrome://predictors",
-    "chrome://prefs-internals",
-    "chrome://privacy-sandbox-dialog/?debug",
-    "chrome://process-internals",
-    "chrome://quota-internals",
-    "chrome://read-later.top-chrome",
-    "chrome://reset-password",
-    "chrome://safe-browsing",
-    "chrome://saved-tab-groups-unsupported",
-    "chrome://search-engine-choice",
-    "chrome://serviceworker-internals",
-    "chrome://segmentation-internals",
-    "chrome://settings",
-    "chrome://signin-internals",
-    "chrome://site-engagement",
-    "chrome://support-tool",
-    // TODO(crbug.com/40137561): Navigating to chrome://sync-confirmation and
-    // quickly navigating away cause DCHECK failure.
-    // "chrome://sync-confirmation",
-    "chrome://sync-internals",
-    "chrome://system",
-    "chrome://tab-search.top-chrome",
-    // TODO(crbug.com/40137562): Navigating to chrome://tab-strip and quickly
-    // navigating away cause DCHECK failure.
-    // "chrome://tab-strip",
-    "chrome://terms",
-    "chrome://topics-internals",
-    "chrome://translate-internals",
-    "chrome://ukm",
-    "chrome://usb-internals",
-    "chrome://user-actions",
-    "chrome://user-education-internals",
-    "chrome://version",
-    "chrome://web-app-internals",
-    "chrome://webrtc-internals",
-    "chrome://webrtc-logs",
-    "chrome://webui-gallery",
+Shipped by earlier versions of this extension and advertised by no browser in the census.
+Each was additionally verified by navigating to it in Chrome 152, where it returns a network error.
+They remain in `paths.ts` marked `isDeprecated`, hidden behind the _Hide Removed URLs_ preference.
 
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
-    "chrome://whats-new",
-#endif
+| URL                             | Why it is gone                                                                                                                                                                                       |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appcache-internals`            | AppCache was removed from Chromium in Chrome 95. Service worker state now lives at chrome://serviceworker-internals.                                                                                 |
+| `assistant-optin`               | Google Assistant was a ChromeOS-only surface and is no longer registered in desktop builds.                                                                                                          |
+| `conversion-internals`          | Renamed to chrome://attribution-internals, which itself has since been dropped by Chrome, Brave, Dia, Edge and Vivaldi along with the Privacy Sandbox Ads APIs. Arc, Comet and Opera still carry it. |
+| `devices`                       | Removed from Chromium. Cast device state now lives at chrome://media-router-internals.                                                                                                               |
+| `internals/gpu`                 | An Android-only surface. Desktop builds serve chrome://gpu instead.                                                                                                                                  |
+| `internals/media`               | An Android-only surface. Desktop builds serve chrome://media-internals instead.                                                                                                                      |
+| `internals/query-tiles`         | An Android-only surface with no desktop equivalent.                                                                                                                                                  |
+| `invalidations`                 | Removed from Chromium. Sync invalidation state is now reported under chrome://sync-internals.                                                                                                        |
+| `privacy-sandbox-dialog/?debug` | The ?debug parameter is gone. Chrome dropped the consent dialog itself alongside the Privacy Sandbox Ads APIs; only Comet still serves chrome://privacy-sandbox-dialog.                              |
+| `skills-manager`                | Folded into chrome://skills.                                                                                                                                                                         |
+| `suggestions`                   | Removed from Chromium. The New Tab Page now renders suggestions directly.                                                                                                                            |
 
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
-    "chrome://cast-feedback",
-#endif
+## Entries not derived from the census
 
-#if BUILDFLAG(IS_ANDROID)
-    "chrome://explore-sites-internals",
-    "chrome://internals/notifications",
-    "chrome://internals/query-tiles",
-    "chrome://snippets-internals",
-    "chrome://webapks",
-#endif
+Six commands are not advertised on any browser's `chrome://chrome-urls` page, so the census could not
+establish their support. Their support sets come from the methods below instead. They are listed here
+because a support set is a claim, and a reader is entitled to know which claims were measured.
 
-#if BUILDFLAG(IS_CHROMEOS)
-    // TODO(crbug.com/40250441): Add CrOS-only WebUI URLs here as TrustedTypes
-    // are deployed to more WebUIs.
+**Measured by direct navigation** — each browser was launched on a throwaway profile, sent to the
+address, and the resulting location recorded (macOS, 2026-09-15). A browser is listed only if it
+actually resolved the page. Brave, Arc and Dia canonicalise these to the `chrome://` form and load
+them, which counts as serving them.
 
-    "chrome://accessory-update",
-    "chrome://account-manager-error",
-    "chrome://account-migration-welcome",
-    "chrome://add-supervision/",
-    "chrome://app-disabled",
-    "chrome://camera-app/views/main.html",
-    "chrome://bluetooth-pairing",
-    "chrome://certificate-manager/",
+| URL                         | Verified in                                                                                                 | Not verified                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `about`                     | Chrome, Brave, Arc, Dia — plus Edge and Opera, which list it in the census                                  | Comet, Vivaldi              |
+| `help`                      | Chrome, Brave, Arc, Dia — plus Edge, which lists it in the census                                           | Comet, Opera, Vivaldi       |
+| `interstitials/ssl`         | Chrome, Brave, Arc, Dia — plus Comet, which answered with its debug-disabled page, so the host exists there | Edge, Opera, Vivaldi        |
+| `internals/session-service` | Chrome, Brave, Arc, Dia                                                                                     | Comet, Edge, Opera, Vivaldi |
 
-    // Crashes because message handler is not registered outside of the dialog
-    // for confirm password change UI.
-    // "chrome://confirm-password-change",
+Edge, Opera and Vivaldi were not installed at the time of this pass. Comet's probe returned
+`about:blank` for every address except the one above, which means the navigation did not complete
+rather than that the page is absent — so Comet is treated as unmeasured, not unsupported.
 
-    // TODO(b/300875336): Navigating to chrome://cloud-upload causes an
-    // assertion failure because there are no dialog args.
-    "chrome://cloud-upload",
-
-    "chrome://connectivity-diagnostics",
-    "chrome://connectors-internals",
-    "chrome://crashes",
-    "chrome://crostini-installer",
-    "chrome://crostini-upgrader",
-    "chrome://cryptohome",
-    "chrome://diagnostics",
-    "chrome://drive-internals",
-    "chrome://emoji-picker",
-    "chrome://family-link-user-internals",
-    "chrome://file-manager",
-    "chrome://help-app",
-    "chrome://linux-proxy-config",
-    "chrome://manage-mirrorsync",
-    "chrome://multidevice-internals",
-    "chrome://multidevice-setup",
-    "chrome://nearby",
-    "chrome://nearby-internals",
-    "chrome://network",
-    "chrome://office-fallback/",
-    "chrome://os-feedback",
-    "chrome-untrusted://os-feedback",
-    "chrome://os-settings",
-    "chrome://parent-access",
-    "chrome://password-change",
-    "chrome://personalization",
-    "chrome://power",
-    "chrome://print-management",
-    "chrome-untrusted://projector",
-    "chrome://proximity-auth/proximity_auth.html",
-    "chrome://scanning",
-    "chrome://set-time",
-    "chrome://shimless-rma",
-    "chrome://shortcut-customization",
-    "chrome://slow",
-    "chrome://smb-credentials-dialog/",
-    "chrome://smb-share-dialog/",
-    "chrome://urgent-password-expiry-notification/",
-    "chrome://sys-internals",
-#endif
-#if !BUILDFLAG(IS_CHROMEOS)
-    "chrome://apps",
-    "chrome://browser-switch",
-    "chrome://browser-switch/internals",
-    "chrome://profile-picker",
-    // Note: Disabled because a DCHECK fires when directly visiting the URL.
-    // "chrome://managed-user-profile-notice",
-    "chrome://intro",
-    "chrome://profile-customization/?debug",
-    "chrome://signin-email-confirmation",
-#endif
-#if !BUILDFLAG(IS_MAC)
-    "chrome://sandbox",
-#endif  // !BUILDFLAG(IS_MAC)
-#if !BUILDFLAG(IS_MAC)
-    // TODO(crbug.com/40772380): this test is flaky on mac.
-    "chrome://bluetooth-internals",
-#endif
-#if BUILDFLAG(IS_WIN)
-    "chrome://conflicts",
-#endif
-#if BUILDFLAG(ENABLE_DICE_SUPPORT)
-    "chrome://signin-dice-web-intercept.top-chrome/?debug",
-// Note: Disabled because a DCHECK fires when directly visiting the URL.
-// "chrome://signin-reauth",
-#endif
-#if BUILDFLAG(IS_CHROMEOS)
-// TODO(crbug.com/40250068): Uncomment when TrustedTypes are enabled.
-// "chrome://chrome-signin",
-#endif
-#if BUILDFLAG(ENABLE_DICE_SUPPORT) && !BUILDFLAG(IS_CHROMEOS)
-    // TODO(crbug.com/40250068): Uncomment when TrustedTypes are enabled.
-    // "chrome://chrome-signin/?reason=5",
-    "chrome://signout-confirmation",
-#endif
-#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
-    "chrome://webuijserror",
-#endif
-#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
-    "chrome://print",
-#endif
-};
-```
+**Source-derived, not measured** — `conflicts` and `sandbox` are gated to Windows and Windows/Linux
+respectively in Chromium's `chrome/common/webui_url_constants.cc`. Every browser tested returns a
+network error for them on macOS, so nothing about them is measurable on the platform this census ran
+on. Their support is narrowed to Chrome, the one browser whose upstream source declares the host.
+Other Chromium browsers may well serve them on Windows; that has not been verified here and is not
+claimed.

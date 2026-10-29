@@ -1,6 +1,14 @@
 # Wikipedia Changelog
 
+## [Article navigation] - 2026-08-13
+
+- Add back and forward navigation between opened articles with `[` and `]` shortcuts
+- Preserve article history when following in-page links or changing page language
+- Update Change Language shortcut to `⌘⇧L` / `Ctrl⇧L`
+- Align Open Link, Copy, and Search in Browser shortcuts with Raycast common defaults on macOS and Windows
+
 ## [Language improvements] - 2025-05-30
+
 - Fix open article in another language
 - Add the ability to delete recent articles
 

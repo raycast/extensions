@@ -1,78 +1,78 @@
-import { Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { VessloApp } from "./types";
 import { SharedAppListItem } from "./components/SharedAppListItem";
 import { useVessloData } from "./utils/useVessloData";
-
-interface SearchResult {
-  app: VessloApp;
-  matchedFields: string[]; // ["developer", "memo", "tag"]
-}
+import {
+  DataStateNotice,
+  ReloadDataAction,
+} from "./components/DataStateNotice";
+import { TaggedApps } from "./browse-by-tag";
+import { searchApps, SearchScope } from "./utils/search-filter";
 
 export default function SearchApps() {
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading } = useVessloData();
-
-  const searchResults = useMemo((): SearchResult[] => {
-    if (!data) return [];
-
-    const query = searchText.toLowerCase();
-    if (!query) {
-      return data.apps.map((app) => ({ app, matchedFields: [] }));
-    }
-
-    return data.apps
-      .map((app) => {
-        const matchedFields: string[] = [];
-
-        // Check each field (skip app name - user doesn't want that shown)
-        if (app.name.toLowerCase().includes(query)) {
-          // Don't add to matchedFields - user said app name is not needed
-        }
-        if (app.developer?.toLowerCase().includes(query)) {
-          matchedFields.push("developer");
-        }
-        if (app.memo?.toLowerCase().includes(query)) {
-          matchedFields.push("memo");
-        }
-        if (app.tags.some((tag) => tag.toLowerCase().includes(query))) {
-          matchedFields.push("tag");
-        }
-
-        // Include if any field matches
-        const matches =
-          app.name.toLowerCase().includes(query) || matchedFields.length > 0;
-
-        return matches ? { app, matchedFields } : null;
-      })
-      .filter((result): result is SearchResult => result !== null);
-  }, [data, searchText]);
+  const [scope, setScope] = useState<SearchScope>("all");
+  const { data, isLoading, state, refresh } = useVessloData();
+  const searchResults = useMemo(
+    () => searchApps(data?.apps ?? [], searchText, scope),
+    [data, searchText, scope],
+  );
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search apps by name, developer, tag, or memo..."
+      filtering={false}
+      searchBarPlaceholder="Search apps by name, Bundle ID, developer, tag, or memo..."
+      searchText={searchText}
       onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Search Field"
+          value={scope}
+          onChange={(value) => setScope(value as SearchScope)}
+        >
+          <List.Dropdown.Item title="All Fields" value="all" />
+          <List.Dropdown.Item title="Name" value="name" />
+          <List.Dropdown.Item title="Bundle ID" value="bundleId" />
+          <List.Dropdown.Item title="Developer" value="developer" />
+          <List.Dropdown.Item title="Tag" value="tag" />
+          <List.Dropdown.Item title="Memo" value="memo" />
+        </List.Dropdown>
+      }
     >
+      <DataStateNotice state={state} refresh={refresh} />
       {!data ? (
         <List.EmptyView
           icon={Icon.Warning}
           title="Vesslo data not found"
           description="Please run Vesslo app to export data"
+          actions={
+            <ActionPanel>
+              <ReloadDataAction refresh={refresh} />
+            </ActionPanel>
+          }
         />
       ) : searchResults.length === 0 ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No apps found"
-          description="Try a different search term"
+          description="Try a different search term or choose All Fields"
+          actions={
+            <ActionPanel>
+              <ReloadDataAction refresh={refresh} />
+            </ActionPanel>
+          }
         />
       ) : (
         searchResults.map((result) => (
           <SharedAppListItem
             key={result.app.id}
             app={result.app}
+            state={state}
             matchedFields={result.matchedFields}
-            onTagClick={(tag) => setSearchText(tag)}
+            searchMatchDescription={result.matchDescription}
+            onRefresh={refresh}
+            tagNavigation={(tag) => <TaggedApps tag={tag} />}
           />
         ))
       )}

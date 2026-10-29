@@ -1,9 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
+import { runCoreCommand } from "./core-process";
 
 /** GitHub URL for Paper Agent core (install instructions). */
 export const CORE_INSTALL_URL = "https://github.com/galleonli/paper-agent";
@@ -24,7 +21,10 @@ export function getBootstrapCopyText(): string {
 /**
  * Check if Paper Agent core is available: config exists and `python -m paper_agent` runs.
  */
-export async function checkCoreAvailable(prefs: CoreCheckPrefs): Promise<{
+export async function checkCoreAvailable(
+  prefs: CoreCheckPrefs,
+  signal?: AbortSignal,
+): Promise<{
   ok: boolean;
   error?: string;
 }> {
@@ -43,15 +43,16 @@ export async function checkCoreAvailable(prefs: CoreCheckPrefs): Promise<{
   }
 
   try {
-    await execFileAsync(pythonBin, ["-m", "paper_agent", "run", "--help"], {
+    await runCoreCommand(pythonBin, ["-m", "paper_agent", "run", "--help"], {
       cwd: agentRoot,
-      encoding: "utf-8",
+      timeout: 10_000,
+      signal,
     });
     return { ok: true };
-  } catch {
+  } catch (error) {
     return {
       ok: false,
-      error: "paper_agent module not found or failed. Install core from GitHub and set Preferences.",
+      error: error instanceof Error ? error.message : "Paper Agent core could not be started.",
     };
   }
 }

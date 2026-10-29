@@ -1,5 +1,6 @@
 import { closeMainWindow, getFrontmostApplication, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { getBobAppName } from "./lib/bob";
 import { getCurrentFinderPath } from "./utils/apple-scripts";
 
 // Function to get selected Path Finder items
@@ -30,13 +31,14 @@ export default async function main() {
       selectedItems = paths.map((p) => ({ path: p }));
     }
 
+    const appName = getBobAppName();
     if (selectedItems.length === 0) {
       const currentPath = await getCurrentFinderPath();
       if (currentPath.length === 0) throw new Error("Not a valid directory");
-      await open(currentPath, "IBM Bob");
+      await open(currentPath, appName);
     } else {
       for (const item of selectedItems) {
-        await open(item.path, "IBM Bob");
+        await open(item.path, appName);
       }
     }
 

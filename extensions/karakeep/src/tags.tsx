@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateTag, fetchDeleteTag, fetchUpdateTag } from "./apis";
@@ -182,7 +182,7 @@ export default function Tags() {
             title={t("tags.actions.createTag")}
             onAction={handleCreateTag}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel>
       }
@@ -198,7 +198,7 @@ export default function Tags() {
                 title={t("tags.actions.createTag")}
                 onAction={handleCreateTag}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -216,19 +216,19 @@ export default function Tags() {
                   onAction={() => push(<TagBookmarksView tagId={tag.id} tagName={tag.name} />)}
                   title={t("tags.actions.viewBookmarks")}
                   icon={Icon.Eye}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 <Action
                   title={t("tags.actions.renameTag")}
                   onAction={() => push(<RenameTagForm tag={tag} onRenamed={revalidate} />)}
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title={t("tags.actions.createTag")}
                   onAction={handleCreateTag}
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -237,7 +237,7 @@ export default function Tags() {
                 <Action.CopyToClipboard
                   title={t("tags.actions.copyTagId")}
                   content={tag.id}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -246,7 +246,7 @@ export default function Tags() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => handleDeleteTag(tag.id)}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel.Section>
             </ActionPanel>

@@ -24,7 +24,10 @@ type Input = {
    * Always include Z or a numeric UTC offset for timed events.
    */
   startDate: string;
-  /** Explicit exclusive end datetime/date. Prefer this when the user gave an end time. */
+  /**
+   * Explicit end datetime/date. For all-day events this is exclusive, so use the day after the user's final date.
+   * Prefer durationDays when converting an inclusive natural-language date range.
+   */
   endDate?: string;
   /** Timed-event length in minutes, used only when endDate is omitted. */
   duration?: number;

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
@@ -333,7 +333,7 @@ function BookmarkActions({
         icon={Icon.Pencil}
         title={editTitle}
         onAction={handlers.handleEdit}
-        shortcut={{ modifiers: ["ctrl"], key: "e" }}
+        shortcut={Keyboard.Shortcut.Common.Edit}
       />
     );
 
@@ -344,7 +344,7 @@ function BookmarkActions({
             <Action.OpenInBrowser
               url={bookmark.content.url}
               title={t("bookmark.actions.openLink")}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
               onOpen={() => onVisit?.(bookmark)}
             />
           );
@@ -367,7 +367,7 @@ function BookmarkActions({
             <Action.CopyToClipboard
               content={bookmark.content.text}
               title={copyNoteTitle}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               onCopy={() => onVisit?.(bookmark)}
             />
           );
@@ -410,44 +410,33 @@ function BookmarkActions({
     <ActionPanel>
       <ActionPanel.Section>
         {mainAction}
-        {mainAction.props.title !== viewDetailTitle && (
-          <Action.Push
-            icon={Icon.Sidebar}
-            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
-            title={viewDetailTitle}
-          />
-        )}
-        {mainAction.props.title !== editTitle && (
-          <Action
-            icon={Icon.Pencil}
-            title={editTitle}
-            onAction={handlers.handleEdit}
-            shortcut={{ modifiers: ["ctrl"], key: "e" }}
-          />
-        )}
+        {/* Open is skipped when it is ALREADY the main action, or the panel
+            would list it twice. Copy is not a duplicate of anything, so it is
+            gated separately — sharing one guard meant Copy disappeared for
+            everyone on the default "Open in Browser" setting. */}
         {bookmark.content.type === "link" &&
           bookmark.content.url &&
           mainAction.props.title !== t("bookmark.actions.openLink") && (
-            <>
-              <Action.OpenInBrowser
-                url={bookmark.content.url}
-                title={t("bookmark.actions.openLink")}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onOpen={() => onVisit?.(bookmark)}
-              />
-              <Action.CopyToClipboard
-                content={bookmark.content.url}
-                title={t("bookmark.actions.copyLink")}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-                onCopy={() => onVisit?.(bookmark)}
-              />
-            </>
+            <Action.OpenInBrowser
+              url={bookmark.content.url}
+              title={t("bookmark.actions.openLink")}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onOpen={() => onVisit?.(bookmark)}
+            />
           )}
+        {bookmark.content.type === "link" && bookmark.content.url && (
+          <Action.CopyToClipboard
+            content={bookmark.content.url}
+            title={t("bookmark.actions.copyLink")}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+            onCopy={() => onVisit?.(bookmark)}
+          />
+        )}
         {bookmark.content.type === "text" && bookmark.content.text && mainAction.props.title !== copyNoteTitle && (
           <Action.CopyToClipboard
             content={bookmark.content.text}
             title={copyNoteTitle}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             onCopy={() => onVisit?.(bookmark)}
           />
         )}
@@ -457,6 +446,25 @@ function BookmarkActions({
           mainAction.props.title !== t("bookmark.actions.viewImage") && (
             <Action.OpenInBrowser url={images.asset} title={t("bookmark.actions.viewImage")} />
           )}
+        {/* Generic actions come after the type-specific ones: what you do with
+            a bookmark's own content (open it, copy it) outranks what you do to
+            the record. Whichever of these is the ↵ action is hoisted above and
+            skipped here. */}
+        {mainAction.props.title !== editTitle && (
+          <Action
+            icon={Icon.Pencil}
+            title={editTitle}
+            onAction={handlers.handleEdit}
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+        )}
+        {mainAction.props.title !== viewDetailTitle && (
+          <Action.Push
+            icon={Icon.Sidebar}
+            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
+            title={viewDetailTitle}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {bookmark.content.type === "link" && bookmark.content.url && (
@@ -465,7 +473,7 @@ function BookmarkActions({
               title={t("bookmark.actions.aiSummary")}
               onAction={handlers.handleSummarize}
               icon={Icon.Wand}
-              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+              shortcut={{ macOS: { modifiers: ["ctrl"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
           </>
         )}
@@ -476,26 +484,32 @@ function BookmarkActions({
           title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
           onAction={() => handlers.handleUpdate({ favourited: !bookmark.favourited })}
           icon={bookmark.favourited ? Icon.StarCircle : Icon.Star}
-          shortcut={{ modifiers: ["ctrl"], key: "f" }}
+          shortcut={{ macOS: { modifiers: ["ctrl"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
         />
         <Action
           title={bookmark.archived ? t("bookmark.actions.unarchive") : t("bookmark.actions.archive")}
           onAction={() => handlers.handleUpdate({ archived: !bookmark.archived })}
           icon={bookmark.archived ? Icon.BlankDocument : Icon.SaveDocument}
-          shortcut={{ modifiers: ["ctrl"], key: "a" }}
+          shortcut={{ macOS: { modifiers: ["ctrl"], key: "a" }, Windows: { modifiers: ["ctrl"], key: "a" } }}
         />
         <Action
           icon={Icon.ArrowClockwise}
           title={t("bookmarkItem.actions.refresh")}
           onAction={onRefresh}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
         {onCleanCache && (
           <Action
             icon={Icon.Trash}
             title={t("bookmarkItem.actions.clearCache")}
             onAction={onCleanCache}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            // Clearing every cached preview is a remove-all, not a copy. It sat on
+            // Common.Copy because `ray lint --fix` matches the COMBO (⌘⇧C) rather
+            // than the meaning — and re-applies that match, so writing the combo
+            // out longhand does not survive the next `--fix`. The constant itself
+            // has to be the right one. RemoveAll (⌃⇧D) does not clash with the
+            // Delete action's Remove (⌃D) in this panel.
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
           />
         )}
       </ActionPanel.Section>
@@ -516,7 +530,7 @@ function BookmarkActions({
           />
           <Action.OpenInBrowser
             title={t("bookmarkItem.actions.browsers.safari")}
-            url="https://apps.apple.com/us/app/karakeeper-bookmarker/id6746722790"
+            url="https://apps.apple.com/us/app/karakeep-app/id6479258022"
             icon={Icon.Globe}
           />
         </ActionPanel.Submenu>
@@ -527,7 +541,7 @@ function BookmarkActions({
           title={deleteTitle}
           style={Action.Style.Destructive}
           onAction={handlers.handleDeleteBookmark}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
         />
       </ActionPanel.Section>
     </ActionPanel>

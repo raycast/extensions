@@ -3,7 +3,7 @@
   "name": "seventv-search",
   "version": "1.0.0",
   "title": "7TV Emotes Search",
-  "description": "Search, preview, copy, and paste 7TV emotes from Raycast.",
+  "description": "Search, preview, copy, and paste emotes from 7TV, BetterTTV, and FrankerFaceZ.",
   "icon": "icon.png",
   "author": "Paranjayy",
   "categories": [
@@ -14,8 +14,61 @@
     {
       "name": "search",
       "title": "Search Emotes",
-      "description": "Find any 7TV emote",
+      "description": "Find emotes across 7TV, BetterTTV, and FrankerFaceZ",
       "mode": "view"
+    },
+    {
+      "name": "browse-channel-emotes",
+      "title": "Browse Channel Emotes",
+      "description": "Find a 7TV user and browse their active channel emotes",
+      "mode": "view"
+    },
+    {
+      "name": "browse-creator-emotes",
+      "title": "Browse Creator Emotes",
+      "description": "Find a 7TV creator and browse their uploaded emotes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "size",
+      "title": "Emote Size",
+      "description": "Size of pasted and copied emotes. Larger sizes are sharper but heavier. When a size is missing, the closest smaller one is used.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1x",
+          "value": "1"
+        },
+        {
+          "title": "2x",
+          "value": "2"
+        },
+        {
+          "title": "3x",
+          "value": "3"
+        },
+        {
+          "title": "4x",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Size of emotes in the grid view. Small shows the most emotes at once.",
+      "type": "dropdown",
+      "required": false,
+      "default": "small",
+      "data": [
+        { "title": "Small", "value": "small" },
+        { "title": "Medium", "value": "medium" },
+        { "title": "Large", "value": "large" }
+      ]
     }
   ],
   "dependencies": {
@@ -38,10 +91,16 @@
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "eslint src --fix",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.ts",
+    "test:live": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/providers.live.ts"
   },
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "contributors": [
+    "Kan-A-Pesh",
+    "nakama"
   ]
 }

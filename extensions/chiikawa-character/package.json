@@ -13,6 +13,17 @@
     "Fun"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "animateCharacters",
+      "title": "Animation",
+      "description": "Show custom character illustrations with blinking eyes and moving limbs or accessories. Turn off to use original portraits.",
+      "type": "checkbox",
+      "label": "Show animated characters",
+      "default": true,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-characters",
@@ -46,6 +57,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
@@ -54,5 +66,8 @@
     "sync:characters:refresh-images": "node scripts/sync-characters.mjs --refresh-image-snapshot",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "contributors": [
+    "ray.dhruv"
+  ]
 }

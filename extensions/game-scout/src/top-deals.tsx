@@ -8,6 +8,7 @@ import {
   Cache,
   getPreferenceValues,
   LocalStorage,
+  Keyboard,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
@@ -116,14 +117,41 @@ export default function TopDeals() {
       }
 
       try {
-        const lowerPricePercent =
-          parseFloat(minDiscount) > 0
-            ? `&lowerPricePercent=${minDiscount}`
-            : "";
+        const params = new URLSearchParams({
+          upperPrice: maxPrice,
+          onSale: "1",
+          sortBy: "DealRating",
+        });
+
         const response = await fetch(
-          `https://www.cheapshark.com/api/1.0/deals?upperPrice=${maxPrice}&onSale=1&sortBy=Deal%20Rating${lowerPricePercent}`,
+          `https://www.cheapshark.com/api/1.0/deals?${params.toString()}`,
+          {
+            headers: {
+              "User-Agent": "GameScout/1.0",
+            },
+          },
         );
-        const data = (await response.json()) as CheapSharkDeal[];
+
+        if (!response.ok) {
+          const retryAfter = response.headers.get("Retry-After");
+
+          throw new Error(
+            `CheapShark API returned HTTP ${response.status}` +
+              (response.status === 429 && retryAfter
+                ? ` (retry after ${retryAfter} seconds)`
+                : ""),
+          );
+        }
+
+        const payload: unknown = await response.json();
+
+        if (!Array.isArray(payload)) {
+          throw new Error(
+            `Unexpected CheapShark API response: ${JSON.stringify(payload).slice(0, 250)}`,
+          );
+        }
+
+        const data = payload as CheapSharkDeal[];
         data.sort((a, b) => {
           const ratingDiff =
             parseFloat(b.dealRating) - parseFloat(a.dealRating);
@@ -197,10 +225,7 @@ export default function TopDeals() {
                 <Action.CopyToClipboard
                   title="Copy Deal Link"
                   content={`https://www.cheapshark.com/redirect?dealID=${deal.dealID}`}
-                  shortcut={{
-                    Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                    macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                  }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
 
                 {deal.metacriticLink && (

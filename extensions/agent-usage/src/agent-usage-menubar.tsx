@@ -2,6 +2,7 @@ import {
   getPreferenceValues,
   Icon,
   LaunchType,
+  LocalStorage,
   MenuBarExtra,
   launchCommand,
   openCommandPreferences,
@@ -9,29 +10,41 @@ import {
   Keyboard,
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { formatClock, latestTimestamp } from "./agents/format.ts";
-import { sortByDefaultAgentOrder } from "./agents/order.ts";
+import { formatClock, latestTimestamp, withCredentialStatus } from "./agents/format.ts";
 import {
+  AGENT_ORDER_KEY,
+  DEFAULT_AGENT_ORDER,
+  isDefaultAgentId,
+  parseStoredAgentOrder,
+  sortByAgentOrder,
+} from "./agents/order.ts";
+import {
+  useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
-  useClaudeUsage,
+  useClaudeAccounts,
   useClinePassAccounts,
   useCodexAccounts,
-  useCopilotUsage,
+  useCopilotAccounts,
   useCursorUsage,
+  useDeepSeekUsage,
   useDroidUsage,
   useGeminiUsage,
   useGrokUsage,
   useKimiAccounts,
   useMiniMaxUsage,
+  useMinimaxCNUsage,
   useOpencodegoUsage,
+  useOpenRouterUsage,
+  useRaycastUsage,
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
 import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
 import { getThemeIcon } from "./agents/ui.tsx";
+import { getAihubmixAccessory } from "./aihubmix/renderer.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
@@ -39,12 +52,16 @@ import { getClinePassAccessory } from "./clinepass/renderer.tsx";
 import { getCodexAccessory } from "./codex/renderer.tsx";
 import { getCopilotAccessory } from "./copilot/renderer.tsx";
 import { getCursorAccessory } from "./cursor/renderer.tsx";
+import { getDeepSeekAccessory } from "./deepseek/renderer.tsx";
 import { getDroidAccessory } from "./droid/renderer.tsx";
 import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
+import { getMinimaxCNAccessory } from "./minimaxcn/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
+import { getOpenRouterAccessory } from "./openrouter/renderer.tsx";
+import { getRaycastAccessory } from "./raycast/renderer.tsx";
 import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
 import { getZaiAccessory } from "./zai/renderer.tsx";
 
@@ -76,13 +93,26 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<AgentVisibilityPreferences>();
+  const [agentOrder, setAgentOrder] = useState<readonly AgentId[]>(DEFAULT_AGENT_ORDER);
 
+  const loadAgentOrder = useCallback(async () => {
+    const stored = await LocalStorage.getItem<string>(AGENT_ORDER_KEY);
+    const parsed = parseStoredAgentOrder(stored, isDefaultAgentId, DEFAULT_AGENT_ORDER);
+    setAgentOrder(parsed ?? DEFAULT_AGENT_ORDER);
+  }, []);
+
+  useEffect(() => {
+    void loadAgentOrder();
+  }, [loadAgentOrder]);
+
+  const isAihubmixVisible = Boolean(prefs.showAihubmix);
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
   const isClinePassVisible = Boolean(prefs.showClinePass);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
   const isCursorVisible = Boolean(prefs.showCursor);
+  const isDeepSeekVisible = Boolean(prefs.showDeepSeek);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
   const isGrokVisible = Boolean(prefs.showGrok);
@@ -91,14 +121,19 @@ export default function MenuBarCommand() {
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
   const isZaiVisible = Boolean(prefs.showZai);
   const isMinimaxVisible = Boolean(prefs.showMinimax);
+  const isMinimaxCNVisible = Boolean(prefs.showMinimaxCN);
   const isOpencodeGoVisible = Boolean(prefs.showOpencodeGo);
+  const isOpenRouterVisible = Boolean(prefs.showOpenRouter);
+  const isRaycastVisible = Boolean(prefs.showRaycast);
 
+  const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
-  const claudeState = useClaudeUsage(isClaudeVisible);
+  const claudeState = useClaudeAccounts(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
-  const copilotState = useCopilotUsage(isCopilotVisible);
+  const copilotState = useCopilotAccounts(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
+  const deepseekState = useDeepSeekUsage(isDeepSeekVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const grokState = useGrokUsage(isGrokVisible);
@@ -107,40 +142,36 @@ export default function MenuBarCommand() {
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiState = useZaiAccounts(isZaiVisible);
   const minimaxState = useMiniMaxUsage(isMinimaxVisible);
+  const minimaxcnState = useMinimaxCNUsage(isMinimaxCNVisible);
   const opencodegoState = useOpencodegoUsage(isOpencodeGoVisible);
+  const openrouterState = useOpenRouterUsage(isOpenRouterVisible);
+  const raycastState = useRaycastUsage(isRaycastVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
     () => [
+      {
+        id: "aihubmix",
+        name: "AIHubMix",
+        icon: "aihubmix.svg",
+        visible: isAihubmixVisible,
+        isLoading: aihubmixState.isLoading,
+        accessory: getAihubmixAccessory(aihubmixState.usage, aihubmixState.error, aihubmixState.isLoading),
+        revalidate: aihubmixState.revalidate,
+        lastFetchedAt: aihubmixState.lastFetchedAt,
+      },
       {
         id: "amp",
         name: "Amp",
         icon: getThemeIcon("amp-icon.svg"),
         visible: isAmpVisible,
         isLoading: ampState.isLoading,
-        accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
+        accessory: withCredentialStatus(
+          getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
+          ampState.credentialStatus,
+        ),
         revalidate: ampState.revalidate,
         lastFetchedAt: ampState.lastFetchedAt,
-      },
-      {
-        id: "claude",
-        name: "Claude",
-        icon: getThemeIcon("claude-icon.svg"),
-        visible: isClaudeVisible,
-        isLoading: claudeState.isLoading,
-        accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
-        revalidate: claudeState.revalidate,
-        lastFetchedAt: claudeState.lastFetchedAt,
-      },
-      {
-        id: "copilot",
-        name: "Copilot",
-        icon: getThemeIcon("copilot-icon.svg"),
-        visible: isCopilotVisible,
-        isLoading: copilotState.isLoading,
-        accessory: getCopilotAccessory(copilotState.usage, copilotState.error, copilotState.isLoading),
-        revalidate: copilotState.revalidate,
-        lastFetchedAt: copilotState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -151,6 +182,16 @@ export default function MenuBarCommand() {
         accessory: getCursorAccessory(cursorState.usage, cursorState.error, cursorState.isLoading),
         revalidate: cursorState.revalidate,
         lastFetchedAt: cursorState.lastFetchedAt,
+      },
+      {
+        id: "deepseek",
+        name: "DeepSeek",
+        icon: getThemeIcon("deepseek.svg"),
+        visible: isDeepSeekVisible,
+        isLoading: deepseekState.isLoading,
+        accessory: getDeepSeekAccessory(deepseekState.usage, deepseekState.error, deepseekState.isLoading),
+        revalidate: deepseekState.revalidate,
+        lastFetchedAt: deepseekState.lastFetchedAt,
       },
       {
         id: "droid",
@@ -178,7 +219,10 @@ export default function MenuBarCommand() {
         icon: getThemeIcon("grok-icon.svg"),
         visible: isGrokVisible,
         isLoading: grokState.isLoading,
-        accessory: getGrokAccessory(grokState.usage, grokState.error, grokState.isLoading),
+        accessory: withCredentialStatus(
+          getGrokAccessory(grokState.usage, grokState.error, grokState.isLoading),
+          grokState.credentialStatus,
+        ),
         revalidate: grokState.revalidate,
         lastFetchedAt: grokState.lastFetchedAt,
       },
@@ -188,7 +232,10 @@ export default function MenuBarCommand() {
         icon: getThemeIcon("antigravity-icon.svg"),
         visible: isAntigravityVisible,
         isLoading: antigravityState.isLoading,
-        accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
+        accessory: withCredentialStatus(
+          getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
+          antigravityState.credentialStatus,
+        ),
         revalidate: antigravityState.revalidate,
         lastFetchedAt: antigravityState.lastFetchedAt,
       },
@@ -203,6 +250,16 @@ export default function MenuBarCommand() {
         lastFetchedAt: minimaxState.lastFetchedAt,
       },
       {
+        id: "minimaxcn",
+        name: "MinimaxCN",
+        icon: getThemeIcon("minimaxcn-icon.svg"),
+        visible: isMinimaxCNVisible,
+        isLoading: minimaxcnState.isLoading,
+        accessory: getMinimaxCNAccessory(minimaxcnState.usage, minimaxcnState.error, minimaxcnState.isLoading),
+        revalidate: minimaxcnState.revalidate,
+        lastFetchedAt: minimaxcnState.lastFetchedAt,
+      },
+      {
         id: "opencode-go",
         name: "OpenCode Go",
         icon: getThemeIcon("opencode-go-icon.svg"),
@@ -212,36 +269,57 @@ export default function MenuBarCommand() {
         revalidate: opencodegoState.revalidate,
         lastFetchedAt: opencodegoState.lastFetchedAt,
       },
+      {
+        id: "openrouter",
+        name: "OpenRouter",
+        icon: getThemeIcon("openrouter-icon.svg"),
+        visible: isOpenRouterVisible,
+        isLoading: openrouterState.isLoading,
+        accessory: getOpenRouterAccessory(openrouterState.usage, openrouterState.error, openrouterState.isLoading),
+        revalidate: openrouterState.revalidate,
+        lastFetchedAt: openrouterState.lastFetchedAt,
+      },
+      {
+        id: "raycast",
+        name: "Raycast",
+        icon: getThemeIcon("raycast-icon.svg"),
+        visible: isRaycastVisible,
+        isLoading: raycastState.isLoading,
+        accessory: getRaycastAccessory(raycastState.usage, raycastState.error, raycastState.isLoading),
+        revalidate: raycastState.revalidate,
+        lastFetchedAt: raycastState.lastFetchedAt,
+      },
     ],
     [
+      isAihubmixVisible,
       isAmpVisible,
-      isClaudeVisible,
-      isCopilotVisible,
       isCursorVisible,
+      isDeepSeekVisible,
       isDroidVisible,
       isGeminiVisible,
       isGrokVisible,
       isAntigravityVisible,
+      aihubmixState.isLoading,
+      aihubmixState.usage,
+      aihubmixState.error,
+      aihubmixState.revalidate,
+      aihubmixState.lastFetchedAt,
       ampState.isLoading,
       ampState.usage,
       ampState.error,
       ampState.revalidate,
       ampState.lastFetchedAt,
-      claudeState.isLoading,
-      claudeState.usage,
-      claudeState.error,
-      claudeState.revalidate,
-      claudeState.lastFetchedAt,
-      copilotState.isLoading,
-      copilotState.usage,
-      copilotState.error,
-      copilotState.revalidate,
-      copilotState.lastFetchedAt,
+      ampState.credentialStatus,
       cursorState.isLoading,
       cursorState.usage,
       cursorState.error,
       cursorState.revalidate,
       cursorState.lastFetchedAt,
+      deepseekState.isLoading,
+      deepseekState.usage,
+      deepseekState.error,
+      deepseekState.revalidate,
+      deepseekState.lastFetchedAt,
       droidState.isLoading,
       droidState.usage,
       droidState.error,
@@ -257,11 +335,13 @@ export default function MenuBarCommand() {
       grokState.error,
       grokState.revalidate,
       grokState.lastFetchedAt,
+      grokState.credentialStatus,
       antigravityState.isLoading,
       antigravityState.usage,
       antigravityState.error,
       antigravityState.revalidate,
       antigravityState.lastFetchedAt,
+      antigravityState.credentialStatus,
       minimaxState.isLoading,
       minimaxState.usage,
       minimaxState.error,
@@ -273,6 +353,18 @@ export default function MenuBarCommand() {
       opencodegoState.error,
       opencodegoState.revalidate,
       opencodegoState.lastFetchedAt,
+      isOpenRouterVisible,
+      openrouterState.isLoading,
+      openrouterState.usage,
+      openrouterState.error,
+      openrouterState.revalidate,
+      openrouterState.lastFetchedAt,
+      isRaycastVisible,
+      raycastState.isLoading,
+      raycastState.usage,
+      raycastState.error,
+      raycastState.revalidate,
+      raycastState.lastFetchedAt,
     ],
   );
 
@@ -304,6 +396,33 @@ export default function MenuBarCommand() {
     }));
   }, [isClinePassVisible, clinePassState]);
 
+  const claudeAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isClaudeVisible) return [];
+    if (claudeState.isLoading) {
+      return [
+        {
+          id: "claude" as AgentId,
+          name: "Claude",
+          icon: getThemeIcon("claude-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getClaudeAccessory(null, null, true),
+          revalidate: claudeState.revalidate,
+        },
+      ];
+    }
+    return claudeState.accounts.map((account) => ({
+      id: `claude-${account.accountId}` as AgentId,
+      name: account.label !== "Default" ? `Claude • ${account.label}` : "Claude",
+      icon: getThemeIcon("claude-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getClaudeAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isClaudeVisible, claudeState]);
+
   const codexAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isCodexVisible) return [];
     if (codexState.isLoading) {
@@ -334,6 +453,33 @@ export default function MenuBarCommand() {
       lastFetchedAt: account.lastFetchedAt,
     }));
   }, [isCodexVisible, codexState]);
+
+  const copilotAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isCopilotVisible) return [];
+    if (copilotState.isLoading) {
+      return [
+        {
+          id: "copilot" as AgentId,
+          name: "Copilot",
+          icon: getThemeIcon("copilot-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getCopilotAccessory(null, null, true),
+          revalidate: copilotState.revalidate,
+        },
+      ];
+    }
+    return copilotState.accounts.map((account) => ({
+      id: `copilot-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "Copilot" : `Copilot • ${account.label}`,
+      icon: getThemeIcon("copilot-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getCopilotAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isCopilotVisible, copilotState]);
 
   const kimiAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isKimiVisible) return [];
@@ -421,17 +567,36 @@ export default function MenuBarCommand() {
 
   const visibleAgents = useMemo(
     () =>
-      sortByDefaultAgentOrder(
-        [...singleAgents, ...clinePassAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter(
-          (a) => a.visible,
-        ),
+      sortByAgentOrder(
+        [
+          ...singleAgents,
+          ...claudeAgents,
+          ...clinePassAgents,
+          ...codexAgents,
+          ...copilotAgents,
+          ...kimiAgents,
+          ...syntheticAgents,
+          ...zaiAgents,
+        ].filter((a) => a.visible),
+        agentOrder,
       ),
-    [singleAgents, clinePassAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [
+      singleAgents,
+      claudeAgents,
+      clinePassAgents,
+      codexAgents,
+      copilotAgents,
+      kimiAgents,
+      syntheticAgents,
+      zaiAgents,
+      agentOrder,
+    ],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
   const handleRefresh = async () => {
-    await Promise.all(visibleAgents.map((a) => a.revalidate()));
+    await loadAgentOrder();
+    await Promise.all([...new Set(visibleAgents.map((agent) => agent.revalidate))].map((refresh) => refresh()));
     await showHUD("Agent Usage Refreshed");
   };
 

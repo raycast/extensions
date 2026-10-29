@@ -32,9 +32,12 @@ import {
   describeYtdlpError,
   looksLikeFilePath,
   hasPlaylist,
+  isLiveStream,
   isMac,
+  isNoisyWarning,
   isValidHHMM,
   isValidUrl,
+  normalizeVideoUrl,
   parseHHMM,
   sanitizeVideoTitle,
 } from "./utils.js";
@@ -43,8 +46,13 @@ import { MP3_FORMAT_ID } from "./utils.js";
 import Installer from "./views/installer.js";
 import Updater from "./views/updater.js";
 
-const { downloadPath, autoLoadUrlFromClipboard, autoLoadUrlFromSelectedText, enableBrowserExtensionSupport } =
-  getPreferenceValues<ExtensionPreferences>();
+const {
+  downloadPath,
+  autoLoadUrlFromClipboard,
+  autoLoadUrlFromSelectedText,
+  enableBrowserExtensionSupport,
+  fastRemux = true,
+} = getPreferenceValues<ExtensionPreferences>();
 
 export default function DownloadVideo() {
   const { push } = useNavigation();
@@ -80,7 +88,9 @@ export default function DownloadVideo() {
         options.push("--audio-quality", "0");
       } else {
         options.push("--format", downloadFormat);
-        options.push("--recode-video", recodeFormat);
+        const hasWebmAudio = video?.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
+        const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
+        options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
       }
 
       const toast = await showToast({
@@ -92,7 +102,7 @@ export default function DownloadVideo() {
       options.push("--progress");
       options.push("--print", "after_move:filepath");
 
-      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, values.url], {
+      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, normalizeVideoUrl(values.url)], {
         env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
       });
 
@@ -102,42 +112,62 @@ export default function DownloadVideo() {
       // in the toast body when the download fails.
       const logLines: string[] = [];
       let lastErrorLine = "";
+      // stderr emits chunks, which can hold several lines or end mid-line.
+      // Classify only complete lines so a noisy warning cannot hide another
+      // warning or error that arrived in the same chunk.
+      let pendingStderr = "";
 
-      downloadProcess.stdout.on("data", (data) => {
-        const line = data.toString() as string;
-
-        const progress = Number(/\[download\]\s+(\d+(\.\d+)?)%.*/.exec(line)?.[1]);
-        if (progress) {
-          const currentProgress = Number(toast.message?.replace("%", ""));
-
-          if (progress < currentProgress) {
-            toast.title = `Formatting ${medium}`;
-          }
-          toast.message = `${Math.floor(progress)}%`;
-        }
-
-        if (looksLikeFilePath(line)) {
-          filePath = line.trim();
-        }
-      });
-
-      downloadProcess.stderr.on("data", (data) => {
-        const line = data.toString();
-        logLines.push(line);
+      const consumeStderrLine = (line: string) => {
+        if (!line) return;
 
         // Surface warnings inline, and remember the last error line for the
         // failure toast — but do NOT touch toast.message here: the running toast
         // is reserved for download progress (stderr would otherwise clobber it
         // on every chunk). The exit code in `close` is the real failure verdict.
-        if (line.startsWith("WARNING:")) {
+        if (line.startsWith("WARNING:") && !isNoisyWarning(line)) {
           setWarning(line);
         }
         if (line.startsWith("ERROR:")) {
           lastErrorLine = line.trim();
         }
+      };
+
+      downloadProcess.stdout.on("data", (data) => {
+        const text = data.toString() as string;
+
+        if (/\[(Merger|VideoConvertor|Remux|ExtractAudio|Fixup)/i.test(text)) {
+          toast.title = `Packaging ${medium}`;
+          toast.message = "Finalizing...";
+        }
+
+        const progressMatch = /\[download\]\s+(\d+(\.\d+)?)%.*/.exec(text);
+        if (progressMatch) {
+          toast.title = `Downloading ${medium}`;
+          toast.message = `${Math.floor(Number(progressMatch[1]))}%`;
+        }
+
+        for (const line of text.split("\n")) {
+          if (looksLikeFilePath(line.trim())) {
+            filePath = line.trim();
+          }
+        }
+      });
+
+      downloadProcess.stderr.on("data", (data) => {
+        const chunk = data.toString();
+        logLines.push(chunk);
+
+        const parts = (pendingStderr + chunk).split(/\r?\n/);
+        pendingStderr = parts.pop() ?? "";
+        for (const line of parts) consumeStderrLine(line);
       });
 
       downloadProcess.on("close", (code) => {
+        if (pendingStderr) {
+          consumeStderrLine(pendingStderr);
+          pendingStderr = "";
+        }
+
         // The exit code is the sole success/failure verdict: 0 is success,
         // anything else (including null, i.e. killed by a signal) is a failure.
         if (code !== 0) {
@@ -237,7 +267,13 @@ export default function DownloadVideo() {
 
       const result = await execa(
         ytdlPath,
-        [...getCommonArgs({ throttle: true }), "--no-playlist", "--dump-json", "--format-sort=res,ext,tbr", url],
+        [
+          ...getCommonArgs({ throttle: true }),
+          "--no-playlist",
+          "--dump-json",
+          "--format-sort=res,ext,tbr",
+          normalizeVideoUrl(url),
+        ],
         {
           env: {
             ...process.env,
@@ -279,7 +315,7 @@ export default function DownloadVideo() {
 
   useEffect(() => {
     if (video) {
-      if (video.live_status !== "not_live" && video.live_status !== undefined) {
+      if (isLiveStream(video)) {
         setValidationError("url", "Live streams are not supported");
       }
     }

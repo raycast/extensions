@@ -1,0 +1,38 @@
+{
+  "prev": [
+    {
+      "firstLine": "Le direct",
+      "secondLine": "Gardez le rythme avec notre sélection dance ou Motown, funk, trip-hop, R'n'B et disco",
+      "thirdLine": "Groove",
+      "songUuid": null,
+      "cover": "95cf76c3-26bc-404e-be1c-b81666188c3f",
+      "startTime": null,
+      "endTime": null
+    }
+  ],
+  "now": {
+    "firstLine": "Roberto",
+    "firstLineSongUuid": "9dc6dd8b-8b52-49b9-aa60-c9cc06e5a5d6",
+    "secondLine": "Vaudou Game",
+    "secondLineSongUuid": "9dc6dd8b-8b52-49b9-aa60-c9cc06e5a5d6",
+    "thirdLine": "Groove",
+    "songUuid": "9dc6dd8b-8b52-49b9-aa60-c9cc06e5a5d6",
+    "cover": "e7516b48-02f1-4a26-acee-1ba950fd9ae3",
+    "startTime": 1792675965,
+    "endTime": 1792676199
+  },
+  "next": [
+    {
+      "firstLine": "Superego",
+      "firstLineSongUuid": "1a9a04e2-11ae-46f7-a979-9bf59a1e9ac6",
+      "secondLine": "Leyya",
+      "secondLineSongUuid": "1a9a04e2-11ae-46f7-a979-9bf59a1e9ac6",
+      "thirdLine": "Groove",
+      "songUuid": "1a9a04e2-11ae-46f7-a979-9bf59a1e9ac6",
+      "cover": "210d0585-46ca-4448-a18d-d20c7dd0a2fa",
+      "startTime": 1792676199,
+      "endTime": 1792676380
+    }
+  ],
+  "delayToRefresh": 200000
+}

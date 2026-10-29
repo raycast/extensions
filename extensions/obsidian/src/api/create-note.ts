@@ -1,10 +1,11 @@
-import { confirmAlert, getPreferenceValues, Icon, open } from "@raycast/api";
+import { confirmAlert, getPreferenceValues, Icon } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import { NoteFormPreferences } from "../utils/preferences";
 import { directoryCreationErrorToast, fileWriteErrorToast } from "../components/Toasts";
 import { ObsidianUtils, ObsidianVault, Vault } from "../obsidian";
 import { applyTemplates } from "./templating/templating.service";
+import { openUrl } from "../utils/open";
 
 export interface CreateNoteParams {
   path: string;
@@ -36,12 +37,12 @@ export async function createNote(vault: ObsidianVault, params: CreateNoteParams)
 
   const saved = await createNoteWithConfirmation(vault.path, content, name, params.path);
 
-  if (pref.openOnCreate) {
+  if (pref.openOnCreate && saved) {
     const target = "obsidian://open?path=" + encodeURIComponent(path.join(vault.path, params.path, name + ".md"));
-    if (saved) {
-      setTimeout(() => {
-        open(target);
-      }, 200);
+    try {
+      await openUrl(target);
+    } catch {
+      // The note is already saved; a failed open must not mask the save or skip cache invalidation.
     }
   }
   return saved;

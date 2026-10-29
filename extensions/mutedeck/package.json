@@ -4,9 +4,20 @@
   "title": "MuteDeck",
   "description": "Control your meetings from Raycast: toggle mute, camera, screen share and recording via MuteDeck, with a live Meeting Deck grid.",
   "icon": "icon.png",
-  "author": "chad_walters",
-  "contributors": ["smitmartijn"],
-  "categories": ["Applications", "Communication", "Productivity"],
+  "author": "smitmartijn",
+  "owner": "mutedeck",
+  "access": "public",
+  "contributors": [
+    "chad_walters"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -69,15 +80,6 @@
       "placeholder": "http://localhost:3491"
     },
     {
-      "name": "wsEndpoint",
-      "type": "textfield",
-      "required": false,
-      "title": "WebSocket Endpoint",
-      "description": "MuteDeck WebSocket URL, used for Bring to Front.",
-      "default": "ws://localhost:3492",
-      "placeholder": "ws://localhost:3492"
-    },
-    {
       "name": "confirmMuteInPresentation",
       "type": "checkbox",
       "required": false,
@@ -106,6 +108,7 @@
     }
   ],
   "dependencies": {
+    "@mutedeck/plugin-client": "^1.0.2",
     "@raycast/api": "^1.100.0",
     "@raycast/utils": "^1.19.0"
   },
@@ -124,8 +127,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

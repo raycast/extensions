@@ -5,7 +5,7 @@ import FormData from "form-data";
 import { markdownToAdf } from "marklassian";
 
 import { IssueFormValues } from "../components/CreateIssueForm";
-import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
+import { CustomFieldSchema, getCustomFieldValue } from "../helpers/customFields";
 
 import { Project } from "./projects";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
@@ -100,12 +100,14 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
   });
 }
 
-export enum StatusCategoryKey {
-  indeterminate = "indeterminate",
-  new = "new",
-  done = "done",
-  unknown = "unknown",
-}
+export const StatusCategoryKey = {
+  indeterminate: "indeterminate",
+  new: "new",
+  done: "done",
+  unknown: "unknown",
+} as const;
+
+export type StatusCategoryKey = (typeof StatusCategoryKey)[keyof typeof StatusCategoryKey];
 
 type IssueStatus = {
   id: string;
@@ -260,13 +262,23 @@ export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
   return issuetype;
 };
 
+const issueTypeIconUris = new Map<string, Promise<string>>();
+
 async function resolveIssueTypeIconUri(issuetype?: IssueType) {
-  if (!issuetype?.iconUrl) {
+  const iconUrl = issuetype?.iconUrl;
+  if (!issuetype || !iconUrl || iconUrl.startsWith("data:")) {
     return;
   }
 
+  let dataUri = issueTypeIconUris.get(iconUrl);
+  if (!dataUri) {
+    dataUri = getAuthenticatedUri(iconUrl, "image/jpeg");
+    dataUri.catch(() => issueTypeIconUris.delete(iconUrl));
+    issueTypeIconUris.set(iconUrl, dataUri);
+  }
+
   try {
-    issuetype.iconUrl = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
+    issuetype.iconUrl = await dataUri;
   } catch {
     // Keep the original Jira icon URL when Jira returns an HTML error page instead of image content.
   }

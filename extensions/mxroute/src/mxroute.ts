@@ -10,6 +10,7 @@ import {
   CreateEmailForwarderRequest,
   CatchAll,
   DomainVerificationKey,
+  Quota,
 } from "./types";
 
 const { api_key, server, username } = getPreferenceValues<Preferences>();
@@ -32,6 +33,7 @@ const makeRequest = async <T>(endpoint: string, options?: RequestInit) => {
 };
 
 export const mxroute = {
+  getDiskUsage: () => makeRequest<Quota>("quota"),
   getDomainVerificationKey: () => makeRequest<DomainVerificationKey>("verification-key"),
   domains: {
     create: (domain: string) => makeRequest("domains", { method: "POST", body: JSON.stringify({ domain }) }),
@@ -65,5 +67,8 @@ export const mxroute = {
         makeRequest(`domains/${domain}/forwarders/${alias}`, { method: "DELETE" }),
       list: (domain: string) => makeRequest<EmailForwarder[]>(`domains/${domain}/forwarders`),
     },
+    getSpamSettings: (domain: string) => makeRequest<{ high_score: number }>(`domains/${domain}/spam/settings`),
+    updateSpamSettings: (domain: string, values: { high_score: number }) =>
+      makeRequest(`domains/${domain}/spam/settings`, { method: "PATCH", body: JSON.stringify(values) }),
   },
 };

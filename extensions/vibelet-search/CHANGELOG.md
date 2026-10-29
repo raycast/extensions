@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Update] - 2026-08-20
+
+### Enhancements
+
+- Cross-list all sessions in a single timeline (no agent grouping), with a per-row source label
+- `⌘K` filter dropdown: All / Agent (Claude, Codex) / Source / Project
+- Content-search hits jump straight to the matched message, highlighted in the detail view
+- Incremental metadata cache (`mtime + size` fingerprints) — re-opening is instant after the first scan, and only changed session files are re-read
+- Merged content index — full-text search runs ripgrep over one index file instead of every session file, returning exact message-level hits
+- Content search debounced (150 ms) so fast typing doesn't spawn a ripgrep per keystroke
+- Data layer split into `adapters/`, `scanners/`, `index/`, and `load-messages.ts` for easier agent support
+
+### Fixes
+
+- Fixed a premature-close error in streamed JSONL head reading that could wipe session titles
+
 ## [Initial Release] - 2026-06-25
 
 - Unified search across Claude Code (`~/.claude`) and Codex CLI (`~/.codex`) sessions

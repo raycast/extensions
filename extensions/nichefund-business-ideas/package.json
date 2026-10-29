@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nichefund-business-ideas",
+  "title": "NicheFund Business Ideas",
+  "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
+  "icon": "extension_icon.png",
+  "author": "backlooplabs",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest-teardowns",
+      "title": "Latest Teardowns",
+      "description": "Browse the latest NicheFund idea teardowns",
+      "mode": "view"
+    },
+    {
+      "name": "teardown-of-the-day",
+      "title": "Teardown of the Day",
+      "description": "Read the latest NicheFund teardown",
+      "mode": "view"
+    },
+    {
+      "name": "random-business-idea",
+      "title": "Random Business Idea",
+      "description": "Discover a random validated business idea",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "^10.8.0",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  }
+}

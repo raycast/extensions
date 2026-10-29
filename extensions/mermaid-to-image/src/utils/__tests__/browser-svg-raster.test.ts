@@ -21,6 +21,44 @@ function createTempDir(): string {
 }
 
 describe("renderSvgToRasterWithBrowser", () => {
+  it.each(["process", "missing-output"])("cleans temporary artifacts on %s failure", async (failure) => {
+    const tmpDir = createTempDir();
+    const exec = vi.fn(async () => {
+      if (failure === "process") throw new Error("browser failure");
+      return { stdout: "", stderr: "" };
+    });
+    await expect(
+      renderSvgToRasterWithBrowser(
+        {
+          svgContent: '<svg width="100" height="50"/>',
+          baseName: "failed",
+          tmpDir,
+          browserExecutablePath: "/chrome",
+        },
+        { execFile: exec as never },
+      ),
+    ).rejects.toThrow();
+    expect(fs.readdirSync(tmpDir)).toEqual([]);
+  });
+  it("forwards a forced subprocess deadline and cleans artifacts on timeout", async () => {
+    const tmpDir = createTempDir();
+    const failure = new Error("timed out");
+    const exec = vi.fn().mockRejectedValue(failure);
+    await expect(
+      renderSvgToRasterWithBrowser(
+        {
+          svgContent: '<svg width="100" height="50"/>',
+          baseName: "timeout",
+          tmpDir,
+          browserExecutablePath: "/chrome",
+          timeoutMs: 1234,
+        },
+        { execFile: exec as never },
+      ),
+    ).rejects.toBe(failure);
+    expect(exec).toHaveBeenCalledWith("/chrome", expect.any(Array), { timeout: 1234, killSignal: "SIGKILL" });
+    expect(fs.readdirSync(tmpDir)).toEqual([]);
+  });
   it("uses the resolved browser executable and writes a png screenshot", async () => {
     const tmpDir = createTempDir();
     const outputPath = path.join(tmpDir, "diagram.png");

@@ -1,3 +1,4 @@
+import { pagination } from "../utils/references";
 import { getPreferenceValues } from "@raycast/api";
 import type { SearchSort } from "../api/types";
 import { getAuthenticatedArena } from "./arenaAuth";
@@ -8,6 +9,8 @@ type Input = {
    * Search query (keywords or phrase). Use * or a broad term to explore when the user has no specific query.
    */
   query: string;
+  /** Filter results by content type. Omit for all types. */
+  type?: "All" | "Block" | "Channel" | "User" | "Text" | "Image" | "Link" | "Attachment" | "Embed";
   /**
    * Page number (1-based). Default 1.
    */
@@ -21,7 +24,7 @@ type Input = {
    */
   sort?: SearchSort;
   /**
-   * Limit which result types to return: "all" (default), "my", or "following".
+   * Limit whose content to search: "all" (default), "my", or "following".
    */
   scope?: "all" | "my" | "following";
 };
@@ -33,8 +36,7 @@ export default async function tool(input: Input) {
   try {
     const prefs = getPreferenceValues<Preferences>();
     const defaultPer = Math.min(100, Math.max(1, parseInt(prefs.defaultPageSize ?? "24", 10) || 24));
-    const per = Math.min(100, Math.max(1, input.per ?? defaultPer));
-    const page = Math.max(1, input.page ?? 1);
+    const { page, per } = pagination(input, defaultPer);
     const sort = input.sort ?? (prefs.defaultSearchSort as SearchSort) ?? "score_desc";
 
     const arena = await getAuthenticatedArena();
@@ -43,6 +45,7 @@ export default async function tool(input: Input) {
       per,
       sort,
       scope: input.scope,
+      type: input.type,
     });
 
     return {
@@ -51,6 +54,7 @@ export default async function tool(input: Input) {
       per: result.per,
       total_count: result.meta?.total_count ?? 0,
       has_more: result.meta?.has_more_pages ?? false,
+      next_page: result.meta?.next_page ?? null,
       channels: result.channels.map(channelSummary),
       blocks: result.blocks.map(blockSummary),
       users: result.users.map(userSummary),

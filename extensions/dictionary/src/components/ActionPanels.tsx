@@ -1,6 +1,6 @@
 import os from "os";
 
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { DefItem } from "../types";
 import NestedList from "../views/NestedList";
@@ -61,7 +61,7 @@ export const DefActionPanel = (props: { defItem: DefItem; onAction?: (nestedView
           <Action.CopyToClipboard
             title={`Copy '${toClipboard[1]}'`}
             content={toClipboard[1]}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         )}
       </ActionPanel.Section>

@@ -1,30 +1,13 @@
-import { Action, ActionPanel, List, showToast, Toast, Clipboard, showHUD, popToRoot, LocalStorage } from "@raycast/api";
-import { getFormattedColor } from "../lib/utils";
+import { Action, ActionPanel, List, Clipboard, showHUD, popToRoot, LocalStorage } from "@raycast/api";
 import { ColorFormatType } from "../lib/types";
 
 type ColorFormatProps = {
-  text: string;
+  convertedColor: string;
   title: string;
-  value: string;
+  value: ColorFormatType;
 };
 
-function getConvertedColor(text: string, format: ColorFormatType) {
-  try {
-    const convertedColor = getFormattedColor(text, format);
-    return convertedColor;
-  } catch {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Conversion failed",
-      message: `"${text}" is not a valid color.`,
-    });
-  }
-}
-
-export const ColorConvertListItem = ({ text, title, value }: ColorFormatProps) => {
-  const convertedColor = getConvertedColor(text, value as ColorFormatType);
-  if (!convertedColor) return null;
-
+export const ColorConvertListItem = ({ convertedColor, title, value }: ColorFormatProps) => {
   return (
     <List.Item
       title={title}
@@ -34,12 +17,10 @@ export const ColorConvertListItem = ({ text, title, value }: ColorFormatProps) =
           <Action
             title="Copy Converted Color"
             onAction={async () => {
-              if (convertedColor) {
-                await Clipboard.copy(convertedColor);
-                await showHUD("Copied color to clipboard");
-              }
-              LocalStorage.setItem("lastConvertedColorFormat", value);
-              popToRoot({ clearSearchBar: true });
+              await Clipboard.copy(convertedColor);
+              await showHUD("Copied color to clipboard");
+              await LocalStorage.setItem("lastConvertedColorFormat", value);
+              await popToRoot({ clearSearchBar: true });
             }}
           />
         </ActionPanel>

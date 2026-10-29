@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { Check, Site } from "../interface";
 import { checkStatuses, icons, ohdearUrl } from "../utils/constants";
 import {
@@ -19,7 +19,7 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
-export function SiteItem({ entry, onRemoveItem }: { entry: any; onRemoveItem: (item: Site) => Promise<void> }) {
+export function SiteItem({ entry, onRemoveItem }: { entry: Site; onRemoveItem: (item: Site) => Promise<void> }) {
   const result = entry.summarized_check_result as "succeeded" | "warning" | "failed";
   const lastCheck = dayjs.utc(entry.latest_run_date).local().fromNow();
 
@@ -40,11 +40,7 @@ export function SiteItem({ entry, onRemoveItem }: { entry: any; onRemoveItem: (i
                 }
 
                 const checkStatus = check.latest_run_result as
-                  | "succeeded"
-                  | "pending"
-                  | "failed"
-                  | "warning"
-                  | "errored-or-timed-out";
+                  "succeeded" | "pending" | "failed" | "warning" | "errored-or-timed-out";
 
                 return (
                   <List.Item.Detail.Metadata.Label
@@ -77,13 +73,20 @@ function Actions({ item, onItemRemove }: { item: Site; onItemRemove: (item: Site
         <Action.OpenInBrowser
           title="Open in Oh Dear"
           url={`${ohdearUrl}/sites/${item.id}/active-checks`}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
-        <Action.OpenInBrowser title="Open in Browser" url={item.url} shortcut={{ modifiers: ["cmd"], key: "i" }} />
+        <Action.OpenInBrowser
+          title="Open in Browser"
+          url={item.url}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "i" },
+            Windows: { modifiers: ["ctrl"], key: "i" },
+          }}
+        />
         <Action.CopyToClipboard
           title="Copy URL to Clipboard"
           content={item.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
         <ActionPanel.Section title="Reports">
           {addedChecks.includes("uptime") && <ActionUptime item={item} />}
@@ -104,7 +107,10 @@ function Actions({ item, onItemRemove }: { item: Site; onItemRemove: (item: Site
                 await onItemRemove(item);
               }
             }}
-            shortcut={{ modifiers: ["cmd"], key: "delete" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "delete" },
+              Windows: { modifiers: ["ctrl"], key: "delete" },
+            }}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>

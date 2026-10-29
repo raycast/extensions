@@ -3,8 +3,8 @@ import { Project } from "./gitlabapi";
 import { gitlab } from "./common";
 import { useState } from "react";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { projectIcon, toFormValues } from "./utils";
-import { useProject, useMilestones } from "./hooks";
+import { projectDropdownTitle, projectIcon, projectIconUrl, toFormValues } from "./utils";
+import { useAvatars, useProject, useMilestones } from "./hooks";
 
 interface IssueFormValues {
   project_id: number;
@@ -101,6 +101,7 @@ function ProjectDropdown(props: {
   setSelectedProject: React.Dispatch<React.SetStateAction<string | undefined>>;
   value?: string;
 }) {
+  const avatarSources = useAvatars(props.projects.map(projectIconUrl));
   return (
     <Form.Dropdown
       id="project_id"
@@ -112,18 +113,18 @@ function ProjectDropdown(props: {
       }}
     >
       {props.projects.map((project) => (
-        <ProjectDropdownItem key={project.id} project={project} />
+        <ProjectDropdownItem key={project.id} project={project} avatarSources={avatarSources} />
       ))}
     </Form.Dropdown>
   );
 }
 
-function ProjectDropdownItem(props: { project: Project }) {
+function ProjectDropdownItem(props: { project: Project; avatarSources: Record<string, string> }) {
   return (
     <Form.Dropdown.Item
       value={props.project.id.toString()}
-      title={props.project.name_with_namespace}
-      icon={projectIcon(props.project)}
+      title={projectDropdownTitle(props.project)}
+      icon={projectIcon(props.project, props.avatarSources)}
     />
   );
 }

@@ -7,4 +7,12 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  plugins: [
+    {
+      name: "raycast-test-runtime",
+      resolveId(id) {
+        if (id === "@raycast/api") return id;
+      },
+    },
+  ],
 });

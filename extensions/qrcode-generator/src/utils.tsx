@@ -67,7 +67,7 @@ export function QRCodeView({ qrData, height, onBack }: { qrData: string; height:
   return (
     <Detail
       isLoading={!qrData}
-      markdown={`![qrcode](${qrData}?raycast-height=${height})`}
+      markdown={`![qrcode](${qrData}?raycast-width=${height}&raycast-height=${height})`}
       actions={
         <ActionPanel>
           <Action title="Edit QR Code" onAction={onBack} />

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 
 import { withQuery, CacheActions } from "@/components";
 import { AVATAR_TYPE, PAGINATION_SIZE, QUERY_TYPE } from "@/constants";
@@ -107,13 +107,13 @@ function ConfluenceSearchUsers() {
                     <Action.CopyToClipboard
                       title="Copy Link"
                       content={item.url}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     {!!item.userKey && <Action.CopyToClipboard title="Copy User Key" content={item.userKey} />}
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={refetchWithToast}
                     />
                     <CacheActions />

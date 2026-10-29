@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, Action, Clipboard } from "@raycast/api";
+import { ActionPanel, Color, Detail, Action, Clipboard, Icon } from "@raycast/api";
 import AddPRReview from "./AddPRReview";
 import ClosePR from "./ClosePR";
 import MergePR from "./MergePR";
@@ -23,7 +23,7 @@ export default function PullRequestDetail(props: PullRequestDetailOwnProps) {
                 title="Add Review"
                 target={<AddPRReview id={id} title={title} />}
                 icon={{
-                  source: "doc-plaintext-16",
+                  source: Icon.Document,
                 }}
                 shortcut={{
                   modifiers: ["cmd", "shift"],
@@ -57,7 +57,7 @@ export default function PullRequestDetail(props: PullRequestDetailOwnProps) {
             <Action
               title="Copy Pull Request Number"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(`${number}`)}
@@ -65,7 +65,7 @@ export default function PullRequestDetail(props: PullRequestDetailOwnProps) {
             <Action
               title="Copy Pull Request URL"
               icon={{
-                source: "doc-on-clipboard-16",
+                source: Icon.Clipboard,
                 tintColor: Color.PrimaryText,
               }}
               onAction={() => Clipboard.copy(url)}

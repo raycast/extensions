@@ -1,5 +1,15 @@
 # Instagram Media Downloader Changelog
 
+## [Improvements] - 2026-10-28
+
+- Carousel downloads now show which item is downloading ("Media 2 of 4") with its progress, and finish with a summary of how many files were saved.
+- Downloaded files are named after the post, numbered for carousels (`<shortcode>-1.jpg`, `<shortcode>-2.jpg`, …), instead of an opaque downloader ID.
+- Starting a second download while one is still running (including pressing Download again in the highlight list) is now refused, instead of saving a second copy of every file.
+- A download that fails partway no longer leaves a partial file behind.
+- The finished-download toast offers Show in Finder and Copy Path.
+- Add a Debug Logging preference for troubleshooting downloads.
+- Update to Raycast API 2.9 and the latest dependencies, fixing all known vulnerabilities, including a high-severity one in `follow-redirects`.
+
 ## [Fixes] - 2026-07-04
 
 - Improve Instagram post and reel downloads, including more reliable filename and extension detection.

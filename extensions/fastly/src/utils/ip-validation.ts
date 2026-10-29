@@ -28,10 +28,13 @@ export function isValidPrefix(input: string): boolean {
   }
 
   const ip = trimmed.slice(0, slashIdx);
-  const subnet = parseInt(trimmed.slice(slashIdx + 1), 10);
-  if (isNaN(subnet)) return false;
-  if (isValidIPv4(ip)) return subnet >= 0 && subnet <= 32;
-  if (isValidIPv6(ip)) return subnet >= 0 && subnet <= 128;
+  // parseInt alone would accept trailing garbage ("/8x") and leading zeros
+  const suffix = trimmed.slice(slashIdx + 1);
+  if (!/^\d{1,3}$/.test(suffix)) return false;
+  const subnet = parseInt(suffix, 10);
+  if (String(subnet) !== suffix) return false;
+  if (isValidIPv4(ip)) return subnet <= 32;
+  if (isValidIPv6(ip)) return subnet <= 128;
   return false;
 }
 

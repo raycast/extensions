@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues, showToast } from "@raycast/api";
 
 export function generateActionPanel({
   setPrefix,
@@ -17,29 +17,19 @@ export function generateActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.CopyToClipboard
-          content={chatCode}
-          title="Copy Chat Code"
-          shortcut={{
-            modifiers: ["cmd"],
-            key: "c",
-          }}
-        />
+        <Action.CopyToClipboard content={chatCode} title="Copy Chat Code" shortcut={Keyboard.Shortcut.Common.Copy} />
         <Action.CopyToClipboard
           content={chatCodeEscaped}
           title="Copy Escaped Chat Code"
-          shortcut={{
-            modifiers: ["cmd", "shift"],
-            key: "c",
-          }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
         {hexCode && (
           <Action.CopyToClipboard
             content={hexCode}
             title="Copy Hex Code"
             shortcut={{
-              modifiers: ["cmd", "shift"],
-              key: "h",
+              macOS: { modifiers: ["cmd", "shift"], key: "h" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "h" },
             }}
           />
         )}
@@ -57,8 +47,8 @@ export function generateActionPanel({
             });
           }}
           shortcut={{
-            modifiers: ["cmd", "shift"],
-            key: "1",
+            macOS: { modifiers: ["cmd", "shift"], key: "1" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "1" },
           }}
         />
         <Action
@@ -72,8 +62,8 @@ export function generateActionPanel({
             });
           }}
           shortcut={{
-            modifiers: ["cmd", "shift"],
-            key: "2",
+            macOS: { modifiers: ["cmd", "shift"], key: "2" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "2" },
           }}
         />
       </ActionPanel.Section>

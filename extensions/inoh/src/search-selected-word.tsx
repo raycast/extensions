@@ -25,6 +25,7 @@ async function _readSelectedText(): Promise<string> {
   throw new Error("No text selected");
 }
 
+/** "Search Selected Word" command — pre-fills the search with the frontmost app's selected text. */
 export default function SearchSelectedWord() {
   const [selectedText, setSelectedText] = useState("");
 

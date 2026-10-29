@@ -1,9 +1,21 @@
-import { Action, ActionPanel, Icon, Keyboard, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  open,
+  showHUD,
+} from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { useState, useEffect } from "react";
 import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
 import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
+import { MeetingDownloadActions } from "./DownloadActions";
 import { RefreshCacheAction } from "./RefreshCacheAction";
 import { cacheManager } from "../utils/cacheManager";
 
@@ -47,11 +59,32 @@ export function MeetingCopyActions(props: {
           title="Copy Calendar Invitees Emails"
           content={meeting.calendarInvitees.join(", ")}
           icon={Icon.Envelope}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "e" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+          }}
         />
       )}
     </ActionPanel.Section>
   );
+}
+
+/** Bundle ID of the Fathom desktop app, which registers the `fathom://` scheme. */
+const FATHOM_DESKTOP_BUNDLE_ID = "video.fathom.electron";
+
+/**
+ * Where "Open in Fathom" should go: the desktop app's deep link when the user prefers it
+ * and the app is installed, otherwise the web URL. The deep link takes the CALL id from
+ * the web URL (`/calls/<id>`), which is not the recording id.
+ */
+async function meetingOpenTarget(webUrl: string): Promise<string> {
+  const callId = /\/calls\/(\d+)/.exec(webUrl)?.[1];
+  if (getPreferenceValues<Preferences>().openMeetingsIn !== "desktop" || !callId) return webUrl;
+  // A failed app scan falls back to the web rather than failing the action.
+  const apps = await getApplications().catch(() => []);
+  if (!apps.some((app) => app.bundleId === FATHOM_DESKTOP_BUNDLE_ID)) return webUrl;
+  // The same link fathom.video's "open in desktop app" page hands the app.
+  return `fathom://open-window/desktop_app/pages/calls/${callId}/details?fathomName=calls&roundedCorners=true`;
 }
 
 // Shared Open Actions Section
@@ -62,7 +95,19 @@ export function MeetingOpenActions(props: { meeting: Meeting }) {
   return (
     <ActionPanel.Section title="Open">
       {meeting.url && (
-        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={Keyboard.Shortcut.Common.Open} />
+        <Action
+          title="Open in Fathom"
+          icon={Icon.ArrowNe}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={async () => {
+            try {
+              await open(await meetingOpenTarget(meeting.url));
+              await closeMainWindow();
+            } catch (error) {
+              await showError(error, { title: "Could Not Open Meeting" });
+            }
+          }}
+        />
       )}
       {shareUrl && shareUrl !== meeting.url && (
         <Action.OpenInBrowser url={shareUrl} title="Open Share Link" shortcut={Keyboard.Shortcut.Common.OpenWith} />
@@ -81,7 +126,13 @@ export function MeetingExportActions(props: { meeting: Meeting; recordingId: str
         title="Export Summary as Markdown"
         icon={Icon.Download}
         onAction={() => exportMeeting({ meeting, recordingId, type: "summary", format: "md" })}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        // ⌘⇧S would collide with Common.Duplicate, and this action duplicates
+        // nothing — it writes a file. ⌘⇧M ("Markdown") is unclaimed and pairs
+        // with ⌘⇧T for the transcript export below.
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "m" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+        }}
       />
       <Action
         title="Export Summary as Text"
@@ -92,7 +143,10 @@ export function MeetingExportActions(props: { meeting: Meeting; recordingId: str
         title="Export Transcript as Markdown"
         icon={Icon.Download}
         onAction={() => exportMeeting({ meeting, recordingId, type: "transcript", format: "md" })}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "t" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+        }}
       />
       <Action
         title="Export Transcript as Text"
@@ -120,7 +174,7 @@ export function MeetingDetailActions(props: {
             title="View Action Items"
             icon={Icon.CheckCircle}
             target={<MeetingActionItemsDetail meeting={meeting} />}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
           />
         )}
         {currentView !== "transcript" && (
@@ -128,7 +182,7 @@ export function MeetingDetailActions(props: {
             title="View Transcript"
             icon={Icon.Text}
             target={<MeetingTranscriptDetail meeting={meeting} recordingId={recordingId} />}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
           />
         )}
         {currentView !== "summary" && (
@@ -136,7 +190,10 @@ export function MeetingDetailActions(props: {
             title="View Summary"
             icon={Icon.Document}
             target={<MeetingSummaryDetail meeting={meeting} recordingId={recordingId} />}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            // No shortcut: ⌘S is Common.Save and ⌘Y is Common.ToggleQuickLook,
+            // neither of which means "view the summary". Borrowing an unrelated
+            // Common binding to silence the linter would teach the wrong muscle
+            // memory; the action stays reachable from the panel and via search.
           />
         )}
       </ActionPanel.Section>
@@ -144,6 +201,7 @@ export function MeetingDetailActions(props: {
       <MeetingCopyActions meeting={meeting} additionalContent={additionalContent} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+      <MeetingDownloadActions meeting={meeting} recordingId={recordingId} />
     </ActionPanel>
   );
 }
@@ -166,7 +224,7 @@ export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Prom
           title="View Action Items"
           icon={Icon.CheckCircle}
           target={<MeetingActionItemsDetail meeting={meeting} />}
-          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
         />
         <Action.Push
           title="View Transcript"
@@ -178,6 +236,7 @@ export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Prom
       <MeetingCopyActions meeting={meeting} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+      <MeetingDownloadActions meeting={meeting} recordingId={recordingId} />
 
       {onRefresh && (
         <ActionPanel.Section>

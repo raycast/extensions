@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - 2026-10-01
+
+- Fixed `Manage Apps` crashing with `TypeError: n?.get is not a function` when loaded from cache: the app path lookup is now a plain record (which survives the cache's JSON round-trip) instead of a `Map`.
+
 ## [Initial Release] - 2026-05-21
 
 ### Added

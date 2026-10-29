@@ -3,6 +3,8 @@ import type { Position } from "../types/accounts";
 import type { QuoteData } from "../types/quotes";
 import { formatChange, formatCurrency, formatPercent, formatNumber } from "../lib/formatters";
 import { SCHWAB_POSITIONS_URL } from "../lib/constants";
+import { getPositionReturn } from "../lib/position-return";
+import { securityName } from "../lib/security-name";
 import { SymbolDetail } from "./SymbolDetail";
 
 interface PositionListItemProps {
@@ -20,6 +22,8 @@ export function PositionListItem({ position, quote }: PositionListItemProps) {
 
   const dailyChange = quote?.quote?.netPercentChange;
   const description = quote?.reference?.description ?? position.instrument.description ?? "";
+
+  const { unrealizedPL, unrealizedPLPct } = getPositionReturn(position);
 
   const changeColor = dailyChange != null ? (dailyChange >= 0 ? Color.Green : Color.Red) : undefined;
   const dayPL = position.currentDayProfitLoss;
@@ -41,6 +45,16 @@ export function PositionListItem({ position, quote }: PositionListItemProps) {
     });
   }
 
+  if (unrealizedPL != null) {
+    accessories.push({
+      tag: {
+        value: `P/L ${unrealizedPLPct != null ? formatPercent(unrealizedPLPct) : formatChange(unrealizedPL)}`,
+        color: unrealizedPL >= 0 ? Color.Green : Color.Red,
+      },
+      tooltip: `Unrealized return: ${formatChange(unrealizedPL)} (${formatPercent(unrealizedPLPct)}). Excludes dividends and realized gains.`,
+    });
+  }
+
   if (position.marketValue != null) {
     accessories.push({ text: formatCurrency(position.marketValue), tooltip: "Market value" });
   }
@@ -48,7 +62,8 @@ export function PositionListItem({ position, quote }: PositionListItemProps) {
   return (
     <List.Item
       title={symbol}
-      subtitle={description}
+      subtitle={securityName(description, position.instrument.assetType)}
+      keywords={[description]}
       accessories={accessories}
       actions={
         <ActionPanel>

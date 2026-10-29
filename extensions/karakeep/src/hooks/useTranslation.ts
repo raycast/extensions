@@ -5,7 +5,7 @@ import { translate } from "../i18n/translate";
 
 export function useTranslation() {
   const { config } = useConfig();
-  const [language, setLanguage] = useState<Language>((config?.language as Language) || "en");
+  const [language, setLanguage] = useState<Language>(config?.language || "en");
 
   const t = useCallback(
     (
@@ -22,7 +22,7 @@ export function useTranslation() {
   );
 
   useEffect(() => {
-    const newLanguage = config?.language as Language | undefined;
+    const newLanguage = config?.language;
     if (newLanguage && newLanguage !== language) {
       setLanguage(newLanguage);
     }

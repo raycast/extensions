@@ -1,5 +1,6 @@
-import { useCachedPromise, useLocalStorage, withAccessToken } from "@raycast/utils";
-import { getClubActivities, getClubs, provider } from "./api/client";
+import { withStrava } from "./with-strava";
+import { useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { getClubActivities, getClubs } from "./api/client";
 import { useEffect } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { formatDistance, formatDuration, getSportTypesFromActivityTypes, getStartOfWeekUnix } from "./utils";
@@ -11,7 +12,7 @@ const PAGE_SIZE = 100;
 
 function withClubs(Component: React.FC<{ clubs: StravaSummaryClub[] }>) {
   return function ClubsWrapper() {
-    const { data: clubs, isLoading, error } = useCachedPromise(getClubs, []);
+    const { data: clubs, isLoading, error, revalidate } = useCachedPromise(getClubs, []);
 
     useEffect(() => {
       if (error) {
@@ -27,10 +28,18 @@ function withClubs(Component: React.FC<{ clubs: StravaSummaryClub[] }>) {
       return <List isLoading searchBarPlaceholder={SEARCHBAR_PLACEHOLDER} />;
     }
 
-    if (clubs === undefined) {
+    if (!clubs?.length) {
       return (
         <List>
-          <List.EmptyView title="No clubs found" />
+          <List.EmptyView
+            title={error ? "Could Not Load Clubs" : "No Clubs Found"}
+            description={error?.message}
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              </ActionPanel>
+            }
+          />
         </List>
       );
     }
@@ -216,4 +225,4 @@ function ClubActivities({ activities }: { activities: StravaClubActivity[] }) {
   );
 }
 
-export default withAccessToken(provider)(withClubs(Leaderboard));
+export default withStrava(withClubs(Leaderboard));

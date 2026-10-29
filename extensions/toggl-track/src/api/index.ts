@@ -25,6 +25,7 @@ export {
   createTimeEntry,
   stopTimeEntry,
   getRunningTimeEntry,
+  refetchRunningTimeEntry,
   updateTimeEntry,
   removeTimeEntry,
   type TimeEntry,

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "metals-prices",
+  "title": "Metals Prices",
+  "description": "Daily gold, silver, platinum and palladium prices per gram by purity, with 1, 3, 6, and 12-month averages.",
+  "icon": "extension-icon.png",
+  "author": "noice_anas",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "gold",
+    "silver",
+    "platinum",
+    "palladium",
+    "karat",
+    "bullion",
+    "spot price",
+    "metals.dev"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "metals-prices",
+      "title": "Show Metals Prices",
+      "subtitle": "metals.dev",
+      "description": "Show current gold, silver, platinum and palladium prices per gram and 1/3/6/12-month averages.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "metals.dev API Key",
+      "description": "Your free metals.dev API key. Get one at https://metals.dev/pricing (free tier: 100 requests/month).",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your metals.dev API key"
+    },
+    {
+      "name": "currency",
+      "title": "Display Currency",
+      "description": "Currency prices are fetched in and displayed as. Switching currencies costs one API request, then caches for 12h.",
+      "type": "dropdown",
+      "required": false,
+      "default": "SAR",
+      "data": [
+        {
+          "title": "SAR \u2014 Saudi Riyal",
+          "value": "SAR"
+        },
+        {
+          "title": "AED \u2014 UAE Dirham",
+          "value": "AED"
+        },
+        {
+          "title": "KWD \u2014 Kuwaiti Dinar",
+          "value": "KWD"
+        },
+        {
+          "title": "QAR \u2014 Qatari Riyal",
+          "value": "QAR"
+        },
+        {
+          "title": "BHD \u2014 Bahraini Dinar",
+          "value": "BHD"
+        },
+        {
+          "title": "OMR \u2014 Omani Rial",
+          "value": "OMR"
+        },
+        {
+          "title": "USD \u2014 US Dollar",
+          "value": "USD"
+        },
+        {
+          "title": "EUR \u2014 Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "GBP \u2014 British Pound",
+          "value": "GBP"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

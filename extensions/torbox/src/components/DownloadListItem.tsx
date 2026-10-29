@@ -6,12 +6,14 @@ import { isVideoFile, openInPlayer } from "../utils/video";
 import { copyDownloadLink } from "../utils/downloads";
 import { VideoPlayers } from "../hooks/useVideoPlayers";
 import { DownloadFiles } from "./DownloadFiles";
+import { RecentDownload } from "../hooks/useRecentDownloads";
 
 interface DownloadListItemProps {
   download: Download;
   apiKey: string;
   videoPlayers: VideoPlayers;
   onRefresh: () => void;
+  onOpen?: (recent: RecentDownload) => void;
 }
 
 const isFailed = (state: string): boolean => state.toLowerCase().startsWith("failed");
@@ -64,7 +66,7 @@ const handleDelete = async (apiKey: string, download: Download, onRefresh: () =>
   }
 };
 
-export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: DownloadListItemProps) => {
+export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh, onOpen }: DownloadListItemProps) => {
   const status = getStatus(download);
   const isDownloadReady = !download.isQueued && (download.download_finished || download.progress >= 1);
   const hasMultipleFiles = download.files.length > 1;
@@ -88,7 +90,15 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: 
                   key={player.name}
                   title={`Open in ${player.name}`}
                   icon={Icon.Play}
-                  onAction={() => openInPlayer(apiKey, download, player)}
+                  onAction={() =>
+                    openInPlayer(apiKey, download, player, undefined, () =>
+                      onOpen?.({
+                        downloadId: download.id,
+                        type: download.type,
+                        fileId: download.files[0]?.id,
+                      }),
+                    )
+                  }
                 />
               ))}
             {isDownloadReady && (
@@ -99,7 +109,8 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: 
                 title="View Files"
                 icon={Icon.List}
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
-                target={<DownloadFiles download={download} apiKey={apiKey} />}
+                target={<DownloadFiles download={download} apiKey={apiKey} onOpen={onOpen} />}
+                onPush={() => onOpen?.({ downloadId: download.id, type: download.type })}
               />
             )}
           </ActionPanel.Section>

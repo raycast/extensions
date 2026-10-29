@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+import { parseAdditionalHomes } from "../agents/home-dirs.ts";
+
 const DEFAULT_CODEX_AUTH_FILE = path.join(os.homedir(), ".codex", "auth.json");
 
 interface CodexAuthFile {
@@ -129,6 +131,10 @@ export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env): string |
   return isExistingDirectory(codexHome) ? codexHome : null;
 }
 
+export function parseAdditionalCodexHomes(value: string, homeDir: string = os.homedir()): string[] {
+  return parseAdditionalHomes(value, homeDir);
+}
+
 function readCodexLoginAuth(authFilePath: string): CodexAuthData {
   try {
     if (!fs.existsSync(authFilePath)) {
@@ -159,7 +165,9 @@ function formatStoredAccountLabel(fileName: string, accountId: string, userId: s
   return normalized || accountId;
 }
 
-function getCodexAccountDedupeKeys(account: CodexOAuthAccount): string[] {
+export function getCodexAccountDedupeKeys(
+  account: Pick<CodexOAuthAccount, "token" | "userId" | "accountId">,
+): string[] {
   const keys = [`token:${account.token}`];
   if (account.userId && account.accountId) {
     keys.unshift(`user-account:${account.userId}:${account.accountId}`);

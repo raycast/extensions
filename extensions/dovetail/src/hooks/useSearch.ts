@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import qs from "qs";
 import { useState } from "react";
 import { ApiEndpoint, BaseUrl, buildHeaders, EndpointData, PageSize } from "../api/endpoints";
@@ -35,6 +35,9 @@ export function useSearch<Endpoint extends ApiEndpoint>(endpoint: Endpoint): Sea
       }),
       keepPreviousData: true,
       initialData: [],
+      onError: (error) => {
+        showFailureToast(error, { title: "Failed to load results" });
+      },
     },
   );
 

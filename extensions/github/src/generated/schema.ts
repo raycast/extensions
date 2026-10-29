@@ -11279,11 +11279,7 @@ export enum IssueFieldVisibility {
 
 /** Possible issue fields. */
 export type IssueFields =
-  | IssueFieldDate
-  | IssueFieldMultiSelect
-  | IssueFieldNumber
-  | IssueFieldSingleSelect
-  | IssueFieldText;
+  IssueFieldDate | IssueFieldMultiSelect | IssueFieldNumber | IssueFieldSingleSelect | IssueFieldText;
 
 /** The connection type for IssueFields. */
 export type IssueFieldsConnection = {
@@ -21986,10 +21982,7 @@ export type ProjectV2FieldCommon = {
 
 /** Configurations for project fields. */
 export type ProjectV2FieldConfiguration =
-  | ProjectV2Field
-  | ProjectV2IterationField
-  | ProjectV2MultiSelectField
-  | ProjectV2SingleSelectField;
+  ProjectV2Field | ProjectV2IterationField | ProjectV2MultiSelectField | ProjectV2SingleSelectField;
 
 /** The connection type for ProjectV2FieldConfiguration. */
 export type ProjectV2FieldConfigurationConnection = {
@@ -31473,14 +31466,7 @@ export enum SavedReplyOrderField {
 
 /** The results of a search. */
 export type SearchResultItem =
-  | App
-  | Discussion
-  | Issue
-  | MarketplaceListing
-  | Organization
-  | PullRequest
-  | Repository
-  | User;
+  App | Discussion | Issue | MarketplaceListing | Organization | PullRequest | Repository | User;
 
 /**
  * A list of results that matched against a search query. Regardless of the number

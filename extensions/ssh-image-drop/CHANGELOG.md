@@ -1,5 +1,10 @@
 # SSH Image Drop Changelog
 
+## [Store Listing Update] - 2026-08-13
+
+- Redrawn extension icon — the arrow fills more of the canvas, so it stays legible at store list size
+- README now links a donation page
+
 ## [Initial Release] - 2026-08-12
 
 - Send files, folders, and clipboard images to servers over SSH — file sends use a one-screen picker form, pre-filled from your Finder selection on macOS

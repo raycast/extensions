@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { BookmarkList } from "./components/BookmarkList";
 import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
@@ -46,7 +46,7 @@ export default function Notes() {
                 title={t("note.create")}
                 icon={Icon.Plus}
                 target={<CreateNoteView />}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }

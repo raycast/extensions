@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import React, { useCallback, useMemo } from "react";
 import { logger } from "@chrismessina/raycast-logger";
@@ -12,8 +12,9 @@ import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
 import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
+import { DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
+import { revalidated } from "./utils/fetchError";
 import { labelLists } from "./utils/listLabels";
 
 const log = logger.child("[Lists]");
@@ -60,7 +61,7 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
       action: async () => {
         try {
           log.log("Refreshing list bookmarks", { listId, listName });
-          await revalidate();
+          await revalidated(revalidate);
           log.info("List bookmarks refreshed", { listId });
         } catch (error) {
           log.error("Failed to refresh list bookmarks", { listId, listName, error });
@@ -187,7 +188,6 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -280,7 +280,6 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.editList")} onSubmit={handleSubmit} icon={Icon.Pencil} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -350,19 +349,19 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
               title={t("list.openList")}
               onAction={() => onOpen(list)}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action
               title={t("list.editList")}
               onAction={() => onEdit(list)}
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
             />
             <Action
               title={t("list.createList")}
               onAction={onCreate}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -370,7 +369,7 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
             <Action.CopyToClipboard
               title={t("common.copyId")}
               content={list.id}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -379,7 +378,7 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={() => onDelete(list.id)}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -400,34 +399,38 @@ export default function Lists() {
       const list = lists?.find((list) => list.id === id);
       const listName = list?.name;
 
+      // Declining the confirmation is a normal outcome, not an error. It used to
+      // raise a red Failure toast reading "Delete cancelled", which reports a
+      // successful no-op as a problem — and no other confirmAlert in this
+      // extension says anything when you back out. Stay silent to match.
       if (
-        await confirmAlert({
+        !(await confirmAlert({
           title: t("list.deleteList"),
           message: t("list.deleteConfirm", { name: listName || "" }),
-        })
+        }))
       ) {
-        await runWithToast({
-          loading: { title: t("common.deleting") },
-          success: { title: t("common.deleteSuccess") },
-          failure: { title: t("common.deleteFailed") },
-          action: async () => {
-            try {
-              log.info("Deleting list", { listId: id, listName });
-              await fetchDeleteList(id);
-              await revalidate();
-              log.info("List deleted", { listId: id });
-            } catch (error) {
-              log.error("Failed to delete list", { listId: id, listName, error });
-              throw error;
-            }
-          },
-        });
-      } else {
-        await showToast({
-          title: t("common.deleteCancel"),
-          style: Toast.Style.Failure,
-        });
+        return;
       }
+
+      await runWithToast({
+        loading: { title: t("common.deleting") },
+        success: { title: t("common.deleteSuccess") },
+        failure: { title: t("common.deleteFailed") },
+        action: async () => {
+          try {
+            log.info("Deleting list", { listId: id, listName });
+            await fetchDeleteList(id);
+            // Plain revalidate, NOT revalidated(): the list is already gone. A
+            // refresh that fails here must not turn a completed delete into
+            // "Couldn't delete list" — the hook's own onError reports it.
+            await revalidate();
+            log.info("List deleted", { listId: id });
+          } catch (error) {
+            log.error("Failed to delete list", { listId: id, listName, error });
+            throw error;
+          }
+        },
+      });
     },
     [lists, revalidate, t],
   );
@@ -496,7 +499,7 @@ export default function Lists() {
             title={t("list.createList")}
             onAction={handleCreateList}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel>
       }
@@ -512,7 +515,7 @@ export default function Lists() {
                 title={t("list.createList")}
                 onAction={handleCreateList}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -527,14 +530,14 @@ export default function Lists() {
               title={t("list.openFavorites")}
               onAction={handleShowFavoritedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/favourites`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }
@@ -548,14 +551,14 @@ export default function Lists() {
               title={t("list.openArchived")}
               onAction={handleShowArchivedBookmarks}
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "return" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             <Action.OpenInBrowser url={`${apiUrl}/dashboard/archive`} title={t("common.viewInBrowser")} />
             <Action
               title={t("list.createList")}
               onAction={handleCreateList}
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel>
         }

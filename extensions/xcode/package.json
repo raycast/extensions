@@ -9,9 +9,10 @@
   "contributors": [
     "qeude",
     "oliep",
-    "kiliankoe",
     "3llomi",
-    "ridemountainpig"
+    "ridemountainpig",
+    "jostein_dyrseth",
+    "nhojb"
   ],
   "categories": [
     "Developer Tools",
@@ -705,5 +706,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7"
+  }
 }
