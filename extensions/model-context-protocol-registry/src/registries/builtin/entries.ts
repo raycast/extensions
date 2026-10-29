@@ -930,6 +930,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "house-ai",
+    title: "House AI",
+    description:
+      "AI interior and exterior design. Share a photo of a room, a house or a yard, pick one of 100+ styles, and House AI returns a photorealistic redesign of that same space. Also preview wall paint and flooring, empty a cluttered room, virtually stage an empty one, find real furniture and decor, and shop the look of a design. Hosted remote Streamable HTTP server at https://mcp.houseaiapp.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Designs use your House AI credits.",
+    icon: "https://raw.githubusercontent.com/Apex-Byte-Technologies/house-ai-mcp/main/assets/logo.png",
+    homepage: "https://www.houseaiapp.com/connector",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.houseaiapp.com/mcp"],
+    },
+    remoteUrl: "https://mcp.houseaiapp.com/mcp",
+  },
+  {
     name: "isms-copilot",
     title: "ISMS Copilot",
     description:

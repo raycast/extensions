@@ -7,6 +7,7 @@
  * to Raycast's OAuth.PKCEClient (`authorize({ url })`). Raycast requires a
  * `state` param in the authorize URL, hence `state()`.
  */
+import { randomUUID } from "node:crypto";
 import { LocalStorage, OAuth } from "@raycast/api";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -59,7 +60,9 @@ class RaycastOAuthProvider implements OAuthClientProvider {
 
   state(): string {
     // Raycast rejects authorize URLs without a state param.
-    return crypto.randomUUID();
+    // Imported from node:crypto: the global `crypto` is missing on some
+    // Raycast Node runtimes (raycast/extensions#32899).
+    return randomUUID();
   }
 
   async clientInformation(): Promise<OAuthClientInformationMixed | undefined> {
