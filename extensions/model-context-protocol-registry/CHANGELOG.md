@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Relaticle MCP Server] - 2026-10-29
+
+- Add Relaticle, an open-source CRM your AI agents can read and update, as a remote server at https://mcp.relaticle.com with OAuth sign-in.
+
 ## [Add Monito MCP Server] - 2026-10-29
 
 - Add Monito to the official registry: check a deployed URL in a real browser from a plain-English expectation and get passed, failed or cannot verify with screenshots, network and console logs. Hosted Streamable HTTP server at https://www.monito.dev/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
