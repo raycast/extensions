@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Improve Xcode project discovery] - {PR_MERGE_DATE}
+## [Improve Xcode project discovery] - 2026-10-29
 
 - Include Xcode projects in hidden git worktrees
 
