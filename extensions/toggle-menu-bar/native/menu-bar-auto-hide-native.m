@@ -23,6 +23,12 @@ typedef struct {
 } SkyLightFunctions;
 
 static bool loadSkyLightFunctions(SkyLightFunctions *functions) {
+#ifdef MENU_BAR_TEST_BACKEND
+  // Only the test build substitutes host side effects; the shipped build has
+  // no runtime switch for this backend.
+  functions->handle = dlopen(NULL, RTLD_NOW);
+  return functions->handle != NULL;
+#else
   const char *path =
       "/System/Library/PrivateFrameworks/SkyLight.framework/SkyLight";
   functions->handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
@@ -46,6 +52,7 @@ static bool loadSkyLightFunctions(SkyLightFunctions *functions) {
   }
 
   return true;
+#endif
 }
 
 static useconds_t pulseStepDelay(void) {
@@ -68,6 +75,7 @@ static useconds_t pulseStepDelay(void) {
   return (useconds_t)milliseconds * 1000;
 }
 
+#ifndef MENU_BAR_TEST_BACKEND
 static bool writeMode(int option, bool updateControlCenterOption,
                       const SkyLightFunctions *skyLight) {
   const bool hideOnDesktop = option <= 1;
@@ -190,6 +198,10 @@ static int readControlCenterOption(void) {
   return valid ? (int)option : -1;
 }
 
+#else
+#include "../tests/native-test-backend.h"
+#endif
+
 static int readCurrentOptionWithFallback(void) {
   const int option = readCurrentOption();
   if (option >= 0) {
@@ -236,11 +248,17 @@ static int acquireModeLock(bool shared) {
   // Shared reads wait for an exclusive pulse to finish. Mutations retain the
   // exclusive lock across their read, target choice, and pulse. The kernel
   // releases either lock automatically if the process dies.
+#ifdef MENU_BAR_TEST_BACKEND
+  testCheckContention(fd, shared);
+#endif
   if (flock(fd, shared ? LOCK_SH : LOCK_EX) != 0) {
     fprintf(stderr, "Could not acquire the menu bar mode lock\n");
     close(fd);
     return -1;
   }
+#ifdef MENU_BAR_TEST_BACKEND
+  testCheckpoint("locked");
+#endif
   return fd;
 }
 

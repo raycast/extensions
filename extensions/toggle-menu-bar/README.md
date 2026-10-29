@@ -38,6 +38,6 @@ npm test
 npm run build
 ```
 
-Tests replace Raycast and native execution with isolated fixtures; they do not change the host menu bar. Production builds rebuild and sign the native helper. Real Raycast behavior and full-screen appearance require manual verification on macOS.
+Command and wrapper tests replace external execution with isolated fixtures. Native process tests compile the production command flow with a test-only file-backed preference and notification backend, using real kernel locks and checkpoint barriers. The shipped helper has no runtime switch for this backend. Tests do not change the host menu bar. Production builds rebuild and sign the native helper. Real Raycast behavior and full-screen appearance require manual verification on macOS.
 
 Originally created by **iamyeizi**, retaining the original extension icon and MIT license. Native controls and the mode picker contributed by **0xAdriaTorralba**.
