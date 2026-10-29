@@ -197,7 +197,6 @@ export function UsageView(props: {
   );
   return (
     <Detail
-      navigationTitle={title}
       isLoading={props.loading || history.isLoading}
       markdown={`![Quota chart](data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")})`}
       actions={actions}

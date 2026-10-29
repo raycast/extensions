@@ -9,15 +9,6 @@ A small Raycast front end for [CLIProxyAPI](https://github.com/router-for-me/CLI
    - **Server URL**: defaults to `http://localhost:8317`
    - **Management Key**: the plaintext secret key
 
-## Install
-
-```sh
-npm install
-npm run install-raycast
-```
-
-This builds the production version straight into Raycast. It stays installed without the dev server running. Run `npm run install-raycast` again after changing the code. Use `npm run dev` only while developing.
-
 ## What it shows
 
 Every auth file grouped by provider, with:
