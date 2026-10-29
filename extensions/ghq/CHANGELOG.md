@@ -1,6 +1,6 @@
 # ghq Changelog
 
-## [Get Repository] - {PR_MERGE_DATE}
+## [Get Repository] - 2026-10-29
 
 - Add repository cloning with SSH, shallow clone, and update options.
 - Use the configured ghq root and allow a custom ghq executable path.
