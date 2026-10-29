@@ -1,6 +1,6 @@
 # Changelog
 
-## [Search Wallpapers] - {PR_MERGE_DATE}
+## [Search Wallpapers] - 2026-10-29
 
 - Added Search Wallpapers to browse the full gallery by title, artist, subject, color, or mood, with the same matching rules as anotherboring.day.
 - Preview search results, set them as your desktop wallpaper, download them, or open their artwork pages.
