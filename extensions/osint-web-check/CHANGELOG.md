@@ -1,5 +1,9 @@
 # OSINT Web Check Changelog
 
+## [Node.js 26 Compatibility] - {PR_MERGE_DATE}
+
+- Support TLS connections to IP addresses on Node.js 26 without sending an invalid SNI hostname.
+
 ## [Consolidate OSINT Toolkit into OSINT Web Check] - 2026-06-22
 
 - Single "OSINT Web Check" command now accepts URLs, domains, IPs, and hashes in one search bar.

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 
 import { bindingsPath } from "./bindings";
-import { helperPath } from "./helper";
+import { extensionFolder, helperPath } from "./helper";
 import * as listener from "./listener";
 import { statusPath } from "./status";
 
@@ -97,7 +97,7 @@ export async function collectDiagnostics(): Promise<string> {
     [
       "Launch agent",
       agent
-        ? `state ${agent.state}, pid ${agent.pid ?? "-"}, runs ${agent.runs ?? "-"}, last exit ${agent.lastExit ?? "-"}\nprogram ${agent.program ?? "-"}\nup to date: ${listener.agentIsCurrent(bundled)}`
+        ? `state ${agent.state}, pid ${agent.pid ?? "-"}, runs ${agent.runs ?? "-"}, last exit ${agent.lastExit ?? "-"}\nprogram ${agent.program ?? "-"}\nup to date: ${listener.agentIsCurrent(bundled, undefined, undefined, undefined, extensionFolder())}`
         : "not loaded",
     ],
     ["Bluetooth", bluetooth()],

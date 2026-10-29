@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "roblox-developer-tools",
   "title": "Roblox Developer Tools",
-  "description": "Launch Roblox games, open Studio, publish places, restart servers, view player counts, and open game pages and Creator Dashboard",
+  "description": "Manage your Roblox development workflow from Raycast",
   "icon": "extension-icon.png",
   "author": "zw1ce",
   "license": "MIT",
@@ -21,6 +21,109 @@
   ],
   "commands": [
     {
+      "name": "robux-earned",
+      "title": "Robux Earned",
+      "subtitle": "Roblox",
+      "description": "Show game or account earnings in the menu bar in Robux or estimated DevEx USD",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "earningsSource",
+          "type": "dropdown",
+          "title": "Earnings Source",
+          "description": "Choose earnings from a game or your Roblox account",
+          "required": true,
+          "default": "game",
+          "data": [
+            {
+              "title": "Game",
+              "value": "game"
+            },
+            {
+              "title": "Roblox Account",
+              "value": "account"
+            }
+          ]
+        },
+        {
+          "name": "earningsPeriod",
+          "type": "dropdown",
+          "title": "Time Range",
+          "description": "All-time includes all history available from Roblox; game analytics retain up to four years",
+          "required": true,
+          "default": "30",
+          "data": [
+            {
+              "title": "All-time",
+              "value": "all"
+            },
+            {
+              "title": "Last 180 Days",
+              "value": "180"
+            },
+            {
+              "title": "Last 90 Days",
+              "value": "90"
+            },
+            {
+              "title": "Last 30 Days",
+              "value": "30"
+            },
+            {
+              "title": "Last 7 Days",
+              "value": "7"
+            },
+            {
+              "title": "Last Day",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "name": "earningsDisplay",
+          "type": "dropdown",
+          "title": "Display Amount As",
+          "description": "USD is an estimate at the standard DevEx rate of $0.0038 per Robux, before fees and eligibility checks",
+          "required": true,
+          "default": "robux",
+          "data": [
+            {
+              "title": "Robux",
+              "value": "robux"
+            },
+            {
+              "title": "USD (DevEx Estimate)",
+              "value": "usd"
+            }
+          ]
+        },
+        {
+          "name": "earningsUserId",
+          "type": "textfield",
+          "title": "Roblox User ID",
+          "description": "The number in your Roblox profile URL; required only for Roblox Account earnings source",
+          "required": false
+        },
+        {
+          "name": "robloxSecurityCookie",
+          "type": "password",
+          "title": "Roblox Session Cookie",
+          "description": "Your .ROBLOSECURITY login cookie; required only for Roblox Account earnings source",
+          "required": false
+        },
+        {
+          "name": "hideZeroEarnings",
+          "type": "checkbox",
+          "title": "",
+          "label": "Hide when zero",
+          "description": "Keep refreshing while hidden and show the item when earnings change",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
       "name": "player-count",
       "title": "Player Count",
       "subtitle": "Roblox",
@@ -32,8 +135,8 @@
           "name": "hideZeroPlayers",
           "type": "checkbox",
           "title": "",
-          "label": "Hide when there are zero players",
-          "description": "Keep refreshing while hidden and show the item when players join",
+          "label": "Hide when zero",
+          "description": "Hide only when enabled and the player count is zero",
           "required": false,
           "default": false
         }
@@ -107,21 +210,21 @@
       "name": "universeId",
       "type": "textfield",
       "title": "Universe ID",
-      "description": "Required for Player Count, Studio, Game Page, Creator Dashboard, and Restart",
+      "description": "Required for Player Count, Open in Studio, Open Game Page, Open in Creator Dashboard, Restart Servers, and Robux Earned (Game)",
       "required": false
     },
     {
       "name": "placeId",
       "type": "textfield",
       "title": "Place ID",
-      "description": "Required for Launch and Studio",
+      "description": "Required for Launch Game and Open in Studio",
       "required": false
     },
     {
       "name": "apiKey",
       "type": "password",
       "title": "API Key",
-      "description": "Required for Restart, Roblox Open Cloud key with universe:write access",
+      "description": "Required for Restart Servers [universe:write] and Robux Earned (Game) [universe.analytics:read]",
       "required": false
     }
   ],
@@ -133,7 +236,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^2.7.3"
+    "@raycast/api": "^2.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

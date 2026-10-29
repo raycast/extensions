@@ -7,14 +7,13 @@ import { cleanupTempFile, createTempFile } from "../utils/files";
 import { findMmdcPath, findNodePath } from "../utils/executables";
 import { BrowserBootstrapRequiredError } from "../utils/browser-errors";
 import { resolveCompatibleBrowser } from "../utils/browser-manager";
-import { Preferences } from "../types";
 import { DiagramRequest, DiagramResult } from "./types";
 import { mapMmdcError } from "./mmdc-error";
 
 const execFilePromise = promisify(execFile);
 
 export interface MmdcRenderOptions {
-  preferences: Preferences;
+  preferences: Pick<Preferences, "theme" | "customMmdcPath">;
   timeoutMs: number;
   scale?: number;
   width?: number;
@@ -123,7 +122,8 @@ export async function renderWithMmdc(
       engine: "mmdc",
       format: request.format,
       outputPath: request.outputPath,
-      svgRasterStrategy: request.format === "svg" ? "macos" : undefined,
+      // Mermaid CLI SVG styles and text can be corrupted by native SVG rasterizers.
+      svgRasterStrategy: request.format === "svg" ? "browser" : undefined,
     };
   } catch (error: unknown) {
     if (error instanceof BrowserBootstrapRequiredError) {

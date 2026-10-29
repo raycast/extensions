@@ -1,6 +1,12 @@
 import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
-import { getInstagramStoryURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
+import {
+  getInstagramStoryURL,
+  handleDownload,
+  mediaExtensionAndId,
+  runExclusive,
+  showErrorToast,
+} from "./download-media";
 
 export default async function Command({
   arguments: { instagramUrl },
@@ -57,8 +63,8 @@ export default async function Command({
       return;
     }
 
-    const { ext, fileId } = mediaExtensionAndId(storyUrl);
-    await handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, ext);
+    const { fileId } = mediaExtensionAndId(storyUrl);
+    await runExclusive(() => handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, "Story"));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error occurred";
     await showErrorToast("Error", message);

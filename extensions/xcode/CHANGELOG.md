@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Improve Xcode project discovery] - 2026-10-29
+
+- Include Xcode projects in hidden git worktrees
+
 ## [Respect the Default Simulator Viewer] - 2026-10-10
 
 - Open simulators using the system's default `devices://` handler, with a fallback to Apple's Device Hub or Simulator.
