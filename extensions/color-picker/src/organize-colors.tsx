@@ -325,7 +325,10 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
         <Action
           icon={historyItem.isFavorite ? Icon.StarDisabled : Icon.Star}
           title={historyItem.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
           onAction={async () => {
             if (historyItem.isFavorite) {
               removeFromFavorites(historyItem.color);
@@ -339,8 +342,9 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
         {canMoveFavoriteUp && (
           <Action
             icon={Icon.ArrowUp}
-            title="Move Favorite up"
-            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Move Favorite Up"
+            shortcut={Keyboard.Shortcut.Common.MoveUp}
             onAction={async () => {
               moveFavorite(historyItem.color, "up");
               await showToast({ title: "Moved favorite up" });
@@ -351,7 +355,7 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
           <Action
             icon={Icon.ArrowDown}
             title="Move Favorite Down"
-            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            shortcut={Keyboard.Shortcut.Common.MoveDown}
             onAction={async () => {
               moveFavorite(historyItem.color, "down");
               await showToast({ title: "Moved favorite down" });
@@ -367,7 +371,7 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
           icon={Icon.Trash}
           title="Delete Color"
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={async () => {
             const confirmed = await confirmAlert({
               title: "Delete Color",
@@ -389,7 +393,7 @@ function Actions({ historyItem, sectionHistory, groups, selectMode, selection }:
           icon={Icon.Trash}
           title="Delete All Colors"
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.RemoveAll}
           onAction={async () => {
             const confirmed = await confirmAlert({
               title: "Delete All Colors",

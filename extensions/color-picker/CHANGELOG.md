@@ -1,5 +1,11 @@
 # Color Picker Changelog
 
+## [Close Raycast Preference and Windows Shortcuts] - {PR_MERGE_DATE}
+
+- Add `Close Raycast before picking color` preference
+- Add Windows keyboard shortcuts
+- Bump all dependencies to the latest
+
 ## [Color Groups] - 2026-10-08
 
 - Sort saved colors into named groups from Organize Colors, each shown as its own section

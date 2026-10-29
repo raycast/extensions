@@ -59,6 +59,7 @@ export default function Command() {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
+          // eslint-disable-next-line @raycast/no-reserved-shortcut, @raycast/no-ambiguous-platform-shortcut
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
         />

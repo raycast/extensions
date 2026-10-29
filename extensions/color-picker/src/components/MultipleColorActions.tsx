@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { HistoryItem, UseColorsSelectionObject } from "../lib/types";
 import { COPY_FORMATS, copySelectedColors, getColor, getFormattedColor } from "../lib/utils";
 
@@ -24,7 +24,10 @@ export default function MultipleColorActions<T extends HistoryItem | string>({
         <ActionPanel.Submenu
           title="Copy Selected Colors"
           icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "return" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+          }}
         >
           <Action.CopyToClipboard
             title="Copy to Clipboard"
@@ -44,14 +47,17 @@ export default function MultipleColorActions<T extends HistoryItem | string>({
       <Action
         icon={isSelected ? Icon.Checkmark : Icon.Circle}
         title={isSelected ? `Deselect Color ${formattedColor}` : `Select Color ${formattedColor}`}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
         onAction={() => toggleSelection(item)}
       />
       {!allSelected && (
         <Action
           icon={Icon.Checkmark}
           title="Select All Colors"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "a" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+          }}
           onAction={selectAll}
         />
       )}
@@ -59,7 +65,10 @@ export default function MultipleColorActions<T extends HistoryItem | string>({
         <Action
           icon={Icon.XMarkCircle}
           title="Clear Selection"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "z" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "z" },
+          }}
           onAction={clearSelection}
         />
       )}
