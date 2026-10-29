@@ -1,5 +1,18 @@
 # Mermaid to Image Changelog
 
+## [Ondine Store Runtime Loading Fix] - 2026-10-29
+
+### Fixed
+
+- Fixed Store-installed Ondine rendering failing with `Render.create needs at least one module.` while local development builds worked. Store-packaged CommonJS dependencies expose the compiler payload under `default.wasm` during native dynamic import, but the loader previously read only the ESM named export `wasm`
+- The loader now accepts both export shapes and validates the compiler payload before creating the runtime, reporting a clear initialization error when the payload is missing or invalid
+- Prevented this initialization failure from unnecessarily sending eligible opt-in Auto diagrams to `Compatible (mmdc)`; renderer priorities, preferences, and fallback behavior remain unchanged
+
+### Added
+
+- Regression tests for ESM and CommonJS compiler exports, export precedence, and missing or invalid payloads
+- A Store-style packaging regression test that bundles Ondine dependency subpaths as separate minified CommonJS files and renders real Traditional Chinese mindmap and flowchart SVGs through native dynamic import
+
 ## [Ondine Experimental Renderer & SVG Fidelity Fixes] - 2026-10-28
 
 ### Added
