@@ -137,16 +137,34 @@ async function nodeHttpFetch(input: FetchInput, init?: FetchInit): Promise<Respo
 
   const lib = parsed.protocol === "https:" ? https : http;
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const settle = (error?: Error, response?: Response) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response as Response);
+      }
+    };
+
     const req = lib.request(parsed, { method, headers: requestHeaders }, (res) => {
       const chunks: Buffer[] = [];
       res.on("data", (chunk: Buffer) => chunks.push(chunk));
+      res.on("error", (error) => {
+        req.destroy();
+        settle(error);
+      });
       res.on("end", () => {
         const responseHeaders = new Headers();
         const raw = res.rawHeaders;
         for (let i = 0; i < raw.length; i += 2) {
           responseHeaders.append(raw[i], raw[i + 1]);
         }
-        resolve(
+        settle(
+          undefined,
           new Response(Buffer.concat(chunks), {
             status: res.statusCode ?? 200,
             statusText: res.statusMessage ?? "",
@@ -155,7 +173,7 @@ async function nodeHttpFetch(input: FetchInput, init?: FetchInit): Promise<Respo
         );
       });
     });
-    req.on("error", reject);
+    req.on("error", settle);
     if (body && body.byteLength > 0) {
       req.write(body);
     }
