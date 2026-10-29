@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Carbon Forge MCP Server] - 2026-10-29
+
+- Add Carbon Forge to the official registry: source control and a shared record for people and agents, with lanes instead of clones and one all-or-nothing changeset per landing. Hosted Streamable HTTP server at https://carbonforge.dev/api/mcp that reads public workspaces with no sign-in and no API key (a bearer token from Carbon Forge's settings to write), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Leal MCP Server] - 2026-10-29
 
 - Add Leal to the official registry: design and launch Apple Wallet and Google Wallet loyalty stamp cards for shops, cafés and salons. Read a business's name, colours and logo from its website, preview card designs as real wallet passes, then save the card, rewards, a QR signup poster and the store location. Hosted Streamable HTTP server at https://mcp.getleal.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
