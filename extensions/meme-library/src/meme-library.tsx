@@ -194,7 +194,7 @@ function ClipboardHistory({ library, onSave }: { library: Library; onSave: () =>
   const { data = [], isLoading } = usePromise(async () => {
     const entries: HistoryEntry[] = [];
     for (let offset = 0; offset <= 5; offset++) {
-      const source = await readClipboardSource(offset).catch((): Source => ({ kind: "none" }));
+      const source = await readClipboardSource(offset, true).catch((): Source => ({ kind: "none" }));
       if (source.kind !== "none") entries.push({ offset, source, label: describe(source) });
     }
     return entries;

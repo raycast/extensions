@@ -49,12 +49,24 @@ async function readRawClipboardImage(): Promise<Buffer | undefined> {
   }
 }
 
-export async function readClipboardSource(offset = 0): Promise<Source> {
+// Set capture to read a raw image now. Clipboard history needs this, because the clipboard can
+// change before the user picks an entry.
+export async function readClipboardSource(offset = 0, capture = false): Promise<Source> {
   const content = await Clipboard.read({ offset });
-  const source = pickSource(content);
+  return withRawImage(pickSource(content), offset, capture);
+}
+
+async function withRawImage(source: Source, offset: number, capture: boolean): Promise<Source> {
+  if (source.kind === "url" && source.fallback) {
+    const fallback = await withRawImage(source.fallback, offset, capture);
+    return { ...source, fallback: fallback.kind === "none" ? undefined : fallback };
+  }
+  if (source.kind !== "raw-image") return source;
   // Older history entries are not on the system clipboard, so only offset 0 can use raw data.
-  if (source.kind === "raw-image" && offset > 0) return { kind: "none" };
-  return source;
+  if (offset > 0) return { kind: "none" };
+  if (!capture) return source;
+  const data = await readRawClipboardImage();
+  return data ? { kind: "raw-image", data } : { kind: "none" };
 }
 
 // Videos and animated WebP files become GIFs, so they loop in every app. If ffmpeg cannot read
@@ -68,14 +80,20 @@ export async function toGifIfNeeded(data: Buffer): Promise<Buffer> {
 export async function saveSource(library: Library, source: Source): Promise<{ meme: Meme; duplicate: boolean }> {
   switch (source.kind) {
     case "url": {
-      const url = isPostUrl(source.url) ? await findPostVideo(source.url) : fullGiphyUrl(source.url);
-      const { data, name } = await download(url);
-      return library.add(await toGifIfNeeded(data), name);
+      try {
+        const url = isPostUrl(source.url) ? await findPostVideo(source.url) : fullGiphyUrl(source.url);
+        const { data, name } = await download(url);
+        return library.add(await toGifIfNeeded(data), name);
+      } catch (error) {
+        // Some images need browser cookies or are copied offline. Their pixels are still on the clipboard.
+        if (!source.fallback) throw error;
+        return saveSource(library, source.fallback).catch(() => Promise.reject(error));
+      }
     }
     case "file":
       return library.add(await toGifIfNeeded(await readFile(source.path)), basename(source.path));
     case "raw-image": {
-      const data = await readRawClipboardImage();
+      const data = source.data ?? (await readRawClipboardImage());
       if (!data) throw new Error("Copy an image, a GIF, or an image URL first");
       return library.add(data);
     }

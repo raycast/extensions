@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -21,7 +21,17 @@ test("pickSource prefers the <img> URL, so a browser 'Copy Image' keeps the GIF 
     file: "/var/folders/x/clipboard.png",
     html: `<meta charset="utf-8"><img src="https://media.example.com/cat.gif?a=1&amp;b=2" alt="cat">`,
   };
-  assert.deepEqual(pickSource(copied), { kind: "url", url: "https://media.example.com/cat.gif?a=1&b=2" });
+  // If the download fails (cookies, offline), the copied file or bitmap is saved instead.
+  assert.deepEqual(pickSource(copied), {
+    kind: "url",
+    url: "https://media.example.com/cat.gif?a=1&b=2",
+    fallback: { kind: "file", path: "/var/folders/x/clipboard.png" },
+  });
+  assert.deepEqual(pickSource({ html: `<img src="https://media.example.com/cat.gif">` }), {
+    kind: "url",
+    url: "https://media.example.com/cat.gif",
+    fallback: { kind: "raw-image" },
+  });
   assert.deepEqual(pickSource({ text: "", file: "/Users/me/Downloads/dance.gif" }), {
     kind: "file",
     path: "/Users/me/Downloads/dance.gif",
@@ -32,6 +42,8 @@ test("pickSource prefers the <img> URL, so a browser 'Copy Image' keeps the GIF 
   });
   // A copied PDF or a sentence is not a meme; fall back to the raw clipboard bitmap.
   assert.deepEqual(pickSource({ text: "report.pdf", file: "/Users/me/report.pdf" }), { kind: "raw-image" });
+  // TIFF and BMP cannot be saved, so a copied one uses the bitmap that macOS also puts on the clipboard.
+  assert.deepEqual(pickSource({ file: "/Users/me/scan.tiff" }), { kind: "raw-image" });
   assert.deepEqual(pickSource({ text: "lol look at this https://x.com/a.gif" }), { kind: "raw-image" });
 });
 
@@ -53,6 +65,15 @@ test("Library saves downloads by content type, skips duplicates, and lists recen
 
     const again = await library.add(GIF);
     assert.equal(again.duplicate, true);
+
+    // A meme deleted in Finder comes back on the next save, with its old title and tags.
+    await library.update(first.meme, { tags: ["back"] });
+    await rm(first.meme.path);
+    const restored = await library.add(GIF);
+    assert.equal(restored.duplicate, false);
+    assert.deepEqual(await readFile(first.meme.path), GIF);
+    assert.deepEqual(restored.meme.tags, ["back"]);
+    await library.update(first.meme, { tags: [] });
 
     await new Promise((resolve) => setTimeout(resolve, 5));
     const png = await library.add(PNG, "thumbs-up.png");
@@ -99,6 +120,12 @@ test("Library keeps every entry when saves run at the same time, and backs up a 
   assert.equal(await readFile(join(library.folder, backup), "utf8"), '{"abc.gif": {"title": "trunc');
   // The grid still lists every image file after the index is lost.
   assert.equal((await library.list()).length, 7);
+
+  // A hand-edited entry with missing or wrong fields is repaired, not a crash in the grid.
+  const [one] = results;
+  await writeFile(join(library.folder, ".meme-library.json"), JSON.stringify({ [one.meme.file]: { title: "Cat", tags: "x" } }));
+  const repaired = (await library.list()).find((meme) => meme.file === one.meme.file);
+  assert.deepEqual([repaired?.title, repaired?.tags, repaired?.useCount], ["Cat", [], 0]);
 });
 
 test("download stops a slow server after the time limit", async () => {

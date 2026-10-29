@@ -22,8 +22,13 @@ export type Meme = {
 type Entry = Omit<Meme, "file" | "path" | "thumbnail">;
 type Index = Record<string, Entry>;
 
+// A browser "Copy Image" gives a URL and also a file or bitmap. The URL keeps GIFs animated; the
+// fallback is used when the download fails. A raw image may carry bytes read earlier from the clipboard.
 export type Source =
-  { kind: "url"; url: string } | { kind: "file"; path: string } | { kind: "raw-image" } | { kind: "none" };
+  | { kind: "url"; url: string; fallback?: Source }
+  | { kind: "file"; path: string }
+  | { kind: "raw-image"; data?: Buffer }
+  | { kind: "none" };
 
 const INDEX_FILE = ".meme-library.json";
 const LOCK_FOLDER = ".meme-library.lock";
@@ -38,7 +43,7 @@ const EXTENSIONS: Record<string, string> = {
   webp: ".webp",
   heic: ".heic",
 };
-const IMAGE_EXTENSIONS = new Set([".gif", ".png", ".jpg", ".jpeg", ".webp", ".heic", ".tiff", ".bmp"]);
+const IMAGE_EXTENSIONS = new Set([".gif", ".png", ".jpg", ".jpeg", ".webp", ".heic"]);
 
 export function resolveFolder(folder: string | undefined): string {
   const value = folder?.trim() || "~/Memes";
@@ -53,11 +58,12 @@ export function isImagePath(path: string): boolean {
 // animated GIF after a browser "Copy Image". The bitmap on the clipboard is a static frame.
 export function pickSource(content: { text?: string; file?: string; html?: string }): Source {
   const src = content.html?.match(/<img\b[^>]*?\bsrc\s*=\s*(["'])(.*?)\1/i)?.[2];
-  if (src && /^(https?:|data:image\/)/i.test(src)) return { kind: "url", url: decodeEntities(src) };
-  if (content.file) {
-    const path = content.file.startsWith("file://") ? decodeURIComponent(new URL(content.file).pathname) : content.file;
-    if (isImagePath(path)) return { kind: "file", path };
+  const path = content.file?.startsWith("file://") ? decodeURIComponent(new URL(content.file).pathname) : content.file;
+  const file: Source | undefined = path && isImagePath(path) ? { kind: "file", path } : undefined;
+  if (src && /^(https?:|data:image\/)/i.test(src)) {
+    return { kind: "url", url: decodeEntities(src), fallback: file ?? { kind: "raw-image" } };
   }
+  if (file) return file;
   const text = content.text?.trim();
   if (text && /^(https?:\/\/\S+|data:image\/\S+)$/i.test(text)) return { kind: "url", url: text };
   return { kind: "raw-image" };
@@ -191,6 +197,24 @@ export async function videoToGif(video: Buffer, extension = ".mp4"): Promise<Buf
   }
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// A hand-edited entry can miss fields or have wrong types. Keep the valid fields and fill in the rest,
+// so one bad entry cannot break the grid. The next index write saves the repaired entry.
+function toEntry(file: string, value: unknown): Entry {
+  const entry = isObject(value) ? value : {};
+  const number = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
+  return {
+    title: typeof entry.title === "string" ? entry.title : basename(file, extname(file)),
+    tags: Array.isArray(entry.tags) ? entry.tags.filter((tag): tag is string => typeof tag === "string") : [],
+    addedAt: number(entry.addedAt) ?? 0,
+    lastUsedAt: number(entry.lastUsedAt),
+    useCount: number(entry.useCount) ?? 0,
+  };
+}
+
 // Index changes in this process run one at a time, so two saves cannot overwrite each other's entries.
 const queues = new Map<string, Promise<unknown>>();
 
@@ -211,7 +235,9 @@ export class Library {
     }
     try {
       const index: unknown = JSON.parse(text);
-      if (index && typeof index === "object" && !Array.isArray(index)) return index as Index;
+      if (isObject(index)) {
+        return Object.fromEntries(Object.entries(index).map(([file, entry]) => [file, toEntry(file, entry)]));
+      }
     } catch {
       // Handled below.
     }
@@ -321,10 +347,20 @@ export class Library {
     const path = join(this.folder, file);
     return this.changeIndex(async (index) => {
       const existing = index[file];
-      if (existing) return { meme: { ...existing, file, path }, duplicate: true };
+      const fileExists = await stat(path).then(
+        () => true,
+        () => false,
+      );
+      if (existing && fileExists) return { meme: { ...existing, file, path }, duplicate: true };
+      // The file may have been deleted in Finder. Write it again and keep its old title and tags.
       await writeFile(path, data);
       const cleanTitle = title ? basename(title, extname(title)).replace(/[-_]+/g, " ").trim() : "";
-      const entry: Entry = { title: cleanTitle || "Untitled meme", tags: [], addedAt: Date.now(), useCount: 0 };
+      const entry: Entry = existing ?? {
+        title: cleanTitle || "Untitled meme",
+        tags: [],
+        addedAt: Date.now(),
+        useCount: 0,
+      };
       index[file] = entry;
       await this.writeIndex(index);
       return { meme: { ...entry, file, path, thumbnail: await this.makeThumbnail(file) }, duplicate: false };
