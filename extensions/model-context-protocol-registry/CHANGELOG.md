@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Paper Plane Post description] - 2026-10-29
+
+- Align the Paper Plane Post description: "Create and send an AI-illustrated postcard anywhere in the world". Keep the website review and payment instructions in the README.
+
 ## [Add Carbon Forge MCP Server] - 2026-10-29
 
 - Add Carbon Forge to the official registry: source control and a shared record for people and agents, with lanes instead of clones and one all-or-nothing changeset per landing. Hosted Streamable HTTP server at https://carbonforge.dev/api/mcp that reads public workspaces with no sign-in and no API key (a bearer token from Carbon Forge's settings to write), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

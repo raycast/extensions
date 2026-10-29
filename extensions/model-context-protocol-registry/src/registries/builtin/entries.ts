@@ -22,8 +22,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "paper-plane-post",
     title: "Paper Plane Post",
-    description:
-      "Turn a photo into a printed postcard. Create an unpaid draft with an optional note and recipient address, then review, finish, and pay for printing and mailing on the website. Tool calls never charge money or mail a card. Hosted Streamable HTTP server with no account or API key; direct HTTP in Raycast and an mcp-remote fallback for other clients.",
+    description: "Create and send an AI-illustrated postcard anywhere in the world",
     icon: "https://paperplanepost.com/icon.png",
     homepage: "https://paperplanepost.com/for/agents",
     configuration: {
