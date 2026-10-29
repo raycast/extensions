@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Helium Support & Meet Link Detection Fix] - {PR_MERGE_DATE}
+## [Helium Support & Meet Link Detection Fix] - 2026-10-29
 
 - Add Helium as a supported browser. Helium is Chromium-based, so meeting links are read from its tabs the same way as Chrome, Brave, and Edge. Previously, Helium as the default browser failed with "isn't a supported browser".
 - Fix meeting links never being copied once Meet redirects `/new` through `/meet/new` to `/meet/<code>`. Only `/<code>` was accepted, so detection timed out on a meeting that had already opened. Both forms are now accepted, and the link is still copied as `https://meet.google.com/<code>`.
