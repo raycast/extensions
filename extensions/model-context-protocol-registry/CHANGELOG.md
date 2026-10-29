@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add AgenticWebScore MCP Server] - {PR_MERGE_DATE}
+## [Add AgenticWebScore MCP Server] - 2026-10-29
 
 - Add AgenticWebScore to the official registry: scan a public website for AI agent readiness with 60 checks, a score, and the evidence for each, read stored records and list the rubric. 4 tools. Hosted Streamable HTTP server at https://agenticwebscore.com/mcp with no sign-up and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
 
