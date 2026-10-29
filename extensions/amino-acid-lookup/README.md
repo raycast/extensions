@@ -32,12 +32,3 @@ Raycast doesn't let extensions put results inline in the root search, but you ca
 
 1. **Alias or hotkey** — Raycast Settings → Extensions → Amino Acid Lookup → Look Up Amino Acids → set an alias like `aa`. Then type `aa`, Tab, `Trp`.
 2. **Fallback command** — In root search, type `Trp`, scroll to the bottom, ⌘K on "Look Up Amino Acids" → *Add to Fallback Commands*. Anything Raycast doesn't recognize can then be sent straight into the extension with the text pre-filled.
-
-## Development
-
-```bash
-npm install
-npm run dev     # opens it in Raycast with hot reload
-npm run lint
-npm test        # checks the lookup logic
-```
