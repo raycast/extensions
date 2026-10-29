@@ -1350,6 +1350,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posty",
+    title: "Posty",
+    description:
+      "Write, schedule and publish posts to 20 social platforms (Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Tumblr, WordPress, Telegram, Discord, Slack and more) with a content calendar and full-quality photo and video uploads. Preview a post before it is saved, list and delete scheduled posts, and switch workspaces. 21 tools. Hosted remote Streamable HTTP server at https://api.posty.hu/mcp-oauth with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Posty account (free trial at posty.hu).",
+    icon: "https://raw.githubusercontent.com/norbertlevente/posty-agent/main/plugins/posty-mcp/.claude-plugin/icon.png",
+    homepage: "https://posty.hu/en/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.posty.hu/mcp-oauth"],
+    },
+    remoteUrl: "https://api.posty.hu/mcp-oauth",
+  },
+  {
     name: "posy",
     title: "Posy",
     description:
