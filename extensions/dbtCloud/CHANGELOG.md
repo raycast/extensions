@@ -1,6 +1,6 @@
 # dbtCloud Changelog
 
-## [Catalog, Lineage, and AI Tools] - {PR_MERGE_DATE}
+## [Catalog, Lineage, and AI Tools] - 2026-10-29
 
 - Add commands to browse models, sources, and lineage via the dbt Cloud Discovery API
 - Add commands to browse projects, jobs, and environments, trigger jobs, and view job performance
