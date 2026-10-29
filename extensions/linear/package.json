@@ -43,7 +43,7 @@
       "required": false,
       "data": [
         {
-          "title": "Show Details (Issues, Documents, Projects, Views)",
+          "title": "Show Details",
           "value": "showDetails"
         },
         {
