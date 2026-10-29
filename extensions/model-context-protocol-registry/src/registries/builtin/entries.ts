@@ -3217,17 +3217,9 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://tools.skaidigital.com/brreg/mcp",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://tools.skaidigital.com/brreg/mcp
-
-
-
-
-
-
-
-
-
-
+      args: ["-y", "mcp-remote", "https://tools.skaidigital.com/brreg/mcp"],
+    },
+  },
   {
     name: "optionsahoy",
     title: "OptionsAhoy",
