@@ -72,13 +72,16 @@ export default function AnalyticsCommand() {
     ]),
   ].sort();
 
-  const groups: Record<string, Subscription[]> = {};
+  // Map instead of a plain object so custom category/list names like "constructor"
+  // or "toString" can't resolve to inherited Object.prototype members
+  const groups = new Map<string, Subscription[]>();
   for (const sub of active) {
     const key = groupBy === "category" ? sub.category : groupBy === "cycle" ? sub.billingCycle : sub.list;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(sub);
+    const subs = groups.get(key);
+    if (subs) subs.push(sub);
+    else groups.set(key, [sub]);
   }
-  const groupTotals = Object.entries(groups)
+  const groupTotals = [...groups.entries()]
     .map(([key, subs]) => ({
       key,
       total: subs.reduce((sum, s) => sum + (toMonthlyPrimary(s) ?? 0), 0),

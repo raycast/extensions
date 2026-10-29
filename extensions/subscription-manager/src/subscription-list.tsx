@@ -10,6 +10,15 @@ import { CATEGORIES, formatCurrency, formatCycle, getSubscriptionIcon } from "./
 
 type SortKey = "name" | "amount" | "billingDay" | "category";
 
+const ALL_CATEGORIES_VALUE = "__all__";
+const CATEGORY_VALUE_PREFIX = "cat:";
+
+// Dropdown values are either the ALL_CATEGORIES_VALUE sentinel or a prefixed
+// category name, so a custom category literally named "all" filters correctly
+function categoryFromDropdownValue(value: string): string | undefined {
+  return value.startsWith(CATEGORY_VALUE_PREFIX) ? value.slice(CATEGORY_VALUE_PREFIX.length) : undefined;
+}
+
 function ExportSubmenu({ subscriptions }: { subscriptions: Subscription[] }) {
   return (
     <ActionPanel.Submenu
@@ -32,8 +41,9 @@ const STATUS_ICON = {
 
 export function SubscriptionList() {
   const { subscriptions, deleteSubscription, updateSubscription, isLoading } = useSubscriptions();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [categoryValue, setCategoryValue] = useState(ALL_CATEGORIES_VALUE);
   const [sortKey, setSortKey] = useState<SortKey>("billingDay");
+  const selectedCategory = categoryFromDropdownValue(categoryValue);
   const categories = [
     ...CATEGORIES,
     ...[...new Set(subscriptions.map((s) => s.category))]
@@ -42,7 +52,7 @@ export function SubscriptionList() {
   ];
 
   const filtered = subscriptions
-    .filter((s) => selectedCategory === "all" || s.category === selectedCategory)
+    .filter((s) => !selectedCategory || s.category === selectedCategory)
     .sort((a, b) => {
       switch (sortKey) {
         case "name":
@@ -143,10 +153,10 @@ export function SubscriptionList() {
       isLoading={isLoading}
       searchBarPlaceholder="Search subscriptions…"
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Category" onChange={setSelectedCategory}>
-          <List.Dropdown.Item value="all" title="All Categories" />
+        <List.Dropdown tooltip="Filter by Category" onChange={setCategoryValue}>
+          <List.Dropdown.Item value={ALL_CATEGORIES_VALUE} title="All Categories" />
           {categories.map((cat) => (
-            <List.Dropdown.Item key={cat} value={cat} title={cat} />
+            <List.Dropdown.Item key={cat} value={`${CATEGORY_VALUE_PREFIX}${cat}`} title={cat} />
           ))}
         </List.Dropdown>
       }
