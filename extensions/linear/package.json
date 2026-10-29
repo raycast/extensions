@@ -35,6 +35,24 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Select the action that runs when pressing Enter on an issue, project, document, or view in a list.",
+      "default": "showDetails",
+      "required": false,
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "showDetails"
+        },
+        {
+          "title": "Open in Linear",
+          "value": "openInLinear"
+        }
+      ]
+    },
+    {
       "name": "issueCustomCopyAction",
       "type": "textfield",
       "title": "Issue Custom Copy Action",
