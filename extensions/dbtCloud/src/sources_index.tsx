@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { ContextMetadata, dateAccessory, freshnessColor, useExplorerEnvironment } from "./display";
+import { ContextMetadata, dateAccessory, freshnessColor, plural, truncate, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import { fetchSources, buildDocsUrl, getResourceTypeIcon, getFreshnessStatus, formatRelativeTime } from "./api";
@@ -81,7 +81,10 @@ export function SourceDetail({
             </Detail.Metadata.TagList>
           )}
           {source.children && (
-            <Detail.Metadata.Label title="Downstream" text={`${source.children.length} dependencies`} />
+            <Detail.Metadata.Label
+              title="Downstream"
+              text={plural(source.children.length, "dependency", "dependencies")}
+            />
           )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Database" text={source.database || "N/A"} />
@@ -109,9 +112,9 @@ export function SourceDetail({
           </ActionPanel.Section>
           <ActionPanel.Section title="Lineage">
             <Action
-              title="Open dbt Cloud Lineage"
+              title="Open Lineage Diagram"
               icon={Icon.Network}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcuts.lineageDiagram}
               onAction={async () => {
                 await openEnvironmentLineageDiagram(
                   environmentId,
@@ -218,7 +221,7 @@ export function SourcesList({
                   key={source.uniqueId}
                   icon="🗄️"
                   title={source.name}
-                  subtitle={source.description?.slice(0, 50) || ""}
+                  subtitle={truncate(source.description, 60)}
                   accessories={[
                     source.children && source.children.length > 0
                       ? { text: String(source.children.length), icon: Icon.ArrowDown, tooltip: "Downstream" }
@@ -242,9 +245,9 @@ export function SourcesList({
                         target={<SourceDetail source={source} environmentId={environmentId} projectId={projectId} />}
                       />
                       <Action
-                        title="Open dbt Cloud Lineage"
+                        title="Open Lineage Diagram"
                         icon={Icon.Network}
-                        shortcut={{ modifiers: ["cmd"], key: "d" }}
+                        shortcut={Shortcuts.lineageDiagram}
                         onAction={async () => {
                           await openEnvironmentLineageDiagram(
                             environmentId,
@@ -339,11 +342,20 @@ function SourcesEnvironmentListItem({ env, projectName }: { env: EnvironmentWith
 export default function SourcesIndex() {
   const [environments, setEnvironments] = useState<EnvironmentWithProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [deploymentFilter, setDeploymentFilter] = useState<string>("all");
 
   useEffect(() => {
     async function loadEnvironments() {
-      const result = await fetchProductionEnvironments();
+      let result: EnvironmentWithProject[];
+      try {
+        result = await fetchProductionEnvironments(true);
+      } catch {
+        // fetchFromApi already showed the real error (bad token, missing prefix, ...)
+        setLoadFailed(true);
+        setIsLoading(false);
+        return;
+      }
       setEnvironments(result);
       setIsLoading(false);
 
@@ -396,15 +408,15 @@ export default function SourcesIndex() {
         >
           <List.Dropdown.Item title="All Environments" value="all" />
           <List.Dropdown.Section title="Deployment Type">
-            <List.Dropdown.Item title="✅ Production" value="production" />
-            <List.Dropdown.Item title="🚧 Staging" value="staging" />
+            <List.Dropdown.Item title={`${DEPLOYMENT_TYPE_INFO.production.icon} Production`} value="production" />
+            <List.Dropdown.Item title={`${DEPLOYMENT_TYPE_INFO.staging.icon} Staging`} value="staging" />
             <List.Dropdown.Item title="🔧 Development" value="development" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
       {projects.map(({ projectId, projectName, environments: projectEnvs }) => (
-        <List.Section key={projectId} title={projectName} subtitle={`${projectEnvs.length} environment(s)`}>
+        <List.Section key={projectId} title={projectName} subtitle={plural(projectEnvs.length, "environment")}>
           {projectEnvs.map((env) => (
             <SourcesEnvironmentListItem key={env.id} env={env} projectName={projectName} />
           ))}
@@ -413,8 +425,18 @@ export default function SourcesIndex() {
       {!isLoading && filteredEnvironments.length === 0 && (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title={deploymentFilter === "all" ? "No deployment environments" : `No ${deploymentFilter} environments`}
-          description="Create a deployment environment and run a job to use the Sources feature"
+          title={
+            loadFailed
+              ? "Could not load environments"
+              : deploymentFilter === "all"
+                ? "No deployment environments"
+                : `No ${deploymentFilter} environments`
+          }
+          description={
+            loadFailed
+              ? "See the error message, then check the extension preferences"
+              : "Create a deployment environment and run a job to use the Sources feature"
+          }
         />
       )}
     </List>

@@ -1,12 +1,26 @@
 import { Color, Detail, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { ExplorerEnvironment, formatRelativeTime } from "./api";
+import { ExplorerEnvironment, fetchAdapterType, formatRelativeTime } from "./api";
 import { DEPLOYMENT_TYPE_INFO, inferDeploymentType } from "./environment_utils";
 import { returnEnvironments } from "./fetch_environments";
+import { returnJobs } from "./fetch_jobs";
 import { returnProjects } from "./fetch_projects";
 import { EnvironmentModel } from "./types";
 
 // Shared presentation so status, context and dates look the same in every list and sidebar
+
+// "1 job", "2 jobs"
+export const plural = (count: number, singular: string, pluralForm = `${singular}s`): string =>
+  `${count} ${count === 1 ? singular : pluralForm}`;
+
+// Shorten at a word boundary and mark the cut with an ellipsis
+export const truncate = (text: string | null | undefined, max: number): string => {
+  if (!text) return "";
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:]+$/, "")}…`;
+};
 
 interface StatusStyle {
   label: string;
@@ -113,6 +127,15 @@ export function useAccountNames() {
   };
 }
 
+// Job names for one project, fetched only by views that show them
+const loadJobNames = async (projectId: number): Promise<Record<number, string>> =>
+  Object.fromEntries((await returnJobs(projectId)).map((job) => [job.id, job.name]));
+
+export function useJobNames(projectId: number) {
+  const { data } = useCachedPromise(loadJobNames, [projectId], { keepPreviousData: true, execute: projectId > 0 });
+  return (id: number) => data?.[id] ?? `Job #${id}`;
+}
+
 // Sidebar block placing a record in the hierarchy: Project › Environment › Job
 export function ContextMetadata({
   projectId,
@@ -149,4 +172,10 @@ export function useExplorerEnvironment() {
   const names = useAccountNames();
   return (environmentId: number): ExplorerEnvironment =>
     names.environment(environmentId)?.deployment_type === "staging" ? "staging" : "production";
+}
+
+// Warehouse adapter of an environment ("bigquery", "snowflake", ...); undefined while loading
+export function useAdapterType(environmentId: number): string | null | undefined {
+  const { data } = useCachedPromise(fetchAdapterType, [environmentId]);
+  return data;
 }

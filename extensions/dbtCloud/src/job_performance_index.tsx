@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
-import { ContextMetadata, successRateColor } from "./display";
+import { ContextMetadata, environmentTag, plural, successRateColor } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -115,7 +115,7 @@ ${chart ? `![Build duration in minutes](${chart})\n\n🟢 success · 🔴 error 
 ${truncated ? `\n> Only the newest ${MAX_RUNS} runs were loaded, so the start of this window is incomplete.\n` : ""}
 ## Runs
 
-| Status | Run | Duration | Branch | Trigger | Finished |
+| Status | Run | Run Time | Branch | Trigger | Finished |
 |--------|-----|----------|--------|---------|----------|
 ${runRows || "| — | — | — | — | — | — |"}
 `;
@@ -243,9 +243,8 @@ export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
     >
       <List.EmptyView title="No active jobs found" icon="icon_64p.png" />
       {sections.map((section) => (
-        <List.Section key={section.title} title={section.title} subtitle={`${section.jobs.length} jobs`}>
+        <List.Section key={section.title} title={section.title} subtitle={plural(section.jobs.length, "job")}>
           {section.jobs.map(({ job, projectName, environment }) => {
-            const deployment = environment ? DEPLOYMENT_TYPE_INFO[inferDeploymentType(environment)] : undefined;
             return (
               <List.Item
                 key={job.id}
@@ -253,7 +252,9 @@ export function JobPerformanceList({ projectId }: { projectId?: number } = {}) {
                 keywords={[projectName, environment?.name ?? ""]}
                 icon={{ source: Icon.BarChart, tintColor: Color.Blue }}
                 accessories={[
-                  ...(deployment ? [{ tag: deployment.displayName }] : []),
+                  ...(environment
+                    ? [{ tag: { value: environmentTag(environment).value, color: environmentTag(environment).color } }]
+                    : []),
                   { text: job.triggers?.schedule ? "Scheduled" : "Not scheduled", icon: Icon.Calendar },
                 ]}
                 actions={

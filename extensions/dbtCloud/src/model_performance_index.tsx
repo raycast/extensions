@@ -1,5 +1,13 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { ContextMetadata, dateAccessory, successRateColor, useExplorerEnvironment } from "./display";
+import {
+  ContextMetadata,
+  dateAccessory,
+  modelStatus,
+  plural,
+  successRateColor,
+  useExplorerEnvironment,
+  useJobNames,
+} from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
@@ -44,6 +52,7 @@ export function ModelPerformanceDetail({
   model: ModelPerformanceNode;
   environment: CatalogEnvironment;
 }) {
+  const jobName = useJobNames(environment.projectId);
   const explorerEnv = useExplorerEnvironment();
   const { data: runs = [], isLoading } = useCachedPromise(fetchModelHistoricalRuns, [
     environment.id,
@@ -74,9 +83,9 @@ export function ModelPerformanceDetail({
     .slice(0, 15)
     .map((run) => {
       const style = styleFor(run.status);
-      return `| ${style?.emoji ?? "❓"} ${run.status ?? "unknown"} | [#${run.runId}](${runUrl(run.runId)}) | ${formatSeconds(
+      return `| ${style?.emoji ?? "❓"} ${modelStatus(run.status)?.label ?? run.status ?? "Unknown"} | [#${run.runId}](${runUrl(run.runId)}) | ${formatSeconds(
         run.executionTime,
-      )} | ${run.jobId ?? "—"} | ${formatRelativeTime(run.runGeneratedAt)} |`;
+      )} | ${run.jobId ? jobName(run.jobId) : "—"} | ${formatRelativeTime(run.runGeneratedAt)} |`;
     })
     .join("\n");
 
@@ -215,7 +224,10 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
     >
       <List.EmptyView title="No models found" description="This environment has no models in the catalog yet" />
       {environment && (
-        <List.Section title="Slowest models" subtitle={`${models.length} models · ${describeEnvironment(environment)}`}>
+        <List.Section
+          title="Slowest models"
+          subtitle={`${plural(models.length, "model")} · ${describeEnvironment(environment)}`}
+        >
           {models.map((model) => {
             const info = model.executionInfo;
             const style = styleFor(info?.lastRunStatus);
@@ -227,7 +239,16 @@ export function ModelPerformanceList({ environment: fixed }: { environment?: Cat
                 keywords={model.tags ?? []}
                 icon={{ source: Icon.Clock, tintColor: style?.color ?? Color.SecondaryText }}
                 accessories={[
-                  ...(info?.lastRunStatus ? [{ tag: { value: info.lastRunStatus, color: style?.color } }] : []),
+                  ...(info?.lastRunStatus
+                    ? [
+                        {
+                          tag: {
+                            value: modelStatus(info.lastRunStatus)?.label ?? info.lastRunStatus,
+                            color: style?.color,
+                          },
+                        },
+                      ]
+                    : []),
                   { text: formatSeconds(info?.executionTime), tooltip: "Last execution time" },
                   dateAccessory(info?.lastRunGeneratedAt, "Last run"),
                 ]}

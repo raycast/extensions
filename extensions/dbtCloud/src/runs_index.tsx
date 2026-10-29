@@ -1,5 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
-import { ContextMetadata, dateAccessory, DateLabel, runStatus } from "./display";
+import { ContextMetadata, dateAccessory, DateLabel, plural, runStatus, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnRuns } from "./fetch_runs";
@@ -8,23 +8,6 @@ import { buildDbtCloudUrl, formatRelativeTime, formatDuration, cancelRun } from 
 import { RunGoTo } from "./navigation";
 
 type StatusFilter = "all" | "success" | "error" | "running" | "queued" | "cancelled";
-
-const getStatusIcon = (status: number): { source: Icon; tintColor: Color } => {
-  switch (status) {
-    case 10:
-      return { source: Icon.Checkmark, tintColor: Color.Green };
-    case 20:
-      return { source: Icon.XmarkCircle, tintColor: Color.Red };
-    case 30:
-      return { source: Icon.XmarkCircle, tintColor: Color.Orange };
-    case 1:
-      return { source: Icon.Clock, tintColor: Color.Blue };
-    case 3:
-      return { source: Icon.ArrowClockwise, tintColor: Color.Purple };
-    default:
-      return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-  }
-};
 
 const getStatusEmoji = (statusHumanized: string): string => {
   switch (statusHumanized?.toLowerCase()) {
@@ -58,6 +41,8 @@ const matchesStatusFilter = (run: RunModel, filter: StatusFilter): boolean => {
 
 // Run Detail Component
 export function RunDetail({ run }: { run: RunModel }) {
+  const names = useAccountNames();
+  const inProgress = [1, 2, 3].includes(run.status);
   const runUrl = run.href || buildDbtCloudUrl(`/projects/${run.project_id}/runs/${run.id}`);
   const jobUrl = buildDbtCloudUrl(`/projects/${run.project_id}/jobs/${run.job_definition_id}`);
 
@@ -76,8 +61,8 @@ ${run.status_message ? `> ${run.status_message}` : ""}
 |----------|-------|
 | **Run ID** | ${run.id} |
 | **Job** | ${run.job?.name || "N/A"} |
-| **Project ID** | ${run.project_id} |
-| **Environment ID** | ${run.environment_id} |
+| **Project** | ${names.projectName(run.project_id)} |
+| **Environment** | ${names.environmentName(run.environment_id)} |
 | **dbt Version** | ${run.dbt_version || "N/A"} |
 | **Git Branch** | \`${run.git_branch || "N/A"}\` |
 | **Git SHA** | \`${run.git_sha?.substring(0, 7) || "N/A"}\` |
@@ -88,15 +73,19 @@ ${run.status_message ? `> ${run.status_message}` : ""}
 |--------|-------|
 | **Created** | ${formatRelativeTime(run.created_at)} |
 | **Started** | ${formatRelativeTime(run.started_at)} |
-| **Finished** | ${formatRelativeTime(run.finished_at)} |
+| **Finished** | ${inProgress ? "In progress" : formatRelativeTime(run.finished_at)} |
 | **Duration** | ${run.duration_humanized || formatDuration(run.started_at, run.finished_at)} |
 | **Queue Time** | ${run.queued_duration_humanized || "N/A"} |
 
-## Artifacts
+${
+  inProgress
+    ? ""
+    : `## Artifacts
 
 ${run.artifacts_saved ? "✅ Artifacts saved" : "❌ No artifacts"}
 ${run.has_docs_generated ? "📚 Documentation generated" : ""}
-${run.has_sources_generated ? "📊 Sources generated" : ""}
+${run.has_sources_generated ? "📊 Sources generated" : ""}`
+}
 
 ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
 `;
@@ -126,18 +115,26 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
           )}
           {run.run_duration_humanized && <Detail.Metadata.Label title="Ran For" text={run.run_duration_humanized} />}
           <DateLabel title="Started" date={run.started_at} />
-          <DateLabel title="Finished" date={run.finished_at} />
+          {inProgress ? (
+            <Detail.Metadata.Label title="Finished" text="In progress" />
+          ) : (
+            <DateLabel title="Finished" date={run.finished_at} />
+          )}
           <Detail.Metadata.Separator />
           {run.trigger?.cause && <Detail.Metadata.Label title="Trigger" text={run.trigger.cause} />}
           <Detail.Metadata.Label title="Git Branch" text={run.git_branch || "default"} icon={Icon.Code} />
           {run.git_sha && <Detail.Metadata.Label title="Git SHA" text={run.git_sha.slice(0, 7)} />}
           <Detail.Metadata.Label title="dbt Version" text={run.dbt_version || "N/A"} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Features">
-            {run.artifacts_saved && <Detail.Metadata.TagList.Item text="Artifacts" color={Color.Green} />}
-            {run.has_docs_generated && <Detail.Metadata.TagList.Item text="Docs" color={Color.Blue} />}
-            {run.has_sources_generated && <Detail.Metadata.TagList.Item text="Sources" color={Color.Purple} />}
-          </Detail.Metadata.TagList>
+          {(run.artifacts_saved || run.has_docs_generated || run.has_sources_generated) && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.TagList title="Features">
+                {run.artifacts_saved && <Detail.Metadata.TagList.Item text="Artifacts" color={Color.Green} />}
+                {run.has_docs_generated && <Detail.Metadata.TagList.Item text="Docs" color={Color.Blue} />}
+                {run.has_sources_generated && <Detail.Metadata.TagList.Item text="Sources" color={Color.Purple} />}
+              </Detail.Metadata.TagList>
+            </>
+          )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Run ID" text={run.id.toString()} />
           <Detail.Metadata.Separator />
@@ -186,14 +183,14 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
     <List.Item
       id={run.id.toString()}
       title={run.job?.name || `Run #${run.id}`}
-      subtitle={`${getStatusEmoji(run.status_humanized)} ${run.status_humanized}`}
-      icon={getStatusIcon(run.status)}
+      subtitle={`#${run.id}`}
+      icon={{ source: runStatus(run.status).icon, tintColor: runStatus(run.status).color }}
       accessories={[
         ...(run.git_branch ? [{ tag: run.git_branch, tooltip: "Git branch" }] : []),
         {
-          text: run.duration_humanized || formatDuration(run.started_at, run.finished_at),
+          text: run.run_duration_humanized || run.duration_humanized || formatDuration(run.started_at, run.finished_at),
           icon: Icon.Clock,
-          tooltip: "Duration",
+          tooltip: "Run time (excluding time queued)",
         },
         dateAccessory(run.finished_at || run.created_at, run.finished_at ? "Finished" : "Created"),
         { tag: { value: runStatus(run.status).label, color: runStatus(run.status).color } },
@@ -302,7 +299,7 @@ export function RunsList({ jobId, scopeTitle }: { jobId?: number; scopeTitle?: s
       />
 
       {Object.entries(runsByJob).map(([jobName, jobRuns]) => (
-        <List.Section key={jobName} title={jobName} subtitle={`${jobRuns.length} runs`}>
+        <List.Section key={jobName} title={jobName} subtitle={plural(jobRuns.length, "run")}>
           {jobRuns.map((run) => (
             <RunListItem key={run.id} run={run} />
           ))}

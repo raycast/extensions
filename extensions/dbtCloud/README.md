@@ -36,7 +36,7 @@ Shortcuts follow one scheme across every command, and the same letter means the 
 | ⌥⇧       | Open the dbt Cloud page     | **P** project · **E** environment · **J** job · **R** run · **L** lineage · **D** docs · **S** settings                                       |
 | ⌘⇧       | Copy                        | **C** ID · **.** name · **,** path or URL                                                                                                     |
 
-Other actions: ⌘⇧T trigger a job, ⌘⌥X cancel a run, ⌘D open the lineage diagram, ⌘1–3 change the job performance window.
+Other actions: ⌘⇧T trigger a job, ⌘⌥X cancel a run, ⌘D open the lineage diagram, ⌘⌥C expand upstream lineage into CTEs, ⌘⇧L copy a SELECT of all columns, ⌥⇧B open BigQuery (BigQuery projects only), ⌘1–3 change the job performance window.
 
 ## ⚙️ Configuration
 

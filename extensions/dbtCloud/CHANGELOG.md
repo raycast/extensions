@@ -16,6 +16,13 @@
 - Detail sidebars share one layout: coloured status, the project and environment by name, details, dates (relative and exact), IDs, and dbt Cloud links
 - List rows show coloured status, environment and freshness tags, and dates with the exact time on hover
 - Fix dbt Cloud links: project pages, project settings, run history (now the job page), and dbt Explorer details and lineage pages
+- BigQuery console actions only appear for BigQuery environments, and Copy SELECT All Columns Query quotes the table for the warehouse in use
+- Browse Models uses the production environment of each project (falling back to staging), matching the AI tools
+- Browse Models, Browse Sources, and Explore Lineage keep the real API error on screen instead of reporting no deployment environments
+- Run details show the project, environment, and job by name, and in-progress runs no longer show a finish time or empty artifacts
+- Model performance lists each run's job by name; counts read "1 job" rather than "1 jobs"; long descriptions are shortened at a word boundary
+- Lineage views show where each upstream source lives (database and schema), and the Explore Upstream menu is sorted
+- New screenshots
 
 ## [Modernize + Specify Endpoint] - 2026-06-30
 

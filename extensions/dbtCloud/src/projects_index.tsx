@@ -1,5 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
-import { dateAccessory, DateLabel } from "./display";
+import { dateAccessory, DateLabel, plural } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
@@ -285,7 +285,7 @@ export default function ProjectsList() {
       />
 
       {activeProjects.length > 0 && (
-        <List.Section title="Active Projects" subtitle={`${activeProjects.length} projects`}>
+        <List.Section title="Active Projects" subtitle={plural(activeProjects.length, "project")}>
           {activeProjects.map((project) => (
             <ProjectListItem key={project.id} project={project} />
           ))}
@@ -293,7 +293,7 @@ export default function ProjectsList() {
       )}
 
       {inactiveProjects.length > 0 && (
-        <List.Section title="Inactive Projects" subtitle={`${inactiveProjects.length} projects`}>
+        <List.Section title="Inactive Projects" subtitle={plural(inactiveProjects.length, "project")}>
           {inactiveProjects.map((project) => (
             <ProjectListItem key={project.id} project={project} />
           ))}

@@ -1,5 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
-import { ContextMetadata, DateLabel, environmentTag, useAccountNames } from "./display";
+import { ContextMetadata, DateLabel, environmentTag, plural, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnEnvironments } from "./fetch_environments";
@@ -140,7 +140,7 @@ ${environment.supports_docs ? "✅ Supports Documentation" : "❌ Does not suppo
           <Action
             title="Explore Lineage Graph"
             icon={Icon.Network}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={Shortcuts.lineageDiagram}
             onAction={async () => {
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
@@ -238,7 +238,7 @@ const EnvironmentListItem = ({ environment }: EnvironmentListItemProps): JSX.Ele
           <Action
             title="Explore Lineage Graph"
             icon={Icon.Network}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            shortcut={Shortcuts.lineageDiagram}
             onAction={async () => {
               await openEnvironmentLineageDiagram(environment.id, environment.name);
             }}
@@ -361,7 +361,7 @@ export function EnvironmentsList({ projectId, scopeTitle }: { projectId?: number
       />
 
       {Object.entries(envsByProject).map(([projectName, projectEnvs]) => (
-        <List.Section key={projectName} title={projectName} subtitle={`${projectEnvs.length} environments`}>
+        <List.Section key={projectName} title={projectName} subtitle={plural(projectEnvs.length, "environment")}>
           {projectEnvs.map((env) => (
             <EnvironmentListItem key={env.id} environment={env} />
           ))}

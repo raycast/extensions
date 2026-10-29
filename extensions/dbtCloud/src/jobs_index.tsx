@@ -10,7 +10,7 @@ import {
   useNavigation,
   confirmAlert,
 } from "@raycast/api";
-import { ContextMetadata, dateAccessory, DateLabel, environmentTag, useAccountNames } from "./display";
+import { ContextMetadata, dateAccessory, DateLabel, environmentTag, plural, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
@@ -169,7 +169,7 @@ ${
               title="Trigger Job Run"
               icon={Icon.Terminal}
               onAction={handleTrigger}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              shortcut={Shortcuts.trigger}
             />
           )}
           <JobGoTo job={job} omit={["details"]} />
@@ -266,7 +266,7 @@ const JobListItem = ({ job, onRefresh, environment }: JobListItemProps): JSX.Ele
               title="Trigger Job Run"
               icon={Icon.Terminal}
               onAction={handleTrigger}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              shortcut={Shortcuts.trigger}
             />
           )}
           <JobGoTo job={job} omit={["details"]} />
@@ -375,7 +375,7 @@ export function JobsList({ projectId, environmentId, scopeTitle }: JobsScope = {
       />
 
       {Object.entries(jobsByProject).map(([projectName, projectJobs]) => (
-        <List.Section key={projectName} title={projectName} subtitle={`${projectJobs.length} jobs`}>
+        <List.Section key={projectName} title={projectName} subtitle={plural(projectJobs.length, "job")}>
           {projectJobs.map((job) => (
             <JobListItem
               key={job.id}

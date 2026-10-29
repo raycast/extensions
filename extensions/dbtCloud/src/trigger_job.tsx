@@ -1,5 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color, confirmAlert } from "@raycast/api";
-import { useAccountNames } from "./display";
+import { plural, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
 import { returnJobs } from "./fetch_jobs";
@@ -130,7 +130,7 @@ export default function TriggerJobCommand() {
       />
 
       {Object.entries(jobsByProject).map(([projectName, projectJobs]) => (
-        <List.Section key={projectName} title={projectName} subtitle={`${projectJobs.length} jobs`}>
+        <List.Section key={projectName} title={projectName} subtitle={plural(projectJobs.length, "job")}>
           {projectJobs.map((job) => (
             <TriggerJobItem
               key={job.id}

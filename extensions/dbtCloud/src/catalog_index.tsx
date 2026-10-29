@@ -11,18 +11,19 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ContextMetadata, useExplorerEnvironment } from "./display";
+import { ContextMetadata, plural, truncate, useAdapterType, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
-  fetchModels,
-  fetchModelWithLineage,
-  fetchModelsWithLineage,
   buildDocsUrl,
   buildLineageUrl,
-  getResourceTypeIcon,
-  getMaterializationIcon,
+  fetchModels,
+  fetchModelsWithLineage,
+  fetchModelWithLineage,
   getAccessColor,
+  getMaterializationIcon,
+  getResourceTypeIcon,
+  quoteTablePath,
 } from "./api";
 import { ModelNode, LineageNode } from "./types";
 import { fetchProductionEnvironments, selectOneEnvPerProject } from "./environment_utils";
@@ -211,6 +212,7 @@ function generateExpandedSQL(ctes: ExpandedCTE[], finalModel: ModelNode): string
 
 // Component to show expanded lineage
 function ExpandedLineageView({ model, environmentId }: { model: ModelNode; environmentId: number }) {
+  const isBigQuery = useAdapterType(environmentId) === "bigquery";
   const [expandedSQL, setExpandedSQL] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [cteCount, setCteCount] = useState(0);
@@ -281,30 +283,42 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
             <Action.CopyToClipboard
               title="Copy Expanded SQL"
               content={expandedSQL}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={Shortcuts.copyExpandedSql}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="BigQuery">
-            {canOpenInBigQuery ? (
-              <Action.OpenInBrowser
-                title="Run in BigQuery Console"
-                icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-                url={bigQueryUrlWithQuery}
-              />
-            ) : (
-              <Action
-                title="Open BigQuery (SQL Copied)"
-                icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-                onAction={openBigQueryWithClipboard}
-              />
-            )}
-          </ActionPanel.Section>
+          {isBigQuery && (
+            <ActionPanel.Section title="BigQuery">
+              {canOpenInBigQuery ? (
+                <Action.OpenInBrowser
+                  title="Run in BigQuery Console"
+                  icon={Icon.Terminal}
+                  shortcut={Shortcuts.bigQuery}
+                  url={bigQueryUrlWithQuery}
+                />
+              ) : (
+                <Action
+                  title="Open BigQuery (SQL Copied)"
+                  icon={Icon.Terminal}
+                  shortcut={Shortcuts.bigQuery}
+                  onAction={openBigQueryWithClipboard}
+                />
+              )}
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
   );
+}
+
+// SELECT of every catalogued column, with the table quoted for the warehouse
+function selectAllQuery(model: ModelNode, adapter: string | null | undefined): string {
+  const parts = [model.database, model.schema, model.alias || model.name].filter((part): part is string =>
+    Boolean(part),
+  );
+  const tablePath = quoteTablePath(adapter, parts);
+  const columns = (model.catalog?.columns ?? []).map((col) => `  ${col.name}`).join(",\n");
+  return `SELECT\n${columns}\nFROM ${tablePath}\nLIMIT 100`;
 }
 
 export function ModelDetail({
@@ -317,6 +331,7 @@ export function ModelDetail({
   projectId: number;
 }) {
   const explorerEnv = useExplorerEnvironment();
+  const adapter = useAdapterType(environmentId);
   const [fullModel, setFullModel] = useState<ModelNode | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { push } = useNavigation();
@@ -431,10 +446,16 @@ export function ModelDetail({
             </Detail.Metadata.TagList>
           )}
           {fullModel?.ancestors && (
-            <Detail.Metadata.Label title="Upstream" text={`${fullModel.ancestors.length} dependencies`} />
+            <Detail.Metadata.Label
+              title="Upstream"
+              text={plural(fullModel.ancestors.length, "dependency", "dependencies")}
+            />
           )}
           {fullModel?.children && (
-            <Detail.Metadata.Label title="Downstream" text={`${fullModel.children.length} dependencies`} />
+            <Detail.Metadata.Label
+              title="Downstream"
+              text={plural(fullModel.children.length, "dependency", "dependencies")}
+            />
           )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Database" text={displayModel.database || "N/A"} />
@@ -477,9 +498,9 @@ export function ModelDetail({
           </ActionPanel.Section>
           <ActionPanel.Section title="Lineage">
             <Action
-              title="Open dbt Cloud Lineage"
+              title="Open Lineage Diagram"
               icon={Icon.Network}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Shortcuts.lineageDiagram}
               onAction={async () => {
                 await openEnvironmentLineageDiagram(
                   environmentId,
@@ -493,44 +514,31 @@ export function ModelDetail({
               <Action
                 title="Expand Upstream Lineage to CTE"
                 icon={Icon.List}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                shortcut={Shortcuts.expandCte}
                 onAction={() => push(<ExpandedLineageView model={displayModel} environmentId={environmentId} />)}
               />
             )}
           </ActionPanel.Section>
-          <ActionPanel.Section title="BigQuery">
-            {displayModel.catalog?.columns && displayModel.catalog.columns.length > 0 && (
-              <Action.OpenInBrowser
-                title="Query in BigQuery Console"
-                icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-                url={(() => {
-                  const tablePath = `\`${displayModel.database}.${displayModel.schema}.${
-                    displayModel.alias || displayModel.name
-                  }\``;
-                  const columns = displayModel.catalog.columns.map((col) => `  ${col.name}`).join(",\n");
-                  const query = `SELECT\n${columns}\nFROM ${tablePath}\nLIMIT 100`;
-                  return `https://console.cloud.google.com/bigquery?project=${
-                    displayModel.database
-                  }&ws=!1m0&query=${encodeURIComponent(query)}`;
-                })()}
-              />
-            )}
-            {displayModel.catalog?.columns && displayModel.catalog.columns.length > 0 && (
+          {displayModel.catalog?.columns && displayModel.catalog.columns.length > 0 && (
+            <ActionPanel.Section title="Query">
+              {adapter === "bigquery" && (
+                <Action.OpenInBrowser
+                  title="Query in BigQuery Console"
+                  icon={Icon.Terminal}
+                  shortcut={Shortcuts.bigQuery}
+                  url={`https://console.cloud.google.com/bigquery?project=${displayModel.database}&ws=!1m0&query=${encodeURIComponent(
+                    selectAllQuery(displayModel, adapter),
+                  )}`}
+                />
+              )}
               <Action.CopyToClipboard
                 title="Copy SELECT All Columns Query"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "q" }}
-                content={(() => {
-                  const tablePath = `\`${displayModel.database}.${displayModel.schema}.${
-                    displayModel.alias || displayModel.name
-                  }\``;
-                  const columns = displayModel.catalog.columns.map((col) => `  ${col.name}`).join(",\n");
-                  return `SELECT\n${columns}\nFROM ${tablePath}\nLIMIT 100`;
-                })()}
+                shortcut={Shortcuts.copySelect}
+                content={selectAllQuery(displayModel, adapter)}
               />
-            )}
-          </ActionPanel.Section>
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
               title="Copy Unique ID"
@@ -553,7 +561,7 @@ export function ModelDetail({
               <Action.CopyToClipboard
                 title="Copy Compiled Code"
                 content={fullModel.compiledCode}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                shortcut={Shortcuts.copyCompiled}
               />
             )}
           </ActionPanel.Section>
@@ -575,12 +583,21 @@ export function CatalogList({
   const explorerEnv = useExplorerEnvironment();
   const [models, setModels] = useState<CatalogModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [projectFilter, setProjectFilter] = useState<string>("all");
   const { push } = useNavigation();
 
   useEffect(() => {
     async function loadAllModels() {
-      const allEnvs = await fetchProductionEnvironments();
+      let allEnvs: Awaited<ReturnType<typeof fetchProductionEnvironments>>;
+      try {
+        allEnvs = await fetchProductionEnvironments(true);
+      } catch {
+        // fetchFromApi already showed the real error (bad token, missing prefix, ...)
+        setLoadFailed(true);
+        setIsLoading(false);
+        return;
+      }
       if (allEnvs.length === 0) {
         setIsLoading(false);
         showToast(
@@ -613,7 +630,11 @@ export function CatalogList({
       const allModels = results.flat();
       setModels(allModels);
       setIsLoading(false);
-      showToast(Toast.Style.Success, `Loaded ${allModels.length} models`, `From ${selectedEnvs.length} project(s)`);
+      showToast(
+        Toast.Style.Success,
+        `Loaded ${plural(allModels.length, "model")}`,
+        `From ${selectedEnvs.length} project(s)`,
+      );
     }
     loadAllModels();
   }, [projectId, environmentId]);
@@ -644,7 +665,7 @@ export function CatalogList({
     sections.push({
       key,
       title: key,
-      subtitle: `${sectionModels.length} models`,
+      subtitle: plural(sectionModels.length, "model"),
       models: sectionModels.sort((a, b) => a.name.localeCompare(b.name)),
     });
   }
@@ -678,7 +699,7 @@ export function CatalogList({
               key={model.uniqueId}
               icon={getMaterializationIcon(model.materializedType)}
               title={model.name}
-              subtitle={model.description?.slice(0, 50) || ""}
+              subtitle={truncate(model.description, 60)}
               accessories={[
                 { text: `${getAccessColor(model.access)} ${model.access || ""}` },
                 model.tests && model.tests.length > 0 ? { text: `🧪 ${model.tests.length}` } : {},
@@ -728,8 +749,12 @@ export function CatalogList({
       {!isLoading && filteredModels.length === 0 && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title="No models found"
-          description="Make sure a job has run successfully with docs generation enabled in at least one deployment environment"
+          title={loadFailed ? "Could not load environments" : "No models found"}
+          description={
+            loadFailed
+              ? "See the error message, then check the extension preferences"
+              : "Make sure a job has run successfully with docs generation enabled in at least one deployment environment"
+          }
         />
       )}
     </List>

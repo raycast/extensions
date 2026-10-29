@@ -47,13 +47,13 @@ export function inferDeploymentType(env: EnvironmentModel): EnvironmentDeploymen
   return "general";
 }
 
-export async function fetchProductionEnvironments(): Promise<EnvironmentWithProject[]> {
+export async function fetchProductionEnvironments(rethrow = false): Promise<EnvironmentWithProject[]> {
   const envEndpoint = buildApiUrl("/environments/");
   const projectEndpoint = buildApiUrl("/projects/");
 
   const [environments, projects] = await Promise.all([
-    fetchFromApi<EnvironmentModel>(envEndpoint, "Could not fetch environments"),
-    fetchFromApi<ProjectModel>(projectEndpoint, "Could not fetch projects"),
+    fetchFromApi<EnvironmentModel>(envEndpoint, "Could not fetch environments", undefined, rethrow),
+    fetchFromApi<ProjectModel>(projectEndpoint, "Could not fetch projects", undefined, rethrow),
   ]);
 
   const projectMap = new Map<number, string>();
@@ -126,9 +126,10 @@ export function selectOneEnvPerProject(environments: EnvironmentWithProject[]): 
 
   const selected: EnvironmentWithProject[] = [];
   for (const [, envs] of projectEnvs) {
-    const staging = envs.find((env) => inferDeploymentType(env) === "staging");
+    // Production first, matching the AI tools, then staging
     const production = envs.find((env) => inferDeploymentType(env) === "production");
-    selected.push(staging || production || envs[0]);
+    const staging = envs.find((env) => inferDeploymentType(env) === "staging");
+    selected.push(production || staging || envs[0]);
   }
 
   return selected;

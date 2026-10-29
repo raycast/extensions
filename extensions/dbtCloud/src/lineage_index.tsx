@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { ContextMetadata, useExplorerEnvironment } from "./display";
+import { ContextMetadata, plural, truncate, useExplorerEnvironment } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState } from "react";
 import {
@@ -129,7 +129,7 @@ export function LineageDetail({
       columns.slice(0, 15).forEach((col) => {
         // Escape pipe characters and newlines in table cells
         const escapeCell = (str: string) => str.replace(/\|/g, "\\|").replace(/\n/g, " ");
-        const desc = escapeCell((col.description || "-").slice(0, 40));
+        const desc = escapeCell(truncate(col.description, 60) || "-");
         const type = escapeCell(col.type || "-");
         const name = escapeCell(col.name);
         markdown += `| \`${name}\` | ${type} | ${desc} |\n`;
@@ -165,8 +165,14 @@ export function LineageDetail({
           <Detail.Metadata.Separator />
           {isModel && fullModel && (
             <>
-              <Detail.Metadata.Label title="Upstream" text={`${fullModel.ancestors?.length || 0} dependencies`} />
-              <Detail.Metadata.Label title="Downstream" text={`${fullModel.children?.length || 0} dependencies`} />
+              <Detail.Metadata.Label
+                title="Upstream"
+                text={plural(fullModel.ancestors?.length || 0, "dependency", "dependencies")}
+              />
+              <Detail.Metadata.Label
+                title="Downstream"
+                text={plural(fullModel.children?.length || 0, "dependency", "dependencies")}
+              />
               <Detail.Metadata.Separator />
               <Detail.Metadata.Label title="Materialization" text={fullModel.materializedType || "N/A"} />
               <Detail.Metadata.Label title="Access" text={fullModel.access || "N/A"} />
@@ -175,7 +181,7 @@ export function LineageDetail({
           {!isModel && (
             <Detail.Metadata.Label
               title="Downstream"
-              text={`${(node as SourceNode).children?.length || 0} dependencies`}
+              text={plural((node as SourceNode).children?.length || 0, "dependency", "dependencies")}
             />
           )}
           <Detail.Metadata.Separator />
@@ -187,9 +193,9 @@ export function LineageDetail({
           {isModel && fullModel && (
             <>
               <Action
-                title="Open dbt Cloud Lineage"
+                title="Open Lineage Diagram"
                 icon={Icon.Network}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={Shortcuts.lineageDiagram}
                 onAction={async () => {
                   await openEnvironmentLineageDiagram(environmentId, "dbt Cloud", fullModel.uniqueId, fullModel.name);
                 }}
@@ -215,35 +221,41 @@ export function LineageDetail({
           )}
           {isModel && fullModel?.ancestors && fullModel.ancestors.length > 0 && (
             <ActionPanel.Submenu title="Explore Upstream" icon={Icon.ChevronUp}>
-              {fullModel.ancestors.map((ancestor) =>
-                ancestor.resourceType === "model" ? (
-                  <Action.Push
-                    key={ancestor.uniqueId}
-                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
-                    target={
-                      <LineageDetail node={ancestor as ModelNode} environmentId={environmentId} projectId={projectId} />
-                    }
-                  />
-                ) : ancestor.resourceType === "source" ? (
-                  <Action.Push
-                    key={ancestor.uniqueId}
-                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
-                    target={
-                      <SourceByUniqueId
-                        uniqueId={ancestor.uniqueId}
-                        environmentId={environmentId}
-                        projectId={projectId}
-                      />
-                    }
-                  />
-                ) : (
-                  <Action.OpenInBrowser
-                    key={ancestor.uniqueId}
-                    title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
-                    url={buildDocsUrl(projectId, ancestor.uniqueId, explorerEnv(environmentId))}
-                  />
-                ),
-              )}
+              {[...fullModel.ancestors]
+                .sort((a, b) => a.resourceType.localeCompare(b.resourceType) || a.name.localeCompare(b.name))
+                .map((ancestor) =>
+                  ancestor.resourceType === "model" ? (
+                    <Action.Push
+                      key={ancestor.uniqueId}
+                      title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                      target={
+                        <LineageDetail
+                          node={ancestor as ModelNode}
+                          environmentId={environmentId}
+                          projectId={projectId}
+                        />
+                      }
+                    />
+                  ) : ancestor.resourceType === "source" ? (
+                    <Action.Push
+                      key={ancestor.uniqueId}
+                      title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                      target={
+                        <SourceByUniqueId
+                          uniqueId={ancestor.uniqueId}
+                          environmentId={environmentId}
+                          projectId={projectId}
+                        />
+                      }
+                    />
+                  ) : (
+                    <Action.OpenInBrowser
+                      key={ancestor.uniqueId}
+                      title={`${getResourceTypeIcon(ancestor.resourceType)} ${ancestor.name}`}
+                      url={buildDocsUrl(projectId, ancestor.uniqueId, explorerEnv(environmentId))}
+                    />
+                  ),
+                )}
             </ActionPanel.Submenu>
           )}
           <ActionPanel.Section title="Open in dbt Cloud">
@@ -338,7 +350,7 @@ export function LineageList({
           <List.Section
             key={type}
             title={`${getResourceTypeIcon(type)} ${type.charAt(0).toUpperCase() + type.slice(1)}s`}
-            subtitle={`${nodes.length} items`}
+            subtitle={plural(nodes.length, "item")}
           >
             {nodes
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -352,7 +364,7 @@ export function LineageList({
                     key={node.uniqueId}
                     icon={getResourceTypeIcon(node.resourceType)}
                     title={node.name}
-                    subtitle={node.description?.slice(0, 40) || ""}
+                    subtitle={truncate(node.description, 60)}
                     accessories={[
                       isModel && modelNode.materializedType
                         ? { text: getMaterializationIcon(modelNode.materializedType) }
@@ -439,11 +451,20 @@ function LineageEnvironmentListItem({ env, projectName }: { env: EnvironmentWith
 export default function LineageIndex() {
   const [environments, setEnvironments] = useState<EnvironmentWithProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [deploymentFilter, setDeploymentFilter] = useState<string>("all");
 
   useEffect(() => {
     async function loadEnvironments() {
-      const result = await fetchProductionEnvironments();
+      let result: EnvironmentWithProject[];
+      try {
+        result = await fetchProductionEnvironments(true);
+      } catch {
+        // fetchFromApi already showed the real error (bad token, missing prefix, ...)
+        setLoadFailed(true);
+        setIsLoading(false);
+        return;
+      }
       setEnvironments(result);
       setIsLoading(false);
 
@@ -496,15 +517,15 @@ export default function LineageIndex() {
         >
           <List.Dropdown.Item title="All Environments" value="all" />
           <List.Dropdown.Section title="Deployment Type">
-            <List.Dropdown.Item title="✅ Production" value="production" />
-            <List.Dropdown.Item title="🚧 Staging" value="staging" />
+            <List.Dropdown.Item title={`${DEPLOYMENT_TYPE_INFO.production.icon} Production`} value="production" />
+            <List.Dropdown.Item title={`${DEPLOYMENT_TYPE_INFO.staging.icon} Staging`} value="staging" />
             <List.Dropdown.Item title="🔧 Development" value="development" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
       {projects.map(({ projectId, projectName, environments: projectEnvs }) => (
-        <List.Section key={projectId} title={projectName} subtitle={`${projectEnvs.length} environment(s)`}>
+        <List.Section key={projectId} title={projectName} subtitle={plural(projectEnvs.length, "environment")}>
           {projectEnvs.map((env) => (
             <LineageEnvironmentListItem key={env.id} env={env} projectName={projectName} />
           ))}
@@ -513,8 +534,18 @@ export default function LineageIndex() {
       {!isLoading && filteredEnvironments.length === 0 && (
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title={deploymentFilter === "all" ? "No deployment environments" : `No ${deploymentFilter} environments`}
-          description="Create a deployment environment and run a job to explore lineage"
+          title={
+            loadFailed
+              ? "Could not load environments"
+              : deploymentFilter === "all"
+                ? "No deployment environments"
+                : `No ${deploymentFilter} environments`
+          }
+          description={
+            loadFailed
+              ? "See the error message, then check the extension preferences"
+              : "Create a deployment environment and run a job to explore lineage"
+          }
         />
       )}
     </List>

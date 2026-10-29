@@ -45,6 +45,15 @@ export const Shortcuts = {
   copyAverage: copy("a"),
   copyError: copy("e"),
 
+  copySelect: copy("l"),
+  copyExpandedSql: copy("x"),
+  copyCompiled: copy("k"),
+
+  // Catalog actions
+  lineageDiagram: { modifiers: ["cmd"], key: "d" } as Keyboard.Shortcut,
+  expandCte: nav("c"),
+  bigQuery: web("b"),
+
   // Job actions
   trigger: copy("t"),
   cancel: { modifiers: ["cmd", "opt"], key: "x" } as Keyboard.Shortcut,

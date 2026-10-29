@@ -1,5 +1,5 @@
 import { List, showToast, Toast, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { useAccountNames } from "./display";
+import { plural, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { useEffect, useState, useCallback } from "react";
 import { returnProjects } from "./fetch_projects";
@@ -239,7 +239,7 @@ export default function QuickSearch() {
       <List.EmptyView title="No results found" description="Try a different search term" icon="icon_64p.png" />
 
       {Object.entries(groupedResults).map(([type, typeResults]) => (
-        <List.Section key={type} title={typeLabels[type] || type} subtitle={`${typeResults.length} items`}>
+        <List.Section key={type} title={typeLabels[type] || type} subtitle={plural(typeResults.length, "item")}>
           {typeResults.slice(0, 10).map((result, index) => (
             <SearchResultItem key={`${result.type}-${result.data.id}-${index}`} result={result} names={names} />
           ))}

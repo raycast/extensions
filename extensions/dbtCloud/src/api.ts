@@ -140,6 +140,8 @@ export async function fetchFromApi<T>(
   endpoint: string,
   errorMessage = "Could not fetch from API",
   maxResults?: number,
+  // Rethrow after showing the error toast, so callers can stop instead of treating the failure as "no results"
+  rethrow = false,
 ): Promise<T[]> {
   try {
     let nextUrl: URL | null = new URL(endpoint, getBaseUrl());
@@ -174,6 +176,7 @@ export async function fetchFromApi<T>(
   } catch (error) {
     console.error("GET Error:", error);
     showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
+    if (rethrow) throw error;
     return [];
   }
 }
@@ -522,6 +525,8 @@ query GetModelWithLineage($environmentId: BigInt!, $uniqueId: String!) {
               }
               ... on SourceAppliedStateNestedNode {
                 sourceName
+                database
+                schema
               }
             }
             children {
@@ -574,6 +579,8 @@ query GetModelsWithLineage($environmentId: BigInt!, $first: Int!, $after: String
               }
               ... on SourceAppliedStateNestedNode {
                 sourceName
+                database
+                schema
               }
             }
             children {
@@ -765,6 +772,37 @@ export async function fetchSourceById(environmentId: number, uniqueId: string): 
     "Could not fetch source",
   );
   return data?.environment?.applied?.sources?.edges?.[0]?.node ?? null;
+}
+
+// Warehouse adapter of an environment (e.g. "bigquery", "snowflake"), used to offer warehouse-specific actions
+export async function fetchAdapterType(environmentId: number): Promise<string | null> {
+  const data = await queryDiscoveryApi<{ environment: { adapterType: string | null } }>(
+    "query GetAdapterType($environmentId: BigInt!) { environment(id: $environmentId) { adapterType } }",
+    { environmentId },
+    "Could not fetch the warehouse type",
+  );
+  return data?.environment?.adapterType?.toLowerCase() ?? null;
+}
+
+// Fully qualified table name quoted the way the warehouse expects
+export function quoteTablePath(adapter: string | null | undefined, parts: string[]): string {
+  switch (adapter) {
+    case "bigquery":
+    case "databricks":
+    case "spark":
+      return parts.map((part) => `\`${part}\``).join(".");
+    case "snowflake":
+    case "postgres":
+    case "redshift":
+    case "duckdb":
+    case "trino":
+    case "athena":
+    case "fabric":
+    case "synapse":
+      return parts.map((part) => `"${part}"`).join(".");
+    default:
+      return parts.join(".");
+  }
 }
 
 // Resource type icons
