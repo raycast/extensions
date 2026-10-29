@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Clara by nOps MCP Server] - {PR_MERGE_DATE}
+
+- Add Clara by nOps to the official registry: FinOps assistant for AWS, GCP and Azure cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server at https://mcp.nops.io with nOps OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add House AI MCP Server] - 2026-10-29
 
 - Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).

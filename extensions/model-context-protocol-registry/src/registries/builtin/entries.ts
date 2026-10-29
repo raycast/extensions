@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "nops-clara",
+    title: "Clara by nOps",
+    description:
+      "FinOps assistant for AWS, GCP and Azure. Query cost and usage, Reserved Instance and Savings Plan performance, budgets, reports, cost allocation and anomalies. Hosted Streamable HTTP server with nOps OAuth sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.",
+    icon: "https://raw.githubusercontent.com/nops-io/clara-mcp/main/assets/logo.png",
+    homepage: "https://github.com/nops-io/clara-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.nops.io"],
+    },
+    remoteUrl: "https://mcp.nops.io",
+  },
+  {
     name: "leal",
     title: "Leal",
     description:
