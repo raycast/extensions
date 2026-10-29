@@ -1402,6 +1402,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "posty",
+    title: "Posty",
+    description:
+      "Write, schedule and publish posts to 20 social platforms (Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest, Mastodon, Tumblr, WordPress, Telegram, Discord, Slack and more) with a content calendar and full-quality photo and video uploads. Preview a post before it is saved, list and delete scheduled posts, and switch workspaces. 21 tools. Hosted remote Streamable HTTP server at https://api.posty.hu/mcp-oauth with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Posty account (free trial at posty.hu).",
+    icon: "https://raw.githubusercontent.com/norbertlevente/posty-agent/main/plugins/posty-mcp/.claude-plugin/icon.png",
+    homepage: "https://posty.hu/en/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.posty.hu/mcp-oauth"],
+    },
+    remoteUrl: "https://api.posty.hu/mcp-oauth",
+  },
+  {
     name: "posy",
     title: "Posy",
     description:
@@ -1533,6 +1546,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         RECUED_MCP_TOKEN: "YOUR_CONTRACT_KEY",
       },
     },
+  },
+  {
+    name: "relaticle",
+    title: "Relaticle",
+    description:
+      "Open-source CRM your AI agents can read and update: companies, people, opportunities, tasks, notes and custom fields. Hosted Streamable HTTP server with OAuth sign-in; 14-day free trial, or self-host with Docker.",
+    icon: "https://relaticle.com/apple-touch-icon.png",
+    homepage: "https://relaticle.com/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.relaticle.com"],
+    },
+    remoteUrl: "https://mcp.relaticle.com",
   },
   {
     name: "removeduplicates",
@@ -1849,6 +1875,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "suprsend",
+    title: "SuprSend",
+    description:
+      "Notification infrastructure for product teams. Manage notification workflows, templates, users, preferences, tenants and subscriber lists, and query delivery logs to debug failed notifications across email, SMS, push, in-app inbox, WhatsApp and Slack. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/suprsend/claude-plugin/main/.claude-plugin/icon.png",
+    homepage: "https://docs.suprsend.com/reference/mcp-overview",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.suprsend.com/mcp"],
+    },
+    remoteUrl: "https://mcp.suprsend.com/mcp",
+  },
+  {
     name: "tapetide",
     title: "Tapetide",
     description:
@@ -2014,6 +2053,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.unblockingapi.com/mcp",
   },
   {
+    name: "vectosolve",
+    title: "VectoSolve",
+    description:
+      "Turn PNG, JPG, WebP or GIF images into vector files: SVG for design tools and Cricut Design Space, DXF for laser cutters, CNC routers and CAD (R12 polylines, millimetres) or EPS for print and sign-making. Tracing modes for logos and illustrations, closed laser cut paths, cutting machines and centerline (one path per stroke for line art and scanned drawings). Returns a PNG preview and the complete file from a public image link. One read-only tool. Hosted remote Streamable HTTP server at https://vectosolve.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://vectosolve.com/favicon-512.png",
+    homepage: "https://vectosolve.com/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://vectosolve.com/api/mcp"],
+    },
+    remoteUrl: "https://vectosolve.com/api/mcp",
+  },
+  {
     name: "visualping",
     title: "Visualping",
     description:
@@ -2126,6 +2178,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://worthbase.app/mcp"],
     },
+  },
+  {
+    name: "writestack",
+    title: "WriteStack",
+    description:
+      "Grow on Substack from your AI assistant. Draft and schedule Substack Notes, manage articles, and read statistics in your WriteStack account. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a WriteStack API key as a bearer token. Public connection documentation is MIT licensed; the hosted service is proprietary.",
+    icon: "https://cdn.writestack.io/writestack-app/og/logo.png",
+    homepage: "https://www.writestack.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.writestack.io/api/mcp/mcp"],
+    },
+    remoteUrl: "https://www.writestack.io/api/mcp/mcp",
   },
   {
     name: "xero",

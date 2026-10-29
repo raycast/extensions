@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "network-hogs",
+  "title": "Network Hogs",
+  "description": "Find which apps are using your network, see live download and upload rates, and quit bandwidth hogs.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "network-hogs",
+      "title": "Network Hogs",
+      "description": "See live per-app network rates, traffic charts, and session usage",
+      "mode": "view",
+      "keywords": [
+        "bandwidth",
+        "upload",
+        "download",
+        "internet",
+        "nettop"
+      ]
+    },
+    {
+      "name": "top-network-app",
+      "title": "Top Network App",
+      "description": "Show the busiest network app in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-network-usage",
+      "title": "Get Network Usage",
+      "description": "Read current per-app download and upload rates from a fresh one-second observation. Returns byte rates and totals for that observation only. Does not quit apps or measure internet speed."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "animateCharts",
+      "title": "Chart Animation",
+      "label": "Animate new traffic samples",
+      "type": "checkbox",
+      "required": false,
+      "description": "Slide the chart into place over 200 ms when a sample arrives. Disable for instant updates.",
+      "default": true
+    },
+    {
+      "name": "units",
+      "title": "Rate Units",
+      "type": "dropdown",
+      "required": false,
+      "description": "Display rates in bytes per second or bits per second. Session usage always uses bytes.",
+      "default": "bytes",
+      "data": [
+        {
+          "title": "Bytes (MB/s)",
+          "value": "bytes"
+        },
+        {
+          "title": "Bits (Mbps)",
+          "value": "bits"
+        }
+      ]
+    },
+    {
+      "name": "menuBarThreshold",
+      "title": "Menu Bar Threshold (KB/s)",
+      "type": "textfield",
+      "required": false,
+      "description": "Show the busiest app's name above this combined rate, in KB/s. Set to 0 to show any traffic.",
+      "default": "500"
+    },
+    {
+      "name": "hideSystemDaemons",
+      "title": "System Daemons",
+      "label": "Hide system daemons and shared services",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide macOS background services and processes owned by other users.",
+      "default": true
+    },
+    {
+      "name": "showUpload",
+      "title": "Menu Bar Upload",
+      "label": "Include the upload rate in the menu bar title",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show upload alongside the busiest app's combined rate.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "test": "tsx --test tests/*.test.ts",
+    "test:live": "tsx scripts/verify-live.ts",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

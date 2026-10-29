@@ -6,17 +6,36 @@ This is a simple Raycast extension that allows users to quickly check the Open G
 
 ## Setup:
 
-No additional setup is required for this extension. Simply enter a URL to fetch its Open Graph data.
+No additional setup is required. Enter a URL, or launch **Preview Open Graph** without an argument to use a URL from your clipboard. If the clipboard doesn't contain a URL, a form lets you enter one.
 
 ## Features:
 
-- Fetch and display Open Graph data such as `og:image`, `og:title`, `og:description`, etc.
+- Inspect every Open Graph and Twitter Card meta tag, including repeated tags.
+- Preview social titles, descriptions, and images, with standard page metadata as a fallback.
+- Browse multiple images, inspect declared dimensions and alt text, and open or copy absolute image URLs.
+- Check the four required Open Graph properties: `og:title`, `og:type`, `og:image`, and `og:url`. URL checks require absolute HTTP or HTTPS URLs. Validation does not fetch images or check platform-specific requirements.
+- Copy individual values or export all metadata as JSON, Markdown, or HTML meta tags. Exports preserve tag order and duplicates; JSON also includes resolved image URLs.
+- Inspect the final URL after redirects, edit the input URL, refresh metadata, or retry a failed request. Requests time out after 15 seconds.
+- Use **Preview Open Graph (Browser Extension)** to inspect the active browser tab.
 
 ## How to Use:
 
-1. Type in the URL of the website you want to check.
-2. The extension will fetch and display the Open Graph data if available.
-3. If no Open Graph tags are found, it will inform you accordingly.
+1. Launch **Preview Open Graph** with a URL, use the clipboard fallback, or enter a URL in the form. URLs without a scheme use HTTPS.
+2. Inspect the preview and metadata panel. Use **Browse Images** to inspect all declared images.
+3. Open the action panel to validate, export, edit the URL, or refresh. Pages without social tags show their standard title and description.
+
+The preview uses the HTML returned by the server. It does not run page JavaScript, and social platforms may render a different card. Image dimensions shown here come from meta tags, rather than image inspection.
+
+## Raycast AI
+
+Use `@open-graph` in Raycast AI Chat to inspect, validate, or export a page's social metadata:
+
+- "Show every Open Graph and Twitter Card tag for https://example.com."
+- "Validate the required Open Graph properties for https://example.com."
+- "Export the social metadata for https://example.com as HTML meta tags."
+- "Suggest a better social title and description for https://example.com."
+
+The tools use the same parser, URL resolution, validation, and 15-second request timeout as the preview command. Provide a URL in the conversation; AI tools do not use the clipboard or active browser tab. Exports return JSON, Markdown, or HTML text in chat. Suggestions use the extracted metadata, and changes are not applied to the website.
 
 ## Contributing:
 

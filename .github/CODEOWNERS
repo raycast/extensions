@@ -435,6 +435,7 @@
 /extensions/claude-session-bookmarks                                @eaescob
 /extensions/claude-sessions                                         @kud
 /extensions/claudecast                                              @qazi0 @RoderickJDunn @diskun00
+/extensions/claudescope                                             @vladar107
 /extensions/clean-agent-text                                        @rhukster
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig @LitoMore @yusifaliyevpro @shivraj-roy @alexibuild @nawwwal
 /extensions/clean-text                                              @MoisesCervera
@@ -454,6 +455,7 @@
 /extensions/clipmate                                                @shvmmshr
 /extensions/clipmenu                                                @Envl
 /extensions/clippyx                                                 @0ssamaak0
+/extensions/cliproxy                                                @ShadowPaint-SP
 /extensions/clipsign                                                @gdcho
 /extensions/clipyai                                                 @strikeraryu
 /extensions/clockify                                                @ismamz @sxn @kuddl @azlekov @sebboer @shkm @constantins2001 @xmok @pcamminadi @riccardogiorato @tonygauderman
@@ -1893,6 +1895,7 @@
 /extensions/netnewswire                                             @xmok
 /extensions/network-diagnostics                                     @hmarr
 /extensions/network-drive                                           @SuoweiHu
+/extensions/network-hogs                                            @0xdhrv
 /extensions/network-menubar-monitor                                 @yarnaid
 /extensions/network-proxy                                           @wuyuxiangX
 /extensions/network-speed                                           @koinzhang
@@ -2025,7 +2028,7 @@
 /extensions/open-docker                                             @K4Lok
 /extensions/open-folders                                            @timothyBoye @gfazioli
 /extensions/open-gem-documentation                                  @sudoremo
-/extensions/open-graph                                              @1weiho @ridemountainpig @tmwrnr @j3lte
+/extensions/open-graph                                              @1weiho @ridemountainpig @tmwrnr @j3lte @0xdhrv
 /extensions/open-in-android-studio                                  @3llomi
 /extensions/open-in-cursor                                          @5Gears0Chill
 /extensions/open-in-json-hero                                       @ericallam @ivanovart @christymcgrory @xmok
@@ -2697,6 +2700,7 @@
 /extensions/short-io                                                @koinzhang @xmok @0xdhrv
 /extensions/shortcut                                                @Yukaii @robertn702 @BrianHicks @vinsg
 /extensions/shortcut-library                                        @rhrabun
+/extensions/shortcut-vault                                          @syedhy
 /extensions/shortcuts-search                                        @solomkinmv
 /extensions/shottr                                                  @jfernandogt @Caffeine19
 /extensions/showmd                                                  @l0kyurue1
@@ -2725,6 +2729,7 @@
 /extensions/simplelogin                                             @adrian-schnell @marcelruhf
 /extensions/simpletexocr                                            @zhuozhiyongde @yiran-frank-mao @Xel-naga7
 /extensions/simpread                                                @Kenshin
+/extensions/simulator-deep-linker                                   @StefanBoblic
 /extensions/simulator-manager                                       @pauloedurezende
 /extensions/single-disk-eject                                       @johndturn @LostViking09
 /extensions/single-focus                                            @Mmehdi06 @LitoMore
