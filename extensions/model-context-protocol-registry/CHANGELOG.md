@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Paidnice MCP Server] - {PR_MERGE_DATE}
+
+- Add Paidnice to the official registry: accounts receivable for Xero and QuickBooks Online. Read the customer email and SMS replies Paidnice collects, list and look up customers, invoices and notes, and update contact people. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration).
+
 ## [Add House AI MCP Server] - 2026-10-29
 
 - Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).
