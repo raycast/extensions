@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { JSX } from "react/jsx-runtime";
 import { List } from "@raycast/api";
+import Fuse from "fuse.js";
 
 import Entry from "./entry";
 import FolderFilterDropdown from "./folder-filter-dropdown";
 import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
 import { PinLoader } from "../utils/pin-loader";
 import { getEntryId, getFolders } from "../utils/entry-helper";
+
+const USER_FILTER = /\bu:(\S*)/;
 
 /**
  * Component for searching and displaying KeePass database entries
@@ -30,6 +33,7 @@ export default function SearchDatabase({
   const [entriesFolder, setEntriesFolder] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [searchText, setSearchText] = useState<string>("");
 
   const errorHandler = (e: { message: string }) => {
     setIsUnlocked(false);
@@ -61,7 +65,14 @@ export default function SearchDatabase({
       });
   }, []);
 
-  const filteredEntries = entries.filter((entry) => entry[0].startsWith(entriesFolder) && entry[1] !== "");
+  const userQuery = searchText.match(USER_FILTER)?.[1].toLowerCase() ?? "";
+  const titleQuery = searchText.replace(USER_FILTER, "").trim();
+  const folderEntries = entries.filter(
+    (entry) => entry[0].startsWith(entriesFolder) && entry[1] !== "" && entry[2].toLowerCase().includes(userQuery),
+  );
+  const filteredEntries = titleQuery
+    ? new Fuse(folderEntries, { keys: ["1"] }).search(titleQuery).map((result) => result.item)
+    : folderEntries;
   const pinnedEntries = filteredEntries.filter((entry) => pinnedIds.has(getEntryId(entry)));
   const unpinnedEntries = filteredEntries.filter((entry) => !pinnedIds.has(getEntryId(entry)));
 
@@ -72,6 +83,8 @@ export default function SearchDatabase({
       searchBarAccessory={
         folders.length > 0 ? <FolderFilterDropdown folders={folders} onFolderChange={setEntriesFolder} /> : undefined
       }
+      filtering={false}
+      onSearchTextChange={setSearchText}
       throttle={true}
     >
       {pinnedEntries.length > 0 && (

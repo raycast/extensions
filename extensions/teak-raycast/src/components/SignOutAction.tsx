@@ -1,15 +1,13 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { type SignOutResult, signOutTeak } from "../lib/oauth";
-import { getPreferences } from "../lib/preferences";
+import { grandfatheredApiKey } from "../lib/preferences";
 
 interface SignOutActionProps {
   onSignedOut?: () => void;
 }
 
 export function SignOutAction({ onSignedOut }: SignOutActionProps) {
-  // Sign-out only applies to browser (OAuth) sessions. API-key users manage
-  // their credential in extension preferences, so hide the action for them.
-  if (getPreferences().apiKey?.trim()) {
+  if (grandfatheredApiKey()) {
     return null;
   }
 

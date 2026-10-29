@@ -1,5 +1,16 @@
 # Skills Changelog
 
+## [Sync with Skills CLI 1.7] - 2026-10-22
+
+- Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL
+- Add the fx, Grok Build, Kimchi, MiniMax Code, Posit Assistant, Sarvam Code, and ZCode agents, so installing to Grok Build passes its real `grok` ID instead of failing
+- Read `SKILL.md` frontmatter that starts with a byte order mark or has no content after it
+
+## [Fix Multiline Skill Descriptions] - 2026-10-18
+
+- Show complete descriptions from multiline YAML frontmatter in Search Skills and Manage Skills details
+- Ignore invalid frontmatter metadata so skill details remain readable
+
 ## [Fix Skills List Troubleshooting] - 2026-10-17
 
 - Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension

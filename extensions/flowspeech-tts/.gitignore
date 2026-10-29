@@ -1,4 +1,8 @@
 node_modules
+.test-dist
+.test-tmp
+.build
+.cli-home
 raycast-env.d.ts
 *.log
 .DS_Store

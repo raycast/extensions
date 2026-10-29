@@ -19,6 +19,8 @@ type Status = {
   heatProtectionEnabled: boolean;
   heatProtectionActive: boolean;
   activeProfile: string;
+  mcpBridgeEnabled?: boolean;
+  mcpBridgeStatus?: string;
 };
 
 function isStatus(value: unknown): value is Status {
@@ -38,7 +40,9 @@ function isStatus(value: unknown): value is Status {
     typeof status.sailingActive === "boolean" &&
     typeof status.heatProtectionEnabled === "boolean" &&
     typeof status.heatProtectionActive === "boolean" &&
-    typeof status.activeProfile === "string"
+    typeof status.activeProfile === "string" &&
+    (status.mcpBridgeEnabled === undefined || typeof status.mcpBridgeEnabled === "boolean") &&
+    (status.mcpBridgeStatus === undefined || typeof status.mcpBridgeStatus === "string")
   );
 }
 
@@ -124,6 +128,11 @@ export default function Command() {
         `Sailing: ${yesNo(status.sailingEnabled)} (active: ${yesNo(status.sailingActive)})`,
         `Heat Protection: ${yesNo(status.heatProtectionEnabled)} (active: ${yesNo(status.heatProtectionActive)})`,
         `Profile: ${status.activeProfile ? escapeMarkdown(status.activeProfile) : "None"}`,
+        ...(typeof status.mcpBridgeEnabled === "boolean"
+          ? [
+              `MCP Bridge: ${yesNo(status.mcpBridgeEnabled)}${status.mcpBridgeStatus ? ` (${escapeMarkdown(status.mcpBridgeStatus)})` : ""}`,
+            ]
+          : []),
         `Updated: ${new Date(status.updatedAt * 1000).toLocaleTimeString()}`,
       ].join("\n\n")
     : errorMessage

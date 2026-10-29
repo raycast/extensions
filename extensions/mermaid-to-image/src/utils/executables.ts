@@ -3,7 +3,6 @@ import path from "path";
 import os from "os";
 import { promisify } from "util";
 import { exec } from "child_process";
-import { Preferences } from "../types";
 import { logOperationalError } from "./logger";
 
 const execPromise = promisify(exec);

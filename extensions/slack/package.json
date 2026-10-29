@@ -160,7 +160,16 @@
       "default": true
     }
   ],
+  "resourceProvider": "read-user",
   "tools": [
+    {
+      "title": "Users",
+      "name": "search-user-mentions",
+      "description": "Search workspace members by name, username, email, or job title to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "title": "Read Canvas",
       "name": "read-canvas",
@@ -194,7 +203,7 @@
     {
       "title": "Find Users",
       "name": "find-users",
-      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID. Before uploading files to that person, pass the user ID to Read Conversation and use its returned DM channel ID."
+      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID, or to get their profile photo URL; hasCustomPhoto is false when the photo is Slack's default avatar. Before uploading files to that person, pass the user ID to Read Conversation and use its returned DM channel ID."
     },
     {
       "title": "Set Status",
@@ -284,7 +293,7 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.0",
     "@raycast/utils": "^2.2.2",
     "@slack/web-api": "^7.14.1",
     "date-fns": "^4.1.0",
@@ -319,9 +328,9 @@
     "Windows"
   ],
   "overrides": {
-    "brace-expansion@1": "1.1.18",
-    "brace-expansion@2": "2.1.4",
-    "brace-expansion@5": "5.0.9",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }

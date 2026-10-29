@@ -10,24 +10,16 @@ import {
   LaunchType,
   List,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { SOURCE_CREDIT } from "./api/forecast-client";
 import { ForecastActions, WEBSITE_URL } from "./components/forecast-actions";
 import { ForecastHistoryItem } from "./components/forecast-history-item";
-import {
-  calendarMonthDescription,
-  calendarMonthImage,
-  calendarMonthSummary,
-  resetCalendar,
-} from "./domain/reset-calendar";
+import { calendarMonthDescription, calendarMonthImage, resetCalendar } from "./domain/reset-calendar";
 import { useForecast } from "./hooks/use-forecast";
 
 export default function Command() {
   const { data, error, isLoading, revalidate, warning } = useForecast();
-  const months = data ? resetCalendar(data.response) : [];
-  const currentMonthId = months.find((month) => month.isCurrent)?.key;
-  const [selectedMonth, setSelectedMonth] = useState<string>();
-  // Apply the initial selection after the native grid has received its items.
-  useEffect(() => setSelectedMonth(currentMonthId), [currentMonthId]);
+  // Current month first also gives the native Grid a reliable initial selection.
+  const months = data ? resetCalendar(data.response).reverse() : [];
 
   return (
     <Grid
@@ -35,7 +27,6 @@ export default function Command() {
       aspectRatio="1"
       inset={Grid.Inset.Zero}
       isLoading={isLoading}
-      selectedItemId={selectedMonth}
       searchBarPlaceholder="Select a Month, Then Press Enter to View Records…"
     >
       <Grid.EmptyView
@@ -48,7 +39,7 @@ export default function Command() {
         }
         actions={<ForecastActions onRefresh={revalidate} />}
       />
-      <Grid.Section title={warning ? "Data Status" : undefined} subtitle={warning}>
+      <Grid.Section title="Data: codex-reset.com" subtitle={warning ?? "Reset and banked updates · UTC"}>
         {months.map((month) => (
           <Grid.Item
             key={month.key}
@@ -61,7 +52,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="View Month’s Reset Records"
+                  title="View Month’s Events"
                   icon={Icon.List}
                   target={<MonthRecords monthKey={month.key} />}
                 />
@@ -70,18 +61,33 @@ export default function Command() {
                   icon={Icon.Gauge}
                   onAction={() => launchCommand({ name: "check-reset-forecast", type: LaunchType.UserInitiated })}
                 />
-                <Action.CopyToClipboard title="Copy Month Summary" content={calendarMonthDescription(month)} />
+                <Action.CopyToClipboard
+                  title="Copy Month Summary"
+                  content={`${calendarMonthDescription(month)}\nData: ${WEBSITE_URL}`}
+                />
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={revalidate}
                 />
-                <Action.OpenInBrowser title="Open Codex Reset Monitor" url={WEBSITE_URL} />
+                <Action.OpenInBrowser title={SOURCE_CREDIT} url={WEBSITE_URL} />
               </ActionPanel>
             }
           />
         ))}
+      </Grid.Section>
+      <Grid.Section title="Data Source" columns={4} aspectRatio="16/9">
+        <Grid.Item
+          title="codex-reset.com"
+          subtitle="Open source website"
+          content={Icon.Globe}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title={SOURCE_CREDIT} url={WEBSITE_URL} />
+            </ActionPanel>
+          }
+        />
       </Grid.Section>
     </Grid>
   );
@@ -93,15 +99,15 @@ function MonthRecords({ monthKey }: { monthKey: string }) {
   const days = month?.days.filter((day) => day.records.length).reverse() ?? [];
   return (
     <List
-      navigationTitle={month?.label ?? "Reset Records"}
+      navigationTitle={month ? `${month.label} · UTC` : "Calendar Events · UTC"}
       isShowingDetail
       isLoading={isLoading}
-      searchBarPlaceholder="Search This Month’s Reset Records…"
+      searchBarPlaceholder="Search This Month’s Reset and Banked Updates…"
     >
       <List.EmptyView
         icon={Icon.Calendar}
-        title={isLoading ? "Loading Reset Records" : "No Reset Records"}
-        description={error?.message ?? `No matching confirmed reset records in ${month?.label ?? "this month"}.`}
+        title={isLoading ? "Loading Events" : "No Events"}
+        description={error?.message ?? `No matching reset or banked updates in ${month?.label ?? "this month"}.`}
         actions={<ForecastActions onRefresh={revalidate} />}
       />
       {warning && days.length ? (
@@ -114,9 +120,14 @@ function MonthRecords({ monthKey }: { monthKey: string }) {
           />
         </List.Section>
       ) : null}
-      <List.Section title={month?.label} subtitle={month ? calendarMonthSummary(month) : undefined}>
+      <List.Section
+        title={month?.label}
+        subtitle={month ? `${days.reduce((count, day) => count + day.records.length, 0)} records` : undefined}
+      >
         {days.flatMap((day) =>
-          day.records.map((record) => <ForecastHistoryItem key={record.id} record={record} onRefresh={revalidate} />),
+          day.records.map((record) => (
+            <ForecastHistoryItem key={record.id} record={record} onRefresh={revalidate} timeZone="UTC" />
+          )),
         )}
       </List.Section>
     </List>

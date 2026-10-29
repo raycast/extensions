@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
 import { formatTime, formatDateTime } from "./backend/formatUtils";
@@ -19,10 +19,9 @@ export default function Command() {
 
   useEffect(() => {
     refreshSWes();
-    const interval = setInterval(() => {
+    setInterval(() => {
       refreshSWes();
     }, 1000);
-    return () => clearInterval(interval);
   }, []);
 
   const pausedTag = { tag: { value: "Paused", color: Color.Red } };
@@ -53,23 +52,22 @@ export default function Command() {
                   <Action title="Unpause Stopwatch" icon={Icon.Play} onAction={() => handleUnpauseSW(sw.swID)} />
                 )}
                 <RenameAction renameLabel="Stopwatch" currentName={sw.name} originalFile={"stopwatch"} ctID={sw.swID} />
-                <Action
-                  title="Stop Stopwatch"
-                  icon={Icon.Stop}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={() => handleStopSW(sw)}
-                />
                 <Action.CopyToClipboard
                   title="Copy Current Time"
-                  shortcut={Keyboard.Shortcut.Common.Copy}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
                   content={formatTime(sw.timeElapsed)}
                 />
                 <Action
                   title="Restart Stopwatch"
                   icon={Icon.ArrowCounterClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={() => handleRestartSW(sw)}
+                />
+                <Action
+                  title="Stop Stopwatch"
+                  icon={Icon.Stop}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => handleStopSW(sw)}
                 />
               </ActionPanel>
             }

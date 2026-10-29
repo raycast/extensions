@@ -37,18 +37,26 @@ enum ClipboardError: LocalizedError {
 func readClipboardImage(pasteboard: NSPasteboard = .general) throws -> (image: CGImage, changeCount: Int) {
   let changeCount = pasteboard.changeCount
   var image: CGImage?
-  for type in [NSPasteboard.PasteboardType.png, .tiff] {
-    if let data = pasteboard.data(forType: type),
-       let representation = NSBitmapImageRep(data: data),
-       let cg = representation.cgImage {
-      image = cg
-      break
+  // A file copied in Finder carries its icon as TIFF. Read the file itself, never the icon.
+  let files = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
+  if !files.isEmpty {
+    if files.count == 1, let native = NSImage(contentsOf: files[0]) {
+      image = native.cgImage(forProposedRect: nil, context: nil, hints: nil)
     }
-  }
-  if image == nil,
-     let objects = pasteboard.readObjects(forClasses: [NSImage.self], options: nil),
-     let native = objects.first as? NSImage {
-    image = native.cgImage(forProposedRect: nil, context: nil, hints: nil)
+  } else {
+    for type in [NSPasteboard.PasteboardType.png, .tiff] {
+      if let data = pasteboard.data(forType: type),
+         let representation = NSBitmapImageRep(data: data),
+         let cg = representation.cgImage {
+        image = cg
+        break
+      }
+    }
+    if image == nil,
+       let objects = pasteboard.readObjects(forClasses: [NSImage.self], options: nil),
+       let native = objects.first as? NSImage {
+      image = native.cgImage(forProposedRect: nil, context: nil, hints: nil)
+    }
   }
   guard pasteboard.changeCount == changeCount else { throw ClipboardError.changed }
   guard let image else { throw ClipboardError.noImage }

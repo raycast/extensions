@@ -1,26 +1,26 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  showInFinder,
-  open,
-  Clipboard,
-  closeMainWindow,
-  showHUD,
-} from "@raycast/api";
+import { mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
-import { writeFile, mkdir } from "fs/promises";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { SUMMARY_MODELS, SummaryModelKey } from "../config/ai";
 import { SummaryStyle } from "../types/summary";
+import { isMacOS } from "../utils/host-api";
+import { markdownToHtml } from "../utils/html-export";
 import { ArchiveSource } from "../utils/paywall-hopper";
 import { getStyleLabel } from "../utils/summarizer";
-import { markdownToHtml } from "../utils/html-export";
-import { isMacOS } from "../utils/host-api";
-import { SUMMARY_MODELS, SummaryModelKey } from "../config/ai";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },

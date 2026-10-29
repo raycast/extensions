@@ -4,9 +4,9 @@ env:
   PROMPTFOO_PASS_RATE_THRESHOLD: 75
   PROMPTFOO_REQUEST_BACKOFF_MS: 10000
 
-# maxConcurrency drives parallelism; each test fires 2 Gemini calls (provider +
+# maxConcurrency drives parallelism; each test fires 2 calls (provider + Gemini
 # rubric judge), so peak in-flight ≈ 2 × this value. Transient 429s are absorbed
-# by the app's own retry layer (gemini.ts) and promptfoo's PROMPTFOO_REQUEST_BACKOFF_MS.
+# by the app's own retry layer (src/lib/providers/transport.ts) and promptfoo's PROMPTFOO_REQUEST_BACKOFF_MS.
 # `delay` is intentionally omitted — it only applies at maxConcurrency: 1.
 commandLineOptions:
   maxConcurrency: 4
@@ -15,11 +15,23 @@ commandLineOptions:
 prompts:
   - "{{input}}"
 
+# One entry per native vendor so results compare side by side; each reads its
+# key from .env (see evals/promptfoo/provider.ts). `npm run eval` and
+# `eval:smoke` select vocabuilder-gemini by label; `npm run eval:all` runs every
+# entry. Keep the labels in step with those package.json filters.
 providers:
   - id: file://promptfoo/provider.ts
-    label: vocabuilder-production
+    label: vocabuilder-gemini
     config:
-      temperature: 0
+      provider: gemini
+  - id: file://promptfoo/provider.ts
+    label: vocabuilder-anthropic
+    config:
+      provider: anthropic
+  - id: file://promptfoo/provider.ts
+    label: vocabuilder-openai
+    config:
+      provider: openai
 
 defaultTest:
   options:

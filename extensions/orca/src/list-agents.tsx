@@ -19,9 +19,13 @@ import { agentInfo } from "./agents.ts";
 import {
   AgentFilter,
   AgentRow,
+  GroupBy,
+  Section,
   StatusFilter,
   buildSections,
+  execOrca,
   filterRows,
+  isUnseen,
   loadAgents,
   projectNamer,
   sessionLabel,
@@ -43,6 +47,61 @@ const EMPTY_TITLES: Record<StatusFilter, string> = {
   stopped: "Nobody is waiting or finished",
   all: "No agents running",
 };
+
+const SECTION_TITLES: Record<Exclude<Section["kind"], "project">, string> = {
+  waiting: "Waiting for input",
+  unseen: "Finished, not seen",
+  working: "Working",
+  finished: "Finished",
+  other: "Other terminals",
+};
+
+function sectionTitle(section: Section): string {
+  return section.kind === "project"
+    ? section.key
+    : SECTION_TITLES[section.kind];
+}
+
+function sectionSubtitle(section: Section): string {
+  const count = section.items.length;
+  if (section.kind === "waiting") return `${count} blocked`;
+  if (section.kind === "unseen") return `${count} new`;
+  return `${count} ${count === 1 ? "terminal" : "terminals"}`;
+}
+
+/**
+ * The icon is the row's state, whatever agent runs it: the agent has its own
+ * tag on the right, and the state is what the list is read for.
+ */
+function stateIcon(row: AgentRow): {
+  value: { source: Icon; tintColor: Color };
+  tooltip: string;
+} {
+  if (row.state === "waiting")
+    return {
+      value: { source: Icon.QuestionMarkCircle, tintColor: Color.Red },
+      tooltip: "Waiting for input",
+    };
+  if (isUnseen(row))
+    return {
+      value: { source: Icon.CheckCircle, tintColor: Color.Green },
+      tooltip: "Finished, not seen",
+    };
+  if (row.state === "working")
+    return {
+      value: { source: Icon.CircleProgress50, tintColor: Color.Blue },
+      tooltip: "Working",
+    };
+  if (row.state === "done")
+    return {
+      value: { source: Icon.CheckCircle, tintColor: Color.SecondaryText },
+      tooltip: "Finished",
+    };
+  return {
+    value: { source: Icon.Terminal, tintColor: Color.SecondaryText },
+    tooltip: row.agentIdentity ? "No state from Orca" : "Shell",
+  };
+}
 
 function shortBranch(branch?: string): string | undefined {
   if (!branch) return undefined;
@@ -91,7 +150,7 @@ function stateTag(row: AgentRow): { value: string; color: Color } | undefined {
 export default function Command(
   props: LaunchProps<{ launchContext?: { status?: StatusFilter } }>,
 ) {
-  const { orcaPath, agentFilter } =
+  const { orcaPath, agentFilter, groupBy } =
     getPreferenceValues<Preferences.ListAgents>();
   const [showDetail, setShowDetail] = useState(false);
   // The list opens on everything — blocked agents sit on top anyway, so the
@@ -101,7 +160,7 @@ export default function Command(
   );
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    (path: string) => loadAgents(path, execFileAsync),
+    (path: string) => loadAgents(path, execOrca),
     [orcaPath],
     {
       initialData: [] as AgentRow[],
@@ -134,7 +193,10 @@ export default function Command(
     () => filterRows(rows, status, agentFilter as AgentFilter),
     [rows, status, agentFilter],
   );
-  const sections = useMemo(() => buildSections(visible), [visible]);
+  const sections = useMemo(
+    () => buildSections(visible, (groupBy as GroupBy) ?? "project"),
+    [visible, groupBy],
+  );
   const projectOf = useMemo(() => projectNamer(visible), [visible]);
 
   const total = sections.reduce(
@@ -144,7 +206,7 @@ export default function Command(
 
   async function switchToTerminal(row: AgentRow) {
     try {
-      await execFileAsync(orcaPath, [
+      await execOrca(orcaPath, [
         "terminal",
         "switch",
         "--terminal",
@@ -157,6 +219,23 @@ export default function Command(
       await showFailureToast(error, {
         title: "Could not switch to that terminal",
       });
+    }
+  }
+
+  // Orca keeps the unread dot per worktree, so this clears it for every pane there.
+  async function markAsRead(row: AgentRow) {
+    try {
+      await execOrca(orcaPath, [
+        "worktree",
+        "set",
+        "--worktree",
+        `id:${row.worktreeId}`,
+        "--read",
+        "--json",
+      ]);
+      revalidate();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not mark as read" });
     }
   }
 
@@ -203,18 +282,20 @@ export default function Command(
 
       {sections.map((section) => (
         <List.Section
-          key={section.key}
-          title={section.kind === "waiting" ? "Waiting for input" : section.key}
-          subtitle={
-            section.kind === "waiting"
-              ? `${section.items.length} blocked`
-              : `${section.items.length} ${section.items.length === 1 ? "terminal" : "terminals"}`
-          }
+          key={`${section.kind}:${section.key}`}
+          title={sectionTitle(section)}
+          subtitle={sectionSubtitle(section)}
         >
           {section.items.map((row) => {
             const agent = row.agentIdentity;
             const branch = shortBranch(row.branch);
             const tag = stateTag(row);
+            // Outside a project section rows come from everywhere, so they name
+            // their project. Raycast puts nothing but the icon before the
+            // title, so it goes with the branch — or, with the details pane
+            // hiding the subtitle, back in front of the title.
+            const project =
+              section.kind === "project" ? undefined : projectOf(row);
             const waited =
               row.state === "waiting"
                 ? waitedFor(row.stateStartedAt)
@@ -223,21 +304,17 @@ export default function Command(
             return (
               <List.Item
                 key={row.handle}
-                icon={
-                  // A blocked agent gets a red question mark whatever it runs:
-                  // the point of the row is that it is stuck, not which CLI it is.
-                  row.state === "waiting"
-                    ? { source: Icon.QuestionMarkCircle, tintColor: Color.Red }
-                    : {
-                        source: Icon.CircleFilled,
-                        tintColor: agentInfo(agent).color,
-                      }
+                icon={stateIcon(row)}
+                title={sessionLabel(row, showDetail ? project : undefined)}
+                subtitle={
+                  showDetail
+                    ? undefined
+                    : // Raycast has no branch icon, and a subtitle takes no
+                      // images anyway; the glyph marks it as a branch.
+                      [project, branch && `⎇ ${branch}`]
+                        .filter(Boolean)
+                        .join(" · ")
                 }
-                title={sessionLabel(
-                  row,
-                  section.kind === "waiting" ? projectOf(row) : undefined,
-                )}
-                subtitle={showDetail ? undefined : branch}
                 keywords={[
                   row.worktreePath,
                   agent ?? "shell",
@@ -263,7 +340,6 @@ export default function Command(
                                 tag: { value: "detached", color: Color.Yellow },
                               },
                             ]),
-                        ...(tag ? [{ tag }] : []),
                         ...(agent
                           ? [
                               {
@@ -372,6 +448,14 @@ export default function Command(
                         shortcut={{ modifiers: ["cmd"], key: "d" }}
                         onAction={() => setShowDetail((shown) => !shown)}
                       />
+                      {row.unread ? (
+                        <Action
+                          title="Mark as Read"
+                          icon={Icon.Eye}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                          onAction={() => markAsRead(row)}
+                        />
+                      ) : null}
                     </ActionPanel.Section>
 
                     <ActionPanel.Section>

@@ -1,10 +1,11 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { createSite, getSites, getUserInfo } from "./api";
 import { Item, Preferences, Team } from "./interface";
-import { checks, errorMessages } from "./utils/constants";
+import { checks } from "./utils/constants";
 import { useRef, useState } from "react";
 
-export default function AddSiteCommand(): JSX.Element {
+export default function AddSiteCommand() {
   const { data, isLoading } = getUserInfo();
   const { revalidate } = getSites();
 
@@ -12,7 +13,9 @@ export default function AddSiteCommand(): JSX.Element {
   const nameRef = useRef<Form.TextField>(null);
   const groupRef = useRef<Form.TextField>(null);
   const checksRef = useRef<Form.TextField>(null);
+  const submissionPending = useRef(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [urlError, setUrlError] = useState<string | undefined>();
   const [checksError, setChecksError] = useState<string | undefined>();
 
@@ -20,6 +23,10 @@ export default function AddSiteCommand(): JSX.Element {
   const checkErrorText = "Pick at least one check!";
 
   async function handleSubmit(item: Item) {
+    if (submissionPending.current) {
+      return false;
+    }
+
     if (item.url === "") {
       setUrlError(urlErrorText);
       return false;
@@ -30,25 +37,24 @@ export default function AddSiteCommand(): JSX.Element {
       return false;
     }
 
-    const response = await createSite(item);
-    const data = (await response.json()) as any;
+    submissionPending.current = true;
+    setIsSubmitting(true);
 
-    if (response.status === 201) {
+    try {
+      await createSite(item);
       popToRoot();
       revalidate();
 
-      showToast({ title: "Success", message: "Successfully added site" });
+      showToast({ style: Toast.Style.Success, title: "Success", message: "Successfully added site" });
 
       return true;
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Add Site" });
+      return false;
+    } finally {
+      submissionPending.current = false;
+      setIsSubmitting(false);
     }
-
-    if (response.status === 403 || response.status === 422) {
-      const message = errorMessages[data.message] ?? data.message;
-
-      showToast(Toast.Style.Failure, "An error occurred", message);
-    }
-
-    return false;
   }
 
   const preferences = getPreferenceValues<Preferences>();
@@ -77,11 +83,13 @@ export default function AddSiteCommand(): JSX.Element {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isSubmitting}
       actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Add Site" onSubmit={handleSubmit} />
-        </ActionPanel>
+        !isSubmitting && (
+          <ActionPanel>
+            <Action.SubmitForm title="Add Site" onSubmit={handleSubmit} />
+          </ActionPanel>
+        )
       }
     >
       <Form.TextField

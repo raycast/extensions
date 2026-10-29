@@ -31,7 +31,7 @@ export default async function (input: StartTimerToolInput) {
     timeInSeconds: timeInSeconds,
     timerName: input.name,
   };
-  await startTimer({
+  startTimer({
     ...res,
     launchedFromMenuBar: false,
     skipRingContinuouslyWarning: true,

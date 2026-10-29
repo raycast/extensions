@@ -1,5 +1,9 @@
 # OpenCode Changelog
 
+## [Client Header] - 2026-10-18
+
+- Identify Raycast requests in the OpenCode Console
+
 ## [OpenCode Go] - 2026-10-17
 
 - Add models from your OpenCode Go subscription

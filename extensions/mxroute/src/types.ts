@@ -1,3 +1,21 @@
+export type Quota = {
+  username: string;
+  total_used: number;
+  total_limit: number;
+  percent_used: number;
+  breakdown: {
+    email: number;
+    web: number;
+    databases: number;
+    backups: number;
+    other: number;
+  };
+  updated_at: string;
+  grace_period: {
+    days_remaining: number;
+    deadline: string;
+  } | null;
+};
 export type DomainVerificationKey = {
   key: string;
   record: {

@@ -45,6 +45,7 @@ export interface Site {
   updated_at: string;
   checks: Check[];
   group: string;
+  group_name?: string | null;
 }
 
 export interface Check {
@@ -166,7 +167,7 @@ export interface PerformanceRecords {
 export interface DNSRecord {
   id: number;
   authoritative_nameservers: string[];
-  dns_records: any[];
+  dns_records: Record<string, unknown>[];
   diff_summary: string;
   created_at: string;
 }
