@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Paper Plane Post description] - {PR_MERGE_DATE}
+## [Update Paper Plane Post description] - 2026-10-29
 
 - Align the Paper Plane Post description: "Create and send an AI-illustrated postcard anywhere in the world". Keep the website review and payment instructions in the README.
 
