@@ -53,24 +53,6 @@ The open list refreshes every 30 seconds and after mutations; use ⌘R to refres
 
 Menu bar background refresh requests a 30-second interval, scheduled by Raycast. Its Refresh action and timer mutations refresh the data. The extension does not automatically retry writes; after a network timeout, refresh the list before starting again to avoid duplicates. It has no offline mode.
 
-## Development
-
-```sh
-npm ci
-npm run dev
-```
-
-```sh
-npm test
-npm run typecheck
-npm run lint
-npm run build
-```
-
-Tests cover API requests, parallel-timer safeguards, partial stop failures, date formatting, recent-entry grouping, project colors, summary boundaries, and pagination with a controlled HTTP transport. Automated tests do not validate a private Kimai deployment's permissions or configuration.
-
-Local `.rayext` bundle import is currently restricted to internal Raycast builds. Standard Raycast users should install through the Store or import the source for local development.
-
 ## Attribution
 
 The code is MIT licensed. The official Kimai logo is separately licensed under CC BY-SA 4.0; see [asset attribution](assets/ATTRIBUTION.md). The artwork is resized and padded for Raycast. Kimai is a registered trademark of Kevin Papst.

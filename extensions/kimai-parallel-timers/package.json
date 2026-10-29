@@ -111,7 +111,7 @@
     {
       "name": "recentDateFormat",
       "title": "Recent Entry Date Format",
-      "description": "Show dates as DD/MM/YYYY or use Today and Yesterday for recent entries. Uses your computer’s local timezone.",
+      "description": "Show dates as DD/MM/YYYY or use Today and Yesterday for recent entries. Uses your computer\u2019s local timezone.",
       "type": "dropdown",
       "required": false,
       "default": "date",
@@ -141,7 +141,6 @@
     "build": "ray build -e dist -o dist",
     "lint": "ray lint",
     "format": "prettier --write .",
-    "test": "node --import tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
     "publish": "npx @raycast/api@latest publish",
     "lint:code": "eslint ."
@@ -156,7 +155,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "tsx": "^4.20.0",
     "typescript": "^5.8.2"
   }
 }
