@@ -1,5 +1,11 @@
 # Changelog
 
+## [Search Wallpapers] - {PR_MERGE_DATE}
+
+- Added Search Wallpapers to browse the full gallery by title, artist, subject, color, or mood, with the same matching rules as anotherboring.day.
+- Preview search results, set them as your desktop wallpaper, download them, or open their artwork pages.
+- Added full-gallery search to Ask Art Wallpapers.
+
 ## [Add Ask AI Support and Improve History] - 2026-10-13
 
 - Added Ask Art Wallpapers support to browse artworks, read history, and set or download wallpapers through Raycast AI.

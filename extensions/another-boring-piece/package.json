@@ -15,6 +15,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search-wallpapers",
+      "title": "Search Wallpapers",
+      "description": "Search the full art gallery by title, artist, subject, color, or mood",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
       "name": "index",
       "title": "Today's Wallpapers",
       "description": "View and set today's wallpaper",
@@ -79,6 +86,11 @@
   ],
   "tools": [
     {
+      "name": "search-wallpapers",
+      "title": "Search Wallpapers",
+      "description": "Search the full artwork catalog using the same matching as anotherboring.day. Find artworks by title, artist, subject, color, mood, genre, or movement. Does not change the desktop wallpaper or search saved history."
+    },
+    {
       "name": "search-wallpaper-history",
       "title": "Search Wallpaper History",
       "description": "Search saved history by artwork words, artist, creation year, usage date range, or action type. Returns unique artworks and their matching events, newest first."
@@ -116,7 +128,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/utils": "^2.2.7",
+    "double-metaphone": "^2.0.1",
+    "minisearch": "^7.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
