@@ -1,6 +1,6 @@
 # ghq Extension for Raycast
 
-![](metadata/ghq-1.png)
+![](media/ghq-1.png)
 
 Raycast Extension for [ghq](https://github.com/x-motemen/ghq) `list` and `get`.
 
@@ -53,8 +53,8 @@ npm run dev
 
 The tests cover command arguments, path handling, and error reporting. When ghq is installed, they also clone and update a temporary local Git repository without accessing a remote host. Set `GHQ_TEST_BINARY` to test a custom ghq installation.
 
-### Quick Get
+### Get from Root Search
 
-Pass a repository URL in the **Get Repository** command argument and press Enter to start cloning immediately with the default options. Launch the command without an argument to use the options form.
+Add **Get Repository** to Raycast Settings → Launcher → Fallback Commands. Paste a repository URL into the normal root search and select **Get Repository** to start cloning with the default options. Launch the command by name to use the options form.
 
-You can also add **Get Repository** in Raycast’s **Manage Fallback Commands** settings. It receives the root search text and starts cloning when selected. The selected root-search result determines what Enter runs; URLs may also match Raycast’s built-in browser action.
+Fallback commands are shown for general search text, not only Git URLs. Raycast controls their ranking and may also offer its built-in browser action for URLs.

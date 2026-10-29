@@ -22,8 +22,8 @@ interface Values {
   update: boolean;
 }
 
-export default function Command(props: LaunchProps<{ arguments: { repository?: string } }>) {
-  const initialRepository = props.arguments.repository || props.fallbackText || "";
+export default function Command(props: LaunchProps) {
+  const initialRepository = props.fallbackText || "";
   const launched = useRef(false);
   const submitting = useRef(false);
   const [isLoading, setIsLoading] = useState(false);

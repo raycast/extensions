@@ -35,15 +35,7 @@
           "placeholder": "/opt/homebrew/bin/ghq"
         }
       ],
-      "subtitle": "ghq",
-      "arguments": [
-        {
-          "name": "repository",
-          "type": "text",
-          "placeholder": "Repository URL or owner/repository",
-          "required": false
-        }
-      ]
+      "subtitle": "ghq"
     }
   ],
   "preferences": [
