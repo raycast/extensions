@@ -4,7 +4,7 @@
 
 - Added Search Wallpapers to browse the full gallery by title, artist, subject, color, or mood, with the same matching rules as anotherboring.day.
 - Preview search results, set them as your desktop wallpaper, download them, or open their artwork pages.
-- Added full-gallery search to Ask Art Wallpapers.
+- Added full-gallery search to Ask Art Wallpapers, with limited results per page and support for requesting more.
 
 ## [Add Ask AI Support and Improve History] - 2026-10-13
 

@@ -57,6 +57,11 @@ const artwork = (overrides = {}) => ({
   ...overrides,
 });
 const ids = (rows) => Array.from(rows, ({ id }) => id);
+const catalogTool = (rows) =>
+  loadModule("tools/search-wallpapers.ts", {
+    "../wallpaper-catalog": { fetchWallpaperCatalog: async () => rows },
+    "../wallpaper-search": { createWallpaperSearch },
+  }).default;
 
 test("catalog reads live JSON and maps original images and artwork links", () => {
   const rows = parseWallpaperCatalog(
@@ -213,16 +218,90 @@ test("phonetic artist fallback matches a differently spelled surname", () => {
 });
 
 test("catalog AI results preserve usable wallpaper fields and are cloneable", async () => {
-  const tool = loadModule("tools/search-wallpapers.ts", {
-    "../wallpaper-catalog": { fetchWallpaperCatalog: async () => [artwork()] },
-    "../wallpaper-search": { createWallpaperSearch },
-  }).default;
+  const tool = catalogTool([artwork()]);
   const result = await tool({ query: "calm sea" });
-  assert.deepEqual(ids(result), ["sea"]);
-  assert.equal(result[0].url, artwork().url);
-  assert.equal(result[0].websiteUrl, artwork().websiteUrl);
-  assert.equal(result[0].creationDate, "1882");
-  assert.equal("searchTerms" in result[0], false);
-  assert.equal(structuredClone(result)[0].id, "sea");
-  assert.equal((await tool({ query: "unknown wallpaper" })).length, 0);
+  assert.deepEqual(ids(result.wallpapers), ["sea"]);
+  assert.equal(result.wallpapers[0].url, artwork().url);
+  assert.equal(result.wallpapers[0].websiteUrl, artwork().websiteUrl);
+  assert.equal(result.wallpapers[0].creationDate, "1882");
+  assert.equal("searchTerms" in result.wallpapers[0], false);
+  assert.equal(structuredClone(result).wallpapers[0].id, "sea");
+  assert.equal(result.total, 1);
+  assert.equal(result.nextOffset, null);
+  const empty = await tool({ query: "unknown wallpaper" });
+  assert.deepEqual(ids(empty.wallpapers), []);
+  assert.equal(empty.total, 0);
+  assert.equal(empty.nextOffset, null);
+});
+
+test("catalog AI browsing is bounded and can resume through the whole gallery", async () => {
+  const rows = Array.from({ length: 25 }, (_, index) =>
+    artwork({ id: `art-${index}` }),
+  );
+  const tool = catalogTool(rows);
+  const first = await tool({ query: "" });
+  assert.equal(first.wallpapers.length, 10);
+  assert.equal(first.total, 25);
+  assert.equal(first.nextOffset, 10);
+
+  const second = await tool({ query: "", offset: first.nextOffset });
+  assert.equal(second.wallpapers.length, 10);
+  assert.equal(second.total, 25);
+  assert.equal(second.nextOffset, 20);
+  const last = await tool({ query: "", offset: second.nextOffset });
+  assert.equal(last.wallpapers.length, 5);
+  assert.equal(last.total, 25);
+  assert.equal(last.nextOffset, null);
+  assert.deepEqual(
+    ids([...first.wallpapers, ...second.wallpapers, ...last.wallpapers]),
+    ids(rows),
+  );
+
+  const capped = await tool({ query: "!!!", limit: 1000 });
+  assert.equal(capped.wallpapers.length, 20);
+  assert.equal(capped.nextOffset, 20);
+});
+
+test("catalog AI pagination counts and slices matching artworks only", async () => {
+  const rows = Array.from({ length: 25 }, (_, index) =>
+    artwork({
+      id: `art-${index}`,
+      searchTerms: [index % 2 ? "violet" : "orange"],
+    }),
+  );
+  const tool = catalogTool(rows);
+  const page = await tool({ query: "violet", limit: 5, offset: 5 });
+  assert.deepEqual(ids(page.wallpapers), [
+    "art-11",
+    "art-13",
+    "art-15",
+    "art-17",
+    "art-19",
+  ]);
+  assert.equal(page.total, 12);
+  assert.equal(page.nextOffset, 10);
+
+  const last = await tool({ query: "violet", limit: 5, offset: 10 });
+  assert.deepEqual(ids(last.wallpapers), ["art-21", "art-23"]);
+  assert.equal(last.nextOffset, null);
+  for (const offset of [12, 100]) {
+    const exhausted = await tool({ query: "violet", limit: 5, offset });
+    assert.deepEqual(ids(exhausted.wallpapers), []);
+    assert.equal(exhausted.total, 12);
+    assert.equal(exhausted.nextOffset, null);
+  }
+
+  const exactPage = await tool({ query: "violet", limit: 6, offset: 6 });
+  assert.equal(exactPage.wallpapers.length, 6);
+  assert.equal(exactPage.nextOffset, null);
+});
+
+test("catalog AI pagination rejects invalid limits and offsets", async () => {
+  const tool = catalogTool([artwork()]);
+  for (const limit of [0, -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    await assert.rejects(tool({ query: "", limit }), /limit/i);
+  }
+  for (const offset of [-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    await assert.rejects(tool({ query: "", offset }), /offset/i);
+  }
 });

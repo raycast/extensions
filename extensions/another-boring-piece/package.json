@@ -88,7 +88,7 @@
     {
       "name": "search-wallpapers",
       "title": "Search Wallpapers",
-      "description": "Search the full artwork catalog using the same matching as anotherboring.day. Find artworks by title, artist, subject, color, mood, genre, or movement. Does not change the desktop wallpaper or search saved history."
+      "description": "Search the full artwork catalog using the same matching as anotherboring.day. Find artworks by title, artist, subject, color, mood, genre, or movement. Returns up to 20 artworks per page with a next offset for more results. Does not change the desktop wallpaper or search saved history."
     },
     {
       "name": "search-wallpaper-history",

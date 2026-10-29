@@ -13,6 +13,7 @@ Browse and set wallpapers without leaving Raycast. The collection is classic pai
 **Ask Art Wallpapers**
 
 Use Raycast AI to search the full gallery, browse today's artworks, find a random wallpaper, review your history, or set and download wallpapers.
+Gallery searches return 10 artworks at a time, with a maximum of 20 per page. Ask for more results to continue browsing.
 Search history by words, artist, artwork year, usage dates, or action type, and set a wallpaper from the results. History date ranges include both days in your local timezone.
 
 **Search Wallpapers**
