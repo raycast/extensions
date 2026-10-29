@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getDocumentCreatorTooltip, getDocumentKeywords } from "../../helpers/documentCreator";
@@ -6,11 +6,14 @@ import { getDocumentIcon } from "../../helpers/documents";
 import { getInitiativeIcon } from "../../helpers/initiatives";
 import { getProjectIcon } from "../../helpers/projects";
 import { getUserIcon } from "../../helpers/users";
+import OpenInLinear from "../OpenInLinear";
 
 import { DocumentActions, DocumentActionsProps } from "./DocumentActions";
 import { DocumentDetail } from "./DocumentDetail";
 
 export function Document({ doc, ...rest }: DocumentActionsProps) {
+  const { primaryAction } = getPreferenceValues<Preferences>();
+  const openInLinearFirst = primaryAction === "openInLinear";
   const keywords = getDocumentKeywords(doc);
   const lastUpdated = doc.updatedAt ? new Date(doc.updatedAt) : new Date(doc.createdAt);
 
@@ -59,9 +62,11 @@ export function Document({ doc, ...rest }: DocumentActionsProps) {
       ]}
       actions={
         <ActionPanel>
+          {openInLinearFirst ? <OpenInLinear title="Open Document" url={doc.url} /> : null}
+
           <Action.Push title="Show Content" target={<DocumentDetail doc={doc} {...rest} />} icon={Icon.Eye} />
 
-          <DocumentActions doc={doc} {...rest} />
+          <DocumentActions doc={doc} hideOpenInLinear={openInLinearFirst} {...rest} />
         </ActionPanel>
       }
     />
