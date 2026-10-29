@@ -113,15 +113,15 @@ export default function SearchDatabase({
     >
       {pinnedEntries.length > 0 && (
         <List.Section title="Favorites">
-          {pinnedEntries.map((entry) => (
-            <Entry key={getEntryId(entry)} entry={entry} pinnedIds={pinnedIds} setPinnedIds={setPinnedIds} />
+          {pinnedEntries.map((entry, i) => (
+            <Entry key={i} entry={entry} pinnedIds={pinnedIds} setPinnedIds={setPinnedIds} />
           ))}
         </List.Section>
       )}
       {unpinnedEntries.length > 0 && (
         <List.Section title={pinnedEntries.length > 0 ? "Other Entries" : undefined}>
-          {unpinnedEntries.map((entry) => (
-            <Entry key={getEntryId(entry)} entry={entry} pinnedIds={pinnedIds} setPinnedIds={setPinnedIds} />
+          {unpinnedEntries.map((entry, i) => (
+            <Entry key={i} entry={entry} pinnedIds={pinnedIds} setPinnedIds={setPinnedIds} />
           ))}
         </List.Section>
       )}
