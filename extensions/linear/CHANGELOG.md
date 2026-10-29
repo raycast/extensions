@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Primary Action Preference] - {PR_MERGE_DATE}
+
+- Add an **Issue Primary Action** preference to choose whether pressing Enter on an issue shows its details or opens it in Linear.
+
 ## [User and Issue Mentions in AI Chat] - 2026-10-28
 
 - Add **Users** and **Issues** mention searches in AI Chat, with active user search and full-text issue search.

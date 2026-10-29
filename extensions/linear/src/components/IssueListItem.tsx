@@ -1,5 +1,5 @@
 import { IssuePriorityValue, User } from "@linear/sdk";
-import { List, Action, Icon, ActionPanel } from "@raycast/api";
+import { List, Action, Icon, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -14,6 +14,7 @@ import { getUserIcon } from "../helpers/users";
 
 import IssueActions from "./IssueActions";
 import IssueDetail from "./IssueDetail";
+import OpenInLinear from "./OpenInLinear";
 
 type IssueListItemProps = {
   issue: IssueResult;
@@ -24,6 +25,7 @@ type IssueListItemProps = {
 };
 
 export default function IssueListItem({ issue, mutateList, mutateSubIssues, priorities, me }: IssueListItemProps) {
+  const { issuePrimaryAction } = getPreferenceValues<Preferences>();
   const keywords = [issue.identifier, issue.state.name, issue.priorityLabel];
 
   if (issue.assignee) {
@@ -82,6 +84,8 @@ export default function IssueListItem({ issue, mutateList, mutateSubIssues, prio
     },
   ];
 
+  const openInLinearFirst = issuePrimaryAction === "openInLinear";
+
   return (
     <List.Item
       key={issue.id}
@@ -92,6 +96,8 @@ export default function IssueListItem({ issue, mutateList, mutateSubIssues, prio
       accessories={accessories}
       actions={
         <ActionPanel title={issue.identifier}>
+          {openInLinearFirst ? <OpenInLinear title="Open Issue" url={issue.url} /> : null}
+
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
@@ -104,6 +110,7 @@ export default function IssueListItem({ issue, mutateList, mutateSubIssues, prio
             mutateSubIssues={mutateSubIssues}
             priorities={priorities}
             me={me}
+            hideOpenInLinear={openInLinearFirst}
           />
         </ActionPanel>
       }
