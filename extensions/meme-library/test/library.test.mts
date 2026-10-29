@@ -151,6 +151,13 @@ test("a post link is detected, and an MP4 becomes a looping GIF", async (t) => {
     "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif",
   );
   assert.equal(fullGiphyUrl("https://media.example.com/cat.gif"), "https://media.example.com/cat.gif");
+  // A copied Giphy page link saves the GIF, not the HTML page.
+  assert.equal(
+    fullGiphyUrl("https://giphy.com/gifs/theoffice-the-office-tv-l0HlBO7eyXzSZkJri?utm_source=share"),
+    "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif",
+  );
+  assert.equal(fullGiphyUrl("https://giphy.com/gifs/l0HlBO7eyXzSZkJri"), "https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif");
+  assert.equal(fullGiphyUrl("https://giphy.com/explore/cats"), "https://giphy.com/explore/cats");
 
   const folder = await mkdtemp(join(tmpdir(), "video-"));
   const mp4 = join(folder, "clip.mp4");

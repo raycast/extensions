@@ -158,9 +158,13 @@ export async function findPostVideo(url: string, timeoutMs = DOWNLOAD_TIMEOUT_MS
 }
 
 // Giphy URLs on Threads and other sites point to small previews (for example 200.gif).
-// Returns the URL of the full-size original GIF.
+// A Giphy page link (giphy.com/gifs/some-title-ID) is an HTML page. Both return the full-size original GIF.
 export function fullGiphyUrl(url: string): string {
-  const id = url.match(/^https?:\/\/media\d*\.giphy\.com\/media\/(?:v1\.[^/]+\/)?([A-Za-z0-9]+)\/[^/]+$/i)?.[1];
+  const id =
+    url.match(/^https?:\/\/media\d*\.giphy\.com\/media\/(?:v1\.[^/]+\/)?([A-Za-z0-9]+)\/[^/]+$/i)?.[1] ??
+    url.match(
+      /^https?:\/\/(?:www\.)?giphy\.com\/(?:gifs|stickers|embed)\/(?:[^/?#]*-)?([A-Za-z0-9]+)\/?(?:[?#].*)?$/i,
+    )?.[1];
   return id ? `https://media.giphy.com/media/${id}/giphy.gif` : url;
 }
 

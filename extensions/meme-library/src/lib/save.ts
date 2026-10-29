@@ -98,6 +98,6 @@ export async function saveSource(library: Library, source: Source): Promise<{ me
       return library.add(data);
     }
     case "none":
-      throw new Error("This clipboard entry has no image");
+      throw new Error("Copy an image, a GIF, or an image URL first");
   }
 }

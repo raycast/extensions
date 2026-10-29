@@ -59,7 +59,7 @@ npm run build   # 把擴充功能安裝到 Raycast
 ### Save Meme 怎麼讓 GIF 保持會動
 
 - 在瀏覽器複製圖片時，macOS 放進剪貼簿的是一張**靜態**點陣圖。Save Meme 會先讀取瀏覽器一起放進剪貼簿的 `<img src>` 網址，下載原始檔案。沒有網址時，改用複製的檔案。連檔案都沒有時，才用靜態點陣圖。
-- Giphy 的預覽網址（例如 `200.gif`）會換成原尺寸的 `giphy.gif`。
+- Giphy 的預覽網址（例如 `200.gif`）和頁面連結（`giphy.com/gifs/…`）會換成原尺寸的 `giphy.gif`。
 - MP4 影片會用 ffmpeg 轉成循環播放的 GIF（15 fps，寬度最多 480 px）。
 - 動態 WebP 會存成 `.webp`，因為 ffmpeg 讀不了。有些 App 貼上 WebP 時只會顯示一張靜態畫面。
 - 下載超過 30 秒會停止。

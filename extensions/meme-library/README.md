@@ -59,7 +59,7 @@ You can also put image files directly into the library folder.
 ### How Save Meme keeps GIFs animated
 
 - When you copy an image in a browser, macOS puts a **static** bitmap on the clipboard. Save Meme first reads the `<img src>` URL that the browser also puts on the clipboard, and downloads the original file. If there is no URL, it uses the copied file. If there is no file either, it uses the static bitmap.
-- Giphy preview URLs (for example `200.gif`) are changed to the full-size `giphy.gif`.
+- Giphy preview URLs (for example `200.gif`) and Giphy page links (`giphy.com/gifs/…`) are changed to the full-size `giphy.gif`.
 - MP4 videos are converted to looping GIFs with ffmpeg (15 fps, up to 480 px wide).
 - Animated WebP files are saved as `.webp`, because ffmpeg cannot read them. Some apps paste a WebP as one still frame.
 - A download stops after 30 seconds.

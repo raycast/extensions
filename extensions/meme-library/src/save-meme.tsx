@@ -34,7 +34,8 @@ export default async function Command() {
       );
       return;
     }
-    const source = await readClipboardSource();
+    // Read a copied bitmap now. During a slow download, the user may copy something else.
+    const source = await readClipboardSource(0, true);
     // A download can take seconds. A HUD shows even when the Raycast window is closed.
     if (source.kind === "url" && !source.url.startsWith("data:")) await showHUD("Downloading meme…");
     const { meme, duplicate } = await saveSource(library, source);
