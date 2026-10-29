@@ -4,6 +4,26 @@
 
 - Add Relaticle, an open-source CRM your AI agents can read and update, as a remote server at https://mcp.relaticle.com with OAuth sign-in.
 
+## [Add Monito MCP Server] - 2026-10-29
+
+- Add Monito to the official registry: check a deployed URL in a real browser from a plain-English expectation and get passed, failed or cannot verify with screenshots, network and console logs. Hosted Streamable HTTP server at https://www.monito.dev/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add AgenticWebScore MCP Server] - 2026-10-29
+
+- Add AgenticWebScore to the official registry: scan a public website for AI agent readiness with 60 checks, a score, and the evidence for each, read stored records and list the rubric. 4 tools. Hosted Streamable HTTP server at https://agenticwebscore.com/mcp with no sign-up and no API key, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients.
+
+## [Update Paper Plane Post description] - 2026-10-29
+
+- Align the Paper Plane Post description: "Create and send an AI-illustrated postcard anywhere in the world". Keep the website review and payment instructions in the README.
+
+## [Add Carbon Forge MCP Server] - 2026-10-29
+
+- Add Carbon Forge to the official registry: source control and a shared record for people and agents, with lanes instead of clones and one all-or-nothing changeset per landing. Hosted Streamable HTTP server at https://carbonforge.dev/api/mcp that reads public workspaces with no sign-in and no API key (a bearer token from Carbon Forge's settings to write), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Leal MCP Server] - 2026-10-29
+
+- Add Leal to the official registry: design and launch Apple Wallet and Google Wallet loyalty stamp cards for shops, cafés and salons. Read a business's name, colours and logo from its website, preview card designs as real wallet passes, then save the card, rewards, a QR signup poster and the store location. Hosted Streamable HTTP server at https://mcp.getleal.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add NebenkostenPro MCP Server] - 2026-10-28
 
 - Add NebenkostenPro to the official registry: free German utility cost (Nebenkosten) data. Property tax rates for all 10,304 German municipalities, utility costs of the 400 largest cities, housing benefit rent levels, billing and objection deadlines, operating cost types and links to check or create a utility bill. Read-only, 9 tools. Hosted Streamable HTTP server at https://nebenkostenpro.de/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

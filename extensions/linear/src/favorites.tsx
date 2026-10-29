@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { ComponentProps, ReactElement } from "react";
@@ -17,6 +17,7 @@ import { CustomViewIssues } from "./search-custom-views";
 
 function Favorites() {
   const { data, isLoading } = useCachedPromise(getFavorites);
+  const { primaryAction } = getPreferenceValues<Preferences>();
 
   const favorites = data?.favorites ?? [];
   const urlKey = data?.organization?.urlKey;
@@ -41,14 +42,17 @@ function Favorites() {
               title: customView.name,
             };
 
+            const openView = <OpenInLinear title="Open View" url={baseLinearUrl + `/view/${customView.id}`} />;
+
             customAction = (
               <ActionPanel>
+                {primaryAction === "openInLinear" ? openView : null}
                 <Action.Push
                   title="Show Issues"
                   icon={Icon.List}
                   target={<CustomViewIssues viewId={customView.id} viewName={customView.name} />}
                 />
-                <OpenInLinear title="Open View in Linear" url={baseLinearUrl + `/view/${customView.id}`} />
+                {primaryAction === "openInLinear" ? null : openView}
               </ActionPanel>
             );
           }
