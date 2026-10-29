@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Fix Search Documents Crash] - 2026-10-29
+
+- Fix **Search Documents** crashing for documents that have no creator.
+
 ## [User and Issue Mentions in AI Chat] - 2026-10-28
 
 - Add **Users** and **Issues** mention searches in AI Chat, with active user search and full-text issue search.
