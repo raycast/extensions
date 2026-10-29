@@ -1,6 +1,6 @@
 # CLIProxyAPI Changelog
 
-## [Fix Author Attribution] - {PR_MERGE_DATE}
+## [Fix Author Attribution] - 2026-10-29
 
 - Correct the author to Richard Voigtmann’s Raycast account.
 
