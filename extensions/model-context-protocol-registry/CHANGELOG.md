@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Norwegian Company Data MCP Server] - {PR_MERGE_DATE}
+
+- Add Norwegian Company Data to the registry: search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers. Hosted Streamable HTTP server at https://tools.skaidigital.com/brreg/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
+
 ## [Add House AI MCP Server] - 2026-10-29
 
 - Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).
