@@ -1894,6 +1894,7 @@
 /extensions/netnewswire                                             @xmok
 /extensions/network-diagnostics                                     @hmarr
 /extensions/network-drive                                           @SuoweiHu
+/extensions/network-hogs                                            @0xdhrv
 /extensions/network-menubar-monitor                                 @yarnaid
 /extensions/network-proxy                                           @wuyuxiangX
 /extensions/network-speed                                           @koinzhang
