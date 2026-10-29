@@ -46,13 +46,20 @@ test("rejects malformed metrics and preserves zero values and periods", async ()
   assert.equal(periodLabel("P0D"), "Current");
   assert.equal(periodLabel("P28D"), "Last 28 days");
 });
+test("rounds currency metrics to whole amounts", () => {
+  const metric = (value: number) => formatMetric({ ...demoOverview.metrics[0], value }, "USD");
+  const whole = (value: number) =>
+    new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  assert.equal(metric(669.92), whole(670));
+  assert.equal(metric(0.49), whole(0));
+});
 test("stops repeated pagination", async () => {
   const client = new RevenueCatClient("test", (async () =>
     json({ items: [], next_page: "/projects?limit=100" })) as typeof fetch);
   await assert.rejects(client.projects(), /repeated pagination/);
 });
 
-test("v3 replaces period metrics with verified chart totals; legacy makes only the overview request", async (t) => {
+test("v3 replaces all metrics with verified totals and current daily values; legacy makes only the overview request", async (t) => {
   t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
   const urls: URL[] = [];
   const client = new RevenueCatClient("test", (async (input) => {
@@ -60,9 +67,15 @@ test("v3 replaces period metrics with verified chart totals; legacy makes only t
     urls.push(url);
     if (url.pathname.endsWith("/overview")) return json(demoOverview);
     assert.equal(url.searchParams.get("realtime"), "true");
-    assert.equal(url.searchParams.get("start_date"), "2026-09-13");
+    const currentChart = v3Charts.find((chart) => chart.current && url.pathname.endsWith(`/${chart.chart}`));
+    assert.equal(url.searchParams.get("start_date"), currentChart ? "2026-10-10" : "2026-09-13");
     assert.equal(url.searchParams.get("end_date"), "2026-10-11");
     assert.equal(url.searchParams.get("expand_periods"), "false");
+    if (currentChart) {
+      assert.equal(url.searchParams.get("resolution"), "0");
+      assert.equal(url.searchParams.has("aggregate"), false);
+      return json(validV3Chart(currentChart));
+    }
     if (url.pathname.endsWith("/customers_active")) {
       assert.equal(url.searchParams.get("resolution"), "4");
       assert.equal(url.searchParams.has("aggregate"), false);
@@ -87,15 +100,17 @@ test("v3 replaces period metrics with verified chart totals; legacy makes only t
     });
   }) as typeof fetch);
   const data = await client.overview("project", "USD", undefined, true);
-  assert.equal(urls.length, 4);
+  assert.equal(urls.length, 7);
   assert.equal(data.metrics.find((m) => m.id === "revenue")?.value, 2072.78);
   assert.equal(data.metrics.find((m) => m.id === "new_customers")?.value, 525);
   assert.equal(data.metrics.find((m) => m.id === "active_users")?.value, 664);
   assert.equal(data.metrics.find((m) => m.id === "active_users")?.name, "Active Customers");
-  assert.deepEqual(
-    data.metrics.find((m) => m.id === "mrr"),
-    demoOverview.metrics.find((m) => m.id === "mrr"),
-  );
+  for (const chart of v3Charts.filter((chart) => chart.current)) {
+    const metric = data.metrics.find((m) => m.id === chart.id)!;
+    assert.equal(metric.value, chart.value);
+    assert.equal(metric.period, "P0D");
+    assert.equal(metric.last_updated_at, null);
+  }
   assert.equal(data.metrics.find((m) => m.id === "revenue")?.last_updated_at, null);
   urls.length = 0;
   assert.deepEqual(await client.overview("project", "USD", undefined, false), demoOverview);
@@ -108,15 +123,7 @@ test("a range crossing calendar years leaves active customers unavailable, never
     const url = String(input);
     assert.ok(!url.includes("customers_active"));
     if (url.includes("/overview")) return json(demoOverview);
-    const revenue = url.includes("/revenue?");
-    const name = revenue ? "Revenue" : "New Customers";
-    return json({
-      object: "chart_data",
-      yaxis_currency: "USD",
-      segments: null,
-      measures: [{ display_name: name, unit: revenue ? "$" : "#" }],
-      summary: { total: { [name]: 0 } },
-    });
+    return json(validV3Chart(v3Charts.find((chart) => url.includes(`/${chart.chart}?`))!));
   }) as typeof fetch);
   const metric = (await client.overview("project", "USD", undefined, true)).metrics.find(
     (m) => m.id === "active_users",
@@ -130,16 +137,26 @@ const v3Charts = [
   { chart: "revenue", id: "revenue", name: "Revenue", unit: "$", value: 12 },
   { chart: "customers_new", id: "new_customers", name: "New Customers", unit: "#", value: 0 },
   { chart: "customers_active", id: "active_users", name: "Active Customers", unit: "#", value: 7 },
+  { chart: "mrr", id: "mrr", name: "MRR", unit: "$", value: 669.92, current: true },
+  { chart: "actives", id: "active_subscriptions", name: "Actives", unit: "#", value: 128, current: true },
+  { chart: "trials", id: "active_trials", name: "Active Trials", unit: "#", value: 82, current: true },
 ];
 function validV3Chart(chart: (typeof v3Charts)[number]) {
   return {
     object: "chart_data",
-    resolution: "year",
+    resolution: chart.current ? "day" : "year",
     segments: null,
     yaxis_currency: "USD",
     measures: [{ display_name: chart.name, unit: chart.unit }],
     summary: { total: { [chart.name]: chart.value } },
-    values: [{ measure: 0, value: chart.value }],
+    values: [
+      {
+        measure: 0,
+        value: chart.value,
+        cohort: Date.parse(new Date().toISOString().slice(0, 10)) / 1000,
+        incomplete: true,
+      },
+    ],
   };
 }
 
@@ -179,7 +196,7 @@ test("a chart HTTP or parse failure only marks that metric unavailable and prese
   }
 });
 
-test("all chart requests can fail without hiding overview metrics or falling back to legacy period values", async (t) => {
+test("all chart requests failing marks metrics unavailable without falling back to legacy values", async (t) => {
   t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-11T20:00:00Z") });
   const client = new RevenueCatClient("test", (async (input) =>
     String(input).includes("/overview") ? json(demoOverview) : json({}, 429, { "retry-after": "30" })) as typeof fetch);

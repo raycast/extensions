@@ -173,31 +173,14 @@ beforeEach(async () => {
   malformedToken = false;
   revocationFailure = false;
   disconnectStatus = 204;
-  // A fresh transport identity gives each scenario a fresh canonical SDK cache.
   globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
 });
 afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-test("pre-WorkOS credentials neither sign in nor block a fresh WorkOS sign-in", async () => {
-  stores.set("teak", {
-    accessToken: "legacy",
-    refreshToken: "legacy-refresh",
-    isExpired: () => false,
-  });
-  expect(await oauth.hasStoredTeakSession()).toBe(false);
-  expect(await oauth.authorizeTeak()).toBe("access-new");
-  expect(browserCount).toBe(1);
-  expect(posts.map((post) => post.url)).toEqual([
-    "https://scholarly-hay-77.authkit.app/oauth2/token",
-  ]);
-  expect(posts[0].body.get("refresh_token")).toBeNull();
-});
-
 test("a server that does not advertise WorkOS is refused before browser sign-in", async () => {
   primary = "betterauth";
-  // Discovery itself refuses any provider other than WorkOS.
   await expect(oauth.authorizeTeak()).rejects.toThrow("Unable to reach Teak");
   expect(browserCount).toBe(0);
   expect(posts).toHaveLength(0);
@@ -230,7 +213,6 @@ test("WorkOS binds PKCE and token exchange to the REST resource and dynamic clie
     "https://raycast.com/redirect?package=teak-raycast",
   );
   expect(posts[0].redirect).toBe("error");
-  expect(stores.get("teak")).toBeUndefined();
 });
 
 test("concurrent commands rotate a refresh token once without opening the browser", async () => {
@@ -353,57 +335,19 @@ test("temporary refresh outage preserves credentials and never opens browser sig
   expect(stores.get(key)?.refreshToken).toBe("still-valid");
 });
 
-test("sign out after restart disconnects WorkOS and clears pre-WorkOS credentials locally", async () => {
+test("sign out after restart disconnects WorkOS from the saved connection", async () => {
   await oauth.authorizeTeak();
   const workosKey = Array.from(stores.keys())[0];
-  // Records an older build saved for its Better Auth connections.
-  const apiBaseUrl = "https://teakvault.com/api/v1";
-  const legacyIssuer = "https://app.teakvault.com";
-  const legacyClient = "teak-raycast";
-  const scopedLegacyId = `teak:${apiBaseUrl}|${legacyIssuer}|${legacyClient}`;
-  for (const providerId of ["teak", scopedLegacyId]) {
-    await raycastLocalStorageMock.setItem(
-      `teak.oauth.provider:${encodeURIComponent(apiBaseUrl)}:${providerId}`,
-      JSON.stringify({
-        apiBaseUrl,
-        providerId,
-        issuer: legacyIssuer,
-        clientId: legacyClient,
-        revocationEndpoint: "https://teakvault.com/api/api/oauth/revoke",
-      }),
-    );
-  }
-  stores.set("teak", {
-    accessToken: "old-legacy",
-    refreshToken: "old-legacy-refresh",
-    isExpired: () => false,
-  });
-  stores.set(scopedLegacyId, { accessToken: "", isExpired: () => true });
   posts.length = 0;
   globalThis.fetch = ((input, init) => transport(input, init)) as typeof fetch;
   const restarted = await import(`../lib/oauth?restart=${crypto.randomUUID()}`);
   expect(await restarted.signOutTeak()).toBe("disconnected");
-  expect(stores.has("teak")).toBe(false);
-  expect(stores.has(scopedLegacyId)).toBe(false);
   expect(stores.has(workosKey)).toBe(false);
   expect(posts.map((post) => post.url)).toEqual([
     "https://teakvault.com/api/v1/oauth/disconnect",
   ]);
   expect(posts[0].authorization).toBe("Bearer access-new");
   expect(Object.keys(await raycastLocalStorageMock.allItems())).toEqual([]);
-});
-
-test("pre-WorkOS-only sign out clears locally and then signs in with WorkOS", async () => {
-  stores.set("teak", {
-    accessToken: "old-legacy",
-    refreshToken: "old-legacy-refresh",
-    isExpired: () => false,
-  });
-  expect(await oauth.signOutTeak()).toBe("disconnected");
-  expect(stores.size).toBe(0);
-  expect(posts).toHaveLength(0);
-  expect(await oauth.authorizeTeak()).toBe("access-new");
-  expect(browserCount).toBe(1);
 });
 
 test("tampered historical endpoints never receive saved credentials", async () => {
@@ -515,7 +459,7 @@ test.each([204, 503])(
               : status,
         });
       }
-      return transport(input, init);
+      return await transport(input, init);
     }) as typeof fetch;
     if (status === 204) {
       await oauth.signOutTeak();
@@ -585,14 +529,14 @@ test.each([false, true])(
         "Sign Out before reconnecting",
       );
     } else {
-      const { request } = await import("../lib/api");
+      const { searchCards } = await import("../lib/api");
       globalThis.fetch = (async (input, init) => {
-        if (String(input).endsWith("/cards")) {
+        if (new URL(String(input)).pathname.endsWith("/cards")) {
           return json({}, 401);
         }
-        return transport(input, init);
+        return await transport(input, init);
       }) as typeof fetch;
-      await expect(request("/cards", (payload) => payload)).rejects.toThrow(
+      await expect(searchCards({}, "interactive")).rejects.toThrow(
         "Sign Out before reconnecting",
       );
     }
@@ -631,7 +575,7 @@ test.each(["success", "server", "network"])(
         if (String(input).endsWith("/oauth/disconnect")) {
           throw new Error("Network unavailable");
         }
-        return transport(input, init);
+        return await transport(input, init);
       }) as typeof fetch;
     }
     if (outcome === "success") {
@@ -725,7 +669,7 @@ test.each(["unknown", "malformed", "network", "server"])(
           failure === "server" ? 503 : 400,
         );
       }
-      return transport(input, init);
+      return await transport(input, init);
     }) as typeof fetch;
     await expect(oauth.signOutTeak()).rejects.toThrow(
       "credentials are still saved",
@@ -760,8 +704,8 @@ test("background reads join WorkOS reauthorization rotation", async () => {
     refreshToken: "prior-refresh",
     isExpired: () => false,
   });
-  let notify = () => {};
-  let release = () => {};
+  let notify = () => undefined;
+  let release = () => undefined;
   const started = new Promise<void>((resolve) => {
     notify = resolve;
   });
@@ -794,7 +738,7 @@ test("corrupt registry metadata cannot block valid logout or clear foreign token
     "teak.oauth.provider:" +
     encodeURIComponent("https://teakvault.com/api/v1") +
     ":";
-  const corruptKey = prefix + "corrupt";
+  const corruptKey = `${prefix}corrupt`;
   await raycastLocalStorageMock.setItem(corruptKey, "{invalid");
   stores.set("foreign-provider", {
     accessToken: "foreign-secret",
@@ -827,20 +771,28 @@ test.each([
       isExpired: () => false,
     });
     globalThis.fetch = (async (input, init) => {
-      if (String(input).endsWith("/oauth/disconnect"))
+      if (String(input).endsWith("/oauth/disconnect")) {
         return new Response(null, { status: 401 });
+      }
       if (String(input).endsWith("/oauth2/token")) {
-        if (failure === "network") throw new Error("Network unavailable");
-        if (failure === "oversized")
+        if (failure === "network") {
+          throw new Error("Network unavailable");
+        }
+        if (failure === "oversized") {
           return json(
             { error: "invalid_grant", extra: "x".repeat(70 * 1024) },
             400,
           );
-        if (failure === "malformed") return new Response("{", { status: 400 });
-        if (failure === "outage") return json({ error: "invalid_grant" }, 503);
+        }
+        if (failure === "malformed") {
+          return new Response("{", { status: 400 });
+        }
+        if (failure === "outage") {
+          return json({ error: "invalid_grant" }, 503);
+        }
         return json({ error: failure }, 400);
       }
-      return transport(input, init);
+      return await transport(input, init);
     }) as typeof fetch;
     if (failure === "invalid_grant" || failure === "invalid_client") {
       expect(await oauth.signOutTeak()).toBe("local-only");
@@ -864,11 +816,13 @@ test.each(["invalid_grant", "invalid_refresh_token"])(
   async (refreshError) => {
     await oauth.authorizeTeak();
     globalThis.fetch = (async (input, init) => {
-      if (String(input).endsWith("/oauth/disconnect"))
+      if (String(input).endsWith("/oauth/disconnect")) {
         return new Response(null, { status: 401 });
-      if (String(input).endsWith("/oauth2/token"))
+      }
+      if (String(input).endsWith("/oauth2/token")) {
         return json({ error: refreshError }, 400);
-      return transport(input, init);
+      }
+      return await transport(input, init);
     }) as typeof fetch;
     const { SignOutAction } = await import("../components/SignOutAction");
     let signedOut = false;
@@ -877,7 +831,9 @@ test.each(["invalid_grant", "invalid_refresh_token"])(
         signedOut = true;
       },
     });
-    if (!action) throw new Error("Missing Sign Out action");
+    if (!action) {
+      throw new Error("Missing Sign Out action");
+    }
     await action.props.onAction();
     expect(toasts).toEqual([
       {
@@ -914,11 +870,13 @@ test.each([400, 401])(
           String(input).endsWith("/oauth2/token") &&
           new URLSearchParams(String(init?.body)).get("grant_type") ===
             "refresh_token"
-        )
+        ) {
           return new Response(body, { status });
-        if (String(input).endsWith("/oauth/disconnect"))
+        }
+        if (String(input).endsWith("/oauth/disconnect")) {
           return new Response(null, { status: 401 });
-        return transport(input, init);
+        }
+        return await transport(input, init);
       }) as typeof fetch;
       await expect(oauth.getStoredTeakAccessToken()).rejects.toThrow();
       await expect(oauth.authorizeTeak()).rejects.toThrow();
@@ -973,13 +931,14 @@ test("trusted historical WorkOS 401 clears locally without refreshing against th
 });
 
 test.each([
-  ["https://attacker.authkit.app", "client_01M47GV3CYKFW0H78W0XYKGTM5"],
-  ["https://scholarly-hay-77.authkit.app", "client_attacker"],
+  ["https://attacker.authkit.app", "http://attacker.authkit.app"],
+  ["https://scholarly-hay-77.authkit.app", "https://other.authkit.app"],
 ])(
-  "untrusted saved WorkOS pin %s never accesses its credential namespace",
-  async (issuer, clientId) => {
+  "saved connection %s whose namespace names another issuer never accesses it",
+  async (issuer, namedIssuer) => {
+    const clientId = "client_01M47GV3CYKFW0H78W0XYKGTM5";
     const apiBaseUrl = "https://teakvault.com/api/v1";
-    const providerId = `teak:${apiBaseUrl}|${issuer}|${clientId}`;
+    const providerId = `teak:${apiBaseUrl}|${namedIssuer}|${clientId}`;
     const key = `teak.oauth.provider:${encodeURIComponent(apiBaseUrl)}:${providerId}`;
     const saved = {
       accessToken: "untouched-access",
@@ -1017,11 +976,13 @@ test.each([
     stores.set(key, saved);
     browserCount = 0;
     globalThis.fetch = (async (input, init) => {
-      if (String(input).endsWith("/oauth2/token"))
+      if (String(input).endsWith("/oauth2/token")) {
         return json({ error }, Number(status));
-      if (String(input).endsWith("/oauth/disconnect"))
+      }
+      if (String(input).endsWith("/oauth/disconnect")) {
         return new Response(null, { status: 401 });
-      return transport(input, init);
+      }
+      return await transport(input, init);
     }) as typeof fetch;
     await expect(oauth.getStoredTeakAccessToken()).rejects.toThrow();
     await expect(oauth.authorizeTeak()).rejects.toThrow();

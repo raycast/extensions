@@ -6,7 +6,7 @@
 
 <p align="center">
   See your screen time and which apps you actually use.<br />
-  Fully local, no account, no network.
+  Local tracking, with optional Raycast AI usage summaries.
 </p>
 
 <p align="center">
@@ -62,7 +62,8 @@ to turn tracking on and offer a shortcut to the preferences.
 
 ## Privacy
 
-1. **No network access whatsoever.** The extension makes zero HTTP requests.
+1. **Local tracking.** Collect Usage, Usage Report, and Daily Usage make no network requests.
+   When you use Ask AI, the requested usage summary is sent to Raycast AI for processing.
 2. **Application names only.** Never window titles, document names, URLs, or clipboard
    contents. Window titles would leak the contents of your work; app names do not.
 3. **Local storage only.** Usage data is plain readable JSON under the extension's support
@@ -92,6 +93,20 @@ rather than having to trust the total.
 | Daily Usage   | When you open it                                                                                      |
 
 Disabling **Collect Usage** stops all tracking.
+
+## Ask AI
+
+Open **Ask App Usage** in Raycast, or mention `@app-usage` in AI Chat. Raycast AI
+requires Raycast Pro. Try asking:
+
+- Which apps did I use most today?
+- How much time did I spend in Safari yesterday?
+- When was I most active over the last 7 days?
+
+AI can read usage for today, yesterday, or the last 7 or 30 days. It cannot change
+settings or erase history. Results reflect recorded samples only. Missing days do
+not mean zero usage. Requested summaries include app names, active and idle time,
+and hourly totals, and are processed by Raycast AI.
 
 ## Development
 

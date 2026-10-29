@@ -69,6 +69,36 @@
       ]
     },
     {
+      "name": "cmd-search",
+      "title": "Search Sessions and Windows",
+      "subtitle": "Sesh",
+      "description": "Search your sessions and every tmux window in one list.",
+      "keywords": [
+        "everything",
+        "all"
+      ],
+      "icon": "command-icon.png",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openWithApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open With (Required)",
+          "description": "Open with",
+          "default": "Terminal"
+        },
+        {
+          "name": "environmentPath",
+          "type": "textfield",
+          "required": true,
+          "title": "Environment Path",
+          "description": "Colon-separated PATH (Unix-style), e.g /usr/local/bin:/usr/bin",
+          "default": "/usr/local/bin:/usr/bin:/opt/homebrew/bin:/run/current-system/sw/bin"
+        }
+      ]
+    },
+    {
       "name": "cmd-connect-browser-worktree",
       "title": "Connect to Worktree from Browser",
       "subtitle": "Sesh",
@@ -118,7 +148,8 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
     "js-yaml@4": "4.3.2"
   }
 }

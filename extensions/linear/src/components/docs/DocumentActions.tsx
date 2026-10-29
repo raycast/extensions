@@ -19,6 +19,7 @@ export type DocumentActionsProps = {
   projects?: ProjectResult[];
   initiatives?: InitiativeResult[];
   deleteUnsupported?: boolean;
+  hideOpenInLinear?: boolean;
 };
 
 function MoveDocument({ doc, mutateDocs, projects, initiatives, mutateDoc }: DocumentActionsProps) {
@@ -183,10 +184,10 @@ function DeleteDocument({ doc, mutateDocs, deleteUnsupported }: DocumentActionsP
   );
 }
 
-export function DocumentActions({ doc, ...rest }: DocumentActionsProps) {
+export function DocumentActions({ doc, hideOpenInLinear, ...rest }: DocumentActionsProps) {
   return (
     <>
-      <OpenInLinear title="Open Document" url={doc.url} />
+      {hideOpenInLinear ? null : <OpenInLinear title="Open Document" url={doc.url} />}
 
       <ActionPanel.Section>
         <MoveDocument doc={doc} {...rest} />

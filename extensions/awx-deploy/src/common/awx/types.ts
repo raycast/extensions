@@ -36,6 +36,10 @@ export interface WorkflowJobTemplate {
   };
 }
 
+/** A row from /unified_job_templates/ narrowed to job and workflow templates. */
+export type UnifiedJobTemplate =
+  (JobTemplate & { type: "job_template" }) | (WorkflowJobTemplate & { type: "workflow_job_template" });
+
 /** A node in a workflow's graph — usually wraps a job template ("stage"). */
 export interface WorkflowNode {
   id: number;
@@ -112,6 +116,25 @@ export interface WorkflowJobNode {
     job?: { id: number; name: string; status: string; elapsed: number };
     unified_job_template?: { id: number; name: string };
   };
+}
+
+/** Launch-time overrides AWX accepts when the template enables "Prompt on launch" for them. */
+export interface LaunchPrompts {
+  job_type?: string;
+  limit?: string;
+  job_tags?: string;
+  skip_tags?: string;
+}
+
+/** GET /{job,workflow_job}_templates/:id/launch/ — what the template prompts for, and its defaults. */
+export interface LaunchConfig {
+  ask_job_type_on_launch?: boolean;
+  ask_limit_on_launch?: boolean;
+  ask_tags_on_launch?: boolean;
+  ask_skip_tags_on_launch?: boolean;
+  ask_inventory_on_launch?: boolean;
+  survey_enabled?: boolean;
+  defaults?: LaunchPrompts;
 }
 
 export interface LaunchResponse {

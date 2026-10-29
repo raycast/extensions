@@ -13,7 +13,15 @@ import { existsSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { useEffect, useState } from "react";
-import { getInstagramHighlightStoryURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
+import {
+  downloadMediaSet,
+  getInstagramHighlightStoryURL,
+  handleDownload,
+  mediaExtensionAndId,
+  runExclusive,
+  showErrorToast,
+} from "./download-media";
+import { countOf } from "./media-files";
 
 function getUniqueFilePath(folder: string, baseName: string, extension: string): string {
   let filePath = join(folder, `${baseName}${extension}`);
@@ -62,22 +70,17 @@ export default function Command({
     const selectedItems = highlightUrls.filter((item) => selectedUrls.has(item.url));
     if (selectedItems.length === 0) return;
 
-    await showToast({
-      title: "Downloading",
-      message: `Downloading ${selectedItems.length} item(s)...`,
-      style: Toast.Style.Animated,
-    });
-
     try {
-      for (const item of selectedItems) {
-        const { ext, fileId } = mediaExtensionAndId(item.url);
-        await handleDownload(item.url, fileId || "instagram-story", downloadFolder, ext);
-      }
-      await showToast({
-        title: "Success",
-        message: `Downloaded ${selectedItems.length} item(s)`,
-        style: Toast.Style.Success,
-      });
+      await runExclusive(() =>
+        downloadMediaSet(
+          selectedItems.map((item) => ({
+            url: item.url,
+            name: mediaExtensionAndId(item.url).fileId || "instagram-story",
+          })),
+          downloadFolder,
+          "Story",
+        ),
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error occurred";
       await showErrorToast("Error", message);
@@ -93,7 +96,7 @@ export default function Command({
       writeFileSync(filePath, JSON.stringify(selectedItems, null, 2));
       await showToast({
         title: "Success",
-        message: `Saved ${selectedItems.length} URL(s) to ${filePath}`,
+        message: `Saved ${countOf(selectedItems.length, "URL")} to ${filePath}`,
         style: Toast.Style.Success,
       });
     } catch (error) {
@@ -216,8 +219,10 @@ export default function Command({
                     icon={Icon.Download}
                     onAction={async () => {
                       try {
-                        const { ext, fileId } = mediaExtensionAndId(item.url);
-                        await handleDownload(item.url, fileId || "instagram-story", downloadFolder, ext);
+                        const { fileId } = mediaExtensionAndId(item.url);
+                        await runExclusive(() =>
+                          handleDownload(item.url, fileId || "instagram-story", downloadFolder, "Story"),
+                        );
                       } catch (error) {
                         const message = error instanceof Error ? error.message : "Unknown error occurred";
                         await showErrorToast("Error", message);

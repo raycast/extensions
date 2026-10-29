@@ -46,9 +46,10 @@ instructions: |
   ### History tool parameters:
   - `action`: One of `list`, `star`, `unstar`, `list_starred` (optional, defaults to `list`)
     - `list`: Return recent history (existing behavior)
-    - `star`: Star a specific app+profile pair (requires `profile` + `app`)
-    - `unstar`: Unstar a specific app+profile pair (requires `profile` + `app`)
-    - `list_starred`: Return starred app+profile pairs (optional `app`, optional `limit`)
+    - `star`: Add a specific app+profile pair to Favorites (requires `profile` + `app`)
+    - `unstar`: Remove a specific app+profile pair from Favorites (requires `profile` + `app`)
+    - `list_starred`: Return the app+profile pairs in Favorites (optional `app`, optional `limit`)
+  - Favorites live in this extension only. Adding one never stars, follows or likes anything on the app itself.
   - `profile`: Required for `star` and `unstar` actions
   - `app`: Filter by specific app name (optional, lowercase) - use this when user mentions a specific app
   - `limit`: Number of results to return (optional, defaults to 10)
@@ -58,9 +59,9 @@ instructions: |
   - "What profiles have I opened recently?" → Call history tool with no app filter
   - "Show me my recent profile history" → Call history tool
   - "What profile sounds like chrissy?" → Call history tool and search the results
-  - "Star @chris on instagram" → Call history tool with `action: "star"`, `profile: "chris"`, `app: "instagram"`
-  - "Unstar chris on bluesky" → Call history tool with `action: "unstar"`, `profile: "chris"`, `app: "bluesky"`
-  - "Show my starred profiles" → Call history tool with `action: "list_starred"`
+  - "Add @chris on instagram to my favorites" or "Star @chris on instagram" → Call history tool with `action: "star"`, `profile: "chris"`, `app: "instagram"`
+  - "Remove chris on bluesky from favorites" or "Unstar chris on bluesky" → Call history tool with `action: "unstar"`, `profile: "chris"`, `app: "bluesky"`
+  - "Show my favorites" → Call history tool with `action: "list_starred"`
 
   ### Important: For fuzzy matching queries, FIRST call the history tool to get the data, then analyze the results
 
@@ -70,7 +71,7 @@ instructions: |
   - If app is unclear, ask for clarification
   - Use the exact profile name and app as provided by the user
   - For history queries, reference past profile visits and provide helpful summaries
-  - For star/unstar requests, always treat stars as app+profile specific (not global by profile)
+  - For favorites requests, always treat favorites as app+profile specific (not global by profile)
 
 evals:
   - input: "@at-profile open raycast on instagram"
@@ -117,21 +118,21 @@ evals:
             profile: "demoaccount"
             app: "github"
 
-  # Disabled app should not be available (linkedin disabled in test-settings)
+  # A hidden app is not available (the mock stands in for LinkedIn hidden in Manage Apps)
   - input: "@at-profile open chrismessina on linkedin"
     mocks:
       open: "App 'linkedin' not found or not enabled"
     expected:
       - includes: "not available"
 
-  # TikTok is also disabled in test-settings
+  # Same for a hidden TikTok
   - input: "@at-profile open user on tiktok"
     mocks:
       open: "App 'tiktok' not found or not enabled"
     expected:
       - includes: "not available"
 
-  # Custom app from test-settings should work
+  # A custom app works (the mock stands in for a custom "testplatform" app)
   - input: "@at-profile open testuser on testplatform"
     mocks:
       open: 'Successfully called "open"'
@@ -202,10 +203,10 @@ evals:
           name: "history"
           arguments: {}
 
-  # Star a specific app+profile pair
-  - input: "@at-profile Star @chris on instagram"
+  # Add a specific app+profile pair to Favorites
+  - input: "@at-profile Add @chris on instagram to my favorites"
     mocks:
-      history: "Starred @chris on Instagram."
+      history: "Added @chris on Instagram to Favorites."
     expected:
       - callsTool:
           name: "history"
@@ -213,18 +214,25 @@ evals:
             action: "star"
             profile: "chris"
             app: "instagram"
-      - or:
-          - includes: "Starred @chris on Instagram"
-          - includes: "starred @chris on Instagram"
-          - includes: "starred on Instagram"
-          - includes: "has been starred on Instagram"
-          - includes: "I have starred the profile @chris on Instagram for you."
-          - includes: 'I have starred the profile "chris" on Instagram.'
+      - includes: "Favorites"
 
-  # Unstar a specific app+profile pair
-  - input: "@at-profile Unstar chris on bluesky"
+  # "Star" still means add to Favorites
+  - input: "@at-profile Star @chris on instagram"
     mocks:
-      history: "Unstarred @chris on Bluesky."
+      history: "Added @chris on Instagram to Favorites."
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            action: "star"
+            profile: "chris"
+            app: "instagram"
+      - includes: "Favorites"
+
+  # Remove a specific app+profile pair from Favorites
+  - input: "@at-profile Remove chris on bluesky from my favorites"
+    mocks:
+      history: "Removed @chris on Bluesky from Favorites."
     expected:
       - callsTool:
           name: "history"
@@ -232,48 +240,32 @@ evals:
             action: "unstar"
             profile: "chris"
             app: "bluesky"
-      - or:
-          - includes: "Unstarred @chris on Bluesky"
-          - includes: "unstarred @chris on Bluesky"
-          - includes: "unstarred on Bluesky"
-          - includes: "has been unstarred on Bluesky"
-          - includes: "Unstarred **chris** on Bluesky"
-          - includes: "I have unstarred the profile @chris on Bluesky for you."
-          - includes: 'I have unstarred the profile "chris" on Bluesky.'
+      - includes: "Favorites"
 
-  # List all starred profiles
-  - input: "@at-profile Show my starred profiles"
+  # List all favorites
+  - input: "@at-profile Show my favorites"
     mocks:
-      history: "Starred profiles:\n\n• chris on Instagram (2 hours ago)\n• chris on Bluesky (1 day ago)"
+      history: "Favorites:\n\n• chris on Instagram (2 hours ago)\n• chris on Bluesky (1 day ago)"
     expected:
       - callsTool:
           name: "history"
           arguments:
             action: "list_starred"
       - or:
-          - includes: "Starred profiles"
           - includes: "chris on Instagram"
           - includes: "chris on Bluesky"
 
-  # List starred profiles filtered by app
-  - input: "@at-profile Show my starred profiles on instagram"
+  # List favorites filtered by app
+  - input: "@at-profile Show my favorites on instagram"
     mocks:
-      history: "Starred profiles on instagram:\n\n• chris on Instagram (2 hours ago)"
+      history: "Favorites on instagram:\n\n• chris on Instagram (2 hours ago)"
     expected:
       - callsTool:
           name: "history"
           arguments:
             action: "list_starred"
             app: "instagram"
-      - or:
-          - includes: "Starred @chris on Instagram"
-          - includes: "starred @chris on Instagram"
-          - includes: "starred on Instagram"
-          - includes: "has been starred on Instagram"
-          - includes: "Your starred profile on Instagram is:"
-          - includes: "Here are your starred profiles on Instagram:"
-          - includes: "I have starred the profile @chris on Instagram for you."
-          - includes: 'I have starred the profile "chris" on Instagram.'
+      - includes: "chris"
 
   # History query: fuzzy matching for profile
   - input: "@at-profile What profile did I open recently that sounds like chrissy?"

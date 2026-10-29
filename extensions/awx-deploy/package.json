@@ -19,7 +19,7 @@
       "name": "search-templates",
       "title": "Search Templates",
       "subtitle": "AWX",
-      "description": "Browse job templates (paginated, filterable) and launch a selected one.",
+      "description": "Browse workflows and job templates in one searchable list and launch a selected one.",
       "mode": "view"
     },
     {

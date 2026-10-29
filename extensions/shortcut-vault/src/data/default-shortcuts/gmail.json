@@ -1,0 +1,273 @@
+{
+  "ownerName": "Gmail",
+  "ownerType": "webapp",
+  "sourceUrl": "https://support.google.com/mail/answer/6594",
+  "shortcuts": [
+    {
+      "id": "compose",
+      "commandName": "Compose",
+      "modifiers": [],
+      "key": "C",
+      "scope": "webapp"
+    },
+    {
+      "id": "search-mail",
+      "commandName": "Search Mail",
+      "modifiers": [],
+      "key": "/",
+      "scope": "webapp"
+    },
+    {
+      "id": "reply",
+      "commandName": "Reply",
+      "modifiers": [],
+      "key": "R",
+      "scope": "webapp"
+    },
+    {
+      "id": "reply-all",
+      "commandName": "Reply All",
+      "modifiers": [],
+      "key": "A",
+      "scope": "webapp"
+    },
+    {
+      "id": "forward",
+      "commandName": "Forward",
+      "modifiers": [],
+      "key": "F",
+      "scope": "webapp"
+    },
+    {
+      "id": "archive",
+      "commandName": "Archive",
+      "modifiers": [],
+      "key": "E",
+      "scope": "webapp"
+    },
+    {
+      "id": "send",
+      "commandName": "Send",
+      "modifiers": ["command"],
+      "key": "Enter",
+      "scope": "webapp"
+    },
+    {
+      "id": "add-cc",
+      "commandName": "Add Cc Recipients",
+      "modifiers": ["command", "shift"],
+      "key": "C",
+      "scope": "webapp"
+    },
+    {
+      "id": "add-bcc",
+      "commandName": "Add Bcc Recipients",
+      "modifiers": ["command", "shift"],
+      "key": "B",
+      "scope": "webapp"
+    },
+    {
+      "id": "insert-link",
+      "commandName": "Insert Link",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "webapp"
+    },
+    {
+      "id": "bold",
+      "commandName": "Bold",
+      "modifiers": ["command"],
+      "key": "B",
+      "scope": "webapp"
+    },
+    {
+      "id": "italic",
+      "commandName": "Italic",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "webapp"
+    },
+    {
+      "id": "underline",
+      "commandName": "Underline",
+      "modifiers": ["command"],
+      "key": "U",
+      "scope": "webapp"
+    },
+    {
+      "id": "numbered-list",
+      "commandName": "Numbered List",
+      "modifiers": ["command", "shift"],
+      "key": "7",
+      "scope": "webapp"
+    },
+    {
+      "id": "bulleted-list",
+      "commandName": "Bulleted List",
+      "modifiers": ["command", "shift"],
+      "key": "8",
+      "scope": "webapp"
+    },
+    {
+      "id": "quote",
+      "commandName": "Quote",
+      "modifiers": ["command", "shift"],
+      "key": "9",
+      "scope": "webapp"
+    },
+    {
+      "id": "indent-less",
+      "commandName": "Indent Less",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "webapp"
+    },
+    {
+      "id": "indent-more",
+      "commandName": "Indent More",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "webapp"
+    },
+    {
+      "id": "align-left",
+      "commandName": "Align Left",
+      "modifiers": ["command", "shift"],
+      "key": "L",
+      "scope": "webapp"
+    },
+    {
+      "id": "align-center",
+      "commandName": "Align Center",
+      "modifiers": ["command", "shift"],
+      "key": "E",
+      "scope": "webapp"
+    },
+    {
+      "id": "align-right",
+      "commandName": "Align Right",
+      "modifiers": ["command", "shift"],
+      "key": "R",
+      "scope": "webapp"
+    },
+    {
+      "id": "move-focus-toolbar",
+      "commandName": "Move Focus to Toolbar",
+      "modifiers": [],
+      "key": ",",
+      "scope": "webapp"
+    },
+    {
+      "id": "select-conversation",
+      "commandName": "Select Conversation",
+      "modifiers": [],
+      "key": "X",
+      "scope": "webapp"
+    },
+    {
+      "id": "toggle-star",
+      "commandName": "Toggle Star",
+      "modifiers": [],
+      "key": "S",
+      "scope": "webapp"
+    },
+    {
+      "id": "mute-conversation",
+      "commandName": "Mute Conversation",
+      "modifiers": [],
+      "key": "M",
+      "scope": "webapp"
+    },
+    {
+      "id": "report-spam",
+      "commandName": "Report as Spam",
+      "modifiers": [],
+      "key": "!",
+      "scope": "webapp"
+    },
+    {
+      "id": "delete",
+      "commandName": "Delete",
+      "modifiers": [],
+      "key": "#",
+      "scope": "webapp"
+    },
+    {
+      "id": "reply-new-window",
+      "commandName": "Reply in New Window",
+      "modifiers": ["shift"],
+      "key": "R",
+      "scope": "webapp"
+    },
+    {
+      "id": "reply-all-new-window",
+      "commandName": "Reply All in New Window",
+      "modifiers": ["shift"],
+      "key": "A",
+      "scope": "webapp"
+    },
+    {
+      "id": "forward-new-window",
+      "commandName": "Forward in New Window",
+      "modifiers": ["shift"],
+      "key": "F",
+      "scope": "webapp"
+    },
+    {
+      "id": "undo-last-action",
+      "commandName": "Undo Last Action",
+      "modifiers": [],
+      "key": "Z",
+      "scope": "webapp"
+    },
+    {
+      "id": "mark-read",
+      "commandName": "Mark as Read",
+      "modifiers": ["shift"],
+      "key": "I",
+      "scope": "webapp"
+    },
+    {
+      "id": "mark-unread",
+      "commandName": "Mark as Unread",
+      "modifiers": ["shift"],
+      "key": "U",
+      "scope": "webapp"
+    },
+    {
+      "id": "compose-new-tab",
+      "commandName": "Compose in New Tab",
+      "modifiers": [],
+      "key": "D",
+      "scope": "webapp"
+    },
+    {
+      "id": "open-more-actions",
+      "commandName": "Open More Actions Menu",
+      "modifiers": [],
+      "key": ".",
+      "scope": "webapp"
+    },
+    {
+      "id": "open-move-to",
+      "commandName": "Open Move To Menu",
+      "modifiers": [],
+      "key": "V",
+      "scope": "webapp"
+    },
+    {
+      "id": "open-label-as",
+      "commandName": "Open Label As Menu",
+      "modifiers": [],
+      "key": "L",
+      "scope": "webapp"
+    },
+    {
+      "id": "keyboard-shortcut-help",
+      "commandName": "Open Keyboard Shortcut Help",
+      "modifiers": [],
+      "key": "?",
+      "scope": "webapp"
+    }
+  ]
+}
