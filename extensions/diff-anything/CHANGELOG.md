@@ -1,6 +1,6 @@
 # Diff Anything Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - Open two files or two folders, including a Finder selection, side by side in Diff Anything.
 - Open two texts, typed or loaded from the clipboard, side by side in Diff Anything.
