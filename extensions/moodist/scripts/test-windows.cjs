@@ -188,6 +188,19 @@ if (background) {
     await assert.rejects(player.setTimer(1441));
     const invalidFile = path.join(supportPath, "sounds", "binaural", "binaural-alpha.wav");
     fs.writeFileSync(invalidFile, "not audio");
+    const beforeRejectedLoad = read();
+    await assert.rejects(
+      player.loadMix(
+        [
+          { soundId: "binaural-theta", volume: 0.6 },
+          { soundId: "binaural-alpha", volume: 0.7 },
+        ],
+        0.9,
+        "rejected-preset",
+      ),
+      "a preset containing an invalid file is rejected",
+    );
+    assert.deepEqual(read(), beforeRejectedLoad, "a rejected preset preserves the playing mix, volumes, and timer");
     await assert.rejects(player.play("binaural-alpha"), "decode errors reach the caller");
     assert.equal(player.playingCount(await player.getMix()), 1, "a failed addition keeps the existing mix playing");
     process.kill(worker);

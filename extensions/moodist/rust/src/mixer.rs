@@ -7,13 +7,13 @@ use std::{
     hash::{Hash, Hasher},
     io::Write,
     path::Path,
-    process::{Command, Stdio},
+    process::{Child, Command, Stdio},
     sync::mpsc,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use windows::{
     core::{Interface, HSTRING},
-    Foundation::TypedEventHandler,
+    Foundation::{AsyncStatus, EventRegistrationToken, IAsyncOperation, TypedEventHandler},
     Media::{Core::MediaSource, Playback::MediaPlayer},
     Storage::{IStorageFile, StorageFile},
     Win32::{
@@ -156,7 +156,7 @@ struct Reply {
     error: Option<String>,
 }
 
-fn spawn_worker(root: &Path) -> Result<(), String> {
+fn spawn_worker(root: &Path) -> Result<Child, String> {
     // Rust's Windows process launcher can inherit Raycast's original pipe handles even
     // with null stdio. Keeping either write end open prevents the bridge call completing.
     let _stdio = StdioInheritance::suspend()?;
@@ -177,13 +177,22 @@ fn spawn_worker(root: &Path) -> Result<(), String> {
                 .map_err(error)?
                 .as_bytes(),
         )
-        .map_err(error)
+        .map_err(error)?;
+    Ok(child)
 }
 
 pub fn request(support: &str, action: &str) -> Result<String, String> {
+    request_with_launcher(support, action, spawn_worker)
+}
+
+fn request_with_launcher(
+    support: &str,
+    action: &str,
+    mut launch: impl FnMut(&Path) -> Result<Child, String>,
+) -> Result<String, String> {
     fs::create_dir_all(support).map_err(error)?;
     let root = fs::canonicalize(support).map_err(error)?;
-    let _lock = lock(&root, "client", 30_000)?;
+    let mut client_lock = Some(lock(&root, "client", 30_000)?);
     let action: Value = serde_json::from_str(action).map_err(error)?;
     let id = format!(
         "{}-{}",
@@ -198,30 +207,49 @@ pub fn request(support: &str, action: &str) -> Result<String, String> {
         deadline: now() + 20_000,
         action,
     };
+    let responses = root.join("windows-responses");
+    fs::create_dir_all(&responses).map_err(error)?;
     let request_file = root.join("windows-request.json");
-    let response_file = root.join("windows-response.json");
+    let response_file = responses.join(format!("{id}.json"));
+    let accepted_file = responses.join(format!("{id}.accepted"));
     atomic_write(&request_file, &envelope)?;
     let deadline = Instant::now() + Duration::from_secs(20);
-    let mut launched = false;
+    let mut launched: Option<Child> = None;
     loop {
+        if client_lock.is_some() && accepted_file.exists() {
+            client_lock.take();
+            let _ = fs::remove_file(&accepted_file);
+        }
         if let Some(event) = open_event(&root)? {
             unsafe { SetEvent(event.0) }.map_err(error)?;
-        } else if !launched {
-            spawn_worker(&root)?;
-            launched = true;
+        } else if launched
+            .as_mut()
+            .map(|child| child.try_wait())
+            .transpose()
+            .map_err(error)?
+            .flatten()
+            .is_some()
+            || launched.is_none()
+        {
+            launched = Some(launch(&root)?);
         }
-        if let Ok(bytes) = fs::read(&response_file) {
-            if let Ok(reply) = serde_json::from_slice::<Reply>(&bytes) {
-                if reply.id == id {
-                    if let Some(message) = reply.error {
-                        return Err(message);
+        for path in [&response_file, &root.join("windows-response.json")] {
+            if let Ok(bytes) = fs::read(path) {
+                if let Ok(reply) = serde_json::from_slice::<Reply>(&bytes) {
+                    if reply.id == id {
+                        let _ = fs::remove_file(&response_file);
+                        let _ = fs::remove_file(&accepted_file);
+                        if let Some(message) = reply.error {
+                            return Err(message);
+                        }
+                        return serde_json::to_string(&reply.result.ok_or("Empty mixer response")?)
+                            .map_err(error);
                     }
-                    return serde_json::to_string(&reply.result.ok_or("Empty mixer response")?)
-                        .map_err(error);
                 }
             }
         }
         if Instant::now() > deadline {
+            let _ = fs::remove_file(&accepted_file);
             return Err("Windows mixer did not respond. Try again.".into());
         }
         std::thread::sleep(Duration::from_millis(20));
@@ -274,11 +302,7 @@ impl Drop for Player {
     }
 }
 impl Player {
-    fn open(sound: &Sound, master: f64) -> Result<Self, String> {
-        let file = StorageFile::GetFileFromPathAsync(&HSTRING::from(sound.file.as_str()))
-            .map_err(error)?
-            .get()
-            .map_err(error)?;
+    fn prepare(file: StorageFile, sound: &Sound, master: f64) -> Result<OpeningMedia, String> {
         let file: IStorageFile = file.cast().map_err(error)?;
         let source = MediaSource::CreateFromStorageFile(&file).map_err(error)?;
         let media = MediaPlayer::new().map_err(error)?;
@@ -326,24 +350,148 @@ impl Player {
             ))
             .map_err(error)?;
         player.media.SetSource(&source).map_err(error)?;
-        let deadline = Instant::now() + Duration::from_secs(8);
-        loop {
-            if let Ok(message) = player.failures.try_recv() {
+        Ok(OpeningMedia {
+            player,
+            opened,
+            opened_token,
+        })
+    }
+}
+
+struct OpeningMedia {
+    player: Player,
+    opened: mpsc::Receiver<()>,
+    opened_token: EventRegistrationToken,
+}
+
+struct OpeningPlayer {
+    file: Option<IAsyncOperation<StorageFile>>,
+    media: Option<OpeningMedia>,
+    sound: Sound,
+    master: f64,
+    deadline: Instant,
+}
+impl Drop for OpeningPlayer {
+    fn drop(&mut self) {
+        if let Some(file) = &self.file {
+            let _ = file.Cancel();
+        }
+    }
+}
+impl OpeningPlayer {
+    fn new(sound: Sound, master: f64) -> Result<Self, String> {
+        Ok(Self {
+            file: Some(
+                StorageFile::GetFileFromPathAsync(&HSTRING::from(sound.file.as_str()))
+                    .map_err(error)?,
+            ),
+            media: None,
+            sound,
+            master,
+            deadline: Instant::now() + Duration::from_secs(8),
+        })
+    }
+    fn poll(&mut self) -> Result<Option<Player>, String> {
+        if Instant::now() >= self.deadline {
+            return Err("Windows could not open the sound".into());
+        }
+        if let Some(file) = &self.file {
+            if file.Status().map_err(error)? == AsyncStatus::Started {
+                return Ok(None);
+            }
+            self.media = Some(Player::prepare(
+                file.GetResults().map_err(error)?,
+                &self.sound,
+                self.master,
+            )?);
+            self.file = None;
+        }
+        if let Some(media) = &self.media {
+            if let Ok(message) = media.player.failures.try_recv() {
                 return Err(message);
             }
-            if opened.recv_timeout(Duration::from_millis(20)).is_ok() {
-                break;
-            }
-            if Instant::now() > deadline {
-                return Err("Windows could not open the sound".into());
+            if media.opened.try_recv().is_ok() {
+                let media = self.media.take().ok_or("Missing prepared sound")?;
+                media
+                    .player
+                    .media
+                    .RemoveMediaOpened(media.opened_token)
+                    .map_err(error)?;
+                return Ok(Some(media.player));
             }
         }
-        player
-            .media
-            .RemoveMediaOpened(opened_token)
-            .map_err(error)?;
-        player.media.Play().map_err(error)?;
-        Ok(player)
+        Ok(None)
+    }
+}
+
+struct PendingLoad {
+    id: String,
+    deadline: u64,
+    expires_at: Instant,
+    opening: HashMap<String, OpeningPlayer>,
+    players: HashMap<String, Player>,
+    sounds: BTreeMap<String, Sound>,
+    master: f64,
+    preset: Option<String>,
+}
+impl PendingLoad {
+    fn new(envelope: &Envelope) -> Result<Self, String> {
+        let action = &envelope.action;
+        let master = volume(action, "master")?;
+        let entries = action["sounds"]
+            .as_array()
+            .filter(|s| !s.is_empty())
+            .ok_or("This mix has no playable sounds")?;
+        let mut sounds = BTreeMap::new();
+        for entry in entries {
+            sounds.insert(
+                text(entry, "id")?.to_string(),
+                Sound {
+                    volume: volume(entry, "volume")?,
+                    file: text(entry, "file")?.into(),
+                    pid: Some(std::process::id()),
+                },
+            );
+        }
+        let opening = sounds
+            .iter()
+            .map(|(id, sound)| Ok((id.clone(), OpeningPlayer::new(sound.clone(), master)?)))
+            .collect::<Result<_, String>>()?;
+        Ok(Self {
+            id: envelope.id.clone(),
+            deadline: envelope.deadline.saturating_sub(250),
+            expires_at: Instant::now()
+                + Duration::from_millis(
+                    envelope.deadline.saturating_sub(now()).saturating_sub(250),
+                ),
+            opening,
+            players: HashMap::new(),
+            sounds,
+            master,
+            preset: action["preset"].as_str().map(String::from),
+        })
+    }
+    fn poll(&mut self) -> Result<bool, String> {
+        self.check_deadline()?;
+        let mut ready = Vec::new();
+        for (id, opening) in &mut self.opening {
+            if let Some(player) = opening.poll()? {
+                self.players.insert(id.clone(), player);
+                ready.push(id.clone());
+            }
+        }
+        for id in ready {
+            self.opening.remove(&id);
+        }
+        self.check_deadline()?;
+        Ok(self.opening.is_empty())
+    }
+    fn check_deadline(&self) -> Result<(), String> {
+        if now() >= self.deadline || Instant::now() >= self.expires_at {
+            Err("Mixer request expired. Try again.".into())
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -352,6 +500,37 @@ struct Mixer {
     players: HashMap<String, Player>,
 }
 impl Mixer {
+    fn commit_load(&mut self, load: PendingLoad) -> Result<Value, String> {
+        load.check_deadline()?;
+        for player in load.players.values() {
+            if let Ok(message) = player.failures.try_recv() {
+                return Err(message);
+            }
+        }
+        let start = (|| {
+            for player in self.players.values() {
+                player.media.Pause().map_err(error)?;
+            }
+            for player in load.players.values() {
+                load.check_deadline()?;
+                player.media.Play().map_err(error)?;
+            }
+            load.check_deadline()?;
+            Ok::<_, String>(())
+        })();
+        if let Err(message) = start {
+            drop(load);
+            for player in self.players.values() {
+                let _ = player.media.Play();
+            }
+            return Err(message);
+        }
+        self.players = load.players;
+        self.mix.sounds = load.sounds;
+        self.mix.master = load.master;
+        self.mix.preset = load.preset;
+        Ok(json!({ "mix": self.mix, "count": 0, "cancelled": false }))
+    }
     fn pause(&mut self) -> usize {
         let count = self.players.len();
         self.players.clear();
@@ -361,7 +540,14 @@ impl Mixer {
         count
     }
     fn start(&mut self, id: &str, sound: Sound) -> Result<(), String> {
-        let player = Player::open(&sound, self.mix.master)?;
+        let mut opening = OpeningPlayer::new(sound.clone(), self.mix.master)?;
+        let player = loop {
+            if let Some(player) = opening.poll()? {
+                break player;
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        };
+        player.media.Play().map_err(error)?;
         self.players.insert(id.into(), player);
         self.mix.sounds.insert(
             id.into(),
@@ -467,29 +653,6 @@ impl Mixer {
                 }
                 self.mix.master = master;
             }
-            "load" => {
-                let master = volume(action, "master")?;
-                let entries = action["sounds"]
-                    .as_array()
-                    .filter(|s| !s.is_empty())
-                    .ok_or("This mix has no playable sounds")?;
-                let mut sounds = BTreeMap::new();
-                let mut players = HashMap::new();
-                for entry in entries {
-                    let id = text(entry, "id")?;
-                    let sound = Sound {
-                        volume: volume(entry, "volume")?,
-                        file: text(entry, "file")?.into(),
-                        pid: Some(std::process::id()),
-                    };
-                    players.insert(id.to_string(), Player::open(&sound, master)?);
-                    sounds.insert(id.to_string(), sound);
-                }
-                self.players = players;
-                self.mix.sounds = sounds;
-                self.mix.master = master;
-                self.mix.preset = action["preset"].as_str().map(String::from);
-            }
             "timer" => {
                 let minutes = action["minutes"]
                     .as_u64()
@@ -519,6 +682,100 @@ fn volume(value: &Value, field: &str) -> Result<f64, String> {
         .ok_or_else(|| format!("Invalid {field}"))
 }
 
+fn reply(root: &Path, id: String, result: Result<Value, String>) -> Result<(), String> {
+    let (result, error) = match result {
+        Ok(value) => (Some(value), None),
+        Err(message) => (None, Some(message)),
+    };
+    let path = root.join("windows-responses").join(format!("{id}.json"));
+    let reply = Reply { id, result, error };
+    atomic_write(&path, &reply)?;
+    atomic_write(&root.join("windows-response.json"), &reply)
+}
+
+fn cancel_load(root: &Path, pending: &mut Option<PendingLoad>, reason: &str) -> Result<(), String> {
+    if let Some(load) = pending.take() {
+        let id = load.id.clone();
+        drop(load);
+        reply(root, id, Err(reason.into()))?;
+    }
+    Ok(())
+}
+
+fn handle_request(
+    root: &Path,
+    mixer: &mut Mixer,
+    pending: &mut Option<PendingLoad>,
+    envelope: Envelope,
+) -> Result<(), String> {
+    let kind = envelope.action["type"].as_str();
+    let result = if envelope.deadline <= now() {
+        Err("Mixer request expired. Try again.".into())
+    } else if kind == Some("load") {
+        cancel_load(
+            root,
+            pending,
+            "Preset loading was replaced by another request",
+        )?;
+        match PendingLoad::new(&envelope) {
+            Ok(load) => {
+                *pending = Some(load);
+                return Ok(());
+            }
+            Err(message) => Err(message),
+        }
+    } else {
+        if !matches!(kind, Some("get" | "timer" | "cancelTimer")) {
+            cancel_load(
+                root,
+                pending,
+                "Preset loading was cancelled by another command",
+            )?;
+        }
+        mixer.apply(&envelope.action)
+    };
+    // Failed multi-sound resumes can still change which sounds are playing.
+    atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
+    reply(root, envelope.id, result)
+}
+
+fn tick(root: &Path, mixer: &mut Mixer, pending: &mut Option<PendingLoad>) -> Result<(), String> {
+    let timer_expired = mixer
+        .mix
+        .timer
+        .as_ref()
+        .is_some_and(|timer| timer.ends_at <= now());
+    if mixer.reconcile() {
+        atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
+    }
+    if timer_expired {
+        cancel_load(
+            root,
+            pending,
+            "Preset loading was cancelled by the sleep timer",
+        )?;
+    }
+    if let Some(load) = pending.as_mut() {
+        let result = match load.poll() {
+            Ok(false) => return Ok(()),
+            Ok(true) => {
+                let load = pending.take().ok_or("Missing pending preset")?;
+                let id = load.id.clone();
+                (id, mixer.commit_load(load))
+            }
+            Err(message) => {
+                let load = pending.take().ok_or("Missing pending preset")?;
+                let id = load.id.clone();
+                drop(load);
+                (id, Err(message))
+            }
+        };
+        atomic_write(&root.join("windows-mix.json"), &mixer.mix)?;
+        reply(root, result.0, result.1)?;
+    }
+    Ok(())
+}
+
 pub fn run(support: &str) -> Result<(), String> {
     let root = fs::canonicalize(support).map_err(error)?;
     let Ok(_owner) = lock(&root, "worker", 0) else {
@@ -546,50 +803,362 @@ pub fn run(support: &str) -> Result<(), String> {
     let event = Handle(
         unsafe { CreateEventW(None, false, false, &name(&root, "request")) }.map_err(error)?,
     );
+    fs::create_dir_all(root.join("windows-responses")).map_err(error)?;
     let request_file = root.join("windows-request.json");
-    let response_file = root.join("windows-response.json");
     let mut last_request = String::new();
+    let mut pending = None;
     let mut active_at = Instant::now();
     loop {
-        if mixer.reconcile() {
-            atomic_write(&state, &mixer.mix)?;
-        }
         if let Ok(bytes) = fs::read(&request_file) {
             if let Ok(envelope) = serde_json::from_slice::<Envelope>(&bytes) {
                 if envelope.id != last_request {
-                    let result = if envelope.deadline < now() {
-                        Err("Mixer request expired. Try again.".into())
-                    } else {
-                        mixer.apply(&envelope.action)
-                    };
-                    // Persist partial changes on errors too, so a failed multi-sound resume remains tracked.
-                    atomic_write(&state, &mixer.mix)?;
-                    let reply = match result {
-                        Ok(value) => Reply {
-                            id: envelope.id.clone(),
-                            result: Some(value),
-                            error: None,
-                        },
-                        Err(message) => Reply {
-                            id: envelope.id.clone(),
-                            result: None,
-                            error: Some(message),
-                        },
-                    };
-                    atomic_write(&response_file, &reply)?;
-                    last_request = envelope.id;
+                    last_request = envelope.id.clone();
+                    atomic_write(
+                        &root
+                            .join("windows-responses")
+                            .join(format!("{}.accepted", envelope.id)),
+                        &true,
+                    )?;
+                    handle_request(&root, &mut mixer, &mut pending, envelope)?;
                     active_at = Instant::now();
                 }
             }
         }
-        if !mixer.players.is_empty() || mixer.mix.timer.is_some() {
+        tick(&root, &mut mixer, &mut pending)?;
+        if !mixer.players.is_empty() || mixer.mix.timer.is_some() || pending.is_some() {
             active_at = Instant::now();
         }
         if active_at.elapsed() > Duration::from_secs(30) {
             return Ok(());
         }
         unsafe {
-            WaitForSingleObject(event.0, 100);
+            WaitForSingleObject(event.0, if pending.is_some() { 20 } else { 100 });
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+    use windows::Media::Playback::MediaPlaybackState;
+
+    struct Fixture {
+        root: PathBuf,
+        _com: ComGuard,
+    }
+    impl Fixture {
+        fn new() -> Self {
+            unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) }
+                .ok()
+                .unwrap();
+            let root = std::env::temp_dir().join(format!(
+                "moodist-regression-{}-{}",
+                std::process::id(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+            fs::create_dir_all(root.join("windows-responses")).unwrap();
+            Self {
+                root,
+                _com: ComGuard,
+            }
+        }
+        fn envelope(&self, id: &str, action: Value) -> Envelope {
+            Envelope {
+                id: id.into(),
+                deadline: now() + 20_000,
+                action,
+            }
+        }
+        fn reply(&self, id: &str) -> Reply {
+            serde_json::from_slice(
+                &fs::read(
+                    self.root
+                        .join("windows-responses")
+                        .join(format!("{id}.json")),
+                )
+                .unwrap(),
+            )
+            .unwrap()
+        }
+        fn sound(&self) -> Sound {
+            let path = self.root.join("silent.wav");
+            let mut wav = Vec::new();
+            wav.extend_from_slice(b"RIFF");
+            wav.extend_from_slice(&16036u32.to_le_bytes());
+            wav.extend_from_slice(b"WAVEfmt ");
+            wav.extend_from_slice(&16u32.to_le_bytes());
+            wav.extend_from_slice(&1u16.to_le_bytes());
+            wav.extend_from_slice(&1u16.to_le_bytes());
+            wav.extend_from_slice(&16000u32.to_le_bytes());
+            wav.extend_from_slice(&32000u32.to_le_bytes());
+            wav.extend_from_slice(&2u16.to_le_bytes());
+            wav.extend_from_slice(&16u16.to_le_bytes());
+            wav.extend_from_slice(b"data");
+            wav.extend_from_slice(&16000u32.to_le_bytes());
+            wav.resize(16044, 0);
+            fs::write(&path, wav).unwrap();
+            Sound {
+                volume: 0.5,
+                file: path.to_string_lossy().into(),
+                pid: None,
+            }
+        }
+        fn pending(&self) -> PendingLoad {
+            let mut load = PendingLoad {
+                id: "load".into(),
+                deadline: now() + 20_000,
+                expires_at: Instant::now() + Duration::from_secs(20),
+                opening: HashMap::new(),
+                players: HashMap::new(),
+                sounds: BTreeMap::new(),
+                master: 1.0,
+                preset: Some("new".into()),
+            };
+            load.opening.insert(
+                "slow".into(),
+                OpeningPlayer {
+                    file: None,
+                    media: None,
+                    sound: self.sound(),
+                    master: 1.0,
+                    deadline: Instant::now() + Duration::from_secs(8),
+                },
+            );
+            load
+        }
+    }
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.root);
+        }
+    }
+    fn mixer() -> Mixer {
+        Mixer {
+            mix: Mix {
+                preset: Some("old".into()),
+                ..Mix::default()
+            },
+            players: HashMap::new(),
+        }
+    }
+
+    #[test]
+    fn prepared_players_stay_silent_and_failed_load_keeps_old_mix() {
+        let fixture = Fixture::new();
+        let sound = fixture.sound();
+        let mut mixer = mixer();
+        mixer.start("old", sound.clone()).unwrap();
+        let mut opening = OpeningPlayer::new(sound, 1.0).unwrap();
+        let prepared = loop {
+            if let Some(player) = opening.poll().unwrap() {
+                break player;
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        };
+        assert_ne!(
+            prepared
+                .media
+                .PlaybackSession()
+                .unwrap()
+                .PlaybackState()
+                .unwrap(),
+            MediaPlaybackState::Playing
+        );
+        let mut load = fixture.pending();
+        load.players.insert("ready".into(), prepared);
+        load.opening.get_mut("slow").unwrap().deadline = Instant::now();
+        let mut pending = Some(load);
+        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
+        assert!(pending.is_none());
+        assert!(fixture.reply("load").error.is_some());
+        assert_eq!(mixer.mix.preset.as_deref(), Some("old"));
+        assert_eq!(mixer.players.len(), 1);
+        assert_eq!(
+            mixer.players["old"]
+                .media
+                .PlaybackSession()
+                .unwrap()
+                .PlaybackState()
+                .unwrap(),
+            MediaPlaybackState::Playing
+        );
+    }
+
+    #[test]
+    fn slow_load_allows_commands_and_expires_without_late_commit() {
+        let fixture = Fixture::new();
+        let mut mixer = mixer();
+        let mut pending = Some(fixture.pending());
+        let started = Instant::now();
+        handle_request(
+            &fixture.root,
+            &mut mixer,
+            &mut pending,
+            fixture.envelope("get", json!({"type":"get"})),
+        )
+        .unwrap();
+        assert!(started.elapsed() < Duration::from_secs(1));
+        assert!(fixture.reply("get").result.is_some());
+        assert!(pending.is_some());
+        pending.as_mut().unwrap().expires_at = Instant::now();
+        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
+        assert!(fixture.reply("load").error.unwrap().contains("expired"));
+        assert!(pending.is_none());
+        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
+        assert_eq!(mixer.mix.preset.as_deref(), Some("old"));
+    }
+
+    #[test]
+    fn sleep_timer_expires_during_load_and_cancels_preparation() {
+        let fixture = Fixture::new();
+        let mut mixer = mixer();
+        mixer.start("old", fixture.sound()).unwrap();
+        mixer.mix.timer = Some(Timer {
+            ends_at: now(),
+            minutes: 1,
+        });
+        let mut pending = Some(fixture.pending());
+        tick(&fixture.root, &mut mixer, &mut pending).unwrap();
+        assert!(mixer.players.is_empty());
+        assert!(mixer.mix.timer.is_none());
+        assert!(mixer.mix.sounds.values().all(|sound| sound.pid.is_none()));
+        assert!(pending.is_none());
+        assert!(fixture.reply("load").error.unwrap().contains("sleep timer"));
+    }
+
+    #[test]
+    fn stop_cancels_pending_load() {
+        let fixture = Fixture::new();
+        let mut mixer = mixer();
+        let mut pending = Some(fixture.pending());
+        handle_request(
+            &fixture.root,
+            &mut mixer,
+            &mut pending,
+            fixture.envelope("stop", json!({"type":"stopAll"})),
+        )
+        .unwrap();
+        assert!(pending.is_none());
+        assert!(fixture.reply("load").error.unwrap().contains("cancelled"));
+        assert!(fixture.reply("stop").result.is_some());
+    }
+
+    #[test]
+    fn request_retries_when_launched_worker_exits_without_answering() {
+        let fixture = Fixture::new();
+        let mut launches = 0;
+        let result = request_with_launcher(
+            fixture.root.to_str().unwrap(),
+            r#"{"type":"get"}"#,
+            |root| {
+                launches += 1;
+                if launches == 2 {
+                    let path = root.join("windows-request.json");
+                    let envelope: Envelope =
+                        serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+                    reply(root, envelope.id, Ok(json!({"retried":true}))).unwrap();
+                }
+                Command::new("cmd.exe")
+                    .args(["/d", "/c", "exit", "0"])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .creation_flags(0x08000000)
+                    .spawn()
+                    .map_err(error)
+            },
+        )
+        .unwrap();
+        assert_eq!(launches, 2);
+        assert_eq!(
+            serde_json::from_str::<Value>(&result).unwrap()["retried"],
+            true
+        );
+    }
+
+    #[test]
+    fn accepted_load_releases_mailbox_before_its_reply() {
+        let fixture = Fixture::new();
+        let mut event = None;
+        let mut responder = None;
+        let result = request_with_launcher(
+            fixture.root.to_str().unwrap(),
+            r#"{"type":"load"}"#,
+            |root| {
+                event = Some(Handle(
+                    unsafe { CreateEventW(None, false, false, &name(root, "request")) }.unwrap(),
+                ));
+                let envelope: Envelope =
+                    serde_json::from_slice(&fs::read(root.join("windows-request.json")).unwrap())
+                        .unwrap();
+                atomic_write(
+                    &root
+                        .join("windows-responses")
+                        .join(format!("{}.accepted", envelope.id)),
+                    &true,
+                )
+                .unwrap();
+                let root = root.to_path_buf();
+                responder = Some(std::thread::spawn(move || {
+                    let _other_client = lock(&root, "client", 1000)
+                        .expect("load kept the mailbox locked while opening files");
+                    reply(&root, envelope.id, Ok(json!({"responsive":true}))).unwrap();
+                }));
+                Command::new("cmd.exe")
+                    .args(["/d", "/c", "exit", "0"])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .creation_flags(0x08000000)
+                    .spawn()
+                    .map_err(error)
+            },
+        )
+        .unwrap();
+        responder.unwrap().join().unwrap();
+        assert_eq!(
+            serde_json::from_str::<Value>(&result).unwrap()["responsive"],
+            true
+        );
+    }
+
+    #[test]
+    fn request_accepts_reply_from_an_older_worker() {
+        let fixture = Fixture::new();
+        let result = request_with_launcher(
+            fixture.root.to_str().unwrap(),
+            r#"{"type":"get"}"#,
+            |root| {
+                let envelope: Envelope =
+                    serde_json::from_slice(&fs::read(root.join("windows-request.json")).unwrap())
+                        .unwrap();
+                atomic_write(
+                    &root.join("windows-response.json"),
+                    &Reply {
+                        id: envelope.id,
+                        result: Some(json!({"legacy":true})),
+                        error: None,
+                    },
+                )
+                .unwrap();
+                Command::new("cmd.exe")
+                    .args(["/d", "/c", "exit", "0"])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .creation_flags(0x08000000)
+                    .spawn()
+                    .map_err(error)
+            },
+        )
+        .unwrap();
+        assert_eq!(
+            serde_json::from_str::<Value>(&result).unwrap()["legacy"],
+            true
+        );
     }
 }
