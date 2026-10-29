@@ -28,7 +28,7 @@
       "preferences": [
         {
           "name": "GHQ_PATH",
-          "title": "ghq executable path",
+          "title": "ghq Executable Path",
           "description": "Optional path to the ghq executable. Leave empty to find ghq in PATH and common Homebrew locations.",
           "type": "textfield",
           "required": false,

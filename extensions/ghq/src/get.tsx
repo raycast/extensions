@@ -22,7 +22,7 @@ interface Values {
   update: boolean;
 }
 
-export default function Command(props: LaunchProps) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Get }>) {
   const initialRepository = props.fallbackText || "";
   const launched = useRef(false);
   const submitting = useRef(false);
@@ -41,7 +41,7 @@ export default function Command(props: LaunchProps) {
           title: "Getting repository",
           message: values.repository.trim(),
         });
-        const preferences = getPreferenceValues<{ GHQ_PATH?: string }>();
+        const preferences = getPreferenceValues<Preferences.Get>();
         await getRepository(values.repository, {
           rootPath: getGHQRootPath(),
           ghqPath: preferences.GHQ_PATH?.trim(),
