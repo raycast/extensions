@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Melso Fiscal MCP] - {PR_MERGE_DATE}
+
+- Add Melso as an official hosted MCP server with direct OAuth connection and a local proxy fallback.
+
 ## [Add House AI MCP Server] - 2026-10-29
 
 - Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).
