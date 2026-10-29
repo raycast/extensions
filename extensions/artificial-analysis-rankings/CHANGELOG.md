@@ -1,6 +1,6 @@
 # Artificial Analysis Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - Dashboard with the top five model families, leaderboard shortcuts, and a provider filter
 - Leaderboards for intelligence, coding, output speed, latency, and price
