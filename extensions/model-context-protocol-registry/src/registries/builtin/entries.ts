@@ -2180,6 +2180,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "writestack",
+    title: "WriteStack",
+    description:
+      "Grow on Substack from your AI assistant. Draft and schedule Substack Notes, manage articles, and read statistics in your WriteStack account. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a WriteStack API key as a bearer token. Public connection documentation is MIT licensed; the hosted service is proprietary.",
+    icon: "https://cdn.writestack.io/writestack-app/og/logo.png",
+    homepage: "https://www.writestack.io/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.writestack.io/api/mcp/mcp"],
+    },
+    remoteUrl: "https://www.writestack.io/api/mcp/mcp",
+  },
+  {
     name: "xero",
     title: "Xero",
     description:
