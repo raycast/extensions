@@ -7,13 +7,13 @@ export async function retrieveBrand(key: string, domain: string): Promise<Retrie
     },
     signal: AbortSignal.timeout(30 * 1000),
   });
-  const data = (await response.json()) as RetrieveBrandResponse;
 
-  if (response.status !== 200) {
-    throw new Error(data.message || `BrandFetch request failed (${response.status})`);
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => undefined)) as { message?: string } | undefined;
+    throw new Error(errorData?.message || `BrandFetch request failed (${response.status})`);
   }
 
-  return data;
+  return (await response.json()) as RetrieveBrandResponse;
 }
 
 export async function searchBrandKeyword(key: string): Promise<SearchBrandKeyword[]> {
