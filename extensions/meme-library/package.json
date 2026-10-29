@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meme-library",
+  "title": "Meme Library",
+  "description": "Save GIFs and images you find online to a personal meme library, then browse and paste them with the arrow keys.",
+  "icon": "extension-icon.png",
+  "author": "madeyexz",
+  "categories": [
+    "Media",
+    "Fun"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "meme-library",
+      "title": "Meme Library",
+      "description": "Browse your saved memes in a grid and paste one into the frontmost app.",
+      "mode": "view"
+    },
+    {
+      "name": "save-meme",
+      "title": "Save Meme",
+      "description": "Save the copied image, GIF, image URL, or selected Finder images to your meme library.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "libraryFolder",
+      "title": "Library Folder",
+      "description": "The folder that stores your memes. Raycast creates it if it does not exist.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Memes"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What Enter does in the library.",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        {
+          "title": "Paste in Frontmost App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
