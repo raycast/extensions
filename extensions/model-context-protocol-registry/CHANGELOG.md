@@ -2,7 +2,7 @@
 
 ## [Add Melso Fiscal MCP] - {PR_MERGE_DATE}
 
-- Add Melso as an official hosted MCP server with direct OAuth connection and a local proxy fallback.
+- Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
 
 ## [Add House AI MCP Server] - 2026-10-29
 

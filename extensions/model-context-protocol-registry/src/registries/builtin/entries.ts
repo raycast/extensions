@@ -10,7 +10,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "melso",
     title: "Melso",
     description:
-      "OAuth-protected access to Spanish invoices, income, expenses and tax calendars in the company you authorize in Melso. Record expenses and prepare invoice work; tax-return approval and filing remain in Melso. Hosted Streamable HTTP service. A paid Melso account and appropriate tool access are required; server source is proprietary.",
+      "OAuth-protected access to Spanish invoices, income, expenses and tax calendars in the company you authorize in Melso. Record expenses, prepare invoice work and start a Spanish S.L. incorporation request. The owner pays and approves incorporation in Melso; professionals complete the legal formation. Tax-return approval and filing remain in Melso. Paid hosted Streamable HTTP service; appropriate Melso tool access required. Server source is proprietary.",
     icon: "https://melso.ai/icons/apple-touch-icon.png",
     homepage: "https://docs.melso.ai/mcp/overview",
     configuration: {
