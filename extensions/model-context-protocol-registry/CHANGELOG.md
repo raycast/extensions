@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add SuprSend MCP Server] - 2026-10-29
+## [Add SuprSend MCP Server] - {PR_MERGE_DATE}
 
 - Add SuprSend to the official registry: manage notification workflows, templates, users, preferences and delivery logs across email, SMS, push, in-app inbox, WhatsApp and Slack. Hosted Streamable HTTP server at https://mcp.suprsend.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
 
