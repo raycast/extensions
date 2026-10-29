@@ -517,6 +517,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "connectmachine",
+    title: "ConnectMachine",
+    description:
+      "Your professional network in your AI agent. Find contacts by how you remember them (company, role, city, the event where you met), save new people from the conversation without duplicates, organize contacts into networks and events, merge duplicates, import from CSV, and draft follow-ups with the context of where you met. Write and delete tools are annotated. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, any ConnectMachine account including free ones, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/connectmachine/claude-plugin/main/assets/logo-400.png",
+    homepage: "https://www.connectmachine.ai/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.connectmachine.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.connectmachine.ai/mcp",
+  },
+  {
     name: "context-7",
     title: "Context 7",
     description:
