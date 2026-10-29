@@ -8,6 +8,7 @@ import {
   copyUnSupportedAppContent,
   copyWindowPath,
   copyQSpacePath,
+  copySelectedPickerPath,
 } from "./utils/common-utils";
 
 export default async () => {
@@ -20,6 +21,7 @@ export default async () => {
   } else if (frontmostApp.bundleId === qSpaceBundleId) {
     await copyQSpacePath();
   } else {
+    if (await copySelectedPickerPath(frontmostApp)) return;
     const windowPath = await copyWindowPath(frontmostApp);
     if (!isEmpty(windowPath)) {
       return;

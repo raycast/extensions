@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "leal",
+    title: "Leal",
+    description:
+      "Design and launch Apple Wallet and Google Wallet loyalty stamp cards for shops, cafés and salons. Read a business's name, colours and logo from its website, preview card designs as real wallet passes, then save the card, rewards, a QR signup poster and the store location. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); design previews work without an account.",
+    icon: "https://mcp.getleal.com/favicon/web-app-manifest-512x512.png",
+    homepage: "https://www.getleal.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.getleal.com/mcp"],
+    },
+    remoteUrl: "https://mcp.getleal.com/mcp",
+  },
+  {
     name: "paper-plane-post",
     title: "Paper Plane Post",
     description: "Create and send an AI-illustrated postcard anywhere in the world",
@@ -364,6 +377,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
     },
     remoteUrl: "https://api.candor.money/mcp",
+  },
+  {
+    name: "carbon-forge",
+    title: "Carbon Forge",
+    description:
+      "Source control and a shared record for people and agents. Code, files and prose live in one record on the server; an agent opens a lane, a set of patches over the trunk, instead of cloning, and each landing is one all-or-nothing changeset. Blame, grep, diff and history run on the server, and git is a projection pushed to GitHub. Hosted remote Streamable HTTP server at https://carbonforge.dev/api/mcp; it reads public workspaces with no sign-in and no API key, and writing needs a bearer token from Carbon Forge's settings.",
+    icon: "https://carbonforge.dev/icon-192.png",
+    homepage:
+      "https://carbonforge.dev/docs/p/guides/mcp-anonymous-access?utm_source=raycast&utm_medium=referral&utm_campaign=push-2026-10-28",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://carbonforge.dev/api/mcp"],
+    },
+    remoteUrl: "https://carbonforge.dev/api/mcp",
   },
   {
     name: "chirpie",
@@ -877,6 +904,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "isms-copilot",
+    title: "ISMS Copilot",
+    description:
+      "The compliance specialist your AI calls: ISO 27001, SOC 2, GDPR, NIS 2, DORA and more. Ask ISMS Copilot framework questions and work with your compliance workspaces, documents, memories, company profile and client companies. Hosted remote Streamable HTTP server at https://account.ismscopilot.com/v1/account/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration, no API key to paste; free plan available.",
+    icon: "https://www.ismscopilot.com/favicon-512.png",
+    homepage: "https://www.ismscopilot.com/mcp?ref=raycast",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://account.ismscopilot.com/v1/account/mcp"],
+    },
+    remoteUrl: "https://account.ismscopilot.com/v1/account/mcp",
+  },
+  {
     name: "quantral",
     title: "Quantral",
     description:
@@ -1172,6 +1212,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mail.lumman.co/mcp",
   },
   {
+    name: "nebenkostenpro",
+    title: "NebenkostenPro",
+    description:
+      "Free German utility cost (Nebenkosten) data for tenants and landlords: property tax rates for all 10,304 German municipalities, utility cost figures for the 400 largest cities, housing benefit rent levels, billing and objection deadlines, the 17 apportionable operating cost types and statistics from checks of real utility bills, each value with date and source. Also returns the link to check or create a utility bill at NebenkostenPro. Read-only, 9 tools. Hosted remote Streamable HTTP server at https://nebenkostenpro.de/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://nebenkostenpro.de/icon-512.png",
+    homepage: "https://nebenkostenpro.de/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://nebenkostenpro.de/mcp"],
+    },
+    remoteUrl: "https://nebenkostenpro.de/mcp",
+  },
+  {
     name: "netactuate",
     title: "NetActuate",
     description:
@@ -1426,6 +1479,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
     },
+  },
+  {
+    name: "recordhtml",
+    title: "RecordHTML",
+    description:
+      "Record web pages and HTML5 creatives to MP4, WebM or GIF in a real browser. Record a public URL, or an HTML document your AI writes (banners, ads, animations, landing pages), and get a signed video link back. Pages can mark the exact start and end of an animation with trim_start() and trim_end(), and each recording reports dropped frames, page errors and failed requests. 5 tools: record, check a recording, estimate a request without using quota, list and delete recordings. Hosted remote Streamable HTTP server at https://mcp.recordhtml.com with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a RecordHTML API key as a Bearer header; free plan with 10 credits a month (1 credit is up to 60 seconds of video). The hosted implementation is proprietary.",
+    icon: "https://recordhtml.com/logo.png",
+    homepage: "https://recordhtml.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.recordhtml.com"],
+    },
+    remoteUrl: "https://mcp.recordhtml.com",
   },
   {
     name: "recued",
@@ -1845,6 +1911,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
+    name: "timesheet",
+    title: "Timesheet",
+    description:
+      "Track time with Timesheet from your AI assistant. Start, pause and stop the timer, log past work, edit time entries, manage projects, todos, tags, expenses and absences, and pull statistics, reports and Excel, CSV or PDF exports. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or a Timesheet API key as a bearer token. Needs a Timesheet Pro plan, which starts with a 30-day free trial.",
+    icon: "https://timesheet.io/android-chrome-512x512.png",
+    homepage: "https://docs.timesheet.io/integrations/mcp-server/",
+    remoteUrl: "https://mcp.timesheet.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.timesheet.io"],
     },
   },
   {

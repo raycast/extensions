@@ -139,7 +139,9 @@ export default function DownloadRepositoryForm({ repository }: DownloadRepositor
         storeValue
       />
       <Form.Dropdown {...itemProps.branch} title="Branch Name">
-        {branches?.map((b) => <Form.Dropdown.Item key={b} value={b} title={b} />)}
+        {branches?.map((b) => (
+          <Form.Dropdown.Item key={b} value={b} title={b} />
+        ))}
       </Form.Dropdown>
     </Form>
   );

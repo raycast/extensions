@@ -64,7 +64,12 @@ export class XcodeSwiftPackageService {
         Path.join("https://api.github.com/repos", url.pathname.replace(".git", ""))
       );
       // Retrieve GitHub Repository from response
-      const gitHubRepository = (await gitHubAPIResponse.json()) as any;
+      const gitHubRepository = (await gitHubAPIResponse.json()) as {
+        name: string;
+        description?: string;
+        stargazers_count: number;
+        license?: { name: string };
+      };
       // Return Metadata
       return {
         name: gitHubRepository.name,
