@@ -287,6 +287,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bestprice",
+    title: "BestPrice",
+    description:
+      "Shopping in Greece from BestPrice, the Greek price-comparison site: get a recommendation for a described need or budget, search products, compare current store offers with shipping and delivered totals, and read a product's price history. 4 read-only tools: get_shopping_decision, search_products, compare_offers and get_price_history. Hosted remote Streamable HTTP server at https://mcp.bestprice.gr/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/TheBestCo/bestprice-mcp/main/assets/bestprice-mcp-logo-1024.png",
+    homepage: "https://github.com/TheBestCo/bestprice-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.bestprice.gr/mcp"],
+    },
+    remoteUrl: "https://mcp.bestprice.gr/mcp",
+  },
+  {
     name: "better-design",
     title: "Better Design",
     description:
