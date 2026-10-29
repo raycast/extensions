@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [Ondine Store Runtime Loading Fix] - {PR_MERGE_DATE}
+## [Ondine Store Runtime Loading Fix] - 2026-10-29
 
 ### Fixed
 
