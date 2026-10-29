@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "industrylens",
+    title: "IndustryLens",
+    description:
+      "Competitive and market intelligence for B2B SaaS: competitor profiles, strategic moves, pricing changes, market landscapes, reports and comparisons, with every fact dated and sourced. Hosted Streamable HTTP server; the public tools need no account or API key.",
+    icon: "https://industry-lens.com/IndustryLens_Favicon.png",
+    homepage: "https://industry-lens.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.industry-lens.com/mcp/public"],
+    },
+    remoteUrl: "https://api.industry-lens.com/mcp/public",
+  },
+  {
     name: "leal",
     title: "Leal",
     description:
