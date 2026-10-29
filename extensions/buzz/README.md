@@ -73,41 +73,7 @@ Channel and conversation lists are read by paging through the relay, up to 20,00
 
 ## Getting Started
 
-### Raycast Store
-
 Install directly from the [Raycast Store](https://www.raycast.com/caasols/buzz).
-
-### Manual
-
-```bash
-git clone https://github.com/caasols/raycast-buzz.git
-cd raycast-buzz
-npm install && npm run dev
-```
-
-### Development
-
-Other useful scripts:
-
-```bash
-npm test               # unit and component tests
-npm run test:coverage  # the same, with a coverage report
-npm run typecheck      # extension and test projects
-npm run lint
-npm run build
-```
-
-There is also an end-to-end smoke test that runs against a real relay. It lists channels, posts a marker message, reads it back, reacts to it, and round-trips a status (with an emoji) through set/get/clear, so point it at a workspace where that is acceptable:
-
-```bash
-BUZZ_RELAY_URL=https://relay.example.com BUZZ_PRIVATE_KEY=nsec1... npm run smoke
-```
-
-Set `BUZZ_SMOKE_DM_PUBKEY` as well to also exercise the direct-message path (opening a conversation, confirming it is idempotent, and confirming it is listed). That publishes a real event the other party will see, so it is opt-in rather than automatic. Use somebody else's pubkey, or one belonging to an agent you own: pointing it at your own pubkey makes the relay answer with a 500, since a conversation whose only participant is yourself is a case it does not handle.
-
-## Contributing
-
-Issues and pull requests are welcome. Please open a discussion if you plan to work on a larger change so we can align on the approach.
 
 ## Support
 
