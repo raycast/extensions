@@ -1,6 +1,6 @@
 # Simulator Deep Linker Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-29
 
 - Search saved deep links by name, URL, group, or tag.
 - Resolve environment variables before opening a deep link and warn about unresolved placeholders.
