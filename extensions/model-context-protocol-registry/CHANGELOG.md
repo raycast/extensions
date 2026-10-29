@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add WriteStack MCP Server] - {PR_MERGE_DATE}
+
+- Add WriteStack to the official registry: draft and schedule Substack Notes, manage articles, and read statistics in a WriteStack account. Hosted Streamable HTTP server at https://www.writestack.io/api/mcp/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Relaticle MCP Server] - 2026-10-29
 
 - Add Relaticle, an open-source CRM your AI agents can read and update, as a remote server at https://mcp.relaticle.com with OAuth sign-in.
