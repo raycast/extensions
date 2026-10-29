@@ -1,6 +1,6 @@
 # Open Graph Changelog
 
-## [Complete Social Metadata Preview] - {PR_MERGE_DATE}
+## [Complete Social Metadata Preview] - 2026-10-29
 
 - Preview all Open Graph and Twitter Card tags, including multiple images and declared dimensions.
 - Launch without a URL to use the clipboard, or enter and edit a URL in a form.
