@@ -4,6 +4,14 @@
 
 - Add SuprSend to the official registry: manage notification workflows, templates, users, preferences and delivery logs across email, SMS, push, in-app inbox, WhatsApp and Slack. Hosted Streamable HTTP server at https://mcp.suprsend.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
 
+## [Add Posty MCP Server] - 2026-10-29
+
+- Add Posty to the official registry: write, schedule and publish posts to 20 social platforms with a content calendar and full-quality photo and video uploads. Hosted Streamable HTTP server at https://api.posty.hu/mcp-oauth with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add VectoSolve MCP Server] - 2026-10-29
+
+- Add VectoSolve to the official registry: image to SVG, DXF and EPS vector files, with machine-ready output for laser cutters, CNC routers and Cricut cutting machines. One read-only tool. Hosted Streamable HTTP server at https://vectosolve.com/api/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Relaticle MCP Server] - 2026-10-29
 
 - Add Relaticle, an open-source CRM your AI agents can read and update, as a remote server at https://mcp.relaticle.com with OAuth sign-in.
