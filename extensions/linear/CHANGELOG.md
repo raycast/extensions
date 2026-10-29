@@ -2,7 +2,8 @@
 
 ## [Primary Action Preference] - {PR_MERGE_DATE}
 
-- Add an **Issue Primary Action** preference to choose whether pressing Enter on an issue shows its details or opens it in Linear.
+- Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.
+- Add an **Open View in Linear** action to **Search Custom Views**.
 
 ## [User and Issue Mentions in AI Chat] - 2026-10-28
 

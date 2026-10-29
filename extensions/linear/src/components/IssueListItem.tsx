@@ -25,7 +25,7 @@ type IssueListItemProps = {
 };
 
 export default function IssueListItem({ issue, mutateList, mutateSubIssues, priorities, me }: IssueListItemProps) {
-  const { issuePrimaryAction } = getPreferenceValues<Preferences>();
+  const { primaryAction } = getPreferenceValues<Preferences>();
   const keywords = [issue.identifier, issue.state.name, issue.priorityLabel];
 
   if (issue.assignee) {
@@ -84,7 +84,7 @@ export default function IssueListItem({ issue, mutateList, mutateSubIssues, prio
     },
   ];
 
-  const openInLinearFirst = issuePrimaryAction === "openInLinear";
+  const openInLinearFirst = primaryAction === "openInLinear";
 
   return (
     <List.Item
