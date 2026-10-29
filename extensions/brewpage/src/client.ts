@@ -25,7 +25,13 @@ const RESERVED_HOST_LABELS = new Set([
 ]);
 export type Choices = { visibility: string; protection: string; password?: string };
 export type Report = { content: string; format: "html" | "markdown"; filename?: string };
-export type Publication = { link: string; expiresAt: string; id: string; namespace: string };
+export type Publication = {
+  link: string;
+  expiresAt: string;
+  id: string;
+  namespace: string;
+  retryOwnerStorage?: () => Promise<void>;
+};
 type Owner = { ownerToken: string; manageUrl?: string; managementLink?: string; ownerLink: string };
 type Options = { confirm: () => Promise<boolean>; saveOwner: (key: string, owner: Owner) => Promise<void> };
 
@@ -34,6 +40,16 @@ export function validateChoices(choices: Choices) {
   if (!["none", "password"].includes(choices.protection)) throw new Error("Choose password protection or no password.");
   if (choices.protection === "password" && (!choices.password?.trim() || /[\r\n]/.test(choices.password)))
     throw new Error("Enter a password without line breaks.");
+  if (choices.protection === "password") {
+    try {
+      const header = new Headers({ "X-Password": choices.password! });
+      if (/\p{Cc}/u.test(choices.password!) || header.get("X-Password") !== choices.password) throw new Error();
+    } catch {
+      throw new Error(
+        "This password cannot be sent unchanged. Remove unsupported characters or leading/trailing whitespace.",
+      );
+    }
+  }
   if (choices.protection === "none" && choices.password) throw new Error("Clear the password or enable protection.");
 }
 
@@ -62,9 +78,14 @@ export async function readSelectedFile(filename: string): Promise<Report> {
     const metadata = await handle.stat();
     if (!metadata.isFile() || metadata.size > MAX_BYTES) throw new Error("Select a regular file up to 2 MiB.");
     const bytes = Buffer.alloc(MAX_BYTES + 1);
-    const { bytesRead } = await handle.read(bytes, 0, bytes.length, 0);
-    if (bytesRead > MAX_BYTES) throw new Error("Report exceeds the 2 MiB client limit.");
-    const content = new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, bytesRead));
+    let length = 0;
+    while (length < bytes.length) {
+      const { bytesRead } = await handle.read(bytes, length, bytes.length - length, length);
+      if (bytesRead === 0) break;
+      length += bytesRead;
+    }
+    if (length > MAX_BYTES) throw new Error("Report exceeds the 2 MiB client limit.");
+    const content = new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, length));
     const report: Report = { content, format: [".md", ".markdown"].includes(extension) ? "markdown" : "html" };
     validateReport(report);
     return report;
@@ -144,20 +165,30 @@ export function createPublisher(fetcher: typeof fetch, origin = ORIGIN) {
     if (expiresAt.slice(0, 19) !== data.expiresAt.slice(0, 19)) throw new Error("Invalid expiry in BrewPage response.");
     const result = data.result as { action?: unknown; extras?: { isOwner?: unknown } } | undefined;
     const nonOwnedMerge = result?.action === "merged" && result.extras?.isOwner === false;
+    const publication: Publication = { link, expiresAt, id: data.id, namespace: data.namespace };
     if (!nonOwnedMerge) {
       if (typeof data.ownerToken !== "string" || !data.ownerToken || typeof data.ownerLink !== "string")
         throw new Error("Incomplete BrewPage response; publication may have succeeded.");
+      const key = `publication:${data.namespace}:${data.id}`;
+      const owner: Owner = {
+        ownerToken: data.ownerToken,
+        ownerLink: data.ownerLink,
+        ...(typeof data.manageUrl === "string" ? { manageUrl: data.manageUrl } : {}),
+        ...(typeof data.managementLink === "string" ? { managementLink: data.managementLink } : {}),
+      };
+      const saveOwner = async () => {
+        try {
+          await options.saveOwner(key, owner);
+        } catch {
+          throw new Error("Owner access could not be saved. Keep this window open and retry saving.");
+        }
+      };
       try {
-        await options.saveOwner(`publication:${data.namespace}:${data.id}`, {
-          ownerToken: data.ownerToken,
-          ownerLink: data.ownerLink,
-          ...(typeof data.manageUrl === "string" ? { manageUrl: data.manageUrl } : {}),
-          ...(typeof data.managementLink === "string" ? { managementLink: data.managementLink } : {}),
-        });
+        await saveOwner();
       } catch {
-        throw new Error("Published, but encrypted owner storage failed. Do not publish again automatically.");
+        publication.retryOwnerStorage = saveOwner;
       }
     }
-    return { link, expiresAt, id: data.id, namespace: data.namespace };
+    return publication;
   };
 }

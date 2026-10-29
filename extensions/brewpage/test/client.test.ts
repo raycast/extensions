@@ -38,11 +38,15 @@ test("HTTP protocol: explicit visibility/password matrix preserves private crede
   const saved: unknown[] = [];
   try {
     for (const visibility of ["public", "unlisted"]) {
-      for (const protection of ["none", "password"]) {
+      for (const [protection, password] of [
+        ["none", ""],
+        ["password", "READER_PASSWORD"],
+        ["password", "caf\u00e9"],
+      ]) {
         // WHEN the user confirms the selected choices.
         const result = await publisher(
           report,
-          { visibility, protection, password: protection === "password" ? "READER_PASSWORD" : "" },
+          { visibility, protection, password },
           {
             confirm: async () => true,
             saveOwner: async (key, owner) => {
@@ -63,14 +67,16 @@ test("HTTP protocol: explicit visibility/password matrix preserves private crede
       [
         { method: "POST", url: "/api/html?ns=public&ttl=15", password: null, body: report },
         { method: "POST", url: "/api/html?ns=public&ttl=15", password: "READER_PASSWORD", body: report },
+        { method: "POST", url: "/api/html?ns=public&ttl=15", password: "caf\u00e9", body: report },
         { method: "POST", url: "/api/html?ttl=15", password: null, body: report },
         { method: "POST", url: "/api/html?ttl=15", password: "READER_PASSWORD", body: report },
+        { method: "POST", url: "/api/html?ttl=15", password: "caf\u00e9", body: report },
       ],
       "HTTP query, JSON, and password header exactly match OpenAPI 2.6",
     );
     assert.deepEqual(
       saved,
-      Array(4).fill({
+      Array(6).fill({
         key: "publication:public:AbCd123456",
         owner: { ownerToken: fixture.ownerToken, ownerLink: fixture.ownerLink, manageUrl: fixture.manageUrl },
       }),

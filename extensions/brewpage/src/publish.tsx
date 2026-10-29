@@ -21,6 +21,22 @@ export default function Command() {
   const [protection, setProtection] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Publication>();
+  async function retryOwnerStorage() {
+    if (busy || !result?.retryOwnerStorage) return;
+    setBusy(true);
+    try {
+      await result.retryOwnerStorage();
+      setResult({ link: result.link, expiresAt: result.expiresAt, id: result.id, namespace: result.namespace });
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Owner Access Not Saved",
+        message: "Keep this window open and retry saving. The report is already published.",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
   async function submit(values: Values) {
     if (busy) return;
     setBusy(true);
@@ -55,11 +71,13 @@ export default function Command() {
   if (result)
     return (
       <Detail
-        markdown={`# Report Ready\n\n${result.link}\n\nExpires: ${result.expiresAt}\n\nKeep this reader link and note its expiry.`}
+        isLoading={busy}
+        markdown={`# Report Ready\n\n${result.link}\n\nExpires: ${result.expiresAt}\n\nKeep this reader link and note its expiry.${result.retryOwnerStorage ? "\n\n**Owner access is not saved.** Keep this window open and retry saving below. No new upload is needed." : ""}`}
         actions={
           <ActionPanel>
             <Action title="Copy Reader Link" onAction={() => Clipboard.copy(result.link)} />
             <Action.OpenInBrowser title="Open Report" url={result.link} />
+            {result.retryOwnerStorage && <Action title="Retry Saving Owner Access" onAction={retryOwnerStorage} />}
           </ActionPanel>
         }
       />
@@ -104,7 +122,13 @@ export default function Command() {
         <Form.Dropdown.Item value="none" title="No Password" />
         <Form.Dropdown.Item value="password" title="Require Password" />
       </Form.Dropdown>
-      {protection === "password" && <Form.PasswordField id="password" title="Reader Password" />}
+      {protection === "password" && (
+        <Form.PasswordField
+          id="password"
+          title="Reader Password"
+          info="Some Unicode characters are unsupported. Avoid control characters and leading or trailing whitespace."
+        />
+      )}
     </Form>
   );
 }
