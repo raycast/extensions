@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Fix Search Documents Crash] - {PR_MERGE_DATE}
+## [Fix Search Documents Crash] - 2026-10-29
 
 - Fix **Search Documents** crashing for documents that have no creator.
 
