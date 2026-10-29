@@ -1,6 +1,6 @@
 # ClaudeScope Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - Search local multi-agent transcript history.
 - Browse and filter recent sessions.
