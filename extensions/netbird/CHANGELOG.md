@@ -1,5 +1,9 @@
 # NetBird Changelog
 
+## [Fix update when a new version is available] - {PR_MERGE_DATE}
+
+- Fixed the update failing with "Command failed: brew outdated netbird" whenever a newer NetBird was available. `brew outdated` exits with code 1 when the formula is outdated, which was treated as an error.
+
 ## [Fix double SSO login page] - 2026-09-23
 
 - Fixed SSO login page opening twice when connecting to NetBird.
