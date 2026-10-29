@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Fix update when a new version is available] - {PR_MERGE_DATE}
+## [Fix update when a new version is available] - 2026-10-29
 
 - Fixed the update failing with "Command failed: brew outdated netbird" whenever a newer NetBird was available. `brew outdated` exits with code 1 when the formula is outdated, which was treated as an error.
 
