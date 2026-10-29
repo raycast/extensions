@@ -1199,6 +1199,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mail.lumman.co/mcp",
   },
   {
+    name: "nebenkostenpro",
+    title: "NebenkostenPro",
+    description:
+      "Free German utility cost (Nebenkosten) data for tenants and landlords: property tax rates for all 10,304 German municipalities, utility cost figures for the 400 largest cities, housing benefit rent levels, billing and objection deadlines, the 17 apportionable operating cost types and statistics from checks of real utility bills, each value with date and source. Also returns the link to check or create a utility bill at NebenkostenPro. Read-only, 9 tools. Hosted remote Streamable HTTP server at https://nebenkostenpro.de/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://nebenkostenpro.de/icon-512.png",
+    homepage: "https://nebenkostenpro.de/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://nebenkostenpro.de/mcp"],
+    },
+    remoteUrl: "https://nebenkostenpro.de/mcp",
+  },
+  {
     name: "netactuate",
     title: "NetActuate",
     description:

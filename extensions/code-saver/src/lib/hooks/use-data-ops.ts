@@ -103,8 +103,9 @@ The snippet with uuid \`${req.uuid}\` can not be found.
     }
     const { id: libraryID } = libraryIDRes;
 
-    await GetDBInstance().transaction(async (txn) => {
-      const res = await txn
+    // better-sqlite3 commits when this callback returns; every statement must run synchronously.
+    GetDBInstance().transaction((txn) => {
+      const res = txn
         .insert(SnippetModel)
         .values({
           uuid: req.uuid,
@@ -124,7 +125,8 @@ The snippet with uuid \`${req.uuid}\` can not be found.
             libraryId: libraryID,
           },
         })
-        .returning({ id: SnippetModel.id });
+        .returning({ id: SnippetModel.id })
+        .all();
 
       const snippetLabelRelations = res
         .map((snippet) =>
@@ -137,7 +139,7 @@ The snippet with uuid \`${req.uuid}\` can not be found.
         )
         .flat();
       if (snippetLabelRelations.length > 0) {
-        await txn.insert(SnippetLabelModel).values(snippetLabelRelations).onConflictDoNothing();
+        txn.insert(SnippetLabelModel).values(snippetLabelRelations).onConflictDoNothing().run();
       }
     });
   } catch (exc) {
@@ -271,9 +273,9 @@ export async function deleteSnippet(snippetUUID: string): Promise<string | undef
 The label with uuid \`${snippetUUID}\` can not be found.
 `;
     }
-    await GetDBInstance().transaction(async (txn) => {
-      await txn.delete(SnippetLabelModel).where(eq(SnippetLabelModel.snippetId, res.id));
-      await txn.delete(SnippetModel).where(eq(SnippetModel.uuid, snippetUUID));
+    GetDBInstance().transaction((txn) => {
+      txn.delete(SnippetLabelModel).where(eq(SnippetLabelModel.snippetId, res.id)).run();
+      txn.delete(SnippetModel).where(eq(SnippetModel.uuid, snippetUUID)).run();
     });
   } catch (exc) {
     return `# Failed to create rows in database
