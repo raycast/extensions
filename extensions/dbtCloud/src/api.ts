@@ -203,6 +203,27 @@ export async function fetchOneFromApi<T>(
   }
 }
 
+// "HTTP 403: <reason>": dbt Cloud's status.user_message when the body is its JSON envelope,
+// otherwise the first 160 characters of the body with any HTML (and its scripts and styles) stripped
+async function httpErrorMessage(response: Response): Promise<string> {
+  const body = await response.text();
+  let detail = "";
+  try {
+    const json = JSON.parse(body) as { status?: { user_message?: string; developer_message?: string } };
+    detail = json.status?.user_message || json.status?.developer_message || "";
+  } catch {
+    // Not JSON, e.g. a proxy error page
+  }
+  if (!detail) {
+    detail = body
+      .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  return `HTTP ${response.status}${detail ? `: ${detail.slice(0, 160)}` : ""}`;
+}
+
 // POST request to API
 export async function postToApi<T>(
   endpoint: string,
@@ -217,8 +238,7 @@ export async function postToApi<T>(
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+      throw new Error(await httpErrorMessage(response));
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -226,7 +246,7 @@ export async function postToApi<T>(
     return json["data"] as T;
   } catch (error) {
     console.error("POST Error:", error);
-    showToast(Toast.Style.Failure, "An error occurred", errorMessage);
+    showToast(Toast.Style.Failure, errorMessage, error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -265,13 +285,14 @@ export async function cancelRun(runId: number): Promise<boolean> {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(await httpErrorMessage(response));
     }
 
     showToast(Toast.Style.Success, "Run cancelled successfully");
     return true;
-  } catch {
-    showToast(Toast.Style.Failure, "Could not cancel run");
+  } catch (error) {
+    console.error("POST Error:", error);
+    showToast(Toast.Style.Failure, "Could not cancel run", error instanceof Error ? error.message : String(error));
     return false;
   }
 }

@@ -1,4 +1,16 @@
-import { List, showToast, Toast, ActionPanel, Action, Icon, Color, Detail, useNavigation } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  Detail,
+  useNavigation,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { ContextMetadata, dateAccessory, DateLabel, plural, runStatus, useAccountNames } from "./display";
 import { Shortcuts } from "./shortcuts";
 import { JSX, useEffect, useState, useCallback } from "react";
@@ -146,14 +158,7 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
         <ActionPanel>
           <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" shortcut={Shortcuts.webRun} />
           <RunGoTo run={run} omit={["details"]} />
-          {run.status === 3 && (
-            <Action
-              title="Cancel Run"
-              shortcut={Shortcuts.cancel}
-              icon={Icon.XmarkCircle}
-              onAction={() => cancelRun(run.id)}
-            />
-          )}
+          {run.status === 3 && <CancelRunAction run={run} />}
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={jobUrl} title="Open Job in dbt Cloud" shortcut={Shortcuts.webJob} />
           </ActionPanel.Section>
@@ -166,6 +171,32 @@ ${run.trigger?.cause ? `\n## Trigger\n\n**Cause:** ${run.trigger.cause}` : ""}
           </ActionPanel.Section>
         </ActionPanel>
       }
+    />
+  );
+}
+
+// Cancelling stops work mid-run, so ask first, as Trigger does
+function CancelRunAction({ run }: { run: RunModel }): JSX.Element {
+  const handleCancel = async () => {
+    const confirmed = await confirmAlert({
+      title: "Cancel Run",
+      message: `Are you sure you want to cancel run #${run.id}${run.job?.name ? ` of "${run.job.name}"` : ""}?`,
+      primaryAction: { title: "Cancel Run", style: Alert.ActionStyle.Destructive },
+      dismissAction: { title: "Keep Running" },
+    });
+
+    if (confirmed) {
+      await cancelRun(run.id);
+    }
+  };
+
+  return (
+    <Action
+      title="Cancel Run"
+      shortcut={Shortcuts.cancel}
+      icon={Icon.XmarkCircle}
+      style={Action.Style.Destructive}
+      onAction={handleCancel}
     />
   );
 }
@@ -204,14 +235,7 @@ const RunListItem = ({ run }: RunListItemProps): JSX.Element => {
             onAction={() => push(<RunDetail run={run} />)}
           />
           <RunGoTo run={run} omit={["details"]} />
-          {run.status === 3 && (
-            <Action
-              title="Cancel Run"
-              shortcut={Shortcuts.cancel}
-              icon={Icon.XmarkCircle}
-              onAction={() => cancelRun(run.id)}
-            />
-          )}
+          {run.status === 3 && <CancelRunAction run={run} />}
           <ActionPanel.Section title="Open in dbt Cloud">
             <Action.OpenInBrowser url={runUrl} title="Open Run in dbt Cloud" shortcut={Shortcuts.webRun} />
             <Action.OpenInBrowser
@@ -239,6 +263,7 @@ export function RunsList({ jobId, scopeTitle }: { jobId?: number; scopeTitle?: s
   const [runs, setRuns] = useState<RunsFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [searchText, setSearchText] = useState("");
 
   const fetchData = useCallback(async () => {
     try {
@@ -276,6 +301,8 @@ export function RunsList({ jobId, scopeTitle }: { jobId?: number; scopeTitle?: s
       isLoading={loading}
       navigationTitle={scopeTitle ? `Runs · ${scopeTitle}` : undefined}
       searchBarPlaceholder="Filter runs by job name..."
+      filtering
+      onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
         <List.Dropdown
@@ -294,7 +321,15 @@ export function RunsList({ jobId, scopeTitle }: { jobId?: number; scopeTitle?: s
     >
       <List.EmptyView
         title="No runs found"
-        description={statusFilter !== "all" ? "Try changing the status filter" : "No job runs in your account"}
+        description={
+          searchText
+            ? `No runs match "${searchText}"${statusFilter !== "all" ? " with this status" : ""}`
+            : statusFilter !== "all"
+              ? "Try changing the status filter"
+              : jobId
+                ? "This job has no runs yet"
+                : "No job runs in your account"
+        }
         icon="icon_64p.png"
       />
 

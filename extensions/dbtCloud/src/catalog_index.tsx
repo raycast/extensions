@@ -154,7 +154,7 @@ function generateExpandedSQL(ctes: ExpandedCTE[], finalModel: ModelNode): string
   const tableToCTEMap: TableToCTEMap[] = [];
 
   let sql = `-- Expanded lineage for: ${finalModel.name}\n`;
-  sql += `-- This query combines ${ctes.length} upstream model(s) into a single executable CTE\n`;
+  sql += `-- This query combines ${plural(ctes.length, "upstream model")} into a single executable CTE\n`;
   sql += `-- Table references have been replaced with CTE names\n\n`;
   sql += "WITH\n";
 
@@ -241,7 +241,7 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
         const sql = generateExpandedSQL(ctes, fullModel);
         setExpandedSQL(sql);
 
-        showToast(Toast.Style.Success, "Expanded lineage ready", `${ctes.length} upstream models included`);
+        showToast(Toast.Style.Success, "Expanded lineage ready", `${plural(ctes.length, "upstream model")} included`);
       } catch (error) {
         setExpandedSQL(`-- Error building expanded lineage: ${error}`);
         showToast(Toast.Style.Failure, "Failed to build expanded lineage");
@@ -255,7 +255,7 @@ function ExpandedLineageView({ model, environmentId }: { model: ModelNode; envir
   const markdown = isLoading
     ? "# Loading expanded lineage...\n\nFetching and combining upstream models..."
     : `# 🔗 Expanded Lineage: ${model.name}\n\n` +
-      `This query combines **${cteCount} upstream model(s)** into a single executable CTE.\n\n` +
+      `This query combines **${plural(cteCount, "upstream model")}** into a single executable CTE.\n\n` +
       `\`\`\`sql\n${expandedSQL}\n\`\`\``;
 
   // BigQuery Console URL has ~8000 char limit, so for large queries we copy to clipboard first
@@ -383,7 +383,7 @@ export function ModelDetail({
     columns.slice(0, 25).forEach((col) => {
       // Escape pipe characters and newlines in table cells
       const escapeCell = (str: string) => str.replace(/\|/g, "\\|").replace(/\n/g, " ");
-      const desc = escapeCell((col.description || "-").slice(0, 50)) + ((col.description?.length || 0) > 50 ? "…" : "");
+      const desc = escapeCell(truncate(col.description, 50) || "-");
       const type = escapeCell(col.type || "-");
       const name = escapeCell(col.name);
       markdown += `| \`${name}\` | ${type} | ${desc} |\n`;
@@ -612,7 +612,7 @@ export function CatalogList({
         ? allEnvs.filter((env) => env.id === environmentId)
         : selectOneEnvPerProject(projectId ? allEnvs.filter((env) => env.project_id === projectId) : allEnvs);
 
-      showToast(Toast.Style.Animated, "Loading models...", `Fetching from ${selectedEnvs.length} project(s)`);
+      showToast(Toast.Style.Animated, "Loading models...", `Fetching from ${plural(selectedEnvs.length, "project")}`);
 
       const results = await Promise.all(
         selectedEnvs.map(async (env) => {
@@ -633,7 +633,7 @@ export function CatalogList({
       showToast(
         Toast.Style.Success,
         `Loaded ${plural(allModels.length, "model")}`,
-        `From ${selectedEnvs.length} project(s)`,
+        `From ${plural(selectedEnvs.length, "project")}`,
       );
     }
     loadAllModels();

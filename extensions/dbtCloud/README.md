@@ -24,11 +24,11 @@ Browse your [dbt Cloud](https://www.getdbt.com/) account from Raycast: models, s
 
 ## Navigation
 
-Every list and detail view has a **Go To** section that moves up and down the dbt hierarchy without leaving Raycast: from a job up to its environment and project or down to its runs and performance, and from a model to its last run, last job, lineage, and performance. The matching dbt Cloud page is always one action away under **Open in dbt Cloud**.
+Every project, environment, job, run, model, and source view has a **Go To** section that moves up and down the dbt hierarchy without leaving Raycast: from a job up to its environment and project or down to its runs and performance, and from a model to its last run, last job, lineage, and performance. The matching dbt Cloud page is always one action away under **Open in dbt Cloud**.
 
 ## Keyboard Shortcuts
 
-Shortcuts follow one scheme across every command, and the same letter means the same thing everywhere.
+Shortcuts follow one scheme across every command: the modifier says where the action goes, and the letter says what it acts on.
 
 | Modifier | Does                        | Letters                                                                                                                                       |
 | -------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,4 +59,5 @@ The extension exposes tools to Raycast AI, so you can ask things like:
 Triggering a job always asks for confirmation first.
 
 Catalog, source, and lineage data comes from the dbt Cloud Discovery API; jobs, runs, and environments come from the
-Administrative API.
+Administrative API. Browse Models and the AI tools read each project's production environment, falling back to staging,
+unless you pick an environment.

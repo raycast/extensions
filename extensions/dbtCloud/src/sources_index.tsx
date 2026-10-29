@@ -213,7 +213,7 @@ export function SourcesList({
       {Object.entries(groupedBySourceName)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([sourceName, sourceTables]) => (
-          <List.Section key={sourceName} title={sourceName} subtitle={`${sourceTables.length} tables`}>
+          <List.Section key={sourceName} title={sourceName} subtitle={plural(sourceTables.length, "table")}>
             {sourceTables
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((source) => (

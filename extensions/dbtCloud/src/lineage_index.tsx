@@ -390,6 +390,22 @@ export function LineageList({
                           shortcut={Shortcuts.copyId}
                           content={node.uniqueId}
                         />
+                        {isModel ? (
+                          <ModelGoTo
+                            uniqueId={node.uniqueId}
+                            name={node.name}
+                            environmentId={environmentId}
+                            projectId={projectId}
+                            omit={["lineage"]}
+                          />
+                        ) : (
+                          <SourceGoTo
+                            source={sourceNode}
+                            environmentId={environmentId}
+                            projectId={projectId}
+                            omit={["lineage"]}
+                          />
+                        )}
                       </ActionPanel>
                     }
                   />

@@ -94,7 +94,7 @@ export function ModelPerformanceDetail({
     ? `# ${model.name}\n\nLoading run history...`
     : `# ${model.name}
 
-**Model performance** · last ${runs.length} runs in ${describeEnvironment(environment)}
+**Model performance** · last ${plural(runs.length, "run")} in ${describeEnvironment(environment)}
 
 | Success rate | Built | Errored | Average | Slowest |
 |:--:|:--:|:--:|:--:|:--:|

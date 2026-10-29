@@ -1,7 +1,8 @@
 import { environment, open, showToast, Toast } from "@raycast/api";
+import { createHash } from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
+import { pathToFileURL } from "url";
 import { fetchModelsWithLineage, fetchSources } from "./api";
 import { escapeHtml, escapeInlineScript, safeJson } from "./html_utils";
 import { ModelNode, SourceNode } from "./types";
@@ -51,6 +52,7 @@ export async function openDbtCloudLineageDiagram(
   allModels: ModelNode[],
   allSources: SourceNode[],
   environmentName: string,
+  environmentId: number,
 ): Promise<void> {
   const nodeId = (name: string) => name.replace(/[^a-zA-Z0-9]/g, "_");
 
@@ -187,13 +189,15 @@ export async function openDbtCloudLineageDiagram(
     return;
   }
 
-  // Write to temp file and open
-  const tempDir = os.tmpdir();
-  const fileName = `dbt-cloud-lineage-${nodeId(selectedLabel)}-${Date.now()}.html`;
-  const filePath = path.join(tempDir, fileName);
+  // One file per environment and selected node in the extension's support folder: reopening a diagram
+  // overwrites its file instead of piling up timestamped copies, and an open tab for another node or
+  // environment (e.g. the same model in production and staging) keeps its own diagram
+  fs.mkdirSync(environment.supportPath, { recursive: true });
+  const fileKey = createHash("sha256").update(`${environmentId}\n${selectedUniqueId}`).digest("hex").slice(0, 16);
+  const filePath = path.join(environment.supportPath, `lineage-${environmentId}-${fileKey}.html`);
 
   fs.writeFileSync(filePath, html);
-  await open(`file://${filePath}`);
+  await open(pathToFileURL(filePath).href);
 }
 
 // Helper to open lineage diagram for a given environment, optionally selecting a specific node
@@ -220,7 +224,7 @@ export async function openEnvironmentLineageDiagram(
   const targetLabel = selectedLabel || allModels[0]?.name || `${allSources[0]?.sourceName}.${allSources[0]?.name}`;
 
   await showToast(Toast.Style.Animated, "Generating lineage diagram...");
-  await openDbtCloudLineageDiagram(targetUniqueId, targetLabel, allModels, allSources, environmentName);
+  await openDbtCloudLineageDiagram(targetUniqueId, targetLabel, allModels, allSources, environmentName, environmentId);
   await showToast(Toast.Style.Success, "Lineage opened in browser");
 }
 
