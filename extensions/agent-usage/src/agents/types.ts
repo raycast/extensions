@@ -10,6 +10,7 @@ export type AgentId =
   | "cursor"
   | "deepseek"
   | "droid"
+  | "elevenlabs"
   | "gemini"
   | "grok"
   | "kimi"
@@ -57,6 +58,7 @@ export interface AgentVisibilityPreferences {
   showCursor: boolean;
   showDeepSeek: boolean;
   showDroid: boolean;
+  showElevenLabs: boolean;
   showGemini: boolean;
   showGrok: boolean;
   showKimi: boolean;

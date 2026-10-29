@@ -126,6 +126,7 @@ src/
   codex/                   # Codex provider, including account/auth helpers
   copilot/                 # Copilot provider
   droid/                   # Droid provider
+  elevenlabs/              # ElevenLabs provider — official subscription API (credits)
   gemini/                  # Gemini provider, including reauth/binary helpers
   grok/                    # Grok (xAI) provider — auth.json + grok.com billing
   kimi/                    # Kimi provider

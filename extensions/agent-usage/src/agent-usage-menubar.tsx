@@ -31,6 +31,7 @@ import {
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
+  useElevenLabsUsage,
   useGeminiUsage,
   useGrokUsage,
   useKimiAccounts,
@@ -54,6 +55,7 @@ import { getCopilotAccessory } from "./copilot/renderer.tsx";
 import { getCursorAccessory } from "./cursor/renderer.tsx";
 import { getDeepSeekAccessory } from "./deepseek/renderer.tsx";
 import { getDroidAccessory } from "./droid/renderer.tsx";
+import { getElevenLabsAccessory } from "./elevenlabs/renderer.tsx";
 import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
@@ -114,6 +116,7 @@ export default function MenuBarCommand() {
   const isCursorVisible = Boolean(prefs.showCursor);
   const isDeepSeekVisible = Boolean(prefs.showDeepSeek);
   const isDroidVisible = Boolean(prefs.showDroid);
+  const isElevenLabsVisible = Boolean(prefs.showElevenLabs);
   const isGeminiVisible = Boolean(prefs.showGemini);
   const isGrokVisible = Boolean(prefs.showGrok);
   const isKimiVisible = Boolean(prefs.showKimi);
@@ -135,6 +138,7 @@ export default function MenuBarCommand() {
   const cursorState = useCursorUsage(isCursorVisible);
   const deepseekState = useDeepSeekUsage(isDeepSeekVisible);
   const droidState = useDroidUsage(isDroidVisible);
+  const elevenlabsState = useElevenLabsUsage(isElevenLabsVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const grokState = useGrokUsage(isGrokVisible);
   const kimiState = useKimiAccounts(isKimiVisible);
@@ -202,6 +206,16 @@ export default function MenuBarCommand() {
         accessory: getDroidAccessory(droidState.usage, droidState.error, droidState.isLoading),
         revalidate: droidState.revalidate,
         lastFetchedAt: droidState.lastFetchedAt,
+      },
+      {
+        id: "elevenlabs",
+        name: "ElevenLabs",
+        icon: getThemeIcon("elevenlabs-icon.svg"),
+        visible: isElevenLabsVisible,
+        isLoading: elevenlabsState.isLoading,
+        accessory: getElevenLabsAccessory(elevenlabsState.usage, elevenlabsState.error, elevenlabsState.isLoading),
+        revalidate: elevenlabsState.revalidate,
+        lastFetchedAt: elevenlabsState.lastFetchedAt,
       },
       {
         id: "gemini",
@@ -365,6 +379,12 @@ export default function MenuBarCommand() {
       raycastState.error,
       raycastState.revalidate,
       raycastState.lastFetchedAt,
+      isElevenLabsVisible,
+      elevenlabsState.isLoading,
+      elevenlabsState.usage,
+      elevenlabsState.error,
+      elevenlabsState.revalidate,
+      elevenlabsState.lastFetchedAt,
     ],
   );
 

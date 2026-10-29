@@ -35,6 +35,9 @@ import type { DeepSeekError, DeepSeekUsage } from "../deepseek/types.ts";
 import { resolveDroidAuth } from "../droid/auth.ts";
 import { fetchDroidUsage } from "../droid/fetcher.ts";
 import type { DroidError, DroidUsage } from "../droid/types.ts";
+import { resolveElevenLabsApiKey } from "../elevenlabs/auth.ts";
+import { fetchElevenLabsUsage } from "../elevenlabs/fetcher.ts";
+import type { ElevenLabsError, ElevenLabsUsage } from "../elevenlabs/types.ts";
 import { fetchGeminiUsage, readGeminiAuthKey } from "../gemini/fetcher.ts";
 import type { GeminiError, GeminiUsage } from "../gemini/types.ts";
 import { fetchGrokUsage } from "../grok/fetcher.ts";
@@ -70,26 +73,13 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
  * coupling every fetcher/auth/parser module to the Raycast runtime.
  */
 
-// Root-level preferences shared by both commands.
-type SharedPrefs = {
-  additionalClaudeHomes?: string;
-  additionalCodexHomes?: string;
-  aihubmixApiKey?: string;
-  copilotAuthToken?: string;
-  cursorCookieHeader?: string;
-  deepseekApiKey?: string;
-  kimiAuthToken?: string;
-  syntheticApiToken?: string;
-  zaiApiToken?: string;
-  minimaxApiToken?: string;
-  minimaxcnApiToken?: string;
-  opencodegoApiKey?: string;
-  openrouterApiKey?: string;
-  raycastCookieHeader?: string;
-};
+// Text preferences shared by every command, keyed by the generated `Preferences` type.
+type TextPreferenceKey = {
+  [K in keyof Preferences]-?: Preferences[K] extends string | undefined ? K : never;
+}[keyof Preferences];
 
-function prefValue(key: keyof SharedPrefs): string {
-  return getPreferenceValues<SharedPrefs>()[key]?.trim() || "";
+function prefValue(key: TextPreferenceKey): string {
+  return getPreferenceValues<Preferences>()[key]?.trim() || "";
 }
 
 export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
@@ -221,6 +211,24 @@ export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({
       };
     }
     return fetchDroidUsage(accessToken);
+  },
+});
+
+export const useElevenLabsUsage = createUsageHook<ElevenLabsUsage, ElevenLabsError>({
+  agentId: "elevenlabs",
+  resolveAuthKey: async () => (await resolveElevenLabsApiKey(prefValue("elevenlabsApiKey"))) ?? "",
+  fetcher: async (apiKey) => {
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "ElevenLabs API key not configured. Add it in extension settings (Cmd+,) or set ELEVENLABS_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchElevenLabsUsage(apiKey);
   },
 });
 

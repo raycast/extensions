@@ -20,6 +20,7 @@ test("dark-mode list icon allowlist contains exactly the requested agents", () =
     "copilot-icon.svg",
     "cursor-icon.svg",
     "droid-icon.svg",
+    "elevenlabs-icon.svg",
     "grok-icon.svg",
     "opencode-go-icon.svg",
     "synthetic-icon.svg",

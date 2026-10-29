@@ -37,6 +37,7 @@ import {
   useCursorUsage,
   useDeepSeekUsage,
   useDroidUsage,
+  useElevenLabsUsage,
   useGeminiUsage,
   useGrokUsage,
   useKimiAccounts,
@@ -74,6 +75,8 @@ import { formatDeepSeekUsageText, getDeepSeekAccessory, renderDeepSeekDetail } f
 import type { DeepSeekError, DeepSeekUsage } from "./deepseek/types.ts";
 import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer.tsx";
 import type { DroidError, DroidUsage } from "./droid/types.ts";
+import { formatElevenLabsUsageText, getElevenLabsAccessory, renderElevenLabsDetail } from "./elevenlabs/renderer.tsx";
+import type { ElevenLabsError, ElevenLabsUsage } from "./elevenlabs/types.ts";
 import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth.ts";
 import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer.tsx";
 import type { GeminiError, GeminiUsage } from "./gemini/types.ts";
@@ -119,6 +122,7 @@ interface AgentUsageById {
   cursor: CursorUsage;
   deepseek: DeepSeekUsage;
   droid: DroidUsage;
+  elevenlabs: ElevenLabsUsage;
   gemini: GeminiUsage;
   grok: GrokUsage;
   kimi: KimiUsage;
@@ -142,6 +146,7 @@ interface AgentErrorById {
   cursor: CursorError;
   deepseek: DeepSeekError;
   droid: DroidError;
+  elevenlabs: ElevenLabsError;
   gemini: GeminiError;
   grok: GrokError;
   kimi: KimiError;
@@ -307,6 +312,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderDroidDetail,
     getAccessory: getDroidAccessory,
     formatUsageText: formatDroidUsageText,
+  },
+  elevenlabs: {
+    id: "elevenlabs",
+    name: "ElevenLabs",
+    icon: "elevenlabs-icon.svg",
+    description: "ElevenLabs Credit Usage",
+    isSupported: true,
+    settingsUrl: "https://elevenlabs.io/app/subscription",
+    useUsage: useElevenLabsUsage,
+    renderDetail: renderElevenLabsDetail,
+    getAccessory: getElevenLabsAccessory,
+    formatUsageText: formatElevenLabsUsageText,
   },
   gemini: {
     id: "gemini",
@@ -530,6 +547,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
   const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
+  const elevenlabsState = AGENT_REGISTRY.elevenlabs.useUsage(Boolean(prefs.showElevenLabs));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const grokState = AGENT_REGISTRY.grok.useUsage(Boolean(prefs.showGrok));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
@@ -554,6 +572,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
     deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
+    elevenlabs: createAgentView(AGENT_REGISTRY.elevenlabs, elevenlabsState, Boolean(prefs.showElevenLabs)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     grok: createAgentView(AGENT_REGISTRY.grok, grokState, Boolean(prefs.showGrok)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),

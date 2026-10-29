@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for AIHubMix, Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, ElevenLabs, Gemini, Grok, Kimi, MiniMax, MinimaxCN, OpenCode Go, OpenRouter, Raycast, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -30,6 +30,7 @@ Track usage across your AI coding agents in one place.
 | **Cursor**      | Cursor API                  |     ✓      |    —     |    —    |       —       | Auto-detected from Cursor app login, or paste cookie header in preferences                                                                                                       |
 | **DeepSeek**    | DeepSeek balance API        |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `deepseek`, set `DEEPSEEK_API_KEY`/`DEEPSEEK_KEY`, or paste an API key                                                                                              |
 | **Droid**       | Factory AI API              |     —      |    —     |    —    |       —       | Run `droid` command to login                                                                                                                                                     |
+| **ElevenLabs**  | ElevenLabs subscription API |     ✓      |    —     |    ✓    |       —       | Set `ELEVENLABS_API_KEY`, or paste an API key with the User → Read permission                                                                                                    |
 | **Gemini**      | Local state file            |     —      |    —     |    —    |       —       | Auto-detected from local state                                                                                                                                                   |
 | **Grok**        | grok.com billing API        |     —      |    —     |    —    |       —       | Auto-detected from `~/.grok/auth.json` after `grok login`                                                                                                                        |
 | **Kimi**        | Moonshot API                |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `kimi-for-coding`, or paste token from https://www.kimi.com/code/console                                                                                            |
@@ -80,6 +81,10 @@ Agent Usage shows the credits you have left on OpenRouter. Create a key from [Op
 Manual preferences take priority, followed by OpenCode and environment variables.
 
 Which balance is shown depends on the key type. A **provisioning key** can read the account ledger (`/api/v1/credits`), so the row shows account-wide credits purchased minus credits used. A regular **inference key** cannot read that ledger, so Agent Usage falls back to the key endpoint (`/api/v1/key`) and shows that key's own spending cap instead — or `$X.XX used` when the key has no cap.
+
+### ElevenLabs Credentials
+
+Agent Usage shows the ElevenLabs credits left in the current billing cycle, your plan, and the next reset. Create a key at [ElevenLabs API Keys](https://elevenlabs.io/app/settings/api-keys) and give it the **User → Read** permission if you restrict it. Then paste it into the **ElevenLabs API Key** extension preference, or set `ELEVENLABS_API_KEY` in your shell. The preference takes priority.
 
 ### Cursor Credentials
 
