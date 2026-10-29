@@ -1,0 +1,75 @@
+{
+  "files": [
+    {
+      "path": "docs/basics/prepare-an-extension-for-store.md",
+      "description": "Raycast Store requirements: manifest fields, naming, icons, screenshots, changelog format, categories, UI/UX guidelines",
+      "scope": ["extensions/**"]
+    },
+    {
+      "path": "docs/information/manifest.md",
+      "description": "package.json manifest reference: extension, command, preference, argument, and tool properties, per-platform preference defaults, AI skills, MCP servers and model providers",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5"
+      ]
+    },
+    {
+      "path": "docs/information/file-structure.md",
+      "description": "Extension folder layout: assets, metadata, media, help.md, skills, and ai.* configuration files",
+      "scope": ["extensions/**"]
+    },
+    {
+      "path": "docs/information/best-practices.md",
+      "description": "Error handling, runtime dependencies, loading indicators and form validation",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"]
+    },
+    {
+      "path": "docs/api-reference/keyboard.md",
+      "description": "Keyboard shortcuts: per-platform shortcut syntax, ambiguous modifiers, and Keyboard.Shortcut.Common bindings on macOS and Windows",
+      "scope": ["extensions/**/*.tsx"]
+    },
+    {
+      "path": "docs/api-reference/menu-bar-commands.md",
+      "description": "Menu bar command lifecycle, isLoading requirements and best practices",
+      "scope": ["extensions/**/*.tsx"]
+    },
+    {
+      "path": "docs/ai/learn-core-concepts-of-ai-extensions.md",
+      "description": "AI extension tools, instructions and confirmations",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/tools/**"
+      ]
+    },
+    {
+      "path": "docs/ai/evals.md",
+      "description": "AI extension eval format: inputs, expectations and mocks",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5"
+      ]
+    },
+    {
+      "path": "docs/ai/provide-ai-models.md",
+      "description": "AI model provider extensions: modelProvider entry point, getModels and streamCompletion",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/**"
+      ]
+    }
+  ]
+}
