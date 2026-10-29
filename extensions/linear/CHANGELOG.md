@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Primary Action Preference] - {PR_MERGE_DATE}
+## [Primary Action Preference] - 2026-10-29
 
 - Add a **Primary Action** preference to choose whether pressing Enter on an issue, project, document, or view shows its details or opens it in Linear.
 - Add an **Open View in Linear** action to **Search Custom Views**.
