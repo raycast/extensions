@@ -153,7 +153,7 @@
 /extensions/argocd                                                  @PixiBixi
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
-/extensions/artificial-analysis-rankings                            
+/extensions/artificial-analysis-rankings                            @NarenTheNumpkin
 /extensions/arxiv                                                   @koayon @pernielsentikaer @osteele
 /extensions/aryan-techie-blog                                       @Aryan-Techie
 /extensions/asafamos-accessibility-scanner                          @asafamos
@@ -659,7 +659,7 @@
 /extensions/daytona                                                 @stefanicjuraj
 /extensions/db-schema-explorer                                      @SciSaif
 /extensions/dbt-documentation                                       @b-per @xmok
-/extensions/dbtCloud                                                @zsombor-flds @xmok
+/extensions/dbtCloud                                                @zsombor-flds @xmok @gavin-burns-US
 /extensions/ddev                                                    @SuoweiHu
 /extensions/debank                                                  @Yukaii
 /extensions/decentraland                                            @fmiras @xmok
