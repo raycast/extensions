@@ -1848,6 +1848,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://suparelay.app/mcp"],
     },
   },
+    {
+    name: "suprsend",
+    title: "SuprSend",
+    description:
+      "Notification infrastructure for product teams. Manage notification workflows, templates, users, preferences, tenants and subscriber lists, and query delivery logs to debug failed notifications across email, SMS, push, in-app inbox, WhatsApp and Slack. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/suprsend/claude-plugin/main/.claude-plugin/icon.png",
+    homepage: "https://docs.suprsend.com/reference/mcp-overview",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.suprsend.com/mcp"],
+    },
+    remoteUrl: "https://mcp.suprsend.com/mcp",
+  },
   {
     name: "tapetide",
     title: "Tapetide",
