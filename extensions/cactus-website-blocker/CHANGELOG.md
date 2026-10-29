@@ -1,6 +1,6 @@
 # Cactus Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - View the current protection state and next transition.
 - Edit recurring days, hours, and blocked websites for the next block.
