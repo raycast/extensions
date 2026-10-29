@@ -1,6 +1,6 @@
 # Ray Icon Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - Create and export icons from the Raycast icon set or a custom SVG.
 - Edit icons with a live preview, including preset, appearance, glare, noise, size, and corner radius.
