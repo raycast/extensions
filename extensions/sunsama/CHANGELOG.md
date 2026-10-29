@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Fix Sign-In Crash] - {PR_MERGE_DATE}
+## [Fix Sign-In Crash] - 2026-10-29
 
 - Fixed every command failing with "crypto is not defined" on some Macs when
   signing in to Sunsama.
