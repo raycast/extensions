@@ -14,7 +14,7 @@ import { DocumentDetail } from "./DocumentDetail";
 export function Document({ doc, ...rest }: DocumentActionsProps) {
   const { primaryAction } = getPreferenceValues<Preferences>();
   const openInLinearFirst = primaryAction === "openInLinear";
-  const keywords = [doc.project?.name ?? "", doc.initiative?.name ?? "", doc.title, doc.creator.displayName];
+  const keywords = getDocumentKeywords(doc);
   const lastUpdated = doc.updatedAt ? new Date(doc.updatedAt) : new Date(doc.createdAt);
 
   return (
