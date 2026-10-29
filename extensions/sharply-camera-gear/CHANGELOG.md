@@ -1,6 +1,6 @@
 # Sharply Gear Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-29
 
 - Search public camera and lens pages without an account or API key.
 - View thumbnails and estimated used prices for US, UK, or EU markets, selected through the Price Market preference.
