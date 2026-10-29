@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Posty MCP Server] - {PR_MERGE_DATE}
+## [Add Posty MCP Server] - 2026-10-29
 
 - Add Posty to the official registry: write, schedule and publish posts to 20 social platforms with a content calendar and full-quality photo and video uploads. Hosted Streamable HTTP server at https://api.posty.hu/mcp-oauth with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
