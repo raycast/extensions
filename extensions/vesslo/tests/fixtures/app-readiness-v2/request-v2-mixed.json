@@ -1,0 +1,29 @@
+{
+  "completedCheckRevision": 41,
+  "createdAt": "2026-09-12T00:00:00.000Z",
+  "inventoryRevision": 70,
+  "publisherSessionId": "91A2BD20-5A2B-5BF8-AD00-0970710119E7",
+  "requestId": "519A85B3-DD3D-5FB0-A2FD-3FBE8A87D3DF",
+  "schemaVersion": 2,
+  "source": "homebrew",
+  "targets": [
+    {
+      "appId": "E77F09D1-EF1B-54DB-8666-11B1EEB8F469",
+      "bundleId": "org.example.readiness.alpha",
+      "canonicalPath": "/Applications/FixtureAlpha.app",
+      "caskToken": "fixture-alpha",
+      "expectedTargetVersion": "2.0",
+      "installedVersion": "1.0",
+      "readinessEvidenceId": "CF25F52B-AABB-5F8C-99E1-02EF51293F49"
+    },
+    {
+      "appId": "22C3432D-44D5-52C5-965E-04C440617C35",
+      "bundleId": "org.example.readiness.beta",
+      "canonicalPath": "/Applications/FixtureBeta.app",
+      "caskToken": "fixture-beta",
+      "expectedTargetVersion": "2.0",
+      "installedVersion": "1.0",
+      "readinessEvidenceId": "80D15174-1AE7-5458-BEC3-052FA22988E6"
+    }
+  ]
+}

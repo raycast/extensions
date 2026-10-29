@@ -92,7 +92,7 @@ export function TeamActions(props: {
           title="Copy Team Members"
           content={copyTeamMembers() || ""}
           icon={Icon.PersonLines}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "m" }, Windows: { modifiers: ["ctrl"], key: "m" } }}
         />
       )}
       {members && members.length > 0 && (
@@ -102,7 +102,10 @@ export function TeamActions(props: {
             title="Export Team as vCard"
             onAction={exportTeamMembersAsVCards}
             icon={Icon.AddPerson}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "e" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+            }}
           />
           <Action title="Export Team as CSV" onAction={exportTeamMembersAsCSV} icon={Icon.Download} />
         </>
@@ -111,13 +114,13 @@ export function TeamActions(props: {
         title="View Team's Meetings"
         onAction={viewTeamMeetings}
         icon={Icon.MagnifyingGlass}
-        shortcut={{ modifiers: ["cmd"], key: "f" }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
       />
       <Action.CopyToClipboard
         title="Copy All Details"
         content={JSON.stringify(team, null, 2)}
         icon={Icon.Document}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />
       {onRefresh && (
         <Action

@@ -3,6 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { existsSync, unlinkSync } from "fs";
+import { join } from "path";
 import { triggerDownload } from "./apiRequest";
 
 const execFileP = promisify(execFile);
@@ -17,14 +18,13 @@ export const copyFileToClipboard = async ({ url, id, downloadLocation }: CopyFil
   if (downloadLocation) triggerDownload(downloadLocation);
   const toast = await showToast(Toast.Style.Animated, "Downloading and copying image...");
 
-  const selectedPath = environment.supportPath;
-  const fixedPathName = selectedPath.endsWith("/") ? `${selectedPath}${id}.jpg` : `${selectedPath}/${id}.jpg`;
+  const fixedPathName = join(environment.supportPath, `${id}.jpg`);
 
   try {
     if (process.platform === "win32") {
       if (!existsSync(fixedPathName)) {
         try {
-          await execFileP("curl.exe", ["-s", "--fail", "-o", fixedPathName, url]);
+          await execFileP("curl.exe", ["-s", "--fail", "-L", "-o", fixedPathName, url]);
         } catch (err) {
           try {
             unlinkSync(fixedPathName);

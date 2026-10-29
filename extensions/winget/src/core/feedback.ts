@@ -69,6 +69,8 @@ function progressMessage(progress: WingetProgressState): string | undefined {
       return "Uninstalling…";
     case "repairing":
       return "Repairing…";
+    case "stalled":
+      return `No output for ${progress.silentMinutes} min — still running, cancel if it looks stuck`;
     case "complete":
       return progress.message;
   }

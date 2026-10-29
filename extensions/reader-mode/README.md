@@ -182,7 +182,7 @@ For paywalled or member-only articles (like Medium member stories), you can re-i
 **How It Works:**
 
 1. Open the article in Reader Mode (you'll see a truncated or blocked version)
-2. Press **⌘ + ⇧ + R** to trigger "Import from Browser Tab"
+2. Open the Action Panel (**⌘ + K**) and choose "Import from Browser Tab" — or, on a blocked page, "Fetch Content from Browser" (**⌘ + R**)
 3. Reader Mode finds the matching browser tab using the article's canonical URL
 4. If the tab is inactive, you'll be prompted to focus it first
 5. Content is re-imported with your authenticated session, showing the full article
@@ -235,5 +235,4 @@ So a readable article that also ships an inactive, externally-hidden paywall tem
 - [Defuddle](https://github.com/kepano/defuddle) - Inspiration for extractor architecture
 - [Turndown](https://github.com/mixmark-io/turndown) - HTML to Markdown conversion
 - [Raycast API Docs](https://developers.raycast.com)
-- [Logger Integration Guide](./docs/logger-integration.md)
-- [Extension Spec](./docs/about.md)
+- [Logging Conventions](./CONTRIBUTING.md#logging)

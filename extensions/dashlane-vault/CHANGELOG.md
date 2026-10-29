@@ -1,5 +1,9 @@
 # Dashlane Vault Changelog
 
+## [Copy Secure Note Content] - 2026-09-19
+
+- Add an action to copy decrypted Secure Note content without saving it to Clipboard History
+
 ## [Improvements] - 2026-04-21
 
 - Update dependencies

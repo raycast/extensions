@@ -1,5 +1,11 @@
 # Vercast Changelog
 
+## [2.20] - 2026-08-03
+
+- Added AI Gateway leaderboards for popular models and creators
+- Added an AI Gateway Playground for sending prompts to language models
+- Improved AI Gateway model discovery with Vercel’s documented JSON catalog
+
 ## [2.19] - 2026-06-29
 
 - Fix deployment fetching for selected Vercel teams by including team slugs in deployment API requests

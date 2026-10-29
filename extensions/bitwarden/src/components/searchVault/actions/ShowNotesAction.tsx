@@ -36,7 +36,7 @@ function ShowNotesAction() {
 
 function DetailsScreen({ itemName, notes }: { itemName: string; notes: string }) {
   const handleCopy = async () => {
-    await Clipboard.copy(notes, { transient: getTransientCopyPreference("other") });
+    await Clipboard.copy(notes, { concealed: getTransientCopyPreference("other") });
     await showCopySuccessMessage("Copied notes to clipboard");
   };
 

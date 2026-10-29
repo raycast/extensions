@@ -9,11 +9,11 @@ Control [Handy](https://handy.computer) — offline speech-to-text — directly 
 | **Toggle Recording**       | Toggle Handy's transcription recording on/off           |
 | **Copy Last Transcript**   | Copy the most recent transcription to clipboard         |
 | **Paste Last Transcript**  | Paste the most recent transcription into the active app |
-| **Search Transcripts**     | Browse history, copy, save, delete, reveal in Finder    |
+| **Search Transcripts**     | Browse history, copy, save, delete, reveal recordings   |
 | **Add Dictionary Word**    | Quickly add a word to Handy's custom dictionary         |
 | **Manage Dictionary**      | View, add, and delete custom dictionary words           |
 | **Select Model**           | Switch the active transcription model                   |
-| **Open Recordings Folder** | Open the recordings directory in Finder                 |
+| **Open Recordings Folder** | Open the recordings directory                           |
 
 ## Screenshots
 

@@ -3,7 +3,6 @@
  * MIT License
  */
 
-import { request } from "undici";
 
 function zr(a: string) {
     let b: any;
@@ -62,8 +61,8 @@ async function updateTKK() {
     let now = Math.floor(Date.now() / 3600000);
 
     if (Number(window.TKK.split(".")[0]) !== now) {
-        const response = await request("https://translate.google.com");
-        const body = await response.body.text();
+        const response = await fetch("https://translate.google.com");
+        const body = await response.text();
 
         // code will extract something like tkk:'1232135.131231321312', we need only value
         const code = body.match(/tkk:'\d+.\d+'/g);

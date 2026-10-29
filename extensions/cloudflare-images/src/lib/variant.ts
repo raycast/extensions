@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { resolveVariant } from "@mcdays/cloudflare-images-core";
+import { resolveVariant } from "./cloudflare-core.js";
 import type { CfImagesPreferences } from "./config.js";
 
 /**

@@ -152,8 +152,11 @@ alias another="incomplete
       const content = `export PATH="/usr/local/bin:$PATH"`;
       const entries = parseZshrc(content);
 
-      expect(entries).toHaveLength(1);
+      // An `export PATH=…` line is both an export and a PATH declaration —
+      // matching what the Exports and PATH views have always shown.
+      expect(entries).toHaveLength(2);
       expect(entries[0]?.type).toBe("export");
+      expect(entries[1]?.type).toBe("path");
 
       const exportEntry = entries[0] as ExportEntry;
       expect(exportEntry.variable).toBe("PATH");

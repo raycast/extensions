@@ -1,13 +1,15 @@
 /**
- * Raycast's v2 beta app track uses its own independent version numbering starting
- * from 0.x (confirmed: "0.67.1.0 (Beta)"), unrelated to and lower than the stable
- * v1 track's numbering (confirmed: "1.104.21"). A plain major-version comparison
- * against the stable track can't tell them apart, so this checks for either the
- * literal "beta" marker or a major version of 0. If Raycast v2 exits beta with a
- * new numbering scheme, this will need revisiting.
+ * Raycast v1 is the only track whose SVG renderer has the colored-fills-as-black bug and no
+ * SMIL animation support, so it's the one that needs rasterizing. Version numbering across
+ * tracks (confirmed):
+ * - v1 stable: "1.104.21"
+ * - v2 beta: "0.67.1.0 (Beta)" — its own independent numbering starting from 0.x
+ * - v2 stable: "2.6.2.0"
+ * Checking for v1 specifically, rather than for v2, keeps any future v2 numbering on the
+ * SVG path.
  */
-export function isRaycastV2Beta(raycastVersion: string): boolean {
-  if (/beta/i.test(raycastVersion)) return true;
+export function isRaycastV1(raycastVersion: string): boolean {
+  if (/beta/i.test(raycastVersion)) return false;
 
-  return Number.parseInt(raycastVersion, 10) === 0;
+  return Number.parseInt(raycastVersion, 10) === 1;
 }

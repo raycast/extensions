@@ -1,0 +1,51 @@
+[
+  {
+    "path": "/Users/lachlan/.config/mise/config.local.toml",
+    "tools": [
+      "aube",
+      "bun",
+      "fnox",
+      "gh",
+      "herdr",
+      "npm:cf",
+      "npm:typescript-language-server",
+      "npm:wrangler",
+      "op",
+      "opencode",
+      "npm:@opencode-ai/cli",
+      "pipx:claude-swap",
+      "shellcheck",
+      "supabase",
+      "usage",
+      "pnpm"
+    ]
+  },
+  {
+    "path": "/Users/lachlan/.config/mise/conf.d/tools.toml",
+    "tools": [
+      "node",
+      "go",
+      "ubi",
+      "rust",
+      "python",
+      "fnox",
+      "neovim",
+      "tree-sitter",
+      "lua-language-server",
+      "stylua",
+      "http:pool"
+    ]
+  },
+  {
+    "path": "/Users/lachlan/.config/mise/conf.d/tasks.toml",
+    "tools": []
+  },
+  {
+    "path": "/Users/lachlan/.config/mise/conf.d/settings.toml",
+    "tools": []
+  },
+  {
+    "path": "/Users/lachlan/.config/mise/conf.d/dotfiles.toml",
+    "tools": []
+  }
+]

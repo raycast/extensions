@@ -58,14 +58,14 @@ function addLineBreaks(text: string): string {
   words.forEach((word) => {
     // If the word contains a line break, reset the current line
     if (word.includes("\n")) {
-      // Add the current line before processing the word with line break
-      result += currentLine.trim() + "\n";
+      // Add the current line, keeping one line per line break (so blank lines are preserved)
+      result += currentLine.trim() + "\n".repeat(word.split("\n").length - 1);
       currentLine = ""; // Reset line
-      // Add the word with the line break and start a new line
-      result += word.trim() + "\n";
     } else if ((currentLine + word).length > maxLineLength) {
       // If the next word would exceed the line length, add the current line to the result
-      result += currentLine.trim() + "\n";
+      if (currentLine.trim()) {
+        result += currentLine.trim() + "\n";
+      }
       currentLine = word; // Start a new line with the current word
     } else {
       // Continue building the current line
@@ -79,6 +79,41 @@ function addLineBreaks(text: string): string {
   }
 
   return result;
+}
+
+// Estimate the width of a line in ems. SVG can't measure text before it is rendered, so this
+// deliberately errs on the wide side: a slightly smaller text is better than text cut off by the viewBox.
+function estimateLineWidth(line: string, monospace: boolean): number {
+  const splitter = new Graphemer();
+  return splitter.splitGraphemes(line).reduce((width, char) => {
+    // CJK, emoji and other wide characters
+    if (
+      /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6\u{20000}-\u{2FA1F}\u{30000}-\u{3FFFD}]/u.test(
+        char,
+      )
+    ) {
+      return width + 1.1;
+    }
+    if (/\p{Extended_Pictographic}/u.test(char)) {
+      return width + 1.2;
+    }
+    if (monospace) {
+      return width + 0.62;
+    }
+    if (/[ il.,:;!|'`Ijf]/.test(char)) {
+      return width + 0.32;
+    }
+    if (/[trs()[\]{}"/\\-]/.test(char)) {
+      return width + 0.42;
+    }
+    if (/[mwMW@%]/.test(char)) {
+      return width + 0.92;
+    }
+    if (/[A-Z&#]/.test(char)) {
+      return width + 0.72;
+    }
+    return width + 0.57;
+  }, 0);
 }
 
 export default function DisplayText({ inputText }: DisplayTextProps) {
@@ -189,21 +224,34 @@ export default function DisplayText({ inputText }: DisplayTextProps) {
     // Only set image height if text is less than 3 lines
     const height = text.length < maxLineLength * 3 ? "350" : "";
 
+    // SVG renderers collapse "\n" into a space, so each line gets its own <tspan>
+    const lines = addLineBreaks(text).split("\n");
+    const fontSize = 200;
+    const lineHeight = fontSize * 1.2;
+    const padding = fontSize / 4;
+    const monospace = preferences.fontStyle === "monospace";
+    const textWidth = lines.reduce((max, line) => Math.max(max, estimateLineWidth(line, monospace)), 0) * fontSize;
+
+    // Grow the viewBox to fit the text, so it is scaled down to fit the window instead of being cut off
+    const svgWidth = Math.ceil(Math.max(700, textWidth + padding * 2));
+    const svgHeight = Math.ceil(Math.max(350, lines.length * lineHeight + padding * 2));
+    const firstLineY = svgHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
+
+    const tspans = lines
+      .map((line, i) => `<tspan x="${svgWidth / 2}" y="${firstLineY + i * lineHeight}">${encodeForSVG(line)}</tspan>`)
+      .join("");
+
     // SVG with a viewBox attribute for scaling
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 350"  > `;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}"  > `;
 
     svg += `<text
-      x="50%"
-      y="50%"
-      font-size="200"
-      fill="${textColor}" 
+      font-size="${fontSize}"
+      fill="${textColor}"
       font-family="${fontFamily}"
-      
-      length-adjust="spacing"
       alignment-baseline="middle"
       dominant-baseline="middle"
       text-anchor="middle"
-    >${addLineBreaks(text)}</text>`;
+    >${tspans}</text>`;
 
     svg += `</svg>`;
 

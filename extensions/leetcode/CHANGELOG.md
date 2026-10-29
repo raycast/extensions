@@ -1,5 +1,9 @@
 # LeetCode Changelog
 
+## [Fix Menu Bar Icon Color] - 2026-09-19
+
+- Fix the daily challenge menu bar icon showing the wrong color after recent Raycast updates by tinting a single icon instead of using light and dark variants
+
 ## [New Additions] - 2026-07-14
 
 - Add `User Profile` command

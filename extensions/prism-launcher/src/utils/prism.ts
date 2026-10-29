@@ -1,11 +1,20 @@
 import { ConfigIniParser } from "config-ini-parser";
 import * as fs from "fs-extra";
 import * as async from "modern-async";
+import * as os from "os";
 import * as path from "path";
 import nbt from "prismarine-nbt";
-import type { Instance, Server } from "../types";
+import { pathToFileURL } from "url";
+import type { Instance, Screenshot, Server } from "../types";
 import { getPreferences } from "./preferences";
-import { getShortcutTargetPath } from "./powershell";
+import { getDownloadsFolderPath, getShortcutTargetPath } from "./powershell";
+
+/**
+ * Convert a local filesystem path to a `file://` URL that Raycast's `Image.source`
+ */
+export function toFileUrl(p: string | undefined): string | undefined {
+  return p ? pathToFileURL(p).href : undefined;
+}
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -62,9 +71,64 @@ export async function saveFavoriteInstanceIds(
 }
 
 /**
+ * Prism component UIDs that identify a mod loader, mapped to their display name
+ */
+const LOADER_UIDS: Record<string, string> = {
+  "net.minecraftforge": "Forge",
+  "net.neoforged": "NeoForge",
+  "net.fabricmc.fabric-loader": "Fabric",
+  "net.legacyfabric.fabric-loader": "Legacy Fabric",
+  "org.quiltmc.quilt-loader": "Quilt",
+  "com.mumfrey.liteloader": "LiteLoader",
+};
+
+type PackComponent = {
+  uid?: string;
+  version?: string;
+  cachedVersion?: string;
+};
+
+/**
+ * Read the Minecraft version and mod loader of an instance from its mmc-pack.json,
+ * falling back to the legacy `IntendedVersion` key in instance.cfg
+ */
+async function readInstanceVersion(
+  instanceFolder: string,
+  instanceCfg: ConfigIniParser,
+): Promise<Pick<Instance, "minecraftVersion" | "loader" | "loaderVersion">> {
+  let intendedVersion: string | undefined;
+  try {
+    intendedVersion = instanceCfg.get("General", "IntendedVersion", "") || undefined;
+  } catch {
+    // Section missing on some legacy configs
+  }
+
+  try {
+    const pack = await fs.readJson(path.join(instanceFolder, "mmc-pack.json"));
+    const components: PackComponent[] = Array.isArray(pack?.components) ? pack.components : [];
+
+    const minecraft = components.find((component) => component.uid === "net.minecraft");
+    const loader = components.find((component) => component.uid && LOADER_UIDS[component.uid]);
+
+    return {
+      minecraftVersion: minecraft?.version ?? minecraft?.cachedVersion ?? intendedVersion,
+      loader: loader?.uid ? LOADER_UIDS[loader.uid] : "Vanilla",
+      loaderVersion: loader?.version ?? loader?.cachedVersion,
+    };
+  } catch {
+    // No (or unreadable) mmc-pack.json - legacy instance or partial download
+    return { minecraftVersion: intendedVersion };
+  }
+}
+
+/**
  * Load all PrismLauncher instances
  */
-export async function loadInstances(favoriteIds: string[], onlyWithServers: boolean = false): Promise<Instance[]> {
+export async function loadInstances(
+  favoriteIds: string[],
+  onlyWithServers: boolean = false,
+  onlyWithScreenshots: boolean = false,
+): Promise<Instance[]> {
   const instancesPath = await getInstancesPath();
   if (!instancesPath) return [];
 
@@ -86,6 +150,8 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     );
     const iconPath = await async.asyncFind(paths, async (p: string) => await fs.pathExists(p));
 
+    const version = await readInstanceVersion(instanceFolder, instanceCfg);
+
     // Check if instance has servers.dat
     let hasServers = false;
     if (onlyWithServers) {
@@ -94,20 +160,32 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       hasServers = (await fs.pathExists(serversPath)) || (await fs.pathExists(legacyServersPath));
     }
 
+    // Check if instance has any screenshots
+    let hasScreenshots = false;
+    if (onlyWithScreenshots) {
+      hasScreenshots = await instanceHasScreenshots(instanceId);
+    }
+
     return {
       name: instanceCfg.get("General", "name", instanceId),
       id: instanceId,
-      icon: iconPath,
+      icon: toFileUrl(iconPath),
       favorite: favoriteIds.includes(instanceId),
+      ...version,
       ...(onlyWithServers ? { hasServers } : {}),
+      ...(onlyWithScreenshots ? { hasScreenshots } : {}),
     };
   });
 
-  // Filter instances with servers if requested
+  // Filter instances with servers/screenshots if requested
   let filteredInstances = instancesList;
   if (onlyWithServers) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filteredInstances = instancesList.filter((instance: any) => instance.hasServers);
+    filteredInstances = filteredInstances.filter((instance: any) => instance.hasServers);
+  }
+  if (onlyWithScreenshots) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filteredInstances = filteredInstances.filter((instance: any) => instance.hasScreenshots);
   }
 
   // Sort instances with favorites at the top, then alphabetically
@@ -145,6 +223,76 @@ export async function getMinecraftFolderPath(instanceId: string): Promise<string
   }
 
   return null;
+}
+
+const SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg"];
+
+/**
+ * Get the screenshots folder path for an instance, if it exists
+ */
+export async function getScreenshotsFolderPath(instanceId: string): Promise<string | null> {
+  const minecraftPath = await getMinecraftFolderPath(instanceId);
+  if (!minecraftPath) return null;
+
+  const screenshotsPath = path.join(minecraftPath, "screenshots");
+  return (await fs.pathExists(screenshotsPath)) ? screenshotsPath : null;
+}
+
+/**
+ * Check whether an instance has at least one screenshot
+ */
+async function instanceHasScreenshots(instanceId: string): Promise<boolean> {
+  const screenshotsPath = await getScreenshotsFolderPath(instanceId);
+  if (!screenshotsPath) return false;
+
+  const files = await fs.readdir(screenshotsPath);
+  return files.some((file) => SCREENSHOT_EXTENSIONS.includes(path.extname(file).toLowerCase()));
+}
+
+/**
+ * Load screenshots from a single instance, newest first
+ */
+export async function loadScreenshotsFromInstance(instance: Instance): Promise<Screenshot[]> {
+  const screenshotsPath = await getScreenshotsFolderPath(instance.id);
+  if (!screenshotsPath) return [];
+
+  const files = await fs.readdir(screenshotsPath);
+  const imageFiles = files.filter((file) => SCREENSHOT_EXTENSIONS.includes(path.extname(file).toLowerCase()));
+
+  const screenshots = await async.asyncMap(imageFiles, async (file: string): Promise<Screenshot> => {
+    const filePath = path.join(screenshotsPath, file);
+    const stats = await fs.stat(filePath);
+
+    return {
+      path: filePath,
+      name: path.basename(file, path.extname(file)),
+      instanceId: instance.id,
+      instanceName: instance.name,
+      modifiedAt: stats.mtimeMs,
+    };
+  });
+
+  return screenshots.sort((a, b) => b.modifiedAt - a.modifiedAt);
+}
+
+/**
+ * Copy a screenshot into the user's Downloads folder, avoiding overwrites
+ */
+export async function saveScreenshotToDownloads(screenshot: Screenshot): Promise<string> {
+  const downloadsPath = (isWin && (await getDownloadsFolderPath())) || path.join(os.homedir(), "Downloads");
+  await fs.ensureDir(downloadsPath);
+
+  const extension = path.extname(screenshot.path);
+  let destination = path.join(downloadsPath, `${screenshot.name}${extension}`);
+  for (let suffix = 1; ; suffix++) {
+    try {
+      await fs.copy(screenshot.path, destination, { overwrite: false, errorOnExist: true });
+      return destination;
+    } catch (error) {
+      if (!(await fs.pathExists(destination))) throw error;
+      destination = path.join(downloadsPath, `${screenshot.name} (${suffix})${extension}`);
+    }
+  }
 }
 
 /**

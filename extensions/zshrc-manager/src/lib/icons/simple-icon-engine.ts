@@ -83,11 +83,20 @@ export function findBestSimpleIcon(
 }
 
 /**
- * Converts SVG string to data URL for Raycast compatibility
+ * Converts SVG string to data URL for Raycast compatibility.
+ *
+ * When a brand hex is given it is injected as the root `fill` before
+ * encoding: simple-icons SVGs ship without a fill attribute, so they
+ * inherit `currentColor`, render black, and are invisible on the dark
+ * theme.
  */
-export function svgToDataUrl(svg: string): string {
-  // Clean up the SVG string
-  const cleanSvg = svg.trim();
+export function svgToDataUrl(svg: string, hex?: string): string {
+  // Clean up the SVG string, baking in the brand color when provided
+  let cleanSvg = svg.trim();
+  if (hex) {
+    const normalizedHex = hex.replace(/^#/, "").toUpperCase();
+    cleanSvg = cleanSvg.replace("<svg ", `<svg fill="#${normalizedHex}" `);
+  }
 
   // Use base64 encoding for better compatibility with special characters
   try {

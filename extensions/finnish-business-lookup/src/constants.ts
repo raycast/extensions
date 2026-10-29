@@ -57,6 +57,18 @@ export interface WhatsNewEntry {
 
 export const WHATS_NEW_ENTRIES: WhatsNewEntry[] = [
   {
+    version: "0.2.1",
+    title: "Readable Search Results",
+    date: "2026-07-25",
+    changes: [
+      "Company names now have more room in split-view search results.",
+      "Hover a company name to view it in full when it is truncated.",
+      "Address details now separate the street, postal code, city, and other available fields.",
+      "Copy a selected company's multiline postal address with `Command-Shift-C`.",
+      "Name history now uses compact rows that remain readable with long or numerous names.",
+    ],
+  },
+  {
     version: "0.2.0",
     title: "Quick Company Actions",
     date: "2026-07-23",

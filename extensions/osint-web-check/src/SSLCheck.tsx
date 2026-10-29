@@ -1,4 +1,5 @@
 import { connect, type PeerCertificate } from "node:tls";
+import { isIP } from "node:net";
 import { List } from "@raycast/api";
 import { Fragment } from "react";
 import { CheckItemActions } from "./components/CheckItemActions";
@@ -61,8 +62,9 @@ export function SSLCheck({ url, enabled }: WebCheckComponentProps) {
 
 async function getSSLInformation(url: string) {
   return new Promise<PeerCertificate>((resolve, reject) => {
-    const host = new URL(url).host;
-    const socket = connect({ host, servername: host, port: 443 });
+    const parsedUrl = new URL(url);
+    const host = parsedUrl.hostname.replace(/^\[|\]$/g, "");
+    const socket = connect({ host, servername: isIP(host) ? undefined : host, port: Number(parsedUrl.port) || 443 });
     socket.setTimeout(1500);
 
     socket.once("secureConnect", () => {

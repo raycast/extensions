@@ -99,6 +99,11 @@ import {
   errorMessage,
   WRITABLE_ROLES,
 } from "./lib/api";
+import {
+  CALLOUTS,
+  appendCalloutPrefix,
+  descriptionFieldInfo,
+} from "./lib/descriptionMarkup";
 import { ENTRY_TYPES, entryTypeLabel } from "./lib/entryTypes";
 import { iconForList } from "./lib/listIconCatalog";
 import { crossShortcut, shortcutHint } from "./lib/platform";
@@ -576,6 +581,28 @@ export default function AddEntryCommand({
               />
             </ActionPanel.Section>
           )}
+          {/* Callout inserts, the action-panel port of the web's `/`
+              picker (Raycast forms can't host an inline popup; see
+              lib/descriptionMarkup.ts). Each appends its prefix to the
+              Description as a fresh block and focuses the field, so
+              the caret lands at the end, right after the prefix. */}
+          <ActionPanel.Section title="Insert into Description">
+            {CALLOUTS.map((c) => (
+              <Action
+                key={c.name}
+                title={`Insert ${c.name} Callout`}
+                icon={Icon.QuoteBlock}
+                shortcut={crossShortcut(["cmd", "shift"], c.shortcutKey)}
+                onAction={() => {
+                  setValue(
+                    "description",
+                    appendCalloutPrefix(values.description ?? "", c.prefix),
+                  );
+                  focus("description");
+                }}
+              />
+            ))}
+          </ActionPanel.Section>
           {lastAdded && (
             <Action.OpenInBrowser
               title="Open Last Added Entry"
@@ -657,6 +684,7 @@ export default function AddEntryCommand({
       <Form.TextArea
         title="Description"
         placeholder="Optional longer notes, examples, references…"
+        info={descriptionFieldInfo()}
         {...itemProps.description}
       />
 

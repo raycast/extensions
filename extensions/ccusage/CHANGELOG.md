@@ -1,5 +1,37 @@
 # Claude Usage (ccusage) Changelog
 
+## [Fix loading and add section preferences] - 2026-10-18
+
+### Fixed
+
+- Share summary and session requests across views to avoid duplicate scans and timeouts on large histories.
+- Cache compact session results while preserving model totals from the full history. Reuse fresh reports across launches and keep cached data visible when a refresh fails.
+- Show completed summaries while session details are still loading, and distinguish loading from empty results.
+
+### Added
+
+- Main-command preferences to show or hide each section. Reports and refresh timers run only when a visible section needs them.
+- A This Month section after This Week, with monthly totals and comparisons.
+
+## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
+
+### Fixed
+
+- Only set `npm_config_prefix` to `~/.npm-global` when that directory exists — pointing npm at a missing prefix made npx fail with ENOENT on nvm/Homebrew installs, breaking every command
+- Report the actual failure reason (spawn error, exit code, signal, or timeout, with stderr) when the ccusage CLI fails, instead of a misleading "No output received"
+
+## [Fable support and per-model limits] - 2026-08-29
+
+### Added
+
+- **Frontier model tier:** Model Statistics now groups Fable into a Frontier tier above Premium, so its higher per-token pricing stays separate from Opus. Tiers also render in a fixed order rather than in whatever order the models arrive.
+- **Per-model limits everywhere:** The Usage Limits detail view and the `get-usage-limits` AI tool now show per-model windows alongside the 5-hour and 7-day totals. Previously these appeared only in the menu bar.
+
+### Changed
+
+- Per-model limits are read from the usage endpoint's self-describing `limits` array, so a window for any model shows up under its own name and period without an extension update. The older `seven_day_sonnet` and `seven_day_opus` fields still supply any window the array does not carry.
+- The menu bar and Usage Limits view render every limit window through one path instead of hardcoding a block per window, so the 5-hour, 7-day, and per-model rows stay consistent with each other.
+
 ## [Rename to Claude Usage] - 2026-07-29
 
 ### Changed

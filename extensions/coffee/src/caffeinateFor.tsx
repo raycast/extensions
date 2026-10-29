@@ -1,8 +1,8 @@
-import { showToast, Toast } from "@raycast/api";
-import { startCaffeinate } from "./utils";
+import { popToRoot, showToast, Toast } from "@raycast/api";
+import { useEffect, useRef } from "react";
+import { startCaffeinate, deviceName } from "./utils";
 
-export default async function Command(props: { arguments: Arguments.CaffeinateFor }) {
-  const { hours, minutes, seconds } = props.arguments;
+async function caffeinateFor({ hours, minutes, seconds }: Arguments.CaffeinateFor) {
   const hasValue = hours || minutes || seconds;
 
   if (!hasValue) {
@@ -20,12 +20,34 @@ export default async function Command(props: { arguments: Arguments.CaffeinateFo
     return;
   }
 
-  const totalSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  const totalSeconds = Number(hours || 0) * 3600 + Number(minutes || 0) * 60 + Number(seconds || 0);
+  if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
+    await showToast(Toast.Style.Failure, "Please enter a duration greater than zero");
+    return;
+  }
+
   const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
 
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac for ${formattedTime}`,
+    `Caffeinating your ${deviceName()} for ${formattedTime}`,
     `-t ${totalSeconds}`,
+    { kind: "for", endsAt: new Date(Date.now() + totalSeconds * 1000).toISOString() },
   );
+}
+
+export default function Command(props: { arguments: Arguments.CaffeinateFor }) {
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    caffeinateFor(props.arguments)
+      .catch((error: unknown) =>
+        showToast(Toast.Style.Failure, "Failed to caffeinate", error instanceof Error ? error.message : String(error)),
+      )
+      .finally(() => popToRoot());
+  }, [props.arguments]);
+
+  return null;
 }

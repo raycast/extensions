@@ -49,18 +49,17 @@ function describeTupleError(error: Error): TupleErrorPresentation {
           </>
         ),
       };
-    case TupleErrorKind.TranscriptionUnavailable:
+    case TupleErrorKind.CaptureUnavailable:
       return {
         icon: Icon.Microphone,
         title: "No Recorded Calls Yet",
-        description:
-          "Transcription hasn’t run on this Mac. Enable it in Tuple’s transcription settings to start recording calls.",
+        description: "Capture hasn’t run on this Mac. Enable it in Tuple’s Capture settings to start recording calls.",
         actions: (retry) => (
           <>
             <Action
-              title="Open Transcription Settings"
+              title="Open Capture Settings"
               icon={Icon.Gear}
-              onAction={() => open(TUPLE_DEEP_LINKS.transcriptionSettings)}
+              onAction={() => open(TUPLE_DEEP_LINKS.captureSettings)}
             />
             {retry}
           </>
@@ -76,12 +75,6 @@ function describeTupleError(error: Error): TupleErrorPresentation {
   }
 }
 
-/**
- * Shared error empty-state for list commands, so every command surfaces a missing CLI, a stopped
- * Tuple app, or a not-yet-set-up transcript store the same way — with a deep link to the right
- * Tuple settings pane. Render this only when there is an error; the no-data empty view stays local
- * to each command since its copy is command-specific.
- */
 export function TupleErrorEmptyView({ error, onRetry }: { error: Error; onRetry?: () => void }) {
   const { icon, title, description, actions } = describeTupleError(error);
   const retry = onRetry ? <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} /> : null;

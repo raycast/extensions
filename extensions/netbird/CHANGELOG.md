@@ -1,5 +1,13 @@
 # NetBird Changelog
 
+## [Fix double SSO login page] - 2026-09-23
+
+- Fixed SSO login page opening twice when connecting to NetBird.
+
+## [Toggle Connection] - 2026-09-16
+
+- Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
+
 ## [Custom Admin URL] - 2026-04-03
 
 - Added option to overwrite Admin Panel URL in preferences.

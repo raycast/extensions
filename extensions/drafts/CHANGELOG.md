@@ -1,5 +1,9 @@
 # Drafts Changelog
 
+## [Node 22 and Node 26 preparation] - {PR_MERGE_DATE}
+
+- Remove unused native dependencies so installation does not require unrelated native binaries.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

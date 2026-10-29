@@ -15,10 +15,11 @@ import { getUnseenActivity, MAX_UNREAD_PRS, MAX_SCAN_PRS } from "./utils";
 import { apiLog as log, safeUrl, getErrorMessage } from "./logger";
 import { fetchPRsWithActivityGraphQL } from "./api-graphql";
 import { applyFullySeenWatermarks } from "./seen";
+import { matchesPrFilter, type CompiledPrFilter } from "./pr-filter-query";
 
 const CONCURRENCY = 5;
 
-function getConfig() {
+export function getConfig() {
   const prefs = getPreferenceValues<Preferences>();
   // Optional preference — default to github.com when unset/blank; only GitHub Enterprise needs a host.
   const host = (prefs.ghHost || "").trim() || "github.com";
@@ -99,27 +100,33 @@ async function fetchAllPages<T>(url: string, headers: Record<string, string>): P
   return results;
 }
 
-/** Fetch all reviews / comments / events / commits for a single PR. */
+/** Fetch all reviews / comments / events / commits for a single PR, and refresh its full metadata. */
 async function fetchActivity(
   base: string,
   headers: Record<string, string>,
   repo: string,
   pr: GHPullRequest,
 ): Promise<PRWithActivity> {
-  const [reviews, reviewComments, issueComments, events, commits] = await Promise.all([
+  const [fullPr, reviews, reviewComments, issueComments, events, commits] = await Promise.all([
+    fetch(`${base}/repos/${repo}/pulls/${pr.number}`, { headers }).then((res) => {
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      return res.json() as Promise<GHPullRequest>;
+    }),
     fetchAllPages<GHReview>(`${base}/repos/${repo}/pulls/${pr.number}/reviews`, headers),
     fetchAllPages<GHReviewComment>(`${base}/repos/${repo}/pulls/${pr.number}/comments`, headers),
     fetchAllPages<GHIssueComment>(`${base}/repos/${repo}/issues/${pr.number}/comments`, headers),
     fetchAllPages<GHIssueEvent>(`${base}/repos/${repo}/issues/${pr.number}/events`, headers),
     fetchAllPages<GHCommit>(`${base}/repos/${repo}/pulls/${pr.number}/commits`, headers),
   ]);
-  return { ...pr, repo, reviews, reviewComments, issueComments, events, commits };
+  return { ...fullPr, repo, reviews, reviewComments, issueComments, events, commits };
 }
 
 /**
  * Keep only the PR fields we actually consume. The open-PR list for a large repo can be hundreds
- * of entries; dropping the heavy fields GitHub returns (body, labels, …) keeps the in-memory
- * index of open PRs small while we scan for unread activity.
+ * of entries; dropping the heaviest fields GitHub returns (body, diff stats, …) keeps the
+ * in-memory index of open PRs small while we scan for unread activity. Assignees, requested
+ * reviewers, labels, and draft status are kept — they're small, and saved PR filters match
+ * against them (see pr-filter-query.ts).
  */
 function slimPr(pr: GHPullRequest): GHPullRequest {
   return {
@@ -131,6 +138,10 @@ function slimPr(pr: GHPullRequest): GHPullRequest {
     user: { login: pr.user.login, avatar_url: pr.user.avatar_url },
     comments: pr.comments,
     state: pr.state,
+    assignees: pr.assignees.map((u) => ({ login: u.login, avatar_url: u.avatar_url })),
+    requested_reviewers: pr.requested_reviewers.map((u) => ({ login: u.login, avatar_url: u.avatar_url })),
+    labels: pr.labels,
+    draft: pr.draft,
   };
 }
 
@@ -139,6 +150,12 @@ export interface FetchOptions {
   seen: SeenMap;
   /** Active event filters — a PR whose only activity is filtered out doesn't count as unread. */
   filters: EventFilters;
+  /**
+   * The currently active saved PR filter, if any. Applied alongside `filters` at the exact point
+   * a PR is judged unread-and-visible, so "Max Unread/Scan" budgets aren't spent on PRs the
+   * filter excludes. Never applied to watermark eligibility — see the scan loop below.
+   */
+  prFilter?: CompiledPrFilter;
   /** Which command initiated this fetch. Logged so duplicate concurrent fetches are attributable. */
   source?: string;
   /** Target number of PRs with unread activity to return. Defaults to MAX_UNREAD_PRS. */
@@ -192,6 +209,7 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
       const result = await fetchPRsWithActivityGraphQL({
         seen: opts.seen,
         filters: opts.filters,
+        prFilter: opts.prFilter,
         maxUnread,
         maxScan,
       });
@@ -232,7 +250,8 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
         for (const pr of backfilled) {
           const entry = opts.seen[prKey(pr)];
           const allUnseen = getUnseenActivity(pr, entry);
-          if (allUnseen.some((item) => opts.filters[item.type])) {
+          const visible = allUnseen.some((item) => opts.filters[item.type]);
+          if (visible && (!opts.prFilter || matchesPrFilter(pr, opts.prFilter))) {
             result.prs.push(pr);
           }
         }
@@ -307,7 +326,7 @@ export async function fetchPRsWithActivity(opts: FetchOptions): Promise<FetchRes
     scanned += built.length;
     for (const pr of built) {
       const unseen = getUnseenActivity(pr, opts.seen[prKey(pr)]).filter((item) => opts.filters[item.type]);
-      if (unseen.length > 0) {
+      if (unseen.length > 0 && (!opts.prFilter || matchesPrFilter(pr, opts.prFilter))) {
         collected.push(pr);
         if (collected.length >= maxUnread) break;
       }

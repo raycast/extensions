@@ -5,22 +5,21 @@ import { getIcon } from "./utils";
 import { useFetch } from "@raycast/utils";
 
 const pref = getPreferenceValues<{ period: string }>();
+const API_PATH = "https://api.ossinsight.io/v1/trends/repos/";
 
 export default function Command() {
   const [language, setLanguage] = useState<string>("All");
-  const { isLoading, data } = useFetch<Repository[]>(
-    `https://api.ossinsight.io/q/trending-repos?language=${language}&period=${pref.period}`,
-    {
-      parseResponse: async (response: Response) => {
-        if (!response.ok) {
-          throw new Error("No data available...");
-        }
+  const searchParams = new URLSearchParams({ language, period: pref.period });
+  const { isLoading, data } = useFetch<Repository[]>(`${API_PATH}?${searchParams}`, {
+    parseResponse: async (response: Response) => {
+      if (!response.ok) {
+        throw new Error("No data available...");
+      }
 
-        const { data } = (await response.json()) as { data: Repository[] };
-        return data as Repository[];
-      },
-    }
-  );
+      const { data } = (await response.json()) as { data: { rows: Repository[] } };
+      return data.rows;
+    },
+  });
 
   return (
     <List
@@ -45,7 +44,7 @@ export default function Command() {
             key={repo.repo_id}
             icon={getIcon(index + 1)}
             title={{ value: repo.repo_name, tooltip: repo.description ?? "" }}
-            subtitle={repo.language ?? ""}
+            subtitle={repo.primary_language ?? ""}
             accessories={[
               {
                 icon: Icon.Star,
@@ -69,9 +68,10 @@ export default function Command() {
               },
               {
                 icon: Icon.TwoPeople,
-                text: repo.contributor_logins ? repo.contributor_logins.split(",").length + "" : "0",
+                text: repo.contributor_logins ? repo.contributor_logins.split(",").filter(Boolean).length + "" : "0",
                 tooltip:
-                  "Top Contributors" + (repo.contributor_logins ? `: ${repo.contributor_logins.slice(0, -1)}` : ""),
+                  "Top Contributors" +
+                  (repo.contributor_logins ? `: ${repo.contributor_logins.split(",").filter(Boolean).join(",")}` : ""),
               },
             ]}
             actions={

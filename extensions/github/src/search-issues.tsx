@@ -6,11 +6,11 @@ import { useState } from "react";
 import { getGitHubClient } from "./api/githubClient";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+import { getSearchPageSize } from "./components/Menu";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { IssueFieldsFragment } from "./generated/graphql";
-import { pluralize } from "./helpers";
-import { ISSUE_DEFAULT_SORT_QUERY } from "./helpers/issue";
+import { compactFragmentNodes, pluralize, uniqueById } from "./helpers";
+import { ISSUE_DEFAULT_SORT_QUERY, normalizeIssueSearchText, parseIssueNumberLookup } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
@@ -30,34 +30,61 @@ function SearchIssues() {
     data,
     isLoading,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (searchText, searchFilter, sortTxt) => {
-      const result = await github.searchIssues({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:issue archived:false ${sortTxt} ${searchFilter} ${searchText}`,
-      });
+    (searchText, searchFilter, sortTxt) =>
+      async ({ cursor }) => {
+        if (!cursor) {
+          const lookup = parseIssueNumberLookup(`${searchFilter ?? ""} ${searchText}`);
+          if (lookup) {
+            try {
+              const exact = await github.issueByNumber(lookup);
+              if (exact.repository?.issue) {
+                return {
+                  data: [exact.repository.issue as IssueFieldsFragment],
+                  hasMore: false,
+                };
+              }
+            } catch {
+              // Fall back to paginated search when the repository is inaccessible.
+            }
+          }
+        }
 
-      return result.search.nodes?.map((node) => node as IssueFieldsFragment);
-    },
+        const result = await github.searchIssues({
+          numberOfItems: getSearchPageSize(),
+          query: `is:issue archived:false ${sortTxt} ${searchFilter ?? ""} ${normalizeIssueSearchText(searchText)}`,
+          after: cursor,
+        });
+
+        return {
+          data: compactFragmentNodes<IssueFieldsFragment>(result.search.nodes),
+          hasMore: result.search.pageInfo.hasNextPage,
+          cursor: result.search.pageInfo.endCursor ?? undefined,
+        };
+      },
     [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
   );
 
+  const issues = uniqueById(data ?? []);
+
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Globally search issues across repositories"
+      searchBarPlaceholder="Search issues, or owner/repo#123"
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
+      pagination={pagination}
     >
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "issue", { withNumber: true })}
+          subtitle={pluralize(issues.length, "issue", { withNumber: true })}
         >
-          {data.map((issue) => {
+          {issues.map((issue) => {
             return <IssueListItem key={issue.id} {...{ issue, viewer, mutateList, sortQuery, setSortQuery }} />;
           })}
         </List.Section>

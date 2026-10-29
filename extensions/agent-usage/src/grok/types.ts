@@ -14,6 +14,12 @@ export interface GrokUsage {
   loginMethod: string | null;
   /** Where credentials came from, e.g. "auth.json". */
   source: string;
+  /** Banked usage-limit reset tokens from Settings → Usage. */
+  resetCredits?: {
+    availableCount: number | null;
+    expiresAtList: string[];
+  };
+  resetCreditsError?: string;
 }
 
 export interface GrokError {

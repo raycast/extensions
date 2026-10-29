@@ -16,11 +16,12 @@ export default defineConfig({
       exclude: ["src/**/*.d.ts", "src/__tests__/**", "src/**/*.test.{ts,tsx}", "src/**/*.spec.{ts,tsx}"],
       // Ratchet: set just below current coverage so regressions fail while
       // `npm run validate` stays green. Raise as coverage grows.
+      // Current: ~81 lines/statements.
       thresholds: {
         branches: 85,
-        functions: 70,
-        lines: 56,
-        statements: 56,
+        functions: 80,
+        lines: 75,
+        statements: 75,
       },
     },
   },

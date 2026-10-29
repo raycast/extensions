@@ -24,7 +24,7 @@ const useMockData = () => getPreferences().useMockData === true;
 
 const createOAuthClient = () =>
   new OAuth.PKCEClient({
-    redirectMethod: OAuth.RedirectMethod.Web,
+    redirectMethod: OAuth.RedirectMethod.App,
     providerName: "Beeper Desktop",
     providerIcon: "extension-icon.png",
     providerId: "beeper-desktop-api",

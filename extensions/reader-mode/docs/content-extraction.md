@@ -12,6 +12,15 @@ Reader uses a multi-stage pipeline to extract clean article content from web pag
 4. **Readability Parsing** — Extract article content using Mozilla Readability
 5. **Markdown Conversion** — Convert HTML to Markdown with additional filtering
 
+**Markdown sources skip all five stages** (`src/utils/markdown-source.ts`, called from `loadArticleFromUrl`). A link to a `.md` file (served as Markdown or plain text), or a page that sends Markdown even when asked for HTML, is shown as is. Other Markdown competes with the page's HTML:
+
+- **Where it comes from.** The first fetch sends `Accept: text/markdown` ahead of `text/html` (a site that refuses it with 406 or 415 is asked again for HTML). A page that answers with Markdown (Cloudflare can convert the pages it serves this way, and documentation sites such as Stripe's and Vercel's publish their own) is fetched again as HTML. A page that doesn't, but links a Markdown version with `<link rel="alternate" type="text/markdown" href="…">`, gets that file fetched; if it is missing or isn't Markdown, the page is read as usual. A page that sent Markdown isn't checked for a link: on the sites checked, the two are the same document.
+- **Cleaning.** `stripPageChrome` removes what a converter keeps from the page's header and footer, at the start and end of the document only: a skip link, home-page links, a quoted `llms.txt` note, a theme toggle, a "Was this helpful? / YesNo" feedback widget, the page's JSON-LD (only when the page's HTML carries the same JSON), and trailing empty headings. When Readability's article holds at least 75% of the Markdown's text, `trimToArticle` also cuts the Markdown to the lines that article covers, extended through neighboring lines found in it, to whole code blocks, and to images the article shows, keeping reference definitions and front matter. An end is left uncut when what would go holds a line of 100 or more letters of prose: that is article Readability left out (a callout, say), not page chrome.
+- **The verdict.** `judgeMarkdown` in `article-loader.ts` passes over the Markdown when it has under 200 characters, says in its prose, not its code, that it is withholding the story ("unlimited access" counts only under 2,000 characters, since a product page says it too), uses more than one MDX component tag (`<Steps>`, `<Card title="…">`, `</Note>`), or holds under 80% of the HTML article's text. When the HTML page is paywalled, the HTML goes first so the Paywall Hopper runs; the Markdown is then shown when it holds 20% more text than the teaser and than any copy the Hopper found. When the HTML can't be fetched or parsed, or the page has over 20,000 elements (too large to parse just for the comparison), the Markdown is shown if it passes the first two checks. The verdict and its reason are logged as `markdown:verdict`, with `from` saying where the Markdown came from.
+- **Display.** The title, author, site name, and image come from the page's `<head>`, parsed on its own, except when the page sent Markdown and then failed to parse: that page may be a login or challenge page, so the Markdown's own title is used. Relative links resolve against the Markdown's URL, image alt text is dropped, and bracketed asides become parentheses, as for HTML articles.
+
+**Data payloads** (`src/utils/data-payload.ts`, called from `parseArticle`; the payload and the text the page shows are read before pre-cleaning). Some sites show a teaser behind a subscribe wall but ship the whole article in their framework's data: Nuxt's `<script id="__NUXT_DATA__">` (bizjournals.com) or Next.js's `<script id="__NEXT_DATA__">` (theatlantic.com). A Next.js payload is flattened into Nuxt's indexed form so one walk reads both, and a string in it that holds JSON is also parsed, as a separate root that leaves the string itself in place, because a data cache such as urql keeps its results as text; every string parsed counts against the payload's 5 MB limit, and a payload that flattens to more than 200,000 entries is skipped. The payload is searched for the shape of an article body rather than a known field: a list with at least 3 objects whose `html`, `innerHtml`, `text`, `body`, or `content` string has visible text (entities decoded; script, style, iframe, and noscript contents don't count), holding at least 500 characters, at most 1 MB of markup, and at most 20,000 tags counting each block's wrapper; objects that look like `<head>` tags (`name`, `property`, `rel`…) are skipped. An article stored as one string, not a list of blocks, isn't found. A payload also holds comments and story cards in that shape, so a list is used only if one of its first 3 non-empty blocks opens (first 40 characters) with text the page shows: Readability's article when it found one, otherwise the page's text outside scripts, styles, `[hidden]`, and `<template>` (not `aria-hidden`, which a subscribe modal sets on the whole page behind it). Of those lists, the longest whose built article still has 500 characters wins. It replaces Readability's result when the page fails the readability check, when Readability finds nothing, or when it contains at least half of Readability's text and holds more than 1.5 times as much. When it holds more than 1.5 times what the page shows of it (`recoveredFromPayload`), the loader's soft-paywall check and Paywall Hopper's candidate check weigh only the recovered text, not the page's paywall markup, which describes the teaser.
+
 ---
 
 ## Sources of Inspiration
@@ -223,16 +232,20 @@ After Readability extraction, Turndown converts HTML to Markdown. Additional ele
 
 The content extraction pipeline logs key events for debugging:
 
-| Event                       | Description                      |
-| --------------------------- | -------------------------------- |
-| `clean:schema-detected`     | Schema.org article markup found  |
-| `clean:site-config-applied` | Site-specific config applied     |
-| `clean:complete`            | Pre-cleaning finished with stats |
-| `parse:start`               | Readability parsing started      |
-| `parse:precheck`            | isProbablyReaderable result      |
-| `parse:success`             | Article extracted successfully   |
-| `parse:markdown:start`      | Markdown conversion started      |
-| `parse:markdown:success`    | Markdown conversion complete     |
+| Event                       | Description                                    |
+| --------------------------- | ---------------------------------------------- |
+| `clean:schema-detected`     | Schema.org article markup found                |
+| `clean:site-config-applied` | Site-specific config applied                   |
+| `clean:complete`            | Pre-cleaning finished with stats               |
+| `parse:start`               | Readability parsing started                    |
+| `parse:precheck`            | isProbablyReaderable result                    |
+| `parse:success`             | Article extracted successfully                 |
+| `parse:markdown:start`      | Markdown conversion started                    |
+| `parse:markdown:success`    | Markdown conversion complete                   |
+| `markdown-negotiated:found` | The page sent Markdown when asked              |
+| `markdown-alternate:found`  | The page links a Markdown version              |
+| `markdown:verdict`          | Markdown or HTML, and why                      |
+| `markdown:beats-teaser`     | Paywalled page: Markdown shown over the teaser |
 
 Enable verbose logging in preferences to see these events.
 

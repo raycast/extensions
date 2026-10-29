@@ -1,6 +1,8 @@
 import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { logger } from "@chrismessina/raycast-logger";
 import { homedir } from "os";
-import { getInstagramMediaURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
+import { downloadMediaSet, getInstagramMediaURL, runExclusive, showErrorToast } from "./download-media";
+import { mediaBasename } from "./media-files";
 
 export default async function Command({
   arguments: { instagramUrl },
@@ -27,23 +29,36 @@ export default async function Command({
     const shortcode = pathParts[1];
     const mediaType = pathParts[0] === "p" ? "post" : "reel";
 
-    const fetchToast = await showToast({
-      title: "Fetching Media",
-      style: Toast.Style.Animated,
-    });
-
-    const instagramMedias = await getInstagramMediaURL(shortcode, fetchToast, instagramUrl, mediaType);
-    if (!instagramMedias) {
-      // Helper already showed a failure toast.
-      return;
-    }
-
-    for (const media of instagramMedias) {
-      const { ext, fileId } = mediaExtensionAndId(media);
-      await handleDownload(media, fileId || "instagram-media", downloadFolder, ext);
-    }
+    // A relaunch while a carousel is still downloading would write a second copy of every file.
+    await runExclusive(() => runDownload(instagramUrl, shortcode, mediaType, downloadFolder));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error occurred";
     await showErrorToast("Error", message);
   }
+}
+
+async function runDownload(
+  instagramUrl: string,
+  shortcode: string,
+  mediaType: "post" | "reel",
+  downloadFolder: string,
+) {
+  const fetchToast = await showToast({
+    title: "Fetching Media",
+    style: Toast.Style.Animated,
+  });
+
+  const instagramMedias = await getInstagramMediaURL(shortcode, fetchToast, instagramUrl, mediaType);
+  if (!instagramMedias) {
+    // Helper already showed a failure toast.
+    return;
+  }
+
+  logger.log(`[download-instagram-media] Resolved ${shortcode}`, { mediaType, items: instagramMedias.length });
+
+  await downloadMediaSet(
+    instagramMedias.map((url, index) => ({ url, name: mediaBasename(shortcode, index, instagramMedias.length) })),
+    downloadFolder,
+    "Media",
+  );
 }

@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-tasks",
   "title": "Google Tasks",
-  "description": "Manage Google Tasks from Raycast.",
+  "description": "Manage Google Tasks from Raycast, and ask Raycast AI about them.",
   "icon": "google-tasks.png",
   "author": "elliotdes",
   "contributors": [
     "pernielsentikaer",
     "erik_vandeputte",
-    "ridemountainpig"
+    "ridemountainpig",
+    "sansaxena789"
   ],
   "platforms": [
     "macOS",
@@ -24,8 +25,8 @@
   "commands": [
     {
       "name": "view-lists",
-      "title": "View Lists",
-      "description": "View task lists",
+      "title": "View Tasks",
+      "description": "View tasks across your Google Task lists",
       "mode": "view"
     },
     {
@@ -38,17 +39,16 @@
   "preferences": [
     {
       "name": "clientId",
-      "type": "password",
+      "type": "textfield",
       "required": true,
-      "title": "OAuth Client ID",
-      "description": "Your OAuth client ID.",
-      "placeholder": "See https://console.developers.google.com/apis/credentials"
+      "title": "Google OAuth Client ID",
+      "description": "One-time setup. This is not an API key. Create an iOS OAuth client with Bundle ID com.raycast.",
+      "placeholder": "123...apps.googleusercontent.com"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -65,5 +65,169 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "tools": [
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search Google tasks and return compact results."
+    },
+    {
+      "name": "list-task-lists",
+      "title": "List Task Lists",
+      "description": "List Google Task lists."
+    },
+    {
+      "name": "get-task",
+      "title": "Get Task",
+      "description": "Get the full content of a Google task."
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a Google task with an optional list and due date."
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Update a Google task's title, notes, or due date."
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "description": "Mark a Google task as completed."
+    },
+    {
+      "name": "reopen-task",
+      "title": "Reopen Task",
+      "description": "Reopen a completed Google task."
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "description": "Permanently delete a Google task."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@google-tasks what is overdue",
+        "mocks": {
+          "search-tasks": {
+            "total": 2,
+            "shown": 2,
+            "view": "overdue",
+            "tasks": [
+              {
+                "id": "task-expense-report",
+                "listId": "list-my-tasks",
+                "listTitle": "My Tasks",
+                "title": "Submit expense report",
+                "due": "2026-04-29",
+                "status": "open",
+                "overdue": true
+              },
+              {
+                "id": "task-parking-permit",
+                "listId": "list-my-tasks",
+                "listTitle": "My Tasks",
+                "title": "Renew parking permit",
+                "due": "2026-03-14",
+                "status": "open",
+                "overdue": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-tasks",
+              "arguments": {
+                "view": "overdue"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Lists the overdue tasks by title."
+          }
+        ]
+      },
+      {
+        "input": "@google-tasks add review the proposal tomorrow to Work",
+        "mocks": {
+          "list-task-lists": [
+            {
+              "id": "list-work",
+              "title": "Work"
+            },
+            {
+              "id": "list-my-tasks",
+              "title": "My Tasks"
+            }
+          ],
+          "create-task": {
+            "title": "Review the proposal",
+            "listId": "list-work",
+            "listTitle": "Work",
+            "due": "2026-09-11"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-task",
+              "arguments": {
+                "title": {
+                  "includes": "proposal"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@google-tasks complete the submit timesheet task",
+        "mocks": {
+          "search-tasks": {
+            "total": 1,
+            "shown": 1,
+            "view": "open",
+            "tasks": [
+              {
+                "id": "task-timesheet",
+                "listId": "list-my-tasks",
+                "listTitle": "My Tasks",
+                "title": "Submit timesheet",
+                "due": null,
+                "status": "open",
+                "overdue": false
+              }
+            ]
+          },
+          "complete-task": {
+            "id": "task-timesheet",
+            "listId": "list-my-tasks",
+            "title": "Submit timesheet",
+            "status": "completed"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-tasks"
+          },
+          {
+            "callsTool": {
+              "name": "complete-task",
+              "arguments": {
+                "taskId": "task-timesheet",
+                "listId": "list-my-tasks"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "instructions": "- Search with search-tasks before get-task, update-task, complete-task, reopen-task, or delete-task. Pass both id and listId from those results. Never invent task or list ids.\n- search-tasks returns compact snippets. Call get-task when you need the full notes.\n- search-tasks pages results. If hasMore is true, call it again with the same query, view, and list, and offset set to nextOffset, until hasMore is false. Never invent offsets. Do not say pagination failed when nextOffset is present.\n- Default search view is open tasks. Use view=overdue, today, upcoming, undated, or completed when the user asks for those.\n- Do not dump the user's entire task list into the chat. Summarize, and keep paging only when the user needs a complete pass.\n- Due dates are calendar dates as YYYY-MM-DD. Google Tasks does not store a time of day.\n- If the user names a list, pass listName or a listId from list-task-lists. If they do not, create-task uses the last list they created into.\n- complete-task marks a task done. reopen-task brings a completed task back. delete-task is permanent and asks the user to confirm.\n- If Google sign-in fails, tell the user to open View Tasks, add their OAuth Client ID if needed, and sign in."
   }
 }

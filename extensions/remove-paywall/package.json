@@ -11,7 +11,8 @@
     "artivilla",
     "maxoliinyk",
     "0xdhrv",
-    "xilopaint"
+    "xilopaint",
+    "alexi.build"
   ],
   "categories": [
     "Web"
@@ -109,6 +110,13 @@
         }
       },
       "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-paywall-free-url",
+      "title": "Get Paywall-Free URL",
+      "description": "Get a link to read an article using the preferred paywall removal service. Medium articles use Freedium."
     }
   ],
   "platforms": [

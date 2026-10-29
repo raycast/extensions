@@ -6,6 +6,7 @@
     "lib": ["es2020"],
     "module": "commonjs",
     "target": "es2020",
+    "types": ["node"],
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

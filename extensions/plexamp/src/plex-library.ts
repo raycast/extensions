@@ -399,3 +399,68 @@ export async function getMetadataByKeyForTimeline(
 export async function getMetadataByRatingKey(ratingKey: string): Promise<MetadataItem | undefined> {
   return getMetadataByKey(buildMetadataKey(ratingKey));
 }
+
+async function resolveNavigableTrack(track: MusicTrack): Promise<MusicTrack> {
+  if (track.parentRatingKey && track.grandparentRatingKey && track.librarySectionKey) {
+    return track;
+  }
+
+  const metadata = await getMetadataByRatingKey(track.ratingKey);
+
+  if (!metadata || metadata.type !== "track") {
+    throw new Error("Could not load full metadata for this track.");
+  }
+
+  return metadata;
+}
+
+export interface TrackAlbumTarget {
+  album: MusicAlbum;
+  sectionKey: string;
+}
+
+export interface TrackArtistTarget {
+  artist: MusicArtist;
+  albumRatingKey?: string;
+  sectionKey: string;
+}
+
+export async function resolveTrackAlbum(track: MusicTrack): Promise<TrackAlbumTarget> {
+  const resolved = await resolveNavigableTrack(track);
+
+  if (!resolved.parentRatingKey) {
+    throw new Error("This track is missing album metadata.");
+  }
+
+  if (!resolved.librarySectionKey) {
+    throw new Error("This track is missing library section metadata.");
+  }
+
+  const album = await getMetadataByRatingKey(resolved.parentRatingKey);
+
+  if (!album || album.type !== "album") {
+    throw new Error("Could not load the album for this track.");
+  }
+
+  return { album, sectionKey: resolved.librarySectionKey };
+}
+
+export async function resolveTrackArtist(track: MusicTrack): Promise<TrackArtistTarget> {
+  const resolved = await resolveNavigableTrack(track);
+
+  if (!resolved.grandparentRatingKey) {
+    throw new Error("This track is missing artist metadata.");
+  }
+
+  if (!resolved.librarySectionKey) {
+    throw new Error("This track is missing library section metadata.");
+  }
+
+  const artist = await getMetadataByRatingKey(resolved.grandparentRatingKey);
+
+  if (!artist || artist.type !== "artist") {
+    throw new Error("Could not load the artist for this track.");
+  }
+
+  return { artist, albumRatingKey: resolved.parentRatingKey, sectionKey: resolved.librarySectionKey };
+}

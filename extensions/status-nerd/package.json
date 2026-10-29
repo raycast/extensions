@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "status-nerd",
+  "title": "Status Nerd",
+  "description": "Set a funny status on Slack, GitLab and GitHub at once — pick services, roll a random one, or generate with AI.",
+  "icon": "icon.png",
+  "author": "jan_werner",
+  "categories": [
+    "Communication",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "description": "Choose services, pick or AI-generate a status, and set it",
+      "mode": "view"
+    },
+    {
+      "name": "select-status",
+      "title": "Select Status",
+      "description": "Pick from recent, saved and default statuses",
+      "mode": "view"
+    },
+    {
+      "name": "random-status",
+      "title": "Random Status",
+      "description": "Set a random status on your default services in one click",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-status",
+      "title": "Clear Status",
+      "description": "Remove your status on all configured services at once",
+      "mode": "no-view"
+    },
+    {
+      "name": "meeting-status",
+      "title": "Meeting Status",
+      "description": "Generate a status from your current or next calendar meeting",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "slackToken",
+      "title": "Slack User Token",
+      "description": "xoxp- token with the users.profile:write scope",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "gitlabToken",
+      "title": "GitLab Token",
+      "description": "Personal access token with the api scope",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "gitlabUrl",
+      "title": "GitLab URL",
+      "description": "Base URL of your GitLab instance",
+      "type": "textfield",
+      "default": "https://gitlab.com",
+      "required": false
+    },
+    {
+      "name": "githubToken",
+      "title": "GitHub Token",
+      "description": "Classic PAT with the user scope (needed for changeUserStatus)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "defaultSlack",
+      "title": "Default Services",
+      "label": "Slack",
+      "description": "Services used by the Random Status command and preselected in Set Status",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "defaultGitlab",
+      "title": "",
+      "label": "GitLab",
+      "description": "Include GitLab in the default services",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "defaultGithub",
+      "title": "",
+      "label": "GitHub",
+      "description": "Include GitHub in the default services",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "calendarIcsUrl",
+      "title": "Calendar ICS URL",
+      "description": "Secret iCal URL (Google Calendar → Settings → Secret address in iCal format). Used by Meeting Status. Grants read access to that calendar — keep it private.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "defaultDuration",
+      "title": "Default Status Duration",
+      "description": "How long a status stays before it clears (GitLab is mapped to its nearest supported bucket)",
+      "type": "dropdown",
+      "default": "until_1730",
+      "required": false,
+      "data": [
+        {
+          "title": "Until 17:30",
+          "value": "until_1730"
+        },
+        {
+          "title": "1 hour",
+          "value": "1h"
+        },
+        {
+          "title": "4 hours",
+          "value": "4h"
+        },
+        {
+          "title": "8 hours",
+          "value": "8h"
+        },
+        {
+          "title": "End of day",
+          "value": "eod"
+        },
+        {
+          "title": "Don't expire",
+          "value": "never"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
+    "node-ical": "^0.27.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

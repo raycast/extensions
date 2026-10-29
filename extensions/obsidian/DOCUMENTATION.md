@@ -43,6 +43,8 @@ All functionality related to Raycast can be placed in the `api`, `components`, `
 
 Raycast commands are stored in the root folder under `src/`. The commands should only be thin wrappers around the actual components. They load initial data, receive search arguments, parse preferences, etc. and forward all of that information into the component tree.
 
+Quick Capture delegates path validation, template expansion, and append-only writes to `src/api/quickCapture.service.ts`. Its regression tests are in `src/tests/quick-capture.spec.ts`.
+
 ## Raycast API and Components
 
 All Raycast related functionality that can't be included in the Obsidian API can be added to `src/api/` or `src/utils`.

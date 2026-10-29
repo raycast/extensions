@@ -87,7 +87,7 @@ export function startDictationSession(
       if (!preflight.ok) {
         setState({
           status: "error",
-          message: "Kesha setup isn't finished yet.",
+          message: preflightMessage(preflight.reason),
           hint: preflight.hint ?? notFoundMessage(),
         });
         return;
@@ -245,6 +245,18 @@ export function startDictationSession(
     stopMonitoring = null;
     stopTranscribeTimer?.();
     stopTranscribeTimer = null;
+  }
+}
+
+// Each reason has a different remedy, so the headline tracks it, not just the hint (#647).
+function preflightMessage(reason: EnginePreflightResult["reason"]): string {
+  switch (reason) {
+    case "unusable":
+      return "Kesha's engine is installed but not working.";
+    case "contract":
+      return "Kesha CLI and this extension are out of sync.";
+    default:
+      return "Kesha setup isn't finished yet.";
   }
 }
 

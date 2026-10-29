@@ -1,4 +1,5 @@
 import { type LaunchProps, open } from "@raycast/api";
+import { repoSearchURL } from "./lib/code-wiki-url";
 
 type SearchReposArguments = {
   query: string;
@@ -6,6 +7,5 @@ type SearchReposArguments = {
 
 export default async function Command(props: LaunchProps<{ arguments: SearchReposArguments }>) {
   const { query } = props.arguments;
-  const url = `https://codewiki.google/search?q=${encodeURIComponent(query)}`;
-  await open(url);
+  await open(repoSearchURL(query));
 }

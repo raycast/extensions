@@ -1,5 +1,13 @@
 # MarkMarks Changelog
 
+## [Fix Bookmarks with Brackets or Parentheses] - 2026-09-16
+
+- Fixed bookmarks disappearing from the list when the title contains brackets (e.g. `[PDF] Title`) or the URL contains parentheses (e.g. Wikipedia links)
+
+## [Add Aside Browser Support] - 2026-09-14
+
+- Add Aside browser support
+
 ## [Bug Fixes] - 2026-05-20
 
 - Fixed opening bookmarks from Safari so links target Safari directly

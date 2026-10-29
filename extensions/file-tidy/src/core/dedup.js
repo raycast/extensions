@@ -3,10 +3,14 @@ import fs from "node:fs";
 
 const QUICK_CHUNK = 64 * 1024;
 
-/** Hash of the first and last 64KB — cheap prefilter for same-size files. */
+/**
+ * Hash of the first and last 64KB — cheap prefilter for same-size files.
+ * null when the file can't be read (see hashOrNull).
+ */
 function quickHash(filePath, size) {
-  const fd = fs.openSync(filePath, "r");
+  let fd;
   try {
+    fd = fs.openSync(filePath, "r");
     const hash = crypto.createHash("sha256");
     const head = Buffer.alloc(Math.min(QUICK_CHUNK, size));
     fs.readSync(fd, head, 0, head.length, 0);
@@ -17,18 +21,21 @@ function quickHash(filePath, size) {
       hash.update(tail);
     }
     return hash.digest("hex");
+  } catch {
+    return null;
   } finally {
-    fs.closeSync(fd);
+    if (fd !== undefined) fs.closeSync(fd);
   }
 }
 
+/** null when the file can't be read (see hashOrNull). */
 function fullHash(filePath) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const hash = crypto.createHash("sha256");
     fs.createReadStream(filePath)
       .on("data", (chunk) => hash.update(chunk))
       .on("end", () => resolve(hash.digest("hex")))
-      .on("error", reject);
+      .on("error", () => resolve(null));
   });
 }
 
@@ -41,6 +48,12 @@ function fullHash(filePath) {
  *
  * Returns Map<sourcePath, { keeper, hash }> for source files judged duplicates.
  * Dest files are never moved; they only serve as keepers.
+ *
+ * A file that can't be read is dropped from its group rather than throwing:
+ * hashing the whole batch takes long enough that a download finishing (and its
+ * temp file being renamed away) mid-pass is routine, and one vanished file must
+ * not throw away the analysis of everything else. Being absent from the result
+ * only means it isn't judged a duplicate — nothing is deleted on this signal.
  */
 export async function findDuplicates(sourceFiles, destFiles) {
   const bySize = new Map();
@@ -52,15 +65,15 @@ export async function findDuplicates(sourceFiles, destFiles) {
 
   const duplicates = new Map();
   for (const [size, group] of bySize) {
-    if (group.length < 2) continue;
+    if (group.length < 2 || size === 0) continue;
 
     const byQuick = new Map();
-    for (const f of group) addTo(byQuick, quickHash(f.path, size), f);
+    for (const f of group) hashOrNull(byQuick, quickHash(f.path, size), f);
 
     for (const quickGroup of byQuick.values()) {
       if (quickGroup.length < 2) continue;
       const byFull = new Map();
-      for (const f of quickGroup) addTo(byFull, await fullHash(f.path), f);
+      for (const f of quickGroup) hashOrNull(byFull, await fullHash(f.path), f);
 
       for (const [hash, identical] of byFull) {
         if (identical.length < 2) continue;
@@ -78,6 +91,11 @@ function addTo(map, key, value) {
   const arr = map.get(key);
   if (arr) arr.push(value);
   else map.set(key, [value]);
+}
+
+/** Group by hash, dropping the file when hashing it failed. */
+function hashOrNull(map, hash, file) {
+  if (hash !== null) addTo(map, hash, file);
 }
 
 /**

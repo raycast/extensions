@@ -6,9 +6,11 @@ import {
   DiffResultNameStatusFile,
   DiffResultTextFile,
   FileStatusResult,
+  LogResult,
   ResetMode,
   simpleGit,
   SimpleGit,
+  SimpleGitOptions,
 } from "simple-git";
 import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync, statSync } from "fs";
@@ -64,20 +66,7 @@ export class GitManager {
     this.gitDirPath = gitDirPath;
     this.gitCommonDirPath = gitCommonDirPath;
 
-    this.git = simpleGit(repoPath, {
-      binary: getPreferenceValues<Preferences>().binaryPath,
-      errors: (error, _result) => {
-        if (error) {
-          showFailureToast(error, { title: `Error running command` });
-        }
-        return error;
-      },
-    });
-
-    this.git = this.git.env(shellEnvironmentVariables);
-
-    // Global logging of all git commands for debugging
-    this.setupGlobalLogging();
+    this.git = GitManager.createSimpleGit(repoPath).env(shellEnvironmentVariables);
   }
 
   /**
@@ -141,6 +130,35 @@ export class GitManager {
     return existsSync(join(this.gitCommonDirPath, "worktrees"));
   }
 
+  private static createSimpleGit(repoPath: string, unsafe?: SimpleGitOptions["unsafe"]): SimpleGit {
+    const git = simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
+      unsafe,
+      errors: (error, _result) => {
+        if (error) {
+          showFailureToast(error, { title: `Error running command` });
+        }
+        return error;
+      },
+    });
+
+    // Global logging of all git commands for debugging
+    GitManager.setupGlobalLogging(git);
+    return git;
+  }
+
+  /**
+   * simple-git only accepts GIT_EDITOR and `-c sequence.editor` with allowUnsafeEditor, so commands that need them run on
+   * a separate instance with its own env copy (`this.git.env(name, value)` would write into shared shellEnvironmentVariables).
+   * GIT_EDITOR=true keeps the default commit message instead of opening an editor.
+   */
+  private createGitWithoutEditor(): SimpleGit {
+    return GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true }).env({
+      ...shellEnvironmentVariables,
+      GIT_EDITOR: "true",
+    });
+  }
+
   /**
    * Resolves git directories for a working tree.
    * In linked worktrees `.git` is a file pointing to `<main repo>/.git/worktrees/<name>`.
@@ -179,8 +197,8 @@ export class GitManager {
   /**
    * Sets up global logging of git commands and streaming output.
    */
-  private setupGlobalLogging(): void {
-    this.git.outputHandler((command, stdout, stderr, args) => {
+  private static setupGlobalLogging(git: SimpleGit): void {
+    git.outputHandler((command, stdout, stderr, args) => {
       const ignoredCommands = ["ls-files", "ls-remote", "remote", "worktree"];
       // Skip logging for ls-files command
       if (ignoredCommands.some((command) => args.includes(command))) {
@@ -727,47 +745,77 @@ export class GitManager {
 
   /**
    * Gets the commit history with optional offset for pagination.
+   * When `search` is set, Git filters by commit message (`--grep`) so the full
+   * history can be searched without loading it into the extension.
+   * Queries that look like a SHA are resolved as a commit object instead.
    * @param branch Branch name to get commits from (optional)
    * @param page Page number for pagination (optional, default 0)
+   * @param search Optional query to search messages, or a commit SHA
    */
-  async getCommits(branch?: string, page: number = 0): Promise<Commit[]> {
+  async getCommits(branch?: string, page: number = 0, search?: string): Promise<Commit[]> {
     const commitsPerPage = parseInt(getPreferenceValues<Preferences>().commitsPerPage);
+    const trimmedSearch = search?.trim() ?? "";
+    const revisions = branch ? [branch] : ["--all"];
+
+    if (!trimmedSearch) {
+      const log = await this.git.log([
+        `--max-count=${commitsPerPage}`,
+        `--skip=${page * commitsPerPage}`,
+        "--first-parent",
+        ...revisions,
+        "--decorate=full",
+      ]);
+      return this.mapLogToCommits(log);
+    }
+
+    if (GitManager.COMMIT_HASH_QUERY.test(trimmedSearch)) {
+      const byHash = await this.git.log([
+        "--ignore-missing",
+        "-1",
+        "--decorate=full",
+        "--end-of-options",
+        trimmedSearch,
+      ]);
+      if (byHash.all.length > 0) {
+        return this.mapLogToCommits(byHash);
+      }
+    }
+
     const log = await this.git.log([
-      `--max-count=${commitsPerPage}`,
-      `--skip=${page * commitsPerPage}`,
-      "--first-parent",
-      ...(branch ? [branch] : ["--all"]),
+      "--regexp-ignore-case",
+      "--fixed-strings",
+      `--grep=${trimmedSearch}`,
+      `--max-count=${(page + 1) * commitsPerPage}`,
+      ...revisions,
       "--decorate=full",
     ]);
+    return this.mapLogToCommits(log).slice(page * commitsPerPage, (page + 1) * commitsPerPage);
+  }
 
-    return log.all.map(
-      (commit: {
-        hash: string;
-        message: string;
-        body: string;
-        author_name: string;
-        author_email: string;
-        date: string;
-        refs?: string;
-        diff?: DiffResult;
-      }) => {
-        const parsedRefs = this.parseCommitRefs(commit.refs);
+  /** Matches a Git object name that is safe to resolve as a commit SHA. */
+  private static readonly COMMIT_HASH_QUERY = /^[0-9a-f]{7,40}$/i;
 
-        return {
-          hash: commit.hash,
-          shortHash: commit.hash.substring(0, 7),
-          message: commit.message,
-          body: commit.body,
-          author: commit.author_name,
-          authorEmail: commit.author_email,
-          date: new Date(commit.date),
-          localBranches: parsedRefs.localBranches,
-          remoteBranches: parsedRefs.remoteBranches,
-          tags: parsedRefs.tags,
-          currentBranchName: parsedRefs.currentBranchName,
-        } as Commit;
-      },
-    );
+  /**
+   * Maps a simple-git log result to commit models.
+   */
+  private mapLogToCommits(log: LogResult): Commit[] {
+    return log.all.map((commit) => {
+      const parsedRefs = this.parseCommitRefs(commit.refs);
+
+      return {
+        hash: commit.hash,
+        shortHash: commit.hash.substring(0, 7),
+        message: commit.message,
+        body: commit.body,
+        author: commit.author_name,
+        authorEmail: commit.author_email,
+        date: new Date(commit.date),
+        localBranches: parsedRefs.localBranches,
+        remoteBranches: parsedRefs.remoteBranches,
+        tags: parsedRefs.tags,
+        currentBranchName: parsedRefs.currentBranchName,
+      } as Commit;
+    });
   }
 
   /**
@@ -837,58 +885,67 @@ export class GitManager {
    * For reword, the new message will be applied using an exec amend step.
    */
   async interactiveRebase(startHash: string, plan: RebasePlanItem[]): Promise<void> {
-    // Build rebase todo content based on plan
-    const todoLines: string[] = [];
-
-    for (const item of plan) {
-      const action = item.action;
-      const hash = item.hash;
-
-      switch (action) {
-        case "pick":
-          todoLines.push(`pick ${hash}`);
-          break;
-        case "drop":
-          todoLines.push(`drop ${hash}`);
-          break;
-        case "edit":
-          todoLines.push(`edit ${hash}`);
-          break;
-        case "squash":
-          todoLines.push(`squash ${hash}`);
-          break;
-        case "fixup":
-          todoLines.push(`fixup ${hash}`);
-          break;
-        case "reword":
-          // Use pick + exec amend to set message non-interactively
-          todoLines.push(`pick ${hash}`);
-          if (item.newMessage) {
-            // Escape double quotes and backslashes for safe shell embedding
-            const escaped = item.newMessage.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-            todoLines.push(`exec git commit --amend -m "${escaped}"`);
-          } else {
-            throw new Error("No new message provided for reword action in interactive rebase plan");
-          }
-          break;
-      }
-    }
-
-    // Create temporary sequence editor script that writes our todo
     const tempDirectory = mkdtempSync(join(tmpdir(), "raycast-git-"));
-    const editorPath = join(tempDirectory, "sequence-editor.sh");
-    // Use template literal to generate shell script for sequence editor
-    const script = `#!/bin/sh
+    try {
+      // Reword messages are never written into the todo, where `exec` would hand them to the shell. Each one is written to a
+      // file that the sequence editor copies into rebase-merge, so it outlives a rebase that stops early (edit, conflict)
+      // and Git removes it when the rebase finishes or is aborted.
+      const rebaseMergePath = join(this.gitDirPath, "rebase-merge");
+      const quoteForShell = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
+      const messageCopyCommands: string[] = [];
+
+      // Build rebase todo content based on plan
+      const todoLines: string[] = [];
+
+      for (const item of plan) {
+        const action = item.action;
+        const hash = item.hash;
+
+        switch (action) {
+          case "pick":
+            todoLines.push(`pick ${hash}`);
+            break;
+          case "drop":
+            todoLines.push(`drop ${hash}`);
+            break;
+          case "edit":
+            todoLines.push(`edit ${hash}`);
+            break;
+          case "squash":
+            todoLines.push(`squash ${hash}`);
+            break;
+          case "fixup":
+            todoLines.push(`fixup ${hash}`);
+            break;
+          case "reword":
+            // Use pick + exec amend to set message non-interactively
+            todoLines.push(`pick ${hash}`);
+            if (item.newMessage) {
+              const messageFileName = `raycast-reword-${messageCopyCommands.length}`;
+              const messagePath = join(tempDirectory, messageFileName);
+              writeFileSync(messagePath, item.newMessage, { encoding: "utf-8" });
+              messageCopyCommands.push(`/bin/cp ${quoteForShell(messagePath)} ${quoteForShell(rebaseMergePath)}`);
+              todoLines.push(`exec git commit --amend -F ${quoteForShell(join(rebaseMergePath, messageFileName))}`);
+            } else {
+              throw new Error("No new message provided for reword action in interactive rebase plan");
+            }
+            break;
+        }
+      }
+
+      // Create temporary sequence editor script that writes our todo
+      const editorPath = join(tempDirectory, "sequence-editor.sh");
+      // Use template literal to generate shell script for sequence editor
+      const script = `#!/bin/sh
 TODO_FILE="$1"
-/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
+${messageCopyCommands.map((command) => `${command} || exit 1\n`).join("")}/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
 ${todoLines.join("\n")}
 __REBASE_TODO__
 `;
-    writeFileSync(editorPath, script, { encoding: "utf-8" });
-    // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
-    chmodSync(editorPath, 0o755);
+      writeFileSync(editorPath, script, { encoding: "utf-8" });
+      // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
+      chmodSync(editorPath, 0o755);
 
-    try {
       const parentCommit = await this.getFirstParentOfCommit(startHash);
       const options = ["-c", `sequence.editor=${editorPath}`, "rebase", "--interactive"];
       if (parentCommit) {
@@ -896,7 +953,7 @@ __REBASE_TODO__
       } else {
         options.push("--root");
       }
-      await this.git.raw(options);
+      await this.createGitWithoutEditor().raw(options);
     } finally {
       try {
         rmSync(tempDirectory, { recursive: true, force: true });
@@ -977,28 +1034,102 @@ __REBASE_TODO__
   }
 
   /**
+   * Whether a Git error can be resolved by temporarily stashing local changes.
+   */
+  private static isBlockedByLocalChanges(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+
+    return (
+      /would be overwritten by/i.test(message) ||
+      /please commit (your changes or )?stash them/i.test(message) ||
+      /please commit or stash them/i.test(message) ||
+      /please move or remove them before you (switch|merge|rebase)/i.test(message) ||
+      /cannot (rebase|pull with rebase): you have unstaged changes/i.test(message) ||
+      /cannot (rebase|pull with rebase): untracked files/i.test(message)
+    );
+  }
+
+  /**
+   * Stashes tracked and untracked changes so a blocked operation can be retried.
+   */
+  private async stashIncludingUntracked(message: string): Promise<void> {
+    await this.git.stash(["push", "--include-untracked", "--message", message]);
+  }
+
+  /**
+   * Runs a Git operation and, if it fails because of local changes, offers to stash,
+   * retry the operation, then reapply the stash.
+   */
+  private async withStashRetry(operation: () => Promise<unknown>, actionTitle: string): Promise<void> {
+    try {
+      await operation();
+      return;
+    } catch (error) {
+      if (!GitManager.isBlockedByLocalChanges(error)) {
+        throw error;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const confirmed = await confirmAlert({
+        title: `${actionTitle} Failed`,
+        message: `${errorMessage}\n\nStash local changes, retry, then reapply the stash?`,
+        primaryAction: {
+          title: "Stash and Retry",
+          style: Alert.ActionStyle.Default,
+        },
+      });
+
+      if (!confirmed) {
+        throw error;
+      }
+
+      await this.stashIncludingUntracked(`WIP: auto-stash before ${actionTitle.toLowerCase()}`);
+
+      try {
+        await operation();
+      } catch (retryError) {
+        try {
+          await this.popStash(0);
+        } catch {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stashed changes were not restored",
+            message: "They remain in the Stashes view.",
+          });
+        }
+        throw retryError;
+      }
+
+      await this.popStash(0);
+    }
+  }
+
+  /**
    * Checks out the specified branch.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async checkoutLocalBranch(branchName: string): Promise<void> {
-    await this.git.checkout(branchName);
+    await this.withStashRetry(() => this.git.checkout(branchName), "Checkout");
   }
 
   async checkoutRemoteBranch(branchName: string, upstream: string): Promise<void> {
-    await this.git.checkout(["--track", "-B", branchName, upstream]);
+    await this.withStashRetry(() => this.git.checkout(["--track", "-B", branchName, upstream]), "Checkout");
   }
 
   /**
    * Checks out a specific commit (creates detached HEAD state).
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async checkoutCommit(commitHash: string): Promise<void> {
-    await this.git.checkout(commitHash);
+    await this.withStashRetry(() => this.git.checkout(commitHash), "Checkout");
   }
 
   /**
    * Creates a new branch.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async createBranch(name: string): Promise<void> {
-    await this.git.checkoutLocalBranch(name);
+    await this.withStashRetry(() => this.git.checkoutLocalBranch(name), "Create Branch");
   }
 
   /**
@@ -1069,16 +1200,18 @@ __REBASE_TODO__
 
   /**
    * Cherry-picks a commit.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async cherryPick(commitHash: string): Promise<void> {
-    await this.git.raw(["cherry-pick", commitHash]);
+    await this.withStashRetry(() => this.git.raw(["cherry-pick", commitHash]), "Cherry-pick");
   }
 
   /**
    * Reverts a commit.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async revert(commitHash: string): Promise<void> {
-    await this.git.raw(["revert", "--no-edit", commitHash]);
+    await this.withStashRetry(() => this.git.raw(["revert", "--no-edit", commitHash]), "Revert");
   }
 
   /**
@@ -1195,6 +1328,7 @@ __REBASE_TODO__
 
   /**
    * Pulls changes.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async pull(rebase = false): Promise<void> {
     const pullArgs = ["--prune", "--tags"];
@@ -1203,7 +1337,7 @@ __REBASE_TODO__
     } else {
       pullArgs.push("--no-rebase");
     }
-    await this.git.pull(undefined, undefined, pullArgs);
+    await this.withStashRetry(() => this.git.pull(undefined, undefined, pullArgs), "Pull");
   }
 
   /**
@@ -1342,9 +1476,10 @@ __REBASE_TODO__
 
   /**
    * Checks out a tag (detached HEAD state).
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async checkoutTag(tagName: string): Promise<void> {
-    await this.git.checkout([`refs/tags/${tagName}`]);
+    await this.withStashRetry(() => this.git.checkout([`refs/tags/${tagName}`]), "Checkout");
   }
 
   /**
@@ -1398,16 +1533,18 @@ __REBASE_TODO__
 
   /**
    * Merges a branch into the current branch.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async mergeBranch(branchName: string, mode: MergeMode): Promise<void> {
-    await this.git.merge([branchName, `--${mode}`]);
+    await this.withStashRetry(() => this.git.merge([branchName, `--${mode}`]), "Merge");
   }
 
   /**
    * Rebases the current branch onto the specified branch.
+   * Offers to stash and retry when local changes would be overwritten.
    */
   async rebase(targetBranch: string): Promise<void> {
-    await this.git.rebase([targetBranch]);
+    await this.withStashRetry(() => this.git.rebase([targetBranch]), "Rebase");
   }
 
   /**
@@ -1428,7 +1565,7 @@ __REBASE_TODO__
    * Continues an ongoing rebase.
    */
   async continueRebase(): Promise<void> {
-    await this.git.env("GIT_EDITOR", "true").rebase(["--continue"]);
+    await this.createGitWithoutEditor().rebase(["--continue"]);
   }
 
   /**

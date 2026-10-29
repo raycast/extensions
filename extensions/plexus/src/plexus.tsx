@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, List, Color, showToast, Toast, confirmAlert, closeMainWindow } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Color,
+  showToast,
+  Toast,
+  confirmAlert,
+  closeMainWindow,
+  getPreferenceValues,
+  open,
+} from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LocalhostItem } from "./types/LocalhostItem";
@@ -124,6 +136,9 @@ function LocalhostListItem({
   const { favicon } = useServiceIcon(item.url);
   const color = frameworkColor(item.framework);
   const name = item.title || getProjectName(item.projectPath);
+  // When set, open links in the browser chosen in preferences; otherwise fall back to the
+  // system default browser via the standard Open in Browser action.
+  const { browserApp } = getPreferenceValues<Preferences>();
 
   async function handleKillProcess() {
     if (
@@ -195,7 +210,11 @@ function LocalhostListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={item.url} />
+            {browserApp ? (
+              <Action title="Open in Browser" icon={Icon.Globe} onAction={() => open(item.url, browserApp)} />
+            ) : (
+              <Action.OpenInBrowser url={item.url} />
+            )}
             <Action.CopyToClipboard content={item.url} title="Copy URL" />
             <Action.CopyToClipboard content={item.pid} title="Copy Process ID" />
             <Action

@@ -1,5 +1,9 @@
 # GitLab Docs Changelog
 
+## [SVG grid view fix for Raycast 2.0] - 2026-08-24
+
+- Fixes the visual alignment of the SVG icons in the grid view for Raycast 2.0
+
 ## [Add Detail View] - 2026-06-22
 
 - Add a detail panel to Documentation, Handbook, and Design System results that renders the full page content

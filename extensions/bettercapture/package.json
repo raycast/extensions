@@ -30,7 +30,27 @@
       "name": "toggle-record",
       "title": "Toggle Record",
       "description": "Stop recording, or open content selection to start a new recording",
-      "subtitle": "BetterCapture"
+      "subtitle": "BetterCapture",
+      "preferences": [
+        {
+          "name": "toggleAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Toggle Action",
+          "description": "Choose whether stopping a recording also copies the generated file to the clipboard.",
+          "default": "toggle",
+          "data": [
+            {
+              "title": "Toggle Recording",
+              "value": "toggle"
+            },
+            {
+              "title": "Toggle and Copy File",
+              "value": "toggle-copy"
+            }
+          ]
+        }
+      ]
     },
     {
       "mode": "no-view",

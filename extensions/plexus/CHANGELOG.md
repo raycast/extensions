@@ -1,5 +1,11 @@
 # Plexus Changelog
 
+## [Choose which browser opens localhost links] - 2026-08-04
+
+### Added
+
+- **Browser** preference to open localhost links in a browser of your choice, independent of your system's default browser. Leave it empty to keep using the system default.
+
 ## [Detect slow dev servers, instant loading, and a richer list] - 2026-07-01
 
 ### Added

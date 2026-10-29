@@ -40,6 +40,7 @@ accordingly.
 ## Windows Beta
 
 ### Install yt-dlp
+
 Use the built-in Windows package manager, `winget`, or alternatives like Scoop or Chocolatey. `yt-dlp` includes `ffmpeg` and `ffprobe` binaries.
 
 ```bash

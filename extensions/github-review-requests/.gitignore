@@ -16,3 +16,5 @@ compiled_raycast_rust
 .DS_Store
 node_modules
 raycast-env.d.ts
+
+.local-preview/

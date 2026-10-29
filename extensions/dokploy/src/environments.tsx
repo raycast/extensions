@@ -1,12 +1,25 @@
 import { ActionPanel, Action, Icon, List, Form, showToast, Toast, popToRoot, Alert, confirmAlert } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { Environment, ErrorResult, type ModernProject } from "./interfaces";
-import { useToken } from "./instances";
+import { type Instance, useToken, tokenForInstance } from "./instances";
 import Services from "./services";
-import { getTotalServices } from "./utils";
+import { OpenInDokployAction } from "./open-in-dokploy";
+import { environmentPagePath } from "./dokploy-pages";
+import { getTotalServices, serviceScopeForEnvironment } from "./utils";
 
-export default function Environments({ project }: { project: ModernProject }) {
-  const { url, headers } = useToken();
+export default function Environments({
+  project,
+  revalidate,
+  instance,
+}: {
+  project: ModernProject;
+  /** Passed through to Services, so a lifecycle action there can refresh this project's data. */
+  revalidate?: () => void;
+  /** The instance this screen was opened for, when a caller (e.g. Projects' own instance dropdown) knows it explicitly - falls back to the shared active token otherwise. */
+  instance?: Instance;
+}) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
 
   async function deleteEnvironment(environment: Environment) {
     if (getTotalServices(environment) > 0) {
@@ -55,12 +68,23 @@ export default function Environments({ project }: { project: ModernProject }) {
           accessories={[{ date: new Date(environment.createdAt) }]}
           actions={
             <ActionPanel>
-              <Action.Push icon="folder-input.svg" title="Services" target={<Services environment={environment} />} />
+              <Action.Push
+                icon="folder-input.svg"
+                title="Services"
+                target={
+                  <Services
+                    environment={serviceScopeForEnvironment(project, environment)}
+                    revalidate={revalidate}
+                    instance={instance}
+                  />
+                }
+              />
               <Action.Push
                 icon={Icon.Plus}
                 title="Create Environment"
-                target={<CreateEnvironment project={project} />}
+                target={<CreateEnvironment project={project} instance={instance} />}
               />
+              <OpenInDokployAction url={url} path={environmentPagePath(project.projectId, environment.environmentId)} />
               <Action
                 icon={Icon.Trash}
                 title="Delete"
@@ -75,8 +99,9 @@ export default function Environments({ project }: { project: ModernProject }) {
   );
 }
 
-function CreateEnvironment({ project }: { project: ModernProject }) {
-  const { url, headers } = useToken();
+function CreateEnvironment({ project, instance }: { project: ModernProject; instance?: Instance }) {
+  const activeToken = useToken();
+  const { url, headers } = instance ? tokenForInstance(instance) : activeToken;
 
   interface FormValues {
     name: string;

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "better-uptime",
-  "title": "Better Uptime",
-  "description": "Check on your Better Uptime monitors, incidents and heartbeats.",
+  "title": "Better Stack",
+  "description": "Check on your Better Stack monitors, incidents and heartbeats.",
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [
@@ -17,43 +17,61 @@
     {
       "name": "monitors",
       "title": "Show Monitors",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing monitors.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-monitor",
       "title": "Add Monitor",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new monitor.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "incidents",
       "title": "Show Incidents",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing incidents.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-incident",
       "title": "Add Incident",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new incident.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "heartbeats",
       "title": "Show Heartbeats",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "List all existing heartbeats.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     },
     {
       "name": "add-heartbeat",
       "title": "Add Heartbeat",
-      "subtitle": "Better Uptime",
+      "subtitle": "Better Stack",
       "description": "Add a new heartbeat.",
+      "keywords": [
+        "better uptime"
+      ],
       "mode": "view"
     }
   ],
@@ -110,13 +128,11 @@
                 "check_frequency": 180,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T15:01:47.000Z",
-                "request_headers": [],
                 "url": "https://raycast.com",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": 180,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -140,10 +156,8 @@
                 "updated_at": "2025-01-29T17:04:26.020Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -152,7 +166,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "raycast.com",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -177,13 +190,11 @@
                 "check_frequency": 1800,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T14:36:13.000Z",
-                "request_headers": [],
                 "url": "https://somerandomdomain.ai",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": null,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -207,10 +218,8 @@
                 "updated_at": "2025-01-29T17:35:38.788Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -219,7 +228,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "somerandomdomain.ai",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -251,13 +259,11 @@
                 "check_frequency": 180,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T15:01:47.000Z",
-                "request_headers": [],
                 "url": "https://raycast.com",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": 180,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -281,10 +287,8 @@
                 "updated_at": "2025-01-29T17:04:26.020Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -293,7 +297,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "raycast.com",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -318,13 +321,11 @@
                 "check_frequency": 1800,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T14:36:13.000Z",
-                "request_headers": [],
                 "url": "https://somerandomdomain.ai",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": null,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -348,10 +349,8 @@
                 "updated_at": "2025-01-29T17:35:38.788Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -360,7 +359,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "somerandomdomain.ai",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -403,13 +401,11 @@
                 "check_frequency": 180,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T15:01:47.000Z",
-                "request_headers": [],
                 "url": "https://raycast.com",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": 180,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -433,10 +429,8 @@
                 "updated_at": "2025-01-29T17:04:26.020Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -445,7 +439,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "raycast.com",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -470,13 +463,11 @@
                 "check_frequency": 1800,
                 "confirmation_period": 0,
                 "last_checked_at": "2025-01-31T14:36:13.000Z",
-                "request_headers": [],
                 "url": "https://somerandomdomain.ai",
                 "paused_at": null,
                 "monitor_type": "status",
                 "team_wait": null,
                 "monitor_group_id": null,
-                "auth_password": "",
                 "required_keyword": null,
                 "http_method": "get",
                 "sms": false,
@@ -500,10 +491,8 @@
                 "updated_at": "2025-01-29T17:35:38.788Z",
                 "expected_status_codes": [],
                 "push": false,
-                "playwright_script": null,
                 "call": false,
                 "port": null,
-                "request_body": "",
                 "ssl_expiration": 7,
                 "checks_version": "v2",
                 "regions": [
@@ -512,7 +501,6 @@
                   "as",
                   "au"
                 ],
-                "auth_username": "",
                 "pronounceable_name": "somerandomdomain.ai",
                 "maintenance_from": null,
                 "remember_cookies": true,
@@ -769,7 +757,7 @@
                   "sun"
                 ],
                 "status": "pending",
-                "url": "https://betteruptime.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
+                "url": "https://incidents.betterstack.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
                 "call": false,
                 "team_name": "Your team",
                 "paused": false,
@@ -811,7 +799,7 @@
                   "sun"
                 ],
                 "status": "down",
-                "url": "https://betteruptime.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
+                "url": "https://incidents.betterstack.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
                 "call": false,
                 "team_name": "Your team",
                 "paused": false,
@@ -847,108 +835,6 @@
             "meetsCriteria": "Returns the status of heartbeats"
           }
         ]
-      },
-      {
-        "input": "@better-uptime When was the last heartbeat?",
-        "mocks": {
-          "get-heartbeats": [
-            {
-              "id": "415245",
-              "relationships": {
-                "policy": {
-                  "data": null
-                }
-              },
-              "type": "heartbeat",
-              "attributes": {
-                "maintenance_days": [
-                  "mon",
-                  "tue",
-                  "wed",
-                  "thu",
-                  "fri",
-                  "sat",
-                  "sun"
-                ],
-                "status": "pending",
-                "url": "https://betteruptime.com/api/v1/heartbeat/KJBfMxHW2jLPLvcPLEVHzibc",
-                "call": false,
-                "team_name": "Your team",
-                "paused": false,
-                "period": 10800,
-                "push": false,
-                "updated_at": "2025-01-29T16:20:13.643Z",
-                "maintenance_from": null,
-                "sort_index": null,
-                "name": "test",
-                "sms": false,
-                "heartbeat_group_id": null,
-                "maintenance_timezone": null,
-                "email": true,
-                "paused_at": null,
-                "grace": 300,
-                "critical_alert": false,
-                "created_at": "2025-01-29T16:20:13.643Z",
-                "policy_id": null,
-                "team_wait": null,
-                "maintenance_to": null
-              }
-            },
-            {
-              "id": "415246",
-              "relationships": {
-                "policy": {
-                  "data": null
-                }
-              },
-              "type": "heartbeat",
-              "attributes": {
-                "maintenance_days": [
-                  "mon",
-                  "tue",
-                  "wed",
-                  "thu",
-                  "fri",
-                  "sat",
-                  "sun"
-                ],
-                "status": "down",
-                "url": "https://betteruptime.com/api/v1/heartbeat/UXckHLkiAaWbe3b9mKGYVEb3",
-                "call": false,
-                "team_name": "Your team",
-                "paused": false,
-                "period": 10800,
-                "push": false,
-                "updated_at": "2025-01-29T22:41:08.957Z",
-                "maintenance_from": null,
-                "sort_index": null,
-                "name": "foobar",
-                "sms": false,
-                "heartbeat_group_id": null,
-                "maintenance_timezone": null,
-                "email": true,
-                "paused_at": null,
-                "grace": 300,
-                "critical_alert": false,
-                "created_at": "2025-01-29T16:20:20.056Z",
-                "policy_id": null,
-                "team_wait": null,
-                "maintenance_to": null
-              }
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "get-heartbeats",
-              "arguments": {}
-            }
-          },
-          {
-            "meetsCriteria": "Returns the last heartbeat time"
-          }
-        ]
       }
     ]
   },
@@ -957,13 +843,13 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "Better Uptime API Key",
-      "description": "You can find this API Key in the Better Uptime dashboard."
+      "title": "Better Stack API Token",
+      "description": "Find it in Better Stack under API tokens → Team-based tokens → Incidents API tokens."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^2.5.0",
+    "@raycast/utils": "^2.3.3",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -984,6 +870,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

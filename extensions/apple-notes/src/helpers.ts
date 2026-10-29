@@ -71,6 +71,10 @@ export function getOpenNoteURL(uuid: string) {
 }
 
 export async function resolveAppleNoteId(noteId: string): Promise<string> {
+  if (!noteId) {
+    throw new Error('A noteId is required. Use the "id" field returned by search-notes.');
+  }
+
   if (noteId.startsWith("x-coredata://")) {
     return noteId;
   }

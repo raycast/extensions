@@ -21,8 +21,8 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
           title="Trigger Deploy Script"
           onAction={() => {
             showToast(Toast.Style.Animated, "Deploying...");
-            Site.deploy({ siteId: site.id, serverId: server.id, token }).catch(() =>
-              showToast(Toast.Style.Failure, "Failed to trigger deploy script")
+            Site.deploy({ orgSlug: server.org_slug, siteId: site.id, serverId: server.id, token }).catch(() =>
+              showToast(Toast.Style.Failure, "Failed to trigger deploy script"),
             );
           }}
         />

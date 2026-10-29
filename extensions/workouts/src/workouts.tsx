@@ -1,6 +1,18 @@
-import { ActionPanel, List, Action, getPreferenceValues, Toast, showToast, Color, Detail, Icon } from "@raycast/api";
-import { useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
-import { PAGE_SIZE, getActivities, getActivity, provider } from "./api/client";
+import { withStrava } from "./with-strava";
+import {
+  ActionPanel,
+  List,
+  Action,
+  getPreferenceValues,
+  Toast,
+  showToast,
+  Color,
+  Detail,
+  Icon,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
+import { PAGE_SIZE, getActivities, getActivity } from "./api/client";
 import { useEffect, useMemo } from "react";
 import { StravaActivitySummary } from "./api/types";
 import { sportIcons } from "./constants";
@@ -17,17 +29,31 @@ import {
 } from "./utils";
 
 export function Splits({ activityId }: { activityId: StravaActivitySummary["id"] }) {
-  const { data: activity, isLoading } = usePromise(() => getActivity(activityId), []);
+  const { data: activity, isLoading, error, revalidate } = usePromise(getActivity, [activityId]);
 
-  if (isLoading || !activity) {
-    return <Detail isLoading={true} />;
+  if (!activity) {
+    return (
+      <Detail
+        isLoading={isLoading}
+        markdown={error ? `# Could Not Load Splits\n\n${error.message}` : undefined}
+        actions={
+          error ? (
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser title="View on Strava" url={`https://www.strava.com/activities/${activityId}/`} />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    );
   }
 
   const preferences = getPreferenceValues<Preferences>();
-  const splits = preferences.distance_unit === "km" ? activity.splits_metric : activity.splits_standard;
+  const splits = (preferences.distance_unit === "km" ? activity.splits_metric : activity.splits_standard) ?? [];
 
   const maxSpeed = Math.max(...splits.map((split) => split.average_speed));
-  const speedToBarLength = (speed: number) => Math.round((speed / maxSpeed) * 10); // Adjusted to cap at 10 blocks
+  const speedToBarLength = (speed: number) =>
+    maxSpeed > 0 ? Math.max(0, Math.min(10, Math.round((speed / maxSpeed) * 10))) : 0; // Adjusted to cap at 10 blocks
 
   const markdownSplits = `
 | Split | Average Speed |  | Elevation Difference |
@@ -69,7 +95,7 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
     ? formatSpeedForSportType(activity.type, activity.average_speed)
     : undefined;
   const formattedDistance = formatDistance(activity.distance);
-  const mapboxImage = generateMapboxImage(activity.map.summary_polyline);
+  const mapboxImage = generateMapboxImage(activity.map?.summary_polyline);
   const elevationGain = formatElevationGain(activity.total_elevation_gain);
   const workoutLabel = getWorkoutTypeLabel(activity.sport_type, activity.workout_type);
 
@@ -266,6 +292,7 @@ function Workouts() {
     data: activities,
     pagination,
     error,
+    revalidate,
   } = useCachedPromise(
     () => async (options: { page: number }) => {
       const newData = await getActivities(options.page + 1, PAGE_SIZE);
@@ -291,6 +318,18 @@ function Workouts() {
 
   return (
     <List searchBarPlaceholder="Search workouts" isLoading={isLoading} pagination={pagination} throttle isShowingDetail>
+      <List.EmptyView
+        icon={error ? Icon.ExclamationMark : Icon.List}
+        title={error ? "Could Not Load Workouts" : "No Workouts Found"}
+        description={error?.message}
+        actions={
+          <ActionPanel>
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action title="Configure Strava" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            <Action.OpenInBrowser title="View on Strava" url="https://www.strava.com/athlete/training" />
+          </ActionPanel>
+        }
+      />
       {groupedActivities.map(([monthTitle, monthActivities]) => (
         <List.Section key={monthTitle} title={monthTitle}>
           {monthActivities.map((activity) => (
@@ -302,4 +341,4 @@ function Workouts() {
   );
 }
 
-export default withAccessToken(provider)(Workouts);
+export default withStrava(Workouts);

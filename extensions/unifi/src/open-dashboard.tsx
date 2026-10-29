@@ -1,20 +1,10 @@
-import { open, showHUD, showToast, Toast } from "@raycast/api";
-import { GetDashboardUrl } from "./lib/unifi/unifi";
-import { getAuthPreferences, hasAuth, isLegacy } from "./lib/auth";
+import { open, showHUD } from "@raycast/api";
+import { UniFiClient } from "./api/client";
+import { getSelectedSite } from "./api/preferences";
 
 export default async function OpenDashboard() {
-  const { controllerUrl } = getAuthPreferences();
-
-  if (!hasAuth() && !isLegacy()) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "You must authenticate",
-      message: "Please authenticate to use this command",
-    });
-    return;
-  }
-
-  const dash = GetDashboardUrl(controllerUrl);
-  open(dash);
-  showHUD("Opening UniFi Dashboard");
+  const client = UniFiClient.fromPreferences();
+  const site = await getSelectedSite();
+  await open(client.getDashboardUrl(site));
+  await showHUD("Opening UniFi dashboard");
 }

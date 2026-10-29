@@ -2,6 +2,8 @@
 
 This extension should work out of the box. If you have multiple JetBrains apps installed, you can choose a priority app to bump to the top of the list in preferences.
 
+Supports both macOS and Windows. On Windows, shell scripts default to `%LOCALAPPDATA%\JetBrains\Toolbox\scripts` — make sure **Generate shell scripts** is enabled in JetBrains Toolbox under Settings → Tools (log out and back in after changing it so the scripts are generated).
+
 ## Issues
 
 ### Opening projects?

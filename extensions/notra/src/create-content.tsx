@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { GenerationStatus } from "./components/generation-status";
+import { WorkspaceFormDropdown } from "./components/workspace-switcher";
 import { useBrandIdentities } from "./hooks/use-brand-identities";
 import { useIntegrations } from "./hooks/use-integrations";
+import { useWorkspace } from "./hooks/use-workspace";
 import { generatePost } from "./lib/notra";
 import { CONTENT_TYPE_OPTIONS, LOOKBACK_WINDOW_OPTIONS } from "./schemas";
 import { getErrorMessage } from "./utils";
@@ -23,10 +25,12 @@ interface GeneratePostFormValues {
 export default function Command() {
   const { push } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: brandIdentities, isLoading: loadingBrands } = useBrandIdentities();
-  const { data: integrations, isLoading: loadingIntegrations } = useIntegrations();
+  const { isLoading: loadingWorkspace, switchWorkspace, workspace, workspaces } = useWorkspace();
+  const workspaceOptions = { execute: !loadingWorkspace, organizationId: workspace?.id };
+  const { data: brandIdentities, isLoading: loadingBrands } = useBrandIdentities(workspaceOptions);
+  const { data: integrations, isLoading: loadingIntegrations } = useIntegrations(workspaceOptions);
 
-  const isLoading = loadingBrands || loadingIntegrations;
+  const isLoading = loadingWorkspace || loadingBrands || loadingIntegrations;
 
   async function handleSubmit(values: GeneratePostFormValues) {
     const toast = await showToast({
@@ -64,7 +68,7 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = "Generation queued";
 
-      push(<GenerationStatus jobId={result.job.id} type="post" />);
+      push(<GenerationStatus jobId={result.job.id} organization={result.organization} type="post" />);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to queue generation";
@@ -90,6 +94,8 @@ export default function Command() {
       isLoading={isLoading || isSubmitting}
       navigationTitle="Create Content"
     >
+      <WorkspaceFormDropdown onChange={switchWorkspace} workspace={workspace} workspaces={workspaces} />
+
       <Form.Dropdown defaultValue="changelog" id="contentType" title="Content Type">
         {contentTypeOptions.map((option) => (
           <Form.Dropdown.Item icon={option.icon} key={option.value} title={option.title} value={option.value} />
@@ -102,7 +108,12 @@ export default function Command() {
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown defaultValue={defaultBrandIdentityId} id="brandIdentityId" title="Brand Identity">
+      <Form.Dropdown
+        defaultValue={defaultBrandIdentityId}
+        id="brandIdentityId"
+        key={`brandIdentityId-${workspace?.id}-${defaultBrandIdentityId}`}
+        title="Brand Identity"
+      >
         {(brandIdentities ?? []).map((bi) => (
           <Form.Dropdown.Item
             icon={Icon.Person}
@@ -116,7 +127,7 @@ export default function Command() {
       <Form.Separator />
 
       {githubIntegrations.length > 0 && (
-        <Form.TagPicker id="githubIntegrations" title="GitHub Repos">
+        <Form.TagPicker id="githubIntegrations" key={`githubIntegrations-${workspace?.id}`} title="GitHub Repos">
           {githubIntegrations.map((gh) => (
             <Form.TagPicker.Item icon={Icon.Code} key={gh.id} title={gh.displayName} value={gh.id} />
           ))}
@@ -124,7 +135,7 @@ export default function Command() {
       )}
 
       {linearIntegrations.length > 0 && (
-        <Form.TagPicker id="linearIntegrations" title="Linear Teams">
+        <Form.TagPicker id="linearIntegrations" key={`linearIntegrations-${workspace?.id}`} title="Linear Teams">
           {linearIntegrations.map((ln) => (
             <Form.TagPicker.Item icon={Icon.List} key={ln.id} title={ln.displayName} value={ln.id} />
           ))}

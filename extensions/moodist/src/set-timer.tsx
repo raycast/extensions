@@ -1,22 +1,37 @@
-import { Action, ActionPanel, Form, Icon, showHUD, showToast, Toast } from "@raycast/api";
-import { checkTimer, clearTimer, formatDuration, setTimer } from "./lib/timer-manager";
-import { TIMER_DURATIONS } from "./lib/constants";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Form, Icon, Keyboard, showHUD } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
+import {
+  cancelTimer,
+  formatMinutes,
+  getMix,
+  MAX_TIMER_MINUTES,
+  playingCount,
+  setTimer,
+  timerRemaining,
+} from "./player";
 
-export default function SetTimerCommand() {
-  const [currentTimer, setCurrentTimer] = useState<{
-    active: boolean;
-    remainingFormatted: string;
-  }>({ active: false, remainingFormatted: "" });
-  const [isLoading, setIsLoading] = useState(true);
+const DURATIONS = [15, 30, 45, 60, 90, 120];
 
-  useEffect(() => {
-    (async () => {
-      const info = await checkTimer();
-      setCurrentTimer({ active: info.active && !info.expired, remainingFormatted: info.remainingFormatted });
-      setIsLoading(false);
-    })();
-  }, []);
+export default function Command() {
+  const { data: mix, isLoading } = usePromise(async () => getMix());
+  const [duration, setDuration] = useState("30");
+  const [customError, setCustomError] = useState<string>();
+  const timer = mix?.timer;
+
+  async function submit(values: { duration: string; custom?: string }) {
+    const minutes = Number(values.duration === "custom" ? values.custom : values.duration);
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > MAX_TIMER_MINUTES) {
+      setCustomError(`Enter whole minutes from 1 to ${MAX_TIMER_MINUTES}`);
+      return;
+    }
+    try {
+      setTimer(minutes);
+      await showHUD(`Sleep timer set for ${formatMinutes(minutes)}`);
+    } catch (e) {
+      await showFailureToast(e, { title: "Could not set timer" });
+    }
+  }
 
   return (
     <Form
@@ -24,53 +39,42 @@ export default function SetTimerCommand() {
       navigationTitle="Set Sleep Timer"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Timer"
-            icon={Icon.Clock}
-            onSubmit={async (values: { duration: string; custom?: string }) => {
-              let minutes: number;
-
-              if (values.duration === "custom") {
-                const parsed = parseInt(values.custom || "", 10);
-                if (isNaN(parsed) || parsed <= 0) {
-                  await showToast({ style: Toast.Style.Failure, title: "Enter a valid number of minutes" });
-                  return;
-                }
-                minutes = parsed;
-              } else {
-                minutes = parseInt(values.duration, 10);
-              }
-
-              await setTimer(minutes);
-              await showHUD(`Timer set for ${formatDuration(minutes)}`);
-            }}
-          />
-          {currentTimer.active && (
+          <Action.SubmitForm title="Start Timer" icon={Icon.Clock} onSubmit={submit} />
+          {timer && (
             <Action
               title="Cancel Timer"
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
-                await clearTimer();
-                await showHUD("Timer cancelled");
-                setCurrentTimer({ active: false, remainingFormatted: "" });
+                cancelTimer();
+                await showHUD("Sleep timer cancelled");
               }}
             />
           )}
         </ActionPanel>
       }
     >
-      {currentTimer.active && (
-        <Form.Description title="Current Timer" text={`${currentTimer.remainingFormatted} remaining`} />
+      {timer && <Form.Description title="Current Timer" text={`${timerRemaining(timer)} left`} />}
+      {mix && playingCount(mix) === 0 && (
+        <Form.Description text="Nothing is playing right now. When the timer ends it pauses whatever is playing." />
       )}
-      <Form.Dropdown id="duration" title="Duration" defaultValue="30">
-        {TIMER_DURATIONS.map((d) => (
-          <Form.Dropdown.Item key={d.value} value={String(d.value)} title={d.title} />
+      <Form.Dropdown id="duration" title="Duration" value={duration} onChange={setDuration}>
+        {DURATIONS.map((m) => (
+          <Form.Dropdown.Item key={m} value={String(m)} title={formatMinutes(m)} />
         ))}
-        <Form.Dropdown.Item value="custom" title="Custom..." />
+        <Form.Dropdown.Item value="custom" title="Custom…" />
       </Form.Dropdown>
-      <Form.TextField id="custom" title="Custom Minutes" placeholder="Enter minutes..." />
+      {duration === "custom" && (
+        <Form.TextField
+          id="custom"
+          title="Minutes"
+          placeholder="25"
+          error={customError}
+          onChange={() => setCustomError(undefined)}
+          autoFocus
+        />
+      )}
     </Form>
   );
 }

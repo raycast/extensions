@@ -12,3 +12,9 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# Local working notes — API feedback, upstream discrepancies. Not for the Store PR.
+.claude/
+.vscode/
+.github/docs/
+.github/private/

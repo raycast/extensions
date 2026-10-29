@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Icon, Keyboard, LaunchType, List, launchCommand } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
 import { Account, Transaction } from "../lib/types";
 import { formatCurrency } from "../lib/format";
 import { LogoutAction } from "./logout-action";
@@ -220,7 +220,25 @@ function getTransactionDetails(transaction: Transaction): string {
   return `${formatDate(transaction.date)} - ${description}: ${isExpense ? "-" : "+"}${formatCurrency(Math.abs(transaction.amount))}`;
 }
 
-export function TransactionsList({ accountId, initialQuery }: { accountId?: string; initialQuery?: string }) {
+async function showBudgets() {
+  try {
+    await launchCommand({ name: "list-budgets", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could not open List Budgets" });
+  }
+}
+
+export function TransactionsList({
+  accountId,
+  initialQuery,
+  budgetCategory,
+  dateRange,
+}: {
+  accountId?: string;
+  initialQuery?: string;
+  budgetCategory?: { id: number; name: string };
+  dateRange?: { startDate: string; endDate: string };
+}) {
   const [searchText, setSearchText] = useState(initialQuery || "");
   const [accountFilter, setAccountFilter] = useState(accountId || "");
   const [accounts, setAccounts] = useState<(Account & { credentialName: string })[]>([]);
@@ -239,25 +257,43 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
 
   const effectiveAccountId = accountFilter || accountId || "";
 
+  // Budgets count only their own category, not subcategories.
+  const categoryIds = useMemo(() => (budgetCategory ? [budgetCategory.id] : undefined), [budgetCategory?.id]);
   const { isLoading, data, pagination, revalidate } = useCachedPromise(
-    (query: string, acctId: string) =>
+    (query: string, acctId: string, selectedIds?: number[], startDate?: string, endDate?: string) =>
       async ({ page }: { page: number }) => {
-        const response = await fetchTransactionPage({
-          page: page + 1,
+        const options = {
           query: query || undefined,
           accountId: acctId ? Number(acctId) : undefined,
-        });
-
+          ...(startDate && endDate ? { startDate, endDate } : {}),
+        };
+        if (selectedIds) {
+          // The transactions endpoint has no verified category filter. Read the complete
+          // recent range before filtering so matches on later pages are not omitted.
+          const matches: Transaction[] = [];
+          const matchingIds = new Set(selectedIds);
+          let nextPage = 1;
+          let fetched = 0;
+          while (true) {
+            const response = await fetchTransactionPage({ ...options, page: nextPage });
+            matches.push(...response.transactions.filter((transaction) => matchingIds.has(transaction.category_id)));
+            fetched += response.transactions.length;
+            if (fetched >= response.transactions_details.transactions_count || response.transactions.length === 0)
+              break;
+            nextPage += 1;
+          }
+          return { data: matches, hasMore: false };
+        }
+        const response = await fetchTransactionPage({ ...options, page: page + 1 });
         const totalCount = response.transactions_details.transactions_count;
         const fetchedSoFar = page * 25 + response.transactions.length;
-
         return {
           data: response.transactions,
           hasMore: fetchedSoFar < totalCount && response.transactions.length > 0,
         };
       },
-    [searchText, effectiveAccountId],
-    { keepPreviousData: !accountId },
+    [searchText, effectiveAccountId, categoryIds, dateRange?.startDate, dateRange?.endDate],
+    { keepPreviousData: !accountId && !budgetCategory },
   );
 
   const transactions = data ?? [];
@@ -270,9 +306,9 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
       onSearchTextChange={setSearchText}
       searchText={searchText}
       searchBarPlaceholder="Query"
-      navigationTitle="Transactions"
+      navigationTitle={budgetCategory ? `${budgetCategory.name} Transactions` : accountId ? "Transactions" : undefined}
       throttle
-      pagination={pagination}
+      pagination={budgetCategory ? undefined : pagination}
       searchBarAccessory={
         accountId ? undefined : (
           <List.Dropdown
@@ -298,10 +334,15 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
           icon={searchText ? Icon.MagnifyingGlass : Icon.Receipt}
           title={searchText ? "No Matching Transactions" : "No Transactions"}
           description={
-            searchText ? `No transactions matching "${searchText}"` : "No transactions found for the last 30 days."
+            budgetCategory
+              ? `No matching transactions ${dateRange ? "this month" : searchText ? "in the searched six-month range" : "in the last 30 days"}.`
+              : searchText
+                ? `No transactions matching "${searchText}"`
+                : "No transactions found for the last 30 days."
           }
           actions={
             <ActionPanel>
+              {!budgetCategory && <Action title="Show Budgets" icon={Icon.Coins} onAction={showBudgets} />}
               <LogoutAction />
             </ActionPanel>
           }
@@ -330,6 +371,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
                       <Action.Push
                         title="Edit Transaction"
                         icon={Icon.Pencil}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
                         target={<EditTransactionForm transaction={transaction} onUpdated={revalidate} />}
                       />
                       <Action.CopyToClipboard
@@ -337,6 +379,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
                         icon={Icon.Clipboard}
                         content={getTransactionDetails(transaction)}
                       />
+                      {!budgetCategory && <Action title="Show Budgets" icon={Icon.Coins} onAction={showBudgets} />}
                       <LogoutAction />
                     </ActionPanel>
                   }

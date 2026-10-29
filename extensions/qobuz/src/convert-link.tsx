@@ -1,101 +1,28 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { Clipboard } from "@raycast/api";
-import type { Album, Track } from "@kud/qobuz";
+import { readNowPlayingTrackId, type Album, type Track } from "@kud/qobuz";
 import { appLink, BRAND, deepLink, formatDuration, getClient } from "./lib/client";
-import {
-  deezerByIsrc,
-  findIsrc,
-  isLikelyMatch,
-  resolveLink,
-  spotifySearchUrl,
-  ytMusicSearchUrl,
-  type ResolveFailure,
-  type ResolvedTrack,
-} from "./lib/resolve";
+import { convertFromQobuz, type FromQobuzResult } from "./lib/convert";
+import { shareClipboard, shareQuery, ytMusicSearchUrl, type ShareLink } from "./lib/share";
 
-type Conversion =
-  | { mode: "empty" }
-  | { mode: "error"; reason: ResolveFailure }
-  | {
-      mode: "to-qobuz";
-      resolved: ResolvedTrack;
-      track: Track | null;
-      album: Album | null;
-      exact: boolean;
-    }
-  | {
-      mode: "from-qobuz";
-      track: Track;
-      album: Album | null;
-      query: string;
-      deezerUrl?: string;
-    };
+const EMPTY_MESSAGE = [
+  "# Nothing playing in Qobuz",
+  "",
+  "Start a track in the Qobuz app, or pass a link to Copy Share Links.",
+].join("\n");
 
-const SUPPORTED_HINT = "Copy a **Spotify**, **YouTube Music**, or **Qobuz** track link, then run this command.";
-
-const UNRESOLVED_MESSAGE: Record<ResolveFailure, string> = {
-  invalid: ["# Nothing to convert", "", SUPPORTED_HINT].join("\n"),
-  qobuz: ["# Unsupported Qobuz link", "", SUPPORTED_HINT].join("\n"),
-  "unsupported-type": [
-    "# Need a track link",
-    "",
-    `That looks like an album, playlist, artist, or podcast. Paste a single **track** link.`,
-  ].join("\n"),
-  unknown: ["# Unsupported link", "", SUPPORTED_HINT].join("\n"),
+const load = async (): Promise<FromQobuzResult | null> => {
+  const nowPlayingId = await readNowPlayingTrackId();
+  if (nowPlayingId === undefined) return null;
+  return convertFromQobuz(await getClient(), nowPlayingId);
 };
 
 export default function Command() {
-  const { data, isLoading } = usePromise(
-    async (): Promise<Conversion> => {
-      const url = (await Clipboard.readText())?.trim() || "";
-      if (!url) return { mode: "empty" };
-
-      const outcome = await resolveLink(url);
-      if (!outcome.ok) return { mode: "error", reason: outcome.reason };
-
-      const client = await getClient();
-
-      // Reverse: a Qobuz track → links on the other services.
-      if (outcome.direction === "from-qobuz") {
-        const track = await client.tracks.get(outcome.qobuzTrackId);
-        const album = track.album?.id
-          ? ((await client.albums.get(track.album.id).catch(() => undefined)) ?? null)
-          : null;
-        const query = `${track.artist?.name ?? ""} ${track.title}`.trim();
-        const deezerUrl = track.isrc ? await deezerByIsrc(track.isrc) : undefined;
-        return { mode: "from-qobuz", track, album, query, deezerUrl };
-      }
-
-      // Forward: a foreign track → the matching Qobuz track.
-      const resolved = outcome.track;
-      const query = `${resolved.artist} ${resolved.title}`;
-      const isrc = await findIsrc(resolved);
-
-      let track = isrc ? ((await client.tracks.match({ isrc, query })) ?? null) : null;
-      const exact = Boolean(track);
-
-      if (!track) {
-        // Approximate fallback: only trust a candidate that actually resembles
-        // the source, so a track absent from Qobuz reports "no match" rather
-        // than a confident wrong result.
-        const candidates = (await client.search.search(query, { limit: 5 })).tracks;
-        track = candidates.find((c) => isLikelyMatch(resolved, c)) ?? null;
-      }
-
-      const album = track?.album?.id
-        ? ((await client.albums.get(track.album.id).catch(() => undefined)) ?? null)
-        : null;
-
-      return { mode: "to-qobuz", resolved, track, album, exact };
+  const { data, isLoading } = usePromise(load, [], {
+    onError: (error) => {
+      showFailureToast(error, { title: "Couldn't load current track" });
     },
-    [],
-    {
-      onError: (error) => {
-        showFailureToast(error, { title: "Couldn't convert link" });
-      },
-    },
-  );
+  });
 
   return (
     <Detail
@@ -107,95 +34,86 @@ export default function Command() {
   );
 }
 
-const renderMetadata = (data: Conversion | undefined) => {
+const renderMetadata = (data: FromQobuzResult | null | undefined) => {
   if (!data) return undefined;
-  if (data.mode === "to-qobuz" && data.track) return <ToQobuzMetadata data={data} track={data.track} />;
-  if (data.mode === "from-qobuz") return <FromQobuzMetadata data={data} track={data.track} />;
-  return undefined;
+  return (
+    <Detail.Metadata>
+      <TrackFacts track={data.track} />
+      <Detail.Metadata.Separator />
+      {data.links
+        .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
+        .map((link) => (
+          <Detail.Metadata.TagList key={link.platform} title={LINK_LABEL[link.platform]}>
+            <Detail.Metadata.TagList.Item
+              text={MATCH_TAG[link.confidence].text}
+              color={MATCH_TAG[link.confidence].color}
+            />
+          </Detail.Metadata.TagList>
+        ))}
+    </Detail.Metadata>
+  );
 };
 
-const renderActions = (data: Conversion | undefined) => {
+const renderActions = (data: FromQobuzResult | null | undefined) => {
   if (!data) return undefined;
 
-  if (data.mode === "to-qobuz" && data.track) {
-    const trackUrl = deepLink.track(data.track.id);
-    return (
-      <ActionPanel>
-        {data.track.album?.id && (
-          <Action.Open title="Open in Qobuz" target={appLink.album(data.track.album.id)} icon={Icon.Music} />
-        )}
-        <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
-        <Action.Open title="Play Track in Qobuz" target={appLink.track(data.track.id)} icon={Icon.Play} />
-        <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
-      </ActionPanel>
-    );
-  }
-
-  if (data.mode === "to-qobuz" && data.resolved) {
-    const q = `${data.resolved.artist} ${data.resolved.title}`;
-    return (
-      <ActionPanel>
-        <Action.OpenInBrowser
-          title="Search on Qobuz"
-          icon={Icon.MagnifyingGlass}
-          url={`https://open.qobuz.com/search/${encodeURIComponent(q)}`}
-        />
-      </ActionPanel>
-    );
-  }
-
-  if (data.mode === "from-qobuz") {
-    return (
-      <ActionPanel>
+  const trackUrl = deepLink.track(data.track.id);
+  return (
+    <ActionPanel>
+      <Action.CopyToClipboard
+        title="Copy Share Links"
+        icon={Icon.Link}
+        content={shareClipboard(data.track, data.links)}
+      />
+      <Action.CopyToClipboard
+        title="Copy Qobuz Link"
+        content={trackUrl}
+        shortcut={{ modifiers: ["cmd"], key: "return" }}
+      />
+      <Action.CopyToClipboard title="Copy Artist & Title" content={shareQuery(data.track)} />
+      <ActionPanel.Section title="Other Services">
         <Action.OpenInBrowser
           title="Search on YouTube Music"
           icon={Icon.MagnifyingGlass}
-          url={ytMusicSearchUrl(data.query)}
+          url={ytMusicSearchUrl(shareQuery(data.track))}
         />
-        <Action.OpenInBrowser
-          title="Search on Spotify"
-          icon={Icon.MagnifyingGlass}
-          url={spotifySearchUrl(data.query)}
-        />
-        {data.deezerUrl && <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />}
-        <Action.CopyToClipboard title="Copy Artist & Title" content={data.query} />
-      </ActionPanel>
-    );
-  }
-
-  return undefined;
+        {data.links
+          .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
+          .map((link) => (
+            <Action.OpenInBrowser
+              key={link.platform}
+              title={
+                link.confidence === "search"
+                  ? `Search on ${LINK_LABEL[link.platform]}`
+                  : `Open on ${LINK_LABEL[link.platform]}`
+              }
+              icon={link.confidence === "search" ? Icon.MagnifyingGlass : Icon.Globe}
+              url={link.url}
+            />
+          ))}
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Qobuz">
+        <Action.Open title="Open in Qobuz" target={appLink.track(data.track.id)} icon={Icon.Music} />
+        <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
 };
 
-function ToQobuzMetadata({ data, track }: { data: Extract<Conversion, { mode: "to-qobuz" }>; track: Track }) {
-  return (
-    <Detail.Metadata>
-      <Detail.Metadata.Label title="From" text={`${data.resolved.artist} — ${data.resolved.title}`} />
-      <Detail.Metadata.TagList title="Match">
-        <Detail.Metadata.TagList.Item
-          text={data.exact ? "Exact (ISRC)" : "Approximate"}
-          color={data.exact ? Color.Green : Color.Orange}
-        />
-      </Detail.Metadata.TagList>
-      <Detail.Metadata.Separator />
-      <TrackFacts track={track} />
-    </Detail.Metadata>
-  );
-}
+const LINK_LABEL: Record<ShareLink["platform"], string> = {
+  qobuz: "Qobuz",
+  deezer: "Deezer",
+  apple: "Apple Music",
+  spotify: "Spotify",
+  tidal: "Tidal",
+  songlink: "song.link",
+};
 
-function FromQobuzMetadata({ data, track }: { data: Extract<Conversion, { mode: "from-qobuz" }>; track: Track }) {
-  return (
-    <Detail.Metadata>
-      <TrackFacts track={track} />
-      <Detail.Metadata.Separator />
-      <Detail.Metadata.TagList title="Deezer">
-        <Detail.Metadata.TagList.Item
-          text={data.deezerUrl ? "Exact (ISRC)" : "Not found"}
-          color={data.deezerUrl ? Color.Green : Color.SecondaryText}
-        />
-      </Detail.Metadata.TagList>
-    </Detail.Metadata>
-  );
-}
+const MATCH_TAG: Record<ShareLink["confidence"], { text: string; color: Color }> = {
+  exact: { text: "Exact (ISRC)", color: Color.Green },
+  approximate: { text: "Approximate", color: Color.Orange },
+  search: { text: "Search", color: Color.SecondaryText },
+};
 
 function TrackFacts({ track }: { track: Track }) {
   return (
@@ -221,19 +139,8 @@ const coverMarkdown = (track: Track, album: Album | null): string => {
   ].join("\n\n");
 };
 
-const buildMarkdown = (data: Conversion | undefined, isLoading: boolean): string => {
-  if (isLoading || !data || data.mode === "empty") return "";
-
-  if (data.mode === "error") return UNRESOLVED_MESSAGE[data.reason];
-
-  if (data.mode === "from-qobuz") return coverMarkdown(data.track, data.album);
-
-  if (!data.track)
-    return [
-      "# No Qobuz match",
-      "",
-      `Couldn't find **${data.resolved.artist} — ${data.resolved.title}** on Qobuz. Try "Search on Qobuz" below.`,
-    ].join("\n");
-
+const buildMarkdown = (data: FromQobuzResult | null | undefined, isLoading: boolean): string => {
+  if (isLoading || data === undefined) return "";
+  if (!data) return EMPTY_MESSAGE;
   return coverMarkdown(data.track, data.album);
 };

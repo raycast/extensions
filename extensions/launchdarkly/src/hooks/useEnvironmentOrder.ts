@@ -1,36 +1,29 @@
-import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
+import { sortEnvironmentKeys } from "../utils/environments";
 
 const GLOBAL_ENVIRONMENT_ORDER_KEY = "GLOBAL_ENVIRONMENT_ORDER";
 
+/**
+ * User-defined environment order, persisted across flags. The effective order is
+ * derived on every render (saved order first, then any unseen environments), so
+ * nothing needs to be synced back with an effect.
+ */
 export function useEnvironmentOrder(currentEnvKeys: string[]) {
-  const [environmentOrder, setEnvironmentOrder] = useCachedState<string[]>(GLOBAL_ENVIRONMENT_ORDER_KEY, []);
+  const [savedOrder, setSavedOrder] = useCachedState<string[]>(GLOBAL_ENVIRONMENT_ORDER_KEY, []);
 
-  useEffect(() => {
-    if (currentEnvKeys.length > 0) {
-      const validOrder = environmentOrder.filter((k) => currentEnvKeys.includes(k));
-      const newEnvs = currentEnvKeys.filter((k) => !environmentOrder.includes(k));
-
-      if (environmentOrder.length === 0) {
-        setEnvironmentOrder([...currentEnvKeys]);
-      } else if (newEnvs.length > 0 || validOrder.length !== environmentOrder.length) {
-        setEnvironmentOrder([...validOrder, ...newEnvs]);
-      }
-    }
-  }, [currentEnvKeys]);
+  const environmentOrder = useMemo(
+    () => sortEnvironmentKeys(currentEnvKeys, savedOrder),
+    [currentEnvKeys.join("|"), savedOrder.join("|")],
+  );
 
   function moveEnvironment(envKey: string, direction: "up" | "down") {
-    const currentOrder = environmentOrder.length > 0 ? environmentOrder : currentEnvKeys;
-    const newOrder = [...currentOrder];
-    const currentIndex = newOrder.indexOf(envKey);
-    if (currentIndex === -1) return;
-
-    if (direction === "up" && currentIndex > 0) {
-      [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
-    } else if (direction === "down" && currentIndex < newOrder.length - 1) {
-      [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-    }
-    setEnvironmentOrder(newOrder);
+    const next = [...environmentOrder];
+    const index = next.indexOf(envKey);
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (index === -1 || target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setSavedOrder(next);
   }
 
   return { environmentOrder, moveEnvironment };

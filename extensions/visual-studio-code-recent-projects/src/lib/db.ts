@@ -1,4 +1,4 @@
-import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Alert, Clipboard, Icon, Toast, confirmAlert, showHUD, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
@@ -131,6 +131,7 @@ export function useRecentEntries() {
           return;
         }
 
+        removeEntriesFromStoredGlobalState([entry]);
         suppressStorageEntries([entryKey]);
         await showStorageEntriesHiddenToast("Entry removed");
       },
@@ -157,6 +158,7 @@ export function useRecentEntries() {
             },
           })
         ) {
+          removeEntriesFromStoredGlobalState(visibleFallbackEntries);
           suppressStorageEntries(visibleStorageEntryKeys);
           await showStorageEntriesHiddenToast("All visible entries removed");
         }
@@ -189,6 +191,10 @@ export function useRecentEntries() {
         );
       }
 
+      // The entry can also exist as a storage.json copy, which would resurface
+      // on the next launch once session suppression resets.
+      removeEntriesFromStoredGlobalState([entry]);
+
       if (entryKey && isStorageEntry) {
         suppressStorageEntries([entryKey]);
       }
@@ -204,8 +210,20 @@ export function useRecentEntries() {
           ? "Storage-backed copies are hidden for this Raycast session"
           : `Restart ${build} to sync the list in ${build} (optional)`,
       );
-    } catch {
-      showToast(Toast.Style.Failure, "Failed to remove entry");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to remove entry",
+        message,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(message);
+            showHUD("Copied to clipboard");
+          },
+        },
+      });
     }
   }
 
@@ -236,6 +254,7 @@ export function useRecentEntries() {
           },
         })
       ) {
+        removeEntriesFromStoredGlobalState(combinedEntries ?? []);
         suppressStorageEntries(visibleStorageEntryKeys);
         await showStorageEntriesHiddenToast("All visible entries removed");
       }
@@ -259,6 +278,7 @@ export function useRecentEntries() {
         })
       ) {
         await saveEntries([], recentEntriesStorageKeys, databasePath);
+        removeEntriesFromStoredGlobalState(combinedEntries ?? []);
         suppressStorageEntries(visibleStorageEntryKeys);
         await revalidate();
         showToast(
@@ -269,8 +289,20 @@ export function useRecentEntries() {
             : `Restart ${build} to sync the list in ${build} (optional)`,
         );
       }
-    } catch {
-      showToast(Toast.Style.Failure, "Failed to remove entries");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to remove entries",
+        message,
+        primaryAction: {
+          title: "Copy Error",
+          onAction: () => {
+            Clipboard.copy(message);
+            showHUD("Copied to clipboard");
+          },
+        },
+      });
     }
   }
 
@@ -335,11 +367,37 @@ async function saveEntries(
   storageKeys: readonly (typeof recentEntriesStorageKeys)[number][],
   databasePath: string,
 ) {
-  const data = JSON.stringify({ entries }).replace(/'/g, "''");
-  const query = storageKeys
-    .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${data}');`)
-    .join("\n");
-  await execFilePromise("sqlite3", [databasePath, query]);
+  const data = JSON.stringify({ entries });
+
+  let DatabaseSync;
+  try {
+    // `node:sqlite` is available on Node 22.13+ (which Raycast bundles) and works on
+    // all platforms, unlike the `sqlite3` CLI which only ships with macOS.
+    ({ DatabaseSync } = await import("node:sqlite"));
+  } catch {
+    // Fall back to the `sqlite3` CLI on runtimes without `node:sqlite`.
+    const escapedData = data.replace(/'/g, "''");
+    const query = storageKeys
+      .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${escapedData}');`)
+      .join("\n");
+    await execFilePromise("sqlite3", [databasePath, query]);
+    return;
+  }
+
+  const database = new DatabaseSync(databasePath);
+  try {
+    database.exec("BEGIN");
+    const statement = database.prepare("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)");
+    for (const storageKey of storageKeys) {
+      statement.run(storageKey, data);
+    }
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  } finally {
+    database.close();
+  }
 }
 
 function getFallbackEntries(): EntryLike[] {
@@ -364,6 +422,95 @@ function getStoredGlobalState(): StoredGlobalState | undefined {
     return JSON.parse(storageContents) as StoredGlobalState;
   } catch {
     return undefined;
+  }
+}
+
+function getEntryUris(entry: EntryLike): string[] {
+  if ("folderUri" in entry) {
+    return [entry.folderUri];
+  }
+
+  if ("workspace" in entry) {
+    return entry.workspace?.configPath ? [entry.workspace.configPath] : [];
+  }
+
+  if ("fileUri" in entry) {
+    return [entry.fileUri];
+  }
+
+  return [];
+}
+
+/**
+ * Removes entries from `storage.json` (`backupWorkspaces` and
+ * `profileAssociations`). The visible list merges the state database with
+ * these storage-backed copies, so deleting from the database alone lets
+ * removed entries resurface on the next launch.
+ *
+ * Returns true when the file was changed. Never throws — callers treat this
+ * as best-effort persistence on top of session suppression.
+ */
+function removeEntriesFromStoredGlobalState(entries: EntryLike[]): boolean {
+  const storageJsonPath = getStorageJsonPath();
+  if (!fs.existsSync(storageJsonPath)) {
+    return false;
+  }
+
+  let state: StoredGlobalState;
+  try {
+    state = JSON.parse(fs.readFileSync(storageJsonPath, "utf8")) as StoredGlobalState;
+  } catch {
+    return false;
+  }
+
+  const uris = new Set(entries.flatMap((entry) => getEntryUris(entry)));
+  if (uris.size === 0) {
+    return false;
+  }
+
+  let changed = false;
+
+  const folders = state.backupWorkspaces?.folders;
+  if (folders) {
+    // Keep records we cannot positively identify instead of crashing on them.
+    const remaining = folders.filter((folder) => !folder?.folderUri || !uris.has(folder.folderUri));
+    if (remaining.length !== folders.length) {
+      state.backupWorkspaces!.folders = remaining;
+      changed = true;
+    }
+  }
+
+  const workspaces = state.backupWorkspaces?.workspaces;
+  if (workspaces) {
+    // Keep records we cannot positively identify instead of crashing on them.
+    const remaining = workspaces.filter(
+      (workspace) => !workspace?.workspace?.configPath || !uris.has(workspace.workspace.configPath),
+    );
+    if (remaining.length !== workspaces.length) {
+      state.backupWorkspaces!.workspaces = remaining;
+      changed = true;
+    }
+  }
+
+  const associations = state.profileAssociations?.workspaces;
+  if (associations) {
+    for (const uri of Object.keys(associations)) {
+      if (uris.has(uri)) {
+        delete associations[uri];
+        changed = true;
+      }
+    }
+  }
+
+  if (!changed) {
+    return false;
+  }
+
+  try {
+    fs.writeFileSync(storageJsonPath, JSON.stringify(state));
+    return true;
+  } catch {
+    return false;
   }
 }
 

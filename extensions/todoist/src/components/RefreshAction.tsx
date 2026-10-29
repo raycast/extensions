@@ -1,17 +1,18 @@
 import { Action, Icon, Toast, showToast } from "@raycast/api";
 
-import { initialSync } from "../api";
+import { SyncData, initialSync } from "../api";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
-import useCachedData from "../hooks/useCachedData";
 
-export default function RefreshAction() {
-  const [, setCachedData] = useCachedData();
+type RefreshActionProps = {
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
+};
 
+export default function RefreshAction({ setData }: RefreshActionProps) {
   async function refresh() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Syncing data" });
       const data = await initialSync();
-      setCachedData(data);
+      setData(data);
       await showToast({ style: Toast.Style.Success, title: "Synced data" });
       await refreshMenuBarCommand();
     } catch {

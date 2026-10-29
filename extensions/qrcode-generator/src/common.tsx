@@ -62,7 +62,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
   return (
     <Detail
       isLoading={!qrData}
-      markdown={`![qrcode](${qrData || ""}?raycast-height=350)`}
+      markdown={`![qrcode](${qrData || ""}?raycast-width=350&raycast-height=350)`}
       actions={
         <ActionPanel>
           <Action title="Save to Downloads" onAction={handleSave} shortcut={{ modifiers: ["cmd"], key: "s" }} />

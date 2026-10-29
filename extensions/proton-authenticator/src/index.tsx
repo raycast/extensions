@@ -1,15 +1,15 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
-import { useCachedState, getProgressIcon, showFailureToast, useFrecencySorting } from "@raycast/utils";
+import { Action, ActionPanel, List, showToast, Toast, Icon, confirmAlert, Alert, useNavigation } from "@raycast/api";
+import { useCachedState, showFailureToast, useFrecencySorting } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import Fuse from "fuse.js";
 
 import { STATE_KEYS } from "./lib/constants";
-import { TOTPAccount, ImportMode } from "./types";
+import { TOTPAccount, ImportMode, MissingKey, LoadResult } from "./types";
 import { loadAccountsFromStorage, clearStoredData, getImportMode, setImportMode } from "./lib/storage";
 import { generateTOTP, generateNextTOTP, getTimeRemaining } from "./lib/totp";
-import { getProgressColor } from "./lib/colors";
+import { getProgressColor, getProgressIcon } from "./lib/colors";
 import SetupFormJSON from "./components/SetupFormJSON";
-import SetupFormSQLite from "./components/SetupFormSQLite";
+import SetupSQLite from "./components/SetupSQLite";
 import ModeSelector from "./components/ModeSelector";
 
 type SetupStep = "select" | "json" | "sqlite" | null;
@@ -29,6 +29,8 @@ export default function Command() {
   );
   const [setupStep, setSetupStep] = useState<SetupStep>(null);
   const [currentMode, setCurrentMode] = useState<ImportMode | null>(null);
+  const [missingKeys, setMissingKeys] = useState<MissingKey[]>([]);
+  const { push, pop } = useNavigation();
 
   const {
     data: sortedByFrecency,
@@ -67,19 +69,67 @@ export default function Command() {
     return fuse.search(searchText.trim()).map((r) => r.item);
   }, [fuse, searchText, sortedAccounts]);
 
+  // Pushed instead of switching the cached setup state, so Esc returns to the account list
+  const openKeySetup = () => {
+    push(
+      <SetupSQLite
+        onAccountsLoaded={(loadedAccounts, missing, undecodableCount) => {
+          setAccounts(loadedAccounts);
+          setMissingKeys(missing);
+          showUndecodableWarning(undecodableCount);
+          pop();
+        }}
+        onBack={pop}
+      />,
+    );
+  };
+
+  // Returns true if a warning toast was shown
+  const showUndecodableWarning = (undecodableCount: number): boolean => {
+    if (undecodableCount === 0) return false;
+    showFailureToast(`${undecodableCount} ${undecodableCount === 1 ? "entry" : "entries"} could not be read`, {
+      title: "Some Entries Skipped",
+    });
+    return true;
+  };
+
+  // Returns true if a warning toast was shown
+  const showLoadWarnings = ({ missingKeys: missing, undecodableCount }: LoadResult): boolean => {
+    if (missing.length > 0) {
+      const entryCount = missing.reduce((sum, key) => sum + key.entryCount, 0);
+      showToast({
+        style: Toast.Style.Failure,
+        title: `${entryCount} ${entryCount === 1 ? "entry" : "entries"} could not be decrypted`,
+        message: `${missing.length} encryption ${missing.length === 1 ? "key is" : "keys are"} missing`,
+        primaryAction: {
+          title: "Add Encryption Key",
+          onAction: (toast) => {
+            toast.hide();
+            openKeySetup();
+          },
+        },
+      });
+      return true;
+    }
+    return showUndecodableWarning(undecodableCount);
+  };
+
   const loadAccounts = async () => {
     setIsLoading(true);
     try {
       const mode = await getImportMode();
       setCurrentMode(mode);
-      const loadedAccounts = await loadAccountsFromStorage();
-      if (loadedAccounts.length === 0) {
+      const result = await loadAccountsFromStorage();
+      setMissingKeys(result.missingKeys);
+      if (result.accounts.length === 0) {
         setNeedsSetup(true);
-        setSetupStep("select");
+        // Database setup explains why nothing loaded, the mode selector would not
+        setSetupStep(result.missingKeys.length > 0 || result.undecodableCount > 0 ? "sqlite" : "select");
       } else {
-        setAccounts(loadedAccounts);
+        setAccounts(result.accounts);
         setNeedsSetup(false);
         setSetupStep(null);
+        showLoadWarnings(result);
       }
       setError(null);
     } catch (err) {
@@ -94,9 +144,12 @@ export default function Command() {
   const handleRefresh = async () => {
     setIsLoading(true);
     try {
-      const loadedAccounts = await loadAccountsFromStorage();
-      setAccounts(loadedAccounts);
-      showToast(Toast.Style.Success, "Refreshed", `Loaded ${loadedAccounts.length} accounts`);
+      const result = await loadAccountsFromStorage();
+      setAccounts(result.accounts);
+      setMissingKeys(result.missingKeys);
+      if (!showLoadWarnings(result)) {
+        showToast(Toast.Style.Success, "Refreshed", `Loaded ${result.accounts.length} accounts`);
+      }
     } catch (err) {
       showFailureToast(err instanceof Error ? err.message : "Failed to refresh accounts");
     } finally {
@@ -132,8 +185,10 @@ export default function Command() {
     return () => clearInterval(interval);
   }, [accounts]);
 
-  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[]) => {
+  const handleAccountsLoaded = (loadedAccounts: TOTPAccount[], missing: MissingKey[] = [], undecodableCount = 0) => {
     setAccounts(loadedAccounts);
+    setMissingKeys(missing);
+    showUndecodableWarning(undecodableCount);
     setNeedsSetup(false);
     setSetupStep(null);
     setError(null);
@@ -162,7 +217,7 @@ export default function Command() {
       return <SetupFormJSON onAccountsLoaded={handleAccountsLoaded} />;
     }
     if (setupStep === "sqlite") {
-      return <SetupFormSQLite onAccountsLoaded={handleAccountsLoaded} onBack={handleBackToModeSelect} />;
+      return <SetupSQLite onAccountsLoaded={handleAccountsLoaded} onBack={handleBackToModeSelect} />;
     }
     // default to mode selector if setup step is unclear
     return <ModeSelector onModeSelected={handleModeSelected} />;
@@ -214,10 +269,8 @@ export default function Command() {
               {
                 text: `${remaining}s`,
                 icon: {
-                  source: getProgressIcon(remaining / (account.period || 30), colors.main, {
-                    background: colors.background,
-                    backgroundOpacity: 1,
-                  }),
+                  source: getProgressIcon(remaining / (account.period || 30)),
+                  tintColor: colors.main,
                 },
                 tooltip: "Time remaining",
               },
@@ -264,6 +317,9 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={handleRefresh}
                     />
+                  )}
+                  {currentMode === "sqlite" && missingKeys.length > 0 && (
+                    <Action title="Add Missing Encryption Key" icon={Icon.Key} onAction={openKeySetup} />
                   )}
                   <Action
                     title={`Sort by ${sortingMode === "frecency" ? "Name" : "Usage"}`}

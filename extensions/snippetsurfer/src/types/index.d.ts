@@ -24,5 +24,6 @@ export interface State {
   selectedFilter?: string;
   primaryAction?: string;
   pasteContentScope?: string;
+  hideFolderInList?: boolean;
   paths?: string[];
 }

@@ -1,4 +1,4 @@
-query getViewerStats($repositoriesCount: Int = 100) {
+query getViewerStats {
   viewer {
     ...UserFields
     bio
@@ -31,6 +31,26 @@ query getViewerStats($repositoriesCount: Int = 100) {
     issuesOpen: issues(states: [OPEN]) {
       totalCount
     }
+    contributionsCollection {
+      totalCommitContributions
+    }
+    publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+      totalCount
+    }
+    ownedRepositories: repositories(ownerAffiliations: OWNER) {
+      totalCount
+    }
+  }
+  rateLimit {
+    remaining
+    limit
+    used
+    resetAt
+  }
+}
+
+query getViewerStatsDetails($repositoriesCount: Int = 100) {
+  viewer {
     recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
       nodes {
         id
@@ -77,18 +97,11 @@ query getViewerStats($repositoriesCount: Int = 100) {
         }
       }
     }
-    contributionsCollection {
-      totalCommitContributions
-    }
-    publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
-      totalCount
-    }
     ownedRepositories: repositories(
       first: $repositoriesCount
       ownerAffiliations: OWNER
       orderBy: { field: STARGAZERS, direction: DESC }
     ) {
-      totalCount
       nodes {
         id
         nameWithOwner
@@ -98,7 +111,6 @@ query getViewerStats($repositoriesCount: Int = 100) {
       }
     }
     organizations(first: 20) {
-      totalCount
       nodes {
         id
         login
@@ -107,11 +119,5 @@ query getViewerStats($repositoriesCount: Int = 100) {
         url
       }
     }
-  }
-  rateLimit {
-    remaining
-    limit
-    used
-    resetAt
   }
 }

@@ -1,0 +1,10 @@
+export const CLERK_ISSUER = "https://clerk.hotkys.com";
+export const CLERK_AUTHORIZATION_ENDPOINT = `${CLERK_ISSUER}/oauth/authorize`;
+export const CLERK_TOKEN_ENDPOINT = `${CLERK_ISSUER}/oauth/token`;
+export const CLERK_REVOKE_ENDPOINT = `${CLERK_ISSUER}/oauth/token/revoke`;
+export const CLERK_USERINFO_ENDPOINT = `${CLERK_ISSUER}/oauth/userinfo`;
+export const CLERK_OAUTH_CLIENT_ID = "vfaZ7CuNng34PLpZ";
+export const CLERK_OAUTH_SCOPE = "profile email offline_access";
+export const RAYCAST_REDIRECT_URI = "https://raycast.com/redirect?packageName=Extension";
+export const SUPABASE_URL = "https://pnzstacjwokxqvtxoeyp.supabase.co";
+export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_GHLB33MvQoaygSAZun4Hiw_kr7CWzWl";

@@ -68,6 +68,8 @@ export default function FpathEntries({ searchBarAccessory }: FpathEntriesProps) 
       searchFields={["entry", "type", "section"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(item) => item.entry}
+      getItemName={(item) => item.entry}
+      getItemValue={(item) => item.entry}
       generateOverviewMarkdown={(_, allItems, grouped) => `
 # FPATH Summary
 
@@ -88,33 +90,13 @@ FPATH (Function PATH) tells Zsh where to look for autoloadable shell functions a
 - **Oh-My-Zsh plugins**: Plugin completion files
 - **Homebrew completions**: \`/opt/homebrew/share/zsh/site-functions\`
       `}
-      generateItemMarkdown={(item) => `
-# FPATH Entry
-
-## Path
-\`\`\`bash
-${item.entry}
-\`\`\`
-
-## Modification Type
-**${getTypeLabel(item.type)}** - ${item.type === "append" ? "Added to FPATH for function/completion lookup" : "Sets or exports FPATH"}
-
-## Location
-- **Section**: ${item.section}
-- **File**: ~/.zshrc
-
-## Purpose
-This path will be searched for autoloadable functions and completion definitions.
-      `}
+      omitValueMarkdown={true}
       generateMetadata={(item) => (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
-            title="Path"
+            title="FPATH Entry"
             text={item.entry}
-            icon={{
-              source: Icon.Folder,
-              tintColor: MODERN_COLORS.warning,
-            }}
+            icon={{ source: Icon.Folder, tintColor: MODERN_COLORS.warning }}
           />
           <List.Item.Detail.Metadata.Label
             title="Type"
@@ -132,6 +114,8 @@ This path will be searched for autoloadable functions and completion definitions
               tintColor: MODERN_COLORS.neutral,
             }}
           />
+          <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${item.sectionStartLine}`} />
+          <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
         </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (
@@ -139,9 +123,9 @@ This path will be searched for autoloadable functions and completion definitions
           <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
-      generateItemActions={(_, refresh) => (
+      generateItemActions={(item, refresh) => (
         <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
+          <SharedActionsSection onRefresh={refresh} item={{ copyName: item.entry, copyValue: item.entry }} />
         </ActionPanel>
       )}
     />

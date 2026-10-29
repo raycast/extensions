@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { homedir } from "os";
 import { useCallback, useEffect, useState } from "react";
-import { readFile } from "simple-plist";
+import { bplistParser, readFile } from "simple-plist";
 import { promisify } from "util";
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";
@@ -9,6 +9,9 @@ import { getUrlDomain } from "../utils";
 export const readPlist = promisify(readFile);
 
 export const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
+
+const SAFARI_BOOKMARKS_MAX_OBJECT_COUNT = 250_000;
+bplistParser.maxObjectCount = SAFARI_BOOKMARKS_MAX_OBJECT_COUNT;
 
 export function extractReadingListBookmarks(
   bookmarks: BookmarkPListResult,

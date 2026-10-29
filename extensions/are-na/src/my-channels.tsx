@@ -12,7 +12,10 @@ function ToggleViewAction({ mode, toggle }: { mode: "list" | "grid"; toggle: () 
     <Action
       icon={mode === "list" ? Icon.AppWindowGrid2x2 : Icon.List}
       title={mode === "list" ? "View as Grid" : "View as List"}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "v" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+      }}
       onAction={toggle}
     />
   );
@@ -27,7 +30,7 @@ function ChannelActions({ channel, mode, toggle }: { channel: Channel; mode: "li
       <Action.CopyToClipboard
         title="Copy Link"
         content={`https://www.are.na/${channel.owner_slug}/${channel.slug}`}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
       />
     </ActionPanel>
   );
@@ -37,16 +40,23 @@ function MyChannelsCommand() {
   const arena = useArena();
   const { mode, toggle } = useViewMode("my-channels", "list");
 
-  const { data, isLoading, revalidate } = usePromise(async (): Promise<Channel[]> => {
-    const me = await arena.me();
-    return arena.user(me.slug || me.id).channels({ page: 1, per: 100, sort: "updated_at_desc" });
-  });
+  const { data, isLoading, revalidate, pagination } = usePromise(
+    () =>
+      async ({ page }: { page: number }) => {
+        const me = await arena.me();
+        const result = await arena
+          .user(me.slug || me.id)
+          .channelsPage({ page: page + 1, per: 24, sort: "updated_at_desc" });
+        return { data: result.items, hasMore: result.meta.has_more_pages };
+      },
+    [],
+  );
 
   const channels = data ?? [];
 
   if (mode === "grid") {
     return (
-      <Grid columns={4} isLoading={isLoading} searchBarPlaceholder="Filter channels...">
+      <Grid columns={4} pagination={pagination} isLoading={isLoading} searchBarPlaceholder="Filter channels...">
         {isLoading && channels.length === 0 ? (
           <Grid.EmptyView icon={{ source: "extension-icon.png" }} title="Loading your channels..." />
         ) : channels.length === 0 ? (
@@ -86,7 +96,7 @@ function MyChannelsCommand() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter channels...">
+    <List pagination={pagination} isLoading={isLoading} searchBarPlaceholder="Filter channels...">
       {isLoading && channels.length === 0 ? (
         <List.EmptyView icon={{ source: "extension-icon.png" }} title="Loading your channels..." />
       ) : channels.length === 0 ? (

@@ -4,6 +4,7 @@ This Raycast extension is the perfect companion for Slack users. It allows you t
 
 - Quickly open Slack channels
 - Search for messages
+- Mention workspace members in AI Chat
 - See unread messages,
 - Snooze notifications
 - Set your presence status
@@ -86,11 +87,19 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # AI Tool: Upload Files
          - files:write
 
+         # AI Tool: Download Files
+         # Command: Search Messages (Download Attachment)
+         - files:read
+
          # Command: Search Emojis
          - emoji:read
 
          # AI Tool: Add Reaction
          - reactions:write
+
+         # AI Tools: Read Canvas & Edit Canvas
+         - canvases:read
+         - canvases:write
 
          # Command: Set Status
          - users.profile:write
@@ -123,3 +132,20 @@ The proxy URL is resolved in the following order:
 
 - Proxy support applies to **Slack API calls only**. The OAuth login flow uses Raycast's built-in networking, which does not go through the configured proxy.
 - If you are on a corporate network that blocks OAuth, use a **personal access token** instead (see above). Token-based authentication bypasses OAuth entirely and all subsequent API calls will use the proxy.
+
+## Slack API rate limits
+
+Slack applies Web API rate limits **per API method, per workspace, per app**, using one-minute windows. The published tier number is a guaranteed floor rather than a fixed maximum; Slack allows some bursts and may change the exact allowance. Signing in again or clearing Raycast's extension cache does not reset these workspace-level app limits.
+
+The limits most relevant to this extension are:
+
+| Extension operation                     | Slack method                                                                         | Published limit                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Search workspace members                | [`users.list`](https://docs.slack.dev/reference/methods/users.list/)                 | Tier 2: 20+ requests per minute                                                  |
+| Search channels and group conversations | [`conversations.list`](https://docs.slack.dev/reference/methods/conversations.list/) | Tier 2: 20+ requests per minute                                                  |
+| Search messages                         | [`search.messages`](https://docs.slack.dev/reference/methods/search.messages/)       | Tier 2: 20+ requests per minute                                                  |
+| Send messages                           | [`chat.postMessage`](https://docs.slack.dev/reference/methods/chat.postMessage/)     | Special: generally 1 message per second per channel, plus a workspace-wide limit |
+
+`users.list` and `conversations.list` are cursor-paginated, and every page is another request against that method's rate limit. Directory loading and search use Slack's recommended 200-item page size. User search scans `users.list` once, keeping a compact copy of the member list in memory and in Raycast's `Cache` (fresh for one hour, reusable for up to a day while it refreshes in the background), so later searches make no member requests. Pages are searched as they arrive, so matches appear without waiting for the whole workspace. Timeouts and server errors stop retrying after a few attempts so they surface instead of loading forever.
+
+When a limit is exceeded, Slack responds with HTTP `429` and a `Retry-After` header containing the number of seconds to wait. The extension waits and retries automatically without showing a toast, including during AI tool calls, except for Canvas tools, which return the wait time without retrying. Although Slack applies limits per method, the Slack SDK pauses this client's request queue during the retry delay. See [Slack's rate-limit overview](https://docs.slack.dev/apis/web-api/rate-limits/) for the full tier definitions and current policy.

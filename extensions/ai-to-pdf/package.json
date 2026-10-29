@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-to-pdf",
+  "title": "AI to PDF",
+  "description": "Convert Adobe Illustrator (.ai) files to print-ready PDF, with or without bleed, using Illustrator's own PDF export.",
+  "icon": "extension-icon.png",
+  "author": "guus",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-ai-to-pdf",
+      "title": "Convert AI to PDF",
+      "subtitle": "Illustrator",
+      "description": "Pick one or more .ai files and export them to PDF, with the bleed read from the file, a custom bleed, or none.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-selection-file-bleed",
+      "title": "Convert Finder Selection with Its Own Bleed",
+      "subtitle": "Illustrator",
+      "description": "Convert the .ai files selected in Finder, using the bleed each file itself defines.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-selection-custom-bleed",
+      "title": "Convert Finder Selection with Custom Bleed",
+      "subtitle": "Illustrator",
+      "description": "Convert the .ai files selected in Finder using the custom bleed from the preferences.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-selection-no-bleed",
+      "title": "Convert Finder Selection Without Bleed",
+      "subtitle": "Illustrator",
+      "description": "Convert the .ai files selected in Finder at trim size, without bleed.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultBleedMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Bleed",
+      "description": "Which bleed the commands start with.",
+      "default": "file",
+      "data": [
+        {
+          "title": "From the file",
+          "value": "file"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    },
+    {
+      "name": "customBleedMm",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Bleed",
+      "description": "Millimetres on all four sides, used by the Custom option. A comma decimal works too.",
+      "default": "3",
+      "placeholder": "3"
+    },
+    {
+      "name": "pdfPreset",
+      "type": "textfield",
+      "required": false,
+      "title": "Default PDF Preset",
+      "description": "Name of the Illustrator PDF preset used by default, including the brackets. Leave empty to use Illustrator's current settings.",
+      "default": "[PDF/X-4:2008]",
+      "placeholder": "[PDF/X-4:2008]"
+    },
+    {
+      "name": "suffixBleed",
+      "type": "textfield",
+      "required": false,
+      "title": "Suffix with Bleed",
+      "description": "Appended to the file name when exporting with bleed.",
+      "default": "_bleed",
+      "placeholder": "_bleed"
+    },
+    {
+      "name": "suffixNoBleed",
+      "type": "textfield",
+      "required": false,
+      "title": "Suffix Without Bleed",
+      "description": "Appended to the file name when exporting without bleed. May be empty.",
+      "default": "",
+      "placeholder": "(none)"
+    },
+    {
+      "name": "destination",
+      "type": "directory",
+      "required": false,
+      "title": "Output Folder",
+      "description": "Where the PDFs are written. Leave empty to write next to the .ai file."
+    },
+    {
+      "name": "overwrite",
+      "type": "checkbox",
+      "required": false,
+      "title": "Existing Files",
+      "label": "Overwrite an existing PDF instead of numbering it",
+      "default": false,
+      "description": "When off, a second export becomes \"Name 2.pdf\" instead of replacing the existing PDF."
+    },
+    {
+      "name": "revealInFinder",
+      "type": "checkbox",
+      "required": false,
+      "title": "After Converting",
+      "label": "Reveal the PDF in Finder",
+      "default": false,
+      "description": "Selects the finished PDF in Finder once the conversion completes."
+    },
+    {
+      "name": "timeoutSeconds",
+      "type": "textfield",
+      "required": false,
+      "title": "Timeout per File",
+      "description": "Seconds to wait for Illustrator before giving up on a file.",
+      "default": "180",
+      "placeholder": "180"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

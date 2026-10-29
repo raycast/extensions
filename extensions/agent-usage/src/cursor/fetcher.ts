@@ -1,8 +1,8 @@
-import { httpFetch } from "../agents/http";
-import { resolveCursorAppAuthSession } from "./auth";
-import { parseCursorUsage } from "./parser";
-import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser";
-import type { CursorError, CursorUsage } from "./types";
+import { httpFetch } from "../agents/http.ts";
+import { resolveCursorAppAuthSession } from "./auth.ts";
+import { parseCursorUsage } from "./parser.ts";
+import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser.ts";
+import type { CursorError, CursorUsage } from "./types.ts";
 
 const CURSOR_BASE_URL = "https://cursor.com";
 const CURSOR_HEADERS = {
@@ -49,7 +49,7 @@ export function resolveCursorCredential(manualCookieHeader?: string): CursorCred
 
   const appSession = resolveCursorAppAuthSession();
   return appSession
-    ? { cookieHeader: appSession.cookieHeader, source: "Cursor.app", requestUsageUserIdFallback: appSession.userId }
+    ? { cookieHeader: appSession.cookieHeader, source: "Cursor", requestUsageUserIdFallback: appSession.userId }
     : null;
 }
 
@@ -63,7 +63,7 @@ export async function fetchCursorUsage(
       error: {
         type: "not_configured",
         message:
-          "Cursor is not configured. Sign in to Cursor.app, or paste a cursor.com Cookie header in extension settings.",
+          "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.",
       },
     };
   }

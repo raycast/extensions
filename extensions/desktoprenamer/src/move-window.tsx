@@ -1,52 +1,74 @@
-import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
-import { runDesktopRenamerCommand, escapeAppleScriptString } from "./utils";
-import { useSpaces, Space, RenameSpaceForm } from "./spaces";
+import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { moveWindowToSpace, getCurrentSpacesByDisplay, restoreSpacesByDisplay } from "./utils";
+import { isMoveTarget, useSpaces, Space, RenameSpaceForm } from "./spaces";
 
 export default function Command() {
-  const { groupedSpaces, currentName, isLoading, revalidate } = useSpaces();
+  const { spaces, displayGroups, hasMultipleDisplays, activeSpaceID, isLoading, revalidate } = useSpaces();
+  const currentSpaceId = activeSpaceID || null;
+  const currentSpace = currentSpaceId ? spaces.find((s) => s.id === currentSpaceId) : undefined;
 
   async function moveWindow(space: Space) {
     try {
-      const sanitizedId = escapeAppleScriptString(space.id);
-      await runDesktopRenamerCommand(`move window to space "${sanitizedId}"`);
+      const preferences = getPreferenceValues<Preferences.MoveWindow>();
+      const originalSpaces = preferences.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
+      const isCurrentFullscreen = currentSpace?.isFullscreen;
+
+      if (isCurrentFullscreen) {
+        await showToast({ style: Toast.Style.Animated, title: "Un-fullscreening and moving window..." });
+      }
+
+      await moveWindowToSpace(space.id);
+
+      if (isCurrentFullscreen !== false) {
+        await new Promise((resolve) => setTimeout(resolve, 1700));
+      }
+
+      if (originalSpaces) {
+        await restoreSpacesByDisplay(originalSpaces);
+      }
+
       await showToast({ style: Toast.Style.Success, title: `Moved window to ${space.name}` });
+      await revalidate();
     } catch {
       // Handled by utils
     }
   }
 
+  function renderSpace(space: Space) {
+    return (
+      <List.Item
+        key={space.id}
+        title={space.name}
+        subtitle={`Space ${space.num}`}
+        icon={{ source: Icon.Window }}
+        actions={
+          <ActionPanel>
+            <Action title="Move Window" icon={Icon.Window} onAction={() => moveWindow(space)} />
+            <Action.Push
+              title="Rename Space"
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              icon={Icon.Pencil}
+              target={<RenameSpaceForm space={space} onRename={revalidate} />}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search desktops...">
-      {Object.entries(groupedSpaces).map(([displayID, spaces]) => (
-        <List.Section key={displayID} title={displayID}>
-          {spaces.map((space) => {
-            const isCurrent = space.name === currentName;
+      {hasMultipleDisplays
+        ? displayGroups.map((group) => {
+            const filtered = group.items.filter((space) => space.id !== currentSpaceId && isMoveTarget(space));
+            if (filtered.length === 0) return null;
             return (
-              <List.Item
-                key={space.id}
-                title={space.name}
-                subtitle={`Space ${space.num}`}
-                icon={{
-                  source: Icon.Window,
-                  tintColor: isCurrent ? Color.Blue : undefined,
-                }}
-                accessories={isCurrent ? [{ tag: { value: "Current", color: Color.Blue } }] : []}
-                actions={
-                  <ActionPanel>
-                    <Action title="Move Window" icon={Icon.Window} onAction={() => moveWindow(space)} />
-                    <Action.Push
-                      title="Rename Space"
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      icon={Icon.Pencil}
-                      target={<RenameSpaceForm space={space} onRename={revalidate} />}
-                    />
-                  </ActionPanel>
-                }
-              />
+              <List.Section key={group.displayID} title={group.displayName}>
+                {filtered.map(renderSpace)}
+              </List.Section>
             );
-          })}
-        </List.Section>
-      ))}
+          })
+        : spaces.filter((space) => space.id !== currentSpaceId && isMoveTarget(space)).map(renderSpace)}
     </List>
   );
 }

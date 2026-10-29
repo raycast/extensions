@@ -5,25 +5,27 @@ import type { Contact, MessagesTarget } from "./types";
 
 const CONTACT_RECIPIENT_PREFIX = "contact:";
 
-type RecipientBase = MessagesTarget & {
+export type RecipientBase = MessagesTarget & {
   id: string;
   service_name: "iMessage" | "SMS" | "auto";
   group_name: string | null;
   displayName: string;
   avatar?: Image.ImageLike;
   keywords: string[];
+  unread_count?: number;
+  last_message_date?: string | null;
 };
 
-type RecentRecipient = RecipientBase & {
+export type RecentRecipient = RecipientBase & {
   kind: "recent";
 };
 
-type ContactRecipient = RecipientBase & {
+export type ContactRecipient = RecipientBase & {
   kind: "contact";
   imageData: string | null;
 };
 
-type Recipient = RecentRecipient | ContactRecipient;
+export type Recipient = RecentRecipient | ContactRecipient;
 export type RecipientSections = { recents: RecentRecipient[]; contacts: ContactRecipient[] };
 
 function normalizeIdentifier(value: unknown): string | undefined {
@@ -69,6 +71,7 @@ function recentRecipient(chat: Chat): RecentRecipient {
   const recipient = {
     kind: "recent" as const,
     id: chat.guid,
+    chat_guid: chat.guid,
     chat_identifier: chat.chat_identifier,
     service_name: chat.service_name,
     group_name: chat.group_name,
@@ -77,6 +80,8 @@ function recentRecipient(chat: Chat): RecentRecipient {
     is_group: chat.is_group,
     displayName: chat.displayName,
     avatar: chat.avatar,
+    unread_count: chat.unread_count,
+    last_message_date: chat.last_message_date,
   };
   return { ...recipient, keywords: recipientKeywords(recipient, chat.phoneNumber ? [chat.phoneNumber] : []) };
 }
@@ -86,6 +91,7 @@ function contactRecipient(contact: Contact, destination: string, loadContactPhot
   const recipient = {
     kind: "contact" as const,
     id: `${CONTACT_RECIPIENT_PREFIX}${contact.id}`,
+    chat_guid: null,
     chat_identifier: destination,
     service_name: destination.includes("@") ? ("iMessage" as const) : ("auto" as const),
     group_name: null,

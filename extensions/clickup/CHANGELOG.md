@@ -1,5 +1,11 @@
 # ClickUp Changelog
 
+## [My Tasks Scope and Due Date Filter] - 2026-09-29
+
+### New Features
+- Add a scope dropdown to "My Tasks" to switch between the Default List and the entire Workspace
+- Add "Show Only Tasks with Due Date" action (⌘D) to "My Tasks"
+
 ## [New "View Default List" Command] - 2026-04-03
 
 ### New Feature

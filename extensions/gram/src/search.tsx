@@ -16,6 +16,7 @@ import {
 } from "@raycast/api";
 import { closeGramWindow, GramBuild, openWithGramCli } from "./lib/gram";
 import { showOpenStatus } from "./lib/preferences";
+import { openProject } from "./lib/open-project";
 import { isMultiFolder, Workspace } from "./lib/workspaces";
 import { EntryItem } from "./components/entry-item";
 
@@ -243,8 +244,7 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithGramCli(cliPath, entry.paths);
+        await openProject(() => openWithGramCli(cliPath, entry.paths), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({
@@ -261,8 +261,7 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithGramCli(cliPath, [entry.paths[0]]);
+        await openProject(() => openWithGramCli(cliPath, [entry.paths[0]]), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({

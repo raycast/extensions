@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { resolve, relative } from "node:path";
+import { expandHomePath } from "./path";
 
 export const getWorkspaceRoot = () => {
   const preferences = getPreferenceValues<Preferences>();
@@ -8,7 +9,7 @@ export const getWorkspaceRoot = () => {
     throw new Error("Workspace root directory is not configured. Please set it in the extension preferences.");
   }
 
-  return resolve(preferences.workspaceRoot);
+  return resolve(expandHomePath(preferences.workspaceRoot));
 };
 
 export const isAutoEditEnabled = () => {

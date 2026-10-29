@@ -128,6 +128,13 @@ export default function EmailAccounts({
                   }
                   style={Action.Style.Destructive}
                 />
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Webmail (via mxpanel)"
+                    url={`https://panel.mxroute.com/webmail-login.php?email=${encodeURIComponent(account.email)}`}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

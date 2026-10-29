@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flowspeech-tts",
+  "version": "1.1.0",
+  "title": "FlowSpeech TTS",
+  "description": "Turn selected or copied text into natural speech with FlowSpeech",
+  "icon": "extension-icon.png",
+  "author": "waeckerlinfederowicz66-sketch",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "speak-selected",
+      "title": "Speak Selected Text",
+      "description": "Read the currently selected text with FlowSpeech",
+      "mode": "view"
+    },
+    {
+      "name": "speak-copied",
+      "title": "Speak Copied Text",
+      "description": "Read text from the clipboard with FlowSpeech",
+      "mode": "view"
+    },
+    {
+      "name": "show-recovery",
+      "title": "Show Speech Recovery",
+      "description": "Show saved request IDs without creating another recording",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "FlowSpeech API Key",
+      "description": "Developer API key; generation requires active paid API access and consumes credits",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "voiceName",
+      "title": "Voice",
+      "description": "Voice used for speech generation",
+      "type": "dropdown",
+      "required": true,
+      "default": "Kore",
+      "data": [
+        {
+          "title": "Kore",
+          "value": "Kore"
+        },
+        {
+          "title": "Puck",
+          "value": "Puck"
+        },
+        {
+          "title": "Charon",
+          "value": "Charon"
+        },
+        {
+          "title": "Aoede",
+          "value": "Aoede"
+        },
+        {
+          "title": "Fenrir",
+          "value": "Fenrir"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.1.2",
+    "proper-lockfile": "4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.15",
+    "@types/react": "19.2.14",
+    "@types/proper-lockfile": "4.1.4",
+    "eslint": "10.0.2",
+    "prettier": "3.8.1",
+    "react-test-renderer": "19.0.0",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "prepublishOnly": "echo \"This extension is published through the Raycast Store, not npm.\" && exit 1",
+    "build": "ray build -e dist -o .build",
+    "pretest": "npm run build",
+    "test": "tsc -p tsconfig.test.json && node --test test/*.test.mjs",
+    "test:build": "npm run build && tsc -p tsconfig.test.json && node --test test/built-check.mjs",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

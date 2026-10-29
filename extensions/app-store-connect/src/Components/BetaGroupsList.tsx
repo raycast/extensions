@@ -89,17 +89,20 @@ export default function BetaGroupsList({ app }: BetaGroupsListProps) {
       <List.Section title="Internal Groups">
         {internalGroups.map((betaGroup: BetaGroup) => (
           <List.Item
+            key={betaGroup.id}
             title={betaGroup.attributes.name}
             icon={{ source: Icon.TwoPeople }}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Manage Group"
-                  icon={Icon.TwoPeople}
-                  target={<BetaGroupDetail app={app} group={betaGroup} />}
-                />
-                {createNewGroupAction()}
-                {deleteGroupAction(betaGroup)}
+                <ActionPanel.Section title={betaGroup.attributes.name}>
+                  <Action.Push
+                    title="Manage Group"
+                    icon={Icon.TwoPeople}
+                    target={<BetaGroupDetail app={app} group={betaGroup} />}
+                  />
+                  {deleteGroupAction(betaGroup)}
+                </ActionPanel.Section>
+                <ActionPanel.Section>{createNewGroupAction()}</ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -108,22 +111,25 @@ export default function BetaGroupsList({ app }: BetaGroupsListProps) {
       <List.Section title="External Groups">
         {externalGroups.map((betaGroup: BetaGroup) => (
           <List.Item
+            key={betaGroup.id}
             title={betaGroup.attributes.name}
             icon={{ source: Icon.TwoPeople }}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Manage Group"
-                  icon={Icon.TwoPeople}
-                  target={<BetaGroupDetail app={app} group={betaGroup} />}
-                />
-                <Action.Push
-                  title="Manage Builds"
-                  icon={Icon.Building}
-                  target={<ExternalBetaGroupBuilds group={betaGroup} app={app} />}
-                />
-                {createNewGroupAction()}
-                {deleteGroupAction(betaGroup)}
+                <ActionPanel.Section title={betaGroup.attributes.name}>
+                  <Action.Push
+                    title="Manage Group"
+                    icon={Icon.TwoPeople}
+                    target={<BetaGroupDetail app={app} group={betaGroup} />}
+                  />
+                  <Action.Push
+                    title="Manage Builds"
+                    icon={Icon.Building}
+                    target={<ExternalBetaGroupBuilds group={betaGroup} app={app} />}
+                  />
+                  {deleteGroupAction(betaGroup)}
+                </ActionPanel.Section>
+                <ActionPanel.Section>{createNewGroupAction()}</ActionPanel.Section>
               </ActionPanel>
             }
           />

@@ -8,7 +8,7 @@ import { ErrorView, runAction, shortcuts } from "./lib/ui";
 export default function Command() {
   const snapshot = useHerdrSnapshot();
   if (snapshot.error && !snapshot.data) return <ErrorView error={snapshot.error} onRetry={snapshot.revalidate} />;
-  const worktrees = (snapshot.data?.workspaces || []).filter((workspace) => workspace.worktree);
+  const worktrees = (snapshot.data?.workspaces || []).filter((workspace) => workspace.worktree?.is_linked_worktree);
 
   async function remove(workspaceId: string, label: string, force: boolean) {
     if (
@@ -27,7 +27,7 @@ export default function Command() {
     await runAction(
       "Removing worktree",
       () =>
-        runHerdr(["worktree", "remove", "--workspace", workspaceId, ...(force ? ["--force"] : []), "--json"], {
+        runHerdr(["worktree", "remove", "--workspace", workspaceId, ...(force ? ["--force"] : [])], {
           timeout: 120_000,
         }).then(() => undefined),
       {

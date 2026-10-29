@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "luci-screen-memory",
+  "title": "Luci Screen Memory",
+  "description": "Toggle Luci screen memory recording and monitor status",
+  "icon": "command-icon.png",
+  "author": "fahd_badran",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Screen Memory",
+      "subtitle": "Luci",
+      "description": "Toggle Luci screen memory recording on/off",
+      "mode": "no-view"
+    },
+    {
+      "name": "status-menu-bar",
+      "title": "Luci Status",
+      "subtitle": "Luci",
+      "description": "Show Luci recording status and toggle from menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

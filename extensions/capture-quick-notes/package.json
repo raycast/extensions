@@ -1,0 +1,220 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "capture-quick-notes",
+  "title": "Capture - Quick Notes",
+  "description": "Add, search, and manage notes in Capture without leaving Raycast. Requires Capture 2.15 or later.",
+  "icon": "extension-icon.png",
+  "author": "furkansimsir",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "notes",
+    "quick capture",
+    "productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-capture",
+      "title": "Add Capture",
+      "description": "Add a new Capture item",
+      "mode": "view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture a thought straight from the root search, without opening any window",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Text, URL, or note",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "list",
+          "placeholder": "List",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "capture-clipboard",
+      "title": "Capture Clipboard",
+      "description": "Save the current clipboard text or file to Capture",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-captures",
+      "title": "Search Captures",
+      "description": "Search, open, archive, and delete Capture items",
+      "mode": "view"
+    },
+    {
+      "name": "create-list",
+      "title": "Create List",
+      "description": "Create a new list in Capture",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "List name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-capture",
+      "title": "Add Capture",
+      "description": "Create a new capture with text content and an optional list"
+    },
+    {
+      "name": "get-captures",
+      "title": "Get Captures",
+      "description": "Search captures by text, filter by list, or get the most recent ones"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get all lists in Capture"
+    },
+    {
+      "name": "open-capture",
+      "title": "Open Capture",
+      "description": "Open a capture in the Capture app"
+    },
+    {
+      "name": "archive-capture",
+      "title": "Archive Capture",
+      "description": "Archive or unarchive a capture"
+    },
+    {
+      "name": "delete-capture",
+      "title": "Delete Capture",
+      "description": "Permanently delete a capture"
+    },
+    {
+      "name": "update-capture",
+      "title": "Update Capture",
+      "description": "Update a capture's content or move it between lists"
+    },
+    {
+      "name": "add-list",
+      "title": "Add List",
+      "description": "Create a new list in Capture"
+    }
+  ],
+  "ai": {
+    "instructions": "You are an assistant for Capture, a quick note-taking app. Captures have an id, text content, extracted urls, an optional listName, and an isArchived flag. Captures without a list live in the Inbox. Always find captures with get-captures first and use the returned id for open/update/archive/delete operations. When the user names a list, match it against get-lists results (list names often include emoji prefixes — match loosely on the text). update-capture replaces the whole content, so fetch the current content first when the user asks for a partial edit. Archiving is reversible; deleting is permanent.",
+    "evals": [
+      {
+        "input": "@capture what did I save about swiftdata?",
+        "mocks": {
+          "get-captures": [
+            {
+              "id": "1783603330.882905",
+              "content": "SwiftData composite attributes are fragile",
+              "urls": [],
+              "creationDate": "2026-07-09T13:22:10Z",
+              "isArchived": false,
+              "attachmentCount": 0,
+              "deepLinkURL": "capture://item?creationDate=1783603330.882905"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-captures",
+              "arguments": {
+                "query": "swiftdata"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@capture save an idea: dark mode for the widget",
+        "mocks": {
+          "add-capture": {
+            "id": "1783603330.882905",
+            "content": "dark mode for the widget",
+            "urls": [],
+            "creationDate": "2026-07-09T13:22:10Z",
+            "isArchived": false,
+            "attachmentCount": 0,
+            "deepLinkURL": "capture://item?creationDate=1783603330.882905"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-capture",
+              "arguments": {
+                "content": {
+                  "includes": "dark mode"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@capture what lists do I have?",
+        "mocks": {
+          "get-lists": [
+            {
+              "id": "💡 Ideas",
+              "name": "💡 Ideas",
+              "creationDate": "2024-10-05T08:06:08Z",
+              "orderIndex": 3
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-lists"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Path to the capture-cli executable bundled with Capture 2.15 or later.",
+      "type": "textfield",
+      "required": true,
+      "default": "/Applications/Capture.app/Contents/Helpers/CaptureCLI.app/Contents/MacOS/capture-cli"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

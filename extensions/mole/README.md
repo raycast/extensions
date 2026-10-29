@@ -43,6 +43,8 @@ brew install mole
 | **Update Mole**         | Update Mole to the latest version                                                 |
 | **Health Menu Bar**     | Show system health score in the menu bar with CPU, RAM, disk, and battery summary  |
 
+Raycast AI adds **Ask Mole** when this extension is installed. Ask it to open Clean System, Purge Dev Artifacts, Clean Installers, Uninstall App, or Optimize System. Review the command's preview and confirm the action in Raycast.
+
 ## Configuration
 
 | Preference       | Scope         | Description                                                |

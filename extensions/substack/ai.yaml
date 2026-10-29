@@ -1,0 +1,177 @@
+instructions: |
+  Use configured Substack connections. Never request or reveal cookies.
+  Call list-accounts before choosing an account. When a user names an account, match
+  its label or publication and pass its ID. An unknown name must not fall back to the default.
+  If multiple connections exist without a default, ask which to use before any draft tool.
+  If no account is named, use the configured default or the sole account.
+  Drafts are unpublished. Return editor URLs as Markdown links.
+  For explicit draft creation, call create-draft after resolving the connection.
+  Do not publish, schedule, or send email. Explain that the Substack editor handles those actions.
+  Supported Markdown includes headings, emphasis, links, lists, quotes, horizontal rules,
+  inline code, and public HTTPS images in separate paragraphs. Code blocks, tables, HTML,
+  strikethrough, task lists, and local images are unsupported. Ask the user to revise unsupported content.
+  If status is needs-review, include: "The draft exists, but the body save could not be verified."
+  Then provide the recovery URL and ask the user to inspect the existing draft. Do not report a complete save.
+  Never retry an uncertain creation automatically. Never claim failed saves succeeded.
+  Use nextOffset for more remote pages. Do not call a first page the complete draft list.
+  For access errors, direct the user to renew the connection in Manage Accounts.
+evals:
+  - input: "@substack Show my drafts for Weekly."
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      list-my-drafts:
+        drafts:
+          - id: 42
+            accountId: weekly
+            title: Weekly update
+            editorUrl: https://example.substack.com/publish/post/42
+            status: unpublished
+    expected:
+      - callsTool:
+          name: list-my-drafts
+          arguments:
+            accountId: weekly
+      - includes: https://example.substack.com/publish/post/42
+      - not:
+          callsTool: create-draft
+  - input: >-
+      @substack Create an unpublished draft for Weekly with title "Weekly update" and Markdown body "Hello
+      readers."
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      create-draft:
+        id: 42
+        accountId: weekly
+        title: Weekly update
+        editorUrl: https://example.substack.com/publish/post/42
+        status: unpublished
+    expected:
+      - callsTool:
+          name: create-draft
+          arguments:
+            accountId: weekly
+            title: Weekly update
+            markdown: Hello readers.
+      - includes: https://example.substack.com/publish/post/42
+  - input: "@substack Create a draft titled Update with body Hello."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: false
+        - id: other
+          label: Other
+          publication: example
+          isDefault: false
+    expected:
+      - callsTool: list-accounts
+      - not:
+          callsTool: create-draft
+      - matches: >-
+          ([Ww]hich|[Cc]hoose|[Ss]elect).*(account|connection)|(?:account|connection).*([Ww]hich|[Cc]hoose|[Ss]elect)
+  - input: "@substack Show drafts for the Unknown account."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+    expected:
+      - callsTool: list-accounts
+      - not:
+          callsTool: list-my-drafts
+      - includes: Unknown
+  - input: "@substack Show my drafts for Weekly."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      list-my-drafts:
+        drafts: []
+    expected:
+      - callsTool: list-my-drafts
+      - matches: ([Nn]o|don.t|not|haven.t|zero).*(draft)
+  - input: "@substack Show my drafts for Weekly."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      list-my-drafts:
+        error: Substack denied access. Refresh your session cookies in Manage Accounts.
+    expected:
+      - callsTool: list-my-drafts
+      - includes: Manage Accounts
+  - input: "@substack Create a draft for Weekly with title Update and Markdown Hello."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      create-draft:
+        id: 42
+        accountId: weekly
+        editorUrl: https://example.substack.com/publish/post/42
+        status: needs-review
+        draftExists: true
+        message: A draft exists but its body was not verified. Do not retry creation.
+    expected:
+      - callsTool: create-draft
+      - includes: https://example.substack.com/publish/post/42
+      - matches: >-
+          ([Ii]ncomplete|[Nn]ot.*verif|could(?:
+          not|n.t).*verif|[Uu]nable.*verif|wasn.t.*verif|[Ii]ssue.*verif|[Pp]roblem.*verif|failed|verif.*(?:issue|problem|fail|not))
+  - input: "@substack Create a draft for Weekly titled Code using a fenced JavaScript code block with alert(1)."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+      create-draft:
+        error: Code blocks are not supported.
+    expected:
+      - not:
+          callsTool: create-draft
+      - matches: ([Uu]nsupported|(?:not|n.t) (?:support|include)|[Rr]evise|[Ee]xclude)
+  - input: "@substack Publish my Weekly draft and email all subscribers."
+    usedAsExample: false
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+    expected:
+      - not:
+          callsTool: create-draft
+      - includes: Substack editor
+  - input: "@substack List my Substack connections."
+    mocks:
+      list-accounts:
+        - id: weekly
+          label: Weekly
+          publication: example
+          isDefault: true
+    expected:
+      - callsTool: list-accounts
+      - includes: Weekly

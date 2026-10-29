@@ -1,35 +1,60 @@
 import { List } from "@raycast/api";
-import { formatResetTime } from "../agents/format";
-import type { Accessory } from "../agents/types";
+
+import { formatResetTime } from "../agents/format.ts";
+import { toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { CopilotError, CopilotUsage } from "./types";
+} from "../agents/ui.tsx";
+import type { CopilotError, CopilotUsage } from "./types.ts";
 
-function formatPercent(value: number | null): string {
-  return value === null ? "N/A" : `${value}%`;
+function formatPercent(value: number | null, mode: PercentageDisplayMode): string {
+  return value === null ? "N/A" : `${toDisplayPercent(value, mode)}%`;
+}
+
+function getAiCreditsRemainingPercent(usage: CopilotUsage): number | null {
+  return usage.aiCreditsRemainingPercent ?? usage.premiumRemaining ?? null;
+}
+
+function formatCreditAmount(value: number): string {
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value);
+}
+
+function formatAiCreditsBalance(usage: CopilotUsage): string | null {
+  const remaining = usage.aiCreditsRemaining ?? null;
+  const entitlement = usage.aiCreditsEntitlement ?? null;
+  if (remaining === null) return null;
+  if (entitlement === null) return `${formatCreditAmount(remaining)} credits`;
+  return `${formatCreditAmount(remaining)} / ${formatCreditAmount(entitlement)} credits`;
 }
 
 export function formatCopilotUsageText(usage: CopilotUsage | null, error: CopilotError | null): string {
   const fallback = formatErrorOrNoData("Copilot", usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CopilotUsage;
+  const mode = getPercentageDisplayMode();
+  const aiCreditsRemainingPercent = getAiCreditsRemainingPercent(u);
+  const aiCreditsBalance = formatAiCreditsBalance(u);
 
   let text = `Copilot Usage\nPlan: ${u.plan}`;
-  if (u.premiumRemaining !== null) {
-    text += `\n\nPremium Interactions: ${generateAsciiBar(u.premiumRemaining)} ${formatPercent(u.premiumRemaining)} remaining`;
+  if (aiCreditsRemainingPercent !== null) {
+    text += `\n\nAI Credits: ${generateAsciiBar(toDisplayPercent(aiCreditsRemainingPercent, mode))} ${formatPercent(aiCreditsRemainingPercent, mode)} ${mode}`;
   } else {
-    text += `\n\nPremium Interactions: ${formatPercent(u.premiumRemaining)} remaining`;
+    text += `\n\nAI Credits: ${formatPercent(aiCreditsRemainingPercent, mode)} ${mode}`;
+  }
+  if (aiCreditsBalance) {
+    text += `\nAI Credits Balance: ${aiCreditsBalance}`;
   }
   if (u.chatRemaining !== null) {
-    text += `\nChat Quota: ${generateAsciiBar(u.chatRemaining)} ${formatPercent(u.chatRemaining)} remaining`;
+    text += `\nChat Quota: ${generateAsciiBar(toDisplayPercent(u.chatRemaining, mode))} ${formatPercent(u.chatRemaining, mode)} ${mode}`;
   } else {
-    text += `\nChat Quota: ${formatPercent(u.chatRemaining)} remaining`;
+    text += `\nChat Quota: ${formatPercent(u.chatRemaining, mode)} ${mode}`;
   }
   if (u.quotaResetDate) {
     text += `\nQuota Reset: ${formatResetTime(u.quotaResetDate)}`;
@@ -42,25 +67,29 @@ export function renderCopilotDetail(usage: CopilotUsage | null, error: CopilotEr
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as CopilotUsage;
+  const mode = getPercentageDisplayMode();
+  const aiCreditsRemainingPercent = getAiCreditsRemainingPercent(u);
+  const aiCreditsBalance = formatAiCreditsBalance(u);
 
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Plan" text={u.plan} />
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Label
-        title="Premium Interactions"
+        title="AI Credits"
         text={
-          u.premiumRemaining !== null
-            ? `${generateAsciiBar(u.premiumRemaining)} ${formatPercent(u.premiumRemaining)} remaining`
-            : `${formatPercent(u.premiumRemaining)} remaining`
+          aiCreditsRemainingPercent !== null
+            ? `${generateAsciiBar(toDisplayPercent(aiCreditsRemainingPercent, mode))} ${formatPercent(aiCreditsRemainingPercent, mode)} ${mode}`
+            : `${formatPercent(aiCreditsRemainingPercent, mode)} ${mode}`
         }
       />
+      {aiCreditsBalance && <List.Item.Detail.Metadata.Label title="AI Credits Balance" text={aiCreditsBalance} />}
       <List.Item.Detail.Metadata.Label
         title="Chat Quota"
         text={
           u.chatRemaining !== null
-            ? `${generateAsciiBar(u.chatRemaining)} ${formatPercent(u.chatRemaining)} remaining`
-            : `${formatPercent(u.chatRemaining)} remaining`
+            ? `${generateAsciiBar(toDisplayPercent(u.chatRemaining, mode))} ${formatPercent(u.chatRemaining, mode)} ${mode}`
+            : `${formatPercent(u.chatRemaining, mode)} ${mode}`
         }
       />
       {u.quotaResetDate && (
@@ -96,9 +125,18 @@ export function getCopilotAccessory(
     return getNoDataAccessory();
   }
 
-  const primaryPercent = usage.premiumRemaining ?? usage.chatRemaining;
-  const text = primaryPercent !== null ? `${primaryPercent}%` : "—";
-  const tooltip = `Premium: ${formatPercent(usage.premiumRemaining)} | Chat: ${formatPercent(usage.chatRemaining)}`;
+  const mode = getPercentageDisplayMode();
+  const aiCreditsRemainingPercent = getAiCreditsRemainingPercent(usage);
+  const aiCreditsBalance = formatAiCreditsBalance(usage);
+  const primaryPercent = aiCreditsRemainingPercent ?? usage.chatRemaining;
+  const text = primaryPercent !== null ? `${toDisplayPercent(primaryPercent, mode)}%` : "—";
+  const tooltip = [
+    `AI Credits: ${formatPercent(aiCreditsRemainingPercent, mode)}`,
+    aiCreditsBalance ? `Balance: ${aiCreditsBalance}` : null,
+    `Chat: ${formatPercent(usage.chatRemaining, mode)}`,
+  ]
+    .filter(Boolean)
+    .join(" | ");
 
   return {
     icon: primaryPercent !== null ? generatePieIcon(primaryPercent) : undefined,

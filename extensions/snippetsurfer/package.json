@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "astronight",
   "contributors": [
-    "stevenokuto"
+    "stevenokuto",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools"
@@ -51,6 +52,15 @@
         }
       ],
       "title": "Select primary action"
+    },
+    {
+      "name": "hideFolderInList",
+      "description": "Hide the folder path next to each snippet in the list to give long snippet names more room.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Hide Folder in List",
+      "label": "Hide folder"
     },
     {
       "name": "pasteContentScope",

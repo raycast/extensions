@@ -33,7 +33,9 @@ vi.mock("fs-extra", () => ({
 }));
 
 // Import after mocks are in place
-import { updateMatchInFile } from "./utils";
+import fse from "fs-extra";
+import { getPreferenceValues } from "@raycast/api";
+import { buildSearchKeywords, getEspansoCmd, truncate, updateMatchInFile } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -328,5 +330,125 @@ describe("updateMatchInFile", () => {
         replace: "bar",
       }),
     ).toThrow(/No 'matches' sequence/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getEspansoCmd — binary resolution
+// ---------------------------------------------------------------------------
+
+describe("getEspansoCmd", () => {
+  const onlyExisting = (...paths: string[]) =>
+    vi.mocked(fse.existsSync).mockImplementation((p) => paths.includes(String(p)));
+
+  beforeEach(() => {
+    vi.mocked(getPreferenceValues).mockReturnValue({});
+    onlyExisting();
+  });
+
+  it("prefers the configured preference over any installed binary", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "/custom/espanso" });
+    onlyExisting("/opt/homebrew/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/custom/espanso");
+  });
+
+  it("trims whitespace around the configured preference", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "  /custom/espanso  " });
+
+    expect(getEspansoCmd()).toBe("/custom/espanso");
+  });
+
+  it("ignores a blank preference and probes instead", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "   " });
+    onlyExisting("/opt/homebrew/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/opt/homebrew/bin/espanso");
+  });
+
+  it("finds the Intel Homebrew location when Apple Silicon's is absent", () => {
+    onlyExisting("/usr/local/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/usr/local/bin/espanso");
+  });
+
+  it("falls back to the app bundle when Homebrew is not installed at all", () => {
+    onlyExisting("/Applications/Espanso.app/Contents/MacOS/espanso");
+
+    expect(getEspansoCmd()).toBe("/Applications/Espanso.app/Contents/MacOS/espanso");
+  });
+
+  it("prefers Apple Silicon Homebrew when several candidates exist", () => {
+    onlyExisting(
+      "/opt/homebrew/bin/espanso",
+      "/usr/local/bin/espanso",
+      "/Applications/Espanso.app/Contents/MacOS/espanso",
+    );
+
+    expect(getEspansoCmd()).toBe("/opt/homebrew/bin/espanso");
+  });
+
+  // Raycast's PATH cannot resolve a bare name, so this is a last resort that
+  // surfaces a clear error rather than a silent wrong path.
+  it("returns the bare command when nothing is found on disk", () => {
+    expect(getEspansoCmd()).toBe("espanso");
+  });
+});
+
+describe("buildSearchKeywords", () => {
+  it("keeps the trigger searchable when a label owns the title", () => {
+    const keywords = buildSearchKeywords([";;email.ooo"], "Out of office");
+
+    expect(keywords).toContain(";;email.ooo");
+    expect(keywords).toContain("email");
+    expect(keywords).toContain("ooo");
+  });
+
+  it("drops single-character fragments left by punctuation", () => {
+    expect(buildSearchKeywords([";;p.email.ooo"], undefined)).not.toContain("p");
+  });
+
+  it("indexes every trigger of a multi-trigger match", () => {
+    const keywords = buildSearchKeywords([":sig", ":signature"], undefined);
+
+    expect(keywords).toEqual(expect.arrayContaining([":sig", "sig", ":signature", "signature"]));
+  });
+
+  it("includes short replacement text alongside the triggers", () => {
+    expect(buildSearchKeywords([":hi"], "Hello world")).toContain("Hello world");
+  });
+
+  it("omits replacement text past the length cap", () => {
+    const long = "x".repeat(201);
+
+    expect(buildSearchKeywords([":long"], long)).not.toContain(long);
+  });
+
+  it("omits blank replacement text", () => {
+    expect(buildSearchKeywords([":blank"], "   ")).toEqual([":blank", "blank"]);
+  });
+
+  it("deduplicates a trigger that tokenizes to itself", () => {
+    expect(buildSearchKeywords(["signature"], undefined)).toEqual(["signature"]);
+  });
+});
+
+describe("truncate", () => {
+  it("leaves text at or under the limit untouched", () => {
+    expect(truncate("Short label", 50)).toBe("Short label");
+    expect(truncate("x".repeat(50), 50)).toBe("x".repeat(50));
+  });
+
+  it("cuts overlong text to the limit, ellipsis included", () => {
+    const result = truncate("Out of office reply with contact details for the winter break", 30);
+
+    expect(result).toBe("Out of office reply with cont…");
+    expect(result).toHaveLength(30);
+  });
+
+  it("does not leave a space stranded before the ellipsis", () => {
+    expect(truncate("Out of office reply with contact details for the winter break", 50)).toBe(
+      "Out of office reply with contact details for the…",
+    );
   });
 });

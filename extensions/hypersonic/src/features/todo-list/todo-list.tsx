@@ -8,6 +8,7 @@ import { RemindAction } from '@/components/remind-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { EditTodoTitleAction } from '@/features/todo-list/components/edit-todo-title-action'
+import { CreateTodoWithDetailsAction } from '@/features/todo-list/components/create-todo-with-details-action'
 import { SetProjectAction } from './components/set-todo-project-action'
 import { SetUserAction } from './components/set-todo-user-action'
 import { SetFilter } from './components/set-filter-action'
@@ -29,6 +30,7 @@ export function TodoList() {
     hasAssigneeProperty,
     hasProjectProperty,
     hasTagProperty,
+    hasUrlProperty,
     loading,
     handleCreate,
     handleComplete,
@@ -93,6 +95,21 @@ export function TodoList() {
                 title="Create Task and Open in Notion"
                 onAction={() => handleCreate('OPEN')}
                 shortcut={{ modifiers: ['cmd'], key: 'o' }}
+              />
+              <CreateTodoWithDetailsAction
+                todo={newTodo}
+                statuses={statuses ?? []}
+                users={users ?? []}
+                tags={tags ?? []}
+                projects={projects ?? []}
+                hasStatusProperty={hasStatusProperty}
+                hasTagProperty={hasTagProperty}
+                hasAssigneeProperty={hasAssigneeProperty}
+                hasProjectProperty={hasProjectProperty}
+                hasUrlProperty={hasUrlProperty}
+                onCreate={async (overrides) => {
+                  return handleCreate(undefined, overrides)
+                }}
               />
               <GeneralActions
                 mutatePreferences={mutatePreferences}

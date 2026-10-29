@@ -9,6 +9,9 @@
     "Fun"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "play_en-US",
@@ -33,13 +36,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.19.1",
     "hash-sum": "^2.0.0"
   },
   "devDependencies": {
     "@types/hash-sum": "^1.0.0",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -53,5 +57,10 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.2",
+    "fast-uri": "3.1.8"
   }
 }

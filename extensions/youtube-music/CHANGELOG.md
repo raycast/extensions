@@ -1,5 +1,16 @@
 # YouTube Music Changelog
 
+## [Fix AppleScript Error Handling] - 2026-08-15
+
+- Fixed: `runJSInYouTubeMusicTab` now wraps `runAppleScript` in a try/catch block — previously, any AppleScript error (permissions, browser not running, invalid browser selection) was thrown unhandled and swallowed by empty catch blocks in commands, resulting in silent failures or "Unknown Error" HUD messages.
+- Added: `handleAppleScriptError` function that detects specific failure modes:
+  - "Allow JavaScript from Apple Events" not enabled
+  - macOS Automation permission denied
+  - Browser not running or unsupported
+  - Generic AppleScript failures
+- Added: Fallback HUD messages in all command catch blocks — commands now always show feedback instead of silently failing.
+- Updated: `@raycast/api` dependency from `^1.35.1` to `^1.104.0` for compatibility with current Raycast versions.
+
 ## [Refactor Commands and Improve Error Handling] - 2026-02-20
 
 - Refactored: Extracted inline JavaScript from all commands into exported constants/functions for better testability and readability.

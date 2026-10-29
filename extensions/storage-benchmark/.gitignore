@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.swiftpm/
+native/DiskSpeedHelper/.build/
+.raycast-swift-build/
+compiled_raycast_swift/
+*.swp
+.DS_Store

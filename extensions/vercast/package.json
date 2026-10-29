@@ -8,7 +8,7 @@
   "author": "MaxLeiter",
   "owner": "vercel",
   "access": "public",
-  "version": "2.19.0",
+  "version": "2.20.0",
   "contributors": [
     "matt",
     "dgrcode",
@@ -113,6 +113,18 @@
       "name": "search-ai-gateway-logs",
       "title": "Search AI Gateway Logs",
       "description": "View AI Gateway inference request logs from the past 12 hours",
+      "mode": "view"
+    },
+    {
+      "name": "ai-gateway-leaderboard",
+      "title": "AI Gateway Leaderboard",
+      "description": "Explore popular AI Gateway models and creators",
+      "mode": "view"
+    },
+    {
+      "name": "ai-gateway-playground",
+      "title": "AI Gateway Playground",
+      "description": "Send a prompt through Vercel AI Gateway",
       "mode": "view"
     }
   ],
@@ -430,12 +442,20 @@
       "description": "Your Vercel access token",
       "placeholder": "Enter your Access Token",
       "link": "https://vercel.com/account/tokens"
+    },
+    {
+      "name": "aiGatewayApiKey",
+      "type": "password",
+      "required": false,
+      "title": "AI Gateway Inference Key",
+      "description": "A separate inference key created in the Vercel AI Gateway dashboard",
+      "placeholder": "Enter your AI Gateway key",
+      "link": "https://vercel.com/ai-gateway"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.7",
-    "node-html-parser": "^8.0.3",
     "swr": "^2.4.2"
   },
   "devDependencies": {

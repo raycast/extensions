@@ -33,7 +33,10 @@
     "raxityo",
     "yusifaliyevpro",
     "jkker",
-    "sillashead"
+    "sillashead",
+    "KamilDev",
+    "muhammadrizo",
+    "Tambouil"
   ],
   "keywords": [
     "vscode",
@@ -87,6 +90,12 @@
       "description": "Show commands of the VS Code Command Palette",
       "disabledByDefault": true,
       "mode": "view"
+    },
+    {
+      "name": "open-agents-window",
+      "title": "Open Agents Window",
+      "description": "Open the Agents Window",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -99,7 +108,7 @@
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
-          "title": "Antigravity",
+          "title": "Antigravity IDE",
           "value": "Antigravity"
         },
         {
@@ -183,7 +192,7 @@
       "type": "checkbox",
       "title": "Advanced",
       "required": false,
-      "label": "Keep Section Order",
+      "label": "Keep section order",
       "default": false,
       "description": "Keep the order of the sections while searching folders, files, etc."
     },
@@ -192,17 +201,28 @@
       "type": "checkbox",
       "title": "Usability",
       "required": false,
-      "label": "Close Other VS Code Windows",
+      "label": "Close other VS Code windows",
       "default": false,
       "description": "Close other VS Code windows when opening a project"
     },
     {
       "name": "terminalApp",
       "type": "appPicker",
-      "default": "com.apple.Terminal",
+      "default": {
+        "macOS": "com.apple.Terminal",
+        "Windows": "Terminal"
+      },
       "required": false,
       "title": "Terminal App",
       "description": "Select which Terminal App to use when opening with a terminal"
+    },
+    {
+      "name": "openInNewTerminalTab",
+      "type": "checkbox",
+      "required": false,
+      "label": "Open in new tab",
+      "default": true,
+      "description": "When using the default terminal app for both macOS and Windows, open the folder in a new tab instead of a new window"
     },
     {
       "name": "showGitBranch",
@@ -218,33 +238,32 @@
       "type": "textfield",
       "title": "Git Integration Color",
       "required": false,
-      "label": "Git Branch Color",
       "default": "",
       "description": "Hexadecimal color code for Git branch tag (e.g., #00FF00). Leave empty to use default green"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.6",
+    "@raycast/api": "^2.5.0",
+    "@raycast/utils": "^2.3.2",
     "cache-func": "^1.1.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "^19.2.17",
-    "eslint": "^9.39.2",
-    "eslint-plugin-react": "^7.37.5",
-    "prettier": "^3.8.4",
-    "react": "^19.2.7",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.2.8",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "react": "^19.2.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "platforms": [
     "macOS",

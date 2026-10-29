@@ -15,5 +15,6 @@ export enum OllamaApiModelCapability {
   TOOLS = "tools",
   INSERT = "insert",
   VISION = "vision",
+  THINKING = "thinking",
   EMBEDDING = "embedding",
 }

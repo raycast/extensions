@@ -1,143 +1,150 @@
-import { Icon, launchCommand, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getSoundById } from "./lib/sound-library";
-import { getPlaybackState } from "./lib/playback-state";
-import { getAllPresets } from "./lib/preset-store";
-import { checkTimer, clearTimer } from "./lib/timer-manager";
-import * as controller from "./lib/playback-controller";
-import type { PlaybackState, Preset } from "./types";
+import {
+  Color,
+  getPreferenceValues,
+  Icon,
+  Image,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+} from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import {
+  cancelTimer,
+  findSound,
+  getMix,
+  pause,
+  percent,
+  playingCount,
+  resume,
+  setMaster,
+  setVolume,
+  stop,
+  stopAll,
+  timerRemaining,
+  VOLUMES,
+} from "./player";
+import { getPresets, playPreset, presetStatus } from "./presets";
 
-export default function MenuBarCommand() {
-  const [state, setState] = useState<PlaybackState>({
-    isPlaying: false,
-    activeSounds: [],
-    masterVolume: 80,
-  });
-  const [presets, setPresets] = useState<Preset[]>([]);
-  const [timerInfo, setTimerInfo] = useState<{
-    active: boolean;
-    expired: boolean;
-    remainingFormatted: string;
-  }>({ active: false, expired: false, remainingFormatted: "" });
-  const [isLoading, setIsLoading] = useState(true);
+function open(name: string) {
+  return launchCommand({ name, type: LaunchType.UserInitiated });
+}
 
-  const prefs = getPreferenceValues<Preferences>();
-  const showCount = prefs.showMenuBarCount !== false;
+export default function Command() {
+  const { data, isLoading } = usePromise(async () => ({ mix: getMix(), presets: await getPresets() }));
+  const { showMenuBarCount } = getPreferenceValues<Preferences.MenuBar>();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        // Reconcile playback state
-        await controller.reconcile();
+  async function act(fn: () => unknown) {
+    try {
+      await fn();
+    } catch (e) {
+      await showFailureToast(e, { title: "Moodist" });
+    }
+  }
 
-        // Load state
-        const [s, p, t] = await Promise.all([getPlaybackState(), getAllPresets(), checkTimer()]);
-
-        setState(s);
-        setPresets(p);
-        setTimerInfo(t);
-
-        // Auto-stop on timer expiry
-        if (t.expired) {
-          await controller.pause();
-          await clearTimer();
-          const updatedState = await getPlaybackState();
-          setState(updatedState);
-          setTimerInfo({ active: false, expired: false, remainingFormatted: "" });
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
-
-  const activeCount = state.activeSounds.length;
-  const title = state.isPlaying && showCount && activeCount > 0 ? `${activeCount}` : undefined;
+  const mix = data?.mix;
+  const presets = data?.presets ?? [];
+  const entries = mix ? Object.entries(mix.sounds) : [];
+  const playing = mix ? playingCount(mix) : 0;
 
   return (
     <MenuBarExtra
-      icon={state.isPlaying ? { source: Icon.Music, tintColor: "#7C5CFC" } : Icon.Music}
-      title={title}
+      icon={{ source: "menubar-icon.png", tintColor: playing ? "#7C5CFC" : Color.PrimaryText }}
+      title={showMenuBarCount && playing ? String(playing) : undefined}
       tooltip={
-        state.isPlaying ? `Moodist — ${activeCount} sound${activeCount !== 1 ? "s" : ""} playing` : "Moodist — Paused"
+        playing
+          ? `Moodist — ${playing} sound${playing === 1 ? "" : "s"} playing`
+          : entries.length
+            ? "Moodist — Paused"
+            : "Moodist"
       }
       isLoading={isLoading}
     >
-      <MenuBarExtra.Item
-        title={state.isPlaying ? "Pause" : "Play"}
-        icon={state.isPlaying ? Icon.Pause : Icon.Play}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-        onAction={async () => {
-          if (!state.isPlaying && state.activeSounds.length === 0) {
-            await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
-            return;
-          }
-          const s = await controller.togglePlayback();
-          setState(s);
-        }}
-      />
+      {entries.length > 0 && (
+        <MenuBarExtra.Item
+          title={playing ? "Pause" : "Resume"}
+          icon={playing ? Icon.Pause : Icon.Play}
+          onAction={() => act(playing ? pause : resume)}
+        />
+      )}
 
-      {state.activeSounds.length > 0 && (
-        <MenuBarExtra.Section title="Active Sounds">
-          {state.activeSounds.map((as) => {
-            const sound = getSoundById(as.soundId);
-            if (!sound) return null;
-            return <MenuBarExtra.Item key={as.soundId} title={`${sound.name}`} subtitle={`${as.volume}%`} />;
-          })}
+      {mix && entries.length > 0 && (
+        <MenuBarExtra.Section title={playing ? "Playing" : "Paused"}>
+          {entries.map(([id, entry]) => (
+            <MenuBarExtra.Submenu
+              key={id}
+              title={`${findSound(id)?.label ?? id} · ${percent(entry.volume)}`}
+              icon={entry.pid ? Icon.SpeakerHigh : Icon.Pause}
+            >
+              {VOLUMES.map((v) => (
+                <MenuBarExtra.Item
+                  key={v}
+                  title={percent(v)}
+                  icon={v === entry.volume ? Icon.Checkmark : undefined}
+                  onAction={() => act(() => setVolume(id, v))}
+                />
+              ))}
+              <MenuBarExtra.Section>
+                <MenuBarExtra.Item title="Remove from Mix" icon={Icon.Minus} onAction={() => act(() => stop(id))} />
+              </MenuBarExtra.Section>
+            </MenuBarExtra.Submenu>
+          ))}
+          <MenuBarExtra.Submenu title={`Master Volume · ${percent(mix.master)}`} icon={Icon.SpeakerOn}>
+            {VOLUMES.map((v) => (
+              <MenuBarExtra.Item
+                key={v}
+                title={percent(v)}
+                icon={v === mix.master ? Icon.Checkmark : undefined}
+                onAction={() => act(() => setMaster(v))}
+              />
+            ))}
+          </MenuBarExtra.Submenu>
         </MenuBarExtra.Section>
       )}
 
       {presets.length > 0 && (
         <MenuBarExtra.Section title="Presets">
-          {presets.slice(0, 10).map((p) => (
-            <MenuBarExtra.Item
-              key={p.id}
-              title={p.name}
-              subtitle={`${p.sounds.length} sounds`}
-              onAction={async () => {
-                const s = await controller.loadPreset(p);
-                setState(s);
-              }}
-            />
-          ))}
+          {presets.slice(0, 10).map((p) => {
+            const status = mix ? presetStatus(p, mix) : undefined;
+            let icon: Image.ImageLike | undefined = p.pinned ? Icon.Pin : undefined;
+            if (status === "playing" || status === "paused") icon = Icon.Checkmark;
+            return (
+              <MenuBarExtra.Item
+                key={p.id}
+                title={p.name}
+                icon={icon}
+                subtitle={
+                  status === "modified" ? "Modified" : `${p.sounds.length} sound${p.sounds.length === 1 ? "" : "s"}`
+                }
+                onAction={() => act(() => playPreset(p))}
+              />
+            );
+          })}
         </MenuBarExtra.Section>
       )}
 
       <MenuBarExtra.Section>
-        {timerInfo.active && !timerInfo.expired && (
-          <MenuBarExtra.Item title={`Timer: ${timerInfo.remainingFormatted}`} icon={Icon.Clock} />
+        {mix?.timer ? (
+          <MenuBarExtra.Submenu title={`Sleep Timer · ${timerRemaining(mix.timer)} left`} icon={Icon.Clock}>
+            <MenuBarExtra.Item title="Cancel Timer" icon={Icon.XMarkCircle} onAction={() => act(cancelTimer)} />
+            <MenuBarExtra.Item title="Set New Timer…" icon={Icon.Clock} onAction={() => open("set-timer")} />
+          </MenuBarExtra.Submenu>
+        ) : (
+          <MenuBarExtra.Item title="Set Sleep Timer…" icon={Icon.Clock} onAction={() => open("set-timer")} />
         )}
         <MenuBarExtra.Item
           title="Open Mixer"
           icon={Icon.AppWindowGrid3x3}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
-          onAction={async () => {
-            await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
-          }}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={() => open("mix-sounds")}
         />
-        <MenuBarExtra.Item
-          title="Manage Presets"
-          icon={Icon.List}
-          onAction={async () => {
-            await launchCommand({ name: "manage-presets", type: LaunchType.UserInitiated });
-          }}
-        />
-        <MenuBarExtra.Item
-          title="Set Timer"
-          icon={Icon.Clock}
-          onAction={async () => {
-            await launchCommand({ name: "set-timer", type: LaunchType.UserInitiated });
-          }}
-        />
-        {state.isPlaying && (
+        <MenuBarExtra.Item title="Manage Presets" icon={Icon.List} onAction={() => open("manage-presets")} />
+        {entries.length > 0 && (
           <MenuBarExtra.Item
             title="Stop All"
             icon={Icon.Stop}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={async () => {
-              const s = await controller.stopAll();
-              setState(s);
-            }}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            onAction={() => act(stopAll)}
           />
         )}
       </MenuBarExtra.Section>

@@ -115,9 +115,6 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
       );
     }
 
-    // Save history before modifying
-    await saveToHistory(`Import ${data.aliases.length} aliases`);
-
     const zshrcContent = await readZshrcFileRaw();
 
     // Generate alias lines with proper escaping
@@ -136,6 +133,10 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
 
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
+
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Import ${data.aliases.length} aliases`, zshrcContent);
 
     await showToast({
       style: Toast.Style.Success,
@@ -184,9 +185,6 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
       );
     }
 
-    // Save history before modifying
-    await saveToHistory(`Import ${data.exports.length} exports`);
-
     const zshrcContent = await readZshrcFileRaw();
 
     // Generate export lines with proper escaping
@@ -205,6 +203,10 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
 
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
+
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Import ${data.exports.length} exports`, zshrcContent);
 
     await showToast({
       style: Toast.Style.Success,

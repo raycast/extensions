@@ -1,6 +1,10 @@
 export interface CopilotUsage {
   plan: string;
-  premiumRemaining: number | null;
+  aiCreditsRemainingPercent: number | null;
+  aiCreditsRemaining: number | null;
+  aiCreditsEntitlement: number | null;
+  /** Kept optional so usage cached by older extension versions still renders correctly. */
+  premiumRemaining?: number | null;
   chatRemaining: number | null;
   quotaResetDate: string | null;
 }

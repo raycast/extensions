@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codepen",
+  "title": "CodePen",
+  "description": "Search, create, and manage your CodePen Pens, collections, and assets with API v2.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-pens",
+      "title": "Search Pens",
+      "subtitle": "CodePen",
+      "description": "Search your Pens, browse source files and versions, edit, fork, and manage deployments",
+      "mode": "view"
+    },
+    {
+      "name": "create-pen",
+      "title": "Create Pen",
+      "subtitle": "CodePen",
+      "description": "Create a CodePen 2.0 Pen with starter files or your own HTML, CSS, and JavaScript",
+      "mode": "view"
+    },
+    {
+      "name": "search-collections",
+      "title": "Search Collections",
+      "subtitle": "CodePen",
+      "description": "Browse your collections and manage their Pens",
+      "mode": "view"
+    },
+    {
+      "name": "create-collection",
+      "title": "Create Collection",
+      "subtitle": "CodePen",
+      "description": "Create a collection to organize your Pens",
+      "mode": "view"
+    },
+    {
+      "name": "search-assets",
+      "title": "Search Assets",
+      "subtitle": "CodePen",
+      "description": "Browse, copy, rename, and delete your hosted assets",
+      "mode": "view"
+    },
+    {
+      "name": "upload-asset",
+      "title": "Upload Asset",
+      "subtitle": "CodePen",
+      "description": "Upload a file to CodePen Asset Hosting and copy its URL",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-my-pens",
+      "title": "Search My Pens",
+      "description": "Search ONLY Pens owned by your API key. Cannot find public community Pens, trending Pens, or other users’ work; do not use this tool for those requests. Returns one page with a next-page URL."
+    },
+    {
+      "name": "get-pen",
+      "title": "Get Pen",
+      "description": "Read a Pen and its saved source files, version ID, deployment, and build diagnostics. Classic Pens are read-only."
+    },
+    {
+      "name": "get-build",
+      "title": "Get Build",
+      "description": "Check a build’s status and next_id. Follow next_id when CodePen applies compiler changes."
+    },
+    {
+      "name": "create-pen",
+      "title": "Create Pen",
+      "description": "Create a CodePen 2.0 Pen and build its source files. Returns the saved Pen and build status."
+    },
+    {
+      "name": "update-pen",
+      "title": "Update Pen",
+      "description": "Edit a CodePen 2.0 Pen’s title, description, tags, template flag, or privacy."
+    },
+    {
+      "name": "write-files",
+      "title": "Write Source Files",
+      "description": "Write text files to a 2.0 Pen using the version ID you read. Saves and builds once; never automatically retries writes."
+    },
+    {
+      "name": "fork-pen",
+      "title": "Fork Pen",
+      "description": "Fork one of your CodePen 2.0 Pens. First read it with Get Pen to preserve its privacy. If its access is Protected, ask the user for a new password before calling this tool. Never generate a password or make the fork public without the user requesting it."
+    },
+    {
+      "name": "set-deployment",
+      "title": "Set Deployment",
+      "description": "Deploy the latest successful saved version of a Pen, or take its deployment down."
+    },
+    {
+      "name": "delete-pen",
+      "title": "Trash Pen",
+      "description": "Move a CodePen 2.0 Pen to the trash. It can be restored on CodePen for 3 days."
+    },
+    {
+      "name": "list-collections",
+      "title": "List Collections",
+      "description": "List one page of your collections, or your Pens in a collection. Follow next-page URLs to see more."
+    },
+    {
+      "name": "save-collection",
+      "title": "Save Collection",
+      "description": "Create a collection or update an existing collection’s details."
+    },
+    {
+      "name": "set-collection-pen",
+      "title": "Set Collection Membership",
+      "description": "Add a Pen to one of your collections or remove it without deleting the Pen."
+    },
+    {
+      "name": "delete-collection",
+      "title": "Trash Collection",
+      "description": "Trash a collection without deleting its Pens. Restorable on CodePen for 3 days."
+    },
+    {
+      "name": "list-assets",
+      "title": "List Assets",
+      "description": "List one page of hosted assets. Follow the next-page URL to see more."
+    },
+    {
+      "name": "get-asset",
+      "title": "Get Asset",
+      "description": "Read hosted asset details and text content when available."
+    },
+    {
+      "name": "create-text-asset",
+      "title": "Create Text Asset",
+      "description": "Upload a text asset with a unique filename. Requires CodePen PRO."
+    },
+    {
+      "name": "delete-asset",
+      "title": "Delete Asset",
+      "description": "Permanently delete a hosted asset. Existing links stop working."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Generate an API key in CodePen Settings → API (https://codepen.io/settings/api). Personal keys access your work; team keys access that team’s work."
+    }
+  ]
+}

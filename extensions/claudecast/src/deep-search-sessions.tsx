@@ -12,37 +12,42 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { existsSync } from "fs";
 import {
   searchSessionContent,
-  getSessionDetail,
+  getSessionDetailAtMatch,
   deleteSession,
   safeTruncate,
   SessionMetadata,
   SessionDetail,
-  PermissionMode,
 } from "./lib/session-parser";
-import { launchClaudeCode } from "./lib/terminal";
-import { ensureClaudeInstalled } from "./lib/claude-cli";
+import { isWslSession, launchStoredSession } from "./lib/session-launch";
+import { shortcut } from "./lib/shortcuts";
+import type { SearchIndexPhase } from "./lib/session-search-index";
+import { localImageMarkdownUrl } from "./lib/session-search-index";
 
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;
 
-function getEmptyDescription(searchText: string, isSearching: boolean): string {
+function getEmptyDescription(
+  searchText: string,
+  isSearching: boolean,
+  searchPhase: SearchIndexPhase | null,
+): string {
   if (searchText.length === 0)
-    return "Type at least 3 characters to search session content";
+    return "Type at Least 3 Characters to Search Session Content";
   if (searchText.length < MIN_QUERY_LENGTH) {
     const remaining = MIN_QUERY_LENGTH - searchText.length;
-    return `Type ${remaining} more character${remaining === 1 ? "" : "s"} to start searching`;
+    return `Type ${remaining} More Character${remaining === 1 ? "" : "s"} to Start Searching`;
   }
-  if (isSearching) return "Searching session content...";
-  return `No sessions matched "${searchText}"`;
+  if (isSearching) return `${searchPhase ?? "Updating Index"}...`;
+  return `No Sessions Matched "${searchText}"`;
 }
 
 export default function DeepSearchSessions() {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SessionMetadata[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [searchPhase, setSearchPhase] = useState<SearchIndexPhase | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -61,34 +66,39 @@ export default function DeepSearchSessions() {
     if (query.length < MIN_QUERY_LENGTH) {
       setResults([]);
       setIsSearching(false);
+      setSearchPhase(null);
       return;
     }
 
     const controller = new AbortController();
     abortRef.current = controller;
     setIsSearching(true);
+    setSearchPhase("Updating Index");
     setResults([]);
 
-    const seenIds = new Set<string>();
+    const seenIdentities = new Set<string>();
 
     try {
       await searchSessionContent(
         query,
         (session) => {
           if (controller.signal.aborted) return;
-          // Deduplicate by session ID
-          if (seenIds.has(session.id)) return;
-          seenIds.add(session.id);
+          const identity = session.identity ?? session.filePath;
+          if (seenIdentities.has(identity)) return;
+          seenIdentities.add(identity);
           setResults((prev) => [...prev, session]);
         },
         controller.signal,
+        (status) => {
+          if (!controller.signal.aborted) setSearchPhase(status.phase);
+        },
       );
     } catch (error: unknown) {
       if (controller.signal.aborted) return; // Expected cancellation
       console.error("Deep search failed:", error);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Search failed",
+        title: "Search Failed",
         message:
           error instanceof Error
             ? error.message
@@ -98,6 +108,7 @@ export default function DeepSearchSessions() {
 
     if (!controller.signal.aborted) {
       setIsSearching(false);
+      setSearchPhase(null);
     }
   }, []);
 
@@ -110,30 +121,43 @@ export default function DeepSearchSessions() {
     [performSearch],
   );
 
-  const emptyDescription = getEmptyDescription(searchText, isSearching);
+  const emptyDescription = getEmptyDescription(
+    searchText,
+    isSearching,
+    searchPhase,
+  );
 
   return (
     <List
       isLoading={isSearching}
-      isShowingDetail
-      searchBarPlaceholder="Search all session content..."
+      searchBarPlaceholder="Search All Session Content, Use dir:Project to Filter"
       filtering={false}
       onSearchTextChange={onSearchTextChange}
       throttle
     >
       {results.map((session) => (
         <SearchResultItem
-          key={session.id}
+          key={session.identity ?? session.filePath}
           session={session}
           onDelete={() =>
-            setResults((prev) => prev.filter((s) => s.id !== session.id))
+            setResults((prev) =>
+              prev.filter(
+                (item) =>
+                  (item.identity ?? item.filePath) !==
+                  (session.identity ?? session.filePath),
+              ),
+            )
           }
         />
       ))}
 
       {results.length === 0 && (
         <List.EmptyView
-          title={isSearching ? "Searching..." : "Deep Search Sessions"}
+          title={
+            isSearching
+              ? (searchPhase ?? "Updating Index")
+              : "Deep Search Sessions"
+          }
           description={emptyDescription}
           icon={isSearching ? Icon.MagnifyingGlass : Icon.Message}
         />
@@ -149,29 +173,15 @@ function SearchResultItem({
   session: SessionMetadata;
   onDelete: () => void;
 }) {
-  const title = session.firstMessage || session.summary || session.id;
+  const title =
+    session.title || session.firstMessage || session.summary || session.id;
   const truncatedTitle = safeTruncate(title, 60, "...");
 
   const accessories: List.Item.Accessory[] = [];
 
-  accessories.push({
-    tag: {
-      value: session.projectName,
-      color: Color.Blue,
-    },
-  });
-
-  if (session.turnCount > 0) {
+  if (session.archived) {
     accessories.push({
-      text: `${session.turnCount} turns`,
-      icon: Icon.Message,
-    });
-  }
-
-  if (session.cost > 0) {
-    accessories.push({
-      text: `$${session.cost.toFixed(4)}`,
-      icon: Icon.Coins,
+      tag: { value: "Archived", color: Color.SecondaryText },
     });
   }
 
@@ -180,40 +190,29 @@ function SearchResultItem({
   });
 
   async function handleResume() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(session.projectPath)) {
+    try {
+      await launchStoredSession(session);
+      await popToRoot();
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: session.projectPath,
+        title: "Session Could Not Be Resumed",
+        message: error instanceof Error ? error.message : String(error),
       });
-      return;
     }
-    await launchClaudeCode({
-      projectPath: session.projectPath,
-      sessionId: session.id,
-      permissionMode: session.permissionMode,
-    });
-    await popToRoot();
   }
 
   async function handleFork() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(session.projectPath)) {
+    try {
+      await launchStoredSession(session, { fork: true });
+      await popToRoot();
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: session.projectPath,
+        title: "Session Could Not Be Forked",
+        message: error instanceof Error ? error.message : String(error),
       });
-      return;
     }
-    await launchClaudeCode({
-      projectPath: session.projectPath,
-      sessionId: session.id,
-      forkSession: true,
-      permissionMode: session.permissionMode,
-    });
-    await popToRoot();
   }
 
   async function handleDelete() {
@@ -232,7 +231,9 @@ function SearchResultItem({
         title: "Deleting session...",
       });
       try {
-        await deleteSession(session.id);
+        const deleted = await deleteSession(session.id, session.filePath);
+        if (!deleted)
+          throw new Error("This Session Could Not Be Moved to Trash");
         onDelete();
         await showToast({
           style: Toast.Style.Success,
@@ -248,17 +249,21 @@ function SearchResultItem({
     }
   }
 
-  const detailMarkdown = buildDetailMarkdown(session);
-
   return (
     <List.Item
       title={truncatedTitle}
+      subtitle={session.projectName}
       icon={Icon.Message}
       accessories={accessories}
-      detail={<List.Item.Detail markdown={detailMarkdown} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Session">
+            <Action.Push
+              title={session.match ? "View Matched Message" : "View Details"}
+              icon={Icon.Eye}
+              shortcut={shortcut.primary("d")}
+              target={<SessionDetailView result={session} />}
+            />
             <Action
               title="Resume Session"
               icon={Icon.ArrowRight}
@@ -267,20 +272,8 @@ function SearchResultItem({
             <Action
               title="Fork Session"
               icon={Icon.ArrowNe}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={shortcut.primary("f")}
               onAction={handleFork}
-            />
-            <Action.Push
-              title="View Details"
-              icon={Icon.Eye}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              target={
-                <SessionDetailView
-                  sessionId={session.id}
-                  projectPath={session.projectPath}
-                  permissionMode={session.permissionMode}
-                />
-              }
             />
           </ActionPanel.Section>
 
@@ -288,57 +281,67 @@ function SearchResultItem({
             <Action.CopyToClipboard
               title="Copy Session Id"
               content={session.id}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={shortcut.copy}
             />
             <Action.CopyToClipboard
               title="Copy Project Path"
               content={session.projectPath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={shortcut.copyPath}
             />
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="Danger">
-            <Action
-              title="Delete Session"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={handleDelete}
-            />
-          </ActionPanel.Section>
+          {!isWslSession(session) ? (
+            <ActionPanel.Section title="Danger">
+              <Action
+                title="Delete Session"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={shortcut.remove}
+                onAction={handleDelete}
+              />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />
   );
 }
 
-function SessionDetailView({
-  sessionId,
-  projectPath,
-  permissionMode,
-}: {
-  sessionId: string;
-  projectPath: string;
-  permissionMode?: PermissionMode;
-}) {
+function SessionDetailView({ result }: { result: SessionMetadata }) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<SessionDetail | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     (async () => {
       try {
-        const detail = await getSessionDetail(sessionId);
-        setSession(detail);
+        const detail = await getSessionDetailAtMatch(result, {
+          before: 3,
+          after: 3,
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted) setSession(detail);
       } catch (err) {
-        console.error("Failed to load session detail:", err);
+        if (!controller.signal.aborted) {
+          console.error("Failed to load session detail:", err);
+          setLoadError(err instanceof Error ? err.message : String(err));
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     })();
-  }, [sessionId]);
+    return () => controller.abort();
+  }, [result]);
 
   if (isLoading) {
     return <Detail isLoading={true} />;
+  }
+
+  if (loadError) {
+    return (
+      <Detail markdown={`# Session Could Not Be Loaded\n\n${loadError}`} />
+    );
   }
 
   if (!session) {
@@ -348,6 +351,11 @@ function SessionDetailView({
   }
 
   const markdown = formatSessionMarkdown(session);
+  const referencedFiles = (session.mentionedFiles ?? []).slice(0, 10);
+  const sourceNames = (session.sources ?? [])
+    .map((source) => formatBackendName(source.backend))
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(", ");
 
   return (
     <Detail
@@ -357,6 +365,27 @@ function SessionDetailView({
           <Detail.Metadata.Label title="Session ID" text={session.id} />
           <Detail.Metadata.Label title="Project" text={session.projectName} />
           <Detail.Metadata.Label title="Path" text={session.projectPath} />
+          {sourceNames && (
+            <Detail.Metadata.Label title="Sources" text={sourceNames} />
+          )}
+          {session.gitBranch && (
+            <Detail.Metadata.Label
+              title="Git Branch"
+              text={
+                session.gitBranch === "HEAD"
+                  ? "Detached HEAD"
+                  : session.gitBranch
+              }
+            />
+          )}
+          {session.archived && (
+            <Detail.Metadata.TagList title="State">
+              <Detail.Metadata.TagList.Item
+                text="Archived"
+                color={Color.SecondaryText}
+              />
+            </Detail.Metadata.TagList>
+          )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Turns"
@@ -383,103 +412,115 @@ function SessionDetailView({
             title="Resume Session"
             icon={Icon.ArrowRight}
             onAction={async () => {
-              if (!(await ensureClaudeInstalled())) return;
-              if (!existsSync(projectPath)) {
+              try {
+                await launchStoredSession(session);
+                await popToRoot();
+              } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Project path no longer exists",
-                  message: projectPath,
+                  title: "Session Could Not Be Resumed",
+                  message:
+                    error instanceof Error ? error.message : String(error),
                 });
-                return;
               }
-              await launchClaudeCode({
-                projectPath,
-                sessionId,
-                permissionMode,
-              });
-              await popToRoot();
             }}
           />
           <Action
             title="Fork Session"
             icon={Icon.ArrowNe}
             onAction={async () => {
-              if (!(await ensureClaudeInstalled())) return;
-              if (!existsSync(projectPath)) {
+              try {
+                await launchStoredSession(session, { fork: true });
+                await popToRoot();
+              } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
-                  title: "Project path no longer exists",
-                  message: projectPath,
+                  title: "Session Could Not Be Forked",
+                  message:
+                    error instanceof Error ? error.message : String(error),
                 });
-                return;
               }
-              await launchClaudeCode({
-                projectPath,
-                sessionId,
-                forkSession: true,
-                permissionMode,
-              });
-              await popToRoot();
             }}
           />
           <Action.CopyToClipboard
             title="Copy Conversation"
             content={formatConversationText(session)}
           />
+          {referencedFiles.length > 0 && (
+            <ActionPanel.Section title="Referenced Files">
+              {referencedFiles.map((filePath) => (
+                <Action.Open
+                  key={filePath}
+                  title={`Open ${filePath.split(/[\\/]/).pop() || "File"}`}
+                  target={filePath}
+                  icon={Icon.Document}
+                />
+              ))}
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
   );
 }
 
-function buildDetailMarkdown(session: SessionMetadata): string {
-  const fullTitle = session.firstMessage || session.summary || session.id;
-  let md = `**Session Prompt**\n\n${fullTitle}\n\n`;
-
-  if (session.matchSnippet) {
-    md += `---\n\n**Match**\n\n${session.matchSnippet}\n\n`;
-  }
-
-  if (session.summary && session.summary !== fullTitle) {
-    md += `**Summary:** ${session.summary}\n\n`;
-  }
-
-  md += `---\n\n`;
-  md += `**Project:** ${session.projectPath}\n\n`;
-  md += `**Turns:** ${session.turnCount}`;
-  if (session.cost > 0) {
-    md += ` · **Cost:** $${session.cost.toFixed(4)}`;
-  }
-  md += `\n\n`;
-  md += `**Modified:** ${session.lastModified.toLocaleString()}`;
-
-  return md;
-}
-
 function formatSessionMarkdown(session: SessionDetail): string {
-  let md = `# ${session.firstMessage || session.summary || "Session"}\n\n`;
+  const title = safeTruncate(
+    session.title || session.firstMessage || session.summary || "Session",
+    90,
+    "…",
+  );
+  let md = `# ${title}\n\n`;
 
   if (session.summary) {
     md += `> ${session.summary}\n\n`;
   }
 
-  // Render budget is 20 messages; the banner reflects what the user actually sees.
-  const rendered = session.messages.slice(-20);
-  if (session.totalMessageCount > rendered.length) {
-    md += `*Showing last ${rendered.length} of ${session.totalMessageCount} messages.*\n\n`;
+  const rendered = session.messages;
+  const matched = rendered.find((message) => message.matched);
+  if (matched?.messageIndex !== undefined) {
+    md += `*Showing ${rendered.length} messages around match ${matched.messageIndex + 1} of ${session.totalMessageCount}.*\n\n`;
+  } else if (session.totalMessageCount > rendered.length) {
+    md += `*Showing ${rendered.length} of ${session.totalMessageCount} messages.*\n\n`;
   }
 
   md += `---\n\n`;
   md += `## Conversation\n\n`;
 
   for (const message of rendered) {
-    const role = message.type === "user" ? "**You**" : "**Claude**";
-    const content = safeTruncate(message.content, 500, "...");
+    const role =
+      message.type === "user"
+        ? "**You**"
+        : message.type === "system"
+          ? "**Summary**"
+          : "**Claude**";
+    if (message.matched) md += `### Matched Message\n\n`;
+    const content = message.content;
 
     md += `${role}:\n${content}\n\n`;
+    for (const imagePath of message.imagePaths ?? []) {
+      md += `![](${localImageMarkdownUrl(imagePath)}?raycast-width=350)\n\n`;
+    }
   }
 
   return md;
+}
+
+function formatBackendName(
+  backend: NonNullable<SessionMetadata["sources"]>[number]["backend"],
+): string {
+  switch (backend) {
+    case "claude-cli":
+      return "Claude CLI";
+    case "claude-desktop":
+      return "Claude Desktop";
+    case "vscode":
+      return "VS Code";
+    case "conductor":
+      return "Conductor";
+    case "wsl":
+      return "WSL";
+  }
 }
 
 function formatConversationText(session: SessionDetail): string {
