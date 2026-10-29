@@ -1,6 +1,6 @@
 # The Downloader Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-29
 
 Download videos, audio, image galleries, Spotify music and complete webpages from Raycast, and chat with AI about any video, post or article. The Downloader started from [Video Downloader](https://www.raycast.com/vimtor/video-downloader) by vimtor and its contributors.
 
