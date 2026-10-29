@@ -9,7 +9,9 @@ type Values = {
 
 export default function Command() {
   const { data: channels, isLoading } = usePromise(listChannels, [], {
-    onError: (error) => showFailureToast(error, { title: "Could not load your channels" }),
+    onError: (error) => {
+      showFailureToast(error, { title: "Could not load your channels" });
+    },
   });
   const activeChannels = (channels ?? []).filter((channel) => !channel.disabled);
 

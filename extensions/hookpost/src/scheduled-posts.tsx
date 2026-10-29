@@ -32,7 +32,9 @@ const timeFormat = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "
 export default function Command() {
   const [channelId, setChannelId] = useState("all");
   const { data, isLoading, revalidate } = usePromise(loadScheduledPosts, [], {
-    onError: (error) => showFailureToast(error, { title: "Could not load your posts" }),
+    onError: (error) => {
+      showFailureToast(error, { title: "Could not load your posts" });
+    },
   });
   const posts = data ?? [];
 
