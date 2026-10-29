@@ -2,9 +2,7 @@ import { LaunchProps, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { findPreset, getPresets, playPreset } from "./presets";
 
-export default async function Command({
-  arguments: { preset: query },
-}: LaunchProps<{ arguments: Arguments.LoadPreset }>) {
+export default async function Command({ arguments: { preset: query } }: LaunchProps) {
   try {
     const presets = await getPresets();
     const preset = findPreset(presets, query);
