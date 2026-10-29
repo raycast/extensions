@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "cockatoo",
+    title: "Cockatoo",
+    description:
+      "Create, edit, preview and publish hosted business websites with owner-approved access. Remote Streamable HTTP with OAuth, dynamic client registration and PKCE. Public catalogue and onboarding tools work before sign-in; existing-site management requires scoped, revocable owner consent. Free plan available; paid upgrades are managed by the owner. Public connection metadata is MIT licensed; the hosted implementation is private.",
+    icon: "https://cockatoo.com.au/android-chrome-512x512.png",
+    homepage: "https://cockatoo.com.au/agents/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.cockatoo.com.au/mcp"],
+    },
+    remoteUrl: "https://app.cockatoo.com.au/mcp",
+  },
+  {
     name: "leal",
     title: "Leal",
     description:

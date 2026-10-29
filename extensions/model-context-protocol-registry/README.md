@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Cockatoo](https://cockatoo.com.au/agents/) | Create, edit, preview and publish hosted business websites with owner-approved access. Remote Streamable HTTP with OAuth, dynamic client registration and PKCE. Public catalogue and onboarding tools work before sign-in; existing-site management requires scoped, revocable owner consent. Free plan available; paid upgrades are managed by the owner. Public connection metadata is MIT licensed; the hosted implementation is private. |
 | [Paper Plane Post](https://paperplanepost.com/for/agents) | Create and send an AI-illustrated postcard anywhere in the world |
 | [BlindPay](https://github.com/blindpaylabs/blindpay-mcp) | Stablecoin API for global payments. Create receivers and virtual accounts, get FX quotes, run payouts and payins across bank rails and blockchains, and read balances and transaction history. Remote Streamable HTTP server with BlindPay OAuth 2.1 sign-in through `mcp-remote`; no API key needed. |
 | [3Dsellers](https://www.3dsellers.com/channel-integration/3dsellers-mcp) | Run eBay, Amazon, Walmart, Etsy, Shopify and TikTok Shop stores from your AI assistant. Search and create products, publish listings, update inventory and prices, manage orders, run bulk edits and CSV imports, and answer buyer messages through your 3Dsellers account. 150+ tools. Hosted remote Streamable HTTP server; OAuth 2.0 sign-in with dynamic client registration, no API key to paste. |
