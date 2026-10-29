@@ -7,10 +7,22 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "leal",
+    title: "Leal",
+    description:
+      "Design and launch Apple Wallet and Google Wallet loyalty stamp cards for shops, cafés and salons. Read a business's name, colours and logo from its website, preview card designs as real wallet passes, then save the card, rewards, a QR signup poster and the store location. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE); design previews work without an account.",
+    icon: "https://mcp.getleal.com/favicon/web-app-manifest-512x512.png",
+    homepage: "https://www.getleal.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.getleal.com/mcp"],
+    },
+    remoteUrl: "https://mcp.getleal.com/mcp",
+  },
+  {
     name: "paper-plane-post",
     title: "Paper Plane Post",
-    description:
-      "Turn a photo into a printed postcard. Create an unpaid draft with an optional note and recipient address, then review, finish, and pay for printing and mailing on the website. Tool calls never charge money or mail a card. Hosted Streamable HTTP server with no account or API key; direct HTTP in Raycast and an mcp-remote fallback for other clients.",
+    description: "Create and send an AI-illustrated postcard anywhere in the world",
     icon: "https://paperplanepost.com/icon.png",
     homepage: "https://paperplanepost.com/for/agents",
     configuration: {
@@ -122,6 +134,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://www.affix-io.com/mcp/"],
     },
     remoteUrl: "https://www.affix-io.com/mcp/",
+  },
+  {
+    name: "agenticwebscore",
+    title: "AgenticWebScore",
+    description:
+      "Scan a public website for AI agent readiness: 60 checks, a score, and the evidence for each. The checks cover robots.txt and AI crawler rules, sitemaps, headings and structured data, HTTP caching and real 404s, markdown negotiation and llms.txt, OpenAPI and MCP servers. Each check returns its status, the evidence it read and a shell command that repeats the measurement. 4 tools: scan_site starts a scan or returns a stored record younger than 6 hours; get_score and get_report read stored records; list_checks returns the rubric. Remote Streamable HTTP server at https://agenticwebscore.com/mcp; no sign-up, no API key.",
+    icon: "https://raw.githubusercontent.com/marifeting/agenticwebscore-mcp/main/assets/logo-512.png",
+    homepage: "https://agenticwebscore.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://agenticwebscore.com/mcp"],
+    },
+    remoteUrl: "https://agenticwebscore.com/mcp",
   },
   {
     name: "aggregate",
@@ -365,6 +390,20 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://api.candor.money/mcp"],
     },
     remoteUrl: "https://api.candor.money/mcp",
+  },
+  {
+    name: "carbon-forge",
+    title: "Carbon Forge",
+    description:
+      "Source control and a shared record for people and agents. Code, files and prose live in one record on the server; an agent opens a lane, a set of patches over the trunk, instead of cloning, and each landing is one all-or-nothing changeset. Blame, grep, diff and history run on the server, and git is a projection pushed to GitHub. Hosted remote Streamable HTTP server at https://carbonforge.dev/api/mcp; it reads public workspaces with no sign-in and no API key, and writing needs a bearer token from Carbon Forge's settings.",
+    icon: "https://carbonforge.dev/icon-192.png",
+    homepage:
+      "https://carbonforge.dev/docs/p/guides/mcp-anonymous-access?utm_source=raycast&utm_medium=referral&utm_campaign=push-2026-10-28",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://carbonforge.dev/api/mcp"],
+    },
+    remoteUrl: "https://carbonforge.dev/api/mcp",
   },
   {
     name: "chirpie",
@@ -1160,6 +1199,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://moltnode.ag/mcp",
   },
   {
+    name: "monito",
+    title: "Monito",
+    description:
+      "Check a deployed URL in a real browser and get a verdict with evidence. Describe in plain English what should happen; Monito runs the check in a cloud browser and returns passed, failed or cannot verify with screenshots, network and console logs, and can save the check as a reusable test. Runs use Monito credits; the free plan includes 50 a month. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, or an API key in the `x-api-key` header.",
+    icon: "https://www.monito.dev/brand/monito-app-icon-512.png",
+    homepage: "https://www.monito.dev/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.monito.dev/api/mcp"],
+    },
+    remoteUrl: "https://www.monito.dev/api/mcp",
+  },
+  {
     name: "multi-calendar",
     title: "Multi Calendar",
     description:
@@ -1494,6 +1546,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         RECUED_MCP_TOKEN: "YOUR_CONTRACT_KEY",
       },
     },
+  },
+  {
+    name: "relaticle",
+    title: "Relaticle",
+    description:
+      "Open-source CRM your AI agents can read and update: companies, people, opportunities, tasks, notes and custom fields. Hosted Streamable HTTP server with OAuth sign-in; 14-day free trial, or self-host with Docker.",
+    icon: "https://relaticle.com/apple-touch-icon.png",
+    homepage: "https://relaticle.com/developers/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.relaticle.com"],
+    },
+    remoteUrl: "https://mcp.relaticle.com",
   },
   {
     name: "removeduplicates",
@@ -1973,6 +2038,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.unblockingapi.com/mcp"],
     },
     remoteUrl: "https://mcp.unblockingapi.com/mcp",
+  },
+  {
+    name: "vectosolve",
+    title: "VectoSolve",
+    description:
+      "Turn PNG, JPG, WebP or GIF images into vector files: SVG for design tools and Cricut Design Space, DXF for laser cutters, CNC routers and CAD (R12 polylines, millimetres) or EPS for print and sign-making. Tracing modes for logos and illustrations, closed laser cut paths, cutting machines and centerline (one path per stroke for line art and scanned drawings). Returns a PNG preview and the complete file from a public image link. One read-only tool. Hosted remote Streamable HTTP server at https://vectosolve.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://vectosolve.com/favicon-512.png",
+    homepage: "https://vectosolve.com/integrations/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://vectosolve.com/api/mcp"],
+    },
+    remoteUrl: "https://vectosolve.com/api/mcp",
   },
   {
     name: "visualping",

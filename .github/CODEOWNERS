@@ -153,6 +153,7 @@
 /extensions/argocd                                                  @PixiBixi
 /extensions/array-this                                              @matheus-depaula
 /extensions/ars-technica                                            @edwin-dd-ong
+/extensions/artificial-analysis-rankings                            @NarenTheNumpkin
 /extensions/arxiv                                                   @koayon @pernielsentikaer @osteele
 /extensions/aryan-techie-blog                                       @Aryan-Techie
 /extensions/asafamos-accessibility-scanner                          @asafamos
@@ -335,6 +336,7 @@
 /extensions/caaals                                                  @chuckcg
 /extensions/cache-control-builder                                   @rkusa
 /extensions/cacher                                                  @jookyboi
+/extensions/cactus-website-blocker                                  @onmax
 /extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking @jfkisafk @runofthemillgeek @andrewbenson
 /extensions/calendar                                                @fuksman @pernielsentikaer @tonka3000
 /extensions/calendly                                                @eluce2 @edumesnil @0xdhrv
@@ -433,6 +435,7 @@
 /extensions/claude-session-bookmarks                                @eaescob
 /extensions/claude-sessions                                         @kud
 /extensions/claudecast                                              @qazi0 @RoderickJDunn @diskun00
+/extensions/claudescope                                             @vladar107
 /extensions/clean-agent-text                                        @rhukster
 /extensions/clean-keyboard                                          @ike-gg @owain-williams @xilopaint @ridemountainpig @LitoMore @yusifaliyevpro @shivraj-roy @alexibuild @nawwwal
 /extensions/clean-text                                              @MoisesCervera
@@ -657,7 +660,7 @@
 /extensions/daytona                                                 @stefanicjuraj
 /extensions/db-schema-explorer                                      @SciSaif
 /extensions/dbt-documentation                                       @b-per @xmok
-/extensions/dbtCloud                                                @zsombor-flds @xmok
+/extensions/dbtCloud                                                @zsombor-flds @xmok @gavin-burns-US
 /extensions/ddev                                                    @SuoweiHu
 /extensions/debank                                                  @Yukaii
 /extensions/decentraland                                            @fmiras @xmok
@@ -718,6 +721,7 @@
 /extensions/dict-cc                                                 @natterstefan @YourMCGeek
 /extensions/dictionary                                              @DrChai
 /extensions/dida365                                                 @Maxaccurate
+/extensions/diff-anything                                           @MartinGryner
 /extensions/diff-checker                                            @Destiner @hayrapetian
 /extensions/diff-view                                               @kalaschnik
 /extensions/dig                                                     @danielbahl @pernielsentikaer @j3lte
@@ -1530,6 +1534,7 @@
 /extensions/lazygit-keybindings                                     @NoamEfergan
 /extensions/ldap-contacts                                           @frdmn
 /extensions/leader-key                                              @alexibuild
+/extensions/leaf-calendar                                           @artistro08
 /extensions/leafcast                                                @syropian
 /extensions/league-stats                                            @mert4x4
 /extensions/leap-new                                                @ivancernja
@@ -2021,7 +2026,7 @@
 /extensions/open-docker                                             @K4Lok
 /extensions/open-folders                                            @timothyBoye @gfazioli
 /extensions/open-gem-documentation                                  @sudoremo
-/extensions/open-graph                                              @1weiho @ridemountainpig @tmwrnr @j3lte
+/extensions/open-graph                                              @1weiho @ridemountainpig @tmwrnr @j3lte @0xdhrv
 /extensions/open-in-android-studio                                  @3llomi
 /extensions/open-in-cursor                                          @5Gears0Chill
 /extensions/open-in-json-hero                                       @ericallam @ivanovart @christymcgrory @xmok
@@ -2671,6 +2676,7 @@
 /extensions/share-a-quote                                           @alexibuild
 /extensions/share-my-code                                           @jairaume
 /extensions/sharex                                                  @zxc-rv @TheTimmaeh
+/extensions/sharply-camera-gear                                     @Flohhhhh
 /extensions/shell                                                   @KELiON @emiara @kevinm6 @MohamedK1 @AnirudhG07 @pernielsentikaer @Sataros221
 /extensions/shell-alias                                             @clemclx
 /extensions/shell-apps                                              @Kxrbx
@@ -2692,6 +2698,7 @@
 /extensions/short-io                                                @koinzhang @xmok @0xdhrv
 /extensions/shortcut                                                @Yukaii @robertn702 @BrianHicks @vinsg
 /extensions/shortcut-library                                        @rhrabun
+/extensions/shortcut-vault                                          @syedhy
 /extensions/shortcuts-search                                        @solomkinmv
 /extensions/shottr                                                  @jfernandogt @Caffeine19
 /extensions/showmd                                                  @l0kyurue1
@@ -2720,6 +2727,7 @@
 /extensions/simplelogin                                             @adrian-schnell @marcelruhf
 /extensions/simpletexocr                                            @zhuozhiyongde @yiran-frank-mao @Xel-naga7
 /extensions/simpread                                                @Kenshin
+/extensions/simulator-deep-linker                                   @StefanBoblic
 /extensions/simulator-manager                                       @pauloedurezende
 /extensions/single-disk-eject                                       @johndturn @LostViking09
 /extensions/single-focus                                            @Mmehdi06 @LitoMore
@@ -3387,7 +3395,7 @@
 /extensions/wu-bi-bian-ma                                           @anyerqi
 /extensions/wu-editor                                               @farshed
 /extensions/xbox-friends                                            @maxpaolucci
-/extensions/xcode                                                   @SvenTiigi @qeude @oliverepper @3llomi @ridemountainpig @josdyr
+/extensions/xcode                                                   @SvenTiigi @qeude @oliverepper @3llomi @ridemountainpig @josdyr @nhojb
 /extensions/xcode-cloud                                             @yuta24
 /extensions/xcodes                                                  @friendlycashew
 /extensions/xecutor                                                 @GastroGeek @ClaPalo

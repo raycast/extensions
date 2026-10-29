@@ -1,0 +1,189 @@
+{
+  "ownerName": "Terminal",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/terminal/keyboard-shortcuts-trmlshtcts/mac",
+  "shortcuts": [
+    {
+      "id": "new-window",
+      "commandName": "New Window",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-window-same-command",
+      "commandName": "New Window with Same Command",
+      "modifiers": ["command", "control"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-tab",
+      "commandName": "New Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "new-tab-same-command",
+      "commandName": "New Tab with Same Command",
+      "modifiers": ["command", "control"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-tab-bar",
+      "commandName": "Show or Hide Tab Bar",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "show-all-tabs",
+      "commandName": "Show All Tabs",
+      "modifiers": ["command", "shift"],
+      "key": "\\",
+      "scope": "app"
+    },
+    {
+      "id": "new-command",
+      "commandName": "New Command",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-remote-connection",
+      "commandName": "New Remote Connection",
+      "modifiers": ["command", "shift"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "show-inspector",
+      "commandName": "Show or Hide Inspector",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "edit-title",
+      "commandName": "Edit Title",
+      "modifiers": ["command", "shift"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "edit-background-color",
+      "commandName": "Edit Background Color",
+      "modifiers": ["command", "option"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "bigger-text",
+      "commandName": "Bigger Text",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "smaller-text",
+      "commandName": "Smaller Text",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "next-window",
+      "commandName": "Next Window",
+      "modifiers": ["command"],
+      "key": "`",
+      "scope": "app"
+    },
+    {
+      "id": "previous-window",
+      "commandName": "Previous Window",
+      "modifiers": ["command", "shift"],
+      "key": "~",
+      "scope": "app"
+    },
+    {
+      "id": "next-tab",
+      "commandName": "Next Tab",
+      "modifiers": ["control"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "previous-tab",
+      "commandName": "Previous Tab",
+      "modifiers": ["control", "shift"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "split-pane",
+      "commandName": "Split Window into Two Panes",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "close-split-pane",
+      "commandName": "Close Split Pane",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "close-tab",
+      "commandName": "Close Tab",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Window",
+      "modifiers": ["command", "shift"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "close-other-tabs",
+      "commandName": "Close Other Tabs",
+      "modifiers": ["command", "option"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "close-all",
+      "commandName": "Close All",
+      "modifiers": ["command", "option", "shift"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "find",
+      "commandName": "Find",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "clear-screen",
+      "commandName": "Clear Screen",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "export-text-as",
+      "commandName": "Export Text As",
+      "modifiers": ["command"],
+      "key": "S",
+      "scope": "app"
+    }
+  ]
+}
