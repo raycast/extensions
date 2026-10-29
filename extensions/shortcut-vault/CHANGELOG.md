@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-29
 
 - Initial release of Shortcut Vault, a local-first keyboard shortcuts manager for macOS.
 - Unified search across 530+ bundled shortcuts for 18 popular macOS apps and developer tools.
