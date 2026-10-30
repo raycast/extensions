@@ -1774,6 +1774,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "skycloak",
+    title: "Skycloak",
+    description:
+      "Manage SSO, users, roles and applications on Skycloak from any MCP client. Skycloak is an identity-as-a-service provider built on managed Keycloak; agents can work with clusters, realms, applications, SSO connections, users, roles, domains and audit events in a workspace. Tools are trimmed to what the signed-in user's role allows, and adding ?readonly=true to the URL forces a read-only session. Hosted remote Streamable HTTP server; OAuth sign-in in the browser, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/sky-cloak/skycloak-mcp/main/docs/assets/skycloak-logo-400.png",
+    homepage: "https://github.com/sky-cloak/skycloak-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.skycloak.io"],
+    },
+    remoteUrl: "https://mcp.skycloak.io",
+  },
+  {
     name: "slack",
     title: "Slack",
     description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",
