@@ -6,8 +6,7 @@ import { GameState, ItemId, ShopEntry } from "./types";
 export const shopOpen = (s: GameState) => boardLevel(s) > 0;
 
 /** Gear is bought once; consumables can be bought again. */
-export const isOwned = (s: GameState, entry: ShopEntry) =>
-  isGear(entry.item) && count(s, entry.item) > 0;
+export const isOwned = (s: GameState, entry: ShopEntry) => isGear(entry.item) && count(s, entry.item) > 0;
 
 export type ShopStatus = "owned" | "locked" | "poor" | "ready";
 
@@ -17,16 +16,12 @@ export function shopStatus(s: GameState, entry: ShopEntry): ShopStatus {
   return s.marks >= entry.cost ? "ready" : "poor";
 }
 
-export function buyFromShop(
-  s: GameState,
-  id: ItemId,
-): { state: GameState; error?: string; cost?: number } {
+export function buyFromShop(s: GameState, id: ItemId): { state: GameState; error?: string; cost?: number } {
   if (!shopOpen(s)) return { state: s, error: "Build a Bounty Board first" };
   const entry = BOUNTY_SHOP.find((e) => e.item === id);
   if (!entry) return { state: s, error: "The shop does not sell that" };
   if (isOwned(s, entry)) return { state: s, error: "You already own this" };
-  if (bountyLevel(s) < entry.levelReq)
-    return { state: s, error: `Requires Bounty level ${entry.levelReq}` };
+  if (bountyLevel(s) < entry.levelReq) return { state: s, error: `Requires Bounty level ${entry.levelReq}` };
   if (s.marks < entry.cost) return { state: s, error: "Not enough Bounty Marks" };
   if (roomFor(s, id) < 1) return { state: s, error: "Not enough room in storage" };
   const next = structuredClone(s);

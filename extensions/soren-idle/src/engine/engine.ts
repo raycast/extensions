@@ -193,12 +193,8 @@ export function build(s: GameState, id: BuildingId): { state: GameState; error?:
   if (def.requires && levelOf(s, def.requires.skill) < def.requires.level) {
     return { state: s, error: `Requires ${def.requires.skill} level ${def.requires.level}` };
   }
-  if (def.requiresContact && !firstContact(s))
-    return { state: s, error: "There is nobody to talk to yet" };
-  if (
-    def.requiresBuilding &&
-    buildingLevel(s, def.requiresBuilding.id) < def.requiresBuilding.level
-  ) {
+  if (def.requiresContact && !firstContact(s)) return { state: s, error: "There is nobody to talk to yet" };
+  if (def.requiresBuilding && buildingLevel(s, def.requiresBuilding.id) < def.requiresBuilding.level) {
     const needed = BUILDING_BY_ID[def.requiresBuilding.id].name;
     return { state: s, error: `Requires ${needed} level ${def.requiresBuilding.level}` };
   }
@@ -239,8 +235,7 @@ export function equipError(s: GameState, id: ItemId): string | undefined {
   const item = ITEMS[id];
   if (!item.slot) return "That cannot be equipped";
   if (count(s, id) < 1) return "You do not have that";
-  if (item.combatReq && levelOf(s, "combat") < item.combatReq)
-    return `Requires Combat level ${item.combatReq}`;
+  if (item.combatReq && levelOf(s, "combat") < item.combatReq) return `Requires Combat level ${item.combatReq}`;
   return undefined;
 }
 
@@ -262,8 +257,7 @@ export function autoEquip(s: GameState, id: ItemId) {
   const item = ITEMS[id];
   if (!item.slot || equipError(s, id)) return;
   const worn = s.equipped[item.slot];
-  if (!worn || count(s, worn) < 1 || (item.tier ?? 0) > (ITEMS[worn].tier ?? 0))
-    s.equipped[item.slot] = id;
+  if (!worn || count(s, worn) < 1 || (item.tier ?? 0) > (ITEMS[worn].tier ?? 0)) s.equipped[item.slot] = id;
 }
 
 /** A potion buff that is still running at time `at`. */
@@ -282,18 +276,10 @@ export function modifiers(s: GameState, at = s.lastTick) {
     Math.min(1, ...owned.filter((i) => i.tool?.skill === skill).map((i) => i.tool?.speed ?? 1));
   return {
     speed: (skill: SkillId) => (activeBuff(s, "speed", at)?.power ?? 1) * toolSpeed(skill),
-    damage:
-      owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) +
-      (activeBuff(s, "damage", at)?.power ?? 0),
+    damage: owned.reduce((sum, i) => sum + (i.weaponDamage ?? 0), 0) + (activeBuff(s, "damage", at)?.power ?? 0),
     armor: owned.reduce((sum, i) => sum + (i.armor ?? 0), 0),
-    weaponType:
-      s.equipped.weapon && count(s, s.equipped.weapon) > 0
-        ? ITEMS[s.equipped.weapon].damageType
-        : undefined,
-    armorType:
-      s.equipped.body && count(s, s.equipped.body) > 0
-        ? ITEMS[s.equipped.body].damageType
-        : undefined,
+    weaponType: s.equipped.weapon && count(s, s.equipped.weapon) > 0 ? ITEMS[s.equipped.weapon].damageType : undefined,
+    armorType: s.equipped.body && count(s, s.equipped.body) > 0 ? ITEMS[s.equipped.body].damageType : undefined,
     yield: activeBuff(s, "yield", at)?.power ?? 1,
     rare: owned.reduce((m, i) => m * (i.rareBonus ?? 1), 1),
   };
@@ -373,28 +359,17 @@ export function taskRates(s: GameState, task: TaskDef): TaskRates {
     inputsPerHour: scaleBundle(task.inputs, perHour),
     hpLossPerHour: task.monster ? fightDamage(s, task) * perHour : 0,
     nextLevelMs:
-      level >= MAX_LEVEL
-        ? null
-        : Math.ceil(((xpForLevel(level + 1) - s.xp[task.skill]) / xpPerHour) * 3_600_000),
+      level >= MAX_LEVEL ? null : Math.ceil(((xpForLevel(level + 1) - s.xp[task.skill]) / xpPerHour) * 3_600_000),
   };
 }
 
 // --- actions ----------------------------------------------------------------
 
-export function startTask(
-  s: GameState,
-  taskId: string,
-  runs?: number,
-): { state: GameState; error?: string } {
+export function startTask(s: GameState, taskId: string, runs?: number): { state: GameState; error?: string } {
   const task = TASK_BY_ID[taskId];
   if (!task) return { state: s, error: "Unknown task" };
-  if (levelOf(s, task.skill) < task.levelReq)
-    return { state: s, error: `Requires level ${task.levelReq}` };
-  if (
-    task.once &&
-    task.outputs &&
-    (Object.keys(task.outputs) as ItemId[]).every((id) => count(s, id) > 0)
-  ) {
+  if (levelOf(s, task.skill) < task.levelReq) return { state: s, error: `Requires level ${task.levelReq}` };
+  if (task.once && task.outputs && (Object.keys(task.outputs) as ItemId[]).every((id) => count(s, id) > 0)) {
     return { state: s, error: "You already own this" };
   }
   if (!canAfford(s, task.inputs)) return { state: s, error: "Missing materials" };
@@ -411,20 +386,14 @@ export function stopTask(s: GameState): GameState {
 }
 
 /** The food the survivor eats first: the weakest by default, so strong food is not wasted. */
-export function foodOwned(
-  s: GameState,
-  priority: FoodPriority = s.settings.foodPriority,
-): ItemId | undefined {
+export function foodOwned(s: GameState, priority: FoodPriority = s.settings.foodPriority): ItemId | undefined {
   const sign = priority === "weakest" ? 1 : -1;
   return Object.values(ITEMS)
     .filter((i) => i.heal && count(s, i.id) > 0)
     .sort((a, b) => sign * ((a.heal ?? 0) - (b.heal ?? 0)))[0]?.id;
 }
 
-export function eat(
-  s: GameState,
-  id: ItemId | undefined = foodOwned(s),
-): { state: GameState; error?: string } {
+export function eat(s: GameState, id: ItemId | undefined = foodOwned(s)): { state: GameState; error?: string } {
   if (!id || count(s, id) < 1 || !ITEMS[id].heal) return { state: s, error: "No rations" };
   if (s.hp >= maxHp(s)) return { state: s, error: "Already at full health" };
   const next = structuredClone(s);
@@ -438,11 +407,8 @@ export function drink(s: GameState, id: ItemId): { state: GameState; error?: str
   const potion = ITEMS[id].potion;
   if (!potion || count(s, id) < 1) return { state: s, error: "Nothing to drink" };
   const current = activeBuff(s, potion.kind);
-  const weaker =
-    current &&
-    (potion.kind === "speed" ? potion.power > current.power : potion.power < current.power);
-  if (current && weaker)
-    return { state: s, error: `A stronger ${ITEMS[current.item].name} is already working` };
+  const weaker = current && (potion.kind === "speed" ? potion.power > current.power : potion.power < current.power);
+  if (current && weaker) return { state: s, error: `A stronger ${ITEMS[current.item].name} is already working` };
   const next = structuredClone(s);
   next.inventory[id] = count(s, id) - 1;
   next.buffs[potion.kind] = {
@@ -513,14 +479,9 @@ function runCycleInto(s: GameState, task: TaskDef, report: Report, at: number): 
   const yieldMult = task.once ? 1 : modifiers(s, at).yield + masteryYield(masteryLevel(s, task));
   if (task.monster) {
     const damage = fightDamage(s, task, at);
-    const wantsFood = () =>
-      s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
+    const wantsFood = () => s.hp <= damage * (1 + FOOD_HEAL_THRESHOLD) || s.hp < s.settings.eatBelow * maxHp(s);
     // Bosses are fought without a break: no eating until the fight is over.
-    for (
-      let food = foodOwned(s);
-      !task.boss && food && wantsFood() && s.hp < maxHp(s);
-      food = foodOwned(s)
-    ) {
+    for (let food = foodOwned(s); !task.boss && food && wantsFood() && s.hp < maxHp(s); food = foodOwned(s)) {
       s.inventory[food] = count(s, food) - 1;
       s.hp = Math.min(maxHp(s), s.hp + (ITEMS[food].heal ?? 0));
     }
@@ -567,28 +528,40 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
     report.notices.push("Strangers are approaching your camp. The locals answered your signal.");
   }
 
-  // Drones work whatever the survivor is doing, and their haul can feed the active task.
-  for (const def of BUILDINGS) {
-    const level = buildingLevel(s, def.id);
-    if (!def.produces || level === 0) continue;
-    const owed =
-      (s.passive[def.id] ?? 0) +
-      (elapsed * level * (def.powerUse ? powerEfficiency(s) : 1)) / def.produces.everyMs;
-    const whole = Math.floor(owed);
-    s.passive[def.id] = owed - whole;
-    if (whole > 0) {
-      const haul = emptyReport();
-      addItems(s, { [def.produces.item]: whole }, 1, haul);
-      mergeReports(report, { ...emptyReport(), items: haul.items, passive: haul.items });
-    }
-  }
-
   const task = s.activeTask ? TASK_BY_ID[s.activeTask] : undefined;
   const regen =
-    (task?.skill === "combat" ? 0 : REGEN_HP_PER_MS) +
-    SHELTER_REGEN_HP_PER_MS * buildingLevel(s, "shelter");
-  s.hp = Math.min(maxHp(s), s.hp + elapsed * regen);
-  if (!task) return finish(s, report);
+    (task?.skill === "combat" ? 0 : REGEN_HP_PER_MS) + SHELTER_REGEN_HP_PER_MS * buildingLevel(s, "shelter");
+
+  // Drones work whatever the survivor is doing, and their haul can feed the active task. They and
+  // the survivor's healing are settled in time order, as regular ticks would: a cycle sees what the
+  // drones hauled and how much the survivor has healed up to the moment it finishes.
+  const carried = { ...s.passive };
+  let settled = 0;
+  const settle = (to: number) => {
+    const upTo = Math.min(Math.max(to, settled), elapsed);
+    if (upTo <= settled) return;
+    s.hp = Math.min(maxHp(s), s.hp + (upTo - settled) * regen);
+    for (const def of BUILDINGS) {
+      const level = buildingLevel(s, def.id);
+      if (!def.produces || level === 0) continue;
+      // Worked out from the start of the absence each time, so slices add up with no drift.
+      const rate = (level * (def.powerUse ? powerEfficiency(s) : 1)) / def.produces.everyMs;
+      const before = (carried[def.id] ?? 0) + settled * rate;
+      const after = (carried[def.id] ?? 0) + upTo * rate;
+      const whole = Math.floor(after) - Math.floor(before);
+      s.passive[def.id] = after - Math.floor(after);
+      if (whole > 0) {
+        const haul = emptyReport();
+        addItems(s, { [def.produces.item]: whole }, 1, haul);
+        mergeReports(report, { ...emptyReport(), items: haul.items, passive: haul.items });
+      }
+    }
+    settled = upTo;
+  };
+  if (!task) {
+    settle(elapsed);
+    return finish(s, report);
+  }
 
   if (task.once && s.taskRemaining === null) s.taskRemaining = 1;
   let remaining = s.taskProgressMs + elapsed;
@@ -609,6 +582,7 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
     const at = windowStart + done;
     const duration = taskDurationMs(s, task, at);
     if (remaining < duration) break;
+    settle(done + duration - prev.taskProgressMs);
     const stopReason = runCycle(s, task, report, at);
     if (stopReason) {
       report.stoppedReason = stopReason;
@@ -623,9 +597,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
       break;
     }
   }
+  settle(elapsed);
   const worked = Math.max(0, done + (s.activeTask ? remaining : 0) - prev.taskProgressMs);
-  if (worked > 0)
-    (report.skills[task.skill] ??= { ms: 0, cycles: 0, xp: 0, items: {} }).ms = worked;
+  if (worked > 0) (report.skills[task.skill] ??= { ms: 0, cycles: 0, xp: 0, items: {} }).ms = worked;
   s.taskProgressMs = s.activeTask ? remaining : 0;
   if (!s.activeTask) s.taskRemaining = null;
   return finish(s, report);
@@ -634,8 +608,9 @@ export function advance(prev: GameState, now: number): { state: GameState; repor
 /** Folds what the report gained into the lifetime totals. */
 function finish(s: GameState, report: Report): { state: GameState; report: Report } {
   refreshBoardIfDue(s);
-  for (const kind of Object.keys(s.buffs) as BuffKind[])
-    if (!activeBuff(s, kind)) delete s.buffs[kind];
+  // A potion stays while the cycle in progress started under it, so that cycle still finishes with it.
+  const cycleStart = s.activeTask ? s.lastTick - s.taskProgressMs : s.lastTick;
+  for (const kind of Object.keys(s.buffs) as BuffKind[]) if (!activeBuff(s, kind, cycleStart)) delete s.buffs[kind];
   for (const [id, n] of Object.entries(report.items) as [ItemId, number][])
     s.stats.produced[id] = (s.stats.produced[id] ?? 0) + n;
   return { state: s, report };

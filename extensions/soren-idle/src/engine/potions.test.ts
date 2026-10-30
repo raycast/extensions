@@ -54,10 +54,7 @@ describe("potions", () => {
   });
 
   it("do not let a weaker potion replace a stronger one", () => {
-    const strong = drink(
-      withItems({ quicksilver_tonic: 1, swift_tonic: 1 }),
-      "quicksilver_tonic",
-    ).state;
+    const strong = drink(withItems({ quicksilver_tonic: 1, swift_tonic: 1 }), "quicksilver_tonic").state;
     expect(drink(strong, "swift_tonic").error).toMatch(/stronger/);
     const weak = drink(withItems({ quicksilver_tonic: 1, swift_tonic: 1 }), "swift_tonic").state;
     expect(drink(weak, "quicksilver_tonic").state.buffs.speed?.item).toBe("quicksilver_tonic");
@@ -84,9 +81,7 @@ describe("potions", () => {
       let s = withItems({ fortune_draught: 1 }, { buildings: { storage: 5, stasis_pod: 5 } });
       if (potion) s = drink(s, "fortune_draught").state;
       // the potion lasts 15 minutes, a few hundred cycles
-      return (
-        advance(startTask(s, "salvage_hull").state, 15 * MINUTE).state.inventory.scrap_metal ?? 0
-      );
+      return advance(startTask(s, "salvage_hull").state, 15 * MINUTE).state.inventory.scrap_metal ?? 0;
     };
     const base = run(false);
     expect(base).toBeGreaterThan(200);

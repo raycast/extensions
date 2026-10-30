@@ -1,12 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { ABANDON_COST, BOARD_BONUS, REROLL_COST } from "../engine/data";
-import {
-  boardCapacity,
-  boardLevel,
-  bountyLevel,
-  bountyTarget,
-  xpForBountyLevel,
-} from "../engine/bounty";
+import { boardCapacity, boardLevel, bountyLevel, bountyTarget, xpForBountyLevel } from "../engine/bounty";
 import { bar, formatDuration, formatMarks } from "../engine/format";
 import { taskDurationMs } from "../engine/engine";
 import { Bounty, GameState } from "../engine/types";
@@ -72,26 +66,17 @@ export function Bounties(props: {
 
   return (
     <>
-      <List.Section
-        title="Bounties"
-        subtitle={`Bounty level ${bountyLevel(state)} · ${formatMarks(state.marks)}`}
-      >
+      <List.Section title="Bounties" subtitle={`Bounty level ${bountyLevel(state)} · ${formatMarks(state.marks)}`}>
         {active ? (
           <List.Item
             title={`Hunt ${active.bounty.count}× ${bountyTarget(active.bounty).monster?.name}`}
             icon={{ source: Icon.Flag, tintColor: Color.Green }}
             accessories={[{ text: `${active.progress}/${active.bounty.count}` }]}
-            detail={
-              <List.Item.Detail markdown={bountyMarkdown(state, active.bounty, active.progress)} />
-            }
+            detail={<List.Item.Detail markdown={bountyMarkdown(state, active.bounty, active.progress)} />}
             actions={
               <ActionPanel>
                 {state.activeTask !== active.bounty.task && (
-                  <Action
-                    title="Start Hunt"
-                    icon={Icon.Play}
-                    onAction={() => props.onHunt(active.bounty.task)}
-                  />
+                  <Action title="Start Hunt" icon={Icon.Play} onAction={() => props.onHunt(active.bounty.task)} />
                 )}
                 <Action
                   title={`Abandon Bounty (${ABANDON_COST} Marks)`}
@@ -121,10 +106,7 @@ export function Bounties(props: {
           />
         )}
       </List.Section>
-      <List.Section
-        title="On the board"
-        subtitle={`${state.board.offers.length}/${boardCapacity(state)}`}
-      >
+      <List.Section title="On the board" subtitle={`${state.board.offers.length}/${boardCapacity(state)}`}>
         {state.board.offers.map((bounty) => (
           <List.Item
             key={bounty.id}
@@ -145,11 +127,7 @@ export function Bounties(props: {
                       icon={Icon.Play}
                       onAction={() => props.onAccept(bounty.id, true)}
                     />
-                    <Action
-                      title="Accept Only"
-                      icon={Icon.Check}
-                      onAction={() => props.onAccept(bounty.id, false)}
-                    />
+                    <Action title="Accept Only" icon={Icon.Check} onAction={() => props.onAccept(bounty.id, false)} />
                   </>
                 )}
                 {reroll}

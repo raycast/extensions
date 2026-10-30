@@ -16,12 +16,7 @@ const ALL: Record<string, (frame: number) => string> = {
 const out = "dist/art-preview";
 mkdirSync(out, { recursive: true });
 
-const names = [
-  "camp",
-  ...Object.keys(PREVIEW_SCENES),
-  ...Object.keys(buildings),
-  "building_shelter_unbuilt",
-];
+const names = ["camp", ...Object.keys(PREVIEW_SCENES), ...Object.keys(buildings), "building_shelter_unbuilt"];
 for (const name of names) {
   for (let f = 0; f < 4; f++) writeFileSync(`${out}/${name}-${f}.svg`, ALL[name](f));
 }

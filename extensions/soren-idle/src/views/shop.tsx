@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { BUILDING_BY_ID, BOUNTY_SHOP, ITEMS } from "../engine/data";
 import { bountyLevel } from "../engine/bounty";
 import { count } from "../engine/engine";
-import { formatMarks } from "../engine/format";
+import { describeItem, formatMarks } from "../engine/format";
 import { shopOpen, shopStatus } from "../engine/shop";
 import { GameState, ItemId } from "../engine/types";
 import { Notice } from "./notice";
@@ -21,10 +21,7 @@ export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => voi
   }
 
   return (
-    <List.Section
-      title="Bounty Shop"
-      subtitle={`Bounty level ${bountyLevel(state)} · ${formatMarks(state.marks)}`}
-    >
+    <List.Section title="Bounty Shop" subtitle={`Bounty level ${bountyLevel(state)} · ${formatMarks(state.marks)}`}>
       {BOUNTY_SHOP.map((entry) => {
         const item = ITEMS[entry.item];
         const status = shopStatus(state, entry);
@@ -39,9 +36,7 @@ export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => voi
             accessories={[
               ...(locked ? [{ tag: `Bounty ${entry.levelReq}` }] : []),
               ...(status === "owned" ? [{ tag: { value: "Owned", color: Color.Green } }] : []),
-              ...(count(state, entry.item) > 0 && status !== "owned"
-                ? [{ text: `×${count(state, entry.item)}` }]
-                : []),
+              ...(count(state, entry.item) > 0 && status !== "owned" ? [{ text: `×${count(state, entry.item)}` }] : []),
               {
                 tag: {
                   value: formatMarks(entry.cost),
@@ -53,7 +48,7 @@ export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => voi
               <List.Item.Detail
                 markdown={[
                   `# ${item.name}`,
-                  item.description,
+                  describeItem(item),
                   "",
                   "_You cannot craft this or buy it from the Hub._",
                   "",
@@ -64,9 +59,7 @@ export function BountyShop(props: { state: GameState; onBuy: (id: ItemId) => voi
             }
             actions={
               <ActionPanel>
-                {status !== "owned" && (
-                  <Action title="Buy" icon={Icon.Cart} onAction={() => props.onBuy(entry.item)} />
-                )}
+                {status !== "owned" && <Action title="Buy" icon={Icon.Cart} onAction={() => props.onBuy(entry.item)} />}
               </ActionPanel>
             }
           />

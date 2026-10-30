@@ -12,10 +12,7 @@ const HULL_TILT = 24;
 /** Hull-local coordinates to screen coordinates. */
 const hull = (x: number, y: number): Pt => {
   const a = rad(HULL_TILT);
-  return [
-    HULL_AT[0] + x * Math.cos(a) - y * Math.sin(a),
-    HULL_AT[1] + x * Math.sin(a) + y * Math.cos(a),
-  ];
+  return [HULL_AT[0] + x * Math.cos(a) - y * Math.sin(a), HULL_AT[1] + x * Math.sin(a) + y * Math.cos(a)];
 };
 
 export function moon(f: number): string {
@@ -27,11 +24,7 @@ export function moon(f: number): string {
   }
   for (const dy of [-15, 0, 15]) {
     const w = Math.sqrt(26 * 26 - dy * dy);
-    out += path(
-      `M${c[0] - w} ${c[1] + dy}Q${c[0]} ${c[1] + dy + 5} ${c[0] + w} ${c[1] + dy}`,
-      BLUE.mid,
-      0.8,
-    );
+    out += path(`M${c[0] - w} ${c[1] + dy}Q${c[0]} ${c[1] + dy + 5} ${c[0] + w} ${c[1] + dy}`, BLUE.mid, 0.8);
   }
   return out;
 }
@@ -39,10 +32,7 @@ export function moon(f: number): string {
 export function ground(): string {
   const ridge = [
     "M18 262",
-    ...Array.from(
-      { length: 13 },
-      (_, i) => `L${18 + (i + 1) * 50} ${258 + Math.round(hash(i, 1, 3) * 10)}`,
-    ),
+    ...Array.from({ length: 13 }, (_, i) => `L${18 + (i + 1) * 50} ${258 + Math.round(hash(i, 1, 3) * 10)}`),
     "V292H18Z",
   ].join("");
   let out = path(ridge, "none", 0, "#2b78d8", 'opacity=".55"');
@@ -138,13 +128,7 @@ function cables(f: number): string {
     const s = hull(150 + i * 14, 98);
     const sway = Math.sin(rad(f * 90 + i * 55)) * 3;
     const e: Pt = [s[0] - 6 + i * 3 + sway, s[1] + 44 + (i % 3) * 9];
-    out += path(
-      `M${P(s)}Q${s[0] + 14 + sway * 2},${s[1] + 28} ${P(e)}`,
-      BLUE.light,
-      1.1,
-      "none",
-      'opacity=".85"',
-    );
+    out += path(`M${P(s)}Q${s[0] + 14 + sway * 2},${s[1] + 28} ${P(e)}`, BLUE.light, 1.1, "none", 'opacity=".85"');
   }
   return out;
 }
@@ -177,17 +161,8 @@ export function sparks(tip: Pt, f: number): string {
     const ang = rad(-150 + i * 22 + hash(i, f, 7) * 16);
     const d = 8 + hash(i, f, 8) * 30;
     const p: Pt = [tip[0] + Math.cos(ang) * d, tip[1] + Math.sin(ang) * d + d * 0.25];
-    const q: Pt = [
-      tip[0] + Math.cos(ang) * (d - 5),
-      tip[1] + Math.sin(ang) * (d - 5) + (d - 5) * 0.25,
-    ];
-    out += line(
-      q,
-      p,
-      i % 2 ? "#ffffff" : BLUE.light,
-      1.2,
-      `opacity="${(0.95 - d / 60).toFixed(2)}"`,
-    );
+    const q: Pt = [tip[0] + Math.cos(ang) * (d - 5), tip[1] + Math.sin(ang) * (d - 5) + (d - 5) * 0.25];
+    out += line(q, p, i % 2 ? "#ffffff" : BLUE.light, 1.2, `opacity="${(0.95 - d / 60).toFixed(2)}"`);
   }
   return out;
 }
@@ -247,13 +222,7 @@ export function crystal(x: number, y: number, h: number, w: number, tilt: number
   const mid = world[3];
   return [
     poly(world, "url(#crystal)", BLUE.pale, 1.2),
-    line(
-      mid,
-      [(world[0][0] + world[1][0]) / 2, (world[0][1] + world[1][1]) / 2],
-      BLUE.deep,
-      0.8,
-      'opacity=".6"',
-    ),
+    line(mid, [(world[0][0] + world[1][0]) / 2, (world[0][1] + world[1][1]) / 2], BLUE.deep, 0.8, 'opacity=".6"'),
     line(world[0], world[4], BLUE.deep, 0.8, 'opacity=".5"'),
   ].join("");
 }
@@ -263,12 +232,7 @@ function strata(): string {
   for (let k = 0; k < 26; k++) {
     let d = "";
     for (let x = 90; x <= 520; x += 22) {
-      const y =
-        340 -
-        (x - 100) * 0.64 +
-        (k - 13) * 17 +
-        Math.sin(x * 0.045 + k * 0.7) * 6 +
-        hash(x, k, 9) * 2;
+      const y = 340 - (x - 100) * 0.64 + (k - 13) * 17 + Math.sin(x * 0.045 + k * 0.7) * 6 + hash(x, k, 9) * 2;
       d += `${d ? "L" : "M"}${x} ${y.toFixed(1)}`;
     }
     out += path(d, BLUE.light, 0.9, "none", `opacity="${(0.4 + (k % 4) * 0.12).toFixed(2)}"`);
@@ -402,13 +366,7 @@ export function wiring(f: number): string {
       cables += path(cubicPath(curve, 0, 0.5 - gap), BLUE.pale, 2.6);
       cables += path(cubicPath(curve, 0.5 + gap, 1), BLUE.pale, 2.6, "none", 'opacity=".9"');
     } else {
-      cables += path(
-        cubicPath(curve, 0, 1),
-        BLUE.light,
-        1.5,
-        "none",
-        `opacity="${0.55 + (i % 3) * 0.15}"`,
-      );
+      cables += path(cubicPath(curve, 0, 1), BLUE.light, 1.5, "none", `opacity="${0.55 + (i % 3) * 0.15}"`);
     }
   }
   const box = (x: number) =>
@@ -518,10 +476,7 @@ function chunk(cx: number, cy: number, r: number, seed: number, bright = 1): str
     const d = r * (0.62 + hash(seed, i, 43) * 0.6);
     rim.push([cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.82]);
   }
-  const core: Pt = [
-    cx + (hash(seed, 7, 44) - 0.5) * r * 0.5,
-    cy + (hash(seed, 8, 44) - 0.5) * r * 0.4,
-  ];
+  const core: Pt = [cx + (hash(seed, 7, 44) - 0.5) * r * 0.5, cy + (hash(seed, 8, 44) - 0.5) * r * 0.4];
   const fills = ["#a9dcff", "#6cb4ff", "#3f8fe8", "#2160b8"];
   const facets = ["", "", "", ""];
   for (let i = 0; i < n; i++) {
@@ -536,17 +491,10 @@ function chunk(cx: number, cy: number, r: number, seed: number, bright = 1): str
   }
   let out = "";
   facets.forEach((d, tone) => {
-    if (d)
-      out += path(d, BLUE.pale, 0.9, fills[tone], `fill-opacity="${(0.9 * bright).toFixed(2)}"`);
+    if (d) out += path(d, BLUE.pale, 0.9, fills[tone], `fill-opacity="${(0.9 * bright).toFixed(2)}"`);
   });
   // a glint on the brightest face
-  out += line(
-    [cx - r * 0.5, cy - r * 0.3],
-    [cx - r * 0.15, cy - r * 0.5],
-    "#ffffff",
-    1.2,
-    'opacity=".8"',
-  );
+  out += line([cx - r * 0.5, cy - r * 0.3], [cx - r * 0.15, cy - r * 0.5], "#ffffff", 1.2, 'opacity=".8"');
   return out;
 }
 
@@ -569,13 +517,7 @@ export function ferrite(f: number): string {
       const cx = 228 + i * 27 + (row ? 13 : 0) + (hash(seed, 1, 45) - 0.5) * 8;
       const cy = 230 + row * 24 + (hash(seed, 2, 45) - 0.5) * 12;
       const near = Math.abs(cx - FERRITE_HIT[0]) < 32 && row === 0;
-      seam += chunk(
-        cx,
-        cy + (near ? (f % 2) * 1.5 : 0),
-        12 + hash(seed, 3, 45) * 9,
-        seed,
-        near ? 1.1 : 1,
-      );
+      seam += chunk(cx, cy + (near ? (f % 2) * 1.5 : 0), 12 + hash(seed, 3, 45) * 9, seed, near ? 1.1 : 1);
     }
   }
   for (let i = 0; i < 9; i++) {

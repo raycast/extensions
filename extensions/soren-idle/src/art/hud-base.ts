@@ -5,17 +5,8 @@ import { callout, crystal, ground, hullBody, moon } from "./hud-scenes";
 import { hash } from "./util";
 
 const rad = (deg: number) => (deg * Math.PI) / 180;
-const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) =>
-  poly(points, "url(#hull)", stroke, w);
-const rect = (
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r = 3,
-  stroke: string = BLUE.pale,
-  fill = "url(#hull)",
-) =>
+const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) => poly(points, "url(#hull)", stroke, w);
+const rect = (x: number, y: number, w: number, h: number, r = 3, stroke: string = BLUE.pale, fill = "url(#hull)") =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
 
 const BASE = 304;
@@ -34,11 +25,7 @@ const shelter: Site = {
   draw: (f, L) => {
     let out = path(`M160 ${BASE}A140 110 0 0 1 440 ${BASE}Z`, BLUE.pale, 1.8, "url(#hull)");
     for (const rx of [100, 60])
-      out += path(
-        `M${300 - rx} ${BASE}A${rx} ${rx * 0.78} 0 0 1 ${300 + rx} ${BASE}`,
-        BLUE.mid,
-        1.2,
-      );
+      out += path(`M${300 - rx} ${BASE}A${rx} ${rx * 0.78} 0 0 1 ${300 + rx} ${BASE}`, BLUE.mid, 1.2);
     out += line([300, BASE], [300, BASE - 110], BLUE.mid, 1.2);
     out += rect(276, 258, 48, 46, 4);
     for (let i = 0; i < L; i++) {
@@ -52,10 +39,7 @@ const shelter: Site = {
         i === f % 5 ? BLUE.pale : BLUE.light,
       );
     }
-    if (L >= 3)
-      out +=
-        line([300, 194], [300, 150], BLUE.pale, 2.4) +
-        path("M280 150Q300 128 320 150", BLUE.pale, 2);
+    if (L >= 3) out += line([300, 194], [300, 150], BLUE.pale, 2.4) + path("M280 150Q300 128 320 150", BLUE.pale, 2);
     if (L >= 5)
       out += `<ellipse cx="300" cy="${BASE}" rx="${170 + (f % 2) * 4}" ry="136" fill="none" stroke="${BLUE.light}" stroke-width="1.4" stroke-dasharray="10 8" stroke-dashoffset="${f * 6}"/>`;
     return out;
@@ -76,11 +60,7 @@ const generator: Site = {
         [x + w - 6, 290],
         [x - 2, 296],
       ]);
-      out += path(
-        `M${x + 2} 273L${x + w} 267M${x + 20} 248L${x + 12} 294M${x + 38} 246L${x + 30} 292`,
-        BLUE.mid,
-        1,
-      );
+      out += path(`M${x + 2} 273L${x + w} 267M${x + 20} 248L${x + 12} 294M${x + 38} 246L${x + 30} 292`, BLUE.mid, 1);
       out += line([x + w / 2, 292], [x + w / 2, BASE], BLUE.pale, 2);
     }
     const sun: Pt = [150, 130];
@@ -128,14 +108,10 @@ const workshop: Site = {
       const r = i % 2 ? 14 : 19;
       gear += `${i ? "L" : "M"}${(300 + Math.cos(g) * r).toFixed(1)} ${(212 + Math.sin(g) * r).toFixed(1)}`;
     }
-    out +=
-      path(`${gear}Z`, BLUE.pale, 1.4, "url(#hull)") +
-      circle([300, 212], 5, BLUE.pale, 1.2, BLUE.bg);
+    out += path(`${gear}Z`, BLUE.pale, 1.4, "url(#hull)") + circle([300, 212], 5, BLUE.pale, 1.2, BLUE.bg);
     out += line([420, BASE], [420, 170], BLUE.pale, 3) + line([420, 170], [470, 190], BLUE.pale, 3);
     const sway = Math.sin(rad(f * 90)) * 6;
-    out +=
-      line([470, 190], [470 + sway, 232], BLUE.light, 1.4) +
-      path(`M${462 + sway} 232h16v8h-16z`, BLUE.pale, 1.4);
+    out += line([470, 190], [470 + sway, 232], BLUE.light, 1.4) + path(`M${462 + sway} 232h16v8h-16z`, BLUE.pale, 1.4);
     out += `<circle cx="300" cy="${BASE - 10}" r="${(10 + f * 2).toFixed(1)}" fill="url(#flare)" opacity=".7"/>`;
     return out;
   },
@@ -143,14 +119,7 @@ const workshop: Site = {
 
 function droneBody(c: Pt, s: number, f: number): string {
   let out = `<ellipse cx="${c[0]}" cy="${c[1]}" rx="${24 * s}" ry="${11 * s}" fill="url(#hull)" stroke="${BLUE.pale}" stroke-width="1.6"/>`;
-  out += circle(
-    [c[0], c[1] - 2 * s],
-    4 * s,
-    "#ffffff",
-    1,
-    "#ffffff",
-    `opacity="${f % 2 ? 1 : 0.6}"`,
-  );
+  out += circle([c[0], c[1] - 2 * s], 4 * s, "#ffffff", 1, "#ffffff", `opacity="${f % 2 ? 1 : 0.6}"`);
   for (const dx of [-34, 34]) {
     out += line([c[0] + dx * 0.55 * s, c[1] - 4 * s], [c[0] + dx * s, c[1] - 12 * s], BLUE.pale, 2);
     out += `<ellipse cx="${c[0] + dx * s}" cy="${c[1] - 13 * s}" rx="${(f % 2 ? 22 : 15) * s}" ry="${2.4 * s}" fill="${BLUE.light}" fill-opacity=".5" stroke="${BLUE.pale}" stroke-width="1"/>`;
@@ -179,13 +148,7 @@ function fleet(kind: "scrap" | "ore" | "glowcap", f: number, L: number): string 
       );
     else if (kind === "ore") out += crystal(x + 10, BASE, 20 + (k % 3) * 8, 6, (k % 3) * 8 - 8);
     else
-      out += path(
-        `M${x} ${BASE}q10 -${24 + (k % 3) * 8} 20 0z`,
-        BLUE.pale,
-        1.3,
-        "url(#crystal)",
-        'fill-opacity=".7"',
-      );
+      out += path(`M${x} ${BASE}q10 -${24 + (k % 3) * 8} 20 0z`, BLUE.pale, 1.3, "url(#crystal)", 'fill-opacity=".7"');
   }
   const spots: Pt[] = [
     [300, 170],
@@ -200,13 +163,7 @@ function fleet(kind: "scrap" | "ore" | "glowcap", f: number, L: number): string 
     const c: Pt = [spots[i][0], spots[i][1] + bob];
     out += droneBody(c, s, f + i);
     const beam = c[1] + 28 * s;
-    out += line(
-      [c[0], beam],
-      [c[0], BASE - 22],
-      BLUE.light,
-      1,
-      'stroke-dasharray="3 5" opacity=".6"',
-    );
+    out += line([c[0], beam], [c[0], BASE - 22], BLUE.light, 1, 'stroke-dasharray="3 5" opacity=".6"');
   }
   return out;
 }
@@ -243,9 +200,7 @@ const translator: Site = {
     for (let x = 0; x <= 172; x += 6)
       wave += `L${214 + x} ${(270 + Math.sin(rad(x * 4 + f * 90)) * 8 * (L / 5 + 0.4)).toFixed(1)}`;
     out += path(wave, "#ffffff", 1.4);
-    out +=
-      line([300, 176], [300, 140], BLUE.pale, 3) +
-      path("M262 130Q300 96 338 130Z", BLUE.pale, 1.8, "url(#hull)");
+    out += line([300, 176], [300, 140], BLUE.pale, 3) + path("M262 130Q300 96 338 130Z", BLUE.pale, 1.8, "url(#hull)");
     for (let i = 0; i < 3; i++)
       out += path(
         `M${318 + i * 10} ${118 - i * 6}a${14 + i * 8} ${14 + i * 8} 0 0 1 0 ${-(10 + i * 8)}`,
@@ -288,8 +243,7 @@ const hub: Site = {
         `fill-opacity=".5" opacity="${(1 - t).toFixed(2)}"`,
       );
     }
-    out +=
-      rect(250, 150, 100, 26, 3) + text(262, 168, 12, "MARKET", BLUE.pale, 'letter-spacing="1"');
+    out += rect(250, 150, 100, 26, 3) + text(262, 168, 12, "MARKET", BLUE.pale, 'letter-spacing="1"');
     return out;
   },
 };
@@ -306,18 +260,8 @@ const hydroponicBay: Site = {
       const h = 16 + ((i * 3 + f) % 4) * 4 + i * 10;
       out += line([x + 26, 264], [x + 26, 264 - h], BLUE.pale, 1.6);
       out +=
-        path(
-          `M${x + 26} ${264 - h * 0.6}q-16 -8 -20 -18q16 0 20 18z`,
-          BLUE.pale,
-          1.1,
-          "url(#hull)",
-        ) +
-        path(
-          `M${x + 26} ${264 - h * 0.8}q16 -8 20 -18q-16 0 -20 18z`,
-          BLUE.pale,
-          1.1,
-          "url(#hull)",
-        );
+        path(`M${x + 26} ${264 - h * 0.6}q-16 -8 -20 -18q16 0 20 18z`, BLUE.pale, 1.1, "url(#hull)") +
+        path(`M${x + 26} ${264 - h * 0.8}q16 -8 20 -18q-16 0 -20 18z`, BLUE.pale, 1.1, "url(#hull)");
       out += hull([
         [x, 264],
         [x + 52, 264],
@@ -325,8 +269,7 @@ const hydroponicBay: Site = {
         [x + 8, 290],
       ]);
       out +=
-        line([x + 18, 290], [x + 18, BASE], BLUE.light, 1.2) +
-        line([x + 34, 290], [x + 34, BASE], BLUE.light, 1.2);
+        line([x + 18, 290], [x + 18, BASE], BLUE.light, 1.2) + line([x + 34, 290], [x + 34, BASE], BLUE.light, 1.2);
     }
     out += rect(170, BASE - 4, 260, 10, 3);
     return out;
@@ -343,19 +286,8 @@ const storage: Site = {
         const x = 210 + c * 66 + (r % 2 ? 12 : 0);
         const y = BASE - 36 - r * 36;
         out += rect(x, y, 60, 32, 2);
-        out += path(
-          `M${x + 4} ${y + 4}L${x + 56} ${y + 28}M${x + 56} ${y + 4}L${x + 4} ${y + 28}`,
-          BLUE.mid,
-          1,
-        );
-        out += circle(
-          [x + 8, y + 8],
-          2,
-          "#ffffff",
-          1,
-          "#ffffff",
-          `opacity="${(r + c + f) % 2 ? 1 : 0.4}"`,
-        );
+        out += path(`M${x + 4} ${y + 4}L${x + 56} ${y + 28}M${x + 56} ${y + 4}L${x + 4} ${y + 28}`, BLUE.mid, 1);
+        out += circle([x + 8, y + 8], 2, "#ffffff", 1, "#ffffff", `opacity="${(r + c + f) % 2 ? 1 : 0.4}"`);
       }
     }
     out += rect(190, BASE, 240, 8, 2);
@@ -367,13 +299,7 @@ const stasisPod: Site = {
   tag: [410, 232],
   draw: (f, L) => {
     let out = rect(170, 252, 260, 50, 14);
-    out += path(
-      "M190 252Q190 196 250 192H350Q410 196 410 252",
-      BLUE.pale,
-      1.8,
-      "url(#plate)",
-      'fill-opacity=".35"',
-    );
+    out += path("M190 252Q190 196 250 192H350Q410 196 410 252", BLUE.pale, 1.8, "url(#plate)", 'fill-opacity=".35"');
     out += `<ellipse cx="300" cy="${230 + (f % 2)}" rx="${70 + (f % 2) * 2}" ry="16" fill="${BLUE.light}" fill-opacity=".3"/>`;
     out +=
       circle([250, 232], 11, BLUE.pale, 1.4, BLUE.light) +
@@ -388,13 +314,7 @@ const stasisPod: Site = {
     for (let x = 0; x < 44; x += 4) beat += `L${446 + x} ${x % 16 === 8 ? 222 + (f % 2) * 2 : 236}`;
     out += path(beat, "#ffffff", 1.4);
     for (let i = 0; i < 6; i++)
-      out += line(
-        [210 + i * 28, 206 - (i % 2) * 6],
-        [214 + i * 28, 198 - (i % 2) * 6],
-        BLUE.pale,
-        1.2,
-        'opacity=".7"',
-      );
+      out += line([210 + i * 28, 206 - (i % 2) * 6], [214 + i * 28, 198 - (i % 2) * 6], BLUE.pale, 1.2, 'opacity=".7"');
     return out;
   },
 };
@@ -402,8 +322,7 @@ const stasisPod: Site = {
 const bountyBoard: Site = {
   tag: [400, 220],
   draw: (f, L) => {
-    let out =
-      line([220, BASE], [220, 160], BLUE.pale, 4) + line([380, BASE], [380, 160], BLUE.pale, 4);
+    let out = line([220, BASE], [220, 160], BLUE.pale, 4) + line([380, BASE], [380, 160], BLUE.pale, 4);
     out += rect(196, 152, 208, 120, 5);
     out += rect(206, 162, 188, 100, 3, BLUE.light, "#0b1e44");
     const cards = Math.min(L, 3) * 2;
@@ -478,15 +397,7 @@ function building(id: BuildingId, level: number): (f: number) => string {
   return (f) => {
     const subject = site.draw(f, Math.max(1, level));
     const pips = Array.from({ length: def.maxLevel }, (_, i) =>
-      rect(
-        320 - (def.maxLevel * 12) / 2 + i * 12,
-        350,
-        8,
-        8,
-        1,
-        BLUE.mid,
-        i < level ? BLUE.light : "none",
-      ),
+      rect(320 - (def.maxLevel * 12) / 2 + i * 12, 350, 8, 8, 1, BLUE.mid, i < level ? BLUE.light : "none"),
     ).join("");
     return [
       moon(f),
@@ -524,10 +435,7 @@ export function camp(f: number): string {
   for (let i = 0; i < 9; i++) {
     const t = ((f + hash(i, 1, 141) * 4) % 4) / 4;
     embers += circle(
-      [
-        fire[0] + (hash(i, 2, 141) - 0.5) * 50 + Math.sin(rad(t * 360 + i * 50)) * 6,
-        fire[1] - 40 - t * 90,
-      ],
+      [fire[0] + (hash(i, 2, 141) - 0.5) * 50 + Math.sin(rad(t * 360 + i * 50)) * 6, fire[1] - 40 - t * 90],
       1.4,
       "#ffffff",
       1,

@@ -26,10 +26,7 @@ describe("storage limits", () => {
   });
 
   it("stop a task when its output would overflow, and say why", () => {
-    const s = startTask(
-      withState({ inventory: { scrap_metal: STORAGE_CAPS[0] - 2 } }),
-      "salvage_hull",
-    ).state;
+    const s = startTask(withState({ inventory: { scrap_metal: STORAGE_CAPS[0] - 2 } }), "salvage_hull").state;
     const { state, report } = advance(s, 10 * 60_000);
     expect(state.inventory.scrap_metal).toBe(STORAGE_CAPS[0]);
     expect(report.stoppedReason).toMatch(/Storage full: Scrap Metal/);

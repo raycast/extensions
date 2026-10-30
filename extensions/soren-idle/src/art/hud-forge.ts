@@ -3,17 +3,8 @@ import { arm, callout, crystal, sparks } from "./hud-scenes";
 import { hash } from "./util";
 
 const rad = (deg: number) => (deg * Math.PI) / 180;
-const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) =>
-  poly(points, "url(#hull)", stroke, w);
-const rect = (
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r = 3,
-  stroke: string = BLUE.pale,
-  fill = "url(#hull)",
-) =>
+const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) => poly(points, "url(#hull)", stroke, w);
+const rect = (x: number, y: number, w: number, h: number, r = 3, stroke: string = BLUE.pale, fill = "url(#hull)") =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
 const rot = (p: Pt, deg: number): Pt => {
   const a = rad(deg);
@@ -60,13 +51,7 @@ const alloy: Item = {
       ...[-60, -20, 20, 60].map((x) => circle([x, -13], 2.4, BLUE.pale, 1, BLUE.bg)),
       `<ellipse cx="22" cy="-38" rx="70" ry="14" fill="url(#flare)" opacity="${[0.6, 0.8, 0.9, 0.7][f]}"/>`,
       ...[0, 1, 2].map((i) =>
-        path(
-          `M${-30 + i * 40} -52q${-6 + (f % 2) * 4} -12 0 -24`,
-          BLUE.light,
-          1.3,
-          "none",
-          'opacity=".7"',
-        ),
+        path(`M${-30 + i * 40} -52q${-6 + (f % 2) * 4} -12 0 -24`, BLUE.light, 1.3, "none", 'opacity=".7"'),
       ),
     ].join(""),
 };
@@ -172,10 +157,7 @@ const fusionCell: Item = {
       Math.cos(rad(i * 60 + 30)) * 76,
       Math.sin(rad(i * 60 + 30)) * 76,
     ]);
-    const orbit = (k: number): Pt => [
-      Math.cos(rad(f * 90 + k * 180)) * 24,
-      Math.sin(rad(f * 90 + k * 180)) * 24,
-    ];
+    const orbit = (k: number): Pt => [Math.cos(rad(f * 90 + k * 180)) * 24, Math.sin(rad(f * 90 + k * 180)) * 24];
     return [
       poly(hex, "none", BLUE.pale, 2),
       ...hex.map((p, i) => line(p, hex[(i + 1) % 6], BLUE.light, 5, 'opacity=".3"')),
@@ -220,12 +202,7 @@ function torch(f: number, arcTorch: boolean): string {
       BLUE.light,
       'fill-opacity=".6"',
     );
-    out += path(
-      `M62 -4Q${76 + grow} -6 ${92 + grow} 0Q${76 + grow} 6 62 4Z`,
-      "#ffffff",
-      1,
-      "#ffffff",
-    );
+    out += path(`M62 -4Q${76 + grow} -6 ${92 + grow} 0Q${76 + grow} 6 62 4Z`, "#ffffff", 1, "#ffffff");
   }
   return out;
 }
@@ -257,9 +234,7 @@ function kit(f: number, deep: boolean): string {
     ),
     // sample jars
     ...[-22, -4, 14].map(
-      (x, i) =>
-        rect(x, -6, 14, 54, 3, BLUE.pale, i === 1 ? "url(#plate)" : "url(#hull)") +
-        rect(x - 1, -12, 16, 7, 1),
+      (x, i) => rect(x, -6, 14, 54, 3, BLUE.pale, i === 1 ? "url(#plate)" : "url(#hull)") + rect(x - 1, -12, 16, 7, 1),
     ),
     // scanner
     rect(44, -16, 46, 66, 4),
@@ -328,19 +303,12 @@ const quantumDrill: Item = { name: "QUANTUM DRILL", work: [106, 0], draw: (f) =>
 // --- weapons -----------------------------------------------------------------------
 
 function hilt(): string {
-  return [
-    rect(-106, -7, 52, 14, 5),
-    circle([-108, 0], 9, BLUE.pale, 1.4, BLUE.bg),
-    rect(-56, -22, 10, 44, 2),
-  ].join("");
+  return [rect(-106, -7, 52, 14, 5), circle([-108, 0], 9, BLUE.pale, 1.4, BLUE.bg), rect(-56, -22, 10, 44, 2)].join("");
 }
 
 const TILT = -16;
 
-function weapon(
-  f: number,
-  kind: "pulse" | "saber" | "cleaver" | "maul" | "fang" | "spore" | "thorn",
-): string {
+function weapon(f: number, kind: "pulse" | "saber" | "cleaver" | "maul" | "fang" | "spore" | "thorn"): string {
   let out = "";
   if (kind === "pulse" || kind === "saber") {
     const len = kind === "saber" ? 124 : 104;
@@ -390,17 +358,13 @@ function weapon(
         BLUE.pale,
         1.2,
       );
-    out += [...Array(4)]
-      .map((_, i) => circle([-30 + i * 34, -14], 2.6, BLUE.pale, 1, BLUE.bg))
-      .join("");
+    out += [...Array(4)].map((_, i) => circle([-30 + i * 34, -14], 2.6, BLUE.pale, 1, BLUE.bg)).join("");
     out += line([-40, 10], [104, 10], BLUE.mid, 1.2);
   } else if (kind === "maul") {
     out += rect(-112, -5, 190, 10, 3);
     out += circle([-114, 0], 14, BLUE.pale, 1.6, "url(#hull)");
     out += rect(30, -46, 64, 92, 6);
-    out += [...Array(3)]
-      .map((_, i) => line([42, -30 + i * 30], [82, -30 + i * 30], BLUE.mid, 1.2))
-      .join("");
+    out += [...Array(3)].map((_, i) => line([42, -30 + i * 30], [82, -30 + i * 30], BLUE.mid, 1.2)).join("");
     out += [-46, 46]
       .map((y) =>
         poly(
@@ -426,14 +390,7 @@ function weapon(
     out += `<ellipse cx="62" cy="0" rx="34" ry="24" fill="url(#crystal)" fill-opacity=".8" stroke="${BLUE.pale}" stroke-width="1.6"/>`;
     out += [...Array(4)]
       .map((_, i) =>
-        circle(
-          [46 + i * 9, -8 + (i % 2) * 14],
-          2.4,
-          "#ffffff",
-          1,
-          "#ffffff",
-          `opacity="${0.5 + 0.5 * ((f + i) % 2)}"`,
-        ),
+        circle([46 + i * 9, -8 + (i % 2) * 14], 2.4, "#ffffff", 1, "#ffffff", `opacity="${0.5 + 0.5 * ((f + i) % 2)}"`),
       )
       .join("");
     for (let i = 0; i < 8; i++) {
@@ -472,13 +429,7 @@ function weapon(
         1,
       );
     }
-    out += path(
-      `M-100 0q${20} ${-12 + (f % 2) * 4} 40 0t40 0t40 0`,
-      BLUE.light,
-      1.4,
-      "none",
-      'opacity=".8"',
-    );
+    out += path(`M-100 0q${20} ${-12 + (f % 2) * 4} 40 0t40 0t40 0`, BLUE.light, 1.4, "none", 'opacity=".8"');
     out += hull([
       [38, -12],
       [100, 0],
@@ -560,8 +511,7 @@ function torso(f: number, kind: "armor" | "ward" | "skyweave" | "sovereign"): st
         BLUE.mid,
         1.3,
       );
-    for (const s of [-1, 1])
-      out += path(`M${s * 40} -80Q${s * 70} -20 ${s * 42} 52`, BLUE.light, 1.3);
+    for (const s of [-1, 1]) out += path(`M${s * 40} -80Q${s * 70} -20 ${s * 42} 52`, BLUE.light, 1.3);
     out += [-1, 1]
       .map(
         (s) =>
@@ -633,21 +583,10 @@ function head(f: number, kind: "scout" | "prism" | "crown"): string {
   if (kind === "scout") {
     let bars = "";
     for (let i = 0; i < 4; i++)
-      bars += line(
-        [-50 + i * 6, 6 - i * 3],
-        [-50 + i * 6 + 20 + ((f + i) % 3) * 12, 6 - i * 3],
-        BLUE.light,
-        1.4,
-      );
+      bars += line([-50 + i * 6, 6 - i * 3], [-50 + i * 6 + 20 + ((f + i) % 3) * 12, 6 - i * 3], BLUE.light, 1.4);
     return [
       frame,
-      path(
-        "M-70 12Q0 -22 70 12L62 26Q0 0 -62 26Z",
-        BLUE.light,
-        1.4,
-        BLUE.light,
-        'fill-opacity=".35"',
-      ),
+      path("M-70 12Q0 -22 70 12L62 26Q0 0 -62 26Z", BLUE.light, 1.4, BLUE.light, 'fill-opacity=".35"'),
       bars,
       line([-96, -6], [-120, 20], BLUE.pale, 2.4),
       line([96, -6], [120, 20], BLUE.pale, 2.4),
@@ -673,23 +612,11 @@ function head(f: number, kind: "scout" | "prism" | "crown"): string {
   ];
   tri.forEach(
     (t, i) =>
-      (facets += poly(
-        t,
-        i === 1 ? "url(#crystal)" : BLUE.light,
-        "#ffffff",
-        1.2,
-        i === 1 ? "" : 'fill-opacity=".35"',
-      )),
+      (facets += poly(t, i === 1 ? "url(#crystal)" : BLUE.light, "#ffffff", 1.2, i === 1 ? "" : 'fill-opacity=".35"')),
   );
   let rays = "";
   for (let i = 0; i < 5; i++)
-    rays += line(
-      [0, 24],
-      [-60 + i * 30, 60 + ((f + i) % 2) * 6],
-      BLUE.pale,
-      1.2,
-      `opacity="${0.4 + 0.1 * i}"`,
-    );
+    rays += line([0, 24], [-60 + i * 30, 60 + ((f + i) % 2) * 6], BLUE.pale, 1.2, `opacity="${0.4 + 0.1 * i}"`);
   return [frame, facets, rays].join("");
 }
 
@@ -733,11 +660,7 @@ function forge(item: Item, f: number): string {
     [1, 1],
   ]
     .map(([sx, sy]) =>
-      path(
-        `M${origin[0] + sx * 132} ${origin[1] + sy * 100 - sy * 16}v${sy * 16}h${-sx * 16}`,
-        BLUE.pale,
-        1.4,
-      ),
+      path(`M${origin[0] + sx * 132} ${origin[1] + sy * 100 - sy * 16}v${sy * 16}h${-sx * 16}`, BLUE.pale, 1.4),
     )
     .join("");
   const progress = `<rect x="240" y="352" width="160" height="6" fill="none" stroke="${BLUE.mid}" stroke-width=".8"/><rect x="240" y="352" width="${(160 * (0.25 + f * 0.2)).toFixed(1)}" height="6" fill="${BLUE.light}" opacity=".85"/>`;

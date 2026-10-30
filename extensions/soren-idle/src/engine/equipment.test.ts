@@ -78,8 +78,7 @@ describe("equipping", () => {
 
   it("changes combat stats and gathering speed", () => {
     let s = withItems({ pulse_blade: 1, composite_armor: 1, cutting_torch: 1 });
-    for (const id of ["pulse_blade", "composite_armor", "cutting_torch"] as const)
-      s = equip(s, id).state;
+    for (const id of ["pulse_blade", "composite_armor", "cutting_torch"] as const) s = equip(s, id).state;
     expect(playerDamage(s)).toBe(3 + 1 + 4);
     expect(playerArmor(s)).toBe(1);
     expect(taskDurationMs(s, TASK_BY_ID.salvage_hull)).toBe(2400);
@@ -88,10 +87,7 @@ describe("equipping", () => {
 
   it("takes effect in the simulation too", () => {
     const plain = withItems({}, { buildings: { storage: 5 } });
-    const worn = equip(
-      withItems({ cutting_torch: 1 }, { buildings: { storage: 5 } }),
-      "cutting_torch",
-    ).state;
+    const worn = equip(withItems({ cutting_torch: 1 }, { buildings: { storage: 5 } }), "cutting_torch").state;
     const a = advance(startTask(plain, "salvage_hull").state, 30 * MINUTE).state;
     const b = advance(startTask(worn, "salvage_hull").state, 30 * MINUTE).state;
     expect(b.inventory.scrap_metal ?? 0).toBeGreaterThan((a.inventory.scrap_metal ?? 0) * 1.2);
@@ -125,8 +121,7 @@ describe("equipping", () => {
 
   it("stacks gear from different slots through one function", () => {
     let s = withItems({ prism_visor: 1, prospector_charm: 1, composite_armor: 1 });
-    for (const id of ["prism_visor", "prospector_charm", "composite_armor"] as const)
-      s = equip(s, id).state;
+    for (const id of ["prism_visor", "prospector_charm", "composite_armor"] as const) s = equip(s, id).state;
     const m = modifiers(s);
     expect(m.armor).toBe(3);
     expect(m.rare).toBeCloseTo(1.25 * 1.5);
@@ -134,11 +129,8 @@ describe("equipping", () => {
 });
 
 describe("auto-equip", () => {
-  const craft = (
-    taskId: string,
-    items: Partial<Record<ItemId, number>>,
-    patch: Partial<GameState>,
-  ) => advance(startTask(withItems(items, patch), taskId).state, 10 * MINUTE).state;
+  const craft = (taskId: string, items: Partial<Record<ItemId, number>>, patch: Partial<GameState>) =>
+    advance(startTask(withItems(items, patch), taskId).state, 10 * MINUTE).state;
 
   it("wears a crafted item when its slot is empty", () => {
     const s = craft("craft_scout_visor", { alloy_plate: 2, circuit_scrap: 3 }, levelled(1, 10));
@@ -162,11 +154,7 @@ describe("auto-equip", () => {
   });
 
   it("does not wear what you are too weak for", () => {
-    const s = craft(
-      "craft_arc_saber",
-      { alloy_plate: 8, lumina_crystal: 4, resonance_coil: 1 },
-      levelled(1, 25),
-    );
+    const s = craft("craft_arc_saber", { alloy_plate: 8, lumina_crystal: 4, resonance_coil: 1 }, levelled(1, 25));
     expect(s.inventory.arc_saber).toBe(1);
     expect(s.equipped.weapon).toBeUndefined();
   });

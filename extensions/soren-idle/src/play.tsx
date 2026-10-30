@@ -5,7 +5,7 @@ import { stopTask } from "./engine/engine";
 import { formatBundle, formatDuration } from "./engine/format";
 import { dismissHint, nextHint } from "./engine/hints";
 import { exportSave, importSave } from "./engine/migrate";
-import { resetState, saveState, takeSaveNotice, update } from "./engine/storage";
+import { replaceState, resetState, takeSaveNotice, update } from "./engine/storage";
 import { topItems } from "./engine/away";
 import { Report } from "./engine/types";
 import { ReadyGame, showReport, TickInfo, useGame } from "./hooks/use-game";
@@ -110,12 +110,18 @@ export default function Command() {
       primaryAction: { title: "Import", style: Alert.ActionStyle.Destructive },
     });
     if (!ok) return;
-    await saveState(imported);
+    await replaceState(imported);
     await ready.sync();
     await showToast({ style: Toast.Style.Success, title: "Save imported" });
   }
 
   async function reset() {
+    const ok = await confirmAlert({
+      title: "Reset your game?",
+      message: "This deletes your save and starts over. It cannot be undone.",
+      primaryAction: { title: "Reset Game", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
     await resetState();
     await ready.sync();
   }

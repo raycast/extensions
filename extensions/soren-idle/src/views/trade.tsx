@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { ITEMS, LOCALS } from "../engine/data";
 import { firstContact } from "../engine/engine";
-import { formatCredits } from "../engine/format";
+import { describeItem, formatCredits } from "../engine/format";
 import {
   buyDiscount,
   buyPrice,
@@ -22,7 +22,7 @@ const MAX_TRANSLATOR_LEVEL = 5;
 export function Trade(props: {
   state: GameState;
   onSell: (id: ItemId, qty: number | "all") => void;
-  onBuy: (id: ItemId, qty: number) => void;
+  onBuy: (id: ItemId, qty: number | "max") => void;
 }) {
   const { state } = props;
 
@@ -69,7 +69,7 @@ export function Trade(props: {
                     talk,
                     "",
                     `# ${item.name}`,
-                    item.description,
+                    describeItem(item),
                     "",
                     `- **Pays:** ${formatCredits(sellPrice(state, id))} each`,
                     `- **All ${have}:** ${formatCredits(have * sellPrice(state, id))}`,
@@ -110,10 +110,7 @@ export function Trade(props: {
           />
         )}
       </List.Section>
-      <List.Section
-        title="Buy"
-        subtitle={discount > 0 ? `${Math.round(discount * 100)}% off` : "Prices are high"}
-      >
+      <List.Section title="Buy" subtitle={discount > 0 ? `${Math.round(discount * 100)}% off` : "Prices are high"}>
         {stock.map((entry) => {
           const item = ITEMS[entry.item];
           const price = buyPrice(state, entry);
@@ -137,7 +134,7 @@ export function Trade(props: {
                     talk,
                     "",
                     `# ${item.name}`,
-                    item.description,
+                    describeItem(item),
                     "",
                     `- **Price:** ${formatCredits(price)}${discount > 0 ? ` (${Math.round(discount * 100)}% off)` : ""}`,
                     `- **You have:** ${formatCredits(state.credits)}`,
@@ -146,11 +143,7 @@ export function Trade(props: {
               }
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Buy 1"
-                    icon={Icon.Cart}
-                    onAction={() => props.onBuy(entry.item, 1)}
-                  />
+                  <Action title="Buy 1" icon={Icon.Cart} onAction={() => props.onBuy(entry.item, 1)} />
                   <Action
                     title="Buy 5"
                     icon={Icon.Cart}
@@ -167,9 +160,7 @@ export function Trade(props: {
                       macOS: { modifiers: ["cmd", "shift"], key: "m" },
                       Windows: { modifiers: ["ctrl", "shift"], key: "m" },
                     }}
-                    onAction={() =>
-                      props.onBuy(entry.item, Math.max(1, Math.floor(state.credits / price)))
-                    }
+                    onAction={() => props.onBuy(entry.item, "max")}
                   />
                 </ActionPanel>
               }

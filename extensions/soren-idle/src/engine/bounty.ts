@@ -35,9 +35,7 @@ export const bountyTier = (task: TaskDef) => (task.levelReq < 8 ? 1 : task.level
 export function huntable(s: GameState): TaskDef[] {
   const level = levelFromXp(s.xp.combat);
   const bounty = bountyLevel(s);
-  return TASKS.filter(
-    (t) => t.monster && !t.boss && t.levelReq <= level && TIER_LEVELS[bountyTier(t) - 1] <= bounty,
-  );
+  return TASKS.filter((t) => t.monster && !t.boss && t.levelReq <= level && TIER_LEVELS[bountyTier(t) - 1] <= bounty);
 }
 
 function makeBounty(s: GameState, avoid: string[]): Bounty | undefined {
@@ -96,8 +94,7 @@ export function acceptBounty(s: GameState, id: number): Result {
 /** Drops the active bounty. It costs Marks, and the offer does not come back. */
 export function abandonBounty(s: GameState): Result {
   if (!s.board.active) return { state: s, error: "No active bounty" };
-  if (s.marks < ABANDON_COST)
-    return { state: s, error: `Abandoning costs ${ABANDON_COST} Bounty Marks` };
+  if (s.marks < ABANDON_COST) return { state: s, error: `Abandoning costs ${ABANDON_COST} Bounty Marks` };
   const next = structuredClone(s);
   next.marks -= ABANDON_COST;
   next.board.active = null;
@@ -108,8 +105,7 @@ export function abandonBounty(s: GameState): Result {
 /** Swaps every unclaimed offer for new ones, for a few Marks. */
 export function rerollBoard(s: GameState): Result {
   if (boardLevel(s) === 0) return { state: s, error: "Build a Bounty Board first" };
-  if (s.marks < REROLL_COST)
-    return { state: s, error: `Rerolling costs ${REROLL_COST} Bounty Marks` };
+  if (s.marks < REROLL_COST) return { state: s, error: `Rerolling costs ${REROLL_COST} Bounty Marks` };
   const next = structuredClone(s);
   next.marks -= REROLL_COST;
   next.board.offers = [];

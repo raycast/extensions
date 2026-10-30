@@ -33,7 +33,7 @@
           "name": "notifications",
           "type": "checkbox",
           "label": "Notifications",
-          "title": "Notify when a task stops",
+          "title": "Notify When a Task Stops",
           "description": "Show a macOS notification when a task stops or a run finishes while you are away.",
           "default": true,
           "required": false

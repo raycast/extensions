@@ -81,9 +81,7 @@ describe("rare drops", () => {
       inventory: { prospector_charm: 1 },
       equipped: { charm: "prospector_charm" },
     });
-    expect(charmed.state.inventory.prism_geode ?? 0).toBeGreaterThan(
-      (plain.state.inventory.prism_geode ?? 0) * 1.2,
-    );
+    expect(charmed.state.inventory.prism_geode ?? 0).toBeGreaterThan((plain.state.inventory.prism_geode ?? 0) * 1.2);
   });
 
   it("does not overflow storage", () => {

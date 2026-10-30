@@ -79,9 +79,7 @@ export function Tasks(props: {
     const locked = levelLocked || !!bossLock;
     const active = state.activeTask === task.id;
     const owned =
-      task.once &&
-      task.outputs &&
-      (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
+      task.once && task.outputs && (Object.keys(task.outputs) as ItemId[]).every((id) => count(state, id) > 0);
     return (
       <List.Item
         key={task.id}
@@ -123,11 +121,7 @@ export function Tasks(props: {
     return (
       <>
         {AREAS.map((area) => (
-          <List.Section
-            key={area.id}
-            title={area.name}
-            subtitle={`${areaKills(state, area)} defeated`}
-          >
+          <List.Section key={area.id} title={area.name} subtitle={`${areaKills(state, area)} defeated`}>
             {[...huntsOf(area), TASK_BY_ID[area.boss]].map(item)}
           </List.Section>
         ))}
@@ -143,11 +137,7 @@ export function Tasks(props: {
 }
 
 /** Notes a combat-triangle advantage or disadvantage next to a stat. */
-function matchupNote(
-  attacker: DamageType | undefined,
-  defender: DamageType | undefined,
-  side: "deal" | "take",
-) {
+function matchupNote(attacker: DamageType | undefined, defender: DamageType | undefined, side: "deal" | "take") {
   const k = matchup(attacker, defender);
   if (k === 1) return "";
   const good = side === "deal" ? k > 1 : k < 1;
@@ -161,9 +151,7 @@ function masteryLines(state: GameState, task: TaskDef): string[] {
   const next = masteryXpForLevel(level + 1);
   const bonuses = [
     ...(task.node ? [`+${level - 1} node HP`] : []),
-    ...(masterySpeed(level) < 1
-      ? [`${Math.round((1 - masterySpeed(level)) * 1000) / 10}% faster`]
-      : []),
+    ...(masterySpeed(level) < 1 ? [`${Math.round((1 - masterySpeed(level)) * 1000) / 10}% faster`] : []),
     ...(masteryYield(level) > 0 ? [`${Math.round(masteryYield(level) * 100)}% bonus yield`] : []),
   ];
   return [
@@ -181,13 +169,10 @@ function taskMarkdown(state: GameState, task: TaskDef, active: boolean, frame: n
   );
   if (task.monster) lines.push(`- **HP lost per hour:** ~${Math.round(rates.hpLossPerHour)}`);
   if (task.inputs) lines.push(`- **Uses per hour:** ${formatRates(rates.inputsPerHour)}`);
-  if (rates.nextLevelMs !== null)
-    lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
+  if (rates.nextLevelMs !== null) lines.push(`- **Next level in:** ${formatDuration(rates.nextLevelMs)} nonstop`);
   if (task.node) {
     const max = nodeMaxHp(state, task);
-    lines.push(
-      `- **Node:** ${max} HP, one per cycle, then ${formatDuration(task.node.respawnMs)} to respawn`,
-    );
+    lines.push(`- **Node:** ${max} HP, one per cycle, then ${formatDuration(task.node.respawnMs)} to respawn`);
   }
   if (hasMastery(task)) lines.push(...masteryLines(state, task));
   if (task.rareDrops) {

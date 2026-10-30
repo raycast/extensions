@@ -20,9 +20,7 @@ function effectLine(def: BuildingDef, level: number, state: GameState): string {
   if (def.id === "beacon") {
     if (!level) return "Not built";
     const wait = contactRemainingMs(state);
-    return wait === null
-      ? "The locals have answered"
-      : `Signal sent, answer expected in ${formatDuration(wait)}`;
+    return wait === null ? "The locals have answered" : `Signal sent, answer expected in ${formatDuration(wait)}`;
   }
   if (def.id === "shelter") return `+${10 * level} max HP, +${(0.15 * level).toFixed(2)} HP/s`;
   if (def.levelNotes) return level ? `Level ${level}: ${def.levelNotes[level - 1]}` : "Not built";
@@ -35,11 +33,7 @@ function effectLine(def: BuildingDef, level: number, state: GameState): string {
   return level ? "Built" : "Not built";
 }
 
-export function Base(props: {
-  state: GameState;
-  frame: number;
-  onBuild: (id: BuildingId) => void;
-}) {
+export function Base(props: { state: GameState; frame: number; onBuild: (id: BuildingId) => void }) {
   const { state } = props;
   const contact = firstContact(state);
   return (
@@ -47,8 +41,7 @@ export function Base(props: {
       {BUILDINGS.map((def) => {
         const level = buildingLevel(state, def.id);
         const maxed = level >= def.maxLevel;
-        const skillLocked =
-          !!def.requires && levelOf(state, def.requires.skill) < def.requires.level;
+        const skillLocked = !!def.requires && levelOf(state, def.requires.skill) < def.requires.level;
         const needsContact = !!def.requiresContact && !contact;
         const needed = def.requiresBuilding;
         const needsBuilding = !!needed && buildingLevel(state, needed.id) < needed.level;
@@ -69,9 +62,7 @@ export function Base(props: {
             return `- ${have >= n ? "✅" : "❌"} ${ITEMS[id].name}: ${have}/${n}`;
           }),
           ...(credits
-            ? [
-                `- ${state.credits >= credits ? "✅" : "❌"} Credits: ${Math.floor(state.credits)}/${credits}`,
-              ]
+            ? [`- ${state.credits >= credits ? "✅" : "❌"} Credits: ${Math.floor(state.credits)}/${credits}`]
             : []),
         ];
         return (

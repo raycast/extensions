@@ -28,10 +28,7 @@ export function mergeReports(into: Report, add: Report): Report {
   addBundle(into.rare, add.rare);
   for (const [skill, n] of Object.entries(add.xp) as [keyof Report["xp"], number][])
     into.xp[skill] = (into.xp[skill] ?? 0) + n;
-  for (const [skill, part] of Object.entries(add.skills) as [
-    keyof Report["skills"],
-    SkillReport,
-  ][]) {
+  for (const [skill, part] of Object.entries(add.skills) as [keyof Report["skills"], SkillReport][]) {
     const mine = (into.skills[skill] ??= { ms: 0, cycles: 0, xp: 0, items: {} });
     mine.ms += part.ms;
     mine.cycles += part.cycles;

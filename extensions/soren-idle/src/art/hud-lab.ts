@@ -14,15 +14,7 @@ function bench(): string {
   ].join("");
 }
 
-function bubbles(
-  cx: number,
-  bottom: number,
-  top: number,
-  half: number,
-  f: number,
-  n: number,
-  seed: number,
-): string {
+function bubbles(cx: number, bottom: number, top: number, half: number, f: number, n: number, seed: number): string {
   let out = "";
   for (let i = 0; i < n; i++) {
     const phase = ((f + hash(i, 1, seed) * 4) % 4) / 4;
@@ -161,13 +153,7 @@ export function honeyRation(f: number): string {
   const jar: Pt = [190, 128];
   const drip = [0, 6, 12, 6][f];
   let stream = path(`M232 150C250 ${170 + drip} 262 ${190 + drip} 270 ${216}`, BLUE.pale, 3.4);
-  stream += path(
-    `M232 150C250 ${170 + drip} 262 ${190 + drip} 270 ${216}`,
-    "#ffffff",
-    1,
-    "none",
-    'opacity=".9"',
-  );
+  stream += path(`M232 150C250 ${170 + drip} 262 ${190 + drip} 270 ${216}`, "#ffffff", 1, "none", 'opacity=".9"');
   for (let i = 0; i < 3; i++) {
     const phase = ((f + i * 1.3) % 4) / 4;
     stream += circle([271 + i * 2, 196 + phase * 24], 2.6 - phase, BLUE.pale, 1, BLUE.pale);
@@ -178,13 +164,7 @@ export function honeyRation(f: number): string {
     `<g transform="rotate(-38 ${jar[0]} ${jar[1]})">${[
       `<rect x="${jar[0] - 30}" y="${jar[1] - 22}" width="60" height="64" rx="10" fill="url(#plate)" fill-opacity=".55" stroke="${BLUE.pale}" stroke-width="1.6"/>`,
       `<rect x="${jar[0] - 22}" y="${jar[1] - 34}" width="44" height="14" rx="3" fill="url(#hull)" stroke="${BLUE.light}" stroke-width="1.4"/>`,
-      path(
-        `M${jar[0] - 18} ${jar[1] - 2}h36M${jar[0] - 18} ${jar[1] + 14}h36`,
-        BLUE.deep,
-        1,
-        "none",
-        'opacity=".6"',
-      ),
+      path(`M${jar[0] - 18} ${jar[1] - 2}h36M${jar[0] - 18} ${jar[1] + 14}h36`, BLUE.deep, 1, "none", 'opacity=".6"'),
     ].join("")}</g>`,
     stream,
     flame(300, 262, f),
@@ -232,23 +212,11 @@ export function swift(f: number): string {
   let chevrons = "";
   for (let i = 0; i < 3; i++) {
     const x = 410 + i * 30 + ((f * 8) % 24);
-    chevrons += path(
-      `M${x} 196l16 18l-16 18`,
-      BLUE.pale,
-      3,
-      "none",
-      `opacity="${(0.95 - i * 0.28).toFixed(2)}"`,
-    );
+    chevrons += path(`M${x} 196l16 18l-16 18`, BLUE.pale, 3, "none", `opacity="${(0.95 - i * 0.28).toFixed(2)}"`);
   }
   let speed = "";
   for (let i = 0; i < 4; i++)
-    speed += line(
-      [140 + i * 10, 190 + i * 16],
-      [200 + i * 6 - f * 3, 190 + i * 16],
-      BLUE.light,
-      1.4,
-      'opacity=".7"',
-    );
+    speed += line([140 + i * 10, 190 + i * 16], [200 + i * 6 - f * 3, 190 + i * 16], BLUE.light, 1.4, 'opacity=".7"');
   return [
     bench(),
     flame(cx, 294, f),
@@ -259,11 +227,7 @@ export function swift(f: number): string {
       1.8,
     ),
     path(`M${cx - 22} ${by - h}h44`, BLUE.pale, 2.4),
-    path(
-      `M${cx - wAt(level)} ${level}Q${cx} ${level + 6} ${cx + wAt(level)} ${level}`,
-      "#ffffff",
-      1.4,
-    ),
+    path(`M${cx - wAt(level)} ${level}Q${cx} ${level + 6} ${cx + wAt(level)} ${level}`, "#ffffff", 1.4),
     chips,
     bubbles(cx, level + 30, by - h + 8, 12, f, 6, 91),
     mushroom(cx + 4, level + 40, 8, 14, f, false),
@@ -287,9 +251,7 @@ export function fortune(f: number): string {
     [-8, 8],
     [8, 8],
   ]
-    .map(([dx, dy]) =>
-      circle([c[0] + dx, c[1] + 12 + dy], 8, BLUE.pale, 1.3, BLUE.light, 'fill-opacity=".35"'),
-    )
+    .map(([dx, dy]) => circle([c[0] + dx, c[1] + 12 + dy], 8, BLUE.pale, 1.3, BLUE.light, 'fill-opacity=".35"'))
     .join("");
   const sparks = [
     [-96, -44],
@@ -330,13 +292,7 @@ export function fortune(f: number): string {
 
 export function fury(f: number): string {
   const push = [0, 6, 12, 6][f];
-  const bolt = path(
-    "M380 80L338 170L366 176L318 290",
-    BLUE.light,
-    3,
-    "none",
-    `opacity="${f % 2 ? 0.9 : 0.5}"`,
-  );
+  const bolt = path("M380 80L338 170L366 176L318 290", BLUE.light, 3, "none", `opacity="${f % 2 ? 0.9 : 0.5}"`);
   let shards = "";
   for (let i = 0; i < 7; i++) {
     const x = -40 + i * 16 + (hash(i, 1, 93) - 0.5) * 10 + push * 0.4;
@@ -452,13 +408,7 @@ export function windfall(f: number): string {
   let shimmer = "";
   for (let i = 0; i < 3; i++) {
     const sway = Math.sin(rad(f * 90 + i * 80)) * 6;
-    shimmer += path(
-      `M${304 + i * 16} 118q${-6 + sway} -16 0 -30t0 -30`,
-      BLUE.light,
-      1.4,
-      "none",
-      'opacity=".7"',
-    );
+    shimmer += path(`M${304 + i * 16} 118q${-6 + sway} -16 0 -30t0 -30`, BLUE.light, 1.4, "none", 'opacity=".7"');
   }
   let spore = circle(c, 15, BLUE.pale, 1.4, BLUE.light, 'fill-opacity=".5"');
   for (let i = 0; i < 14; i++) {
@@ -509,11 +459,7 @@ export function windfall(f: number): string {
       BLUE.pale,
       1.6,
     ),
-    path(
-      `M${c[0] - 64} ${c[1] - 14}Q${c[0]} ${c[1] - 6} ${c[0] + 64} ${c[1] - 14}`,
-      "#ffffff",
-      1.4,
-    ),
+    path(`M${c[0] - 64} ${c[1] - 14}Q${c[0]} ${c[1] - 6} ${c[0] + 64} ${c[1] - 14}`, "#ffffff", 1.4),
     `<circle cx="${c[0]}" cy="${c[1]}" r="${(30 + f * 3).toFixed(1)}" fill="url(#flare)" opacity=".5"/>`,
     spore,
     dissolve,
@@ -545,9 +491,7 @@ export function berserker(f: number): string {
     );
   }
   const drip = [0, 1, 2, 3]
-    .map((i) =>
-      circle([392 + ((f + i) % 4) * 3, 280 + ((f + i) % 4) * 6], 2, BLUE.pale, 1, BLUE.pale),
-    )
+    .map((i) => circle([392 + ((f + i) % 4) * 3, 280 + ((f + i) % 4) * 6], 2, BLUE.pale, 1, BLUE.pale))
     .join("");
   return [
     bench(),

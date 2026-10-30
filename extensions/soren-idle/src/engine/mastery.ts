@@ -35,23 +35,19 @@ export const masteryXpPerCycle = (task: TaskDef) => (task.durationMs / 1000) * X
 export const masterySpeed = (level: number) => 1 - SPEED_PER_TEN_LEVELS * Math.floor(level / 10);
 
 /** Extra yield (a chance of one more of each output) at this mastery level. */
-export const masteryYield = (level: number) =>
-  YIELD_PER_LEVEL_STEP * YIELD_LEVELS.filter((l) => level >= l).length;
+export const masteryYield = (level: number) => YIELD_PER_LEVEL_STEP * YIELD_LEVELS.filter((l) => level >= l).length;
 
 export const MASTERY_MAX = MAX_LEVEL;
 
 // --- resource nodes -----------------------------------------------------------
 
 /** How much a node holds at full health: its base, and one more for every mastery level past the first. */
-export const nodeMaxHp = (s: GameState, task: TaskDef) =>
-  task.node ? task.node.hp + masteryLevel(s, task) - 1 : 0;
+export const nodeMaxHp = (s: GameState, task: TaskDef) => (task.node ? task.node.hp + masteryLevel(s, task) - 1 : 0);
 
 /** The node's health right now. Untouched or fully respawned nodes are at full health. */
 export const nodeHp = (s: GameState, task: TaskDef) => {
   const node = s.nodes[task.id];
-  return node && (node.respawnAt === undefined || node.respawnAt > s.lastTick)
-    ? node.hp
-    : nodeMaxHp(s, task);
+  return node && (node.respawnAt === undefined || node.respawnAt > s.lastTick) ? node.hp : nodeMaxHp(s, task);
 };
 
 /** Milliseconds until the node is back, or 0 if it can be worked. */

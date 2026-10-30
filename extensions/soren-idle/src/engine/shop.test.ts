@@ -14,9 +14,7 @@ const withShop = (patch: Partial<GameState> = {}): GameState => ({
 
 describe("the Bounty Shop", () => {
   it("needs a Bounty Board", () => {
-    expect(buyFromShop({ ...newGame(0), marks: 999, bountyXp: 9999 }, "stim_pack").error).toMatch(
-      /Bounty Board/,
-    );
+    expect(buyFromShop({ ...newGame(0), marks: 999, bountyXp: 9999 }, "stim_pack").error).toMatch(/Bounty Board/);
   });
 
   it("enforces the bounty level", () => {
@@ -63,8 +61,7 @@ describe("the Bounty Shop", () => {
       xp: { ...newGame(0).xp, combat: xpForLevel(88) },
       bountyXp,
     });
-    const tiers = (s: GameState) =>
-      new Set(huntable(s).map((t) => (t.levelReq < 8 ? 1 : t.levelReq < 20 ? 2 : 3)));
+    const tiers = (s: GameState) => new Set(huntable(s).map((t) => (t.levelReq < 8 ? 1 : t.levelReq < 20 ? 2 : 3)));
     expect([...tiers(strong(0))]).toEqual([1]);
     expect(bountyLevel(strong(60))).toBe(2);
     expect(tiers(strong(60))).toEqual(new Set([1, 2]));

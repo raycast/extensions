@@ -1,23 +1,14 @@
+import { describeItem } from "../engine/format";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { EQUIP_SLOTS, ITEMS } from "../engine/data";
-import {
-  count,
-  equipError,
-  isEquipped,
-  levelOf,
-  maxHp,
-  modifiers,
-  playerArmor,
-  playerDamage,
-} from "../engine/engine";
+import { count, equipError, isEquipped, levelOf, maxHp, modifiers, playerArmor, playerDamage } from "../engine/engine";
 import { EquipSlot, GameState, ItemId } from "../engine/types";
 
 /** The effect of a piece of gear, in words. */
 export function gearStats(id: ItemId): string {
   const item = ITEMS[id];
   const parts: string[] = [];
-  if (item.tool)
-    parts.push(`${Math.round((1 - item.tool.speed) * 100)}% faster ${item.tool.skill}`);
+  if (item.tool) parts.push(`${Math.round((1 - item.tool.speed) * 100)}% faster ${item.tool.skill}`);
   if (item.weaponDamage) parts.push(`+${item.weaponDamage} damage`);
   if (item.armor) parts.push(`-${item.armor} damage taken`);
   if (item.rareBonus) parts.push(`${Math.round((item.rareBonus - 1) * 100)}% more rare finds`);
@@ -48,24 +39,16 @@ export function Equipment(props: {
               key={slot}
               title={name}
               subtitle={worn ? ITEMS[worn].name : "Empty"}
-              icon={
-                worn
-                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                  : { source: Icon.Circle }
-              }
+              icon={worn ? { source: Icon.CheckCircle, tintColor: Color.Green } : { source: Icon.Circle }}
               accessories={[
                 ...(worn ? [{ text: gearStats(worn) }] : []),
-                ...(worn && (ITEMS[worn].tier ?? 0) > 0
-                  ? [{ tag: `Tier ${ITEMS[worn].tier}` }]
-                  : []),
+                ...(worn && (ITEMS[worn].tier ?? 0) > 0 ? [{ tag: `Tier ${ITEMS[worn].tier}` }] : []),
               ]}
               detail={
                 <List.Item.Detail
                   markdown={[
                     `# ${name}`,
-                    worn
-                      ? `**${ITEMS[worn].name}**\n\n${ITEMS[worn].description}`
-                      : "_Nothing worn._",
+                    worn ? `**${ITEMS[worn].name}**\n\n${describeItem(ITEMS[worn])}` : "_Nothing worn._",
                     "",
                     candidates.length
                       ? "**You own:**"
@@ -89,13 +72,7 @@ export function Equipment(props: {
                         onAction={() => props.onEquip(c)}
                       />
                     ))}
-                  {worn && (
-                    <Action
-                      title="Unequip"
-                      icon={Icon.XMarkCircle}
-                      onAction={() => props.onUnequip(slot)}
-                    />
-                  )}
+                  {worn && <Action title="Unequip" icon={Icon.XMarkCircle} onAction={() => props.onUnequip(slot)} />}
                 </ActionPanel>
               }
             />
@@ -103,16 +80,8 @@ export function Equipment(props: {
         })}
       </List.Section>
       <List.Section title="Combat">
-        <List.Item
-          title="Damage per round"
-          icon={Icon.Bolt}
-          accessories={[{ text: `${playerDamage(state)}` }]}
-        />
-        <List.Item
-          title="Armor"
-          icon={Icon.Shield}
-          accessories={[{ text: `${playerArmor(state)}` }]}
-        />
+        <List.Item title="Damage per round" icon={Icon.Bolt} accessories={[{ text: `${playerDamage(state)}` }]} />
+        <List.Item title="Armor" icon={Icon.Shield} accessories={[{ text: `${playerArmor(state)}` }]} />
         <List.Item
           title="Combat level"
           icon={Icon.Heart}

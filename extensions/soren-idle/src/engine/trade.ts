@@ -109,23 +109,26 @@ export function spendCredits(s: GameState, amount: number): { state: GameState; 
   return { state: { ...s, credits: s.credits - amount } };
 }
 
+/** Buys `qty` of an item, or as many as the Credits and the storage room allow when `qty` is "max". */
 export function buy(
   s: GameState,
   id: ItemId,
-  qty: number,
-): { state: GameState; error?: string; cost?: number } {
+  qty: number | "max",
+): { state: GameState; error?: string; cost?: number; amount?: number } {
   if (!canTrade(s)) return { state: s, error: "Build a Trading Hub first" };
   const stock = stockFor(s).find((x) => x.item === id);
   if (!stock) return { state: s, error: "The locals do not offer that yet" };
-  if (roomFor(s, id) < qty) return { state: s, error: "Not enough room in storage" };
-  const cost = qty * buyPrice(s, stock);
+  const price = buyPrice(s, stock);
+  const amount = qty === "max" ? Math.min(Math.floor(s.credits / price), roomFor(s, id)) : qty;
+  if (roomFor(s, id) < Math.max(1, amount)) return { state: s, error: "Not enough room in storage" };
+  if (amount < 1) return { state: s, error: "Not enough Credits" };
+  const cost = amount * price;
   const paid = spendCredits(s, cost);
   if (paid.error) return { state: s, error: paid.error };
   const next = structuredClone(paid.state);
-  next.inventory[id] = count(next, id) + qty;
-  return { state: next, cost };
+  next.inventory[id] = count(next, id) + amount;
+  return { state: next, cost, amount };
 }
 
 /** The most of an item the player can currently afford, at least 1 so the UI can show the price. */
-export const affordable = (s: GameState, stock: StockItem) =>
-  Math.floor(s.credits / buyPrice(s, stock));
+export const affordable = (s: GameState, stock: StockItem) => Math.floor(s.credits / buyPrice(s, stock));

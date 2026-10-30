@@ -34,12 +34,9 @@ export function awayLines(r: Report): string[] {
   const lines = skillLines(r);
   if (Object.keys(r.passive).length) lines.push(`Drones brought back ${formatBundle(r.passive)}`);
   if (Object.keys(r.rare).length) lines.push(`★ Rare finds: ${formatBundle(r.rare)}`);
-  for (const up of r.levelUps)
-    lines.push(`${SKILL_BY_ID[up.skill].name} reached level ${up.level}`);
+  for (const up of r.levelUps) lines.push(`${SKILL_BY_ID[up.skill].name} reached level ${up.level}`);
   for (const b of r.bounties)
-    lines.push(
-      `Bounty for ${b.poster} done: +${b.marks} Marks${b.level ? `, Bounty level ${b.level}` : ""}`,
-    );
+    lines.push(`Bounty for ${b.poster} done: +${b.marks} Marks${b.level ? `, Bounty level ${b.level}` : ""}`);
   lines.push(...r.notices);
   if (r.completed) lines.push(r.completed);
   if (r.stoppedReason) lines.push(`Stopped: ${r.stoppedReason}`);

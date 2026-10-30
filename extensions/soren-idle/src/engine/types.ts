@@ -1,12 +1,5 @@
 export type SkillId =
-  | "salvaging"
-  | "mining"
-  | "foraging"
-  | "cooking"
-  | "engineering"
-  | "combat"
-  | "hydroponics"
-  | "xenochemistry";
+  "salvaging" | "mining" | "foraging" | "cooking" | "engineering" | "combat" | "hydroponics" | "xenochemistry";
 
 export type ItemId =
   | "scrap_metal"

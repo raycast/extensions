@@ -24,8 +24,7 @@ function radar(f: number, blips: [number, number][]): string {
   let out = circle(c, r, BLUE.pale, 1.4, "#0b1e44", 'fill-opacity=".7"');
   out += circle(c, r * 0.66, BLUE.mid, 0.9) + circle(c, r * 0.33, BLUE.mid, 0.9);
   out +=
-    line([c[0] - r, c[1]], [c[0] + r, c[1]], BLUE.mid, 0.8) +
-    line([c[0], c[1] - r], [c[0], c[1] + r], BLUE.mid, 0.8);
+    line([c[0] - r, c[1]], [c[0] + r, c[1]], BLUE.mid, 0.8) + line([c[0], c[1] - r], [c[0], c[1] + r], BLUE.mid, 0.8);
   const a0 = sweep - rad(50);
   out += `<path d="M${P(c)}L${P([c[0] + Math.cos(a0) * r, c[1] + Math.sin(a0) * r])}A${r} ${r} 0 0 1 ${P([c[0] + Math.cos(sweep) * r, c[1] + Math.sin(sweep) * r])}Z" fill="${BLUE.light}" opacity=".3"/>`;
   out += line(c, [c[0] + Math.cos(sweep) * r, c[1] + Math.sin(sweep) * r], "#ffffff", 1.4);
@@ -46,8 +45,7 @@ function hpBar(frac: number, boss: boolean): string {
   let out = `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="${BLUE.pale}" stroke-width="1.4"/>`;
   out += `<rect x="${x}" y="${y}" width="${(w * frac).toFixed(1)}" height="${h}" fill="${BLUE.light}" opacity=".9"/>`;
   if (boss) {
-    for (let i = 1; i < 5; i++)
-      out += line([x + (w * i) / 5, y], [x + (w * i) / 5, y + h], BLUE.bg, 1.4);
+    for (let i = 1; i < 5; i++) out += line([x + (w * i) / 5, y], [x + (w * i) / 5, y + h], BLUE.bg, 1.4);
     out += path(`M${x - 8} ${y - 2}v${h + 4}h8M${x + w + 8} ${y - 2}v${h + 4}h-8`, BLUE.pale, 1.4);
   }
   return out;
@@ -97,8 +95,7 @@ function cave(f: number): string {
     );
   }
   let floor = "M18 306";
-  for (let x = 18; x <= 622; x += 24)
-    floor += `L${x} ${Math.round(304 + Math.sin(x / 31) * 4 + hash(x, 4, 101) * 5)}`;
+  for (let x = 18; x <= 622; x += 24) floor += `L${x} ${Math.round(304 + Math.sin(x / 31) * 4 + hash(x, 4, 101) * 5)}`;
   out += path(`${floor}L622 396L18 396Z`, "none", 0, BLUE.bg);
   out += path(floor, BLUE.mid, 1.3);
   for (let i = 0; i < 5; i++) {
@@ -115,36 +112,17 @@ function cave(f: number): string {
 
 // --- creature parts ----------------------------------------------------------------
 
-const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) =>
-  poly(points, "url(#hull)", stroke, w);
+const hull = (points: Pt[], stroke: string = BLUE.pale, w = 1.5) => poly(points, "url(#hull)", stroke, w);
 
 /** A jointed leg from a hip to the ground, swinging with the frame. */
-function leg(
-  hip: Pt,
-  reach: number,
-  drop: number,
-  f: number,
-  phase: number,
-  dir = 1,
-  w = 2,
-): string {
+function leg(hip: Pt, reach: number, drop: number, f: number, phase: number, dir = 1, w = 2): string {
   const swing = Math.sin(rad(f * 90 + phase)) * 9;
   const knee: Pt = [hip[0] + dir * reach * 0.6 + swing * 0.5, hip[1] + drop * 0.45 - 8];
   const foot: Pt = [hip[0] + dir * reach + swing, hip[1] + drop];
-  return (
-    path(`M${P(hip)}L${P(knee)}L${P(foot)}`, BLUE.pale, w) +
-    circle(knee, 2.4, BLUE.pale, 1, BLUE.bg)
-  );
+  return path(`M${P(hip)}L${P(knee)}L${P(foot)}`, BLUE.pale, w) + circle(knee, 2.4, BLUE.pale, 1, BLUE.bg);
 }
 
-function ellipse(
-  c: Pt,
-  rx: number,
-  ry: number,
-  stroke: string = BLUE.pale,
-  w = 1.5,
-  rot = 0,
-): string {
+function ellipse(c: Pt, rx: number, ry: number, stroke: string = BLUE.pale, w = 1.5, rot = 0): string {
   return `<ellipse cx="${c[0]}" cy="${c[1]}" rx="${rx}" ry="${ry}" fill="url(#hull)" stroke="${stroke}" stroke-width="${w}" transform="rotate(${rot} ${c[0]} ${c[1]})"/>`;
 }
 
@@ -162,9 +140,7 @@ function quadruped(
   const bodyY = by - o.leg - o.bulk * 0.6;
   let out = "";
   // far legs first, dimmer
-  out +=
-    leg([cx - 34, bodyY + 6], 14, o.leg, f, 180, -1, 1.5) +
-    leg([cx + 34, bodyY + 6], 14, o.leg, f, 0, 1, 1.5);
+  out += leg([cx - 34, bodyY + 6], 14, o.leg, f, 180, -1, 1.5) + leg([cx + 34, bodyY + 6], 14, o.leg, f, 0, 1, 1.5);
   out += path(
     `M${cx - o.bulk * 1.2} ${bodyY}Q${cx - o.bulk * 2.2} ${bodyY - 18} ${cx - o.bulk * 2.7} ${bodyY + 14 + (f % 2) * 4}`,
     BLUE.pale,
@@ -209,9 +185,7 @@ function quadruped(
       0.6,
     );
   out += eye([hx + 22, bodyY - 8]);
-  out +=
-    leg([cx - 24, bodyY + 12], 12, o.leg, f, 90, -1, 2.4) +
-    leg([cx + 28, bodyY + 12], 12, o.leg, f, 270, 1, 2.4);
+  out += leg([cx - 24, bodyY + 12], 12, o.leg, f, 90, -1, 2.4) + leg([cx + 28, bodyY + 12], 12, o.leg, f, 270, 1, 2.4);
   return out;
 }
 
@@ -305,11 +279,7 @@ export function burrower(f: number): string {
 
 export function stalker(f: number): string {
   const heat = `<circle cx="296" cy="244" r="${(90 + f * 4).toFixed(1)}" fill="url(#flare)" opacity=".3"/><circle cx="296" cy="244" r="58" fill="url(#flare)" opacity=".35"/>`;
-  return [
-    cave(f),
-    heat,
-    quadruped(296, 306, f, { bulk: 36, leg: 52, spines: true, jaw: [6, 12, 20, 12][f] }),
-  ].join("");
+  return [cave(f), heat, quadruped(296, 306, f, { bulk: 36, leg: 52, spines: true, jaw: [6, 12, 20, 12][f] })].join("");
 }
 
 export function leech(f: number): string {
@@ -325,8 +295,7 @@ export function leech(f: number): string {
     edge.bottom.push([x, y + w]);
   }
   let rings = "";
-  for (let i = 2; i < 25; i += 2)
-    rings += line(edge.top[i], edge.bottom[i], BLUE.mid, 1, 'opacity=".8"');
+  for (let i = 2; i < 25; i += 2) rings += line(edge.top[i], edge.bottom[i], BLUE.mid, 1, 'opacity=".8"');
   const head = centre[26];
   let sucker = circle(head, 20, BLUE.pale, 1.6, "#0b1e44") + circle(head, 11, BLUE.light, 1.2);
   for (let i = 0; i < 10; i++) {
@@ -340,24 +309,12 @@ export function leech(f: number): string {
   }
   const lureTop: Pt = [head[0] - 28, head[1] - 74 + (f % 2) * 3];
   const lure = [
-    path(
-      `M${head[0] - 14} ${head[1] - 18}Q${head[0] - 44} ${head[1] - 50} ${P(lureTop)}`,
-      BLUE.pale,
-      2,
-    ),
+    path(`M${head[0] - 14} ${head[1] - 18}Q${head[0] - 44} ${head[1] - 50} ${P(lureTop)}`, BLUE.pale, 2),
     `<circle cx="${lureTop[0]}" cy="${lureTop[1]}" r="${(26 + f * 3).toFixed(1)}" fill="url(#flare)"/>`,
     circle(lureTop, 5, "#ffffff", 1, "#ffffff"),
   ].join("");
   const drops = [0, 1, 2]
-    .map((i) =>
-      circle(
-        [head[0] + 6 + i * 4, head[1] + 24 + ((f + i * 1.3) % 4) * 12],
-        2.4,
-        BLUE.pale,
-        1,
-        BLUE.pale,
-      ),
-    )
+    .map((i) => circle([head[0] + 6 + i * 4, head[1] + 24 + ((f + i * 1.3) % 4) * 12], 2.4, BLUE.pale, 1, BLUE.pale))
     .join("");
   return [
     cave(f),
@@ -378,13 +335,7 @@ export function wraith(f: number): string {
     for (let i = 0; i <= 6; i++)
       d += `L${cx + 56 - i * 18.7 + dx} ${296 + (i % 2 ? 14 : -4) + Math.sin(rad(f * 90 + i * 60)) * 5}`;
     d += `L${cx - 56 + dx} 250Z`;
-    echoes += path(
-      d,
-      BLUE.pale,
-      k === 1 ? 1.8 : 1,
-      k === 1 ? "url(#hull)" : "none",
-      `opacity="${k === 1 ? 1 : 0.3}"`,
-    );
+    echoes += path(d, BLUE.pale, k === 1 ? 1.8 : 1, k === 1 ? "url(#hull)" : "none", `opacity="${k === 1 ? 1 : 0.3}"`);
   }
   const head = [
     `<ellipse cx="${cx}" cy="162" rx="18" ry="24" fill="#0b1e44" stroke="${BLUE.pale}" stroke-width="1.6"/>`,
@@ -442,10 +393,7 @@ export function hound(f: number): string {
   let shards = "";
   for (let i = 0; i < 12; i++) {
     const phase = ((f + hash(i, 3, 104) * 4) % 4) / 4;
-    const p: Pt = [
-      250 + hash(i, 4, 104) * 180 + phase * 20,
-      200 + hash(i, 5, 104) * 90 - phase * 24,
-    ];
+    const p: Pt = [250 + hash(i, 4, 104) * 180 + phase * 20, 200 + hash(i, 5, 104) * 90 - phase * 24];
     shards += poly(
       [
         [p[0], p[1] - 6],
@@ -603,10 +551,7 @@ export function sovereign(f: number): string {
     crown += poly(
       [
         [c[0] + Math.cos(a - 0.06) * 120, c[1] + Math.sin(a - 0.06) * 120],
-        [
-          c[0] + Math.cos(a) * (150 - Math.abs(i) * 6),
-          c[1] + Math.sin(a) * (150 - Math.abs(i) * 6),
-        ],
+        [c[0] + Math.cos(a) * (150 - Math.abs(i) * 6), c[1] + Math.sin(a) * (150 - Math.abs(i) * 6)],
         [c[0] + Math.cos(a + 0.06) * 120, c[1] + Math.sin(a + 0.06) * 120],
       ],
       BLUE.light,

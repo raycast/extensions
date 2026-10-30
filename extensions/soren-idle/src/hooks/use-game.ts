@@ -84,8 +84,7 @@ export function useGame(onTick?: (info: TickInfo) => void | Promise<void>): Game
       return result.state;
     });
     if (result?.error) await showToast({ style: Toast.Style.Failure, title: result.error });
-    else if (result && success)
-      await showToast({ style: Toast.Style.Success, title: success(result) });
+    else if (result && success) await showToast({ style: Toast.Style.Success, title: success(result) });
   }
 
   useEffect(() => {

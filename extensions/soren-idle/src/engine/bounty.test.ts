@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BOARD_REFRESH_MS, TASKS } from "./data";
-import {
-  abandonBounty,
-  acceptBounty,
-  boardCapacity,
-  bountyLevel,
-  bountyTarget,
-  rerollBoard,
-} from "./bounty";
+import { abandonBounty, acceptBounty, boardCapacity, bountyLevel, bountyTarget, rerollBoard } from "./bounty";
 import { advance, build, newGame, startTask, xpForLevel } from "./engine";
 import { nextRandom } from "./rng";
 import { GameState } from "./types";

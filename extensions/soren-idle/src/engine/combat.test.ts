@@ -1,16 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { areaKills, areaOf, bossLockReason, counterTo, matchup } from "./areas";
 import { AREAS, ITEMS, TASK_BY_ID, TASKS } from "./data";
-import {
-  advance,
-  damageAgainst,
-  equip,
-  fightDamage,
-  hitDamage,
-  newGame,
-  startTask,
-  xpForLevel,
-} from "./engine";
+import { advance, damageAgainst, equip, fightDamage, hitDamage, newGame, startTask, xpForLevel } from "./engine";
 import { GameState, ItemId } from "./types";
 
 const MINUTE = 60_000;
@@ -41,28 +32,20 @@ describe("areas", () => {
     for (const area of AREAS) {
       const boss = TASK_BY_ID[area.boss].monster!;
       for (const id of area.hunts) expect(boss.hp).toBeGreaterThan(TASK_BY_ID[id].monster!.hp);
-      const others = TASKS.filter((t) => t.id !== area.boss).flatMap((t) =>
-        Object.keys(t.monster?.drops ?? {}),
-      );
+      const others = TASKS.filter((t) => t.id !== area.boss).flatMap((t) => Object.keys(t.monster?.drops ?? {}));
       const unique = Object.keys(boss.drops).filter((id) => !others.includes(id));
       expect(unique.length, area.id).toBeGreaterThan(0);
     }
   });
 
   it("counts kills per hunt, offline too", () => {
-    const { state } = advance(
-      startTask(withItems({}, strong(28)), "fight_skitter").state,
-      10 * MINUTE,
-    );
+    const { state } = advance(startTask(withItems({}, strong(28)), "fight_skitter").state, 10 * MINUTE);
     expect(state.stats.hunts.fight_skitter).toBe(state.stats.kills);
     expect(areaKills(state, areaOf("fight_skitter")!)).toBe(state.stats.kills);
   });
 
   it("counts a retreat when the survivor is too wounded to keep fighting", () => {
-    const { state, report } = advance(
-      startTask(withItems({}, strong(28)), "fight_skitter").state,
-      MINUTE,
-    );
+    const { state, report } = advance(startTask(withItems({}, strong(28)), "fight_skitter").state, MINUTE);
     expect(state.stats.retreats).toBe(0);
     const hurt = { ...startTask(withItems({}, { hp: 1 }), "fight_skitter").state };
     const after = advance(hurt, 10 * MINUTE);
@@ -86,10 +69,7 @@ describe("bosses", () => {
   });
 
   it("refuse a survivor who is too wounded to start", () => {
-    const s = withItems(
-      {},
-      { ...strong(88), hp: 1, stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } } },
-    );
+    const s = withItems({}, { ...strong(88), hp: 1, stats: { ...newGame(0).stats, hunts: { fight_skitter: 99 } } });
     expect(startTask(s, boss.id).error).toMatch(/Too wounded/);
   });
 
@@ -164,9 +144,7 @@ describe("the combat triangle", () => {
     const stalker = TASK_BY_ID.fight_stalker; // energy: bio armor beats it, kinetic armor loses to it
     const wear = (id: ItemId) => equip(withItems({ [id]: 1 }, strong(58)), id).state;
     expect(counterTo("energy")).toBe("bio");
-    expect(hitDamage(wear("skyweave_suit"), stalker)).toBeLessThan(
-      hitDamage(wear("composite_armor"), stalker),
-    );
+    expect(hitDamage(wear("skyweave_suit"), stalker)).toBeLessThan(hitDamage(wear("composite_armor"), stalker));
     // untyped stays neutral
     expect(hitDamage(withItems({}, strong(1)), stalker)).toBe(stalker.monster!.damage);
   });

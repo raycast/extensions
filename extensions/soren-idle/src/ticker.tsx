@@ -4,13 +4,7 @@ import { awayLines, recordAway } from "./engine/away";
 import { bountyTarget } from "./engine/bounty";
 import { SKILL_BY_ID, TASK_BY_ID } from "./engine/data";
 import { contactRemainingMs, count, levelOf, maxHp, stopTask } from "./engine/engine";
-import {
-  formatBuffs,
-  formatBundle,
-  formatCredits,
-  formatDuration,
-  formatReport,
-} from "./engine/format";
+import { formatBuffs, formatBundle, formatCredits, formatDuration, formatReport } from "./engine/format";
 import { ripeCount } from "./engine/hydroponics";
 import { update } from "./engine/storage";
 import { notify } from "./notify";
@@ -24,29 +18,17 @@ export default function Command() {
       : Object.keys(result.report.rare).length
         ? `Rare find: ${formatBundle(result.report.rare)}`
         : undefined;
-    if (
-      (stoppedReason || completed || bounty) &&
-      getPreferenceValues<{ notifications: boolean }>().notifications
-    )
+    if ((stoppedReason || completed || bounty) && getPreferenceValues<Preferences.Ticker>().notifications)
       notify("Soren Idle", stoppedReason ?? completed ?? bounty ?? "");
     return result;
   });
 
   const state = data?.state;
   const task = state?.activeTask ? TASK_BY_ID[state.activeTask] : undefined;
-  const title = state
-    ? task
-      ? `${SKILL_BY_ID[task.skill].name} ${levelOf(state, task.skill)}`
-      : "Idle"
-    : undefined;
+  const title = state ? (task ? `${SKILL_BY_ID[task.skill].name} ${levelOf(state, task.skill)}` : "Idle") : undefined;
 
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      icon="extension-icon.png"
-      title={title}
-      tooltip="Soren Idle"
-    >
+    <MenuBarExtra isLoading={isLoading} icon="extension-icon.png" title={title} tooltip="Soren Idle">
       {state && (
         <>
           <MenuBarExtra.Section>
@@ -62,13 +44,9 @@ export default function Command() {
                 title={`Bounty ${state.board.active.progress}/${state.board.active.bounty.count} ${bountyTarget(state.board.active.bounty).monster?.name}`}
               />
             )}
-            {ripeCount(state) > 0 && (
-              <MenuBarExtra.Item title={`Hydroponics: ${ripeCount(state)} ready to harvest`} />
-            )}
+            {ripeCount(state) > 0 && <MenuBarExtra.Item title={`Hydroponics: ${ripeCount(state)} ready to harvest`} />}
             {contactRemainingMs(state) !== null && (
-              <MenuBarExtra.Item
-                title={`Locals arrive in ${formatDuration(contactRemainingMs(state) ?? 0)}`}
-              />
+              <MenuBarExtra.Item title={`Locals arrive in ${formatDuration(contactRemainingMs(state) ?? 0)}`} />
             )}
           </MenuBarExtra.Section>
           {(data.report.stoppedReason ||

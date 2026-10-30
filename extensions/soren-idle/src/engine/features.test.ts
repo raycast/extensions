@@ -73,10 +73,7 @@ describe("task rates", () => {
 
   it("use the faster time that a tool gives", () => {
     const slow = taskRates(newGame(0), TASK_BY_ID["mine_ferrite"]);
-    const fast = taskRates(
-      equip(withItems({ plasma_drill: 1 }), "plasma_drill").state,
-      TASK_BY_ID["mine_ferrite"],
-    );
+    const fast = taskRates(equip(withItems({ plasma_drill: 1 }), "plasma_drill").state, TASK_BY_ID["mine_ferrite"]);
     expect(fast.xpPerHour).toBeGreaterThan(slow.xpPerHour);
   });
 
@@ -95,8 +92,7 @@ describe("task rates", () => {
 });
 
 describe("keep when selling", () => {
-  const trader = (items: Partial<Record<ItemId, number>>) =>
-    withItems(items, { buildings: { hub: 1 } });
+  const trader = (items: Partial<Record<ItemId, number>>) => withItems(items, { buildings: { hub: 1 } });
 
   it("holds back the amount the player set", () => {
     const s = setKeep(trader({ scrap_metal: 30 }), "scrap_metal", 12);
@@ -147,10 +143,7 @@ describe("lifetime totals", () => {
 describe("auto-eat settings", () => {
   const fighting = (hp: number, eatBelow: number) =>
     startTask(
-      withItems(
-        { ration: 5, honey_ration: 5 },
-        { hp, settings: { eatBelow, foodPriority: "weakest" } },
-      ),
+      withItems({ ration: 5, honey_ration: 5 }, { hp, settings: { eatBelow, foodPriority: "weakest" } }),
       "fight_skitter",
     ).state;
 
@@ -168,9 +161,7 @@ describe("auto-eat settings", () => {
     const s = withItems({ ration: 1, honey_ration: 1 });
     expect(foodOwned(s, "weakest")).toBe("ration");
     expect(foodOwned(s, "strongest")).toBe("honey_ration");
-    expect(foodOwned({ ...s, settings: { ...s.settings, foodPriority: "strongest" } })).toBe(
-      "honey_ration",
-    );
+    expect(foodOwned({ ...s, settings: { ...s.settings, foodPriority: "strongest" } })).toBe("honey_ration");
   });
 });
 
@@ -190,9 +181,7 @@ describe("hydroponics", () => {
     expect(build(s, "hydroponic_bay").error).toBeTruthy();
     const ready = { ...s, xp: { ...s.xp, engineering: xpForLevel(16) } };
     expect(build(ready, "hydroponic_bay").error).toMatch(/power/i);
-    expect(
-      build({ ...ready, buildings: { generator: 1 } }, "hydroponic_bay").error,
-    ).toBeUndefined();
+    expect(build({ ...ready, buildings: { generator: 1 } }, "hydroponic_bay").error).toBeUndefined();
   });
 
   it("gives one plot per bay level", () => {
@@ -205,9 +194,7 @@ describe("hydroponics", () => {
     expect(count(planted.state, "glowcap")).toBe(8);
     expect(plant(planted.state, 0, "glowcap_bed").error).toMatch(/already/);
     expect(plant(bay(), 2, "glowcap_bed").error).toMatch(/plot/);
-    expect(
-      plant(withItems({}, { buildings: { hydroponic_bay: 1 } }), 0, "glowcap_bed").error,
-    ).toMatch(/seeds/);
+    expect(plant(withItems({}, { buildings: { hydroponic_bay: 1 } }), 0, "glowcap_bed").error).toMatch(/seeds/);
     expect(plant(bay(), 0, "lumina_bloom").error).toMatch(/level/);
   });
 

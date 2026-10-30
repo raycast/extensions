@@ -190,8 +190,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   sorenian_lance: {
     id: "sorenian_lance",
     name: "Sorenian Lance",
-    description:
-      "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
+    description: "+14 damage per combat round. A hunter's lance, made by the locals and given to those they trust.",
     value: 0,
     weaponDamage: 14,
     unsellable: true,
@@ -239,8 +238,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   flight_recorder: {
     id: "flight_recorder",
     name: "Flight Recorder",
-    description:
-      "Sealed, scorched and still ticking. The locals pay well for other people's last words.",
+    description: "Sealed, scorched and still ticking. The locals pay well for other people's last words.",
     value: 500,
   },
   golden_spore: {
@@ -327,7 +325,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   arc_saber: {
     id: "arc_saber",
     name: "Arc Saber",
-    description: "+9 damage per combat round. Energy. Needs Combat 12 to wield.",
+    description: "+9 damage per combat round. Energy.",
     value: 900,
     weaponDamage: 9,
     damageType: "energy",
@@ -338,8 +336,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   ward_plate: {
     id: "ward_plate",
     name: "Ward Plate",
-    description:
-      "Take 4 less damage per enemy hit. Energy ward: holds up against kinetic. Needs Combat 15.",
+    description: "Take 4 less damage per enemy hit. Energy ward: holds up against kinetic.",
     value: 1100,
     armor: 4,
     damageType: "energy",
@@ -389,7 +386,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   siege_maul: {
     id: "siege_maul",
     name: "Siege Maul",
-    description: "+9 damage per combat round. Kinetic. Needs Combat 12 to wield.",
+    description: "+9 damage per combat round. Kinetic.",
     value: 900,
     weaponDamage: 9,
     damageType: "kinetic",
@@ -400,7 +397,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   thorn_lance: {
     id: "thorn_lance",
     name: "Thorn Lance",
-    description: "+9 damage per combat round. Bio. Needs Combat 12 to wield.",
+    description: "+9 damage per combat round. Bio.",
     value: 900,
     weaponDamage: 9,
     damageType: "bio",
@@ -411,7 +408,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   fang_blade: {
     id: "fang_blade",
     name: "Fang Blade",
-    description: "+13 damage per combat round. Kinetic. Needs Combat 18 to wield.",
+    description: "+13 damage per combat round. Kinetic.",
     value: 2500,
     weaponDamage: 13,
     damageType: "kinetic",
@@ -422,8 +419,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   chitin_crown: {
     id: "chitin_crown",
     name: "Chitin Crown",
-    description:
-      "Take 4 less damage per enemy hit. Worn by something that thought it was in charge.",
+    description: "Take 4 less damage per enemy hit. Worn by something that thought it was in charge.",
     value: 1500,
     armor: 4,
     slot: "head",
@@ -432,7 +428,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   sovereign_mail: {
     id: "sovereign_mail",
     name: "Sovereign Mail",
-    description: "Take 6 less damage per enemy hit. Bio weave. Needs Combat 28 to wear.",
+    description: "Take 6 less damage per enemy hit. Bio weave.",
     value: 5000,
     armor: 6,
     damageType: "bio",
@@ -455,8 +451,7 @@ export const ITEMS: Record<ItemId, ItemDef> = {
   sovereign_shard: {
     id: "sovereign_shard",
     name: "Sovereign Shard",
-    description:
-      "A sliver of the Hollow Sovereign. It is cold in a way that has nothing to do with temperature.",
+    description: "A sliver of the Hollow Sovereign. It is cold in a way that has nothing to do with temperature.",
     value: 1500,
   },
   prospector_charm: {

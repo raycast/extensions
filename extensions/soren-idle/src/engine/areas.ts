@@ -14,9 +14,7 @@ export function bossLockReason(s: GameState, task: TaskDef): string | undefined 
   const area = areaOf(task.id);
   if (!area) return undefined;
   const kills = areaKills(s, area);
-  return kills >= area.bossKills
-    ? undefined
-    : `Hunt ${area.bossKills - kills} more in ${area.name} to draw it out`;
+  return kills >= area.bossKills ? undefined : `Hunt ${area.bossKills - kills} more in ${area.name} to draw it out`;
 }
 
 export const huntsOf = (area: AreaDef): TaskDef[] => area.hunts.map((id) => TASK_BY_ID[id]);

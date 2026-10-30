@@ -133,7 +133,7 @@ const placeView: Record<Place, (g: ReadyGame) => Children> = {
       onBuy={(id, qty) =>
         g.act(
           (s) => buy(s, id, qty),
-          (r) => `Bought ${qty}× ${ITEMS[id].name} for ${formatCredits(r.cost ?? 0)}`,
+          (r) => `Bought ${r.amount ?? qty}× ${ITEMS[id].name} for ${formatCredits(r.cost ?? 0)}`,
         )
       }
     />
@@ -146,9 +146,7 @@ const placeView: Record<Place, (g: ReadyGame) => Children> = {
           (s) => {
             const accepted = acceptBounty(s, id);
             const target = s.board.offers.find((o) => o.id === id);
-            return start && !accepted.error && target
-              ? startTask(accepted.state, target.task)
-              : accepted;
+            return start && !accepted.error && target ? startTask(accepted.state, target.task) : accepted;
           },
           () => "Bounty accepted",
         )
@@ -202,8 +200,5 @@ export const SkillScreen = (props: { skill: SkillId }) => (
 );
 
 export const PlaceScreen = (props: { place: Place }) => (
-  <Screen
-    title={props.place[0].toUpperCase() + props.place.slice(1)}
-    render={placeView[props.place]}
-  />
+  <Screen title={props.place[0].toUpperCase() + props.place.slice(1)} render={placeView[props.place]} />
 );

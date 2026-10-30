@@ -35,13 +35,13 @@ export const SKILLS: SkillDef[] = [
   {
     id: "xenochemistry",
     name: "Xenochemistry",
-    blurb:
-      "Brew local compounds into potions that speed you up, fatten your hauls or sharpen your blows.",
+    blurb: "Brew local compounds into potions that speed you up, fatten your hauls or sharpen your blows.",
   },
 ];
 
-export const SKILL_BY_ID: Record<SkillId, SkillDef> = Object.fromEntries(
-  SKILLS.map((s) => [s.id, s]),
-) as Record<SkillId, SkillDef>;
+export const SKILL_BY_ID: Record<SkillId, SkillDef> = Object.fromEntries(SKILLS.map((s) => [s.id, s])) as Record<
+  SkillId,
+  SkillDef
+>;
 
 export const MAX_LEVEL = 99;

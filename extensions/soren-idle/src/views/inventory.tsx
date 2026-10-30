@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { ITEMS } from "../engine/data";
 import { storageCap, count, isEquipped, isGear } from "../engine/engine";
-import { formatCredits } from "../engine/format";
+import { describeItem, formatCredits } from "../engine/format";
 import { canTrade, keepCount, sellPrice, sellableCount } from "../engine/trade";
 import { gearStats } from "./equipment";
 import { GameState, ItemId } from "../engine/types";
@@ -21,15 +21,10 @@ export function Inventory(props: {
   const { state } = props;
   const owned = (Object.keys(ITEMS) as ItemId[]).filter((id) => count(state, id) > 0);
   if (!owned.length) {
-    return (
-      <Notice title="Nothing yet" description="Salvage something from the wreck." icon={Icon.Box} />
-    );
+    return <Notice title="Nothing yet" description="Salvage something from the wreck." icon={Icon.Box} />;
   }
   return (
-    <List.Section
-      title="Inventory"
-      subtitle={`Each item holds up to ${storageCap(state).toLocaleString("en-US")}`}
-    >
+    <List.Section title="Inventory" subtitle={`Each item holds up to ${storageCap(state).toLocaleString("en-US")}`}>
       {owned.map((id) => {
         const item = ITEMS[id];
         const keep = keepCount(state, id);
@@ -45,37 +40,27 @@ export function Inventory(props: {
             ]}
             icon={Icon.Box}
             accessories={[
-              ...(isEquipped(state, id)
-                ? [{ tag: { value: "Equipped", color: Color.Green } }]
-                : []),
+              ...(isEquipped(state, id) ? [{ tag: { value: "Equipped", color: Color.Green } }] : []),
               ...(keep > 0 && !isGear(id) ? [{ tag: `Keep ${keep}` }] : []),
               {
                 text: `×${Math.floor(count(state, id))}`,
-                tooltip: isGear(id)
-                  ? undefined
-                  : `Holds up to ${storageCap(state).toLocaleString("en-US")}`,
+                tooltip: isGear(id) ? undefined : `Holds up to ${storageCap(state).toLocaleString("en-US")}`,
               },
             ]}
             detail={
               <List.Item.Detail
-                markdown={`# ${item.name}\n${item.description}${item.slot ? `\n\n**${gearStats(id)}**` : ""}${item.unsellable ? "\n\n_The locals will not buy this._" : `\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}`}
+                markdown={`# ${item.name}\n${describeItem(item)}${item.slot ? `\n\n**${gearStats(id)}**` : ""}${item.unsellable ? "\n\n_The locals will not buy this._" : `\n\nWorth **${formatCredits(sellPrice(state, id))}** each.`}`}
               />
             }
             actions={
               <ActionPanel>
                 {item.heal && (
-                  <Action
-                    title={`Eat (+${item.heal} HP)`}
-                    icon={Icon.Heart}
-                    onAction={() => props.onEat(id)}
-                  />
+                  <Action title={`Eat (+${item.heal} HP)`} icon={Icon.Heart} onAction={() => props.onEat(id)} />
                 )}
                 {item.slot && !isEquipped(state, id) && (
                   <Action title="Equip" icon={Icon.Check} onAction={() => props.onEquip(id)} />
                 )}
-                {item.potion && (
-                  <Action title="Drink" icon={Icon.Pill} onAction={() => props.onDrink(id)} />
-                )}
+                {item.potion && <Action title="Drink" icon={Icon.Pill} onAction={() => props.onDrink(id)} />}
                 {canTrade(state) && sellable > 0 && (
                   <>
                     <Action title="Sell 1" icon={Icon.Coins} onAction={() => props.onSell(id, 1)} />

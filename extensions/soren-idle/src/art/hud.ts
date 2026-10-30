@@ -34,24 +34,10 @@ export const path = (d: string, color: string = BLUE.light, w = 1.2, fill = "non
 export const poly = (points: Pt[], fill: string, color: string = BLUE.light, w = 1.2, extra = "") =>
   `<polygon points="${points.map(P).join(" ")}" fill="${fill}" stroke="${color}" stroke-width="${w}" stroke-linejoin="round" ${extra}/>`;
 
-export const circle = (
-  c: Pt,
-  r: number,
-  color: string = BLUE.light,
-  w = 1.2,
-  fill = "none",
-  extra = "",
-) =>
+export const circle = (c: Pt, r: number, color: string = BLUE.light, w = 1.2, fill = "none", extra = "") =>
   `<circle cx="${n(c[0])}" cy="${n(c[1])}" r="${n(r)}" fill="${fill}" stroke="${color}" stroke-width="${w}" ${extra}/>`;
 
-export const text = (
-  x: number,
-  y: number,
-  size: number,
-  s: string,
-  color: string = BLUE.light,
-  extra = "",
-) =>
+export const text = (x: number, y: number, size: number, s: string, color: string = BLUE.light, extra = "") =>
   `<text x="${x}" y="${y}" font-family="Menlo, Monaco, 'Courier New', monospace" font-size="${size}" fill="${color}" ${extra}>${s}</text>`;
 
 /** A reticle: a few concentric rings, a rotating dashed ring and a crosshair with gaps. */
@@ -61,14 +47,7 @@ export function reticle(c: Pt, r: number, f: number): string {
     circle(c, r * 0.12, BLUE.pale, 1.4),
     circle(c, r * 0.42, BLUE.light, 1),
     circle(c, r * 0.72, BLUE.pale, 2.2),
-    circle(
-      c,
-      r,
-      BLUE.light,
-      1,
-      "none",
-      `stroke-dasharray="14 9" stroke-dashoffset="${f * 6}" opacity=".8"`,
-    ),
+    circle(c, r, BLUE.light, 1, "none", `stroke-dasharray="14 9" stroke-dashoffset="${f * 6}" opacity=".8"`),
     line([x - r * 1.35, y], [x - r * 0.5, y], BLUE.light, 1, 'opacity=".7"'),
     line([x + r * 0.5, y], [x + r * 1.35, y], BLUE.light, 1, 'opacity=".7"'),
     line([x, y - r * 1.35], [x, y - r * 0.5], BLUE.light, 1, 'opacity=".7"'),
@@ -77,15 +56,7 @@ export function reticle(c: Pt, r: number, f: number): string {
 }
 
 /** Rows of tiny illegible hex, one row of which changes every frame. */
-function readout(
-  x: number,
-  y: number,
-  rows: number,
-  cols: number,
-  f: number,
-  seed: number,
-  anchor = "start",
-): string {
+function readout(x: number, y: number, rows: number, cols: number, f: number, seed: number, anchor = "start"): string {
   let out = "";
   for (let r = 0; r < rows; r++) {
     const live = r === f % rows ? f : 0;

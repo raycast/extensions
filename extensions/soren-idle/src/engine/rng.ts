@@ -12,7 +12,6 @@ export function nextRandom(s: Seeded): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
-export const randomInt = (s: Seeded, min: number, max: number) =>
-  min + Math.floor(nextRandom(s) * (max - min + 1));
+export const randomInt = (s: Seeded, min: number, max: number) => min + Math.floor(nextRandom(s) * (max - min + 1));
 
 export const pick = <T>(s: Seeded, list: T[]): T => list[Math.floor(nextRandom(s) * list.length)];

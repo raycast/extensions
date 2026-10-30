@@ -5,14 +5,7 @@ import { hash } from "./util";
 const rad = (deg: number) => (deg * Math.PI) / 180;
 
 /** A glowcap: a domed, gilled cap on a stem, with a halo and glowing spots. */
-export function mushroom(
-  cx: number,
-  by: number,
-  w: number,
-  h: number,
-  f: number,
-  halo = true,
-): string {
+export function mushroom(cx: number, by: number, w: number, h: number, f: number, halo = true): string {
   const capY = by - h * 0.5;
   let out = "";
   if (halo)
@@ -45,10 +38,7 @@ export function mushroom(
     );
   }
   for (let i = 0; i < 3; i++) {
-    const a: Pt = [
-      cx + (hash(i, Math.round(w), 61) - 0.5) * w * 1.1,
-      by - h * (0.68 + hash(i, 2, 61) * 0.2),
-    ];
+    const a: Pt = [cx + (hash(i, Math.round(w), 61) - 0.5) * w * 1.1, by - h * (0.68 + hash(i, 2, 61) * 0.2)];
     out += circle(
       a,
       Math.max(1.4, w * 0.08),
@@ -150,13 +140,7 @@ function root(cx: number, top: number, w: number, h: number, id: number): string
   for (let i = 1; i < 5; i++) {
     const y = top + (h * i) / 5.5;
     const half = w * (0.5 - i * 0.07);
-    out += path(
-      `M${cx - half} ${y}Q${cx} ${y + 5} ${cx + half} ${y}`,
-      BLUE.deep,
-      0.9,
-      "none",
-      'opacity=".7"',
-    );
+    out += path(`M${cx - half} ${y}Q${cx} ${y + 5} ${cx + half} ${y}`, BLUE.deep, 0.9, "none", 'opacity=".7"');
   }
   for (let i = 0; i < 9; i++) {
     const y = top + h * (0.2 + hash(id, i, 71) * 0.7);
@@ -208,14 +192,7 @@ export function sweetroot(f: number): string {
     const phase = ((f + hash(i, 1, 77) * 4) % 4) / 4;
     const vx = (hash(i, 2, 77) - 0.5) * 90;
     const p: Pt = [dig[0] + vx * phase, surface - 4 - 52 * phase + 120 * phase * phase * 0.5];
-    soil += circle(
-      p,
-      1.2 + hash(i, 3, 77) * 2.4,
-      BLUE.light,
-      1,
-      "none",
-      `opacity="${(1 - phase * 0.7).toFixed(2)}"`,
-    );
+    soil += circle(p, 1.2 + hash(i, 3, 77) * 2.4, BLUE.light, 1, "none", `opacity="${(1 - phase * 0.7).toFixed(2)}"`);
   }
   return [
     moon(f),
@@ -240,9 +217,7 @@ function plant(kind: Crop, cx: number, by: number, stage: number, f: number): st
   const h = 14 + stage * 15;
   if (kind === "glowcap") return mushroom(cx, by, 5 + stage * 2.4, h, f, stage > 2);
   if (kind === "lumina") {
-    return (
-      crystal(cx - 7, by, h * 0.6, 3 + stage, -10) + crystal(cx + 3, by, h, 4 + stage * 1.3, 4)
-    );
+    return crystal(cx - 7, by, h * 0.6, 3 + stage, -10) + crystal(cx + 3, by, h, 4 + stage * 1.3, 4);
   }
   const top: Pt = [cx, by - h];
   return [
@@ -285,14 +260,9 @@ function hydroponics(kind: Crop, f: number): string {
       BLUE.light,
       1.2,
     );
-    trays += path(
-      `M${x + 6} ${y0 + 3}q${trayW / 4} -4 ${trayW / 2 - 6} 0t${trayW / 2 - 6} 0`,
-      BLUE.mid,
-      0.9,
-    );
+    trays += path(`M${x + 6} ${y0 + 3}q${trayW / 4} -4 ${trayW / 2 - 6} 0t${trayW / 2 - 6} 0`, BLUE.mid, 0.9);
     stubs +=
-      line([cx - 6, y0 + 34], [cx - 6, 296], BLUE.light, 1.2) +
-      line([cx + 6, y0 + 34], [cx + 6, 296], BLUE.light, 1.2);
+      line([cx - 6, y0 + 34], [cx - 6, 296], BLUE.light, 1.2) + line([cx + 6, y0 + 34], [cx + 6, 296], BLUE.light, 1.2);
   }
   const busX0 = x0 - 8;
   const busX1 = x0 + 6 * (trayW + 6) - 6;

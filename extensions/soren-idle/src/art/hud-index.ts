@@ -2,16 +2,7 @@ import { renderHud } from "./hud";
 import { camp } from "./hud-base";
 import { COMBAT_SCENES } from "./hud-combat";
 import { FORGE_SCENES } from "./hud-forge";
-import {
-  berserker,
-  fortune,
-  fury,
-  honeyRation,
-  quicksilver,
-  ration,
-  swift,
-  windfall,
-} from "./hud-lab";
+import { berserker, fortune, fury, honeyRation, quicksilver, ration, swift, windfall } from "./hud-lab";
 import { glowcap, hydroGlowcap, hydroLumina, hydroSweetroot, sweetroot } from "./hud-grow";
 import { cargo, ferrite, mining, salvaging, wiring } from "./hud-scenes";
 
@@ -39,16 +30,10 @@ export const HUD_SCENES: Record<string, SceneSvg> = {
   brew_windfall: (frame) => renderHud(windfall, frame, 73),
   brew_berserker: (frame) => renderHud(berserker, frame, 79),
   ...Object.fromEntries(
-    Object.entries(COMBAT_SCENES).map(([id, draw], i) => [
-      id,
-      (frame: number) => renderHud(draw, frame, 83 + i * 2),
-    ]),
+    Object.entries(COMBAT_SCENES).map(([id, draw], i) => [id, (frame: number) => renderHud(draw, frame, 83 + i * 2)]),
   ),
   ...Object.fromEntries(
-    Object.entries(FORGE_SCENES).map(([id, draw], i) => [
-      id,
-      (frame: number) => renderHud(draw, frame, 101 + i * 2),
-    ]),
+    Object.entries(FORGE_SCENES).map(([id, draw], i) => [id, (frame: number) => renderHud(draw, frame, 101 + i * 2)]),
   ),
 };
 

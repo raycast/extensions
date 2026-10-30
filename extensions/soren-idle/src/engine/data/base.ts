@@ -70,8 +70,7 @@ export const BUILDINGS: BuildingDef[] = [
   {
     id: "translator",
     name: "Translation Device",
-    description:
-      "Turns the locals' speech into something you can understand. Each level teaches it more.",
+    description: "Turns the locals' speech into something you can understand. Each level teaches it more.",
     maxLevel: 5,
     baseCost: {},
     costGrowth: 1,
@@ -106,9 +105,7 @@ export const BUILDINGS: BuildingDef[] = [
       { alloy_plate: 60, resonance_coil: 4, void_lens: 2 },
       { resonance_coil: 8, void_lens: 4, aether_cell: 2 },
     ],
-    levelNotes: HUB_SELL_RATES.map(
-      (rate) => `The locals buy your goods at ${Math.round(rate * 100)}% of their worth.`,
-    ),
+    levelNotes: HUB_SELL_RATES.map((rate) => `The locals buy your goods at ${Math.round(rate * 100)}% of their worth.`),
     requires: { skill: "engineering", level: 46 },
     requiresContact: true,
     requiresBuilding: { id: "translator", level: 1 },
@@ -139,16 +136,13 @@ export const BUILDINGS: BuildingDef[] = [
       { alloy_plate: 60, resonance_coil: 3, void_lens: 1 },
     ],
     levelCredits: [0, 0, 300, 900, 2500],
-    levelNotes: STORAGE_CAPS.slice(1).map(
-      (n) => `Each item stack holds ${n.toLocaleString("en-US")}.`,
-    ),
+    levelNotes: STORAGE_CAPS.slice(1).map((n) => `Each item stack holds ${n.toLocaleString("en-US")}.`),
     requires: { skill: "engineering", level: 13 },
   },
   {
     id: "stasis_pod",
     name: "Stasis Pod",
-    description:
-      "Sleep through long absences. Your survivor keeps working for longer while you are away.",
+    description: "Sleep through long absences. Your survivor keeps working for longer while you are away.",
     maxLevel: 5,
     baseCost: {},
     costGrowth: 1,
@@ -160,9 +154,7 @@ export const BUILDINGS: BuildingDef[] = [
       { resonance_coil: 6, void_lens: 3, aether_cell: 1 },
     ],
     levelCredits: [0, 0, 400, 1200, 3000],
-    levelNotes: [1, 2, 3, 4, 5].map(
-      (l) => `Away progress counts for up to ${12 + l * OFFLINE_BONUS_HOURS} hours.`,
-    ),
+    levelNotes: [1, 2, 3, 4, 5].map((l) => `Away progress counts for up to ${12 + l * OFFLINE_BONUS_HOURS} hours.`),
     requires: { skill: "engineering", level: 28 },
   },
   {

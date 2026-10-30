@@ -30,14 +30,10 @@ export function Overview(props: {
         <List.Section title="While you were away">
           <List.Item
             title={`Away for ${formatDuration(props.away.elapsedMs)}`}
-            subtitle={
-              props.away.cycles ? `${props.away.cycles.toLocaleString("en-US")} tasks` : undefined
-            }
+            subtitle={props.away.cycles ? `${props.away.cycles.toLocaleString("en-US")} tasks` : undefined}
             icon={Icon.Clock}
             accessories={
-              Object.keys(props.away.rare).length
-                ? [{ tag: { value: "Rare find", color: Color.Orange } }]
-                : []
+              Object.keys(props.away.rare).length ? [{ tag: { value: "Rare find", color: Color.Orange } }] : []
             }
             detail={
               <List.Item.Detail
@@ -173,12 +169,7 @@ function SurvivorSettings(props: {
       </ActionPanel.Submenu>
       <Action title="Copy Save to Clipboard" icon={Icon.CopyClipboard} onAction={props.onExport} />
       <Action title="Import Save from Clipboard" icon={Icon.Download} onAction={props.onImport} />
-      <Action
-        title="Reset Game"
-        icon={Icon.Trash}
-        style={Action.Style.Destructive}
-        onAction={props.onReset}
-      />
+      <Action title="Reset Game" icon={Icon.Trash} style={Action.Style.Destructive} onAction={props.onReset} />
     </>
   );
 }

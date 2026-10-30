@@ -53,13 +53,7 @@ export function Hydroponics(props: {
             key={index}
             title={`Plot ${index + 1}`}
             subtitle={crop ? crop.name : "Empty"}
-            icon={
-              ripe
-                ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                : crop
-                  ? Icon.Clock
-                  : Icon.Circle
-            }
+            icon={ripe ? { source: Icon.CheckCircle, tintColor: Color.Green } : crop ? Icon.Clock : Icon.Circle}
             accessories={[
               plot && crop
                 ? ripe
@@ -85,20 +79,8 @@ export function Hydroponics(props: {
             }
             actions={
               <ActionPanel>
-                {ripe && (
-                  <Action
-                    title="Harvest"
-                    icon={Icon.Leaf}
-                    onAction={() => props.onHarvest(index)}
-                  />
-                )}
-                {ready > 1 && (
-                  <Action
-                    title="Harvest All Ready"
-                    icon={Icon.Leaf}
-                    onAction={props.onHarvestAll}
-                  />
-                )}
+                {ripe && <Action title="Harvest" icon={Icon.Leaf} onAction={() => props.onHarvest(index)} />}
+                {ready > 1 && <Action title="Harvest All Ready" icon={Icon.Leaf} onAction={props.onHarvestAll} />}
                 {!plot && (
                   <ActionPanel.Submenu title="Plant" icon={Icon.Plus}>
                     {CROPS.map((c) => (

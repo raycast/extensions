@@ -125,8 +125,8 @@ describe("mastery", () => {
 
   it("gives more from a mastered task than a fresh one over many cycles", () => {
     const run = (s: GameState) =>
-      advance(startTask({ ...s, buildings: { storage: 5 } }, "salvage_hull", 400).state, 1e9).state
-        .inventory.scrap_metal ?? 0;
+      advance(startTask({ ...s, buildings: { storage: 5 } }, "salvage_hull", 400).state, 1e9).state.inventory
+        .scrap_metal ?? 0;
     expect(run(withMastery("salvage_hull", 99))).toBeGreaterThan(run(newGame(0)));
   });
 

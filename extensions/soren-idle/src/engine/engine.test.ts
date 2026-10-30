@@ -24,10 +24,7 @@ import { GameState, ItemId } from "./types";
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
-function withItems(
-  items: Partial<Record<ItemId, number>>,
-  patch: Partial<GameState> = {},
-): GameState {
+function withItems(items: Partial<Record<ItemId, number>>, patch: Partial<GameState> = {}): GameState {
   return { ...newGame(0), inventory: { ...items }, ...patch };
 }
 
@@ -138,9 +135,7 @@ describe("advance: crafting", () => {
     expect(taskDurationMs(withTorch, TASK_BY_ID.salvage_hull)).toBeLessThan(
       taskDurationMs(base, TASK_BY_ID.salvage_hull),
     );
-    expect(taskDurationMs(withTorch, TASK_BY_ID.mine_ferrite)).toBe(
-      taskDurationMs(base, TASK_BY_ID.mine_ferrite),
-    );
+    expect(taskDurationMs(withTorch, TASK_BY_ID.mine_ferrite)).toBe(taskDurationMs(base, TASK_BY_ID.mine_ferrite));
   });
 });
 
@@ -254,15 +249,9 @@ describe("base", () => {
   it("workshop speeds up engineering only", () => {
     const s = engineer({ alloy_plate: 100, circuit_scrap: 100 });
     const built = build(s, "workshop").state;
-    expect(taskDurationMs(built, TASK_BY_ID.craft_alloy)).toBeLessThan(
-      taskDurationMs(s, TASK_BY_ID.craft_alloy),
-    );
-    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBe(
-      taskDurationMs(s, TASK_BY_ID.craft_ration),
-    );
-    expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(
-      taskDurationMs(s, TASK_BY_ID.mine_ferrite),
-    );
+    expect(taskDurationMs(built, TASK_BY_ID.craft_alloy)).toBeLessThan(taskDurationMs(s, TASK_BY_ID.craft_alloy));
+    expect(taskDurationMs(built, TASK_BY_ID.craft_ration)).toBe(taskDurationMs(s, TASK_BY_ID.craft_ration));
+    expect(taskDurationMs(built, TASK_BY_ID.mine_ferrite)).toBe(taskDurationMs(s, TASK_BY_ID.mine_ferrite));
   });
 });
 
@@ -278,9 +267,7 @@ describe("drone power", () => {
 
   it("scales output down when drones draw more than the generators give", () => {
     expect(powerEfficiency(drones(2))).toBeCloseTo(6 / 8);
-    expect(advance(drones(2), hour).state.inventory.scrap_metal).toBe(
-      Math.floor(4 * (hour / 20_000) * 0.75),
-    );
+    expect(advance(drones(2), hour).state.inventory.scrap_metal).toBe(Math.floor(4 * (hour / 20_000) * 0.75));
     expect(advance(drones(0), hour).state.inventory.scrap_metal).toBeUndefined();
   });
 });

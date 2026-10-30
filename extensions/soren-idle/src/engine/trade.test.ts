@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HUB_SELL_RATES, ITEMS, STOCK } from "./data";
-import { build, count, eat, maxHp, newGame, xpForLevel } from "./engine";
+import { build, count, eat, maxHp, newGame, storageCap, xpForLevel } from "./engine";
 import {
   buy,
   buyDiscount,
@@ -15,10 +15,7 @@ import {
 } from "./trade";
 import { GameState, ItemId } from "./types";
 
-function trader(
-  inventory: Partial<Record<ItemId, number>>,
-  { hub = 1, translator = 1, credits = 0 } = {},
-): GameState {
+function trader(inventory: Partial<Record<ItemId, number>>, { hub = 1, translator = 1, credits = 0 } = {}): GameState {
   return {
     ...newGame(1000),
     contactAt: 0,
@@ -31,8 +28,7 @@ function trader(
 
 describe("item values", () => {
   it("every item the locals buy is worth something", () => {
-    for (const item of Object.values(ITEMS))
-      if (!item.unsellable) expect(item.value, item.id).toBeGreaterThan(0);
+    for (const item of Object.values(ITEMS)) if (!item.unsellable) expect(item.value, item.id).toBeGreaterThan(0);
   });
 
   it("everything the locals sell costs more than it pays out", () => {
@@ -58,16 +54,11 @@ describe("selling", () => {
     const rates = [1, 2, 3, 4, 5].map((hub) => sellRate(trader({}, { hub })));
     expect(rates).toEqual(HUB_SELL_RATES);
     expect(sellPrice(trader({}, { hub: 5 }), "lumina_crystal")).toBe(ITEMS.lumina_crystal.value);
-    expect(sellPrice(trader({}, { hub: 1 }), "lumina_crystal")).toBeLessThan(
-      ITEMS.lumina_crystal.value,
-    );
+    expect(sellPrice(trader({}, { hub: 1 }), "lumina_crystal")).toBeLessThan(ITEMS.lumina_crystal.value);
   });
 
   it("buys everything the player can own", () => {
-    const everything = Object.fromEntries(Object.keys(ITEMS).map((id) => [id, 5])) as Record<
-      ItemId,
-      number
-    >;
+    const everything = Object.fromEntries(Object.keys(ITEMS).map((id) => [id, 5])) as Record<ItemId, number>;
     let s = trader(everything);
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       if (sellableCount(s, id) > 0) s = sell(s, id, "all").state;
@@ -115,6 +106,24 @@ describe("buying", () => {
     expect(count(state, "glyph_tablet")).toBe(3);
   });
 
+  it("buys as many as the Credits allow when asked for the most", () => {
+    const { state, amount } = buy(trader({}, { credits: 200 }), "glyph_tablet", "max");
+    expect(amount).toBe(3);
+    expect(count(state, "glyph_tablet")).toBe(3);
+    expect(state.credits).toBe(200 - 180);
+  });
+
+  it("stops at the storage room instead of refusing the whole purchase", () => {
+    const cap = storageCap(trader({}));
+    const s = trader({ glyph_tablet: cap - 2 }, { credits: 9999 });
+    const { state, amount, error } = buy(s, "glyph_tablet", "max");
+    expect(error).toBeUndefined();
+    expect(amount).toBe(2);
+    expect(count(state, "glyph_tablet")).toBe(cap);
+    expect(buy(state, "glyph_tablet", "max").error).toMatch(/room/);
+    expect(buy(trader({}, { credits: 10 }), "glyph_tablet", "max").error).toMatch(/Not enough Credits/);
+  });
+
   it("refuses without credits, a hub, or the right Translation Device level", () => {
     expect(buy(trader({}, { credits: 10 }), "glyph_tablet", 1).error).toMatch(/Not enough/);
     expect(buy(trader({}, { hub: 0, credits: 999 }), "glyph_tablet", 1).error).toMatch(/Hub/);
@@ -126,9 +135,7 @@ describe("buying", () => {
       0, 0, 0.05, 0.1, 0.15,
     ]);
     const stock = STOCK.find((x) => x.item === "glyph_tablet")!;
-    expect(buyPrice(trader({}, { translator: 5 }), stock)).toBeLessThan(
-      buyPrice(trader({}, { translator: 1 }), stock),
-    );
+    expect(buyPrice(trader({}, { translator: 5 }), stock)).toBeLessThan(buyPrice(trader({}, { translator: 1 }), stock));
   });
 });
 
@@ -142,10 +149,7 @@ describe("spendCredits", () => {
 
 describe("Trading Hub", () => {
   const ready = (): GameState => ({
-    ...trader(
-      { alloy_plate: 999, circuit_scrap: 999, scrap_metal: 999 },
-      { hub: 0, translator: 1 },
-    ),
+    ...trader({ alloy_plate: 999, circuit_scrap: 999, scrap_metal: 999 }, { hub: 0, translator: 1 }),
   });
 
   it("needs a Translation Device first", () => {
@@ -170,9 +174,7 @@ describe("local food", () => {
     expect(first.state.hp).toBe(1 + (ITEMS.ration.heal ?? 0));
     expect(count(first.state, "ration")).toBe(0);
     expect(count(first.state, "honey_ration")).toBe(1);
-    expect(eat(s, "honey_ration").state.hp).toBe(
-      Math.min(maxHp(s), 1 + (ITEMS.honey_ration.heal ?? 0)),
-    );
+    expect(eat(s, "honey_ration").state.hp).toBe(Math.min(maxHp(s), 1 + (ITEMS.honey_ration.heal ?? 0)));
     expect(ITEMS.honey_ration.heal).toBeGreaterThan(ITEMS.ration.heal ?? 0);
   });
 });

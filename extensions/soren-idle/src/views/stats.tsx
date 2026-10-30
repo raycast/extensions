@@ -23,12 +23,7 @@ export function Stats({ state }: { state: GameState }) {
     <>
       <List.Section title="Lifetime">
         {rows.map(([title, value]) => (
-          <List.Item
-            key={title}
-            title={title}
-            icon={Icon.BarChart}
-            accessories={[{ text: value }]}
-          />
+          <List.Item key={title} title={title} icon={Icon.BarChart} accessories={[{ text: value }]} />
         ))}
       </List.Section>
       <List.Section title="Skills">

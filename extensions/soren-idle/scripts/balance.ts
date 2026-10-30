@@ -48,13 +48,7 @@ function hoursToLevel(skill: SkillId): number[] {
 }
 
 const fmt = (h: number) =>
-  !isFinite(h)
-    ? "n/a"
-    : h < 1
-      ? `${Math.round(h * 60)}m`
-      : h < 100
-        ? `${h.toFixed(1)}h`
-        : `${Math.round(h)}h`;
+  !isFinite(h) ? "n/a" : h < 1 ? `${Math.round(h * 60)}m` : h < 100 ? `${h.toFixed(1)}h` : `${Math.round(h)}h`;
 
 const table = (rows: string[][]) => {
   const widths = rows[0].map((_, i) => Math.max(...rows.map((r) => r[i].length)));
@@ -78,9 +72,7 @@ table([
 console.log("\nTime to unlock each task, training its own skill nonstop\n");
 table([
   ["task", "skill", "lv", "unlocks after", "xp/h when it opens"],
-  ...TASKS.filter(
-    (t) => t.levelReq > 1 && !t.once && Number.isFinite(byHours.get(t.skill)![t.levelReq]),
-  )
+  ...TASKS.filter((t) => t.levelReq > 1 && !t.once && Number.isFinite(byHours.get(t.skill)![t.levelReq]))
     .sort((a, b) => a.skill.localeCompare(b.skill) || a.levelReq - b.levelReq)
     .map((t) => [
       t.name,

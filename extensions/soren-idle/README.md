@@ -69,10 +69,6 @@ npm run lint
 | `src/ticker.tsx` | The menu bar command. |
 | `scripts` | Tooling such as the balance simulation. |
 
-## Releasing
-
-See [RELEASING.md](RELEASING.md).
-
 ## Contributing
 
 Issues and pull requests are welcome. Please run `npm test` and `npm run lint` before opening a PR.
