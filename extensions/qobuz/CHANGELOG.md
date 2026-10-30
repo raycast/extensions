@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Open Shared Music] - {PR_MERGE_DATE}
+## [Open Shared Music] - 2026-10-30
 
 ### Added
 
