@@ -1,6 +1,6 @@
 # Buzz Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-30
 
 - Search Channels: browse every channel on your relay, open one in the Buzz app, or drill into its
   recent messages to read and react. Thread replies are collapsed into their root with a reply
