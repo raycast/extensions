@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALL_SECTIONS, SECTION_GROUPS, sectionUrl } from "../src/lib/sections";
@@ -22,11 +22,17 @@ describe("Sections", () => {
     }
   });
 
-  it("matches the sections Folnaro's link accepts", () => {
-    const source = readFileSync(
-      join(__dirname, "..", "..", "..", "mac/Packages/FolnaroKit/Sources/FolnaroCore/Links/FolnaroLink.swift"),
-      "utf8",
-    );
+  // The app's link source lives in the Folnaro repository; the published extension ships without it.
+  const linkSource = join(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "mac/Packages/FolnaroKit/Sources/FolnaroCore/Links/FolnaroLink.swift",
+  );
+
+  it.skipIf(!existsSync(linkSource))("matches the sections Folnaro's link accepts", () => {
+    const source = readFileSync(linkSource, "utf8");
     const list = source.match(/static let sections: \[String\] = \[([^\]]*)\]/)![1];
     const accepted = [...list.matchAll(/"(\w+)"/g)].map((match) => match[1]);
     expect(ALL_SECTIONS.map((section) => section.id).sort()).toEqual([...accepted].sort());
