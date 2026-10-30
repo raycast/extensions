@@ -47,30 +47,3 @@ When none exists, every command says so and offers the install command.
   menu bar's background refresh passes `--no-launch`, so it never reopens a
   FanBar you quit; it shows "FanBar is not running" instead. Clicking a preset
   in its menu is an explicit request and may start FanBar.
-
-## Development
-
-```sh
-npm install
-npm run dev     # load into Raycast in development mode
-npm run build
-npm run lint
-```
-
-`npm run publish` opens a pull request against `raycast/extensions` for Store
-review. FanBar 0.7.0 and later ship the `fanbar` CLI the extension needs.
-Before publishing, check that `author` in `package.json` is the Raycast Store
-username and that `metadata/` holds the Store screenshots.
-
-## Follow-ups for the CLI contract
-
-Things the extension works around rather than changing the contract:
-
-- `preset list --json` carries no `status`, so the selected preset cannot be
-  told apart from the running one without a second `status` call. The menu bar
-  makes both calls each refresh; Switch Preset only marks the selected preset.
-- Exit code `3` has no JSON reply, so "not running" and "socket broken" can only
-  be told apart by the stderr wording. A `--json` error object on stdout (for
-  example `{"ok": false, "reachable": false, "message": …}`) would let
-  integrations show precise states.
-- `status` has no per-fan name (Left/Right), so fans show as Fan 1, Fan 2.

@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, List, Toast, open, openExtensionPreferences, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, open, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast as showUtilsFailureToast } from "@raycast/utils";
 import { DEFAULT_LOCATIONS, DOCS_URL, FanBarError, INSTALL_COMMAND, asFanBarError } from "./fanbar";
 
 export function showFailureToast(error: unknown): Promise<Toast> {
   const failure = asFanBarError(error);
-  return showToast({ style: Toast.Style.Failure, title: failure.title, message: failure.message });
+  return showUtilsFailureToast(failure, { title: failure.title });
 }
 
 /** Actions that help with any failure; extra ones go first. */
