@@ -50,10 +50,10 @@
 	"scripts": {
 		"build": "ray build -e dist",
 		"dev": "ray develop",
-		"lint": "ESLINT_FLAGS=unstable_native_nodejs_ts_config ray lint --exit-on-error --non-interactive && eslint --flag unstable_native_nodejs_ts_config . && prettier --check .",
+		"lint": "ray lint --exit-on-error --non-interactive && eslint . && prettier --check .",
 		"test": "node --test test/*.test.ts",
 		"typecheck": "tsc --noEmit",
-		"publish": "ESLINT_FLAGS=unstable_native_nodejs_ts_config ray publish",
+		"publish": "ray publish",
 		"prepublishOnly": "node scripts/block-npm-publish.ts"
 	},
 	"dependencies": {

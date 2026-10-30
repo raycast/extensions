@@ -1,12 +1,5 @@
 {
-	"include": [
-		"src/**/*",
-		"test/**/*.ts",
-		"scripts/**/*.ts",
-		"eslint.config.ts",
-		"types/**/*.d.ts",
-		"raycast-env.d.ts"
-	],
+	"include": ["src/**/*", "test/**/*.ts", "scripts/**/*.ts", "raycast-env.d.ts"],
 	"compilerOptions": {
 		"lib": ["ES2024"],
 		"module": "ESNext",

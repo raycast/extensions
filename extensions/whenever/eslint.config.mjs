@@ -5,6 +5,7 @@ export default [
 	{ ignores: ['dist/**', 'raycast-env.d.ts'] },
 	{
 		files: ['**/*.{js,jsx,mjs,cjs}'],
+		ignores: ['eslint.config.mjs'],
 		rules: {
 			'no-restricted-syntax': [
 				'error',
