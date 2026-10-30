@@ -8,6 +8,7 @@ import {
   Clipboard,
   Form,
   Icon,
+  Keyboard,
   getPreferenceValues,
   getSelectedText,
   open,
@@ -19,14 +20,19 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useForm, usePromise } from "@raycast/utils";
 import { execa } from "execa";
+import { logger } from "@chrismessina/raycast-logger";
 import {
   DownloadOptions,
   getffmpegPath,
   getffprobePath,
+  formatLanguage,
+  getAudioLanguages,
+  getDubbedFormatSelector,
   getFormats,
-  getFormatTitle,
+  getFormatTitles,
   getFormatValue,
   getytdlPath,
+  getYtdlpEnv,
   getCommonArgs,
   copyToClipboardAction,
   describeYtdlpError,
@@ -54,6 +60,23 @@ const {
   fastRemux = true,
 } = getPreferenceValues<ExtensionPreferences>();
 
+const log = logger.child("[yt-dlp]");
+
+const REAL_DOWNLOAD_MARKER = "real-download: ";
+
+// One line per format yt-dlp returned, with the fields the dropdown hides, so a
+// confusing dropdown can be traced back to the raw data.
+function logFormats(video: Video) {
+  const rows = video.formats.map((f) =>
+    [f.format_id, f.resolution, f.fps, f.ext, f.vcodec, f.acodec, f.tbr, f.protocol, f.language, f.format_note]
+      .map((value) => value ?? "-")
+      .join(" | "),
+  );
+  log.debug(
+    `${video.formats.length} formats (id | resolution | fps | ext | vcodec | acodec | tbr | protocol | language | note)\n${rows.join("\n")}`,
+  );
+}
+
 export default function DownloadVideo() {
   const { push } = useNavigation();
   const [error, setError] = useState(0);
@@ -69,7 +92,17 @@ export default function DownloadVideo() {
     },
     onSubmit: async (values) => {
       if (!values.format) return;
-      const options = ["-o", path.join(downloadPath, `${video?.title || "video"} (%(id)s).%(ext)s`)];
+      // While a new URL loads, the previous video's formats are still on screen,
+      // and their IDs (and dubbed tracks) mean something else in the new video.
+      if (isLoading || video?.sourceUrl !== values.url) {
+        setValidationError("url", "Formats for this URL are still loading");
+        return;
+      }
+      setValidationError("url", undefined);
+      // A dubbed download gets its own file name; otherwise yt-dlp would find the
+      // original-language file already on disk and skip the download.
+      const dubSuffix = dubLanguage ? ` [${formatLanguage(dubLanguage)}]` : "";
+      const options = ["-o", path.join(downloadPath, `${video?.title || "video"} (%(id)s)${dubSuffix}.%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
       // `medium` ("Audio"/"Video") is derived at component scope from the selected
@@ -83,11 +116,12 @@ export default function DownloadVideo() {
       options.push("--ffmpeg-location", ffmpegPath);
 
       if (values.format === MP3_FORMAT_ID) {
+        if (dubSelector) options.push("--format", dubSelector);
         options.push("--extract-audio");
         options.push("--audio-format", "mp3");
         options.push("--audio-quality", "0");
       } else {
-        options.push("--format", downloadFormat);
+        options.push("--format", dubSelector ?? downloadFormat);
         const hasWebmAudio = video?.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
         const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
         options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
@@ -101,12 +135,37 @@ export default function DownloadVideo() {
 
       options.push("--progress");
       options.push("--print", "after_move:filepath");
+      // yt-dlp silently skips a file that's already on disk (and exits 0), so ask
+      // it whether this run actually downloaded anything.
+      options.push("--print", `post_process:${REAL_DOWNLOAD_MARKER}%(__real_download)s`);
 
-      const downloadProcess = spawn(ytdlPath, [...getCommonArgs(), ...options, normalizeVideoUrl(values.url)], {
-        env: { ...globalThis.process.env, PYTHONUNBUFFERED: "1" },
-      });
+      const downloadArgs = [...getCommonArgs(), ...options, normalizeVideoUrl(values.url)];
+      log.log("Download started", { args: downloadArgs });
+      const downloadProcess = spawn(ytdlPath, downloadArgs, { env: getYtdlpEnv(ytdlPath) });
+
+      let canceled = false;
+      toast.primaryAction = {
+        title: "Cancel Download",
+        shortcut: { macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } },
+        onAction: () => {
+          canceled = true;
+          // SIGINT lets yt-dlp stop cleanly; its partial file resumes next time.
+          downloadProcess.kill("SIGINT");
+        },
+      };
 
       let filePath = "";
+      let realDownloads = 0;
+      let skippedDownloads = 0;
+      // stdout chunks can end mid-line, so markers and paths are read from
+      // complete lines only (progress updates are matched per chunk below).
+      let pendingStdout = "";
+      const consumeStdoutLine = (line: string) => {
+        const trimmed = line.trim();
+        if (trimmed === `${REAL_DOWNLOAD_MARKER}True`) realDownloads++;
+        else if (trimmed === `${REAL_DOWNLOAD_MARKER}False`) skippedDownloads++;
+        else if (looksLikeFilePath(trimmed)) filePath = trimmed;
+      };
       // Accumulate the full stderr stream so a failure can surface complete logs
       // via "Copy Logs". `lastErrorLine` is the most useful single line to show
       // in the toast body when the download fails.
@@ -119,6 +178,7 @@ export default function DownloadVideo() {
 
       const consumeStderrLine = (line: string) => {
         if (!line) return;
+        log.log(line);
 
         // Surface warnings inline, and remember the last error line for the
         // failure toast — but do NOT touch toast.message here: the running toast
@@ -146,11 +206,9 @@ export default function DownloadVideo() {
           toast.message = `${Math.floor(Number(progressMatch[1]))}%`;
         }
 
-        for (const line of text.split("\n")) {
-          if (looksLikeFilePath(line.trim())) {
-            filePath = line.trim();
-          }
-        }
+        const lines = (pendingStdout + text).split(/\r?\n|\r/);
+        pendingStdout = lines.pop() ?? "";
+        for (const line of lines) consumeStdoutLine(line);
       });
 
       downloadProcess.stderr.on("data", (data) => {
@@ -166,6 +224,19 @@ export default function DownloadVideo() {
         if (pendingStderr) {
           consumeStderrLine(pendingStderr);
           pendingStderr = "";
+        }
+        if (pendingStdout) {
+          consumeStdoutLine(pendingStdout);
+          pendingStdout = "";
+        }
+        log.log("Download finished", { exitCode: code, filePath, canceled, realDownloads, skippedDownloads });
+
+        if (canceled) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Download Canceled";
+          toast.message = video?.title;
+          toast.primaryAction = undefined;
+          return;
         }
 
         // The exit code is the sole success/failure verdict: 0 is success,
@@ -203,9 +274,14 @@ export default function DownloadVideo() {
           return;
         }
 
-        toast.title = `${medium} Downloaded`;
+        const allSkipped = skippedDownloads > 0 && realDownloads === 0;
+        toast.title = allSkipped ? `${medium} Already Downloaded` : `${medium} Downloaded`;
         toast.style = Toast.Style.Success;
-        toast.message = video?.title;
+        toast.message =
+          skippedDownloads > 0 && realDownloads > 0
+            ? `${realDownloads} downloaded, ${skippedDownloads} already in your download folder`
+            : video?.title;
+        toast.primaryAction = undefined;
 
         if (filePath) {
           toast.primaryAction = {
@@ -265,25 +341,20 @@ export default function DownloadVideo() {
       if (!url) return;
       if (!isValidUrl(url)) return;
 
-      const result = await execa(
-        ytdlPath,
-        [
-          ...getCommonArgs({ throttle: true }),
-          "--no-playlist",
-          "--dump-json",
-          "--format-sort=res,ext,tbr",
-          normalizeVideoUrl(url),
-        ],
-        {
-          env: {
-            ...process.env,
-            PYTHONUNBUFFERED: "1",
-          },
-        },
-      );
+      const args = [
+        ...getCommonArgs({ throttle: true }),
+        "--no-playlist",
+        "--dump-json",
+        "--format-sort=res,ext,tbr",
+        normalizeVideoUrl(url),
+      ];
+      log.log("Fetching video info", { ytdlPath, args });
+      const result = await execa(ytdlPath, args, { env: getYtdlpEnv(ytdlPath) });
+      if (result.stderr) log.log(result.stderr);
       const data = JSON.parse(result.stdout) as Video;
+      logFormats(data);
 
-      return { ...data, title: sanitizeVideoTitle(data.title) };
+      return { ...data, title: sanitizeVideoTitle(data.title), sourceUrl: url };
     },
     [values.url],
     {
@@ -301,7 +372,7 @@ export default function DownloadVideo() {
           primaryAction: friendly.retryable
             ? {
                 title: "Try Again",
-                shortcut: { modifiers: ["cmd"], key: "r" },
+                shortcut: Keyboard.Shortcut.Common.Refresh,
                 onAction: () => {
                   revalidate();
                 },
@@ -374,13 +445,37 @@ export default function DownloadVideo() {
   // else "Video". Drives both the submit button label and the progress toasts, so
   // the whole flow agrees on what's being downloaded. MP3_FORMAT_ID is a hardcoded
   // value with no backing Format in the list, so it's checked explicitly.
-  const medium = useMemo(() => {
-    const selectedFormat = Object.values(formats)
-      .flat()
-      .find((format) => getFormatValue(format) === values.format);
-    const isAudio = values.format === MP3_FORMAT_ID || selectedFormat?.vcodec === "none";
-    return isAudio ? "Audio" : "Video";
-  }, [formats, values.format]);
+  const selectedFormat = useMemo(
+    () =>
+      Object.values(formats)
+        .flat()
+        .find((format) => getFormatValue(format) === values.format),
+    [formats, values.format],
+  );
+  const audioLanguages = useMemo(() => getAudioLanguages(video), [video]);
+  // Only the languages the selected format can be downloaded in. A format with
+  // its own fixed soundtrack offers none, so the dropdown hides rather than
+  // naming a language the download would ignore. Track IDs are specific to one
+  // video, so a playlist download keeps each video's default soundtrack.
+  const languageOptions =
+    audioLanguages && selectedFormat && video && !values.downloadPlaylist
+      ? audioLanguages.options.filter(
+          (option) =>
+            option.code === audioLanguages.original || getDubbedFormatSelector(selectedFormat, video, option.code),
+        )
+      : [];
+  // A choice belongs to the URL it was made for, so a new video starts on its
+  // original language, as does a reload that no longer offers the choice.
+  const [languageChoice, setLanguageChoice] = useState<{ url: string; code: string }>();
+  const audioLanguage =
+    languageChoice?.url === video?.sourceUrl && languageOptions.some((option) => option.code === languageChoice?.code)
+      ? languageChoice?.code
+      : audioLanguages?.original;
+  const dubLanguage = audioLanguage !== audioLanguages?.original ? audioLanguage : undefined;
+  const dubSelector =
+    dubLanguage && selectedFormat && video ? getDubbedFormatSelector(selectedFormat, video, dubLanguage) : undefined;
+
+  const medium = values.format === MP3_FORMAT_ID || selectedFormat?.vcodec === "none" ? "Audio" : "Video";
 
   // Classify the load error once so the placeholder, the Title row, and the
   // Try Again action all agree on whether a retry would help.
@@ -420,7 +515,7 @@ export default function DownloadVideo() {
               <Action
                 icon={Icon.ArrowClockwise}
                 title="Try Again"
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => revalidate()}
               />
             )}
@@ -447,16 +542,27 @@ export default function DownloadVideo() {
       {warning && <Form.Description text={warning} />}
       {video && (
         <Form.Dropdown {...itemProps.format} title="Format">
-          {Object.entries(formats).map(([category, formats]) => (
-            <Form.Dropdown.Section title={category} key={category}>
-              {formats.map((format) => (
-                <Form.Dropdown.Item
-                  key={format.format_id}
-                  value={getFormatValue(format)}
-                  title={getFormatTitle(format)}
-                />
-              ))}
-            </Form.Dropdown.Section>
+          {Object.entries(formats).map(([category, formats]) => {
+            const titles = getFormatTitles(formats);
+            return (
+              <Form.Dropdown.Section title={category} key={category}>
+                {formats.map((format, i) => (
+                  <Form.Dropdown.Item key={format.format_id} value={getFormatValue(format)} title={titles[i]} />
+                ))}
+              </Form.Dropdown.Section>
+            );
+          })}
+        </Form.Dropdown>
+      )}
+      {video && languageOptions.length > 1 && (
+        <Form.Dropdown
+          id="audioLanguage"
+          title="Audio Language"
+          value={audioLanguage}
+          onChange={(code) => setLanguageChoice({ url: video.sourceUrl, code })}
+        >
+          {languageOptions.map((option) => (
+            <Form.Dropdown.Item key={option.code} value={option.code} title={option.name} />
           ))}
         </Form.Dropdown>
       )}

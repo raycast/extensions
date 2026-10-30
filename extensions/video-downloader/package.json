@@ -176,6 +176,24 @@
       "label": "Remux streams without re-encoding (faster, recommended)",
       "default": true,
       "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "description": "Show detailed logs in the console for debugging.",
+      "type": "checkbox",
+      "label": "Enable extra diagnostics in the console",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "strictRedaction",
+      "title": "Strict Redaction",
+      "description": "Turn on before reproducing an issue, then share only the new log lines.",
+      "type": "checkbox",
+      "label": "Also hide URL query strings and fragments in logs",
+      "default": false,
+      "required": false
     }
   ],
   "ai": {
@@ -232,22 +250,22 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
     "@types/validator": "^13.15.10",
     "date-fns": "^4.4.0",
     "execa": "^9.6.1",
-    "pretty-bytes": "^6.1.1",
     "srt-parser-2": "^1.2.3",
     "validator": "^13.15.35"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.9",
-    "@types/react": "^19.2.16",
-    "eslint": "^9.36.0",
-    "prettier": "^3.8.3",
-    "typescript": "^5.8.2"
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

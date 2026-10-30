@@ -4,6 +4,7 @@ import {
   getFormats,
   downloadPath,
   getytdlPath,
+  getYtdlpEnv,
   getffmpegPath,
   getffprobePath,
   getCommonArgs,
@@ -43,13 +44,17 @@ export default async function tool(input: Input) {
   // Get video info and available formats. --no-playlist keeps this to a single
   // video so --dump-json emits one JSON object (a playlist would emit one per
   // line and break JSON.parse below).
-  const videoInfo = await execa(ytdlPath, [
-    ...getCommonArgs({ throttle: true }),
-    "--no-playlist",
-    "--dump-json",
-    "--format-sort=res,ext,tbr",
-    normalizeVideoUrl(input.url),
-  ]);
+  const videoInfo = await execa(
+    ytdlPath,
+    [
+      ...getCommonArgs({ throttle: true }),
+      "--no-playlist",
+      "--dump-json",
+      "--format-sort=res,ext,tbr",
+      normalizeVideoUrl(input.url),
+    ],
+    { env: getYtdlpEnv(ytdlPath) },
+  );
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
@@ -78,7 +83,7 @@ export default async function tool(input: Input) {
   options.push("--print", "after_move:filepath");
 
   // Execute download
-  const result = await execa(ytdlPath, [...options, normalizeVideoUrl(input.url)]);
+  const result = await execa(ytdlPath, [...options, normalizeVideoUrl(input.url)], { env: getYtdlpEnv(ytdlPath) });
 
   if (result.failed) {
     throw new Error(`Failed to download video: ${result.stderr}`);
