@@ -1,6 +1,6 @@
 # Resend Changelog
 
-## [Add Careers View] - {PR_MERGE_DATE}
+## [Add Careers View] - 2026-10-30
 
 - Upgrade Raycast API to 2.8.0 and refresh vulnerable dependencies
 - Display full application questions above short answer labels to avoid widening the form's label column
