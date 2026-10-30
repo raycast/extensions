@@ -1,5 +1,17 @@
 # Qobuz Changelog
 
+## [Convert Track] - {PR_MERGE_DATE}
+
+### Added
+
+- Convert Track: a new command for a track someone sends you. Pass a Spotify, YouTube Music or Qobuz track link, or leave the argument empty to use the one on the clipboard
+- A Spotify or YouTube Music link opens its Qobuz match, with an exact (ISRC) or approximate tag, and the same share links and per-service matches as Show Current Track; a Qobuz link shows the track on every other service
+- A Source line says where the track came from, such as "From clipboard (Spotify)" or "From link (Qobuz)"
+
+### Changed
+
+- Show Current Track's "Nothing playing" screen now points to Convert Track for links
+
 ## [Fix media keys never posting] - 2026-10-05
 
 ### Fixed

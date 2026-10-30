@@ -25,6 +25,21 @@
       "mode": "view"
     },
     {
+      "name": "convert-track",
+      "title": "Convert Track",
+      "subtitle": "Qobuz",
+      "description": "Bring a Spotify or YouTube Music track over to Qobuz, or see a Qobuz track on every other service. Uses the link you pass, else a track link on the clipboard.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "link",
+          "placeholder": "Track link (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "copy-share-links",
       "title": "Copy Share Links",
       "subtitle": "Qobuz",

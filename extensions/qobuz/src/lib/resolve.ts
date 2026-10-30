@@ -72,6 +72,24 @@ export const looksLikeTrackLink = (input: string): boolean => {
   return false;
 };
 
+export type LinkService = "qobuz" | "spotify" | "youtube-music" | "youtube";
+
+/** Which supported service a link points at, whatever kind of page it is. */
+export const linkService = (input: string): LinkService | undefined => {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return undefined;
+  }
+  const host = url.hostname;
+  if (isQobuz(host)) return "qobuz";
+  if (isSpotify(host)) return "spotify";
+  if (host.endsWith("music.youtube.com")) return "youtube-music";
+  if (isYouTube(host)) return "youtube";
+  return undefined;
+};
+
 export const resolveLink = async (input: string): Promise<ResolveOutcome> => {
   let url: URL;
   try {
