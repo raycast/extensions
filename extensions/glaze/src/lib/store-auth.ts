@@ -33,7 +33,19 @@ function authError(response: Response, fallback: string): Error {
   );
 }
 
-async function saveSession(response: Response): Promise<string> {
+let sessionRevision = 0;
+let disconnectInFlight: Promise<void> | undefined;
+const sessionWrites = new Set<Promise<void>>();
+
+function assertCurrentSession(revision: number): void {
+  if (disconnectInFlight || revision !== sessionRevision)
+    throw new StoreSignInRequired();
+}
+
+async function saveSession(
+  response: Response,
+  revision: number,
+): Promise<string> {
   const session = (await response.json()) as {
     access_token?: string;
     refresh_token?: string;
@@ -44,11 +56,19 @@ async function saveSession(response: Response): Promise<string> {
       "Glaze did not return a complete session. Please sign in again.",
     );
   }
-  await tokenStore.setTokens({
+  assertCurrentSession(revision);
+  const write = tokenStore.setTokens({
     accessToken: session.access_token,
     refreshToken: session.refresh_token,
     expiresIn: session.expires_in,
   });
+  sessionWrites.add(write);
+  try {
+    await write;
+  } finally {
+    sessionWrites.delete(write);
+  }
+  assertCurrentSession(revision);
   return session.access_token;
 }
 
@@ -57,6 +77,8 @@ export type StoreSignInProvider = "google" | "apple";
 export async function signInToStore(
   provider: StoreSignInProvider,
 ): Promise<void> {
+  const revision = sessionRevision;
+  assertCurrentSession(revision);
   tokenStore.description = `Sign in with ${provider === "google" ? "Google" : "Apple"} to access your Glaze team stores.`;
   const request = await tokenStore.authorizationRequest({
     endpoint: `${AUTH_URL}/authorize`,
@@ -90,13 +112,16 @@ export async function signInToStore(
     );
   }
   await refreshInFlight?.catch(() => undefined);
-  await saveSession(response);
+  await saveSession(response, revision);
 }
 
 let refreshInFlight: Promise<string> | undefined;
 
 export async function getStoreAccessToken(): Promise<string> {
+  const revision = sessionRevision;
+  assertCurrentSession(revision);
   const session = await tokenStore.getTokens();
+  assertCurrentSession(revision);
   if (!session) throw new StoreSignInRequired();
   if (!session.isExpired()) return session.accessToken;
   if (!session.refreshToken) throw new StoreSignInRequired();
@@ -113,7 +138,7 @@ export async function getStoreAccessToken(): Promise<string> {
           "Glaze sign-in is temporarily unavailable. Try again shortly.",
         );
       }
-      return saveSession(response);
+      return saveSession(response, revision);
     })().finally(() => {
       refreshInFlight = undefined;
     });
@@ -122,11 +147,25 @@ export async function getStoreAccessToken(): Promise<string> {
 }
 
 export async function hasStoreSession(): Promise<boolean> {
-  return Boolean(await tokenStore.getTokens());
+  const revision = sessionRevision;
+  if (disconnectInFlight) return false;
+  const session = await tokenStore.getTokens();
+  return (
+    !disconnectInFlight && revision === sessionRevision && Boolean(session)
+  );
 }
 
-export async function disconnectStore(): Promise<void> {
-  // Avoid a pending refresh restoring the session after the user disconnects.
-  await refreshInFlight?.catch(() => undefined);
-  await tokenStore.removeTokens();
+export function disconnectStore(): Promise<void> {
+  if (disconnectInFlight) return disconnectInFlight;
+  // Invalidate readers before yielding, including requests still loading tokens.
+  sessionRevision += 1;
+  disconnectInFlight = (async () => {
+    await refreshInFlight?.catch(() => undefined);
+    // A token write already handed to Raycast must finish before removal.
+    await Promise.allSettled([...sessionWrites]);
+    await tokenStore.removeTokens();
+  })().finally(() => {
+    disconnectInFlight = undefined;
+  });
+  return disconnectInFlight;
 }

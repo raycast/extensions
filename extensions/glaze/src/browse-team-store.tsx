@@ -18,7 +18,6 @@ import {
   disconnectStore,
   signInToStore,
   StoreSignInRequired,
-  type StoreSignInProvider,
 } from "./lib/store-auth";
 
 export default function Command() {
@@ -207,9 +206,8 @@ function TeamStore({ onAccountChange }: { onAccountChange: () => void }) {
 }
 
 function StoreSignIn({ onConnected }: { onConnected: () => void }) {
-  const { signInProvider = "google" } = getPreferenceValues<{
-    signInProvider?: StoreSignInProvider;
-  }>();
+  const { signInProvider = "google" } =
+    getPreferenceValues<Preferences.BrowseTeamStore>();
   // authorize() supplies the login UI. Start once on mount; retry only after an
   // explicit action so cancelling/failing doesn't reopen the overlay in a loop.
   const { isLoading, error, revalidate } = usePromise(

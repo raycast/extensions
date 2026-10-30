@@ -7,6 +7,7 @@ import { resolveTargetApp } from "../src/lib/target-app";
 import { discoverApps } from "../src/lib/app-discovery";
 import { newProjectUrl } from "../src/lib/new-project-url";
 import { editProjectUrl } from "../src/lib/edit-project-url";
+import { getProjectDeletion } from "../src/lib/project-deletion";
 
 const installed = (paths: string[]) => (candidate: string) =>
   paths.includes(candidate);
@@ -95,6 +96,13 @@ test("discovers current and legacy projects, deduplicates roots, and resolves re
   const timer = apps.find((app) => app.id === "timer-local-abc")!;
   assert.equal(timer.sourcesPath, path.join(projects, "Timer/sources"));
   assert.equal(timer.bundlePath, path.join(bundles, "Timer.app"));
+  const deletion = getProjectDeletion(timer);
+  assert.equal(deletion.title, "Delete Project");
+  assert.deepEqual(deletion.paths, [
+    path.join(projects, "Timer"),
+    timer.bundlePath,
+  ]);
+  assert.equal(deletion.successTitle, "Project deleted");
   assert.equal(apps.find((app) => app.name === "old")?.variant, "local");
   assert.equal(apps.find((app) => app.name === "store")?.variant, "store");
 });
@@ -178,7 +186,15 @@ test("orphaned local bundles stay local and broken links do not hide store insta
   });
   const apps = await discoverApps([], [path.join(root, "bundles")]);
   assert.equal(apps.length, 2);
-  assert.equal(apps.find((app) => app.name === "orphan")?.variant, "local");
+  const orphan = apps.find((app) => app.name === "orphan")!;
+  assert.equal(orphan.variant, "local");
+  assert.equal(orphan.runtimePath, await fs.realpath(runtime));
+  const deletion = getProjectDeletion(orphan);
+  assert.equal(deletion.title, "Delete App Bundle");
+  assert.deepEqual(deletion.paths, [path.join(root, "bundles/Orphan.app")]);
+  assert.match(deletion.message, /Only the app bundle will move to Trash/);
+  assert.match(deletion.message, /Linked project files will remain on disk/);
+  assert.equal(deletion.successTitle, "App bundle deleted");
   assert.equal(apps.find((app) => app.name === "store")?.variant, "store");
 });
 

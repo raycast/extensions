@@ -3,10 +3,10 @@ import * as os from "node:os";
 import * as fs from "node:fs";
 
 import { getPreferenceValues } from "@raycast/api";
-import { resolveTargetApp, type TargetPreference } from "./target-app";
+import { resolveTargetApp } from "./target-app";
 
 export const TARGET_APP = resolveTargetApp(
-  getPreferenceValues<{ targetApp: TargetPreference }>().targetApp ?? "auto",
+  getPreferenceValues<Preferences>().targetApp ?? "auto",
   os.homedir(),
   fs.existsSync,
 );

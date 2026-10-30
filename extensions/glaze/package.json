@@ -129,7 +129,7 @@
       "default": "auto",
       "data": [
         {
-          "title": "Auto (prefer Internal)",
+          "title": "Auto (Prefer Internal)",
           "value": "auto"
         },
         {

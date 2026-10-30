@@ -16,6 +16,7 @@ import { IS_GLAZE_INSTALLED } from "./lib/paths";
 import { GlazeApp, EDITOR_APPS } from "./lib/types";
 import { getLocalProjects } from "./lib/apps";
 import { getAppIcon } from "./lib/icons";
+import { getProjectDeletion } from "./lib/project-deletion";
 import {
   editWithAgent,
   getAvailableEditors,
@@ -106,6 +107,7 @@ function ProjectListItem({
   const sourcesPath = project.sourcesPath;
   const canEdit = glazePath && fs.existsSync(glazePath);
   const canOpenInEditor = sourcesPath && fs.existsSync(sourcesPath);
+  const deletion = getProjectDeletion(project);
 
   return (
     <List.Item
@@ -176,15 +178,15 @@ function ProjectListItem({
 
           <ActionPanel.Section>
             <GlazeAction
-              title="Delete Project"
+              title={deletion.title}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 if (
                   await confirmAlert({
-                    title: "Delete Project",
-                    message: `Are you sure you want to delete "${project.displayName || project.name}"? The project and app bundle will move to Trash.`,
+                    title: deletion.title,
+                    message: deletion.message,
                     primaryAction: {
                       title: "Delete",
                       style: Alert.ActionStyle.Destructive,
@@ -192,22 +194,16 @@ function ProjectListItem({
                   })
                 ) {
                   try {
-                    await trash([
-                      project.path,
-                      ...(project.bundlePath &&
-                      project.bundlePath !== project.path
-                        ? [project.bundlePath]
-                        : []),
-                    ]);
+                    await trash(deletion.paths);
                     await showToast({
                       style: Toast.Style.Success,
-                      title: "Project deleted",
+                      title: deletion.successTitle,
                     });
                     onDelete();
                   } catch (error) {
                     await showToast({
                       style: Toast.Style.Failure,
-                      title: "Failed to delete project",
+                      title: deletion.failureTitle,
                       message: String(error),
                     });
                   }
