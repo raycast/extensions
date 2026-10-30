@@ -2,6 +2,18 @@ import { parseHTML } from "linkedom";
 
 /** Reads the charset from the Content-Type header, falling back to a <meta> sniff. */
 function detectCharset(contentType: string | null, bytes: Uint8Array): string {
+  // A byte-order mark is authoritative: an outdated header or meta tag must not
+  // override it, otherwise a UTF-8 page declared as windows-1252 gets corrupted.
+  if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    return "utf-8";
+  }
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return "utf-16le";
+  }
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return "utf-16be";
+  }
+
   const fromHeader = /charset\s*=\s*["']?([\w-]+)/i.exec(contentType ?? "")?.[1];
   if (fromHeader) {
     return fromHeader.toLowerCase();

@@ -68,6 +68,19 @@ describe("loadDocument", () => {
     expect(document.querySelector("title")?.textContent).toBe("Café");
   });
 
+  it("prefers the UTF-8 BOM over a stale windows-1252 header", async () => {
+    const html = '<html><head><meta charset="windows-1252"><title>Caf\u00e9</title></head></html>';
+    const body = new TextEncoder().encode(html);
+    const withBom = new Uint8Array(body.length + 3);
+    withBom.set([0xef, 0xbb, 0xbf], 0);
+    withBom.set(body, 3);
+
+    mockFetchOnce(withBom, { contentType: "text/html; charset=windows-1252" });
+
+    const { document } = await loadDocument("https://example.com");
+    expect(document.querySelector("title")?.textContent).toBe("Café");
+  });
+
   it("falls back to UTF-8 for an unknown charset label", async () => {
     mockFetchOnce("<html><head><title>Ok</title></head></html>", {
       contentType: "text/html; charset=x-unknown-charset",
