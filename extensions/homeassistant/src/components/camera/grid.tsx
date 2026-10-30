@@ -37,9 +37,11 @@ export function getCameraRefreshInterval(): number | null {
 function CameraGridItem(props: { state: State }): React.ReactElement {
   const s = props.state;
   const { getAlias } = useEntityOverrides();
-  const { localFilepath, imageFilepath } = useImage(s.entity_id);
+  const { imageFilepath } = useImage(s.entity_id);
   const content: Image.ImageLike =
-    s.state === "unavailable" ? { source: "video.svg", tintColor: Color.Blue } : { source: localFilepath || "" };
+    s.state === "unavailable"
+      ? { source: "video.svg", tintColor: Color.Blue }
+      : { source: imageFilepath || "video.svg" };
   const titleParts = [getDisplayName(s, getAlias(s.entity_id))];
   if (s.state === "unavailable") {
     titleParts.push("❌");
