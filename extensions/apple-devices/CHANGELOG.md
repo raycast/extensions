@@ -1,5 +1,10 @@
 # Apple Devices Changelog
 
+## [Fix Run Simulator on Xcode 27] - {PR_MERGE_DATE}
+
+- Open the device in Device Hub, which replaced Simulator.app in Xcode 27, and fall back to Simulator.app on older Xcode versions.
+- Boot the simulator with `simctl` directly instead of asking System Events whether Simulator is running.
+
 ## [Added new devices] - 2026-03-24
 
 - Added iPhone, iPad and Watch 2025 Lineup

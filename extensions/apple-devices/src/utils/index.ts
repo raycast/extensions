@@ -1,3 +1,5 @@
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import Devices from "../data/devices.json";
@@ -16,29 +18,51 @@ export async function getAvailableSimulators() {
   });
 }
 
+const execFileAsync = promisify(execFile);
+
+async function bootSimulator(identifier: string): Promise<boolean> {
+  try {
+    await execFileAsync("xcrun", ["simctl", "boot", identifier]);
+    return true;
+  } catch (error) {
+    if ((error as { stderr?: string })?.stderr?.includes("current state: Booted")) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+async function openSimulatorApp(identifier: string) {
+  try {
+    // Xcode 27 replaced Simulator.app with Device Hub, which opens a device by URL.
+    await execFileAsync("open", [
+      "-b",
+      "com.apple.dt.Devices",
+      `devices://device/open?id=${encodeURIComponent(identifier)}`,
+    ]);
+  } catch {
+    // Simulator.app (Xcode 26 and earlier)
+    await execFileAsync("open", ["-b", "com.apple.iphonesimulator", "--args", "-CurrentDeviceUDID", identifier]);
+  }
+}
+
 export function runSimulator(identifier: string): void {
   showToast({
     style: Toast.Style.Animated,
     title: "Running Simulator",
   });
-  runAppleScript(`
-    tell application "System Events"
-      if (get name of every application process) contains "Simulator" then\t
-        do shell script "xcrun simctl boot ${identifier}"
-      else
-        do shell script "open -a Simulator --args -CurrentDeviceUDID ${identifier}"
-      end if
-    end tell
-  `)
-    .then(() => {
+  bootSimulator(identifier)
+    .then(async (booted) => {
+      await openSimulatorApp(identifier);
+      if (!booted) {
+        await showToast({ style: Toast.Style.Success, title: "Simulator is already running" });
+      }
       closeMainWindow({ clearRootSearch: true });
     })
-    .catch((error) => {
-      const isBooted = error?.message?.includes("current state: Booted");
-
+    .catch(() => {
       showToast({
-        style: isBooted ? Toast.Style.Success : Toast.Style.Failure,
-        title: isBooted ? "Simulator is already running" : "Unknown error",
+        style: Toast.Style.Failure,
+        title: "Unknown error",
       });
     });
 }
