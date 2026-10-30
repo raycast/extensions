@@ -32,12 +32,3 @@ Browse tasks by scope: All, Today, Starred, Scheduled, Done, any list, or any sm
 | Complete / Mark as Not Done | ⌘D       |
 | Star / Unstar               | ⌘.       |
 | Open in 2Do                 | ⌘O       |
-
-## Development
-
-```bash
-npm install
-npm run dev     # load the extension into Raycast
-npm test        # unit tests
-npm run lint    # Raycast lint (ESLint + Prettier + manifest checks)
-```

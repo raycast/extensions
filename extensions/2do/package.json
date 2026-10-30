@@ -39,7 +39,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
@@ -52,7 +51,6 @@
     "@types/react": "19.3.0",
     "eslint": "10.12.0",
     "prettier": "3.9.10",
-    "typescript": "6.0.3",
-    "vitest": "5.0.4"
+    "typescript": "6.0.3"
   }
 }
