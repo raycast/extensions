@@ -1,0 +1,237 @@
+import { BuildingDef, BuildingId, CropDef } from "../types";
+
+import { HUB_SELL_RATES } from "./trade";
+import { OFFLINE_BONUS_HOURS } from "./game";
+
+/** How many of one item you can hold, by Storage Depot level (index 0 is no depot). */
+export const STORAGE_CAPS = [1000, 2000, 4000, 8000, 16000, 32000];
+
+export const BUILDINGS: BuildingDef[] = [
+  {
+    id: "shelter",
+    name: "Shelter",
+    description: "+10 max HP and faster healing per level.",
+    maxLevel: 5,
+    baseCost: { scrap_metal: 20, alloy_plate: 2 },
+    costGrowth: 2,
+  },
+  {
+    id: "generator",
+    name: "Solar Generator",
+    description: "Provides 3 power per level for your drones.",
+    maxLevel: 5,
+    baseCost: { scrap_metal: 15, alloy_plate: 3, circuit_scrap: 4 },
+    costGrowth: 1.8,
+    requires: { skill: "engineering", level: 13 },
+    powerProvided: 3,
+  },
+  {
+    id: "workshop",
+    name: "Workshop",
+    description: "Engineering tasks take 8% less time per level.",
+    maxLevel: 5,
+    baseCost: { alloy_plate: 6, circuit_scrap: 5 },
+    costGrowth: 1.8,
+    requires: { skill: "engineering", level: 10 },
+  },
+  {
+    id: "salvage_drone",
+    name: "Salvage Drone",
+    description: "Brings back 1 Scrap Metal every 20s per level. Uses 1 power.",
+    maxLevel: 10,
+    baseCost: { alloy_plate: 3, circuit_scrap: 5 },
+    costGrowth: 1.6,
+    requires: { skill: "engineering", level: 19 },
+    powerUse: 1,
+    produces: { item: "scrap_metal", everyMs: 20_000 },
+  },
+  {
+    id: "mining_drone",
+    name: "Mining Drone",
+    description: "Brings back 1 Ferrite Ore every 30s per level. Uses 1 power.",
+    maxLevel: 10,
+    baseCost: { alloy_plate: 4, circuit_scrap: 6, ferrite_ore: 10 },
+    costGrowth: 1.6,
+    requires: { skill: "engineering", level: 19 },
+    powerUse: 1,
+    produces: { item: "ferrite_ore", everyMs: 30_000 },
+  },
+  {
+    id: "forager_drone",
+    name: "Forager Drone",
+    description: "Brings back 1 Glowcap every 20s per level. Uses 1 power.",
+    maxLevel: 10,
+    baseCost: { alloy_plate: 3, circuit_scrap: 4, glowcap: 10 },
+    costGrowth: 1.6,
+    requires: { skill: "engineering", level: 19 },
+    powerUse: 1,
+    produces: { item: "glowcap", everyMs: 20_000 },
+  },
+  {
+    id: "translator",
+    name: "Translation Device",
+    description:
+      "Turns the locals' speech into something you can understand. Each level teaches it more.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 10, circuit_scrap: 8, lumina_crystal: 3 },
+      { alloy_plate: 15, circuit_scrap: 12, glyph_tablet: 3 },
+      { alloy_plate: 20, lumina_crystal: 8, glyph_tablet: 6, resonance_coil: 1 },
+      { alloy_plate: 30, glyph_tablet: 10, resonance_coil: 3, void_lens: 1 },
+      { glyph_tablet: 15, resonance_coil: 6, void_lens: 3, aether_cell: 1 },
+    ],
+    levelNotes: [
+      "Basic phrases. The locals will trade with you and sell their first goods.",
+      "Simple conversation. More goods are offered.",
+      "Bargaining. 5% off everything you buy, and rarer goods appear.",
+      "Cultural exchange. 10% off, and the locals bring valuable things.",
+      "Fluent. 15% off, and nothing is held back.",
+    ],
+    requires: { skill: "engineering", level: 40 },
+    requiresContact: true,
+  },
+  {
+    id: "hub",
+    name: "Trading Hub",
+    description: "A market where the locals buy what you make and sell what you cannot.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 20, circuit_scrap: 15, scrap_metal: 50 },
+      { alloy_plate: 30, circuit_scrap: 20, glyph_tablet: 4 },
+      { alloy_plate: 45, glyph_tablet: 8, resonance_coil: 2 },
+      { alloy_plate: 60, resonance_coil: 4, void_lens: 2 },
+      { resonance_coil: 8, void_lens: 4, aether_cell: 2 },
+    ],
+    levelNotes: HUB_SELL_RATES.map(
+      (rate) => `The locals buy your goods at ${Math.round(rate * 100)}% of their worth.`,
+    ),
+    requires: { skill: "engineering", level: 46 },
+    requiresContact: true,
+    requiresBuilding: { id: "translator", level: 1 },
+  },
+  {
+    id: "hydroponic_bay",
+    name: "Hydroponic Bay",
+    description: "Racks of nutrient trays. One plot per level, and crops grow while you are away.",
+    maxLevel: 4,
+    baseCost: { alloy_plate: 4, scrap_metal: 20, glowcap: 10 },
+    costGrowth: 1.7,
+    levelNotes: ["1 plot", "2 plots", "3 plots", "4 plots"],
+    requires: { skill: "engineering", level: 16 },
+    powerUse: 1,
+  },
+  {
+    id: "storage",
+    name: "Storage Depot",
+    description: "Each item stack holds more. When a stack is full, the task feeding it stops.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { scrap_metal: 40, alloy_plate: 4 },
+      { scrap_metal: 80, alloy_plate: 10, circuit_scrap: 6 },
+      { alloy_plate: 20, circuit_scrap: 12 },
+      { alloy_plate: 40, circuit_scrap: 20, resonance_coil: 1 },
+      { alloy_plate: 60, resonance_coil: 3, void_lens: 1 },
+    ],
+    levelCredits: [0, 0, 300, 900, 2500],
+    levelNotes: STORAGE_CAPS.slice(1).map(
+      (n) => `Each item stack holds ${n.toLocaleString("en-US")}.`,
+    ),
+    requires: { skill: "engineering", level: 13 },
+  },
+  {
+    id: "stasis_pod",
+    name: "Stasis Pod",
+    description:
+      "Sleep through long absences. Your survivor keeps working for longer while you are away.",
+    maxLevel: 5,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 10, circuit_scrap: 8, lumina_crystal: 2 },
+      { alloy_plate: 15, circuit_scrap: 10, lumina_crystal: 4 },
+      { alloy_plate: 25, lumina_crystal: 8, resonance_coil: 1 },
+      { alloy_plate: 40, resonance_coil: 3, void_lens: 1 },
+      { resonance_coil: 6, void_lens: 3, aether_cell: 1 },
+    ],
+    levelCredits: [0, 0, 400, 1200, 3000],
+    levelNotes: [1, 2, 3, 4, 5].map(
+      (l) => `Away progress counts for up to ${12 + l * OFFLINE_BONUS_HOURS} hours.`,
+    ),
+    requires: { skill: "engineering", level: 28 },
+  },
+  {
+    id: "bounty_board",
+    name: "Bounty Board",
+    description: "Locals travel here to post requests for you, mostly about dangerous wildlife.",
+    maxLevel: 3,
+    baseCost: {},
+    costGrowth: 1,
+    levelCosts: [
+      { alloy_plate: 12, circuit_scrap: 10, scrap_metal: 30 },
+      { alloy_plate: 24, glyph_tablet: 5, resonance_coil: 1 },
+      { alloy_plate: 40, glyph_tablet: 10, resonance_coil: 3, void_lens: 1 },
+    ],
+    levelNotes: [
+      "3 bounties on offer.",
+      "4 bounties on offer, and they pay 15% more Marks.",
+      "5 bounties on offer, and they pay 30% more Marks.",
+    ],
+    requires: { skill: "engineering", level: 43 },
+    requiresContact: true,
+    requiresBuilding: { id: "translator", level: 1 },
+  },
+  {
+    id: "beacon",
+    name: "Signal Beacon",
+    description: "Broadcasts a signal across the planet. Someone might be listening.",
+    maxLevel: 1,
+    baseCost: { alloy_plate: 15, circuit_scrap: 12, lumina_crystal: 5 },
+    costGrowth: 1,
+    requires: { skill: "engineering", level: 34 },
+  },
+];
+
+export const BUILDING_BY_ID: Record<BuildingId, BuildingDef> = Object.fromEntries(
+  BUILDINGS.map((b) => [b.id, b]),
+) as Record<BuildingId, BuildingDef>;
+
+export const CROPS: CropDef[] = [
+  {
+    id: "glowcap_bed",
+    name: "Glowcap Bed",
+    description: "Spores in a tray of warm nutrient gel. Hard to kill.",
+    levelReq: 1,
+    growMs: 5 * 60_000,
+    xp: 167,
+    seeds: { glowcap: 2 },
+    yield: { glowcap: 8 },
+  },
+  {
+    id: "sweetroot_bed",
+    name: "Sweetroot Bed",
+    description: "Sweetroot likes the dark and takes its time.",
+    levelReq: 10,
+    growMs: 10 * 60_000,
+    xp: 1020,
+    seeds: { sweetroot: 2 },
+    yield: { sweetroot: 8 },
+  },
+  {
+    id: "lumina_bloom",
+    name: "Lumina Bloom",
+    description: "Seed a tray with crystal dust and something crystalline grows back.",
+    levelReq: 22,
+    growMs: 20 * 60_000,
+    xp: 9072,
+    seeds: { lumina_crystal: 2 },
+    yield: { lumina_crystal: 6 },
+  },
+];
+
+export const CROP_BY_ID: Record<string, CropDef> = Object.fromEntries(CROPS.map((c) => [c.id, c]));
