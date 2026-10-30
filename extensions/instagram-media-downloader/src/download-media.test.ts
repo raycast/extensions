@@ -643,6 +643,22 @@ describe("resolveMedia for a story", () => {
     expect((toasts.at(-1) as FakeToast).message).toContain("Open the story in a new browser tab");
   });
 
+  it("on Windows, says stories can't be downloaded there instead of offering an install that can't help", async () => {
+    vi.mocked(browserExtensionAvailable).mockReturnValue(false);
+    const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+    Object.defineProperty(process, "platform", { value: "win32" });
+    try {
+      const pending = resolveMedia(STORY, { progressToast: {} as never, method: "browser" });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(await pending).toBeNull();
+    } finally {
+      Object.defineProperty(process, "platform", platform);
+    }
+    const toast = toasts.at(-1) as FakeToast & { primaryAction?: Action };
+    expect(toast.message).toContain("isn't available on Windows");
+    expect(toast.primaryAction?.title).toBe("Copy Error");
+  });
+
   it("without the browser extension, fails at once and offers to install it", async () => {
     vi.mocked(browserExtensionAvailable).mockReturnValue(false);
     const pending = resolveMedia(STORY, { progressToast: {} as never, method: "browser" });

@@ -7,6 +7,7 @@
 - New Download Method preference: Browser Tab (default) or Instagram Directly, which needs no browser but may be rate-limited. For posts and reels, the other is tried next.
 - Download Instagram Media now downloads stories too. While it waits, press ⌘T to open the post or story in your browser; the download comes from that tab if it loads first.
 - A highlight link in Download Instagram Media or Download Instagram Story opens the highlight grid. Without the highlight open, the grid offers to open it; without the browser extension, to install it.
+- On Windows, where the browser extension isn't available, posts and reels download from Instagram directly; stories and highlights need macOS.
 - Links with a username (`instagram.com/<user>/reel/…`) or without `https://` are accepted.
 - Errors say what went wrong in words, and Copy Error shows what was tried, with signed links removed.
 - Story and highlight files are named after the story (`story-<id>`, `highlight-<id>-1`, …).

@@ -8,7 +8,12 @@ export type InstagramPostRef = {
 
 const HOSTS = new Set(["instagram.com", "www.instagram.com", "m.instagram.com"]);
 const SHORTCODE = /^[A-Za-z0-9_-]+$/;
-const KIND_BY_SEGMENT: Record<string, InstagramPostKind> = { p: "post", reel: "reel", reels: "reel" };
+// A Map, so inherited object names (`constructor`, `__proto__`) are never kinds.
+const KIND_BY_SEGMENT = new Map<string, InstagramPostKind>([
+  ["p", "post"],
+  ["reel", "reel"],
+  ["reels", "reel"],
+]);
 
 /**
  * An Instagram URL, or null for anything else: an exact Instagram host, http(s) only, no
@@ -40,7 +45,7 @@ export function parseInstagramPostUrl(raw: string): InstagramPostRef | null {
   const segments = url.pathname.split("/").filter(Boolean);
   // `/<kind>/<code>` or `/<user>/<kind>/<code>`; anything longer is some other page.
   const [kindSegment, shortcode] = segments.length === 2 ? segments : segments.length === 3 ? segments.slice(1) : [];
-  const kind = kindSegment ? KIND_BY_SEGMENT[kindSegment] : undefined;
+  const kind = kindSegment ? KIND_BY_SEGMENT.get(kindSegment) : undefined;
 
   if (!kind || !shortcode || !SHORTCODE.test(shortcode)) return null;
   return { shortcode, kind };

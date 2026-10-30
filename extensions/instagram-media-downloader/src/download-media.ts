@@ -196,10 +196,14 @@ export async function resolveMedia(target: MediaTarget, lookup: MediaLookup): Pr
   }
 
   if (!post && !tabCanHelp) {
+    // The browser extension doesn't exist on Windows, so offering to install it can't help there.
+    const onWindows = process.platform === "win32";
     await showErrorToast(
       "Could Not Read the Story",
-      "Downloading stories needs the Raycast browser extension.",
-      { title: "Install Browser Extension", url: BROWSER_EXTENSION_URL },
+      onWindows
+        ? "Stories need the Raycast browser extension, which isn't available on Windows."
+        : "Downloading stories needs the Raycast browser extension.",
+      onWindows ? undefined : { title: "Install Browser Extension", url: BROWSER_EXTENSION_URL },
       `Browser tab: ${browserMiss}`,
     );
     return null;

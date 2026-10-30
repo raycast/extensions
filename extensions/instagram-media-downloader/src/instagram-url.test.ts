@@ -36,6 +36,10 @@ describe("parseInstagramPostUrl", () => {
     ["https://www.instagram.com/p/"],
     ["https://www.instagram.com/p/Ab.Cd/"],
     ["https://www.instagram.com/a/b/p/AbCdEfGhIjK/"],
+    // Inherited object properties are not kinds.
+    ["https://www.instagram.com/constructor/AbCdEfGhIjK/"],
+    ["https://www.instagram.com/example_user/toString/AbCdEfGhIjK/"],
+    ["https://www.instagram.com/__proto__/AbCdEfGhIjK/"],
   ])("rejects %s", (url) => {
     expect(parseInstagramPostUrl(url)).toBeNull();
   });

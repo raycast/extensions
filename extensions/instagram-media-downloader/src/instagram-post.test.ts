@@ -141,6 +141,12 @@ describe("extractPostMedia", () => {
     expect(run(page(one, other))).toEqual({ ok: false, reason: "ambiguous" });
   });
 
+  it("uses a fresh copy of the post when an earlier copy's links are stale", () => {
+    const stale = { code: CODE, media_type: 1, image_versions2: image("same", (NOW - 10).toString(16)) };
+    const fresh = { code: CODE, media_type: 1, image_versions2: image("same") };
+    expect(run(page(stale, fresh))).toEqual({ ok: true, media: [{ url: cdn("same-1080.jpg"), kind: "image" }] });
+  });
+
   it("accepts two complete copies of the same post", () => {
     const one = { ...photo("same"), code: CODE };
     expect(run(page(one, one))).toEqual({ ok: true, media: [{ url: cdn("same-1080.jpg"), kind: "image" }] });

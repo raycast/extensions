@@ -167,6 +167,8 @@ export default function Command({
   if (miss) {
     const badLink = miss === "bad-link";
     const unavailable = !badLink && miss.reason === "unavailable";
+    // The browser extension doesn't exist on Windows, so offering to install it can't help there.
+    const onWindows = process.platform === "win32";
     return (
       <Grid isLoading={isLoading}>
         <Grid.EmptyView
@@ -182,26 +184,28 @@ export default function Command({
             badLink
               ? "Paste a link like instagram.com/stories/highlights/…"
               : unavailable
-                ? "Highlights are read from your browser tab. Press ↵ to install it."
+                ? onWindows
+                  ? "Highlights are read through the Raycast browser extension, which isn't available on Windows."
+                  : "Highlights are read from your browser tab. Press ↵ to install it."
                 : "Press ↵ to open it; it appears here once it loads."
           }
           actions={
-            unavailable ? (
-              <ActionPanel>
-                <Action.OpenInBrowser title="Install Browser Extension" url={BROWSER_EXTENSION_URL} />
-              </ActionPanel>
-            ) : (
-              highlight && (
-                <ActionPanel>
-                  <Action
-                    title="Open in Browser"
-                    icon={Icon.Globe}
-                    shortcut={OPEN_TAB_SHORTCUT}
-                    onAction={() => openAndWatch(highlight)}
-                  />
-                </ActionPanel>
-              )
-            )
+            unavailable
+              ? !onWindows && (
+                  <ActionPanel>
+                    <Action.OpenInBrowser title="Install Browser Extension" url={BROWSER_EXTENSION_URL} />
+                  </ActionPanel>
+                )
+              : highlight && (
+                  <ActionPanel>
+                    <Action
+                      title="Open in Browser"
+                      icon={Icon.Globe}
+                      shortcut={OPEN_TAB_SHORTCUT}
+                      onAction={() => openAndWatch(highlight)}
+                    />
+                  </ActionPanel>
+                )
           }
         />
       </Grid>

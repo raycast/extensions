@@ -19,6 +19,8 @@ The extension reads media from one of two places, both on your own Mac:
 
 The **Download Method** preference chooses which one is tried first for posts and reels; the other is tried next. Stories and highlights always come from the browser. While a download is waiting, press **⌘T** to open the post or story in a new browser tab: if the tab loads the whole page first, the download comes from the tab. Without the browser extension, the story and highlight commands offer to install it.
 
+On Windows, where the Raycast browser extension isn't available, posts and reels download from Instagram directly; stories and highlights need macOS.
+
 ## Why no download servers
 
 Earlier versions sent your links to third-party download services. Services like these typically ask Instagram on your behalf from many addresses and throwaway accounts, which is why they work until they are blocked, and why they tend to vanish: the story service this extension used can no longer be reached, and the post service failed most of the time while this version was being built. They also see every link you download.

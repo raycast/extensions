@@ -199,10 +199,12 @@ export function extractPostMedia(html: string, shortcode: string, nowSeconds = D
   const complete = nodes.map(completeMedia).filter((media): media is PostMedia[] => media !== null);
   if (complete.length === 0) return { ok: false, reason: "incomplete" };
 
-  const [media, ...others] = complete;
-  if (others.some((other) => identity(other) !== identity(media))) return { ok: false, reason: "ambiguous" };
+  const [first, ...others] = complete;
+  if (others.some((other) => identity(other) !== identity(first))) return { ok: false, reason: "ambiguous" };
 
-  if (isExpiring(media, nowSeconds)) return { ok: false, reason: "expired" };
+  // The copies agree on the files; any one with links that outlive the download will do.
+  const media = complete.find((copy) => !isExpiring(copy, nowSeconds));
+  if (!media) return { ok: false, reason: "expired" };
 
   return { ok: true, media };
 }
