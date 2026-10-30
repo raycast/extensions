@@ -64,6 +64,7 @@ export default function Command() {
             key={`${char}-${i}`}
             title={char}
             subtitle={d["1"]}
+            accessories={[{ text: d["2"], tooltip: `鹤形：${d["2"]}` }]}
             detail={<List.Item.Detail markdown={buildMarkdown(char, d)} />}
             actions={
               <ActionPanel>
