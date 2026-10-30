@@ -6,21 +6,28 @@ import {
   LaunchProps,
   Toast,
   getPreferenceValues,
-  popToRoot,
+  open,
   showToast,
+  Keyboard,
 } from "@raycast/api";
+import { logger } from "@chrismessina/raycast-logger";
 import { existsSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { BrowserMiss, readReelFromBrowser } from "./browser-tab";
 import {
+  BROWSER_EXTENSION_URL,
   downloadMediaSet,
-  getInstagramHighlightStoryURL,
   handleDownload,
-  mediaExtensionAndId,
+  OPEN_TAB_SHORTCUT,
+  revealActions,
   runExclusive,
   showErrorToast,
+  watchBrowser,
 } from "./download-media";
+import { ReelItem } from "./instagram-reel";
+import { canonicalStoryUrl, InstagramStoryRef, parseInstagramStoryUrl } from "./instagram-url";
 import { countOf } from "./media-files";
 
 function getUniqueFilePath(folder: string, baseName: string, extension: string): string {
@@ -37,12 +44,16 @@ function getUniqueFilePath(folder: string, baseName: string, extension: string):
 
 export default function Command({
   arguments: { instagramUrl },
-}: LaunchProps<{
-  arguments: { instagramUrl: string };
-}>) {
-  const { mediaDownloadPath } = getPreferenceValues();
+}: LaunchProps<{ arguments: Arguments.DownloadInstagramHighlightStory }>) {
+  const { mediaDownloadPath } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
-  const [highlightUrls, setHighlightUrls] = useState<{ img: string; url: string }[]>([]);
+  const [highlightUrls, setHighlightUrls] = useState<HighlightItem[]>([]);
+  const [miss, setMiss] = useState<BrowserMiss | "bad-link">();
+  const unmounted = useRef(false);
+  /** The one watch ⌘T started; pressing it again only reopens the tab. */
+  const watching = useRef(false);
+  const ref = parseInstagramStoryUrl(instagramUrl);
+  const highlight = ref?.kind === "highlight" ? ref : undefined;
   const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
@@ -75,7 +86,7 @@ export default function Command({
         downloadMediaSet(
           selectedItems.map((item) => ({
             url: item.url,
-            name: mediaExtensionAndId(item.url).fileId || "instagram-story",
+            name: item.name,
           })),
           downloadFolder,
           "Story",
@@ -93,11 +104,12 @@ export default function Command({
 
     try {
       const filePath = getUniqueFilePath(downloadFolder, "highlight-urls", ".json");
-      writeFileSync(filePath, JSON.stringify(selectedItems, null, 2));
+      writeFileSync(filePath, JSON.stringify(selectedItems.map(toSavedUrl), null, 2));
       await showToast({
         title: "Success",
         message: `Saved ${countOf(selectedItems.length, "URL")} to ${filePath}`,
         style: Toast.Style.Success,
+        ...revealActions(filePath),
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error occurred";
@@ -105,51 +117,96 @@ export default function Command({
     }
   };
 
+  const show = (items: HighlightItem[]) => {
+    logger.log(`[download-instagram-highlight-story] Resolved`, { items: items.length });
+    setHighlightUrls(items);
+    setMiss(undefined);
+  };
+
   useEffect(() => {
-    const fetchHighlightStory = async () => {
-      if (!instagramUrl.includes("instagram.com")) {
-        await popToRoot();
-        await showErrorToast("Error", "Invalid URL provided. Please provide a valid instagram URL");
-        return;
-      }
-
-      try {
-        const parsedUrl = new URL(instagramUrl);
-        const pathParts = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").split("/");
-
-        if (pathParts.length !== 3 || pathParts[0] !== "stories" || pathParts[1] !== "highlights") {
-          await popToRoot();
-          await showErrorToast("Error", "Invalid Instagram highlight story URL format.");
-          return;
-        }
-
-        const fetchedUrls = await getInstagramHighlightStoryURL(instagramUrl);
-
-        if (fetchedUrls === null) {
-          // Helper already showed a failure toast.
-          await popToRoot();
-          return;
-        }
-
-        if (fetchedUrls.length === 0) {
-          await popToRoot();
-          await showErrorToast("Error", "No highlight story found at the provided URL");
-          return;
-        }
-
-        fetchedUrls.reverse();
-
-        setHighlightUrls(fetchedUrls);
+    // React can mount, unmount and remount a view (it does in development), so "closed" is reset
+    // on every mount and each read is canceled only by its own mount's cleanup.
+    unmounted.current = false;
+    let canceled = false;
+    if (!highlight) {
+      setMiss("bad-link");
+      setIsLoading(false);
+    } else {
+      logger.log(`[download-instagram-highlight-story] Reading from the browser`);
+      readReelFromBrowser(highlight).then((result) => {
+        if (canceled) return;
+        if (result.ok) show(toHighlightItems(highlight, result.items));
+        else setMiss(result);
         setIsLoading(false);
-      } catch (error) {
-        await popToRoot();
-        const message = error instanceof Error ? error.message : "Unknown error occurred";
-        await showErrorToast("Error", message);
-      }
+      });
+    }
+    return () => {
+      canceled = true;
+      unmounted.current = true;
     };
-
-    fetchHighlightStory();
   }, []);
+
+  /** Open the highlight in a new tab and fill the grid as soon as that tab has it. */
+  const openAndWatch = async (target: Extract<InstagramStoryRef, { kind: "highlight" }>) => {
+    await open(canonicalStoryUrl(target));
+    if (watching.current) return;
+    watching.current = true;
+    setIsLoading(true);
+    const found = await watchBrowser(
+      () => readReelFromBrowser(target),
+      () => unmounted.current,
+    );
+    watching.current = false;
+    // Leaving the view cancels the watch; that is not a failure to report.
+    if (unmounted.current) return;
+    setIsLoading(false);
+    if (found) show(toHighlightItems(target, found.items));
+    else await showErrorToast("Could Not Read the Highlight", "It didn't load in your browser within 30 seconds.");
+  };
+
+  if (miss) {
+    const badLink = miss === "bad-link";
+    const unavailable = !badLink && miss.reason === "unavailable";
+    return (
+      <Grid isLoading={isLoading}>
+        <Grid.EmptyView
+          icon={Icon.Globe}
+          title={
+            badLink
+              ? "Not an Instagram Highlight Link"
+              : unavailable
+                ? "Needs the Raycast Browser Extension"
+                : "Open the Highlight in Your Browser"
+          }
+          description={
+            badLink
+              ? "Paste a link like instagram.com/stories/highlights/…"
+              : unavailable
+                ? "Highlights are read from your browser tab. Press ↵ to install it."
+                : "Press ↵ to open it; it appears here once it loads."
+          }
+          actions={
+            unavailable ? (
+              <ActionPanel>
+                <Action.OpenInBrowser title="Install Browser Extension" url={BROWSER_EXTENSION_URL} />
+              </ActionPanel>
+            ) : (
+              highlight && (
+                <ActionPanel>
+                  <Action
+                    title="Open in Browser"
+                    icon={Icon.Globe}
+                    shortcut={OPEN_TAB_SHORTCUT}
+                    onAction={() => openAndWatch(highlight)}
+                  />
+                </ActionPanel>
+              )
+            )
+          }
+        />
+      </Grid>
+    );
+  }
 
   return (
     <Grid isLoading={isLoading} columns={5} fit={Grid.Fit.Fill}>
@@ -167,10 +224,6 @@ export default function Command({
                     title={isSelected ? "Deselect" : "Select"}
                     icon={isSelected ? Icon.Circle : Icon.Checkmark}
                     onAction={() => toggleSelection(item.url)}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "s" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "s" },
-                    }}
                   />
                   <Action
                     title="Select All"
@@ -202,15 +255,7 @@ export default function Command({
                         Windows: { modifiers: ["ctrl", "shift"], key: "d" },
                       }}
                     />
-                    <Action
-                      title="Save Selected Urls to JSON"
-                      icon={Icon.Document}
-                      onAction={saveSelectedUrls}
-                      shortcut={{
-                        macOS: { modifiers: ["opt", "alt"], key: "s" },
-                        Windows: { modifiers: ["ctrl", "alt"], key: "s" },
-                      }}
-                    />
+                    <Action title="Save Selected Urls to JSON" icon={Icon.Document} onAction={saveSelectedUrls} />
                   </ActionPanel.Section>
                 )}
                 <ActionPanel.Section title="Single Item">
@@ -219,10 +264,7 @@ export default function Command({
                     icon={Icon.Download}
                     onAction={async () => {
                       try {
-                        const { fileId } = mediaExtensionAndId(item.url);
-                        await runExclusive(() =>
-                          handleDownload(item.url, fileId || "instagram-story", downloadFolder, "Story"),
-                        );
+                        await runExclusive(() => handleDownload(item.url, item.name, downloadFolder, "Story"));
                       } catch (error) {
                         const message = error instanceof Error ? error.message : "Unknown error occurred";
                         await showErrorToast("Error", message);
@@ -239,21 +281,19 @@ export default function Command({
                     onAction={async () => {
                       try {
                         const filePath = getUniqueFilePath(downloadFolder, "highlight-urls", ".json");
-                        writeFileSync(filePath, JSON.stringify(highlightUrls, null, 2));
+                        writeFileSync(filePath, JSON.stringify(highlightUrls.map(toSavedUrl), null, 2));
                         await showToast({
                           title: "Success",
                           message: `Saved to ${filePath}`,
                           style: Toast.Style.Success,
+                          ...revealActions(filePath),
                         });
                       } catch (error) {
                         const message = error instanceof Error ? error.message : "Unknown error occurred";
                         await showErrorToast("Error", message);
                       }
                     }}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd"], key: "s" },
-                      Windows: { modifiers: ["ctrl"], key: "s" },
-                    }}
+                    shortcut={Keyboard.Shortcut.Common.Save}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -263,4 +303,20 @@ export default function Command({
       })}
     </Grid>
   );
+}
+
+type HighlightItem = { img: string; url: string; name: string };
+
+/** In the order Instagram plays them, named `highlight-<id>-<n>` like a carousel's files. */
+function toHighlightItems(ref: { highlightId: string }, items: ReelItem[]): HighlightItem[] {
+  return items.map((item, index) => ({
+    img: item.thumbnail,
+    url: item.url,
+    name: `highlight-${ref.highlightId}-${index + 1}`,
+  }));
+}
+
+/** The saved JSON keeps the shape it always had. */
+function toSavedUrl({ img, url }: HighlightItem) {
+  return { img, url };
 }
