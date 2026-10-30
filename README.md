@@ -45,24 +45,7 @@ Convert between satoshis and US dollars at the live Bitcoin price:
 - Choose direction with a dropdown (Sats → USD or USD → Sats)
 - See the converted result alongside the current BTC price and timestamp
 
-## Instructions
-
-### Prerequisites
-
-- [Raycast](https://raycast.com) installed
-- Node.js 22.22.2+
-
-### Setup
-
-```bash
-cd bitcoin-toolkit
-npm install
-npm run dev
-```
-
-Raycast will open a development window. All four commands are available from the root search.
-
-### Usage
+## Usage
 
 | Command | Arguments | Description |
 |---|---|---|
@@ -70,44 +53,6 @@ Raycast will open a development window. All four commands are available from the
 | **Look up Transaction** | `txid` (required) | Enter a TXID to see its fee, status, inputs, and outputs |
 | **Bitcoin Price Dashboard** | _(none)_ | Shows live BTC prices across multiple currencies |
 | **Convert Sats ↔ USD** | `amount` (required), `direction` (dropdown) | Convert between satoshis and USD at the live rate |
-
-## Project Structure
-
-```
-bitcoin-toolkit/
-  assets/
-    icon.png                      512×512 extension icon
-  media/
-    commands.png                  Overview of the commands in Raycast
-    block-height.png              Screenshot of the block lookup command
-    price-dashboard.png           Screenshot of the price dashboard command
-  metadata/
-    commands.png                  Store screenshot: command overview
-    block-height.png              Store screenshot: block lookup
-    price-dashboard.png           Store screenshot: price dashboard
-  src/
-    lib/
-      api.ts                      Mempool.space block API client
-      prices.ts                   BTC price fetching
-      types.ts                    Shared TypeScript interfaces
-      utils.ts                    Pure helper functions (time, conversion, formatting)
-    look-up-block.tsx             Block lookup command
-    look-up-transaction.tsx       Transaction lookup command
-    price-dashboard.tsx           Price dashboard command
-    sats-usd-converter.tsx        Sats ↔ USD converter command
-  package.json                    Extension manifest, dependencies, scripts
-  tsconfig.json                   TypeScript configuration
-```
-
-Each file has a single responsibility:
-- **`lib/api.ts`** — network layer: fetches block data from Mempool.space, resolves exact vs estimated results
-- **`lib/prices.ts`** — fetches current BTC prices from Mempool.space
-- **`lib/utils.ts`** — pure functions with no side effects (time formatting, satoshi/BTC/USD conversion)
-- **`lib/types.ts`** — shared types used across all commands
-- **`look-up-block.tsx`** — block lookup rendering and user interaction
-- **`look-up-transaction.tsx`** — transaction lookup rendering and user interaction (includes API call inline)
-- **`price-dashboard.tsx`** — price dashboard rendering and user interaction
-- **`sats-usd-converter.tsx`** — sats ↔ USD converter rendering and user interaction
 
 ## API
 

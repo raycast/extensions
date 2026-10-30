@@ -65,7 +65,7 @@ _Last updated: ${priceTime}_
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="Copy Usd Price"
+            title="Copy Price in USD"
             content={String(priceUsd)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
           />

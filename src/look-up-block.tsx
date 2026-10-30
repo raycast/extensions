@@ -30,7 +30,7 @@ export default function Command({
           <ActionPanel>
             <Action.OpenInBrowser
               title="Search on Mempool"
-              url="https://mempool.space"
+              url={`https://mempool.space/block-height/${trimmed}`}
             />
           </ActionPanel>
         }
@@ -50,7 +50,7 @@ export default function Command({
           <ActionPanel>
             <Action.OpenInBrowser
               title="Search on Mempool"
-              url="https://mempool.space"
+              url={`https://mempool.space/block-height/${heightNum}`}
             />
           </ActionPanel>
         }

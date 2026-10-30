@@ -33,6 +33,16 @@ export default function Command({
     numericValue = numMatch ? parseFloat(raw) : NaN;
   }
 
+  const isValidRequest =
+    !(btcMatch && !isSatsToUsd) && isFinite(numericValue) && numericValue > 0;
+
+  const {
+    isLoading,
+    data: prices,
+    error,
+    revalidate,
+  } = usePromise(fetchPrices, [], { execute: isValidRequest });
+
   if (btcMatch && !isSatsToUsd) {
     return (
       <Detail markdown="## Invalid amount\n\nPlease enter a USD amount for the **USD → Sats** direction." />
@@ -48,13 +58,6 @@ export default function Command({
   if (numericValue === 0) {
     return <Detail markdown="## Enter an amount above zero to convert." />;
   }
-
-  const {
-    isLoading,
-    data: prices,
-    error,
-    revalidate,
-  } = usePromise(fetchPrices, [], { execute: true });
 
   if (isLoading) {
     return <Detail isLoading markdown="## Fetching current Bitcoin price…" />;

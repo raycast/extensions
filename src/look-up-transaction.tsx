@@ -21,18 +21,18 @@ export default function Command({
 }: LaunchProps<{ arguments: Arguments.LookUpTransaction }>) {
   const raw = txid.trim();
 
-  if (!raw) {
-    return (
-      <Detail markdown="## Missing transaction ID\n\nPlease enter a valid Bitcoin transaction ID (TXID)." />
-    );
-  }
-
   const {
     isLoading,
     data: tx,
     error,
     revalidate,
-  } = usePromise(fetchTransaction, [raw], { execute: true });
+  } = usePromise(fetchTransaction, [raw], { execute: raw.length > 0 });
+
+  if (!raw) {
+    return (
+      <Detail markdown="## Missing transaction ID\n\nPlease enter a valid Bitcoin transaction ID (TXID)." />
+    );
+  }
 
   if (isLoading) {
     return <Detail isLoading markdown="## Fetching transaction data…" />;
@@ -46,7 +46,7 @@ export default function Command({
           <ActionPanel>
             <Action.OpenInBrowser
               title="Search on Mempool"
-              url="https://mempool.space"
+              url={`https://mempool.space/tx/${raw}`}
             />
             <Action
               icon={Icon.RotateClockwise}
