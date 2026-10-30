@@ -186,6 +186,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "amplify",
+    title: "Amplify",
+    description:
+      "Make browser games from your AI agent. Describe a game and Amplify builds a playable browser version in your Amplify account; keep changing it by prompt, follow the build, read its files and version history, and get a preview link. It builds web apps and websites the same way. 19 tools. Building and editing spend your own Amplify credits, always after a two-step confirmation with the price, and publishing only queues a request that you approve in the Amplify app. Hosted remote Streamable HTTP server at https://app.amplify.is/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, where you choose scopes, projects and a daily credit limit on the consent screen, no API key to paste. Needs an Amplify account.",
+    icon: "https://amplify.is/apple-touch-icon.png",
+    homepage: "https://amplify.is/data",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.amplify.is/mcp"],
+    },
+    remoteUrl: "https://app.amplify.is/mcp",
+  },
+  {
     name: "apmzoom",
     title: "apMZoomAI · Dongdaemun Wholesale",
     description:

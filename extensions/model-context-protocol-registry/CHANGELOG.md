@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Amplify MCP Server] - {PR_MERGE_DATE}
+
+- Add Amplify to the official registry: make browser games, web apps and websites from your AI agent in your Amplify account, with credit spending behind a two-step price confirmation and publishing behind the owner's approval in the app. 19 tools. Hosted Streamable HTTP server at https://app.amplify.is/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add ConnectMachine MCP Server] - 2026-10-30
 
 - Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
