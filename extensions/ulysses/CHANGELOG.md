@@ -1,6 +1,6 @@
 # Ulysses Changelog
 
-## [Capture, Journal and Preferences] - {PR_MERGE_DATE}
+## [Capture, Journal and Preferences] - 2026-10-30
 
 - New Quick Capture command: write a sheet with a title, text, group and format
 - New Capture Text command: save typed text, the selected text, or the clipboard as a sheet
