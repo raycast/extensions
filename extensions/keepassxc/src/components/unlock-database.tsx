@@ -51,7 +51,7 @@ export default function UnlockDatabase({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Unlock" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Unlock" icon={Icon.LockUnlocked} onSubmit={handleSubmit} />
           <Action
             title={showPassword ? "Hide Password" : "Show Password"}
             icon={showPassword ? Icon.EyeDisabled : Icon.Eye}

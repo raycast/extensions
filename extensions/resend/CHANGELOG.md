@@ -1,5 +1,13 @@
 # Resend Changelog
 
+## [Add Careers View] - 2026-10-30
+
+- Upgrade Raycast API to 2.8.0 and refresh vulnerable dependencies
+- Display full application questions above short answer labels to avoid widening the form's label column
+- Make sender preferences optional so browsing positions does not require email setup; require applicant details when applying
+- Add Careers with open positions, application forms, local resume uploads, and review before submission
+- Add list-positions, retrieve-position, and apply-to-position AI tools
+
 ## [Received Email and Expanded AI Tools] - 2026-08-31
 
 - Add a Received Emails command with inbound message details and attachment downloads
