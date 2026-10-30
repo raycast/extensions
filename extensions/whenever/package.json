@@ -6,9 +6,7 @@
 	"title": "Whenever",
 	"description": "Find Whenever workflows, run saved versions, and inspect their results.",
 	"icon": "icon.png",
-	"author": "kasparasb",
-	"owner": "whenever",
-	"access": "public",
+	"author": "whenever-team",
 	"license": "MIT",
 	"platforms": [
 		"macOS"
