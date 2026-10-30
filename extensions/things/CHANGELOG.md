@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Fix Ordering] - {PR_MERGE_DATE}
+
+- Fixed to-dos, projects and areas showing up in the wrong order when the Unofficial API preference is enabled. They now follow the order you set in Things.
+- Fixed areas missing from lists and Quick Find when the Unofficial API preference is enabled.
+
 ## [Tag Pills] - 2026-10-21
 
 - Show each to-do tag as its own tag pill in list rows instead of a single comma-separated label.
