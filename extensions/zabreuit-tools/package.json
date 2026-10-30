@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zabreuit-tools",
+  "title": "Zabreuit Web Tools",
+  "description": "Instant web scraping, AI Markdown RAG generation, SEO audits, and B2B contact extraction directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "jose_antonio_abreu_yanez",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-scraper",
+      "title": "Quick Web Scraper",
+      "subtitle": "Convert URL to clean Markdown or JSON",
+      "description": "Extract clean text, structured JSON-LD, or RAG-ready markdown from any URL.",
+      "mode": "view"
+    },
+    {
+      "name": "seo-auditor",
+      "title": "SEO & OpenGraph Auditor",
+      "subtitle": "Audit meta tags, SSL & security headers",
+      "description": "Run an instant technical compliance audit on any webpage.",
+      "mode": "view"
+    },
+    {
+      "name": "b2b-extractor",
+      "title": "B2B Contact Extractor",
+      "subtitle": "Find emails, socials & company tech stack",
+      "description": "Extract B2B contact info and DNS technologies from a company domain.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "licenseKey",
+      "type": "password",
+      "title": "Pro License Key",
+      "description": "Gumroad license key or Ed25519 token to unlock Pro RAG chunking and batch audits.",
+      "required": false
+    },
+    {
+      "name": "defaultFormat",
+      "type": "dropdown",
+      "title": "Default Export Format",
+      "description": "Default clipboard output format for scrapers.",
+      "required": false,
+      "default": "markdown",
+      "data": [
+        {
+          "title": "Clean Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "Structured JSON",
+          "value": "json"
+        },
+        {
+          "title": "HTML",
+          "value": "html"
+        }
+      ]
+    }
+  ],
+  "devDependencies": {
+    "@raycast/api": "^2.9.0",
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.12",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.12"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0"
+  },
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ]
+}
