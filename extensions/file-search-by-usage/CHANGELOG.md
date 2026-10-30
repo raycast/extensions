@@ -1,6 +1,6 @@
 # File Search by Usage Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-30
 
 - Keep an internal symlink's real target searchable when ignore rules hide the preferred link, without scanning separately configured children twice through external links.
 
