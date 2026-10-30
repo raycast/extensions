@@ -1,6 +1,12 @@
 import { ObsidianVault } from "@/obsidian";
 import { getVaultNameFromPath, getVaultsFromPreferences } from "@/obsidian/internal/obsidian";
-import { getNotes, getExcludedFolders, getNoteFileContent, getMedia } from "@/obsidian/internal/vault";
+import {
+  getNotes,
+  getBookmarkedNotes,
+  getExcludedFolders,
+  getNoteFileContent,
+  getMedia,
+} from "@/obsidian/internal/vault";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getPreferenceValues } from "@raycast/api";
 import { createTempVault } from "./helpers/createTemporaryVault";
@@ -173,6 +179,63 @@ describe("vault", () => {
 
       // Should have at least 3 notes (2 md + 1 canvas)
       expect(noteMetadataEntries.length).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  describe("getBookmarkedNotes", () => {
+    it("should return bookmarked notes in bookmark order with the same exclusions as getNotes", async () => {
+      const vaultPath = tempVaultData.vault.path;
+      fs.mkdirSync(path.join(vaultPath, "excluded"));
+      fs.mkdirSync(path.join(vaultPath, "Archive"));
+      fs.mkdirSync(path.join(vaultPath, ".drafts"));
+      fs.writeFileSync(path.join(vaultPath, "Ideas (draft).md"), "# Ideas");
+      fs.writeFileSync(path.join(vaultPath, "Folder1", "board.canvas"), JSON.stringify({ nodes: [], edges: [] }));
+      fs.writeFileSync(path.join(vaultPath, "excluded", "hidden.md"), "# Hidden");
+      fs.writeFileSync(path.join(vaultPath, "Archive", "old.md"), "# Old");
+      fs.writeFileSync(path.join(vaultPath, "drawing.excalidraw.md"), "# Drawing");
+      fs.writeFileSync(path.join(vaultPath, ".drafts", "draft.md"), "# Draft");
+      fs.writeFileSync(
+        path.join(vaultPath, ".obsidian", "app.json"),
+        JSON.stringify({ userIgnoreFilters: ["Archive"] })
+      );
+      fs.writeFileSync(
+        path.join(vaultPath, ".obsidian", "bookmarks.json"),
+        JSON.stringify({
+          items: [
+            { type: "file", title: "Note 2", path: "Folder1/note2.md" },
+            {
+              type: "group",
+              title: "My Group",
+              items: [
+                { type: "file", title: "Note 1", path: "note1.md" },
+                { type: "file", title: "Ideas", path: "Ideas (draft).md" },
+                { type: "file", title: "Note 2 again", path: "Folder1/note2.md" },
+              ],
+            },
+            { type: "file", title: "Board", path: "Folder1/board.canvas" },
+            { type: "file", title: "Media", path: "media.jpg" },
+            { type: "file", title: "Hidden", path: "excluded/hidden.md" },
+            { type: "file", title: "Old", path: "Archive/old.md" },
+            { type: "file", title: "Drawing", path: "drawing.excalidraw.md" },
+            { type: "file", title: "Draft", path: ".drafts/draft.md" },
+            { type: "file", title: "Deleted", path: "deleted.md" },
+          ],
+        })
+      );
+
+      const notes = await getBookmarkedNotes(vaultPath, ".obsidian", ["excluded"]);
+
+      expect(notes.map((note) => [note.title, note.path, note.bookmarked, note.fileSize])).toEqual([
+        ["note2", path.join(vaultPath, "Folder1", "note2.md"), true, 24],
+        ["note1", path.join(vaultPath, "note1.md"), true, 19],
+        ["Ideas (draft)", path.join(vaultPath, "Ideas (draft).md"), true, 7],
+        ["board", path.join(vaultPath, "Folder1", "board.canvas"), true, 23],
+      ]);
+    });
+
+    it("should return an empty array when bookmarks.json doesn't exist", async () => {
+      const notes = await getBookmarkedNotes(tempVaultData.vault.path, ".obsidian", []);
+      expect(notes).toEqual([]);
     });
   });
 

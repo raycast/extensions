@@ -149,3 +149,39 @@ export async function getNotes(
 
   return notes;
 }
+
+/** Gets the notes in bookmarks.json in bookmark order, filtered like getNotes, without scanning the vault. */
+export async function getBookmarkedNotes(
+  vaultPath: string,
+  configFileName: string = ".obsidian",
+  excludedFolders: string[] = []
+): Promise<Note[]> {
+  // The glob in getNotes skips dot files and folders, but would match them when given as a literal path
+  const bookmarkedFilePaths = getBookmarkedNotePaths(vaultPath).filter(
+    (filePath) =>
+      [".md", ".canvas"].includes(path.extname(filePath)) && !filePath.split("/").some((part) => part.startsWith("."))
+  );
+  const existingFilePaths = await getFilePaths({
+    path: vaultPath,
+    excludedFolders: [...excludedFolders, ...getExcludedFolders(vaultPath, configFileName), configFileName],
+    includedFilePaths: bookmarkedFilePaths,
+  });
+  const notes: Note[] = [];
+
+  // A Set, because a note can be bookmarked more than once, e.g. in two groups
+  for (const filePath of new Set(bookmarkedFilePaths.map((relativePath) => path.join(vaultPath, relativePath)))) {
+    if (!existingFilePaths.includes(filePath)) continue;
+    const stats = fs.statSync(filePath);
+
+    notes.push({
+      title: path.basename(filePath, path.extname(filePath)),
+      path: filePath,
+      lastModified: stats.mtime,
+      bookmarked: true,
+      createdAt: stats.birthtime,
+      fileSize: stats.size,
+    });
+  }
+
+  return notes;
+}

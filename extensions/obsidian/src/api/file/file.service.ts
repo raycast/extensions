@@ -6,7 +6,7 @@ import { GetFilePathsHelper } from "./file.types";
 const logger = new Logger("File");
 
 export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]> {
-  const { path: vaultPath, excludedFolders = [], includedFileExtensions } = params;
+  const { path: vaultPath, excludedFolders = [], includedFileExtensions, includedFilePaths } = params;
   const defaultExcludedDirs = [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"];
 
   const cleanedExcludes = [...defaultExcludedDirs, ...excludedFolders].filter((dir) => !!dir && dir.trim() !== "");
@@ -31,7 +31,8 @@ export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]
 
   logger.info(`Globbing files with option ${JSON.stringify(options)}`);
 
-  const files = (await glob(extensionPattern, options)).map((file) => path.join(vaultPath, file));
+  const patterns = includedFilePaths?.map((file) => glob.escapePath(file)) ?? extensionPattern;
+  const files = (await glob(patterns, options)).map((file) => path.join(vaultPath, file));
   logger.success(`Globbed ${files.length} file paths.`);
   return files;
 }
