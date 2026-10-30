@@ -816,6 +816,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "fictura",
+    title: "Fictura",
+    description:
+      "Growth data for Expo and React Native apps: paywalls and onboarding flows, subscription analytics and funnels, A/B experiments, attribution and ad spend, deep links, App Store and Google Play analytics, and error reports. Mostly read-only: it can create and edit draft paywalls and onboarding flows, never live ones. Hosted Streamable HTTP server with OAuth 2.1 sign-in (pick one app and an access level); documentation tools work without signing in. Needs a Fictura account.",
+    icon: "https://raw.githubusercontent.com/Apex-Byte-Technologies/fictura-mcp/main/assets/fictura-icon-512.png",
+    homepage: "https://docs.fictura.co/connections/outgoing/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.fictura.co/mcp"],
+    },
+    remoteUrl: "https://mcp.fictura.co/mcp",
+  },
+  {
     name: "fotofoto",
     title: "foto foto",
     description:
