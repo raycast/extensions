@@ -1,6 +1,6 @@
 # Changelog
 
-## [Weekly Review, Templates, and Automatic Carryover] - {PR_MERGE_DATE}
+## [Weekly Review, Templates, and Automatic Carryover] - 2026-10-30
 
 - Retry brief reminder-lock contention during automatic carryover instead of showing an error on startup.
 - Save reusable plan templates, preview and add them as fresh plans, and create, edit, or delete templates without changing previously recorded work.
