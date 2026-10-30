@@ -77,9 +77,11 @@ Get the current state of caffeination.
 
 Get the status of current caffeination in your menu bar.
 
-On macOS, Coffee distinguishes its own session from **External caffeination** started by another application or a terminal. External activity shows a process count and keeps the icon visible when **Hide the icon** is enabled. Only a Coffee-managed session selects a Coffee action or shows its countdown. Starting, replacing, toggling, or stopping Coffee leaves external processes running.
+On macOS, Coffee distinguishes its own session from **External caffeination** started by another application or a terminal. The menu's **External caffeination** row shows how many external processes are running (or **None**), and external activity keeps the icon visible when **Hide the icon** is enabled. **Stop Coffee Caffeination** is only available while Coffee's own session is running, and only a Coffee-managed session selects a Coffee action or shows its countdown. Starting, replacing, toggling, or stopping Coffee leaves external processes running.
 
-Coffee saves its process ID and creation time, so it can recognize a surviving session after Raycast restarts. Sessions already running when upgrading to this version have no ownership record and appear as external. Coffee can start a new managed session alongside them; the older process must expire or be stopped through its original caller.
+The menu keeps the same rows while it refreshes, so it opens with the last known state and updates in place once the current process scan completes.
+
+Coffee saves its process ID and creation time, so it can recognize a surviving session after Raycast restarts. A session started by an earlier version of Coffee has no ownership record. If exactly one process matches how earlier versions launched `caffeinate` and it was already running before this version first ran, the menu offers **Stop Previous Coffee Session** in place of the external row. Coffee never adopts it or stops it on its own, and Decaffeinate leaves it running. Anything else is treated as external and must expire or be stopped through its original caller.
 
 On Windows, Coffee tracks its own keep-awake worker. External sleep prevention is not monitored. A session surviving an update remains controllable, but its description may be omitted until the next session if it was saved by an older version.
 

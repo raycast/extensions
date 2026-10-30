@@ -13,13 +13,15 @@ import {
   CaffeinationState,
   ConditionalStopResult,
   getMacCaffeinationState,
+  LegacySession,
   parseReason,
   startMacCaffeinate,
   stopMacCaffeinate,
   stopMacCaffeinateIfMatches,
+  stopMacLegacyCaffeinate,
 } from "./caffeination";
 
-export type { Schedule, CaffeinationReason, CaffeinationState };
+export type { Schedule, CaffeinationReason, CaffeinationState, LegacySession };
 
 type Updates = {
   menubar: boolean;
@@ -139,6 +141,13 @@ export async function stopCaffeinate(
     await showHUD(stoppedCaffeinationMessage(state, Boolean(pausedSchedule)));
   }
   await refresh;
+  return state;
+}
+
+/** Stop a session started by Coffee before this version tracked ownership (macOS only). */
+export async function stopLegacyCaffeinate(updates: Updates, legacy: LegacySession) {
+  const state = await stopMacLegacyCaffeinate(legacy);
+  await update(updates);
   return state;
 }
 

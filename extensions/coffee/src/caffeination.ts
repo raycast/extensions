@@ -21,6 +21,15 @@ export interface CaffeinationState {
   totalSeconds: number | null;
   startTime: number | null;
   reason?: CaffeinationReason;
+  // A session started by Coffee before it tracked ownership. Only offered for
+  // an explicit user stop; it is never adopted or stopped implicitly.
+  legacySession?: LegacySession;
+}
+
+export interface LegacySession {
+  pid: number;
+  createdAt: string;
+  endsAt: number | null;
 }
 
 export interface ConditionalStopResult {
@@ -43,6 +52,10 @@ interface ManagedSession extends ProcessIdentity {
 }
 
 const SESSION_KEY = "caffeinationSession";
+const LEGACY_CUTOFF_KEY = "legacySessionCutoff";
+// Coffee before session tracking launched `/usr/bin/caffeinate -u [-dims] [-t N | -w PID]`.
+// A terminal `caffeinate` is normally started by name, not by absolute path.
+const LEGACY_ARGS = /^\/usr\/bin\/caffeinate -u(?: -[dims]+)?(?: -(t|w) (\d+))?$/;
 const EXECUTABLE = "/usr/bin/caffeinate";
 const PROCESS_QUERY_TIMEOUT_MS = 5000;
 const LOCK_WAIT_MS = 5000;
@@ -108,6 +121,21 @@ async function listProcesses(pid?: number): Promise<ProcessIdentity[]> {
     });
   }
   return processes;
+}
+
+async function getProcessArgs(pid: number): Promise<string | undefined> {
+  const output = await new Promise<string>((resolve, reject) => {
+    execFile(
+      "/bin/ps",
+      ["-ww", "-p", String(pid), "-o", "args="],
+      { encoding: "utf8", env: { ...process.env, LC_ALL: "C" }, timeout: PROCESS_QUERY_TIMEOUT_MS },
+      (error, stdout, stderr) => {
+        if (error && !(error.code === 1 && !stdout.trim() && !stderr.trim())) reject(error);
+        else resolve(stdout);
+      },
+    );
+  });
+  return output.trim() || undefined;
 }
 
 async function getProcessIdentity(pid: number): Promise<ProcessIdentity | undefined> {
@@ -232,9 +260,39 @@ async function readSession(processes?: ProcessIdentity[]): Promise<ManagedSessio
   return session;
 }
 
+// The first run of this version fixes the cutoff, so only processes that were
+// already running before the update can qualify as legacy Coffee sessions.
+async function getLegacyCutoff(): Promise<number> {
+  const saved = Number(await LocalStorage.getItem<string>(LEGACY_CUTOFF_KEY));
+  if (Number.isFinite(saved) && saved > 0) return saved;
+  const now = Date.now();
+  await LocalStorage.setItem(LEGACY_CUTOFF_KEY, String(now));
+  return now;
+}
+
+async function findLegacySession(
+  processes: ProcessIdentity[],
+  session?: ManagedSession,
+): Promise<(LegacySession & ProcessIdentity) | undefined> {
+  const cutoff = await getLegacyCutoff();
+  const candidates: (LegacySession & ProcessIdentity)[] = [];
+  for (const entry of processes) {
+    if (entry.executable !== EXECUTABLE || entry.uid !== process.getuid?.() || entry.pid === session?.pid) continue;
+    const startedAt = Date.parse(`${entry.createdAt} UTC`);
+    if (!Number.isFinite(startedAt) || startedAt >= cutoff) continue;
+    const match = LEGACY_ARGS.exec((await getProcessArgs(entry.pid)) ?? "");
+    if (!match) continue;
+    const endsAt = match[1] === "t" ? startedAt + Number(match[2]) * 1000 : null;
+    candidates.push({ ...entry, endsAt });
+  }
+  // Two matching processes mean at least one is not Coffee's; offer neither.
+  return candidates.length === 1 ? candidates[0] : undefined;
+}
+
 async function readState(): Promise<CaffeinationState> {
   const processes = await listProcesses();
   const session = await readSession(processes);
+  const legacy = await findLegacySession(processes, session);
   const externalCount = processes.filter(
     ({ executable, pid }) => (executable === EXECUTABLE || executable === "caffeinate") && pid !== session?.pid,
   ).length;
@@ -246,6 +304,7 @@ async function readState(): Promise<CaffeinationState> {
     totalSeconds: session?.durationSeconds ?? null,
     startTime: session?.startedAt ?? null,
     reason: session?.reason,
+    ...(legacy && { legacySession: { pid: legacy.pid, createdAt: legacy.createdAt, endsAt: legacy.endsAt } }),
   };
 }
 
@@ -285,6 +344,31 @@ export function getMacCaffeinationState(): Promise<CaffeinationState> {
 export function stopMacCaffeinate(): Promise<CaffeinationState> {
   return withSessionLock(async () => {
     await stopSession();
+    return readState();
+  });
+}
+
+/** Stop the pre-update Coffee session the user selected, if it is still the same process. */
+export function stopMacLegacyCaffeinate(expected: LegacySession): Promise<CaffeinationState> {
+  return withSessionLock(async () => {
+    const processes = await listProcesses();
+    const legacy = await findLegacySession(processes, await readSession(processes));
+    if (!legacy || legacy.pid !== expected.pid || legacy.createdAt !== expected.createdAt) {
+      throw new Error("The previous Coffee session is no longer running");
+    }
+    if (!sameProcess(legacy, await getProcessIdentity(legacy.pid))) {
+      throw new Error("The previous Coffee session is no longer running");
+    }
+    try {
+      process.kill(legacy.pid, "SIGTERM");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+    }
+    for (let attempt = 0; attempt < STOP_POLL_ATTEMPTS; attempt++) {
+      if (!sameProcess(legacy, await getProcessIdentity(legacy.pid))) break;
+      if (attempt === STOP_POLL_ATTEMPTS - 1) throw new Error("The previous Coffee session did not stop");
+      await delay(STOP_POLL_INTERVAL_MS);
+    }
     return readState();
   });
 }

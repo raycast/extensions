@@ -371,3 +371,79 @@ test("Windows adapter preserves native worker timing and propagates inspection e
   fail = true;
   await assert.rejects(adapter.windowsGetCaffeinationState(), /Native state unavailable/);
 });
+
+const legacyStart = "Mon Jan 5 10:00:00 2026";
+const legacyRow = { createdAt: legacyStart, args: "/usr/bin/caffeinate -u -dim -t 3600" };
+
+test("a pre-update Coffee session is offered for an explicit stop but never adopted or stopped implicitly", async () => {
+  const h = createHarness();
+  h.addProcess(900, legacyRow);
+  const utils = h.load("utils.ts");
+  const state = await utils.getCaffeinationState();
+  assert.equal(state.isManaged, false);
+  assert.equal(state.externalCount, 1);
+  assert.deepEqual(
+    { ...state.legacySession },
+    {
+      pid: 900,
+      createdAt: legacyStart,
+      endsAt: Date.parse(`${legacyStart} UTC`) + 3600 * 1000,
+    },
+  );
+  assert.equal(h.storage.has(key), false);
+  await utils.stopCaffeinate(quiet);
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+  const stopped = await utils.stopLegacyCaffeinate(quiet, state.legacySession);
+  assert.deepEqual(
+    h.fakeProcess.kill.mock.calls.map(({ arguments: args }) => Array.from(args)),
+    [[900, "SIGTERM"]],
+  );
+  assert.equal(stopped.isRunning, false);
+  assert.equal(stopped.legacySession, undefined);
+});
+
+for (const [name, setup] of [
+  [
+    "a terminal caffeinate with the same flags",
+    (h) => h.addProcess(900, { ...legacyRow, args: "caffeinate -u -dim -t 3600" }),
+  ],
+  ["a caffeinate with other flags", (h) => h.addProcess(900, { ...legacyRow, args: "/usr/bin/caffeinate -i -t 3600" })],
+  ["another user's process", (h) => h.addProcess(900, { ...legacyRow, uid: 502 })],
+  ["two matching processes", (h) => (h.addProcess(900, legacyRow), h.addProcess(901, legacyRow))],
+  [
+    "a process started after this version first ran",
+    (h) => {
+      h.storage.set("legacySessionCutoff", String(Date.parse(`${legacyStart} UTC`) - 1000));
+      h.addProcess(900, legacyRow);
+    },
+  ],
+]) {
+  test(`does not offer ${name} as a previous Coffee session`, async () => {
+    const h = createHarness();
+    setup(h);
+    const state = await h.load("utils.ts").getCaffeinationState();
+    assert.equal(state.legacySession, undefined);
+    assert.ok(state.externalCount >= 1);
+  });
+}
+
+test("the first run fixes the legacy cutoff so later sessions never qualify", async () => {
+  const h = createHarness();
+  const utils = h.load("utils.ts");
+  await utils.getCaffeinationState();
+  const cutoff = Number(h.storage.get("legacySessionCutoff"));
+  assert.ok(cutoff > 0);
+  await utils.getCaffeinationState();
+  assert.equal(Number(h.storage.get("legacySessionCutoff")), cutoff);
+});
+
+test("stopping a previous Coffee session rechecks its identity and never signals a replacement", async () => {
+  const h = createHarness();
+  h.addProcess(900, legacyRow);
+  const utils = h.load("utils.ts");
+  const { legacySession } = await utils.getCaffeinationState();
+  h.table.get(900).createdAt = "Tue Jan 6 10:00:00 2026";
+  await assert.rejects(utils.stopLegacyCaffeinate(quiet, legacySession), /no longer running/);
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+  assert.ok(h.table.has(900));
+});

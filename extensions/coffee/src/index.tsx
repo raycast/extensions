@@ -10,7 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   formatDuration,
@@ -19,6 +19,7 @@ import {
   deviceName,
   prepareUserStop,
   getCaffeinationState,
+  stopLegacyCaffeinate,
   CaffeinationState,
 } from "./utils";
 import { maybeAutoCaffeinate } from "./status";
@@ -35,10 +36,12 @@ const DURATION_PRESETS: { label: string; seconds: number }[] = [
 ];
 
 function useCaffeinateInfo() {
-  const result = usePromise(getCaffeinationState, [], { onError: () => {} });
+  // Raycast relaunches the menu bar command on every click; the cached result
+  // keeps the menu populated while the fresh process scan runs.
+  const result = useCachedPromise(getCaffeinationState, [], { onError: () => {} });
   const { revalidate } = result;
   useEffect(() => {
-    const interval = setInterval(() => void revalidate().catch(() => {}), process.platform === "win32" ? 5000 : 60000);
+    const interval = setInterval(() => revalidate(), process.platform === "win32" ? 5000 : 60000);
     return () => clearInterval(interval);
   }, [revalidate]);
   return result;
@@ -57,15 +60,19 @@ export default function Command(props: LaunchProps) {
   const [cachedCaffeinated, setCachedCaffeinated] = useCachedState<boolean>("caffeinateStatus");
   const { isLoading, data: state, mutate, error } = useCaffeinateInfo();
   const data = state ?? EMPTY_STATE;
-  const displayCaffeinateStatus = state?.isRunning ?? cachedCaffeinated;
+  // While loading, `state` may be the snapshot saved by an earlier launch. Rows can
+  // show it, but the icon and caffeinateStatus follow only this launch's own scan,
+  // falling back to the flag the start/stop handlers keep current.
+  const isFresh = Boolean(state) && !isLoading && !error;
+  const displayCaffeinateStatus = isFresh ? state?.isRunning : (cachedCaffeinated ?? state?.isRunning);
   const preferences = getPreferenceValues<Preferences.Index>();
   const isHideEnabled = Boolean(preferences.hidenWhenDecaffeinated);
 
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (state && !error) setCachedCaffeinated(state.isRunning);
-  }, [state, error, setCachedCaffeinated]);
+    if (isFresh && state) setCachedCaffeinated(state.isRunning);
+  }, [isFresh, state, setCachedCaffeinated]);
 
   const isUserInitiated = props.launchType === LaunchType.UserInitiated;
   const { isVisible, keepVisibleAfterStop } = useMenuVisibility({
@@ -140,6 +147,32 @@ export default function Command(props: LaunchProps) {
     }
   };
 
+  const handleStopLegacy = async () => {
+    if (!data.legacySession) return;
+    try {
+      const operation = stopLegacyCaffeinate({ menubar: true, status: true }, data.legacySession);
+      await mutate(operation);
+      const stopped = await operation;
+      setCachedCaffeinated(stopped.isRunning);
+      if (isHideEnabled && !stopped.isRunning) keepVisibleAfterStop();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to stop previous Coffee session",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  const legacySubtitle = (() => {
+    if (!data.legacySession) return undefined;
+    if (data.legacySession.endsAt === null) return "Started before update";
+    const remain = Math.floor((data.legacySession.endsAt - Date.now()) / 1000);
+    return remain > 0 ? `Started before update — ${formatDuration(remain)} remain` : "Started before update";
+  })();
+  const externalCount = (data.externalCount ?? 0) - (data.legacySession ? 1 : 0);
+  const externalSummary = `${externalCount} ${externalCount === 1 ? "process" : "processes"}`;
+
   const handleDeactivate = async () => {
     try {
       const decision = await prepareUserStop();
@@ -178,7 +211,8 @@ export default function Command(props: LaunchProps) {
 
   return (
     <MenuBarExtra
-      isLoading={isLoading && cachedCaffeinated === undefined}
+      // Keep Raycast from unloading the command before its own scan has landed.
+      isLoading={isLoading}
       icon={
         displayCaffeinateStatus
           ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
@@ -187,15 +221,29 @@ export default function Command(props: LaunchProps) {
     >
       {error ? (
         <MenuBarExtra.Item title="Caffeination status unavailable" />
-      ) : isLoading ? null : (
+      ) : isLoading && !state ? null : (
         <>
-          {Boolean(data.externalCount) && (
-            <MenuBarExtra.Item
-              title="External caffeination"
-              subtitle={`${data.externalCount} ${data.externalCount === 1 ? "process" : "processes"}`}
-            />
-          )}
-          {data.isManaged && <MenuBarExtra.Item title="Stop Coffee Caffeination" onAction={handleDeactivate} />}
+          {/* The menu renders cached state, then the fresh scan while it may be open.
+              Raycast leaves blank rows when an open menu inserts or removes rows, so
+              these rows always exist and only their text and action change. */}
+          {data.externalCount !== null &&
+            (data.legacySession ? (
+              <MenuBarExtra.Item
+                title="Stop Previous Coffee Session"
+                subtitle={externalCount > 0 ? `${legacySubtitle} · ${externalCount} external` : legacySubtitle}
+                onAction={handleStopLegacy}
+              />
+            ) : (
+              // Keep a subtitle: Raycast blanks an open row whose subtitle is removed.
+              <MenuBarExtra.Item
+                title="External caffeination"
+                subtitle={externalCount > 0 ? externalSummary : "None"}
+              />
+            ))}
+          <MenuBarExtra.Item
+            title="Stop Coffee Caffeination"
+            onAction={data.isManaged ? handleDeactivate : undefined}
+          />
           <MenuBarExtra.Section title="Caffeinate">
             <MenuBarExtra.Item
               title="Indefinitely"

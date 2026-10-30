@@ -5,6 +5,7 @@ const { createHarness } = require("./helpers.cjs");
 async function menu(options = {}) {
   const h = createHarness({ preferences: { icon: "pot", hidenWhenDecaffeinated: true, ...options.preferences } });
   if (options.external) h.addProcess(900);
+  if (options.legacy) h.addProcess(901, { createdAt: "Mon Jan 5 10:00:00 2026", args: "/usr/bin/caffeinate -u -dim" });
   if (options.coffee)
     await h
       .load("utils.ts")
@@ -13,7 +14,11 @@ async function menu(options = {}) {
         undefined,
         options.duration ? `-t ${options.duration}` : undefined,
       );
-  const state = { data: await h.load("utils.ts").getCaffeinationState(), isLoading: false, error: options.error };
+  const state = {
+    data: await h.load("utils.ts").getCaffeinationState(),
+    isLoading: Boolean(options.loading),
+    error: options.error,
+  };
   const optimisticStates = [];
   const react = {
     createElement: (type, props, ...children) => ({ type, props: props || {}, children }),
@@ -28,7 +33,7 @@ async function menu(options = {}) {
     "@raycast/api": { ...h.api, MenuBarExtra, Color: { PrimaryText: "primary" }, Icon: { Checkmark: "check" } },
     "@raycast/utils": {
       useCachedState: () => [options.cached ?? false, () => {}],
-      usePromise: () => ({
+      useCachedPromise: () => ({
         ...state,
         revalidate: async () => {},
         mutate: async (operation, config) => {
@@ -78,10 +83,7 @@ test("external-only activity has a filled icon and an informational row without 
     items.some(({ icon }) => icon === "check"),
     false,
   );
-  assert.equal(
-    items.some(({ title }) => title === "Stop Coffee Caffeination"),
-    false,
-  );
+  assert.equal(items.find(({ title }) => title === "Stop Coffee Caffeination").onAction, undefined);
   assert.equal(items.find(({ title }) => title === "Until…").subtitle, undefined);
 });
 
@@ -114,10 +116,7 @@ test("stopping Coffee in a mixed state leaves the external row and icon visible"
     items.some(({ icon }) => icon === "check"),
     false,
   );
-  assert.equal(
-    items.some(({ title }) => title === "Stop Coffee Caffeination"),
-    false,
-  );
+  assert.equal(items.find(({ title }) => title === "Stop Coffee Caffeination").onAction, undefined);
   assert.ok(h.table.has(900));
   assert.equal(h.optimisticStates[0].sessionId, null);
 });
@@ -184,4 +183,67 @@ test("optimistically starting a replacement does not reuse the previous session 
   assert.equal(h.optimisticStates[0].totalSeconds, 600);
   assert.ok(h.state.data.sessionId);
   assert.notEqual(h.state.data.sessionId, previousSessionId);
+});
+
+test("a relaunch renders the cached menu while the fresh scan is still loading", async () => {
+  const h = await menu({ coffee: true, duration: 300, loading: true });
+  const items = h.items(h.render());
+  assert.ok(items.find(({ title }) => title === "Stop Coffee Caffeination").onAction);
+  assert.ok(items.some(({ title }) => title === "10 Minutes"));
+});
+
+test("status changes only update row text and actions, never the set of rows", async () => {
+  const titles = async (options) => {
+    const h = await menu({ ...options, preferences: { hidenWhenDecaffeinated: false } });
+    return h.items(h.render()).map(({ title }) => title);
+  };
+  const layouts = await Promise.all(
+    [{}, { external: true }, { coffee: true }, { coffee: true, external: true }, { legacy: true }].map(titles),
+  );
+  for (const layout of layouts) assert.equal(layout.length, layouts[0].length);
+  const subtitles = async (options) => {
+    const h = await menu({ ...options, preferences: { hidenWhenDecaffeinated: false } });
+    return h.items(h.render())[0].subtitle;
+  };
+  assert.equal(await subtitles({}), "None");
+  assert.equal(await subtitles({ external: true }), "1 process");
+  assert.deepEqual(
+    layouts.map((layout) => layout[0]),
+    [
+      "External caffeination",
+      "External caffeination",
+      "External caffeination",
+      "External caffeination",
+      "Stop Previous Coffee Session",
+    ],
+  );
+});
+
+test("a pre-update Coffee session gets its own stop item and is not counted as external", async () => {
+  const h = await menu({ legacy: true, external: true });
+  const items = h.items(h.render());
+  assert.equal(
+    items.some(({ title }) => title === "External caffeination"),
+    false,
+  );
+  const legacy = items.find(({ title }) => title === "Stop Previous Coffee Session");
+  assert.equal(legacy.subtitle, "Started before update · 1 external");
+  assert.equal(items.find(({ title }) => title === "Stop Coffee Caffeination").onAction, undefined);
+  await legacy.onAction();
+  assert.equal(h.table.has(901), false);
+  assert.ok(h.table.has(900));
+  const after = h.items(h.render()).map(({ title }) => title);
+  assert.equal(after.includes("Stop Previous Coffee Session"), false);
+  assert.equal(after[0], "External caffeination");
+});
+
+test("a cached snapshot never drives the icon or keeps Raycast from waiting for the fresh scan", async () => {
+  const h = await menu({ coffee: true, loading: true, cached: false });
+  const tree = h.render();
+  assert.equal(tree.props.isLoading, true);
+  assert.equal(tree.props.icon.source, "pot-empty.svg");
+  h.state.isLoading = false;
+  const fresh = h.render();
+  assert.equal(fresh.props.isLoading, false);
+  assert.equal(fresh.props.icon.source, "pot-filled.svg");
 });

@@ -80,7 +80,9 @@ function createHarness(options = {}) {
       assert.equal(executable, "/bin/ps");
       const pidIndex = args.indexOf("-p");
       const rows = [...table.values()].filter((p) => pidIndex < 0 || p.pid === Number(args[pidIndex + 1]));
-      const output = rows.map((p) => `${p.pid} ${p.uid} ${p.createdAt} ${p.executable}`).join("\n");
+      const output = args.includes("args=")
+        ? rows.map((p) => p.args ?? p.executable).join("\n")
+        : rows.map((p) => `${p.pid} ${p.uid} ${p.createdAt} ${p.executable}`).join("\n");
       queueMicrotask(() =>
         callback(rows.length ? null : Object.assign(new Error("No process"), { code: 1 }), output, ""),
       );
