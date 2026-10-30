@@ -1,10 +1,10 @@
 # Qobuz Changelog
 
-## [Open Shared Link] - {PR_MERGE_DATE}
+## [Open Shared Music] - {PR_MERGE_DATE}
 
 ### Added
 
-- Open Shared Link: a new command for a track or album someone sends you. Pass a Spotify, YouTube Music or Qobuz link, or leave the argument empty to use the one on the clipboard
+- Open Shared Music: a new command for a track or album someone sends you. Pass a Spotify, YouTube Music or Qobuz link, or leave the argument empty to use the one on the clipboard
 - A Spotify or YouTube Music track opens its Qobuz match, with an exact (ISRC) or approximate tag, and the same share links and per-service matches as Show Current Track; a Qobuz track shows the track on every other service
 - An album opens its Qobuz match, with an exact (UPC) or approximate tag, its cover, tracklist, release year, label and quality
 - A Source line says where the link came from, such as "From clipboard (Spotify)" or "From link (Qobuz)"
@@ -12,7 +12,7 @@
 
 ### Changed
 
-- Show Current Track's "Nothing playing" screen now points to Open Shared Link for links
+- Show Current Track's "Nothing playing" screen now points to Open Shared Music for links
 
 ## [Fix media keys never posting] - 2026-10-05
 

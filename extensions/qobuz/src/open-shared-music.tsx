@@ -17,7 +17,7 @@ const EMPTY_MESSAGE = [
 const UNKNOWN_MESSAGE = [
   "# Unsupported link",
   "",
-  "Open Shared Link takes Spotify, YouTube Music and Qobuz links.",
+  "Open Shared Music takes Spotify, YouTube Music and Qobuz links.",
 ].join("\n");
 
 const UNSUPPORTED_TITLE: Partial<Record<LinkKind, string>> = {
@@ -59,7 +59,7 @@ const convert = async (argument: string): Promise<Conversion> => {
   return { picked, opened: await open(picked.url) };
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.OpenSharedLink }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.OpenSharedMusic }>) {
   const argument = props.arguments.link?.trim() ?? "";
   const { data, isLoading } = usePromise(convert, [argument], {
     onError: (error) => {
@@ -165,7 +165,7 @@ const buildMarkdown = (data: Conversion | undefined, isLoading: boolean): string
         "",
         `${sourceLabel(picked)}: \`${picked.url}\``,
         "",
-        "Open Shared Link opens tracks and albums.",
+        "Opens shared tracks and albums from Spotify, YouTube Music and Qobuz.",
       ].join("\n");
     case "unknown":
       return UNKNOWN_MESSAGE;
