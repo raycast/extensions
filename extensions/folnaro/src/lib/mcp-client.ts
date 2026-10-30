@@ -1,5 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { FolnaroError, classifyToolError } from "./errors";
+import { CLIENT_NOT_APPROVED_CODE, FolnaroError, classifyToolError } from "./errors";
 
 /**
  * A small MCP client for folnaro-mcp over stdio (newline-delimited JSON-RPC 2.0).
@@ -271,7 +271,9 @@ export class McpClient implements ToolClient {
     this.pending.delete(message.id);
     clearTimeout(pending.timer);
     if (message.error) {
-      pending.reject(new FolnaroError("protocol", message.error.message, { code: message.error.code }));
+      // A program that is not approved yet is refused at the protocol level (tools/list, resources).
+      const kind = message.error.code === CLIENT_NOT_APPROVED_CODE ? "notApproved" : "protocol";
+      pending.reject(new FolnaroError(kind, message.error.message, { code: message.error.code }));
     } else {
       pending.resolve(message.result);
     }

@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { BRAND_ACCENT } from "./lib/brand";
 import { elapsedSeconds, formatClock, formatDuration, formatTime } from "./lib/format";
 import { openFolnaro, showError, withFolnaro } from "./lib/raycast";
+import { menuState } from "./lib/menu-state";
 import { byId, describeEntry } from "./lib/timer";
 import type { TimeEntry } from "./lib/types";
 import { t } from "./lib/text";
@@ -37,8 +38,8 @@ export default function RunningTimer() {
     onError: () => undefined,
   });
 
-  const entry = data?.entry ?? null;
-  const unavailable = Boolean(error) && !data;
+  // After an error the cached timer is dropped: the menu says Folnaro is unreachable and the clock stops.
+  const { entry, name, unavailable, unavailableKey } = menuState(data, error);
   if (!entry && hideWhenIdle && !isLoading && !unavailable) return null;
 
   const elapsed = entry ? elapsedSeconds(entry) : 0;
@@ -59,13 +60,13 @@ export default function RunningTimer() {
     <MenuBarExtra
       icon={icon}
       title={title}
-      tooltip={entry ? (data?.name ?? t("timer.startedPlain")) : t("menu.noTimer")}
+      tooltip={entry ? (name ?? t("timer.startedPlain")) : unavailable ? t(unavailableKey) : t("menu.noTimer")}
       isLoading={isLoading}
     >
       {entry ? (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
-            title={data?.name ?? t("timer.withoutProject")}
+            title={name ?? t("timer.withoutProject")}
             subtitle={entry.note || entry.activity || undefined}
             icon={Icon.Stopwatch}
             onAction={() => openFolnaro(`folnaro://time/${encodeURIComponent(entry.id)}`)}
@@ -86,7 +87,7 @@ export default function RunningTimer() {
         </MenuBarExtra.Section>
       ) : (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Item title={unavailable ? t("menu.unavailable") : t("menu.noTimer")} />
+          <MenuBarExtra.Item title={unavailable ? t(unavailableKey) : t("menu.noTimer")} />
         </MenuBarExtra.Section>
       )}
       <MenuBarExtra.Section>

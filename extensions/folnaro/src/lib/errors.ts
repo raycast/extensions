@@ -14,6 +14,7 @@ export type FolnaroErrorKind =
   | "helperExited"
   | "timeout"
   | "protocol"
+  | "notApproved"
   | "permissionDenied"
   | "readOnlyMode"
   | "timerRunning"
@@ -83,6 +84,8 @@ export const LOCKED_AFTER_TRIAL = new Set(["documents_create_draft", "expenses_c
  * (`FOLNARO_LANGUAGE=en`), so every check matches the English catalog entries (FolnaroMCP and FolnaroData
  * Localizable.xcstrings):
  *
+ * - error.client_not_approved and error.client_denied (the program itself is not approved in Settings > Agents):
+ *   "has no access to Folnaro yet", "isn’t allowed to access Folnaro", "couldn’t identify this program".
  * - error.permission_denied always names the setting `mcp.permissions`.
  * - error.entitlement_locked: "read-only mode".
  * - store.error.timer_running: "A timer is already running.".
@@ -91,6 +94,9 @@ export const LOCKED_AFTER_TRIAL = new Set(["documents_create_draft", "expenses_c
  */
 export function classifyToolError(tool: string, message: string): FolnaroError {
   const text = message.trim();
+  if (isNotApprovedText(text)) {
+    return new FolnaroError("notApproved", text, { tool });
+  }
   if (text.includes("mcp.permissions")) {
     return new FolnaroError("permissionDenied", text, { tool, permission: TOOL_PERMISSIONS[tool] });
   }
@@ -107,4 +113,14 @@ export function classifyToolError(tool: string, message: string): FolnaroError {
     return new FolnaroError("timerNotRunning", text, { tool });
   }
   return new FolnaroError("tool", text, { tool });
+}
+
+/** JSON-RPC code of a request from a program the user has not approved (`MCPServer.clientNotApprovedCode`). */
+export const CLIENT_NOT_APPROVED_CODE = -32001;
+
+/** The helper's refusal of a program that is pending or denied in Settings > Agents (English catalog entries). */
+export function isNotApprovedText(text: string): boolean {
+  return /has no access to Folnaro yet|isn[’']t allowed to access Folnaro|couldn[’']t identify this program/i.test(
+    text,
+  );
 }

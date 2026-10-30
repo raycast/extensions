@@ -52,6 +52,14 @@ export function describeError(error: unknown): ErrorPresentation {
       };
     case "timeout":
       return { ...base, title: t("error.timeout.title"), message: t("error.timeout.message") };
+    case "notApproved":
+      return {
+        ...base,
+        title: t("error.notApproved.title"),
+        message: t("error.notApproved.message"),
+        needsUserAction: true,
+        offerOpenFolnaro: true,
+      };
     case "permissionDenied": {
       const permission = permissionLabel(folnaroError.permission);
       return {

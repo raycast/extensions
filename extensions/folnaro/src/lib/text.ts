@@ -16,6 +16,8 @@ const TEXT = {
   "error.timeout.title": "Folnaro is taking too long",
   "error.timeout.message": "Folnaro didn’t answer in time. Try again in a moment.",
   "error.protocol.title": "Folnaro couldn’t read the request",
+  "error.notApproved.title": "Allow Raycast in Folnaro first",
+  "error.notApproved.message": "In Folnaro, open Settings > Agents and allow this program. Then try again.",
   "error.permission.title": "Allow “{permission}” first",
   "error.permission.message":
     "In Folnaro, open Settings > Agents and turn on “{permission}” under “What agents may do”.",
@@ -164,6 +166,7 @@ const TEXT = {
   "menu.openTime": "Open Time in Folnaro",
   "menu.openFolnaro": "Open Folnaro",
   "menu.unavailable": "Folnaro isn’t reachable",
+  "menu.notApproved": "Allow Raycast in Folnaro",
   "menu.today": "Today",
 
   // Invoice draft
@@ -229,27 +232,26 @@ const TEXT = {
   // Sections
   "section.placeholder": "Go to a section in Folnaro",
   "section.overview": "Overview",
+  "section.suggestions": "Suggestions",
+  "section.time": "Time",
   "section.invoices": "Invoices",
-  "section.quotes": "Quotes",
   "section.recurring": "Recurring Invoices",
   "section.income": "Self-Billing",
-  "section.time": "Time",
-  "section.projects": "Projects",
+  "section.quotes": "Quotes",
   "section.expenses": "Expenses",
   "section.bank": "Bank",
+  "section.projects": "Projects",
   "section.customers": "Customers",
+  "section.contracts": "Contracts",
   "section.articles": "Products & Services",
   "section.reports": "Reports",
   "section.taxAdvisor": "Tax Advisor",
-  "section.group.sales": "Sales",
-  "section.group.time": "Time & Projects",
-  "section.group.spending": "Expenses & Bank",
-  "section.group.records": "Customers & Products",
+  "section.group.today": "Today",
+  "section.group.money": "Money",
+  "section.group.work": "Work",
   "section.group.taxes": "Taxes",
   "section.open": "Open Section",
   "section.opened": "Opened {section}",
-  "section.needsAccessibility":
-    "Folnaro is open. To jump to a section, allow Raycast under Privacy & Security > Accessibility.",
 
   // Expense categories (FolnaroCore expense.category.*.title)
   "category.software": "Software and licenses",

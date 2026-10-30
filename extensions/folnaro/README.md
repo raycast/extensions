@@ -39,14 +39,11 @@ click **Allow** under **Programs** and confirm with Touch ID or your login passw
 program that starts `folnaro-mcp` needs it (see [Allow a new program](https://folnaro.app/en/help/agents-mcp/#agents-mcp-approval) in the Folnaro help).
 
 The switches apply immediately, no restart needed. When one is off, the extension says which one to turn
-on instead of failing. **Open Section** presses Folnaro's own Go shortcuts (⌘1 to ⌥⌘4), so Raycast needs
-Accessibility access (System Settings > Privacy & Security > Accessibility); without it the command still
-brings Folnaro to the front. It assumes the default shortcuts; if you changed them in Folnaro, it may open a different section.
+on instead of failing. **Open Section** lists every section of Folnaro's sidebar in its order and groups and opens
+the one you pick through its `folnaro://section/<name>` link; it needs no Accessibility access.
 
 Record actions (Open in Folnaro, the copied link, the timer's "Open in Folnaro") use the record links
-`folnaro://<kind>/<id>` that Folnaro already handles. A later Folnaro version may add more of its
-`folnaro://` URL scheme, for example links to sections; Open Section can then switch to those and no longer
-needs Accessibility access. Nothing in the extension depends on that today.
+`folnaro://<kind>/<id>` that Folnaro already handles.
 
 ### After the trial
 

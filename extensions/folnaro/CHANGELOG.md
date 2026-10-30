@@ -8,6 +8,6 @@
 - Show the running timer in the menu bar
 - Create invoice drafts with line items
 - Capture the receipt selected in Finder into the receipt inbox
-- Jump to any section of Folnaro
+- Jump to any section of Folnaro, in the sidebar's order and groups, through its `folnaro://section/` link (no Accessibility access needed)
 - Amounts and dates follow your Mac's regional format
 - Clear notes when a permission is off in Folnaro or Folnaro is in read-only mode
