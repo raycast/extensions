@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" width="128" height="128" alt="Simple GIF Cap icon" />
+  <img src="media/icon.png" width="128" height="128" alt="Simple GIF Cap icon" />
 </p>
 
 <h1 align="center">Simple GIF Cap</h1>
@@ -15,7 +15,6 @@
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Swift-F05138?logo=swift&logoColor=white" alt="Swift" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
-  <a href="https://codeberg.org/justsamuel/raycast-simple-gif-cap/actions"><img src="https://codeberg.org/justsamuel/raycast-simple-gif-cap/badges/workflows/ci.yml/badge.svg" alt="CI" /></a>
 </p>
 
 <p align="center">
@@ -74,26 +73,11 @@ Assign a hotkey to one of the record commands in Raycast settings and use it to 
 | Cmd+O / Cmd+Shift+F       | Open GIF / show in Finder     |
 | Ctrl+X                    | Delete                        |
 
-## Installation
-
-**Raycast Store**: coming soon.
-
-**From source**:
-
-```bash
-git clone https://codeberg.org/justsamuel/raycast-simple-gif-cap.git
-cd raycast-simple-gif-cap
-npm install && npm run dev
-```
-
-`npm run dev` compiles the Swift part and imports the extension into Raycast. It stays installed after you stop it.
-
-### Requirements
+## Requirements
 
 - macOS 13 or newer and [Raycast](https://raycast.com)
 - Nothing else to use it. GIFs are encoded with macOS's own frameworks.
 - Optional: `brew install ffmpeg` for smaller files, plus `brew install gifski` for sharper colors. Simple GIF Cap picks them up automatically.
-- To build from source: [Node.js](https://nodejs.org) 22+ and Xcode 16.3+. If `xcode-select -p` points at the Command Line Tools, prefix the npm commands with `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
 
 ## Configuration
 
@@ -115,32 +99,6 @@ Open Raycast Settings, go to Extensions and select Simple GIF Cap.
 - **Raycast asks to run "Show Last GIF"**: the recorder opens the preview through a deeplink, and Raycast confirms deeplinks from other apps. Choose **Always Run Command** once.
 - **The recording is empty or fails**: give Raycast Screen Recording access in System Settings > Privacy & Security > Screen & System Audio Recording, then restart Raycast.
 - **"ffmpeg not found"**: you forced the ffmpeg or gifski encoder. Install it with Homebrew, set the ffmpeg path, or switch the encoder back to Best Available.
-
-## How it works
-
-The native part is a Swift package (`swift/`) built with Raycast's [Swift tooling](https://github.com/raycast/extensions-swift-tools): Raycast compiles it and the TypeScript code calls its `@raycast` functions.
-
-- `pickTarget` shows the region and window picker.
-- `startRecording` launches the recorder as its own process. It runs `screencapture -v` with the countdown, frame and Stop pill (marked as not shareable, so they stay out of the video), and opens the preview command through a Raycast deeplink when the recording ends.
-- `encodeGif` and `probeMedia` are the built-in encoder, on AVFoundation and ImageIO.
-
-The TypeScript side (`src/`) picks the encoder, keeps a history and renders the preview, edit form and grid.
-
-Source videos of the latest 20 captures are kept in the extension's support folder so they can be trimmed and re-encoded later.
-
-## Development
-
-```bash
-npm install
-npm run dev        # ray develop (compiles swift/ too)
-npm run build      # ray build
-npm run lint       # ray lint
-npm run check      # typecheck, eslint, prettier, ASCII (what CI runs)
-npm run demo       # render media/demo.gif
-npm run screenshots # regenerate the Store screenshots in metadata/
-```
-
-`npm run demo` re-renders `media/demo.gif` from `scripts/demo/` in headless Chrome. The scene recreates the extension's UI, and the GIF in its preview is encoded with ffmpeg the way the extension does it. See [AGENTS.md](AGENTS.md) for the project layout and conventions.
 
 ## License
 

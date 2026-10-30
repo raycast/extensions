@@ -243,7 +243,6 @@
     "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
-    "puppeteer-core": "^25.13.0",
     "typescript": "^5.6.0"
   },
   "scripts": {
@@ -251,11 +250,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "demo": "node scripts/demo/render.mjs",
-    "typecheck": "tsc --noEmit",
-    "format:check": "prettier --check src scripts README.md AGENTS.md CHANGELOG.md package.json",
-    "check": "npm run typecheck && eslint src && npm run format:check && sh scripts/check-ascii.sh",
-    "publish": "npx @raycast/api@latest publish",
-    "screenshots": "node scripts/screenshots/run.mjs"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
