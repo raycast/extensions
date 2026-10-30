@@ -89,6 +89,11 @@ async function start(choice: Choice, settings: Settings, hud: string) {
       ...(settings.lidClosed && choice.lid ? ["--lid-closed"] : []),
     ];
     const child = spawn(cliPath(), args, { detached: true, stdio: "ignore" });
+    // A CLI that can't run (no execute permission, wrong file) fails asynchronously: wait for it to start.
+    await new Promise<void>((resolve, reject) => {
+      child.once("spawn", resolve);
+      child.once("error", reject);
+    });
     child.unref();
     if (child.pid) {
       const session: Session = {

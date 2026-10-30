@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { appCard, noticeCard, NARROW } from "./cards";
+import { appCard, noticeCard, NARROW, staleCard } from "./cards";
 import { ErrorView, KilobatAppAction } from "./components";
 import { image } from "./draw";
 import { formatBytes, formatRate, kilobat, NetworkApp, Status } from "./kilobat";
@@ -42,6 +42,7 @@ function group(apps: NetworkApp[], grouped: boolean): NetworkApp[] {
 export default function Command() {
   const [apps, setApps] = useState<NetworkApp[]>();
   const [error, setError] = useState<Error>();
+  const [updated, setUpdated] = useState<Date>();
   const [attempt, setAttempt] = useState(0);
   const [grouped, setGrouped] = useState(true);
   const history = useRef<History>(new Map());
@@ -70,6 +71,7 @@ export default function Command() {
         record("mac", down, up);
         setApps(status.apps);
         setError(undefined);
+        setUpdated(new Date());
       } catch (caught) {
         if (stopped) return;
         setError(caught as Error);
@@ -159,8 +161,25 @@ export default function Command() {
     <List
       isShowingDetail
       searchBarPlaceholder="Find an app or process…"
-      navigationTitle={`↓ ${formatRate(total.down)}  ↑ ${formatRate(total.up)}`}
+      navigationTitle={
+        error ? "Not updating · last reading shown" : `↓ ${formatRate(total.down)}  ↑ ${formatRate(total.up)}`
+      }
     >
+      {error ? (
+        // When a refresh fails, the last reading stays, labelled as old rather than shown as live.
+        <List.Section title="Not updating">
+          <List.Item
+            title="Kilobat stopped answering"
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            detail={<List.Item.Detail markdown={image(staleCard(error, updated, NARROW), NARROW, "Not updating")} />}
+            actions={
+              <ActionPanel>
+                <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => setAttempt(attempt + 1)} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
       <List.Section title="This Mac">
         {item({
           id: "mac",

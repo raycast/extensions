@@ -60,10 +60,11 @@ export function kilobatRun(args: string[], timeoutMs = 15_000): Promise<string> 
 }
 
 /** Like `kilobat`, but reports each line the CLI prints to stderr (its progress) as it arrives. */
+/** Aborting `signal` stops the CLI process, so a test that's been replaced stops moving data. */
 export function kilobatStreaming<T>(
   args: string[],
   onProgress: (line: string) => void,
-  timeoutMs = 120_000,
+  { timeoutMs = 120_000, signal }: { timeoutMs?: number; signal?: AbortSignal } = {},
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     let path: string;
@@ -72,7 +73,7 @@ export function kilobatStreaming<T>(
     } catch (error) {
       return reject(error);
     }
-    const child = spawn(path, args);
+    const child = spawn(path, args, { signal });
     const timer = setTimeout(() => child.kill(), timeoutMs);
     let stdout = "",
       stderr = "",

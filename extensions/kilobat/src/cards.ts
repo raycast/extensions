@@ -460,3 +460,19 @@ export function noticeCard(
 ${content}`,
   );
 }
+
+/** Shown over the last reading when a refresh fails, so old numbers never pass for live ones. */
+export function staleCard(error: Error, updated: Date | undefined, width = WIDE) {
+  const when = updated
+    ? updated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : "earlier";
+  return noticeCard(
+    "Not updating",
+    `Kilobat stopped answering, so this is the reading from ${when}. It keeps trying.\n${error.message}`,
+    {
+      tone: "warning",
+      tagText: "Stale",
+      width,
+    },
+  );
+}

@@ -11,7 +11,7 @@ type State =
   | { kind: "metered" }
   | { kind: "running"; live: Live; options: Options }
   | { kind: "done"; live: Live; result: SpeedTest; options: Options }
-  | { kind: "failed"; error: Error };
+  | { kind: "failed"; error: Error; options?: Options };
 
 type Update = { phase: Phase; fraction: number; mbps?: number };
 
@@ -31,8 +31,13 @@ export default function Command() {
   const [state, setState] = useState<State>({ kind: "checking" });
   const run = useRef(0);
   const started = useRef(0);
+  const current = useRef<AbortController | undefined>(undefined);
 
   const start = useCallback((options: Options) => {
+    // One test at a time: stop the one running so two never share the line or the data limit.
+    current.current?.abort();
+    const controller = new AbortController();
+    current.current = controller;
     const id = ++run.current;
     started.current = Date.now();
     setState({ kind: "running", live: fresh(), options });
@@ -43,17 +48,21 @@ export default function Command() {
       ...(options.parallel ? ["--parallel"] : []),
       ...(options.budgetMB ? ["--budget-mb", String(options.budgetMB)] : []),
     ];
-    kilobatStreaming<SpeedTest>(args, (line) => {
-      const update = parse(line);
-      if (!update || run.current !== id) return;
-      setState((previous) => {
-        if (previous.kind !== "running") return previous;
-        const live = { ...previous.live, phase: update.phase, fraction: update.fraction };
-        if (update.mbps != null && update.phase === "download") live.down = [...live.down, update.mbps];
-        if (update.mbps != null && update.phase === "upload") live.up = [...live.up, update.mbps];
-        return { ...previous, live };
-      });
-    })
+    kilobatStreaming<SpeedTest>(
+      args,
+      (line) => {
+        const update = parse(line);
+        if (!update || run.current !== id) return;
+        setState((previous) => {
+          if (previous.kind !== "running") return previous;
+          const live = { ...previous.live, phase: update.phase, fraction: update.fraction };
+          if (update.mbps != null && update.phase === "download") live.down = [...live.down, update.mbps];
+          if (update.mbps != null && update.phase === "upload") live.up = [...live.up, update.mbps];
+          return { ...previous, live };
+        });
+      },
+      { signal: controller.signal },
+    )
       .then((result) => {
         if (run.current !== id) return;
         setState((previous) => ({
@@ -65,15 +74,21 @@ export default function Command() {
       })
       .catch((error: Error) => {
         if (run.current !== id) return;
-        setState({ kind: "failed", error });
+        setState({ kind: "failed", error, options });
       });
   }, []);
 
   // Look for a metered network first, so a test never spends 80 MB of someone's hotspot unasked.
-  useEffect(() => {
+  const check = useCallback(() => {
+    setState({ kind: "checking" });
     kilobat<Conditions>(["conditions", "--json"])
       .then((conditions) => (conditions.metered ? setState({ kind: "metered" }) : start({ parallel: false })))
       .catch((error: Error) => setState({ kind: "failed", error }));
+  }, [start]);
+
+  useEffect(() => {
+    check();
+    return () => current.current?.abort();
   }, []);
 
   // The elapsed seconds beside the phase.
@@ -93,7 +108,9 @@ export default function Command() {
 
   if (state.kind === "failed") {
     if (state.error instanceof MissingCLIError) return <MissingCLI />;
-    return <ErrorView error={state.error} onRetry={() => start({ parallel: false })} />;
+    // Retry the same test, light limit included; if the metered check never finished, check again first.
+    const failed = state.options;
+    return <ErrorView error={state.error} onRetry={() => (failed ? start(failed) : check())} />;
   }
 
   const options = state.kind === "running" || state.kind === "done" ? state.options : { parallel: false };

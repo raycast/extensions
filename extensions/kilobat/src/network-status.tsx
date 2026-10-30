@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { noticeCard, statusCard } from "./cards";
+import { noticeCard, staleCard, statusCard } from "./cards";
 import { ErrorView, KilobatAppAction } from "./components";
 import { image } from "./draw";
 import { Conditions, kilobat, WiFi } from "./kilobat";
@@ -32,6 +32,7 @@ export default function Command() {
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [latencies, setLatencies] = useState<number[]>([]);
   const [error, setError] = useState<Error>();
+  const [updated, setUpdated] = useState<Date>();
   const [attempt, setAttempt] = useState(0);
   const stopped = useRef(false);
 
@@ -45,6 +46,7 @@ export default function Command() {
         if (stopped.current) return;
         setSnapshot(next);
         setError(undefined);
+        setUpdated(new Date());
         const latency = next.conditions.internetLatencyMs;
         if (latency != null) setLatencies((values) => [...values, latency].slice(-40));
       } catch (caught) {
@@ -67,7 +69,9 @@ export default function Command() {
       navigationTitle="Network Status"
       markdown={
         snapshot
-          ? image(statusCard(snapshot.wifi, snapshot.conditions, latencies), 700, "Network status")
+          ? // When a refresh fails, the last reading stays, labelled as old rather than shown as live.
+            (error ? `${image(staleCard(error, updated), 700, "Not updating")}\n\n` : "") +
+            image(statusCard(snapshot.wifi, snapshot.conditions, latencies), 700, "Network status")
           : image(noticeCard("Network status", "Reading Wi-Fi, latency, VPN and power…", { tagText: "Listening" }), 700)
       }
       actions={
