@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Fix Ordering] - {PR_MERGE_DATE}
+## [Fix Ordering] - 2026-10-30
 
 - Fixed to-dos, projects and areas showing up in the wrong order when the Unofficial API preference is enabled. They now follow the order you set in Things.
 - Fixed areas missing from lists and Quick Find when the Unofficial API preference is enabled.
