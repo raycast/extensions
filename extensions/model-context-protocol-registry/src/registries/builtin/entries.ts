@@ -123,6 +123,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://www.a1.gallery/api/mcp",
   },
   {
+    name: "adswipefile",
+    title: "AdSwipeFile",
+    description:
+      "Winning Facebook and Instagram ads from the AdSwipeFile ad library: search real Meta ads by brand, niche and format, see which ads a brand is running and which ran longest, read an ad's full copy, and write hooks and angles from real ads. Your saved ads and followed brands are included. 8 read-only tools: search_library, list_ads, get_ad, list_brands, list_niches, list_formats, list_saved_ads and list_followed_ads. Hosted remote Streamable HTTP server at https://adswipefile.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Free plan available.",
+    icon: "https://raw.githubusercontent.com/adswipefile/adswipefile-plugin/25f0a435335033280568b53f68f5661e8424d865/assets/icon.png",
+    homepage: "https://adswipefile.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://adswipefile.com/api/mcp"],
+    },
+    remoteUrl: "https://adswipefile.com/api/mcp",
+  },
+  {
     name: "affixio",
     title: "AffixIO",
     description:
