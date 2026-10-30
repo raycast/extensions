@@ -125,7 +125,9 @@ export interface RunOptions {
 export function runFanBar(args: string[], options: RunOptions = {}): Promise<FanBarResponse> {
   const tool = findFanBar();
   if (!tool) {
-    return Promise.reject(new FanBarError("missing", "Install it in FanBar Settings › General › Command-line tool."));
+    return Promise.reject(
+      new FanBarError("missing", "Install it in FanBar Settings › General › Command Line & Automation."),
+    );
   }
   const fullArgs = [...args, "--json"];
   if (options.hold) fullArgs.push("--hold");

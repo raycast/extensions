@@ -40,7 +40,7 @@ export function FailureEmptyView(props: { error: unknown; onRetry?: () => void }
 export function describe(failure: FanBarError): string {
   if (failure.failure === "missing") {
     return (
-      "Install the command-line tool in FanBar Settings › General › Command-line tool, " +
+      "Install the command-line tool in FanBar Settings › General › Command Line & Automation, " +
       `or set its path in this extension's preferences. Looked in ${DEFAULT_LOCATIONS.join(", ")}.`
     );
   }

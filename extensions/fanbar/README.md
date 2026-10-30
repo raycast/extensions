@@ -15,8 +15,9 @@ back to macOS, and keep the CPU temperature in the menu bar.
 ## Requirements
 
 The extension drives the `fanbar` command-line tool that ships inside
-FanBar.app 0.7.0 and later. Install it on PATH from **FanBar Settings › General › FanBar ›
-Command-line tool › Install…**, or by hand:
+FanBar.app 0.7.0 and later. Install it on PATH from **FanBar Settings ›
+General › Command Line & Automation › Command-line tool › Install…**, or by
+hand:
 
 ```sh
 sudo mkdir -p /usr/local/bin
