@@ -21,6 +21,8 @@ export default function Command() {
   const urlRevision = useRef(0);
   const savingUrls = useRef(new Set<string>());
   const savedIds = useRef(new Map<string, string>());
+  const failedUrls = useRef(new Set<string>());
+  const completedRevision = useRef<number | null>(null);
 
   useEffect(() => {
     Clipboard.readText()
@@ -71,7 +73,6 @@ export default function Command() {
       return;
     }
     const revision = urlRevision.current;
-    const isCurrent = () => revision === urlRevision.current;
     savingUrls.current.add(targetUrl);
     setSaving(true);
     try {
@@ -84,6 +85,7 @@ export default function Command() {
         try {
           await updateBookmark(saved.id, metadata);
         } catch (error) {
+          failedUrls.current.add(targetUrl);
           await showToast({
             style: Toast.Style.Failure,
             title: "Bookmark saved, but details were not updated",
@@ -92,13 +94,18 @@ export default function Command() {
           return;
         }
       }
+      failedUrls.current.delete(targetUrl);
+      completedRevision.current = Math.max(
+        completedRevision.current ?? revision,
+        revision,
+      );
       await showToast({
         style: Toast.Style.Success,
         title: "Saved to Keep.md",
         message: targetUrl,
       });
-      if (isCurrent()) pop();
     } catch (error) {
+      failedUrls.current.add(targetUrl);
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not save bookmark",
@@ -107,6 +114,13 @@ export default function Command() {
     } finally {
       savingUrls.current.delete(targetUrl);
       setSaving(savingUrls.current.size > 0);
+      if (
+        savingUrls.current.size === 0 &&
+        failedUrls.current.size === 0 &&
+        completedRevision.current === urlRevision.current
+      ) {
+        pop();
+      }
     }
   }
 
