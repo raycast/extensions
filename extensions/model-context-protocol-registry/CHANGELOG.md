@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add ConnectMachine MCP Server] - 2026-10-30
+
+- Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add BestPrice MCP Server] - 2026-10-30
 
 - Add BestPrice to the official registry: shopping recommendations, product search, current Greek store offers with delivered totals, and price history. 4 read-only tools. Hosted Streamable HTTP server at https://mcp.bestprice.gr/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
