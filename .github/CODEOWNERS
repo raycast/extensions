@@ -333,6 +333,7 @@
 /extensions/bundles                                                 @JaceThings
 /extensions/bunq                                                    @TurboCoder13
 /extensions/busycal                                                 @guidedways
+/extensions/buzz                                                    @caasols
 /extensions/caaals                                                  @chuckcg
 /extensions/cache-control-builder                                   @rkusa
 /extensions/cacher                                                  @jookyboi
@@ -2404,6 +2405,7 @@
 /extensions/ray-boop                                                @nschwermann
 /extensions/ray-clicker                                             @JonathanRReed
 /extensions/ray-code                                                @1weiho
+/extensions/ray-icon                                                @0xdhrv
 /extensions/ray-so                                                  @gt-codes @RSO @PeraSite @emlez @samuelkraft @benoitgrelard @sdorra @sebdanielsson @0xdhrv
 /extensions/raycafe                                                 @lemikeone
 /extensions/raycall                                                 @sixfwa
@@ -2524,7 +2526,7 @@
 /extensions/repology-search                                         @sebdanielsson
 /extensions/repository-manager                                      @Frameck
 /extensions/rescuetime-focus-session-trigger                        @tuortheblessed @RobErskine
-/extensions/resend                                                  @xmok @AlexIsMaking @peduarte @pernielsentikaer @0xdhrv
+/extensions/resend                                                  @xmok @AlexIsMaking @peduarte @pernielsentikaer @0xdhrv @alexibuild
 /extensions/resend-wallpaper                                        @joaopcm @alexibuild
 /extensions/resmo                                                   @ozgunarslantas
 /extensions/respace                                                 @Royal-lobster
@@ -2880,6 +2882,7 @@
 /extensions/subwatch                                                @nirgn975
 /extensions/summarize-youtube-video-with-ai                         @iKasch @bl1nk @mateusbadalotti
 /extensions/summation                                               @supermamon
+/extensions/summy                                                   @patbarlow
 /extensions/sun-moon-times                                          @DannySeidel
 /extensions/sunsama                                                 @artistro08
 /extensions/supabase                                                @keito4
@@ -3005,6 +3008,7 @@
 /extensions/tflink-tmpfile                                          @tflink-tmpfile
 /extensions/thaw                                                    @diazdesandi
 /extensions/the-blue-cloud                                          @chyroc @xmok
+/extensions/the-downloader                                          @sth3no
 /extensions/the-forest-link                                         @0xdhrv
 /extensions/the-labyrinth                                           @luarmr
 /extensions/the-lot-radio                                           @evnm

@@ -4,6 +4,18 @@
 
 - Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add BestPrice MCP Server] - 2026-10-30
+
+- Add BestPrice to the official registry: shopping recommendations, product search, current Greek store offers with delivered totals, and price history. 4 read-only tools. Hosted Streamable HTTP server at https://mcp.bestprice.gr/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add House AI MCP Server] - 2026-10-29
+
+- Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).
+
+## [Add WriteStack MCP Server] - 2026-10-29
+
+- Add WriteStack to the official registry: draft and schedule Substack Notes, manage articles, and read statistics in a WriteStack account. Hosted Streamable HTTP server at https://www.writestack.io/api/mcp/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) or an API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add SuprSend MCP Server] - 2026-10-29
 
 - Add SuprSend to the official registry: manage notification workflows, templates, users, preferences and delivery logs across email, SMS, push, in-app inbox, WhatsApp and Slack. Hosted Streamable HTTP server at https://mcp.suprsend.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE) through `mcp-remote`.
