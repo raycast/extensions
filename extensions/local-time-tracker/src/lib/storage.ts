@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { copyMissingLegacyWorkLogs } from "./storage-migration";
 import { planForDate, isSavedPlan, isPlanDate, isPlanReference } from "./planning";
-import type { ActiveTimer, SavedPlan, Project, ProjectCategory, WorkLog } from "./types";
+import type { ActiveTimer, SavedPlan, Project, ProjectCategory, WorkLog, PlanTemplate } from "./types";
 
 export const STORAGE_KEYS = {
   schemaVersion: "schemaVersion",
@@ -16,6 +16,55 @@ const WORK_LOG_KEY_PREFIX = "workLog:";
 // Keep the original on-disk keys when renaming goals to plans.
 const PLAN_KEY_PREFIX = "dailyGoal:";
 const PLAN_ORDER_KEY_PREFIX = "dailyGoalOrder:";
+const PLAN_CARRYOVER_KEY = "dailyPlanCarryover";
+const PLAN_TEMPLATES_KEY = "planTemplates";
+
+export async function getPlanTemplates(): Promise<PlanTemplate[]> {
+  await initializeStorage();
+  const templates = await readArray(PLAN_TEMPLATES_KEY, isPlanTemplate, "plan templates");
+  if (new Set(templates.map((item) => item.id)).size !== templates.length)
+    throw new StorageDataError("Saved plan templates contain duplicate IDs. Existing data was not overwritten.");
+  return templates;
+}
+
+// Template mutations share the reminder-operation lock with other plan writes.
+export async function savePlanTemplates(templates: PlanTemplate[]): Promise<void> {
+  await initializeStorage();
+  await LocalStorage.setItem(PLAN_TEMPLATES_KEY, JSON.stringify(templates));
+}
+
+export type PlanCarryover = {
+  date: string;
+  sourceDate?: string;
+  goalIds: string[];
+  complete: boolean;
+};
+
+export async function getPlanCarryover(): Promise<PlanCarryover | undefined> {
+  await initializeStorage();
+  const raw = await LocalStorage.getItem<string>(PLAN_CARRYOVER_KEY);
+  if (raw === undefined) return undefined;
+  const value = parseJson(raw, "plan carryover") as Partial<PlanCarryover> | null;
+  if (
+    !value ||
+    !isPlanDate(value.date) ||
+    (value.sourceDate !== undefined && (!isPlanDate(value.sourceDate) || value.sourceDate >= value.date!)) ||
+    !Array.isArray(value.goalIds) ||
+    !value.goalIds.every((id) => typeof id === "string" && id.length > 0) ||
+    new Set(value.goalIds).size !== value.goalIds.length ||
+    typeof value.complete !== "boolean" ||
+    (!value.sourceDate && value.goalIds.length > 0)
+  ) {
+    throw new StorageDataError("Saved plan carryover data is invalid. Existing data was not overwritten.");
+  }
+  return value as PlanCarryover;
+}
+
+// The caller holds the reminder-operation lock for carryover state writes.
+export async function savePlanCarryover(value: PlanCarryover): Promise<void> {
+  await initializeStorage();
+  await LocalStorage.setItem(PLAN_CARRYOVER_KEY, JSON.stringify(value));
+}
 
 export const SCHEMA_VERSION = 1;
 
@@ -240,6 +289,19 @@ function isProject(value: unknown): value is Project {
     isNonEmptyString(value.name) &&
     isNonEmptyString(value.type) &&
     typeof value.isActive === "boolean" &&
+    isIsoDate(value.createdAt) &&
+    isIsoDate(value.updatedAt)
+  );
+}
+
+function isPlanTemplate(value: unknown): value is PlanTemplate {
+  return (
+    isRecord(value) &&
+    isNonEmptyString(value.id) &&
+    isNonEmptyString(value.name) &&
+    isNonEmptyString(value.projectId) &&
+    typeof value.content === "string" &&
+    value.content.split(/\r?\n/)[0].trim().length > 0 &&
     isIsoDate(value.createdAt) &&
     isIsoDate(value.updatedAt)
   );
