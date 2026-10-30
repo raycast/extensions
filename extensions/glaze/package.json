@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glaze",
+  "description": "Browse Glaze projects and stores, launch installed apps, and prepare app ideas or changes with Raycast AI.",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "owner": "raycast",
+  "access": "public",
+  "author": "alexander_antonov",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "dev:internal": "ray develop --target internal",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "evals": "ray evals"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "my-projects",
+      "title": "My Projects",
+      "description": "Browse and open projects in your selected Glaze app.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-store",
+      "title": "Browse Public Store",
+      "description": "Explore public Glaze apps by category. No sign-in required.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-team-store",
+      "title": "Browse Team Store",
+      "description": "Sign in with Glaze and browse the Raycast or other team stores you can access.",
+      "keywords": [
+        "Raycast",
+        "Internal",
+        "Organization"
+      ],
+      "preferences": [
+        {
+          "name": "signInProvider",
+          "title": "Sign-In Method",
+          "description": "Choose the provider used by the Glaze connection screen. Use the same method as your Glaze account.",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "Apple",
+              "value": "apple"
+            }
+          ]
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "installed-apps",
+      "title": "Installed Apps",
+      "description": "Browse apps installed with your selected Glaze app.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "title": "Glaze",
+  "tools": [
+    {
+      "name": "create-project",
+      "title": "Prepare New Project",
+      "description": "Open a new app composer in Glaze with the user's exact, unmodified message. Use only for an explicitly new app. Never use this for edits or fixes to an existing app. The user presses Send in Glaze."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List local projects and their IDs from your selected Glaze app."
+    },
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Call list-projects first, then open an unambiguously identified project using its exact ID. If multiple projects match, ask which one before calling this tool. Does not submit changes."
+    },
+    {
+      "name": "edit-project",
+      "title": "Edit Project",
+      "description": "Open an existing project's agent with the requested changes. Pass the originalRequest verbatim and separately extract projectReference, the exact phrase identifying the target app. The tool removes that phrase before sending. Requires an exact projectId from list-projects. The user presses Send in Glaze."
+    }
+  ],
+  "ai": {
+    "instructions": "Glaze handles implementation. Route the user's request to the correct agent and keep the actual requested changes in the user's wording.\nFor changes, fixes, additions, or opening an existing app, always call list-projects first. An explicit new-app request goes directly to create-project; it does not need a project lookup. If it is unclear whether the user wants a new app or a change to an existing one, list projects and clarify before handing off. Changes, fixes, or additions to an existing app go to edit-project using the exact ID from list-projects. Match names and descriptions, including references resolved from this conversation. Before selecting a project, consider ALL returned projects. If the reference matches more than one, STOP and ask the user to choose by name. Never pick the first result, infer a preference from list order, or choose an arbitrary match. For example, 'my Timer app' matches both 'Work Timer' and 'Kitchen Timer': ask 'Work Timer or Kitchen Timer?' and do not call edit-project or open-project. A match is unambiguous only when the user or conversation distinguishes it from every other candidate. If an existing project is ambiguous or missing, ask which project; never guess an ID, create a replacement, or offer to create a replacement for a fix request. A clearly new app may be created even if a similar project exists. Use open-project only to open a project without changes. Use list-projects alone for listing requests.\nFor create-project, copy the user's message into prompt verbatim, removing only the @glaze mention.\nFor edit-project, provide three separate fields: projectId, originalRequest, and projectReference. originalRequest is the user's complete message copied verbatim, removing only the @glaze mention. Keep the destination phrase in originalRequest. projectReference is the exact, unique substring that only identifies or addresses the target app; the tool deletes it from originalRequest before opening Glaze. If the request explicitly says which app to edit, extract that phrase instead of passing an empty projectReference. Include its linking preposition (in, to, for), my/the, app/project, and any adjacent routing comma or colon. Include a separating space if helpful. Use an empty string only when the destination is implied by the conversation, there is no explicit routing phrase, or all app-name mentions are requirements that must stay.\nExample: originalRequest = \"let's add light mode to my nts app\", projectReference = \"to my nts app\". The resulting prompt must be \"let's add light mode\".\nExample: originalRequest = \"In my Timer app, add a pause button and keep the layout\", projectReference = \"In my Timer app, \".\nExample: originalRequest = \"Timer: make the numbers bigger\", projectReference = \"Timer: \".\nPreserve quoted UI text, rename targets, comparisons, integrations, and app references that Glaze needs to implement a change. Do not remove phrases such as \"rename the title to NTS\", \"match the colors of my Notes app\", or the quoted label in \"add a button saying 'to my nts app'\". Preserve spelling, punctuation, line breaks, constraints, and all actual requirements. Never summarize, expand, translate, add requirements, or turn the request into a specification.\nMake only one successful handoff per request. If validation rejects the inputs before opening Glaze, correct the extraction and retry; never resend after a successful handoff. After a successful new-app or edit handoff, say only: 'Your request is in [destination]’s composer. Press Send in Glaze to start.' Do not say the project is created, set up, ready, updated, or fixed. Only the request has been prepared; no implementation has started. Never claim building or editing has started or finished."
+  },
+  "preferences": [
+    {
+      "name": "targetApp",
+      "title": "Target App",
+      "description": "Auto opens Glaze Internal when installed, otherwise Glaze. An explicit selection never falls back to the other app.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (prefer Internal)",
+          "value": "auto"
+        },
+        {
+          "title": "Glaze",
+          "value": "production"
+        },
+        {
+          "title": "Glaze Internal",
+          "value": "internal"
+        }
+      ]
+    }
+  ]
+}
