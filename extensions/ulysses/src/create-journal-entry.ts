@@ -12,6 +12,6 @@ export default async function CreateJournalEntry(props: LaunchProps<{ arguments:
     silent: background,
   });
   if (await openUlyssesCallback(url, { background })) {
-    await showHUD(`Added today's sheet to ${group}`);
+    await showHUD("Saved today's journal sheet");
   }
 }

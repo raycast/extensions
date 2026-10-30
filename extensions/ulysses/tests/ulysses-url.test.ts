@@ -39,7 +39,13 @@ describe("sheetText", () => {
 
   it("works with only a title or only text", () => {
     expect(sheetText("  Ideas ", "", "markdown")).toBe("# Ideas");
-    expect(sheetText("", "  Body  ", "markdown")).toBe("Body");
+    expect(sheetText("", "Body", "markdown")).toBe("Body");
+    expect(sheetText("Ideas", "   ", "markdown")).toBe("# Ideas");
+  });
+
+  it("keeps the body as written, including Markdown code indentation", () => {
+    expect(sheetText("", "    const a = 1;", "markdown")).toBe("    const a = 1;");
+    expect(sheetText("Snippet", "    const a = 1;", "markdown")).toBe("# Snippet\n    const a = 1;");
   });
 });
 
@@ -68,7 +74,7 @@ describe("journalSheetText", () => {
   });
 
   it("adds the entry below the title", () => {
-    expect(journalSheetText({ now, entry: " Shipped the Raycast update ", locale: "en-US" })).toBe(
+    expect(journalSheetText({ now, entry: "Shipped the Raycast update", locale: "en-US" })).toBe(
       "# Friday, October 30, 2026\nShipped the Raycast update",
     );
   });
@@ -114,5 +120,12 @@ describe("journalSheetUrl", () => {
     expect(createGroup.parent).toBe("/Personal");
     expect(params(createGroup["x-success"])).toEqual(sheet);
     expect(new URL(createGroup["x-success"]).pathname).toBe("/new-sheet");
+  });
+
+  it("saves to the Inbox when the group's parent doesn't exist either", () => {
+    const url = journalSheetUrl({ text: "# Today", group: "/Personal/Journal" });
+    const createGroup = params(params(url)["x-error"]);
+    expect(params(createGroup["x-error"])).toEqual({ text: "# Today", format: "markdown" });
+    expect(new URL(createGroup["x-error"]).pathname).toBe("/new-sheet");
   });
 });

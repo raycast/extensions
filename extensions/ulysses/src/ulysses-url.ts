@@ -15,7 +15,8 @@ export function ulyssesUrl(action: string, params: Params = {}): string {
 
 export function sheetText(title: string, body: string, format: TextFormat): string {
   const heading = title.trim();
-  const text = body.trim();
+  // Keep the body as written: leading spaces can be Markdown code indentation.
+  const text = body.trim() ? body : "";
   if (!heading) return text;
   const titleLine = format === "markdown" ? `# ${heading}` : heading;
   return text ? `${titleLine}\n${text}` : titleLine;
@@ -76,12 +77,14 @@ export function splitGroupPath(group: string): { name: string; parent?: string }
 }
 
 // Saves to the group, creating the group first when it doesn't exist yet.
+// If the group can't be created either (its parent is missing), the sheet goes to the Inbox.
 export function journalSheetUrl(options: { text: string; group: string; silent?: boolean }): string {
   const sheet: SheetOptions = { ...options, format: "markdown" };
   const createGroup = newGroupUrl({
     ...splitGroupPath(options.group),
     silent: options.silent,
     onSuccess: newSheetUrl(sheet),
+    onError: newSheetUrl({ ...sheet, group: undefined }),
   });
   return newSheetUrl({ ...sheet, onError: createGroup });
 }

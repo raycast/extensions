@@ -11,8 +11,13 @@ async function selectedText() {
   }
 }
 
+// Saves text as written; trimming is only used to skip blank sources.
+function nonBlank(text?: string) {
+  return text?.trim() ? text : undefined;
+}
+
 export default async function CaptureText(props: LaunchProps<{ arguments: Arguments.CaptureText }>) {
-  const text = props.arguments.text?.trim() || (await selectedText())?.trim() || (await Clipboard.readText())?.trim();
+  const text = nonBlank(props.arguments.text) ?? nonBlank(await selectedText()) ?? nonBlank(await Clipboard.readText());
 
   if (!text) {
     await showToast({

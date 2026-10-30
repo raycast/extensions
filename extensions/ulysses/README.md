@@ -35,7 +35,7 @@ In Quick Capture, press `⌘⇧L` (**Create Quicklink for Group**) to save a Qui
 | --- | --- | --- |
 | Default Group | Inbox | Where Quick Capture, Capture Text and Create Empty Sheet save. |
 | Text Format | Markdown | Markdown or plain text. Plain text keeps characters like `**` as they are. |
-| Bring Ulysses to the front | On | Turn off to save in the background. |
+| Bring Ulysses to the front | On | Turn off to save in the background. Create Empty Sheet always opens Ulysses, since it's for starting to write. |
 | Journal Group | Journal | Set on the Create Journal Entry command. |
 
 ## Development
