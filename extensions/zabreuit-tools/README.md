@@ -1,19 +1,29 @@
 # Zabreuit Web Tools
 
-Instant web extraction inside Raycast: clean Markdown, structured product data, SEO audits and B2B contact discovery — all processed locally on your Mac.
+Read any web page without leaving Raycast.
 
-## Commands
+Three commands:
 
-- **Quick Web Scraper** — converts any URL into clean Markdown, text or JSON-LD, ready to paste into notes, docs or AI tools.
-- **SEO & OpenGraph Auditor** — checks titles, meta descriptions, canonical URLs, social preview tags and security headers.
-- **B2B Contact Extractor** — finds publicly listed business emails, phone numbers, WhatsApp links and social profiles.
+- **Quick Web Scraper** — fetches a URL and turns it into clean Markdown, plain text or structured data (JSON-LD) you can paste anywhere.
+- **SEO & OpenGraph Auditor** — reports the page title, meta description, canonical URL, missing OpenGraph tags and a health score.
+- **B2B Contact Extractor** — lists publicly available business emails, phone numbers, social profiles and detected technologies.
+
+## Usage
+
+Each command takes a URL as its argument. Type or paste an address when Raycast asks for it, and the results open in a list you can copy from.
+
+## How it works
+
+The extension fetches the page you ask for, parses the HTML locally and runs the extraction rules on your machine. Nothing is sent to a third-party service, and no account is required.
 
 ## Privacy
 
-Everything runs locally on your machine. No account is required, nothing is uploaded to a server, and no analytics are collected. The extension only reads the URL you explicitly submit.
+- No analytics and no telemetry.
+- No data is uploaded: the only network request is the page you explicitly provide.
+- Results stay in your clipboard.
 
 Please use it responsibly and respect the terms of the sites you visit.
 
-## Pro License (optional)
+## License
 
-A free trial covers everyday use. A Pro license unlocks batch audits and deep RAG chunking. License keys are verified offline with Ed25519 — no server round-trip.
+MIT

@@ -1,20 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Detail, ActionPanel, Action, showToast, Toast } from '@raycast/api';
-import { EngineBridge } from './services/engine-bridge.js';
-import type { ScrapeResult } from './types.js';
+import { useState, useEffect } from "react";
+import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { EngineBridge } from "./services/engine-bridge.js";
+import type { ScrapeResult } from "./types.js";
 
 export async function runQuickScraper(url: string, htmlOverride?: string): Promise<ScrapeResult> {
   const bridge = new EngineBridge();
   return bridge.scrapeUrl(url, htmlOverride);
 }
 
-export default function Command(): JSX.Element {
-  const [url, setUrl] = useState<string>('https://news.ycombinator.com');
+export default function Command(props: { arguments: { url: string } }): JSX.Element {
+  const url = props.arguments.url;
   const [result, setResult] = useState<ScrapeResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     let isMounted = true;
+    setIsLoading(true);
+    setError(null);
+
     runQuickScraper(url)
       .then((data) => {
         if (isMounted) {
@@ -24,12 +28,10 @@ export default function Command(): JSX.Element {
       })
       .catch((err) => {
         if (isMounted) {
+          const message = err instanceof Error ? err.message : String(err);
+          setError(message);
           setIsLoading(false);
-          showToast({
-            style: Toast.Style.Failure,
-            title: 'Scrape Failed',
-            message: err instanceof Error ? err.message : String(err),
-          });
+          showToast({ style: Toast.Style.Failure, title: "Scrape failed", message });
         }
       });
 
@@ -38,9 +40,23 @@ export default function Command(): JSX.Element {
     };
   }, [url]);
 
+  if (error) {
+    return (
+      <Detail
+        markdown={`# Could not read this page\n\n${error}\n\n**URL:** ${url}`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={url} />
+            <Action.CopyToClipboard title="Copy Error" content={error} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   const markdownContent = result
     ? `# ${result.title}\n\n**Source:** [${result.url}](${result.url})\n\n---\n\n${result.markdown}`
-    : '# Zabreuit Quick Scraper\n\nFetching page content...';
+    : `# Reading ${url}\n\nFetching page content...`;
 
   return (
     <Detail
@@ -54,7 +70,7 @@ export default function Command(): JSX.Element {
               <Action.CopyToClipboard title="Copy Clean Text" content={result.cleanText} />
               {result.jsonLd && (
                 <Action.CopyToClipboard
-                  title="Copy Extracted JSON-LD"
+                  title="Copy Structured Data (JSON-LD)"
                   content={JSON.stringify(result.jsonLd, null, 2)}
                 />
               )}

@@ -2,81 +2,71 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zabreuit-tools",
   "title": "Zabreuit Web Tools",
-  "description": "Instant web scraping, AI Markdown RAG generation, SEO audits, and B2B contact extraction directly from Raycast.",
+  "description": "Turn any web page into clean Markdown or structured data, audit its SEO metadata, and find publicly listed business contacts.",
   "icon": "extension-icon.png",
   "author": "jose_antonio_abreu_yanez",
+  "categories": ["Productivity", "Developer Tools"],
   "license": "MIT",
   "commands": [
     {
       "name": "quick-scraper",
       "title": "Quick Web Scraper",
-      "subtitle": "Convert URL to clean Markdown or JSON",
-      "description": "Extract clean text, structured JSON-LD, or RAG-ready markdown from any URL.",
-      "mode": "view"
+      "subtitle": "Convert a URL to clean Markdown or JSON",
+      "description": "Extract readable text, structured data or RAG-ready markdown from any URL.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://example.com/product",
+          "required": true
+        }
+      ]
     },
     {
       "name": "seo-auditor",
       "title": "SEO & OpenGraph Auditor",
-      "subtitle": "Audit meta tags, SSL & security headers",
-      "description": "Run an instant technical compliance audit on any webpage.",
-      "mode": "view"
+      "subtitle": "Audit metadata and social tags",
+      "description": "Check titles, descriptions, canonical URLs and OpenGraph tags of any page.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://example.com",
+          "required": true
+        }
+      ]
     },
     {
       "name": "b2b-extractor",
       "title": "B2B Contact Extractor",
-      "subtitle": "Find emails, socials & company tech stack",
-      "description": "Extract B2B contact info and DNS technologies from a company domain.",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "licenseKey",
-      "type": "password",
-      "title": "Pro License Key",
-      "description": "Gumroad license key or Ed25519 token to unlock Pro RAG chunking and batch audits.",
-      "required": false
-    },
-    {
-      "name": "defaultFormat",
-      "type": "dropdown",
-      "title": "Default Export Format",
-      "description": "Default clipboard output format for scrapers.",
-      "required": false,
-      "default": "markdown",
-      "data": [
+      "subtitle": "Find public emails, phones and socials",
+      "description": "Extract publicly listed business emails, phone numbers, social profiles and detected technologies.",
+      "mode": "view",
+      "arguments": [
         {
-          "title": "Clean Markdown",
-          "value": "markdown"
-        },
-        {
-          "title": "Structured JSON",
-          "value": "json"
-        },
-        {
-          "title": "HTML",
-          "value": "html"
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://company.com",
+          "required": true
         }
       ]
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "linkedom": "^0.18.5"
+  },
   "devDependencies": {
-    "@raycast/api": "^2.9.0",
     "@types/node": "^20.17.0",
     "@types/react": "^18.3.12",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.12"
+    "typescript": "^5.7.2"
   },
   "scripts": {
-    "build": "tsup",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@raycast/api": "^1.93.0"
-  },
-  "categories": [
-    "Productivity",
-    "Developer Tools"
-  ]
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }
