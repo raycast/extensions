@@ -31,8 +31,14 @@ export async function getFilePaths(params: GetFilePathsHelper): Promise<string[]
 
   logger.info(`Globbing files with option ${JSON.stringify(options)}`);
 
-  const patterns = includedFilePaths?.map((file) => glob.escapePath(file)) ?? extensionPattern;
-  const files = (await glob(patterns, options)).map((file) => path.join(vaultPath, file));
+  // fast-glob's `escapePath` misses some names with `\` or `$$`, so match each character with `?` and keep exact
+  // matches. The first character is `*` because fast-glob treats a leading `Folder?/` as a literal folder.
+  const patterns = includedFilePaths?.map((file) => `*${file.slice(1).replace(/[^/]/g, "?")}`) ?? extensionPattern;
+  const globbedFiles = await glob(patterns, options);
+  const matchedFiles = includedFilePaths
+    ? globbedFiles.filter((file) => includedFilePaths.includes(file))
+    : globbedFiles;
+  const files = matchedFiles.map((file) => path.join(vaultPath, file));
   logger.success(`Globbed ${files.length} file paths.`);
   return files;
 }

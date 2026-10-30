@@ -190,6 +190,7 @@ describe("vault", () => {
       fs.mkdirSync(path.join(vaultPath, ".drafts"));
       fs.writeFileSync(path.join(vaultPath, "Ideas (draft).md"), "# Ideas");
       fs.writeFileSync(path.join(vaultPath, "Folder1", "board.canvas"), JSON.stringify({ nodes: [], edges: [] }));
+      fs.writeFileSync(path.join(vaultPath, "n12$$.canvas"), "{}");
       fs.writeFileSync(path.join(vaultPath, "excluded", "hidden.md"), "# Hidden");
       fs.writeFileSync(path.join(vaultPath, "Archive", "old.md"), "# Old");
       fs.writeFileSync(path.join(vaultPath, "drawing.excalidraw.md"), "# Drawing");
@@ -213,6 +214,9 @@ describe("vault", () => {
               ],
             },
             { type: "file", title: "Board", path: "Folder1/board.canvas" },
+            { type: "file", title: "Dollars", path: "n12$$.canvas" },
+            { type: "file", title: "Wrong case", path: "NOTE1.md" },
+            { type: "file", title: "Wrong folder case", path: "folder1/note2.md" },
             { type: "file", title: "Media", path: "media.jpg" },
             { type: "file", title: "Hidden", path: "excluded/hidden.md" },
             { type: "file", title: "Old", path: "Archive/old.md" },
@@ -230,8 +234,60 @@ describe("vault", () => {
         ["note1", path.join(vaultPath, "note1.md"), true, 19],
         ["Ideas (draft)", path.join(vaultPath, "Ideas (draft).md"), true, 7],
         ["board", path.join(vaultPath, "Folder1", "board.canvas"), true, 23],
+        ["n12$$", path.join(vaultPath, "n12$$.canvas"), true, 2],
       ]);
     });
+
+    it("should return bookmarked notes in subfolders when none are at the vault root", async () => {
+      const vaultPath = tempVaultData.vault.path;
+      fs.mkdirSync(path.join(vaultPath, "Folder1", "Sub folder"));
+      fs.mkdirSync(path.join(vaultPath, "excluded"));
+      fs.writeFileSync(path.join(vaultPath, "Folder1", "Sub folder", "deep.md"), "# Deep");
+      fs.writeFileSync(path.join(vaultPath, "excluded", "hidden.md"), "# Hidden");
+      fs.writeFileSync(
+        path.join(vaultPath, ".obsidian", "bookmarks.json"),
+        JSON.stringify({
+          items: [
+            { type: "file", title: "Note 2", path: "Folder1/note2.md" },
+            { type: "file", title: "Hidden", path: "excluded/hidden.md" },
+            { type: "file", title: "Deep", path: "Folder1/Sub folder/deep.md" },
+          ],
+        })
+      );
+
+      const notes = await getBookmarkedNotes(vaultPath, ".obsidian", ["excluded"]);
+
+      expect(notes.map((note) => note.path)).toEqual([
+        path.join(vaultPath, "Folder1", "note2.md"),
+        path.join(vaultPath, "Folder1", "Sub folder", "deep.md"),
+      ]);
+    });
+
+    // A literal backslash can't be part of a file name on Windows, where it separates path segments.
+    it.skipIf(process.platform === "win32")(
+      "should return bookmarked notes with backslashes in their names",
+      async () => {
+        const vaultPath = tempVaultData.vault.path;
+        fs.writeFileSync(path.join(vaultPath, "Bad\\ note.md"), "# Bad");
+        fs.writeFileSync(path.join(vaultPath, "Folder1", "a\\.b.md"), "# A");
+        fs.writeFileSync(
+          path.join(vaultPath, ".obsidian", "bookmarks.json"),
+          JSON.stringify({
+            items: [
+              { type: "file", title: "Bad note", path: "Bad\\ note.md" },
+              { type: "file", title: "A", path: "Folder1/a\\.b.md" },
+            ],
+          })
+        );
+
+        const notes = await getBookmarkedNotes(vaultPath, ".obsidian", []);
+
+        expect(notes.map((note) => note.path)).toEqual([
+          path.join(vaultPath, "Bad\\ note.md"),
+          path.join(vaultPath, "Folder1", "a\\.b.md"),
+        ]);
+      }
+    );
 
     it("should return an empty array when bookmarks.json doesn't exist", async () => {
       const notes = await getBookmarkedNotes(tempVaultData.vault.path, ".obsidian", []);
