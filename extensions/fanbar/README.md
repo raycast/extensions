@@ -15,7 +15,7 @@ back to macOS, and keep the CPU temperature in the menu bar.
 ## Requirements
 
 The extension drives the `fanbar` command-line tool that ships inside
-FanBar.app. Install it on PATH from **FanBar Settings › General › FanBar ›
+FanBar.app 0.7.0 and later. Install it on PATH from **FanBar Settings › General › FanBar ›
 Command-line tool › Install…**, or by hand:
 
 ```sh
@@ -35,9 +35,6 @@ When none exists, every command says so and offers the install command.
 
 ## Behaviour
 
-- Every call runs `fanbar … --json` with `execFile` (no shell) and reads the
-  app's JSON reply (`FanBarCLIResponse` in
-  `Sources/FanBarShared/FanBarCLIContract.swift`).
 - Exit codes become toasts: `1` "FanBar refused the command" with the app's
   message, `2` "fanbar did not understand the command", `3` "FanBar could not
   be reached".
