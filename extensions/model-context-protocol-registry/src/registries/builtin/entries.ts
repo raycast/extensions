@@ -2105,6 +2105,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://vectosolve.com/api/mcp",
   },
   {
+    name: "viralswipefile",
+    title: "Viral Swipe File",
+    description:
+      "Know what to post next on TikTok and Instagram Reels from Viral Swipe File, a curated library of viral videos filed by niche and format: search by topic, creator, niche or format, open a video for its hook, caption, views and viral factor (its views against the account's usual), and write new hooks and content ideas from real posts. 6 read-only tools: search_library, list_videos, get_video, list_niches, list_formats and list_saved_videos. Hosted remote Streamable HTTP server at https://viralswipefile.com/api/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Free plan with a daily allowance.",
+    icon: "https://raw.githubusercontent.com/viralswipefile/viralswipefile-plugin/11ca12a0133beca08291938cbeb174d6a155e36c/assets/icon.png",
+    homepage: "https://viralswipefile.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://viralswipefile.com/api/mcp"],
+    },
+    remoteUrl: "https://viralswipefile.com/api/mcp",
+  },
+  {
     name: "visualping",
     title: "Visualping",
     description:
