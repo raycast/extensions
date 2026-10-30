@@ -912,6 +912,18 @@ test("daily planning integrates with existing timers, logs and recoverable stora
         previousItems.forEach((value, key) => items.set(key, value));
       }
     });
+    await t.test("automatic carryover retries brief contention with menu-bar reminder operations", async () => {
+      const { withReminderOperation } = load(
+        "../src/lib/reminder-service.ts",
+      ) as typeof import("../src/lib/reminder-service");
+      let pending: Promise<{ date: string; count: number }> | undefined;
+      await withReminderOperation(async () => {
+        pending = service.carryOverPlansToToday(date);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+      assert.deepEqual(await pending, { date, count: 0 });
+    });
+
     async function withTemplateFixture(run: () => Promise<void>) {
       const previousItems = new Map(items);
       items.clear();

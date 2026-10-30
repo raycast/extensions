@@ -1,7 +1,8 @@
 # Changelog
 
-## [Weekly Review and Automatic Carryover] - {PR_MERGE_DATE}
+## [Weekly Review, Templates, and Automatic Carryover] - {PR_MERGE_DATE}
 
+- Retry brief reminder-lock contention during automatic carryover instead of showing an error on startup.
 - Save reusable plan templates, preview and add them as fresh plans, and create, edit, or delete templates without changing previously recorded work.
 - Automatically show completed plans after unfinished plans in Today's Plan, keeping each plan's subtasks together and preserving manual order within each group.
 - Show Reports weekly bars in fixed Monday-to-Sunday order with weekday and date labels, leaving future days empty and highlighting today's tracked time.

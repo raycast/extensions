@@ -9,6 +9,7 @@ import {
   parsePlanContent,
   replaceDayTasks,
 } from "./planning";
+import { setTimeout as delay } from "node:timers/promises";
 import { withReminderOperation } from "./reminder-service";
 import {
   deletePlan,
@@ -59,6 +60,22 @@ export async function movePlannedItemToToday(
 }
 
 export async function carryOverPlansToToday(expectedToday: string): Promise<{ date: string; count: number }> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await carryOverUnderLock(expectedToday);
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        error.message !== "Another reminder operation is running. Try again shortly." ||
+        attempt >= 9
+      )
+        throw error;
+      await delay(150);
+    }
+  }
+}
+
+async function carryOverUnderLock(expectedToday: string): Promise<{ date: string; count: number }> {
   return withReminderOperation(async () => {
     const today = localDateKey(new Date());
     if (expectedToday !== today) return { date: today, count: 0 };
