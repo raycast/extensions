@@ -100,6 +100,14 @@ export function TrackActions({
   );
 }
 
+export function QualityTag({ hires }: { hires?: boolean }) {
+  return (
+    <Detail.Metadata.TagList title="Quality">
+      <Detail.Metadata.TagList.Item text={hires ? "Hi-Res" : "CD"} color={BRAND} />
+    </Detail.Metadata.TagList>
+  );
+}
+
 function TrackFacts({ track }: { track: Track }) {
   return (
     <>
@@ -107,9 +115,7 @@ function TrackFacts({ track }: { track: Track }) {
       <Detail.Metadata.Label title="Artist" text={track.artist?.name ?? "—"} />
       {track.album?.title && <Detail.Metadata.Label title="Album" text={track.album.title} />}
       <Detail.Metadata.Label title="Duration" text={formatDuration(track.duration) || "—"} />
-      <Detail.Metadata.TagList title="Quality">
-        <Detail.Metadata.TagList.Item text={track.hires ? "Hi-Res" : "CD"} color={BRAND} />
-      </Detail.Metadata.TagList>
+      <QualityTag hires={track.hires} />
       {track.isrc && <Detail.Metadata.Label title="ISRC" text={track.isrc} />}
     </>
   );

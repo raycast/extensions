@@ -53,23 +53,64 @@ const resolveYouTube = async (url: string): Promise<ResolvedTrack | null> => {
   };
 };
 
+export type LinkKind = "track" | "album" | "playlist" | "artist" | "podcast" | "other";
+
+// Qobuz album ids are alphanumeric: /album/<slug>/<id> on the store,
+// /album/<id> on open.qobuz.com and play.qobuz.com.
+const QOBUZ_ALBUM = /\/album\/(?:[^/]+\/)?([a-z0-9]+)\/?$/i;
+
+// YouTube Music albums are playlists whose id starts OLAK5uy_, or browse pages
+// whose id starts MPREb_.
+const isYouTubeAlbum = (url: URL): boolean =>
+  (url.pathname === "/playlist" && (url.searchParams.get("list") ?? "").startsWith("OLAK5uy_")) ||
+  url.pathname.startsWith("/browse/MPREb_");
+
 /**
- * Cheap, offline check that a string is a single-track link from a supported
- * service — the shape test of resolveLink without its network round-trip, for
- * deciding whether to offer the clipboard as an alternative input.
+ * What kind of page a link from a supported service points at, offline; for
+ * any other link, undefined.
  */
-export const looksLikeTrackLink = (input: string): boolean => {
+export const linkKind = (input: string): LinkKind | undefined => {
   let url: URL;
   try {
     url = new URL(input);
   } catch {
-    return false;
+    return undefined;
   }
   const host = url.hostname;
-  if (isQobuz(host)) return /\/track\/\d+/.test(url.pathname);
-  if (isSpotify(host)) return url.pathname.includes("/track/");
-  if (isYouTube(host)) return url.pathname === "/watch" || host.endsWith("youtu.be");
-  return false;
+  const path = url.pathname;
+  if (isQobuz(host)) {
+    if (/\/track\/\d+/.test(path)) return "track";
+    if (QOBUZ_ALBUM.test(path)) return "album";
+    if (path.includes("/playlist/")) return "playlist";
+    if (/\/(artist|interpreter)\//.test(path)) return "artist";
+    return "other";
+  }
+  if (isSpotify(host)) {
+    if (path.includes("/track/")) return "track";
+    if (path.includes("/album/")) return "album";
+    if (path.includes("/playlist/")) return "playlist";
+    if (path.includes("/artist/")) return "artist";
+    if (/\/(show|episode)\//.test(path)) return "podcast";
+    return "other";
+  }
+  if (isYouTube(host)) {
+    if (path === "/watch" || host.endsWith("youtu.be")) return "track";
+    if (isYouTubeAlbum(url)) return "album";
+    if (path === "/playlist") return "playlist";
+    if (path.startsWith("/channel/") || path.startsWith("/@")) return "artist";
+    return "other";
+  }
+  return undefined;
+};
+
+/**
+ * Cheap, offline check that a string is a single track or an album from a
+ * supported service — the shape test of the resolvers without their network
+ * round-trip, for deciding what to do with the clipboard.
+ */
+export const looksLikeOpenableLink = (input: string): boolean => {
+  const kind = linkKind(input);
+  return kind === "track" || kind === "album";
 };
 
 export type LinkService = "qobuz" | "spotify" | "youtube-music" | "youtube";
@@ -120,6 +161,74 @@ export const resolveLink = async (input: string): Promise<ResolveOutcome> => {
   return { ok: false, reason: "unknown" };
 };
 
+export type ResolvedAlbum = {
+  title: string;
+  artist: string;
+  year?: number;
+  tracksCount?: number;
+};
+
+export type AlbumOutcome =
+  | { ok: true; direction: "to-qobuz"; album: ResolvedAlbum }
+  | { ok: true; direction: "from-qobuz"; qobuzAlbumId: string }
+  | { ok: false; reason: ResolveFailure };
+
+// An album's og:title reads "Listen to Random Access Memories - Album by Daft
+// Punk | Spotify" and its og:description "Daft Punk · album · 2013 · 13 songs".
+export const parseSpotifyAlbum = (ogTitle: string, ogDescription: string): ResolvedAlbum | null => {
+  const title = ogTitle.match(/^Listen to (.+) - \S+ by .+ \| Spotify$/)?.[1] ?? ogTitle;
+  const parts = ogDescription.split(" · ");
+  const artist = parts[0];
+  if (!title || !artist) return null;
+  const year = parts.find((part) => /^\d{4}$/.test(part));
+  const tracksCount = ogDescription.match(/(\d+) songs?/)?.[1];
+  return {
+    title: decodeEntities(title),
+    artist: decodeEntities(artist),
+    year: year ? Number(year) : undefined,
+    tracksCount: tracksCount ? Number(tracksCount) : undefined,
+  };
+};
+
+const resolveSpotifyAlbum = async (url: string): Promise<ResolvedAlbum | null> => {
+  const res = await fetch(url, { headers: { "User-Agent": CRAWLER_UA } });
+  if (!res.ok) return null;
+  const html = await res.text();
+  const title = metaContent(html, "og:title");
+  const description = metaContent(html, "og:description");
+  return title && description ? parseSpotifyAlbum(title, description) : null;
+};
+
+// oEmbed names an album playlist but not its artist; its thumbnail is the
+// first track's video, whose oEmbed author is the artist's "- Topic" channel.
+const resolveYouTubeAlbum = async (url: string): Promise<ResolvedAlbum | null> => {
+  const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+  if (!res.ok) return null;
+  const data = (await res.json()) as { title?: string; thumbnail_url?: string };
+  const firstVideo = data.thumbnail_url?.match(/\/vi\/([^/]+)\//)?.[1];
+  if (!data.title || !firstVideo) return null;
+  const first = await resolveYouTube(`https://music.youtube.com/watch?v=${firstVideo}`);
+  return first ? { title: data.title, artist: first.artist } : null;
+};
+
+export const resolveAlbumLink = async (input: string): Promise<AlbumOutcome> => {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return { ok: false, reason: "invalid" };
+  }
+  if (linkKind(input) !== "album") return { ok: false, reason: "unsupported-type" };
+
+  const host = url.hostname;
+  if (isQobuz(host)) {
+    const id = url.pathname.match(QOBUZ_ALBUM)?.[1];
+    return id ? { ok: true, direction: "from-qobuz", qobuzAlbumId: id } : { ok: false, reason: "unsupported-type" };
+  }
+  const album = isSpotify(host) ? await resolveSpotifyAlbum(input) : await resolveYouTubeAlbum(input);
+  return album ? { ok: true, direction: "to-qobuz", album } : { ok: false, reason: "unknown" };
+};
+
 type DeezerSearch = { data?: { id: number }[] };
 type DeezerTrack = { isrc?: string };
 
@@ -137,6 +246,25 @@ export const findIsrc = async ({ title, artist }: ResolvedTrack): Promise<string
   if (!res.ok) return undefined;
   const track = (await res.json()) as DeezerTrack;
   return track.isrc;
+};
+
+type DeezerAlbumSearch = { data?: { id: number; title: string; artist?: { name?: string }; nb_tracks?: number }[] };
+type DeezerAlbum = { upc?: string };
+
+export const findUpc = async (album: ResolvedAlbum): Promise<string | undefined> => {
+  const res = await fetch(
+    `https://api.deezer.com/search/album?q=${encodeURIComponent(`${album.artist} ${album.title}`)}&limit=5`,
+  );
+  if (!res.ok) return undefined;
+  const hits = ((await res.json()) as DeezerAlbumSearch).data ?? [];
+  const match = pickAlbumMatch(
+    album,
+    hits.map((hit) => ({ ...hit, tracksCount: hit.nb_tracks })),
+  );
+  if (!match) return undefined;
+  const albumRes = await fetch(`https://api.deezer.com/album/${match.album.id}`);
+  if (!albumRes.ok) return undefined;
+  return ((await albumRes.json()) as DeezerAlbum).upc;
 };
 
 const normalize = (text: string): string =>
@@ -171,6 +299,42 @@ export const isLikelyMatch = (
   const titleScore = overlap(tokenSet(resolved.title), tokenSet(candidate.title));
   const artistScore = overlap(tokenSet(resolved.artist), tokenSet(candidate.artist?.name ?? ""));
   return titleScore >= 0.6 && artistScore > 0;
+};
+
+export type AlbumCandidate = {
+  title: string;
+  artist?: { name?: string };
+  upc?: string;
+  year?: number;
+  tracksCount?: number;
+};
+
+// Deezer drops the leading zero Qobuz keeps on a 12-digit UPC.
+const sameUpc = (a: string, b: string): boolean => a.replace(/^0+/, "") === b.replace(/^0+/, "");
+
+/**
+ * The candidate that is this album: the one sharing its UPC is exact; failing
+ * that, among those passing isLikelyMatch, the one whose year and track count
+ * agree with the source, so a deluxe edition or a reissue loses to the album
+ * that was shared. Ties keep the search ranking.
+ */
+export const pickAlbumMatch = <T extends AlbumCandidate>(
+  source: ResolvedAlbum,
+  candidates: T[],
+  upc?: string,
+): { album: T; exact: boolean } | undefined => {
+  const byUpc = upc ? candidates.find((candidate) => candidate.upc && sameUpc(candidate.upc, upc)) : undefined;
+  if (byUpc) return { album: byUpc, exact: true };
+
+  const agreement = (candidate: T): number =>
+    Number(source.year !== undefined && candidate.year === source.year) +
+    Number(source.tracksCount !== undefined && candidate.tracksCount === source.tracksCount);
+  const likely = candidates.filter((candidate) => isLikelyMatch(source, candidate));
+  const best = likely.reduce<T | undefined>(
+    (best, candidate) => (best === undefined || agreement(candidate) > agreement(best) ? candidate : best),
+    undefined,
+  );
+  return best ? { album: best, exact: false } : undefined;
 };
 
 const decodeEntities = (text: string): string =>

@@ -59,7 +59,7 @@ export const resolveCopyTrack = async (argument: string): Promise<CopyTrack> => 
   return { ok: true, track, album: null, links, approximate: false };
 };
 
-// Album, playlist, artist or invalid links reuse the convert view's wording.
+// Copy Share Links takes tracks only, so any other link asks for one.
 export const linkFailureTitle = (failure: ResolveFailure): string =>
   failure === "unsupported-type" ? "Need a track link" : "Unsupported link";
 

@@ -25,21 +25,24 @@
       "mode": "view"
     },
     {
-      "name": "open-shared-track",
-      "title": "Open Shared Track",
+      "name": "open-shared-link",
+      "title": "Open Shared Link",
       "subtitle": "Qobuz",
-      "description": "Bring a Spotify or YouTube Music track over to Qobuz, or see a Qobuz track on every other service. Uses the link you pass, else a track link on the clipboard.",
+      "description": "Bring a Spotify or YouTube Music track or album over to Qobuz, or see a Qobuz track on every other service. Uses the link you pass, else a track or album link on the clipboard.",
       "keywords": [
         "convert",
         "link",
+        "share",
         "spotify",
-        "youtube music"
+        "youtube music",
+        "album",
+        "track"
       ],
       "mode": "view",
       "arguments": [
         {
           "name": "link",
-          "placeholder": "Track link",
+          "placeholder": "Track or album link",
           "type": "text",
           "required": false
         }
