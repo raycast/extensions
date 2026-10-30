@@ -2181,6 +2181,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.webly.ai/v1/mcp",
   },
   {
+    name: "wiro-ai",
+    title: "Wiro AI",
+    description:
+      "Official MCP server for Wiro AI. Search 3,500+ AI models for images, video, audio, speech, music and text, check each model's parameters and price, run it and get the results back in your assistant. Hosted remote Streamable HTTP server at https://mcp.wiro.ai/v1; sign in with your Wiro account in the browser (OAuth 2.1), or send a Wiro API key as a Bearer token. Connecting is free. Each model run is billed from your Wiro wallet.",
+    icon: "https://wiro.ai/images/favicon/icon-512x512.png",
+    homepage: "https://wiro.ai/docs/wiro-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.wiro.ai/v1"],
+    },
+    remoteUrl: "https://mcp.wiro.ai/v1",
+  },
+  {
     name: "worthbase",
     title: "Worthbase",
     description:
