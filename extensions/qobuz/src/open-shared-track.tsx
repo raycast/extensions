@@ -19,11 +19,11 @@ const convert = async (argument: string): Promise<Conversion> => {
   return { picked, result: await resolveTrackLink(await getClient(), picked.url) };
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.ConvertTrack }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.OpenSharedTrack }>) {
   const argument = props.arguments.link?.trim() ?? "";
   const { data, isLoading } = usePromise(convert, [argument], {
     onError: (error) => {
-      showFailureToast(error, { title: "Couldn't convert track" });
+      showFailureToast(error, { title: "Couldn't open shared track" });
     },
   });
 
@@ -111,6 +111,6 @@ const buildMarkdown = (data: Conversion | undefined, isLoading: boolean): string
     "",
     `${sourceLabel(picked)}: \`${picked.url}\``,
     "",
-    "Convert Track takes a Spotify, YouTube Music or Qobuz track link.",
+    "Open Shared Track takes a Spotify, YouTube Music or Qobuz track link.",
   ].join("\n");
 };

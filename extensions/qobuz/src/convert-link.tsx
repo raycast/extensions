@@ -8,7 +8,7 @@ import { coverMarkdown, TrackActions, TrackMetadata } from "./lib/track-view";
 const EMPTY_MESSAGE = [
   "# Nothing playing in Qobuz",
   "",
-  "Start a track in the Qobuz app, or use Convert Track for a Spotify, YouTube Music or Qobuz link.",
+  "Start a track in the Qobuz app, or use Open Shared Track for a Spotify, YouTube Music or Qobuz link.",
 ].join("\n");
 
 const load = async (): Promise<FromQobuzResult | null> => {
