@@ -1,5 +1,12 @@
 # Hule Changelog
 
+## [Quick Capture List] - {PR_MERGE_DATE}
+
+- Quick Add Task writes to your Quick capture list from Hule's account settings — the same list the Hule Telegram bot uses. The Default List preference is gone: if you had set it, choose that list as your Quick capture list in Hule.
+- Without a Quick capture list, Quick Add Task opens Create Task with your title filled in, so you pick the list for that one task.
+- Create Task lists your Inbox lists first, one per workspace, and keeps that order while you search.
+- Requests carry a `HuleRaycast/1.0.0` User-Agent, so Hule can tell how much the extension is used. Nothing else is sent.
+
 ## [Fix Installation on Raycast 2.4] - 2026-09-20
 
 - Build against Raycast API 2.4.0, the version the current Raycast release ships, so the extension can be installed
