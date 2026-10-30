@@ -295,7 +295,7 @@ export async function queryTodosSQL(
   }
   const dbPath = await getValidatedDBPath();
   const where = buildTodosWhereClause(opts.projectId, opts.areaId);
-  const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS} WHERE ${where}`;
+  const sql = `SELECT ${TODO_SELECT_SUMMARY} ${TODO_JOINS} WHERE ${where} ORDER BY t."index" ASC`;
   const rows = await executeSQL<TodoSummaryRow>(dbPath, sql);
   return rows.map(rowToTodoSummary);
 }
@@ -853,7 +853,8 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           ${areaTagsSql('a')} as areaTags
         FROM TMTask p
         LEFT JOIN TMArea a ON a.uuid = p.area
-        WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0`,
+        WHERE p.type = 1 AND p.trashed = 0 AND p.status = 0
+        ORDER BY p."index" ASC`,
       ),
       executeSQL<CollectionTodoRow>(
         dbPath,
@@ -867,7 +868,8 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           datetime(t.creationDate, 'unixepoch') as creationDate,
           t.project as projectId
         FROM TMTask t
-        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0`,
+        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0
+        ORDER BY t."index" ASC`,
       ),
     ]);
 
@@ -906,7 +908,8 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
         dbPath,
         `SELECT a.uuid as id, a.title as name,
           ${areaTagsSql('a')} as tags
-        FROM TMArea a WHERE a.visible = 1`,
+        FROM TMArea a WHERE a.visible = 1
+        ORDER BY a."index" ASC`,
       ),
       executeSQL<CollectionAreaTodoRow>(
         dbPath,
@@ -920,7 +923,8 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
           datetime(t.creationDate, 'unixepoch') as creationDate,
           t.area as areaId
         FROM TMTask t
-        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0 AND t.project IS NULL AND t.area IS NOT NULL`,
+        WHERE t.type = 0 AND t.trashed = 0 AND t.status = 0 AND t.project IS NULL AND t.area IS NOT NULL
+        ORDER BY t."index" ASC`,
       ),
     ]);
 
