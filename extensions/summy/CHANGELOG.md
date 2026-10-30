@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-10-30
 
 - Save links, text, images, PDFs, and text-based files to Summy.
 - Search and filter everything saved in Summy.
