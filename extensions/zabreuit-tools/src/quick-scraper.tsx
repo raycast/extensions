@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, LaunchProps } from "@raycast/api";
 import { EngineBridge } from "./services/engine-bridge.js";
 import type { ScrapeResult } from "./types.js";
 
@@ -8,7 +8,7 @@ export async function runQuickScraper(url: string, htmlOverride?: string): Promi
   return bridge.scrapeUrl(url, htmlOverride);
 }
 
-export default function Command(props: { arguments: { url: string } }): JSX.Element {
+export default function Command(props: LaunchProps<{ arguments: Arguments.QuickScraper }>): JSX.Element {
   const url = props.arguments.url;
   const [result, setResult] = useState<ScrapeResult | null>(null);
   const [error, setError] = useState<string | null>(null);

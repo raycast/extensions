@@ -1,8 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*"],
+  "include": [
+    "raycast-env.d.ts",
+    "src/**/*"
+  ],
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "bundler",

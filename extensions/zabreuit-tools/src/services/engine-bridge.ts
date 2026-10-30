@@ -49,11 +49,14 @@ export class EngineBridge {
   async auditSeo(url: string, htmlOverride?: string): Promise<SeoAuditResult> {
     const { document, finalUrl } = await loadDocument(url, htmlOverride);
 
+    // Headers are not audited: the engine issues its own HEAD request and does not
+    // check whether it succeeded, so a 403/405 would be reported as missing security
+    // headers and would wrongly lower the score.
     const res = await this.auditEngine.extract({
       document,
       url: finalUrl,
       checkPerformance: false,
-      fetchHeadHeaders: true,
+      fetchHeadHeaders: false,
     });
     if (!res?.success || !res.data) {
       throw new Error(res?.error?.message || "Could not audit the page");
