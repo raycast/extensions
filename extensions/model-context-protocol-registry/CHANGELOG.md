@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add BestPrice MCP Server] - {PR_MERGE_DATE}
+## [Add BestPrice MCP Server] - 2026-10-30
 
 - Add BestPrice to the official registry: shopping recommendations, product search, current Greek store offers with delivered totals, and price history. 4 read-only tools. Hosted Streamable HTTP server at https://mcp.bestprice.gr/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
