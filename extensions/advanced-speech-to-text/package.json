@@ -168,7 +168,7 @@
   "dependencies": {
     "@raycast/api": "^1.77.0",
     "@raycast/utils": "^1.19.0",
-    "openai": "^4.0.0",
+    "openai": "^7.45.1",
     "title-case": "^3.0.3"
   },
   "devDependencies": {
