@@ -5,14 +5,13 @@ import {
   launchCommand,
   LaunchType,
   MenuBarExtra,
-  open,
   showHUD,
   Keyboard,
 } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import dayjs from "dayjs";
 import { useEffect } from "react";
-import { KEITO_WEB_URL } from "./services/keito/config";
+import { openKeito } from "./services/keitoApp";
 import { errorMessage, errorTitle, isKeitoError } from "./services/keito/errors";
 import { syncStatusFile } from "./services/keito/statusFile";
 import { TimeEntry } from "./services/keito/types";
@@ -143,7 +142,7 @@ export default function MenuBar() {
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => revalidate()}
         />
-        <MenuBarExtra.Item title="Open Keito" icon={Icon.Globe} onAction={() => open(KEITO_WEB_URL)} />
+        <MenuBarExtra.Item title="Open Keito" icon={Icon.Globe} onAction={openKeito} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

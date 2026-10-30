@@ -239,19 +239,17 @@
     "eslint": "^9.39.5",
     "prettier": "^3.9.10",
     "react": "19.0.0",
-    "typescript": "~6.0.3",
-    "vitest": "^5.0.5"
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "npm run test:run && npm run lint && npm run build && npm run check:publish && npx @raycast/api@latest publish",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:live": "node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.mts",
-    "test:live:write": "KEITO_LIVE_WRITE=1 node --env-file=\"${KEITO_ENV_FILE:-$HOME/.config/keito-raycast/live.env}\" node_modules/vitest/vitest.mjs run --config vitest.live.config.mts src/services/keito/writes.live.ts",
-    "check:publish": "node scripts/check-publish.js"
+    "publish": "npx @raycast/api@latest publish"
   },
-  "packageManager": "npm@11.15.0"
+  "packageManager": "npm@11.15.0",
+  "contributors": [
+    "bchopson",
+    "mrpunkin"
+  ]
 }

@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { KeitoApi } from "./keito/api";
 import { AuthConfig, resolveAuthConfig } from "./keito/config";
@@ -147,8 +147,7 @@ export async function showKeitoError(error: unknown, fallbackTitle = "Keito requ
       : `Keito error: ${errorMessage(error)}`,
   );
   const setup = isKeitoError(error) && error.isSetupProblem;
-  await showToast({
-    style: Toast.Style.Failure,
+  await showFailureToast(new Error(errorMessage(error)), {
     title: isKeitoError(error) ? errorTitle(error) : fallbackTitle,
     message: errorMessage(error),
     primaryAction:

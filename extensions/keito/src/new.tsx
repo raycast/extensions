@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { KeitoGate } from "./components/KeitoGate";
@@ -166,7 +166,7 @@ export function EntryForm({ session, entry, template, viewDate, onSave }: EntryF
     );
 
     if (plan.kind === "error") {
-      if (plan.field === "form") await showToast({ style: Toast.Style.Failure, title: plan.message });
+      if (plan.field === "form") await showFailureToast(new Error(plan.message), { title: plan.message });
       else setErrors({ [plan.field]: plan.message });
       return;
     }
