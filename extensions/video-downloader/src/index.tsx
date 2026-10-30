@@ -27,7 +27,7 @@ import {
   getffprobePath,
   formatLanguage,
   getAudioLanguages,
-  getDubbedFormatSelector,
+  getLanguageFormatSelector,
   getFormats,
   getFormatTitles,
   getFormatValue,
@@ -116,12 +116,12 @@ export default function DownloadVideo() {
       options.push("--ffmpeg-location", ffmpegPath);
 
       if (values.format === MP3_FORMAT_ID) {
-        if (dubSelector) options.push("--format", dubSelector);
+        if (languageSelector) options.push("--format", languageSelector);
         options.push("--extract-audio");
         options.push("--audio-format", "mp3");
         options.push("--audio-quality", "0");
       } else {
-        options.push("--format", dubSelector ?? downloadFormat);
+        options.push("--format", languageSelector ?? downloadFormat);
         const hasWebmAudio = video?.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
         const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
         options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
@@ -461,7 +461,7 @@ export default function DownloadVideo() {
     audioLanguages && selectedFormat && video && !values.downloadPlaylist
       ? audioLanguages.options.filter(
           (option) =>
-            option.code === audioLanguages.original || getDubbedFormatSelector(selectedFormat, video, option.code),
+            option.code === audioLanguages.original || getLanguageFormatSelector(selectedFormat, video, option.code),
         )
       : [];
   // A choice belongs to the URL it was made for, so a new video starts on its
@@ -471,9 +471,13 @@ export default function DownloadVideo() {
     languageChoice?.url === video?.sourceUrl && languageOptions.some((option) => option.code === languageChoice?.code)
       ? languageChoice?.code
       : audioLanguages?.original;
-  const dubLanguage = audioLanguage !== audioLanguages?.original ? audioLanguage : undefined;
-  const dubSelector =
-    dubLanguage && selectedFormat && video ? getDubbedFormatSelector(selectedFormat, video, dubLanguage) : undefined;
+  // Applied for the original too, so the download never rests on yt-dlp's own
+  // track ranking; only a dub changes the file name.
+  const languageSelector =
+    audioLanguages && audioLanguage && selectedFormat && video && !values.downloadPlaylist
+      ? getLanguageFormatSelector(selectedFormat, video, audioLanguage)
+      : undefined;
+  const dubLanguage = languageSelector && audioLanguage !== audioLanguages?.original ? audioLanguage : undefined;
 
   const medium = values.format === MP3_FORMAT_ID || selectedFormat?.vcodec === "none" ? "Audio" : "Video";
 

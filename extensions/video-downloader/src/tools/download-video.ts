@@ -1,7 +1,9 @@
 import { execa } from "execa";
 import {
+  getAudioLanguages,
   getFormatValue,
   getFormats,
+  getLanguageFormatSelector,
   downloadPath,
   getytdlPath,
   getYtdlpEnv,
@@ -76,7 +78,9 @@ export default async function tool(input: Input) {
     const hasWebmAudio = video.formats.some((f) => f.acodec?.includes("opus") || f.acodec?.includes("vorbis"));
     const canRemux = fastRemux && (recodeFormat !== "webm" || hasWebmAudio);
     options.push("--ffmpeg-location", ffmpegPath);
-    options.push("--format", downloadFormat);
+    // On a dubbed video, ask for the original soundtrack by name.
+    const original = getAudioLanguages(video)?.original;
+    options.push("--format", (original && getLanguageFormatSelector(bestFormat, video, original)) || downloadFormat);
     options.push(canRemux ? "--remux-video" : "--recode-video", recodeFormat);
   }
 

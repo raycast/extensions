@@ -428,12 +428,13 @@ export function getAudioLanguages(video?: Video): AudioLanguages | undefined {
   return { original, options: [{ code: original, name: `${formatLanguage(original)} (original)` }, ...options] };
 }
 
-// The --format selector that downloads a format in a dubbed language: the same
-// family's copy in that language, or for a video-only stream (or MP3), the best
-// audio-only track in that language. Undefined when the format can't be had in
-// that language, e.g. a format with its own fixed soundtrack, or a DRC copy
-// (dubbed tracks have none).
-export function getDubbedFormatSelector(format: Format, video: Video, language: string) {
+// The --format selector that downloads a format in a given audio language
+// (original or dubbed): the same family's copy in that language, or for a
+// video-only stream (or MP3), the best audio-only track in that language. Naming
+// the original explicitly keeps it from depending on yt-dlp's own ranking.
+// Undefined when the format can't be had in that language, e.g. a format with
+// its own fixed soundtrack, or a DRC copy of a dub (dubbed tracks have none).
+export function getLanguageFormatSelector(format: Format, video: Video, language: string) {
   const { hasVcodec, hasAcodec } = hasCodec(format);
   const family = trackFamily(format);
   if (family) {
