@@ -1096,6 +1096,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "lasso",
+    title: "Lasso",
+    description:
+      "Find unpaid Amazon links, dry-run higher-rate hops, and report clicks for one site. Hosted remote Streamable HTTP server; Bearer Hub license key or OAuth. Free Lasso account, no card.",
+    icon: "https://github.com/lassoanalytics.png",
+    homepage: "https://getlasso.co/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://lasso.link/mcp"],
+    },
+    remoteUrl: "https://lasso.link/mcp",
+  },
+  {
     name: "levea",
     title: "Levea AI Video Editor",
     description:
