@@ -1,4 +1,4 @@
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-10-30
 
 - Browse and search NVIDIA's SimReady Assets with type filters and previews.
 - Inspect asset files, sizes, model formats, and licenses, with preview metadata hidden by default and a toggle to show or hide it.
