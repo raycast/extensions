@@ -908,7 +908,7 @@ export async function getCollectionsFromDB<K extends keyof CollectionMap>(
         dbPath,
         `SELECT a.uuid as id, a.title as name,
           ${areaTagsSql('a')} as tags
-        FROM TMArea a WHERE a.visible = 1
+        FROM TMArea a
         ORDER BY a."index" ASC`,
       ),
       executeSQL<CollectionAreaTodoRow>(
@@ -963,7 +963,7 @@ export const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
     executeSQL<AreaRow>(
       dbPath,
       `SELECT a.uuid as id, a.title as name
-      FROM TMArea a WHERE a.visible = 1`,
+      FROM TMArea a`,
     ),
     executeSQL<ProjectRow>(
       dbPath,
