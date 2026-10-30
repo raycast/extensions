@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { clearPhotoshopCaches } from "../services/automation";
 import { PhotoshopFile, ViewMode } from "../types";
 import { openInNewFinderTab, openInNewFinderWindow } from "../utils/fileAttributes";
@@ -36,9 +37,7 @@ export function PhotoshopActionPanel({
       }
       if (onRefresh) onRefresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to purge caches";
-      toast.message = String(error);
+      await showFailureToast(error, { title: "Failed to purge caches" });
     }
   };
 

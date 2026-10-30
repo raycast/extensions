@@ -1,7 +1,7 @@
 # Photoshop Projects — Raycast Extension
 
 <p align="center">
-  <img src="assets/extension-icon.png" width="128" height="128" alt="Photoshop Projects Icon" />
+  <img src="media/extension-icon.png" width="128" height="128" alt="Photoshop Projects Icon" />
 </p>
 
 <p align="center">

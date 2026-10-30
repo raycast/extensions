@@ -1,6 +1,6 @@
 # Photoshop Projects Changelog
 
-## [Initial Version] - 2026-10-03
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse and open recently edited Photoshop documents (`.psd`, `.psb`, `.psdt`, `.pdd`) in visual Grid or dense List view.
 - Fast fuzzy Spotlight search across file titles, directory paths, and indexed Photoshop layer names.

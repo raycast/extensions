@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { clearPhotoshopCaches } from "./services/automation";
 
 export default async function Command() {
@@ -17,8 +18,6 @@ export default async function Command() {
       toast.message = `Freed ${result.formattedFreedSpace}${result.purgedMemory ? " & purged memory" : ""}`;
     }
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to clear cache";
-    toast.message = String(error);
+    await showFailureToast(error, { title: "Failed to clear cache" });
   }
 }

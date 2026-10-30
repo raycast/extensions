@@ -62,7 +62,7 @@ export async function clearPhotoshopCaches(): Promise<CacheClearResult> {
   }
 
   const diskCacheDir = path.join(os.homedir(), "Library/Caches/com.adobe.Photoshop");
-  if (fs.existsSync(diskCacheDir)) {
+  if (fs.existsSync(diskCacheDir) && !runningApp) {
     const size = await getDirectorySize(diskCacheDir);
     diskBytesFreed += size;
     await clearDirectoryContents(diskCacheDir);
