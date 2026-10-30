@@ -28,37 +28,42 @@ export default function MarketRates() {
   );
 }
 
+const emptyRates =
+  "# Not enough published prices yet\n\nThis city has spaces on CoworkingView, but too few published prices to compute a fair median.";
+
+function ratesMarkdown(data: CityRates): string {
+  const figures = data.figures ?? [];
+  const { dayPass, meetingRoom } = data;
+  if (figures.length === 0 && !dayPass && !meetingRoom) return emptyRates;
+
+  const lines = [`# What coworking costs in ${data.city.name.trim()}`];
+  if (figures.length > 0) {
+    lines.push(
+      "| Workspace | Median | Middle half | Spaces |",
+      "| --- | --- | --- | --- |",
+      ...figures.map(
+        (f) =>
+          `| ${typeTitle(f.optionType)} | **${money(f.median)}**/month | ${
+            f.p25 && f.p75 ? `${money(f.p25)} – ${money(f.p75)}` : "—"
+          } | ${f.propertyCount} |`,
+      ),
+    );
+  }
+  if (dayPass) lines.push("", `Day pass median: **${money(dayPass.median)}**/day (${dayPass.sampleSize} spaces)`);
+  if (meetingRoom) {
+    lines.push("", `Meeting room median: **${money(meetingRoom.median)}**/hour (${meetingRoom.sampleSize} spaces)`);
+  }
+  lines.push("", "_Medians over the spaces that publish a price. Source: CoworkingView Price Index, CC BY 4.0._");
+  return lines.join("\n");
+}
+
 function RatesDetail({ slug }: { slug: string }) {
   const { data, isLoading } = useCachedPromise(
     async (url: string) => (await getJson<Envelope<{ cities: CityRates[] }>>(url)).data.cities[0] ?? null,
     [`${API}/v1/market/rates?locale=${locale()}&city=${encodeURIComponent(slug)}`],
   );
 
-  const figures = data?.figures ?? [];
-  const markdown = isLoading
-    ? ""
-    : !data || figures.length === 0
-      ? "# Not enough published prices yet\n\nThis city has spaces on CoworkingView, but too few published prices to compute a fair median."
-      : [
-          `# What coworking costs in ${data.city.name.trim()}`,
-          "| Workspace | Median | Middle half | Spaces |",
-          "| --- | --- | --- | --- |",
-          ...figures.map(
-            (f) =>
-              `| ${typeTitle(f.optionType)} | **${money(f.median)}**/month | ${
-                f.p25 && f.p75 ? `${money(f.p25)} – ${money(f.p75)}` : "—"
-              } | ${f.propertyCount} |`,
-          ),
-          data.dayPass
-            ? `\nDay pass median: **${money(data.dayPass.median)}**/day (${data.dayPass.sampleSize} spaces)`
-            : "",
-          data.meetingRoom
-            ? `\nMeeting room median: **${money(data.meetingRoom.median)}**/hour (${data.meetingRoom.sampleSize} spaces)`
-            : "",
-          "\n_Medians over the spaces that publish a price. Source: CoworkingView Price Index, CC BY 4.0._",
-        ]
-          .filter(Boolean)
-          .join("\n");
+  const markdown = isLoading ? "" : data ? ratesMarkdown(data) : emptyRates;
 
   return (
     <Detail

@@ -72,7 +72,18 @@ export default function SearchSpaces() {
       <List.EmptyView
         icon={Icon.Building}
         title={isLoading ? "Loading spaces…" : "No spaces match"}
-        description={type ? "Try another workspace type with ⌘T." : undefined}
+        description={!isLoading && type ? "Try another workspace type with ⌘T." : undefined}
+        actions={
+          <ActionPanel>
+            {type ? (
+              <Action title="Show Any Type" icon={Icon.Filter} onAction={() => setType("")} />
+            ) : (
+              <Action.OpenInBrowser title={`Open All Spaces in ${cityName}`} url={cityUrl(city)} />
+            )}
+            <WorkspaceTypeSubmenu type={type} onTypeChange={setType} />
+            {type ? <Action.OpenInBrowser title={`Open All Spaces in ${cityName}`} url={cityUrl(city)} /> : null}
+          </ActionPanel>
+        }
       />
       {(data ?? []).map((space) => (
         <List.Item
@@ -100,22 +111,29 @@ export default function SearchSpaces() {
               <Action.Push title="Show Details" icon={Icon.Sidebar} target={<SpaceDetail slug={space.slug} />} />
               <Action.OpenInBrowser url={spaceUrl(space.slug)} />
               <Action.CopyToClipboard title="Copy Link" content={spaceUrl(space.slug)} />
-              <ActionPanel.Submenu
-                title="Workspace Type…"
-                icon={Icon.Filter}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-              >
-                <Action title="Any Type" onAction={() => setType("")} />
-                {WORKSPACE_TYPES.map((t) => (
-                  <Action key={t.value} title={t.title} onAction={() => setType(t.value)} />
-                ))}
-              </ActionPanel.Submenu>
+              <WorkspaceTypeSubmenu type={type} onTypeChange={setType} />
               <Action.OpenInBrowser title={`Open All Spaces in ${cityName}`} url={cityUrl(city)} />
             </ActionPanel>
           }
         />
       ))}
     </List>
+  );
+}
+
+function WorkspaceTypeSubmenu({ type, onTypeChange }: { type: string; onTypeChange: (type: string) => void }) {
+  return (
+    <ActionPanel.Submenu title="Workspace Type…" icon={Icon.Filter} shortcut={{ modifiers: ["cmd"], key: "t" }}>
+      <Action title="Any Type" icon={type === "" ? Icon.Checkmark : Icon.Circle} onAction={() => onTypeChange("")} />
+      {WORKSPACE_TYPES.map((t) => (
+        <Action
+          key={t.value}
+          title={t.title}
+          icon={type === t.value ? Icon.Checkmark : Icon.Circle}
+          onAction={() => onTypeChange(t.value)}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }
 
