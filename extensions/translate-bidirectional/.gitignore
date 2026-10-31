@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# raycast (auto-generated)
+raycast-env.d.ts
+
+# editor
+.vscode/
+
+# misc
+.DS_Store
+*.local
+*.log
+.env
+
+.idea/
+
+# local design/backup assets (not bundled)
+design/
