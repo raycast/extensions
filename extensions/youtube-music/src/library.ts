@@ -32,7 +32,9 @@ export interface CollectionRequest {
   artworkURL?: string;
 }
 
-export type CollectionResult = { status: "ready"; tracks: SongResult[] } | { status: "unavailable"; reason: string };
+export type CollectionResult =
+  | { status: "ready"; tracks: SongResult[]; truncated: boolean }
+  | { status: "unavailable"; reason: string };
 
 function runLibraryJS(code: string): Promise<string | undefined> {
   return runJSInYouTubeMusicTab(code, { silent: true, musicOnly: true });
@@ -55,9 +57,9 @@ export async function loadCollection(request: CollectionRequest): Promise<Collec
     if (state.startsWith("error:")) return { status: "unavailable", reason: state.slice("error:".length) };
 
     if (state !== "pending" && state !== "idle") {
-      const tracks = parseCollectionPayload(state);
-      if (!tracks) return { status: "unavailable", reason: "unreadable" };
-      return { status: "ready", tracks };
+      const parsed = parseCollectionPayload(state);
+      if (!parsed) return { status: "unavailable", reason: "unreadable" };
+      return { status: "ready", tracks: parsed.tracks, truncated: parsed.truncated };
     }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));

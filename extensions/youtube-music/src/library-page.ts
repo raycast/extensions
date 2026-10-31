@@ -341,6 +341,7 @@ export const LIBRARY_START_SCRIPT = `(function() {
   window.__ytmLibraryV1 = { state: "loading", at: 0, data: null, error: null, diag: {} };
   var data = {};
   var diag = {};
+  var truncated = {};
   var remaining = 0;
   var settled = false;
   var loggedOut = false;
@@ -373,10 +374,13 @@ export const LIBRARY_START_SCRIPT = `(function() {
 
         var rows = trackScopes[scope] ? trackRows(json) : rowsOf(json);
         data[scope] = rows;
+        // A scope that fills the cap may be hiding rows the server did send.
+        if (rows.length >= (trackScopes[scope] ? trackLimit : limit)) truncated[scope] = true;
         total += rows.length;
         remaining--;
         if (remaining === 0) {
           settled = true;
+          data.__truncated = truncated;
           window.__ytmLibraryV1 = {
             state: total === 0 && loggedOut ? "signed-out" : "ready",
             at: Date.now(),
@@ -562,6 +566,8 @@ export function collectionStartScript(browseId: string, albumTitle: string, fall
     return typeof index === "string" && /^[0-9]+$/.test(index) ? index : "0";
   }
 
+  var hitCap = false;
+
   function addTracks(json, rows) {
     var nodes = collect(json, "musicResponsiveListItemRenderer", []);
     for (var i = 0; i < nodes.length && rows.length < limit; i++) {
@@ -603,13 +609,14 @@ export function collectionStartScript(browseId: string, albumTitle: string, fall
         addTracks(json, rows);
         var token = nextToken(json);
         if (token && rows.length < limit) return loadPage({ context: context, continuation: token }, rows);
+        hitCap = rows.length >= limit;
         return rows;
       });
     }
 
     loadPage({ context: context, browseId: browseId }, [])
       .then(function (rows) {
-        window.__ytmCollectionV1[browseId] = { state: "ready", rows: rows };
+        window.__ytmCollectionV1[browseId] = { state: "ready", rows: rows, truncated: hitCap };
       })
       .catch(function (error) {
         window.__ytmCollectionV1[browseId] = { state: "error", error: String((error && error.message) || error) };
@@ -627,7 +634,7 @@ export function collectionStateScript(browseId: string): string {
   if (!entry) return "idle";
   if (entry.state === "loading") return "pending";
   if (entry.state === "error") return "error:" + entry.error;
-  return JSON.stringify(entry.rows);
+  return JSON.stringify({ rows: entry.rows, truncated: !!entry.truncated });
 })();`;
 }
 
@@ -637,6 +644,8 @@ export interface LibraryData {
   playlists: BrowseResult[];
   liked: SongResult[];
   recent: SongResult[];
+  /** Scopes whose cap was reached, so the list may be hiding rows. */
+  truncated?: Partial<Record<LibraryScope, boolean>>;
 }
 
 interface CompactRow {
@@ -666,16 +675,28 @@ function toBrowseResult(row: CompactRow): BrowseResult | null {
   };
 }
 
-export function parseCollectionPayload(raw: string): SongResult[] | null {
-  let rows: unknown;
+export function parseCollectionPayload(raw: string): { tracks: SongResult[]; truncated: boolean } | null {
+  let parsed: unknown;
   try {
-    rows = JSON.parse(raw) as unknown;
+    parsed = JSON.parse(raw) as unknown;
   } catch {
     return null;
   }
 
-  if (!Array.isArray(rows)) return null;
-  return rows.map((row) => toSongResult(row as CompactTrack)).filter((row): row is SongResult => row !== null);
+  const container = Array.isArray(parsed) ? undefined : (parsed as Record<string, unknown> | null);
+  const rows = Array.isArray(parsed)
+    ? parsed
+    : container && Array.isArray(container["rows"])
+    ? container["rows"]
+    : null;
+  if (!rows) return null;
+
+  return {
+    tracks: (rows as unknown[])
+      .map((row) => toSongResult(row as CompactTrack))
+      .filter((row): row is SongResult => row !== null),
+    truncated: container ? Boolean(container["truncated"]) : false,
+  };
 }
 
 export function parseLibraryPayload(raw: string): LibraryData | null {
@@ -698,12 +719,21 @@ export function parseLibraryPayload(raw: string): LibraryData | null {
     return rows.map((row) => toSongResult(row as CompactTrack)).filter((row): row is SongResult => row !== null);
   };
 
+  const truncated: Partial<Record<LibraryScope, boolean>> = {};
+  const truncatedRaw = payload["__truncated"];
+  if (truncatedRaw && typeof truncatedRaw === "object") {
+    for (const [scope, hit] of Object.entries(truncatedRaw as Record<string, unknown>)) {
+      if (hit) truncated[scope as LibraryScope] = true;
+    }
+  }
+
   return {
     albums: read("albums"),
     artists: read("artists"),
     playlists: read("playlists"),
     liked: readTracks("liked"),
     recent: readTracks("recent"),
+    truncated,
   };
 }
 

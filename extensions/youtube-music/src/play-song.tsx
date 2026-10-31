@@ -513,6 +513,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
           title: "Recently played",
           icon: Icon.Clock,
           count: library.recent.length,
+          truncated: library.truncated?.recent,
           results: library.recent,
         },
         {
@@ -520,6 +521,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
           title: "Liked songs",
           icon: Icon.Heart,
           count: library.liked.length,
+          truncated: library.truncated?.liked,
           results: library.liked,
         },
         {
@@ -527,6 +529,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
           title: "Albums",
           icon: Icon.Cd,
           count: library.albums.length,
+          truncated: library.truncated?.albums,
           results: library.albums,
         },
         {
@@ -534,6 +537,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
           title: "Artists",
           icon: Icon.Person,
           count: library.artists.length,
+          truncated: library.truncated?.artists,
           results: library.artists,
         },
         {
@@ -541,6 +545,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
           title: "Playlists",
           icon: Icon.List,
           count: library.playlists.length,
+          truncated: library.truncated?.playlists,
           results: library.playlists,
         },
       ].filter((category) => category.count > 0)
@@ -644,6 +649,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
                                 addMode={addMode}
                                 currentSource={source}
                                 onSelectSource={setSource}
+                                truncated={category.truncated}
                               />
                             );
                           } else {
@@ -657,6 +663,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
                                 // Liked songs are the VLLM playlist; recently played
                                 // has no collection page to queue through.
                                 collectionBrowseId={category.key === "liked" ? "VLLM" : undefined}
+                                truncated={category.truncated}
                               />
                             );
                           }
@@ -765,13 +772,26 @@ function LibraryBrowseView({
   addMode,
   currentSource,
   onSelectSource,
+  truncated,
 }: {
   title: string;
   results: BrowseResult[];
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  truncated?: boolean;
 }) {
+  const items = results.map((result) => (
+    <BrowseGridItem
+      key={`library-${result.kind}-${result.id}`}
+      result={result}
+      addMode={addMode}
+      currentSource={currentSource}
+      onSelectSource={onSelectSource}
+      scopePopDepth={2}
+    />
+  ));
+
   return (
     <Grid
       columns={5}
@@ -782,16 +802,7 @@ function LibraryBrowseView({
       searchBarPlaceholder={`Filter ${title.toLowerCase()}`}
       filtering={true}
     >
-      {results.map((result) => (
-        <BrowseGridItem
-          key={`library-${result.kind}-${result.id}`}
-          result={result}
-          addMode={addMode}
-          currentSource={currentSource}
-          onSelectSource={onSelectSource}
-          scopePopDepth={2}
-        />
-      ))}
+      {truncated ? <Grid.Section subtitle={`Showing the first ${results.length}`}>{items}</Grid.Section> : items}
     </Grid>
   );
 }
@@ -803,6 +814,7 @@ function LibrarySongsView({
   currentSource,
   onSelectSource,
   collectionBrowseId,
+  truncated,
 }: {
   title: string;
   songs: SongResult[];
@@ -810,21 +822,24 @@ function LibrarySongsView({
   currentSource: Source;
   onSelectSource: (source: Source) => void;
   collectionBrowseId?: string;
+  truncated?: boolean;
 }) {
+  const items = songs.map((song) => (
+    <SongItem
+      key={`library-song-${song.id}`}
+      song={song}
+      query={song.title}
+      addMode={addMode}
+      currentSource={currentSource}
+      onSelectSource={onSelectSource}
+      collectionBrowseId={collectionBrowseId}
+      scopePopDepth={2}
+    />
+  ));
+
   return (
     <List navigationTitle={title} searchBarPlaceholder={`Filter ${title.toLowerCase()}`} filtering={true}>
-      {songs.map((song) => (
-        <SongItem
-          key={`library-song-${song.id}`}
-          song={song}
-          query={song.title}
-          addMode={addMode}
-          currentSource={currentSource}
-          onSelectSource={onSelectSource}
-          collectionBrowseId={collectionBrowseId}
-          scopePopDepth={2}
-        />
-      ))}
+      {truncated ? <List.Section subtitle={`Showing the first ${songs.length}`}>{items}</List.Section> : items}
     </List>
   );
 }
@@ -906,6 +921,7 @@ function CollectionView({
   onSelectSource: (source: Source) => void;
 }) {
   const [tracks, setTracks] = useState<SongResult[]>([]);
+  const [truncated, setTruncated] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [attempt, setAttempt] = useState(0);
@@ -922,6 +938,7 @@ function CollectionView({
         setIsLoading(false);
         if (result.status === "ready") {
           setTracks(result.tracks);
+          setTruncated(result.truncated);
         } else {
           setTracks([]);
           setError(collectionFailureDescription(result.reason));
@@ -936,6 +953,19 @@ function CollectionView({
   function retry() {
     setAttempt((count) => count + 1);
   }
+
+  const items = tracks.map((song) => (
+    <SongItem
+      key={`collection-${request.kind}-${request.browseId}-${song.id}`}
+      song={song}
+      query={song.title}
+      addMode={addMode}
+      currentSource={currentSource}
+      onSelectSource={onSelectSource}
+      collectionBrowseId={request.browseId}
+      scopePopDepth={2}
+    />
+  ));
 
   return (
     <List
@@ -957,19 +987,10 @@ function CollectionView({
         />
       ) : tracks.length === 0 && !isLoading ? (
         <List.EmptyView title="No tracks found" description={`This ${request.kind} does not contain any tracks.`} />
+      ) : truncated ? (
+        <List.Section subtitle={`Showing the first ${tracks.length} tracks`}>{items}</List.Section>
       ) : (
-        tracks.map((song) => (
-          <SongItem
-            key={`collection-${request.kind}-${request.browseId}-${song.id}`}
-            song={song}
-            query={song.title}
-            addMode={addMode}
-            currentSource={currentSource}
-            onSelectSource={onSelectSource}
-            collectionBrowseId={request.browseId}
-            scopePopDepth={2}
-          />
-        ))
+        items
       )}
     </List>
   );
