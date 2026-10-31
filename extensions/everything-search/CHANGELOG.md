@@ -1,5 +1,8 @@
 # Everything Search Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+- Fixed searches failing with "Error Searching Files" after Raycast has been running for a few hours
+
 ## [Fix] - 2026-10-26
 - Fixed searches that contain `&`, `|`, `<`, `>`, `^` or `%`, or start with `-`, failing with "Error Searching Files" or returning wrong results
 
