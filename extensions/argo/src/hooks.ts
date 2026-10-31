@@ -412,5 +412,17 @@ export function useDraft(bindingId: string, identity?: string) {
       );
     await writes.current;
   };
-  return { text, change, clearIf, prepare, ready };
+  const reject = async (messageId: string) => {
+    if (!identity) return;
+    const key = `${draftKey(bindingId, identity)}:pending`;
+    const removal = writes.current.then(async () => {
+      if (pending.current?.id !== messageId) return;
+      await LocalStorage.removeItem(key);
+      pending.current = undefined;
+    });
+    // Keep subsequent writes usable, but report this failure without dropping the retry ID.
+    writes.current = removal.catch(() => undefined);
+    await removal;
+  };
+  return { text, change, clearIf, prepare, reject, ready };
 }

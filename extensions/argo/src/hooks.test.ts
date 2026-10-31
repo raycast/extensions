@@ -626,3 +626,47 @@ test("failed sent-draft cleanup retains the durable retry ID across reopening", 
   assert.equal((await h.render("binding", "bridge-a").prepare("kept", "generation")).id, first.id);
   h.cleanup();
 });
+
+test("confirmed rejection keeps the draft and releases its exact pending ID durably", async () => {
+  const data = new Map<string, string>([["draft:bridge-a:binding", "kept draft"]]);
+  let failRemove = true;
+  const globals = {
+    LocalStorage: {
+      async getItem(key: string) {
+        return data.get(key);
+      },
+      async setItem(key: string, value: string) {
+        data.set(key, value);
+      },
+      async removeItem(key: string) {
+        if (failRemove) throw new Error("disk unavailable");
+        data.delete(key);
+      },
+    },
+  };
+  const open = async () => {
+    const h = hookHarness("useDraft", globals);
+    h.render("binding", "bridge-a");
+    h.flush();
+    await settle();
+    return h;
+  };
+  let h = await open();
+  let draft = h.render("binding", "bridge-a");
+  const first = await draft.prepare("kept draft", "old-generation");
+  await assert.rejects(draft.reject(first.id), /disk unavailable/);
+  await assert.rejects(draft.prepare("kept draft", "new-generation"), /session changed/i);
+  failRemove = false;
+  await draft.reject("another-message");
+  assert.equal(JSON.parse(data.get("draft:bridge-a:binding:pending")!).id, first.id);
+  await draft.reject(first.id);
+  assert.equal(data.get("draft:bridge-a:binding"), "kept draft");
+  assert.equal(data.has("draft:bridge-a:binding:pending"), false);
+  h.cleanup();
+  h = await open();
+  draft = h.render("binding", "bridge-a");
+  assert.equal(draft.text, "kept draft");
+  const next = await draft.prepare(draft.text, "new-generation");
+  assert.notEqual(next.id, first.id);
+  h.cleanup();
+});

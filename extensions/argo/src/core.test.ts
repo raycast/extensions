@@ -903,3 +903,96 @@ test("approval rechecks expiry on activation and keeps denial an explicit separa
     assert.deepEqual(decisions, expired ? [] : ["deny"]);
   }
 });
+
+test("confirmed send rejection releases only its pending ID, while uncertain or previously queued sends retain it", async () => {
+  for (const scenario of [
+    "rejected",
+    "network",
+    "server-error",
+    "queued-earlier",
+    "lookup-failed",
+    "generation-changed",
+    "nonadvancing-page",
+    "empty-page",
+  ]) {
+    const harness = viewHarness();
+    const released: string[] = [],
+      pages: (number | undefined)[] = [];
+    const attempt = { id: "pending-message", text: "kept draft", generation: "old-generation" };
+    const client = new Hub({ url: "http://127.0.0.1:1", token });
+    client.mutate = async () => {
+      if (scenario === "network") throw new Error("response lost");
+      throw new HubError(scenario === "server-error" ? 503 : 409);
+    };
+    client.snapshot = async (_binding, before) => {
+      pages.push(before);
+      if (scenario === "lookup-failed") throw new Error("snapshot unavailable");
+      return {
+        session: sessionFixture({
+          generation: scenario === "generation-changed" && before !== undefined ? "changed-again" : "new-generation",
+        }),
+        messages:
+          scenario === "empty-page"
+            ? []
+            : before === undefined
+              ? [{ id: "recent", role: "assistant", text: "recent", state: "completed", createdAt: 20 }]
+              : scenario === "queued-earlier"
+                ? [{ id: attempt.id, role: "user", text: attempt.text, state: "completed", createdAt: 10 }]
+                : scenario === "nonadvancing-page"
+                  ? [{ id: "stale-page", role: "assistant", text: "stale", state: "completed", createdAt: 20 }]
+                  : [],
+        interactions: [],
+        cursor: 1,
+        hasMore: before === undefined,
+      };
+    };
+    const draft = {
+      text: attempt.text,
+      ready: true,
+      change() {},
+      async prepare() {
+        return attempt;
+      },
+      async reject(id: string) {
+        released.push(id);
+      },
+      clearIf() {
+        assert.fail("rejected sending must keep the draft");
+      },
+    };
+    const feed = {
+      snapshot: { session: sessionFixture(), messages: [], interactions: [] },
+      connection: "live",
+      connectionKey: "bridge-a",
+      hub: { current: client },
+      async refresh() {},
+    };
+    const { Conversation } = viewLogic(
+      [
+        "project",
+        "title",
+        "sessionStatus",
+        "knownOnline",
+        "messageStatus",
+        "sendUnavailable",
+        "conversationSelection",
+        "Conversation",
+      ],
+      {
+        ...harness.globals,
+        useHub: () => feed,
+        useDraft: () => draft,
+        useNavigation: () => ({ push() {} }),
+        async showToast() {},
+      },
+    );
+    const tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+    await views(tree)
+      .find((view) => view.props.title === "Send Message")!
+      .props.onAction();
+    assert.deepEqual(released, scenario === "rejected" ? [attempt.id] : [], scenario);
+    assert.equal(draft.text, attempt.text);
+    if (["rejected", "queued-earlier"].includes(scenario)) assert.deepEqual(pages, [undefined, 20]);
+    client.close();
+  }
+});

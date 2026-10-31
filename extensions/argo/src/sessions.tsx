@@ -654,11 +654,38 @@ function Conversation({
         }
         // Arm before I/O: a reply can arrive through the subscription before POST resolves.
         setSelection((previous) => conversationSelection(previous, { type: "send", messageId: attempt.id }));
-        return client.mutate(bindingId, "/messages", {
-          messageId: attempt.id,
-          generation: attempt.generation,
-          text,
-        });
+        try {
+          await client.mutate(bindingId, "/messages", {
+            messageId: attempt.id,
+            generation: attempt.generation,
+            text,
+          });
+        } catch (cause) {
+          if (cause instanceof HubError && [400, 401, 403, 404, 409, 422].includes(cause.status)) {
+            try {
+              // A rejected retry can still refer to an earlier accepted send. Check every history page.
+              let page = await client.snapshot(bindingId);
+              const checkedGeneration = page.session.generation;
+              while (!page.messages.some((message) => message.id === attempt.id)) {
+                if (!page.hasMore) {
+                  await draft.reject(attempt.id);
+                  break;
+                }
+                const before = Math.min(...page.messages.map((message) => message.createdAt));
+                if (!page.messages.length || !Number.isFinite(before)) break;
+                page = await client.snapshot(bindingId, before);
+                if (
+                  page.session.generation !== checkedGeneration ||
+                  page.messages.some((message) => message.createdAt >= before)
+                )
+                  break;
+              }
+            } catch {
+              // Unavailable history or storage leaves delivery uncertain and preserves the original ID.
+            }
+          }
+          throw cause;
+        }
       },
       session.status === "ready" ? "Message queued for Agent" : "Queued — waiting for Agent",
     );
