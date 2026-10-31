@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix Windows New Tab Search] - {PR_MERGE_DATE}
+
+- Fixed **New Tab** searches on Windows: a query with several words no longer opens a separate tab for each word, and searching with the **Browser Default** search engine no longer fails with a PowerShell error.
+
 ## [Fix] - 2026-09-19
 
 - Fixed the **New Tab** command always searching with Google regardless of Zen's configured default search engine. Added a **Browser Default** search engine preference (now the default): queries are handed to Zen itself, which resolves them with its own default search engine.
