@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Clipboard Image OCR on macOS] - {PR_MERGE_DATE}
+## [Clipboard Image OCR on macOS] - 2026-10-31
 
 - Added macOS support for **Recognize Text in Clipboard Image**, including copied image files, using Apple Vision with your recognition preferences.
 - Added an **After Recognition (macOS)** option for that command: copy the text (replaces the clipboard image) or paste it into the active app and restore the original clipboard contents.
