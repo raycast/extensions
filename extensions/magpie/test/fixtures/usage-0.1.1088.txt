@@ -1,0 +1,15 @@
+no calls through magpie last 7 days
+
+not through magpie · the agents' own requests, read from their session files
+39.7K tokens last 7 days · 4 calls · ≈$0.095
+  in 38.8K  out 845  cache read 90.2K  cache write 0  reasoning 28 
+
+  agents
+  Codex 100% 39.7K   4 calls    ≈$0.095 
+
+  models
+  local session/gpt-6.1-sol 100% 39.7K   4 calls    ≈$0.095 
+
+  sessions
+  Codex  sess-local-example 100% 39.7K   4 calls    ≈$0.095 
+  /Users/me/.config/magpie/usage.jsonl
