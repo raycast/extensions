@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { VaultDetector, ObsidianVault } from "./services/vaultDetector";
 import * as path from "path";
+import * as os from "os";
 
 const SELECTED_VAULT_KEY = "selectedVaultPath";
 
@@ -89,7 +90,9 @@ export default function SelectVault() {
       ) : (
         vaults.map((vault) => {
           const isSelected = vault.path === selectedVaultPath;
-          const subtitle = vault.path.replace(process.env.HOME || "", "~");
+          const subtitle = vault.path.startsWith(os.homedir())
+            ? "~" + vault.path.slice(os.homedir().length)
+            : vault.path;
 
           return (
             <List.Item
