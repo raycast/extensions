@@ -5,6 +5,9 @@
   "description": "Open URLs from Obsidian markdown files' frontmatter",
   "icon": "command-icon.png",
   "author": "osteele",
+  "contributors": [
+    "andrew_horbach"
+  ],
   "license": "MIT",
   "platforms": [
     "macOS",
