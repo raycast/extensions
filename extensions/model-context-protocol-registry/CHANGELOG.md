@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Bowmark MCP Server] - {PR_MERGE_DATE}
+
+- Add Bowmark to the built-in registry: typed, tested functions for live websites (LinkedIn, YouTube, Amazon, Reddit, flights and more). Hosted Streamable HTTP server at https://api.bowmark.ai/mcp, connected through `mcp-remote` with a Bowmark API key header.
+
 ## [Add Norwegian Company Data MCP Server] - 2026-10-31
 
 - Add Norwegian Company Data to the registry: search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers. Hosted Streamable HTTP server at https://tools.skaidigital.com/brreg/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
