@@ -1,6 +1,6 @@
 # Changelog
 
-## [Queue, YouTube Search and History] - {PR_MERGE_DATE}
+## [Queue, YouTube Search and History] - 2026-10-31
 
 ### Added
 
