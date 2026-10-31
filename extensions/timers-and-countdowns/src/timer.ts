@@ -2,6 +2,10 @@ import { LocalStorage } from "@raycast/api";
 import { parse, parseDuration, scan, type ParseResult } from "@timelang/parse";
 
 const TIMER_KEY_PREFIX = "timer:";
+const REMOVAL_KEY_PREFIX = "removed:";
+const EXPIRED_CLEANUP_GRACE_MS = 2_000;
+
+type RemovalReason = "stopped" | "replaced" | "expired";
 
 export interface ActiveTimer {
   id: string;
@@ -174,6 +178,23 @@ function timerKey(id: string): string {
   return `${TIMER_KEY_PREFIX}${id}`;
 }
 
+function removalKey(id: string): string {
+  return `${REMOVAL_KEY_PREFIX}${id}`;
+}
+
+async function deleteTimer(id: string, reason: RemovalReason): Promise<void> {
+  await Promise.all([LocalStorage.removeItem(timerKey(id)), LocalStorage.setItem(removalKey(id), reason)]);
+}
+
+async function consumeRemovalReason(id: string): Promise<RemovalReason | undefined> {
+  const reason = await LocalStorage.getItem<string>(removalKey(id));
+  await LocalStorage.removeItem(removalKey(id));
+  if (reason === "stopped" || reason === "replaced" || reason === "expired") {
+    return reason;
+  }
+  return undefined;
+}
+
 function parseStoredTimer(value: unknown): ActiveTimer | undefined {
   if (typeof value !== "string") {
     return undefined;
@@ -205,11 +226,9 @@ export async function getActiveTimers(): Promise<ActiveTimer[]> {
   return readTimerList();
 }
 
-const EXPIRED_CLEANUP_GRACE_MS = 2_000;
-
 export async function removeExpiredTimers(now = Date.now()): Promise<ActiveTimer[]> {
   const expired = (await readTimerList()).filter((timer) => now - timer.endAt >= EXPIRED_CLEANUP_GRACE_MS);
-  await Promise.all(expired.map((timer) => LocalStorage.removeItem(timerKey(timer.id))));
+  await Promise.all(expired.map((timer) => deleteTimer(timer.id, "expired")));
   return expired;
 }
 
@@ -217,7 +236,7 @@ export async function upsertTimer(timer: ActiveTimer): Promise<ActiveTimer | und
   const timers = await getActiveTimers();
   const replaced = timer.name ? timers.find((candidate) => namesMatch(candidate.name, timer.name)) : undefined;
   if (replaced) {
-    await LocalStorage.removeItem(timerKey(replaced.id));
+    await deleteTimer(replaced.id, "replaced");
   }
   await LocalStorage.setItem(timerKey(timer.id), JSON.stringify(timer));
   return replaced;
@@ -228,13 +247,13 @@ export async function removeTimer(id: string): Promise<ActiveTimer | undefined> 
   if (!timer) {
     return undefined;
   }
-  await LocalStorage.removeItem(timerKey(id));
+  await deleteTimer(id, "stopped");
   return timer;
 }
 
 export async function stopAllTimers(): Promise<number> {
   const timers = await getActiveTimers();
-  await Promise.all(timers.map((timer) => LocalStorage.removeItem(timerKey(timer.id))));
+  await Promise.all(timers.map((timer) => deleteTimer(timer.id, "stopped")));
   return timers.length;
 }
 
@@ -243,18 +262,20 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export async function waitForTimer(id: string): Promise<"finished" | "stopped"> {
-  let last: ActiveTimer | undefined;
-
   while (true) {
     const timer = (await getActiveTimers()).find((candidate) => candidate.id === id);
     if (!timer) {
-      return last !== undefined && last.endAt <= Date.now() ? "finished" : "stopped";
+      const reason = await consumeRemovalReason(id);
+      return reason === "expired" ? "finished" : "stopped";
     }
 
-    last = timer;
     const remaining = timer.endAt - Date.now();
     if (remaining <= 0) {
-      await removeTimer(id);
+      const reason = await consumeRemovalReason(id);
+      await LocalStorage.removeItem(timerKey(id));
+      if (reason === "stopped" || reason === "replaced") {
+        return "stopped";
+      }
       return "finished";
     }
 
