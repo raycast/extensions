@@ -581,7 +581,7 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
   if (!query) {
     return (
       <List
-        isLoading={false}
+        isLoading={library === undefined && libraryError === undefined}
         searchBarPlaceholder={SEARCH_PLACEHOLDER[source]}
         searchText={searchText}
         onSearchTextChange={setSearchText}
@@ -602,10 +602,6 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
               icon={libraryStatusIcon(libraryError)}
               actions={libraryActions}
             />
-          </List.Section>
-        ) : library === undefined ? (
-          <List.Section title="Your library">
-            <List.Item title="Loading library…" icon={Icon.Clock} />
           </List.Section>
         ) : libraryCategories.length > 0 ? (
           <>
