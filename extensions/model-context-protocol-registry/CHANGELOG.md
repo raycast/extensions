@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add IndustryLens MCP Server] - {PR_MERGE_DATE}
+## [Add IndustryLens MCP Server] - 2026-10-31
 
 - Add IndustryLens to the official registry: competitive and market intelligence for B2B SaaS (competitor profiles, strategic moves, pricing changes, market landscapes, reports and comparisons). Hosted Streamable HTTP server at https://api.industry-lens.com/mcp/public with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
