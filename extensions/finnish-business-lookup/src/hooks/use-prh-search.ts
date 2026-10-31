@@ -1,19 +1,15 @@
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  DIGITS_ONLY_REGEX,
-  EIGHT_DIGIT_BUSINESS_ID_REGEX,
-  FULL_BUSINESS_ID_REGEX,
-  MIN_TEXT_QUERY_LENGTH,
-} from "../constants";
 import { searchCompanies } from "../api/prh";
 import { getLanguageFallbackOrder, getPreferredLanguageCode } from "../lib/language";
+import { classifyQuery } from "../lib/query";
+import { getLanguage } from "../lib/localization";
+import { translate } from "../lib/translations";
 import { rankCompaniesForNameQuery } from "../lib/search-ranking";
 import { toUiCompany } from "../lib/selectors";
 import type { QueryClassification, UiCompany } from "../types/ui";
 
-const NUMERIC_HINT = "Enter 8 digits or full 7+1 format";
-const TEXT_HINT = "Enter at least 3 characters";
+export { classifyQuery } from "../lib/query";
 
 const SEARCH_CACHE_STORAGE_KEY = "prh-search-cache-v2";
 const SEARCH_CACHE_TTL_MS = 120_000;
@@ -30,10 +26,6 @@ interface SearchCacheEntry {
 type PersistedSearchCache = Record<string, SearchCacheEntry>;
 
 const searchCache = new Map<string, SearchCacheEntry>();
-
-function normalizeBusinessId(raw: string): string {
-  return `${raw.slice(0, 7)}-${raw.slice(7)}`;
-}
 
 function getCacheBaseKey(classification: QueryClassification): string | undefined {
   if (classification.kind === "businessId" && classification.normalizedBusinessId) {
@@ -125,52 +117,6 @@ function hydrateSearchCache(persistedCache: PersistedSearchCache): void {
   }
 }
 
-export function classifyQuery(rawInput: string): QueryClassification {
-  const trimmed = rawInput.trim();
-
-  if (!trimmed) {
-    return { kind: "empty" };
-  }
-
-  if (FULL_BUSINESS_ID_REGEX.test(trimmed)) {
-    return {
-      kind: "businessId",
-      value: trimmed,
-      normalizedBusinessId: trimmed,
-    };
-  }
-
-  if (EIGHT_DIGIT_BUSINESS_ID_REGEX.test(trimmed)) {
-    const normalized = normalizeBusinessId(trimmed);
-    return {
-      kind: "businessId",
-      value: trimmed,
-      normalizedBusinessId: normalized,
-    };
-  }
-
-  if (DIGITS_ONLY_REGEX.test(trimmed)) {
-    return {
-      kind: "invalid-numeric",
-      value: trimmed,
-      hint: NUMERIC_HINT,
-    };
-  }
-
-  if (trimmed.length < MIN_TEXT_QUERY_LENGTH) {
-    return {
-      kind: "too-short-text",
-      value: trimmed,
-      hint: TEXT_HINT,
-    };
-  }
-
-  return {
-    kind: "name",
-    value: trimmed,
-  };
-}
-
 interface UsePrhSearchResult {
   searchText: string;
   setSearchText: (value: string) => void;
@@ -187,6 +133,7 @@ interface UsePrhSearchResult {
 }
 
 export function usePrhSearch(): UsePrhSearchResult {
+  const language = getLanguage();
   const [searchText, setSearchText] = useState("");
   const [companies, setCompanies] = useState<UiCompany[]>([]);
   const [page, setPage] = useState(1);
@@ -205,12 +152,12 @@ export function usePrhSearch(): UsePrhSearchResult {
   } = useLocalStorage<PersistedSearchCache>(SEARCH_CACHE_STORAGE_KEY, {});
   const setPersistedCacheValueRef = useRef(setPersistedCacheValue);
 
-  const classification = useMemo(() => classifyQuery(searchText), [searchText]);
+  const classification = useMemo(() => classifyQuery(searchText, language), [searchText, language]);
 
   const languageOrder = useMemo(() => {
-    const preferred = getPreferredLanguageCode();
+    const preferred = getPreferredLanguageCode(language);
     return getLanguageFallbackOrder(preferred);
-  }, []);
+  }, [language]);
 
   const cacheBaseKey = useMemo(() => getCacheBaseKey(classification), [classification]);
 
@@ -263,7 +210,7 @@ export function usePrhSearch(): UsePrhSearchResult {
     setIsRefreshing(false);
     setIsLoadingMore(false);
     pendingLoadMoreRef.current = false;
-  }, [cacheBaseKey]);
+  }, [cacheBaseKey, languageOrder]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -290,7 +237,11 @@ export function usePrhSearch(): UsePrhSearchResult {
     const hasFreshCache = Boolean(cached && cacheAgeMs <= SEARCH_CACHE_TTL_MS);
 
     if (cached) {
-      const rankedCachedCompanies = rankCompaniesForClassification(cached.companies, classification);
+      // Cache entries contain raw PRH data; remap so changing language never keeps old labels.
+      const rankedCachedCompanies = rankCompaniesForClassification(
+        cached.companies.map((company) => toUiCompany(company.raw, languageOrder)),
+        classification,
+      );
 
       setTotalResults(cached.totalResults);
 
@@ -337,6 +288,7 @@ export function usePrhSearch(): UsePrhSearchResult {
             businessId: classification.kind === "businessId" ? classification.normalizedBusinessId : undefined,
             name: classification.kind === "name" ? classification.value : undefined,
             page,
+            language,
           },
           controller.signal,
         );
@@ -374,7 +326,7 @@ export function usePrhSearch(): UsePrhSearchResult {
           setPage((current) => (current === page ? page - 1 : current));
         }
 
-        await showFailureToast(error, { title: "Failed to fetch companies from PRH" });
+        await showFailureToast(error, { title: translate("searchFailed", language) });
       } finally {
         if (!controller.signal.aborted && requestTokenRef.current === requestToken) {
           if (page === 1) {
@@ -402,7 +354,7 @@ export function usePrhSearch(): UsePrhSearchResult {
         clearTimeout(timer);
       }
     };
-  }, [cacheBaseKey, classification, isLoadingPersistedCache, languageOrder, page, setCacheEntry]);
+  }, [cacheBaseKey, classification, isLoadingPersistedCache, language, languageOrder, page, setCacheEntry]);
 
   const hasMoreResults = totalResults > companies.length;
 
