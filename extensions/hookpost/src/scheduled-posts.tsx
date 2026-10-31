@@ -31,7 +31,7 @@ const timeFormat = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "
 
 export default function Command() {
   const [channelId, setChannelId] = useState("all");
-  const { data, isLoading, revalidate } = usePromise(loadScheduledPosts, [], {
+  const { data, error, isLoading, revalidate } = usePromise(loadScheduledPosts, [], {
     onError: (error) => {
       showFailureToast(error, { title: "Could not load your posts" });
     },
@@ -83,11 +83,21 @@ export default function Command() {
     >
       {!isLoading && (
         <List.EmptyView
-          icon={Icon.Calendar}
-          title="Nothing scheduled"
-          description={`No posts are scheduled in the next ${DAYS_AHEAD} days.`}
+          icon={error ? Icon.Warning : Icon.Calendar}
+          title={error ? "Could not load your posts" : "Nothing scheduled"}
+          description={
+            error
+              ? "Check your API key and connection, then refresh."
+              : `No posts are scheduled in the next ${DAYS_AHEAD} days.`
+          }
           actions={
             <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
               <Action.OpenInBrowser title="Open Hookpost" url={`${APP_URL}/launches`} />
             </ActionPanel>
           }
