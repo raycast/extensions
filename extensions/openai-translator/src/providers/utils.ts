@@ -3,6 +3,16 @@ import fetch, { RequestInit } from "node-fetch";
 import { Transform, TransformCallback, TransformOptions } from "stream";
 
 export const DEFAULT_TIMEOUT = 60 * 1000;
+
+/**
+ * OpenAI reasoning models (o1/o3/o4/gpt-5 series) reject `max_tokens`,
+ * `temperature`, `frequency_penalty`, and `presence_penalty`.
+ * They require `max_completion_tokens` instead.
+ */
+export function isReasoningModel(model: string | undefined): boolean {
+  if (!model) return false;
+  return /^(o[134]|gpt-5)/i.test(model);
+}
 export async function* fetchSSE(input: string, options: RequestInit) {
   const { signal: originSignal, ...fetchOptions } = options;
   const timeout = DEFAULT_TIMEOUT;

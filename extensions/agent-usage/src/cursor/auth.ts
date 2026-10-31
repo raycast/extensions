@@ -90,6 +90,10 @@ export function isCursorAccessTokenUsable(accessToken: string, now = Date.now())
   return resolveAccessToken(accessToken, now) !== null;
 }
 
+export function isCursorAccessTokenJwt(accessToken: string): boolean {
+  return accessToken.split(".").length === 3;
+}
+
 export function buildCursorCookieHeader(accessToken: string): string | null {
   const userId = getCursorUserIdFromAccessToken(accessToken);
   return userId ? `WorkosCursorSessionToken=${userId}%3A%3A${accessToken}` : null;

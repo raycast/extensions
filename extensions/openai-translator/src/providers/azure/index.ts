@@ -2,6 +2,7 @@ import OpenAIProvider from "../openai";
 import { Message } from "../base";
 import { Prompt } from "../prompt";
 import { TranslateQuery, ProviderProps } from "../types";
+import { isReasoningModel } from "../utils";
 
 export default class extends OpenAIProvider {
   private isChatAPI: boolean;
@@ -29,13 +30,20 @@ export default class extends OpenAIProvider {
   body(query: TranslateQuery, prompt: Prompt): Record<string, any> {
     const { rolePrompt, commandPrompt, contentPrompt } = prompt;
     const body: Record<string, any> = {
-      temperature: 0,
-      max_tokens: 1000,
-      top_p: 1,
-      frequency_penalty: 1,
-      presence_penalty: 1,
       stream: true,
+      top_p: 1,
     };
+
+    if (isReasoningModel(this.model)) {
+      // Reasoning models (o1/o3/o4/gpt-5) only support max_completion_tokens
+      // and reject temperature, frequency_penalty, presence_penalty.
+      body.max_completion_tokens = 1000;
+    } else {
+      body.temperature = 0;
+      body.max_tokens = 1000;
+      body.frequency_penalty = 1;
+      body.presence_penalty = 1;
+    }
 
     if (!this.isChatAPI) {
       body["prompt"] =

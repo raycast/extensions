@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Fix Reasoning Model Compatibility] - {PR_MERGE_DATE}
+
+- Fix translation failing with OpenAI reasoning models (o1/o3/o4/gpt-5 series) by sending `max_completion_tokens` instead of `max_tokens`, and omitting `temperature`, `frequency_penalty`, and `presence_penalty` which these models reject
+
 ## [Fix Extension Crash and Language Detection] - 2026-10-13
 
 - Upgrade `@anthropic-ai/sdk` to fix the `Package subpath './_shims/auto/runtime' is not defined by "exports"` crash on launch
