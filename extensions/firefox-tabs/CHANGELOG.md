@@ -1,23 +1,23 @@
 # Firefox Tabs Changelog
 
-## [Fix Setup After Raycast Updates] - {PR_MERGE_DATE}
+## [Fix Setup After Raycast Updates] - 2026-10-31
 
 - Fix installing or updating the native host failing with "file already exists" after Raycast moved its bundled Node.js
 - Repair the link to Raycast's Node.js whenever Search Firefox Tabs or Set Up Firefox Bridge opens, and finish an update that was interrupted
 
-## [Automatic Native Host Updates] - {PR_MERGE_DATE}
+## [Automatic Native Host Updates] - 2026-10-31
 
 - Install a pinned native host release and check it against hashes shipped with the extension
 - Update an older native host automatically when Search Firefox Tabs or Set Up Firefox Bridge opens, then reconnect each Firefox profile to it
 
-## [Profile Setup] - {PR_MERGE_DATE}
+## [Profile Setup] - 2026-10-31
 
 - Search Firefox Tabs lists running profiles that are missing the companion extension, with an action to install it in that profile
 - Offer to install the companion extension, instead of native host setup, when Firefox is running without it
 - Open pages in a profile with the Firefox it runs from, so Developer Edition, Nightly and Firefox outside /Applications work
 - Set Up Firefox Bridge (renamed from Setup Firefox Bridge) shows the native host and every Firefox profile with what each one still needs, and only downloads the native host when it isn't installed
 
-## [Multiple Firefox Profiles] - {PR_MERGE_DATE}
+## [Multiple Firefox Profiles] - 2026-10-31
 
 - Show tabs from every running Firefox profile, not just one
 - Switch to and close tabs in the profile they belong to
