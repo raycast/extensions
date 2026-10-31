@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Fix Cursor "not configured" for non-JWT access tokens] - {PR_MERGE_DATE}
+
+### Bug Fixes
+
+- Detect Cursor 3.27+ access tokens that are no longer JWTs and show a helpful message pointing to the Cookie header fallback, instead of a generic "not configured" error
+
 ## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback

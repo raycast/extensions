@@ -1,5 +1,5 @@
 import { httpFetch } from "../agents/http.ts";
-import { resolveCursorAppAuthSession } from "./auth.ts";
+import { isCursorAccessTokenJwt, readCursorAppAccessToken, resolveCursorAppAuthSession } from "./auth.ts";
 import { parseCursorUsage } from "./parser.ts";
 import type { CursorRequestUsageResponse, CursorUsageSummary, CursorUserInfo } from "./parser.ts";
 import type { CursorError, CursorUsage } from "./types.ts";
@@ -53,6 +53,13 @@ export function resolveCursorCredential(manualCookieHeader?: string): CursorCred
     : null;
 }
 
+export function getCursorNotConfiguredMessage(appToken: string | null): string {
+  if (appToken && !isCursorAccessTokenJwt(appToken)) {
+    return "Cursor's access token uses a format not supported by this extension (Cursor 3.27+ may have changed it). Please paste a cursor.com Cookie header in extension settings.";
+  }
+  return "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.";
+}
+
 export async function fetchCursorUsage(
   manualCookieHeader?: string,
 ): Promise<{ usage: CursorUsage | null; error: CursorError | null }> {
@@ -62,8 +69,7 @@ export async function fetchCursorUsage(
       usage: null,
       error: {
         type: "not_configured",
-        message:
-          "Cursor is not configured. Sign in to Cursor, or paste a cursor.com Cookie header in extension settings.",
+        message: getCursorNotConfiguredMessage(readCursorAppAccessToken()),
       },
     };
   }
