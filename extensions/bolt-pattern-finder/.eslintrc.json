@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json.schemastore.org/eslintrc",
+  "root": true,
+  "extends": ["@raycast"]
+}
