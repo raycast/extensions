@@ -205,8 +205,10 @@ export async function getActiveTimers(): Promise<ActiveTimer[]> {
   return readTimerList();
 }
 
+const EXPIRED_CLEANUP_GRACE_MS = 2_000;
+
 export async function removeExpiredTimers(now = Date.now()): Promise<ActiveTimer[]> {
-  const expired = (await readTimerList()).filter((timer) => timer.endAt <= now);
+  const expired = (await readTimerList()).filter((timer) => now - timer.endAt >= EXPIRED_CLEANUP_GRACE_MS);
   await Promise.all(expired.map((timer) => LocalStorage.removeItem(timerKey(timer.id))));
   return expired;
 }
@@ -241,12 +243,15 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export async function waitForTimer(id: string): Promise<"finished" | "stopped"> {
+  let last: ActiveTimer | undefined;
+
   while (true) {
     const timer = (await getActiveTimers()).find((candidate) => candidate.id === id);
     if (!timer) {
-      return "stopped";
+      return last !== undefined && last.endAt <= Date.now() ? "finished" : "stopped";
     }
 
+    last = timer;
     const remaining = timer.endAt - Date.now();
     if (remaining <= 0) {
       await removeTimer(id);
