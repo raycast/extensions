@@ -4,7 +4,7 @@ Download public videos, audio, and playlists from supported social platforms, or
 
 ## Setup
 
-Open **Download Social Media**. On first launch, the extension automatically downloads and verifies yt-dlp, FFmpeg, and FFprobe in its own support folder. Keep the command open until setup finishes. No administrator access, PATH changes, or executable selection is needed. The only preference is your download folder.
+Open **Download Social Media**. On first launch, the extension automatically downloads and verifies yt-dlp, FFmpeg, and FFprobe in its own support folder. Keep the command open until setup finishes. No administrator access, PATH changes, or executable selection is needed. Preferences let you choose your download folder and customize the two link shortcuts.
 
 ## Multiple links and playlists
 
@@ -15,6 +15,8 @@ Open **Download Social Media**. On first launch, the extension automatically dow
 5. Start the queue. Up to three downloads can run at once. Cancel individual items or the entire queue, open completed files, and retry failed or canceled items.
 
 **Advanced Single Video Quality** preserves the original per-track selection view.
+
+To customize shortcuts, open **Configure Folder and Shortcuts** and edit **Add Link Shortcut** and **Remove Link Shortcut**. Examples: `Alt+N` and `Alt+Backspace`. Use Ctrl or Alt, optionally Shift, with a letter, number, or Backspace. Reopen the command after changing preferences. Invalid or duplicate combinations activate the defaults and show an explanation in the form. Shortcuts apply inside this command; they do not configure a global hotkey to launch the extension.
 
 Supported host families: YouTube, Instagram, X/Twitter, TikTok, Facebook, Reddit, Vimeo, Twitch, and Pinterest. Actual availability depends on the site's extractor, public access, region, and network restrictions. Authentication and cookies are not supported. Live streams are not supported.
 

@@ -28,6 +28,24 @@
       "description": "Defaults to your Windows Downloads folder",
       "type": "directory",
       "required": false
+    },
+    {
+      "name": "addLinkShortcut",
+      "title": "Add Link Shortcut",
+      "description": "For example Ctrl+N or Alt+N. Supports Ctrl, Alt, Shift plus a letter, number, or Backspace. Reopen the command after changing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Ctrl+N",
+      "placeholder": "Ctrl+N"
+    },
+    {
+      "name": "removeLinkShortcut",
+      "title": "Remove Link Shortcut",
+      "description": "Removes the last additional field. Use a different combination from Add Link. Reopen the command after changing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Ctrl+Shift+Backspace",
+      "placeholder": "Ctrl+Shift+Backspace"
     }
   ],
   "scripts": {

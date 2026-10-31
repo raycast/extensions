@@ -11,11 +11,11 @@ import {
   showToast,
   Toast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
+import { linkShortcuts } from "./shortcuts";
 import {
   expand,
   entryKey,
@@ -284,6 +284,10 @@ export function Workspace({
 }) {
   const { push } = useNavigation();
   const settings = getPreferenceValues<Preferences>();
+  const shortcuts = linkShortcuts(
+    settings.addLinkShortcut,
+    settings.removeLinkShortcut,
+  );
   const [kind, setKind] = useState("download");
   const [links, setLinks] = useState([""]);
   const [files, setFiles] = useState<string[]>([]);
@@ -425,7 +429,7 @@ export function Workspace({
             <Action
               title="Add Link"
               icon={Icon.Plus}
-              shortcut={Keyboard.Shortcut.Common.New}
+              shortcut={shortcuts.add.shortcut}
               onAction={() => setLinks((old) => [...old, ""])}
             />
           )}
@@ -433,7 +437,7 @@ export function Workspace({
             <Action
               title="Remove Last Field"
               icon={Icon.XMarkCircle}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "backspace" }}
+              shortcut={shortcuts.remove.shortcut}
               onAction={() => setLinks((old) => old.slice(0, -1))}
             />
           )}
@@ -455,7 +459,7 @@ export function Workspace({
             />
           )}
           <Action
-            title="Configure Download Folder"
+            title="Configure Folder and Shortcuts"
             icon={Icon.Gear}
             onAction={openExtensionPreferences}
           />
@@ -499,7 +503,7 @@ export function Workspace({
         <>
           <Form.Description
             title="Shortcuts"
-            text="Ctrl+N: add a link. Ctrl+Shift+Backspace: remove the last additional field. Also available in Actions."
+            text={`${shortcuts.add.label}: add a link. ${shortcuts.remove.label}: remove the last additional field. Customize in extension preferences.${shortcuts.warning ? ` ${shortcuts.warning}` : ""}`}
           />
           <Form.Description
             title="Platforms"
