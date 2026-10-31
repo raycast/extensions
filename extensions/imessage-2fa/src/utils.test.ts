@@ -1,4 +1,6 @@
 import {
+  combineMessageText,
+  decodeAttributedBody,
   extractCode,
   extractVerificationLink,
   extractTextFromBinaryData,
@@ -337,6 +339,71 @@ describe("Testing binary data extraction from iMessage", () => {
 
     expect(result).toContain("246810");
     expect(result).not.toContain("NSMutableAttributedString");
+  });
+});
+
+describe("Testing attributedBody decoding from iMessage", () => {
+  // Builds a typedstream blob shaped like the ones in chat.db, hex encoded as SQLite's hex() returns it
+  function attributedBodyHex(body: string): string {
+    const text = Buffer.from(body, "utf-8");
+    const length = Buffer.alloc(text.length < 0x80 ? 1 : 3);
+    if (text.length < 0x80) {
+      length.writeUInt8(text.length);
+    } else {
+      length.writeUInt8(0x81);
+      length.writeUInt16LE(text.length, 1);
+    }
+    return Buffer.concat([
+      Buffer.from(
+        "\x04\x0Bstreamtyped\x81\xE8\x03\x84\x01@\x84\x84\x84\x19NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00\x84\x84\bNSObject\x00\x85\x92\x84\x84\x84\bNSString\x01\x94\x84\x01+",
+        "latin1"
+      ),
+      length,
+      text,
+      Buffer.from("\x86\x84\x02iI\x01\x7F\x92\x84\x84\x84\fNSDictionary\x00", "latin1"),
+    ]).toString("hex");
+  }
+
+  test("Decodes a short body", () => {
+    const body = "AOL: If anyone asks you for this code, it's a scam. Your 6-digit code is: 123456";
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes a body with a two-byte length", () => {
+    const body = `Amazon: Your profile security code is 654321. ${"Don't share it with others. ".repeat(6)}`;
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes non-Latin text", () => {
+    const body = "【抖音】验证码9316，用于手机验证 🎉";
+    expect(decodeAttributedBody(attributedBodyHex(body))).toBe(body);
+  });
+
+  test("Decodes a real iMessage payload", () => {
+    const binaryData =
+      "\x04\x0Bstreamtyped\x81è\x03\x84\x01@\x84\x84\x84\x19NSMutableAttributedString\x00\x84\x84\x12NSAttributedString\x00\x84\x84\bNSObject\x00\x85\x92\x84\x84\x84\x0FNSMutableString\x01\x84\x84\bNSString\x01\x95\x84\x01+\x81\x85\x00DO NOT share. We will NEVER call you to ask for this code. Didn't request? Contact support. Your HealthSafe ID access code is: 643066\x86\x84\x02iI\x01\x7F\x92";
+    const result = decodeAttributedBody(Buffer.from(binaryData, "latin1").toString("hex"));
+    expect(result).toMatch(/^DO NOT share\..*access code is: 643066$/);
+    expect(extractCode(result)).toBe("643066");
+  });
+
+  test("Returns an empty string when there is no body", () => {
+    expect(decodeAttributedBody(null)).toBe("");
+    expect(decodeAttributedBody("")).toBe("");
+    expect(decodeAttributedBody(Buffer.from("\x04\x0Bstreamtyped\x00NSObject", "latin1").toString("hex"))).toBe("");
+  });
+
+  test("Combines a notification label with the decoded body", () => {
+    expect(combineMessageText("Time Sensitive", "Your Example verification code is: 246810")).toBe(
+      "Time Sensitive Your Example verification code is: 246810"
+    );
+  });
+
+  test("Does not duplicate text already in the decoded body", () => {
+    const body = "Your verification code is: 246810";
+    expect(combineMessageText(body, body)).toBe(body);
+    expect(combineMessageText(null, body)).toBe(body);
+    expect(combineMessageText(body, "")).toBe(body);
   });
 });
 
