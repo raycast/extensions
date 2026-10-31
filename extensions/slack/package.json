@@ -160,12 +160,20 @@
       "default": true
     }
   ],
-  "resourceProvider": "read-user",
+  "resourceProvider": "read-resource",
   "tools": [
     {
       "title": "Users",
       "name": "search-user-mentions",
       "description": "Search workspace members by name, username, email, or job title to mention in AI Chat.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
+      "title": "Channels",
+      "name": "search-channel-mentions",
+      "description": "Search public and private channels by name to mention in AI Chat, listing your own channels by default.",
       "functionalities": [
         "AI mention search"
       ]

@@ -34,6 +34,59 @@
         {
           "title": "Long (50 chars)",
           "value": "long"
+        },
+        {
+          "title": "Marquee",
+          "value": "marquee"
+        }
+      ]
+    },
+    {
+      "name": "menuBarIconStyle",
+      "type": "dropdown",
+      "title": "Menu Bar Icon",
+      "description": "Show album artwork or a progress ring",
+      "required": false,
+      "default": "artwork",
+      "data": [
+        {
+          "title": "Album Artwork",
+          "value": "artwork"
+        },
+        {
+          "title": "Progress Ring",
+          "value": "progress"
+        }
+      ]
+    },
+    {
+      "name": "hideWhenIdle",
+      "type": "checkbox",
+      "title": "Hide When Idle",
+      "label": "Hide the menu bar icon when nothing is playing",
+      "description": "Hide the menu bar item when no track is playing",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "searchSource",
+      "type": "dropdown",
+      "title": "Play Song Source",
+      "description": "Which source Play Song searches by default",
+      "required": false,
+      "default": "both",
+      "data": [
+        {
+          "title": "YouTube Music + YouTube",
+          "value": "both"
+        },
+        {
+          "title": "YouTube Music",
+          "value": "ytmusic"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
         }
       ]
     }
@@ -49,7 +102,7 @@
     {
       "name": "now-playing",
       "title": "Now Playing",
-      "description": "View the currently playing track",
+      "description": "View the current track, queue, and recently played",
       "mode": "view"
     },
     {
@@ -111,10 +164,17 @@
       "title": "Dislike Track",
       "description": "Dislike or undislike the current track",
       "mode": "no-view"
+    },
+    {
+      "name": "record-player-state",
+      "title": "Record Player State",
+      "description": "Records the current track for the recently played list",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.3",
+    "@raycast/api": "^2.8.2",
     "@raycast/utils": "^2.2.2",
     "run-applescript": "^7.0.0"
   },
@@ -136,5 +196,8 @@
   },
   "platforms": [
     "macOS"
+  ],
+  "contributors": [
+    "danieltsam"
   ]
 }

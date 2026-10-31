@@ -1,6 +1,7 @@
 instructions: |
   When a user asks for a GIF, search for it and include a direct media link in the response.
   Use GIPHY Clips only when the user asks for a clip or video.
+  Use GIPHY Stickers only when the user asks for a sticker.
 evals:
   - input: "@gif-search Find a GIF of a cat waving hello"
     mocks:
@@ -27,3 +28,15 @@ evals:
           arguments:
             service: giphy-clips
       - includes: "https://media.giphy.com/media/applause/720p.mp4"
+  - input: "@gif-search Find a GIPHY sticker of a thumbs up"
+    mocks:
+      search-gifs:
+        - title: "Thumbs up sticker"
+          mediaUrl: "https://media.giphy.com/media/thumbs-up/giphy.gif"
+          pageUrl: "https://giphy.com/stickers/thumbs-up"
+    expected:
+      - callsTool:
+          name: search-gifs
+          arguments:
+            service: giphy-stickers
+      - includes: "https://media.giphy.com/media/thumbs-up/giphy.gif"

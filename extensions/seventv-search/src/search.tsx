@@ -187,7 +187,7 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
     const controller = new AbortController();
     setIsLoading(true);
     setErrorMessage(undefined);
-    const timeout = setTimeout(async () => {
+    void (async () => {
       try {
         const result = await (source?.load ?? searchEmotes)(
           {
@@ -223,11 +223,8 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
       } finally {
         if (fetchId === fetchIdRef.current) setIsLoading(false);
       }
-    }, 300);
-    return () => {
-      controller.abort();
-      clearTimeout(timeout);
-    };
+    })();
+    return () => controller.abort();
   }, [
     preferencesLoaded,
     source,
@@ -587,6 +584,7 @@ This status applies to 7TV personal emote sets. It does not describe general per
   if (isGridView) {
     return (
       <Grid
+        throttle
         isLoading={isLoading}
         onSearchTextChange={changeSearch}
         searchText={searchText}

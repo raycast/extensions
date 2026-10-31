@@ -184,9 +184,7 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
         storeValue
       />
       <Form.Dropdown {...itemProps.branch} title="Branch Name">
-        {branches?.map((b) => (
-          <Form.Dropdown.Item key={b} value={b} title={b} />
-        ))}
+        {branches?.map((b) => <Form.Dropdown.Item key={b} value={b} title={b} />)}
       </Form.Dropdown>
       {values.cloneTool === "gh" ? (
         <Form.Description
