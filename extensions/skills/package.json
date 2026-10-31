@@ -35,7 +35,14 @@
       "name": "manage-skills",
       "title": "Manage Skills",
       "subtitle": "Skills",
-      "description": "View and remove installed skills",
+      "description": "Review installed skills and manage Skills CLI installs",
+      "mode": "view"
+    },
+    {
+      "name": "manage-plugins",
+      "title": "Manage Plugins",
+      "subtitle": "Skills",
+      "description": "View installed Claude Code and Codex plugins",
       "mode": "view"
     },
     {
@@ -49,7 +56,7 @@
       "name": "update-all-skills",
       "title": "Update All Skills",
       "subtitle": "Skills",
-      "description": "Update all installed skills",
+      "description": "Update remote skills tracked by the Skills CLI",
       "mode": "no-view"
     }
   ],

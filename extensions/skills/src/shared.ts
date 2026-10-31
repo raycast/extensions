@@ -67,6 +67,7 @@ export type InstalledSkill = {
   ref?: string;
   installedAt?: string;
   updatedAt?: string;
+  managedBySkillsCli?: boolean;
 };
 
 export type SkillFrontmatter = {

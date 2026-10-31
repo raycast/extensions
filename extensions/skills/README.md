@@ -10,7 +10,8 @@ Search and manage AI agent skills from [Skills](https://skills.sh) directly in R
 - Filter available skills by owner
 - Install skills for all supported agents
 - View security audit status from `skills.sh` before installing
-- View, update, and remove installed skills
+- Review installed skills by management source; update and remove Skills CLI managed installs
+- View installed Claude Code and Codex plugins and manage supported installations
 - Check for skill updates — outdated skills are highlighted with an orange icon
 - Filter installed skills by agent
 - View skill source, install date, and update date from the lock file
@@ -30,7 +31,13 @@ Search for agent skills from skills.sh with real-time results. Results show whic
 
 ### Manage Skills
 
-View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
+View installed skills discovered by the Skills CLI, grouped by management source. Skills tracked in the CLI lock file can be updated or removed. Other local or externally managed skills remain available for reading, opening, and copying; the extension does not alter them. Outdated tracked skills are highlighted in "Updates Available". Filter by agent to see which skills are available for each AI agent.
+
+### Manage Plugins
+
+View plugins already installed in Claude Code and Codex using each host's CLI. The full-width list shows each installation separately, including Claude Code project installations. Open a plugin to inspect its status, version, scope, and location. User-scope Claude Code plugins can be enabled, disabled, or removed; removal keeps their persistent data. Codex plugins can be removed. Project and local Claude Code plugins are shown for inspection, since changing them requires their owning project directory. Removal asks for confirmation.
+
+The host CLI must be installed for its plugins to appear. The command reports a host-specific error if one CLI is unavailable.
 
 ### Inspect Agent Package
 

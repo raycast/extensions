@@ -81,6 +81,8 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
+  const cliManagedSkills = filteredSkills.filter((skill) => skill.managedBySkillsCli);
+  const localSkills = filteredSkills.filter((skill) => !skill.managedBySkillsCli);
   // Global count — "Update All" applies to all agents regardless of filter
   const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
@@ -106,7 +108,7 @@ export default function Command() {
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills from Search Skills to manage them here."
+          description="The Skills CLI did not find skills installed for its supported agents."
           icon={Icon.Box}
           actions={
             <ActionPanel>
@@ -164,8 +166,21 @@ export default function Command() {
               />
             </List.Section>
           )}
-          <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>
-            {filteredSkills.map((skill) => (
+          <List.Section title="Skills CLI Managed" subtitle={`${cliManagedSkills.length} skills`}>
+            {cliManagedSkills.map((skill) => (
+              <InstalledSkillListItem
+                key={skill.name}
+                skill={skill}
+                isSelected={selectedId === skill.name}
+                isShowingDetail={isShowingDetail}
+                mutate={mutate}
+                onToggleDetail={toggleDetail}
+                onRefresh={revalidate}
+              />
+            ))}
+          </List.Section>
+          <List.Section title="Local or Externally Managed" subtitle={`${localSkills.length} skills`}>
+            {localSkills.map((skill) => (
               <InstalledSkillListItem
                 key={skill.name}
                 skill={skill}

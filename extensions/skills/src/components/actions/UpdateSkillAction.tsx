@@ -23,7 +23,7 @@ export function UpdateSkillAction({ skillName, mutate }: UpdateSkillActionProps)
             title: isSingle ? `Update "${skillName}"?` : "Update All Skills?",
             message: isSingle
               ? `This will update "${skillName}" to the latest version.`
-              : "This will update all installed skills to the latest version.",
+              : "This will update all remote skills tracked by the Skills CLI lock file. Locally managed skills are excluded.",
             primaryAction: { title: "Update", style: Alert.ActionStyle.Default },
           },
           toast: {

@@ -1,6 +1,7 @@
 import { homedir } from "node:os";
 import type { InstalledSkill, Skill } from "../shared";
 import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
+import { readSkillLock, requireCliManagedSkill } from "./skill-lock";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
@@ -100,6 +101,7 @@ export async function discoverAgents(): Promise<AgentDiscoveryResult> {
 }
 
 export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {
+  requireCliManagedSkill(skillName, await readSkillLock());
   const args = ["remove", skillName, "-g"];
   if (agentDisplayNames && agentDisplayNames.length > 0) {
     args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
@@ -109,9 +111,15 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
 }
 
 export async function updateAllSkills(): Promise<void> {
-  await runSkillsCli(["update", "-g", "-y"]);
+  const lock = await readSkillLock();
+  const names = Object.keys(lock).filter((name) => lock[name].sourceType !== "local");
+  if (names.length === 0) throw new Error("No Skills CLI managed remote skills are available to update.");
+  for (const name of names) {
+    await updateSkill(name);
+  }
 }
 
 export async function updateSkill(skillName: string): Promise<void> {
+  requireCliManagedSkill(skillName, await readSkillLock());
   await runSkillsCli(["update", skillName, "-g", "-y"]);
 }

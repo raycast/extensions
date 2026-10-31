@@ -1,32 +1,10 @@
-import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { getGithubToken } from "../preferences";
 import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
 import { withSkillsCliLock } from "./skills-cli-runner";
-
-const LOCK_FILE = ".skill-lock.json";
-const AGENTS_DIR = ".agents";
-
-function getSkillLockPath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
-  return join(homedir(), AGENTS_DIR, LOCK_FILE);
-}
-
-async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
-  try {
-    const raw = await readFile(getSkillLockPath(), "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
-      return parsed.skills as Record<string, SkillLockEntry>;
-    }
-    return {};
-  } catch {
-    return {};
-  }
-}
+import { readSkillLock } from "./skill-lock";
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
   return (await getInstalledSkillsSnapshot()).skills;
@@ -53,7 +31,7 @@ function tildifyPath(path: string): string {
 function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
   return skills.map((skill) => {
     const lock = lockEntries[skill.name];
-    if (!lock) return skill;
+    if (!lock) return { ...skill, managedBySkillsCli: false };
     // Local installs record the absolute directory path as both source and sourceUrl.
     const isLocal = lock.sourceType === "local";
     return {
@@ -64,6 +42,7 @@ function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, 
       ref: lock.ref,
       installedAt: lock.installedAt,
       updatedAt: lock.updatedAt,
+      managedBySkillsCli: true,
     };
   });
 }
