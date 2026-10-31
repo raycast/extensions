@@ -1,0 +1,7 @@
+node_modules/
+.test_dist/
+.agents/
+dist/
+*.log
+.DS_Store
+Thumbs.db
