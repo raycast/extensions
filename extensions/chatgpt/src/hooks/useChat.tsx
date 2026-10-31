@@ -2,43 +2,55 @@ import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/
 import { useCallback, useMemo, useRef, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, Model } from "../type";
+import { Chat, ChatHook, Message, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
+import { requestCodexResponse } from "../utils/codex-responses";
+import { listCodexAppServerModels } from "../utils/codex-app-server";
+import { resolveAuthStatus } from "../utils/auth";
+import { resolveModelOption, normalizeAvailableOptions } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
+import { ResponseInput, ResponseInputContent } from "openai/resources/responses/responses";
 import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
 import { Stream } from "openai/streaming";
 
-function hasUnsupportedReasoningEffortError(error: unknown): boolean {
+function isUnsupportedSetting(error: unknown, setting: string): boolean {
   const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
-  if (!message.includes("reasoning_effort")) {
-    return false;
-  }
   return (
-    message.includes("unknown") ||
-    message.includes("unsupported") ||
-    message.includes("not allowed") ||
-    message.includes("not permitted") ||
-    message.includes("unrecognized")
+    message.includes(setting) &&
+    ["unsupported", "does not support", "not allowed", "not permitted", "unrecognized", "unknown"].some((word) =>
+      message.includes(word),
+    )
   );
 }
 
-function hasUnsupportedTemperatureError(error: unknown): boolean {
-  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
-  if (!message.includes("temperature")) {
-    return false;
-  }
-  return (
-    message.includes("unsupported") ||
-    message.includes("does not support") ||
-    message.includes("not allowed") ||
-    message.includes("not permitted") ||
-    message.includes("unrecognized")
-  );
+function toResponseInput(messages: Message[]): ResponseInput {
+  return messages
+    .filter((message) => message.role === "user" || message.role === "assistant")
+    .map((message) => {
+      if (typeof message.content === "string")
+        return { role: message.role as "user" | "assistant", content: message.content };
+      const parts = Array.isArray(message.content) ? message.content : [];
+      const content: ResponseInputContent[] = [];
+      for (const part of parts) {
+        if (part.type === "text") content.push({ type: "input_text", text: part.text });
+        if (part.type === "image_url")
+          content.push({
+            type: "input_image",
+            image_url: typeof part.image_url === "string" ? part.image_url : part.image_url.url,
+            detail: "auto",
+          });
+      }
+      return { role: message.role as "user" | "assistant", content };
+    });
 }
 
-export function useChat<T extends Chat>(props: T[]): ChatHook {
+export function useChat<T extends Chat>(
+  props: T[],
+  initialCodexThreadId?: string | null,
+  initialInstructions = "",
+): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -51,6 +63,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const codexThreadRef = useRef<{ threadId: string | null; instructions: string }>({
+    threadId: initialCodexThreadId ?? null,
+    instructions: initialInstructions,
+  });
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -60,11 +76,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const history = useHistory();
   const isAutoTTS = useAutoTTS();
-  const chatGPT = useChatGPT();
+  const chatGPT = useChatGPT({ allowMissingApiKey: true });
 
   async function ask(question: string, files: string[], model: Model) {
     clearSearchBar();
 
+    setErrorMsg(null);
+    setIsAborted(false);
     setLoading(true);
     const toast = await showToast({
       title: "Getting your answer...",
@@ -92,7 +110,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         return { apiKey: {}, params: {} };
       }
       return {
-        apiKey: { "api-key": config.apiKey },
+        apiKey: { "api-key": config.apiKey ?? "" },
         params: { "api-version": "2023-06-01-preview" },
       };
     };
@@ -107,92 +125,156 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       headers: { ...headers.apiKey },
       signal: abortSignal,
     };
-    const selectedReasoningEffort =
-      model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
-
-    const createCompletion = (includeReasoningEffort: boolean, includeTemperature: boolean) =>
-      chatGPT.chat.completions.create(
-        {
-          model: model.option,
-          ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
-          ...(includeReasoningEffort && selectedReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
-          messages: [
-            ...chatTransformer(
-              [...data].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)),
-              model.prompt,
-            ),
-            { role: "user", content: buildUserMessage(question, files) },
-          ],
-          stream: useStream,
-        },
-        requestOptions,
-      );
-    let includeReasoningEffort = Boolean(selectedReasoningEffort);
-    let includeTemperature = true;
+    const selectedReasoningEffort = model.enableReasoningEffortChange
+      ? model.option === "gpt-6-astra" && model.reasoningEffort === "none"
+        ? "low"
+        : model.reasoningEffort
+      : "medium";
     let retriedWithoutReasoningEffort = false;
     let retriedWithoutTemperature = false;
 
     try {
-      let res: ChatCompletion | Stream<ChatCompletionChunk>;
-      for (;;) {
-        try {
-          res = await createCompletion(includeReasoningEffort, includeTemperature);
-          break;
-        } catch (error) {
-          if (includeReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
-            includeReasoningEffort = false;
-            retriedWithoutReasoningEffort = true;
-            toast.title = "Reasoning effort not supported";
-            toast.message = "Retrying without effort setting...";
-            toast.style = Toast.Style.Animated;
-            continue;
-          }
-          if (includeTemperature && hasUnsupportedTemperatureError(error)) {
-            includeTemperature = false;
-            retriedWithoutTemperature = true;
-            toast.title = "Temperature not supported";
-            toast.message = "Retrying with the model's default temperature...";
-            toast.style = Toast.Style.Animated;
-            continue;
-          }
-          throw error;
-        }
+      const auth = await resolveAuthStatus();
+      const codexModels = auth.provider === "chatgpt" ? await listCodexAppServerModels() : [];
+      const availableOptions =
+        auth.provider === "chatgpt"
+          ? normalizeAvailableOptions(codexModels.filter((item) => !item.hidden).map((item) => item.model || item.id))
+          : undefined;
+      if (auth.provider === "chatgpt" && availableOptions?.length === 0) {
+        throw new Error("Your Codex account does not currently list any available models.");
+      }
+      const modelOption = resolveModelOption(model.option, availableOptions);
+
+      const messages: Message[] = [
+        ...chatTransformer(data, model.prompt),
+        { role: "user", content: buildUserMessage(question, auth.provider === "chatgpt" ? [] : files) },
+      ];
+
+      if (auth.provider === "chatgpt" && modelOption !== model.option) {
+        toast.message = `Using ${modelOption} for ChatGPT sign-in.`;
       }
 
-      if (useStream) {
-        const stream = res as Stream<ChatCompletionChunk>;
-
-        for await (const chunk of stream) {
-          try {
-            const content = chunk.choices[0]?.delta?.content;
-
-            if (content) {
-              chat.answer += chunk.choices[0].delta.content;
-              setStreamData({ ...chat, answer: chat.answer });
-            }
-          } catch (error) {
-            if (abortSignal.aborted) {
-              toast.title = "Request canceled";
-              toast.message = undefined;
-              setIsAborted(true);
-            } else {
-              const message = `Couldn't stream message: ${error}`;
-              toast.title = "Error";
-              toast.message = message;
-              setErrorMsg(message);
-            }
-            toast.style = Toast.Style.Failure;
-            setLoading(false);
+      if (auth.provider === "chatgpt") {
+        const onDelta = (content: string) => {
+          if (!content) {
+            return;
           }
-        }
+          chat.answer += content;
+          setStreamData({ ...chat, answer: chat.answer });
+        };
 
-        setTimeout(async () => {
-          setStreamData(undefined);
-        }, 5);
+        const instructions = model.prompt;
+        const currentCodexThreadId =
+          codexThreadRef.current.instructions === instructions ? codexThreadRef.current.threadId : null;
+
+        const response = await requestCodexResponse({
+          model: modelOption,
+          effort: selectedReasoningEffort,
+          supportedEfforts: codexModels
+            .find((item) => (item.model || item.id) === modelOption)
+            ?.supportedReasoningEfforts?.map((item) => item.reasoningEffort),
+          messages,
+          imagePaths: files,
+          instructions,
+          stream: useStream,
+          signal: abortSignal,
+          onDelta,
+          threadId: currentCodexThreadId,
+        });
+
+        codexThreadRef.current = {
+          threadId: response.threadId,
+          instructions,
+        };
+
+        chat = { ...chat, answer: response.text };
+
+        if (useStream) {
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        }
       } else {
-        const completion = res as ChatCompletion;
-        chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+        if (auth.provider === "none") {
+          throw new Error("You are not signed in. Add an API key in extension preferences or sign in with ChatGPT.");
+        }
+
+        if (!chatGPT) {
+          throw new Error("OpenAI API key is missing. Add it in extension preferences.");
+        }
+
+        if (getConfiguration().useAzure) {
+          const azureMessages = messages.filter((message) => message.role !== "developer");
+          let includeTemperature = true;
+          let includeReasoningEffort = model.enableReasoningEffortChange && selectedReasoningEffort !== "none";
+          let result: ChatCompletion | Stream<ChatCompletionChunk>;
+          for (;;) {
+            try {
+              const params = {
+                model: getConfiguration().azureDeployment || modelOption,
+                messages: azureMessages,
+                ...(includeTemperature ? { temperature: Number(model.temperature) } : {}),
+                ...(includeReasoningEffort ? { reasoning_effort: selectedReasoningEffort } : {}),
+              };
+              result = useStream
+                ? await chatGPT.chat.completions.create({ ...params, stream: true }, requestOptions)
+                : await chatGPT.chat.completions.create({ ...params, stream: false }, requestOptions);
+              break;
+            } catch (error) {
+              if (includeReasoningEffort && isUnsupportedSetting(error, "reasoning_effort")) {
+                includeReasoningEffort = false;
+                retriedWithoutReasoningEffort = true;
+                continue;
+              }
+              if (includeTemperature && isUnsupportedSetting(error, "temperature")) {
+                includeTemperature = false;
+                retriedWithoutTemperature = true;
+                continue;
+              }
+              throw error;
+            }
+          }
+          if (useStream) {
+            for await (const chunk of result as Stream<ChatCompletionChunk>) {
+              const delta = chunk.choices[0]?.delta?.content;
+              if (delta) {
+                chat.answer += delta;
+                setStreamData({ ...chat, answer: chat.answer });
+              }
+            }
+            setStreamData(undefined);
+          } else {
+            const completion = result as ChatCompletion;
+            chat = { ...chat, answer: completion.choices[0]?.message.content ?? "" };
+          }
+        } else {
+          const request = {
+            model: modelOption,
+            instructions: model.prompt,
+            input: toResponseInput(messages),
+            ...(model.enableReasoningEffortChange ? { reasoning: { effort: selectedReasoningEffort } } : {}),
+            store: false,
+          } as const;
+          if (useStream) {
+            const stream = await chatGPT.responses.create({ ...request, stream: true }, requestOptions);
+            for await (const event of stream) {
+              if (event.type === "response.output_text.delta") {
+                chat.answer += event.delta;
+                setStreamData({ ...chat, answer: chat.answer });
+              } else if (event.type === "response.failed") {
+                throw new Error(event.response.error?.message || "OpenAI response failed.");
+              } else if (event.type === "error") {
+                throw new Error(event.message);
+              }
+            }
+            setStreamData(undefined);
+          } else {
+            const response = await chatGPT.responses.create({ ...request, stream: false }, requestOptions);
+            chat = { ...chat, answer: response.output_text };
+          }
+        }
       }
+
       if (isAutoTTS) {
         say.stop();
         say.speak(chat.answer);
@@ -227,7 +309,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         await history.add(chat);
       }
     } catch (err) {
-      if (abortSignal.aborted) {
+      if (abortSignal.aborted || isAbortError(err)) {
         toast.title = "Request canceled";
         toast.message = undefined;
         setIsAborted(true);
@@ -256,11 +338,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const clear = useCallback(async () => {
     setData([]);
+    codexThreadRef.current = { threadId: null, instructions: "" };
   }, [setData]);
 
   return useMemo(
     () => ({
       data,
+      codexThreadId: codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,
@@ -276,6 +360,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }),
     [
       data,
+      codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,
@@ -290,4 +375,13 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       abort,
     ],
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const lowerMessage = error.message.toLowerCase();
+  return error.name === "AbortError" || lowerMessage.includes("abort") || lowerMessage.includes("canceled");
 }

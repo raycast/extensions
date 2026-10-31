@@ -17,8 +17,7 @@ function limitConversationLength(chats: Chat[]) {
   const newChats: Chat[] = [];
   let tokens = 0;
 
-  // Walk from the newest chat back so the most recent turns are kept when the budget runs out.
-  // The newest turn is always kept, even if it alone exceeds the budget, so a follow-up never loses all context.
+  // Keep the newest turns when the conversation exceeds the context budget.
   for (let i = chats.length - 1; i >= 0; i--) {
     const chat = chats[i];
     const questionTokens = countOpenAITokens(chat.question);

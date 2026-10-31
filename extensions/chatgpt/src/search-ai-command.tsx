@@ -1,3 +1,4 @@
+import { AuthGate } from "./views/auth-required";
 import { Action, ActionPanel, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
@@ -8,6 +9,14 @@ import { CommandForm, iconsByContentSource } from "./views/command/from";
 import CommandView, { CommandLaunchProps } from "./views/command/command-view";
 
 export default function EntryPoint(props: CommandLaunchProps) {
+  return (
+    <AuthGate>
+      <AuthenticatedEntryPoint {...props} />
+    </AuthGate>
+  );
+}
+
+function AuthenticatedEntryPoint(props: CommandLaunchProps) {
   const requestModelId = props.launchContext?.commandId;
   if (requestModelId) {
     return <CommandView {...props} />;
