@@ -1,5 +1,19 @@
 # Video Downloader Changelog
 
+## [Fix] - 2026-10-31
+
+- Auto-dubbed YouTube videos no longer fill the Format dropdown with identical-looking copies of each format, one per dubbed language. Each format is listed once, and a new Audio Language dropdown (shown only for dubbed videos) picks the soundtrack, defaulting to the original.
+- Fixed the default format (and the AI tool's download) sometimes being a dubbed soundtrack instead of the original
+- Downloads in a dubbed language are saved under their own file name (e.g. "… [Polish].mp4")
+- A download that yt-dlp skips because the file already exists now says "Already Downloaded" instead of "Downloaded"
+- Pasting something that isn't a link now says "Not a Video Link" instead of offering Try Again, and error messages no longer start with yt-dlp's internal tags like "[generic]"
+- Added a "Cancel Download" action (⌘. on macOS, Ctrl+. on Windows) to the download progress toast
+- Format entries now show the codec, plus the frame rate above 30 fps and HDR, so formats that share a resolution can be told apart. Audio entries lead with their language, and YouTube's volume-normalized copies are labeled "DRC".
+- Fixed yt-dlp missing YouTube formats when run from Raycast: it couldn't find the JavaScript runtime (deno) that Homebrew installs alongside it
+- Added a "Debug Logging" preference that shows the raw yt-dlp output and every format it returns in the console, and a "Strict Redaction" preference that hides URL query strings in those logs before you share them
+- Updated to Raycast API 2.x and refreshed dependencies, which resolves an esbuild security advisory
+- The "Try Again" shortcut now uses the standard Refresh shortcut on each platform (⌘R on macOS, Ctrl+R on Windows)
+
 ## [Fix] - 2026-10-28
 
 - Fixed "Couldn't check versions" in Update Libraries when yt-dlp or ffmpeg has an update. `brew outdated` exits with code 1 whenever something is outdated, and that was treated as a failure, so the check failed exactly when there was something to upgrade.

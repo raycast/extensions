@@ -5,6 +5,7 @@ import {
   STRUCTURED_DESKTOP_RENAMER_API_VERSION,
   SUPPORTED_DESKTOP_RENAMER_API_MAJOR,
   STRUCTURED_READ_METHODS,
+  UNIX_SOCKET_TRANSPORT_API_VERSION,
   SpaceAPIProtocolError,
   type SpaceAPIInfo,
   type SpaceAPIMethod,
@@ -242,6 +243,27 @@ export function parseAPIInfo(value: unknown): SpaceAPIInfo {
   if (!eventNotifications && eventCapabilities.length > 0) {
     throw protocolError("Structured API information cannot advertise event capabilities when events are disabled.");
   }
+  const transports =
+    record.transports === undefined
+      ? ["distributedNotificationCenter"]
+      : requiredStringArray(record.transports, "transports");
+  if (
+    new Set(transports).size !== transports.length ||
+    transports.some((transport) => !["unixDomainSocket", "distributedNotificationCenter"].includes(transport))
+  ) {
+    throw protocolError("Structured API information contains an unknown or duplicate transport.");
+  }
+  const socketEndpoint = nullableString(record.socketEndpoint, "socketEndpoint");
+  if (transports.includes("unixDomainSocket") && !socketEndpoint) {
+    throw protocolError(
+      "Structured API information must provide a socket endpoint when socket transport is available.",
+    );
+  }
+  const accessRestricted =
+    record.accessRestricted === undefined ? false : requiredBoolean(record.accessRestricted, "accessRestricted");
+  if (accessRestricted && compareVersions(contractVersion, UNIX_SOCKET_TRANSPORT_API_VERSION) < 0) {
+    throw protocolError("An older SpaceAPI contract cannot advertise access restriction.");
+  }
   return {
     contractVersion,
     jsonRPCVersion,
@@ -251,6 +273,12 @@ export function parseAPIInfo(value: unknown): SpaceAPIInfo {
     eventNotifications,
     eventCapabilities,
     maxPayloadBytes,
+    transports,
+    socketEndpoint,
+    accessRestricted,
+    ...(record.returnToOriginalSpace === undefined
+      ? {}
+      : { returnToOriginalSpace: requiredBoolean(record.returnToOriginalSpace, "returnToOriginalSpace") }),
   };
 }
 

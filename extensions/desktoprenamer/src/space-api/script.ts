@@ -1,4 +1,8 @@
-import { SpaceAPIParameters, SpaceAPIMethod } from "./contract";
+import { SpaceAPIMethod, SpaceAPIMethodArguments, SpaceAPIParameters, SpaceAPIWindowAction } from "./contract";
+
+type ParsedSpaceAPICommand = {
+  [M in SpaceAPIMethod]: { name: M; arguments: SpaceAPIMethodArguments[M] };
+}[SpaceAPIMethod];
 
 export function escapeAppleScriptString(str: string): string {
   return str
@@ -10,9 +14,7 @@ export function escapeAppleScriptString(str: string): string {
     .replace(/\t/g, "\\t");
 }
 
-export function parseSpaceAPICommand(
-  command: string,
-): { name: SpaceAPIMethod; arguments: Record<string, string> } | null {
+export function parseSpaceAPICommand(command: string): ParsedSpaceAPICommand | null {
   const quoted = (value: string) => value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
   if (command === "get api version") return { name: "getAPIVersion", arguments: {} };
   if (command === "get current space name") return { name: "getCurrentSpaceName", arguments: {} };
@@ -40,19 +42,29 @@ export function parseSpaceAPICommand(
   match = command.match(/^move window to space "(.*)"$/);
   if (match) return { name: "moveWindowToSpace", arguments: { spaceID: quoted(match[1]) } };
   match = command.match(/^rearrange space "(.*)" direction "(up|down)"$/);
-  if (match) return { name: "rearrangeSpace", arguments: { spaceID: quoted(match[1]), direction: match[2] } };
+  if (match) {
+    return {
+      name: "rearrangeSpace",
+      arguments: { spaceID: quoted(match[1]), direction: match[2] as "up" | "down" },
+    };
+  }
   match = command.match(/^focus window (\d+) pid (\d+)$/);
-  if (match) return { name: "focusWindow", arguments: { windowID: match[1], pid: match[2] } };
+  if (match) return { name: "focusWindow", arguments: { windowID: Number(match[1]), pid: Number(match[2]) } };
   match = command.match(/^execute window action "(\d+)" pid "(\d+)" action "([^"]+)"$/);
-  if (match) return { name: "executeWindowAction", arguments: { windowID: match[1], pid: match[2], action: match[3] } };
+  if (match) {
+    return {
+      name: "executeWindowAction",
+      arguments: { windowID: Number(match[1]), pid: Number(match[2]), action: match[3] as SpaceAPIWindowAction },
+    };
+  }
   match = command.match(/^move specific window "(\d+)"(?: pid "(\d+)")? from space "(.*)" to space "(.*)"$/);
   if (match) {
     const [, windowID, pid, fromSpaceID, targetSpaceID] = match;
     return {
       name: "moveSpecificWindow",
       arguments: {
-        windowID,
-        ...(pid ? { pid } : {}),
+        windowID: Number(windowID),
+        ...(pid ? { pid: Number(pid) } : {}),
         fromSpaceID: quoted(fromSpaceID),
         targetSpaceID: quoted(targetSpaceID),
       },

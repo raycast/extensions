@@ -370,7 +370,17 @@ export async function netbirdUpdate(
     throw new Error("NetBird is not installed via Homebrew. We can't update it automatically.");
   }
 
-  const outdated = (await execAsync("brew outdated netbird", { env })).stdout.trim();
+  // `brew outdated <formula>` exits with code 1 when the formula is outdated, so a
+  // rejection with output is the "update available" case, not a failure.
+  const outdated = await execAsync("brew outdated netbird", { env }).then(
+    ({ stdout }) => stdout.trim(),
+    (error: { code?: number; stdout?: string }) => {
+      if (error.code === 1 && error.stdout?.trim()) {
+        return error.stdout.trim();
+      }
+      throw error;
+    },
+  );
   if (!outdated) {
     return { version: brewVersionBefore, updated: false, serviceRestarted: false };
   }

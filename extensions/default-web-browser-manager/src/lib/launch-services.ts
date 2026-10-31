@@ -11,14 +11,21 @@ export type BrowserListResult = {
   browsers: BrowserInfo[];
 };
 
+// `swift` compiles the script on every run, which takes much longer when its module cache is cold
+const SWIFT_TIMEOUT_MS = 60_000;
+
 function runSwiftScript<T>(script: string, parser: (stdout: string) => T, args: string[] = []): Promise<T> {
   return new Promise((resolve, reject) => {
     // -suppress-warnings avoids noisy deprecation logs from LaunchServices APIs
     const child = execFile(
       "swift",
       ["-suppress-warnings", "-", ...args],
-      { timeout: 10_000 },
+      { timeout: SWIFT_TIMEOUT_MS },
       (error, stdout, stderr) => {
+        if (error?.killed) {
+          reject(new Error(`swift did not finish within ${SWIFT_TIMEOUT_MS / 1000} seconds`));
+          return;
+        }
         if (error) {
           reject(new Error(stderr || error.message));
           return;
