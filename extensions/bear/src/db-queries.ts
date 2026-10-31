@@ -1,97 +1,34 @@
-export const SEARCH_NOTES_V1 = `
-SELECT
-  notes.ZUNIQUEIDENTIFIER AS id,
-  notes.ZTITLE AS title,
-  notes.ZTEXT AS text,
-  notes.ZMODIFICATIONDATE AS modified_at,
-  notes.ZCREATIONDATE AS created_at,
-  group_concat(tags.ZTITLE) AS tags,
-  notes.ZENCRYPTED AS encrypted
-FROM
-  ZSFNOTE AS notes
-LEFT OUTER JOIN
-  Z_7TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_7NOTES
-LEFT OUTER JOIN
-  ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK
-WHERE
-  -- When there is a query, filter the body by that query, otherwise
-  -- ignore the query
-  (
-    lower(notes.ZTITLE) LIKE lower('%' || :query || '%')
-    OR lower(notes.ZTEXT) LIKE lower('%' || :query || '%')
-    OR :query = ''
-    OR lower(notes.ZUNIQUEIDENTIFIER) LIKE lower('%' || :query || '%')
-  )
-  -- Ignore trashed, archived, and empty notes
-  AND notes.ZARCHIVED = 0
-  AND notes.ZTRASHED = 0
-  AND (
-    notes.ZTEXT IS NOT NULL
-    OR notes.ZENCRYPTED = 1
-  )
-GROUP BY
-  notes.ZUNIQUEIDENTIFIER
-HAVING
-  (:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
-ORDER BY
-  -- Sort title matches ahead of body matches
-  CASE WHEN (
-    lower(notes.ZTITLE) like lower('%' || :query || '%')
-    OR :query = ''
-  ) THEN 0 ELSE 1 END,
-  -- When there are multiple title matches, sort by last modified
-  notes.ZMODIFICATIONDATE DESC
-LIMIT
-  20
+// Limit matching notes before joining tags. Search folding is computed once per snapshot.
+function searchNotes(version: 1 | 2): string {
+  const joinTable = version === 2 ? "Z_5TAGS" : "Z_7TAGS";
+  const noteKey = version === 2 ? "Z_5NOTES" : "Z_7NOTES";
+  const tagKey = version === 2 ? "Z_13TAGS" : "Z_14TAGS";
+  return `
+WITH candidates AS (
+  SELECT notes.*, CASE WHEN :query = '' OR search.title LIKE :pattern THEN 0 ELSE 1 END AS priority
+  FROM ZSFNOTE notes JOIN bear_search search ON search.id = notes.Z_PK
+  WHERE notes.ZARCHIVED = 0 AND notes.ZTRASHED = 0
+    AND (notes.ZTEXT IS NOT NULL OR notes.ZENCRYPTED = 1)
+    AND (:query = '' OR search.title LIKE :pattern OR search.text LIKE :pattern OR search.identifier LIKE :pattern)
+    AND (:tag IS NULL OR EXISTS (
+      SELECT 1 FROM ${joinTable} nt JOIN ZSFNOTETAG t ON t.Z_PK = nt.${tagKey}
+      WHERE nt.${noteKey} = notes.Z_PK AND t.ZTITLE = :tag
+    ))
+  ORDER BY priority, notes.ZMODIFICATIONDATE DESC LIMIT 20
+)
+SELECT notes.ZUNIQUEIDENTIFIER AS id, notes.ZTITLE AS title, notes.ZTEXT AS text,
+  notes.ZMODIFICATIONDATE AS modified_at, notes.ZCREATIONDATE AS created_at,
+  group_concat(tags.ZTITLE) AS tags, notes.ZENCRYPTED AS encrypted,
+  ${version === 2 ? "notes.ZPINNED" : "0"} AS pinned
+FROM candidates notes
+LEFT JOIN ${joinTable} nt ON nt.${noteKey} = notes.Z_PK
+LEFT JOIN ZSFNOTETAG tags ON tags.Z_PK = nt.${tagKey}
+GROUP BY notes.Z_PK
+ORDER BY notes.priority, notes.ZMODIFICATIONDATE DESC
 `;
-
-export const SEARCH_NOTES_V2 = `
-SELECT
-  notes.ZUNIQUEIDENTIFIER AS id,
-  notes.ZTITLE AS title,
-  notes.ZTEXT AS text,
-  notes.ZMODIFICATIONDATE AS modified_at,
-  notes.ZCREATIONDATE AS created_at,
-  group_concat(tags.ZTITLE) AS tags,
-  notes.ZENCRYPTED AS encrypted,
-  notes.ZPINNED AS pinned
-FROM
-  ZSFNOTE AS notes
-LEFT OUTER JOIN
-  Z_5TAGS AS notes_to_tags ON notes.Z_PK = notes_to_tags.Z_5NOTES
-LEFT OUTER JOIN
-  ZSFNOTETAG AS tags ON notes_to_tags.Z_13TAGS = tags.Z_PK
-WHERE
-  -- When there is a query, filter the body by that query, otherwise
-  -- ignore the query
-  (
-    lower(notes.ZTITLE) LIKE lower('%' || :query || '%')
-    OR lower(notes.ZTEXT) LIKE lower('%' || :query || '%')
-    OR :query = ''
-    OR lower(notes.ZUNIQUEIDENTIFIER) LIKE lower('%' || :query || '%')
-  )
-  -- Ignore trashed, archived, and empty notes
-  AND notes.ZARCHIVED = 0
-  AND notes.ZTRASHED = 0
-  AND (
-    notes.ZTEXT IS NOT NULL
-    OR notes.ZENCRYPTED = 1
-  )
-GROUP BY
-  notes.ZUNIQUEIDENTIFIER
-HAVING
-  (:tag IS NULL OR group_concat('#' || tags.ZTITLE || '#') LIKE '%#' || :tag || '#%')
-ORDER BY
-  -- Sort title matches ahead of body matches
-  CASE WHEN (
-    lower(notes.ZTITLE) like lower('%' || :query || '%')
-    OR :query = ''
-  ) THEN 0 ELSE 1 END,
-  -- When there are multiple title matches, sort by last modified
-  notes.ZMODIFICATIONDATE DESC
-LIMIT
-  20
-`;
+}
+export const SEARCH_NOTES_V1 = searchNotes(1);
+export const SEARCH_NOTES_V2 = searchNotes(2);
 
 export const SEARCH_BACKLINKS_V1 = `
   SELECT DISTINCT
@@ -99,6 +36,8 @@ export const SEARCH_BACKLINKS_V1 = `
   note.ZTITLE AS title,
   note.ZTEXT AS text,
   note.ZMODIFICATIONDATE AS modified_at,
+  note.ZCREATIONDATE AS created_at,
+  note.ZENCRYPTED AS encrypted,
   group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
@@ -125,6 +64,8 @@ SELECT DISTINCT
 	note.ZTITLE AS title,
 	note.ZTEXT AS text,
 	note.ZMODIFICATIONDATE AS modified_at,
+  note.ZCREATIONDATE AS created_at,
+  note.ZENCRYPTED AS encrypted,
 	group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
@@ -151,6 +92,8 @@ SELECT DISTINCT
   note.ZTITLE AS title,
   note.ZTEXT AS text,
   note.ZMODIFICATIONDATE AS modified_at,
+  note.ZCREATIONDATE AS created_at,
+  note.ZENCRYPTED AS encrypted,
   group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
@@ -177,6 +120,8 @@ SELECT DISTINCT
 	note.ZTITLE AS title,
 	note.ZTEXT AS text,
 	note.ZMODIFICATIONDATE AS modified_at,
+  note.ZCREATIONDATE AS created_at,
+  note.ZENCRYPTED AS encrypted,
 	group_concat(tag.ZTITLE) AS tags
 FROM
 	ZSFNOTE note
