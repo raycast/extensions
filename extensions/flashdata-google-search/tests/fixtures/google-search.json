@@ -1,0 +1,90 @@
+{
+  "source": "google_search",
+  "status": "done",
+  "created_at": "2026-09-16T04:15:25.751Z",
+  "results": [
+    {
+      "searchParameters": {
+        "q": "openai",
+        "gl": "us",
+        "hl": "en",
+        "type": "search",
+        "num": 10,
+        "page": 1,
+        "engine": "google"
+      },
+      "organic": [
+        {
+          "title": "OpenAI | Research & Deployment",
+          "link": "https://openai.com/",
+          "snippet": "We believe our research will eventually lead to artificial general intelligence, a system that can solve human-level problems.",
+          "position": 1
+        },
+        {
+          "title": "OpenAI",
+          "link": "https://en.wikipedia.org/wiki/OpenAI",
+          "snippet": "OpenAI is an American artificial intelligence (AI) public benefit corporation (PBC) headquartered in San Francisco. It develops proprietary generative AI models ...",
+          "position": 2
+        },
+        {
+          "title": "OpenAI",
+          "link": "https://x.com/OpenAI",
+          "snippet": "OpenAI's mission is to ensure that artificial general intelligence benefits all of humanity. can develop research, build financial models, and create ...",
+          "position": 3
+        },
+        {
+          "title": "OpenAI",
+          "link": "https://www.linkedin.com/company/openai",
+          "snippet": "OpenAI is an AI research and deployment company dedicated to ensuring that general-purpose artificial intelligence benefits all of humanity.",
+          "position": 4
+        },
+        {
+          "title": "OpenAI",
+          "link": "https://www.reddit.com/r/OpenAI/",
+          "snippet": "OpenAI is an AI research and deployment company. OpenAI&#39;s mission is to create safe and powerful AI that benefits all of humanity.",
+          "position": 5
+        }
+      ],
+      "peopleAlsoAsk": [
+        {
+          "question": "Is OpenAI created by Elon Musk?"
+        },
+        {
+          "question": "Why are people leaving ChatGPT?"
+        },
+        {
+          "question": "Is OpenAI the same as ChatGPT?"
+        },
+        {
+          "question": "Why is OpenAI in trouble?"
+        }
+      ],
+      "relatedSearches": [
+        {
+          "query": "OpenAI login"
+        },
+        {
+          "query": "OpenAI chat"
+        },
+        {
+          "query": "OpenAI ChatGPT"
+        },
+        {
+          "query": "OpenAI API"
+        },
+        {
+          "query": "OpenAI - wikipedia"
+        },
+        {
+          "query": "OpenAI app"
+        },
+        {
+          "query": "OpenAI video"
+        },
+        {
+          "query": "OpenAI download"
+        }
+      ]
+    }
+  ]
+}
