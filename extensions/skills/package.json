@@ -39,6 +39,13 @@
       "mode": "view"
     },
     {
+      "name": "inspect-agent-package",
+      "title": "Inspect Agent Package",
+      "subtitle": "Skills",
+      "description": "Validate a local Agent Skill or Plugin package",
+      "mode": "view"
+    },
+    {
       "name": "update-all-skills",
       "title": "Update All Skills",
       "subtitle": "Skills",
@@ -129,6 +136,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "test": "node --test test/*.test.mjs",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"

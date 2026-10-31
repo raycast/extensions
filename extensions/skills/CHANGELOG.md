@@ -1,5 +1,10 @@
 # Skills Changelog
 
+## [Inspect Agent Skills and Plugins] - {PR_MERGE_DATE}
+
+- Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts
+- Validate skill metadata, plugin manifests, MCP server configuration, and package paths before showing components
+
 ## [Sync with Skills CLI 1.7] - 2026-10-22
 
 - Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL

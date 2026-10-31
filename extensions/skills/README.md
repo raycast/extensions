@@ -19,6 +19,8 @@ Search and manage AI agent skills from [Skills](https://skills.sh) directly in R
 - See GitHub star counts in the detail view
 - Copy install commands
 - Quick access to GitHub repositories
+- Inspect a local Agent Skill or Agent Plugin v1 package, including its bundled skills, resources, and MCP server configuration
+- Distinguish Claude Code and Codex compatibility layouts from portable Agent Plugins
 
 ## Commands
 
@@ -29,6 +31,10 @@ Search for agent skills from skills.sh with real-time results. Results show whic
 ### Manage Skills
 
 View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
+
+### Inspect Agent Package
+
+Enter the path to a local skill or plugin folder. The inspector checks Agent Skills frontmatter and portable Agent Plugins v1 structure, shows bundled resources and MCP servers, and reports invalid paths or metadata. It recognizes Claude Code and Codex compatibility layouts separately. Inspection does not install packages or run their code.
 
 ## Using a Custom Package Registry (Corporate Proxy)
 
