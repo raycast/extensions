@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "limit": 3,
+    "offset": 0,
+    "total": 1
+  },
+  "items": [
+    {
+      "_objectType": "Person",
+      "Email": "donald.thompson@example.com",
+      "FirstName": "Frances",
+      "LastName": "Lovelace",
+      "MailingAddress": null,
+      "PasswordLastUpdated": "2023-10-31T00:21:49",
+      "PasswordMustChange": false,
+      "PhoneMobile": "+1 555 0100",
+      "PhoneWork": "",
+      "ProfileImageS3Url": "https://example.com/",
+      "Title": "redacted-10",
+      "Timezone": "America/Toronto",
+      "Language": "en-US, en; q=0.9",
+      "IPAddress": "192.0.2.1",
+      "Referer": null,
+      "UserAgent": null,
+      "LastLoginDateTime": "2026-10-24T18:39:17",
+      "OAuthGoogleProfileId": null,
+      "PersonAccount": [
+        {
+          "_objectType": "PersonAccount",
+          "Person": null,
+          "Account": null,
+          "IsPrimary": true,
+          "ReceiveInvoices": false,
+          "Role": null,
+          "ActivityEventData": null,
+          "Uid": "fake0039",
+          "Created": "2022-09-07T13:20:21",
+          "Updated": "2022-09-07T13:20:21"
+        }
+      ],
+      "DealPeople": [],
+      "LeadFormSubmissions": null,
+      "Account": null,
+      "AccountUids": null,
+      "EmailListPerson": null,
+      "FullName": "Edsger Allen",
+      "HasLoggedIn": true,
+      "OAuthIntegrationStatus": 0,
+      "OptInToEmailList": false,
+      "Password": null,
+      "RecaptchaToken": null,
+      "UserAgentPlatformBrowser": "",
+      "HasUnsubscribed": false,
+      "DiscordUser": null,
+      "IsConnectedToDiscord": false,
+      "SchemaLessDataLoaded": true,
+      "ActivityEventData": null,
+      "Uid": "fake0009",
+      "Created": "2022-09-07T13:20:21",
+      "Updated": "2026-10-24T18:39:29",
+      "Message": "redacted-11"
+    }
+  ]
+}
