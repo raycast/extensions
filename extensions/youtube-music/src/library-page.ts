@@ -6,8 +6,8 @@ import { isVideoId, type BrowseKind, type BrowseResult, type SongResult } from "
 
 // How long a page-side library snapshot is reused before it is fetched again.
 const LIBRARY_TTL_MS = 30 * 60 * 1000;
-const ROW_LIMIT = 30;
-const TRACK_LIMIT = 50;
+const ROW_LIMIT = 50;
+const TRACK_LIMIT = 200;
 
 export const LIBRARY_BROWSE_IDS = {
   albums: "FEmusic_liked_albums",
@@ -98,6 +98,13 @@ export const LIBRARY_START_SCRIPT = `(function() {
     return Array.prototype.map
       .call(new Uint8Array(buffer), function (byte) { return ("0" + byte.toString(16)).slice(-2); })
       .join("");
+  }
+
+  // Which Google account the tab is signed into. Only some builds expose it; the
+  // default matches a single-account session.
+  function authUser() {
+    var index = cfgValue("SESSION_INDEX");
+    return typeof index === "string" && /^[0-9]+$/.test(index) ? index : "0";
   }
 
   // Cookies alone do not authenticate an innertube call: it answers 200 with a
@@ -385,7 +392,7 @@ export const LIBRARY_START_SCRIPT = `(function() {
   }
 
   authorization(function (header) {
-    start(header ? { "Content-Type": "application/json", "Authorization": header, "X-Goog-AuthUser": "0" } : { "Content-Type": "application/json" });
+    start(header ? { "Content-Type": "application/json", "Authorization": header, "X-Goog-AuthUser": authUser() } : { "Content-Type": "application/json" });
   });
 
   return "started";
@@ -465,7 +472,7 @@ export const LIBRARY_STATE_SCRIPT = `(function() {
 // browse id and hangs its rows off musicPlaylistShelfRenderer; an album page by
 // its MPREb id, with the rows in a shelf. Both expose the same row structure as
 // the liked songs list, so the extraction mirrors it.
-const COLLECTION_LIMIT = 200;
+const COLLECTION_LIMIT = 500;
 
 export function collectionStartScript(browseId: string, albumTitle: string, fallbackArt: string): string {
   return `(function() {
@@ -546,37 +553,67 @@ export function collectionStartScript(browseId: string, albumTitle: string, fall
   window.__ytmCollectionV1 = window.__ytmCollectionV1 || {};
   window.__ytmCollectionV1[browseId] = { state: "loading" };
 
+  // Some builds expose the account index, most do not; default to the first.
+  function authUser() {
+    var cfg = window.ytcfg;
+    var index = null;
+    try { if (cfg && typeof cfg.get === "function") index = cfg.get("SESSION_INDEX"); } catch (error) { /* fall through */ }
+    if (!index && cfg && cfg.data_) index = cfg.data_.SESSION_INDEX;
+    return typeof index === "string" && /^[0-9]+$/.test(index) ? index : "0";
+  }
+
+  function addTracks(json, rows) {
+    var nodes = collect(json, "musicResponsiveListItemRenderer", []);
+    for (var i = 0; i < nodes.length && rows.length < limit; i++) {
+      var row = trackOf(nodes[i]);
+      if (!row) continue;
+      // An album page's third column is a play count, so the album name comes
+      // from the page we opened instead, and its rows carry no thumbnail of
+      // their own, so the cover stands in for them.
+      if (albumTitle) row.b = albumTitle;
+      if (!row.art && fallbackArt) row.art = fallbackArt;
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function nextToken(json) {
+    var commands = collect(json, "continuationCommand", []);
+    return commands.length && commands[0].token ? commands[0].token : "";
+  }
+
   authorization(function (header) {
     var headers = { "Content-Type": "application/json" };
-    if (header) { headers["Authorization"] = header; headers["X-Goog-AuthUser"] = "0"; }
+    if (header) { headers["Authorization"] = header; headers["X-Goog-AuthUser"] = authUser(); }
 
-    fetch("/youtubei/v1/browse?key=" + encodeURIComponent(apiKey) + "&prettyPrint=false", {
-      method: "POST",
-      credentials: "include",
-      headers: headers,
-      body: JSON.stringify({ context: context, browseId: browseId })
-    }).then(function (response) {
-      if (response.ok) return response.json();
-      return response.text().then(function (body) {
-        throw new Error(response.status + " " + body.slice(0, 140));
+    // Playlists only page when the server sends a continuation token; the ones
+    // seen in testing arrive complete, so this usually runs once.
+    function loadPage(payload, rows) {
+      return fetch("/youtubei/v1/browse?key=" + encodeURIComponent(apiKey) + "&prettyPrint=false", {
+        method: "POST",
+        credentials: "include",
+        headers: headers,
+        body: JSON.stringify(payload)
+      }).then(function (response) {
+        if (response.ok) return response.json();
+        return response.text().then(function (body) {
+          throw new Error(response.status + " " + body.slice(0, 140));
+        });
+      }).then(function (json) {
+        addTracks(json, rows);
+        var token = nextToken(json);
+        if (token && rows.length < limit) return loadPage({ context: context, continuation: token }, rows);
+        return rows;
       });
-    }).then(function (json) {
-      var nodes = collect(json, "musicResponsiveListItemRenderer", []);
-      var rows = [];
-      for (var i = 0; i < nodes.length && rows.length < limit; i++) {
-        var row = trackOf(nodes[i]);
-        if (!row) continue;
-        // An album page's third column is a play count, so the album name comes
-        // from the page we opened instead, and its rows carry no thumbnail of
-        // their own, so the cover stands in for them.
-        if (albumTitle) row.b = albumTitle;
-        if (!row.art && fallbackArt) row.art = fallbackArt;
-        rows.push(row);
-      }
-      window.__ytmCollectionV1[browseId] = { state: "ready", rows: rows };
-    }).catch(function (error) {
-      window.__ytmCollectionV1[browseId] = { state: "error", error: String((error && error.message) || error) };
-    });
+    }
+
+    loadPage({ context: context, browseId: browseId }, [])
+      .then(function (rows) {
+        window.__ytmCollectionV1[browseId] = { state: "ready", rows: rows };
+      })
+      .catch(function (error) {
+        window.__ytmCollectionV1[browseId] = { state: "error", error: String((error && error.message) || error) };
+      });
   });
 
   return "started";

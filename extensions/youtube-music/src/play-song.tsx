@@ -274,6 +274,24 @@ export function navigateToSearch(query: string): string {
 })();`;
 }
 
+/**
+ * Opens a playlist or album page. Queueing from a browsed collection goes through
+ * this rather than the search page, so the track only has to exist where the user
+ * already saw it, instead of ranking in a title search.
+ */
+export function navigateToCollection(browseId: string): string {
+  return `(function() {
+  var app = document.querySelector("ytmusic-app");
+  if (!app) return "no-app";
+  app.dispatchEvent(new CustomEvent("yt-navigate", {
+    bubbles: true,
+    composed: true,
+    detail: { endpoint: { browseEndpoint: { browseId: "${browseId}" } } }
+  }));
+  return "ok";
+})();`;
+}
+
 export function findResultRow(videoId: string): string {
   return `(function() {
   var link = document.querySelector('ytmusic-responsive-list-item-renderer a[href*="v=${videoId}"]');
@@ -636,10 +654,19 @@ export default function PlaySong(props: LaunchProps<{ launchContext: PlaySongLau
                                 addMode={addMode}
                                 currentSource={source}
                                 onSelectSource={setSource}
+                                // Liked songs are the VLLM playlist; recently played
+                                // has no collection page to queue through.
+                                collectionBrowseId={category.key === "liked" ? "VLLM" : undefined}
                               />
                             );
                           }
                         }}
+                      />
+                      <Action
+                        title="Reload Library"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onAction={reloadLibrary}
                       />
                       <ScopeActionSection currentSource={source} onSelect={setSource} />
                     </ActionPanel>
@@ -762,6 +789,7 @@ function LibraryBrowseView({
           addMode={addMode}
           currentSource={currentSource}
           onSelectSource={onSelectSource}
+          scopePopDepth={2}
         />
       ))}
     </Grid>
@@ -774,12 +802,14 @@ function LibrarySongsView({
   addMode,
   currentSource,
   onSelectSource,
+  collectionBrowseId,
 }: {
   title: string;
   songs: SongResult[];
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  collectionBrowseId?: string;
 }) {
   return (
     <List navigationTitle={title} searchBarPlaceholder={`Filter ${title.toLowerCase()}`} filtering={true}>
@@ -791,6 +821,8 @@ function LibrarySongsView({
           addMode={addMode}
           currentSource={currentSource}
           onSelectSource={onSelectSource}
+          collectionBrowseId={collectionBrowseId}
+          scopePopDepth={2}
         />
       ))}
     </List>
@@ -800,9 +832,13 @@ function LibrarySongsView({
 function ScopeActionSection({
   currentSource,
   onSelect,
+  scopePopDepth = 1,
 }: {
   currentSource: Source;
   onSelect: (source: Source) => void;
+  // Pushed views stack under the picker, so they need an extra pop to land back
+  // on the search view where the chosen scope applies.
+  scopePopDepth?: number;
 }) {
   const { push } = useNavigation();
   return (
@@ -810,13 +846,23 @@ function ScopeActionSection({
       <Action
         title="Search in…"
         icon={Icon.MagnifyingGlass}
-        onAction={() => push(<ScopePicker currentSource={currentSource} onSelect={onSelect} />)}
+        onAction={() =>
+          push(<ScopePicker currentSource={currentSource} onSelect={onSelect} popDepth={scopePopDepth} />)
+        }
       />
     </ActionPanel.Section>
   );
 }
 
-function ScopePicker({ currentSource, onSelect }: { currentSource: Source; onSelect: (source: Source) => void }) {
+function ScopePicker({
+  currentSource,
+  onSelect,
+  popDepth = 1,
+}: {
+  currentSource: Source;
+  onSelect: (source: Source) => void;
+  popDepth?: number;
+}) {
   const { pop } = useNavigation();
   return (
     <List navigationTitle="Choose Search Scope">
@@ -833,7 +879,7 @@ function ScopePicker({ currentSource, onSelect }: { currentSource: Source; onSel
                 icon={row.icon}
                 onAction={() => {
                   onSelect(row.value);
-                  pop();
+                  for (let step = 0; step < popDepth; step += 1) pop();
                 }}
               />
             </ActionPanel>
@@ -920,6 +966,8 @@ function CollectionView({
             addMode={addMode}
             currentSource={currentSource}
             onSelectSource={onSelectSource}
+            collectionBrowseId={request.browseId}
+            scopePopDepth={2}
           />
         ))
       )}
@@ -933,12 +981,16 @@ function SongItem({
   addMode,
   currentSource,
   onSelectSource,
+  collectionBrowseId,
+  scopePopDepth = 1,
 }: {
   song: SongResult;
   query: string;
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  collectionBrowseId?: string;
+  scopePopDepth?: number;
 }) {
   const subtitle = [song.artist || "Unknown Artist", song.album].filter(Boolean).join(" · ");
 
@@ -948,7 +1000,7 @@ function SongItem({
       title="Add to Queue"
       icon={Icon.Plus}
       shortcut={{ modifiers: ["opt"], key: "enter" }}
-      onAction={() => runExclusive(() => queueSong(song, query, "end"))}
+      onAction={() => runExclusive(() => queueSong(song, query, "end", collectionBrowseId))}
     />
   );
 
@@ -968,9 +1020,9 @@ function SongItem({
             title="Play Next"
             icon={Icon.Forward}
             shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
-            onAction={() => runExclusive(() => queueSong(song, query, "next"))}
+            onAction={() => runExclusive(() => queueSong(song, query, "next", collectionBrowseId))}
           />
-          <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} />
+          <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} scopePopDepth={scopePopDepth} />
           <Action.CopyToClipboard
             title="Copy to Clipboard"
             icon={Icon.Link}
@@ -987,10 +1039,12 @@ function VideoItem({
   video,
   currentSource,
   onSelectSource,
+  scopePopDepth = 1,
 }: {
   video: VideoResult;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  scopePopDepth?: number;
 }) {
   return (
     <List.Item
@@ -1001,7 +1055,7 @@ function VideoItem({
       actions={
         <ActionPanel>
           <Action title="Play Video" icon={Icon.Play} onAction={() => playVideo(video)} />
-          <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} />
+          <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} scopePopDepth={scopePopDepth} />
           <Action.CopyToClipboard
             title="Copy to Clipboard"
             icon={Icon.Link}
@@ -1033,11 +1087,13 @@ function BrowseActions({
   addMode,
   currentSource,
   onSelectSource,
+  scopePopDepth = 1,
 }: {
   result: BrowseResult;
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  scopePopDepth?: number;
 }) {
   const { push } = useNavigation();
   const openTitle = result.kind === "album" ? "Open Album" : result.kind === "artist" ? "Open Artist" : "Open Playlist";
@@ -1066,7 +1122,7 @@ function BrowseActions({
           }
         />
       ) : null}
-      <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} />
+      <ScopeActionSection currentSource={currentSource} onSelect={onSelectSource} scopePopDepth={scopePopDepth} />
       <Action.CopyToClipboard
         title="Copy to Clipboard"
         icon={Icon.Link}
@@ -1082,11 +1138,13 @@ function BrowseItem({
   addMode,
   currentSource,
   onSelectSource,
+  scopePopDepth = 1,
 }: {
   result: BrowseResult;
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  scopePopDepth?: number;
 }) {
   const icon = result.kind === "album" ? Icon.Cd : result.kind === "artist" ? Icon.Person : Icon.List;
 
@@ -1102,6 +1160,7 @@ function BrowseItem({
           addMode={addMode}
           currentSource={currentSource}
           onSelectSource={onSelectSource}
+          scopePopDepth={scopePopDepth}
         />
       }
     />
@@ -1113,11 +1172,13 @@ function BrowseGridItem({
   addMode,
   currentSource,
   onSelectSource,
+  scopePopDepth = 1,
 }: {
   result: BrowseResult;
   addMode: boolean;
   currentSource: Source;
   onSelectSource: (source: Source) => void;
+  scopePopDepth?: number;
 }) {
   const fallback = result.kind === "album" ? Icon.Cd : result.kind === "artist" ? Icon.Person : Icon.List;
   const subtitle = [result.subtitle, result.detail].filter(Boolean).join(" · ");
@@ -1137,6 +1198,7 @@ function BrowseGridItem({
           addMode={addMode}
           currentSource={currentSource}
           onSelectSource={onSelectSource}
+          scopePopDepth={scopePopDepth}
         />
       }
     />
@@ -1311,7 +1373,7 @@ async function openBrowse(result: BrowseResult) {
   await showHUD(`Opened ${result.title}`);
 }
 
-async function queueSong(song: SongResult, query: string, position: "end" | "next") {
+async function queueSong(song: SongResult, query: string, position: "end" | "next", collectionBrowseId?: string) {
   const failureTitle = position === "next" ? "Could not play next" : "Could not add to queue";
 
   if (!isVideoId(song.id)) {
@@ -1327,7 +1389,8 @@ async function queueSong(song: SongResult, query: string, position: "end" | "nex
     style: Toast.Style.Animated,
     title: position === "next" ? "Playing next" : "Adding to queue",
   });
-  const opened = await runMusic(navigateToSearch(query));
+  const useCollection = collectionBrowseId !== undefined && isBrowseId(collectionBrowseId);
+  const opened = await runMusic(useCollection ? navigateToCollection(collectionBrowseId) : navigateToSearch(query));
 
   if (opened !== "ok") {
     progress.style = Toast.Style.Failure;
@@ -1335,6 +1398,8 @@ async function queueSong(song: SongResult, query: string, position: "end" | "nex
     progress.message =
       opened === "no-app"
         ? "Open YouTube Music in the selected browser."
+        : useCollection
+        ? "Could not open the YouTube Music collection."
         : "Could not open the YouTube Music search page.";
     return;
   }
