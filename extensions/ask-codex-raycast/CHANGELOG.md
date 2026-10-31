@@ -7,12 +7,6 @@
 - Merge CLI Settings into the AI CLI in Raycast launcher: the launcher opens the settings view in place, and chats open it through `launchCommand({ name: "cli-hub", context: { view: "cli-settings" } })`. Conversation data, preferences and the preserved `ask-codex-raycast` / `index` IDs are unaffected.
 - Fix the npm shim and WorkBuddy product tests for macOS: compare realpaths on both sides, and simulate an outside product.json with a real symlink where the platform allows one, falling back to the fs mock where it does not.
 
-## [Unreleased]
-
-- Merge CLI Settings into the AI CLI in Raycast launcher: the standalone `cli-settings` command is gone, the launcher opens the settings view in place, and chats open it through `launchCommand({ name: "cli-hub", context: { view: "cli-settings" } })`. Conversation data, preferences and the preserved `ask-codex-raycast` / `index` IDs are unaffected.
-- Localize root-search subtitles at runtime: each command refreshes its subtitle through `updateCommandMetadata` in the chosen language ("本机 AI CLI", "与本机 Codex CLI 对话", …), with English manifest text as the static fallback. Subtitles update after a command runs; manifest titles stay fixed because Raycast does not localize them.
-- Fix the npm shim and WorkBuddy product tests for macOS: compare realpaths on both sides, and simulate an outside product.json with a real symlink where the platform allows one, falling back to the fs mock where it does not.
-
 ## [v0.1.0-beta.1] - 2026-10-22
 
 - Publish the GitHub beta under `bbfss/ai-cli-in-raycast`, with a focused repository homepage and extension-only source download.
