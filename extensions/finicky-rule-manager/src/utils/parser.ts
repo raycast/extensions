@@ -20,6 +20,35 @@ export async function parseFinickyConfig(configPath: string): Promise<ParsedConf
 }
 
 /**
+ * Number of handler objects in a config file, whether or not they can be parsed
+ * into rules. A missing file counts as zero.
+ */
+export async function countConfigHandlers(configPath: string): Promise<number> {
+  let content: string;
+  try {
+    content = await fs.readFile(configPath, "utf8");
+  } catch {
+    return 0;
+  }
+  const handlersContent = extractHandlersArrayContent(content);
+  return handlersContent ? splitTopLevelObjects(handlersContent).length : 0;
+}
+
+/**
+ * Turns a rule name into something safe for a single-line `// Rule:` comment.
+ * Also repairs names from older imports, which picked up the `"` or `",` that
+ * followed a pattern (e.g. `norm.ooo/*"`).
+ */
+export function cleanRuleName(name: string): string {
+  return name
+    .replace(/[\r\n\u2028\u2029]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/["'`]+,?$/, "")
+    .trim();
+}
+
+/**
  * Robustly parse a Finicky config that looks like:
  * module.exports = { defaultBrowser: "...", handlers: [ { ... }, { ... } ] }
  *
@@ -27,6 +56,8 @@ export async function parseFinickyConfig(configPath: string): Promise<ParsedConf
  * - Do NOT use regex to capture the whole handlers array (it breaks on inner match arrays).
  * - Instead, locate "handlers: [" and then scan until the matching closing ']'.
  * - Split top-level handler objects by brace-depth.
+ * - Skip strings, regex literals and comments while scanning, so a quote or bracket
+ *   inside a comment (or a "//" inside "*://") can't throw the depth count off.
  */
 export function parseFinickyConfigContent(content: string): ParsedConfig {
   const rules: Rule[] = [];
@@ -43,10 +74,8 @@ export function parseFinickyConfigContent(content: string): ParsedConfig {
       return { rules, defaultBrowser };
     }
 
-    const handlerBlocks = splitTopLevelObjects(handlersContent);
-
-    for (const block of handlerBlocks) {
-      const rule = parseHandlerBlock(block);
+    for (const { block, comment } of splitTopLevelObjects(handlersContent)) {
+      const rule = parseHandlerBlock(block, comment);
       if (rule) {
         rules.push(rule);
       }
@@ -59,8 +88,21 @@ export function parseFinickyConfigContent(content: string): ParsedConfig {
 }
 
 function extractHandlersArrayContent(content: string): string | null {
-  // Find "handlers" then the first '[' after it, then scan to its matching ']'.
-  const handlersKeyIndex = content.search(/\bhandlers\s*:/);
+  // Find a "handlers:" key outside of strings and comments, then the first '[' after it.
+  let i = 0;
+  let handlersKeyIndex = -1;
+  while (i < content.length) {
+    const literal = skipLiteral(content, i);
+    if (literal) {
+      i = literal.end;
+      continue;
+    }
+    if (/^handlers\s*:/.test(content.slice(i, i + 40)) && !/[\w$]/.test(content[i - 1] ?? "")) {
+      handlersKeyIndex = i;
+      break;
+    }
+    i++;
+  }
   if (handlersKeyIndex === -1) return null;
 
   const openBracketIndex = content.indexOf("[", handlersKeyIndex);
@@ -72,81 +114,90 @@ function extractHandlersArrayContent(content: string): string | null {
   return content.slice(openBracketIndex + 1, closeBracketIndex);
 }
 
-function findMatchingBracket(text: string, openIndex: number, openChar: string, closeChar: string): number {
-  let depth = 0;
-  let inSingle = false;
-  let inDouble = false;
-  let inTemplate = false;
-  let inRegex = false;
-  let escaping = false;
+type Literal = { end: number; kind: "line-comment" | "block-comment" | "string" | "regex" };
 
-  for (let i = openIndex; i < text.length; i++) {
-    const c = text[i];
-    const prev = i > 0 ? text[i - 1] : "";
+/**
+ * If a string, template, regex literal or comment starts at `i`, returns the index
+ * just past its end. Returns null for ordinary code.
+ */
+function skipLiteral(text: string, i: number): Literal | null {
+  const c = text[i];
+  const next = text[i + 1];
 
-    if (escaping) {
-      escaping = false;
-      continue;
-    }
+  if (c === "/" && next === "/") {
+    const newline = text.indexOf("\n", i);
+    return { end: newline === -1 ? text.length : newline, kind: "line-comment" };
+  }
 
-    // Escape handling inside strings/templates/regex
-    if (c === "\\") {
-      escaping = true;
-      continue;
-    }
+  if (c === "/" && next === "*") {
+    const close = text.indexOf("*/", i + 2);
+    return { end: close === -1 ? text.length : close + 2, kind: "block-comment" };
+  }
 
-    // Toggle string/template states (but not inside regex)
-    if (!inRegex) {
-      if (!inDouble && !inTemplate && c === "'" && !inSingle) {
-        inSingle = true;
-        continue;
-      } else if (inSingle && c === "'") {
-        inSingle = false;
+  if (c === '"' || c === "'" || c === "`") {
+    let j = i + 1;
+    while (j < text.length) {
+      if (text[j] === "\\") {
+        j += 2;
         continue;
       }
-
-      if (!inSingle && !inTemplate && c === '"' && !inDouble) {
-        inDouble = true;
-        continue;
-      } else if (inDouble && c === '"') {
-        inDouble = false;
-        continue;
-      }
-
-      if (!inSingle && !inDouble && c === "`" && !inTemplate) {
-        inTemplate = true;
-        continue;
-      } else if (inTemplate && c === "`") {
-        inTemplate = false;
-        continue;
-      }
+      if (text[j] === c) return { end: j + 1, kind: "string" };
+      // An unterminated ' or " string ends at the line break, as in JS.
+      if (c !== "`" && text[j] === "\n") return { end: j, kind: "string" };
+      j++;
     }
+    return { end: text.length, kind: "string" };
+  }
 
-    // Very light regex literal detection:
-    // If we see a '/' that looks like it could start a regex and we aren't in a string/template.
-    // This isn't perfect, but good enough for typical Finicky configs.
-    if (!inSingle && !inDouble && !inTemplate) {
-      if (!inRegex && c === "/" && prev !== "/" && prev !== "*") {
-        // Heuristic: treat as regex start only if previous non-space char is one of these
-        const prevNonSpace = findPrevNonSpace(text, i - 1);
-        if (prevNonSpace === "" || /[=(:[{},!&|?;]/.test(prevNonSpace)) {
-          inRegex = true;
+  // Very light regex literal detection: a '/' that follows something an
+  // expression can start after, including the '>' of an arrow function
+  // (`({ urlString }) => /.../.test(urlString)`). Good enough for typical Finicky configs.
+  if (c === "/") {
+    const prevNonSpace = findPrevNonSpace(text, i - 1);
+    if (prevNonSpace === "" || /[=(:[{},!&|?;>]/.test(prevNonSpace)) {
+      let j = i + 1;
+      let inClass = false;
+      while (j < text.length && text[j] !== "\n") {
+        const ch = text[j];
+        if (ch === "\\") {
+          j += 2;
           continue;
         }
-      } else if (inRegex && c === "/") {
-        inRegex = false;
-        continue;
+        if (ch === "[") inClass = true;
+        else if (ch === "]") inClass = false;
+        else if (ch === "/" && !inClass) {
+          j++;
+          while (j < text.length && /[a-z]/i.test(text[j])) j++;
+          return { end: j, kind: "regex" };
+        }
+        j++;
       }
+      // No closing '/' on this line, so it was a division operator after all.
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function findMatchingBracket(text: string, openIndex: number, openChar: string, closeChar: string): number {
+  let depth = 0;
+
+  let i = openIndex;
+  while (i < text.length) {
+    const literal = skipLiteral(text, i);
+    if (literal) {
+      i = literal.end;
+      continue;
     }
 
-    // If inside any literal, ignore structural chars
-    if (inSingle || inDouble || inTemplate || inRegex) continue;
-
+    const c = text[i];
     if (c === openChar) depth++;
     if (c === closeChar) {
       depth--;
       if (depth === 0) return i;
     }
+    i++;
   }
 
   return -1;
@@ -160,89 +211,90 @@ function findPrevNonSpace(text: string, fromIndex: number): string {
   return "";
 }
 
-function splitTopLevelObjects(arrayContent: string): string[] {
-  const blocks: string[] = [];
+/**
+ * Splits the handlers array into its top-level objects. Each object comes with
+ * the last line comment that appeared before it at the top level, which is where
+ * the generator writes `// Rule: <name>`.
+ */
+function splitTopLevelObjects(arrayContent: string): { block: string; comment?: string }[] {
+  const blocks: { block: string; comment?: string }[] = [];
 
   let depth = 0;
   let start = -1;
+  let pendingComment: string | undefined;
 
-  let inSingle = false;
-  let inDouble = false;
-  let inTemplate = false;
-  let inRegex = false;
-  let escaping = false;
+  let i = 0;
+  while (i < arrayContent.length) {
+    const literal = skipLiteral(arrayContent, i);
+    if (literal) {
+      if (depth === 0 && literal.kind === "line-comment") {
+        pendingComment = arrayContent.slice(i + 2, literal.end);
+      }
+      i = literal.end;
+      continue;
+    }
 
-  for (let i = 0; i < arrayContent.length; i++) {
     const c = arrayContent[i];
-    const prev = i > 0 ? arrayContent[i - 1] : "";
-
-    if (escaping) {
-      escaping = false;
-      continue;
-    }
-    if (c === "\\") {
-      escaping = true;
-      continue;
-    }
-
-    if (!inRegex) {
-      if (!inDouble && !inTemplate && c === "'" && !inSingle) {
-        inSingle = true;
-        continue;
-      } else if (inSingle && c === "'") {
-        inSingle = false;
-        continue;
-      }
-
-      if (!inSingle && !inTemplate && c === '"' && !inDouble) {
-        inDouble = true;
-        continue;
-      } else if (inDouble && c === '"') {
-        inDouble = false;
-        continue;
-      }
-
-      if (!inSingle && !inDouble && c === "`" && !inTemplate) {
-        inTemplate = true;
-        continue;
-      } else if (inTemplate && c === "`") {
-        inTemplate = false;
-        continue;
-      }
-    }
-
-    if (!inSingle && !inDouble && !inTemplate) {
-      if (!inRegex && c === "/" && prev !== "/" && prev !== "*") {
-        const prevNonSpace = findPrevNonSpace(arrayContent, i - 1);
-        if (prevNonSpace === "" || /[=(:[{},!&|?;]/.test(prevNonSpace)) {
-          inRegex = true;
-          continue;
-        }
-      } else if (inRegex && c === "/") {
-        inRegex = false;
-        continue;
-      }
-    }
-
-    if (inSingle || inDouble || inTemplate || inRegex) continue;
-
     if (c === "{") {
       if (depth === 0) start = i;
       depth++;
-      continue;
-    }
-
-    if (c === "}") {
+    } else if (c === "}") {
       depth--;
       if (depth === 0 && start !== -1) {
-        blocks.push(arrayContent.slice(start, i + 1));
+        blocks.push({ block: arrayContent.slice(start, i + 1), comment: pendingComment });
         start = -1;
+        pendingComment = undefined;
       }
-      continue;
     }
+    i++;
   }
 
   return blocks;
+}
+
+/**
+ * The first line comment inside a handler block, for hand-written configs that
+ * put the description inside the braces.
+ */
+function firstInnerComment(block: string): string | undefined {
+  let i = 0;
+  while (i < block.length) {
+    const literal = skipLiteral(block, i);
+    if (literal) {
+      if (literal.kind === "line-comment") return block.slice(i + 2, literal.end);
+      i = literal.end;
+      continue;
+    }
+    i++;
+  }
+  return undefined;
+}
+
+/**
+ * Source of the first regex literal in a block that is followed by `.test(`,
+ * scanned with skipLiteral so escaped slashes (`/^https:\/\//`) stay intact.
+ */
+function findTestedRegexLiteral(block: string): string | undefined {
+  let i = 0;
+  while (i < block.length) {
+    const literal = skipLiteral(block, i);
+    if (!literal) {
+      i++;
+      continue;
+    }
+    if (literal.kind === "regex" && /^\s*\.\s*test\s*\(/.test(block.slice(literal.end))) {
+      const source = block.slice(i, literal.end);
+      return source.slice(1, source.lastIndexOf("/"));
+    }
+    i = literal.end;
+  }
+  return undefined;
+}
+
+function ruleNameFromComment(comment: string | undefined): string | undefined {
+  if (!comment) return undefined;
+  const name = cleanRuleName(comment.replace(/^\s*Rule:\s*/, ""));
+  return name || undefined;
 }
 
 /**
@@ -256,6 +308,10 @@ function splitTopLevelStrings(arrayContent: string): string[] {
   let i = 0;
   while (i < arrayContent.length) {
     const c = arrayContent[i];
+    if (c === "/" && (arrayContent[i + 1] === "/" || arrayContent[i + 1] === "*")) {
+      i = skipLiteral(arrayContent, i)?.end ?? i + 1;
+      continue;
+    }
     if (c === '"' || c === "'") {
       const quote = c;
       let value = "";
@@ -282,10 +338,10 @@ function splitTopLevelStrings(arrayContent: string): string[] {
   return out;
 }
 
-function parseHandlerBlock(block: string): Rule | null {
+function parseHandlerBlock(block: string, leadingComment?: string): Rule | null {
   try {
-    const nameMatch = block.match(/\/\/\s*(?:Rule:\s*)?([^\n]+)/);
-    const name = nameMatch ? nameMatch[1].trim() : "Imported Rule";
+    const name =
+      ruleNameFromComment(leadingComment) ?? ruleNameFromComment(firstInnerComment(block)) ?? "Imported Rule";
 
     // Support both browser: "App" and browser: { name: "App", ... }
     const browserMatch = block.match(/browser\s*:\s*["']([^"']+)["']/);
@@ -363,9 +419,8 @@ function parseHandlerBlock(block: string): Rule | null {
     }
 
     // match: ({ urlString }) => /.../i.test(urlString)
-    const matchTestMatch = block.match(/\/([^/]+)\/[igm]*\.test\(/);
-    if (matchTestMatch) {
-      const regexPattern = matchTestMatch[1];
+    const regexPattern = findTestedRegexLiteral(block);
+    if (regexPattern) {
       return {
         id: uuid(),
         name,
