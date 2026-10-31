@@ -1,6 +1,6 @@
 # Default Web Browser Manager Changelog
 
-## [Fix timeout when loading browsers] - {PR_MERGE_DATE}
+## [Fix timeout when loading browsers] - 2026-10-31
 
 - Give `swift` 60 seconds instead of 10, since it can be slow when its module cache is cold, and say so if it still times out
 
