@@ -1,6 +1,6 @@
 # DesktopRenamer Changelog
 
-## [SpaceAPI and Automatic Return Improvements] - {PR_MERGE_DATE}
+## [SpaceAPI and Automatic Return Improvements] - 2026-10-31
 
 - Added authenticated socket communication for SpaceAPI access controls, with DNC compatibility for older DesktopRenamer versions
 - Use DesktopRenamer's app-wide automatic-return setting for window operations instead of a separate Raycast preference
