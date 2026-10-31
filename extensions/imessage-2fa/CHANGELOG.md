@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Fix iMessage codes on recent macOS versions] - {PR_MERGE_DATE}
+
+- iMessage codes show up again when macOS stores the message body only in `attributedBody`. The body was cut off at the first NUL byte when read as text, so no codes were found ([#29673](https://github.com/raycast/extensions/issues/29673), [#21910](https://github.com/raycast/extensions/issues/21910))
+
 ## [Update contributors] - 2026-10-12
 
 - Move `ronaldheft` to past contributors.
