@@ -9,7 +9,7 @@ import { SetupError } from "../lib/jira";
 import { getMoreIssues, getMyself, sourceKey } from "../lib/source";
 import { PRIORITY_FILTERS, PriorityLevel, priorityIcon, priorityLabel } from "../lib/priority";
 import { CreateIssueDefaults, CreateIssueForm } from "./create-issue-form";
-import { IssueActions } from "./issue-actions";
+import { IssueActions, PriorityFilterSubmenu } from "./issue-actions";
 import { IssueDetail } from "./issue-detail";
 import { ExtensionActions, PreferencesAction, RetryActions } from "./extension-actions";
 
@@ -253,6 +253,7 @@ export function IssueList({ id, load, loadKey = "", boardActions, createDefaults
                 onAction={revalidate}
               />
               {boardAction}
+              <PriorityFilterSubmenu priority={priority} onChange={setPriority} />
               <ExtensionActions />
             </ActionPanel>
           }

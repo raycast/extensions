@@ -134,8 +134,11 @@ export interface NewIssue {
 }
 
 /** The issue was created, and sometimes a later step, like adding it to the sprint, failed. */
+/** What creating returns: enough to show it and select it, without another request that could fail. */
+export type CreatedIssue = Pick<Issue, "id" | "key" | "summary" | "url">;
+
 export interface Created {
-  issue: Issue;
+  issue: CreatedIssue;
   warning?: string;
 }
 

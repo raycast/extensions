@@ -30,12 +30,18 @@ interface Config {
   authorization: string;
 }
 
-/** The site's origin, like https://your-team.atlassian.net. */
+/**
+ * The site's origin, like https://your-team.atlassian.net. Always HTTPS, since the email and API token go with every
+ * request: Jira Cloud has no plain-HTTP sites, so an http:// URL is upgraded and other schemes are refused.
+ */
 export function siteOrigin(): string | undefined {
   const siteUrl = getPreferenceValues<Preferences>().siteUrl?.trim();
   if (!siteUrl) return undefined;
   try {
-    return new URL(siteUrl.includes("://") ? siteUrl : `https://${siteUrl}`).origin;
+    const url = new URL(siteUrl.includes("://") ? siteUrl : `https://${siteUrl}`);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+    url.protocol = "https:";
+    return url.origin;
   } catch {
     return undefined;
   }

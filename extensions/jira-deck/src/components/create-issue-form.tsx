@@ -15,7 +15,7 @@ import { useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { typeIcon, userIcon } from "../lib/icons";
 import { usePinnedBoards } from "../lib/pins";
-import { Board, FieldErrors, Issue, NewIssue, ParentChoice, Sprint, SprintChoice, User } from "../lib/issue";
+import { Board, CreatedIssue, FieldErrors, NewIssue, ParentChoice, Sprint, SprintChoice, User } from "../lib/issue";
 import { priorityIcon } from "../lib/priority";
 import {
   createIssue,
@@ -72,7 +72,7 @@ interface Props {
   /** Typed in root search, as the command's argument. The form then starts at the description. */
   summary?: string;
   /** Called after Jira created the issue. Without it, the form clears for the next one. */
-  onCreated?: (issue: Issue) => void;
+  onCreated?: (issue: CreatedIssue) => void;
 }
 
 function errorMessage(error: unknown): string {

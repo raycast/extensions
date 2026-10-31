@@ -50,26 +50,7 @@ export function IssueActions({
       </ActionPanel.Section>
       <ActionPanel.Section>
         {boardAction}
-        {/* Raycast has room for one search bar dropdown, which is taken by people. */}
-        <ActionPanel.Submenu
-          title="Filter by Priority"
-          icon={Icon.Filter}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-        >
-          <Action
-            title="All Priorities"
-            icon={priority ? Icon.Circle : Icon.CheckCircle}
-            onAction={() => onPriorityChange(undefined)}
-          />
-          {PRIORITY_FILTERS.map(({ level, title }) => (
-            <Action
-              key={level}
-              title={title}
-              icon={priority === level ? Icon.CheckCircle : Icon.Circle}
-              onAction={() => onPriorityChange(level)}
-            />
-          ))}
-        </ActionPanel.Submenu>
+        <PriorityFilterSubmenu priority={priority} onChange={onPriorityChange} />
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
@@ -79,6 +60,40 @@ export function IssueActions({
       </ActionPanel.Section>
       <ExtensionActions />
     </ActionPanel>
+  );
+}
+
+/**
+ * Raycast has room for one search bar dropdown, which is taken by people, so priority is filtered from here.
+ * Also on the empty list, where a filter with no matches would otherwise have no way back.
+ */
+export function PriorityFilterSubmenu({
+  priority,
+  onChange,
+}: {
+  priority?: PriorityLevel;
+  onChange: (priority?: PriorityLevel) => void;
+}) {
+  return (
+    <ActionPanel.Submenu
+      title="Filter by Priority"
+      icon={Icon.Filter}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+    >
+      <Action
+        title="All Priorities"
+        icon={priority ? Icon.Circle : Icon.CheckCircle}
+        onAction={() => onChange(undefined)}
+      />
+      {PRIORITY_FILTERS.map(({ level, title }) => (
+        <Action
+          key={level}
+          title={title}
+          icon={priority === level ? Icon.CheckCircle : Icon.Circle}
+          onAction={() => onChange(level)}
+        />
+      ))}
+    </ActionPanel.Submenu>
   );
 }
 
