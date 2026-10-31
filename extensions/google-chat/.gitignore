@@ -1,0 +1,7 @@
+/node_modules
+/dist
+raycast-env.d.ts
+.DS_Store
+
+# Personal research notes, not part of the extension
+/research/
