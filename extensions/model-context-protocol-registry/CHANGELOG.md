@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Melso Fiscal MCP] - 2026-10-31
+
+- Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
+
 ## [Add Postemi MCP Server] - 2026-10-31
 
 - Add Postemi to the official registry: write, schedule and publish posts to 37 social platforms and apps with a content calendar and full-quality photo and video uploads. Hosted Streamable HTTP server at https://mcp.postemi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

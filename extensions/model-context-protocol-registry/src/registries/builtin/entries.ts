@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "melso",
+    title: "Melso",
+    description:
+      "OAuth-protected access to Spanish invoices, income, expenses and tax calendars in the company you authorize in Melso. Record expenses, prepare invoice work and start a Spanish S.L. incorporation request. The owner pays and approves incorporation in Melso; professionals complete the legal formation. Tax-return approval and filing remain in Melso. Paid hosted Streamable HTTP service; appropriate Melso tool access required. Server source is proprietary.",
+    icon: "https://melso.ai/icons/apple-touch-icon.png",
+    homepage: "https://docs.melso.ai/mcp/overview",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.melso.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.melso.ai/mcp",
+  },
+  {
     name: "industrylens",
     title: "IndustryLens",
     description:
