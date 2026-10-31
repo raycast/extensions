@@ -1,0 +1,13 @@
+{
+  "invoice_number": "INV-0001",
+  "from": "Jane Doe, Freelance Developer",
+  "to": "Acme Corp",
+  "date": "2026-10-14",
+  "due_date": "2026-10-28",
+  "tax_rate": 0,
+  "items": [
+    {"description": "Website redesign — homepage + 3 subpages", "qty": 1, "rate": 1800},
+    {"description": "Extra revision round", "qty": 2, "rate": 90}
+  ],
+  "notes": "Net 14. Late payments accrue 1.5% monthly interest after the due date."
+}
