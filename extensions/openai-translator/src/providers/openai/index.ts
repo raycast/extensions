@@ -4,7 +4,7 @@
 import { Provider, Message } from "../base";
 import { Prompt } from "../prompt";
 import { TranslateQuery, ProviderProps } from "../types";
-import { fetchSSE, SSETransform } from "../utils";
+import { fetchSSE, SSETransform, isReasoningModel } from "../utils";
 /* @ts-expect-error: has no exported member 'compose' */
 import { compose } from "stream";
 
@@ -52,15 +52,24 @@ export default class extends Provider {
   }
 
   body(query: TranslateQuery, prompt: Prompt): Record<string, any> {
-    return {
+    const body: Record<string, any> = {
       model: this.model,
-      temperature: 0,
-      max_tokens: 1000,
-      top_p: 1,
-      frequency_penalty: 1,
-      presence_penalty: 1,
       stream: true,
+      top_p: 1,
     };
+
+    if (isReasoningModel(this.model)) {
+      // Reasoning models (o1/o3/o4/gpt-5) only support max_completion_tokens
+      // and reject temperature, frequency_penalty, presence_penalty.
+      body.max_completion_tokens = 1000;
+    } else {
+      body.temperature = 0;
+      body.max_tokens = 1000;
+      body.frequency_penalty = 1;
+      body.presence_penalty = 1;
+    }
+
+    return body;
   }
 
   messages(query: TranslateQuery, prompt: Prompt): any {
