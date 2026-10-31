@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Fix Search Note crash when vault path is not in note path] - {PR_MERGE_DATE}
+
+- Fix a crash in Search Note when a note's path does not contain the vault path (e.g. on Windows with different separators), caused by `split(vault.path)[1]` returning undefined
+- Fix `trimPathToMaxLength` stripping the first character of paths without a leading separator
+
 ## [Quick Capture Validation] - 2026-10-10
 
 - Restrict Quick Capture to existing regular Markdown files inside the vault
