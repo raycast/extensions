@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "human-id",
+  "title": "Human ID",
+  "description": "Generate unique, human-readable kebab-case IDs for git branch names",
+  "icon": "icon.png",
+  "author": "rachelkoh",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Generate Human ID",
+      "description": "Generate a kebab-case ID like brave-otter-jumps-quickly and copy it to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "words",
+          "type": "dropdown",
+          "placeholder": "Words (default 4)",
+          "required": false,
+          "data": [
+            {
+              "title": "4 words",
+              "value": "4"
+            },
+            {
+              "title": "3 words",
+              "value": "3"
+            },
+            {
+              "title": "5 words",
+              "value": "5"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test test/*.test.ts",
+    "bench": "tsx test/bench.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
