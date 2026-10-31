@@ -1,13 +1,45 @@
-import { LocalStorage, OAuth } from "@raycast/api";
+import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { PlaneClient } from "./client";
-import { STORAGE_WORKSPACE_SLUG_KEY } from "../helpers/keys";
+import {
+  findStoredWorkspaceSlug,
+  legacyWorkspaceSlugKeys,
+  STORAGE_OAUTH_WORKSPACE_SLUG_KEY,
+  STORAGE_WORKSPACE_SLUG_KEY,
+} from "../helpers/keys";
 import { getAppInstallations } from "./installations";
-import { getPreferenceValues } from "@raycast/api";
+import { emitWorkspaceChange } from "../helpers/workspace-events";
 
 const preferences = getPreferenceValues<Preferences>();
+/** Raw preference value, used only to find a workspace slug saved before keys were trimmed. */
+const RAW_API_KEY = preferences.API_KEY ?? "";
+/** A pasted key with a stray space or newline is rejected by Plane as "Given API token is not valid". */
+const API_KEY = RAW_API_KEY.trim();
 
 let planeClient: PlaneClient | undefined;
+let currentToken: string | undefined;
+
+export function isApiKeyAuth() {
+  return !!API_KEY;
+}
+
+function getSlugStorageKey(token: string) {
+  return isApiKeyAuth() ? STORAGE_WORKSPACE_SLUG_KEY(token) : STORAGE_OAUTH_WORKSPACE_SLUG_KEY;
+}
+
+function createClient(workspaceSlug: string, token: string) {
+  return isApiKeyAuth() ? new PlaneClient(workspaceSlug, undefined, token) : new PlaneClient(workspaceSlug, token);
+}
+
+/**
+ * Reads the stored workspace slug. Earlier versions stored it under a key that contained the raw token
+ * (untrimmed, for keys saved before trimming); such a key is read once, moved to the hashed key, and removed.
+ */
+export async function getStoredWorkspaceSlug(token: string): Promise<string | undefined> {
+  // Only the API key can have been saved untrimmed; OAuth tokens never came from the preference.
+  const rawToken = isApiKeyAuth() && token === API_KEY ? RAW_API_KEY : token;
+  return findStoredWorkspaceSlug(LocalStorage, getSlugStorageKey(token), legacyWorkspaceSlugKeys(token, rawToken));
+}
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -27,27 +59,65 @@ const plane = new OAuthService({
   refreshTokenUrl:
     "https://oauth.raycast.com/v1/refresh-token/dERRhlRqcHTtXPJLaZZqs7h8JYsRPZrQeWpVvNN_5F9qd_Z6Hb1q6xr_iVeLUmKBj9Ewk3xHAuADSKCpQ1fb0rJq07vziFLkate0VW2zkV0a-xfj23KBoVM2y50aA4geUo7XQT4PS0MKFBIt44ZaD0QRnr3gdZIf37xWollM66pK35YAmuIgo4uFDFJnj1-A1zJ8FvuYL16tHK5qO4nK6SBKE-AktYpraqpziJUINAwN6ByKe_JO1MdvtGGeMb-5",
   scope: "read write",
-  personalAccessToken: preferences.API_KEY,
+  personalAccessToken: API_KEY || undefined,
   onAuthorize: async ({ token }) => {
-    const tokenKey = STORAGE_WORKSPACE_SLUG_KEY(token);
-    let workspaceSlug = await LocalStorage.getItem(tokenKey);
-    if (preferences.API_KEY) {
-      if (workspaceSlug) {
-        planeClient = new PlaneClient(workspaceSlug?.toString(), undefined, token);
-      }
+    currentToken = token;
+    const workspaceSlug = await getStoredWorkspaceSlug(token);
+    if (workspaceSlug) {
+      planeClient = createClient(workspaceSlug, token);
       return;
     }
-    if (!workspaceSlug) {
-      const installations = await getAppInstallations({ accessToken: token });
-      workspaceSlug = installations[0].workspace_detail.slug;
-      await LocalStorage.setItem(tokenKey, workspaceSlug);
+    if (isApiKeyAuth()) {
+      // AuthorizedView asks for the slug (there is no "list my workspaces" endpoint).
+      return;
     }
-    planeClient = new PlaneClient(workspaceSlug?.toString(), token, undefined);
+    // OAuth: default to the first workspace that installed the app. "Change Workspace" lists all of them.
+    try {
+      const installations = await getAppInstallations({ accessToken: token });
+      const firstSlug = installations[0]?.workspace_detail?.slug;
+      if (firstSlug) {
+        await LocalStorage.setItem(STORAGE_OAUTH_WORKSPACE_SLUG_KEY, firstSlug);
+        planeClient = createClient(firstSlug, token);
+      }
+    } catch (error) {
+      console.error("Failed to load Plane app installations", error);
+    }
   },
 });
 
+/** Kept for compatibility: initializes the client without persisting the slug. */
 export function initializePlaneClient(workspaceSlug: string, accessToken?: string, apiKey?: string) {
   planeClient = new PlaneClient(workspaceSlug, accessToken, apiKey);
+  return planeClient;
+}
+
+/**
+ * Persists the slug for the current credentials, re-creates the client, and notifies `AuthorizedView`.
+ * Workspace-level hooks include the slug in their cache key, so data never leaks across workspaces.
+ */
+export async function selectWorkspace(workspaceSlug: string) {
+  const token = currentToken ?? API_KEY;
+  if (!token) {
+    throw new Error("Not signed in to Plane yet. Open any Plane command to authorize first.");
+  }
+  await LocalStorage.setItem(getSlugStorageKey(token), workspaceSlug);
+  planeClient = createClient(workspaceSlug, token);
+  emitWorkspaceChange(workspaceSlug);
+}
+
+export function getCurrentAccessToken() {
+  return currentToken ?? API_KEY;
+}
+
+/** Returns the client or throws a message that tells the user what to do. */
+export function requirePlaneClient(): PlaneClient {
+  if (!planeClient) {
+    throw new Error(
+      isApiKeyAuth()
+        ? "No Plane workspace selected. Open a Plane command (e.g. Search Work Items) once to enter your workspace slug."
+        : "No Plane workspace found. Open a Plane command (e.g. Search Work Items) to sign in and pick a workspace.",
+    );
+  }
   return planeClient;
 }
 
