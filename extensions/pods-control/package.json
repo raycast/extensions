@@ -1,0 +1,274 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pods-control",
+  "title": "Pods Control",
+  "description": "Control AirPods and Beats listening modes and Conversation Awareness, and show the confirmed mode in command subtitles.",
+  "icon": "pods-control.png",
+  "author": "raulg",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Media"
+  ],
+  "keywords": [
+    "pods-control",
+    "airpods",
+    "beats",
+    "pods",
+    "anc",
+    "noise cancellation",
+    "transparency",
+    "adaptive",
+    "conversation awareness",
+    "noise cancelling",
+    "adaptive audio",
+    "conversational awareness"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "set-noise-cancellation",
+      "title": "Set to Noise Cancellation",
+      "description": "Set the connected AirPods or Beats to Noise Cancellation (ANC) listening mode.",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "anc",
+        "nc",
+        "lm",
+        "noise cancelling"
+      ]
+    },
+    {
+      "name": "set-transparency",
+      "title": "Set to Transparency",
+      "description": "Set the connected AirPods or Beats to Transparency listening mode.",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "ambient",
+        "passthrough",
+        "trans",
+        "lm"
+      ]
+    },
+    {
+      "name": "set-adaptive",
+      "title": "Set to Adaptive",
+      "description": "Set the connected AirPods or Beats to Adaptive listening mode when the device supports it.",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "adaptive audio",
+        "auto",
+        "automatic",
+        "lm"
+      ],
+      "disabledByDefault": true
+    },
+    {
+      "name": "set-off",
+      "title": "Set to Off",
+      "description": "Set the connected AirPods or Beats to the Off listening mode (no Noise Cancellation or Transparency).",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "disable",
+        "lm"
+      ],
+      "disabledByDefault": true
+    },
+    {
+      "name": "cycle-listening-mode",
+      "title": "Cycle Listening Mode",
+      "description": "Cycle through your enabled listening modes. The current mode is read from the connected AirPods or Beats before cycling, and unsupported modes are skipped.",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "lm",
+        "anc",
+        "nc",
+        "trans"
+      ],
+      "preferences": [
+        {
+          "name": "cycleOff",
+          "title": "Modes to Cycle Through",
+          "label": "Off",
+          "description": "Enable Off when cycling listening modes.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cycleTransparency",
+          "label": "Transparency",
+          "description": "Enable Transparency when cycling listening modes.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "cycleAdaptive",
+          "label": "Adaptive",
+          "description": "Enable Adaptive when cycling listening modes. Skipped automatically if the connected device does not support it.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "cycleAnc",
+          "label": "Noise Cancellation",
+          "description": "Enable Noise Cancellation when cycling listening modes.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toggle-conversation-awareness",
+      "title": "Toggle Conversation Awareness",
+      "description": "Toggle Conversation Awareness on or off. Requires AirPods or Beats that support Conversation Awareness.",
+      "mode": "no-view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "speech",
+        "switch",
+        "conversational awareness",
+        "ca"
+      ]
+    },
+    {
+      "name": "pods-status",
+      "title": "Pods Status",
+      "description": "Refresh the listening mode and Conversation Awareness shown in command subtitles.",
+      "mode": "no-view",
+      "interval": "1m",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "pods",
+        "control",
+        "listening mode",
+        "lm",
+        "conversation awareness",
+        "ca"
+      ]
+    },
+    {
+      "name": "manage-cli",
+      "title": "Manage CLI",
+      "description": "Install, update, or fix the pods-control CLI used by this extension.",
+      "mode": "view",
+      "keywords": [
+        "pods-control",
+        "airpods control",
+        "beats control",
+        "pods control",
+        "airpods",
+        "beats",
+        "install",
+        "update",
+        "setup",
+        "fix",
+        "homebrew",
+        "brew"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Full path to the CLI binary. Leave empty to let Raycast find it automatically.",
+      "type": "textfield",
+      "placeholder": "/path/to/pods-control",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.3.0",
+    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/ui": "^5.0.5",
+    "eslint": "^10.13.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "happy-dom": "^20.14.6",
+    "prettier": "^3.9.10",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration"
+  }
+}
