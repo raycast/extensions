@@ -1,7 +1,7 @@
+import { runCommand } from '../commands'
+import { projectShortcut, commandEnvironment } from '../platform'
 import { Action, ActionPanel, Color, Detail, Icon, confirmAlert, useNavigation } from '@raycast/api'
 import { useExec } from '@raycast/utils'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import { useState } from 'react'
 import { Project } from '../project'
 import { OpenInEditor, OpenInTerminal } from './Open'
@@ -12,15 +12,13 @@ type GitPullDetailProps = {
     project: Project
 }
 
-const execAsync = promisify(exec)
-
 export default function GitPullDetail({ project }: GitPullDetailProps) {
     const { pop } = useNavigation()
     const [isPulling, setIsPulling] = useState(false)
     const [pullOutput, setPullOutput] = useState<string | null>(null)
     const [pullError, setPullError] = useState<string | null>(null)
 
-    const { isLoading: isLoadingStatus, data: status } = useExec('git', ['status', '--porcelain'], { cwd: project.fullPath })
+    const { isLoading: isLoadingStatus, data: status } = useExec('git', ['status', '--porcelain'], { cwd: project.fullPath, env: commandEnvironment })
 
     const {
         data: upstreamBranch,
@@ -28,10 +26,12 @@ export default function GitPullDetail({ project }: GitPullDetailProps) {
         error: upstreamError,
     } = useExec('git', ['rev-parse', '--abbrev-ref', 'HEAD@{upstream}'], {
         cwd: project.fullPath,
+        env: commandEnvironment,
     })
 
     const { data: remoteStatus, isLoading: isLoadingRemoteStatus } = useExec('git', ['rev-list', '--left-right', '--count', `HEAD...${upstreamBranch}`], {
         cwd: project.fullPath,
+        env: commandEnvironment,
         execute: !isLoadingUpstream && !!upstreamBranch && !upstreamError,
     })
 
@@ -61,7 +61,7 @@ export default function GitPullDetail({ project }: GitPullDetailProps) {
         setPullOutput(null)
 
         try {
-            const { stdout, stderr } = await execAsync('git pull', { cwd: project.fullPath })
+            const { stdout, stderr } = await runCommand('git', ['pull'], { cwd: project.fullPath, env: commandEnvironment, timeout: 0 })
             setPullOutput([stdout, stderr].filter(Boolean).join('\n') || 'Already up to date.')
             await showSuccessToast('Git pull completed')
         } catch (error) {
@@ -101,7 +101,7 @@ ${pullError ? '## Pull Error\n\n```bash\n' + pullError + '\n```' : ''}
                         title="Pull Latest Changes"
                         icon={Icon.Download}
                         onAction={pullLatestChanges}
-                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                        shortcut={projectShortcut('p')}
                     />
                     {!canPull && (
                         <Action

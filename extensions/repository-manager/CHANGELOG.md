@@ -1,5 +1,12 @@
 # Repository Manager Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+- Add native Windows support with platform-specific defaults and keyboard shortcuts.
+- Open Windows Terminal, PowerShell, and Command Prompt in the repository directory.
+- Support Windows paths, PATH lookup, and package-manager command shims.
+- Share application launching with Start Development and report launch failures.
+- Keep optional tokei statistics cross-platform and editor window resizing macOS-only.
+
 ## [Repository Workflow, Tags, and AI Briefs] - 2026-05-12
 - **Repository Tags**: Add custom tags to repositories, show them in the list, and filter by tag from the main repository filter dropdown
 - **Unified Filters**: Combine directory, health, recent, favorite, and tag filters in the upper-right list filter with clearly labeled sections

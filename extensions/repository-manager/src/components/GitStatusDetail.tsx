@@ -1,3 +1,4 @@
+import { projectShortcut, commandEnvironment } from '../platform'
 import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
 import { useExec } from '@raycast/utils'
@@ -66,9 +67,10 @@ ${fileRows}
 export default function GitStatusDetail({ project }: GitStatusDetailProps) {
     const { push, pop } = useNavigation()
     const cachedHealth = project.gitHealth
-    const { isLoading, data: status } = useExec('git', ['status', '--porcelain'], { cwd: project.fullPath })
+    const { isLoading, data: status } = useExec('git', ['status', '--porcelain'], { cwd: project.fullPath, env: commandEnvironment })
     const { data: currentBranchFromGit, isLoading: isLoadingBranch } = useExec('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
         cwd: project.fullPath,
+        env: commandEnvironment,
         execute: !cachedHealth,
     })
 
@@ -78,12 +80,14 @@ export default function GitStatusDetail({ project }: GitStatusDetailProps) {
         error: upstreamError,
     } = useExec('git', ['rev-parse', '--abbrev-ref', 'HEAD@{upstream}'], {
         cwd: project.fullPath,
+        env: commandEnvironment,
         execute: !cachedHealth,
     })
 
     const upstreamBranch = cachedHealth?.upstream || upstreamBranchFromGit
     const { data: remoteStatus, isLoading: isLoadingRemoteStatus } = useExec('git', ['rev-list', '--left-right', '--count', `HEAD...${upstreamBranch}`], {
         cwd: project.fullPath,
+        env: commandEnvironment,
         execute: !cachedHealth && !isLoadingUpstream && !!upstreamBranch && !upstreamError,
     })
 
@@ -192,7 +196,7 @@ ${status ? status : 'No changes'}
                     <Action
                         title="Git Pull"
                         icon={Icon.Download}
-                        shortcut={{ modifiers: ['cmd'], key: 'g' }}
+                        shortcut={projectShortcut('g')}
                         onAction={() => push(<GitPullDetail project={project} />)}
                     />
                 </ActionPanel>

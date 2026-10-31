@@ -1,3 +1,4 @@
+import { commandEnvironment } from '../platform'
 import { Action, ActionPanel, AI, Detail, Icon, environment, useNavigation } from '@raycast/api'
 import { useAI, usePromise } from '@raycast/utils'
 import { execFile } from 'child_process'
@@ -38,7 +39,7 @@ const MAX_AI_CONTEXT_BYTES = 300_000
 
 async function runGit(project: Project, args: string[]): Promise<GitResult> {
     try {
-        const { stdout, stderr } = await execFileAsync('git', args, { cwd: project.fullPath, maxBuffer: 1024 * 1024 * 50 })
+        const { stdout, stderr } = await execFileAsync('git', args, { cwd: project.fullPath, env: commandEnvironment, maxBuffer: 1024 * 1024 * 50 })
 
         return {
             stdout,

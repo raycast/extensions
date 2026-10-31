@@ -1,3 +1,4 @@
+import { projectShortcut, commandEnvironment } from '../platform'
 import { Action, ActionPanel, Detail, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
 import { useExec, showFailureToast } from '@raycast/utils'
@@ -15,28 +16,23 @@ type CommitStat = {
     name: string
 }
 
-const commandPath = ['/opt/homebrew/bin', '/usr/local/bin', process.env.HOME ? `${process.env.HOME}/.cargo/bin` : null, '/usr/bin', '/bin', process.env.PATH || null].filter((path): path is string => Boolean(path)).join(':')
-
 const tokeiArgs = ['.', '--compact', '--exclude', 'node_modules', '--exclude', 'vendor', '--exclude', '.git', '--exclude', 'dist', '--exclude', 'build', '--exclude', 'target', '--exclude', 'coverage', '--exclude', '.next', '--exclude', '.nuxt', '--exclude', '.turbo', '--exclude', '.cache', '--exclude', 'tmp', '--exclude', '*.lock', '--exclude', '*-lock.*', '--exclude', 'bun.lockb']
 
 export default function GitStatisticsDetail({ project }: GitStatisticsDetailProps) {
     const { push, pop } = useNavigation()
     const [tokeiAvailable, setTokeiAvailable] = useState<boolean | null>(null)
 
-    const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath })
-    const { isLoading: isLoadingBranches, data: totalBranches } = useExec('git', ['branch', '-r'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
-    const { isLoading: isLoadingTags, data: totalTags } = useExec('git', ['tag'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
+    const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath, env: commandEnvironment })
+    const { isLoading: isLoadingBranches, data: totalBranches } = useExec('git', ['branch', '-r'], { cwd: project.fullPath, env: commandEnvironment, parseOutput: (output) => output.stdout.split('\n').length - 1 })
+    const { isLoading: isLoadingTags, data: totalTags } = useExec('git', ['tag'], { cwd: project.fullPath, env: commandEnvironment, parseOutput: (output) => output.stdout.split('\n').length - 1 })
 
     // First check if tokei is available
     const {
         isLoading: isCheckingTokei,
         error: tokeiCheckError,
         revalidate: revalidateTokeiCheck,
-    } = useExec('which', ['tokei'], {
-        env: {
-            ...process.env,
-            PATH: commandPath,
-        },
+    } = useExec('tokei', ['--version'], {
+        env: commandEnvironment,
         parseOutput: (output) => {
             if (output.stdout && output.stdout.trim().length > 0) {
                 setTokeiAvailable(true)
@@ -51,10 +47,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         cwd: project.fullPath,
         execute: tokeiAvailable === true,
         timeout: 30000, // 30 second timeout
-        env: {
-            ...process.env,
-            PATH: commandPath,
-        },
+        env: commandEnvironment,
         parseOutput: (output) => {
             if (output.stdout && output.stdout.trim().length > 0) {
                 return output.stdout
@@ -73,7 +66,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     // Handle tokei errors
     useEffect(() => {
         if (tokeiAvailable === false) {
-            showFailureToast('Code Statistics Error', { title: 'tokei command not found' })
+            showFailureToast('Code Statistics Unavailable', { title: 'Install tokei and add it to PATH' })
         } else if (tokeiAvailable === true && !isLoadingTokei && (!tokeiData || tokeiData.trim().length === 0)) {
             showFailureToast('Code Statistics Error', { title: 'tokei command failed to generate statistics' })
         }
@@ -81,6 +74,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 
     const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all'], {
         cwd: project.fullPath,
+        env: commandEnvironment,
         timeout: 10000, // 10 second timeout
         parseOutput: (output) => {
             try {
@@ -248,7 +242,7 @@ ${getTokeiSection()}
                     <Action
                         title="Refresh Code Statistics"
                         icon={Icon.BarChart}
-                        shortcut={{ modifiers: ['cmd'], key: 'l' }}
+                        shortcut={projectShortcut('l')}
                         onAction={refreshCodeStatistics}
                     />
                     <Action
@@ -262,7 +256,7 @@ ${getTokeiSection()}
                     <Action
                         title="Git Status"
                         icon={Icon.Download}
-                        shortcut={{ modifiers: ['cmd'], key: 'g' }}
+                        shortcut={projectShortcut('g')}
                         onAction={() => push(<GitStatusDetail project={project} />)}
                     />
                 </ActionPanel>

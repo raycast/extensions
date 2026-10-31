@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Icon } from '@raycast/api'
+import { projectShortcut } from '../platform'
+import { Keyboard, Action, ActionPanel, Icon } from '@raycast/api'
 import { Project, Repo } from '../project'
 import { markProjectOpened } from '../helpers'
 
@@ -48,7 +49,7 @@ function getRemotePages(remote: Repo): RemotePage[] {
     return []
 }
 
-function OpenRemoteAction({ project, remote, shortcut }: { project: Project; remote: Repo; shortcut?: { modifiers: ('cmd' | 'shift')[]; key: 'o' } }) {
+function OpenRemoteAction({ project, remote, shortcut }: { project: Project; remote: Repo; shortcut?: Keyboard.Shortcut }) {
     return (
         <Action.OpenInBrowser
             title={`Open on ${remote.hostDisplayName} (${remote.name})`}
@@ -98,7 +99,7 @@ export default function OpenGitRemotes({ project }: OpenGitRemotesProps) {
                 <OpenRemoteAction
                     project={project}
                     remote={remote}
-                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+                    shortcut={projectShortcut('o', ['shift'])}
                 />
                 <OpenRemotePages
                     project={project}
@@ -111,7 +112,7 @@ export default function OpenGitRemotes({ project }: OpenGitRemotesProps) {
     return (
         <ActionPanel.Submenu
             title="Open Git Remotes"
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+            shortcut={projectShortcut('o', ['shift'])}
             icon={Icon.Globe}
         >
             {project.gitRemotes.map((remote, i) => {
