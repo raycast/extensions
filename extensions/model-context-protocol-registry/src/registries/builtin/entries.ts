@@ -364,6 +364,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://bool.com/api/mcp",
   },
   {
+    name: "bowmark",
+    title: "Bowmark",
+    description:
+      "Typed, tested functions for live websites: search and read LinkedIn, YouTube, Amazon, Reddit, flights and more, as structured results your agent can use. Hosted remote Streamable HTTP server through `mcp-remote`; needs a Bowmark API key (bowmark.ai/dashboard/keys), and new accounts get a free $10 of usage. Replace YOUR_BOWMARK_API_KEY in BOWMARK_AUTH_HEADER; keep the Bearer prefix.",
+    icon: "https://bowmark.ai/icon.png",
+    homepage: "https://bowmark.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.bowmark.ai/mcp", "--header", "Authorization:${BOWMARK_AUTH_HEADER}"],
+      env: {
+        BOWMARK_AUTH_HEADER: "Bearer YOUR_BOWMARK_API_KEY",
+      },
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
