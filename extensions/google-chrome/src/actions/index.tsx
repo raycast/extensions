@@ -1,47 +1,60 @@
 import { runAppleScript } from "run-applescript";
 import { LocalStorage, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { AUTOMATION_PERMISSION_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
+    ? `try
+            set _favicon to execute (tab i of w) javascript ¬
+              "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"
+          end try`
+    : "";
 
   await checkAppInstalled();
 
   try {
     const openTabs = await runAppleScript(`
+      set _rec_sep to character id ${Tab.TAB_RECORD_SEPARATOR.charCodeAt(0)}
+      set _field_sep to character id ${Tab.TAB_FIELD_SEPARATOR.charCodeAt(0)}
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
-          set _w_id to get id of w as inches as string
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
-            set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
-          end repeat
+          try
+            set _w_id to (id of w as inches as string)
+            set _titles to title of tabs of w
+            set _urls to URL of tabs of w
+            repeat with i from 1 to count of _titles
+              set _favicon to ""
+              ${faviconFormula}
+              set _output to _output & ((item i of _titles) as text) & _field_sep & ((item i of _urls) as text) & _field_sep & _favicon & _field_sep & _w_id & _field_sep & i & _rec_sep
+            end repeat
+          end try
         end repeat
       end tell
       return _output
-  `);
+    `);
 
     return openTabs
-      .split("\n")
-      .filter((line) => line.length !== 0)
+      .split(Tab.TAB_RECORD_SEPARATOR)
+      .filter((line) => line.trim().length !== 0)
       .map((line) => Tab.parse(line));
   } catch (err) {
     if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
       LocalStorage.removeItem("is-installed");
+      await checkAppInstalled();
     }
-    await checkAppInstalled();
-    return [];
+    if (isAutomationPermissionError(err)) {
+      throw new Error(AUTOMATION_PERMISSION_MESSAGE);
+    }
+    throw err;
   }
+}
+
+function isAutomationPermissionError(err: unknown): boolean {
+  const text = `${(err as Error)?.message ?? ""} ${(err as { stderr?: string })?.stderr ?? ""}`;
+  return text.includes("-1743") || text.includes("Not authorized to send Apple events");
 }
 
 export async function openNewTab({
