@@ -1,0 +1,29 @@
+{
+  "exchanges": [
+    {
+      "request": { "method": "tools/list" },
+      "response": {
+        "error": {
+          "code": -32001,
+          "message": "This program (Raycast) has no access to Folnaro yet and can’t read or change anything. Ask the user to allow it in Folnaro under Settings > Agents."
+        }
+      },
+      "repeat": true
+    },
+    {
+      "request": { "method": "tools/call", "params": { "name": "time_running" } },
+      "response": {
+        "result": {
+          "isError": true,
+          "content": [
+            {
+              "type": "text",
+              "text": "This program (Raycast) has no access to Folnaro yet and can’t read or change anything. Ask the user to allow it in Folnaro under Settings > Agents."
+            }
+          ]
+        }
+      },
+      "repeat": true
+    }
+  ]
+}

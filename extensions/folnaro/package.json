@@ -1,0 +1,176 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folnaro",
+  "title": "Folnaro",
+  "description": "Search invoices, quotes and customers, track time and capture receipts in Folnaro, the invoicing app for freelancers in Germany.",
+  "icon": "extension-icon.png",
+  "author": "folnaro",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "keywords": [
+    "invoice",
+    "rechnung",
+    "time tracking",
+    "zeiterfassung",
+    "receipt",
+    "beleg",
+    "freelancer",
+    "ustg",
+    "timer"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-folnaro",
+      "title": "Search Folnaro",
+      "description": "Find invoices, quotes, customers, expenses and projects in Folnaro.",
+      "mode": "view",
+      "icon": "command-search.png",
+      "keywords": [
+        "invoice",
+        "quote",
+        "customer",
+        "expense",
+        "project",
+        "rechnung",
+        "angebot",
+        "kunde",
+        "ausgabe",
+        "projekt"
+      ]
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Folnaro",
+      "description": "Start the Folnaro timer for a project or customer, with your recent ones first.",
+      "mode": "view",
+      "icon": "command-start-timer.png",
+      "keywords": [
+        "time",
+        "track",
+        "zeit",
+        "zeiterfassung"
+      ]
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Folnaro",
+      "description": "Stop the running Folnaro timer and save the time entry.",
+      "mode": "no-view",
+      "icon": "command-stop-timer.png",
+      "keywords": [
+        "time",
+        "zeit",
+        "stoppen"
+      ]
+    },
+    {
+      "name": "running-timer",
+      "title": "Running Timer",
+      "subtitle": "Folnaro",
+      "description": "Show the running Folnaro timer in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "icon": "command-running-timer.png",
+      "keywords": [
+        "menu bar",
+        "time",
+        "zeit"
+      ],
+      "preferences": [
+        {
+          "name": "hideWhenIdle",
+          "title": "Menu Bar",
+          "label": "Hide when no timer runs",
+          "description": "Only show the menu bar item while a timer is running.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "create-invoice-draft",
+      "title": "Create Invoice Draft",
+      "subtitle": "Folnaro",
+      "description": "Create an invoice draft for a customer. Folnaro computes totals and VAT.",
+      "mode": "view",
+      "icon": "command-create-invoice.png",
+      "keywords": [
+        "invoice",
+        "rechnung",
+        "entwurf",
+        "draft"
+      ]
+    },
+    {
+      "name": "capture-receipt",
+      "title": "Capture Receipt",
+      "subtitle": "Folnaro",
+      "description": "Add the PDF or image selected in Finder to Folnaro's receipt inbox.",
+      "mode": "view",
+      "icon": "command-capture-receipt.png",
+      "keywords": [
+        "receipt",
+        "expense",
+        "beleg",
+        "ausgabe",
+        "finder"
+      ]
+    },
+    {
+      "name": "open-section",
+      "title": "Open Section",
+      "subtitle": "Folnaro",
+      "description": "Jump to a section of Folnaro, like Invoices, Time or Expenses.",
+      "mode": "view",
+      "icon": "command-open-section.png",
+      "keywords": [
+        "go",
+        "navigate",
+        "bereich",
+        "gehe zu"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "helperPath",
+      "title": "Helper Path",
+      "description": "Only if Folnaro is not in Applications: the full path of folnaro-mcp inside Folnaro.app.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Applications/Folnaro.app/Contents/MacOS/folnaro-mcp"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

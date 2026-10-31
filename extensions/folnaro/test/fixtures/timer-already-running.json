@@ -1,0 +1,24 @@
+{
+  "exchanges": [
+    {
+      "request": {
+        "method": "tools/call",
+        "params": {
+          "name": "time_start_timer"
+        }
+      },
+      "response": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "A timer is already running. Stop it first."
+            }
+          ],
+          "isError": true
+        }
+      },
+      "repeat": true
+    }
+  ]
+}
