@@ -34,7 +34,10 @@ export function parseShortcut(value: string): {
   return {
     shortcut: {
       modifiers: ordered,
-      key: key === "deleteforward" ? "deleteForward" : (key as Keyboard.KeyEquivalent),
+      key:
+        key === "deleteforward"
+          ? "deleteForward"
+          : (key as Keyboard.KeyEquivalent),
     },
     label: [
       ...ordered.map((modifier) => labels[modifier]),
