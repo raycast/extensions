@@ -13,7 +13,15 @@ import {
 } from "@raycast/api";
 import { useCachedState, useExec } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate, deviceName, getSchedule } from "./utils";
+import {
+  CaffeinateInfo,
+  formatDuration,
+  startCaffeinate,
+  stopCaffeinate,
+  deviceName,
+  getSchedule,
+  parseCaffeinateProcesses,
+} from "./utils";
 import { maybeAutoCaffeinate } from "./status";
 import { get_caffeinate_state } from "rust:../rust";
 
@@ -21,29 +29,6 @@ interface CaffeinateStatus {
   running: boolean;
   startTime: number | null;
   durationSeconds: number | null;
-}
-
-function parseEtime(etime: string): number {
-  const parts = etime.split(":").reverse();
-  const seconds = parseInt(parts[0]) || 0;
-  const minutes = parseInt(parts[1]) || 0;
-
-  let hours = parts[2] ? parseInt(parts[2]) : 0;
-  let days = 0;
-
-  if (parts[2] && parts[2].includes("-")) {
-    const dayHour = parts[2].split("-");
-    days = parseInt(dayHour[0]) || 0;
-    hours = parseInt(dayHour[1]) || 0;
-  }
-
-  return seconds + minutes * 60 + hours * 3600 + days * 86400;
-}
-
-interface CaffeinateInfo {
-  isRunning: boolean;
-  totalSeconds: number | null;
-  startTime: number | null;
 }
 
 const DURATION_PRESETS: { label: string; seconds: number }[] = [
@@ -66,22 +51,7 @@ function useCaffeinateInfo(execute: boolean) {
   const { isLoading, data, mutate } = useExec("ps -o etime,args= -p $(pgrep caffeinate) 2>/dev/null", [], {
     shell: true,
     execute,
-    parseOutput: (output): CaffeinateInfo => {
-      const stdout = output.stdout.trim();
-      if (!stdout) {
-        return { isRunning: false, totalSeconds: null, startTime: null };
-      }
-
-      const lines = stdout.split("\n");
-      const [etime, ...cmdArgs] = lines[lines.length - 1].trim().split(/\s+/);
-
-      const secondsRunning = parseEtime(etime);
-      const timeoutMatch = cmdArgs.join(" ").match(/-t (\d+)/);
-      const totalSeconds = timeoutMatch ? parseInt(timeoutMatch[1]) : null;
-      const startTime = Date.now() - secondsRunning * 1000;
-
-      return { isRunning: true, totalSeconds, startTime };
-    },
+    parseOutput: (output): CaffeinateInfo => parseCaffeinateProcesses(output.stdout),
   });
 
   return {

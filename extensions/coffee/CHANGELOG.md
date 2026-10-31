@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Show the caffeination that ends furthest in the future in the menu bar when several `caffeinate` processes are running. Previously the most recently started one was shown, so a short-lived `caffeinate` started by another app (e.g. Claude Code's 5-minute one) replaced the remaining time of a longer Coffee caffeination.
+
 ## [Enhancement] - 2026-10-15
 
 - Add "Prevent system sleep on AC power" preference (`caffeinate -s`), which stops the system from sleeping while it runs on AC power ([#31139](https://github.com/raycast/extensions/issues/31139)).

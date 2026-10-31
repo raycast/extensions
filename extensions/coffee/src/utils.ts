@@ -265,3 +265,52 @@ export function formatDuration(seconds: number): string {
 
   return result.join(" ");
 }
+
+export interface CaffeinateInfo {
+  isRunning: boolean;
+  totalSeconds: number | null;
+  startTime: number | null;
+}
+
+export function parseEtime(etime: string): number {
+  const parts = etime.split(":").reverse();
+  const seconds = parseInt(parts[0]) || 0;
+  const minutes = parseInt(parts[1]) || 0;
+
+  let hours = parts[2] ? parseInt(parts[2]) : 0;
+  let days = 0;
+
+  if (parts[2] && parts[2].includes("-")) {
+    const dayHour = parts[2].split("-");
+    days = parseInt(dayHour[0]) || 0;
+    hours = parseInt(dayHour[1]) || 0;
+  }
+
+  return seconds + minutes * 60 + hours * 3600 + days * 86400;
+}
+
+// Parses `ps -o etime,args=` output for all running caffeinate processes. Other apps (e.g. Claude Code)
+// may run their own short-lived caffeinate, so report the one that keeps the Mac awake the longest
+// rather than whichever happens to be listed last. A process without -t runs until stopped.
+export function parseCaffeinateProcesses(stdout: string, now = Date.now()): CaffeinateInfo {
+  let best: CaffeinateInfo = { isRunning: false, totalSeconds: null, startTime: null };
+  let bestEnd = -Infinity;
+
+  for (const line of stdout.trim().split("\n")) {
+    const [etime, ...cmdArgs] = line.trim().split(/\s+/);
+    // Skips the "ELAPSED" header line and anything else that isn't a process row
+    if (!/^[\d:-]+$/.test(etime)) continue;
+
+    const startTime = now - parseEtime(etime) * 1000;
+    const timeoutMatch = cmdArgs.join(" ").match(/-t\s*(\d+)/);
+    const totalSeconds = timeoutMatch ? parseInt(timeoutMatch[1]) : null;
+    const end = totalSeconds === null ? Infinity : startTime + totalSeconds * 1000;
+
+    if (end > bestEnd) {
+      bestEnd = end;
+      best = { isRunning: true, totalSeconds, startTime };
+    }
+  }
+
+  return best;
+}
