@@ -1,0 +1,195 @@
+[
+  {
+    "pace": {
+      "secondary": {
+        "expectedUsedPercent": 45,
+        "willLastToReset": false,
+        "summary": "15% in deficit | Expected 45% used | Runs out in 2d 2h",
+        "etaSeconds": 182339,
+        "deltaPercent": 15,
+        "stage": "farAhead"
+      }
+    },
+    "rateWindowLabels": {
+      "secondary": "Weekly"
+    },
+    "usage": {
+      "dataConfidence": "exact",
+      "tertiary": null,
+      "accountEmail": "alice@example.com",
+      "secondary": {
+        "usedPercent": 60,
+        "windowMinutes": 10080,
+        "resetsAt": "2026-10-03T16:58:28Z",
+        "resetDescription": "Oct 3 at 9:58\u202fAM"
+      },
+      "primary": null,
+      "codexResetCredits": {
+        "updatedAt": "2026-09-29T20:56:56Z",
+        "availableCount": 2,
+        "credits": [
+          {
+            "id": "codex-reset-credit-v1-redacted",
+            "expires_at": "2026-10-22T21:05:39Z",
+            "granted_at": "2026-09-22T21:05:39Z",
+            "reset_type": "codex_rate_limits",
+            "title": "Full reset",
+            "status": "available",
+            "description": "Thanks for using Codex! You've been granted one free rate limit reset."
+          },
+          {
+            "id": "codex-reset-credit-v1-redacted",
+            "expires_at": "2026-10-29T19:13:57Z",
+            "granted_at": "2026-09-29T19:13:57Z",
+            "reset_type": "codex_rate_limits",
+            "title": "Full reset",
+            "status": "available",
+            "description": "Thanks for using Codex! You've been granted one free rate limit reset."
+          }
+        ]
+      },
+      "loginMethod": "pro",
+      "providerCost": {
+        "balanceUpdatedAt": "2026-09-29T20:56:56Z",
+        "updatedAt": "2026-09-29T20:56:56Z",
+        "used": 0,
+        "period": "Extra usage",
+        "currencyCode": "Credits",
+        "limit": 0
+      },
+      "updatedAt": "2026-09-29T20:56:56Z",
+      "identity": {
+        "providerID": "codex",
+        "accountEmail": "alice@example.com",
+        "loginMethod": "pro"
+      }
+    },
+    "version": "0.159.0",
+    "account": "alice@example.com",
+    "source": "oauth",
+    "provider": "codex",
+    "credits": {
+      "events": [],
+      "updatedAt": "2026-09-29T20:56:56Z",
+      "balanceReadSucceeded": true,
+      "balanceIsWorkspace": false,
+      "remaining": 0,
+      "creditsAvailable": false
+    }
+  },
+  {
+    "version": "0.159.0",
+    "provider": "codex",
+    "account": "bob@example.com",
+    "source": "oauth",
+    "credits": {
+      "balanceReadSucceeded": true,
+      "events": [],
+      "creditsAvailable": false,
+      "updatedAt": "2026-09-29T20:56:57Z",
+      "remaining": 0,
+      "balanceIsWorkspace": false
+    },
+    "rateWindowLabels": {
+      "secondary": "Weekly"
+    },
+    "usage": {
+      "dataConfidence": "exact",
+      "accountOrganization": "Personal",
+      "tertiary": null,
+      "accountEmail": "bob@example.com",
+      "secondary": {
+        "usedPercent": 41,
+        "resetsAt": "2026-10-05T06:58:11Z",
+        "resetDescription": "Oct 4 at 11:58\u202fPM",
+        "windowMinutes": 10080
+      },
+      "primary": null,
+      "codexResetCredits": {
+        "updatedAt": "2026-09-29T20:56:57Z",
+        "availableCount": 2,
+        "credits": [
+          {
+            "expires_at": "2026-10-22T20:22:08Z",
+            "id": "codex-reset-credit-v1-redacted",
+            "granted_at": "2026-09-22T20:22:08Z",
+            "reset_type": "codex_rate_limits",
+            "title": "Full reset",
+            "status": "available",
+            "description": "Thanks for using Codex! You've been granted one free rate limit reset."
+          },
+          {
+            "expires_at": "2026-10-29T18:44:42Z",
+            "id": "codex-reset-credit-v1-redacted",
+            "granted_at": "2026-09-29T18:44:42Z",
+            "reset_type": "codex_rate_limits",
+            "title": "Full reset",
+            "status": "available",
+            "description": "Thanks for using Codex! You've been granted one free rate limit reset."
+          }
+        ]
+      },
+      "loginMethod": "pro",
+      "providerCost": {
+        "limit": 0,
+        "currencyCode": "Credits",
+        "period": "Extra usage",
+        "updatedAt": "2026-09-29T20:56:57Z",
+        "balanceUpdatedAt": "2026-09-29T20:56:57Z",
+        "used": 0
+      },
+      "updatedAt": "2026-09-29T20:56:57Z",
+      "identity": {
+        "providerID": "codex",
+        "accountOrganization": "Personal",
+        "loginMethod": "pro",
+        "accountEmail": "bob@example.com"
+      }
+    },
+    "pace": {
+      "secondary": {
+        "stage": "farAhead",
+        "willLastToReset": false,
+        "etaSeconds": 196753,
+        "summary": "18% in deficit | Expected 23% used | Runs out in 2d 6h",
+        "expectedUsedPercent": 23,
+        "deltaPercent": 18
+      }
+    }
+  },
+  {
+    "usage": {
+      "tertiary": null,
+      "updatedAt": "2026-09-29T20:56:59Z",
+      "dataConfidence": "exact",
+      "primary": null,
+      "identity": {
+        "providerID": "codex",
+        "accountEmail": "carol@school.example.edu",
+        "loginMethod": "edu_pro",
+        "accountOrganization": "Example University Pro (Edu)"
+      },
+      "codexResetCredits": {
+        "updatedAt": "2026-09-29T20:56:59Z",
+        "credits": [],
+        "availableCount": 0
+      },
+      "secondary": {
+        "usedPercent": 100,
+        "windowMinutes": 10080,
+        "resetsAt": "2026-09-30T19:53:39Z",
+        "resetDescription": "tomorrow, 12:53\u202fPM"
+      },
+      "accountEmail": "carol@school.example.edu",
+      "loginMethod": "edu_pro",
+      "accountOrganization": "Example University Pro (Edu)"
+    },
+    "source": "oauth",
+    "account": "carol@school.example.edu \u2014 Example University Pro (Edu)",
+    "version": "0.159.0",
+    "provider": "codex",
+    "rateWindowLabels": {
+      "secondary": "Weekly"
+    }
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "activeAccountNumber": 1,
+  "accounts": [
+    {
+      "number": 1,
+      "email": "alice@example.com",
+      "organizationName": "alice@example.com's Organization",
+      "organizationUuid": "00000000-0000-4000-8000-000000000001",
+      "isOrganization": true,
+      "active": true,
+      "usageStatus": "ok",
+      "usage": {
+        "fiveHour": {
+          "pct": 41.0,
+          "resetsAt": "2026-09-30T01:09:59.900920+00:00",
+          "countdown": "3h 20m",
+          "clock": "18:09"
+        },
+        "sevenDay": {
+          "pct": 11.0,
+          "resetsAt": "2026-09-30T17:59:59.900941+00:00",
+          "countdown": "20h 10m",
+          "clock": "Sep 30 10:59",
+          "expectedPct": 88.0,
+          "aheadOfPace": false,
+          "projectedExhaustionAt": "2026-11-18T17:47:17Z",
+          "willLastToReset": true
+        },
+        "scoped": [
+          {
+            "pct": 0.0,
+            "resetsAt": "2026-09-30T18:00:00+00:00",
+            "countdown": "20h 10m",
+            "clock": "Sep 30 11:00",
+            "expectedPct": 88.0,
+            "aheadOfPace": false,
+            "willLastToReset": true,
+            "name": "Fable"
+          }
+        ]
+      },
+      "usageFetchedAt": "2026-09-29T21:48:59Z",
+      "usageAgeSeconds": 0.0
+    }
+  ]
+}
