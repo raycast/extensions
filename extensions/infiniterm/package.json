@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "infiniterm",
+  "title": "Infiniterm",
+  "description": "Open Finder folders in infiniterm, in a workspace you pick or a new one.",
+  "icon": "icon.png",
+  "author": "tarikkavaz",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "open-in-infiniterm",
+      "title": "Open in Infiniterm",
+      "subtitle": "Infiniterm",
+      "description": "Open the Finder selection (or the front Finder window) in a workspace you choose, or a new one.",
+      "mode": "view"
+    },
+    {
+      "name": "new-terminal-card",
+      "title": "New Terminal Card",
+      "subtitle": "Infiniterm",
+      "description": "Open a new terminal card in a directory you choose (home by default), in a workspace you pick or a new one.",
+      "mode": "view"
+    },
+    {
+      "name": "open-file",
+      "title": "Open File in Infiniterm",
+      "subtitle": "Infiniterm",
+      "description": "Open the file selected in Finder as an editor card.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-diff",
+      "title": "Open Git Diff in Infiniterm",
+      "subtitle": "Infiniterm",
+      "description": "Show the git changes of the Finder selection (or the front Finder window's folder) as a diff card.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Infiniterm Settings File",
+      "subtitle": "Infiniterm",
+      "description": "Open ~/.config/infiniterm/settings.json as an editor card.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-keybindings",
+      "title": "Open Infiniterm Keybindings File",
+      "subtitle": "Infiniterm",
+      "description": "Open ~/.config/infiniterm/keybindings.json as an editor card.",
+      "mode": "no-view"
+    },
+    {
+      "name": "send-to-card",
+      "title": "Send Text to Card",
+      "subtitle": "Infiniterm",
+      "description": "Type a command or text into a chosen terminal card without moving the focus.",
+      "mode": "view"
+    },
+    {
+      "name": "run-saved-command",
+      "title": "Run Saved Command in Card",
+      "subtitle": "Infiniterm",
+      "description": "Save commands once, then send one to any terminal card. Add, edit and delete them here.",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-card",
+      "title": "Go to Card",
+      "subtitle": "Infiniterm",
+      "description": "Pick a card from any workspace and bring it on screen. Needs an ift with the focus verb.",
+      "mode": "view"
+    },
+    {
+      "name": "open-in-current-workspace",
+      "title": "Open in Infiniterm (Current Workspace)",
+      "subtitle": "Infiniterm",
+      "description": "Open the Finder selection (or the front Finder window) on the workspace on screen.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "iftPath",
+      "type": "textfield",
+      "required": false,
+      "title": "ift Path",
+      "description": "Path to the ift binary. Raycast has a minimal PATH, so use an absolute path.",
+      "default": "/opt/homebrew/bin/ift",
+      "placeholder": "/opt/homebrew/bin/ift"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test src/lib/parse.test.ts src/lib/saved.test.ts"
+  }
+}
