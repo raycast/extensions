@@ -16,19 +16,15 @@ import { useEffect, useRef, useState } from "react";
 import { useDailyPlan } from "./hooks/use-daily-plan";
 import { formatDuration } from "./lib/duration";
 import { showFailure } from "./lib/errors";
-import { planDateLabel, planItemId, type PlanItem } from "./lib/plan-model";
+import { planDateLabel, planItemId, sortPlansForDisplay, type PlanItem } from "./lib/plan-model";
 import { planContent, planForDate, localDateKey, planMatches } from "./lib/planning";
-import {
-  importLatestPlansToToday,
-  movePlannedItemToToday,
-  removePlannedItem,
-  reorderPlannedItem,
-  savePlanDraft,
-} from "./lib/planning-service";
+import { movePlannedItemToToday, removePlannedItem, reorderPlannedItem, savePlanDraft } from "./lib/planning-service";
 import { sortProjectsByPreference } from "./lib/projects";
 import { completePlannedItem, startPlannedTimer, stopTimer } from "./lib/timer";
-import type { PlanReference } from "./lib/types";
+import type { PlanReference, PlanTemplate } from "./lib/types";
 import ProjectsCommand from "./projects";
+import { PlanTemplates, PlanTemplateEditor } from "./plan-templates";
+import { WeeklyReviewAction } from "./weekly-review";
 
 type PlanState = ReturnType<typeof useDailyPlan>;
 
@@ -38,7 +34,7 @@ export default function TodayPlanCommand() {
   currentDate.current = date;
   const [selected, setSelected] = useState<string>();
   const [search, setSearch] = useState("");
-  const state = useDailyPlan(date);
+  const state = useDailyPlan(date, true);
   const { plan, busy, error, now, reload } = state;
   const previousToday = useRef(localDateKey(now));
   useEffect(() => {
@@ -88,7 +84,8 @@ export default function TodayPlanCommand() {
         plan && !error && !busy ? (
           <ActionPanel>
             {newPlan}
-            <ImportLatestPlanAction state={state} onImported={moved} />
+            <NewFromTemplateAction date={date} onSaved={saved} onPop={reload} />
+            <WeeklyReviewAction date={date} onPop={reload} />
           </ActionPanel>
         ) : undefined
       }
@@ -123,6 +120,7 @@ export default function TodayPlanCommand() {
           actions={
             <ActionPanel>
               <Action title="Reload Plan" onAction={reload} shortcut={Keyboard.Shortcut.Common.Refresh} />
+              <WeeklyReviewAction date={date} onPop={reload} />
             </ActionPanel>
           }
         />
@@ -131,23 +129,21 @@ export default function TodayPlanCommand() {
         <List.EmptyView
           icon={Icon.List}
           title={date === localDateKey(now) ? "What Will You Work on Today?" : "No Plan for This Date"}
-          description={
-            date === plan.today && plan.previousPlanDate
-              ? "⌘⇧I: import unfinished plans from the last day with tasks. Or create a new plan."
-              : "Choose about three goals. Enter a goal on the first line and subtasks on the following lines."
-          }
+          description="Choose about three goals. Enter a goal on the first line and subtasks on the following lines. Unfinished plans carry over automatically."
           actions={
             busy ? undefined : (
               <ActionPanel>
                 {newPlan}
-                <ImportLatestPlanAction state={state} onImported={moved} />
+                <NewFromTemplateAction date={date} onSaved={saved} onPop={reload} />
+                <WeeklyReviewAction date={date} onPop={reload} />
               </ActionPanel>
             )
           }
         />
       ) : null}
       {!error &&
-        plan?.goals.map((goal) => (
+        plan &&
+        sortPlansForDisplay(plan.goals).map((goal) => (
           <List.Section key={goal.id}>
             {goal.tasks.length ? (
               <List.Item
@@ -301,7 +297,8 @@ function TaskActions({
           target={<PlanEditor date={plan.date} onSaved={onSaved} />}
           onPop={reload}
         />
-        <ImportLatestPlanAction state={state} onImported={onMoved} />
+        <NewFromTemplateAction date={plan.date} onSaved={onSaved} onPop={reload} />
+        <Action.Push title="Save as Template" icon={Icon.Document} target={<PlanTemplateEditor source={goal} />} />
         {plan.date < plan.today && !goal.complete ? (
           <Action
             title="Move Plan to Today"
@@ -341,6 +338,7 @@ function TaskActions({
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <WeeklyReviewAction date={plan.date} onPop={reload} />
         <Action
           title="Reload Plan"
           icon={Icon.ArrowClockwise}
@@ -352,38 +350,32 @@ function TaskActions({
   );
 }
 
-function ImportLatestPlanAction({
-  state,
-  onImported,
+function NewFromTemplateAction({
+  date,
+  onSaved,
+  onPop,
 }: {
-  state: PlanState;
-  onImported: (result: { date: string }) => void;
+  date: string;
+  onSaved: (reference: PlanReference) => void;
+  onPop: () => void;
 }) {
-  const { plan, busy, perform } = state;
-  if (!plan || busy || plan.date !== plan.today) return null;
-  const sourceDate = plan.previousPlanDate;
-  async function importLatest() {
-    const result = await perform("Could Not Import Latest Plan", () => importLatestPlansToToday(sourceDate));
-    if (!result) return;
-    onImported(result.value);
-    await showToast({
-      style: Toast.Style.Success,
-      title: result.value.count
-        ? "Imported Latest Plan"
-        : sourceDate
-          ? "No Unfinished Plans to Import"
-          : "No Past Plans to Import",
-      message: sourceDate
-        ? `${result.value.count} ${result.value.count === 1 ? "plan" : "plans"} from ${planDateLabel(sourceDate)}`
-        : "No tasks remain on earlier dates. They may already be in today's plan.",
-    });
-  }
   return (
-    <Action
-      title="Import Latest Plan"
-      icon={Icon.ArrowDown}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-      onAction={importLatest}
+    <Action.Push
+      title="New from Template"
+      icon={Icon.Document}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+      target={
+        <PlanTemplates
+          renderUseAction={(template) => (
+            <Action.Push
+              title="Use Template"
+              icon={Icon.Plus}
+              target={<PlanEditor date={date} template={template} onSaved={onSaved} />}
+            />
+          )}
+        />
+      }
+      onPop={onPop}
     />
   );
 }
@@ -391,17 +383,19 @@ function ImportLatestPlanAction({
 function PlanEditor({
   date,
   goal,
+  template,
   onSaved,
 }: {
   date: string;
   goal?: PlanItem;
+  template?: PlanTemplate;
   onSaved: (reference: PlanReference) => void;
 }) {
   const state = useDailyPlan(date);
   const { pop } = useNavigation();
   const [editing, setEditing] = useState(goal);
-  const [content, setContent] = useState(goal ? planContent(goal) : "");
-  const [projectId, setProjectId] = useState(goal?.projectId ?? "");
+  const [content, setContent] = useState(goal ? planContent(goal) : (template?.content ?? ""));
+  const [projectId, setProjectId] = useState(goal?.projectId ?? template?.projectId ?? "");
   const [saving, setSaving] = useState(false);
   const submitting = useRef(false);
   const projects = sortProjectsByPreference(
@@ -431,6 +425,12 @@ function PlanEditor({
       });
       const firstTask = planForDate(saved, date)?.tasks[0];
       onSaved({ goalId: saved.id, ...(firstTask ? { taskId: firstTask.id } : {}) });
+      if (template)
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Plan Added",
+          message: `Added to ${planDateLabel(date)}`,
+        });
       pop();
     } catch (error) {
       await showFailure("Could Not Save Plan", error);
@@ -482,7 +482,7 @@ function PlanEditor({
   return (
     <Form
       isLoading={saving || (!state.plan && !state.error)}
-      navigationTitle={editing ? "Edit Plan" : "New Plan"}
+      navigationTitle={editing ? "Edit Plan" : template ? "New Plan from Template" : "New Plan"}
       actions={
         saving || state.error ? undefined : (
           <ActionPanel>
@@ -496,12 +496,19 @@ function PlanEditor({
       }
     >
       {state.error ? <Form.Description title="Could Not Load Plan" text={state.error} /> : null}
-      <Form.Dropdown id="plan" title="Plan" value={editing?.id ?? "new"} onChange={choose}>
-        <Form.Dropdown.Item value="new" title="New Plan" />
-        {state.plan?.goals.map((item) => (
-          <Form.Dropdown.Item key={item.id} value={item.id} title={item.title} />
-        ))}
-      </Form.Dropdown>
+      {template ? (
+        <Form.Description
+          title="Template"
+          text={`${template.name} · ${planDateLabel(date)}. Creates a separate plan with new tasks; the template stays unchanged.`}
+        />
+      ) : (
+        <Form.Dropdown id="plan" title="Plan" value={editing?.id ?? "new"} onChange={choose}>
+          <Form.Dropdown.Item value="new" title="New Plan" />
+          {state.plan?.goals.map((item) => (
+            <Form.Dropdown.Item key={item.id} value={item.id} title={item.title} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TextArea
         id="content"
         title="Plan and Subtasks"
@@ -512,7 +519,12 @@ function PlanEditor({
         info="First line: your goal. Following lines: one subtask per line. A single line is also fine."
       />
       <Form.Dropdown id="project" title="Project" value={projectId} onChange={setProjectId}>
-        {!projects.length ? <Form.Dropdown.Item value="" title="Add an Active Project First" /> : null}
+        {!projects.some((project) => project.id === projectId) ? (
+          <Form.Dropdown.Item
+            value={projectId}
+            title={projects.length ? "Choose an Active Project" : "Add an Active Project First"}
+          />
+        ) : null}
         {projects.map((project) => (
           <Form.Dropdown.Item key={project.id} value={project.id} title={project.name} />
         ))}

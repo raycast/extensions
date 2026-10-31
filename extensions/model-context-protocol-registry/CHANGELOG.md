@@ -4,6 +4,10 @@
 
 - Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
 
+## [Add IndustryLens MCP Server] - 2026-10-31
+
+- Add IndustryLens to the official registry: competitive and market intelligence for B2B SaaS (competitor profiles, strategic moves, pricing changes, market landscapes, reports and comparisons). Hosted Streamable HTTP server at https://api.industry-lens.com/mcp/public with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add ConnectMachine MCP Server] - 2026-10-30
 
 - Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

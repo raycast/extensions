@@ -81,6 +81,7 @@
 /extensions/alwaysdata                                              @xmok
 /extensions/amazon-aws                                              @victor-falcon @Hodglim @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @frese @nagauta @vineus @jfkisafk @srikirank @b0lle @2357gi @davzoku @deleugpn @espenbye @bastor
 /extensions/amazon-search                                           @xilopaint
+/extensions/amino-acid-lookup                                       @azankl
 /extensions/amp-runner-manager                                      @khangkontum
 /extensions/amphetamine                                             @gstvds @mikedloss @ceyhuncicek
 /extensions/analog-film-library                                     @samuelkraft
@@ -302,7 +303,7 @@
 /extensions/braid                                                   @felixhabib
 /extensions/braintick                                               @SamarpitSantoki
 /extensions/brand-dev                                               @xmok
-/extensions/brand-fetch                                             @dilutedev
+/extensions/brand-fetch                                             @dilutedev @muhammadrizo-y
 /extensions/brasileirao-serie-a                                     @willianhf @xilopaint
 /extensions/brave                                                   @ron-myers @rgomezcasas @crisboarna @tleo19 @faridrashidi @pernielsentikaer
 /extensions/brave-search                                            @VishwasShashidhar @Spl0itable @Justiniscoding
@@ -2732,6 +2733,7 @@
 /extensions/simplelogin                                             @adrian-schnell @marcelruhf
 /extensions/simpletexocr                                            @zhuozhiyongde @yiran-frank-mao @Xel-naga7
 /extensions/simpread                                                @Kenshin
+/extensions/simready-assets                                         @0xdhrv
 /extensions/simulator-deep-linker                                   @StefanBoblic
 /extensions/simulator-manager                                       @pauloedurezende
 /extensions/single-disk-eject                                       @johndturn @LostViking09
