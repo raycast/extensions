@@ -1,0 +1,7 @@
+{
+  "version": "1.2.0",
+  "sha256": {
+    "host.bundle.js": "9513a5dfd8ee316afeae14ce04ff3c477183c62e08c57da8d05b5d6ec531f375",
+    "run.sh": "780dafc6106fb7d2b4e9a3c928ae1d8837f6369a897529fbad00a13cd7f50bdb"
+  }
+}
