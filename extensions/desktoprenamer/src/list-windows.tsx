@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, popToRoot, Color, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, popToRoot, Color } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -13,6 +13,7 @@ import {
   SpaceAPIWindowEntry,
   SpaceAPIWindowSpaceRecord,
   getWindowActionLabel,
+  getAutomaticReturnPreference,
 } from "./utils";
 import { groupByDisplay, hasMultipleDisplays, isMoveTarget } from "./spaces";
 
@@ -78,8 +79,8 @@ export default function Command() {
 
   async function moveToCurrentDesktop(entry: WindowEntry) {
     try {
-      const prefs = getPreferenceValues<Preferences>();
       const originalSpaces = await getCurrentSpacesByDisplay();
+      const shouldReturn = await getAutomaticReturnPreference();
       const targetId = originalSpaces.spacesByDisplay[entry.space.displayID] ?? "";
       if (!targetId) {
         await showToast({ style: Toast.Style.Failure, title: "Could not determine current desktop" });
@@ -104,7 +105,7 @@ export default function Command() {
         isHidden: entry.isHidden,
       });
       await delay(entry.space.isFullscreen === false ? 600 : 1750); // Wait for the backend's drag operation to complete
-      if (prefs.returnToOriginalSpace) {
+      if (shouldReturn) {
         await restoreSpacesByDisplay(originalSpaces);
       }
       await showToast({
@@ -125,8 +126,8 @@ export default function Command() {
         return;
       }
 
-      const prefs = getPreferenceValues<Preferences>();
-      const originalSpaces = prefs.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
+      const shouldReturn = await getAutomaticReturnPreference();
+      const originalSpaces = shouldReturn ? await getCurrentSpacesByDisplay() : undefined;
 
       await moveSpecificWindowToSpace({
         windowID: entry.windowID,
@@ -156,9 +157,8 @@ export default function Command() {
 
   async function handleWindowAction(entry: WindowEntry, action: SpaceAPIWindowAction) {
     try {
-      const prefs = getPreferenceValues<Preferences>();
-      const originalSpaces =
-        action === "quit" || !prefs.returnToOriginalSpace ? undefined : await getCurrentSpacesByDisplay();
+      const shouldReturn = await getAutomaticReturnPreference();
+      const originalSpaces = action === "quit" || !shouldReturn ? undefined : await getCurrentSpacesByDisplay();
       const actionLabel = getWindowActionLabel(action);
       if (action === "quit") {
         setTerminatingPIDs((previous) => new Set(previous).add(entry.pid));

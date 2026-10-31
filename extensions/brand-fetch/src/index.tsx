@@ -9,38 +9,25 @@ import {
   Icon,
   LaunchProps,
   List,
+  Keyboard,
+  showInFinder,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { retrieveBrand, searchBrandKeyword } from "./source";
 import { RetrieveBrandResponse, SearchBrandKeyword } from "./source.types";
-import { homedir } from "os";
-import axios from "axios";
-import { writeFile } from "fs/promises";
-import { join } from "path";
-import { randomUUID } from "crypto";
+import { homedir } from "node:os";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { failToast, showError } from "@chrismessina/raycast-kit";
 
-const DOWNLOADS_DIR = `${homedir()}/Downloads`;
-
-interface Preferences {
-  bfApiKey: string;
-}
+const DOWNLOAD_DIR = `${homedir()}/Downloads`;
 
 export default function Command(props: LaunchProps<{ arguments: { query: string } }>) {
-  const { bfApiKey } = getPreferenceValues<Preferences>();
-  const [error, setError] = useState<string | null>(null);
+  const { bfApiKey } = getPreferenceValues<Preferences.Index>();
   const [isLoading, setIsLoading] = useState(false);
   const [resp, setResp] = useState<RetrieveBrandResponse | SearchBrandKeyword[]>();
   const [queryType, setQueryType] = useState("query");
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: error,
-      });
-    }
-  }, [error]);
 
   async function handleSubmit(input: string) {
     setIsLoading(true);
@@ -56,7 +43,7 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
 
       setResp(data);
     } catch (err: unknown) {
-      setError((err as Error).message);
+      await showError(err, { title: "Failed to search brands" });
     }
 
     setIsLoading(false);
@@ -76,10 +63,13 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
           title={brand.name || brand.domain}
           subtitle={brand.domain}
           icon={brand.icon || Icon.Warning}
-          accessories={[{ icon: Icon.ChevronRightSmall }]}
           actions={
             <ActionPanel>
-              <Action.Push title="Preview" target={<BrandView bfApiKey={bfApiKey} domain={brand.domain} />} />
+              <Action.Push
+                title="Browse"
+                icon={Icon.Image}
+                target={<BrandView bfApiKey={bfApiKey} domain={brand.domain} />}
+              />
               <Action.OpenInBrowser url={`https://brandfetch.com/${brand.domain}`} />
             </ActionPanel>
           }
@@ -92,24 +82,13 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
 function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
   const [data, setData] = useState<RetrieveBrandResponse | null>(null);
   const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: error,
-      });
-    }
-  }, [error]);
 
   async function handleSubmit(input: string) {
     try {
       const resp = await retrieveBrand(bfApiKey, input);
       setData(resp);
     } catch (err: unknown) {
-      setError((err as Error).message);
+      await showError(err, { title: "Failed to load brand" });
     }
     setLoading(false);
   }
@@ -118,22 +97,35 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
     handleSubmit(domain.replaceAll(/http:|https:|\/\//g, ""));
   }, [domain]);
 
-  async function saveToDownloads(imageUrl: string, extName: string) {
-    const filePath = join(DOWNLOADS_DIR, randomUUID() + "." + extName);
+  async function download(imageUrl: string, extName: string) {
+    const { downloadPath } = getPreferenceValues<Preferences.Index>();
+    const configuredPath = downloadPath?.trim() || DOWNLOAD_DIR;
+    const directory = configuredPath.replace(/^~(?=$|[\\/])/, homedir());
+    const filePath = join(directory, randomUUID() + "." + extName);
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Downloading image…",
+    });
+
     try {
-      const { data } = await axios.get(imageUrl, {
-        responseType: "arraybuffer",
-      });
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download image (${response.status})`);
+      }
+      const data = Buffer.from(await response.arrayBuffer());
 
       await writeFile(filePath, data);
       await Clipboard.copy(filePath);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: `Saved To Downloads!`,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = `Downloaded to ${directory}`;
+      toast.primaryAction = {
+        title: `Show in ${process.platform === "darwin" ? "Finder" : "File Explorer"}`,
+        onAction: () => showInFinder(filePath),
+        shortcut: Keyboard.Shortcut.Common.OpenWith,
+      };
     } catch (err: unknown) {
-      setError((err as Error).message);
+      failToast(toast, err, { title: "Failed to download image" });
     }
   }
 
@@ -147,17 +139,13 @@ function BrandView({ domain, bfApiKey }: { domain: string; bfApiKey: string }) {
             content={{ tooltip: format.format, source: format.src }}
             actions={
               <ActionPanel>
-                <Action
-                  title="Save to Downloads"
-                  onAction={() => saveToDownloads(format.src, format.format)}
-                  icon={Icon.Download}
-                />
-                <Action.OpenInBrowser url={format.src} />
-                <Action.CopyToClipboard content={format.src} />
+                <Action title="Download" onAction={() => download(format.src, format.format)} icon={Icon.Download} />
+                <Action.OpenInBrowser url={format.src} shortcut={Keyboard.Shortcut.Common.Open} />
+                <Action.CopyToClipboard content={format.src} shortcut={Keyboard.Shortcut.Common.Copy} />
                 <Action.CopyToClipboard
                   title="Copy Description"
                   content={data?.description || "description empty"}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  shortcut={Keyboard.Shortcut.Common.CopyName}
                 />
               </ActionPanel>
             }
