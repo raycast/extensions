@@ -144,7 +144,7 @@ export class CodexAppServer {
 
     await this.request("initialize", {
       clientInfo: {
-        name: "ask_codex_raycast",
+        name: "ai_cli_in_raycast",
         title: "Codex in Raycast",
         version: "1.0.0",
       },
@@ -320,7 +320,7 @@ export class CodexAppServer {
       ...(this.cwd ? { cwd: this.cwd } : {}),
       sandbox: this.sandbox,
       approvalPolicy: "never",
-      serviceName: "ask_codex_raycast",
+      serviceName: "ai_cli_in_raycast",
       developerInstructions: RESPONSE_FORMAT,
     };
   }

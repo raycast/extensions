@@ -5,8 +5,9 @@
 - Publish AI CLI in Raycast: native Raycast chats for six installed AI CLIs (Codex, Antigravity, Qoder, Qoder CN, WorkBuddy, Gemini) with a searchable suite launcher, an in-place CLI Settings view, per-CLI conversations, drafts and model choice, and automatic CLI detection.
 - Reopen never-sent draft-only conversations from Recent Chats: they start a fresh CLI thread instead of failing on the missing session mapping, restore the saved draft, and replace the stale entry.
 - Keep drafts typed before the connection finishes: pre-connection input persists under its own pending-draft key and is restored when the command reopens.
+-- Rename the extension ID from `ask-codex-raycast` to `ai-cli-in-raycast` to match the suite; Raycast scopes storage per extension, so conversations, drafts and model choices saved under the previous ID do not carry over. The Codex command ID `index` is unchanged.
 - Localize root-search subtitles at runtime: each command refreshes its subtitle through `updateCommandMetadata` in the chosen language ("本机 AI CLI", "与本机 Codex CLI 对话", …), with English manifest text as the static fallback. Subtitles update after a command runs; manifest titles stay fixed because Raycast does not localize them.
-- Merge CLI Settings into the AI CLI in Raycast launcher: the launcher opens the settings view in place, and chats open it through `launchCommand({ name: "cli-hub", context: { view: "cli-settings" } })`. Conversation data, preferences and the preserved `ask-codex-raycast` / `index` IDs are unaffected.
+- Merge CLI Settings into the AI CLI in Raycast launcher: the launcher opens the settings view in place, and chats open it through `launchCommand({ name: "cli-hub", context: { view: "cli-settings" } })`.
 - Fix the npm shim and WorkBuddy product tests for macOS: compare realpaths on both sides, and simulate an outside product.json with a real symlink where the platform allows one, falling back to the fs mock where it does not.
 
 ## [v0.1.0-beta.1] - 2026-10-22

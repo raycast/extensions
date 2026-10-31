@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "ask-codex-raycast",
+  "name": "ai-cli-in-raycast",
   "title": "AI CLI in Raycast",
   "description": "在 Raycast 中使用本机 AI CLI，各家拥有独立命令、设置与会话。Native chats for your installed AI CLIs, with independent commands, settings, and sessions.",
   "icon": "chat-icon.png",

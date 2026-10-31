@@ -97,4 +97,4 @@ Earlier native Raycast checks showed the Chinese launcher with six detection sta
 
 Codex, Antigravity and Qoder CN have real inference/resume/cancel evidence. WorkBuddy still needs native CLI login, Gemini CLI is blocked by account compatibility, and international Qoder remains untested locally. See [HANDOFF.md](HANDOFF.md) for the evidence and limits.
 
-The internal extension ID remains `ask-codex-raycast` to preserve existing local data. GitHub beta releases are available from [bbfss/ai-cli-in-raycast](https://github.com/bbfss/ai-cli-in-raycast/releases). The previous Raycast Store applications remain withdrawn; this GitHub release is installed from source.
+The internal extension ID is `ai-cli-in-raycast`, renamed from `ask-codex-raycast` on 2026-10-31; local records created under the previous ID are not migrated. GitHub beta releases are available from [bbfss/ai-cli-in-raycast](https://github.com/bbfss/ai-cli-in-raycast/releases). The previous Raycast Store applications remain withdrawn; this GitHub release is installed from source.
