@@ -184,6 +184,14 @@
       "required": false
     },
     {
+      "name": "keychainService",
+      "title": "Keychain Service Name",
+      "description": "macOS only. Read the API token from a Keychain generic password item with this service name. Used when API Token is empty; Email and Jira Site URL are still required. Create it with `security add-generic-password -U -a \"$USER\" -s jira-token -w \"$(pbpaste)\"` after copying the token.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "jira-token"
+    },
+    {
       "name": "open_in",
       "type": "appPicker",
       "title": "Open Issues in",

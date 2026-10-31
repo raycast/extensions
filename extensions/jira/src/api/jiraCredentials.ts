@@ -2,6 +2,7 @@ import { Cache, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import fetch from "node-fetch";
 
+import { getKeychainToken } from "./keychain";
 import { User } from "./users";
 import { parseJiraResponse } from "./response";
 
@@ -77,7 +78,10 @@ async function fetchMyself(url: string, authorizationHeader: string) {
 
 export const jiraWithApiToken = {
   authorize: async () => {
-    const { siteUrl, token, email } = getPreferenceValues();
+    const { siteUrl, token, email, keychainService } = getPreferenceValues();
+    // The API Token preference wins; otherwise `withJiraCredentials` only picks this service when
+    // a Keychain Service Name is set.
+    const apiToken = token || (await getKeychainToken(keychainService));
 
     let hostname;
     try {
@@ -87,7 +91,7 @@ export const jiraWithApiToken = {
       hostname = siteUrl;
     }
 
-    const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
+    const authorizationHeader = `Basic ${btoa(`${email}:${apiToken}`)}`;
 
     await resolveCredentials(`api-token:${email}@${hostname}`, authorizationHeader, async () => {
       let myselfResponse;
@@ -105,7 +109,7 @@ export const jiraWithApiToken = {
       }
     });
 
-    return token;
+    return apiToken;
   },
 };
 
