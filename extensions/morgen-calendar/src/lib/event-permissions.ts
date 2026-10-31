@@ -1,7 +1,15 @@
 import type { Calendar, Event } from "../types";
 
 export function canModifyEvent(calendar: Calendar | undefined, event: Event): boolean {
-  if (!calendar || calendar.accountId !== event.accountId || calendar.id !== event.calendarId) return false;
+  if (
+    !calendar ||
+    !event.id ||
+    !event.accountId ||
+    !event.calendarId ||
+    calendar.accountId !== event.accountId ||
+    calendar.id !== event.calendarId
+  )
+    return false;
   if (calendar.myRights?.mayWriteAll) return true;
   if (!calendar.myRights?.mayWriteOwn || !event.participants) return false;
 

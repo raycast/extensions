@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { isoDuration, systemTimeZone, toLocalDateTime } from "./lib/dates";
 import { createTask } from "./lib/morgen";
 import { showFailure, showSuccess } from "./lib/ui";
@@ -15,12 +15,15 @@ interface Values {
 export default function CreateTask() {
   const [submitting, setSubmitting] = useState(false);
   const { pop } = useNavigation();
+  const saving = useRef(false);
 
   async function submit(values: Values) {
+    if (saving.current) return;
     if (!values.title.trim()) {
       await showFailure(new Error("Enter a task title."));
       return;
     }
+    saving.current = true;
     setSubmitting(true);
     try {
       await createTask({
@@ -40,6 +43,7 @@ export default function CreateTask() {
     } catch (error) {
       await showFailure(error);
     } finally {
+      saving.current = false;
       setSubmitting(false);
     }
   }
