@@ -32,7 +32,10 @@ export function parseShortcut(value: string): {
     modifiers.includes(modifier),
   );
   return {
-    shortcut: { modifiers: ordered, key: key as Keyboard.KeyEquivalent },
+    shortcut: {
+      modifiers: ordered,
+      key: key === "deleteforward" ? "deleteForward" : (key as Keyboard.KeyEquivalent),
+    },
     label: [
       ...ordered.map((modifier) => labels[modifier]),
       key === "backspace"
