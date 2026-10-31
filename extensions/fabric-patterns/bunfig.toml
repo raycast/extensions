@@ -1,4 +1,0 @@
-[test]
-# Module mocks are process-wide in bun test, so the Raycast and React stand-ins are installed
-# once, before any test file loads. A file that mocks them itself breaks the others (test/mocks.test.ts).
-preload = ["./test/preload.ts"]

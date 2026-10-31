@@ -176,22 +176,6 @@ Raycast calls these Preferences.
 
 - Background-run records are removed once they're over 7 days old, the next time you open Show Background Runs. Answers saved to your Save Folder are kept.
 
-## Development
-
-The rest of this page is for people changing the extension's code.
-
-- Install the dependencies with `npm ci`. The Raycast Store installs this way, so the lockfile is npm's.
-
-- Run the tests with `bun test` (or `bun run test`). One test runs `npm ci --dry-run`, so npm must be on your PATH.
-
-- Tests that run the real fabric are opt-in, since fabric reads its own `.env`: `FABRIC_REAL=1 bun test`, with fabric at `/opt/homebrew/bin/fabric`.
-
-- Check types with `bun run typecheck` and lint with `bun run lint`.
-
-- Run the extension in Raycast while you edit with `bun run dev` (`ray develop`), and build it with `bun run build` (`ray build`).
-
-`ISC-NN` tags in test names and comments are internal requirement IDs.
-
 ## License
 
 MIT. See [LICENSE](LICENSE).

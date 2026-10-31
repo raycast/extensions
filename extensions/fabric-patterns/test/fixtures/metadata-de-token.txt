@@ -1,2 +1,0 @@
-
-[Metadaten] Eingabe-Token: 12 | Ausgabe-Token: 4 | Gesamt-Token: 16

@@ -1,5 +1,0 @@
-create_5_sentence_summary
-create_stride_threat_model
-extract_wisdom
-summarize
-translate

@@ -1,2 +1,0 @@
-
-[Metadata] Input: 28 | Output: 3 | Total: 31

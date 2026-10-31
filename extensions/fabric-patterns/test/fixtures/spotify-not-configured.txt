@@ -1,1 +1,0 @@
-error getting Spotify metadata: Spotify is not configured, please run the setup procedure
