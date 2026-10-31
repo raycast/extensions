@@ -1,0 +1,544 @@
+[
+  {
+    "actions" : [
+      {
+        "command" : "space 1",
+        "name" : "space-1",
+        "title" : "Switch to Space 1"
+      },
+      {
+        "command" : "send 1",
+        "name" : "send-1",
+        "title" : "Send to Space 1"
+      },
+      {
+        "command" : "space 2",
+        "name" : "space-2",
+        "title" : "Switch to Space 2"
+      },
+      {
+        "command" : "send 2",
+        "name" : "send-2",
+        "title" : "Send to Space 2"
+      },
+      {
+        "command" : "space 3",
+        "name" : "space-3",
+        "title" : "Switch to Space 3"
+      },
+      {
+        "command" : "send 3",
+        "name" : "send-3",
+        "title" : "Send to Space 3"
+      },
+      {
+        "command" : "space 4",
+        "name" : "space-4",
+        "title" : "Switch to Space 4"
+      },
+      {
+        "command" : "send 4",
+        "name" : "send-4",
+        "title" : "Send to Space 4"
+      },
+      {
+        "command" : "space 5",
+        "name" : "space-5",
+        "title" : "Switch to Space 5"
+      },
+      {
+        "command" : "send 5",
+        "name" : "send-5",
+        "title" : "Send to Space 5"
+      },
+      {
+        "command" : "space 6",
+        "name" : "space-6",
+        "title" : "Switch to Space 6"
+      },
+      {
+        "command" : "send 6",
+        "name" : "send-6",
+        "title" : "Send to Space 6"
+      },
+      {
+        "command" : "space 7",
+        "name" : "space-7",
+        "title" : "Switch to Space 7"
+      },
+      {
+        "command" : "send 7",
+        "name" : "send-7",
+        "title" : "Send to Space 7"
+      },
+      {
+        "command" : "space 8",
+        "name" : "space-8",
+        "title" : "Switch to Space 8"
+      },
+      {
+        "command" : "send 8",
+        "name" : "send-8",
+        "title" : "Send to Space 8"
+      },
+      {
+        "command" : "space 9",
+        "name" : "space-9",
+        "title" : "Switch to Space 9"
+      },
+      {
+        "command" : "send 9",
+        "name" : "send-9",
+        "title" : "Send to Space 9"
+      },
+      {
+        "command" : "space 10",
+        "name" : "space-10",
+        "title" : "Switch to Space 10"
+      },
+      {
+        "command" : "send 10",
+        "name" : "send-10",
+        "title" : "Send to Space 10"
+      }
+    ],
+    "title" : "Spaces"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "focus west",
+        "name" : "focus-west",
+        "title" : "Focus the window on the left"
+      },
+      {
+        "command" : "focus south",
+        "name" : "focus-south",
+        "title" : "Focus the window below"
+      },
+      {
+        "command" : "focus north",
+        "name" : "focus-north",
+        "title" : "Focus the window above"
+      },
+      {
+        "command" : "focus east",
+        "name" : "focus-east",
+        "title" : "Focus the window on the right"
+      },
+      {
+        "command" : "space prev",
+        "name" : "space-prev",
+        "title" : "Previous Space"
+      },
+      {
+        "command" : "space next",
+        "name" : "space-next",
+        "title" : "Next Space"
+      },
+      {
+        "command" : "space last",
+        "name" : "space-last",
+        "title" : "Last-used Space"
+      },
+      {
+        "command" : "display next",
+        "name" : "display-next",
+        "title" : "Focus next display"
+      },
+      {
+        "command" : "display prev",
+        "name" : "display-prev",
+        "title" : "Focus previous display"
+      },
+      {
+        "command" : "stack prev",
+        "name" : "stack-prev",
+        "title" : "Previous window in stack"
+      },
+      {
+        "command" : "stack next",
+        "name" : "stack-next",
+        "title" : "Next window in stack"
+      }
+    ],
+    "title" : "Focus"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "swap west",
+        "name" : "swap-west",
+        "title" : "Swap with the window on the left"
+      },
+      {
+        "command" : "swap south",
+        "name" : "swap-south",
+        "title" : "Swap with the window below"
+      },
+      {
+        "command" : "swap north",
+        "name" : "swap-north",
+        "title" : "Swap with the window above"
+      },
+      {
+        "command" : "swap east",
+        "name" : "swap-east",
+        "title" : "Swap with the window on the right"
+      },
+      {
+        "command" : "pop out",
+        "name" : "pop-out",
+        "title" : "Pop out"
+      },
+      {
+        "command" : "pop in",
+        "name" : "pop-in",
+        "title" : "Pop back in"
+      },
+      {
+        "command" : "send prev",
+        "name" : "send-prev",
+        "title" : "Send to previous Space"
+      },
+      {
+        "command" : "send next",
+        "name" : "send-next",
+        "title" : "Send to next Space"
+      },
+      {
+        "command" : "send display next",
+        "name" : "send-display-next",
+        "title" : "Send to next display"
+      },
+      {
+        "command" : "send display prev",
+        "name" : "send-display-prev",
+        "title" : "Send to previous display"
+      }
+    ],
+    "title" : "Move"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "join west",
+        "name" : "join-west",
+        "title" : "Join with the window on the left"
+      },
+      {
+        "command" : "join south",
+        "name" : "join-south",
+        "title" : "Join with the window below"
+      },
+      {
+        "command" : "join north",
+        "name" : "join-north",
+        "title" : "Join with the window above"
+      },
+      {
+        "command" : "join east",
+        "name" : "join-east",
+        "title" : "Join with the window on the right"
+      }
+    ],
+    "title" : "Join"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "zoom",
+        "name" : "zoom",
+        "title" : "Zoom (fill the Space)"
+      },
+      {
+        "command" : "float",
+        "name" : "float",
+        "title" : "Toggle float"
+      },
+      {
+        "command" : "split",
+        "name" : "split",
+        "title" : "Toggle split direction"
+      },
+      {
+        "command" : "balance",
+        "name" : "balance",
+        "title" : "Balance"
+      },
+      {
+        "command" : "layout bsp",
+        "name" : "layout-bsp",
+        "title" : "Tile this Space"
+      },
+      {
+        "command" : "layout stack",
+        "name" : "layout-stack",
+        "title" : "Stack this Space"
+      },
+      {
+        "command" : "layout float",
+        "name" : "layout-float",
+        "title" : "Float this Space"
+      },
+      {
+        "command" : "mirror horizontal",
+        "name" : "mirror-horizontal",
+        "title" : "Mirror left ↔ right"
+      },
+      {
+        "command" : "mirror vertical",
+        "name" : "mirror-vertical",
+        "title" : "Mirror top ↕ bottom"
+      },
+      {
+        "command" : "rotate 90",
+        "name" : "rotate-90",
+        "title" : "Rotate clockwise"
+      },
+      {
+        "command" : "rotate 270",
+        "name" : "rotate-270",
+        "title" : "Rotate anticlockwise"
+      },
+      {
+        "command" : "retile",
+        "name" : "retile",
+        "title" : "Retile"
+      },
+      {
+        "command" : "close",
+        "name" : "close",
+        "title" : "Close window"
+      }
+    ],
+    "title" : "Layout"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "place column",
+        "name" : "place-column",
+        "title" : "Maximize height"
+      },
+      {
+        "command" : "place left",
+        "icon" : "regions/place-left.png",
+        "name" : "place-left",
+        "title" : "Left ½ → ⅔ → ⅓"
+      },
+      {
+        "command" : "place right",
+        "icon" : "regions/place-right.png",
+        "name" : "place-right",
+        "title" : "Right ½ → ⅔ → ⅓"
+      },
+      {
+        "command" : "place top",
+        "icon" : "regions/place-top.png",
+        "name" : "place-top",
+        "title" : "Top ½ → ⅔ → ⅓"
+      },
+      {
+        "command" : "place bottom",
+        "icon" : "regions/place-bottom.png",
+        "name" : "place-bottom",
+        "title" : "Bottom ½ → ⅔ → ⅓"
+      },
+      {
+        "command" : "place left 3/4",
+        "icon" : "regions/place-left-3-4.png",
+        "name" : "place-left-3-4",
+        "title" : "Left ¾"
+      },
+      {
+        "command" : "place right 3/4",
+        "icon" : "regions/place-right-3-4.png",
+        "name" : "place-right-3-4",
+        "title" : "Right ¾"
+      },
+      {
+        "command" : "place center",
+        "icon" : "regions/place-center.png",
+        "name" : "place-center",
+        "title" : "Centre ⅓"
+      },
+      {
+        "command" : "place top-left",
+        "icon" : "regions/place-top-left.png",
+        "name" : "place-top-left",
+        "title" : "Top-left ¼"
+      },
+      {
+        "command" : "place top-right",
+        "icon" : "regions/place-top-right.png",
+        "name" : "place-top-right",
+        "title" : "Top-right ¼"
+      },
+      {
+        "command" : "place bottom-left",
+        "icon" : "regions/place-bottom-left.png",
+        "name" : "place-bottom-left",
+        "title" : "Bottom-left ¼"
+      },
+      {
+        "command" : "place bottom-right",
+        "icon" : "regions/place-bottom-right.png",
+        "name" : "place-bottom-right",
+        "title" : "Bottom-right ¼"
+      },
+      {
+        "command" : "place top-left-sixth",
+        "icon" : "regions/place-top-left-sixth.png",
+        "name" : "place-top-left-sixth",
+        "title" : "Top-left ⅙"
+      },
+      {
+        "command" : "place top-center-sixth",
+        "icon" : "regions/place-top-center-sixth.png",
+        "name" : "place-top-center-sixth",
+        "title" : "Top-centre ⅙"
+      },
+      {
+        "command" : "place top-right-sixth",
+        "icon" : "regions/place-top-right-sixth.png",
+        "name" : "place-top-right-sixth",
+        "title" : "Top-right ⅙"
+      },
+      {
+        "command" : "place bottom-left-sixth",
+        "icon" : "regions/place-bottom-left-sixth.png",
+        "name" : "place-bottom-left-sixth",
+        "title" : "Bottom-left ⅙"
+      },
+      {
+        "command" : "place bottom-center-sixth",
+        "icon" : "regions/place-bottom-center-sixth.png",
+        "name" : "place-bottom-center-sixth",
+        "title" : "Bottom-centre ⅙"
+      },
+      {
+        "command" : "place bottom-right-sixth",
+        "icon" : "regions/place-bottom-right-sixth.png",
+        "name" : "place-bottom-right-sixth",
+        "title" : "Bottom-right ⅙"
+      },
+      {
+        "command" : "grow",
+        "name" : "grow",
+        "title" : "Grow"
+      },
+      {
+        "command" : "shrink",
+        "name" : "shrink",
+        "title" : "Shrink"
+      },
+      {
+        "command" : "restore",
+        "name" : "restore",
+        "title" : "Restore"
+      },
+      {
+        "command" : "border horizontal -100",
+        "name" : "border-horizontal-minus100",
+        "title" : "Move vertical border left"
+      },
+      {
+        "command" : "border horizontal 100",
+        "name" : "border-horizontal-100",
+        "title" : "Move vertical border right"
+      },
+      {
+        "command" : "border vertical -100",
+        "name" : "border-vertical-minus100",
+        "title" : "Raise horizontal border"
+      },
+      {
+        "command" : "border vertical 100",
+        "name" : "border-vertical-100",
+        "title" : "Lower horizontal border"
+      }
+    ],
+    "title" : "Place & Size"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "fullscreen",
+        "name" : "fullscreen",
+        "title" : "Toggle full screen"
+      },
+      {
+        "command" : "fullscreen pair",
+        "name" : "fullscreen-pair",
+        "title" : "Full screen with the neighbouring window"
+      },
+      {
+        "command" : "space fullscreen prev",
+        "name" : "space-fullscreen-prev",
+        "title" : "Previous full-screen app"
+      },
+      {
+        "command" : "space fullscreen next",
+        "name" : "space-fullscreen-next",
+        "title" : "Next full-screen app"
+      }
+    ],
+    "title" : "Full Screen"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "pause",
+        "name" : "pause",
+        "title" : "Pause or resume tiling"
+      },
+      {
+        "command" : "settings",
+        "name" : "settings",
+        "title" : "Open Settings"
+      },
+      {
+        "command" : "toggle spacing",
+        "name" : "toggle-spacing",
+        "title" : "Toggle spacing"
+      },
+      {
+        "command" : "toggle border",
+        "name" : "toggle-border",
+        "title" : "Toggle active border"
+      },
+      {
+        "command" : "toggle dim",
+        "name" : "toggle-dim",
+        "title" : "Toggle dimming"
+      }
+    ],
+    "title" : "Spacetile"
+  },
+  {
+    "actions" : [
+      {
+        "command" : "preselect west",
+        "name" : "preselect-west",
+        "title" : "Next window goes left"
+      },
+      {
+        "command" : "preselect south",
+        "name" : "preselect-south",
+        "title" : "Next window goes below"
+      },
+      {
+        "command" : "preselect north",
+        "name" : "preselect-north",
+        "title" : "Next window goes above"
+      },
+      {
+        "command" : "preselect east",
+        "name" : "preselect-east",
+        "title" : "Next window goes right"
+      }
+    ],
+    "title" : "Preselect"
+  }
+]
