@@ -102,3 +102,14 @@ Coming soon:
 ## License
 
 MIT
+
+## Development
+
+Run `npm test` for unit tests. To check the packaged extension, build it with the same Raycast CLI version used by the repository CI, then run:
+
+```sh
+ray build -e dist -o dist
+npm run test:dist
+```
+
+The distribution test runs the built Browse Chats tool with synthetic session data and mocked network methods. It checks client construction and Telegram user recognition without signing in or connecting to Telegram.

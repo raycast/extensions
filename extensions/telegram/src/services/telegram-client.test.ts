@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Api } from "teleproto/tl";
+import { Api } from "teleproto";
 import bigInt from "big-integer";
 import { renderMessageContent, hasRenderableContent, parseMessageMedia, resolveMessageAuthor } from "./telegram-client";
 
