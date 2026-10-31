@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notchwake",
+  "title": "Notchwake",
+  "description": "Control the Notchwake island in your Mac's notch: open a tab, start a timer, keep the Mac awake and jot a note.",
+  "icon": "extension-icon.png",
+  "author": "victorserpa",
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-island",
+      "title": "Open Island",
+      "subtitle": "Notchwake",
+      "description": "Open the island on a tab.",
+      "mode": "view"
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Notchwake",
+      "description": "Start a countdown under the notch.",
+      "mode": "no-view",
+      "arguments": [{ "name": "minutes", "placeholder": "Minutes", "type": "text", "required": true }]
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Notchwake",
+      "description": "Stop the running timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "keep-awake",
+      "title": "Keep Mac Awake",
+      "subtitle": "Notchwake",
+      "description": "Keep the Mac awake for some minutes, or type off to stop.",
+      "mode": "no-view",
+      "arguments": [{ "name": "minutes", "placeholder": "Minutes or off", "type": "text", "required": true }]
+    },
+    {
+      "name": "add-note",
+      "title": "Add Note",
+      "subtitle": "Notchwake",
+      "description": "Append a line to the island's note.",
+      "mode": "no-view",
+      "arguments": [{ "name": "text", "placeholder": "Note", "type": "text", "required": true }]
+    },
+    {
+      "name": "close-island",
+      "title": "Close Island",
+      "subtitle": "Notchwake",
+      "description": "Close the island.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
