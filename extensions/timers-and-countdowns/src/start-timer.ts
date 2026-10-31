@@ -1,4 +1,5 @@
-import { LaunchProps, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, PopToRootType, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { ring } from "./alert";
 import {
@@ -13,10 +14,8 @@ import {
 export default async function Command(props: LaunchProps<{ arguments: Arguments.StartTimer }>) {
   const input = (props.arguments.when || props.fallbackText || "").trim();
   if (!input) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error("Try “5 minutes”, “tea 10m”, or “tomorrow at 9am”."), {
       title: "Enter a time",
-      message: "Try “5 minutes”, “tea 10m”, or “tomorrow at 9am”.",
     });
     return;
   }
@@ -24,19 +23,15 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const now = new Date();
   const parsed = parseTimerPhrase(input, now);
   if (!parsed) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error("Try “5 minutes”, “eggs in 10m”, or “standup at 3pm”."), {
       title: `Could not read “${input}” as a time`,
-      message: "Try “5 minutes”, “eggs in 10m”, or “standup at 3pm”.",
     });
     return;
   }
 
   if (!Number.isFinite(parsed.endAt) || parsed.endAt <= now.getTime()) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(new Error("Use a duration or a time still ahead of now."), {
       title: "That time is in the past",
-      message: "Use a duration or a time still ahead of now.",
     });
     return;
   }

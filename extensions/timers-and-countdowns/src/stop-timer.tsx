@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import {
   formatHumanDuration,
   formatTimerEndTime,
   formatTimerName,
   getActiveTimers,
+  removeExpiredTimers,
   removeTimer,
   stopAllTimers,
   type ActiveTimer,
@@ -29,7 +31,7 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    void removeExpiredTimers().then(() => refresh());
   }, [refresh]);
 
   useEffect(() => {
@@ -44,7 +46,9 @@ export default function Command() {
     const stopped = await removeTimer(timer.id);
     await refresh();
     if (!stopped) {
-      await showToast({ style: Toast.Style.Failure, title: "Timer was already gone" });
+      await showFailureToast(new Error("It may have finished or been stopped already."), {
+        title: "Timer was already gone",
+      });
       return;
     }
     await showToast({

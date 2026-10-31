@@ -2,8 +2,6 @@ import { LocalStorage } from "@raycast/api";
 import { parse, parseDuration, scan, type ParseResult } from "@timelang/parse";
 
 const TIMER_KEY_PREFIX = "timer:";
-const TIMERS_KEY = "active-timers";
-const LEGACY_TIMER_KEY = "active-timer";
 
 export interface ActiveTimer {
   id: string;
@@ -188,43 +186,7 @@ function parseStoredTimer(value: unknown): ActiveTimer | undefined {
   }
 }
 
-function parseTimerList(raw: string | undefined): ActiveTimer[] {
-  if (!raw) {
-    return [];
-  }
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.filter(isTimer);
-    }
-    return isTimer(parsed) ? [parsed] : [];
-  } catch {
-    return [];
-  }
-}
-
-let migrateLegacyTimersPromise: Promise<void> | undefined;
-
-async function migrateLegacyTimers(): Promise<void> {
-  migrateLegacyTimersPromise ??= (async () => {
-    const [listRaw, legacyRaw] = await Promise.all([
-      LocalStorage.getItem<string>(TIMERS_KEY),
-      LocalStorage.getItem<string>(LEGACY_TIMER_KEY),
-    ]);
-    if (listRaw === undefined && legacyRaw === undefined) {
-      return;
-    }
-
-    const timers = [...parseTimerList(listRaw), ...parseTimerList(legacyRaw)];
-    await Promise.all(timers.map((timer) => LocalStorage.setItem(timerKey(timer.id), JSON.stringify(timer))));
-    await Promise.all([LocalStorage.removeItem(TIMERS_KEY), LocalStorage.removeItem(LEGACY_TIMER_KEY)]);
-  })();
-
-  await migrateLegacyTimersPromise;
-}
-
 async function readTimerList(): Promise<ActiveTimer[]> {
-  await migrateLegacyTimers();
   const items = await LocalStorage.allItems();
   const timers: ActiveTimer[] = [];
   for (const [key, value] of Object.entries(items)) {
@@ -241,6 +203,12 @@ async function readTimerList(): Promise<ActiveTimer[]> {
 
 export async function getActiveTimers(): Promise<ActiveTimer[]> {
   return readTimerList();
+}
+
+export async function removeExpiredTimers(now = Date.now()): Promise<ActiveTimer[]> {
+  const expired = (await readTimerList()).filter((timer) => timer.endAt <= now);
+  await Promise.all(expired.map((timer) => LocalStorage.removeItem(timerKey(timer.id))));
+  return expired;
 }
 
 export async function upsertTimer(timer: ActiveTimer): Promise<ActiveTimer | undefined> {

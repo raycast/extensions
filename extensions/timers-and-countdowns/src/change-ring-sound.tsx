@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { playSound } from "./alert";
 import { getSelectedRingSound, listRingSounds, setSelectedRingSound, type RingSound } from "./sounds";
@@ -18,11 +19,7 @@ export default function Command() {
     try {
       await playSound(sound);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not play sound",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Could not play sound" });
     }
   }
 
