@@ -1,5 +1,9 @@
 # Changelog
 
+## [Ownership Transfer] - {PR_MERGE_DATE}
+
+- Transfer ownership from Paranjayy to nakama. Paranjayy stays credited as a past contributor.
+
 ## [Faster Search] - 2026-10-31
 
 - Load results without the 300 ms delay. Raycast now throttles typing in grid view, and next pages, sort and provider changes load straight away.
