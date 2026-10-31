@@ -53,6 +53,8 @@ export default class extends Provider {
         if (param === undefined || !canDrop(body, param)) throw error;
         rejected.push(param);
         await LocalStorage.setItem(storageKey, JSON.stringify(rejected));
+        // fetchSSE only hears aborts that happen after it starts, so a cancel during the retry setup stops here.
+        if (query.signal.aborted) throw error;
         continue;
       }
 
