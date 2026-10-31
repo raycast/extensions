@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pdf-expert",
   "title": "PDF Expert",
-  "description": "Navigate open tabs and recent documents in PDF Expert",
+  "description": "Navigate open tabs and recent documents in PDF Expert, and copy the current page as an image",
   "icon": "pdf-expert.png",
   "author": "mattiacolombomc",
   "license": "MIT",
@@ -27,6 +27,37 @@
       "subtitle": "PDF Expert",
       "description": "Browse recently opened PDF Expert documents",
       "mode": "view"
+    },
+    {
+      "name": "screenshot-current-page",
+      "title": "Screenshot Current Page",
+      "subtitle": "PDF Expert",
+      "description": "Copy the page currently shown in PDF Expert to the clipboard as a clean image",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "dpi",
+          "title": "Image Resolution",
+          "description": "Resolution of the rendered page image",
+          "type": "dropdown",
+          "required": false,
+          "default": "216",
+          "data": [
+            {
+              "title": "144 DPI (2x)",
+              "value": "144"
+            },
+            {
+              "title": "216 DPI (3x)",
+              "value": "216"
+            },
+            {
+              "title": "300 DPI (print)",
+              "value": "300"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {

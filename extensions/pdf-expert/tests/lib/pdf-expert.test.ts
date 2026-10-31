@@ -167,6 +167,26 @@ describe("getOpenTabs", () => {
 });
 
 describe("getRecentDocuments", () => {
+  it("resolves bookmarks with Ref() out-params (passing $() crashes osascript with SIGSEGV)", () => {
+    mockedExistsSync.mockReturnValue(true);
+    mockedExecFileSync.mockReturnValue("[]" as never);
+    getRecentDocuments();
+    const script = String(mockedExecFileSync.mock.calls[0][1]?.[3]);
+    expect(script).toContain("var isStale = Ref()");
+    expect(script).toContain("var error = Ref()");
+    expect(script).toContain("bookmarkData, 0x100, $(), isStale, error");
+    expect(script).not.toContain("$(), $(), $()");
+  });
+
+  it("decodes the SFL archive with secure coding and an explicit class allow-list", () => {
+    mockedExistsSync.mockReturnValue(true);
+    mockedExecFileSync.mockReturnValue("[]" as never);
+    getRecentDocuments();
+    const script = String(mockedExecFileSync.mock.calls[0][1]?.[3]);
+    expect(script).not.toContain("requiresSecureCoding = false");
+    expect(script).toContain("unarchivedObjectOfClassesFromDataError");
+  });
+
   it("returns empty array when SFL4 file does not exist", () => {
     mockedExistsSync.mockReturnValue(false);
     expect(getRecentDocuments()).toEqual([]);
