@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import BackgroundPicker from "./lib/background-picker";
 import { imageMarkdown } from "./lib/preview";
+import { discardPreview, retainPreview } from "./lib/preview-files";
 import { runNativeBridge } from "./lib/native-bridge";
 import { saveTemporaryImage } from "./lib/storage";
 
@@ -51,7 +52,7 @@ export default function ScreenshotToImage() {
 
   useEffect(() => {
     return () => {
-      if (imagePath) void fs.rm(imagePath, { force: true });
+      if (imagePath) discardPreview(imagePath);
     };
   }, [imagePath]);
 
@@ -72,6 +73,7 @@ export default function ScreenshotToImage() {
   }
 
   async function share() {
+    const release = retainPreview(imagePath);
     try {
       await runNativeBridge("share-image", imagePath);
     } catch (cause) {
@@ -80,6 +82,8 @@ export default function ScreenshotToImage() {
         title: "Could Not Open the Share Sheet",
         message: String(cause),
       });
+    } finally {
+      release();
     }
   }
 

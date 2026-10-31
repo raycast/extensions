@@ -7,9 +7,9 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import fs from "node:fs/promises";
 import BackgroundPicker from "./lib/background-picker";
 import { imageMarkdown } from "./lib/preview";
+import { discardPreview, retainPreview } from "./lib/preview-files";
 import { runNativeBridge } from "./lib/native-bridge";
 import { saveTemporaryImage } from "./lib/storage";
 
@@ -46,7 +46,7 @@ export default function TextToImage() {
 
   useEffect(() => {
     return () => {
-      if (imagePath) void fs.rm(imagePath, { force: true });
+      if (imagePath) discardPreview(imagePath);
     };
   }, [imagePath]);
 
@@ -67,6 +67,7 @@ export default function TextToImage() {
   }
 
   async function share() {
+    const release = retainPreview(imagePath);
     try {
       await runNativeBridge("share-image", imagePath);
     } catch (cause) {
@@ -75,6 +76,8 @@ export default function TextToImage() {
         title: "Could Not Open the Share Sheet",
         message: String(cause),
       });
+    } finally {
+      release();
     }
   }
 
