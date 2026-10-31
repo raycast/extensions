@@ -17,6 +17,11 @@ const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 // Same candidate check the code search used to run in SQL: at least 3 consecutive digits/capitals
 const CODE_CANDIDATE_REGEX = /[0-9A-Z]{3}/;
 
+// Most recent messages in the look back window to decode and filter, bounding the cost of polling every second
+const SCAN_LIMIT = 1000;
+// Most matching messages to show, applied after filtering so newer unrelated messages can't hide a code
+const RESULT_LIMIT = 100;
+
 /**
  * Options for message hook configuration
  */
@@ -70,7 +75,7 @@ function getQuery() {
 	`;
   if (preferences.ignoreRead) query += " and message.is_read = 0";
 
-  return `${query} \norder by message.date desc limit 100`.trim();
+  return `${query} \norder by message.date desc limit ${SCAN_LIMIT}`.trim();
 }
 
 /**
@@ -104,7 +109,8 @@ export function useMessages(options: UseMessagesOptions) {
       ?.map(toMessage)
       .filter((message) => message.text.length > 0)
       .filter((message) => options.searchType !== "code" || CODE_CANDIDATE_REGEX.test(message.text))
-      .filter((message) => !searchText || message.text.toLowerCase().includes(searchText));
+      .filter((message) => !searchText || message.text.toLowerCase().includes(searchText))
+      .slice(0, RESULT_LIMIT);
   }, [result.data, options.searchText, options.searchType]);
 
   return { ...result, data };
