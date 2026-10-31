@@ -1122,6 +1122,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "layiq-jobs",
+    title: "LAYIQ Jobs",
+    description:
+      "Find public job listings and explore roles from LAYIQ. LAYIQ is a candidate-first job search workspace that helps job seekers find, score, and prioritize the roles worth their time, without sponsored listings or selling user data. 2 read-only tools: search_jobs and get_job_details. Hosted remote Streamable HTTP server at https://www.layiq.co/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://www.layiq.co/brand/icon-512.png",
+    homepage: "https://www.layiq.co",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.layiq.co/mcp"],
+    },
+    remoteUrl: "https://www.layiq.co/mcp",
+  },
+  {
     name: "levea",
     title: "Levea AI Video Editor",
     description:
