@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro-windows",
+  "title": "Pomodoro for Windows",
+  "description": "A full Pomodoro timer for Raycast on Windows: customizable focus presets, type-a-task-and-go, Windows notifications plus Raycast HUDs, auto-start, daily goals and stats.",
+  "icon": "icon.png",
+  "author": "hridey_kapoor",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "pomodoro",
+    "timer",
+    "focus",
+    "tomato",
+    "break",
+    "productivity",
+    "windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pomodoro",
+      "title": "Pomodoro",
+      "description": "Start a focus session by typing your task and pressing Enter. Manage focus presets, control the running timer, and see today's stats.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-toggle",
+      "title": "Pomodoro Quick Toggle",
+      "subtitle": "Pomodoro",
+      "description": "One hotkey that does the next obvious thing: start focus with your default preset, pause, resume, or start the next interval. Also keeps the timer running and shows time left here in root search.",
+      "mode": "no-view",
+      "interval": "15s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dailyGoal",
+      "title": "Daily Goal",
+      "description": "How many focus intervals you aim for each day.",
+      "type": "textfield",
+      "default": "8",
+      "required": false
+    },
+    {
+      "name": "autoStartBreaks",
+      "title": "Automation",
+      "label": "Auto-start breaks after focus",
+      "description": "Start the break automatically when a focus interval ends.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoStartFocus",
+      "label": "Auto-start focus after breaks",
+      "description": "Start the next focus interval automatically when a break ends.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableToast",
+      "title": "Notifications",
+      "label": "Show Windows notification",
+      "description": "Show a native Windows toast notification when an interval ends.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableSound",
+      "label": "Play alarm sound",
+      "description": "Play a sound when an interval ends.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "sound",
+      "title": "Alarm Sound",
+      "description": "Built-in Windows sound to play when an interval ends.",
+      "type": "dropdown",
+      "default": "Alarm01.wav",
+      "required": false,
+      "data": [
+        {
+          "title": "Alarm 1",
+          "value": "Alarm01.wav"
+        },
+        {
+          "title": "Alarm 2",
+          "value": "Alarm02.wav"
+        },
+        {
+          "title": "Alarm 3",
+          "value": "Alarm03.wav"
+        },
+        {
+          "title": "Alarm 5",
+          "value": "Alarm05.wav"
+        },
+        {
+          "title": "Alarm 10",
+          "value": "Alarm10.wav"
+        },
+        {
+          "title": "Chimes",
+          "value": "chimes.wav"
+        },
+        {
+          "title": "Chord",
+          "value": "chord.wav"
+        },
+        {
+          "title": "Notify",
+          "value": "notify.wav"
+        },
+        {
+          "title": "Ring 1",
+          "value": "Ring01.wav"
+        },
+        {
+          "title": "Tada",
+          "value": "tada.wav"
+        }
+      ]
+    },
+    {
+      "name": "customSound",
+      "title": "Custom Sound (.wav)",
+      "description": "Optional .wav file to play instead of the built-in sound.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
