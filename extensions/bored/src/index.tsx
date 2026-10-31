@@ -8,17 +8,17 @@ interface Activity {
   price: number;
   link: string;
   key: string;
-  accessibility: number;
+  accessibility: string;
 }
 
 export default () => {
-  const { isLoading, data, revalidate } = useFetch<Activity>("https://www.boredapi.com/api/activity", {
+  const { isLoading, data, revalidate } = useFetch<Activity>("https://bored-api.appbrewery.com/random", {
     keepPreviousData: false,
   });
 
   let markdown = "Loading...";
   if (data) {
-    markdown = `# ${data.activity}\n\nType: ${data.type}\n\nParticipants: ${data.participants}\n\nPrice: $${Math.round(data.price * 100)}\n\nAccessibility: ${Math.round(data.accessibility * 100)}%`;
+    markdown = `# ${data.activity}\n\nType: ${data.type}\n\nParticipants: ${data.participants}\n\nPrice: $${Math.round(data.price * 100)}\n\nAccessibility: ${data.accessibility}`;
   }
 
   return (
