@@ -1075,6 +1075,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "kin",
+    title: "Kin",
+    description:
+      "Use your accounts at GitHub, Notion, Linear and other services from Raycast AI and your other AI apps, even two accounts of one service, such as a work and a personal GitHub. Each account and action has your rule: Allow, Ask me or Block. Kin checks the rule on its server when the action runs, and Ask me waits for your approval. Hosted remote Streamable HTTP server at https://app.kinlab.ai/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Kin account.",
+    icon: "https://app.kinlab.ai/brand/icon-512.png",
+    homepage: "https://kinlab.ai/docs/ai-apps",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.kinlab.ai/mcp"],
+    },
+    remoteUrl: "https://app.kinlab.ai/mcp",
+  },
+  {
     name: "kolect",
     title: "Kolect Creator Search",
     description:
