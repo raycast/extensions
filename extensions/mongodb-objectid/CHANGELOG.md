@@ -1,6 +1,6 @@
 # MongoDB ObjectId Changelog
 
-## [Fix crash on launch] - {PR_MERGE_DATE}
+## [Fix crash on launch] - 2026-10-31
 
 - Use `bson` directly instead of the full `mongodb` driver, which pulled in the `punycode` package that crashed the extension on launch
 
