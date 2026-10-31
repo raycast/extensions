@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Paidnice MCP Server] - {PR_MERGE_DATE}
+## [Add Paidnice MCP Server] - 2026-10-31
 
 - Add Paidnice to the official registry: accounts receivable for Xero and QuickBooks Online. Read the customer email and SMS replies Paidnice collects, list and look up customers, invoices and notes, and update contact people. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration).
 
