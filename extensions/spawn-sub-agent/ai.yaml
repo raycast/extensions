@@ -1,0 +1,5 @@
+﻿instructions: |
+  Use spawn_sub_agent to delegate a self-contained task to an Ollama-compatible model.
+  Provide a clear prompt and delegation reason. Optional JSON fields carry caller-defined relationship, capability, lifecycle, or policy metadata without changing their meaning.
+  Optional pre-dispatch and post-result hooks let the caller admit or reject execution through its own policy service.
+  Treat returned output as observed child output, not as proof that a wider objective is complete.
