@@ -290,7 +290,8 @@ export const buildGhCloneCommandArgs = (
  * Result of checking the availability of the GitHub CLI on the user's machine.
  */
 export type GhAvailability =
-  { available: true; executable: string } | { available: false; reason: "not-installed" | "not-authenticated" };
+  | { available: true; executable: string }
+  | { available: false; reason: "not-installed" | "not-authenticated" };
 
 const execFileAsync = promisify(execFile);
 
