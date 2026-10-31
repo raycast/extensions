@@ -1,0 +1,73 @@
+{
+  "name": "webcull",
+  "title": "WebCull",
+  "description": "Find your WebCull bookmarks, open the links you need, and save new URLs from Raycast.",
+  "icon": "icon.png",
+  "author": "andrew_dear",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "connect-account",
+      "title": "Manage WebCull Account",
+      "description": "Connect or switch WebCull accounts, and manage their Raycast access.",
+      "mode": "view",
+      "keywords": [
+        "login",
+        "auth",
+        "connect",
+        "account",
+        "switch",
+        "logout"
+      ]
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search WebCull Bookmarks",
+      "description": "Find saved links by title, URL, notes, or tags, then open or copy them.",
+      "mode": "view",
+      "keywords": [
+        "bookmark",
+        "bookmarks",
+        "links",
+        "search"
+      ]
+    },
+    {
+      "name": "save-url-to-stack",
+      "title": "Save URL to WebCull Stack",
+      "description": "Save a URL to Root or a selected WebCull folder.",
+      "mode": "view",
+      "keywords": [
+        "bookmark",
+        "save",
+        "stack"
+      ]
+    }
+  ],
+  "preferences": [],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.10.1",
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.5.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.61.0"
+  },
+  "$schema": "https://www.raycast.com/schemas/extension.json"
+}
