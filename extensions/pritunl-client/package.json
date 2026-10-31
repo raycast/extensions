@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pritunl-client",
+  "title": "Pritunl",
+  "description": "Connect to and disconnect from your Pritunl VPN profiles.",
+  "icon": "extension-icon.png",
+  "author": "gibranbadrul",
+  "categories": [
+    "Security",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "manage-connections",
+      "title": "Manage VPN Connections",
+      "subtitle": "Pritunl",
+      "description": "See your VPN profiles and connect or disconnect them.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "VPN Status",
+      "subtitle": "Pritunl",
+      "description": "Shows whether you're connected and lets you connect or disconnect from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "pritunl-client Path",
+      "description": "Where the pritunl-client binary lives. The default is the one bundled with the Pritunl app.",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/Pritunl.app/Contents/Resources/pritunl-client"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
