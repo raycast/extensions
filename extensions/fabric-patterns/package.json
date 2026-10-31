@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fabric-patterns",
+  "title": "Fabric Patterns",
+  "description": "Run Daniel Miessler's fabric patterns on your selection, a URL or a file. Search patterns, manage strategies, contexts, sessions, configs and chains. Requires the fabric CLI.",
+  "icon": "command-icon.png",
+  "author": "michaelhixon",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Run Fabric Pattern",
+      "subtitle": "Fabric Patterns",
+      "description": "Find a fabric pattern, chain or session and run it. Enter runs it on your selection; Cmd+Enter opens the run form.",
+      "mode": "view"
+    },
+    {
+      "name": "browse",
+      "title": "Manage Fabric",
+      "subtitle": "Fabric Patterns",
+      "description": "Create, edit and organize custom patterns, strategies, contexts, sessions, configs and chains, and view the built-in patterns.",
+      "mode": "view"
+    },
+    {
+      "name": "update-patterns",
+      "title": "Update Fabric Patterns",
+      "subtitle": "Fabric Patterns",
+      "description": "Download the newest built-in fabric patterns (runs fabric --updatepatterns).",
+      "mode": "no-view"
+    },
+    {
+      "name": "background-runs",
+      "title": "Show Background Runs",
+      "subtitle": "Fabric Patterns",
+      "description": "See fabric runs started in the background, copy or paste finished results, or stop a running one.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fabricPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Fabric Path",
+      "description": "Absolute path to the fabric binary. Left at the default, it also finds Homebrew's Intel install at /usr/local/bin/fabric-ai; a path you type here is used as is.",
+      "default": "/opt/homebrew/bin/fabric-ai"
+    },
+    {
+      "name": "defaultOutput",
+      "type": "dropdown",
+      "required": false,
+      "title": "When a Run Finishes",
+      "description": "Where the answer goes when a run finishes. The Run form can override it.",
+      "default": "clipboard",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Paste into Current App",
+          "value": "paste"
+        },
+        {
+          "title": "Save to File",
+          "value": "file"
+        },
+        {
+          "title": "Copy to Clipboard + Save to File",
+          "value": "clipboard-file"
+        }
+      ]
+    },
+    {
+      "name": "saveFolder",
+      "type": "textfield",
+      "required": false,
+      "title": "Save Folder",
+      "placeholder": "~/Documents/Fabric",
+      "description": "Where saved results and background-run results are written. Paste or type a path; ~ and file:// URLs work.",
+      "default": "~/Documents/Fabric"
+    },
+    {
+      "name": "longInputs",
+      "type": "dropdown",
+      "required": false,
+      "title": "Long Runs (Web Pages, YouTube, Audio, Video)",
+      "description": "How runs on a web page, YouTube, audio or video are handled.",
+      "default": "background",
+      "data": [
+        {
+          "title": "Run in Background",
+          "value": "background"
+        },
+        {
+          "title": "Keep Raycast Open",
+          "value": "foreground"
+        }
+      ]
+    },
+    {
+      "name": "customPatternsFolder",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Patterns Folder",
+      "placeholder": "~/.config/fabric/custom",
+      "description": "fabric's Custom Patterns folder. Must match fabric's own setting (fabric --setup › Custom Patterns). Paste or type a path; ~ and file:// URLs work."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
