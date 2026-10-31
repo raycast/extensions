@@ -35,26 +35,10 @@ export const TRACK_SCOPES: LibraryScope[] = ["liked", "recent"];
  * to the handful of fields Raycast needs before it comes back through
  * AppleScript, which keeps the payload in the low kilobytes.
  */
-export const LIBRARY_START_SCRIPT = `(function() {
-  var ttl = ${LIBRARY_TTL_MS};
-  var limit = ${ROW_LIMIT};
-  var trackLimit = ${TRACK_LIMIT};
-  var scopes = {
-    albums: "${LIBRARY_BROWSE_IDS.albums}",
-    artists: "${LIBRARY_BROWSE_IDS.artists}",
-    playlists: "${LIBRARY_BROWSE_IDS.playlists}",
-    liked: "${LIBRARY_BROWSE_IDS.liked}",
-    recent: "${LIBRARY_BROWSE_IDS.recent}"
-  };
-  var trackScopes = { liked: true, recent: true };
-
-  var previous = window.__ytmLibraryV1;
-  if (previous && previous.state === "loading") return "loading";
-  if (previous && previous.state === "ready" && Date.now() - previous.at < ttl) return "cached";
-
-  // Some builds (including recent Chromium forks) do not expose ytcfg or yt at
-  // all, so nothing below may depend on them.
-  function cfgValue(key) {
+// Helpers shared by the library and collection page scripts. They are injected
+// into both rather than copied, because the copies drifted: only one had the
+// account-index lookup, and the two track extractors had different shapes.
+const PAGE_HELPERS = `  function cfgValue(key) {
     var cfg = window.ytcfg;
     if (!cfg) return null;
     try {
@@ -69,19 +53,6 @@ export const LIBRARY_START_SCRIPT = `(function() {
     if (ytConfig && ytConfig[key]) return ytConfig[key];
     return null;
   }
-
-  var version = cfgValue("INNERTUBE_CLIENT_VERSION");
-  var context = cfgValue("INNERTUBE_CONTEXT") || {
-    client: {
-      clientName: "WEB_REMIX",
-      clientVersion: typeof version === "string" ? version : "1.20231204.01.00",
-      hl: document.documentElement.lang || "en",
-      gl: "US"
-    }
-  };
-
-  // Public WEB_REMIX key, used when the page config is not readable.
-  var apiKey = cfgValue("INNERTUBE_API_KEY") || "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
 
   // Split rather than regex: this code lives inside a template literal, where a
   // backslash in a string pattern collapses and silently breaks the match.
@@ -138,6 +109,98 @@ export const LIBRARY_START_SCRIPT = `(function() {
     for (var i = 0; i < text.runs.length; i++) parts.push(text.runs[i].text || "");
     return parts.join("").trim();
   }
+
+  function rowTitle(node) {
+    if (node.title) return joinedText(node.title);
+    var columns = node.flexColumns;
+    if (columns && columns[0] && columns[0].musicResponsiveListItemFlexColumnRenderer) {
+      return joinedText(columns[0].musicResponsiveListItemFlexColumnRenderer.text);
+    }
+    return "";
+  }
+
+  function columnText(node, index) {
+    var columns = node.flexColumns || [];
+    var column = columns[index] && columns[index].musicResponsiveListItemFlexColumnRenderer;
+    return column && column.text ? joinedText(column.text) : "";
+  }
+
+  function trackOf(node) {
+    var data = node.playlistItemData;
+    var id = data && data.videoId;
+    if (!id) return null;
+
+    var title = rowTitle(node);
+    if (!title) return null;
+
+    var fixed = node.fixedColumns && node.fixedColumns[0] && node.fixedColumns[0].musicResponsiveListItemFixedColumnRenderer;
+    var thumbnails = node.thumbnail && node.thumbnail.musicThumbnailRenderer;
+    var thumbs = thumbnails && thumbnails.thumbnail && thumbnails.thumbnail.thumbnails ? thumbnails.thumbnail.thumbnails : [];
+
+    return {
+      v: id,
+      t: title,
+      a: columnText(node, 1),
+      b: columnText(node, 2),
+      d: fixed && fixed.text ? joinedText(fixed.text) : "",
+      art: thumbs.length ? thumbs[thumbs.length - 1].url || "" : ""
+    };
+  }
+`;
+
+export const LIBRARY_START_SCRIPT = `(function() {
+${PAGE_HELPERS}
+  var ttl = ${LIBRARY_TTL_MS};
+  var limit = ${ROW_LIMIT};
+  var trackLimit = ${TRACK_LIMIT};
+  var scopes = {
+    albums: "${LIBRARY_BROWSE_IDS.albums}",
+    artists: "${LIBRARY_BROWSE_IDS.artists}",
+    playlists: "${LIBRARY_BROWSE_IDS.playlists}",
+    liked: "${LIBRARY_BROWSE_IDS.liked}",
+    recent: "${LIBRARY_BROWSE_IDS.recent}"
+  };
+  var trackScopes = { liked: true, recent: true };
+
+  var previous = window.__ytmLibraryV1;
+  if (previous && previous.state === "loading") return "loading";
+  if (previous && previous.state === "ready" && Date.now() - previous.at < ttl) return "cached";
+
+  // Some builds (including recent Chromium forks) do not expose ytcfg or yt at
+  // all, so nothing below may depend on them.
+
+
+  var version = cfgValue("INNERTUBE_CLIENT_VERSION");
+  var context = cfgValue("INNERTUBE_CONTEXT") || {
+    client: {
+      clientName: "WEB_REMIX",
+      clientVersion: typeof version === "string" ? version : "1.20231204.01.00",
+      hl: document.documentElement.lang || "en",
+      gl: "US"
+    }
+  };
+
+  // Public WEB_REMIX key, used when the page config is not readable.
+  var apiKey = cfgValue("INNERTUBE_API_KEY") || "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
+
+  // Split rather than regex: this code lives inside a template literal, where a
+  // backslash in a string pattern collapses and silently breaks the match.
+
+
+
+
+  // Which Google account the tab is signed into. Only some builds expose it; the
+  // default matches a single-account session.
+
+
+  // Cookies alone do not authenticate an innertube call: it answers 200 with a
+  // sign-in prompt and logged_in=0. The session is proven with a SAPISIDHASH
+  // header, which is the same thing the app's own requests carry.
+
+
+
+
+
 
   function pageTypeOf(endpoint) {
     var browse = endpoint && endpoint.browseEndpoint;
@@ -223,33 +286,7 @@ export const LIBRARY_START_SCRIPT = `(function() {
 
   // Song rows carry the video id on playlistItemData rather than a browse
   // endpoint: title, then artist, then album as flex columns, duration fixed.
-  function trackOf(node) {
-    var data = node.playlistItemData;
-    var id = data && data.videoId;
-    if (!id) return null;
 
-    var title = rowTitle(node);
-    if (!title) return null;
-
-    function columnText(index) {
-      var columns = node.flexColumns || [];
-      var column = columns[index] && columns[index].musicResponsiveListItemFlexColumnRenderer;
-      return column && column.text ? joinedText(column.text) : "";
-    }
-
-    var fixed = node.fixedColumns && node.fixedColumns[0] && node.fixedColumns[0].musicResponsiveListItemFixedColumnRenderer;
-    var renderer = node.thumbnail && node.thumbnail.musicThumbnailRenderer;
-    var thumbs = renderer && renderer.thumbnail && renderer.thumbnail.thumbnails ? renderer.thumbnail.thumbnails : [];
-
-    return {
-      v: id,
-      t: title,
-      a: columnText(1),
-      b: columnText(2),
-      d: fixed && fixed.text ? joinedText(fixed.text) : "",
-      art: thumbs.length ? thumbs[thumbs.length - 1].url || "" : ""
-    };
-  }
 
   function trackRows(response) {
     var nodes = collect(response, "musicResponsiveListItemRenderer", []);
@@ -293,14 +330,7 @@ export const LIBRARY_START_SCRIPT = `(function() {
     return null;
   }
 
-  function rowTitle(node) {
-    if (node.title) return joinedText(node.title);
-    var columns = node.flexColumns;
-    if (columns && columns[0] && columns[0].musicResponsiveListItemFlexColumnRenderer) {
-      return joinedText(columns[0].musicResponsiveListItemFlexColumnRenderer.text);
-    }
-    return "";
-  }
+
 
   function sectionKeys(response) {
     var tabs = response && response.contents && response.contents.singleColumnBrowseResultsRenderer;
@@ -480,91 +510,41 @@ const COLLECTION_LIMIT = 500;
 
 export function collectionStartScript(browseId: string, albumTitle: string, fallbackArt: string): string {
   return `(function() {
+${PAGE_HELPERS}
   var limit = ${COLLECTION_LIMIT};
   var browseId = ${JSON.stringify(browseId)};
   var albumTitle = ${JSON.stringify(albumTitle)};
   var fallbackArt = ${JSON.stringify(fallbackArt)};
-  var apiKey = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
-  var context = { client: { clientName: "WEB_REMIX", clientVersion: "1.20231204.01.00", hl: document.documentElement.lang || "en", gl: "US" } };
-
-  function cookieValue(name) {
-    var parts = document.cookie.split(";");
-    for (var i = 0; i < parts.length; i++) {
-      var part = parts[i].trim();
-      if (part.indexOf(name + "=") === 0) return part.slice(name.length + 1);
+  var version = cfgValue("INNERTUBE_CLIENT_VERSION");
+  var apiKey = cfgValue("INNERTUBE_API_KEY") || "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
+  var context = cfgValue("INNERTUBE_CONTEXT") || {
+    client: {
+      clientName: "WEB_REMIX",
+      clientVersion: typeof version === "string" ? version : "1.20231204.01.00",
+      hl: document.documentElement.lang || "en",
+      gl: "US"
     }
-    return null;
-  }
+  };
 
-  function hex(buffer) {
-    return Array.prototype.map
-      .call(new Uint8Array(buffer), function (byte) { return ("0" + byte.toString(16)).slice(-2); })
-      .join("");
-  }
 
-  function authorization(callback) {
-    var secret = cookieValue("SAPISID") || cookieValue("__Secure-3PAPISID") || cookieValue("APISID");
-    if (!secret || !window.crypto || !crypto.subtle) { callback(null); return; }
-    var seconds = Math.floor(Date.now() / 1000);
-    crypto.subtle.digest("SHA-1", new TextEncoder().encode(seconds + " " + secret + " https://music.youtube.com"))
-      .then(function (digest) { callback("SAPISIDHASH " + seconds + "_" + hex(digest)); })
-      .catch(function () { callback(null); });
-  }
 
-  function collect(node, key, out) {
-    if (!node || typeof node !== "object") return out;
-    if (Object.prototype.toString.call(node) === "[object Array]") {
-      for (var i = 0; i < node.length; i++) collect(node[i], key, out);
-      return out;
-    }
-    if (node[key]) out.push(node[key]);
-    for (var name in node) collect(node[name], key, out);
-    return out;
-  }
 
-  function joinedText(text) {
-    if (!text || !text.runs) return "";
-    var parts = [];
-    for (var i = 0; i < text.runs.length; i++) parts.push(text.runs[i].text || "");
-    return parts.join("").trim();
-  }
 
-  function columnText(node, index) {
-    var columns = node.flexColumns || [];
-    var column = columns[index] && columns[index].musicResponsiveListItemFlexColumnRenderer;
-    return column && column.text ? joinedText(column.text) : "";
-  }
 
-  function trackOf(node) {
-    var data = node.playlistItemData;
-    var id = data && data.videoId;
-    if (!id) return null;
-    var title = columnText(node, 0);
-    if (!title) return null;
-    var fixed = node.fixedColumns && node.fixedColumns[0] && node.fixedColumns[0].musicResponsiveListItemFixedColumnRenderer;
-    var renderer = node.thumbnail && node.thumbnail.musicThumbnailRenderer;
-    var thumbs = renderer && renderer.thumbnail && renderer.thumbnail.thumbnails ? renderer.thumbnail.thumbnails : [];
-    return {
-      v: id,
-      t: title,
-      a: columnText(node, 1),
-      b: columnText(node, 2),
-      d: fixed && fixed.text ? joinedText(fixed.text) : "",
-      art: thumbs.length ? thumbs[thumbs.length - 1].url || "" : ""
-    };
-  }
+
+
+
+
+
+
+
+
 
   window.__ytmCollectionV1 = window.__ytmCollectionV1 || {};
   window.__ytmCollectionV1[browseId] = { state: "loading" };
 
   // Some builds expose the account index, most do not; default to the first.
-  function authUser() {
-    var cfg = window.ytcfg;
-    var index = null;
-    try { if (cfg && typeof cfg.get === "function") index = cfg.get("SESSION_INDEX"); } catch (error) { /* fall through */ }
-    if (!index && cfg && cfg.data_) index = cfg.data_.SESSION_INDEX;
-    return typeof index === "string" && /^[0-9]+$/.test(index) ? index : "0";
-  }
+
 
   var hitCap = false;
 
