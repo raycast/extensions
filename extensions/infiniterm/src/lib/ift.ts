@@ -9,7 +9,7 @@ const run = promisify(execFile);
 const LAUNCH_TIMEOUT_MS = 40_000;
 
 function iftPath(): string {
-  const { iftPath } = getPreferenceValues<{ iftPath?: string }>();
+  const { iftPath } = getPreferenceValues<Preferences>();
   return iftPath?.trim() || "/opt/homebrew/bin/ift";
 }
 

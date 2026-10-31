@@ -18,7 +18,8 @@ import { sendToCard } from "./lib/ift.ts";
 import { newId, remove, upsert, type SavedCommand } from "./lib/saved.ts";
 import { readSaved, writeSaved } from "./lib/saved-store.ts";
 
-function SavedForm({ initial, onSave }: { initial?: SavedCommand; onSave: (c: SavedCommand) => void }) {
+// `onSave` resolves to whether the list was written, so a failed save keeps the form and what was typed.
+function SavedForm({ initial, onSave }: { initial?: SavedCommand; onSave: (c: SavedCommand) => Promise<boolean> }) {
   const { pop } = useNavigation();
   return (
     <Form
@@ -32,8 +33,13 @@ function SavedForm({ initial, onSave }: { initial?: SavedCommand; onSave: (c: Sa
                 await showToast({ style: Toast.Style.Failure, title: "A name and a command are required" });
                 return;
               }
-              onSave({ id: initial?.id ?? newId(), name: v.name.trim(), command: v.command, enter: v.enter });
-              pop();
+              const saved = await onSave({
+                id: initial?.id ?? newId(),
+                name: v.name.trim(),
+                command: v.command,
+                enter: v.enter,
+              });
+              if (saved) pop();
             }}
           />
         </ActionPanel>
@@ -49,12 +55,14 @@ function SavedForm({ initial, onSave }: { initial?: SavedCommand; onSave: (c: Sa
 export default function Command() {
   const [items, setItems] = useState<SavedCommand[]>(() => readSaved());
 
-  const persist = async (next: SavedCommand[]) => {
+  const persist = async (next: SavedCommand[]): Promise<boolean> => {
     try {
       writeSaved(next);
       setItems(next);
+      return true;
     } catch (e) {
       await showFailureToast(e, { title: "Could not save the command" });
+      return false;
     }
   };
 

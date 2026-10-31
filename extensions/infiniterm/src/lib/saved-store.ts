@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { environment } from "@raycast/api";
 import { parseSaved, type SavedCommand } from "./saved.ts";
@@ -16,8 +16,16 @@ export function readSaved(): SavedCommand[] {
   }
 }
 
-// Throws when the write fails, so the caller can say the command was not saved.
+// Throws when the write fails, so the caller can say the command was not saved. The list goes to a temporary
+// file first and is renamed over the old one, so a full disk or an interrupted write cannot empty the saved list.
 export function writeSaved(list: SavedCommand[]): void {
   mkdirSync(environment.supportPath, { recursive: true });
-  writeFileSync(file(), JSON.stringify(list, null, 2));
+  const tmp = `${file()}.tmp`;
+  try {
+    writeFileSync(tmp, JSON.stringify(list, null, 2));
+    renameSync(tmp, file());
+  } catch (e) {
+    rmSync(tmp, { force: true });
+    throw e;
+  }
 }
