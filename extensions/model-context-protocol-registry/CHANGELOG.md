@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add BatchData MCP Server] - {PR_MERGE_DATE}
+
+- Add BatchData to the official registry: U.S. real estate property, ownership and contact data for AI agents (property lookup, comparables, property search, skip tracing, phone and address checks, investor buy boxes). 21 tools. Hosted Streamable HTTP server at https://mcp.batchdata.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a BatchData API token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A BatchData account is required.
+
 ## [Add ConnectMachine MCP Server] - 2026-10-30
 
 - Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.

@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "batchdata",
+    title: "BatchData",
+    description:
+      "Real estate data for AI agents: look up U.S. properties and owners, pull comparable properties, search properties, skip trace owners and contacts, check phone numbers for Do Not Call and TCPA status, verify and geocode addresses, and use property datasets and investor buy boxes. 21 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration and PKCE) with a BatchData account, or a BatchData API token as a Bearer header; a BatchData account is required.",
+    icon: "https://raw.githubusercontent.com/batchdataco/batchdata-mcp-server/main/assets/batchdata-logo-400x400.png",
+    homepage: "https://batchdata.io/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.batchdata.com"],
+    },
+    remoteUrl: "https://mcp.batchdata.com",
+  },
+  {
     name: "leal",
     title: "Leal",
     description:
