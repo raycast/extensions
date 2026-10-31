@@ -1,6 +1,6 @@
 # Video Downloader Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-10-31
 
 - Auto-dubbed YouTube videos no longer fill the Format dropdown with identical-looking copies of each format, one per dubbed language. Each format is listed once, and a new Audio Language dropdown (shown only for dubbed videos) picks the soundtrack, defaulting to the original.
 - Fixed the default format (and the AI tool's download) sometimes being a dubbed soundtrack instead of the original
