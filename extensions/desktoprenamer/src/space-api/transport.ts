@@ -120,7 +120,12 @@ async function runSpaceAPIMethod(
   try {
     info = await getStructuredAPIInfo();
   } catch (error) {
-    if (fallbackToLegacy && error instanceof SpaceAPIProtocolError && error.canFallback) {
+    if (
+      fallbackToLegacy &&
+      error instanceof SpaceAPIProtocolError &&
+      error.canFallback &&
+      error.code !== SPACE_API_ERROR_CODES.apiDisabled
+    ) {
       return await runLegacySpaceAPICommandWithCompatibility(command, stringifyLegacyParameters(arguments_));
     }
     throw error;
@@ -157,24 +162,37 @@ async function runSpaceAPIMethod(
 
 async function getStructuredAPIInfo(): Promise<SpaceAPIInfo> {
   if (!structuredAPIInfoLookup) {
-    structuredAPIMaxPayloadBytes = MAX_STRUCTURED_PAYLOAD_BYTES;
-    structuredAPIInfoLookup = requestStructuredAPIInfo().catch((error) => {
-      structuredAPIInfoLookup = null;
-      structuredAPIMaxPayloadBytes = MAX_STRUCTURED_PAYLOAD_BYTES;
-      structuredAPINamespace = null;
-      structuredAPITransport = null;
+    clearStructuredAPIInfoState();
+    const lookup = requestStructuredAPIInfo().catch((error) => {
+      if (structuredAPIInfoLookup === lookup) clearStructuredAPIInfoState();
       throw error;
     });
+    structuredAPIInfoLookup = lookup;
   }
   return await structuredAPIInfoLookup;
+}
+
+function clearStructuredAPIInfoState(): void {
+  structuredAPIInfoLookup = null;
+  structuredAPIMaxPayloadBytes = MAX_STRUCTURED_PAYLOAD_BYTES;
+  structuredAPINamespace = null;
+  structuredAPITransport = null;
 }
 
 export async function refreshStructuredAPIInfo(): Promise<SpaceAPIInfo> {
   // The negotiated API information is cached for transport discovery, but
   // app-owned settings can change while Raycast remains open.
-  if (!structuredAPIInfoLookup) return await getStructuredAPIInfo();
-  await structuredAPIInfoLookup;
-  return await requestStructuredAPIInfo();
+  const currentLookup = structuredAPIInfoLookup;
+  if (!currentLookup) return await getStructuredAPIInfo();
+  await currentLookup;
+  if (structuredAPIInfoLookup !== currentLookup) return await getStructuredAPIInfo();
+
+  const refreshedLookup = requestStructuredAPIInfo().catch((error) => {
+    if (structuredAPIInfoLookup === refreshedLookup) clearStructuredAPIInfoState();
+    throw error;
+  });
+  structuredAPIInfoLookup = refreshedLookup;
+  return await refreshedLookup;
 }
 
 async function requestStructuredAPIInfo(): Promise<SpaceAPIInfo> {
@@ -218,7 +236,12 @@ async function requestStructuredAPIInfo(): Promise<SpaceAPIInfo> {
         false,
       );
     } catch (error) {
-      if (error instanceof SpaceAPIProtocolError && !error.canFallback) throw error;
+      if (
+        error instanceof SpaceAPIProtocolError &&
+        (!error.canFallback || error.code === SPACE_API_ERROR_CODES.apiDisabled)
+      ) {
+        throw error;
+      }
     }
   }
 
@@ -245,7 +268,8 @@ async function requestStructuredAPIInfo(): Promise<SpaceAPIInfo> {
           accessRestricted: false,
         };
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof SpaceAPIProtocolError && error.code === SPACE_API_ERROR_CODES.apiDisabled) throw error;
       // A missing version response is not evidence that the app is old.
     }
   }
@@ -470,7 +494,20 @@ export async function runStructuredSpaceAPICommand<M extends SpaceAPIMethod>(
       return validateStructuredResult(command, response.result) as SpaceAPIMethodResults[M];
     } catch (error) {
       if (error instanceof SpaceAPIProtocolError) {
-        throw new SpaceAPIProtocolError(error.message, error.code, error.data, false);
+        if (
+          error.code === SPACE_API_ERROR_CODES.methodNotFound ||
+          error.code === SPACE_API_ERROR_CODES.unsupportedContract
+        ) {
+          // The app may have restarted or changed capabilities since the
+          // negotiation was cached. Force the next call to negotiate again.
+          clearStructuredAPIInfoState();
+        }
+        throw new SpaceAPIProtocolError(
+          error.message,
+          error.code,
+          error.data,
+          error.code === SPACE_API_ERROR_CODES.apiDisabled && error.canFallback,
+        );
       }
       throw protocolError(
         error instanceof Error ? error.message : "SpaceAPI socket request failed.",
@@ -591,13 +628,12 @@ export async function runDesktopRenamerMethod<M extends SpaceAPIMethod>(
     // response is also safe because DesktopRenamer rejected the request before
     // execution. A write must otherwise stop after an ambiguous API response so
     // the same operation is never executed twice.
-    if (
-      method === "automatic" &&
-      structuredAPITransport === "distributedNotificationCenter" &&
+    const canFallbackToAppleScript =
       error instanceof SpaceAPIProtocolError &&
       error.canFallback &&
-      (isReadSpaceAPIMethod(command) || error.code === SPACE_API_ERROR_CODES.apiDisabled)
-    ) {
+      (error.code === SPACE_API_ERROR_CODES.apiDisabled ||
+        (structuredAPITransport === "distributedNotificationCenter" && isReadSpaceAPIMethod(command)));
+    if (method === "automatic" && canFallbackToAppleScript) {
       try {
         const result = await runAppleScript(makeAppleScriptForMethod(command, parameters));
         return normalizeDesktopRenamerMethodResult(command, result);

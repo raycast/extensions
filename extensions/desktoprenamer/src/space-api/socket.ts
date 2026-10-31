@@ -1,3 +1,5 @@
+import { lstat } from "node:fs/promises";
+import type { Stats } from "node:fs";
 import { createConnection } from "node:net";
 import {
   MAX_STRUCTURED_PAYLOAD_BYTES,
@@ -57,7 +59,8 @@ export async function requestSpaceAPISocket(
   timeoutMs: number,
   maximumPayloadBytes = MAX_STRUCTURED_PAYLOAD_BYTES,
 ): Promise<JSONRPCResponse> {
-  const endpoint = getDesktopRenamerSocketPath();
+  const userID = getDesktopRenamerUserID();
+  const endpoint = socketPathForUser(userID);
   const requestData = Buffer.from(payload, "utf8");
   if (requestData.length > maximumPayloadBytes) {
     throw protocolError(
@@ -67,6 +70,7 @@ export async function requestSpaceAPISocket(
       false,
     );
   }
+  const endpointIdentity = await inspectSocketEndpoint(endpoint, userID);
 
   return await new Promise<JSONRPCResponse>((resolve, reject) => {
     const socket = createConnection(endpoint);
@@ -95,11 +99,20 @@ export async function requestSpaceAPISocket(
     });
     socket.once("connect", () => {
       connecting = false;
-      try {
-        socket.write(encodeSpaceAPIFrame(requestData));
-      } catch (error) {
-        finish(asNonFallbackError(error));
-      }
+      void inspectSocketEndpoint(endpoint, userID)
+        .then((connectedEndpoint) => {
+          if (settled) return;
+          if (connectedEndpoint.dev !== endpointIdentity.dev || connectedEndpoint.ino !== endpointIdentity.ino) {
+            throw protocolError(
+              "DesktopRenamer's socket endpoint changed while connecting.",
+              SPACE_API_ERROR_CODES.permissionDenied,
+              undefined,
+              false,
+            );
+          }
+          socket.write(encodeSpaceAPIFrame(requestData));
+        })
+        .catch((error) => finish(asNonFallbackError(error)));
     });
     socket.on("data", (chunk) => {
       try {
@@ -141,11 +154,46 @@ export async function requestSpaceAPISocket(
 }
 
 export function getDesktopRenamerSocketPath(): string {
+  return socketPathForUser(getDesktopRenamerUserID());
+}
+
+function getDesktopRenamerUserID(): number {
   const userID = process.getuid?.();
   if (userID === undefined) {
     throw protocolError("The DesktopRenamer socket is only available on macOS.", undefined, undefined, false);
   }
+  return userID;
+}
+
+function socketPathForUser(userID: number): string {
   return `/tmp/dev.mqiu.DesktopRenamer-${userID}.sock`;
+}
+
+async function inspectSocketEndpoint(endpoint: string, userID: number): Promise<Stats> {
+  let stats: Stats;
+  try {
+    stats = await lstat(endpoint);
+  } catch (error) {
+    if (error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new SpaceAPISocketUnavailable();
+    }
+    throw protocolError(
+      "Could not verify the DesktopRenamer socket endpoint.",
+      SPACE_API_ERROR_CODES.appUnavailable,
+      undefined,
+      false,
+    );
+  }
+
+  if (!stats.isSocket() || stats.uid !== userID || (stats.mode & 0o777) !== 0o600) {
+    throw protocolError(
+      "DesktopRenamer's socket is not a private socket owned by the current user.",
+      SPACE_API_ERROR_CODES.permissionDenied,
+      undefined,
+      false,
+    );
+  }
+  return stats;
 }
 
 function isJSONRPCEvent(value: unknown): value is { method: string } {
@@ -154,7 +202,12 @@ function isJSONRPCEvent(value: unknown): value is { method: string } {
 
 function asNonFallbackError(error: unknown): Error {
   if (error instanceof SpaceAPIProtocolError) {
-    return new SpaceAPIProtocolError(error.message, error.code, error.data, false);
+    return new SpaceAPIProtocolError(
+      error.message,
+      error.code,
+      error.data,
+      error.code === SPACE_API_ERROR_CODES.apiDisabled && error.canFallback,
+    );
   }
   return protocolError(
     error instanceof Error ? error.message : "Structured SpaceAPI socket request failed.",
