@@ -1,5 +1,9 @@
 # Bitbucket Changelog
 
+## [Add Notifications] - {PR_MERGE_DATE}
+
+- Add "Notifications" menu bar command: review requests, approvals / requested changes, comments and mentions on pull requests, merged or declined pull requests and failed pipelines, with mark-as-read support. Bitbucket Cloud has no notifications API, so these are derived from repository activity of the last 7 days
+
 ## [Update] - 2026-09-28
 
 - Cache the repository list and start fetching pull requests as repo pages arrive instead of waiting for the full workspace scan to finish
