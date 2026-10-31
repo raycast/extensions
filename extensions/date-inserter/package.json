@@ -1,0 +1,193 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "date-inserter",
+  "title": "Date Inserter",
+  "description": "Pick a date from a keyboard-driven calendar and insert it at the cursor in any app, in your own format.",
+  "icon": "extension-icon.png",
+  "author": "namikaze-40p",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "insert-date",
+      "title": "Insert Date",
+      "description": "Pick a date from a monthly calendar and paste it into the frontmost app.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "format1",
+          "title": "Date Format 1",
+          "description": "date-fns format (Unicode tokens), e.g. yyyy-MM-dd or yyyy/MM/dd (EEE). See https://date-fns.org/docs/format",
+          "type": "textfield",
+          "default": "yyyy-MM-dd",
+          "placeholder": "yyyy-MM-dd",
+          "required": false
+        },
+        {
+          "name": "format2",
+          "title": "Date Format 2",
+          "description": "Optional second format. When set, press 1 or 2 in the calendar to switch formats.",
+          "type": "textfield",
+          "default": "",
+          "placeholder": "e.g. MMM d, yyyy",
+          "required": false
+        },
+        {
+          "name": "defaultFormat",
+          "title": "Initial Format",
+          "description": "Format selected when the calendar opens.",
+          "type": "dropdown",
+          "default": "1",
+          "required": false,
+          "data": [
+            {
+              "title": "Date Format 1",
+              "value": "1"
+            },
+            {
+              "title": "Date Format 2",
+              "value": "2"
+            }
+          ]
+        },
+        {
+          "name": "language",
+          "title": "Language",
+          "description": "Language of the calendar and of names in the inserted date (e.g. EEE, MMMM).",
+          "type": "dropdown",
+          "default": "en",
+          "required": false,
+          "data": [
+            {
+              "title": "Deutsch",
+              "value": "de"
+            },
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Español",
+              "value": "es"
+            },
+            {
+              "title": "Français",
+              "value": "fr"
+            },
+            {
+              "title": "Italiano",
+              "value": "it"
+            },
+            {
+              "title": "日本語",
+              "value": "ja"
+            },
+            {
+              "title": "한국어",
+              "value": "ko"
+            },
+            {
+              "title": "ไทย",
+              "value": "th"
+            },
+            {
+              "title": "Tiếng Việt",
+              "value": "vi"
+            },
+            {
+              "title": "简体中文",
+              "value": "zh-CN"
+            },
+            {
+              "title": "繁體中文",
+              "value": "zh-TW"
+            }
+          ]
+        },
+        {
+          "name": "weekStart",
+          "title": "Week Start",
+          "description": "First day of the week in the calendar.",
+          "type": "dropdown",
+          "default": "0",
+          "required": false,
+          "data": [
+            {
+              "title": "Sunday",
+              "value": "0"
+            },
+            {
+              "title": "Monday",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "name": "weekNumbers",
+          "title": "Week Numbers",
+          "description": "Show week numbers in the calendar. \"Auto\" matches the week start: Sunday → Western Traditional, Monday → ISO 8601.",
+          "type": "dropdown",
+          "default": "off",
+          "required": false,
+          "data": [
+            {
+              "title": "Off",
+              "value": "off"
+            },
+            {
+              "title": "ISO 8601",
+              "value": "iso"
+            },
+            {
+              "title": "Western Traditional",
+              "value": "western"
+            },
+            {
+              "title": "Middle Eastern",
+              "value": "middle-eastern"
+            },
+            {
+              "title": "Auto (Based on Week Start)",
+              "value": "auto"
+            }
+          ]
+        }
+      ],
+      "keywords": [
+        "date",
+        "calendar",
+        "insert",
+        "paste",
+        "today",
+        "format",
+        "datepicker"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "date-fns": "^4.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.9",
+    "react": "^19.0.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
