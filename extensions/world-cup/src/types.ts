@@ -32,6 +32,8 @@ export type Match = {
   StageName: { Description: string }[];
   HomeTeamScore: number | null;
   AwayTeamScore: number | null;
+  HomeTeamPenaltyScore?: number | null;
+  AwayTeamPenaltyScore?: number | null;
   MatchStatus: number;
   Home: Team | null;
   Away: Team | null;
