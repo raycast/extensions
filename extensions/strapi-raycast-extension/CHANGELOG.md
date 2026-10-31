@@ -1,6 +1,6 @@
 # Strapi Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-10-31
 
 - Load all entries and files with pagination (previously limited by Strapi's `maxLimit`)
 - Search entries and files server-side
