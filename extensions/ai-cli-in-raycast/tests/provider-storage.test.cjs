@@ -5,10 +5,10 @@ const {storageKeys}=require('../src/session-storage.ts');
 const {connectionSignature}=require('../src/setup-state.ts');
 test('Codex retains installed storage while other CLI state cannot collide',()=>{
  const codex=storageKeys('codex'), agy=storageKeys('antigravity');
- assert.equal(codex.library,'ask-codex.conversations.v2');
+ assert.equal(codex.library,'ai-cli-in-raycast.conversations.v2');
  assert.equal(codex.model,'ask-chatgpt.model-selection.v1');
  for(const key of Object.keys(codex))assert.notEqual(codex[key],agy[key]);
- assert.equal(new Set([...Object.values(codex),...Object.values(agy)]).size,12);
+ assert.equal(new Set([...Object.values(codex),...Object.values(agy)]).size,10);
 });
 test('CLI connection setup changes only for its own executable settings',()=>{
  const base={codexPath:'/codex',agyPath:'/agy'};
@@ -24,8 +24,8 @@ for (const [provider, key] of [['antigravity','agyPath'],['qoder','qoderPath'],[
   assert.equal(connectionSignature(base,'codex'),connectionSignature(changed,'codex'));
  });
 }
-test('all six providers have distinct storage without changing Codex legacy keys',()=>{
+test('all six providers have distinct storage',()=>{
  const providers=['codex','antigravity','qoder','qoder-cn','workbuddy','gemini'];
  const keys=providers.flatMap(p=>Object.values(storageKeys(p)));
- assert.equal(new Set(keys).size,36);
+ assert.equal(new Set(keys).size,30);
 });

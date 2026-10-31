@@ -91,8 +91,7 @@ export const ACTIVE_PROVIDER_KEY = "ai-in-raycast.active-provider.v1";
 export function storageKeys(provider: ProviderId) {
   if (provider === "codex")
     return {
-      library: "ask-codex.conversations.v2",
-      legacy: "ask-codex.current-conversation.v1",
+      library: "ai-cli-in-raycast.conversations.v2",
       model: "ask-chatgpt.model-selection.v1",
       modelPolicy: "ai-in-raycast.codex.model-policy.v1",
       pendingDraft: "ai-in-raycast.codex.pending-draft.v1",
@@ -101,7 +100,6 @@ export function storageKeys(provider: ProviderId) {
   const prefix = `ai-in-raycast.${provider}`;
   return {
     library: `${prefix}.conversations.v2`,
-    legacy: `${prefix}.legacy`,
     model: `${prefix}.model.v1`,
     modelPolicy: `${prefix}.model-policy.v1`,
     pendingDraft: `${prefix}.pending-draft.v1`,

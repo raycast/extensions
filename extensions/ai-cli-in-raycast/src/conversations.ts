@@ -25,8 +25,6 @@ export type ConversationLibrary = {
   sessions: StoredConversation[];
 };
 
-export const LEGACY_KEY = "ask-codex.current-conversation.v1";
-export const LIBRARY_KEY = "ask-codex.conversations.v2";
 export const emptyConversation = (): StoredConversation => ({
   threadId: null,
   messages: [],
@@ -117,10 +115,7 @@ export function parseConversation(value: unknown): StoredConversation {
   };
 }
 
-export function parseLibrary(
-  value?: string,
-  legacy?: string,
-): ConversationLibrary {
+export function parseLibrary(value?: string): ConversationLibrary {
   if (value) {
     const data = asRecord(JSON.parse(value));
     if (data.version !== 2 || !Array.isArray(data.sessions))
@@ -137,14 +132,7 @@ export function parseLibrary(
         .filter((session) => session.threadId),
     };
   }
-  const previous = legacy
-    ? parseConversation(JSON.parse(legacy))
-    : emptyConversation();
-  return {
-    version: 2,
-    activeId: previous.threadId,
-    sessions: previous.threadId ? [previous] : [],
-  };
+  return { version: 2, activeId: null, sessions: [] };
 }
 
 export function upsertConversation(

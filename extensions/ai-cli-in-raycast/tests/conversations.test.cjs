@@ -4,13 +4,6 @@ const assert = require("node:assert/strict");
 const { parseLibrary, upsertConversation, filterSessions, conversationTitle, latestRound, messagesFromThread, transcript } = require("../src/conversations.ts");
 
 const user = (id, content, kind = "message") => ({ id, role: "user", content, kind });
-test("migration preserves legacy messages and session ID", () => {
-  const previous = { threadId: "old", messages: [user("m1", "你好")] };
-  const lib = parseLibrary(undefined, JSON.stringify(previous));
-  assert.equal(lib.activeId, "old");
-  assert.deepEqual(lib.sessions[0].messages, previous.messages);
-  assert.equal(lib.version, 2);
-});
 test("invalid storage fails closed instead of overwriting history", () => {
   assert.throws(() => parseLibrary("broken"));
   assert.throws(() => parseLibrary('{"version":99,"sessions":[]}'));

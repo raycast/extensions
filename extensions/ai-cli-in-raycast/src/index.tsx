@@ -639,7 +639,6 @@ function NativeChat(
       setModelSelection(selection);
       const library = parseLibrary(
         await LocalStorage.getItem<string>(keys.library),
-        await LocalStorage.getItem<string>(keys.legacy),
       );
       if (disposed) return;
       libraryRef.current = library;
