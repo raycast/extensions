@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oxford-dictionary",
+  "title": "Dictionary & Thesaurus",
+  "description": "Search definitions, word types (noun, verb, adj), pronunciations, and synonyms with offline support.",
+  "icon": "command-icon.png",
+  "author": "johnathan_w",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "def",
+      "title": "Define Word",
+      "subtitle": "Word meanings, type, pronunciation & synonyms",
+      "description": "Look up definitions, word types (noun, verb, adjective, etc.), pronunciation, and synonyms.",
+      "mode": "view",
+      "alias": "def",
+      "keywords": [
+        "def",
+        "definition",
+        "dictionary",
+        "meaning"
+      ]
+    },
+    {
+      "name": "pronounce",
+      "title": "Pronounce Word",
+      "subtitle": "Audio pronunciation in background",
+      "description": "Pronounce word in background without opening any browser or window.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "word",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "roget",
+      "title": "Roget's Thesaurus",
+      "subtitle": "Roget's Thesaurus (rrthesaurus.com)",
+      "description": "Browse and search all 1,000 categories of Roget's Thesaurus 1911 edition from rrthesaurus.com with number navigation and full-text search.",
+      "mode": "view",
+      "alias": "rr",
+      "keywords": [
+        "rr",
+        "roget",
+        "thesaurus",
+        "categories",
+        "rrthesaurus",
+        "1911"
+      ]
+    },
+    {
+      "name": "wrd",
+      "title": "Reverse Dictionary",
+      "subtitle": "Reverse definition & concept search",
+      "description": "Find words by describing what you mean or searching definition fragments (e.g. 'to put forward', 'fear of spiders').",
+      "mode": "view",
+      "alias": "wrd",
+      "keywords": [
+        "wrd",
+        "reverse",
+        "definition",
+        "concept",
+        "find",
+        "meaning",
+        "word",
+        "reverse dictionary"
+      ]
+    },
+    {
+      "name": "vec",
+      "title": "Vector Synonym Search",
+      "subtitle": "Vector semantic synonym search",
+      "description": "Find words and synonyms ordered by semantic vector closeness to a set of words.",
+      "mode": "view",
+      "alias": "vec",
+      "keywords": [
+        "vec",
+        "vector",
+        "semantic",
+        "synonym",
+        "similarity",
+        "embedding",
+        "meaning"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "offlineOnly",
+      "type": "checkbox",
+      "required": false,
+      "title": "Offline Mode",
+      "label": "Force offline mode (disable online enrichment)",
+      "default": false,
+      "description": "When enabled, lookups only use the offline database and local cache."
+    },
+    {
+      "name": "preferOxford",
+      "type": "checkbox",
+      "required": false,
+      "title": "macOS Oxford Dictionary",
+      "label": "Use macOS native Oxford Dictionary when available",
+      "default": true,
+      "description": "If running on macOS, accesses Apple's built-in Oxford Dictionary."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist && node build-sync.js",
+    "build:vector-db": "tsx scripts/build-vector-db.ts",
+    "test": "tsx tests/test-dictionary.ts && tsx tests/test-roget.ts && tsx tests/test-reverse.ts && tsx tests/test-vector.ts",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
