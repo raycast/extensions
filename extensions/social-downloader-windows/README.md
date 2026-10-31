@@ -9,7 +9,7 @@ Open **Download Social Media**. On first launch, the extension automatically dow
 ## Multiple links and playlists
 
 1. Paste a video or playlist URL.
-2. Click the visible **＋ Add Link** control below the URL fields to add another link. Each additional field has its own **✕ Remove Link** control. The Add Link action and **Ctrl+N** shortcut are also available. These are native Raycast checkbox controls that trigger an immediate action; custom inline buttons inside text fields are not supported.
+2. Press **Ctrl+N** to add another link, or **Ctrl+Shift+Backspace** to remove the last additional field. **Add Link** and **Remove Last Field** are also available in Actions. The first link field is always kept.
 3. Choose **Analyze Links and Playlists**. The preview loads up to 200 entries per source link and deduplicates identical URLs. Remove unwanted entries from the video selector.
 4. Choose video or audio, format, resolution cap, audio bitrate, and destination.
 5. Start the queue. Up to three downloads can run at once. Cancel individual items or the entire queue, open completed files, and retry failed or canceled items.
@@ -48,7 +48,7 @@ npm install
 npm run dev
 ```
 
-When importing source through **Import Extension**, run `npm run build` afterward. It compiles to Raycast's default runtime directory. Do not override it with `-o dist` for an imported extension.
+When importing source through **Import Extension**, run `npm run build` afterward. Importing the source folder again can replace the runtime directory and remove its compiled command, causing “Missing executable.” For local development and screenshots, keep `npm run dev` running and open the existing command instead of reimporting. Do not override the build destination with `-o dist` for an imported extension.
 
 `npm run bundle` produces `dist/social-downloader-windows.rayext` for direct installation.
 

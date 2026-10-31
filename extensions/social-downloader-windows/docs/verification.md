@@ -46,3 +46,9 @@ Implementação Windows aprovada no chat e executada nesta pasta, inicialmente v
 - Interface pública convertida para inglês conforme as diretrizes de localização da Store. As plataformas adicionais têm suporte pelo extrator yt-dlp, mas ainda não foram verificadas com links reais nesta sessão.
 - Revisão independente identificou e corrigiu isolamento de links inválidos e identidade/posição dos itens de carrosséis. Total final: 18 testes aprovados; tipos, validações SDK, build e bundle aprovados.
 - Submissão pública criada como rascunho: https://github.com/raycast/extensions/pull/33001. Descrição preenchida com evidências e limitações; validação visual/capturas da nova interface ainda pendentes. Não publicada na Store; verificações remotas em andamento no momento da submissão.
+
+## Recorrência de Missing executable após reimportação
+
+- Às 18:57:34 UTC, o Raycast registrou nova instalação da pasta-fonte. A pasta de execução voltou a conter apenas configurações e assets; `download.js` estava ausente. As aberturas seguintes falharam com Missing executable.
+- Executado `npm run dev`: SDK recompilou e registrou o comando, restaurando `download.js` e seu sourcemap. O log das 18:58:54 UTC registra nova abertura, sem a falha de arquivo ausente. O modo de desenvolvimento foi mantido ativo para os testes/capturas do usuário.
+- Documentado que reimportar a pasta pode apagar os resultados da compilação; usar o comando existente durante desenvolvimento.

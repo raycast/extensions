@@ -13,13 +13,7 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  type ReactElement,
-} from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
@@ -439,6 +433,7 @@ export function Workspace({
             <Action
               title="Remove Last Field"
               icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "backspace" }}
               onAction={() => setLinks((old) => old.slice(0, -1))}
             />
           )}
@@ -487,42 +482,24 @@ export function Workspace({
       {kind === "download" &&
         !entries &&
         links.map((link, index) => (
-          <Fragment key={index}>
-            <Form.TextField
-              key={index}
-              id={`link-${index}`}
-              title={`Link ${index + 1}`}
-              placeholder="Paste a video or playlist link"
-              value={link}
-              onChange={(value) =>
-                setLinks((old) =>
-                  old.map((text, i) => (i === index ? value : text)),
-                )
-              }
-            />
-            {index > 0 && (
-              <Form.Checkbox
-                key={`remove-${links.length}-${index}`}
-                id={`remove-link-${index}`}
-                title=""
-                label={`✕ Remove Link ${index + 1}`}
-                value={false}
-                onChange={() =>
-                  setLinks((old) => old.filter((_, i) => i !== index))
-                }
-              />
-            )}
-          </Fragment>
+          <Form.TextField
+            key={index}
+            id={`link-${index}`}
+            title={`Link ${index + 1}`}
+            placeholder="Paste a video or playlist link"
+            value={link}
+            onChange={(value) =>
+              setLinks((old) =>
+                old.map((text, i) => (i === index ? value : text)),
+              )
+            }
+          />
         ))}
       {kind === "download" && !entries && (
         <>
-          <Form.Checkbox
-            key={`add-${links.length}`}
-            id="add-link"
-            title=""
-            label="＋ Add Link"
-            value={false}
-            onChange={() => setLinks((old) => [...old, ""])}
+          <Form.Description
+            title="Shortcuts"
+            text="Ctrl+N: add a link. Ctrl+Shift+Backspace: remove the last additional field. Also available in Actions."
           />
           <Form.Description
             title="Platforms"
