@@ -1,0 +1,16 @@
+
+> 550w-media@3.1.6 lint
+> ray lint --non-interactive --exit-on-error
+
+wait  - validate package.json file
+ready  - validate package.json file
+wait  - validate extension icons
+ready  - validate extension icons
+wait  - validate extension skills
+ready  - validate extension skills
+wait  - validate extension metadata
+ready  - validate extension metadata
+wait  - run ESLint
+ready  - run ESLint
+wait  - run Prettier 3.9.9
+ready  - run Prettier 3.9.9
