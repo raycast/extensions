@@ -40,8 +40,8 @@ import type { ResolvedDates } from './types';
  * correctly. Used by assertDatabaseSchema() in api-sql.ts to detect Things
  * updates that break the internal database format before any query runs.
  *
- * Only columns that are actively read or filtered on are listed — columns that
- * are merely cosmetic or unused are omitted intentionally.
+ * Only columns that are actively read, filtered, or sorted on are listed —
+ * columns that are merely cosmetic or unused are omitted intentionally.
  */
 export const REQUIRED_SCHEMA: Record<string, string[]> = {
   TMTask: [
@@ -65,7 +65,7 @@ export const REQUIRED_SCHEMA: Record<string, string[]> = {
     'userModificationDate',
     'todayIndex',
   ],
-  TMArea: ['uuid', 'title', 'visible'],
+  TMArea: ['uuid', 'title', 'index'],
   TMChecklistItem: ['uuid', 'title', 'status', 'task', 'index'],
   TMTag: ['uuid', 'title', 'parent'],
   TMTaskTag: ['tasks', 'tags'],

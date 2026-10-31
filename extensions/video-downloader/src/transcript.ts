@@ -6,6 +6,7 @@ import {
   downloadPath,
   getffmpegPath,
   getytdlPath,
+  getYtdlpEnv,
   getCommonArgs,
   isLiveStream,
   normalizeVideoUrl,
@@ -26,11 +27,11 @@ export default async function extractTranscript(url: string, language: string = 
   }
 
   // First get video info to get the title
-  const videoInfo = await execa(ytdlPath, [
-    ...getCommonArgs({ throttle: true }),
-    "--dump-json",
-    normalizeVideoUrl(url),
-  ]);
+  const videoInfo = await execa(
+    ytdlPath,
+    [...getCommonArgs({ throttle: true }), "--dump-json", normalizeVideoUrl(url)],
+    { env: getYtdlpEnv(ytdlPath) },
+  );
 
   const video = JSON.parse(videoInfo.stdout) as Video;
 
@@ -47,21 +48,25 @@ export default async function extractTranscript(url: string, language: string = 
 
   try {
     // Download subtitles using yt-dlp
-    const subtitleResult = await execa(ytdlPath, [
-      ...getCommonArgs({ throttle: true }),
-      "--write-sub", // Write subtitle file
-      "--write-auto-sub", // Write automatically generated subtitles
-      "--skip-download", // Don't download the video
-      "--sub-lang", // Specify subtitle language
-      language,
-      "--convert-subs", // Convert subtitles to srt format
-      "srt",
-      "--ffmpeg-location",
-      ffmpegPath,
-      "-o", // Output template
-      path.join(tmpDir, "%(id)s.%(ext)s"),
-      normalizeVideoUrl(url),
-    ]);
+    const subtitleResult = await execa(
+      ytdlPath,
+      [
+        ...getCommonArgs({ throttle: true }),
+        "--write-sub", // Write subtitle file
+        "--write-auto-sub", // Write automatically generated subtitles
+        "--skip-download", // Don't download the video
+        "--sub-lang", // Specify subtitle language
+        language,
+        "--convert-subs", // Convert subtitles to srt format
+        "srt",
+        "--ffmpeg-location",
+        ffmpegPath,
+        "-o", // Output template
+        path.join(tmpDir, "%(id)s.%(ext)s"),
+        normalizeVideoUrl(url),
+      ],
+      { env: getYtdlpEnv(ytdlPath) },
+    );
 
     if (subtitleResult.failed) {
       throw new Error("Failed to download subtitles");

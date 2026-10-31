@@ -17,6 +17,7 @@ function createHost(options = {}) {
     playSound: true,
     showToast: true,
     resultAction: "copy",
+    clipboardResultAction: "copy",
     ...options.preferences,
   };
   const api = {
@@ -40,8 +41,13 @@ function createHost(options = {}) {
       getItem: async (key) => storage.get(key),
       setItem: async (key, value) => storage.set(key, value),
     },
-    Toast: { Style: { Success: "success", Failure: "failure" } },
-    showToast: async (value) => calls.push(["toast", value]),
+    Toast: {
+      Style: { Success: "success", Failure: "failure", Animated: "animated" },
+    },
+    showToast: async (value) => {
+      calls.push(["toast", value]);
+      return { hide: async () => calls.push(["toast-hide"]) };
+    },
   };
   const overrides = {
     "@raycast/api": api,
@@ -66,12 +72,38 @@ function createHost(options = {}) {
       },
     },
     "swift:../../swift": Object.fromEntries(
-      ["recognizeText", "detectBarcode"].map((name) => [
+      [
+        "recognizeText",
+        "recognizeClipboard",
+        "detectBarcode",
+        "snapshotClipboard",
+        "restoreClipboard",
+        "clipboardChangeCount",
+      ].map((name) => [
         name,
         async (...args) => {
           calls.push(["swift", name, args]);
           if (options.swiftError) throw options.swiftError;
-          return options.swiftResult ?? "Example text";
+          if (options.swiftDelayMs)
+            await new Promise((resolve) =>
+              setTimeout(resolve, options.swiftDelayMs),
+            );
+          if (options.swiftResults?.[name] !== undefined)
+            return options.swiftResults[name];
+          if (name === "snapshotClipboard")
+            return JSON.stringify({ status: "snapshot", id: "snapshot-id" });
+          if (name === "restoreClipboard")
+            return JSON.stringify({ status: "restored" });
+          if (name === "clipboardChangeCount")
+            return JSON.stringify({
+              status: "count",
+              count: options.clipboardChangeCount ?? 1,
+            });
+          if (options.swiftResult !== undefined) return options.swiftResult;
+          return JSON.stringify({
+            status: "recognized",
+            text: "Example text",
+          });
         },
       ]),
     ),

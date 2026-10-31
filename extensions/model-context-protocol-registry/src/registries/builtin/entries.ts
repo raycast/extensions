@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "industrylens",
+    title: "IndustryLens",
+    description:
+      "Competitive and market intelligence for B2B SaaS: competitor profiles, strategic moves, pricing changes, market landscapes, reports and comparisons, with every fact dated and sourced. Hosted Streamable HTTP server; the public tools need no account or API key.",
+    icon: "https://industry-lens.com/IndustryLens_Favicon.png",
+    homepage: "https://industry-lens.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.industry-lens.com/mcp/public"],
+    },
+    remoteUrl: "https://api.industry-lens.com/mcp/public",
+  },
+  {
     name: "leal",
     title: "Leal",
     description:
@@ -287,6 +300,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "bestprice",
+    title: "BestPrice",
+    description:
+      "Shopping in Greece from BestPrice, the Greek price-comparison site: get a recommendation for a described need or budget, search products, compare current store offers with shipping and delivered totals, and read a product's price history. 4 read-only tools: get_shopping_decision, search_products, compare_offers and get_price_history. Hosted remote Streamable HTTP server at https://mcp.bestprice.gr/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; no sign-in, no API key.",
+    icon: "https://raw.githubusercontent.com/TheBestCo/bestprice-mcp/main/assets/bestprice-mcp-logo-1024.png",
+    homepage: "https://github.com/TheBestCo/bestprice-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.bestprice.gr/mcp"],
+    },
+    remoteUrl: "https://mcp.bestprice.gr/mcp",
+  },
+  {
     name: "better-design",
     title: "Better Design",
     description:
@@ -515,6 +541,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://codex-reset.com/mcp"],
     },
+  },
+  {
+    name: "connectmachine",
+    title: "ConnectMachine",
+    description:
+      "Your professional network in your AI agent. Find contacts by how you remember them (company, role, city, the event where you met), save new people from the conversation without duplicates, organize contacts into networks and events, merge duplicates, import from CSV, and draft follow-ups with the context of where you met. Write and delete tools are annotated. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, any ConnectMachine account including free ones, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/connectmachine/claude-plugin/main/assets/logo-400.png",
+    homepage: "https://www.connectmachine.ai/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.connectmachine.ai/mcp"],
+    },
+    remoteUrl: "https://mcp.connectmachine.ai/mcp",
   },
   {
     name: "context-7",
@@ -1342,6 +1381,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@paddle/paddle-mcp", "--api-key=PADDLE_API_KEY", "--environment=(sandbox|production)"],
+    },
+  },
+  {
+    name: "paidnice",
+    title: "Paidnice",
+    description:
+      "Accounts receivable for Xero and QuickBooks Online. Read the customer email and SMS replies Paidnice collects, list and look up customers, invoices and notes, and update contact people. Hosted remote Streamable HTTP server at https://api.paidnice.com/mcp; OAuth 2.1 sign-in with dynamic client registration, no API key. Needs a Paidnice Pro or Custom plan. The hosted service is proprietary.",
+    icon: "https://www.paidnice.com/images/paidnice-icon-teal.png",
+    homepage: "https://www.paidnice.com/mcp",
+    remoteUrl: "https://api.paidnice.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.paidnice.com/mcp"],
     },
   },
   {
@@ -3219,6 +3271,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "nika",
       args: ["mcp"],
+    },
+  },
+  {
+    name: "norwegian-company-data",
+    title: "Norwegian Company Data",
+    description:
+      "Search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers.",
+    homepage: "https://github.com/skaidigital/brreg-mcp",
+    remoteUrl: "https://tools.skaidigital.com/brreg/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://tools.skaidigital.com/brreg/mcp"],
     },
   },
   {

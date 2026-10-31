@@ -1,4 +1,5 @@
-import { BookmarkFolder, HistoryEntry, Tab } from "../interfaces";
+import { countOf } from "@chrismessina/raycast-kit/plural";
+import { BookmarkEntry, BookmarkFolder, HistoryEntry, Tab } from "../interfaces";
 import { ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
 import { Icon, List } from "@raycast/api";
@@ -42,20 +43,27 @@ function BookmarkFolderItem({
     <List.Item
       id={`${profile}-${id}`}
       title={name}
-      subtitle={`${urls.length} bookmarks`}
+      subtitle={countOf(urls.length, "bookmark")}
       icon={Icon.Folder}
       actions={<BraveActions.OpenAllBookmarksInFolder urls={urls as string[]} profile={profile} />}
     />
   );
 }
 
-function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
+function HistoryItem({ profile, entry }: { entry: HistoryEntry | BookmarkEntry; profile: string }): ReactElement {
+  const { url, title, id } = entry;
+  const folderPath = "folderPath" in entry ? entry.folderPath : undefined;
+  const displayUrl = url
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "");
   return (
     <List.Item
       id={`${profile}-${id}`}
       title={title}
-      subtitle={url}
-      keywords={getUrlKeywords(url)}
+      subtitle={displayUrl}
+      accessories={folderPath ? [{ tag: folderPath, icon: Icon.Folder, tooltip: folderPath }] : []}
+      keywords={[...getUrlKeywords(url), ...(folderPath ? [folderPath] : [])]}
       icon={isValidHttpUrl(url) ? getFavicon(url) : Icon.Globe}
       actions={<BraveActions.TabHistory title={title} url={url} profile={profile} />}
     />
@@ -69,7 +77,7 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
       subtitle={props.tab.urlWithoutScheme()}
       keywords={getUrlKeywords(props.tab.url)}
       actions={<BraveActions.TabList tab={props.tab} />}
-      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
+      icon={props.useOriginalFavicon && props.tab.favicon ? props.tab.favicon : props.tab.googleFavicon()}
     />
   );
 }
