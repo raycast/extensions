@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-10-31
 
 - Story and highlight downloads work again. Their service can no longer be reached, so they now read the story or highlight open in your browser, through the Raycast browser extension.
 - No more third-party download servers: media comes from your browser tab or from Instagram itself, so your links go only to Instagram. The README explains how.
