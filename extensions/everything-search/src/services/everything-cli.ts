@@ -63,11 +63,17 @@ export async function searchFilesWithCLI(searchText: string, preferences: Prefer
     // its own command line and would not understand Node's \" escaping of quoted search terms.
     // Verbatim mode also leaves the program path unquoted, so a custom es.exe is started from its
     // own folder by file name, which keeps a path with spaces out of the command line.
+    // es.exe is started without a console (`detached`). Raycast's backend has no console of its own,
+    // so otherwise Windows creates a new one for every search, and after Raycast has been running
+    // for a few hours that can fail: es.exe then exits with 0xC0000142 before printing anything.
+    // The results come from the CSV file and errors still come through the stderr pipe.
     let csv: string;
     try {
       await execFileAsync(esExePath ? basename(esExePath) : "es.exe", args, {
         cwd: esExePath ? dirname(esExePath) : undefined,
         windowsVerbatimArguments: true,
+        detached: true,
+        windowsHide: true,
       });
       csv = await readFile(csvPath, "utf8");
     } finally {
