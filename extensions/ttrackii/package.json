@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ttrackii",
+  "title": "ttrackii",
+  "description": "Start, stop, and review your ttrackii time without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "dahegyi",
+  "license": "MIT",
+  "private": true,
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "time",
+    "timer",
+    "freelance",
+    "tracking"
+  ],
+  "commands": [
+    {
+      "name": "timer",
+      "title": "Timer",
+      "subtitle": "ttrackii",
+      "description": "Start a timer, or stop or switch the one that's running",
+      "mode": "view",
+      "keywords": [
+        "start",
+        "stop",
+        "switch",
+        "track",
+        "time"
+      ]
+    },
+    {
+      "name": "recent-entries",
+      "title": "Recent Entries",
+      "subtitle": "ttrackii",
+      "description": "Browse and search your time entries, and continue any of them",
+      "mode": "view"
+    },
+    {
+      "name": "reports",
+      "title": "Reports",
+      "subtitle": "ttrackii",
+      "description": "Totals, breakdowns, and insights for a timeframe",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Timer",
+      "subtitle": "ttrackii",
+      "description": "Show the running timer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Leave blank to use https://app.ttrackii.com.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Default server"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist --exit-on-error",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.6.3",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "type": "module"
+}
