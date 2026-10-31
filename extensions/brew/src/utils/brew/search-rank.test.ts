@@ -16,4 +16,12 @@ describe("searchRank", () => {
   it("treats an alias match as exact", () => {
     expect(rank("python@3.13", "python3", { a: ["python3"] })).toBe(0);
   });
+
+  it("folds case on the name, aliases, and query", () => {
+    expect(rank("Dia", "DIA")).toBe(0);
+    expect(rank("Diagnostics", "Dia")).toBe(1);
+    expect(rank("cool-Dialpad", "DIA")).toBe(2);
+    expect(rank("AirMedia", "dIa")).toBe(3);
+    expect(rank("python@3.13", "Python3", { a: ["Python3"] })).toBe(0);
+  });
 });
