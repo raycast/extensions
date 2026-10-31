@@ -91,7 +91,7 @@ test("a failed listing with nothing to show is a failure, not an empty account",
   ];
   assert.equal(getRefreshResult([], [], failures).failureMessage, "timeout");
 
-  // Get TOTP only shows items with a 2FA code.
+  // Get TOTP only shows items with a TOTP code.
   const withoutCodes = getRefreshResult([item("vault-3", "c")], [], failures, (candidate) => candidate.hasTotp);
   assert.equal(withoutCodes.failureMessage, "timeout");
 });

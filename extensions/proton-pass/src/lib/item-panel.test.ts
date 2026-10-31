@@ -54,7 +54,7 @@ test("shows the same rows in the same order for every item", () => {
     "username:Username",
     "email:Email",
     "password:Password",
-    "totp:2FA Code",
+    "totp:TOTP Code",
     "website:Website",
     "note:Note",
     "vault:Vault",

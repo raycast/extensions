@@ -3,7 +3,7 @@ import { Item, SavedSharing, Vault } from "./types";
 
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
 const VAULTS_CACHE_KEY = "proton_pass_vaults_cache";
-// Only List Vaults lists sharing, so it's saved apart from the vaults, which Search Items saves too.
+// Only the vault list lists sharing, so it's saved apart from the vaults, which the item list saves too.
 const SHARING_CACHE_KEY = "proton_pass_sharing_cache";
 // Per-vault item caches were written by earlier versions; keep them available for offline vault views.
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;

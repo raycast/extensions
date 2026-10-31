@@ -2,11 +2,6 @@
 
 Search and manage your Proton Pass items directly from Raycast.
 
-## Project Notes
-
-- This extension is maintained as an independent `proton-pass` implementation.
-- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
-
 ## Setup
 
 This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
@@ -49,12 +44,16 @@ Test that the CLI is working:
 pass-cli vault list
 ```
 
+## Browse Items
+
+Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list.
+
 ## Preferences
 
 - **CLI Path**: Path to your own `pass-cli` executable. The default, `pass-cli`, uses the one the extension installs
 - **Primary Action**: What Enter does on an item: view its details (default), copy the password, or fill the login (macOS)
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
-- **Transient Clipboard**: Keep copied secrets (passwords, 2FA codes, notes and hidden fields) out of clipboard history
+- **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
@@ -74,9 +73,9 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 ## Filling Logins (macOS)
 
-**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a 2FA code, the code is then left in the clipboard, ready to paste on the next screen.
+**Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.
 
-For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste 2FA Code** instead.
+For logins split over several screens, use **Paste Email**, **Paste Username**, **Paste Password** and **Paste TOTP Code** instead.
 
 Filling only types into the app Raycast was opened from: if another app comes in front, it stops before the next key.
 
@@ -115,21 +114,3 @@ If the CLI is installed but not detected, set the full path in extension prefere
 ### Re-download CLI
 
 If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
-
-## Platform Verification
-
-Run on Windows x86_64 from this extension directory:
-
-```powershell
-npm ci; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm test; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx tsc --noEmit
-```
-
-Then verify a fresh automatic install keeps `pass-cli.exe` beside `libcrypto-3-x64.dll`, browser login persists through Windows Credential Manager (or shows the documented `keyring_error` guidance), search/copy/TOTP work, shortcuts display Ctrl-based keys, and Browser Extension plus Terminal fallback actions stay absent.
-
-Run on macOS:
-
-```bash
-npm ci && npm test && npm run lint && npm run build
-```
-
-Then verify a fresh install passes Gatekeeper after chmod/quarantine removal, browser re-login works with CLI 2.3.3, and all commands complete a smoke test. Sessions from CLI 1.4.1 may require login again.
