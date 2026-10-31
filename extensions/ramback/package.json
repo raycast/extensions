@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ramback",
+  "title": "Ramback",
+  "description": "See your Mac's dev stack with its RAM (simulators, emulators, daemons, containers, dev servers) and stop what you don't need.",
+  "icon": "icon.png",
+  "author": "kadir",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "running",
+      "title": "Running",
+      "subtitle": "Ramback",
+      "description": "Everything in your dev stack, by project, with RAM. Stop it, open it, copy its URL.",
+      "mode": "view"
+    },
+    {
+      "name": "free-memory",
+      "title": "Free Memory",
+      "subtitle": "Ramback",
+      "description": "Stop idle simulators, emulators and daemons until about this many GB are free.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "gb",
+          "placeholder": "GB",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
