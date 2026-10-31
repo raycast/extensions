@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "election-results",
+  "title": "Election Results",
+  "description": "Follow live election results from your menu bar, get notified as the count comes in, and ask Raycast AI about them.",
+  "icon": "extension-icon.png",
+  "author": "clins1994",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "News",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "elections",
+      "title": "Browse Elections",
+      "subtitle": "Brazil",
+      "description": "Every election, newest first. Open one for its live results, or pick the one the menu bar shows.",
+      "mode": "view"
+    },
+    {
+      "name": "election-results",
+      "title": "Election Results Menu Bar",
+      "subtitle": "Brazil",
+      "description": "Live Brazilian election results in the menu bar, with a notification when results come in.",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "notify",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Notifications",
+          "description": "Plays a sound and shows a macOS notification on big moments",
+          "label": "Notify when results come in, the lead changes, or a winner is declared"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-elections",
+      "title": "List Elections",
+      "description": "List the elections this extension has results for, newest first, with their ids and voting windows."
+    },
+    {
+      "name": "get-election-results",
+      "title": "Get Election Results",
+      "description": "Get one election's official results: phase, share counted, candidates with party, running mate, votes, share and outcome, the winner, and the gap between the first two."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
