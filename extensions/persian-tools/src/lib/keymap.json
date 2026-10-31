@@ -1,0 +1,594 @@
+{
+  "fa_id": "com.apple.keylayout.Persian-ISIRI2901",
+  "pairs": [
+    {
+      "fa": "ش",
+      "keycode": 0,
+      "shift": false,
+      "us": "a"
+    },
+    {
+      "fa": "ؤ",
+      "keycode": 0,
+      "shift": true,
+      "us": "A"
+    },
+    {
+      "fa": "س",
+      "keycode": 1,
+      "shift": false,
+      "us": "s"
+    },
+    {
+      "fa": "ئ",
+      "keycode": 1,
+      "shift": true,
+      "us": "S"
+    },
+    {
+      "fa": "ی",
+      "keycode": 2,
+      "shift": false,
+      "us": "d"
+    },
+    {
+      "fa": "ي",
+      "keycode": 2,
+      "shift": true,
+      "us": "D"
+    },
+    {
+      "fa": "ب",
+      "keycode": 3,
+      "shift": false,
+      "us": "f"
+    },
+    {
+      "fa": "إ",
+      "keycode": 3,
+      "shift": true,
+      "us": "F"
+    },
+    {
+      "fa": "ا",
+      "keycode": 4,
+      "shift": false,
+      "us": "h"
+    },
+    {
+      "fa": "آ",
+      "keycode": 4,
+      "shift": true,
+      "us": "H"
+    },
+    {
+      "fa": "ل",
+      "keycode": 5,
+      "shift": false,
+      "us": "g"
+    },
+    {
+      "fa": "أ",
+      "keycode": 5,
+      "shift": true,
+      "us": "G"
+    },
+    {
+      "fa": "ظ",
+      "keycode": 6,
+      "shift": false,
+      "us": "z"
+    },
+    {
+      "fa": "ك",
+      "keycode": 6,
+      "shift": true,
+      "us": "Z"
+    },
+    {
+      "fa": "ط",
+      "keycode": 7,
+      "shift": false,
+      "us": "x"
+    },
+    {
+      "fa": "ٓ",
+      "keycode": 7,
+      "shift": true,
+      "us": "X"
+    },
+    {
+      "fa": "ز",
+      "keycode": 8,
+      "shift": false,
+      "us": "c"
+    },
+    {
+      "fa": "ژ",
+      "keycode": 8,
+      "shift": true,
+      "us": "C"
+    },
+    {
+      "fa": "ر",
+      "keycode": 9,
+      "shift": false,
+      "us": "v"
+    },
+    {
+      "fa": "ٰ",
+      "keycode": 9,
+      "shift": true,
+      "us": "V"
+    },
+    {
+      "fa": "‍",
+      "keycode": 10,
+      "shift": false,
+      "us": "§"
+    },
+    {
+      "fa": "÷",
+      "keycode": 10,
+      "shift": true,
+      "us": "±"
+    },
+    {
+      "fa": "ذ",
+      "keycode": 11,
+      "shift": false,
+      "us": "b"
+    },
+    {
+      "fa": "‌",
+      "keycode": 11,
+      "shift": true,
+      "us": "B"
+    },
+    {
+      "fa": "ض",
+      "keycode": 12,
+      "shift": false,
+      "us": "q"
+    },
+    {
+      "fa": "ْ",
+      "keycode": 12,
+      "shift": true,
+      "us": "Q"
+    },
+    {
+      "fa": "ص",
+      "keycode": 13,
+      "shift": false,
+      "us": "w"
+    },
+    {
+      "fa": "ٌ",
+      "keycode": 13,
+      "shift": true,
+      "us": "W"
+    },
+    {
+      "fa": "ث",
+      "keycode": 14,
+      "shift": false,
+      "us": "e"
+    },
+    {
+      "fa": "ٍ",
+      "keycode": 14,
+      "shift": true,
+      "us": "E"
+    },
+    {
+      "fa": "ق",
+      "keycode": 15,
+      "shift": false,
+      "us": "r"
+    },
+    {
+      "fa": "ً",
+      "keycode": 15,
+      "shift": true,
+      "us": "R"
+    },
+    {
+      "fa": "غ",
+      "keycode": 16,
+      "shift": false,
+      "us": "y"
+    },
+    {
+      "fa": "ِ",
+      "keycode": 16,
+      "shift": true,
+      "us": "Y"
+    },
+    {
+      "fa": "ف",
+      "keycode": 17,
+      "shift": false,
+      "us": "t"
+    },
+    {
+      "fa": "ُ",
+      "keycode": 17,
+      "shift": true,
+      "us": "T"
+    },
+    {
+      "fa": "۱",
+      "keycode": 18,
+      "shift": false,
+      "us": "1"
+    },
+    {
+      "fa": "!",
+      "keycode": 18,
+      "shift": true,
+      "us": "!"
+    },
+    {
+      "fa": "۲",
+      "keycode": 19,
+      "shift": false,
+      "us": "2"
+    },
+    {
+      "fa": "٬",
+      "keycode": 19,
+      "shift": true,
+      "us": "@"
+    },
+    {
+      "fa": "۳",
+      "keycode": 20,
+      "shift": false,
+      "us": "3"
+    },
+    {
+      "fa": "٫",
+      "keycode": 20,
+      "shift": true,
+      "us": "#"
+    },
+    {
+      "fa": "۴",
+      "keycode": 21,
+      "shift": false,
+      "us": "4"
+    },
+    {
+      "fa": "﷼",
+      "keycode": 21,
+      "shift": true,
+      "us": "$"
+    },
+    {
+      "fa": "۶",
+      "keycode": 22,
+      "shift": false,
+      "us": "6"
+    },
+    {
+      "fa": "×",
+      "keycode": 22,
+      "shift": true,
+      "us": "^"
+    },
+    {
+      "fa": "۵",
+      "keycode": 23,
+      "shift": false,
+      "us": "5"
+    },
+    {
+      "fa": "٪",
+      "keycode": 23,
+      "shift": true,
+      "us": "%"
+    },
+    {
+      "fa": "=",
+      "keycode": 24,
+      "shift": false,
+      "us": "="
+    },
+    {
+      "fa": "+",
+      "keycode": 24,
+      "shift": true,
+      "us": "+"
+    },
+    {
+      "fa": "۹",
+      "keycode": 25,
+      "shift": false,
+      "us": "9"
+    },
+    {
+      "fa": ")",
+      "keycode": 25,
+      "shift": true,
+      "us": "("
+    },
+    {
+      "fa": "۷",
+      "keycode": 26,
+      "shift": false,
+      "us": "7"
+    },
+    {
+      "fa": "،",
+      "keycode": 26,
+      "shift": true,
+      "us": "&"
+    },
+    {
+      "fa": "-",
+      "keycode": 27,
+      "shift": false,
+      "us": "-"
+    },
+    {
+      "fa": "ـ",
+      "keycode": 27,
+      "shift": true,
+      "us": "_"
+    },
+    {
+      "fa": "۸",
+      "keycode": 28,
+      "shift": false,
+      "us": "8"
+    },
+    {
+      "fa": "*",
+      "keycode": 28,
+      "shift": true,
+      "us": "*"
+    },
+    {
+      "fa": "۰",
+      "keycode": 29,
+      "shift": false,
+      "us": "0"
+    },
+    {
+      "fa": "(",
+      "keycode": 29,
+      "shift": true,
+      "us": ")"
+    },
+    {
+      "fa": "چ",
+      "keycode": 30,
+      "shift": false,
+      "us": "]"
+    },
+    {
+      "fa": "{",
+      "keycode": 30,
+      "shift": true,
+      "us": "}"
+    },
+    {
+      "fa": "خ",
+      "keycode": 31,
+      "shift": false,
+      "us": "o"
+    },
+    {
+      "fa": "]",
+      "keycode": 31,
+      "shift": true,
+      "us": "O"
+    },
+    {
+      "fa": "ع",
+      "keycode": 32,
+      "shift": false,
+      "us": "u"
+    },
+    {
+      "fa": "َ",
+      "keycode": 32,
+      "shift": true,
+      "us": "U"
+    },
+    {
+      "fa": "ج",
+      "keycode": 33,
+      "shift": false,
+      "us": "["
+    },
+    {
+      "fa": "}",
+      "keycode": 33,
+      "shift": true,
+      "us": "{"
+    },
+    {
+      "fa": "ه",
+      "keycode": 34,
+      "shift": false,
+      "us": "i"
+    },
+    {
+      "fa": "ّ",
+      "keycode": 34,
+      "shift": true,
+      "us": "I"
+    },
+    {
+      "fa": "ح",
+      "keycode": 35,
+      "shift": false,
+      "us": "p"
+    },
+    {
+      "fa": "[",
+      "keycode": 35,
+      "shift": true,
+      "us": "P"
+    },
+    {
+      "fa": "م",
+      "keycode": 37,
+      "shift": false,
+      "us": "l"
+    },
+    {
+      "fa": "«",
+      "keycode": 37,
+      "shift": true,
+      "us": "L"
+    },
+    {
+      "fa": "ت",
+      "keycode": 38,
+      "shift": false,
+      "us": "j"
+    },
+    {
+      "fa": "ة",
+      "keycode": 38,
+      "shift": true,
+      "us": "J"
+    },
+    {
+      "fa": "گ",
+      "keycode": 39,
+      "shift": false,
+      "us": "'"
+    },
+    {
+      "fa": "؛",
+      "keycode": 39,
+      "shift": true,
+      "us": "\""
+    },
+    {
+      "fa": "ن",
+      "keycode": 40,
+      "shift": false,
+      "us": "k"
+    },
+    {
+      "fa": "»",
+      "keycode": 40,
+      "shift": true,
+      "us": "K"
+    },
+    {
+      "fa": "ک",
+      "keycode": 41,
+      "shift": false,
+      "us": ";"
+    },
+    {
+      "fa": ":",
+      "keycode": 41,
+      "shift": true,
+      "us": ":"
+    },
+    {
+      "fa": "\\",
+      "keycode": 42,
+      "shift": false,
+      "us": "\\"
+    },
+    {
+      "fa": "|",
+      "keycode": 42,
+      "shift": true,
+      "us": "|"
+    },
+    {
+      "fa": "و",
+      "keycode": 43,
+      "shift": false,
+      "us": ","
+    },
+    {
+      "fa": "<",
+      "keycode": 43,
+      "shift": true,
+      "us": "<"
+    },
+    {
+      "fa": "\/",
+      "keycode": 44,
+      "shift": false,
+      "us": "\/"
+    },
+    {
+      "fa": "؟",
+      "keycode": 44,
+      "shift": true,
+      "us": "?"
+    },
+    {
+      "fa": "د",
+      "keycode": 45,
+      "shift": false,
+      "us": "n"
+    },
+    {
+      "fa": "ٔ",
+      "keycode": 45,
+      "shift": true,
+      "us": "N"
+    },
+    {
+      "fa": "پ",
+      "keycode": 46,
+      "shift": false,
+      "us": "m"
+    },
+    {
+      "fa": "ء",
+      "keycode": 46,
+      "shift": true,
+      "us": "M"
+    },
+    {
+      "fa": ".",
+      "keycode": 47,
+      "shift": false,
+      "us": "."
+    },
+    {
+      "fa": ">",
+      "keycode": 47,
+      "shift": true,
+      "us": ">"
+    },
+    {
+      "fa": " ",
+      "keycode": 49,
+      "shift": false,
+      "us": " "
+    },
+    {
+      "fa": "‌",
+      "keycode": 49,
+      "shift": true,
+      "us": " "
+    },
+    {
+      "fa": "‍",
+      "keycode": 50,
+      "shift": false,
+      "us": "`"
+    },
+    {
+      "fa": "÷",
+      "keycode": 50,
+      "shift": true,
+      "us": "~"
+    }
+  ],
+  "us_id": "com.apple.keylayout.US"
+}
