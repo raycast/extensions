@@ -261,6 +261,12 @@ final class ShareView: NSView {
   }
 }
 
+final class ShareAppDelegate: NSObject, NSApplicationDelegate {
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+}
+
+let shareAppDelegate = ShareAppDelegate()
+
 func shareImage(_ imagePath: String) throws {
   let imageURL = URL(fileURLWithPath: imagePath).standardizedFileURL
   guard FileManager.default.fileExists(atPath: imageURL.path) else {
@@ -269,6 +275,7 @@ func shareImage(_ imagePath: String) throws {
 
   let app = NSApplication.shared
   app.setActivationPolicy(.regular)
+  app.delegate = shareAppDelegate
   let window = NSWindow(
     contentRect: NSRect(x: 0, y: 0, width: 480, height: 380),
     styleMask: [.titled, .closable, .miniaturizable],

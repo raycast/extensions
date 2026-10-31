@@ -7,6 +7,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import fs from "node:fs/promises";
 import BackgroundPicker from "./lib/background-picker";
 import { imageMarkdown } from "./lib/preview";
 import { runNativeBridge } from "./lib/native-bridge";
@@ -43,6 +44,12 @@ export default function TextToImage() {
     void readSelection();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (imagePath) void fs.rm(imagePath, { force: true });
+    };
+  }, [imagePath]);
+
   async function importToPhotos() {
     try {
       await runNativeBridge("import-photos", imagePath);
@@ -74,7 +81,6 @@ export default function TextToImage() {
   async function saveToPictures() {
     try {
       const savedPath = await saveTemporaryImage(imagePath);
-      setImagePath(savedPath);
       await showToast({
         style: Toast.Style.Success,
         title: "Saved to Pictures",
@@ -120,7 +126,6 @@ export default function TextToImage() {
   return (
     <Detail
       markdown={imageMarkdown(imagePath)}
-      navigationTitle="Inspiration Image"
       actions={
         <ActionPanel>
           <Action

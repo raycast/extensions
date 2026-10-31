@@ -49,6 +49,12 @@ export default function ScreenshotToImage() {
     };
   }, [loadClipboardImage]);
 
+  useEffect(() => {
+    return () => {
+      if (imagePath) void fs.rm(imagePath, { force: true });
+    };
+  }, [imagePath]);
+
   async function importToPhotos() {
     try {
       await runNativeBridge("import-photos", imagePath);
@@ -80,7 +86,6 @@ export default function ScreenshotToImage() {
   async function saveToPictures() {
     try {
       const savedPath = await saveTemporaryImage(imagePath);
-      setImagePath(savedPath);
       await showToast({
         style: Toast.Style.Success,
         title: "Saved to Pictures",
@@ -129,7 +134,6 @@ export default function ScreenshotToImage() {
   return (
     <Detail
       markdown={imageMarkdown(imagePath)}
-      navigationTitle="Inspiration Image"
       actions={
         <ActionPanel>
           <Action

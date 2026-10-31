@@ -10,7 +10,8 @@ import {
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { randomUUID } from "node:crypto";
 import { imageMarkdown, quoteForMarkdown } from "./preview";
 import { runNativeBridge } from "./native-bridge";
 
@@ -59,6 +60,13 @@ export default function BackgroundPicker({
 }: BackgroundPickerProps) {
   const [customPath, setCustomPath] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const generation = useRef(0);
+  useEffect(
+    () => () => {
+      generation.current += 1;
+    },
+    [],
+  );
 
   async function selectCustomBackground() {
     try {
@@ -74,16 +82,20 @@ export default function BackgroundPicker({
   }
 
   async function compose(backgroundPath: string) {
+    const currentGeneration = ++generation.current;
     setIsComposing(true);
     const outputPath = path.join(
       os.tmpdir(),
-      `inspiration-output-${Date.now()}.png`,
+      `inspiration-output-${randomUUID()}.png`,
     );
     let textPath = "";
     let completed = false;
     try {
       if (source.kind === "text") {
-        textPath = path.join(os.tmpdir(), `inspiration-text-${Date.now()}.txt`);
+        textPath = path.join(
+          os.tmpdir(),
+          `inspiration-text-${randomUUID()}.txt`,
+        );
         await fs.writeFile(textPath, source.text, "utf8");
         await runNativeBridge(
           "compose-text",
@@ -101,16 +113,19 @@ export default function BackgroundPicker({
       }
 
       await fs.access(outputPath);
-      completed = true;
-      onCreated(outputPath);
+      if (currentGeneration === generation.current) {
+        completed = true;
+        onCreated(outputPath);
+      }
     } catch (cause) {
+      if (currentGeneration !== generation.current) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Image Composition Failed",
         message: cause instanceof Error ? cause.message : String(cause),
       });
     } finally {
-      setIsComposing(false);
+      if (currentGeneration === generation.current) setIsComposing(false);
       if (!completed)
         await fs.rm(outputPath, { force: true }).catch(() => undefined);
       if (textPath)
@@ -130,7 +145,6 @@ export default function BackgroundPicker({
     <List
       isLoading={isComposing}
       isShowingDetail
-      navigationTitle="Choose a Background"
       searchBarPlaceholder="Choose a preset or custom image"
     >
       <List.Section title="Foreground Content">
