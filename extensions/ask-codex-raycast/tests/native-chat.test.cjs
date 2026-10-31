@@ -670,6 +670,15 @@ test("a pending pre-connection draft is restored on the next open", async (t) =>
   assert.equal(ui.saved.get(ui.keys.pendingDraft), undefined);
 });
 
+test("the pending draft copy survives a failed library save", async (t) => {
+  const ui = chat(t, "antigravity", "", { pendingDraft: "typed earlier" });
+  ui.failWrites("library");
+  await ui.ready();
+  assert.equal(ui.input().draft, "typed earlier");
+  assert.equal(ui.saved.get(ui.keys.pendingDraft), "typed earlier");
+  ui.dispose();
+});
+
 test("provider switch blocks sending and another switch until old storage is durable", async (t) => {
   const ui = chat(t);
   await ui.ready();

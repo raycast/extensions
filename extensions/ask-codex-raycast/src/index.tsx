@@ -369,6 +369,13 @@ function NativeChat(
     });
   }
 
+  function consumePendingDraft() {
+    // Only drop the recovery copy once its library write has succeeded.
+    void saveQueueRef.current
+      .then(() => LocalStorage.removeItem(keys.pendingDraft))
+      .catch(() => {});
+  }
+
   function save(value: StoredConversation, activate = true) {
     if (!storageReadyRef.current) return;
     // Codex does not persist a rollout until the first message. Do not make
@@ -699,7 +706,7 @@ function NativeChat(
       setConversation(resumed);
       setDraftValue(resumed.draft || "");
       save(resumed);
-      void LocalStorage.removeItem(keys.pendingDraft).catch(() => {});
+      consumePendingDraft();
       setBusy(Boolean(client.currentTurnId));
       setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
@@ -751,10 +758,12 @@ function NativeChat(
         void LocalStorage.setItem(keys.pendingDraft, draft).catch(() => {});
       return;
     }
-    void LocalStorage.removeItem(keys.pendingDraft).catch(() => {});
     const snapshot = { ...conversation, draft, updatedAt: Date.now() };
     persistedRef.current = snapshot;
-    const timer = setTimeout(() => save(snapshot), 350);
+    const timer = setTimeout(() => {
+      save(snapshot);
+      consumePendingDraft();
+    }, 350);
     return () => clearTimeout(timer);
   }, [conversation, draft]);
 
