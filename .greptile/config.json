@@ -1,0 +1,387 @@
+{
+  "strictness": 2,
+  "commentTypes": ["logic", "syntax", "style"],
+  "autoReview": ["open"],
+  "ignorePatterns": ".github/CODEOWNERS\n.github/extensionName2Folder.json\n.github/raycast2github.json\n.github/public_raycast_extensions.txt",
+  "rules": [
+    {
+      "id": "generated-preference-argument-types",
+      "rule": "Generated preference and argument types\n\nWhat: Don't hand-write types for `getPreferenceValues()` or command arguments. Raycast generates them in `raycast-env.d.ts` from `package.json`: use `Preferences` (extension-wide), `Preferences.<CommandName>` (per command) and `Arguments.<CommandName>`.\n\nWhy: Hand-written shapes drift from the manifest and hide renamed or removed preferences from the type checker.\n\nGood:\n```tsx\nimport { getPreferenceValues, LaunchProps } from \"@raycast/api\";\n\nconst { apiKey } = getPreferenceValues<Preferences.SearchIssues>();\n\nexport default function Command(props: LaunchProps<{ arguments: Arguments.SearchIssues }>) {\n  const { query } = props.arguments;\n}\n```\n\nBad:\n```tsx\ninterface Preferences {\n  apiKey: string;\n}\nconst prefs = getPreferenceValues<Preferences>();\nconst { apiKey } = getPreferenceValues<{ apiKey: string }>();\ntype CommandArguments = { query: string };\n```\n\nDon't flag: types for API responses, LocalStorage values, form values or tool inputs. Those aren't generated. `raycast-env.d.ts` itself must not be committed; see the no-generated-files rule.\n\nAlso correct: passing the generated type itself, e.g. `getPreferenceValues<Preferences>()` or `getPreferenceValues<Preferences.Index>()`. Never call that redundant; removing it makes the result `any`.\n\nAlso flag: `import { Preferences } from \"@raycast/api\"`, a deprecated export that shadows the generated type.\n\nPre-existing: if `main` already has a hand-written interface and this PR only adds a field to it, leave at most one note labelled pre-existing. Don't block on it.\n\nDocs: https://developers.raycast.com/api-reference/preferences#getpreferencevalues",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "changelog-entries",
+      "rule": "Changelog entries\n\nWhat: Each PR that changes how an extension behaves adds exactly one new entry at the top of that extension's `CHANGELOG.md`, titled `## [Short Description] - {PR_MERGE_DATE}`. A new extension starts with a single `## [Initial Version] - {PR_MERGE_DATE}` (`[Initial Release]` is also fine; accept either and never ask to switch).\n\nFlag on entries this PR adds:\n- a hardcoded date instead of `{PR_MERGE_DATE}` (nit: the docs still allow `YYYY-MM-DD`, but a fixed date goes stale while the PR waits for review)\n- more than one new `{PR_MERGE_DATE}` heading, or carried-over pre-release/beta history in a new extension: ask to merge them into one entry\n- edits to, or deletion of, entries already on `main`: past entries are history and must not be rewritten\n- user-visible breaking changes (removed or renamed commands, changed defaults, reset settings) that the new entry doesn't mention\n- entries listing internal-only work (refactors, lint, tests); keep it to user-facing changes (nit)\n\nGood:\n```markdown\n# Brew Changelog\n\n## [Add Search Filters] - {PR_MERGE_DATE}\n\n- Added a filter for installed casks\n- Renamed the \"Outdated\" command to \"Upgrade Packages\"; existing hotkeys need to be reassigned\n\n## [Fixes] - 2026-03-15\n\n- Fixed a crash when loading preferences\n```\n\nBad:\n```markdown\n## [Add Search Filters] - 2026-10-20\n## [Unreleased]\n```\n\nMissing changelog: CI's changelog check already enforces it, so mention it once as a plain note. Don't ask for an entry when the PR only changes dependencies or the lockfile (including security bumps across many extensions), only `contributors`/`author`, only the README or docs, or only files outside `extensions/`.\n\nNever:\n- suggest replacing `{PR_MERGE_DATE}` with a date or an `[Unreleased]` heading\n- comment on a dated entry whose date equals the PR's merge date: `raycastbot`'s post-merge \"Update CHANGELOG.md\" commit wrote it\n- comment on changelog dates once the PR is merged\n- ask to change the bracketed title text except for a spelling error\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#version-history",
+      "scope": ["extensions/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "store-screenshots",
+      "rule": "Store screenshots\n\nWhat:\n- **New extension** with at least one `view` or `menu-bar` command: it must ship a `metadata/` folder with Store screenshots. Zero screenshots is blocking. Fewer than three: suggest adding more (the docs recommend at least three; the maximum is six).\n- **Update:** flag when the PR adds the first `view` command (or a new main view) to an extension that has no `metadata/`, or deletes screenshots so none are left. If the PR renames the extension or a command, or clearly redesigns a view that existing screenshots show, ask (as a question) whether the screenshots need refreshing.\n\nWhat you can check from the diff:\n- whether `metadata/` exists and how many image files it holds\n- images in `media/` are README media, not Store screenshots, and don't count\n- file names that obviously show Raycast Settings, onboarding or a preferences page aren't Store screenshots\n\nDon't judge pixels: size, padding, background, local-extension icon in the bottom bar, dev badges, blur, or whether an image is a real Window Capture. `scripts/check_metadata_images.py` runs in CI for that, and the human reviewer looks at the images. Don't flag screenshots that already exist on `main` and that the PR doesn't touch.\n\nHow to capture (include this in the comment):\n1. Open the command in Raycast in development mode.\n2. Run **Window Capture** (set a hotkey in Raycast's Advanced settings).\n3. Tick **Save to Metadata**.\nUse mock data, not real emails, names, home-folder paths or calendars. Blurring isn't accepted.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots",
+      "scope": ["extensions/*/package.json", "extensions/*/metadata/**"],
+      "severity": "high"
+    },
+    {
+      "id": "unused-dependencies",
+      "rule": "Unused dependencies\n\nWhat: Every package in `dependencies` should be imported somewhere in the extension (`src/`, plus any `swift/` or `rust/` glue that loads it). Tooling-only packages belong in `devDependencies`.\n\nWhy: Unused runtime dependencies make installs bigger and slower and make it unclear what the extension needs.\n\nGood:\n```json\n{ \"dependencies\": { \"@raycast/api\": \"^2.8.2\" }, \"devDependencies\": { \"@types/node\": \"22.19.17\" } }\n```\n\nBad:\n```json\n{ \"dependencies\": { \"@raycast/api\": \"^2.8.2\", \"@raycast/utils\": \"^2.2.7\", \"@types/node\": \"22.19.17\" } }\n```\n(`@raycast/utils` is never imported, and `@types/*` is a dev dependency.)\n\nDon't flag: packages loaded by dynamic `import()` or `require()`, binaries run from `node_modules/.bin`, or packages that only scripts, tests or the ESLint config use. Those should move to `devDependencies`, not be removed. After a removal, ask for a regenerated `package-lock.json` (npm).\n\nA package imported anywhere in the extension (any folder, not only `src/`) counts as used. Don't flag packages used only by tests or scripts, or CLI tools run from `package.json` scripts (e.g. `tsx`), when they're already in `devDependencies`. The reverse is a problem: a package imported by runtime code but listed only in `devDependencies` must move to `dependencies`. If the PR explains that a package is resolved indirectly at build time, don't flag it.",
+      "scope": ["extensions/*/package.json"],
+      "severity": "low"
+    },
+    {
+      "id": "eslint-flat-config",
+      "rule": "ESLint flat config\n\nWhat: New extensions use the flat config from Raycast's docs, in `eslint.config.js` (CommonJS) or `eslint.config.mjs` (ESM):\n\n```javascript\n// eslint.config.js\nconst { defineConfig } = require(\"eslint/config\");\nconst raycastConfig = require(\"@raycast/eslint-config\");\n\nmodule.exports = defineConfig([...raycastConfig]);\n```\n\n```javascript\n// eslint.config.mjs\nimport { defineConfig } from \"eslint/config\";\nimport raycastConfig from \"@raycast/eslint-config\";\n\nexport default defineConfig([...raycastConfig]);\n```\n\nFlag:\n- a new extension that ships a legacy `.eslintrc*` file\n- a PR that bumps `eslint` to 9 or later, or `@raycast/eslint-config` to 2 or later, but keeps `.eslintrc*`, since `ray lint` then breaks\n- `defineConfig` imported from anywhere other than `eslint/config`\n\nDon't flag: a config that exports `[...raycastConfig]` or `raycastConfig.flat()` without `defineConfig` (`@raycast/eslint-config` 2.x is already a flat array, so it lints fine), extra `ignores` entries, or older extensions on `main` that still use `.eslintrc.json` when the PR doesn't touch linting.\n\nDocs: https://developers.raycast.com/information/developer-tools/eslint",
+      "scope": [
+        "extensions/*/eslint.config.*",
+        "extensions/*/.eslintrc*",
+        "extensions/*/package.json"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "no-custom-localization",
+      "rule": "Localization\n\nWhat: Raycast only supports US English. Don't add custom localization such as translation catalogs, `t()` helpers or language switches. When the locale changes behaviour (units, first weekday, currency), add a preference instead. Use US English spelling in user-facing strings.\n\nGood:\n```typescript\nconst { unitSystem } = getPreferenceValues<Preferences>();\nconst distance = unitSystem === \"metric\" ? \"10 km\" : \"6.2 mi\";\n```\n\nBad:\n```typescript\nconst strings = { en: { search: \"Search\" }, de: { search: \"Suchen\" } };\nconst t = (key: string) => strings[activeLocale][key];\n```\n\nDon't flag: `Intl` or `toLocale*String()` used only to format dates or numbers. That isn't custom localization.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#localization-language\n\nAlso don't flag: choosing among language variants that an API returns (that's data, not UI localization), or strings added to a catalog that already exists on `main` (one pre-existing note at most). Do flag non-English UI strings and British spellings in user-facing text (`Organisation` → `Organization`).",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "prettier-config",
+      "rule": "Prettier configuration\n\nWhat: Extensions use Raycast's standard `.prettierrc`:\n\n```json\n{\n  \"printWidth\": 120,\n  \"singleQuote\": false\n}\n```\n\nFlag only when the PR adds or changes `.prettierrc` to values other than these, for example `\"singleQuote\": true` or `\"printWidth\": 80`. Don't suggest extra Prettier options, and don't comment on `.prettierrc` files this PR doesn't touch.\n\nA missing `singleQuote` key is fine (`false` is Prettier's default). Flag only a missing or non-120 `printWidth`, an explicit `\"singleQuote\": true`, or a different formatter config (e.g. Biome at 80 columns) that conflicts with the standard.",
+      "scope": ["extensions/*/.prettierrc*"],
+      "severity": "low"
+    },
+    {
+      "id": "extension-categories",
+      "rule": "Extension categories\n\nWhat: Every extension lists at least one category in `categories`, and the first one fits its primary job. Avoid `Other` when a real category fits.\n\nAllowed values (the schema enforces these and CI runs `ray validate`, so don't comment on spelling or casing): Applications, Communication, Data, Documentation, Design Tools, Developer Tools, Finance, Fun, Media, News, Productivity, Security, System, Web, Other.\n\nFlag:\n- `categories` missing or empty\n- `Other` used when a clear category exists\n- a clearly wrong primary category, such as a password manager under `System` instead of `Security`\n\nDon't flag: a reasonable choice that isn't the only possible one, or requests to add more categories. Keep it to a nit.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#categories",
+      "scope": ["extensions/*/package.json"],
+      "severity": "low"
+    },
+    {
+      "id": "manifest-title-case",
+      "rule": "Title Case for manifest titles\n\nWhat: The extension `title`, command `title`s, preference `title`s and argument placeholders use Title Case. Brand, product and CLI names keep their canonical spelling (`GitHub`, `macOS`, `iCloud`, `API`, `phpIPAM`, `ghq`, `npm`). `description` fields are sentence case, so don't title-case them.\n\nGood:\n```json\n{ \"title\": \"Tab Width\" }\n{ \"title\": \"API Key\" }\n{ \"title\": \"Search Recent Projects\" }\n```\n\nBad:\n```json\n{ \"title\": \"Tab width\" }\n{ \"title\": \"API key\" }\n{ \"title\": \"search recent projects\" }\n```\n\nFollow `ray lint` (`@raycast/prefer-title-case`) where it decides the casing, including lowercase particles it produces such as \"Set up\", \"Look up\" or \"Get up Next\"; never ask for a form the validator rejects.\n\nDon't flag:\n- `Action` titles in TSX (`ray lint` covers literal action titles)\n- an intentionally empty `title` on the second and later checkboxes in a group\n- checkbox `label` text, which is sentence case\n- existing titles on `main` that the PR doesn't change\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#extensions-and-commands-naming",
+      "scope": ["extensions/*/package.json"],
+      "severity": "low"
+    },
+    {
+      "id": "native-fetch",
+      "rule": "Use the global fetch\n\nWhat: Raycast runs extensions on Node 22 (`@raycast/api` declares `node >=22`), so `fetch` is a global. Don't add `node-fetch`, `cross-fetch` or `isomorphic-fetch`. In React views, `useFetch` from `@raycast/utils` adds loading state, caching and failure toasts.\n\nGood:\n```typescript\nconst res = await fetch(\"https://api.example.com/items\");\n// or in a view\nconst { data, isLoading } = useFetch<Item[]>(\"https://api.example.com/items\");\n```\n\nBad:\n```typescript\nimport fetch from \"node-fetch\";\n```\n\nDon't flag: `axios`, `got` or `undici` used for something they add (interceptors, proxy agents, retries), or existing imports on `main` that this PR doesn't touch.\n\nAlso don't flag a fetch package imported for proxy or custom-agent support (e.g. `cross-fetch` with an `https-proxy-agent`), or imports in test files.",
+      "scope": [
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx",
+        "extensions/*/package.json"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "raycast-trash",
+      "rule": "Use trash() for user files\n\nWhat: When an extension deletes the user's own files or folders, use `trash()` from `@raycast/api` (or `Action.Trash`) so the files can be recovered and the code works on macOS and Windows.\n\nGood:\n```typescript\nimport { trash } from \"@raycast/api\";\nawait trash(filePath);\n```\n\nBad:\n```typescript\nexecSync(`mv \"${filePath}\" ~/.Trash`);\nexecSync(`rm -rf \"${filePath}\"`);\n```\n\nDon't flag: `fs.rm` or `fs.unlink` on the extension's own temp or cache files (`environment.supportPath`, `os.tmpdir()`, its own downloads), where a recoverable delete isn't expected.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "supported-platforms",
+      "rule": "Supported platforms\n\nWhat: Every extension must declare `platforms` in `package.json`, using only `\"macOS\"` and/or `\"Windows\"`. If it's missing, the extension defaults to `[\"macOS\"]` (the merge workflow writes it in). Cross-platform extensions must declare both explicitly.\n\n- macOS only (`[\"macOS\"]`): uses AppleScript (`runAppleScript`, `osascript`), Swift or `swift:` imports, `open -a`, `/Applications` paths, `defaults`, `pbcopy`, or anything else untested on Windows. These Raycast APIs aren't available on Windows: `\"mode\": \"menu-bar\"` commands, `BrowserExtension.*` and `WindowManagement.*`.\n- Windows only (`[\"Windows\"]`): uses Windows-only APIs such as `runPowerShellScript`, PowerShell, WinRT or `rust:` imports with no macOS counterpart.\n- Both (`[\"macOS\", \"Windows\"]`): pure TypeScript with platform branches where needed, and the author has tested it on Windows. If they haven't, suggest `[\"macOS\"]`.\n\nGood:\n```json\n\"platforms\": [\"macOS\"]\n```\n\nBad:\n```json\n// missing \"platforms\"\n\"platforms\": [\"macOS\", \"Windows\", \"Linux\"]\n\"platforms\": [\"macOS\", \"Windows\"]   // while src/ calls runAppleScript with no platform guard\n```\n\nDocs: https://developers.raycast.com/information/manifest#extension-properties\n\nOn updates where `platforms` is missing on `main`: if this PR touches `package.json`, leave one pre-existing note (should fix), not a blocker. Don't flag it when `package.json` isn't in the diff. Unreachable Windows code in a macOS-only extension is fine.\n\nFine in a `[\"macOS\", \"Windows\"]` extension: Swift, Rust or AppleScript code selected with `process.platform` (Raycast generates stubs so platform-specific native code builds on the other platform), and `useSQL` / `executeSQL` (they work on Windows from `@raycast/utils` 2.2.1).\n\nAlso flag in cross-platform extensions: macOS-only paths (`~/Library/...`, `/Applications/...`) as a plain preference `default`. Preference defaults can be per-platform: `\"default\": { \"macOS\": \"~/Library/...\", \"Windows\": \"%APPDATA%\\\\...\" }`.",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx"
+      ],
+      "severity": "high"
+    },
+    {
+      "id": "shortcut-platform-keys",
+      "rule": "Cross-platform keyboard shortcuts\n\nWhat: Platform-specific shortcuts use the object keys `macOS` and `Windows`. A lowercase `windows:` object key is deprecated in `@raycast/api`, and `macos` doesn't type-check. (`modifiers: [\"windows\"]` is a valid modifier, not the deprecated key.) Prefer `Keyboard.Shortcut.Common.*` when a common shortcut fits (Open, Copy, Edit, Remove, Refresh and so on).\n\nGood:\n```tsx\nshortcut={Keyboard.Shortcut.Common.Copy}\nshortcut={{ macOS: { modifiers: [\"cmd\"], key: \"h\" }, Windows: { modifiers: [\"ctrl\"], key: \"h\" } }}\n```\n\nBad:\n```tsx\nshortcut={{ macos: { modifiers: [\"cmd\"], key: \"h\" }, windows: { modifiers: [\"ctrl\"], key: \"h\" } }}\n```\n\nAlso flag:\n- a shortcut with `cmd`, `ctrl` or `windows` given in the single-platform form when `platforms` includes `\"Windows\"`. Raycast treats these modifiers as ambiguous and expects both platforms.\n- two actions in one panel with the same shortcut, or an explicit shortcut that collides with the automatic shortcut of the second action (⌘⏎ in List, Grid and Detail; ⌘⇧⏎ in a Form, where the primary is ⌘⏎). `Common.Copy` and `Common.CopyDeeplink` are both ⌘⇧C, so they collide in one panel.\n- a custom shortcut on the first or second action: it won't be displayed (nit)\n- a custom shortcut that now collides with a common one remapped in Raycast 2.0 on macOS: `CopyName` ⌘⌥C, `CopyPath` ⌘⌃C, `Pin` ⌘., `MoveUp` / `MoveDown` ⌘⌥↑ / ⌘⌥↓\n- `Keyboard.Shortcut.Common.*` used for an action with a different meaning (e.g. `Common.Refresh` on a non-refresh action)\n\nA lowercase `windows` key is deprecated but still works. It's a nit: never claim it is ignored or broken.\n\nDocs: https://developers.raycast.com/api-reference/keyboard#keyboard.shortcut.common",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "favicon-utility",
+      "rule": "Favicons with getFavicon\n\nWhat: When a website favicon is only used as a List, Grid or Action icon, use `getFavicon(url)` from `@raycast/utils` instead of building a favicon-service URL by hand. It's synchronous and returns an `Image.ImageLike`, not a URL string, so don't `await` it. Since `@raycast/utils` 2.1.0 it follows the user's favicon provider setting in Raycast (except the Apple provider, which needs a native API), and it falls back to `Icon.Link`. Options: `fallback`, `size` (default 64) and `mask`.\n\nGood:\n```tsx\nimport { getFavicon } from \"@raycast/utils\";\n<List.Item icon={getFavicon(site.url)} title={site.name} />\n```\n\nBad:\n```tsx\n<List.Item icon={`https://www.google.com/s2/favicons?sz=64&domain=${domain}`} title={site.name} />\n```\n\nDon't flag: code that needs the icon as bytes or a URL string (download, cache to disk, validate, export), or a custom implementation that adds something `getFavicon` doesn't have, such as more sources, racing, validation or its own caching.\n\nDocs: https://developers.raycast.com/utilities/icons/getfavicon\n\nAlso don't flag direct logo or brand image URLs (for example 512px assets in a registry list), or fields whose contract is a URL string.\n\nRelated (low): hand-built initials avatars or progress-ring SVGs used as icons can use `getAvatarIcon(name)` / `getProgressIcon(progress, color)` from `@raycast/utils`.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "launch-command-api",
+      "rule": "launchCommand over command deeplinks\n\nWhat: To start another Raycast command programmatically, use `launchCommand` instead of `open(\"raycast://extensions/<author>/<extension>/<command>\")`. Deeplinks ask the user to confirm before they run. Pass `extensionName` and `ownerOrAuthorName` for commands in other extensions.\n\nGood:\n```ts\nawait launchCommand({ name: \"my-command\", type: LaunchType.UserInitiated });\n```\n\nBad:\n```ts\nawait open(\"raycast://extensions/author/extension/my-command\");\n```\n\nDon't flag: deeplinks the user copies, shares or saves as Quicklinks (built with `createDeeplink` from `@raycast/utils`), code that runs outside the Raycast runtime (Node scripts, e2e tests, templates), or cases where the PR explains `launchCommand` can't do it (e.g. launching a disabled menu-bar command). Error handling is a separate rule (launch-command-try-catch).\n\nRelated (low): deeplink strings built by hand for Quicklinks or sharing (`raycast://extensions/...?arguments=...`) should use `createDeeplink` from `@raycast/utils`.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "launch-command-try-catch",
+      "rule": "Wrap launchCommand in try/catch\n\nWhat: `launchCommand` throws when the target command is disabled, not installed or doesn't exist. Wrap every call in `try/catch` and show the failure.\n\nGood:\n```ts\nimport { launchCommand, LaunchType } from \"@raycast/api\";\nimport { showFailureToast } from \"@raycast/utils\";\n\ntry {\n  await launchCommand({ name: \"my-command\", type: LaunchType.UserInitiated });\n} catch (error) {\n  await showFailureToast(error, { title: \"Could not open My Command\" });\n}\n```\n\nBad:\n```ts\nawait launchCommand({ name: \"my-command\", type: LaunchType.UserInitiated });\n```\n\nDon't flag calls already inside a `try` block or a `.catch()` chain.\n\nDocs: https://developers.raycast.com/api-reference/command#launchcommand",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "preference-types",
+      "rule": "No number preference or argument type\n\nWhat: There is no `number` type. Preference types are `textfield`, `password`, `checkbox`, `dropdown`, `appPicker`, `file` and `directory`. Argument types are `text`, `password` and `dropdown`. Never suggest `\"type\": \"number\"`. For numeric input, use a `textfield` (with a `placeholder`) and parse and validate it in code, or a `dropdown` of fixed values.\n\nGood:\n```json\n{ \"name\": \"limit\", \"type\": \"textfield\", \"title\": \"Result Limit\", \"description\": \"Maximum number of results to show\", \"default\": \"20\", \"placeholder\": \"20\", \"required\": false }\n```\n```typescript\nconst limit = Number.parseInt(getPreferenceValues<Preferences>().limit, 10);\nconst safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 20;\n```\n\nBad:\n```json\n{ \"name\": \"limit\", \"type\": \"number\", \"title\": \"Result Limit\" }\n```\n\nRelated tips (low): use `\"type\": \"file\"` or `\"directory\"` for paths instead of a `textfield`, and don't combine `\"required\": true` with a `default`.\n\nAlso flag: more than 3 arguments on a command (the maximum), and optional arguments declared before required ones. `appPicker` preference values are `Application` objects (`name`, `path`, `bundleId`), not strings, so flag string operations on them.\n\nDocs: https://developers.raycast.com/information/lifecycle/arguments",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx"
+      ],
+      "severity": "medium"
+    },
+    {
+      "id": "action-organization",
+      "rule": "Action panel organization\n\nWhat: In an existing extension, the primary and secondary actions are muscle memory (⏎ and ⌘⏎ in List, Grid and Detail; ⌘⏎ and ⌘⇧⏎ in a Form). If a PR changes which action comes first or second, ask whether that's intended unless the PR description or changelog already says so. Don't put a mutating or destructive action in the secondary slot. Place new actions next to related ones (open, copy and edit groups) and use `ActionPanel.Section` for groups. They don't have to go at the very end.\n\nGood:\n```tsx\n<ActionPanel>\n  <Action.OpenInBrowser url={item.url} />\n  <Action.CopyToClipboard content={item.url} />\n  <ActionPanel.Section>\n    <Action.Push title=\"Edit Item\" target={<EditItem item={item} />} />\n    <Action title=\"New Action\" onAction={run} />\n  </ActionPanel.Section>\n</ActionPanel>\n```\n\nFlag: a new action inserted above the existing first action, which changes ⏎, when the PR doesn't say so.\n\nDon't flag:\n- new actions or submenus added below the first two that push lower actions down\n- grouping related actions together\n- keeping a destructive action (delete, remove) last\n- renaming an action's title while its position stays the same\n\nAlso (nits): if some actions in a panel have icons, all should. Submenu children don't repeat the parent's name (`Set Priority` → `Low`, `Medium`, `High`, not `Set Priority Low`).",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "preference-storage",
+      "rule": "Preference storage and secrets\n\nWhat: Raycast stores all preference values and LocalStorage in its local encrypted database, whatever the preference type. Don't claim that a `textfield` value is stored in plain text, and don't call it a security bug.\n\nStill suggest `\"type\": \"password\"` for API keys, tokens and passwords, as a nit, because it masks the value in Raycast Settings.\n\nNever suggest the macOS Keychain or `keytar`. Extensions that request Keychain access are rejected from the Store.\n\nDocs: https://developers.raycast.com/information/security\n\nDo flag secrets (tokens, passwords, API keys, OAuth tokens) written to `Cache`: it stores plain files on disk in the support directory. Use a `password` preference, `LocalStorage` or the OAuth utilities instead.\n\nAlso flag: passwords, tokens or one-time codes copied with `Clipboard.copy` or `Action.CopyToClipboard` without `concealed: true` (they land in Clipboard History). LocalStorage isn't meant for large amounts of data: suggest files in `environment.supportPath` for big caches or datasets (low).",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "no-hardcoded-secrets",
+      "rule": "No hardcoded secrets or personal data\n\nWhat: Flag API keys, tokens, passwords, OAuth client secrets, private URLs with credentials, and real personal data (emails, names, home-folder paths) committed in source, `package.json` defaults, fixtures, eval mocks or README examples. Ask users for credentials with a `password` preference, or use the OAuth utilities (`OAuthService` / `OAuth.PKCEClient`). Raycast's OAuth API only supports the PKCE flow, so a client secret must not ship in the extension. For providers without PKCE, use Raycast's PKCE proxy rather than shipping the secret. In `ai.mcp` (in `package.json` or `ai.*`), flag real tokens in `headers` or `env`, and a `clientSecret` in a static `oauth` block. That field exists, but a secret committed to a public repo is still leaked.\n\nDon't flag obvious placeholders (`YOUR_API_KEY`, `example.com`) or public, documented client IDs.\n\nDocs: https://developers.raycast.com/api-reference/oauth",
+      "scope": ["extensions/**"],
+      "severity": "high"
+    },
+    {
+      "id": "root-navigation-title",
+      "rule": "No navigationTitle on the root view\n\nWhat: Don't set `navigationTitle` on the view a command returns at its root (the default export's top-level `List`, `Grid`, `Detail` or `Form`). Raycast already shows the command title there. Put dynamic status in a section title, `subtitle`, accessories or detail metadata instead.\n\nGood:\n```tsx\nexport default function Command() {\n  return <List searchBarPlaceholder=\"Search issues…\">{/* … */}</List>;\n}\n// pushed view, which is fine\n<Action.Push title=\"Show Details\" target={<Detail navigationTitle={issue.key} markdown={md} />} />\n```\n\nBad:\n```tsx\nexport default function Command() {\n  return <List navigationTitle=\"Search Issues\">{/* … */}</List>;\n}\n```\n\nOnly flag when the view is clearly the command's root. Views shown with `Action.Push` or `push()` can set `navigationTitle`. If you can't tell whether a component is pushed or rendered at the root, don't flag it.\n\nThis includes shared components (an error view, or a form used both as the root and as a pushed view) when the command's default export returns them directly. In that case suggest passing `navigationTitle` only from the pushed call site.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#navigation-title\n\nSeveral API reference examples set `navigationTitle` on a root view for illustration. If the author cites them, the Store guideline still applies. Also (nit): avoid long titles, and don't update `navigationTitle` repeatedly from state.",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "high"
+    },
+    {
+      "id": "ai-tools-evals",
+      "rule": "AI tools need evals\n\nWhat: When a PR adds an extension with `tools`, or adds new tools to an existing extension, it should ship evals that exercise them: `ai.evals` in `package.json`, or `evals` in an `ai.yaml` / `ai.yml` / `ai.json` / `ai.json5` file next to it. No evals at all for new tools is a medium issue. A few tools without their own eval is a low suggestion.\n\nGood:\n```json\n{\n  \"tools\": [{ \"name\": \"get-todos\", \"title\": \"Get Todos\", \"description\": \"Return the user's open todos\" }],\n  \"ai\": {\n    \"evals\": [{ \"input\": \"@todo what's on my list?\", \"expected\": [{ \"callsTool\": \"get-todos\" }] }]\n  }\n}\n```\n\nBad:\n```json\n{ \"tools\": [{ \"name\": \"get-todos\", \"title\": \"Get Todos\", \"description\": \"…\" }] }\n```\n\nAn empty `\"tools\": []` adds the AI Extension label for nothing. Suggest removing it (low).\n\nAlso check that eval `mocks` contain no real personal data, emails, tokens or API keys.\n\nDon't flag: extensions on `main` that already had tools without evals, when this PR doesn't add tools.\n\nDocs: https://developers.raycast.com/ai/evals\n\nEval `input` must `@`-mention the extension by its `name`. `mocks` keys are the tool `name`s, with no prefix.",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/tools/**"
+      ],
+      "severity": "medium"
+    },
+    {
+      "id": "ai-instructions",
+      "rule": "AI extension instructions and tools\n\nWhat:\n- `ai.instructions` (in `package.json` or an `ai.*` file) must not open with a persona such as \"You are a … assistant\". Several AI extensions can run in one conversation. State the extension-specific rules directly.\n- New tools that create, change, delete or send something should export a `confirmation` function whose message names the target and the action. Irreversible ones (deleting data) return `style: Action.Style.Destructive`. Read-only tools don't need one.\n- Tool `Input` fields should have JSDoc comments that explain the expected format (IDs, dates, units).\n\nDocs: https://developers.raycast.com/ai/learn-core-concepts-of-ai-extensions\n\nAI config can live in `package.json` or one of `ai.json`, `ai.json5`, `ai.yaml`, `ai.yml`. Flag a PR that adds a second `ai.*` file: pick one format.",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/tools/**"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "no-agent-scaffolding",
+      "rule": "No AI agent or tooling scaffolding in the extension\n\nWhat: Extension folders must not ship AI-agent, planning or personal tooling files that Store users never use, such as:\n- `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTEXT*.md`, `PLAN.md`, `TODO.md`\n- `.cursor/`, `.cursorrules`, `.claude/`, `.windsurf/`, `.github/copilot-instructions.md` inside the extension\n- `docs/agents/`, `docs/planning/`, `.compound-engineering/`, `.scratch/`, `.zcodeignore`\n- `.coderabbit.yaml`, `flake.nix`, `flake.lock`, `.envrc`\n- review-bot config inside an extension: a nested `.greptile/` folder or `greptile.json`. Nested Greptile configs cascade over the repo root, so one can switch off repo rules (`disabledRules`, `enabled: false`, `ignorePatterns`, `skipReview`) for that extension. Flag these as high and leave them to the human reviewer.\nAsk the author to remove them from the PR and keep them in their own repo.\n\nOnly flag files this PR adds or changes. Files already on `main` that the PR doesn't touch are the owner's call, so don't raise them.\n\nDon't flag bundled Agent Skills: `skills/<name>/SKILL.md` and the scripts, references and assets beside it are shipped to users when the skill is declared in `ai.skills` (or `skills` in an `ai.*` file). See the ai-skills rule.",
+      "scope": ["extensions/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "readme-user-facing",
+      "rule": "README is the Store page\n\nWhat: The README is shown as the Store \"About\" page to people who install from the Store and never build the extension. Keep it user-facing: features, setup (API keys, permissions), preferences, shortcuts and limitations.\n\nFlag:\n- **Development**, **Local Development**, **Build**, **Contributing** or clone-and-`npm run dev` install sections\n- \"Coming soon to the Raycast Store\" or CI badges, and notes addressed to reviewers\n- README images linked from `metadata/` or `assets/`. They belong in a top-level `media/` folder (`metadata/` is for Store screenshots, `assets/` is bundled into the extension).\n\nSuggest a README, or a `help.md`, when the extension needs setup such as an API key or app permissions and none exists.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#provide-readme-if-additional-configuration-required",
+      "scope": ["extensions/*/README.md", "extensions/*/media/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "docs-match-behavior",
+      "rule": "README and descriptions match the code\n\nWhat: When a PR changes behavior, the README, `help.md`, `CHANGELOG.md` entry, command/preference/tool `description`s and any shortcut tables in this PR must match what the code now does. Flag:\n- claims the code doesn't back up (features, \"verified\", \"secure\", supported platforms)\n- stale setup steps, renamed commands or preferences, or old shortcuts left in the README\n- tool descriptions that no longer match the tool's input or behavior\n\nNew extensions that need another app, a CLI, a paid plan or an account must say so in the README and the extension `description`, and show a helpful message when the dependency is missing.\n\nOnly flag text that this PR adds or makes stale.",
+      "scope": [
+        "extensions/*/README.md",
+        "extensions/*/help.md",
+        "extensions/*/CHANGELOG.md",
+        "extensions/*/package.json",
+        "extensions/*/src/tools/**"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "no-generated-files",
+      "rule": "Don't commit generated files\n\nWhat: Don't commit files Raycast or the toolchain generates: `raycast-env.d.ts` (its header says it's generated from `package.json`), `node_modules/`, `dist/`, `.raycast-swift-build/`, `.swiftpm/`, `.build/`, `compiled_raycast_swift/`, `compiled_raycast_rust/`, `.DS_Store`. Ask the author to remove them from git and list them in the extension's `.gitignore`.\n\nCommitted build directories or compiled output are blocking. A stray `raycast-env.d.ts` or `.DS_Store` is an issue.",
+      "scope": ["extensions/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "no-native-binaries",
+      "rule": "No committed or runtime-compiled native binaries\n\nWhat: A PR (new extension or update) must not add prebuilt executables (Mach-O, ELF, `.exe`, `.dll`, `.dylib`, or extensionless executable files in `assets/`), committed minified build output, or helpers that are compiled at runtime (calling `swiftc`, `clang`, `xcodebuild` or `cargo` from TypeScript). Store CI can't verify a committed binary against its source.\n\nAlso flag code that depends on output produced only by `npm run build`, `prebuild` or other npm scripts (a gitignored helper binary, a bundled web app in `dist/`). The Store pipeline runs `ray build` directly, so that output won't exist for users.\n\nAsk for a Swift package under `swift/` using `extensions-swift-tools` (the Color Picker pattern): `@raycast` functions, `import ... from \"swift:../swift/<Package>\"`, built by `ray build`. For native Windows code, the equivalent is a Cargo package under `rust/` using `extensions-rust-tools`: `#[raycast]` functions, `import ... from \"rust:../rust\"`. Long-running helpers aren't an exception. The Dimmer extension shows a `@raycast` function that spawns a detached worker, and Clean Keyboard shows event taps.\n\nFine:\n- calling system binaries (`/usr/bin/...`, `osascript`)\n- binaries from npm packages with traceable, reproducible builds\n- vendored source that matches a published package\n\nRaise for the human reviewer (don't decide): downloading a helper at runtime. The docs only accept a download from a source the author can't modify, verified against a SHA-256 pinned in source.\n\nAlso raise: an `ai.mcp` stdio server whose `command` points at a binary shipped in the extension; the same rules apply.\n\nReferences: https://github.com/raycast/extensions-swift-tools, https://github.com/raycast/extensions-rust-tools and https://developers.raycast.com/basics/prepare-an-extension-for-store#binary-dependencies-and-additional-configuration",
+      "scope": ["extensions/**"],
+      "severity": "high"
+    },
+    {
+      "id": "no-dev-material",
+      "rule": "No repo-only or dev material in the extension\n\nWhat: An extension should ship what Store users run. Flag files this PR adds that only serve the author's own repo or workflow:\n- contributor and repo docs: `DEVELOPMENT.md`, `ARCHITECTURE.md`, `VALIDATION.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, a top-level `docs/` folder, website copy\n- a per-extension `LICENSE` (the repo's MIT license already covers every extension)\n- scratch, reference or sample files, local vaults and dev-only scripts or `tools/`\n- unreferenced files in `assets/` (e.g. a leftover `icon.svg`)\nAsk the author to keep these in their own repo.\n\nTests: don't flag lightweight tests. Flag only test setups that add heavy tooling (a second test runner, or `jest` with its large dependency tree when `node:test` would do) and fixtures containing real personal data. If the extension already has tests on `main`, new or changed tests are fine.\n\nThis is a should-fix, not a blocker.\n\nDon't flag files under `skills/<name>/` that a declared skill references.",
+      "scope": ["extensions/**"],
+      "severity": "low"
+    },
+    {
+      "id": "npm-lockfile-registry",
+      "rule": "npm lockfile and registry\n\nWhat: Extensions use npm. Ship `package-lock.json` and no `yarn.lock`, `pnpm-lock.yaml`, `bun.lock` or `bun.lockb`. When `package.json` dependencies change, the lockfile must change with them, because CI runs `npm ci` and fails when they're out of sync. Dependencies come only from `https://registry.npmjs.org`. Flag an `.npmrc` that sets another registry or scope registry, and `resolved` URLs in the lockfile from other hosts.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#metadata-and-configuration\n\nOnly flag a stale lockfile when this PR changed `package.json` dependencies.",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/*lock*",
+        "extensions/*/.npmrc"
+      ],
+      "severity": "high"
+    },
+    {
+      "id": "failure-toasts",
+      "rule": "Failure toasts and error handling\n\nWhat: In `catch` blocks that show an error to the user, prefer `showFailureToast(error, { title })` from `@raycast/utils` over hand-built `showToast({ style: Toast.Style.Failure, ... })`. `getSelectedText()`, `getSelectedFinderItems()`, `getFrontmostApplication()` and `WindowManagement.getActiveWindow()` reject when there's nothing to read, so wrap them in `try/catch`. `Clipboard.readText()` resolves to `undefined` when the clipboard is empty: ask for an `undefined` check, not a `try/catch`. Don't swallow errors from user-triggered actions without a toast or HUD.\n\nGood:\n```typescript\nimport { showFailureToast } from \"@raycast/utils\";\ntry {\n  await saveItem(item);\n} catch (error) {\n  await showFailureToast(error, { title: \"Could not save item\" });\n}\n```\n\nBad:\n```typescript\ntry { await saveItem(item); } catch (e) { await showToast({ style: Toast.Style.Failure, title: \"Error\", message: (e as Error).message }); }\ntry { await saveItem(item); } catch { /* ignored */ }\n```\n\nDon't flag: `useFetch`, `usePromise`, `useCachedPromise`, `useExec`, `useSQL`, `useAI` and `useStreamJSON` already show a failure toast with a Retry action by default, so don't ask for a second one. To change its text, suggest `failureToastOptions: { title, message, primaryAction }` (utils 1.16.0+) instead of an `onError` that only re-toasts. `showFailureToast` takes a `primaryAction`, so a single extra action is no reason for a manual toast. Leave alone manual toasts that need what `showFailureToast` can't do (a custom `message`, a `secondaryAction`, an Animated toast later switched to Failure), and existing code on `main` the PR doesn't touch.\n\nIf the extension pins `@raycast/utils` below 1.10.0 (no `showFailureToast`), a manual `showToast` is fine. Never call either toast during render; call it from an effect or event handler.\n\n`showHUD` closes the main window. In a view command where the user should stay in Raycast, suggest `showToast` instead (nit).\n\nDocs: https://developers.raycast.com/utilities/functions/showfailuretoast",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "error-empty-state",
+      "rule": "Show errors in the view, not as an empty list\n\nWhat: A `List` or `Grid` that loads remote or fallible data should render a failure state when loading fails, not the default \"No results\". Destructure `error` from `useFetch` / `usePromise` / `useCachedPromise` and render a `List.EmptyView` / `Grid.EmptyView` with a clear title, the error message and a retry or \"Open Extension Preferences\" action. A bad API key or network error should never look like \"nothing found\". The hook still shows its default failure toast unless `onError` is passed; that's fine alongside the empty view, so don't ask to remove it. If cached data exists, showing it with the toast is also fine.\n\nGood:\n```tsx\nconst { data, isLoading, error, revalidate } = useFetch<Item[]>(url);\nreturn (\n  <List isLoading={isLoading}>\n    {error ? (\n      <List.EmptyView\n        icon={Icon.Warning}\n        title=\"Could not load items\"\n        description={error.message}\n        actions={<ActionPanel><Action title=\"Retry\" onAction={revalidate} /></ActionPanel>}\n      />\n    ) : (\n      data?.map((item) => <List.Item key={item.id} title={item.title} />)\n    )}\n  </List>\n);\n```\n\nBad:\n```tsx\nconst { data, isLoading } = useFetch<Item[]>(url);\nreturn <List isLoading={isLoading}>{data?.map((item) => <List.Item key={item.id} title={item.title} />)}</List>;\n```\n\nSeverity: should fix on new extensions; a suggestion on updates that don't touch the loading code.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#empty-states and https://developers.raycast.com/information/best-practices#handle-errors",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "no-silent-failure",
+      "rule": "No silent failures or false success\n\nWhat: User-triggered actions must not report success, or change local state, before the operation actually succeeded. Flag:\n- optimistic UI updates, `showHUD`/success toasts or `popToRoot()` that run even when the request failed\n- saving to `LocalStorage`/`Cache` or closing a form before the mutation succeeds\n- empty `catch {}` blocks, or catches that only `console.error`, around actions the user started (console output is disabled for Store extensions, so the user sees nothing)\n- silently falling back to a different account, file, variant or default without telling the user\n- unhandled promise rejections in `no-view` commands (wrap the body of the default export in `try/catch`)\n\nKeep forms open with their input when submission fails, and show the error.\n\nDon't flag deliberate, documented best-effort work (background refresh, prefetching, cache warm-up) where failure is harmless.\n\nFor optimistic updates with a data hook, suggest `mutate(promise, { optimisticUpdate })`: it rolls back automatically when the promise rejects.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "shell-command-injection",
+      "rule": "No shell injection\n\nWhat: Never build a shell, AppleScript or PowerShell command by interpolating user input, file names, clipboard text, preference values or API data into a string. Run executables with an argument array (`execFile`/`spawn` from `node:child_process`, without `shell: true`), pass values into AppleScript through `runAppleScript(script, [value])` and `on run argv`, and into PowerShell as properly escaped literals or `execFile(\"powershell\", [...])` (`runPowerShellScript` has no arguments parameter). `useExec` with `shell: true`, or a single interpolated command string, is the same problem; use `useExec(file, args)`. Don't disable sandboxing (e.g. Chromium `--no-sandbox`) to make something work.\n\nGood:\n```ts\nimport { execFile } from \"node:child_process\";\nimport { promisify } from \"node:util\";\nawait promisify(execFile)(\"git\", [\"-C\", repoPath, \"log\", \"--oneline\", \"-n\", String(limit)]);\nawait runAppleScript(\n  `on run argv\n    tell application \"Finder\" to open POSIX file (item 1 of argv)\n  end run`,\n  [userPath],\n);\n```\n\nBad:\n```ts\nexecSync(`git -C ${repoPath} log --oneline -n ${limit}`);\nawait runAppleScript(`tell application \"Finder\" to open POSIX file \"${userPath}\"`);\n```\n\nDon't flag fixed command strings with no interpolated values.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "high"
+    },
+    {
+      "id": "no-analytics-or-keychain",
+      "rule": "No external analytics or Keychain access\n\nWhat: The Store rejects extensions that include external analytics or telemetry, or that access the macOS Keychain.\n\nFlag:\n- dependencies or imports of PostHog, Mixpanel, Segment, Amplitude, Sentry, Google Analytics, Plausible, Umami or similar, and hand-rolled telemetry calls\n- `security find-generic-password` / `add-generic-password`, `keytar`, or `SecItem*` calls in Swift\n\nStore secrets in `password` preferences, or in LocalStorage when they're obtained at runtime. For error reporting instead of Sentry, suggest `captureException` from `@raycast/api`, which reports to the Developer Hub.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#analytics and https://developers.raycast.com/basics/prepare-an-extension-for-store#keychain-access",
+      "scope": ["extensions/**"],
+      "severity": "high"
+    },
+    {
+      "id": "store-naming",
+      "rule": "Extension and command naming\n\nWhat:\n- **Extension title** names the service or what the extension does, and prefers nouns (`Emoji Search` over `Search Emoji`). Avoid generic titles (`Converter`, `Utils`, `Images`). Suggest a descriptor for a coined or brand-only title when it adds context (`Clocky - Time Tracker`); creative titles are allowed. The folder and `name` should match in kebab-case.\n- **No \"Raycast\" in the name:** the extension `name`, folder and title shouldn't contain \"raycast\"; every Store extension is a Raycast extension.\n- **Restricted word:** titles containing \"Assistant\" should be renamed to name the service or the job.\n- **Command titles** are usually `<verb> <noun>` or just `<noun>`, with no articles: `Search Emoji`, not `Search an Emoji`.\n- **Subtitles:** usually the app or service name, which helps when several commands share one. A subtitle isn't a description (`Quickly open Xcode recent projects` is wrong). In a single-command extension, don't add a subtitle that repeats the extension title.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#extensions-and-commands-naming",
+      "scope": ["extensions/*/package.json"],
+      "severity": "medium"
+    },
+    {
+      "id": "backward-compatible-updates",
+      "rule": "Keep updates backward compatible\n\nWhat: In an update to an existing extension, flag changes that silently break existing users:\n- a changed command `name` (the ID that stores ranking, aliases and hotkeys). Keep the old `name` and change only the `title`.\n- a removed command\n- a renamed preference or argument `name`, which drops the value users already saved\n- a changed preference `default`, or a preference whose meaning changed under the same `name`\n- removing an existing confirmation (`confirmAlert`) before a destructive action\n- a changed `author` field: ask the author to confirm it's intentional, since it changes Store attribution. New contributors go in `contributors`.\n\nIf the change is intentional, ask for it to be called out in the changelog entry.",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx"
+      ],
+      "severity": "high"
+    },
+    {
+      "id": "loading-navigation-placeholders",
+      "rule": "Loading state, navigation and placeholders\n\nWhat:\n- `List`, `Grid`, `Detail`, `Form` and `MenuBarExtra` pass `isLoading` while data loads (and set it back to `false` when done), so the \"No results\" state doesn't flicker. Don't render an empty list before the first load finishes.\n- Use the Navigation API (`Action.Push`, `useNavigation().push`) to show a new screen. Replacing a root view's contents through state (`view === \"detail\" ? <Detail/> : <List/>`) breaks Esc and back navigation (Esc closes the command), and the Store rejects it.\n- Give search bars, text fields, text areas and `textfield`/`password` preferences a `placeholder` / `searchBarPlaceholder`.\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#ui-ux-guidelines\n\n- `MenuBarExtra` must either never set `isLoading` (synchronous commands) or set it to `true` during async work and `false` when done, because Raycast keeps the command loaded until `isLoading` turns `false`. Pass the data hook's `isLoading`.\n- Search-text-driven `useFetch` / `useCachedPromise` / `useExec` should pass `keepPreviousData: true` so the list doesn't flash back to empty on every keystroke.\n- Don't build a separate settings or configure command for values that belong in preferences.",
+      "scope": ["extensions/**/*.tsx", "extensions/*/package.json"],
+      "severity": "low"
+    },
+    {
+      "id": "third-party-tos-signals",
+      "rule": "Third-party service usage signals\n\nWhat: When a new extension talks to an outside service, point out (don't rule on) usage that may break that service's terms:\n- scraping HTML pages instead of a documented API\n- private or undocumented endpoints, or reusing browser session cookies\n- reverse-engineered app or portal auth\n- bundling proprietary SDKs or brand assets\n- missing attribution that the API requires\n\nDescribe what the code does, with the host or endpoint, and leave the decision to the human reviewer.\n\nDon't flag: a user-supplied API key stored in a `password` preference and sent directly to the official API. That's the standard pattern, not a terms problem.\n\nThese can block a Store listing (for example impersonating an official client or reusing a subscription plan outside its terms), so state the concern plainly, but leave the decision to the human reviewer.",
+      "scope": ["extensions/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "owner-field",
+      "rule": "Organisation owner field\n\nWhat: Public organisation extensions are restricted for now, and the CI check fails when a public extension adds `owner`. If this PR adds an `owner` field (a new extension, or `owner` absent on `main`), ask the author to remove it and publish under their own `author`, unless the PR says Raycast approved the organisation. Existing extensions whose `owner` is already on `main` are fine.\n\n`owner` without `\"access\": \"public\"` makes the extension private, which doesn't belong in this public repo either.",
+      "scope": ["extensions/*/package.json"],
+      "severity": "medium"
+    },
+    {
+      "id": "contributors-third-party-updates",
+      "rule": "Contributors on third-party updates\n\nWhat: When someone other than the extension's `author` updates it and isn't listed in `contributors`, add a short non-blocking note asking them to add their **Raycast** username (it can differ from their GitHub handle). This never blocks approval and never counts as a requested change.\n\nDocs: https://developers.raycast.com/basics/contribute-to-an-extension\n\n`author` must also be a Raycast username. On a new extension, if `author` looks like a GitHub handle that differs from the PR author's Raycast profile, ask (as a question) whether it's right.",
+      "scope": ["extensions/*/package.json"],
+      "severity": "low"
+    },
+    {
+      "id": "deprecated-apis",
+      "rule": "Don't introduce deprecated Raycast APIs\n\nWhat: Flag lines this PR adds that use APIs marked `@deprecated` in `@raycast/api` / `@raycast/utils`, and suggest the replacement. Common ones:\n- `environment.commandName` / `commandMode` / `theme` → `environment.entryPointName` / `entryPointMode` / `appearance`\n- `transient` on `Clipboard.copy` / `Action.CopyToClipboard` → `concealed`\n- `List.Item` `accessoryTitle` / `accessoryIcon` → `accessories`\n- `MenuBarExtra.Separator` → `MenuBarExtra.Section`\n- retired `AI.Model[...]` IDs → the replacement named in the typings\n- `Cache({ directory })` → default directory; `Grid` `itemSize` → `columns`; `randomId` / `useId` → `nanoid` (with `useRef`)\n- old top-level helpers (`copyTextToClipboard`, `allLocalStorageItems`, `*Action` components, `ActionPanel.Item`)\n- a lowercase `windows:` shortcut object key → `Windows`\n- `environment.launchContext` → the `launchContext` launch prop; `render()` → a default-export component\n- `Form.DropdownItem` / `Form.DropdownSection` / `Form.TagPickerItem` → `Form.Dropdown.Item` / `Form.Dropdown.Section` / `Form.TagPicker.Item`\n- the `preferences` constant and `Preference` type → `getPreferenceValues()`\n- `unstable_AI` / `useUnstableAI` → `AI` / `useAI`\n- flat type aliases (`ToastStyle`, `AlertActionStyle`, `ImageMask`, `ImageLike`, `ColorLike`, `KeyboardShortcut`) → namespaced forms (`Toast.Style`, `Alert.ActionStyle`, `Image.Mask`, `Image.ImageLike`, `Color.ColorLike`, `Keyboard.Shortcut`)\n- `ArgumentsLaunchProps` / `FormLaunchProps` → `LaunchProps`\n- `id` on `ActionPanel`, `ActionPanel.Section` or `ActionPanel.Submenu` → remove it\n- `Grid` `enableFiltering` → `filtering`\n\nDon't flag existing usages on `main` that the PR doesn't touch.\n\nSome docs pages still show `environment.commandName` / `commandMode` (Environment, Cache). Authors may have copied them from there; still suggest the replacement, without blaming them.\n\nNot deprecated, don't flag: leftover `captureMemorySnapshot(...)` calls (no-ops unless memory reporting is enabled). `AI.experimental_decide` is experimental, not deprecated: at most note that its signature may change.",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "manifest-basics",
+      "rule": "Manifest basics for new extensions\n\nWhat: In a new extension's `package.json`, flag:\n- `license` other than `\"MIT\"`\n- a missing `icon`, or the default Raycast extension icon (the Store rejects it). The icon is a 512x512 PNG in `assets/`; a dark variant is named `icon@dark.png`.\n- a `version` field: Raycast extensions are versioned by the Store, so the manifest doesn't declare one (nit)\n- an `@raycast/api` version far behind the latest major (nit): new extensions should start on the current API\n- `react-dom` in `dependencies`: Raycast renders natively and doesn't use the DOM\n\nDon't flag existing extensions on `main` that already have a `version` field, or icon artwork itself (the human reviewer judges it).\n\nDocs: https://developers.raycast.com/basics/prepare-an-extension-for-store#metadata-and-configuration and https://developers.raycast.com/basics/prepare-an-extension-for-store#extension-icon",
+      "scope": ["extensions/*/package.json", "extensions/*/assets/**"],
+      "severity": "medium"
+    },
+    {
+      "id": "menu-bar-commands",
+      "rule": "Menu bar commands\n\nWhat: In `MenuBarExtra` code this PR adds or changes, flag:\n- identical `MenuBarExtra.Item`s at the same level: their `onAction` handlers won't run correctly. Give them distinct titles or nest them.\n- an `alternate` item with its own `shortcut` or a nested `alternate`, or a parent of an `alternate` whose shortcut uses ⌥\n- `\"interval\"` on a command whose mode isn't `no-view` or `menu-bar`, or a very short interval for a network-backed command: choose it as high as the data allows and handle rate limits\n\nMenu bar commands aren't available on Windows; see supported-platforms. `isLoading` handling is in loading-navigation-placeholders.\n\nDocs: https://developers.raycast.com/api-reference/menu-bar-commands#best-practices and https://developers.raycast.com/information/lifecycle/background-refresh",
+      "scope": ["extensions/**/*.tsx", "extensions/*/package.json"],
+      "severity": "medium"
+    },
+    {
+      "id": "destructive-actions",
+      "rule": "Destructive actions\n\nWhat: An action that deletes, overwrites or sends something uses `style={Action.Style.Destructive}`. If it can't be undone, ask first with `confirmAlert` and `Alert.ActionStyle.Destructive`, using the `if (await confirmAlert(...))` form.\n\nGood:\n```tsx\n<Action\n  title=\"Delete Item\"\n  icon={Icon.Trash}\n  style={Action.Style.Destructive}\n  onAction={async () => {\n    if (await confirmAlert({ title: \"Delete Item?\", primaryAction: { title: \"Delete\", style: Alert.ActionStyle.Destructive } })) {\n      await deleteItem(item.id);\n    }\n  }}\n/>\n```\n\nBad:\n```tsx\n<Action title=\"Delete Item\" onAction={() => deleteItem(item.id)} />\n```\n\nDon't flag recoverable deletes (`trash()`, archive, or anything with an undo), or actions inside a form whose submission is the confirmation.\n\nDocs: https://developers.raycast.com/api-reference/user-interface/actions#action.style and https://developers.raycast.com/api-reference/feedback/alert#confirmalert",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "list-search-filtering",
+      "rule": "List and Grid search filtering\n\nWhat: Passing `onSearchTextChange` to a `List` or `Grid` turns built-in filtering off. Flag a view that sets `onSearchTextChange` (or `searchText`) but neither filters items itself nor passes `filtering` / `filtering={true}`: typing then does nothing.\n\nAlso (low):\n- `pagination` on a view that shows only a few items per page may never load more, because nothing scrolls. Page sizes around 20 work.\n- `List.Item` `accessories` while `isShowingDetail` is on: they're hidden by the detail pane, so don't render them there.\n\nDocs: https://developers.raycast.com/api-reference/user-interface/list#custom-filtering",
+      "scope": ["extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "data-hooks",
+      "rule": "Data hooks from @raycast/utils\n\nWhat: In views, async data belongs in `useFetch`, `usePromise`, `useCachedPromise`, `useExec`, `useSQL`, `useAI`, `useLocalStorage` or `useCachedState` rather than hand-rolled `useState` + `useEffect`. The hooks handle loading state, caching, race conditions (`abortable`), failure toasts and pagination.\n\nFlag as an issue (these are bugs the type checker misses):\n- a `usePromise` / `useCachedPromise` function that reads changing values (search text, IDs) from its closure instead of receiving them through the args array. The function is treated as constant, so it never re-runs.\n- non-JSON-serializable values (`Map`, `Set`, class instances, functions, `Date` expected back as `Date`) returned from `useCachedPromise` / `useFetch` or stored in `useCachedState`. Cached values go through JSON.\n- an inline `filter` or `transform` passed to `useStreamJSON` without `useCallback`: the hook revalidates on every render.\n\nSuggest (low):\n- hand-rolled fetch-in-effect → `useFetch` / `useCachedPromise`\n- hooks called conditionally, or fired with an empty query or missing ID → `execute: false` until inputs are ready\n- hand-rolled page state and array concatenation → return `{ data, hasMore, cursor }` and pass the hook's `pagination` to the view\n- `LocalStorage` + `useState` + `useEffect` → `useLocalStorage`\n- hand-built form validation state → `useForm` with `FormValidation`\n- \"recent first\" sorting via LocalStorage → `useFrecencySorting` (items without `id` need `options.key`)\n- `AI.ask` inside a component → `useAI`\n- an expensive async function memoized by hand with `Cache` + timestamps → `withCache`\n\nCheck the extension's `@raycast/utils` version before suggesting a newer helper (`useLocalStorage` 1.15.0, `failureToastOptions` 1.16.0, `createDeeplink` 1.17.0, `executeSQL` 1.18.0, `withCache` 1.19.0); suggest a bump if needed.\n\nDon't flag working code on `main` this PR doesn't touch, or no-view commands and tools, where hooks don't apply.\n\nDocs: https://developers.raycast.com/utilities/react-hooks/usecachedpromise and https://developers.raycast.com/information/best-practices",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    },
+    {
+      "id": "script-and-sql-utils",
+      "rule": "AppleScript, PowerShell and SQLite helpers\n\nWhat: Prefer the `@raycast/utils` helpers over hand-rolled process calls:\n- `osascript -e` through `child_process`, or the npm `run-applescript` package → `runAppleScript(script, args?, { language, humanReadableOutput, timeout })`. Use `language: \"JavaScript\"` for JXA. Parsing lists or records needs `humanReadableOutput: false`. The default timeout is 10 seconds, so long scripts need `timeout`.\n- `powershell -Command` through `child_process` → `runPowerShellScript` (Windows only).\n- reading a local app's SQLite database with the `sqlite3` CLI, `better-sqlite3` or `sqlite3` → `useSQL` in views, `executeSQL` in no-view commands and tools. Native sqlite packages also fall under no-native-binaries.\n\nFlag as an issue: a `useSQL` result whose `permissionView` is ignored. Return it when present so users can grant Full Disk Access.\n\nInterpolating values into scripts is covered by shell-command-injection.\n\nDocs: https://developers.raycast.com/utilities/functions/runapplescript and https://developers.raycast.com/utilities/react-hooks/usesql",
+      "scope": [
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx",
+        "extensions/*/package.json"
+      ],
+      "severity": "low"
+    },
+    {
+      "id": "ai-api-usage",
+      "rule": "Raycast AI API usage\n\nWhat: `AI.*`, `BrowserExtension.*` and `WindowManagement.*` throw when the user hasn't granted access (no Pro plan, extension not installed, declined). Check `environment.canAccess(AI)` (or `BrowserExtension`) first, or wrap the call and show a helpful failure, not a raw error.\n\nAlso flag:\n- `AI.ask` in loops, per-item maps, `interval` commands, or un-debounced `onSearchTextChange`. Raycast rate-limits AI requests (10 per minute, 100 per hour).\n- `AI.ask` inside a React component (low): use `useAI` from `@raycast/utils`.\n- `AI.experimental_decide` (low): note that its signature may change. Don't block.\n\nDocs: https://developers.raycast.com/api-reference/ai#rate-limit and https://developers.raycast.com/api-reference/environment#environment.canaccess",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "medium"
+    },
+    {
+      "id": "ai-skills",
+      "rule": "Bundled Agent Skills\n\nWhat: Extensions can ship Agent Skills as `skills/<name>/SKILL.md`. For skills this PR adds or changes, flag:\n- a `SKILL.md` without YAML frontmatter, or with a `name` that isn't lowercase-hyphenated or doesn't match its directory\n- an empty `description` in the frontmatter\n- a skill directory not declared in `ai.skills` (in `package.json`) or `skills` (in an `ai.*` file), or a declaration with no `title` or no matching directory\n- real personal data or secrets in skill scripts or references\n\nDon't flag the skill's own scripts, references and assets as dev material or agent scaffolding.\n\nDocs: https://developers.raycast.com/information/file-structure",
+      "scope": [
+        "extensions/*/skills/**",
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5"
+      ],
+      "severity": "medium"
+    },
+    {
+      "id": "ai-model-provider",
+      "rule": "AI model providers\n\nWhat: An extension with `ai.modelProvider: \"<name>\"` must ship `src/<name>.ts` exporting `getModels` and `streamCompletion`. Flag:\n- a missing entry file or a missing export\n- `AI.refreshModels` called inside the provider entry point (call it from a separate command)\n- a README that doesn't say a Raycast Pro plan is required to use custom models\n- provider API keys hardcoded instead of read from a `password` preference\n\nDocs: https://developers.raycast.com/ai/provide-ai-models",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/**",
+        "extensions/*/README.md"
+      ],
+      "severity": "medium"
+    },
+    {
+      "id": "oauth-utils",
+      "rule": "OAuth utilities\n\nWhat: For Asana, GitHub, Google, Jira, Linear, Slack or Zoom, prefer `OAuthService.<provider>()` with `withAccessToken` and `getAccessToken` from `@raycast/utils` over a hand-rolled authorize, token-exchange and refresh flow (low). Asana, GitHub, Linear and Slack already have a Raycast-configured OAuth app, so a custom `clientId` is optional there.\n\nFlag as an issue:\n- `getAccessToken()` called outside a `withAccessToken`-wrapped command, or before authorization finishes: it throws\n- reading the token from the wrapped component's props: it isn't injected there\n- a hand-rolled `OAuth.PKCEClient` flow that stores tokens without `expiresIn`, or never refreshes them, when the provider issues expiring tokens\n\nSuggest (low): `personalAccessToken` on `withAccessToken` instead of hand-branching on a token preference; a distinct `providerId` when one extension signs in to the same provider twice; `removeTokens()` only for an extra logout or a migration, since Raycast already offers a logout preference.\n\nDocs: https://developers.raycast.com/utilities/oauth and https://developers.raycast.com/api-reference/oauth",
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"],
+      "severity": "low"
+    }
+  ]
+}
