@@ -1,5 +1,9 @@
 # SwitchHosts Changelog
 
+## [Add Refresh Action] - {PR_MERGE_DATE}
+
+- Add refresh action for remote hosts
+
 ## [Add Host Information] - 2026-07-08
 
 - Show more hosts information via Detail View
