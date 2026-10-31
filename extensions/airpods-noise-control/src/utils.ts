@@ -15,3 +15,10 @@ export function isSequoiaOrLater() {
   // Darwin 24 = macOS Sequoia (15), Darwin 25 = macOS Tahoe (26)
   return getDarwinMajorVersion() >= 24;
 }
+
+export function isMacOS27OrLater(
+  osPlatform: string = platform(),
+  osRelease: string = release(),
+) {
+  return osPlatform === "darwin" && parseInt(osRelease.split(".")[0], 10) >= 26;
+}

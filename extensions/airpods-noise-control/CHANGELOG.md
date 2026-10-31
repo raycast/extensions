@@ -1,5 +1,9 @@
 # AirPods Noise Control Changelog
 
+## [Fix Sound Menu Lookup on macOS 27] - {PR_MERGE_DATE}
+
+- Fixed commands reporting "Sound menu not found. Check Localization!" on macOS 27, where the Sound menu bar item is owned by MenuBarAgent.
+
 ## [Major Update] - 2025-12-08
 
 > **Note:** This update has only been tested on macOS Tahoe (26).
