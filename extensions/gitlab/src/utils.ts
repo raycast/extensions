@@ -4,6 +4,8 @@ import { getSVGText, GitLabIcons } from "./icons";
 import * as fsSync from "fs";
 import { constants } from "fs";
 import * as crypto from "crypto";
+import { execFile, ExecFileException } from "child_process";
+import { promisify } from "util";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import urljoin from "url-join";
@@ -11,6 +13,7 @@ import { emojiSymbol } from "./components/status/utils";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
+const execFileAsync = promisify(execFile);
 
 export const copyShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
 export const copySecondaryShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
@@ -289,6 +292,7 @@ export function formatDurationHuman(totalSeconds: number): string {
 export interface Preferences {
   instance: string;
   token?: string;
+  keychainService?: string;
   oauthClientId?: string;
   artifactDownloadDirectory?: string;
   showRepositoryGroupName: boolean;
@@ -336,6 +340,45 @@ export function getInstance(preferences: Preferences = getPreferences()): string
 // the single site that reports nothing being set.
 export function getPersonalAccessToken(preferences: Preferences = getPreferences()): string | undefined {
   return preferences.token?.trim() || undefined;
+}
+
+// Exit status of `security find-generic-password` when no item matches.
+const KEYCHAIN_ITEM_NOT_FOUND = 44;
+let keychainToken: { service: string; token: Promise<string> } | undefined;
+
+/**
+ * Read a Personal Access Token from the login Keychain (generic password item
+ * with the given service name). Cached per service for the command's lifetime,
+ * so concurrent requests run `security` once. A failed read is not cached, so
+ * the next request retries after the user fixes the item.
+ */
+export function getKeychainToken(service: string): Promise<string> {
+  if (process.platform !== "darwin") {
+    return Promise.reject(
+      new Error("Keychain Service Name is only supported on macOS. Clear it and set the API Token instead."),
+    );
+  }
+  if (keychainToken?.service !== service) {
+    const token = execFileAsync("/usr/bin/security", ["find-generic-password", "-s", service, "-w"]).then(
+      ({ stdout }) => {
+        const value = stdout.trim();
+        if (!value) throw new Error(`Keychain item "${service}" is empty.`);
+        return value;
+      },
+      (error: ExecFileException & { stderr?: string }) => {
+        throw new Error(
+          error.code === KEYCHAIN_ITEM_NOT_FOUND
+            ? `Keychain item "${service}" not found. Create it with \`security add-generic-password -a "$USER" -s ${service} -w\` or fix the Keychain Service Name preference.`
+            : `Reading GitLab token from Keychain item "${service}" failed: ${error.stderr?.trim() || error.message}`,
+        );
+      },
+    );
+    token.catch(() => {
+      if (keychainToken?.token === token) keychainToken = undefined;
+    });
+    keychainToken = { service, token };
+  }
+  return keychainToken.token;
 }
 
 export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
