@@ -1,6 +1,6 @@
 # Brandfetch Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-10-31
 
 - Add support for Windows platform
 - Add a configurable download path and a Finder/File Explorer action after downloads
