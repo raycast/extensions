@@ -1,4 +1,12 @@
-# Changelog
+# Moodist Changelog
+
+## [Windows Support and Grid View] - {PR_MERGE_DATE}
+
+- Windows Support: Native background playback with sound mixing, individual and master volume, pause and resume, presets, sleep timers, and AI tools
+- Switch between list and grid layouts with Toggle Layout (`⌘` `L` on macOS, `Ctrl` `L` on Windows), with your layout remembered automatically
+- Individual colored sound icons and category icons in both layouts
+- Download indicators for uncached sounds, green speakers for playing sounds, orange pause icons for paused sounds, and no status accessory for cached sounds outside the mix
+- Volume controls now use `⌘` `-`/`Ctrl` `-` to decrease, `⌘` `=`/`Ctrl` `=` to increase, and `⌘` `⇧` `V`/`Ctrl` `Shift` `V` to set volume
 
 ## [New Catalog, Menu Bar Controls, and AI] - 2026-10-01
 

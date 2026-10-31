@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Grid, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import {
   getMix,
@@ -18,21 +18,22 @@ import {
 } from "./player";
 import { PresetNameForm } from "./preset-form";
 import { savePreset } from "./presets";
+import { categoryIcons, soundIcons } from "./sound-icons";
 import { categories, Sound } from "./sounds";
 
 const decreaseVolumeShortcut: Keyboard.Shortcut = {
-  macOS: { modifiers: ["opt"], key: "arrowLeft" },
-  Windows: { modifiers: ["alt"], key: "arrowLeft" },
+  macOS: { modifiers: ["cmd"], key: "-" },
+  Windows: { modifiers: ["ctrl"], key: "-" },
 };
 
 const increaseVolumeShortcut: Keyboard.Shortcut = {
-  macOS: { modifiers: ["opt"], key: "arrowRight" },
-  Windows: { modifiers: ["alt"], key: "arrowRight" },
+  macOS: { modifiers: ["cmd"], key: "=" },
+  Windows: { modifiers: ["ctrl"], key: "=" },
 };
 
 const setVolumeShortcut: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd"], key: "v" },
-  Windows: { modifiers: ["ctrl"], key: "v" },
+  macOS: { modifiers: ["cmd", "shift"], key: "v" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
 };
 
 const pauseShortcut: Keyboard.Shortcut = {
@@ -45,12 +46,30 @@ const masterVolumeShortcut: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl"], key: "m" },
 };
 
+function ToggleLayoutAction({ layout, onToggleLayout }: { layout: string; onToggleLayout: () => void }) {
+  return (
+    <Action
+      title="Toggle Layout"
+      icon={layout === "grid" ? Icon.AppWindowList : Icon.AppWindowGrid3x3}
+      onAction={onToggleLayout}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "l" },
+        Windows: { modifiers: ["ctrl"], key: "l" },
+      }}
+    />
+  );
+}
+
 export default function Command() {
   const { data: mix, isLoading, revalidate } = usePromise(async () => getMix());
   const { push } = useNavigation();
   const [busy, setBusy] = useState<string>();
   const busyRef = useRef(false);
   const [filter, setFilter] = useState("all");
+  const [layout, setLayout] = useCachedState<"list" | "grid">("layout", "list");
+  const [searchText, setSearchText] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const toggleLayout = () => setLayout((current) => (current === "grid" ? "list" : "grid"));
 
   async function run(id: string, title: string, fn: () => unknown) {
     if (busyRef.current) return;
@@ -117,7 +136,7 @@ export default function Command() {
             <PresetNameForm
               title="Save Preset"
               onSubmit={async (name) => {
-                await savePreset(name, getMix());
+                await savePreset(name, await getMix());
                 await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
               }}
             />,
@@ -138,131 +157,159 @@ export default function Command() {
     const entry = sounds[sound.id];
     const isPlaying = !!entry?.pid;
     const color = isPlaying ? Color.Green : Color.Orange;
-    let icon: List.Item.Props["icon"] = { source: Icon.Play, tintColor: Color.SecondaryText };
-    if (busy === sound.id) icon = Icon.CircleProgress;
-    else if (isPlaying) icon = { source: Icon.SpeakerHigh, tintColor: Color.Green };
-    else if (entry) icon = { source: Icon.Pause, tintColor: Color.Orange };
+    let statusAccessory: Grid.Item.Props["accessory"];
+    if (!isCached(sound)) {
+      statusAccessory = { icon: Icon.Download, tooltip: "Downloads on first play" };
+    } else if (isPlaying) {
+      statusAccessory = { icon: { source: Icon.SpeakerOn, tintColor: Color.Green }, tooltip: "Playing" };
+    } else if (entry) {
+      statusAccessory = { icon: { source: Icon.Pause, tintColor: Color.Orange }, tooltip: "Paused" };
+    }
 
-    return (
+    const actions = (
+      <ActionPanel>
+        {isPlaying ? (
+          <Action
+            title="Stop"
+            icon={Icon.Stop}
+            onAction={() => run(sound.id, `Stopping ${sound.label}`, () => stop(sound.id))}
+          />
+        ) : (
+          <Action
+            title={entry ? "Resume" : "Play"}
+            icon={Icon.Play}
+            onAction={() => run(sound.id, `Starting ${sound.label}`, () => play(sound.id))}
+          />
+        )}
+        {entry && !isPlaying && (
+          <Action
+            title="Remove from Mix"
+            icon={Icon.Minus}
+            onAction={() => run(sound.id, `Removing ${sound.label}`, () => stop(sound.id))}
+          />
+        )}
+        {entry && (
+          <ActionPanel.Section>
+            <Action
+              title="Decrease Volume"
+              icon={Icon.SpeakerDown}
+              shortcut={decreaseVolumeShortcut}
+              onAction={() => {
+                const next = stepVolume(entry.volume, -1);
+                if (next !== entry.volume) run(sound.id, `Volume ${percent(next)}`, () => setVolume(sound.id, next));
+              }}
+            />
+            <Action
+              title="Increase Volume"
+              icon={Icon.SpeakerUp}
+              shortcut={increaseVolumeShortcut}
+              onAction={() => {
+                const next = stepVolume(entry.volume, 1);
+                if (next !== entry.volume) run(sound.id, `Volume ${percent(next)}`, () => setVolume(sound.id, next));
+              }}
+            />
+            <ActionPanel.Submenu title="Set Volume" icon={Icon.SpeakerOn} shortcut={setVolumeShortcut}>
+              {VOLUMES.map((v) => (
+                <Action
+                  key={v}
+                  title={percent(v)}
+                  icon={v === entry.volume ? Icon.Checkmark : undefined}
+                  onAction={() => run(sound.id, "Adjusting volume", () => setVolume(sound.id, v))}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          </ActionPanel.Section>
+        )}
+        <Action
+          title="Play Only This"
+          icon={Icon.Music}
+          shortcut={Keyboard.Shortcut.Common.Open}
+          onAction={() =>
+            run(sound.id, `Playing ${sound.label}`, async () => {
+              await stopAll();
+              await play(sound.id, entry?.volume);
+            })
+          }
+        />
+        {mixActions}
+        <Action.OpenInBrowser title="Open Moodist Website" url="https://moodist.mvze.net" />
+        <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+      </ActionPanel>
+    );
+    const itemProps = { id: sound.id, title: sound.label, keywords: [sound.id], actions };
+
+    return layout === "grid" ? (
+      <Grid.Item
+        key={sound.id}
+        {...itemProps}
+        content={soundIcons[sound.id]}
+        subtitle={entry ? percent(entry.volume) : undefined}
+        accessory={statusAccessory}
+      />
+    ) : (
       <List.Item
         key={sound.id}
-        title={sound.label}
-        icon={icon}
-        keywords={[sound.id]}
+        {...itemProps}
+        icon={soundIcons[sound.id]}
         accessories={[
-          ...(entry
-            ? [{ tag: { value: percent(entry.volume), color }, tooltip: isPlaying ? "Playing" : "Paused" }]
-            : []),
-          ...(!isCached(sound) ? [{ icon: Icon.Download, tooltip: "Downloads on first play" }] : []),
+          ...(statusAccessory ? [statusAccessory] : []),
+          ...(entry ? [{ tag: { value: percent(entry.volume), color } }] : []),
         ]}
-        actions={
-          <ActionPanel>
-            {isPlaying ? (
-              <Action
-                title="Stop"
-                icon={Icon.Stop}
-                onAction={() => run(sound.id, `Stopping ${sound.label}`, () => stop(sound.id))}
-              />
-            ) : (
-              <Action
-                title={entry ? "Resume" : "Play"}
-                icon={Icon.Play}
-                onAction={() => run(sound.id, `Starting ${sound.label}`, () => play(sound.id))}
-              />
-            )}
-            {entry && !isPlaying && (
-              <Action
-                title="Remove from Mix"
-                icon={Icon.Minus}
-                onAction={() => run(sound.id, `Removing ${sound.label}`, () => stop(sound.id))}
-              />
-            )}
-            {entry && (
-              <ActionPanel.Section>
-                <Action
-                  title="Decrease Volume"
-                  icon={Icon.SpeakerDown}
-                  shortcut={decreaseVolumeShortcut}
-                  onAction={() => {
-                    const next = stepVolume(entry.volume, -1);
-                    if (next !== entry.volume)
-                      run(sound.id, `Volume ${percent(next)}`, () => setVolume(sound.id, next));
-                  }}
-                />
-                <Action
-                  title="Increase Volume"
-                  icon={Icon.SpeakerUp}
-                  shortcut={increaseVolumeShortcut}
-                  onAction={() => {
-                    const next = stepVolume(entry.volume, 1);
-                    if (next !== entry.volume)
-                      run(sound.id, `Volume ${percent(next)}`, () => setVolume(sound.id, next));
-                  }}
-                />
-                <ActionPanel.Submenu title="Set Volume" icon={Icon.SpeakerOn} shortcut={setVolumeShortcut}>
-                  {VOLUMES.map((v) => (
-                    <Action
-                      key={v}
-                      title={percent(v)}
-                      icon={v === entry.volume ? Icon.Checkmark : undefined}
-                      onAction={() => run(sound.id, "Adjusting volume", () => setVolume(sound.id, v))}
-                    />
-                  ))}
-                </ActionPanel.Submenu>
-              </ActionPanel.Section>
-            )}
-            <Action
-              title="Play Only This"
-              icon={Icon.Music}
-              shortcut={Keyboard.Shortcut.Common.Open}
-              onAction={() =>
-                run(sound.id, `Playing ${sound.label}`, async () => {
-                  stopAll();
-                  await play(sound.id, entry?.volume);
-                })
-              }
-            />
-            {mixActions}
-            <Action.OpenInBrowser title="Open Moodist Website" url="https://moodist.mvze.net" />
-          </ActionPanel>
-        }
       />
     );
   }
 
+  const Layout = layout === "grid" ? Grid : List;
+  const Section = layout === "grid" ? Grid.Section : List.Section;
+  const Dropdown = layout === "grid" ? Grid.Dropdown : List.Dropdown;
+  const EmptyView = layout === "grid" ? Grid.EmptyView : List.EmptyView;
+  const layoutActions = (
+    <ActionPanel>
+      <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+    </ActionPanel>
+  );
+
   return (
-    <List
+    <Layout
+      {...(layout === "grid" ? { columns: 5, inset: Grid.Inset.Large } : {})}
       isLoading={isLoading || !!busy}
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search sounds…"
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
+      actions={layoutActions}
       searchBarAccessory={
-        <List.Dropdown tooltip="Category" value={filter} onChange={setFilter}>
-          <List.Dropdown.Item title="All Sounds" value="all" />
-          <List.Dropdown.Item title="In Mix" value="in-mix" icon={Icon.SpeakerHigh} />
-          <List.Dropdown.Section>
+        <Dropdown tooltip="Category" value={filter} onChange={setFilter}>
+          <Dropdown.Item title="All Sounds" value="all" icon={"list-music.svg"} />
+          <Dropdown.Item title="In Mix" value="in-mix" icon={"list-video.svg"} />
+          <Dropdown.Section>
             {categories.map((c) => (
-              <List.Dropdown.Item key={c.id} title={c.title} value={c.id} />
+              <Dropdown.Item key={c.id} title={c.title} value={c.id} icon={categoryIcons[c.id]} />
             ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+          </Dropdown.Section>
+        </Dropdown>
       }
     >
       {filter === "in-mix" && inMix === 0 && (
-        <List.EmptyView
+        <EmptyView
           icon={Icon.SpeakerOff}
           title="Nothing in the mix"
           description="Pick a sound to start your mix."
+          actions={layoutActions}
         />
       )}
       {visible.map((c) => {
         const list = filter === "in-mix" ? c.sounds.filter((s) => sounds[s.id]) : c.sounds;
         if (!list.length) return null;
         return (
-          <List.Section key={c.id} title={c.title}>
+          <Section key={c.id} title={c.title}>
             {list.map(item)}
-          </List.Section>
+          </Section>
         );
       })}
-    </List>
+    </Layout>
   );
 }

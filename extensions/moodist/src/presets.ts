@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { clampVolume, findSound, loadMix, Mix, MixInput, playingCount } from "./player";
 
 export type Preset = {
@@ -12,8 +12,6 @@ export type Preset = {
   pinned?: boolean;
   lastUsedAt?: number;
 };
-
-/** How a preset relates to the current mix. "modified" means it was loaded last but the mix has changed since. */
 export type PresetStatus = "playing" | "paused" | "modified";
 
 const STORAGE_KEY = "moodist-presets";
@@ -73,8 +71,6 @@ function parsePreset(raw: unknown, legacy: boolean): Preset | undefined {
     lastUsedAt: typeof raw.lastUsedAt === "number" ? raw.lastUsedAt : undefined,
   };
 }
-
-/** Pinned first, then most recently used, then newest. */
 function comparePresets(a: Preset, b: Preset): number {
   if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
   return (b.lastUsedAt ?? 0) - (a.lastUsedAt ?? 0) || b.createdAt - a.createdAt;
@@ -106,8 +102,6 @@ export async function getPresets(): Promise<Preset[]> {
   if (legacy) await writePresets(presets);
   return presets.sort(comparePresets);
 }
-
-/** Match by id, then by exact name, then by a partial name that only one preset contains. Case-insensitive. */
 export function findPreset(presets: Preset[], query: string): Preset | undefined {
   const q = query.trim().toLowerCase();
   const byId = presets.find((p) => p.id === query.trim());
