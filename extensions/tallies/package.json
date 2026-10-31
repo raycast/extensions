@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tallies",
+  "title": "Tallies",
+  "description": "Track attendance and copy Excel-compatible tables and template notes.",
+  "icon": "tallies-icon.png",
+  "author": "spannmicah",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "template",
+      "title": "Template",
+      "description": "Create and select attendance markdown templates",
+      "mode": "view",
+      "icon": "tallies-icon.png"
+    },
+    {
+      "name": "attendance",
+      "title": "Check In",
+      "description": "Track attendance and copy Excel-compatible tables",
+      "mode": "view",
+      "icon": "tallies-icon.png"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "publish": "ray publish",
+    "bundle": "ray bundle"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
