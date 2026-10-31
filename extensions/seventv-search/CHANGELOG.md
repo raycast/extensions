@@ -1,6 +1,6 @@
 # Changelog
 
-## [Faster Search] - {PR_MERGE_DATE}
+## [Faster Search] - 2026-10-31
 
 - Load results without the 300 ms delay. Raycast now throttles typing in grid view, and next pages, sort and provider changes load straight away.
 
