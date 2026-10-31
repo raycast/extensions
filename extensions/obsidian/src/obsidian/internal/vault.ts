@@ -156,9 +156,11 @@ export async function getBookmarkedNotes(
   configFileName: string = ".obsidian",
   excludedFolders: string[] = []
 ): Promise<Note[]> {
-  const bookmarkedFilePaths = getBookmarkedNotePaths(vaultPath).filter((filePath) =>
-    [".md", ".canvas"].includes(path.extname(filePath))
-  );
+  // bookmarkNote saves `path.relative` output, which uses `\` on Windows, but the glob below matches `/` paths.
+  // Convert only the platform separator, since `\` is a valid file name character on macOS.
+  const bookmarkedFilePaths = getBookmarkedNotePaths(vaultPath)
+    .filter((filePath) => [".md", ".canvas"].includes(path.extname(filePath)))
+    .map((filePath) => filePath.split(path.sep).join("/"));
   const existingFilePaths = await getFilePaths({
     path: vaultPath,
     excludedFolders: [...excludedFolders, ...getExcludedFolders(vaultPath, configFileName), configFileName],
