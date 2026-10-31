@@ -6,11 +6,12 @@ import {
   showToast,
   Toast,
   Icon,
+  open,
 } from "@raycast/api";
 import { NoteWithUrl, CommandProps } from "../types";
 import { scanVaultForUrls } from "../services/fileScanner";
 import { NoteGrouper } from "../services/noteGrouper";
-import open from "open";
+import { primaryShortcut } from "../utils/shortcuts";
 
 export default function Command(props: CommandProps): React.ReactNode {
   const [items, setItems] = React.useState<NoteWithUrl[]>([]);
@@ -133,7 +134,7 @@ export default function Command(props: CommandProps): React.ReactNode {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={refreshItems}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={primaryShortcut("r")}
                   />
                 </ActionPanel>
               }

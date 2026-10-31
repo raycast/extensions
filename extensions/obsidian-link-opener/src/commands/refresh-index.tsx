@@ -8,6 +8,7 @@ import {
   Icon,
 } from "@raycast/api";
 import { scanVaultForUrls } from "../services/fileScanner";
+import { primaryShortcut } from "../utils/shortcuts";
 
 export default function Command(): React.ReactNode {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -67,7 +68,7 @@ export default function Command(): React.ReactNode {
             title="Scan Again"
             icon={Icon.ArrowClockwise}
             onAction={runScan}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={primaryShortcut("r")}
           />
         </ActionPanel>
       }

@@ -1,5 +1,13 @@
 # Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Use Ctrl instead of Cmd for keyboard shortcuts on Windows
+- Fix the vault path subtitle in "Select Vault" on Windows
+- Fix the directory count in "Refresh Index" for Windows paths
+- Use Raycast's `open` instead of the `open` package
+
 ## [Caching, Ignore filters, Alias recognition, Memory optimization] - 2025-09-09
 
 ### Added
