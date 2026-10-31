@@ -72,14 +72,14 @@ export function remotePrompt(name: string, url: string, code: string, adapter: "
   localUrl(url);
   if (!/^ARGO-[a-f0-9]{32}$/.test(code)) throw new Error("Invalid pairing code");
   if (adapter === "codex")
-    return `Read https://github.com/MatrixA/argo/blob/v0.1.3/docs/connect-codex.md and follow it to connect THIS existing Codex session to Argo, not a subagent or a new model.
+    return `Read https://github.com/MatrixA/argo/blob/v0.1.4/docs/connect-codex.md and follow it to connect THIS existing Codex session to Argo, not a subagent or a new model.
 Bridge address reachable FROM THIS AGENT MACHINE: ${url}
 Display name: ${JSON.stringify(name)}
 One-time pairing code: ${code}
 First verify this session supplies authoritative CODEX_THREAD_ID and the existing shared App Server supports app-server proxy. If unavailable, stop and report the exact missing prerequisite. Do not guess from history, restart Codex, start a new daemon/thread, use codex exec/resume, or change sandbox/approval policy to fake attachment.
-Install pinned v0.1.3 with --agent codex. Claim the single-use code via stdin. Never read or print the resulting durable credential. Use the existing transport and this exact bridge address. Do not change SSH tunnels or global settings.
+Install pinned v0.1.4 with --agent codex. Claim the single-use code via stdin. Never read or print the resulting durable credential. Use the existing transport and this exact bridge address. Do not change SSH tunnels or global settings.
 Run the installed connector with its private credential file and this exact loaded thread. Keep only this connector alive using the session's supported background execution. Report ready only after authenticated registration. Native populated-session rejoin is experimental; on failure report it without falling back to another session.`;
-  return `Read https://github.com/MatrixA/argo/blob/v0.1.3/docs/connect.md and follow it to install Argo and bind THIS existing Claude session, not a subagent or a new model.
+  return `Read https://github.com/MatrixA/argo/blob/v0.1.4/docs/connect.md and follow it to install Argo and bind THIS existing Claude session, not a subagent or a new model.
 Bridge address reachable FROM THIS AGENT MACHINE: ${url}
 Display name: ${JSON.stringify(name)}
 One-time pairing code: ${code}
@@ -254,10 +254,15 @@ export class Hub {
   ): Promise<void> {
     const stop = () => this.close();
     signal.addEventListener("abort", stop, { once: true });
+    let reconnect = false;
     try {
       while (!signal.aborted) {
         status("connecting");
         try {
+          // Event cursors acknowledge invalidations, not successful UI refreshes.
+          if (reconnect) cursor = await reset();
+          if (signal.aborted) break;
+          reconnect = true;
           await this.fetch(
             `/v1/events?after=${cursor}`,
             { headers: { Accept: "text/event-stream" } },
@@ -279,6 +284,7 @@ export class Hub {
           if (error instanceof HubError && error.status === 409) {
             try {
               cursor = await reset();
+              reconnect = false;
               continue;
             } catch {
               /* Retry below; no stale cursor assumed valid. */

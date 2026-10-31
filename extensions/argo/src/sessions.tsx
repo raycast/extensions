@@ -17,7 +17,6 @@ import {
   Keyboard,
 } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
-import { randomUUID } from "node:crypto";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { Interaction, Message, Session } from "./protocol.js";
 import { Hub, HubError, safeMarkdown } from "./core.js";
@@ -561,7 +560,6 @@ function Conversation({
   const [busy, setBusy] = useState(false);
   const [detached, setDetached] = useState(false);
   const lock = useRef(false);
-  const sendAttempt = useRef<{ id: string; text: string; generation: string } | undefined>(undefined);
   const [older, setOlder] = useState<Message[]>([]);
   const [more, setMore] = useState<boolean>();
   const [selection, setSelection] = useState<ConversationSelection>({});
@@ -643,13 +641,17 @@ function Conversation({
       await showToast({ style: Toast.Style.Failure, title: "Enter a message of 1–100,000 characters" });
       return false;
     }
-    if (sendAttempt.current?.text !== text || sendAttempt.current.generation !== session.generation) {
-      sendAttempt.current = { id: randomUUID(), text, generation: session.generation };
-    }
-    const attempt = sendAttempt.current;
     const client = feed.hub.current!;
     const sent = await run(
-      () => {
+      async () => {
+        let attempt;
+        try {
+          attempt = await draft.prepare(text, session.generation);
+        } catch (cause) {
+          const error = new HubError(0);
+          error.message = cause instanceof Error ? cause.message : "Could not save the pending message locally.";
+          throw error;
+        }
         // Arm before I/O: a reply can arrive through the subscription before POST resolves.
         setSelection((previous) => conversationSelection(previous, { type: "send", messageId: attempt.id }));
         return client.mutate(bindingId, "/messages", {
@@ -661,8 +663,7 @@ function Conversation({
       session.status === "ready" ? "Message queued for Agent" : "Queued — waiting for Agent",
     );
     if (sent) {
-      draft.clearIf(text);
-      sendAttempt.current = undefined;
+      await draft.clearIf(text);
     }
     return sent;
   }
@@ -1080,11 +1081,7 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
   const [target, setTarget] = useState<ConversationTarget>();
   const [loading, setLoading] = useState(Boolean(recent || bindingId));
   const [notice, setNotice] = useState<string>();
-  const { configPath, portStart, portEnd } = getPreferenceValues<{
-    configPath?: string;
-    portStart?: string;
-    portEnd?: string;
-  }>();
+  const { configPath, portStart, portEnd } = getPreferenceValues<Preferences>();
   useEffect(() => {
     if (!recent && !bindingId) return;
     let active = true;

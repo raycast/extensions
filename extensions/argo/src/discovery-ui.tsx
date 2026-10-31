@@ -85,7 +85,7 @@ export function DiscoverBridges({ onConnected }: { onConnected: () => void }) {
     [error, setError] = useState<string>();
   const [attempt, setAttempt] = useState(0);
   const { push, pop } = useNavigation();
-  const prefs = getPreferenceValues<{ portStart?: string; portEnd?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   useEffect(() => {
     const controller = new AbortController();
     setBusy(true);

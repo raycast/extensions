@@ -5,7 +5,13 @@ import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import test from "node:test";
 import { clientCodeIdentity, discoverBridge, discoverBridges, pairDiscoveredBridge, portRange } from "./discovery.js";
-import { connectionIdentity, loadConnection, saveProfile, type SettingsStorage } from "./connections.js";
+import {
+  activateProfile,
+  connectionIdentity,
+  loadConnection,
+  saveProfile,
+  type SettingsStorage,
+} from "./connections.js";
 import { serverSetupPrompt } from "./server-prompt.js";
 
 test("discovery is bounded, signature verified, credential-free and pairs only a code-pinned identity", async () => {
@@ -102,9 +108,14 @@ test("discovery is bounded, signature verified, credential-free and pairs only a
     broken = true;
     await assert.rejects(loadConnection(storage, undefined, profile.id, [address.port]));
     assert.equal(authCalls, 1, "wrong signature never receives stored token");
+    broken = false;
+    const staleUrl = "http://127.0.0.1:1";
+    data.set("bridge-connections-v1", JSON.stringify([{ ...profile, url: staleUrl }]));
+    await activateProfile(storage, profile.id, undefined, [address.port]);
+    assert.equal(data.get("active-bridge-v1"), profile.id, "activation uses the configured non-default port range");
     assert.equal(clientCodeIdentity(code), bridgeId);
     assert.throws(() => clientCodeIdentity("ARGO-" + "a".repeat(32)));
-    assert.match(serverSetupPrompt, /github.com\/MatrixA\/argo\/blob\/[a-f0-9]{40}\/docs\/server-setup.md/);
+    assert.match(serverSetupPrompt, /github.com\/MatrixA\/argo\/blob\/v0\.1\.4\/docs\/server-setup.md/);
     assert.match(serverSetupPrompt, /may not be installed/);
   } finally {
     server.closeAllConnections();

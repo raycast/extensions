@@ -139,10 +139,15 @@ export async function saveProfile(storage: SettingsStorage, input: Omit<BridgePr
   connectionChanged();
   return profile;
 }
-export async function activateProfile(storage: SettingsStorage, id: string, preferencePath?: string) {
+export async function activateProfile(
+  storage: SettingsStorage,
+  id: string,
+  preferencePath?: string,
+  ports = portRange(),
+) {
   const entry = (await profiles(storage)).find((item) => item.id === id);
   if (id !== "default" && !entry) throw new Error("This connection was removed. Refresh before selecting it.");
-  const { config } = await loadConnection(storage, preferencePath, id);
+  const { config } = await loadConnection(storage, preferencePath, id, ports);
   const hub = new Hub(config);
   try {
     await hub.sessions();

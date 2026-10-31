@@ -1,5 +1,6 @@
 import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { randomUUID } from "node:crypto";
 import type { Session, Snapshot } from "./protocol.js";
 import { Hub, HubError } from "./core.js";
 import type { Connection } from "./core.js";
@@ -29,11 +30,7 @@ export function useHub(bindingId?: string, selectedProfileId?: string, expectedC
   const hub = useRef<Hub | undefined>(undefined);
   const refreshRef = useRef<() => Promise<void>>(async () => undefined);
   const [attempt, setAttempt] = useState(0);
-  const { configPath, portStart, portEnd } = getPreferenceValues<{
-    configPath?: string;
-    portStart?: string;
-    portEnd?: string;
-  }>();
+  const { configPath, portStart, portEnd } = getPreferenceValues<Preferences>();
 
   const reconnect = useCallback(() => {
     stop.current();
@@ -201,11 +198,7 @@ export function useBridges() {
     stop.current();
     setAttempt((value) => value + 1);
   }, []);
-  const { configPath, portStart, portEnd } = getPreferenceValues<{
-    configPath?: string;
-    portStart?: string;
-    portEnd?: string;
-  }>();
+  const { configPath, portStart, portEnd } = getPreferenceValues<Preferences>();
   useEffect(() => onConnectionChange(reconnect), [reconnect]);
   useEffect(() => {
     const controller = new AbortController();
@@ -323,24 +316,45 @@ export function useDraft(bindingId: string, identity?: string) {
   const [ready, setReady] = useState(false);
   const writes = useRef<Promise<unknown>>(Promise.resolve());
   const current = useRef("");
+  const pending = useRef<{ id: string; text: string; generation: string } | undefined>(undefined);
   useEffect(() => {
     let active = true;
     setReady(false);
     setText("");
     current.current = "";
+    pending.current = undefined;
     if (!identity) return;
-    void LocalStorage.getItem<string>(draftKey(bindingId, identity))
-      .then((value) => {
+    const key = draftKey(bindingId, identity);
+    void Promise.all([LocalStorage.getItem<string>(key), LocalStorage.getItem<string>(`${key}:pending`)])
+      .then(([value, raw]) => {
+        const saved = raw === undefined ? undefined : JSON.parse(raw);
+        if (
+          raw !== undefined &&
+          (!saved ||
+            typeof saved !== "object" ||
+            Array.isArray(saved) ||
+            typeof saved.id !== "string" ||
+            !/^[\w:.-]{1,200}$/.test(saved.id) ||
+            typeof saved.generation !== "string" ||
+            !/^[\w:.-]{1,200}$/.test(saved.generation) ||
+            typeof saved.text !== "string" ||
+            !saved.text.trim() ||
+            saved.text.length > 100_000)
+        )
+          throw new Error("Invalid pending message");
         if (active) {
-          current.current = value || "";
+          pending.current = saved;
+          current.current = value ?? saved?.text ?? "";
           setText(current.current);
           setReady(true);
         }
       })
       .catch(() => {
         if (active) {
-          setReady(true);
-          void showToast({ style: Toast.Style.Failure, title: "Could not restore the local draft" });
+          void showToast({
+            style: Toast.Style.Failure,
+            title: "Could not restore the local draft and pending message",
+          });
         }
       });
     return () => {
@@ -359,8 +373,44 @@ export function useDraft(bindingId: string, identity?: string) {
       )
       .catch(() => showToast({ style: Toast.Style.Failure, title: "Could not save the local draft" }));
   };
-  const clearIf = (sent: string) => {
-    if (current.current === sent) change("");
+  const prepare = async (value: string, generation: string) => {
+    if (!identity || !ready) throw new Error("Wait for your local draft to restore before sending.");
+    if (pending.current && pending.current.text !== value)
+      throw new Error(
+        "The previous message's delivery is unknown. Retry its original text before sending a different message.",
+      );
+    if (pending.current && pending.current.generation !== generation)
+      throw new Error(
+        "The Agent session changed while message delivery was unknown. Check the original Agent before retrying.",
+      );
+    const attempt = pending.current ?? { id: randomUUID(), text: value, generation };
+    await writes.current;
+    // Save before network I/O, so closing Raycast cannot turn an ambiguous retry into a new execution.
+    await LocalStorage.setItem(`${draftKey(bindingId, identity)}:pending`, JSON.stringify(attempt));
+    pending.current = attempt;
+    return attempt;
   };
-  return { text, change, clearIf, ready };
+  const clearIf = async (sent: string) => {
+    if (!identity) return;
+    const key = draftKey(bindingId, identity);
+    const clearText = current.current === sent;
+    if (clearText) {
+      current.current = "";
+      setText("");
+    }
+    writes.current = writes.current
+      .then(async () => {
+        // Clear the text first: a crash must never leave an old draft without its retry ID.
+        if (clearText) await LocalStorage.removeItem(key);
+        if (pending.current?.text === sent) {
+          await LocalStorage.removeItem(`${key}:pending`);
+          pending.current = undefined;
+        }
+      })
+      .catch(() =>
+        showToast({ style: Toast.Style.Failure, title: "Could not clear the sent draft; its retry ID is kept" }),
+      );
+    await writes.current;
+  };
+  return { text, change, clearIf, prepare, ready };
 }

@@ -1,4 +1,5 @@
 import { DiscoverBridges } from "./discovery-ui.js";
+import { portRange } from "./discovery.js";
 export { DiscoverBridges } from "./discovery-ui.js";
 import {
   Action,
@@ -44,11 +45,11 @@ function ConnectionGuide() {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Public Installation Instructions"
-            url="https://github.com/MatrixA/argo/blob/v0.1.3/docs/connect.md"
+            url="https://github.com/MatrixA/argo/blob/v0.1.4/docs/connect.md"
           />
           <Action.OpenInBrowser
             title="Codex Connection Instructions"
-            url="https://github.com/MatrixA/argo/blob/v0.1.3/docs/connect-codex.md"
+            url="https://github.com/MatrixA/argo/blob/v0.1.4/docs/connect-codex.md"
           />
         </ActionPanel>
       }
@@ -355,9 +356,7 @@ export function Setup({ onConnected }: Props) {
   const { push, pop } = useNavigation();
   const [entries, setEntries] = useState<BridgeProfile[]>([]);
   const [settingsError, setSettingsError] = useState(false);
-  const preference = getPreferenceValues<{
-    configPath?: string;
-  }>().configPath;
+  const preferences = getPreferenceValues<Preferences>();
   useEffect(() => {
     void profiles(LocalStorage)
       .then(setEntries)
@@ -365,7 +364,12 @@ export function Setup({ onConnected }: Props) {
   }, []);
   async function select(id: string) {
     try {
-      await activateProfile(LocalStorage, id, preference);
+      await activateProfile(
+        LocalStorage,
+        id,
+        preferences.configPath,
+        portRange(preferences.portStart || 49120, preferences.portEnd || 49139),
+      );
       onConnected();
       pop();
     } catch (cause) {
@@ -457,7 +461,7 @@ export function Setup({ onConnected }: Props) {
       <List.Section title="Switch Bridge" subtitle="Config references only · Credentials stay in private files">
         <List.Item
           title="Default bridge"
-          subtitle={preference || "~/.argo/client.json"}
+          subtitle={preferences.configPath || "~/.argo/client.json"}
           accessories={feed.profileId === "default" ? [{ tag: "Active" }] : []}
           actions={
             <ActionPanel>

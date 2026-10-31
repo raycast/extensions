@@ -120,7 +120,7 @@ Raycast needs that same bridge's admin credential. Do not create an unrelated Ma
 node bin/argo.mjs export-client --out /NEW/private/mac-client.json --url http://127.0.0.1:49124
 \`\`\`
 
-The output file grants access to all bindings. Transfer it privately using SCP to a new private directory on this Mac, preserve mode 600, and select its file path in Use an Existing Bridge. Never read or paste its contents into chat. The source config is unchanged. This command is included in the pinned v0.1.3 runtime.
+The output file grants access to all bindings. Transfer it privately using SCP to a new private directory on this Mac, preserve mode 600, and select its file path in Use an Existing Bridge. Never read or paste its contents into chat. The source config is unchanged. This command is included in the pinned v0.1.4 runtime.
 
 ## Diagnose without exposing credentials
 

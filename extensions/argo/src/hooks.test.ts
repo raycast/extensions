@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { Hub } from "./core.js";
 
 test("drafts remain isolated across bridge identities and never write before configuration loads", async () => {
   const source = ts.createSourceFile(
@@ -101,7 +103,7 @@ test("drafts remain isolated across bridge identities and never write before con
   assert.equal(data.has("draft:bridge-b:binding"), false);
 });
 
-function hookHarness(name: "useHub" | "useBridges", globals: Record<string, unknown>) {
+function hookHarness(name: "useHub" | "useBridges" | "useDraft", globals: Record<string, unknown>) {
   const source = ts.createSourceFile(
     "hooks.ts",
     readFileSync(new URL("./hooks.ts", import.meta.url), "utf8"),
@@ -155,6 +157,10 @@ function hookHarness(name: "useHub" | "useBridges", globals: Record<string, unkn
       getPreferenceValues: () => ({ configPath: "/private/config.json", portStart: "49120", portEnd: "49121" }),
       portRange: () => [49120, 49121],
       LocalStorage: {},
+      draftKey: (id: string, identity: string) => `draft:${identity}:${id}`,
+      randomUUID,
+      showToast() {},
+      Toast: { Style: {} },
       errorText: () => "Bridge unavailable",
       ...globals,
     },
@@ -423,5 +429,200 @@ test("reconnect aborts a pending pinned load immediately, before the next effect
   assert.equal(client.closed, true);
   assert.equal(feed.snapshot, undefined);
   assert.equal(feed.hub.current, undefined);
+  h.cleanup();
+});
+
+test("reconnect refreshes a missed terminal reply before marking the conversation live", async () => {
+  let reads = 0,
+    subscriptions = 0;
+  const refreshed = deferred<any>();
+  const controller = new AbortController();
+  const h = hookHarness("useHub", {
+    onConnectionChange: () => () => {},
+    loadConnection: async () => ({
+      profile: { id: "server", name: "Server" },
+      config: {},
+      connectionKey: "server-key",
+    }),
+    Hub: class extends Hub {
+      constructor() {
+        super({ url: "http://127.0.0.1:1", token: "a".repeat(64) });
+        (this as any).fetch = async (_path: string, _options: any, consume: (response: Response) => Promise<void>) => {
+          subscriptions++;
+          const first = subscriptions === 1;
+          await consume(
+            new Response(
+              new ReadableStream({
+                start(stream) {
+                  if (first) {
+                    stream.enqueue(
+                      new TextEncoder().encode(
+                        'id: 2\ndata: {"cursor":2,"bindingId":"binding","type":"message","createdAt":2}\n\n',
+                      ),
+                    );
+                    setTimeout(() => stream.close(), 250);
+                  } else controller.signal.addEventListener("abort", () => stream.close(), { once: true });
+                },
+              }),
+              { headers: { "Content-Type": "text/event-stream" } },
+            ),
+          );
+        };
+      }
+      async snapshot(): Promise<any> {
+        reads++;
+        if (reads === 2) throw new Error("terminal event refresh failed");
+        if (reads >= 3) return refreshed.promise;
+        return { session: { id: "binding" }, messages: [{ text: "unfinished" }], cursor: 1 };
+      }
+    },
+  });
+  try {
+    h.render("binding", "server", "server-key");
+    h.flush();
+    await new Promise((resolve) => setTimeout(resolve, 2350));
+    let feed = h.render("binding", "server", "server-key");
+    assert.equal(reads, 3, "reconnect must fetch the missed reply even though its event cursor already advanced");
+    assert.notEqual(feed.connection, "live", "a reconnect cannot call a stale snapshot live");
+    refreshed.resolve({ session: { id: "binding" }, messages: [{ text: "final reply" }], cursor: 2 });
+    await settle();
+    feed = h.render("binding", "server", "server-key");
+    assert.equal(feed.snapshot.messages[0].text, "final reply");
+    assert.equal(feed.error, undefined);
+    assert.equal(feed.connection, "live");
+  } finally {
+    h.cleanup();
+    controller.abort();
+  }
+});
+
+test("a lost send response retains its durable ID with the draft across closing and reopening", async () => {
+  const data = new Map<string, string>([["draft:bridge-a:binding", "run once"]]);
+  const globals = {
+    LocalStorage: {
+      async getItem(key: string) {
+        return data.get(key);
+      },
+      async setItem(key: string, value: string) {
+        data.set(key, value);
+      },
+      async removeItem(key: string) {
+        data.delete(key);
+      },
+    },
+  };
+  const open = async () => {
+    const h = hookHarness("useDraft", globals);
+    h.render("binding", "bridge-a");
+    h.flush();
+    await settle();
+    return h;
+  };
+  let h = await open();
+  const first = await h.render("binding", "bridge-a").prepare("run once", "generation");
+  assert.ok(
+    [...data.values()].some((value) => value.includes(first.id)),
+    "ID must be saved before the POST can execute",
+  );
+  h.cleanup(); // Server accepted, but the POST response was lost and Raycast closed.
+  h = await open();
+  let draft = h.render("binding", "bridge-a");
+  assert.equal(draft.text, "run once");
+  const retry = await draft.prepare(draft.text, "generation");
+  assert.equal(retry.id, first.id, "retrying after reopen must not enqueue another execution");
+  await assert.rejects(draft.prepare(draft.text, "replacement-generation"), /session changed/i);
+  await assert.rejects(draft.prepare("different operation", "generation"), /delivery is unknown/);
+  await draft.clearIf(draft.text); // A confirmed response makes a later identical message a new operation.
+  await settle();
+  h.cleanup();
+  h = await open();
+  draft = h.render("binding", "bridge-a");
+  assert.equal(draft.text, "");
+  const later = await draft.prepare("run once", "generation");
+  assert.notEqual(later.id, first.id, "a confirmed send must not suppress an intentional later message");
+  h.cleanup();
+});
+
+test("pending-ID storage failures never permit a new send or erase the draft", async () => {
+  for (const fail of ["read", "write"]) {
+    const h = hookHarness("useDraft", {
+      LocalStorage: {
+        async getItem(key: string) {
+          if (fail === "read" && key.endsWith(":pending")) throw new Error("disk unavailable");
+          return key.endsWith(":pending") ? undefined : "kept";
+        },
+        async setItem() {
+          throw new Error("disk full");
+        },
+      },
+    });
+    h.render("binding", "bridge-a");
+    h.flush();
+    await settle();
+    const draft = h.render("binding", "bridge-a");
+    if (fail === "read") assert.equal(draft.ready, false, "unread pending IDs cannot be replaced safely");
+    else await assert.rejects(draft.prepare("kept", "generation"), /disk full/);
+    h.cleanup();
+  }
+});
+
+test("malformed durable pending records fail closed instead of generating replacement IDs", async () => {
+  for (const raw of [
+    "",
+    "null",
+    "0",
+    "false",
+    JSON.stringify("foo"),
+    "[]",
+    "{}",
+    JSON.stringify({ id: "bad id", text: "kept", generation: "g" }),
+    JSON.stringify({ id: "m", text: " ", generation: "g" }),
+    JSON.stringify({ id: "m", text: "kept", generation: "g".repeat(201) }),
+  ]) {
+    const h = hookHarness("useDraft", {
+      LocalStorage: {
+        async getItem(key: string) {
+          return key.endsWith(":pending") ? raw : "kept";
+        },
+      },
+    });
+    h.render("binding", "bridge-a");
+    h.flush();
+    await settle();
+    assert.equal(h.render("binding", "bridge-a").ready, false, `must reject pending record: ${raw}`);
+    h.cleanup();
+  }
+});
+
+test("failed sent-draft cleanup retains the durable retry ID across reopening", async () => {
+  const data = new Map<string, string>([["draft:bridge-a:binding", "kept"]]);
+  const globals = {
+    LocalStorage: {
+      async getItem(key: string) {
+        return data.get(key);
+      },
+      async setItem(key: string, value: string) {
+        data.set(key, value);
+      },
+      async removeItem() {
+        throw new Error("cannot clear draft");
+      },
+    },
+  };
+  let h = hookHarness("useDraft", globals);
+  h.render("binding", "bridge-a");
+  h.flush();
+  await settle();
+  const draft = h.render("binding", "bridge-a");
+  const first = await draft.prepare("kept", "generation");
+  await draft.clearIf("kept");
+  assert.equal(data.get("draft:bridge-a:binding"), "kept");
+  assert.equal(JSON.parse(data.get("draft:bridge-a:binding:pending")!).id, first.id);
+  h.cleanup();
+  h = hookHarness("useDraft", globals);
+  h.render("binding", "bridge-a");
+  h.flush();
+  await settle();
+  assert.equal((await h.render("binding", "bridge-a").prepare("kept", "generation")).id, first.id);
   h.cleanup();
 });

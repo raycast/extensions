@@ -319,7 +319,7 @@ test("conversation initializes empty and user-only snapshots once without steali
 test("remote setup prompt keeps names as data and clearly discloses pull handoff", () => {
   const code = "ARGO-" + "a".repeat(32);
   const prompt = remotePrompt("backend\nnot a shell command", "http://127.0.0.1:49123", code);
-  assert.ok(prompt.includes("https://github.com/MatrixA/argo/blob/v0.1.3/docs/connect.md"));
+  assert.ok(prompt.includes("https://github.com/MatrixA/argo/blob/v0.1.4/docs/connect.md"));
   assert.ok(prompt.includes(JSON.stringify("backend\nnot a shell command")));
   assert.ok(prompt.includes(code));
   assert.match(prompt, /waiting occupies this session/);
@@ -788,7 +788,7 @@ test("opening a valid conversation persists only its bridge, binding and nonsecr
 test("Codex pairing prompt targets its exact existing shared runtime without Claude pull", () => {
   const code = "ARGO-" + "c".repeat(32);
   const prompt = remotePrompt("server-codex", "http://127.0.0.1:49123", code, "codex");
-  assert.match(prompt, /v0\.1\.3\/docs\/connect-codex\.md/);
+  assert.match(prompt, /v0\.1\.4\/docs\/connect-codex\.md/);
   assert.match(prompt, /CODEX_THREAD_ID/);
   assert.match(prompt, /--agent codex/);
   assert.match(prompt, /Do not guess from history/);
