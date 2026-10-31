@@ -214,26 +214,27 @@ test("status changes only update row text and actions, never the set of rows", a
       "External caffeination",
       "External caffeination",
       "External caffeination",
-      "Stop Previous Coffee Session",
+      "Stop Likely Coffee Session…",
     ],
   );
 });
 
-test("a pre-update Coffee session gets its own stop item and is not counted as external", async () => {
+test("a likely pre-update Coffee session gets its own confirmed stop item and is not counted as external", async () => {
   const h = await menu({ legacy: true, external: true });
   const items = h.items(h.render());
   assert.equal(
     items.some(({ title }) => title === "External caffeination"),
     false,
   );
-  const legacy = items.find(({ title }) => title === "Stop Previous Coffee Session");
+  const legacy = items.find(({ title }) => title === "Stop Likely Coffee Session…");
   assert.equal(legacy.subtitle, "Started before update · 1 external");
   assert.equal(items.find(({ title }) => title === "Stop Coffee Caffeination").onAction, undefined);
   await legacy.onAction();
+  assert.match(h.api.confirmAlert.mock.calls[0].arguments[0].message, /cannot confirm it started this process/);
   assert.equal(h.table.has(901), false);
   assert.ok(h.table.has(900));
   const after = h.items(h.render()).map(({ title }) => title);
-  assert.equal(after.includes("Stop Previous Coffee Session"), false);
+  assert.equal(after.includes("Stop Likely Coffee Session…"), false);
   assert.equal(after[0], "External caffeination");
 });
 
@@ -246,4 +247,60 @@ test("a cached snapshot never drives the icon or keeps Raycast from waiting for 
   const fresh = h.render();
   assert.equal(fresh.props.isLoading, false);
   assert.equal(fresh.props.icon.source, "pot-filled.svg");
+});
+
+async function legacyStop(options) {
+  const h = await menu({ legacy: true, ...options });
+  if (options.schedule) {
+    const day = h.load("utils.ts").numberToDayString(new Date().getDay()).toLowerCase();
+    h.storage.set(day, JSON.stringify({ day, from: "00:00", to: "23:59", IsManuallyDecafed: false, IsRunning: true }));
+    h.day = day;
+  }
+  if (options.declined) h.api.confirmAlert.mock.mockImplementation(async () => false);
+  if (options.killFails)
+    h.fakeProcess.kill.mock.mockImplementation(() => {
+      throw new Error("Cannot stop");
+    });
+  await h
+    .items(h.render())
+    .find(({ title }) => title === "Stop Likely Coffee Session…")
+    .onAction();
+  return h;
+}
+
+test("declining the confirmation leaves the possibly unrelated process running", async () => {
+  const h = await legacyStop({ declined: true });
+  assert.equal(h.fakeProcess.kill.mock.callCount(), 0);
+  assert.ok(h.table.has(901));
+});
+
+test("with no managed session, a running schedule blocks the stop unless the preference pauses it", async () => {
+  const blocked = await legacyStop({ schedule: true });
+  assert.equal(blocked.api.confirmAlert.mock.callCount(), 0);
+  assert.equal(blocked.fakeProcess.kill.mock.callCount(), 0);
+  assert.equal(blocked.api.showToast.mock.calls[0].arguments[0].title, "Caffeination schedule running");
+
+  const paused = await legacyStop({ schedule: true, preferences: { decaffeinatePausesSchedules: true } });
+  assert.equal(paused.table.has(901), false);
+  const schedule = JSON.parse(paused.storage.get(paused.day));
+  assert.equal(schedule.IsManuallyDecafed, true);
+  assert.equal(schedule.IsRunning, false);
+});
+
+test("a failed stop restores the schedule it paused", async () => {
+  const h = await legacyStop({ schedule: true, killFails: true, preferences: { decaffeinatePausesSchedules: true } });
+  assert.ok(h.table.has(901));
+  const schedule = JSON.parse(h.storage.get(h.day));
+  assert.equal(schedule.IsManuallyDecafed, false);
+  assert.equal(schedule.IsRunning, true);
+  assert.equal(h.api.showToast.mock.calls[0].arguments[0].title, "Failed to stop caffeinate process");
+});
+
+test("with a managed session running, stopping the leftover never blocks or pauses the schedule", async () => {
+  const h = await legacyStop({ schedule: true, coffee: true });
+  assert.equal(h.table.has(901), false);
+  assert.ok(h.table.has(200));
+  const schedule = JSON.parse(h.storage.get(h.day));
+  assert.equal(schedule.IsManuallyDecafed, false);
+  assert.equal(schedule.IsRunning, true);
 });

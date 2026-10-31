@@ -98,6 +98,8 @@ function createHarness(options = {}) {
     PopToRootType: { Immediate: "immediate" },
     updateCommandMetadata: mock.fn(async () => {}),
     Toast: { Style: { Failure: "failure", Animated: "animated" } },
+    Alert: { ActionStyle: { Destructive: "destructive" } },
+    confirmAlert: mock.fn(async () => true),
     getPreferenceValues: () => preferences,
     launchCommand: mock.fn(async () => {}),
     LaunchType: { Background: "background", UserInitiated: "user" },

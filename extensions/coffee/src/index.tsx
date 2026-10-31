@@ -1,5 +1,7 @@
 import {
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   LaunchProps,
   LaunchType,
@@ -148,9 +150,26 @@ export default function Command(props: LaunchProps) {
   };
 
   const handleStopLegacy = async () => {
-    if (!data.legacySession) return;
+    const legacy = data.legacySession;
+    if (!legacy) return;
     try {
-      const operation = stopLegacyCaffeinate({ menubar: true, status: true }, data.legacySession);
+      // With no Coffee-managed session, this process may be what keeps a running
+      // schedule satisfied; stopping it is then a decaffeination like any other.
+      // With a managed session running, it is only a leftover and the schedule is untouched.
+      const decision = data.isManaged ? { allowed: true, pauseRunningSchedule: false } : await prepareUserStop();
+      if (!decision.allowed) return;
+      const confirmed = await confirmAlert({
+        title: "Stop this caffeinate process?",
+        message:
+          `Process ${legacy.pid} was already running when this version of Coffee first started, and it was ` +
+          "launched the way earlier versions of Coffee launched caffeinate. Coffee cannot confirm it started " +
+          "this process: a terminal or another app could have launched it the same way.",
+        primaryAction: { title: "Stop Process", style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) return;
+      const operation = stopLegacyCaffeinate({ menubar: true, status: true }, legacy, {
+        pauseRunningSchedule: decision.pauseRunningSchedule,
+      });
       await mutate(operation);
       const stopped = await operation;
       setCachedCaffeinated(stopped.isRunning);
@@ -158,7 +177,7 @@ export default function Command(props: LaunchProps) {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to stop previous Coffee session",
+        title: "Failed to stop caffeinate process",
         message: error instanceof Error ? error.message : String(error),
       });
     }
@@ -229,7 +248,7 @@ export default function Command(props: LaunchProps) {
           {data.externalCount !== null &&
             (data.legacySession ? (
               <MenuBarExtra.Item
-                title="Stop Previous Coffee Session"
+                title="Stop Likely Coffee Session…"
                 subtitle={externalCount > 0 ? `${legacySubtitle} · ${externalCount} external` : legacySubtitle}
                 onAction={handleStopLegacy}
               />

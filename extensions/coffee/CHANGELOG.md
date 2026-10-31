@@ -5,7 +5,7 @@
 - Reject invalid durations before replacing an active Coffee session, including requests from AI tools.
 - Stop the observed scheduled session without affecting a newer manual session on macOS or Windows.
 - Reduce blocking process inspection and consolidate menu visibility and schedule-stop handling.
-- Offer a "Stop Previous Coffee Session" menu item for a session started before updating, without adopting terminal `caffeinate` processes.
+- Offer a confirmed "Stop Likely Coffee Session…" menu item for a session that appears to predate the update, without adopting terminal `caffeinate` processes; it follows the Decaffeinate schedule rules when no Coffee session is running.
 - Keep the menu bar populated while it refreshes instead of briefly showing an empty menu.
 
 ## [Fix] Avoid blank window in Caffeinate For - {PR_MERGE_DATE}

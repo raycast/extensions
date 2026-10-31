@@ -108,14 +108,7 @@ export async function stopCaffeinate(
   showFeedback = false,
   options?: { pauseRunningSchedule?: boolean },
 ) {
-  let pausedSchedule: Schedule | undefined;
-  if (options?.pauseRunningSchedule) {
-    const schedule = await getSchedule();
-    if (schedule && isTodaysSchedule(schedule) && schedule.IsRunning) {
-      pausedSchedule = schedule;
-      await changeScheduleState("decaffeinate", schedule);
-    }
-  }
+  const pausedSchedule = options?.pauseRunningSchedule ? await pauseRunningSchedule() : undefined;
   let state: CaffeinationState;
   try {
     if (process.platform === "win32") {
@@ -125,11 +118,7 @@ export async function stopCaffeinate(
       state = await stopMacCaffeinate();
     }
   } catch (e) {
-    if (pausedSchedule) {
-      pausedSchedule.IsManuallyDecafed = false;
-      pausedSchedule.IsRunning = true;
-      await LocalStorage.setItem(pausedSchedule.day, JSON.stringify(pausedSchedule));
-    }
+    if (pausedSchedule) await restorePausedSchedule(pausedSchedule);
     throw e;
   }
   // Windows reasons are tied to worker identity. Leave them in place so a
@@ -144,9 +133,33 @@ export async function stopCaffeinate(
   return state;
 }
 
+async function pauseRunningSchedule(): Promise<Schedule | undefined> {
+  const schedule = await getSchedule();
+  if (!schedule || !isTodaysSchedule(schedule) || !schedule.IsRunning) return undefined;
+  await changeScheduleState("decaffeinate", schedule);
+  return schedule;
+}
+
+async function restorePausedSchedule(schedule: Schedule) {
+  schedule.IsManuallyDecafed = false;
+  schedule.IsRunning = true;
+  await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
+}
+
 /** Stop a session started by Coffee before this version tracked ownership (macOS only). */
-export async function stopLegacyCaffeinate(updates: Updates, legacy: LegacySession) {
-  const state = await stopMacLegacyCaffeinate(legacy);
+export async function stopLegacyCaffeinate(
+  updates: Updates,
+  legacy: LegacySession,
+  options?: { pauseRunningSchedule?: boolean },
+) {
+  const pausedSchedule = options?.pauseRunningSchedule ? await pauseRunningSchedule() : undefined;
+  let state: CaffeinationState;
+  try {
+    state = await stopMacLegacyCaffeinate(legacy);
+  } catch (e) {
+    if (pausedSchedule) await restorePausedSchedule(pausedSchedule);
+    throw e;
+  }
   await update(updates);
   return state;
 }
