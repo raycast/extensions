@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add LAYIQ Jobs MCP Server] - {PR_MERGE_DATE}
+
+- Add LAYIQ Jobs to the official registry: find public job listings and explore roles from LAYIQ, a candidate-first job search workspace. 2 read-only tools. Hosted Streamable HTTP server at https://www.layiq.co/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add ConnectMachine MCP Server] - 2026-10-30
 
 - Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
