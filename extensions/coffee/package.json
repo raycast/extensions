@@ -70,7 +70,7 @@
       "preferences": [
         {
           "name": "hidenWhenDecaffeinated",
-          "description": "Hide the icon when decaffeinated",
+          "description": "Hide when no caffeination is detected. On macOS, external caffeinate processes also keep the icon visible",
           "type": "checkbox",
           "required": false,
           "default": false,
@@ -91,7 +91,7 @@
       "title": "Caffeinate for ...",
       "subtitle": "Coffee",
       "description": "Prevent your computer from sleeping for a certain time",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "hours",
@@ -161,7 +161,7 @@
     {
       "name": "decaffeinate",
       "title": "Decaffeinate",
-      "description": "Turn off your computer's sleep prevention"
+      "description": "Stop Coffee-managed sleep prevention; external caffeination remains active"
     },
     {
       "name": "schedule-caffeination",
@@ -279,6 +279,8 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "npm test && tsc --noEmit && eslint src tests",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

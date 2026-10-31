@@ -1,5 +1,24 @@
 # Coffee Changelog
 
+## [Fix] Preserve sessions during validation and schedule expiry - {PR_MERGE_DATE}
+
+- Reject invalid durations before replacing an active Coffee session, including requests from AI tools.
+- Stop the observed scheduled session without affecting a newer manual session on macOS or Windows.
+- Reduce blocking process inspection and consolidate menu visibility and schedule-stop handling.
+- Offer a confirmed "Stop Likely Coffee Session…" menu item for a session that appears to predate the update, without adopting terminal `caffeinate` processes; it follows the Decaffeinate schedule rules when no Coffee session is running.
+- Keep the menu bar populated while it refreshes instead of briefly showing an empty menu.
+
+## [Fix] Avoid blank window in Caffeinate For - {PR_MERGE_DATE}
+
+- Run Caffeinate For without opening a view and close the launcher before process tracking starts.
+- Clear root search for fresh duration arguments on the next run, while preserving startup and background-refresh ordering.
+
+## [Fix] Recognize Coffee-owned caffeination - {PR_MERGE_DATE}
+
+- Track macOS sessions by persisted process ID and creation time, including across Raycast relaunches.
+- Label external caffeination separately and preserve it when starting, replacing, or stopping Coffee.
+- Keep the menu bar icon visible while external caffeination is active and clarify status messages.
+
 ## [Enhancement] - 2026-10-15
 
 - Add "Prevent system sleep on AC power" preference (`caffeinate -s`), which stops the system from sleeping while it runs on AC power ([#31139](https://github.com/raycast/extensions/issues/31139)).
