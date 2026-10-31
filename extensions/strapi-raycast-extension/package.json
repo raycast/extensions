@@ -20,8 +20,8 @@
     },
     {
       "name": "apiKey",
-      "title": "Strapi API Key",
-      "description": "The API key of your Strapi instance.",
+      "title": "Strapi API Token",
+      "description": "An API token of your Strapi instance (Settings → API Tokens).",
       "type": "password",
       "required": true
     }
@@ -43,17 +43,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
