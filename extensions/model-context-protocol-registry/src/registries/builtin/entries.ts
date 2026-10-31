@@ -2220,6 +2220,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://api.webly.ai/v1/mcp",
   },
   {
+    name: "wolfsms",
+    title: "WolfSMS",
+    description: "WolfSMS lets you access SMS from your own phone. Pair using the WolfSMS Android app.",
+    icon: "https://usewolfsms.com/logo.svg",
+    homepage: "https://usewolfsms.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://usewolfsms.com/mcp"],
+    },
+    remoteUrl: "https://usewolfsms.com/mcp",
+  },
+  {
     name: "worthbase",
     title: "Worthbase",
     description:
