@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Channel Mentions in AI Chat] - {PR_MERGE_DATE}
+## [Channel Mentions in AI Chat] - 2026-10-31
 
 - Add a **Channels** mention search to find public and private channels by name. Without a query it lists the channels you're a member of, and search results rank your own channels first.
 - Read the selected channel's current topic, purpose, member count, and Slack channel ID when sending a mention, so AI can read its history or search it without guessing the channel.
