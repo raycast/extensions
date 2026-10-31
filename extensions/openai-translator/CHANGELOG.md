@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Fix Reasoning Models] - {PR_MERGE_DATE}
+
+- Fix translation failing with reasoning models such as `gpt-5.6-luna`. When the API rejects a request parameter, the request is retried without it, and the result is remembered per model
+
 ## [Fix Extension Crash and Language Detection] - 2026-10-13
 
 - Upgrade `@anthropic-ai/sdk` to fix the `Package subpath './_shims/auto/runtime' is not defined by "exports"` crash on launch
