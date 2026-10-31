@@ -1,0 +1,210 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "ableton-project-manager",
+	"title": "Ableton Project Manager",
+	"description": "Browse, organize, and listen to your Ableton Live projects",
+	"icon": "icon.png",
+	"author": "iyek",
+	"platforms": [
+		"macOS"
+	],
+	"categories": [
+		"Productivity",
+		"Media"
+	],
+	"license": "MIT",
+	"preferences": [
+		{
+			"name": "projectsFolder",
+			"title": "Projects Folder",
+			"description": "The folder containing your Ableton Live projects.",
+			"type": "directory",
+			"required": true
+		},
+		{
+			"name": "bouncesFolderName",
+			"title": "Bounces Subfolder",
+			"description": "The subfolder inside each project where bounces are saved (e.g. Bounces). Leave empty to look directly in each project folder.",
+			"type": "textfield",
+			"required": false,
+			"placeholder": "e.g. Bounces"
+		},
+		{
+			"name": "notesFolder",
+			"title": "Notes Folder",
+			"description": "The folder where notes are saved as .md files (e.g. an Obsidian vault). Leave empty to save Notes.md in each project folder.",
+			"type": "directory",
+			"required": false
+		},
+		{
+			"name": "lyricsFolder",
+			"title": "Lyrics Folder",
+			"description": "The folder where lyrics are saved as .md files. Leave empty to save Lyrics.md in each project folder.",
+			"type": "directory",
+			"required": false
+		},
+		{
+			"name": "notesTemplateFile",
+			"title": "Notes Template",
+			"description": "Optional .md file used as the starting point for new notes. Supports {{title}}, {{date}}, and {{time}}.",
+			"type": "file",
+			"required": false
+		},
+		{
+			"name": "lyricsTemplateFile",
+			"title": "Lyrics Template",
+			"description": "Optional .md file used as the starting point for new lyrics. Supports {{title}}, {{date}}, and {{time}}.",
+			"type": "file",
+			"required": false
+		},
+		{
+			"name": "strictLineBreaks",
+			"title": "Strict Line Breaks",
+			"label": "Strict line breaks",
+			"description": "Off: preserve single line breaks. On: follow standard Markdown line breaks (two trailing spaces or a blank line). Affects the preview only; your files aren’t changed.",
+			"type": "checkbox",
+			"required": false,
+			"default": false
+		},
+		{
+			"name": "weightCrest",
+			"title": "Energy: Density",
+			"description": "How much density (crest factor) affects the energy score. Only the ratio between the three weights matters.",
+			"type": "dropdown",
+			"required": false,
+			"default": "1",
+			"data": [
+				{
+					"title": "Off",
+					"value": "0"
+				},
+				{
+					"title": "Low",
+					"value": "0.5"
+				},
+				{
+					"title": "Normal",
+					"value": "1"
+				},
+				{
+					"title": "High",
+					"value": "2"
+				}
+			]
+		},
+		{
+			"name": "weightBrightness",
+			"title": "Energy: Brightness",
+			"description": "How much brightness (spectral centroid) affects the energy score.",
+			"type": "dropdown",
+			"required": false,
+			"default": "1",
+			"data": [
+				{
+					"title": "Off",
+					"value": "0"
+				},
+				{
+					"title": "Low",
+					"value": "0.5"
+				},
+				{
+					"title": "Normal",
+					"value": "1"
+				},
+				{
+					"title": "High",
+					"value": "2"
+				}
+			]
+		},
+		{
+			"name": "weightActivity",
+			"title": "Energy: Movement",
+			"description": "How much movement (spectral flux) affects the energy score.",
+			"type": "dropdown",
+			"required": false,
+			"default": "1",
+			"data": [
+				{
+					"title": "Off",
+					"value": "0"
+				},
+				{
+					"title": "Low",
+					"value": "0.5"
+				},
+				{
+					"title": "Normal",
+					"value": "1"
+				},
+				{
+					"title": "High",
+					"value": "2"
+				}
+			]
+		}
+	],
+	"commands": [
+		{
+			"name": "search-projects",
+			"title": "Search Projects",
+			"description": "Search, play, and organize your Ableton Live projects and collections",
+			"mode": "view",
+			"subtitle": "Ableton Live",
+			"keywords": [
+				"ableton",
+				"ableton live",
+				"als",
+				"daw",
+				"music",
+				"music production",
+				"producer",
+				"projects",
+				"sets",
+				"bounce"
+			]
+		},
+		{
+			"name": "manage-categories",
+			"title": "Manage Tags",
+			"description": "Create and manage Stages, Genres, and Track Roles",
+			"mode": "view",
+			"subtitle": "Ableton Live",
+			"keywords": [
+				"ableton",
+				"ableton live",
+				"tags",
+				"stages",
+				"genres",
+				"track roles",
+				"music production"
+			]
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^2.8.2",
+		"@raycast/utils": "^2.3.3",
+		"saxes": "^6.0.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.2.0",
+		"@types/node": "22.19.17",
+		"@types/react": "19.0.10",
+		"eslint": "^10.5.0",
+		"prettier": "^3.8.5",
+		"typescript": "^6.0.3",
+		"vitest": "^3.2.4"
+	},
+	"scripts": {
+		"build": "ray build",
+		"build:player": "bash ./scripts/build-audio-player.sh",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	}
+}
