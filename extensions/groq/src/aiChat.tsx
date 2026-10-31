@@ -15,9 +15,8 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Chats } from "./hook/AIChat.types";
-import { currentDate } from "./hook/utils";
+import { currentDate, isStream } from "./hook/utils";
 import { ChatCompletionMessageParam } from "openai/resources";
-import { Stream } from "openai/streaming";
 
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Groq";
@@ -127,7 +126,7 @@ export default function Chat() {
       });
 
       let answer = "";
-      if (response instanceof Stream) {
+      if (isStream(response)) {
         for await (const message of response) {
           answer += message.choices[0].delta.content || "";
           updateChatData((data) => {
@@ -302,7 +301,7 @@ export default function Chat() {
           });
 
           let answer = "";
-          if (response instanceof Stream) {
+          if (isStream(response)) {
             for await (const message of response) {
               answer += message.choices[0].delta.content || "";
               updateChatData((newChatData) => {
