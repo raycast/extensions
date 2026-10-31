@@ -1371,6 +1371,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "pandadoc",
+    title: "PandaDoc",
+    description:
+      "Official PandaDoc MCP server. Create documents from templates, send them for e-signature, and track status, recipients and audit trail; manage templates, contacts, quotes and the product catalog. 44 tools. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration), no API key. EU workspaces use https://mcp.pandadoc.eu/v1/mcp.",
+    icon: "https://raw.githubusercontent.com/PandaDoc/mcp-server-guide/main/assets/pd-logo_400x400.png",
+    homepage: "https://developers.pandadoc.com/docs/getting-started-with-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pandadoc.com/v1/mcp"],
+    },
+    remoteUrl: "https://mcp.pandadoc.com/v1/mcp",
+  },
+  {
     name: "parlor",
     title: "Parlor.sh",
     description:
