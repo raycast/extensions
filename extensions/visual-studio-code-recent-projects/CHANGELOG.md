@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Git error toasts for unavailable projects] - {PR_MERGE_DATE}
+
+- Stop showing a "Git Error" toast when the Git branch of a recent project can't be resolved, e.g. when the folder was deleted, is on an unreachable SSH mount, or is a worktree whose main repository was removed. The branch is now hidden instead.
+
 ## [Fix Open Agents Window on macOS] - 2026-10-15
 
 - Fix `Open Agents Window` failing on macOS with `spawnSync ENOENT` by not quoting the CLI executable path when spawning without a shell. Fixes [#32324](https://github.com/raycast/extensions/issues/32324).
