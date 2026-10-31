@@ -337,6 +337,8 @@ function NativeChat(
     draftRef.current = text;
     if (persistedRef.current)
       persistedRef.current = { ...persistedRef.current, draft: text };
+    else if (!text)
+      void LocalStorage.removeItem(keys.pendingDraft).catch(() => {});
     setDraft(text);
   }
 
@@ -640,10 +642,17 @@ function NativeChat(
         library.sessions.find(
           (session) => session.threadId === library.activeId,
         ) || emptyConversation();
+      const pendingDraft = await LocalStorage.getItem<string>(
+        keys.pendingDraft,
+      );
+      if (disposed) return;
       setConversation(stored);
       // Synchronize the ref before connecting: a fast connection may finish
       // before React renders the restored draft. Keep text typed while loading.
-      if (draftEditRevision.current === 0) setDraftValue(stored.draft || "");
+      // A draft typed before the connection finished has no session yet; it
+      // lives in its own key until this connection decides where it belongs.
+      if (draftEditRevision.current === 0)
+        setDraftValue(stored.draft || pendingDraft || "");
       await client.connect();
       if (disposed) {
         client.close();
@@ -690,6 +699,7 @@ function NativeChat(
       setConversation(resumed);
       setDraftValue(resumed.draft || "");
       save(resumed);
+      void LocalStorage.removeItem(keys.pendingDraft).catch(() => {});
       setBusy(Boolean(client.currentTurnId));
       setCurrentModel(client.currentModelSelection);
       readyRef.current = true;
@@ -714,6 +724,10 @@ function NativeChat(
       mountedRef.current = false;
       readyRef.current = false;
       if (persistedRef.current) save(persistedRef.current);
+      else if (draftRef.current)
+        void LocalStorage.setItem(keys.pendingDraft, draftRef.current).catch(
+          () => {},
+        );
       client.close();
     };
   }, [
@@ -732,7 +746,12 @@ function NativeChat(
   ]);
 
   useEffect(() => {
-    if (!conversation.threadId) return;
+    if (!conversation.threadId) {
+      if (draft)
+        void LocalStorage.setItem(keys.pendingDraft, draft).catch(() => {});
+      return;
+    }
+    void LocalStorage.removeItem(keys.pendingDraft).catch(() => {});
     const snapshot = { ...conversation, draft, updatedAt: Date.now() };
     persistedRef.current = snapshot;
     const timer = setTimeout(() => save(snapshot), 350);
@@ -991,7 +1010,14 @@ function NativeChat(
           t("Service not connected. Please return to chat and reconnect."),
         );
       if (persistedRef.current) save(persistedRef.current);
-      const threadId = await client.resumeThread(session.threadId);
+      let threadId: string;
+      if (session.messages.length) {
+        threadId = await client.resumeThread(session.threadId);
+      } else {
+        // A never-sent conversation has no CLI session mapping yet; reopening
+        // it only needs a fresh thread and the saved draft.
+        threadId = await client.startThread();
+      }
       const existing = libraryRef.current.sessions.find(
         (item) => item.threadId === threadId,
       );
@@ -1007,6 +1033,13 @@ function NativeChat(
           : existing?.messages || session.messages,
         cwd: asString(client.threadSnapshot.cwd),
       };
+      if (threadId !== session.threadId)
+        libraryRef.current = {
+          ...libraryRef.current,
+          sessions: libraryRef.current.sessions.filter(
+            (item) => item.threadId !== session.threadId,
+          ),
+        };
       activeReplyRef.current = null;
       persistedRef.current = next;
       setConversation(next);

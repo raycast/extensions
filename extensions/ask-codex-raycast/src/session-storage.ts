@@ -95,6 +95,7 @@ export function storageKeys(provider: ProviderId) {
       legacy: "ask-codex.current-conversation.v1",
       model: "ask-chatgpt.model-selection.v1",
       modelPolicy: "ai-in-raycast.codex.model-policy.v1",
+      pendingDraft: "ai-in-raycast.codex.pending-draft.v1",
       setup: "codex-in-raycast.setup.v1",
     };
   const prefix = `ai-in-raycast.${provider}`;
@@ -103,6 +104,7 @@ export function storageKeys(provider: ProviderId) {
     legacy: `${prefix}.legacy`,
     model: `${prefix}.model.v1`,
     modelPolicy: `${prefix}.model-policy.v1`,
+    pendingDraft: `${prefix}.pending-draft.v1`,
     setup: `${prefix}.setup.v1`,
   };
 }

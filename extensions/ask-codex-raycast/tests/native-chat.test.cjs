@@ -80,9 +80,14 @@ function chat(t, provider = "antigravity", initialDraft = "", options = {}) {
         ],
       }),
     );
+  if (options.library) saved.set(keys.library, JSON.stringify(options.library));
+  if (options.pendingDraft) saved.set(keys.pendingDraft, options.pendingDraft);
   let writeGate;
   let switched = 0;
   let started = 0;
+  let resumed = 0;
+  let threadSeq = 0;
+  let historyOptions;
   let interrupted = 0;
   let event;
   let writeFailure;
@@ -109,13 +114,22 @@ function chat(t, provider = "antigravity", initialDraft = "", options = {}) {
       model: "test-model",
       effort: "",
     },
-    connect: async () => {},
+    connect: async () => {
+      if (options.connectGate) await options.connectGate;
+    },
     async startThread() {
       if (options.threadDefault)
         this.currentModelSelection = { ...options.threadDefault };
-      return "test-thread";
+      return `thread-${++threadSeq}`;
     },
-    resumeThread: async () => "test-thread",
+    async resumeThread(id) {
+      resumed++;
+      if (options.unresumable?.includes(id))
+        throw new Error(
+          "CLI session mapping is unavailable. Start a new session.",
+        );
+      return id;
+    },
     close() {},
     async listModels() {
       catalogCalls++;
@@ -183,6 +197,10 @@ function chat(t, provider = "antigravity", initialDraft = "", options = {}) {
     },
     LocalStorage: {
       getItem: async (key) => saved.get(key),
+      removeItem: async (key) => {
+        saved.delete(key);
+        timeline.push(key);
+      },
       setItem: async (key, value) => {
         if (writeGate) await writeGate;
         if (keyedWriteGates.has(key)) await keyedWriteGates.get(key);
@@ -217,7 +235,13 @@ function chat(t, provider = "antigravity", initialDraft = "", options = {}) {
       return { ModelMenu: "models", EffortMenu: "efforts" };
     if (id === "./setup") return { SetupWizard: "setup" };
     if (id === "./model-settings") return { ModelSettings: "model-settings" };
-    if (id === "./history") return { useSessionHistory: () => ({}) };
+    if (id === "./history")
+      return {
+        useSessionHistory: (hookOptions) => {
+          historyOptions = hookOptions;
+          return {};
+        },
+      };
     return require(path.resolve(path.dirname(filename), id + ".ts"));
   };
   const source = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
@@ -357,6 +381,10 @@ function chat(t, provider = "antigravity", initialDraft = "", options = {}) {
       nodes(render())
         .find((node) => node.type === Action && node.props.title === "New Chat")
         .props.onAction(),
+    select: (session) => historyOptions.onSelect(session),
+    get resumed() {
+      return resumed;
+    },
     blockWrites() {
       let release;
       writeGate = new Promise((resolve) => {
@@ -578,6 +606,68 @@ test("unacknowledged input is persisted when the command closes", async (t) => {
     JSON.parse(ui.saved.get(ui.keys.library)).sessions[0].draft,
     "keep until accepted",
   );
+});
+
+test("a never-sent draft-only conversation reopens with its draft instead of failing resume", async (t) => {
+  const ui = chat(t, "antigravity", "", {
+    library: {
+      version: 2,
+      activeId: "test-thread",
+      sessions: [
+        {
+          threadId: "test-thread",
+          messages: [{ id: "u", role: "user", content: "hi" }],
+          updatedAt: 1,
+        },
+        {
+          threadId: "draft-thread",
+          messages: [],
+          draft: "unsent draft",
+          updatedAt: 2,
+        },
+      ],
+    },
+  });
+  await ui.ready();
+  const resumedBefore = ui.resumed;
+  await ui.select({
+    threadId: "draft-thread",
+    messages: [],
+    draft: "unsent draft",
+    updatedAt: 2,
+  });
+  await ui.flush();
+  assert.equal(ui.input().draft, "unsent draft");
+  assert.deepEqual(ui.toasts, []);
+  assert.equal(ui.resumed, resumedBefore);
+  const library = JSON.parse(ui.saved.get(ui.keys.library));
+  assert.equal(
+    library.sessions.some((session) => session.threadId === "draft-thread"),
+    false,
+  );
+});
+
+test("drafts typed while connecting survive closing the command", async (t) => {
+  let releaseConnect;
+  const ui = chat(t, "antigravity", "", {
+    connectGate: new Promise((resolve) => {
+      releaseConnect = resolve;
+    }),
+  });
+  ui.input().onChange("typed while connecting");
+  await ui.flush();
+  assert.equal(ui.saved.get(ui.keys.pendingDraft), "typed while connecting");
+  ui.dispose();
+  await ui.flush();
+  assert.equal(ui.saved.get(ui.keys.pendingDraft), "typed while connecting");
+  releaseConnect();
+});
+
+test("a pending pre-connection draft is restored on the next open", async (t) => {
+  const ui = chat(t, "antigravity", "", { pendingDraft: "typed earlier" });
+  await ui.ready();
+  assert.equal(ui.input().draft, "typed earlier");
+  assert.equal(ui.saved.get(ui.keys.pendingDraft), undefined);
 });
 
 test("provider switch blocks sending and another switch until old storage is durable", async (t) => {

@@ -8,7 +8,7 @@ test('Codex retains installed storage while other CLI state cannot collide',()=>
  assert.equal(codex.library,'ask-codex.conversations.v2');
  assert.equal(codex.model,'ask-chatgpt.model-selection.v1');
  for(const key of Object.keys(codex))assert.notEqual(codex[key],agy[key]);
- assert.equal(new Set([...Object.values(codex),...Object.values(agy)]).size,10);
+ assert.equal(new Set([...Object.values(codex),...Object.values(agy)]).size,12);
 });
 test('CLI connection setup changes only for its own executable settings',()=>{
  const base={codexPath:'/codex',agyPath:'/agy'};
@@ -27,5 +27,5 @@ for (const [provider, key] of [['antigravity','agyPath'],['qoder','qoderPath'],[
 test('all six providers have distinct storage without changing Codex legacy keys',()=>{
  const providers=['codex','antigravity','qoder','qoder-cn','workbuddy','gemini'];
  const keys=providers.flatMap(p=>Object.values(storageKeys(p)));
- assert.equal(new Set(keys).size,30);
+ assert.equal(new Set(keys).size,36);
 });
