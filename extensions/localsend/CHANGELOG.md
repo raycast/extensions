@@ -1,5 +1,9 @@
 # LocalSend Changelog
 
+## [Fix Sending to Encrypted Devices That Require a Client Certificate] - {PR_MERGE_DATE}
+
+- Fixed sending to LocalSend 1.18 devices with encryption enabled failing with `fetch failed` (`UND_ERR_SOCKET`, other side closed). These receivers require a client certificate, so the extension now generates a self-signed one and presents it ([#32747](https://github.com/raycast/extensions/issues/32747))
+
 ## [Fix Sending to Encrypted Devices] - 2026-10-24
 
 - Fixed transfers to devices with encryption enabled (HTTPS) failing with `DEPTH_ZERO_SELF_SIGNED_CERT` — LocalSend's self-signed certificates are now accepted for device connections ([#32695](https://github.com/raycast/extensions/issues/32695))
