@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add stickers, clips, memes and All Sources] - {PR_MERGE_DATE}
+## [Add stickers, clips, memes and All Sources] - 2026-10-31
 
 - Add GIPHY Stickers as a provider, with favorites, recents, and the Ask AI tool support.
 - Add Klipy Stickers, Klipy Clips and Klipy Memes. All Klipy content works out of the box.
