@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * Helper per i piani Free/Premium, condivisi da Chrome e Raycast (e specchiati in Swift/Dart).
  * Il server resta l'unica autorità: questi controlli servono solo a mostrare
@@ -136,7 +136,8 @@ export function checkImportAgainstPlan(status: BillingStatus, plan: ImportPlan, 
     };
   }
   const maxItems = status.limits.maxItems;
-  if (maxItems !== null && status.usage.items + items > maxItems) {
+  // Organization vaults don't count: an import that adds no personal items is never blocked.
+  if (items > 0 && maxItems !== null && status.usage.items + items > maxItems) {
     const free = Math.max(0, maxItems - status.usage.items);
     return {
       ok: false,

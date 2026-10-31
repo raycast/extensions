@@ -1,19 +1,20 @@
 /**
- * Gestione della sessione Passig in Raycast.
+ * Passig session handling in Raycast.
  *
- * Ogni comando Raycast gira in un processo Node separato e di breve durata:
- * non esiste una memoria condivisa tra un'invocazione e l'altra, e Raycast
- * non espone il Keychain di macOS. Compromesso adottato (vedi README):
+ * Every Raycast command runs in its own short-lived Node process, so there is no
+ * shared memory between invocations, and Raycast does not expose the macOS
+ * Keychain. Trade-off (see README):
  *
- * - `LocalStorage` (persistente): SOLO il refresh token. Permette di riusare
- *   la stessa sessione server senza creare un nuovo login a ogni sblocco, ma
- *   da solo NON consente di decifrare nulla (serve la master password).
- * - `Cache` con TTL = auto-lock (preferenza, default 15 min): snapshot della
- *   sessione sbloccata (userKey/privateKey/vaultKey in base64 + item cifrati
- *   + access token). Scaduto il TTL il file viene cancellato e si richiede la
- *   master password. La master password non viene MAI salvata.
+ * - `passig.refreshToken` (LocalStorage): lets the extension reuse the same server
+ *   session without a new login on every unlock. On its own it cannot decrypt
+ *   anything: the master password is still required.
+ * - `passig.session` (LocalStorage, Raycast's encrypted local database): snapshot
+ *   of the unlocked session (user/private/vault keys in base64, encrypted items,
+ *   access token) with its own expiry = auto-lock preference (default 15 min).
+ *   Expired snapshots are deleted and the master password is asked again.
+ *   The master password is NEVER stored.
  */
-import { Cache, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import {
   ApiClient,
   InvalidCredentialsError,
@@ -24,23 +25,20 @@ import {
   type Tokens,
 } from "../vendor/client-core/index.js";
 import { initCrypto } from "../vendor/shared/index.js";
-import { acceptLanguage } from "../i18n";
 import { clearIfStillSecret } from "./clipboard";
 import { autoLockMs, getPrefs } from "./preferences";
 
 const LS_REFRESH_TOKEN = "passig.refreshToken";
-const CACHE_SESSION = "session";
+const LS_SESSION = "passig.session";
 
 interface CachedSession {
   v: 2;
-  /** Email (normalizzata) dell'account a cui appartiene lo snapshot. */
+  /** Normalized email of the account the snapshot belongs to. */
   email: string;
   expiresAt: number;
   accessToken: string;
   snapshot: SessionSnapshot;
 }
-
-const cache = new Cache({ namespace: "passig" });
 
 async function readRefreshToken(): Promise<string | null> {
   return (await LocalStorage.getItem<string>(LS_REFRESH_TOKEN)) ?? null;
@@ -51,28 +49,27 @@ function normalizeEmail(email: string): string {
 }
 
 /**
- * Legge lo snapshot in cache. Lo scarta (e lo cancella) se è scaduto, se ha un
- * formato vecchio o se appartiene a un account diverso da quello configurato
- * nelle preferenze: cambiando email non si devono mai vedere/scrivere i vault
- * dell'account precedente.
+ * Reads the stored snapshot. It is discarded (and deleted) when expired, in an old
+ * format, or owned by an account other than the one in the preferences: after
+ * changing the email the previous account's vaults must never be shown or written.
  */
-function readCached(): CachedSession | null {
-  const raw = cache.get(CACHE_SESSION);
+async function readCached(): Promise<CachedSession | null> {
+  const raw = await LocalStorage.getItem<string>(LS_SESSION);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as CachedSession;
     if (parsed.v !== 2 || parsed.expiresAt <= Date.now() || parsed.email !== normalizeEmail(getPrefs().email)) {
-      cache.remove(CACHE_SESSION);
+      await LocalStorage.removeItem(LS_SESSION);
       return null;
     }
     return parsed;
   } catch {
-    cache.remove(CACHE_SESSION);
+    await LocalStorage.removeItem(LS_SESSION);
     return null;
   }
 }
 
-function writeCached(session: VaultSession, accessToken: string, expiresAt: number): void {
+async function writeCached(session: VaultSession, accessToken: string, expiresAt: number): Promise<void> {
   const payload: CachedSession = {
     v: 2,
     email: normalizeEmail(getPrefs().email),
@@ -80,25 +77,22 @@ function writeCached(session: VaultSession, accessToken: string, expiresAt: numb
     accessToken,
     snapshot: session.exportSnapshot(),
   };
-  cache.set(CACHE_SESSION, JSON.stringify(payload));
+  await LocalStorage.setItem(LS_SESSION, JSON.stringify(payload));
 }
 
-/**
- * `fetch` che aggiunge `Accept-Language` con la lingua attiva: l'API traduce i
- * messaggi d'errore in base a questo header (client-core non lo imposta da solo).
- */
-const localizedFetch: typeof fetch = (input, init) => {
+/** `fetch` that asks the API for English error messages (client-core does not set the header). */
+const englishFetch: typeof fetch = (input, init) => {
   const headers = new Headers(init?.headers);
-  if (!headers.has("Accept-Language")) headers.set("Accept-Language", acceptLanguage());
+  if (!headers.has("Accept-Language")) headers.set("Accept-Language", "en");
   return fetch(input, { ...init, headers });
 };
 
-/** Crea l'ApiClient con persistenza del refresh token (rotazione) su LocalStorage. */
+/** Creates the ApiClient, persisting the (rotating) refresh token in LocalStorage. */
 async function makeApi(tokens: Tokens | null): Promise<ApiClient> {
   const prefs = getPrefs();
   return new ApiClient({
     baseUrl: prefs.serverUrl,
-    fetch: localizedFetch,
+    fetch: englishFetch,
     tokens,
     onTokensChanged: async (t) => {
       if (t) await LocalStorage.setItem(LS_REFRESH_TOKEN, t.refreshToken);
@@ -110,25 +104,28 @@ async function makeApi(tokens: Tokens | null): Promise<ApiClient> {
 export interface ActiveSession {
   api: ApiClient;
   vault: VaultSession;
-  /** Istante (ms epoch) dell'auto-lock: fissato allo sblocco, NON rinnovato dall'uso. */
+  /** Auto-lock time (ms epoch): set at unlock, NOT extended by usage. */
   expiresAt: number;
-  /** true se l'auto-lock è scaduto (o la sessione è stata bloccata). */
+  /** true once the auto-lock has expired (or the session was locked). */
   isExpired: () => boolean;
-  /** Salva lo snapshot aggiornato (dopo load/create/update) mantenendo la scadenza. */
-  persist: () => void;
-  /** Ricarica vault e item dal server e aggiorna la cache. */
+  /** Stores the updated snapshot (after load/create/update), keeping the same expiry. */
+  persist: () => Promise<void>;
+  /** Reloads vaults and items from the server and updates the stored snapshot. */
   refresh: () => Promise<void>;
-  /** Blocca: cancella la cache, azzera le chiavi in memoria e svuota gli appunti se contengono un segreto. */
+  /** Locks: deletes the snapshot, zeroes the in-memory keys and clears the clipboard if it holds a secret. */
   lock: () => Promise<void>;
 }
 
 function wrap(api: ApiClient, vault: VaultSession, expiresAt: number): ActiveSession {
   let locked = false;
   const isExpired = () => locked || Date.now() >= expiresAt;
-  const persist = () => {
+  const persist = async () => {
     if (isExpired()) return;
     const t = api.getTokens();
-    if (t) writeCached(vault, t.accessToken, expiresAt);
+    if (!t) return;
+    await writeCached(vault, t.accessToken, expiresAt);
+    // locked while writing: never leave a snapshot behind
+    if (isExpired()) await lockSession();
   };
   return {
     api,
@@ -138,25 +135,25 @@ function wrap(api: ApiClient, vault: VaultSession, expiresAt: number): ActiveSes
     persist,
     refresh: async () => {
       await vault.load();
-      persist();
+      await persist();
     },
     lock: async () => {
       locked = true;
-      lockSession();
+      await lockSession();
       vault.lock();
       await clearIfStillSecret(true);
     },
   };
 }
 
-/** Restituisce la sessione sbloccata dalla cache, oppure null se serve la master password. */
+/** Returns the unlocked session from storage, or null when the master password is needed. */
 export async function getActiveSession(): Promise<ActiveSession | null> {
   await initCrypto();
-  const cached = readCached();
+  const cached = await readCached();
   if (!cached) return null;
   const refreshToken = await readRefreshToken();
   if (!refreshToken) {
-    cache.remove(CACHE_SESSION);
+    await LocalStorage.removeItem(LS_SESSION);
     return null;
   }
   const api = await makeApi({ accessToken: cached.accessToken, refreshToken });
@@ -165,9 +162,9 @@ export async function getActiveSession(): Promise<ActiveSession | null> {
 }
 
 /**
- * Sblocca con la master password.
- * Se esiste un refresh token prova a riusare la sessione server (refresh → /me →
- * derivazione stretchKey → sblocco chiavi); altrimenti esegue il login completo.
+ * Unlocks with the master password.
+ * With a refresh token it tries to reuse the server session (refresh → /me →
+ * stretchKey derivation → key unlock); otherwise it performs a full login.
  */
 export async function unlock(masterPassword: string): Promise<ActiveSession> {
   await initCrypto();
@@ -184,7 +181,7 @@ export async function unlock(masterPassword: string): Promise<ActiveSession> {
       vault = new VaultSession(api, result.keys);
     } catch (err) {
       if (err instanceof InvalidCredentialsError) throw err;
-      // refresh token revocato/scaduto o altro: si passa al login completo
+      // refresh token revoked/expired or other failure: fall back to a full login
       api = null;
       vault = null;
       await LocalStorage.removeItem(LS_REFRESH_TOKEN);
@@ -199,19 +196,19 @@ export async function unlock(masterPassword: string): Promise<ActiveSession> {
 
   await vault.load();
   const active = wrap(api, vault, Date.now() + autoLockMs());
-  active.persist();
+  await active.persist();
   return active;
 }
 
-/** Blocca: cancella la cache delle chiavi (il refresh token resta per il prossimo sblocco). */
-export function lockSession(): void {
-  cache.remove(CACHE_SESSION);
+/** Lock: deletes the key snapshot (the refresh token is kept for the next unlock). */
+export async function lockSession(): Promise<void> {
+  await LocalStorage.removeItem(LS_SESSION);
 }
 
-/** Logout completo: revoca la sessione server e cancella tutto. */
+/** Full logout: revokes the server session and deletes everything. */
 export async function logoutSession(): Promise<void> {
   const active = await getActiveSession();
-  cache.clear();
+  await LocalStorage.removeItem(LS_SESSION);
   if (active) {
     await active.api.logout();
   } else {

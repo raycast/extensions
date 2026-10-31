@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * Pianificazione dell'import: destinazione (un vault o un vault per cartella) e
  * rilevamento dei duplicati, prima di cifrare e caricare.

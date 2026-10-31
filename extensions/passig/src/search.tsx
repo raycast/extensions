@@ -23,7 +23,7 @@ import {
 } from "./vendor/client-core/index.js";
 import type { BillingStatus } from "./vendor/shared/index.js";
 import { UnlockForm } from "./components/UnlockForm";
-import { formatDateTime, t } from "./i18n";
+import { formatDateTime, t } from "./lib/text";
 import { copySecret } from "./lib/clipboard";
 import { describeError } from "./lib/errors";
 import { BillingActions, PlanDetail, openCheckout, useBilling } from "./lib/billing";
@@ -42,13 +42,13 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
   const [query, setQuery] = useState("");
   const [showDetail, setShowDetail] = useState(false);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
-  const [tick, setTick] = useState(0); // forza il re-render dopo refresh
+  const [tick, setTick] = useState(0); // forces a re-render after a refresh
   const [refreshing, setRefreshing] = useState(false);
   const { billing } = useBilling(session);
   const totpAllowed = isTotpAllowed(billing);
   const usageLevel = billing ? itemUsageLevel(billing) : "ok";
 
-  // Aggiorna dal server in background all'apertura (gli item in cache si vedono subito).
+  // Refresh from the server in the background on open (stored items show right away).
   useEffect(() => {
     let cancelled = false;
     setRefreshing(true);
@@ -68,7 +68,7 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
     };
   }, [session]);
 
-  /** Aggiornamento manuale: ricarica dal server e ricalcola i risultati (tick). */
+  /** Manual refresh: reloads from the server and recomputes the results (tick). */
   async function refresh() {
     if (session.isExpired()) {
       onLock();
@@ -88,8 +88,8 @@ function SearchList({ session, onLock }: { session: ActiveSession; onLock: () =>
 
   const results = useMemo(() => session.vault.search(query, 200), [session, query, tick]);
   const byVault = useMemo(() => {
-    // Con una ricerca attiva i risultati restano in un'unica sezione, nell'ordine di
-    // rilevanza (prima i match sul nome): raggrupparli per vault romperebbe l'ordine.
+    // With an active query results stay in a single section, in relevance order
+    // (title matches first): grouping them by vault would break that order.
     if (query.trim()) return results.length > 0 ? [[t("common.results"), results] as [string, DecryptedItem[]]] : [];
     const groups = new Map<string, DecryptedItem[]>();
     for (const item of results) {
@@ -174,7 +174,7 @@ interface RowProps {
   item: DecryptedItem;
   session: ActiveSession;
   billing: BillingStatus | null;
-  /** false con il piano Free: il codice TOTP non viene generato (il segreto resta nell'item). */
+  /** false on the Free plan: no TOTP code is generated (the secret stays visible and copyable). */
   totpAllowed: boolean;
   showDetail: boolean;
   revealed: boolean;
@@ -207,7 +207,7 @@ function ItemRow({
   const d = item.data;
   const host = d.urls[0] ? displayHost(d.urls[0]) : undefined;
 
-  /** Le azioni sui segreti non funzionano mai oltre l'auto-lock, anche con la vista ancora aperta. */
+  /** Secret actions never work past the auto-lock, even with the view still open. */
   async function ensureUnlocked(): Promise<boolean> {
     if (!session.isExpired()) return true;
     await session.lock();
@@ -256,6 +256,14 @@ function ItemRow({
     }
   }
 
+  /** The raw TOTP secret is available on every plan, so it can be used in another authenticator. */
+  async function copyTotpSecret() {
+    if (!(await ensureUnlocked())) return;
+    if (!d.totp) return;
+    await copySecret(d.totp);
+    await showHUD(t("search.totpSecretCopied"));
+  }
+
   async function showTotpLocked() {
     await showToast({
       style: Toast.Style.Failure,
@@ -285,7 +293,7 @@ function ItemRow({
   }
 
   async function lock() {
-    await session.lock(); // come il comando «Lock Passig»: svuota anche gli appunti
+    await session.lock(); // like the Lock Passig command: also clears the clipboard
     onLock();
     await showToast({ style: Toast.Style.Success, title: t("common.locked") });
   }
@@ -344,6 +352,14 @@ function ItemRow({
                 onAction={pasteTotp}
               />
             )}
+            {d.totp && (
+              <Action
+                title={t("action.copyTotpSecret")}
+                icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+                onAction={copyTotpSecret}
+              />
+            )}
             {d.urls[0] && (
               <Action.OpenInBrowser
                 title={t("action.openWebsite")}
@@ -397,7 +413,7 @@ function ItemDetail({ item, revealed, totpAllowed }: { item: DecryptedItem; reve
   const d = item.data;
   const [totp, setTotp] = useState<{ code: string; remaining: number } | null>(null);
 
-  // Aggiorna il codice TOTP ogni secondo quando il dettaglio è visibile.
+  // Refresh the TOTP code every second while the detail is visible.
   useEffect(() => {
     if (!d.totp || !totpAllowed) return;
     let active = true;
@@ -427,6 +443,13 @@ function ItemDetail({ item, revealed, totpAllowed }: { item: DecryptedItem; reve
             text={revealed ? d.password || "—" : masked}
             icon={revealed ? Icon.Eye : Icon.EyeDisabled}
           />
+          {d.totp && !totpAllowed && (
+            <List.Item.Detail.Metadata.Label
+              title={t("detail.totpSecret")}
+              text={revealed ? d.totp : "••••••"}
+              icon={revealed ? Icon.Eye : Icon.EyeDisabled}
+            />
+          )}
           {d.totp && (
             <List.Item.Detail.Metadata.Label
               title="TOTP"

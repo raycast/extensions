@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * Errori tipizzati del client Passig.
  * Tutti derivano da `PassigError` così i chiamanti possono distinguere

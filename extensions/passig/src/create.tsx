@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { PlanLimitError, canAddItems, newLoginItem, shouldOfferUpgrade } from "./vendor/client-core/index.js";
-import { generatePassword, passwordStrength } from "./vendor/shared/index.js";
+import { generatePassword, passwordStrength, type BillingStatus } from "./vendor/shared/index.js";
 import { UnlockForm } from "./components/UnlockForm";
-import { t } from "./i18n";
+import { t } from "./lib/text";
 import { BillingActions, PlanDetail, openCheckout, personalVaultIds, useBilling } from "./lib/billing";
 import { describeError } from "./lib/errors";
 import { planErrorMessage, strengthLabel, upgradeCta } from "./lib/plan";
@@ -32,18 +32,18 @@ function CreateForm({ session }: { session: ActiveSession }) {
   const [titleError, setTitleError] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
 
-  // i limiti del piano valgono solo per i vault personali creati dall'utente
+  // plan limits only apply to the personal vaults owned by the user
   const atLimit = billing !== null && personal.has(vaultId) && !canAddItems(billing);
 
-  /** Toast di errore per il limite del piano, con l'azione di upgrade (o il dettaglio del piano). */
-  function planLimitToast(toast: Toast, message: string) {
+  /** Plan-limit error toast, with the upgrade action (or the plan details). */
+  function planLimitToast(toast: Toast, message: string, status: BillingStatus | null = billing) {
     toast.style = Toast.Style.Failure;
     toast.title = t("create.planLimitTitle");
     toast.message = message;
     toast.primaryAction =
-      billing && shouldOfferUpgrade(billing)
-        ? { title: upgradeCta(billing), onAction: () => void openCheckout(session) }
-        : { title: t("common.planDetail"), onAction: () => push(<PlanDetail session={session} initial={billing} />) };
+      status && shouldOfferUpgrade(status)
+        ? { title: upgradeCta(status), onAction: () => void openCheckout(session) }
+        : { title: t("common.planDetail"), onAction: () => push(<PlanDetail session={session} initial={status} />) };
   }
 
   function generate() {
@@ -60,9 +60,13 @@ function CreateForm({ session }: { session: ActiveSession }) {
       return;
     }
     if (atLimit) {
-      const toast = await showToast({ style: Toast.Style.Failure, title: t("create.planLimitTitle") });
-      planLimitToast(toast, planErrorMessage("PLAN_LIMIT_ITEMS"));
-      return;
+      // the plan may have changed since the form opened (e.g. upgrade just completed): re-check first
+      const fresh = await reloadBilling();
+      if (fresh && personal.has(vaultId) && !canAddItems(fresh)) {
+        const toast = await showToast({ style: Toast.Style.Failure, title: t("create.planLimitTitle") });
+        planLimitToast(toast, planErrorMessage("PLAN_LIMIT_ITEMS"), fresh);
+        return;
+      }
     }
     setBusy(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: t("create.saving") });
@@ -76,7 +80,7 @@ function CreateForm({ session }: { session: ActiveSession }) {
         totp: totp.trim() || undefined,
       });
       await session.vault.createItem(vaultId, item);
-      session.persist();
+      await session.persist();
       toast.style = Toast.Style.Success;
       toast.title = t("create.saved");
       await popToRoot();
@@ -99,7 +103,6 @@ function CreateForm({ session }: { session: ActiveSession }) {
   return (
     <Form
       isLoading={busy}
-      navigationTitle={t("create.navTitle")}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("common.save")} icon={Icon.SaveDocument} onSubmit={submit} />

@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, closeMainWindow, showHUD, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { generatePassword, initCrypto, passwordStrength } from "./vendor/shared/index.js";
-import { t } from "./i18n";
+import { t } from "./lib/text";
 import { copySecret } from "./lib/clipboard";
 import { strengthLabel } from "./lib/plan";
 
-/** Generatore password: non richiede lo sblocco del vault. */
+/** Password generator: does not require unlocking the vault. */
 export default function GenerateCommand() {
   const [ready, setReady] = useState(false);
   const [length, setLength] = useState("20");
@@ -21,7 +21,7 @@ export default function GenerateCommand() {
     initCrypto().then(() => setReady(true));
   }, []);
 
-  /** Lunghezza valida (8-128) e almeno un set di caratteri: altrimenti null. */
+  /** Valid length (8-128) and at least one character set, otherwise null. */
   function validLength(): number | null {
     const n = Number(length);
     if (!Number.isInteger(n) || n < 8 || n > 128) return null;
@@ -29,7 +29,7 @@ export default function GenerateCommand() {
     return n;
   }
 
-  /** Genera con le impostazioni correnti; con impostazioni non valide azzera la password mostrata. */
+  /** Generates with the current settings; invalid settings clear the shown password. */
   function regenerate(): string | null {
     const n = validLength();
     if (n === null) {
@@ -48,13 +48,13 @@ export default function GenerateCommand() {
     }
   }
 
-  /** Password da copiare/incollare: solo se le impostazioni CORRENTI sono valide (mai una vecchia). */
+  /** Password to copy/paste: only when the CURRENT settings are valid (never a stale one). */
   function currentPassword(): string | null {
     if (validLength() === null) return regenerate();
     return password || regenerate();
   }
 
-  // rigenera ad ogni cambio di opzione
+  // regenerate on every option change
   useEffect(() => {
     if (ready) regenerate();
   }, [ready, length, lowercase, uppercase, digits, symbols, excludeAmbiguous]);
@@ -76,7 +76,6 @@ export default function GenerateCommand() {
   return (
     <Form
       isLoading={!ready}
-      navigationTitle={t("generate.navTitle")}
       actions={
         <ActionPanel>
           <Action title={t("action.copyPassword")} icon={Icon.Clipboard} onAction={copy} />

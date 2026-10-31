@@ -1,5 +1,5 @@
-/** Sorgente inglese: ogni altra lingua deve avere le stesse chiavi e gli stessi placeholder. */
-export const en = {
+/** All user-facing strings of the extension (US English). */
+export const strings = {
   // --- common
   "common.loading": "Loading…",
   "common.cancel": "Cancel",
@@ -49,24 +49,27 @@ export const en = {
   "search.totpCopied": "Code {code} copied (valid for {seconds} s)",
   "search.totpInvalid": "Invalid TOTP",
   "search.totpPremiumTitle": "Code available with Premium",
-  "search.totpPremiumMessage": "The TOTP secret stays saved in the item.",
+  "search.totpPremiumMessage": "Copy the TOTP secret (⌥⌘T) to use it in another authenticator app.",
   "search.totpAvailable": "TOTP available",
   "search.totpPremiumTooltip": "TOTP code available with Premium",
-  "action.copyPassword": "Copy password",
-  "action.pastePassword": "Paste password",
-  "action.copyUsername": "Copy username",
-  "action.copyTotp": "Copy TOTP code",
-  "action.totpPremium": "TOTP code (Premium)",
-  "action.pasteTotp": "Paste TOTP code",
-  "action.openWebsite": "Open website",
-  "action.showDetails": "Show details",
-  "action.hideDetails": "Hide details",
-  "action.showPassword": "Show password",
-  "action.hidePassword": "Hide password",
-  "action.refreshFromServer": "Refresh from server",
+  "search.totpSecretCopied": "TOTP secret copied (clears in 30 s)",
+  "action.copyPassword": "Copy Password",
+  "action.pastePassword": "Paste Password",
+  "action.copyUsername": "Copy Username",
+  "action.copyTotp": "Copy TOTP Code",
+  "action.totpPremium": "TOTP Code (Premium)",
+  "action.pasteTotp": "Paste TOTP Code",
+  "action.copyTotpSecret": "Copy TOTP Secret",
+  "action.openWebsite": "Open Website",
+  "action.showDetails": "Show Details",
+  "action.hideDetails": "Hide Details",
+  "action.showPassword": "Show Password",
+  "action.hidePassword": "Hide Password",
+  "action.refreshFromServer": "Refresh from Server",
   "detail.notes": "Notes",
   "detail.totpCode": "{code}  ({seconds} s)",
   "detail.totpInvalid": "invalid",
+  "detail.totpSecret": "TOTP Secret",
   "detail.updated": "Updated",
 
   // --- create
@@ -75,7 +78,6 @@ export const en = {
   "strength.2": "fair",
   "strength.3": "good",
   "strength.4": "excellent",
-  "create.navTitle": "Save password",
   "create.titleRequired": "Title is required",
   "create.planLimitTitle": "Free plan limit",
   "create.saving": "Saving…",
@@ -94,7 +96,6 @@ export const en = {
   "create.totpPlaceholder": "otpauth://totp/… or base32 key",
 
   // --- generate
-  "generate.navTitle": "Generate password",
   "generate.lengthError": "Length between 8 and 128",
   "generate.regenerate": "Regenerate",
   "generate.strength": "Strength",
@@ -220,7 +221,7 @@ export const en = {
   "import.vaultsCreated": "Vaults created: {names}",
   "import.trashConfirm": "Move the export file to the Trash?",
   "import.trashAction": "Move to Trash",
-  "import.trashFile": "Move file to Trash",
+  "import.trashFile": "Move File to Trash",
   "import.trashed": "File moved to the Trash",
   "import.emptyTrash": "Remember to empty the Trash",
   "import.trashFailed": "Couldn't move the file",
@@ -264,5 +265,11 @@ export const en = {
   "import.howTo.protonpass-csv": "Settings → Export → CSV.",
   "import.howTo.enpass-json": "File → Export → .json format.",
   "import.howTo.roboform-csv": "Options → Account & Data → Export → CSV.",
+  "import.recheckPlan": "Check Plan Again",
+  "import.recheckingPlan": "Checking your plan…",
+  "import.planOk": "Your plan now allows this import",
+  "import.stillOverPlan": "This import still exceeds your plan",
+  "import.lockedDuringImport":
+    "Passig locked during the import: the remaining items were not uploaded. Unlock and import again (duplicates are skipped).",
   "import.howTo.generic-csv": "Any CSV with a header row: the columns are matched to fields automatically.",
 } as const;

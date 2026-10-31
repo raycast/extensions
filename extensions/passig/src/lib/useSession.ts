@@ -2,15 +2,15 @@ import { popToRoot } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getActiveSession, type ActiveSession } from "./session";
 
-/** Ogni quanto la vista controlla la scadenza dell'auto-lock (robusto anche dopo lo sleep del Mac). */
+/** How often an open view checks the auto-lock expiry (robust after the Mac wakes from sleep). */
 const EXPIRY_CHECK_MS = 1_000;
 
 /**
- * Carica la sessione dalla cache (se non scaduta); altrimenti `session` resta null.
+ * Loads the stored session (if not expired); otherwise `session` stays null.
  *
- * Finché la vista resta aperta controlla la scadenza dell'auto-lock: allo scadere
- * blocca la sessione (cache + chiavi in memoria + appunti), torna alla radice del
- * comando e mostra di nuovo la richiesta della master password.
+ * While the view is open it watches the auto-lock expiry: when it expires it locks
+ * the session (stored snapshot + in-memory keys + clipboard), pops to the command
+ * root and asks for the master password again.
  */
 export function useSession() {
   const [session, setSessionState] = useState<ActiveSession | null>(null);

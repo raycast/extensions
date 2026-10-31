@@ -1,16 +1,16 @@
 /**
- * Etichette localizzate del piano Free/Premium. Specchia gli helper di
- * `client-core/billing.ts` (planLabel, itemUsageLabel, upgradeCta, PREMIUM_FEATURES,
- * planErrorMessage, checkImportAgainstPlan) che restituiscono testo in italiano:
- * la logica resta nel package condiviso, qui solo la presentazione nella lingua attiva.
+ * Free/Premium plan labels. Mirrors the helpers in `client-core/billing.ts`
+ * (planLabel, itemUsageLabel, upgradeCta, PREMIUM_FEATURES, planErrorMessage,
+ * checkImportAgainstPlan), whose texts are not in English: the logic stays in the
+ * shared package, only the wording lives here.
  */
 import type { ImportPlan } from "../vendor/client-core/index.js";
 import type { BillingStatus, PlanErrorCode } from "../vendor/shared/index.js";
-import { formatCurrency, formatDate, t } from "../i18n";
+import { formatCurrency, formatDate, t } from "./text";
 
 type BillingPrice = NonNullable<BillingStatus["price"]>;
 
-/** Nome dello store che gestisce l'abbonamento, null se non è un acquisto in-app. */
+/** Name of the store that manages the subscription, null when it is not an in-app purchase. */
 export function storeName(billing: BillingStatus): string | null {
   if (billing.source === "app_store") return "App Store";
   if (billing.source === "play_store") return "Google Play";
@@ -23,7 +23,7 @@ export function formatPrice(p: BillingPrice): string {
   return t(key[p.interval], { amount });
 }
 
-/** Etichetta breve del piano, es. "Premium · trial until 16 November 2026". */
+/** Short plan label, e.g. "Premium · trial until November 16, 2026". */
 export function planLabel(status: BillingStatus): string {
   switch (status.source) {
     case "unlimited":
@@ -55,7 +55,7 @@ export function planLabel(status: BillingStatus): string {
   }
 }
 
-/** "37 / 50 items" oppure "37 items" se illimitato. */
+/** "37 / 50 items", or "37 items" when unlimited. */
 export function itemUsageLabel(status: BillingStatus): string {
   const max = status.limits.maxItems;
   return max === null
@@ -63,7 +63,7 @@ export function itemUsageLabel(status: BillingStatus): string {
     : t("plan.itemUsageOf", { used: status.usage.items, max });
 }
 
-/** Testo del pulsante di acquisto, con il prezzo se disponibile. */
+/** Upgrade button title, with the price when available. */
 export function upgradeCta(status: BillingStatus): string {
   return status.price ? t("plan.upgradeWithPrice", { price: formatPrice(status.price) }) : t("plan.upgrade");
 }
@@ -78,7 +78,7 @@ export function premiumFeatures(): string[] {
   ];
 }
 
-/** Messaggio da mostrare per un errore 402 (se il server non ne ha fornito uno). */
+/** Message for a 402 error (when the server did not provide one). */
 export function planErrorMessage(code: PlanErrorCode | string): string {
   switch (code) {
     case "PLAN_LIMIT_ITEMS":
@@ -96,7 +96,7 @@ export function planErrorMessage(code: PlanErrorCode | string): string {
 
 export type PlanCheck = { ok: true } | { ok: false; code: PlanErrorCode; message: string };
 
-/** Come `checkImportAgainstPlan` di client-core, con i messaggi nella lingua attiva. */
+/** Same as client-core's `checkImportAgainstPlan`, with English messages. */
 export function checkImportAgainstPlan(
   status: BillingStatus,
   plan: ImportPlan,
@@ -121,7 +121,8 @@ export function checkImportAgainstPlan(
     };
   }
   const maxItems = status.limits.maxItems;
-  if (maxItems !== null && status.usage.items + items > maxItems) {
+  // organization vaults don't count: an import that adds no personal items is never blocked
+  if (items > 0 && maxItems !== null && status.usage.items + items > maxItems) {
     const free = Math.max(0, maxItems - status.usage.items);
     return {
       ok: false,
@@ -132,7 +133,7 @@ export function checkImportAgainstPlan(
   return { ok: true };
 }
 
-/** Etichetta della robustezza (0-4) restituita da `passwordStrength`. */
+/** Label for the strength score (0-4) returned by `passwordStrength`. */
 export function strengthLabel(score: number): string {
   const keys = ["strength.0", "strength.1", "strength.2", "strength.3", "strength.4"] as const;
   return t(keys[Math.min(Math.max(score, 0), 4)]!);

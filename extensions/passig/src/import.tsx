@@ -1,9 +1,9 @@
 /**
- * Comando «Importa password»: legge un file di export di un altro password
- * manager, lo converte in memoria (in questo processo) e carica gli elementi
- * cifrati con la vaultKey del vault di destinazione. Il server non vede mai il
- * contenuto in chiaro. Per i CSV generici si usa la mappatura delle colonne
- * indovinata dalle intestazioni (la mappatura manuale è nelle app desktop/Chrome).
+ * "Import Passwords" command: reads an export file from another password manager,
+ * converts it in memory (in this process) and uploads the items encrypted with the
+ * destination vault key. The server never sees the plaintext. Generic CSV files use
+ * the column mapping guessed from the headers (manual mapping is in the desktop and
+ * Chrome apps).
  */
 import {
   Action,
@@ -43,7 +43,7 @@ import {
 } from "./vendor/client-core/index.js";
 import type { BillingStatus, ItemData } from "./vendor/shared/index.js";
 import { UnlockForm } from "./components/UnlockForm";
-import { formatNumber, t, type MessageKey } from "./i18n";
+import { formatNumber, t, type MessageKey } from "./lib/text";
 import { BillingActions, fetchBilling, personalVaultIds } from "./lib/billing";
 import { describeError } from "./lib/errors";
 import { checkImportAgainstPlan } from "./lib/plan";
@@ -65,14 +65,14 @@ const TARGET_LABELS: Record<CsvTarget, MessageKey> = {
   ignore: "import.target.ignore",
 };
 
-/** Nome del password manager di origine (i nomi propri restano, le voci generiche sono tradotte). */
+/** Source password manager name (generic entries get a friendlier label). */
 function formatSource(f: ImportFormatInfo): string {
   if (f.id === "generic-csv") return t("import.source.generic");
   if (f.id === "safari-csv") return t("import.source.safari");
   return f.source;
 }
 
-/** Istruzioni di export localizzate (`import.howTo.<id>`), con fallback al testo del catalogo. */
+/** Export instructions (`import.howTo.<id>`), falling back to the catalog text. */
 function formatHowTo(f: ImportFormatInfo): string {
   const key = `import.howTo.${f.id}` as MessageKey;
   const text = t(key);
@@ -94,7 +94,7 @@ export default function ImportCommand() {
   return <ImportForm session={session} />;
 }
 
-/** Escape minimo per testo dell'utente inserito nel markdown del Detail. */
+/** Minimal escaping for user text placed in the Detail markdown. */
 function md(text: string): string {
   return text.replace(/([\\`*_[\]<>#|])/g, "\\$1");
 }
@@ -155,7 +155,7 @@ function ImportForm({ session }: { session: ActiveSession }) {
           message: t("import.columnsMapped"),
         });
       }
-      // controllo preventivo del piano: un import che sfora viene rifiutato per intero dal server (402)
+      // plan pre-check: an import over the plan is rejected as a whole by the server (402)
       const billing = await fetchBilling(session);
       const check = billing
         ? checkImportAgainstPlan(billing, plan, personalVaultIds(session.vault))
@@ -176,7 +176,7 @@ function ImportForm({ session }: { session: ActiveSession }) {
       toast.title = t("import.readFailed");
       toast.message = describeError(err);
     } finally {
-      // i byte del file non servono più: il risultato in chiaro vive solo nell'anteprima
+      // the file bytes are no longer needed: the plaintext result only lives in the preview
       bytes?.fill(0);
       setBusy(false);
     }
@@ -185,7 +185,6 @@ function ImportForm({ session }: { session: ActiveSession }) {
   return (
     <Form
       isLoading={busy}
-      navigationTitle={t("import.navTitle")}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("import.preview")} icon={Icon.Eye} onSubmit={submit} />
@@ -251,11 +250,13 @@ function ImportPreview(props: {
   plan: ImportPlan;
   mapping?: CsvMapping;
   billing: BillingStatus | null;
-  /** messaggio se l'import supera il piano (nessun caricamento possibile) */
+  /** message when the import exceeds the plan (nothing can be uploaded) */
   blocked: string | null;
 }) {
-  const { session, path, billing, blocked } = props;
-  // risultato e piano contengono dati in chiaro: li teniamo in stato e li azzeriamo a import concluso
+  const { session, path } = props;
+  const [billing, setBilling] = useState(props.billing);
+  const [blocked, setBlocked] = useState(props.blocked);
+  // result and plan hold plaintext data: kept in state and dropped once the import is done
   const [data, setData] = useState<{ result: ImportResult; plan: ImportPlan; mapping?: CsvMapping } | null>({
     result: props.result,
     plan: props.plan,
@@ -264,6 +265,20 @@ function ImportPreview(props: {
   const [phase, setPhase] = useState<Phase>({ kind: "preview" });
 
   const vaultNames = useMemo(() => new Map(session.vault.listVaults().map((v) => [v.id, v.name])), [session]);
+
+  /** Re-reads the plan (e.g. after upgrading in the browser) and unblocks the import if it now fits. */
+  async function recheckPlan() {
+    if (!data) return;
+    const toast = await showToast({ style: Toast.Style.Animated, title: t("import.recheckingPlan") });
+    const next = await fetchBilling(session);
+    setBilling(next);
+    const check = next
+      ? checkImportAgainstPlan(next, data.plan, personalVaultIds(session.vault))
+      : ({ ok: true } as const);
+    setBlocked(check.ok ? null : check.message);
+    toast.style = check.ok ? Toast.Style.Success : Toast.Style.Failure;
+    toast.title = check.ok ? t("import.planOk") : t("import.stillOverPlan");
+  }
 
   async function run() {
     if (!data || data.plan.total === 0 || blocked) return;
@@ -278,19 +293,21 @@ function ImportPreview(props: {
       const report = await session.vault.importPlan(plan, (p) => {
         toast.message = t("import.progressVault", { done: p.done, total: p.total, vault: p.vaultName });
       });
-      session.persist();
+      await session.persist();
       toast.style = Toast.Style.Success;
       toast.title = t("import.completed");
       toast.message = t("import.itemsImported", { count: report.created });
       setPhase({ kind: "done", report });
     } catch (err) {
-      session.persist(); // i blocchi già caricati restano: aggiorna la cache
+      await session.persist(); // chunks already uploaded are kept: update the stored snapshot
       const report = err instanceof ImportFailedError ? err.report : { created: 0, vaultsCreated: [] };
       const cause = err instanceof ImportFailedError ? err.cause : err;
+      // auto-lock during the import: the remaining items were not encrypted or uploaded
+      const message = session.isExpired() ? t("import.lockedDuringImport") : describeError(cause);
       toast.style = Toast.Style.Failure;
       toast.title = t("import.interrupted");
-      toast.message = describeError(cause);
-      setPhase({ kind: "done", report, error: describeError(err), planLimit: cause instanceof PlanLimitError });
+      toast.message = message;
+      setPhase({ kind: "done", report, error: message, planLimit: cause instanceof PlanLimitError });
     } finally {
       plan.batches.length = 0;
       setData(null);
@@ -405,6 +422,7 @@ function ImportPreview(props: {
         phase.kind === "preview" ? (
           <ActionPanel>
             {blocked && <BillingActions session={session} billing={billing} />}
+            {blocked && <Action title={t("import.recheckPlan")} icon={Icon.ArrowClockwise} onAction={recheckPlan} />}
             {plan.total > 0 && !blocked && (
               <Action title={t("import.run", { count: plan.total })} icon={Icon.Download} onAction={run} />
             )}

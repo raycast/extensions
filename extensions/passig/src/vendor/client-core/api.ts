@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * ApiClient: wrapper tipizzato su fetch per le API di Passig.
  *

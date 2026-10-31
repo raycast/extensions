@@ -1,8 +1,8 @@
 import { clearIfStillSecret } from "./lib/clipboard";
 
 /**
- * Comando in background (ogni minuto): svuota gli appunti se contengono ancora
- * il segreto copiato almeno 30 secondi fa. Vedi lib/clipboard.ts.
+ * Background command (every minute): clears the clipboard if it still holds a
+ * secret copied at least 30 seconds ago. See lib/clipboard.ts.
  */
 export default async function ClearClipboardCommand() {
   await clearIfStillSecret();

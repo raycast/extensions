@@ -1,19 +1,18 @@
 /**
- * Copia "nascosta" negli appunti con cancellazione automatica dopo 30 s.
+ * Concealed clipboard copy, cleared automatically after 30 s.
  *
- * Il processo di un comando Raycast termina poco dopo la chiusura della
- * finestra, quindi un semplice setTimeout non basta. Strategia a due livelli:
- * 1. se il processo è ancora vivo dopo 30 s, cancella subito;
- * 2. in ogni caso scrive un "marker" (hash SHA-256 del segreto + timestamp)
- *    in LocalStorage: il comando in background `clear-clipboard` (ogni minuto)
- *    svuota gli appunti se contengono ancora lo stesso segreto.
- * Negli appunti non viene mai salvato l'hash in chiaro del contenuto futuro: si
- * confronta solo l'hash del contenuto corrente.
+ * A Raycast command process ends shortly after its window closes, so a plain
+ * setTimeout is not enough. Two-level strategy:
+ * 1. if the process is still alive after 30 s, clear right away;
+ * 2. in any case write a "marker" (SHA-256 of the secret + timestamp) to
+ *    LocalStorage: the background `clear-clipboard` command (every minute)
+ *    clears the clipboard if it still holds the same secret.
+ * Only hashes are stored, and only the current clipboard content is compared.
  */
 import { Clipboard, LocalStorage } from "@raycast/api";
 import { createHash, randomUUID } from "node:crypto";
 
-/** Prefisso delle chiavi dei marker: una chiave distinta per ogni copia. */
+/** Marker key prefix: one distinct key per copy. */
 export const CLIPBOARD_MARKER_KEY = "passig.clipboardMarker";
 export const CLIPBOARD_CLEAR_AFTER_MS = 30_000;
 
@@ -27,10 +26,9 @@ function hashOf(text: string): string {
 }
 
 /**
- * Ogni copia scrive un marker con una chiave PROPRIA (`passig.clipboardMarker.<id>`):
- * la pulizia rimuove solo le chiavi che ha letto ed elaborato, quindi una copia
- * fatta nel frattempo da un altro comando non può mai perdere il proprio marker
- * (niente read-modify-write su una chiave condivisa).
+ * Every copy writes a marker under its OWN key (`passig.clipboardMarker.<id>`):
+ * cleanup removes only the keys it read and processed, so a copy made meanwhile by
+ * another command can never lose its marker (no read-modify-write on a shared key).
  */
 export async function copySecret(text: string): Promise<void> {
   const marker: ClipboardMarker = { hash: hashOf(text), at: Date.now() };
@@ -40,14 +38,14 @@ export async function copySecret(text: string): Promise<void> {
   const timer = setTimeout(() => {
     void clearIfStillSecret();
   }, CLIPBOARD_CLEAR_AFTER_MS);
-  // non tenere vivo il processo solo per il timer
+  // do not keep the process alive just for the timer
   timer.unref?.();
 }
 
 /**
- * Svuota gli appunti se contengono ancora un segreto copiato da almeno 30 s
- * (con `force`, indipendentemente dall'età: usato dal blocco). Rimuove solo i
- * marker scaduti/elaborati; quelli più recenti restano per la pulizia successiva.
+ * Clears the clipboard if it still holds a secret copied at least 30 s ago (with
+ * `force`, regardless of age: used when locking). Only expired/processed markers
+ * are removed; newer ones are kept for the next cleanup.
  */
 export async function clearIfStillSecret(force = false): Promise<boolean> {
   const all = await LocalStorage.allItems<Record<string, string>>();
@@ -59,7 +57,7 @@ export async function clearIfStillSecret(force = false): Promise<boolean> {
     try {
       marker = JSON.parse(String(raw)) as ClipboardMarker;
     } catch {
-      marker = null; // marker corrotto: va solo rimosso
+      marker = null; // corrupted marker: just remove it
     }
     if (marker && !force && now - marker.at < CLIPBOARD_CLEAR_AFTER_MS) continue;
     due.push({ key, marker });

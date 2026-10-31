@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /** Formati JSON/ZIP: Dashlane, Keeper, Proton Pass, Enpass. */
 import { csvTable, decodeText, isZip, unzip, zipFind } from "../io.js";
 import { cardFields, identityFields, identityTitle, truthy, type Collector, type DraftField } from "../normalize.js";

@@ -1,11 +1,11 @@
 import { showHUD } from "@raycast/api";
 import { clearIfStillSecret } from "./lib/clipboard";
-import { t } from "./i18n";
+import { t } from "./lib/text";
 import { lockSession } from "./lib/session";
 
-/** Blocca Passig: cancella le chiavi in cache e svuota gli appunti se contengono un segreto copiato. */
+/** Lock Passig: deletes the stored keys and clears the clipboard if it still holds a copied secret. */
 export default async function LockCommand() {
-  lockSession();
+  await lockSession();
   await clearIfStillSecret(true);
   await showHUD(t("common.locked"));
 }

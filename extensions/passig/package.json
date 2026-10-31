@@ -10,6 +10,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "private": true,
   "commands": [
     {
@@ -121,58 +124,13 @@
       "type": "textfield",
       "required": false,
       "default": "Raycast"
-    },
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "Language of the extension's interface. 'System' follows the language of your Mac.",
-      "type": "dropdown",
-      "required": false,
-      "default": "system",
-      "data": [
-        {
-          "title": "System",
-          "value": "system"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Italiano",
-          "value": "it"
-        },
-        {
-          "title": "Español",
-          "value": "es"
-        },
-        {
-          "title": "Deutsch",
-          "value": "de"
-        },
-        {
-          "title": "Français",
-          "value": "fr"
-        },
-        {
-          "title": "Português (Brasil)",
-          "value": "pt-BR"
-        },
-        {
-          "title": "日本語",
-          "value": "ja"
-        }
-      ]
     }
   ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "typecheck": "tsc --noEmit",
-    "vendor": "node scripts/vendor.mjs",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs",
-    "check-i18n": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-i18n.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@raycast/api": "^1.80.0",

@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * Import da altri password manager — tutto avviene SUL CLIENT: il file viene
  * letto e convertito in `ItemData` in memoria, poi cifrato con la vaultKey e

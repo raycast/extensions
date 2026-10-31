@@ -8,15 +8,14 @@ import {
   ResponseFormatError,
   SessionExpiredError,
 } from "../vendor/client-core/index.js";
-import { t } from "../i18n";
+import { t } from "./text";
 import { SERVER_URL } from "./preferences";
 
 /**
- * Messaggio utente, nella lingua attiva, per un errore qualsiasi.
- * Gli errori tipizzati di client-core portano messaggi fissi in italiano: qui si
- * ri-mappano per classe/codice. I messaggi che arrivano dal server (`ApiError`,
- * `PlanLimitError`) sono già tradotti dall'API in base ad `Accept-Language` e si
- * mostrano così come sono.
+ * User-facing message for any error.
+ * client-core's typed errors carry fixed (non-English) messages, so they are
+ * mapped here by class/code. Server messages (`ApiError`, `PlanLimitError`) are
+ * already in English (the API is called with `Accept-Language: en`) and are shown as-is.
  */
 export function describeError(err: unknown): string {
   if (err instanceof InvalidCredentialsError) return t("error.invalidCredentials");
@@ -25,7 +24,7 @@ export function describeError(err: unknown): string {
   if (err instanceof ConflictError) return t("error.conflict");
   if (err instanceof ResponseFormatError) return t("error.responseFormat");
   if (err instanceof ImportError) return describeImportError(err);
-  // 402: il messaggio del server è già localizzato
+  // 402: the server message is already in English
   if (err instanceof PlanLimitError) return err.message;
   if (err instanceof ApiError) {
     if (err.status === 429) return t("error.tooManyAttempts");

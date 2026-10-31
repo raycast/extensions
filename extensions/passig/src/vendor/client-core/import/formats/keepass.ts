@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 import { parseXml, xmlChild, xmlChildren, xmlText, type XmlNode } from "../io.js";
 import type { Collector, DraftField, DraftHistory } from "../normalize.js";
 import { ImportError } from "../types.js";

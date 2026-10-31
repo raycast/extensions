@@ -1,6 +1,6 @@
 /**
- * Mini formatter ICU (senza dipendenze da Raycast, così è testabile con `node --test`):
- * placeholder `{name}` e plurali `{count, plural, one {# item} other {# items}}`.
+ * Minimal ICU-style template formatter: `{name}` placeholders and plurals
+ * like `{count, plural, one {# item} other {# items}}`.
  */
 export type Params = Record<string, string | number>;
 
@@ -8,11 +8,11 @@ export function format(template: string, params: Params, lang: string): string {
   return render(parse(template), params, lang);
 }
 
-// ---- mini parser ICU ---------------------------------------------------------
+// ---- parser ------------------------------------------------------------------
 
 type Node = string | { arg: string } | { arg: string; plural: Record<string, Node[]> };
 
-/** Analizza un template: testo, `{arg}` e `{arg, plural, cat {...} ...}`. */
+/** Parses a template: text, `{arg}` and `{arg, plural, cat {...} ...}`. */
 export function parse(template: string): Node[] {
   const out: Node[] = [];
   let i = 0;
@@ -20,7 +20,7 @@ export function parse(template: string): Node[] {
   while (i < template.length) {
     const ch = template[i]!;
     if (ch === "'" && template[i + 1] === "{") {
-      // `'{'` = graffa letterale
+      // `'{` = literal brace
       text += "{";
       i += 2;
       continue;
@@ -104,18 +104,4 @@ function pluralCategory(lang: string, n: number): string {
   } catch {
     return n === 1 ? "one" : "other";
   }
-}
-
-/** Nomi degli argomenti usati da un template (per il controllo di coerenza tra lingue). */
-export function templateArgs(template: string): string[] {
-  const names = new Set<string>();
-  const visit = (nodes: Node[]) => {
-    for (const node of nodes) {
-      if (typeof node === "string") continue;
-      names.add(node.arg);
-      if ("plural" in node) for (const branch of Object.values(node.plural)) visit(branch);
-    }
-  };
-  visit(parse(template));
-  return [...names].sort();
 }

@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 import type { ItemData } from "../../shared/index.js";
 
 /** Formati di import supportati. L'id è stabile: è usato anche da Swift/Dart e nelle fixture. */

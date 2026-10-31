@@ -1,16 +1,17 @@
 /**
- * Piano Free/Premium in Raycast.
+ * Free/Premium plan in Raycast.
  *
- * Il server resta l'unica autorità (402 su ogni operazione oltre il piano): qui lo stato
- * serve solo a mostrare messaggi chiari prima. Ogni comando rilegge `GET /billing/status`
- * all'apertura; l'ultimo valore resta in `Cache` per mostrarlo subito. Se la chiamata
- * fallisce (server vecchio, offline) lo stato è `null` e tutto funziona come prima.
+ * The server stays the only authority (402 on any operation beyond the plan): the
+ * status here is only used to show clear messages upfront. Every command re-reads
+ * `GET /billing/status` when it opens; the last value is kept in `Cache` (it holds
+ * no secrets) to show it immediately. If the call fails (older server, offline) the
+ * status is `null` and everything works as before.
  */
 import { Action, ActionPanel, Cache, Detail, Icon, Toast, open, showToast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { shouldOfferUpgrade, type VaultSession } from "../vendor/client-core/index.js";
 import type { BillingStatus } from "../vendor/shared/index.js";
-import { formatNumber, t } from "../i18n";
+import { formatNumber, t } from "./text";
 import { describeError } from "./errors";
 import { itemUsageLabel, planLabel, premiumFeatures, storeName, upgradeCta } from "./plan";
 import type { ActiveSession } from "./session";
@@ -41,7 +42,7 @@ export async function fetchBilling(session: ActiveSession): Promise<BillingStatu
   }
 }
 
-/** Stato del piano: valore in cache subito, poi riletto dal server. */
+/** Plan status: cached value first, then re-read from the server. */
 export function useBilling(session: ActiveSession) {
   const [billing, setBilling] = useState<BillingStatus | null>(() => readCachedBilling());
   const reload = useCallback(async () => {
@@ -55,7 +56,7 @@ export function useBilling(session: ActiveSession) {
   return { billing, reload };
 }
 
-/** Id dei vault personali creati dall'utente (organizationId null, ruolo owner): contano nei limiti. */
+/** IDs of the user's own personal vaults (no organization, owner role): these count toward the limits. */
 export function personalVaultIds(vault: VaultSession): Set<string> {
   return new Set(
     vault
@@ -65,7 +66,7 @@ export function personalVaultIds(vault: VaultSession): Set<string> {
   );
 }
 
-/** Apre Stripe Checkout nel browser di sistema. */
+/** Opens Stripe Checkout in the default browser. */
 export async function openCheckout(session: ActiveSession): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: t("billing.openingCheckout") });
   try {
@@ -79,7 +80,7 @@ export async function openCheckout(session: ActiveSession): Promise<void> {
   }
 }
 
-/** Apre il Customer Portal di Stripe (pagamento, fatture, disdetta). */
+/** Opens the Stripe Customer Portal (payment method, invoices, cancellation). */
 export async function openBillingPortal(session: ActiveSession): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: t("billing.opening") });
   try {
@@ -93,10 +94,10 @@ export async function openBillingPortal(session: ActiveSession): Promise<void> {
   }
 }
 
-/** Azioni «Passa a Premium» / «Gestisci abbonamento», solo quando hanno senso. */
+/** "Upgrade to Premium" / "Manage Subscription" actions, only when they apply. */
 export function BillingActions({ session, billing }: { session: ActiveSession; billing: BillingStatus | null }) {
   if (!billing) return null;
-  // abbonamento in-app: si gestisce solo dallo store, niente checkout né portale Stripe
+  // in-app subscription: managed only from the store, no Stripe checkout or portal
   if (storeName(billing)) return null;
   return (
     <>
@@ -110,7 +111,7 @@ export function BillingActions({ session, billing }: { session: ActiveSession; b
   );
 }
 
-/** Dettaglio «Piano Passig». */
+/** "Passig Plan" detail. */
 export function PlanDetail({ session, initial }: { session: ActiveSession; initial?: BillingStatus | null }) {
   const [billing, setBilling] = useState<BillingStatus | null | undefined>(initial ?? undefined);
   const [loading, setLoading] = useState(true);

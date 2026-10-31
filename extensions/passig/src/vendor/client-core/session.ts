@@ -1,4 +1,4 @@
-// GENERATO da scripts/vendor.mjs — non modificare: modifica packages/ e rilancia `npm run vendor`.
+// GENERATED from packages/ by the Passig monorepo — do not edit by hand.
 /**
  * VaultSession: stato "sbloccato" di un client.
  *
@@ -363,6 +363,7 @@ export class VaultSession {
     const report: ImportReport = { created: 0, vaultsCreated: [] };
     try {
       for (const batch of plan.batches) {
+        this.assertUnlocked();
         let entry: VaultEntry | undefined;
         if (batch.vaultId) {
           entry = this.vaults.get(batch.vaultId);
@@ -378,6 +379,7 @@ export class VaultSession {
         let chars = 0;
         const flush = async () => {
           if (!chunk.length) return;
+          this.assertUnlocked();
           const res = await this.api.createItemsBulk(vault.id, chunk.map((c) => c.blob));
           res.items.forEach((created, i) => {
             this.rawItems.set(created.id, created);
@@ -396,6 +398,9 @@ export class VaultSession {
           chars = 0;
         };
         for (const raw of batch.items) {
+          // Each upload is awaited: if the session was locked meanwhile (auto-lock),
+          // the vault key has been zeroed and must never be used to encrypt more items.
+          this.assertUnlocked();
           const data = ItemData.parse(raw);
           const blob = encryptItem(data, vaultKey);
           if (chunk.length >= BULK_CHUNK || (chunk.length && chars + blob.length > BULK_MAX_CHARS)) await flush();

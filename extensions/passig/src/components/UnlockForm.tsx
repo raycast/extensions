@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useState } from "react";
-import { t } from "../i18n";
+import { t } from "../lib/text";
 import { getPrefs } from "../lib/preferences";
 import { unlock, type ActiveSession } from "../lib/session";
 import { describeError } from "../lib/errors";
@@ -9,7 +9,7 @@ interface Props {
   onUnlocked: (session: ActiveSession) => void;
 }
 
-/** Form di sblocco: chiede solo la master password (email e server sono preferenze). */
+/** Unlock form: asks only for the master password (email and server come from the preferences). */
 export function UnlockForm({ onUnlocked }: Props) {
   const prefs = getPrefs();
   const [password, setPassword] = useState("");
