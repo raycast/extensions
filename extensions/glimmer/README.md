@@ -38,7 +38,7 @@ The CLI does not open Glimmer. Only when no CLI executable is installed does Sto
 
 Quicklinks identify the PC by its saved ID and the app by name. Renaming an app can require recreating its quicklink. Spaces use `%20` and literal plus signs use `%2B`, matching Glimmer’s URL rules.
 
-PC and app lists use Raycast’s `useCachedPromise`. Once the PC list finishes, app lists load in parallel. Each PC’s failure stays in its own section, where Wake PC and refresh remain available. Cached lists appear while refreshing; choose **Refresh apps** after changing pairing or the app library. The running app stays visible even when marked hidden. A running app can also be active on another device; only **Glimmer Status** describes this Mac’s live stream.
+PC and app lists use Raycast’s `useCachedPromise`. Once the PC list finishes, each PC appears immediately and its apps load independently. A slow PC never holds up another PC’s apps or actions. Each PC’s failure stays in its own section, where Wake PC and refresh remain available. Cached lists appear while refreshing; choose **Refresh apps** after changing pairing or the app library. The running app stays visible even when marked hidden. A running app can also be active on another device; only **Glimmer Status** describes this Mac’s live stream.
 
 ## Troubleshooting
 
