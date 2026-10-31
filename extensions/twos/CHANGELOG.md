@@ -1,5 +1,12 @@
 # Twos Changelog
 
+## [Add to Today] - {PR_MERGE_DATE}
+
+- **Add Thing** now defaults to **Today**, so you can add a thing without
+  picking a list. Choose any other list from the dropdown as before.
+- New **Add to Today** command: type a thing right in the Raycast search bar
+  and press Enter to add it to today's list, no form.
+
 ## [Create things from search] - 2026-10-01
 
 - Add a Create Thing action to search results and the empty state. Press Command+N to open Add Thing with your search text already filled in.
