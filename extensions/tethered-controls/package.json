@@ -15,6 +15,61 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "share-profile",
+      "title": "Share Profile",
+      "description": "Choose a saved profile and export a .tetheredprofile file through Tethered",
+      "mode": "view"
+    },
+    {
+      "name": "post-profile",
+      "title": "Post Profile",
+      "description": "Choose a saved profile and open Tethered’s submission editor for tetheredmac.com/profiles",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-companion-sync",
+      "title": "Toggle Companion Sync",
+      "description": "Request a Companion Sync toggle; requires a supporting Tethered app version",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mcp-bridge",
+      "title": "Toggle MCP Bridge",
+      "description": "Enable or disable the Tethered MCP bridge; disabling ends the active task session",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-events",
+      "title": "Next Event",
+      "description": "Show the next upcoming event and open the event manager",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "manage-events-view",
+      "title": "Manage Events",
+      "description": "View upcoming events, edit schedules, and enable or disable repeating events",
+      "mode": "view"
+    },
+    {
+      "name": "quick-event",
+      "title": "Quick Event",
+      "description": "Type an event in plain language, preview it live, and press Enter to create it",
+      "mode": "view"
+    },
+    {
+      "name": "create-scheduled-event",
+      "title": "Create Scheduled Event",
+      "description": "Schedule a one-time Tethered action or macOS power event",
+      "mode": "view"
+    },
+    {
+      "name": "create-repeating-event",
+      "title": "Create Repeating Event",
+      "description": "Repeat a Tethered action or macOS power event on selected weekdays",
+      "mode": "view"
+    },
+    {
       "name": "get-tethered",
       "title": "Get Tethered",
       "description": "Open the Tethered website to download the Mac app",

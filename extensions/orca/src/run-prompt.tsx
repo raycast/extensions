@@ -9,13 +9,10 @@ import {
   showHUD,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 
+import { execOrca } from "./orca.ts";
 import type { PromptSpec } from "./prompt.ts";
 import { composePrompt, runPrompt, worktreeNameFor } from "./prompt.ts";
-
-const execFileAsync = promisify(execFile);
 
 /**
  * What a saved prompt Quicklink points at. On its own this command has nothing
@@ -68,7 +65,7 @@ export default async function Command(
         prompt: composePrompt(spec.prompt, extra, { clipboard, selection }),
       },
       orcaPath,
-      execFileAsync,
+      execOrca,
     );
 
     await showHUD(

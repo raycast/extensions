@@ -1077,7 +1077,7 @@
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "gpt-tokenizer": "^2.8.1",
-    "openai": "^4.104.0"
+    "openai": "^7.36.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

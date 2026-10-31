@@ -1,4 +1,5 @@
 import { Chat } from "@ai-sdk/react";
+import { captureException } from "@raycast/api";
 import { getAccessToken, showFailureToast } from "@raycast/utils";
 import { DefaultChatTransport, UIMessage } from "ai";
 import * as z from "zod";
@@ -60,7 +61,10 @@ export const getAssistantChat = (chatId: string) => {
       if (type !== "data-assistant-sources") return;
       sourcesByChatId.set(chatId, [...getChatSources(chatId), ...(SourcesSchema.safeParse(data).data ?? [])]);
     },
-    onError: (error) => showFailureToast(error, { title: "Could not get an answer." }),
+    onError: (error) => {
+      captureException(error);
+      showFailureToast(error, { title: "Could not get an answer." });
+    },
   });
   chatsById.set(chatId, chat);
   return chat;

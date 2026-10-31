@@ -1,5 +1,29 @@
 # Instagram Media Downloader Changelog
 
+## [Improvements] - 2026-10-31
+
+- Story and highlight downloads work again. Their service can no longer be reached, so they now read the story or highlight open in your browser, through the Raycast browser extension.
+- No more third-party download servers: media comes from your browser tab or from Instagram itself, so your links go only to Instagram. The README explains how.
+- New Download Method preference: Browser Tab (default) or Instagram Directly, which needs no browser but may be rate-limited. For posts and reels, the other is tried next.
+- Download Instagram Media now downloads stories too. While it waits, press ⌘T to open the post or story in your browser; the download comes from that tab if it loads first.
+- A highlight link in Download Instagram Media or Download Instagram Story opens the highlight grid. Without the highlight open, the grid offers to open it; without the browser extension, to install it.
+- On Windows, where the browser extension isn't available, posts and reels download from Instagram directly; stories and highlights need macOS.
+- Links with a username (`instagram.com/<user>/reel/…`) or without `https://` are accepted.
+- Errors say what went wrong in words, and Copy Error shows what was tried, with signed links removed.
+- Story and highlight files are named after the story (`story-<id>`, `highlight-<id>-1`, …).
+- Downloaded files only ever get an image, video or audio extension, whatever the link says.
+- In the highlight grid, Select is on ↵ alone, the saved-JSON toasts offer Show in Finder and Copy Path, and Save Selected Urls to JSON lost a malformed shortcut.
+
+## [Improvements] - 2026-10-28
+
+- Carousel downloads now show which item is downloading ("Media 2 of 4") with its progress, and finish with a summary of how many files were saved.
+- Downloaded files are named after the post, numbered for carousels (`<shortcode>-1.jpg`, `<shortcode>-2.jpg`, …), instead of an opaque downloader ID.
+- Starting a second download while one is still running (including pressing Download again in the highlight list) is now refused, instead of saving a second copy of every file.
+- A download that fails partway no longer leaves a partial file behind.
+- The finished-download toast offers Show in Finder and Copy Path.
+- Add a Debug Logging preference for troubleshooting downloads.
+- Update to Raycast API 2.9 and the latest dependencies, fixing all known vulnerabilities, including a high-severity one in `follow-redirects`.
+
 ## [Fixes] - 2026-07-04
 
 - Improve Instagram post and reel downloads, including more reliable filename and extension detection.

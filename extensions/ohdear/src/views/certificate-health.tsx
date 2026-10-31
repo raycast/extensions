@@ -4,7 +4,7 @@ import { EmptyView } from "../components/empty-view";
 import { CertificateCheck, Site } from "../interface";
 import { camelCaseToWords } from "../utils/camel-case";
 
-export default function CertificateHealthCommand({ item }: { item: Site }): JSX.Element {
+export default function CertificateHealthCommand({ item }: { item: Site }) {
   const { data, isLoading } = getCertificateHealth(item);
 
   return (
@@ -36,7 +36,7 @@ export default function CertificateHealthCommand({ item }: { item: Site }): JSX.
                   <List.Item.Detail.Metadata.Label
                     key={index}
                     title={camelCaseToWords(check.type)}
-                    text={camelCaseToWords(check.type)}
+                    text={check.passed ? "Passed" : "Failed"}
                   />
                 ))}
               </List.Item.Detail.Metadata>

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teak-raycast",
-  "version": "1.0.81",
+  "version": "1.0.91",
   "private": true,
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
   "categories": [
@@ -19,45 +19,190 @@
     "typecheck": "tsc --noEmit"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
     "esbuild": "0.28.2"
   },
   "dependencies": {
     "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0",
-    "teak-sdk": "1.0.81"
+    "teak-sdk": "1.0.87"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "21.0.4",
     "@types/node": "^26.2.0",
     "@types/react": "19.2.18",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.66.0",
-    "@happy-dom/global-registrator": "20.14.5",
+    "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react": "19.2.8"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.66.0"
   },
   "icon": "icon.png",
   "ai": {
-    "instructions": "Use search-cards or get-recent to find Teak cards, list-tags to discover the user's taxonomy, get-card for follow-up detail on a specific card, save-card when the user explicitly asks to save something, and favorite-card to toggle favorites. Always confirm mutating actions before running them."
+    "instructions": "Use search-cards or get-recent to find Teak cards, list-tags to discover the user's tags, and list-folders to see their folders (manual and smart). Narrow search-cards with tag, folder, type, favorited, archived, done (\"done\" or \"todo\" for links they have or haven't read, watched or bought), mood (images), and dates. Pass similarTo with a card id to find cards close in meaning to it, and sort \"shuffle\" for a random sample. Archived cards, and cards tagged secret or hidden, are left out of searches unless asked for: use archived for the first and tag secret or hidden for the second. Use get-card for follow-up detail on a specific card, save-card when the user explicitly asks to save something, favorite-card to toggle favorites, and update-card to add or remove tags, change notes, mark a link done, archive or unarchive a card, or add it to a folder. Always confirm mutating actions before running them.",
+    "evals": [
+      {
+        "input": "@teak find cards similar to card 4a2f9c1e7b3d5a8e0c6f1b2d4e7a9c3b5",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "similarTo": "4a2f9c1e7b3d5a8e0c6f1b2d4e7a9c3b5"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak show me the articles I haven't read yet",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "done": "todo"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak what have I already watched?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "done": "done"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak show me a few random things I saved",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "sort": "shuffle"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak what's in my archive?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "archived": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak find moody brutalist images",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-cards",
+              "arguments": {
+                "mood": "moody brutalist"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak list my Teak folders",
+        "expected": [
+          {
+            "callsTool": "list-folders"
+          }
+        ]
+      },
+      {
+        "input": "@teak add card 4a2f9c1e7b3d5a8e0c6f1b2d4e7a9c3b5 to my Reading list folder",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-card",
+              "arguments": {
+                "addToFolder": "Reading list"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak mark card 4a2f9c1e7b3d5a8e0c6f1b2d4e7a9c3b5 as done",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-card",
+              "arguments": {
+                "done": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak archive card 4a2f9c1e7b3d5a8e0c6f1b2d4e7a9c3b5",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-card",
+              "arguments": {
+                "archived": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@teak list my Teak tags",
+        "expected": [
+          {
+            "callsTool": "list-tags"
+          }
+        ]
+      }
+    ]
   },
   "commands": [
     {
       "name": "quick-save",
       "title": "Quick Save",
       "subtitle": "Capture text or links to Teak",
-      "description": "Save text or URLs to Teak without leaving your workflow",
+      "description": "Save text or URLs to Teak, with optional tags and a note, without leaving your workflow",
       "mode": "view"
     },
     {
       "name": "save-text",
       "title": "Save to Teak",
       "subtitle": "Capture text or links to Teak",
-      "description": "Save any text or URL to Teak. Works as a Raycast root-search fallback command.",
+      "description": "Save any text or URL to Teak, with optional tags and a note. Works as a Raycast root-search fallback command.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "content",
           "placeholder": "Text or URL",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "Tags (comma separated)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "note",
+          "placeholder": "Note",
           "type": "text",
           "required": false
         }
@@ -67,7 +212,7 @@
       "name": "save-clipboard-url",
       "title": "Save Clipboard",
       "subtitle": "Capture copied text or links to Teak",
-      "description": "Save the current clipboard contents to Teak in one step",
+      "description": "Save the current clipboard to Teak in one step, including copied files and images",
       "mode": "no-view"
     },
     {
@@ -85,10 +230,17 @@
       "mode": "no-view"
     },
     {
+      "name": "save-finder-selection",
+      "title": "Save Finder Selection",
+      "subtitle": "Upload selected files to Teak",
+      "description": "Save the files selected in Finder to Teak, like dropping them on the web app",
+      "mode": "no-view"
+    },
+    {
       "name": "search-cards",
       "title": "Search Cards",
       "subtitle": "Find anything in your Teak vault",
-      "description": "Find any Teak card by content, tags, or metadata",
+      "description": "Find any Teak card by content, tags, or metadata, then archive it, mark it done, add it to a folder, or find similar cards",
       "mode": "view"
     },
     {
@@ -104,6 +256,35 @@
       "subtitle": "List your tags with card counts",
       "description": "Browse every tag in your Teak vault with card counts and drill into any tag",
       "mode": "view"
+    },
+    {
+      "name": "folders",
+      "title": "Browse Folders",
+      "subtitle": "Open your folders and smart folders",
+      "description": "Browse your Teak folders, including smart folders that save a search, and open any of them",
+      "mode": "view"
+    },
+    {
+      "name": "random-cards",
+      "title": "Random Cards",
+      "subtitle": "Revisit a shuffled set of cards",
+      "description": "See 20 random cards from your vault and archive the ones you're done with, or keep them",
+      "mode": "view"
+    },
+    {
+      "name": "find-similar",
+      "title": "Find Similar Cards",
+      "subtitle": "Cards close in meaning to one card",
+      "description": "Find the cards closest in meaning to a card, from its ID or a Teak link",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "card",
+          "placeholder": "Card ID or Teak link",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "platforms": [
@@ -115,7 +296,7 @@
       "title": "API Key",
       "type": "password",
       "required": false,
-      "description": "Optional — only if you prefer an API key over browser sign-in. Generate in Teak Settings > Manage API Keys."
+      "description": "Optional. Only if you prefer an API key to browser sign-in. Make one in Teak Settings > Integrations > API keys."
     }
   ],
   "title": "Teak",
@@ -123,7 +304,7 @@
     {
       "name": "search-cards",
       "title": "Search Teak Cards",
-      "description": "Search Teak cards by text, type, tags, favorites, and sort order."
+      "description": "Search Teak cards by text, type, tags, folder, favorites, done state, archive, mood, similarity to a card, and sort order."
     },
     {
       "name": "get-card",
@@ -141,6 +322,11 @@
       "description": "List the user's Teak tags with per-tag card counts."
     },
     {
+      "name": "list-folders",
+      "title": "List Teak Folders",
+      "description": "List the user's Teak folders, manual and smart, with card counts."
+    },
+    {
       "name": "save-card",
       "title": "Save to Teak",
       "description": "Save a note or URL to the user's Teak library."
@@ -149,6 +335,11 @@
       "name": "favorite-card",
       "title": "Toggle Favorite",
       "description": "Favorite or unfavorite a Teak card by id."
+    },
+    {
+      "name": "update-card",
+      "title": "Update Teak Card",
+      "description": "Add or remove a Teak card's tags (including tags Teak added), replace its notes, mark a link done, archive it, or add it to a folder."
     }
   ]
 }

@@ -41,7 +41,7 @@ function describeSkillsError(error: Error): SkillsErrorDescription {
   return {
     errorTitle: "Unable to Load Installed Skills",
     errorDetails:
-      "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` (or `npx -y skills@latest list -g` if Bun is not installed) in Terminal to inspect the underlying CLI error.",
+      "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g --json` (or `npx -y skills@latest list -g --json` if Bun is not installed) in Terminal to inspect the JSON output or underlying CLI error.",
   };
 }
 

@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { resolveRenderer } from "../select-renderer";
 
 describe("resolveRenderer", () => {
+  it.each(["svg", "png"] as const)(
+    "keeps explicit Ondine selection for %s so format validation cannot silently reroute",
+    (format) => {
+      expect(resolveRenderer({ code: "mindmap\n root((Plan))", format, requestedEngine: "ondine" })).toBe("ondine");
+    },
+  );
+
   it("chooses beautiful for supported svg in auto mode", () => {
     const result = resolveRenderer({
       code: "graph TD\nA-->B",

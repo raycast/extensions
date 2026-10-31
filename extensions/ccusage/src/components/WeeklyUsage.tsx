@@ -29,19 +29,23 @@ export function WeeklyUsage() {
     [weeklyUsage?.totalCost, weeklyUsage?.totalTokens],
   );
 
-  const accessories: List.Item.Accessory[] = error
-    ? STANDARD_ACCESSORIES.ERROR
-    : weeklyUsage === undefined
-      ? STANDARD_ACCESSORIES.LOADING
-      : [{ text: formatCost(weeklyUsage.totalCost), icon: Icon.Coins }];
+  const accessories: List.Item.Accessory[] =
+    error && !weeklyUsage
+      ? STANDARD_ACCESSORIES.ERROR
+      : weeklyUsage === undefined
+        ? isLoading
+          ? STANDARD_ACCESSORIES.LOADING
+          : STANDARD_ACCESSORIES.NO_DATA
+        : [{ text: formatCost(weeklyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
-    if (error || !weeklyUsage) {
-      return <ErrorMetadata error={error} noDataMessage={!weeklyUsage ? "No usage recorded this week" : undefined} />;
+    if (!weeklyUsage) {
+      return <ErrorMetadata error={error} isLoading={isLoading} noDataMessage="No usage recorded this week" />;
     }
 
     return (
       <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
         <List.Item.Detail.Metadata.Label title="Week of" text={weeklyUsage.week} icon={Icon.Calendar} />
         {weeklyUsage.metadata?.agents && weeklyUsage.metadata.agents.length > 1 && (
           <List.Item.Detail.Metadata.Label

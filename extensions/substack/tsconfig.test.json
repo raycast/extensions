@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["tests/**/*", "src/**/*", "raycast-env.d.ts", "vitest.config.mts"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "lib": ["ES2023", "DOM"]
+  }
+}

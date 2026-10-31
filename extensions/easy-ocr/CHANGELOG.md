@@ -1,5 +1,9 @@
 # Tesseract OCR Changelog
 
+## [Bug Fixes] - 2026-10-17
+
+- Fixed screenshot capture failing when the path contains spaces
+
 ## [Apple Vision Engine] - 2026-10-14
 
 - Added Apple Vision (the engine behind macOS Live Text) as an optional OCR engine that needs no Tesseract install

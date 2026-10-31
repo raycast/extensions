@@ -218,7 +218,8 @@
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "@types/archiver": "7.0.0",
-    "archiver": "7.0.1"
+    "archiver": "7.0.1",
+    "undici": "^6.29.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

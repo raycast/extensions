@@ -1,5 +1,20 @@
 # Slack Changelog
 
+## [Channel Mentions in AI Chat] - 2026-10-31
+
+- Add a **Channels** mention search to find public and private channels by name. Without a query it lists the channels you're a member of, and search results rank your own channels first.
+- Read the selected channel's current topic, purpose, member count, and Slack channel ID when sending a mention, so AI can read its history or search it without guessing the channel.
+
+## [User Mentions in AI Chat] - 2026-10-28
+
+- Add a **Users** mention search to find workspace members by name, username, email, or job title.
+- Read the selected person's current profile when sending a mention, including their Slack user ID and workspace.
+
+## [Profile photos in Find Users] - 2026-10-22
+
+- Return each person's profile photo URL from the **Find Users** AI tool, so AI can use it, for example to add a photo to a contact. It uses the 1024px photo when someone uploaded their own and the 512px image otherwise.
+- Add a `hasCustomPhoto` flag so AI can tell an uploaded photo apart from Slack's default avatar.
+
 ## [Added new screenshots] - 2026-10-13
 
 ## [Rename Channel AI Tool] - 2026-10-12
