@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add WolfSMS MCP Server] - {PR_MERGE_DATE}
+
+- Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Norwegian Company Data MCP Server] - 2026-10-31
 
 - Add Norwegian Company Data to the registry: search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers. Hosted Streamable HTTP server at https://tools.skaidigital.com/brreg/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
