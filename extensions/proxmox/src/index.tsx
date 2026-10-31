@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { type VmListGroup, useVmList } from "@/hooks/use-vm-list";
+import { parseTags } from "@/utils/tags";
 import { getVmStatusIcon } from "@/utils/ui";
 import { NoServersEmptyView } from "@/components/NoServersEmptyView";
 import { ServerErrorItem } from "@/components/ServerErrorItem";
@@ -29,7 +30,7 @@ const Command = () => {
             icon={{ ...getVmStatusIcon(vm.status), tooltip: vm.status }}
             title={vm.name}
             actions={<VmActionPanel vm={vm} mutate={mutate} revalidate={revalidate} />}
-            keywords={[vm.vmid.toString(), group.server.name]}
+            keywords={[vm.vmid.toString(), group.server.name, ...parseTags(vm.tags)]}
             detail={<VmDetail vm={vm} />}
             accessories={[{ text: vm.id }]}
           />

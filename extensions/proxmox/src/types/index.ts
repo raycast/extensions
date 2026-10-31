@@ -46,8 +46,21 @@ export type PveVm = {
 
   node: string;
   status: PveVmStatus;
+  /** Semicolon separated, absent when the VM has no tags */
+  tags?: string;
   uptime: number;
   vmid: number;
+};
+
+export type PveVmConfig = {
+  tags?: string;
+  /** SHA1 of the config file, which a save can send to fail when the config changed meanwhile */
+  digest: string;
+};
+
+export type PveClusterOptions = {
+  /** Every tag the token may set: the ones in use plus the allow-list */
+  "allowed-tags"?: string[];
 };
 
 export type PveStorage = {
@@ -122,8 +135,32 @@ export type VmAction = {
     doing: string;
     ended: string;
   };
-  func: (vm: WithServer<PveVm>) => Promise<unknown>;
+  /** Resolves to the UPID of the task Proxmox started */
+  func: (vm: WithServer<PveVm>) => Promise<string>;
   needConfirm?: boolean;
+};
+
+export type PveTask = {
+  upid: string;
+  node: string;
+  type: string;
+  /** The VM or other object the task works on */
+  id?: string;
+  user: string;
+  starttime: number;
+  endtime?: number;
+  /** "OK", "WARNINGS: n" or an error message, absent while the task runs */
+  status?: string;
+};
+
+export type PveTaskStatus = {
+  status: "running" | "stopped";
+  exitstatus?: string;
+};
+
+export type PveTaskLogLine = {
+  n: number;
+  t: string;
 };
 
 export type WithShowErrorScreen<T extends object> = T & { showErrorScreen: boolean };

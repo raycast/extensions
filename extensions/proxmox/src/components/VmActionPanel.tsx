@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { PveVm, VmAction, WithServer } from "@/types";
 import { PveVmStatus, PveVmTypes } from "@/types";
@@ -6,6 +6,9 @@ import type { useVmList } from "@/hooks/use-vm-list";
 import { ALL_ACTIONS } from "@/utils/const";
 import { describeFetchError } from "@/utils/errors";
 import { formatBrowserUrl } from "@/utils/format";
+import { EditTags } from "@/screens/EditTags";
+import { TaskLog } from "@/screens/TaskLog";
+import { VmTasks } from "@/screens/VmTasks";
 
 type VmActionPanelProps = {
   vm: WithServer<PveVm>;
@@ -14,6 +17,8 @@ type VmActionPanelProps = {
 };
 
 export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) => {
+  const { push } = useNavigation();
+
   const handleAction = async (vm: WithServer<PveVm>, { title, labels, func, needConfirm = true }: VmAction) => {
     const confirm =
       !needConfirm ||
@@ -32,8 +37,9 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
       style: Toast.Style.Animated,
     });
 
+    let upid: string;
     try {
-      await mutate(func(vm));
+      upid = await mutate(func(vm));
     } catch (e) {
       await showFailureToast(e, {
         title: `Failed to ${title} ${vm.name}`,
@@ -44,6 +50,13 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
 
     toast.style = Toast.Style.Success;
     toast.message = `${labels.ended} ${vm.name}`;
+    toast.primaryAction = {
+      title: "Show Log",
+      onAction: (toast) => {
+        toast.hide();
+        push(<TaskLog server={vm.server} node={vm.node} upid={upid} />);
+      },
+    };
   };
 
   return (
@@ -89,6 +102,18 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
             onAction={() => handleAction(vm, ALL_ACTIONS.start)}
           />
         )}
+        <Action.Push
+          title="Show Tasks"
+          icon={Icon.Terminal}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          target={<VmTasks vm={vm} />}
+        />
+        <Action.Push
+          title="Edit Tags"
+          icon={Icon.Tag}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          target={<EditTags vm={vm} onChange={revalidate} />}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser

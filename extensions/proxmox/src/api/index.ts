@@ -1,5 +1,6 @@
-import type { ApiResponse, PveServer, PveVm, WithServer } from "@/types";
+import type { ApiResponse, PveServer, PveVm, PveVmConfig, WithServer } from "@/types";
 import { buildHeaders } from "@/utils/headers";
+import { parseTags } from "@/utils/tags";
 
 /** Upper bound for a single request, a server that stops answering must not stay pending forever */
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -31,51 +32,39 @@ export async function pveFetch<T = unknown>(server: PveServer, url: string, opti
   return (await response.json()) as ApiResponse<T>;
 }
 
-export async function startVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/start`;
-  await pveFetch(vm.server, url, {
+async function postVmStatus(vm: WithServer<PveVm>, action: string): Promise<string> {
+  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/${action}`;
+  const response = await pveFetch<string>(vm.server, url, {
     method: "POST",
   });
+  return response.data;
 }
 
-export async function stopVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/stop`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
+export const startVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "start");
+export const stopVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "stop");
+export const shutdownVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "shutdown");
+export const suspendVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "suspend");
+export const resetVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "reset");
+export const resumeVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "resume");
+export const rebootVm = (vm: WithServer<PveVm>) => postVmStatus(vm, "reboot");
 
-export async function shutdownVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/shutdown`;
+/**
+ * Applies `edit` to the tags the VM has right now and returns the saved list. We send the config
+ * digest along, so Proxmox rejects the save when someone changed the VM since we read it.
+ */
+export async function editVmTags(vm: WithServer<PveVm>, edit: (current: string[]) => string[]): Promise<string[]> {
+  const url = `api2/json/nodes/${vm.node}/${vm.id}/config`;
+  const { data: config } = await pveFetch<PveVmConfig>(vm.server, url);
+  const tags = edit(parseTags(config.tags));
+  const body = new URLSearchParams({ digest: config.digest });
+  if (tags.length > 0) {
+    body.set("tags", tags.join(";"));
+  } else {
+    body.set("delete", "tags");
+  }
   await pveFetch(vm.server, url, {
-    method: "POST",
+    method: "PUT",
+    body,
   });
-}
-
-export async function suspendVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/suspend`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function resetVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reset`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function resumeVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/resume`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
-}
-
-export async function rebootVm(vm: WithServer<PveVm>) {
-  const url = `api2/json/nodes/${vm.node}/${vm.id}/status/reboot`;
-  await pveFetch(vm.server, url, {
-    method: "POST",
-  });
+  return tags;
 }

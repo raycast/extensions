@@ -1,5 +1,17 @@
 # Proxmox Changelog
 
+## [Task Logs and System Log] - {PR_MERGE_DATE}
+
+- After starting, stopping or rebooting a VM, the success toast offers `Show Log`, which follows the task's log live, hook script output included
+- Added a `Show Tasks` action (`⌘L`) that lists the recent tasks of a VM and opens their logs
+- Added a `Show Tasks` command with the recent tasks of every server
+- Added a `Show System Log` command with the system journal of each node
+
+## [VM Tags] - {PR_MERGE_DATE}
+
+- Show the tags of a VM in its details, and find VMs by tag in the search bar
+- Added an `Edit Tags` action to add, remove or create tags on a VM
+
 ## [Fix Slow Server Loading] - 2026-09-10
 
 - Fixed the VM and storage lists staying empty and loading forever when a server responds slower than the refresh interval
