@@ -1,0 +1,5 @@
+node_modules
+dist
+raycast-env.d.ts
+package-lock.json
+.local
