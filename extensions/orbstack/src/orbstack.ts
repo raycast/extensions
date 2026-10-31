@@ -42,6 +42,36 @@ export type Distro =
 
 export const ORB_CTL = "orbctl";
 
+export const DOCKER = "docker";
+
+// Without a pinned context, `docker` targets whatever engine the user last
+// selected (Docker Desktop, Colima, remote) — list and mutations would hit it.
+export const DOCKER_CONTEXT_ARGS = ["--context", "orbstack"];
+
+export interface OrbContainer {
+  ID: string;
+  Names: string;
+  Image: string;
+  Command: string;
+  State: string;
+  Status: string;
+  Ports: string;
+  RunningFor: string;
+  Project: string;
+  Service: string;
+}
+
+export interface ContainerSection {
+  title: string;
+  runningCount: number;
+  containers: OrbContainer[];
+}
+
+// `docker container ls` emits one JSON object per line; labels come from a Go template
+// because parsing them out of the comma-joined Labels blob is fragile.
+export const CONTAINER_LS_FORMAT =
+  '{"ID":{{json .ID}},"Names":{{json .Names}},"Image":{{json .Image}},"Command":{{json .Command}},"State":{{json .State}},"Status":{{json .Status}},"Ports":{{json .Ports}},"RunningFor":{{json .RunningFor}},"Project":{{json (.Label "com.docker.compose.project")}},"Service":{{json (.Label "com.docker.compose.service")}}}';
+
 export const DISTROS: { value: Distro; title: string }[] = [
   { value: "alma", title: "AlmaLinux" },
   { value: "alpine", title: "Alpine Linux" },
