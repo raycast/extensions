@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Paidnice MCP Server] - 2026-10-31
+
+- Add Paidnice to the official registry: accounts receivable for Xero and QuickBooks Online. Read the customer email and SMS replies Paidnice collects, list and look up customers, invoices and notes, and update contact people. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration).
+
 ## [Add Norwegian Company Data MCP Server] - 2026-10-31
 
 - Add Norwegian Company Data to the registry: search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers. Hosted Streamable HTTP server at https://tools.skaidigital.com/brreg/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
