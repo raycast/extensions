@@ -42,7 +42,7 @@ export interface Model {
   vision?: boolean;
 }
 
-export type ReasoningEffort = "none" | "low" | "medium" | "high";
+export type ReasoningEffort = "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
 export type CommandContentSource = "clipboard" | "selectedText" | "browserTab";
 
