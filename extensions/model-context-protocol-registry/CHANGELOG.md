@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kin MCP Server] - {PR_MERGE_DATE}
+
+- Add Kin to the official registry: use your accounts at GitHub, Notion, Linear and other services, even two accounts of one service, each with its own rule per action (Allow, Ask me or Block). Hosted Streamable HTTP server at https://app.kinlab.ai/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Melso Fiscal MCP] - 2026-10-31
 
 - Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
