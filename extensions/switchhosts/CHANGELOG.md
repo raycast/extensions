@@ -1,6 +1,6 @@
 # SwitchHosts Changelog
 
-## [Add Refresh Action] - {PR_MERGE_DATE}
+## [Add Refresh Action] - 2026-10-31
 
 - Add refresh action for remote hosts
 
