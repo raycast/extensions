@@ -1,0 +1,58 @@
+# Argo
+
+Continue explicitly connected Claude Code sessions from Raycast, on your Mac or a server. Browse sessions, send messages, read replies, and respond to supported agent requests. Codex support is experimental and has additional requirements below.
+
+Argo is a **self-configured companion bridge**, not a hosted AI service. Installing this extension installs the Raycast UI only: it does not install the Argo runtime, open a tunnel, start a model, or install a launchd/systemd service. You run the bridge and connector on machines you control and keep their processes and transport alive. No Argo cloud account or model API key is required by the extension; your existing agent's authentication and permissions still apply.
+
+## Requirements
+
+- Raycast on **macOS**.
+- On the bridge/agent machine: **Node.js 22.13+**, npm, and an already-running supported agent. The public installer also needs tar and HTTPS access to GitHub release assets and the npm registry. Argo does not install system packages.
+- Claude Code with its Bash tool and an authoritative current session identity for cooperative pull. No restart or MCP configuration is needed for this default path.
+- For a server: ordinary SSH Local Port Forwarding or VS Code Ports, exposing the bridge only on your Mac's loopback interface. The setup tool must support persistent background execution for Argo's processes.
+
+The runtime is installed separately from the pinned public **v0.1.3** release after inspecting its installer. GitHub distributes code, not conversation traffic.
+
+**Pre-publication security gate:** v0.1.3 has a client-revocation race for requests already uploading when access is revoked. Repository source is patched, but the pinned public release is not. This submission remains a draft until setup can pin a patched runtime. For emergency revocation, stop the bridge first to terminate incomplete uploads, remove untrusted forwarding, then revoke access using the local administrator before restoring access. See the [security assessment](https://github.com/MatrixA/argo/blob/main/docs/security-review.md).
+
+## First connection: an unconfigured server
+
+You do not need a pre-existing Argo installation, bridge address, or pairing code.
+
+1. Open **Argo → Connect a Server**. Choose **Copy Fresh Server Setup Prompt** and give it to your **existing** server agent, not a new session or subagent. The prompt uses these fixed, revision-pinned [server setup instructions](https://github.com/MatrixA/argo/blob/ab8250bdbcb6c626b21a5698efff0983c2260de8/docs/server-setup.md).
+2. The agent checks prerequisites, inspects and installs the pinned runtime, starts or reuses a server-local bridge, and connects its exact current session through the supported adapter. It reports installation, bridge startup, and agent registration separately. Unsupported prerequisites mean **not connected**, not permission to start a replacement agent or weaken security policy.
+3. The agent prints the actual endpoint, such as `http://127.0.0.1:49120`, on its own line in terminal output and its handoff, and returns a short-lived **Mac pairing code** separately. VS Code can detect the URL when automatic forwarding is enabled; check its Ports view for the actual Mac mapping. Otherwise forward the returned server port manually.
+4. Use ordinary **Local Port Forwarding** into one unused **Mac loopback port 49120–49139**. Keep listeners private. No Remote Forward is required for this flow. Multiple servers may use the same server port but need different Mac-mapped ports. The discovery range is configurable in extension preferences, up to 64 ports.
+5. Choose **Find Forwarded Server Bridges** in Connection Setup, or scan again in Connect a Server. Select the matching discovered identity, choose **Pair This Server**, and submit the Mac pairing code with **Verify and Pair Server**. **Pairing is mandatory:** signed discovery checks a fresh bridge signature, not authorization or transport confidentiality. Use only your own trusted loopback listener or SSH/VS Code forward. A malicious local proxy can relay a genuine signature and observe bearer credentials; signed discovery is not TLS and does not prevent relay attacks. The code must match that bridge; pairing grants control of all its agent sessions, not just one agent. No durable credential or admin-file copying is needed in this flow.
+6. Open **Agent Sessions**. After pairing, Argo remembers the server. If a code expires or its claim is uncertain, request a fresh code using `client-invite` on the bridge machine rather than retrying an uncertain claim.
+
+The bridge and connector are tool-managed processes, not permanently installed services. If their process handles end or the tunnel closes, delivery stops. Installing the extension alone cannot make a server reachable.
+
+### Local or existing bridges
+
+A bridge can instead run on your Mac, or use an existing working loopback tunnel. Follow the [topology guide](https://github.com/MatrixA/argo/blob/v0.1.3/docs/topologies.md). **Connection Setup → Use an Existing Bridge** accepts a private client configuration **file path**, not a pasted token, and verifies authentication before switching. The default path is `~/.argo/client.json`; the Client Configuration File preference can override it. Attach each additional agent separately using its scoped pairing prompt. Importing client access does not attach an agent.
+
+## Everyday use
+
+- **Agent Sessions** aggregates sessions across paired bridges. Both it and **Recent Agent Session** reopen the last valid conversation; use **All Sessions** to change targets. Reopening checks the configured loopback range and can relocate a paired bridge by its pinned identity when mapped ports change. It is not a system-wide background scanner.
+- Use **Send Message** for short input or **Compose Message** (**⌘N**) for longer drafts. Only explicitly submitted text is sent; drafts never send automatically after reconnecting. Replies appear as Markdown details, not Raycast AI chat. Bridge history begins at binding, not at the start of your terminal conversation.
+- For a supported pending approval, open **Review Approval**, inspect the parameters, then press **Enter** for **Allow Request** or **⌘⇧D** for **Deny Request**. There is no second confirmation modal; the explicit action submits the decision. Expired requests cannot be answered. Runtime support determines which requests can be relayed—this does not bypass agent permissions.
+- If a prompt's outcome becomes unknown after disconnection, check the original agent before using **Resume Queue After Checking Agent**. Argo does not automatically replay uncertain work.
+
+## Agent limitations and verification
+
+**Claude cooperative pull:** waiting occupies the original session's current turn. It cannot independently advance its previous task while waiting, although existing background processes continue. The agent must keep its receive/ack/reply loop running; Raycast cannot wake an ordinary completed prompt. Expired waits may consume additional agent turns. Tool approvals stay in the original terminal; this mode has no remote approval relay, native interruption, or automatic token streaming. Optional native Channels require separate startup authorization and are not enabled by Store installation.
+
+**Codex — experimental:** requires authoritative `CODEX_THREAD_ID`, `codex app-server proxy` support, and an **existing compatible shared App Server with that exact thread already loaded**. An ordinary standalone TUI may not provide these. Argo must not start a new daemon/thread/model, use `codex exec` or CLI resume, guess from history, or weaken sandbox/approval policy to attach. Connector process exit requires a fresh scoped binding before restarting.
+
+Development used Claude Code 2.1.314 and Codex CLI 0.157.1. Native Codex testing passed initialization and metadata reads but failed empty-thread rejoin with `no rollout found`; no model turn was sent to manufacture a rollout. Real populated-session rejoin, model replies, and multi-client approval routing remain unverified. Published-runtime installation, forwarded loopback discovery/pairing, and synthetic Claude messaging were tested; actual Raycast discovery/pairing was also exercised. These are **not** real model round-trips or external SSH acceptance. Real Claude model round-trips and permission views also remain unverified. Discovery, registration, and a passing build do not establish end-to-end agent support.
+
+## Privacy, storage, and removal
+
+- **Transport trust:** HTTP is intentionally loopback-only and relies on your trusted local processes and SSH forwarding. It is not a security boundary against other users or processes that can replace or proxy your forwarded listener. Do not use shared/untrusted machines or public/shared forwarded endpoints. If the listener changes unexpectedly, stop and verify your tunnel before connecting.
+- Conversation traffic goes between Raycast, your chosen self-hosted bridge, and its scoped agent connectors, directly or through your existing tunnel. Argo does not upload conversations to an Argo cloud or automatically collect your screen, browser pages, selected text, or source files. Your agent provider's own data policies still apply.
+- Pairing saves an independent durable Mac client credential in a mode-`600` file under the extension's support directory (`clients/`). Existing configurations remain private files. Tokens are not stored in Raycast preferences or LocalStorage. Agent credentials authorize one binding; Mac client credentials authorize the bridge's sessions. Never paste durable tokens into agent chat, logs, GitHub issues, or screenshots. Treat temporary pairing codes as private too.
+- Saved connection references, draft text, and recent-session identifiers live in Raycast LocalStorage on the Mac. Bridge messages/events persist in `~/.argo/bridge.sqlite` on the bridge machine; connector outbox data lives in `~/.argo/outbox/` on the agent machine (`ARGO_HOME` can change these runtime locations). Private files are not application-level encrypted storage. There is no automatic retention or cloud backup.
+- **Unbind Session** revokes that agent binding without stopping the original agent or deleting history. Removing a saved connection only removes its Mac reference; it does not revoke credentials or stop the server. `revoke-clients` on the bridge machine revokes all paired Mac clients. Revocation is not deletion: back up needed data and stop the relevant Argo processes before manually removing their stored data. Removing the Raycast extension does not uninstall the separate runtime.
+
+Argo is an independent companion tool, not an official Raycast, Anthropic, or OpenAI product. [Source and further documentation](https://github.com/MatrixA/argo).

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "argo",
+  "title": "Argo",
+  "description": "Continue your existing terminal Agent sessions through a self-hosted Argo bridge.",
+  "icon": "icon.png",
+  "author": "fernando_jacob",
+  "license": "MIT",
+  "type": "module",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "sessions",
+      "title": "Agent Sessions",
+      "subtitle": "Argo",
+      "description": "Browse bound sessions, send messages, and respond to agent requests.",
+      "mode": "view"
+    },
+    {
+      "name": "recent",
+      "title": "Recent Agent Session",
+      "subtitle": "Argo",
+      "description": "Continue the last session opened in Argo.",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect a Server",
+      "subtitle": "Argo",
+      "description": "Start with an uninstalled Agent, discover ordinary forwarded ports and pair once.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "title": "Client Configuration File",
+      "description": "Private JSON file containing the local hub URL and token. Defaults to ~/.argo/client.json. Credentials are never stored in Raycast preferences.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.argo/client.json"
+    },
+    {
+      "name": "portStart",
+      "title": "Discovery Port Range Start",
+      "description": "Only Mac loopback ports are checked. Forward server bridges into this range. Maximum 64 ports.",
+      "type": "textfield",
+      "required": false,
+      "default": "49120"
+    },
+    {
+      "name": "portEnd",
+      "title": "Discovery Port Range End",
+      "description": "Last Mac loopback port to check for signed Argo bridge identities.",
+      "type": "textfield",
+      "required": false,
+      "default": "49139"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "react": "^19.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
+}
