@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lens-local-search",
+  "title": "Lens",
+  "description": "Find local files by meaning, with private on-device search and optional decision-model guidance.",
+  "icon": "icon.png",
+  "author": "justus_august",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files by Meaning",
+      "subtitle": "Lens",
+      "description": "Find photos, documents, audio, video and code with local semantic search.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "decisionProvider",
+          "type": "dropdown",
+          "title": "Decision Model",
+          "description": "Interprets your search and optionally guides candidate ranking. Select a provider and its key. Reopen Search after changing settings.",
+          "required": false,
+          "default": "off",
+          "data": [
+            {
+              "title": "SubQ",
+              "value": "subq"
+            },
+            {
+              "title": "Jev (TypeSafe)",
+              "value": "jev"
+            },
+            {
+              "title": "OpenAI Decisions",
+              "value": "openai"
+            },
+            {
+              "title": "Local Model",
+              "value": "local"
+            },
+            {
+              "title": "Off",
+              "value": "off"
+            }
+          ]
+        },
+        {
+          "name": "decisionMetadata",
+          "type": "dropdown",
+          "title": "Decision Model Sharing",
+          "description": "Contents, previews, OCR, embeddings and folder paths always stay local. Candidate ranking uses up to 12 files. Provider retention policies apply.",
+          "required": false,
+          "default": "query",
+          "data": [
+            {
+              "title": "Query, Filenames and Technical Metadata",
+              "value": "filenames"
+            },
+            {
+              "title": "Query Only",
+              "value": "query"
+            }
+          ]
+        },
+        {
+          "name": "subqApiKey",
+          "type": "password",
+          "title": "SubQ API Key",
+          "description": "Used only for this provider. Shared fields follow Decision Model Sharing above. Files and index stay local.",
+          "required": false
+        },
+        {
+          "name": "jevApiKey",
+          "type": "password",
+          "title": "Jev API Key",
+          "description": "Used only for this provider. Shared fields follow Decision Model Sharing above. Files and index stay local.",
+          "required": false
+        },
+        {
+          "name": "openaiApiKey",
+          "type": "password",
+          "title": "OpenAI API Key",
+          "description": "Used only for this provider. Shared fields follow Decision Model Sharing above. Files and index stay local.",
+          "required": false
+        },
+        {
+          "name": "localDecisionURL",
+          "type": "textfield",
+          "title": "Local Model URL",
+          "description": "For Local Model only. OpenAI-compatible server on this Mac, such as LM Studio (port 1234) or Ollama (port 11434). Include /v1.",
+          "required": false,
+          "default": "http://127.0.0.1:11434/v1"
+        },
+        {
+          "name": "localDecisionModel",
+          "type": "textfield",
+          "title": "Local Model Name",
+          "description": "For Local Model only. Model name from your local server; blank uses its first reported model. Your server may load it into memory.",
+          "required": false
+        },
+        {
+          "name": "localContentRanking",
+          "type": "checkbox",
+          "title": "Local Content Ranking",
+          "label": "Check the best candidates on this Mac",
+          "description": "Requires the optional 2.66 GB model: download it from Actions in Choose Search Folders. Uses a small local shortlist and releases the model afterward. File contents stay local. Reopen Search after changing.",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "configure",
+      "title": "Choose Search Folders",
+      "subtitle": "Lens",
+      "description": "Choose local folders for files, media and code. No separate app is required.",
+      "mode": "view"
+    },
+    {
+      "name": "index-files",
+      "title": "Update Search Index",
+      "subtitle": "Lens",
+      "description": "Keep chosen folders indexed automatically every five minutes, or update them now.",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "review-scope",
+      "title": "Review Automatic Exclusions",
+      "subtitle": "Lens",
+      "description": "Review automatically omitted project copies and tool snapshots, or restore them to the index. No files are deleted.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && DIGUP_TEST_SEARCH=dist/search.js DIGUP_TEST_CONFIGURE=dist/configure.js DIGUP_TEST_COMMAND=dist/index-files.js node --experimental-strip-types --test tests/*.test.ts",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.8.0",
+    "react": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "typescript": "^6.0.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10"
+  }
+}

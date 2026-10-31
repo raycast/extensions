@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+*.rayext
+native/.build/
+native/.swiftpm/
+native/Vendor/

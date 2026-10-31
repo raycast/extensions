@@ -1,0 +1,15 @@
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index ff2ea46..511d6a4 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -2133,7 +2133,9 @@ uint32_t llama_context::output_reserve(int32_t n_outputs) {
+     const auto n_embd     = hparams.n_embd;
+     const auto n_embd_out = hparams.n_embd_out();
+ 
+-    bool has_logits     = true;
++    // a non-causal embedding context (EmbeddingGemma, BERT) only returns embeddings: without this, encode() reserves
++    // and clears n_vocab floats for every token (1 MiB per token with Gemma's 262k vocabulary)
++    bool has_logits     = !(cparams.embeddings && !cparams.causal_attn);
+     bool has_embd       = cparams.embeddings;
+     bool has_embd_nextn = cparams.embeddings_nextn;
+ 
