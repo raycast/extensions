@@ -1,5 +1,10 @@
 # Obsidian Changelog
 
+## [Load Bookmarked Notes from bookmarks.json] - {PR_MERGE_DATE}
+
+- Read the vault's bookmarks.json in Bookmarked Notes and the menu bar instead of scanning every note in the vault
+- Show bookmarked notes in the order of Obsidian's Bookmarks pane, and show bookmark changes made in Obsidian right away
+
 ## [Quick Capture Validation] - 2026-10-10
 
 - Restrict Quick Capture to existing regular Markdown files inside the vault
