@@ -1,6 +1,6 @@
 # Changelog
 
-## [Ownership Transfer] - {PR_MERGE_DATE}
+## [Ownership Transfer] - 2026-10-31
 
 - Transfer ownership from Paranjayy to nakama. Paranjayy stays credited as a past contributor.
 
