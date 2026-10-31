@@ -1,5 +1,12 @@
 # Toggle Menu Bar Changelog
 
+## [Native menu bar controls and mode picker] - {PR_MERGE_DATE}
+
+- Apply menu bar modes directly with a signed universal native helper.
+- Add a picker with current-mode highlighting and read-only background status updates.
+- Preserve existing preferences, defaults, toggle behavior, and the optional window closing.
+- Validate the applied mode and report failures without claiming success.
+
 ## [Refactor with new features] - 2024-02-01
 
 - Optimized code for better readability.
