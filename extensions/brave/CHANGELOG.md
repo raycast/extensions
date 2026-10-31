@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-10-31
 
 ### ✨ New
 
