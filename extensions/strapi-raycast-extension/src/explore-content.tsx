@@ -60,9 +60,11 @@ function Entries({ contentType }: { contentType: ContentType }) {
   const { data, isLoading, error, pagination } = useEntries(contentType, { ...query, search });
 
   const statuses: EntryQuery["status"][] = draftAndPublish ? ["draft", "published"] : [undefined];
-  const localeOptions = localized
-    ? [...(locales.data ?? [])].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
-    : [undefined];
+  // Without locales (not loaded yet or the request failed), still allow switching status
+  const localeOptions =
+    localized && locales.data?.length
+      ? [...locales.data].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+      : [undefined];
   const options = statuses.flatMap((status) =>
     localeOptions.map((locale) => ({
       value: `${status ?? ""}|${locale?.code ?? ""}`,
@@ -131,7 +133,10 @@ function Entries({ contentType }: { contentType: ContentType }) {
                   />
                   <Action.CopyToClipboard
                     title="Copy API URL"
-                    content={apiUrl(`${contentType.route}/${item.documentId ?? item.id}`)}
+                    content={apiUrl(`${contentType.route}/${item.documentId ?? item.id}`, {
+                      status: draftAndPublish ? query.status : undefined,
+                      locale: localized ? (item.locale ?? query.locale ?? undefined) : undefined,
+                    })}
                     shortcut={Keyboard.Shortcut.Common.CopyPath}
                   />
                   <Action.CopyToClipboard
