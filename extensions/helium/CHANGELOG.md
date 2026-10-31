@@ -1,5 +1,14 @@
 # Helium Changelog
 
+## [Windows Tab Control Improvements] - {PR_MERGE_DATE}
+
+- Replace PowerShell tab automation with a native Rust helper for faster switching, verified tab selection, and preserved normal/maximized window placement when restoring minimized windows.
+- Support vertical tabs and temporarily reveal hidden sidebars in Frameless mode while restoring their previous state.
+- Report switching failures instead of silently opening duplicate URLs, and avoid matching unrelated tabs by partial title.
+- Add a Windows User Data Directory preference for portable/custom profiles, keeping profile reads and launches together.
+- Add Copy Error actions to command failure toasts and improve error details.
+- Update copy shortcuts: Copy URL uses `⌘⇧C` / `Ctrl+Shift+C`, Copy Title (or Copy Query) uses `⌘⌥C` / `Ctrl+Alt+C`, and Copy as Markdown uses `⌘⌃C` / `Alt+Shift+C` (macOS / Windows).
+
 ## [Windows Support] - 2026-08-10
 
 - Add Windows support: Search Web, Search History, Search Bookmarks, and the new tab/window/incognito commands work against [Helium for Windows](https://github.com/imputnet/helium-windows), located via the standard install roots, the path registered by Helium's installer, or the new "Helium Location" preference for portable builds.

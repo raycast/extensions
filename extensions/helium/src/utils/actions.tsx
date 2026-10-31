@@ -1,3 +1,5 @@
+import { showError, failToast } from "@chrismessina/raycast-kit";
+import { countOf, plural } from "@chrismessina/raycast-kit/plural";
 import { Action, Icon, Keyboard, showToast, Toast, closeMainWindow } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
@@ -40,11 +42,7 @@ export function OpenInHeliumAction({ title, url, icon, shortcut }: OpenInHeliumA
           await openUrlInHelium(url);
           await closeMainWindow();
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to open in Helium",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to open in Helium" });
         }
       }}
     />
@@ -67,8 +65,8 @@ interface MutationActionProps extends BaseActionProps {
  * macOS uses the stable Helium AppleScript `id` bridged at fetch time (see
  * {@link getBrowserTabs}), so it always targets the exact tab the user picked,
  * even when several tabs share the same URL. Windows has no such handle and
- * matches on the tab title through the accessibility tree, falling back to
- * opening the URL when nothing matches.
+ * matches on the tab title through the native accessibility helper. Failures
+ * leave the list open so the user can refresh and try again.
  */
 export function SwitchToTabAction({ tab }: BaseActionProps) {
   return (
@@ -82,27 +80,11 @@ export function SwitchToTabAction({ tab }: BaseActionProps) {
             return;
           }
 
-          // Windows matches tabs by title through the accessibility tree, so a
-          // page that retitled itself since the list was read finds nothing.
-          // Opening the URL is the next best thing; macOS addresses tabs by a
-          // stable id, where a miss really does mean the tab is gone.
-          if (isWindows) {
-            await openUrlInHelium(tab.url);
-            await closeMainWindow();
-            return;
-          }
-
-          await showToast({
-            style: Toast.Style.Failure,
+          await showError(new Error("The tab may have been closed. Refresh the list and try again."), {
             title: "Tab not found",
-            message: "The tab may have been closed",
           });
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to switch to tab",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to switch to tab" });
         }
       }}
     />
@@ -123,11 +105,7 @@ export function OpenNewTabAction() {
           await createNewTab();
           await closeMainWindow();
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to open new tab",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to open new tab" });
         }
       }}
     />
@@ -158,7 +136,7 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
       icon={Icon.ArrowClockwise}
       shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={async () => {
-        await showToast({
+        const toast = await showToast({
           style: Toast.Style.Animated,
           title: `Reloading ${subject.toLowerCase()}…`,
         });
@@ -169,11 +147,7 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
             title: `${subject} reloaded`,
           });
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: `Failed to reload ${subject.toLowerCase()}`,
-            message: error instanceof Error ? error.message : String(error),
-          });
+          failToast(toast, error, { title: `Failed to reload ${subject.toLowerCase()}` });
         }
       }}
     />
@@ -198,7 +172,7 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
         // Keep in-flight closes hidden even if another mutation revalidates first.
         pendingCloseIdsRef.current.add(tab.id);
 
-        await showToast({
+        const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Closing tab",
         });
@@ -246,11 +220,7 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
             });
           }
 
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to close tab",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          failToast(toast, error, { title: "Failed to close tab" });
         }
       }}
     />
@@ -334,6 +304,7 @@ export function DeduplicateTabsAction({
       icon={Icon.Filter}
       shortcut={SHORTCUTS.deduplicateTabs}
       onAction={async () => {
+        let toast: Toast | undefined;
         try {
           const currentTabs = tabs ?? (await getBrowserTabs());
 
@@ -350,9 +321,9 @@ export function DeduplicateTabsAction({
             return;
           }
 
-          await showToast({
+          toast = await showToast({
             style: Toast.Style.Animated,
-            title: `Closing ${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`,
+            title: `Closing ${countOf(duplicates.length, "duplicate tab")}`,
           });
 
           const duplicateIds = duplicates.map((t) => t.id);
@@ -399,19 +370,22 @@ export function DeduplicateTabsAction({
           }
 
           const closed = closedIds.length;
-          await showToast({
-            style: closed === duplicates.length ? Toast.Style.Success : Toast.Style.Failure,
-            title:
-              closed > 0
-                ? `Closed ${closed}/${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`
-                : "Failed to close duplicates",
-          });
+          const title = `Closed ${closed}/${duplicates.length} duplicate ${plural(duplicates.length, "tab")}`;
+          if (closed === duplicates.length) {
+            toast.style = Toast.Style.Success;
+            toast.title = title;
+          } else {
+            failToast(
+              toast,
+              new Error(`${countOf(duplicates.length - closed, "tab")} could not be closed. Refresh and try again.`),
+              {
+                title: closed > 0 ? title : "Failed to close duplicates",
+              },
+            );
+          }
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to deduplicate tabs",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          if (toast) failToast(toast, error, { title: "Failed to deduplicate tabs" });
+          else await showError(error, { title: "Failed to deduplicate tabs" });
         }
       }}
     />
@@ -437,11 +411,7 @@ export function OpenBookmarkAction({ bookmark }: BookmarkActionProps) {
           await openUrlInHelium(bookmark.url);
           await closeMainWindow();
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to open bookmark",
-            message: error instanceof Error ? error.message : String(error),
-          });
+          await showError(error, { title: "Failed to open bookmark" });
         }
       }}
     />
