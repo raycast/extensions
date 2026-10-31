@@ -1,0 +1,15 @@
+node_modules/
+.raycast/
+*.rayext
+.DS_Store
+.env
+.env.*
+index-*.nul
+index.json
+coverage/
+dist/
+# Raycast generated files
+raycast-env.d.ts
+.build/
+raycast-env.d.ts
+.build/
