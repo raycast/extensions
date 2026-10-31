@@ -1,5 +1,9 @@
 # Changelog
 
+## [Faster Search] - {PR_MERGE_DATE}
+
+- Load results without the 300 ms delay. Raycast now throttles typing in grid view, and next pages, sort and provider changes load straight away.
+
 ## [Grid Size] - 2026-10-24
 
 - Add a Grid Size preference: Small (8 columns, the new default), Medium (6 columns, the previous layout) or Large (4 columns).
