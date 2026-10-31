@@ -285,8 +285,11 @@ export async function runJSInYouTubeMusicTab(
 /**
  * Opens a URL in the browser selected in the extension preferences. Unlike
  * `runJSInYouTubeMusicTab`, this is intentionally allowed to launch the browser.
+ *
+ * Returns false when the URL was not handed to a browser, so callers can skip
+ * their success HUD instead of announcing a tab that never opened.
  */
-export async function openInSelectedBrowser(url: string): Promise<void> {
+export async function openInSelectedBrowser(url: string): Promise<boolean> {
   const { browser } = getPreferenceValues<Preferences>();
   if (!browser) {
     await showToast({
@@ -294,7 +297,7 @@ export async function openInSelectedBrowser(url: string): Promise<void> {
       message: "Choose a browser in the extension preferences.",
       style: Toast.Style.Failure,
     });
-    return;
+    return false;
   }
 
   try {
@@ -304,7 +307,9 @@ export async function openInSelectedBrowser(url: string): Promise<void> {
         open location "${escapeJS(url)}"
       end tell
     `);
+    return true;
   } catch (error) {
     handleAppleScriptError(error, browser.name);
+    return false;
   }
 }

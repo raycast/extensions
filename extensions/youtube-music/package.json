@@ -48,6 +48,40 @@
       ]
     },
     {
+      "name": "searchSource",
+      "title": "Play Music Source",
+      "description": "Which source Play Music searches by default.",
+      "type": "dropdown",
+      "default": "both",
+      "required": false,
+      "data": [
+        {
+          "title": "YouTube Music + YouTube",
+          "value": "both"
+        },
+        {
+          "title": "Songs",
+          "value": "ytmusic"
+        },
+        {
+          "title": "Albums",
+          "value": "albums"
+        },
+        {
+          "title": "Artists",
+          "value": "artists"
+        },
+        {
+          "title": "Playlists",
+          "value": "playlists"
+        },
+        {
+          "title": "YouTube",
+          "value": "youtube"
+        }
+      ]
+    },
+    {
       "name": "ff-rew-seconds",
       "title": "Number of seconds to fast forward or rewind.",
       "default": "10",
@@ -89,9 +123,9 @@
   "commands": [
     {
       "name": "play-song",
-      "title": "Play Song",
+      "title": "Play Music",
       "subtitle": "YouTube Music",
-      "description": "Search YouTube Music and play a song in the selected browser.",
+      "description": "Search YouTube Music and YouTube for songs, albums, artists, playlists, and videos, and play them in the selected browser.",
       "mode": "view"
     },
     {

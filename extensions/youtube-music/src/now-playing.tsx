@@ -413,11 +413,13 @@ export default function NowPlaying() {
                 <Action
                   title="Open YouTube Music"
                   icon={Icon.Globe}
-                  onAction={() => openInSelectedBrowser("https://music.youtube.com")}
+                  onAction={async () => {
+                    await openInSelectedBrowser("https://music.youtube.com");
+                  }}
                 />
               ) : null}
               <Action
-                title="Play Song…"
+                title="Play Music…"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "play-song", type: LaunchType.UserInitiated })}
               />
@@ -598,7 +600,7 @@ function QueueItem({
           <Action.CopyToClipboard title="Copy Title" icon={Icon.Link} content={track.title} />
           <ActionPanel.Section title="Search">
             <Action
-              title="Play Song…"
+              title="Play Music…"
               icon={Icon.MagnifyingGlass}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={() => launchCommand({ name: "play-song", type: LaunchType.UserInitiated })}
@@ -672,10 +674,23 @@ function CurrentTrackActions({ state, onRefresh }: { state: PlayerState; onRefre
       </ActionPanel.Section>
       <ActionPanel.Section title="Queue">
         <Action
-          title="Play Song…"
+          title="Play Music…"
           icon={Icon.MagnifyingGlass}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={() => launchCommand({ name: "play-song", type: LaunchType.UserInitiated })}
+        />
+        <Action
+          title="Add to Queue…"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          onAction={() =>
+            launchCommand({
+              name: "play-song",
+              type: LaunchType.UserInitiated,
+              // Opens Play Music with Add to Queue as the primary action.
+              context: { mode: "add" },
+            })
+          }
         />
         <Action
           title="Refresh"
