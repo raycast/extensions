@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "social-downloader-windows",
+  "title": "Social Downloader",
+  "description": "Download videos and playlists from social platforms, manage a batch queue, and convert local media on Windows.",
+  "icon": "icon.png",
+  "author": "victorhugoguimaraes",
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "download",
+      "title": "Download Social Media",
+      "description": "Inspect a link and choose video or audio quality and format",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "destination",
+      "title": "Download Folder",
+      "description": "Defaults to your Windows Downloads folder",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "addLinkShortcut",
+      "title": "Add Link Shortcut",
+      "description": "For example Ctrl+N or Alt+N. Supports Ctrl, Alt, Shift plus a letter, number, or Backspace. Reopen the command after changing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Ctrl+N",
+      "placeholder": "Ctrl+N"
+    },
+    {
+      "name": "removeLinkShortcut",
+      "title": "Remove Link Shortcut",
+      "description": "Removes the last additional field. Use a different combination from Add Link. Reopen the command after changing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Ctrl+Shift+Backspace",
+      "placeholder": "Ctrl+Shift+Backspace"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "bundle": "ray bundle -o dist/social-downloader-windows.rayext",
+    "publish": "ray publish",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "format": "prettier --write src tests package.json tsconfig.json eslint.config.js"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
