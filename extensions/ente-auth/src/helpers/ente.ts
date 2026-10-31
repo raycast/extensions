@@ -1,7 +1,7 @@
 import { getPreferenceValues, trash } from "@raycast/api";
-import { execFileSync } from "child_process";
-import fse from "fs-extra";
-import path from "path";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, statSync } from "node:fs";
+import path from "node:path";
 import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "../constants/ente";
 
 const normalizeConfiguredPath = (configuredPath: string): string => {
@@ -19,7 +19,7 @@ const getCliPath = (): string => {
 	// Tolerate the common mistake of pointing at the containing directory (e.g. "/opt/homebrew/bin")
 	// instead of the binary itself by appending the expected executable name.
 	try {
-		if (fse.existsSync(configuredPath) && fse.statSync(configuredPath).isDirectory()) {
+		if (existsSync(configuredPath) && statSync(configuredPath).isDirectory()) {
 			return path.join(configuredPath, process.platform === "win32" ? "ente.exe" : "ente");
 		}
 	} catch {
@@ -85,8 +85,8 @@ const parseEnteAccounts = (accountList: string): EnteAccount[] => {
 };
 
 export const createEntePath = (path: string): string => {
-	if (!fse.existsSync(path)) {
-		fse.mkdirSync(path, { recursive: true });
+	if (!existsSync(path)) {
+		mkdirSync(path, { recursive: true });
 		console.log("Ente folder created at", path);
 	} else {
 		console.log("Ente folder already exists at", path);
