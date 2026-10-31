@@ -70,7 +70,7 @@
   "dependencies": {
     "@raycast/api": "^1.86.1",
     "@raycast/utils": "^1.17.0",
-    "openai": "^4.73.1"
+    "openai": "^7.45.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
