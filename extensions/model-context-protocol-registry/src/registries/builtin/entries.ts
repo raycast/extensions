@@ -1452,6 +1452,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "postemi",
+    title: "Postemi",
+    description:
+      "Write, schedule and publish posts to 37 social platforms and apps (Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Telegram, Slack, Discord and more) with a content calendar and full-quality photo and video uploads. Preview a post before it is saved, list, edit and delete scheduled posts, and switch workspaces. 25 tools. Hosted remote Streamable HTTP server at https://mcp.postemi.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Postemi account on the Pro plan or higher (7-day free trial at postemi.com).",
+    icon: "https://postemi.com/icons/icon-512.png",
+    homepage: "https://postemi.com/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.postemi.com/mcp"],
+    },
+    remoteUrl: "https://mcp.postemi.com/mcp",
+  },
+  {
     name: "posteverywhere",
     title: "PostEverywhere",
     description:
