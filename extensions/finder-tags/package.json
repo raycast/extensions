@@ -1,0 +1,459 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finder-tags",
+  "title": "Finder Tags",
+  "description": "Tag Finder selections, browse your tags, and find tagged files on your Mac.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tag-selected-files",
+      "title": "Tag Selected Files",
+      "description": "Add or remove Finder tags on the selected files",
+      "mode": "view"
+    },
+    {
+      "name": "quick-tag",
+      "title": "Quick Tag",
+      "description": "Apply comma-separated tags to the Finder selection, or start with a minus to remove tags",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "tag",
+          "placeholder": "invoice-2026 or -draft,review",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "search-tags",
+      "title": "Search Tags",
+      "description": "Browse Finder tags with file counts, rename tags, or remove tags across indexed files",
+      "mode": "view"
+    },
+    {
+      "name": "search-files-by-tag",
+      "title": "Search Files by Tag",
+      "description": "Find files with one or more Finder tags, preview files, and manage their tags",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List Finder tags with colours and file counts in configured search folders."
+    },
+    {
+      "name": "find-files-by-tag",
+      "title": "Find Files by Tag",
+      "description": "Find up to 50 files by Finder tags, kind, and optional modification date range."
+    },
+    {
+      "name": "tag-files",
+      "title": "Tag Files",
+      "description": "Add Finder tags to explicit paths or the current Finder selection after confirmation."
+    },
+    {
+      "name": "untag-files",
+      "title": "Untag Files",
+      "description": "Remove specified Finder tags from explicit paths or the current Finder selection after confirmation."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:native": "bash scripts/test-native.sh",
+    "typecheck": "tsc --noEmit"
+  },
+  "preferences": [
+    {
+      "name": "searchScope",
+      "type": "textfield",
+      "title": "Search Scope",
+      "description": "An absolute folder path or ~ for your home folder. Counts and tag-wide actions are limited to this scope and extra folders.",
+      "default": "~",
+      "required": false
+    },
+    {
+      "name": "extraFolders",
+      "type": "textfield",
+      "title": "Extra Folders",
+      "description": "Additional absolute folder paths, separated by semicolons or newlines.",
+      "required": false
+    },
+    {
+      "name": "closeAfterTagging",
+      "type": "checkbox",
+      "title": "After Tagging",
+      "label": "Close Raycast after tagging selected files",
+      "default": true,
+      "required": false,
+      "description": "Close Raycast after a successful change in Tag Selected Files. Quick Tag always shows a HUD."
+    },
+    {
+      "name": "sortByCount",
+      "type": "checkbox",
+      "title": "Tag Order",
+      "label": "Sort tags by file count instead of name",
+      "default": true,
+      "required": false,
+      "description": "Show the most-used tags first. Turn off to sort alphabetically."
+    }
+  ],
+  "ai": {
+    "instructions": "Finder Tags manages macOS Finder tags locally. Before calling tag-files or untag-files, always call list-tags first and reuse existing tag spelling when names differ only in case. An empty list is not proof that a specific tag does not exist because Spotlight may be delayed or unavailable. Still run an explicitly requested search or create a new tag when needed. For these files, the selection, or no explicit paths, omit paths from tag-files and untag-files; the tools resolve the Finder selection. Never invent paths. Every write tool asks for confirmation listing the exact files and tags. When the user has asked to tag or untag files, call the write tool directly after resolving spelling; do not ask a separate conversational confirmation. A new tag needs no separate creation step or approval. For search-and-tag requests, first call find-files-by-tag and then pass only its returned paths to the write tool. Searches return at most 50 files. If hasMore is true, explain the limit and ask the user to narrow the search before changing everything; never claim all matches were changed. modifiedAfter is inclusive and modifiedBefore is exclusive. For a named month, use both bounds; clarify the year when unclear. Report failures and indexing warnings, and never claim a failed file changed. Tag-wide changes are restricted to indexed files in configured search folders. When list-tags reports countsArePartial, counts are lower bounds; zero means no files could be found, not that a saved tag is unused. Explain the search warning when discussing usage.",
+    "evals": [
+      {
+        "input": "@finder-tags tag these as invoice-2026",
+        "mocks": {
+          "list-tags": {
+            "tags": []
+          },
+          "tag-files": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "tags": [
+                  {
+                    "name": "invoice-2026",
+                    "color": 0
+                  }
+                ],
+                "changed": true
+              }
+            ],
+            "failures": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "tag-files",
+              "arguments": {
+                "tags": [
+                  "invoice-2026"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags which PDFs are tagged tax-2025?",
+        "mocks": {
+          "find-files-by-tag": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "name": "receipt.pdf",
+                "kind": "PDF document",
+                "modifiedAt": "2026-03-12T10:00:00Z"
+              }
+            ],
+            "hasMore": false,
+            "warnings": [],
+            "totalCandidates": 1
+          },
+          "list-tags": {
+            "tags": [
+              {
+                "name": "tax-2025",
+                "color": 0,
+                "count": 1
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-files-by-tag",
+              "arguments": {
+                "tags": [
+                  "tax-2025"
+                ],
+                "kind": "pdf"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags move the draft tag off everything in the selection",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "draft",
+                "color": 0,
+                "count": 3
+              }
+            ]
+          },
+          "untag-files": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "tags": [
+                  {
+                    "name": "invoice-2026",
+                    "color": 0
+                  }
+                ],
+                "changed": true
+              }
+            ],
+            "failures": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "untag-files",
+              "arguments": {
+                "tags": [
+                  "draft"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags tag everything tagged receipts modified in March 2026 as invoice-2026",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "receipts",
+                "color": 0,
+                "count": 1
+              }
+            ]
+          },
+          "find-files-by-tag": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "name": "receipt.pdf",
+                "kind": "PDF document",
+                "modifiedAt": "2026-03-12T10:00:00Z"
+              }
+            ],
+            "hasMore": false,
+            "warnings": [],
+            "totalCandidates": 1
+          },
+          "tag-files": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "tags": [
+                  {
+                    "name": "invoice-2026",
+                    "color": 0
+                  }
+                ],
+                "changed": true
+              }
+            ],
+            "failures": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-files-by-tag",
+              "arguments": {
+                "tags": [
+                  "receipts"
+                ],
+                "modifiedAfter": {
+                  "includes": "2026-03-01"
+                },
+                "modifiedBefore": {
+                  "includes": "2026-04-01"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "tag-files",
+              "arguments": {
+                "tags": [
+                  "invoice-2026"
+                ],
+                "paths": [
+                  "/Users/example/Documents/receipt.pdf"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags what tags do I use most?",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "Invoice",
+                "color": 4,
+                "count": 28
+              },
+              {
+                "name": "draft",
+                "color": 0,
+                "count": 2
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-tags"
+          },
+          {
+            "includes": "Invoice"
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags tag these as invoice",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "Invoice",
+                "color": 4,
+                "count": 28
+              }
+            ]
+          },
+          "tag-files": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "tags": [
+                  {
+                    "name": "invoice-2026",
+                    "color": 0
+                  }
+                ],
+                "changed": true
+              }
+            ],
+            "failures": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "tag-files",
+              "arguments": {
+                "tags": [
+                  "Invoice"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags tag everything tagged receipts as invoice-2026",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "receipts",
+                "color": 0,
+                "count": 80
+              }
+            ]
+          },
+          "find-files-by-tag": {
+            "files": [
+              {
+                "path": "/Users/example/Documents/receipt.pdf",
+                "name": "receipt.pdf",
+                "kind": "PDF document",
+                "modifiedAt": "2026-03-12T10:00:00Z"
+              }
+            ],
+            "hasMore": true,
+            "warnings": [],
+            "totalCandidates": 80
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-files-by-tag"
+          },
+          {
+            "not": {
+              "callsTool": "tag-files"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@finder-tags how many files use my Work tag?",
+        "mocks": {
+          "list-tags": {
+            "tags": [
+              {
+                "name": "Work",
+                "color": 0,
+                "count": 0
+              }
+            ],
+            "countsArePartial": true,
+            "warnings": [
+              "Spotlight indexing is off. Counts are unavailable."
+            ],
+            "failures": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-tags"
+          },
+          {
+            "includes": "Spotlight"
+          }
+        ]
+      }
+    ]
+  }
+}
