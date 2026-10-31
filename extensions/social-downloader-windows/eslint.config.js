@@ -1,5 +1,6 @@
 const raycast = require("@raycast/eslint-config");
-module.exports = [
+const { defineConfig } = require("eslint/config");
+module.exports = defineConfig([
   ...raycast,
   { rules: { "@raycast/prefer-title-case": "off" } },
-];
+]);

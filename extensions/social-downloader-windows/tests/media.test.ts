@@ -86,6 +86,24 @@ test("audio-only uses selected source and requested bitrate", () => {
   assert.ok(args.includes("192K"));
   assert.ok(args.includes("--extract-audio"));
 });
+
+test("audio prepared for explicit conversion is downloaded without an extra encode", () => {
+  const args = downloadArgs({
+    url: "https://youtu.be/abc",
+    mode: "audio",
+    video: "",
+    audio: "opus-track",
+    container: "mp3",
+    bitrate: "192",
+    destination: "C:\\Downloads",
+    ffmpeg: "ffmpeg.exe",
+    preserveSourceAudio: true,
+  });
+  assert.equal(args[args.indexOf("-f") + 1], "opus-track");
+  assert.ok(!args.includes("--extract-audio"));
+  assert.ok(!args.includes("--audio-format"));
+  assert.ok(!args.includes("--audio-quality"));
+});
 test("parses progress and final output without treating other output as completion", () => {
   assert.deepEqual(
     parseEvent(

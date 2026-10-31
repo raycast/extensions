@@ -9,4 +9,4 @@ Implementation: batch.ts owns playlist expansion, format presets and bounded que
 - [x] Add and test playlist normalization, format selection and queue concurrency/failure isolation.
 - [x] Add and test local conversion and download-to-conversion integration.
 - [x] Implement native multiple-link, playlist selection, queue and converter flows.
-- [ ] Verify tests/build/bundle and real media operations; prepare Store metadata and inspect publishing prerequisites.
+- [x] Verify tests/build/bundle and real media operations; prepare Store metadata and submit draft PR https://github.com/raycast/extensions/pull/33001. Native UI validation and screenshots remain pending before marking ready for review.

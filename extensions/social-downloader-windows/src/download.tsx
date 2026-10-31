@@ -13,7 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { download, executables, inspect, type Settings } from "./downloader";
+import { download, executables, inspect } from "./downloader";
 import { ensureTools, type Tools } from "./tools";
 import { Workspace } from "./workspace";
 import {
@@ -108,7 +108,7 @@ export default function Command() {
 }
 
 function DownloadCommand({ tools }: { tools: Tools }) {
-  const settings = getPreferenceValues<Settings>();
+  const settings = getPreferenceValues<Preferences>();
   const paths = executables(settings);
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string>();

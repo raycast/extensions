@@ -16,10 +16,7 @@ import {
 import { run } from "./process";
 import type { Tools } from "./tools";
 
-export interface Settings {
-  destination?: string;
-}
-export function executables(settings: Settings) {
+export function executables(settings: Preferences) {
   return {
     destination: settings.destination || join(homedir(), "Downloads"),
   };

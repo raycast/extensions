@@ -44,3 +44,5 @@ Implementação Windows aprovada no chat e executada nesta pasta, inicialmente v
 - `ray lint` validou manifesto, ícone, ESLint e Prettier. Tipos, compilação padrão e pacote instalável aprovados.
 - Autor confirmado pelo usuário: `victorhugoguimaraes`. Autenticação do CLI Raycast concluída nessa conta.
 - Interface pública convertida para inglês conforme as diretrizes de localização da Store. As plataformas adicionais têm suporte pelo extrator yt-dlp, mas ainda não foram verificadas com links reais nesta sessão.
+- Revisão independente identificou e corrigiu isolamento de links inválidos e identidade/posição dos itens de carrosséis. Total final: 18 testes aprovados; tipos, validações SDK, build e bundle aprovados.
+- Submissão pública criada como rascunho: https://github.com/raycast/extensions/pull/33001. Descrição preenchida com evidências e limitações; validação visual/capturas da nova interface ainda pendentes. Não publicada na Store; verificações remotas em andamento no momento da submissão.

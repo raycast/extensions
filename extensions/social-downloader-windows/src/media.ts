@@ -123,6 +123,7 @@ export interface DownloadOptions {
   ffmpeg: string;
   filenameTag?: string;
   playlistItem?: number;
+  preserveSourceAudio?: boolean;
 }
 export function playlistSelection(item?: number): string[] {
   if (item === undefined) return [];
@@ -174,15 +175,15 @@ export function downloadArgs(options: DownloadOptions): string[] {
       !options.audio
     )
       throw new Error("Select an audio format, track, and quality.");
-    args.push(
-      "-f",
-      options.audio,
-      "--extract-audio",
-      "--audio-format",
-      options.container,
-      "--audio-quality",
-      `${options.bitrate}K`,
-    );
+    args.push("-f", options.audio);
+    if (!options.preserveSourceAudio)
+      args.push(
+        "--extract-audio",
+        "--audio-format",
+        options.container,
+        "--audio-quality",
+        `${options.bitrate}K`,
+      );
   } else {
     if (!["mp4", "mkv"].includes(options.container) || !options.video)
       throw new Error("Select a video format and track.");

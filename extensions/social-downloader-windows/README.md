@@ -9,7 +9,7 @@ Open **Download Social Media**. On first launch, the extension automatically dow
 ## Multiple links and playlists
 
 1. Paste a video or playlist URL.
-2. Use **Add Link** in Actions or **Ctrl+N** to add more URL fields. Raycast native forms do not support an inline plus button beside a field.
+2. Click the visible **＋ Add Link** control below the URL fields to add another link. Each additional field has its own **✕ Remove Link** control. The Add Link action and **Ctrl+N** shortcut are also available. These are native Raycast checkbox controls that trigger an immediate action; custom inline buttons inside text fields are not supported.
 3. Choose **Analyze Links and Playlists**. The preview loads up to 200 entries per source link and deduplicates identical URLs. Remove unwanted entries from the video selector.
 4. Choose video or audio, format, resolution cap, audio bitrate, and destination.
 5. Start the queue. Up to three downloads can run at once. Cancel individual items or the entire queue, open completed files, and retry failed or canceled items.

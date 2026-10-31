@@ -13,7 +13,13 @@ import {
   useNavigation,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 import { basename } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
@@ -25,7 +31,7 @@ import {
   type Preset,
 } from "./batch";
 import { convert } from "./conversion";
-import { download, executables, type Settings } from "./downloader";
+import { download, executables } from "./downloader";
 import type { Tools } from "./tools";
 import { validateUrl } from "./media";
 
@@ -118,6 +124,7 @@ function Queue({
               {
                 url: job.source,
                 playlistItem: job.playlistItem,
+                preserveSourceAudio: preset.mode === "audio" && preset.convert,
                 ...selection,
                 mode: preset.mode,
                 container:
@@ -282,7 +289,7 @@ export function Workspace({
   advanced: ReactElement;
 }) {
   const { push } = useNavigation();
-  const settings = getPreferenceValues<Settings>();
+  const settings = getPreferenceValues<Preferences>();
   const [kind, setKind] = useState("download");
   const [links, setLinks] = useState([""]);
   const [files, setFiles] = useState<string[]>([]);
@@ -414,7 +421,7 @@ export function Workspace({
                   ? kind === "local"
                     ? "Convert Files"
                     : "Start Downloads"
-                  : "Analyze Links e Playlists"
+                  : "Analyze Links and Playlists"
               }
               icon={Icon.Download}
               onSubmit={ready ? start : analyze}
@@ -431,7 +438,7 @@ export function Workspace({
           {!busy && kind === "download" && !entries && links.length > 1 && (
             <Action
               title="Remove Last Field"
-              icon={Icon.Minus}
+              icon={Icon.XMarkCircle}
               onAction={() => setLinks((old) => old.slice(0, -1))}
             />
           )}
@@ -480,24 +487,48 @@ export function Workspace({
       {kind === "download" &&
         !entries &&
         links.map((link, index) => (
-          <Form.TextField
-            key={index}
-            id={`link-${index}`}
-            title={`Link ${index + 1}`}
-            placeholder="Paste a video or playlist link"
-            value={link}
-            onChange={(value) =>
-              setLinks((old) =>
-                old.map((text, i) => (i === index ? value : text)),
-              )
-            }
-          />
+          <Fragment key={index}>
+            <Form.TextField
+              key={index}
+              id={`link-${index}`}
+              title={`Link ${index + 1}`}
+              placeholder="Paste a video or playlist link"
+              value={link}
+              onChange={(value) =>
+                setLinks((old) =>
+                  old.map((text, i) => (i === index ? value : text)),
+                )
+              }
+            />
+            {index > 0 && (
+              <Form.Checkbox
+                key={`remove-${links.length}-${index}`}
+                id={`remove-link-${index}`}
+                title=""
+                label={`✕ Remove Link ${index + 1}`}
+                value={false}
+                onChange={() =>
+                  setLinks((old) => old.filter((_, i) => i !== index))
+                }
+              />
+            )}
+          </Fragment>
         ))}
       {kind === "download" && !entries && (
-        <Form.Description
-          title="＋ More Videos"
-          text="Use Add Link in Actions or Ctrl+N. YouTube, Instagram, X, TikTok, Facebook, Reddit, Vimeo, Twitch, and Pinterest. Preview up to 200 playlist entries per link."
-        />
+        <>
+          <Form.Checkbox
+            key={`add-${links.length}`}
+            id="add-link"
+            title=""
+            label="＋ Add Link"
+            value={false}
+            onChange={() => setLinks((old) => [...old, ""])}
+          />
+          <Form.Description
+            title="Platforms"
+            text="YouTube, Instagram, X, TikTok, Facebook, Reddit, Vimeo, Twitch, and Pinterest. Preview up to 200 playlist entries per link."
+          />
+        </>
       )}
       {entries && (
         <Form.TagPicker
