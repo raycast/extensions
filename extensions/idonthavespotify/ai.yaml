@@ -1,0 +1,117 @@
+instructions: |
+  Only call convert-link when the user has supplied an actual HTTP or HTTPS music URL.
+  If no URL is present, ask for it and do not call convert-link. A song title or "my favorite song" is not a URL.
+  Convert music links between streaming services using URLs supplied by the user.
+  Use convert-link with platform omitted for all destinations or a universal sharing link.
+  For a specific destination, pass its ID from get-supported-platforms. YouTube Music uses youTube;
+  Apple Music uses appleMusic; SoundCloud uses soundCloud. Other IDs are lowercase service names.
+  These tools return information only. They do not read or change the clipboard, open links, play music,
+  transfer playlists, or search by title. Ask for a music URL when one is missing. Never invent a URL.
+  Link to the returned URLs and identify the title and artist/description when available.
+  An empty links array means no available match. Do not invent a match or substitute a different destination.
+  Matches with isVerified false are unverified: tell the user to check the match before sharing it.
+  A universalUrl is a sharing page, not a destination-platform match.
+  If authentication is required, explain that the public instance requires a browser login and that
+  direct Raycast conversion needs a self-hosted instance configured in Extension Preferences.
+  Do not claim that browser login authenticates this extension. Do not repeatedly retry authentication errors.
+
+evals:
+  - input: "@idonthavespotify Convert https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT to Apple Music"
+    mocks:
+      get-supported-platforms: &platforms
+        - { id: spotify, name: Spotify }
+        - { id: youTube, name: YouTube Music }
+        - { id: appleMusic, name: Apple Music }
+        - { id: soundCloud, name: SoundCloud }
+        - { id: deezer, name: Deezer }
+        - { id: tidal, name: Tidal }
+        - { id: qobuz, name: Qobuz }
+        - { id: bandcamp, name: Bandcamp }
+        - { id: pandora, name: Pandora }
+      convert-link:
+        title: "Example song"
+        description: "Example artist"
+        type: song
+        universalUrl: "https://idhs.example.com/?id=example"
+        links:
+          - platform: appleMusic
+            platformName: Apple Music
+            url: "https://music.apple.com/us/song/example/123456789"
+            isVerified: true
+    expected:
+      - callsTool:
+          name: convert-link
+          arguments:
+            link: "https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT"
+            platform: appleMusic
+      - includes: "https://music.apple.com/us/song/example/123456789"
+  - input: "@idonthavespotify Make a universal sharing link for https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT"
+    mocks:
+      get-supported-platforms: *platforms
+      convert-link:
+        title: "Example song"
+        description: "Example artist"
+        type: song
+        universalUrl: "https://idhs.example.com/?id=example"
+        links: []
+    expected:
+      - callsTool:
+          name: convert-link
+          arguments:
+            link: "https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT"
+      - includes: "https://idhs.example.com/?id=example"
+  - input: "@idonthavespotify Which streaming services can I convert links to?"
+    mocks:
+      get-supported-platforms: *platforms
+    expected:
+      - callsTool: get-supported-platforms
+      - includes: Qobuz
+      - includes: Pandora
+      - not: { callsTool: convert-link }
+  - input: "@idonthavespotify Convert my favorite song to Spotify"
+    usedAsExample: false
+    mocks:
+      get-supported-platforms: *platforms
+      convert-link:
+        error: "No music URL supplied. Ask the user for a link."
+    expected:
+      - not: { callsTool: convert-link }
+      - matches: "([Ll]ink|[Uu][Rr][Ll])"
+  - input: "@idonthavespotify Convert https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT to Tidal"
+    usedAsExample: false
+    mocks:
+      get-supported-platforms: *platforms
+      convert-link:
+        title: "Example song"
+        description: "Example artist"
+        type: song
+        universalUrl: "https://idhs.example.com/?id=example"
+        links: []
+        message: "No available match found for the requested destination(s)."
+    expected:
+      - callsTool:
+          name: convert-link
+          arguments: { platform: tidal }
+      - includes: "Tidal"
+      - matches: "([Nn]o |[Nn]ot |[Uu]navailable|[Uu]nable|[Cc]ouldn.t)"
+      - not: { includes: "tidal.com" }
+  - input: "@idonthavespotify Convert https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT to YouTube Music"
+    usedAsExample: false
+    mocks:
+      get-supported-platforms: *platforms
+      convert-link:
+        title: "Example song"
+        description: "Example artist"
+        type: song
+        universalUrl: "https://idhs.example.com/?id=example"
+        links:
+          - platform: youTube
+            platformName: YouTube Music
+            url: "https://music.youtube.com/watch?v=example"
+            isVerified: false
+    expected:
+      - callsTool:
+          name: convert-link
+          arguments: { platform: youTube }
+      - includes: "https://music.youtube.com/watch?v=example"
+      - matches: "([Uu]nverified|[Nn]ot verified|[Cc]heck|[Cc]onfirm|[Vv]erify)"
