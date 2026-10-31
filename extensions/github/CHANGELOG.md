@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Create Release and Dispatch Workflow Commands] - {PR_MERGE_DATE}
+## [Create Release and Dispatch Workflow Commands] - 2026-10-31
 
 - New **Create Release** command to publish a release with auto-suggested next tag, generated release notes, draft and pre-release options.
 - New **Dispatch Workflow** command to trigger `workflow_dispatch` workflows with their inputs, defaulting the ref to the branch of the latest run.
