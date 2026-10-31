@@ -1,5 +1,9 @@
 # Default Web Browser Manager Changelog
 
+## [Fix timeout when loading browsers] - {PR_MERGE_DATE}
+
+- Give `swift` 60 seconds instead of 10, since it can be slow when its module cache is cold, and say so if it still times out
+
 ## [Add Open Default Browser Command] - 2026-05-11
 
 - Add "Open Default Browser" command to quickly open the current default browser
