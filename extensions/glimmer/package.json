@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glimmer",
+  "type": "module",
+  "title": "Glimmer",
+  "description": "Stream apps from your paired PCs, wake a PC, and check your Glimmer stream from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "ugfuglio",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "stream-app",
+      "title": "Stream App",
+      "description": "Browse apps on paired PCs and start or resume a Glimmer stream",
+      "mode": "view"
+    },
+    {
+      "name": "wake-pc",
+      "title": "Wake PC",
+      "description": "Wake a paired PC and wait for it to answer",
+      "mode": "view"
+    },
+    {
+      "name": "stop-streaming",
+      "title": "Stop Streaming",
+      "description": "Stop this Mac’s Glimmer stream using its disconnect setting, after confirmation",
+      "mode": "no-view"
+    },
+    {
+      "name": "glimmer-status",
+      "title": "Glimmer Status",
+      "description": "Show this Mac’s stream and video details in the menu bar",
+      "mode": "menu-bar",
+      "interval": "30s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.10.1",
+    "@raycast/utils": "2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "publish": "ray publish"
+  },
+  "engines": {
+    "node": ">=22.6.0"
+  }
+}

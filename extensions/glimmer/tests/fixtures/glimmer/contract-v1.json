@@ -1,0 +1,274 @@
+{
+  "apps": {
+    "apps": [
+      {
+        "hdr": true,
+        "hidden": true,
+        "id": 7,
+        "name": "Game, \"two\"\n雪",
+        "running": true
+      },
+      {
+        "hdr": false,
+        "hidden": false,
+        "id": 9,
+        "name": "Desktop",
+        "running": false
+      }
+    ],
+    "version": 1
+  },
+  "appsEmpty": {
+    "apps": [],
+    "version": 1
+  },
+  "pcs": {
+    "pcs": [
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": null,
+        "state": "ready"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": null,
+        "state": "asleep"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": false,
+        "runningApp": null,
+        "state": "reachable"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": null,
+        "state": "unknown"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": {
+          "id": 7,
+          "name": "Hades II"
+        },
+        "state": "reachable"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": {
+          "id": 99,
+          "name": null
+        },
+        "state": "reachable"
+      },
+      {
+        "address": "Den.local:47989",
+        "default": true,
+        "id": "pc-id",
+        "name": "Den PC",
+        "paired": true,
+        "runningApp": {
+          "id": null,
+          "name": "Unlisted game"
+        },
+        "state": "reachable"
+      },
+      {
+        "address": null,
+        "default": false,
+        "id": "other-id",
+        "name": "客厅 PC",
+        "paired": false,
+        "runningApp": null,
+        "state": "unknown"
+      }
+    ],
+    "version": 1
+  },
+  "pcsEmpty": {
+    "pcs": [],
+    "version": 1
+  },
+  "rejectedURLs": [
+    "glimmer://pair?pc=Den",
+    "glimmer://unknown?pc=Den",
+    "glimmer://stream?pc=Den&force=1",
+    "glimmer://stream?pc=Den&pc=Other",
+    "glimmer://wake?pc=Den&app=A",
+    "glimmer://quit?pc=Den&app=A",
+    "glimmer://stream?pc=",
+    "glimmer://stream?pc=%20",
+    "glimmer://stream?pc=Den%0A",
+    "glimmer://stream?pc=Den%E2%80%8B",
+    "glimmer://stream?pc=Den%E2%80%AE",
+    "glimmer://stop?pc=",
+    "glimmer://stop?pc=%20",
+    "glimmer://stop?pc=Den%0A",
+    "glimmer://stop?pc=Den%E2%80%8B",
+    "glimmer://stop?pc=Den%E2%80%AE",
+    "glimmer://stop?pc=Den&app=A",
+    "glimmer://stop?app=A",
+    "glimmer://stop?pc=Den&pc=Other",
+    "glimmer://stop?force=1"
+  ],
+  "statusIdle": {
+    "app": null,
+    "bitrateMbps": null,
+    "codec": null,
+    "fps": null,
+    "hdr": null,
+    "live": false,
+    "pc": null,
+    "resolution": null,
+    "version": 1
+  },
+  "statusLive": {
+    "app": {
+      "id": 7,
+      "name": "Hades II"
+    },
+    "bitrateMbps": 82.5,
+    "codec": "HEVC",
+    "fps": 120,
+    "hdr": true,
+    "live": true,
+    "pc": {
+      "id": "pc-id",
+      "name": "Den PC"
+    },
+    "resolution": {
+      "height": 1440,
+      "width": 2560
+    },
+    "version": 1
+  },
+  "statusReconnecting": {
+    "app": {
+      "id": 7,
+      "name": "Hades II"
+    },
+    "bitrateMbps": null,
+    "codec": null,
+    "fps": null,
+    "hdr": null,
+    "live": false,
+    "pc": {
+      "id": "pc-id",
+      "name": "Den PC"
+    },
+    "resolution": null,
+    "version": 1
+  },
+  "statusUnknown": {
+    "app": null,
+    "bitrateMbps": null,
+    "codec": "HEVC",
+    "fps": null,
+    "hdr": null,
+    "live": true,
+    "pc": null,
+    "resolution": null,
+    "version": 1
+  },
+  "stopIdle": {
+    "result": "noActiveStream",
+    "stopped": false,
+    "version": 1
+  },
+  "stopStopped": {
+    "result": "stopped",
+    "stopped": true,
+    "version": 1
+  },
+  "urls": [
+    {
+      "action": "stream",
+      "app": "Hades II",
+      "pc": "Den PC",
+      "url": "glimmer://stream?pc=Den%20PC&app=Hades%20II"
+    },
+    {
+      "action": "stream",
+      "app": "A+B&C",
+      "pc": "Den%20PC",
+      "url": "glimmer://stream?pc=Den%2520PC&app=A%2BB%26C"
+    },
+    {
+      "action": "stream",
+      "app": "雪 + #?/%&=",
+      "pc": "客厅 café 🎮",
+      "url": "glimmer://stream?pc=%E5%AE%A2%E5%8E%85%20caf%C3%A9%20%F0%9F%8E%AE&app=%E9%9B%AA%20%2B%20%23%3F%2F%25%26%3D"
+    },
+    {
+      "action": "stream",
+      "pc": "pc-id",
+      "url": "glimmer://stream?pc=pc-id"
+    },
+    {
+      "action": "wake",
+      "pc": "Den PC",
+      "url": "glimmer://wake?pc=Den%20PC"
+    },
+    {
+      "action": "quit",
+      "pc": "[2001:db8::1]",
+      "url": "glimmer://quit?pc=%5B2001%3Adb8%3A%3A1%5D"
+    },
+    {
+      "action": "stop",
+      "url": "glimmer://stop"
+    },
+    {
+      "action": "stop",
+      "pc": "Den PC",
+      "url": "glimmer://stop?pc=Den%20PC"
+    },
+    {
+      "action": "stop",
+      "pc": "PC-ID",
+      "url": "glimmer://stop?pc=PC-ID"
+    },
+    {
+      "action": "stop",
+      "pc": "DEN.local:47989",
+      "url": "glimmer://stop?pc=DEN.local%3A47989"
+    },
+    {
+      "action": "stop",
+      "pc": "客厅 + PC",
+      "url": "glimmer://stop?pc=%E5%AE%A2%E5%8E%85%20%2B%20PC"
+    }
+  ],
+  "source": {
+    "repository": "https://github.com/Se7enbrc/glimmer",
+    "revision": "3e59901396c3445c04e9fe73be3d3fafb1a30ce8",
+    "sha256": {
+      "Glimmer/CLI/GlimmerCLI+JSON.swift": "cf96892fc9e0aaad23ad048fd17da35ac33f600ece1f8a90620c2eea254181a5",
+      "Glimmer/CLI/GlimmerCLI+URL.swift": "40087ed9039166edd16b71440cef721443898b8db397a68315e33e162708fc81",
+      "GlimmerEngine/Models/GlimmerCommandURL.swift": "7c64a7e7848897ec1fb20cc6e19033f397e90f4d0500e65b15985cd2979df1bb"
+    }
+  }
+}
