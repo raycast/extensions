@@ -6,6 +6,7 @@ import type { useVmList } from "@/hooks/use-vm-list";
 import { ALL_ACTIONS } from "@/utils/const";
 import { describeFetchError } from "@/utils/errors";
 import { formatBrowserUrl } from "@/utils/format";
+import { EditTags } from "@/screens/EditTags";
 
 type VmActionPanelProps = {
   vm: WithServer<PveVm>;
@@ -89,6 +90,12 @@ export const VmActionPanel = ({ vm, revalidate, mutate }: VmActionPanelProps) =>
             onAction={() => handleAction(vm, ALL_ACTIONS.start)}
           />
         )}
+        <Action.Push
+          title="Edit Tags"
+          icon={Icon.Tag}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          target={<EditTags vm={vm} onChange={revalidate} />}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section title="Browser">
         <Action.OpenInBrowser

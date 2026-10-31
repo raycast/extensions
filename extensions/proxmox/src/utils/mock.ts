@@ -64,6 +64,7 @@ export const getMockPveVmData = (): PveVm[] => {
       type: PveVmTypes.lxc,
       name: "Alpine",
       status: PveVmStatus.running,
+      tags: "dns;prod",
     },
     {
       type: PveVmTypes.lxc,
@@ -74,6 +75,7 @@ export const getMockPveVmData = (): PveVm[] => {
       type: PveVmTypes.qemu,
       name: "Debian 12",
       status: PveVmStatus.running,
+      tags: "prod;web",
     },
     {
       type: PveVmTypes.qemu,
