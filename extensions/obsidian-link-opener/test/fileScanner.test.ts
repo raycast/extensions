@@ -23,6 +23,7 @@ vi.mock("@raycast/api", () => ({
 
 import { LocalStorage } from "@raycast/api";
 import { scanVaultForUrls } from "../src/services/fileScanner";
+import { FrontmatterReader } from "../src/services/frontmatterReader";
 
 // Uses the real file system so paths have the platform's native separators
 describe("scanVaultForUrls", () => {
@@ -44,6 +45,7 @@ describe("scanVaultForUrls", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await fs.rm(vaultPath, { recursive: true, force: true });
   });
 
@@ -60,8 +62,10 @@ describe("scanVaultForUrls", () => {
 
   it("serves the second scan from the cache", async () => {
     const first = await scanVaultForUrls(true);
+    const readSpy = vi.spyOn(FrontmatterReader.prototype, "readFrontmatter");
     const second = await scanVaultForUrls();
 
+    expect(readSpy).not.toHaveBeenCalled();
     expect(second).toHaveLength(first.length);
     expect(second.map((n) => n.path)).toEqual(first.map((n) => n.path));
   });
@@ -79,8 +83,14 @@ describe("scanVaultForUrls", () => {
       "---\ndocs: https://docs.example.com\n---\n"
     );
 
+    const readSpy = vi.spyOn(FrontmatterReader.prototype, "readFrontmatter");
     const notes = await scanVaultForUrls();
 
+    const readFiles = readSpy.mock.calls.map(([filePath]) => filePath);
+    expect(readFiles).toContain(path.join(vaultPath, "new.md"));
+    expect(readFiles).not.toContain(
+      path.join(vaultPath, "projects", "web", "site.md")
+    );
     expect(notes.map((n) => n.urlSource).sort()).toEqual([
       "docs",
       "github",
