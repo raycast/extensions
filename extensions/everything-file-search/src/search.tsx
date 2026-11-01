@@ -156,11 +156,15 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
   // Built-ins from preferences; custom types from LocalStorage (edited via Configure File Types),
   // polled so changes made in the other command show up without reopening this one.
   const [typeDefs, setTypeDefs] = useState(() => buildTypeDefs(prefs, []));
+  const [customLoaded, setCustomLoaded] = useState(false);
   useEffect(() => {
     let alive = true;
     const load = () => {
       loadCustomTypes().then((custom) => {
-        if (alive) setTypeDefs(buildTypeDefs(prefs, custom));
+        if (alive) {
+          setTypeDefs(buildTypeDefs(prefs, custom));
+          setCustomLoaded(true);
+        }
       });
     };
     load();
@@ -216,6 +220,11 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
     setAllResults([]);
   }, [debouncedQuery, typeSig, sortKey]);
 
+  // A persisted custom type id can load before its definition does — hold the
+  // search until the custom types arrive instead of briefly falling back to All
+  const waitingForTypes =
+    !customLoaded && typeId !== "all" && !typeDefs.some((t) => t.id === typeId);
+
   const skipFetch =
     !debouncedQuery.trim() && !fileType?.extensions && !fileType?.onlyFolders;
   const { isLoading, data, error } = usePromise(
@@ -225,7 +234,9 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
       sortK: string,
       pageArg: number,
       _tick: number,
+      waiting: boolean,
     ) => {
+      if (waiting) return null;
       // The closure holds the latest typeDefs, so edits to the active custom
       // type apply as soon as the signature change re-triggers the fetch
       const ft = typeDefs.find((t) => t.id === typeId) ?? typeDefs[0];
@@ -249,7 +260,7 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
         totalResults: resp.totalResults,
       };
     },
-    [debouncedQuery, typeSig, sortKey, page, reloadTick],
+    [debouncedQuery, typeSig, sortKey, page, reloadTick, waitingForTypes],
   );
 
   // Apply only the response that matches the current page — while the next page
@@ -310,7 +321,7 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
   return (
     <List
       isShowingDetail={showPreview}
-      isLoading={isLoading}
+      isLoading={isLoading || waitingForTypes}
       searchText={query}
       onSearchTextChange={setQuery}
       enableFiltering={false}
@@ -367,7 +378,13 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
         </List.Dropdown>
       }
     >
-      {skipFetch ? (
+      {waitingForTypes ? (
+        <List.EmptyView
+          title="Loading type filters…"
+          description="Restoring the saved custom type from local storage"
+          icon={Icon.CircleProgress}
+        />
+      ) : skipFetch ? (
         <List.EmptyView
           title="Type to start searching"
           description={`Current type: ${fileType?.label ?? "All"} · switch type/sort/preview in the dropdown on the right of the search bar`}
