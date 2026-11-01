@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Bowmark MCP Server] - {PR_MERGE_DATE}
+## [Add Bowmark MCP Server] - 2026-11-01
 
 - Add Bowmark to the built-in registry: typed, tested functions for live websites (LinkedIn, YouTube, Amazon, Reddit, flights and more). Hosted Streamable HTTP server at https://api.bowmark.ai/mcp, connected through `mcp-remote` with a Bowmark API key header.
 
