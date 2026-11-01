@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Fictura MCP Server] - 2026-11-01
+
+- Add Fictura to the official registry: growth data for Expo and React Native apps, covering paywalls and onboarding flows, subscription analytics and funnels, A/B experiments, attribution and ad spend, deep links, App Store and Google Play analytics, and error reports. Mostly read-only; it can create and edit draft paywalls and onboarding flows, never live ones. Hosted Streamable HTTP server at https://mcp.fictura.co/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Wiro AI MCP Server] - 2026-11-01
 
 - Add Wiro AI to the official registry: search 3,500+ AI models for images, video, audio, speech, music and text, check each model's parameters and price, run it and get the results back. Hosted Streamable HTTP server at https://mcp.wiro.ai/v1 with OAuth 2.1 browser sign-in or a Wiro API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
