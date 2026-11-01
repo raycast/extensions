@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { parseSkillLock } from "../src/utils/skill-lock.ts";
+import { parseSkillLock, skillLockMetadata } from "../src/utils/skill-lock.ts";
 import { isVerifiedCliSkill, safeMutableAgents } from "../src/utils/skill-ownership.ts";
 
 test("verifies the canonical skill contents before allowing CLI management", async () => {
@@ -57,4 +57,22 @@ test("invalid lock entries cannot authorize skill changes", () => {
   assert.deepEqual(Object.keys(lock), ["valid"]);
   assert.equal(lock.malformed, undefined);
   assert.deepEqual(parseSkillLock(JSON.stringify({ skills: [] })), {});
+});
+
+test("keeps local lock metadata readable without granting removal permission", () => {
+  const lock = {
+    source: join(homedir(), "projects", "my-skills"),
+    sourceType: "local",
+    installedAt: "2026-10-01T00:00:00Z",
+    updatedAt: "2026-10-02T00:00:00Z",
+  };
+  assert.deepEqual(parseSkillLock(JSON.stringify({ skills: { demo: lock } })).demo, lock);
+  assert.deepEqual(skillLockMetadata(lock), {
+    source: join("~", "projects", "my-skills"),
+    sourceType: "local",
+    sourceUrl: undefined,
+    ref: undefined,
+    installedAt: lock.installedAt,
+    updatedAt: lock.updatedAt,
+  });
 });

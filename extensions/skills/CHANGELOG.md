@@ -5,6 +5,7 @@
 - Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts
 - Validate skill metadata, plugin manifests, MCP server configuration, and package paths before showing components
 - Group installed skills by management source and restrict removal to verified CLI installs
+- Keep local-path source and dates visible as recorded, read-only lock-file details
 - Add a Manage Plugins command for installed Claude Code and Codex plugins, with supported host CLI actions
 - Verify Skills CLI ownership before offering removal and limit it to checked Codex and Claude Code installations
 - Show available skill updates without automatically running the Skills CLI update command, which can affect other detected agents

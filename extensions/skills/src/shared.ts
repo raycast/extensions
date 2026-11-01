@@ -49,7 +49,7 @@ export type SkillLockEntry = {
   sourceType: string;
   sourceUrl?: string;
   ref?: string;
-  skillPath: string;
+  skillPath?: string;
   skillFolderHash: string;
   installedAt: string;
   updatedAt: string;

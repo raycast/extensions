@@ -31,7 +31,7 @@ Search for agent skills from skills.sh with real-time results. Results show whic
 
 ### Manage Skills
 
-View installed skills discovered by the Skills CLI, grouped by management source. The extension verifies the installed GitHub skill contents against the CLI lock before enabling removal. Removal is available for verified Codex and Claude Code installations. Other local or externally managed skills remain available for reading, opening, and copying. Outdated verified skills are highlighted for review. Automatic updates are unavailable because the Skills CLI update command can change installations for other detected agents. Filter by agent to see which skills are available for each AI agent.
+View installed skills discovered by the Skills CLI, grouped by management source. The extension verifies the installed GitHub skill contents against the CLI lock before enabling removal. Removal is available for verified Codex and Claude Code installations. Other local or externally managed skills remain available for reading, opening, and copying. For local-path installs, the source and dates are shown as recorded lock-file details, not verified ownership. Outdated verified skills are highlighted for review. Automatic updates are unavailable because the Skills CLI update command can change installations for other detected agents. Filter by agent to see which skills are available for each AI agent.
 
 ### Manage Plugins
 
