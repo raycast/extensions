@@ -1,6 +1,6 @@
 # Changelog
 
-## [Palette colors, faster start and fixes] - {PR_MERGE_DATE}
+## [Palette colors, faster start and fixes] - 2026-11-01
 
 - Edit Card adds and removes a palette's colors, and the Update Teak Card AI tool can too
 - Commands open faster while you're signed in: Raycast uses your saved sign-in without asking Teak where to sign in first
