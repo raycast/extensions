@@ -1,5 +1,14 @@
 # Slack Changelog
 
+## [Cache channel directory for instant local search] - 2026-11-01
+
+- Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
+
+## [Channel Mentions in AI Chat] - 2026-10-31
+
+- Add a **Channels** mention search to find public and private channels by name. Without a query it lists the channels you're a member of, and search results rank your own channels first.
+- Read the selected channel's current topic, purpose, member count, and Slack channel ID when sending a mention, so AI can read its history or search it without guessing the channel.
+
 ## [User Mentions in AI Chat] - 2026-10-28
 
 - Add a **Users** mention search to find workspace members by name, username, email, or job title.
