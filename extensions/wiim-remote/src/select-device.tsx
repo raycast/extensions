@@ -32,13 +32,13 @@ async function mapDevicesWithNames(found: WiiMDevice[]): Promise<WiiMDeviceWithN
 async function handleSelect(device: WiiMDevice, manualIP?: string): Promise<boolean> {
   try {
     await setSelectedDeviceIP(device.ip);
-    await showToast(
-      Toast.Style.Success,
-      "Device Selected",
-      manualIP
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Device Selected",
+      message: manualIP
         ? `Saved, but the "WiiM Device IP" preference (${manualIP}) takes precedence`
         : `WiiM device at ${device.ip} selected`,
-    );
+    });
     return true;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
