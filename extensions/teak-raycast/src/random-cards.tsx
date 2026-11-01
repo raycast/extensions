@@ -68,7 +68,9 @@ export default function RandomCardsCommand() {
     )
       .then((response) => {
         if (isCurrent) {
-          goneIds.current.clear();
+          for (const card of response.items) {
+            goneIds.current.delete(card.id);
+          }
           setCards(response.items);
           setDealt(response.items.length);
         }
@@ -116,6 +118,19 @@ export default function RandomCardsCommand() {
       handleUpdated(card);
     },
     [handleUpdated],
+  );
+
+  // Archive marks the card gone so a late save can't deal it again; its Undo
+  // answers with the card unarchived, which restores it.
+  const handleArchiveChange = useCallback(
+    (next: RaycastCard) => {
+      if (next.isArchived) {
+        handleRemoved(next.id);
+      } else {
+        handleRestored(next);
+      }
+    },
+    [handleRemoved, handleRestored],
   );
 
   const handleKeep = useCallback(
@@ -204,7 +219,9 @@ export default function RandomCardsCommand() {
                     />
                     <Action
                       icon={Icon.Box}
-                      onAction={() => void archiveCard(card, handleUpdated)}
+                      onAction={() =>
+                        void archiveCard(card, handleArchiveChange)
+                      }
                       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                       title="Archive"
                     />

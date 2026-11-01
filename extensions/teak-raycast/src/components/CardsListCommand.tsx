@@ -143,7 +143,11 @@ export function CardsListCommand({
         if (generation === requestGeneration.current) {
           // A new page has its own order, so old Undo positions no longer fit.
           removedAt.current.clear();
-          goneIds.current.clear();
+          // A trashed card isn't in a fresh page, so it stays blocked; one
+          // restored elsewhere is back in the page and takes updates again.
+          for (const card of response.items) {
+            goneIds.current.delete(card.id);
+          }
           setItems(response.items);
           setNextCursor(response.nextCursor);
           setSimilarity(response.similarity);

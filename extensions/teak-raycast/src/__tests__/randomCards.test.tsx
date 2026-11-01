@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { act, createElement } from "react";
-import { mockRaycastUi } from "./raycastUiMock";
+import { mockRaycastUi, shownToasts } from "./raycastUiMock";
 
 const transportGlobals = {
   Response,
@@ -121,6 +121,32 @@ test("Archive archives it and drops it from the deck", async () => {
   expect(patch?.body).toEqual({ isArchived: true });
   expect(patch?.url.pathname).toBe(`/api/v1/cards/${idA}`);
   expect(container.textContent).not.toContain("First card");
+});
+
+test("Undo after Archive deals the card back", async () => {
+  serve([card(idA, "First card"), card(idB, "Second card")]);
+  const answer = globalThis.fetch;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    if (init?.method === "PATCH") {
+      const { isArchived } = JSON.parse(String(init.body));
+      return Promise.resolve(
+        Response.json({ ...card(idA, "First card"), isArchived }),
+      );
+    }
+    return answer(input, init);
+  }) as typeof fetch;
+  await act(async () => root.render(createElement(RandomCardsCommand)));
+  await settle();
+  await press("Archive");
+  expect(container.textContent).not.toContain("First card");
+
+  const archived = shownToasts.at(-1);
+  const undo = archived?.primaryAction as
+    | { onAction: (toast: unknown) => Promise<void> }
+    | undefined;
+  await act(async () => undo?.onAction(archived));
+  await settle();
+  expect(container.textContent).toContain("First card");
 });
 
 test("Shuffle Again deals a new set with a new seed", async () => {

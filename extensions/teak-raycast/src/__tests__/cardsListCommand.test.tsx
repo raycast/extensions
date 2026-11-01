@@ -301,3 +301,35 @@ test("a favorite that answers after Move to Trash doesn't bring the card back", 
   await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
   expect(container.textContent).toContain("A long read");
 });
+
+test("a favorite that answers after Trash and a reload still stays out", async () => {
+  let answerFavorite: (() => void) | undefined;
+  let trashed = false;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input));
+    const method = init?.method ?? "GET";
+    if (url.pathname.endsWith("/favorite")) {
+      return new Promise<Response>((resolve) => {
+        answerFavorite = () =>
+          resolve(Response.json({ ...linkCard, isFavorited: true }));
+      });
+    }
+    if (method === "DELETE") {
+      trashed = true;
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
+    // Once in Trash, the card is no longer in a fresh page.
+    const items = trashed ? [] : [linkCard];
+    return Promise.resolve(
+      Response.json({ items, pageInfo: { hasMore: false, nextCursor: null } }),
+    );
+  }) as typeof fetch;
+  await render();
+  await press("Favorite");
+  await press("Move to Trash");
+  await press("Reload");
+
+  await act(async () => answerFavorite?.());
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(container.textContent).not.toContain("A long read");
+});
