@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 2,
+  "issue": "berthelius/frihet-distribution#10",
+  "verifiedAt": "2026-10-28T12:38:39.782Z",
+  "startedAt": "2026-10-28T12:38:13.217Z",
+  "apiBaseUrl": "https://api.frihet.io/v1",
+  "flows": {
+    "flow1_connectionAndContext": {
+      "status": "PASSED",
+      "endpoint": "https://api.frihet.io/v1/context",
+      "workspaceName": "Frihet OpenAI Demo",
+      "currency": "EUR",
+      "fiscalZone": "canarias",
+      "planTier": "free",
+      "tenantNamespace": "6140492150774d3f"
+    },
+    "flow2_businessBriefMonetaryAndTemporalContract": {
+      "status": "PASSED",
+      "question": "¿Qué debería revisar hoy en mi negocio y por qué?",
+      "asOfDate": "2026-10-28",
+      "referenceMonth": "2026-10",
+      "temporalScope": "unfiltered_operational_sample_as_of_date",
+      "isPartial": false,
+      "resources": {
+        "invoices": {
+          "resource": "invoices",
+          "collection": "invoices",
+          "sourceTool": "list_invoices",
+          "inspected": 4,
+          "total": 4,
+          "complete": true
+        },
+        "quotes": {
+          "resource": "quotes",
+          "collection": "quotes",
+          "sourceTool": "list_quotes",
+          "inspected": 0,
+          "total": 0,
+          "complete": true
+        },
+        "expenses": {
+          "resource": "expenses",
+          "collection": "expenses",
+          "sourceTool": "list_expenses",
+          "inspected": 2,
+          "total": 2,
+          "complete": true
+        },
+        "clients": {
+          "resource": "clients",
+          "collection": "clients",
+          "sourceTool": "list_clients",
+          "inspected": 2,
+          "total": 2,
+          "complete": true
+        },
+        "client_activities": {
+          "resource": "client_activities",
+          "collection": "client_activities",
+          "sourceTool": "list_client_activities",
+          "inspected": 2,
+          "total": 2,
+          "complete": true
+        }
+      },
+      "draftActivity": {
+        "invoiceDraftsCount": 4,
+        "invoiceDraftsTotal": {
+          "amount": 4095,
+          "currency": "EUR",
+          "provenance": "derived_from_items",
+          "formula": "sum(stored doc.total/amount + canonical derived item totals)",
+          "fieldOrFormula": "sum(stored doc.total/amount + canonical derived item totals)",
+          "totalsByCurrency": {
+            "EUR": {
+              "amount": 4095,
+              "currency": "EUR",
+              "provenance": "derived_from_items",
+              "documentCount": 4
+            }
+          },
+          "unavailableCount": 0
+        },
+        "quoteDraftsCount": 0,
+        "quoteDraftsTotal": {
+          "amount": 0,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(0 documents)",
+          "fieldOrFormula": "sum(0 documents)",
+          "totalsByCurrency": {},
+          "unavailableCount": 0
+        }
+      },
+      "issuedActivity": {
+        "realOutstandingBalanceDeterminable": false,
+        "unpaidNominalSemantics": "nominal_unpaid_invoice_totals_without_partial_payments",
+        "issuedInvoicesCount": 0,
+        "issuedInvoicesTotal": {
+          "amount": 0,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(0 documents)",
+          "fieldOrFormula": "sum(0 documents)",
+          "totalsByCurrency": {},
+          "unavailableCount": 0
+        },
+        "paidInvoicesCount": 0,
+        "paidInvoicesTotal": {
+          "amount": 0,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(0 documents)",
+          "fieldOrFormula": "sum(0 documents)",
+          "totalsByCurrency": {},
+          "unavailableCount": 0
+        },
+        "unpaidNominalInvoicesCount": 0,
+        "unpaidNominalTotal": {
+          "amount": 0,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(0 documents)",
+          "fieldOrFormula": "sum(0 documents)",
+          "totalsByCurrency": {},
+          "unavailableCount": 0
+        },
+        "unpaidNominalTotalsByCurrency": {}
+      },
+      "recordedExpenses": {
+        "expensesCount": 2,
+        "expensesTotal": {
+          "amount": 166.99,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(stored doc.total/amount)",
+          "fieldOrFormula": "sum(stored doc.total/amount)",
+          "totalsByCurrency": {
+            "EUR": {
+              "amount": 166.99,
+              "currency": "EUR",
+              "provenance": "stored_field",
+              "documentCount": 2
+            }
+          },
+          "unavailableCount": 0
+        },
+        "deductibleCount": 1,
+        "nonDeductibleCount": 1,
+        "pendingReviewCount": 0
+      },
+      "currentMonthActivity": {
+        "referenceMonth": "2026-10",
+        "note": "Subconjunto de documentos cuya fecha de emisión (issueDate) o fecha de gasto (date) pertenece explícitamente al mes 2026-10, separado de los registros de meses previos presentes en la muestra operativa.",
+        "issuedInvoicesInMonthCount": 0,
+        "issuedInvoicesInMonthTotal": {
+          "amount": 0,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(0 documents)",
+          "fieldOrFormula": "sum(0 documents)",
+          "totalsByCurrency": {},
+          "unavailableCount": 0
+        },
+        "invoiceDraftsInMonthCount": 4,
+        "invoiceDraftsInMonthTotal": {
+          "amount": 4095,
+          "currency": "EUR",
+          "provenance": "derived_from_items",
+          "formula": "sum(stored doc.total/amount + canonical derived item totals)",
+          "fieldOrFormula": "sum(stored doc.total/amount + canonical derived item totals)",
+          "totalsByCurrency": {
+            "EUR": {
+              "amount": 4095,
+              "currency": "EUR",
+              "provenance": "derived_from_items",
+              "documentCount": 4
+            }
+          },
+          "unavailableCount": 0
+        },
+        "expensesInMonthCount": 1,
+        "expensesInMonthTotal": {
+          "amount": 121,
+          "currency": "EUR",
+          "provenance": "stored_field",
+          "formula": "sum(stored doc.total/amount)",
+          "fieldOrFormula": "sum(stored doc.total/amount)",
+          "totalsByCurrency": {
+            "EUR": {
+              "amount": 121,
+              "currency": "EUR",
+              "provenance": "stored_field",
+              "documentCount": 1
+            }
+          },
+          "unavailableCount": 0
+        }
+      },
+      "reviewItemsCount": 3,
+      "reviewCategories": [
+        "draft_invoice",
+        "tax_discrepancy",
+        "crm_followup"
+      ],
+      "mutationsExecuted": 0
+    },
+    "flow3_searchInvoicesClientsProductsAndDeepLinks": {
+      "status": "PASSED",
+      "invoices": {
+        "inspected": 4,
+        "total": 4,
+        "sampleIds": [
+          "0avUIazQWeadR9NIXNOu",
+          "UzxMlbbJ9PLLPcpRmF8y",
+          "Xzpy4RGYVdhSiByaHLvE",
+          "edeCSbfZtmpzx8q2S19s"
+        ],
+        "detailedInvoiceSample": {
+          "id": "0avUIazQWeadR9NIXNOu",
+          "invoiceNumber": "F20260004",
+          "status": "draft",
+          "clientName": "Acme SL",
+          "itemCount": 1,
+          "deepLinkUrl": "https://app.frihet.io/invoices",
+          "deepLinkTargetProbe": {
+            "url": "https://app.frihet.io/invoices",
+            "httpStatus": 200,
+            "ok": true,
+            "contentType": "text/html; charset=utf-8",
+            "hasAppRootShell": true
+          }
+        },
+        "openInFrihetUrl": "https://app.frihet.io/invoices"
+      },
+      "clients": {
+        "inspected": 3,
+        "total": 3,
+        "sampleNames": [
+          {
+            "id": "444IZvNpVrtJhj5nRySW",
+            "name": "Acme SL"
+          },
+          {
+            "id": "RCjuHqsCchF5ZCB7gU0s",
+            "name": "OpenAI Demo Sample Client"
+          },
+          {
+            "id": "eFj2cdKGXIAaXjjVnO9x",
+            "name": "Zapier v2.2.0 Ephemeral Lead 1793191059449 SL"
+          }
+        ],
+        "openInFrihetUrl": "https://app.frihet.io/clients"
+      },
+      "products": {
+        "inspected": 3,
+        "total": 3,
+        "usedClientSideFallback": true,
+        "fallbackCoveragePartial": false,
+        "fallbackReason": "Server returned HTTP 500 on ?isActive=true; applied client-side filter preserving legacy products.",
+        "sampleProducts": [
+          {
+            "id": "EYd0ioEOZwMLAn30dxu6",
+            "name": "OpenAI Demo Annual Hosting",
+            "unitPrice": 240,
+            "isActive": true
+          },
+          {
+            "id": "GRO7SpqTTeMeky1sume9",
+            "name": "OpenAI Demo UX Design Hour",
+            "unitPrice": 65,
+            "isActive": true
+          },
+          {
+            "id": "LfkcoMynn0JFlhbkYeZQ",
+            "name": "OpenAI Demo Consulting Hour",
+            "unitPrice": 80,
+            "isActive": true
+          }
+        ],
+        "openInFrihetUrl": "https://app.frihet.io/products"
+      }
+    },
+    "flow4_twoCompanyWorkspaceSwitchAndCacheIsolation": {
+      "status": "PASSED",
+      "twoDistinctCompaniesVerified": true,
+      "workspaceA": {
+        "companyName": "Frihet OpenAI Demo",
+        "fiscalZone": "canarias",
+        "tenantNamespace": "6140492150774d3f",
+        "invoiceIds": [
+          "0avUIazQWeadR9NIXNOu",
+          "UzxMlbbJ9PLLPcpRmF8y",
+          "Xzpy4RGYVdhSiByaHLvE",
+          "edeCSbfZtmpzx8q2S19s"
+        ],
+        "clientNames": [
+          "Acme SL",
+          "OpenAI Demo Sample Client",
+          "Zapier v2.2.0 Ephemeral Lead 1793191059449 SL"
+        ]
+      },
+      "workspaceB": {
+        "companyName": "Frihet MCP Test Company SL",
+        "fiscalZone": "peninsula",
+        "tenantNamespace": "93651fe989870b6c",
+        "invoiceIds": [
+          "3rJhIb48hpMjc9qTjUbj",
+          "6TQYdxNmukwPlAegsrQj",
+          "H95WGDJy4X9JNzrP63VR",
+          "IZ7RUIBLpRGRMh0mUqXQ",
+          "NuBEololc2bB38Kz9Ghz",
+          "TvRgq9S480uULOqFyywb",
+          "cEBoTYXQdfywGhl2Sg6c",
+          "hGrZUxktimCygU71vPnd",
+          "kjFvX6yARhO5DauICB1x",
+          "wlWPnP9YNDAddwTVzDWQ"
+        ],
+        "clientNames": [
+          "TechStart Solutions GmbH",
+          "Nordic Digital ApS",
+          "Barcelona Design Studio",
+          "Innovate Labs SL",
+          "Green Valley Organic Ltd"
+        ]
+      },
+      "generationBeforeSwitch": 0,
+      "cachedEntriesBeforeSwitch": 11,
+      "generationAfterSwitch": 1,
+      "cachedEntriesImmediatelyAfterSwitch": 0,
+      "inFlightRequestAbortedOnSwitch": true,
+      "staleWorkspaceAContextRemaining": false,
+      "overlappingInvoiceIds": [],
+      "overlappingClientIds": []
+    }
+  },
+  "qaHarnessSeparation": {
+    "adminCredentialsInExtensionRepo": false,
+    "firebaseAdminInExtensionRepo": false,
+    "harnessScript": "frihet-distribution/activation-2026-10-28/raycast-qa-harness.mjs",
+    "clientScript": "frihet-raycast/scripts/verify-live-raycast-flows.mjs"
+  },
+  "ephemeralCredentialCleanup": {
+    "ephemeralKeysRevokedCount": 2,
+    "revokedKeys": [
+      {
+        "label": "Synthetic-Workspace-A-OpenAI-Demo",
+        "syntheticUid": "hnVCrCb9Pxf8BgLP0ijz84iuntt2",
+        "ephemeralKeyId": "5X4DJGuZlDCS1HIidBuy",
+        "redactedKeyPrefix": "fri_OCBP...[REDACTED]",
+        "deletedFromFirestore": true,
+        "postRevocationProbeUrl": "https://api.frihet.io/v1/context",
+        "postRevocationHttpStatus": 401
+      },
+      {
+        "label": "Synthetic-Workspace-B-MCP-Test-Company",
+        "syntheticUid": "5GyW6w25gZQU6bKHxDo6w4xiQV23",
+        "ephemeralKeyId": "zvVxPtMGZOHzMDi6fq7W",
+        "redactedKeyPrefix": "fri_rep1...[REDACTED]",
+        "deletedFromFirestore": true,
+        "postRevocationProbeUrl": "https://api.frihet.io/v1/context",
+        "postRevocationHttpStatus": 401
+      }
+    ]
+  }
+}
