@@ -1,5 +1,13 @@
 # Changelog
 
+## [Ownership Transfer] - 2026-10-31
+
+- Transfer ownership from Paranjayy to nakama. Paranjayy stays credited as a past contributor.
+
+## [Faster Search] - 2026-10-31
+
+- Load results without the 300 ms delay. Raycast now throttles typing in grid view, and next pages, sort and provider changes load straight away.
+
 ## [Grid Size] - 2026-10-24
 
 - Add a Grid Size preference: Small (8 columns, the new default), Medium (6 columns, the previous layout) or Large (4 columns).
