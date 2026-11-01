@@ -6,6 +6,7 @@ import {
   parseClaudePlugins,
   parseCodexPlugins,
   pluginRowId,
+  shouldUsePluginShell,
 } from "../src/utils/installed-plugins.ts";
 
 test("normalizes installed Claude plugins with their scope and enabled state", () => {
@@ -120,4 +121,11 @@ test("only builds management commands for supported installed scopes", () => {
     binary: "codex",
     args: ["plugin", "remove", "tools@market", "--json"],
   });
+});
+
+test("runs Windows plugin launchers through a shell only with safe argument tokens", () => {
+  assert.equal(shouldUsePluginShell(["plugin", "list", "--json"], "win32"), true);
+  assert.equal(shouldUsePluginShell(["plugin", "remove", "tools@market", "--json"], "win32"), true);
+  assert.equal(shouldUsePluginShell(["plugin", "list", "--json"], "darwin"), false);
+  assert.throws(() => shouldUsePluginShell(["plugin", "remove", "tools&echo injected"], "win32"), /unsafe/i);
 });

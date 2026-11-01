@@ -224,6 +224,46 @@ test("accepts permitted plugin names and MCP working directories", async () => {
   });
 });
 
+test("reports missing package-relative MCP commands and working directories", async () => {
+  await fixture(async (root) => {
+    await mkdir(join(root, "bin"));
+    await mkdir(join(root, "work"));
+    await writeFile(join(root, "bin", "server"), "server");
+    await writeFile(
+      join(root, "plugin.json"),
+      JSON.stringify({ $schema: "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json", name: "mcp-files" }),
+    );
+    await writeFile(
+      join(root, "mcp.json"),
+      JSON.stringify({
+        $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+        mcpServers: {
+          missingCommand: { type: "stdio", command: "./bin/missing" },
+          directoryCommand: { type: "stdio", command: "./bin" },
+          missingCwd: { type: "stdio", command: "node", cwd: "${PLUGIN_ROOT}/missing" },
+          fileCwd: { type: "stdio", command: "node", cwd: "./bin/server" },
+          valid: { type: "stdio", command: "./bin/server", cwd: "./work" },
+          generatedData: { type: "stdio", command: "node", cwd: "${PLUGIN_DATA}/future" },
+        },
+      }),
+    );
+
+    const result = await inspectLocalPackage(root);
+    assert.deepEqual(
+      result.mcpServers.map((server) => [server.name, server.valid]),
+      [
+        ["missingCommand", false],
+        ["directoryCommand", false],
+        ["missingCwd", false],
+        ["fileCwd", false],
+        ["valid", true],
+        ["generatedData", true],
+      ],
+    );
+    assert.equal(result.valid, false);
+  });
+});
+
 test("rejects a dangling plugin manifest symlink", async () => {
   await fixture(async (root) => {
     await symlink("missing.json", join(root, "plugin.json"));

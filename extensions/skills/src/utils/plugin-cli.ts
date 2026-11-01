@@ -6,6 +6,7 @@ import {
   getPluginCommand,
   parseClaudePlugins,
   parseCodexPlugins,
+  shouldUsePluginShell,
   type InstalledPlugin,
   type PluginAction,
 } from "./installed-plugins";
@@ -17,6 +18,7 @@ async function runPluginCli(binary: "claude" | "codex", args: string[]): Promise
     env: { ...options.env, PATH: `${join(homedir(), ".local", "bin")}${delimiter}${options.env.PATH}` },
     timeout: 30_000,
     maxBuffer: 3 * 1024 * 1024,
+    shell: shouldUsePluginShell(args),
   });
   return stdout;
 }

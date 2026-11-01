@@ -12,6 +12,16 @@ export type InstalledPlugin = {
 
 export type PluginAction = "enable" | "disable" | "remove";
 
+const WINDOWS_SAFE_CLI_ARG = /^[a-zA-Z0-9@._/+:=-]+$/;
+
+export function shouldUsePluginShell(args: string[], platform = process.platform): boolean {
+  if (platform !== "win32") return false;
+  if (args.some((arg) => !WINDOWS_SAFE_CLI_ARG.test(arg))) {
+    throw new Error("Unsafe plugin CLI argument for Windows command shell");
+  }
+  return true;
+}
+
 export function pluginRowId(plugin: InstalledPlugin): string {
   return [plugin.host, plugin.id, plugin.scope ?? "", plugin.projectPath ?? ""].join(":");
 }

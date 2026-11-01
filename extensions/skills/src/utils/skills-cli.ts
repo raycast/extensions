@@ -12,6 +12,7 @@ import {
   isSkillsCliBusyError,
   runSkillsCli,
   stripAnsiEscapes,
+  withSkillsCliLock,
   type SkillsCliRunner,
 } from "./skills-cli-runner";
 
@@ -101,9 +102,9 @@ export async function discoverAgents(): Promise<AgentDiscoveryResult> {
   return { agents: [...agentSet].sort(), skillAgentMap };
 }
 
-async function verifiedManagedSkill(skillName: string): Promise<InstalledSkill> {
+async function verifiedManagedSkill(skillName: string, runLocked: SkillsCliRunner): Promise<InstalledSkill> {
   const lock = await readSkillLock();
-  const skill = (await listInstalledSkills()).find((item) => item.name === skillName);
+  const skill = (await listInstalledSkills(runLocked)).find((item) => item.name === skillName);
   if (!skill || !(await isVerifiedCliSkill(skill, lock[skillName]))) {
     throw new Error(`"${skillName}" is no longer a verified Skills CLI installation. Refresh the list.`);
   }
@@ -111,12 +112,14 @@ async function verifiedManagedSkill(skillName: string): Promise<InstalledSkill> 
 }
 
 export async function removeSkill(skillName: string, agentDisplayNames: string[]): Promise<void> {
-  const skill = await verifiedManagedSkill(skillName);
-  const safe = await safeMutableAgents(skillName, skill.agents);
-  if (!agentDisplayNames.length || agentDisplayNames.some((agent) => !safe.includes(agent))) {
-    throw new Error("Only verified Codex or Claude Code installations can be removed here. Refresh the list.");
-  }
-  const args = ["remove", skillName, "-g", "-a", ...agentDisplayNames.map(agentDisplayNameToId)];
-  args.push("-y");
-  await runSkillsCli(args);
+  await withSkillsCliLock(async (runLocked) => {
+    const skill = await verifiedManagedSkill(skillName, runLocked);
+    const safe = await safeMutableAgents(skillName, skill.agents);
+    if (!agentDisplayNames.length || agentDisplayNames.some((agent) => !safe.includes(agent))) {
+      throw new Error("Only verified Codex or Claude Code installations can be removed here. Refresh the list.");
+    }
+    const args = ["remove", skillName, "-g", "-a", ...agentDisplayNames.map(agentDisplayNameToId)];
+    args.push("-y");
+    await runLocked(args);
+  });
 }

@@ -273,8 +273,11 @@ async function validServer(result: PackageInspection, name: string, value: unkno
   else if (value.type === "stdio") {
     if (typeof value.command !== "string" || (!value.command.startsWith("./") && !/^[^\s/\\]+$/.test(value.command)))
       fail("Invalid stdio command");
-    else if (value.command.startsWith("./") && !(await containedPackagePath(result.root, value.command)))
-      fail("Command escapes package root");
+    else if (value.command.startsWith("./")) {
+      if (!(await containedPackagePath(result.root, value.command))) fail("Command escapes package root");
+      else if (!(await safeStat(result, resolve(result.root, value.command)))?.isFile())
+        fail("Plugin-relative command must be an existing file");
+    }
     if (value.cwd !== undefined) {
       if (typeof value.cwd !== "string") fail("Invalid stdio cwd");
       else if (value.cwd === "${PLUGIN_DATA}" || value.cwd.startsWith("${PLUGIN_DATA}/")) {
@@ -289,6 +292,8 @@ async function validServer(result: PackageInspection, name: string, value: unkno
               ? `./${value.cwd.slice(15)}`
               : value.cwd;
         if (!cwd.startsWith("./") || !(await containedPackagePath(result.root, cwd))) fail("cwd escapes package root");
+        else if (!(await safeStat(result, resolve(result.root, cwd)))?.isDirectory())
+          fail("Plugin-relative cwd must be an existing directory");
       }
     }
     if (value.args !== undefined && (!Array.isArray(value.args) || value.args.some((arg) => typeof arg !== "string")))

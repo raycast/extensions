@@ -1,10 +1,8 @@
-import { homedir } from "node:os";
-import { isAbsolute, join, relative, sep } from "node:path";
 import { getGithubToken } from "../preferences";
-import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../shared";
+import type { InstalledSkill, SkillLockEntry } from "../shared";
 import { listInstalledSkills } from "./skills-cli";
 import { withSkillsCliLock } from "./skills-cli-runner";
-import { readSkillLock } from "./skill-lock";
+import { readSkillLock, skillLockMetadata } from "./skill-lock";
 import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
@@ -22,13 +20,6 @@ async function getInstalledSkillsSnapshot(): Promise<{
   });
 }
 
-function tildifyPath(path: string): string {
-  const fromHome = relative(homedir(), path);
-  if (fromHome === "") return "~";
-  if (fromHome === ".." || fromHome.startsWith(`..${sep}`) || isAbsolute(fromHome)) return path;
-  return join("~", fromHome);
-}
-
 async function mergeLockEntries(
   skills: InstalledSkill[],
   lockEntries: Record<string, SkillLockEntry>,
@@ -36,20 +27,13 @@ async function mergeLockEntries(
   return Promise.all(
     skills.map(async (skill) => {
       const lock = lockEntries[skill.name];
-      if (!lock || !(await isVerifiedCliSkill(skill, lock))) return { ...skill, managedBySkillsCli: false };
-      const mutableAgents = await safeMutableAgents(skill.name, skill.agents);
-      // Local installs record the absolute directory path as both source and sourceUrl.
-      const isLocal = lock.sourceType === "local";
+      const verified = lock ? await isVerifiedCliSkill(skill, lock) : false;
+      if (!lock || (!verified && lock.sourceType !== "local")) return { ...skill, managedBySkillsCli: false };
       return {
         ...skill,
-        source: isLocal ? tildifyPath(lock.source) : lock.source,
-        sourceType: lock.sourceType,
-        sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
-        ref: lock.ref,
-        installedAt: lock.installedAt,
-        updatedAt: lock.updatedAt,
-        managedBySkillsCli: true,
-        mutableAgents,
+        ...skillLockMetadata(lock),
+        managedBySkillsCli: verified,
+        mutableAgents: verified ? await safeMutableAgents(skill.name, skill.agents) : [],
       };
     }),
   );
