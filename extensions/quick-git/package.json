@@ -45,8 +45,7 @@
   "dependencies": {
     "@raycast/api": "^2.10.1",
     "@raycast/utils": "^2.3.3",
-    "ini": "^7.0.0",
-    "tslib": "^2.9.1"
+    "ini": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

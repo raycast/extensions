@@ -1,4 +1,4 @@
-import { Action, Icon, Keyboard } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { GitSubmodules } from "../GitSubmodules.js";
 import { useCheckStatus } from "../../hooks/useGitStatus.js";
 
@@ -14,7 +14,10 @@ export function ChangeSubmodules({ changeRepo }: Props) {
       title="View Submodules"
       icon={Icon.ArrowsExpand}
       target={<GitSubmodules changeRepo={changeRepo} checkStatus={checkStatus} />}
-      shortcut={Keyboard.Shortcut.Common.Duplicate}
+      shortcut={{
+        macOS: { key: "s", modifiers: ["cmd", "shift"] },
+        Windows: { key: "s", modifiers: ["ctrl", "shift"] },
+      }}
     />
   );
 }
