@@ -62,7 +62,7 @@
     },
     {
       "name": "setup",
-      "title": "Set up Passwordless Doorstopper",
+      "title": "Set Up Passwordless Doorstopper",
       "subtitle": "Doorstopper",
       "description": "Install or remove the rule that lets Doorstopper toggle sleep without a password, which timers and auto-off need",
       "mode": "view"
