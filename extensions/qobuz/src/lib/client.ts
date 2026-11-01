@@ -5,9 +5,11 @@ import {
   createDeepLink,
   createKeychainStore,
   createQobuzClient,
+  createTransport,
   type CredentialStore,
   type QobuzClient,
   type StoredCredentials,
+  type Transport,
 } from "@kud/qobuz";
 
 const STORAGE_KEY = "qobuz-credentials";
@@ -42,6 +44,16 @@ export const getClient = async (): Promise<QobuzClient> => {
   throw new Error(
     "No Qobuz token found. Add one in the extension preferences, or run `qobuz login` with the Qobuz CLI.",
   );
+};
+
+// @kud/qobuz maps albums without their UPC, label or tracklist, so album
+// details come from the raw API, signed with the credentials getClient stored.
+export const getTransport = async (): Promise<Transport> => {
+  await getClient();
+  const { token } = getPreferenceValues<Preferences>();
+  const credentials = await (token ? localStore : keychainStore).load();
+  if (!credentials) throw new Error("No Qobuz token found.");
+  return createTransport({ appId: credentials.appId, token: credentials.token });
 };
 
 export const deepLink = createDeepLink();

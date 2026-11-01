@@ -4,6 +4,38 @@
 
 - Add Fictura to the official registry: growth data for Expo and React Native apps, covering paywalls and onboarding flows, subscription analytics and funnels, A/B experiments, attribution and ad spend, deep links, App Store and Google Play analytics, and error reports. Mostly read-only; it can create and edit draft paywalls and onboarding flows, never live ones. Hosted Streamable HTTP server at https://mcp.fictura.co/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add Wiro AI MCP Server] - 2026-11-01
+
+- Add Wiro AI to the official registry: search 3,500+ AI models for images, video, audio, speech, music and text, check each model's parameters and price, run it and get the results back. Hosted Streamable HTTP server at https://mcp.wiro.ai/v1 with OAuth 2.1 browser sign-in or a Wiro API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Melso Fiscal MCP] - 2026-10-31
+
+- Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
+
+## [Add Postemi MCP Server] - 2026-10-31
+
+- Add Postemi to the official registry: write, schedule and publish posts to 37 social platforms and apps with a content calendar and full-quality photo and video uploads. Hosted Streamable HTTP server at https://mcp.postemi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Paidnice MCP Server] - 2026-10-31
+
+- Add Paidnice to the official registry: accounts receivable for Xero and QuickBooks Online. Read the customer email and SMS replies Paidnice collects, list and look up customers, invoices and notes, and update contact people. Hosted Streamable HTTP server with OAuth 2.1 sign-in (dynamic client registration).
+
+## [Add Norwegian Company Data MCP Server] - 2026-10-31
+
+- Add Norwegian Company Data to the registry: search Norwegian companies and get accounts, roles, corporate groups and websites from the Brønnøysund registers. Hosted Streamable HTTP server at https://tools.skaidigital.com/brreg/mcp with no sign-in, a direct HTTP connection in Raycast and an mcp-remote fallback for other clients
+
+## [Add IndustryLens MCP Server] - 2026-10-31
+
+- Add IndustryLens to the official registry: competitive and market intelligence for B2B SaaS (competitor profiles, strategic moves, pricing changes, market landscapes, reports and comparisons). Hosted Streamable HTTP server at https://api.industry-lens.com/mcp/public with no account or API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add ConnectMachine MCP Server] - 2026-10-30
+
+- Add ConnectMachine to the official registry: search, save and organize professional contacts, networks and events, and draft follow-ups with the context of where you met. Hosted Streamable HTTP server at https://mcp.connectmachine.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add BestPrice MCP Server] - 2026-10-30
+
+- Add BestPrice to the official registry: shopping recommendations, product search, current Greek store offers with delivered totals, and price history. 4 read-only tools. Hosted Streamable HTTP server at https://mcp.bestprice.gr/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add House AI MCP Server] - 2026-10-29
 
 - Add House AI to the official registry: redesign rooms, house exteriors and yards from a photo in 100+ styles, preview wall paint and flooring, and find real furniture and decor to match. Hosted Streamable HTTP server at https://mcp.houseaiapp.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE).
