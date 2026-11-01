@@ -35,15 +35,22 @@
       "name": "manage-skills",
       "title": "Manage Skills",
       "subtitle": "Skills",
-      "description": "View and remove installed skills",
+      "description": "Review installed skills and manage verified Skills CLI installs",
       "mode": "view"
     },
     {
-      "name": "update-all-skills",
-      "title": "Update All Skills",
+      "name": "manage-plugins",
+      "title": "Manage Plugins",
       "subtitle": "Skills",
-      "description": "Update all installed skills",
-      "mode": "no-view"
+      "description": "View installed Claude Code and Codex plugins",
+      "mode": "view"
+    },
+    {
+      "name": "inspect-agent-package",
+      "title": "Inspect Agent Package",
+      "subtitle": "Skills",
+      "description": "Validate a local Agent Skill or Plugin package",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -70,7 +77,7 @@
     {
       "name": "remove-skill",
       "title": "Remove Skill",
-      "description": "Remove an installed skill. Only call after the user has confirmed."
+      "description": "Remove a verified Codex or Claude Code skill. Only call after the user has confirmed the agents."
     }
   ],
   "preferences": [
@@ -129,6 +136,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "test": "node --test test/*.test.mjs",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"

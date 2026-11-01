@@ -5,6 +5,7 @@
 /extensions/1bookmark                                               @1bookmark-bot @b6pzeusbc54tvhw5jgpyw8pwz2x6gs @1bookmark-bot
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
 /extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @vimtor @Pavelas @iml885203
+/extensions/2do                                                     @danielh-official
 /extensions/2fa-directory                                           @andreaselia @pernielsentikaer @xmok
 /extensions/2fas-authenticator                                      @LockeAG @MushuDG
 /extensions/40-questions                                            @dnnsmnstrr
@@ -284,6 +285,7 @@
 /extensions/blip-raycast                                            @astroboii47 @brunocbreis
 /extensions/blockchain-explorer-search                              @Namaskar-1F64F
 /extensions/blockchain-gas-tracker                                  @vonernue
+/extensions/bluecat-ipam-lookup                                     @afly007
 /extensions/bluesky                                                 @dkapila @peduarte @xmok
 /extensions/blurhash                                                @freaktion-craft
 /extensions/bmrks                                                   @raunofreiberg @peduarte @almoce @xmok
@@ -793,7 +795,7 @@
 /extensions/doutu                                                   @gaoyang
 /extensions/dovetail                                                @patbarlow
 /extensions/downdetector                                            @MagnasiePro
-/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim @ridemountainpig @nagauta @nmder @clins1994 @0xdhrv @YourMCGeek @dhaydl @hugodemenez
+/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim @ridemountainpig @nagauta @nmder @clins1994 @0xdhrv @YourMCGeek @dhaydl @hugodemenez @danieltsam
 /extensions/dpm-lol                                                 @ouichniaziz
 /extensions/dr-news                                                 @kenanbendz @pernielsentikaer
 /extensions/drafts                                                  @FlohGro-dev @wmorgano
@@ -1455,6 +1457,7 @@
 /extensions/keeper-security                                         @amuley-ks
 /extensions/keeply                                                  @RolfKoenders
 /extensions/kef-control                                             @ho991217
+/extensions/keito                                                   @eluce2 @bchopson @mrpunkin
 /extensions/keka                                                    @aonez
 /extensions/kesha-voice-kit                                         @drakulavich
 /extensions/key-value                                               @NirLevy98 @pernielsentikaer @gkpln3
@@ -2130,6 +2133,7 @@
 /extensions/party-parrot                                            @thomaspaulmann
 /extensions/pass                                                    @capipo @camiloaromero23 @mthies-unibi
 /extensions/passbolt                                                @Tiku96 @eist76
+/extensions/passig                                                  @gianlucainnocente
 /extensions/passphrase-generator                                    @omBratteng @pernielsentikaer
 /extensions/password-generator                                      @joshuaiz @teziovsky @pernielsentikaer @mybuddymichael @yusifaliyevpro @xmok @peduarte
 /extensions/password-link                                           @tdrayson
