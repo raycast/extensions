@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { act, createElement } from "react";
-import { mockRaycastUi, shownToasts } from "./raycastUiMock";
+import { listPagination, mockRaycastUi, shownToasts } from "./raycastUiMock";
 
 const transportGlobals = {
   Response,
@@ -332,4 +332,36 @@ test("a favorite that answers after Trash and a reload still stays out", async (
   await act(async () => answerFavorite?.());
   await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
   expect(container.textContent).not.toContain("A long read");
+});
+
+test("a trashed card that comes back on a later page takes updates again", async () => {
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input));
+    const method = init?.method ?? "GET";
+    if (url.pathname.endsWith("/favorite")) {
+      return Promise.resolve(Response.json({ ...linkCard, isFavorited: true }));
+    }
+    if (method === "DELETE") {
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
+    // Restored elsewhere, the card shows up again on the second page.
+    const nextPage = url.searchParams.get("cursor") === "page-2";
+    return Promise.resolve(
+      Response.json({
+        items: [linkCard],
+        pageInfo: nextPage
+          ? { hasMore: false, nextCursor: null }
+          : { hasMore: true, nextCursor: "page-2" },
+      }),
+    );
+  }) as typeof fetch;
+  await render();
+  await press("Move to Trash");
+  expect(container.textContent).not.toContain("A long read");
+
+  await act(async () => listPagination.onLoadMore?.());
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(container.textContent).toContain("A long read");
+  await press("Favorite");
+  expect(container.textContent).toContain("Unfavorite");
 });

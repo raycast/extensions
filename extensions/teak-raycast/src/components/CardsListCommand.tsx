@@ -177,6 +177,10 @@ export function CardsListCommand({
     try {
       const response = await loadCards({ ...requestInput, cursor: nextCursor });
       if (generation === requestGeneration.current) {
+        // A card restored elsewhere can come back on a later page.
+        for (const card of response.items) {
+          goneIds.current.delete(card.id);
+        }
         setItems((previous) => {
           const seen = new Set(previous.map((card) => card.id));
           return [
