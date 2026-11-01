@@ -199,48 +199,46 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
   );
   const [total, setTotal] = useState(0);
 
-  const activeExtensions = fileType?.onlyFolders
-    ? undefined
-    : fileType?.extensions;
-  const onlyFolders = fileType?.onlyFolders ?? false;
-  const onlyFiles =
-    !onlyFolders && fileType?.id !== "all" && !!fileType?.extensions;
-  const sortField = sort.field;
-  const sortAscending = sort.ascending;
+  // Stable signature of the active filter: the typeDefs array is re-created by
+  // the 3s LocalStorage poll, so array identities would churn the fetch deps
+  // and re-run the search on every poll — compare a serialized signature instead
+  const typeSig = useMemo(
+    () =>
+      JSON.stringify({
+        e: fileType?.onlyFolders ? undefined : fileType?.extensions,
+        f: fileType?.onlyFolders ?? false,
+      }),
+    [fileType],
+  );
 
   useEffect(() => {
     setPage(0);
     setAllResults([]);
-  }, [
-    debouncedQuery,
-    typeId,
-    activeExtensions,
-    onlyFolders,
-    onlyFiles,
-    sortKey,
-  ]);
+  }, [debouncedQuery, typeSig, sortKey]);
 
-  const skipFetch = !debouncedQuery.trim() && !activeExtensions && !onlyFolders;
+  const skipFetch =
+    !debouncedQuery.trim() && !fileType?.extensions && !fileType?.onlyFolders;
   const { isLoading, data, error } = usePromise(
     async (
       q: string,
-      ext: string[] | undefined,
-      folders: boolean,
-      files: boolean,
-      field: SortField,
-      ascending: boolean,
+      _sig: string,
+      sortK: string,
       pageArg: number,
       _tick: number,
     ) => {
-      if (!q.trim() && !ext && !folders) return null;
+      // The closure holds the latest typeDefs, so edits to the active custom
+      // type apply as soon as the signature change re-triggers the fetch
+      const ft = typeDefs.find((t) => t.id === typeId) ?? typeDefs[0];
+      if (!q.trim() && !ft?.extensions && !ft?.onlyFolders) return null;
+      const st = SORT_OPTIONS.find((s) => s.key === sortK) ?? SORT_OPTIONS[0];
       const resp = await searchEverything({
         host,
         port,
         query: q,
-        extensions: ext,
-        onlyFolders: folders,
-        onlyFiles: files,
-        sort: { field, ascending },
+        extensions: ft?.onlyFolders ? undefined : ft?.extensions,
+        onlyFolders: ft?.onlyFolders ?? false,
+        onlyFiles: !ft?.onlyFolders && ft?.id !== "all" && !!ft?.extensions,
+        sort: { field: st.field, ascending: st.ascending },
         count: maxResults,
         offset: pageArg * maxResults,
         timeoutMs: 6000,
@@ -251,16 +249,7 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
         totalResults: resp.totalResults,
       };
     },
-    [
-      debouncedQuery,
-      activeExtensions,
-      onlyFolders,
-      onlyFiles,
-      sortField,
-      sortAscending,
-      page,
-      reloadTick,
-    ],
+    [debouncedQuery, typeSig, sortKey, page, reloadTick],
   );
 
   // Apply only the response that matches the current page — while the next page
