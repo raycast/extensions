@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kin MCP Server] - 2026-11-01
+
+- Add Kin to the official registry: use your accounts at GitHub, Notion, Linear and other services, even two accounts of one service, each with its own rule per action (Allow, Ask me or Block). Hosted Streamable HTTP server at https://app.kinlab.ai/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Bowmark MCP Server] - 2026-11-01
 
 - Add Bowmark to the built-in registry: typed, tested functions for live websites (LinkedIn, YouTube, Amazon, Reddit, flights and more). Hosted Streamable HTTP server at https://api.bowmark.ai/mcp, connected through `mcp-remote` with a Bowmark API key header.
