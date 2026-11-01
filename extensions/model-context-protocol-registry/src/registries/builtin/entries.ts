@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "slicktrip",
+    title: "SlickTrip",
+    description:
+      "Live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Search flights and hotels for real dates, see the cheapest days to go, check open seats on a flight, and watch any fare, stay, seat or flexible bucket list; SlickTrip emails or texts you when the price drops. Booking happens on the airline's or hotel seller's own site. 38 tools; free account. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/sliktrip/slicktrip-mcp/HEAD/assets/logo-400.png",
+    homepage: "https://slicktrip.com/connector",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.slicktrip.com/mcp"],
+    },
+    remoteUrl: "https://mcp.slicktrip.com/mcp",
+  },
+  {
     name: "melso",
     title: "Melso",
     description:
