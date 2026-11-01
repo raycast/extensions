@@ -82,6 +82,25 @@ test("note search and material portrait map", async () => {
   assert.ok(rose.showcasedIn.length > 0);
   assert.equal(rose.url, "https://www.scento.com/note/rose");
   assert.match(materialMarkdown(rose), /Showcased in/);
+  assert.match(materialMarkdown(rose), new RegExp(`## Smells like\\n\\n${rose.smellsLike}`));
+});
+
+test("material markdown adds a Smells like section only when present", () => {
+  const base = {
+    name: "Test",
+    aliases: [],
+    naturalOrSynthetic: null,
+    origin: null,
+    smellsLike: null,
+    family: null,
+    scentoFamily: null,
+    pairsWellWith: [],
+    showcasedIn: [],
+    lede: "A lede.",
+    url: "https://www.scento.com/note/test",
+  };
+  assert.doesNotMatch(materialMarkdown(base), /Smells like/);
+  assert.match(materialMarkdown({ ...base, smellsLike: "Warm amber." }), /## Smells like\n\nWarm amber\./);
 });
 
 test("unknown perfume and note raise NotFoundError", async () => {

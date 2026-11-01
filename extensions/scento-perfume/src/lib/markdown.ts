@@ -17,6 +17,7 @@ export function portraitMarkdown(p: Portrait): string {
 
 export function materialMarkdown(m: Material): string {
   let md = `# ${m.name}\n\n${m.lede}\n\n`;
+  if (m.smellsLike) md += `## Smells like\n\n${m.smellsLike}\n\n`;
   md += line("Pairs well with", m.pairsWellWith);
   if (m.showcasedIn.length) {
     md += "## Showcased in\n\n";
