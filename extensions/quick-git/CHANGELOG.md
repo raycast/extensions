@@ -1,5 +1,9 @@
 # Quick Git Changelog
 
+## [General Maintainence] - {PR_MERGE_DATE}
+
+General updates.
+
 ## [Bug fixes] - 2026-06-15
 
 Fixes a bug to do with certain forms not submitting correctly
