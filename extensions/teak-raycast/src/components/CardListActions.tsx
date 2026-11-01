@@ -24,6 +24,8 @@ export interface CardListActionsProps {
   inTrash: boolean;
   keepNewestSort: boolean;
   onCardRemoved: (cardId: string) => void;
+  /** Puts a card back after Undo; late updates for a removed card don't. */
+  onCardRestored: (card: RaycastCard) => void;
   onCardUpdated: (card: RaycastCard) => void;
   onFilterByTag: (tag: string) => void;
   onQueryChange: (update: (previous: string) => string) => void;
@@ -39,6 +41,7 @@ export function CardListActions(props: CardListActionsProps) {
     card,
     inTrash,
     onCardRemoved,
+    onCardRestored,
     onCardUpdated,
     onFilterByTag,
     onSignedOut,
@@ -54,6 +57,7 @@ export function CardListActions(props: CardListActionsProps) {
             <CardDetail
               card={card}
               onCardDeleted={onCardRemoved}
+              onCardRestored={onCardRestored}
               onCardUpdated={onCardUpdated}
               onFilterByTag={
                 props.removeTagFilterFromList ? undefined : onFilterByTag
@@ -132,7 +136,7 @@ export function CardListActions(props: CardListActionsProps) {
             onAction={() =>
               void moveCardToTrash(card, {
                 onRemoved: onCardRemoved,
-                onRestored: onCardUpdated,
+                onRestored: onCardRestored,
               })
             }
             shortcut={Keyboard.Shortcut.Common.Remove}

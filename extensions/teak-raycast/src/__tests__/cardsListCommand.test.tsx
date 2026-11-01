@@ -261,3 +261,43 @@ test("Undo after the list reloads places the card by the new order", async () =>
     text.indexOf("Newer card"),
   );
 });
+
+test("a favorite that answers after Move to Trash doesn't bring the card back", async () => {
+  let answerFavorite: (() => void) | undefined;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input));
+    const method = init?.method ?? "GET";
+    if (url.pathname.endsWith("/favorite")) {
+      return new Promise<Response>((resolve) => {
+        answerFavorite = () =>
+          resolve(Response.json({ ...linkCard, isFavorited: true }));
+      });
+    }
+    if (method === "DELETE" || url.pathname.endsWith("/restore")) {
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
+    return Promise.resolve(
+      Response.json({
+        items: [linkCard],
+        pageInfo: { hasMore: false, nextCursor: null },
+      }),
+    );
+  }) as typeof fetch;
+  await render();
+  await press("Favorite");
+  await press("Move to Trash");
+  const trashToast = shownToasts.at(-1);
+  expect(trashToast?.title).toBe("Moved to Trash");
+
+  await act(async () => answerFavorite?.());
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(container.textContent).not.toContain("A long read");
+
+  // Undo still puts it back.
+  const undo = trashToast?.primaryAction as
+    | { onAction: (toast: unknown) => Promise<void> }
+    | undefined;
+  await act(async () => undo?.onAction(trashToast));
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(container.textContent).toContain("A long read");
+});

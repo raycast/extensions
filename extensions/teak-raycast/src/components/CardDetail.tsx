@@ -58,6 +58,8 @@ interface FavoriteMutationState {
 export interface CardDetailProps {
   card: RaycastCard;
   onCardDeleted: (cardId: string) => void;
+  /** Puts the card back in the list after Undo from Move to Trash. */
+  onCardRestored: (card: RaycastCard) => void;
   onCardUpdated: (next: RaycastCard) => void;
   /** Left out where the list can't filter by another tag; tags then don't click. */
   onFilterByTag?: (tag: string) => void;
@@ -101,6 +103,7 @@ const statusColor = (
 export function CardDetail({
   card,
   onCardDeleted,
+  onCardRestored,
   onCardUpdated,
   onFilterByTag,
   onNavigateBackAfterDelete,
@@ -259,7 +262,7 @@ export function CardDetail({
       }
       const moved = await moveCardToTrash(cardStateRef.current, {
         onRemoved: onCardDeleted,
-        onRestored: onCardUpdated,
+        onRestored: onCardRestored,
       });
       if (moved) {
         leaveDetail();
@@ -267,7 +270,7 @@ export function CardDetail({
     } finally {
       setIsDeleting(false);
     }
-  }, [isDeleting, leaveDetail, onCardDeleted, onCardUpdated, settleFavorite]);
+  }, [isDeleting, leaveDetail, onCardDeleted, onCardRestored, settleFavorite]);
 
   const handleRestore = useCallback(async () => {
     if (!(await settleFavorite())) {

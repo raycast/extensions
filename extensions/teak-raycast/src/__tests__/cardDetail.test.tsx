@@ -88,6 +88,7 @@ test("a favorite still waiting is sent before the card moves to Trash", async ()
       createElement(CardDetail, {
         card,
         onCardDeleted: () => events.push("removed"),
+        onCardRestored: () => events.push("restored"),
         onCardUpdated: (next) =>
           events.push(next.isFavorited ? "favorited" : "unfavorited"),
         onNavigateBackAfterDelete: () => undefined,

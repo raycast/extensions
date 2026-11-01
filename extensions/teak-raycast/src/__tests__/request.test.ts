@@ -529,6 +529,30 @@ describe("raycast request handling", () => {
     expect(result.notes).toBe("Updated note");
   });
 
+  // The pinned teak-sdk's types predate palette edits, so this pins that the
+  // fields still reach the API in the body.
+  test("updateCard sends palette color edits in the body", async () => {
+    let capturedBody: unknown = null;
+
+    globalThis.fetch = withDiscovery(
+      mock((_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, sampleCard);
+      }) as unknown as typeof fetch,
+    );
+
+    await updateCard(
+      "card_123",
+      { addColors: ["#00FF00"], removeColors: ["#FF0000"] },
+      "interactive",
+    );
+
+    expect(capturedBody).toEqual({
+      addColors: ["#00FF00"],
+      removeColors: ["#FF0000"],
+    });
+  });
+
   test("falls back to browser OAuth when no API key is set", async () => {
     getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "   " }));
 
