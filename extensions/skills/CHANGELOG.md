@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Inspect Agent Skills and Plugins] - {PR_MERGE_DATE}
+## [Inspect Agent Skills and Plugins] - 2026-11-01
 
 - Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts
 - Validate skill metadata, plugin manifests, MCP server configuration, and package paths before showing components
