@@ -3,7 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { WiiMAPI } from "./wiim/api";
 import { broadcastDiscoverAll } from "./wiim/discovery";
-import { getSelectedDeviceIP, setSelectedDeviceIP } from "./wiim/preferences";
+import { getManualDeviceIP, getSelectedDeviceIP, setSelectedDeviceIP } from "./wiim/preferences";
 import { WiiMDevice } from "./wiim/types";
 
 type WiiMDeviceWithName = WiiMDevice & { name?: string };
@@ -29,19 +29,50 @@ async function mapDevicesWithNames(found: WiiMDevice[]): Promise<WiiMDeviceWithN
   }));
 }
 
-async function handleSelect(device: WiiMDevice) {
+async function handleSelect(device: WiiMDevice, manualIP?: string): Promise<boolean> {
   try {
     await setSelectedDeviceIP(device.ip);
-    await showToast(Toast.Style.Success, "Device Selected", `WiiM device at ${device.ip} selected`);
+    await showToast(
+      Toast.Style.Success,
+      "Device Selected",
+      manualIP
+        ? `Saved, but the "WiiM Device IP" preference (${manualIP}) takes precedence`
+        : `WiiM device at ${device.ip} selected`,
+    );
+    return true;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     await showFailureToast("Selection Failed", { message });
+    return false;
   }
+}
+
+function getAccessories(device: WiiMDevice, manualIP: string | undefined, selectedIP: string | undefined) {
+  const accessories: List.Item.Accessory[] = [];
+
+  if (manualIP && device.ip === manualIP) {
+    accessories.push({
+      icon: Icon.Pin,
+      text: "In Use",
+      tooltip: 'Set by the "WiiM Device IP" preference, which takes precedence over the selection',
+    });
+  }
+
+  if (device.ip === selectedIP && device.ip !== manualIP) {
+    accessories.push({
+      icon: Icon.CheckCircle,
+      text: "Selected",
+      tooltip: manualIP ? 'Overridden by the "WiiM Device IP" preference' : "Currently selected device",
+    });
+  }
+
+  return accessories.length > 0 ? accessories : undefined;
 }
 
 export default function SelectDevice() {
   const [devices, setDevices] = useState<WiiMDeviceWithName[]>([]);
   const [selectedIP, setSelectedIP] = useState<string | undefined>();
+  const [manualIP, setManualIP] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +80,7 @@ export default function SelectDevice() {
     async function discover() {
       try {
         setIsLoading(true);
+        setManualIP(getManualDeviceIP());
         setSelectedIP(await getSelectedDeviceIP());
         const found = await broadcastDiscoverAll();
         const devicesWithNames = await mapDevicesWithNames(found);
@@ -82,18 +114,15 @@ export default function SelectDevice() {
             key={device.ip}
             title={device.name || `WiiM Device`}
             subtitle={device.ip}
-            accessories={
-              device.ip === selectedIP
-                ? [{ icon: Icon.CheckCircle, text: "Selected", tooltip: "Currently selected device" }]
-                : undefined
-            }
+            accessories={getAccessories(device, manualIP, selectedIP)}
             actions={
               <ActionPanel>
                 <Action
                   title="Select Device"
                   onAction={async () => {
-                    await handleSelect(device);
-                    setSelectedIP(device.ip);
+                    if (await handleSelect(device, manualIP)) {
+                      setSelectedIP(device.ip);
+                    }
                   }}
                 />
               </ActionPanel>
