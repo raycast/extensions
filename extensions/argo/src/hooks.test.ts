@@ -480,7 +480,8 @@ test("reconnect refreshes a missed terminal reply before marking the conversatio
   try {
     h.render("binding", "server", "server-key");
     h.flush();
-    await new Promise((resolve) => setTimeout(resolve, 2350));
+    const deadline = Date.now() + 7000;
+    while (reads < 3 && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 25));
     let feed = h.render("binding", "server", "server-key");
     assert.equal(reads, 3, "reconnect must fetch the missed reply even though its event cursor already advanced");
     assert.notEqual(feed.connection, "live", "a reconnect cannot call a stale snapshot live");

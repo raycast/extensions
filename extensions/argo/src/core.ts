@@ -2,7 +2,7 @@ import { open } from "node:fs/promises";
 import { homedir } from "node:os";
 import { isAbsolute, join } from "node:path";
 import { localUrl } from "./protocol.js";
-import type { BridgeEvent, Pairing, Session, Snapshot } from "./protocol.js";
+import type { Answer, BridgeEvent, Interaction, Pairing, Session, Snapshot } from "./protocol.js";
 
 export type ClientConfig = { url: string; token: string; bridgeId?: string };
 export type Connection = "connecting" | "live" | "offline";
@@ -157,8 +157,43 @@ export async function consumeEvents(
   }
 }
 
+// The reviewed parameters and authority epoch never change underneath an open review.
+export function interactionIssue(
+  snapshot: Snapshot,
+  generation: string,
+  reviewed: Interaction,
+  now?: number,
+): string | undefined {
+  if (snapshot.session.generation !== generation || snapshot.session.revoked)
+    return "Agent session changed. Return to the conversation and open the new request.";
+  if (!snapshot.session.online || !["ready", "busy", "waiting"].includes(snapshot.session.status))
+    return "Agent is offline or not ready. Reconnect before reviewing this request.";
+  const fresh = snapshot.interactions.find((item) => item.requestId === reviewed.requestId);
+  if (!fresh) return "This request is no longer available. Check the original Agent.";
+  if (fresh.state === "submitted")
+    return "Decision already submitted. Waiting for the original Agent; do not submit again.";
+  if (fresh.state === "resolved") return "This request was already handled in the original Agent or another client.";
+  if (fresh.state === "expired") return "This request expired. Ask the original Agent for a new request.";
+  if (
+    fresh.kind !== reviewed.kind ||
+    fresh.title !== reviewed.title ||
+    fresh.detail !== reviewed.detail ||
+    fresh.expiresAt !== reviewed.expiresAt ||
+    JSON.stringify(fresh.questions) !== JSON.stringify(reviewed.questions)
+  )
+    return "Request parameters changed. Return to the conversation and review the updated request.";
+  if (now === undefined) return "Cannot verify bridge time. Refresh the connection before approving.";
+  if (fresh.expiresAt <= now) return "This request expired. Ask the original Agent for a new request.";
+  if (fresh.kind === "approval" ? !snapshot.session.capabilities.approvals : !snapshot.session.capabilities.questions)
+    return "This Agent does not support this interaction. Use its original terminal.";
+}
+
 export class Hub {
   private controller = new AbortController();
+  private clock?: { server: number; received: number };
+  now(): number | undefined {
+    return this.clock ? this.clock.server + performance.now() - this.clock.received : undefined;
+  }
   constructor(private config: ClientConfig) {
     this.config = parseConfig(config);
   }
@@ -178,12 +213,19 @@ export class Hub {
     if (this.controller.signal.aborted) controller.abort();
     const timer = setTimeout(cancel, timeout);
     try {
+      const started = performance.now();
       const response = await fetch(new URL(path, this.config.url), {
         ...options,
         signal: controller.signal,
         redirect: "error",
         headers: { Authorization: `Bearer ${this.config.token}`, ...options.headers },
       });
+      // Node's bridge already sends HTTP Date. Use its clock, not the Mac wall clock.
+      const serverTime = Date.parse(response.headers.get("date") || "");
+      const received = performance.now();
+      this.clock = Number.isFinite(serverTime)
+        ? { server: Math.max(serverTime + 1000 + received - started, this.now() ?? 0), received }
+        : undefined;
       if (!response.ok) {
         await response.body?.cancel();
         throw new HubError(response.status);
@@ -209,6 +251,33 @@ export class Hub {
     return this.json<Snapshot>(
       `/v1/sessions/${encodeURIComponent(bindingId)}${before === undefined ? "" : `?before=${before}`}`,
     );
+  }
+  async answerInteraction(bindingId: string, generation: string, reviewed: Interaction, answer: Answer): Promise<void> {
+    const check = (snapshot: Snapshot) => interactionIssue(snapshot, generation, reviewed, this.now());
+    const issue = check(await this.snapshot(bindingId));
+    if (issue) {
+      const error = new HubError(409);
+      error.message = issue;
+      throw error;
+    }
+    try {
+      await this.mutate(bindingId, `/interactions/${encodeURIComponent(reviewed.requestId)}`, {
+        generation,
+        ...answer,
+      });
+    } catch (cause) {
+      if (cause instanceof HubError && cause.status === 409) {
+        let reason: string | undefined;
+        try {
+          reason = check(await this.snapshot(bindingId));
+        } catch {
+          /* No retry of an uncertain decision. */
+        }
+        cause.message =
+          reason || "The Agent rejected this decision because the request changed. Refresh and review it again.";
+      }
+      throw cause;
+    }
   }
   createPairing(name: string, adapter: "claude" | "codex" = "claude"): Promise<Pairing> {
     return this.fetch(

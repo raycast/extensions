@@ -9,7 +9,16 @@ import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { consumeEvents, Hub, HubError, parseConfig, readConfig, remotePrompt, safeMarkdown } from "./core.js";
+import {
+  consumeEvents,
+  Hub,
+  HubError,
+  interactionIssue,
+  parseConfig,
+  readConfig,
+  remotePrompt,
+  safeMarkdown,
+} from "./core.js";
 
 const token = "a".repeat(64);
 
@@ -200,6 +209,7 @@ function viewHarness() {
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
       HubError,
+      showToast: async () => {},
     },
   };
 }
@@ -994,5 +1004,320 @@ test("confirmed send rejection releases only its pending ID, while uncertain or 
     assert.equal(draft.text, attempt.text);
     if (["rejected", "queued-earlier"].includes(scenario)) assert.deepEqual(pages, [undefined, 20]);
     client.close();
+  }
+});
+
+test("approval submission uses bridge time and reports exact invalidation without posting stale decisions", async () => {
+  const request = {
+    requestId: "approval-clock",
+    kind: "approval" as const,
+    title: "Fixture approval",
+    detail: "No real command",
+    state: "pending" as const,
+    expiresAt: Date.now() - 60_000,
+  };
+  for (const scenario of [
+    "valid",
+    "expired",
+    "resolved",
+    "submitted",
+    "offline",
+    "generation",
+    "parameters",
+    "race",
+    "clock-missing",
+  ]) {
+    let posts = 0,
+      reads = 0;
+    const hub = new Hub({ url: "http://127.0.0.1:1", token });
+    (hub as any).now = () => (scenario === "clock-missing" ? undefined : request.expiresAt - 30_000);
+    hub.snapshot = async () => {
+      reads++;
+      return {
+        session: sessionFixture({
+          online: scenario !== "offline",
+          generation: scenario === "generation" ? "g2" : "g1",
+          capabilities: { send: true, streaming: false, interrupt: false, approvals: true, questions: true },
+        }),
+        messages: [],
+        cursor: 1,
+        hasMore: false,
+        interactions: [
+          {
+            ...request,
+            state:
+              scenario === "race" && reads > 1
+                ? "resolved"
+                : ["expired", "resolved", "submitted"].includes(scenario)
+                  ? (scenario as "expired" | "resolved" | "submitted")
+                  : "pending",
+            detail: scenario === "parameters" ? "Changed parameters" : request.detail,
+          },
+        ],
+      };
+    };
+    hub.mutate = async () => {
+      posts++;
+      if (scenario === "race") throw new HubError(409);
+    };
+    const call = () => (hub as any).answerInteraction("session", "g1", request, { decision: "allow" });
+    if (scenario === "valid") {
+      await call();
+      assert.equal(posts, 1, "Mac clock must not expire a valid remote request");
+    } else {
+      const reasons: Record<string, RegExp> = {
+        expired: /expired/i,
+        resolved: /already handled/i,
+        submitted: /already submitted/i,
+        offline: /offline/i,
+        generation: /session changed/i,
+        parameters: /parameters changed/i,
+        race: /already handled/i,
+        "clock-missing": /bridge time/i,
+      };
+      await assert.rejects(call(), reasons[scenario]!);
+      assert.equal(posts, scenario === "race" ? 1 : 0, scenario);
+    }
+    hub.close();
+  }
+});
+
+test("bridge clock comes from HTTP Date rather than the Mac wall clock and unknown clocks fail closed", async () => {
+  const serverTime = Date.parse("2026-01-01T00:00:00Z");
+  const server = createServer((_req, res) =>
+    res
+      .writeHead(200, { Date: new Date(serverTime).toUTCString(), "Content-Type": "application/json" })
+      .end(JSON.stringify({ session: sessionFixture(), messages: [], interactions: [], cursor: 1, hasMore: false })),
+  );
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  const hub = new Hub({ url: `http://127.0.0.1:${address.port}`, token });
+  try {
+    assert.equal((hub as any).now(), undefined);
+    await hub.snapshot("session");
+    const now = (hub as any).now();
+    assert.ok(now >= serverTime && now < serverTime + 5_000, "server clock must not inherit local date skew");
+  } finally {
+    hub.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
+test("an open review follows resolved, disconnected and expired states, ticks without events, and stops its timer", async () => {
+  const harness = viewHarness();
+  const now = Date.now();
+  const request = {
+    requestId: "live-approval",
+    kind: "approval" as const,
+    title: "Fixture",
+    detail: "No command",
+    state: "pending" as const,
+    expiresAt: now + 30_000,
+  };
+  let clock = now,
+    posted = 0,
+    timer: (() => void) | undefined,
+    cleared = false;
+  const feed = {
+    snapshot: {
+      session: sessionFixture({
+        capabilities: { send: true, streaming: false, interrupt: false, approvals: true, questions: true },
+      }),
+      messages: [],
+      interactions: [{ ...request, state: "pending" as string }],
+      cursor: 1,
+      hasMore: false,
+    },
+    connection: "live",
+    hub: {
+      current: {
+        now: () => clock,
+        answerInteraction: async () => {
+          posted++;
+        },
+      },
+    },
+    refresh: async () => {},
+  };
+  const { InteractionReview } = viewLogic(["InteractionReview"], {
+    ...harness.globals,
+    interactionIssue,
+    useHub: () => feed,
+    Approval: "Approval",
+    Questions: "Questions",
+    setTimeout: (callback: () => void, milliseconds: number) => {
+      assert.equal(milliseconds, 30001);
+      timer = callback;
+      return 1;
+    },
+    clearTimeout: () => {
+      cleared = true;
+    },
+  });
+  const render = () => {
+    harness.reset();
+    return InteractionReview({
+      request,
+      bindingId: "session",
+      profileId: "fixture",
+      connectionKey: "bridge",
+      generation: "g1",
+    });
+  };
+  let tree = render();
+  assert.equal(tree.props.issue, undefined);
+  const clean = harness.effects[0]!() as unknown as () => void;
+  assert.ok(timer);
+  feed.snapshot.interactions[0]!.state = "resolved";
+  tree = render();
+  assert.match(tree.props.issue, /already handled/);
+  await tree.props.respond(request, { decision: "allow" });
+  assert.equal(posted, 0);
+  feed.snapshot.interactions[0]!.state = "pending";
+  feed.connection = "offline";
+  tree = render();
+  assert.match(tree.props.issue, /disconnected/);
+  feed.connection = "live";
+  clock = request.expiresAt + 1;
+  timer!();
+  tree = render();
+  assert.match(tree.props.issue, /expired/);
+  await tree.props.respond(request, { decision: "deny" });
+  assert.equal(posted, 0);
+  clean();
+  assert.equal(cleared, true);
+});
+
+test("expiry during Enter gives explicit feedback and unknown delivery disables further decisions", async () => {
+  const h = viewHarness(),
+    toasts: any[] = [];
+  const request = {
+    requestId: "expiry",
+    kind: "approval" as const,
+    title: "Fixture",
+    detail: "No command",
+    state: "pending" as const,
+    expiresAt: 2000,
+  };
+  let clock = 1000,
+    posted = 0;
+  const { Approval } = viewLogic(["Approval"], {
+    ...h.globals,
+    useNavigation: () => ({ pop() {} }),
+    showToast: async (toast: any) => toasts.push(toast),
+  });
+  const props = {
+    request,
+    now: () => clock,
+    respond: async () => {
+      posted++;
+      return true;
+    },
+  };
+  let tree = Approval(props);
+  clock = 3000;
+  await views(tree)
+    .find((v) => v.props.title === "Allow Request")!
+    .props.onAction();
+  assert.equal(posted, 0);
+  assert.match(toasts[0].message, /expired/);
+  h.reset();
+  tree = Approval(props);
+  assert.match(tree.props.markdown, /expired/);
+  assert.ok(!views(tree).some((v) => v.props.title === "Allow Request"));
+
+  const review = viewHarness();
+  clock = 1000;
+  const feed = {
+    snapshot: {
+      session: sessionFixture({
+        capabilities: { send: true, streaming: false, interrupt: false, approvals: true, questions: false },
+      }),
+      interactions: [request],
+      messages: [],
+      cursor: 1,
+      hasMore: false,
+    },
+    connection: "live",
+    hub: {
+      current: {
+        now: () => clock,
+        answerInteraction: async () => {
+          posted++;
+          throw new Error("response lost");
+        },
+      },
+    },
+    refresh: async () => {},
+  };
+  const { InteractionReview } = viewLogic(["InteractionReview"], {
+    ...review.globals,
+    interactionIssue,
+    useHub: () => feed,
+    Approval: "Approval",
+    Questions: "Questions",
+    useNavigation: () => ({ pop() {} }),
+  });
+  const reviewProps = { request, bindingId: "session", profileId: "fixture", generation: "g1" };
+  tree = InteractionReview(reviewProps);
+  await tree.props.respond(request, { decision: "allow" });
+  review.reset();
+  tree = InteractionReview(reviewProps);
+  assert.match(tree.props.issue, /delivery is unknown/);
+  await tree.props.respond(request, { decision: "allow" });
+  assert.equal(posted, 1, "uncertain decisions cannot be replayed from the same review");
+});
+
+test("closing an in-flight approval or question cannot pop another view after submission finishes", async () => {
+  for (const method of ["approval-action", "approval-native-back", "question-native-back"]) {
+    const h = viewHarness();
+    let finish!: (ok: boolean) => void;
+    let popped = 0;
+    const request = {
+      requestId: "late-navigation",
+      kind: method.startsWith("approval") ? "approval" : "question",
+      title: "Fixture",
+      detail: "No command",
+      state: "pending",
+      expiresAt: Date.now() + 60000,
+      questions: [{ id: "fixture-question", question: "Fixture question", options: [], multiSelect: false }],
+    };
+    const component = method.startsWith("approval") ? "Approval" : "Questions";
+    const render = viewLogic([component], {
+      ...h.globals,
+      useNavigation: () => ({
+        pop() {
+          popped++;
+        },
+      }),
+    })[component];
+    const props = {
+      request,
+      respond: () =>
+        new Promise<boolean>((resolve) => {
+          finish = resolve;
+        }),
+    };
+    let tree = render(props);
+    const action = views(tree).find(
+      (v) => v.props.title === (component === "Approval" ? "Allow Request" : "Submit Answers"),
+    )!;
+    const pending =
+      component === "Approval" ? action.props.onAction() : action.props.onSubmit({ "custom-0": "Fixture answer" });
+    const cleanups = h.effects.map((effect) => effect() as unknown as (() => void) | undefined);
+    if (method === "approval-action") {
+      h.reset();
+      tree = render({ ...props, issue: "Decision already submitted." });
+      await views(tree)
+        .find((v) => v.props.title === "Back to Conversation")!
+        .props.onAction();
+    }
+    for (const cleanup of cleanups) cleanup?.(); // Native Back unmounts the review too.
+    finish(true);
+    await pending;
+    assert.equal(popped, method === "approval-action" ? 1 : 0, method);
   }
 });

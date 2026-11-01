@@ -19,7 +19,7 @@ import {
 import type { LaunchProps } from "@raycast/api";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { Interaction, Message, Session } from "./protocol.js";
-import { Hub, HubError, safeMarkdown } from "./core.js";
+import { Hub, HubError, interactionIssue, safeMarkdown } from "./core.js";
 import { errorText, recentKey, useBridges, useDraft, useHub } from "./hooks.js";
 import { loadConnection } from "./connections.js";
 import { DiscoverBridges, Setup } from "./onboarding.js";
@@ -372,17 +372,58 @@ type Respond = (
   answer: { decision: "allow" | "deny" } | { answers: Record<string, string[]> },
 ) => Promise<boolean>;
 
-function Approval({ request, respond }: { request: Interaction; respond: Respond }) {
+function Approval({
+  request,
+  respond,
+  issue,
+  now = Date.now,
+}: {
+  request: Interaction;
+  respond: Respond;
+  issue?: string;
+  now?: () => number | undefined;
+}) {
   const { pop } = useNavigation();
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const close = () => {
+    if (!active.current) return;
+    active.current = false;
+    pop();
+  };
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
-  const pending = request.state === "pending" && request.expiresAt > Date.now();
+  const [notice, setNotice] = useState<string>();
+  const time = now();
+  const unavailable =
+    issue ||
+    notice ||
+    (time === undefined
+      ? "Cannot verify bridge time. Refresh before approving."
+      : request.state !== "pending"
+        ? "This request is no longer pending."
+        : request.expiresAt <= time
+          ? "This request expired. Return to the conversation for a new request."
+          : undefined);
+  const pending = !unavailable;
   async function decide(decision: "allow" | "deny") {
-    if (submitting.current || request.state !== "pending" || request.expiresAt <= Date.now()) return;
+    if (submitting.current) return;
+    const currentTime = now();
+    if (unavailable || currentTime === undefined || request.expiresAt <= currentTime) {
+      const message = unavailable || "This request expired. Return to the conversation for a new request.";
+      setNotice(message);
+      await showToast({ style: Toast.Style.Failure, title: "Decision Not Submitted", message });
+      return;
+    }
     submitting.current = true;
     setBusy(true);
     try {
-      if (await respond(request, { decision })) pop();
+      if (await respond(request, { decision })) close();
     } finally {
       submitting.current = false;
       setBusy(false);
@@ -392,7 +433,7 @@ function Approval({ request, respond }: { request: Interaction; respond: Respond
     <Detail
       navigationTitle="Review Approval"
       isLoading={busy}
-      markdown={`# ${safeMarkdown(request.title)}\n\n**${pending ? "Pending approval — review all parameters before allowing." : "This request is no longer pending."}**\n\n${safeMarkdown(request.detail)}\n\nExpires: ${new Date(request.expiresAt).toLocaleString()}`}
+      markdown={`# ${safeMarkdown(request.title)}\n\n**${pending ? "Pending approval — review all parameters before allowing." : safeMarkdown(unavailable!)}**\n\n${safeMarkdown(request.detail)}\n\nExpires: ${new Date(request.expiresAt).toLocaleString()}`}
       actions={
         <ActionPanel>
           {pending ? (
@@ -406,15 +447,39 @@ function Approval({ request, respond }: { request: Interaction; respond: Respond
                 onAction={() => decide("deny")}
               />
             </>
-          ) : null}
+          ) : (
+            <Action title="Back to Conversation" icon={Icon.ArrowLeft} onAction={close} />
+          )}
         </ActionPanel>
       }
     />
   );
 }
 
-function Questions({ request, respond }: { request: Interaction; respond: Respond }) {
+function Questions({
+  request,
+  respond,
+  issue,
+  now = Date.now,
+}: {
+  request: Interaction;
+  respond: Respond;
+  issue?: string;
+  now?: () => number | undefined;
+}) {
   const { pop } = useNavigation();
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const close = () => {
+    if (!active.current) return;
+    active.current = false;
+    pop();
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const questions = request.questions || [];
@@ -430,8 +495,14 @@ function Questions({ request, respond }: { request: Interaction; respond: Respon
             icon={Icon.ArrowUp}
             onSubmit={async (values: Record<string, string[] | string>) => {
               if (busy) return;
-              if (request.state !== "pending" || request.expiresAt <= Date.now()) {
-                setError("This request has expired. Refresh the conversation.");
+              const time = now();
+              if (issue || time === undefined || request.state !== "pending" || request.expiresAt <= time) {
+                setError(
+                  issue ||
+                    (time === undefined
+                      ? "Cannot verify bridge time. Refresh the connection."
+                      : "This request has expired. Refresh the conversation."),
+                );
                 return;
               }
               const answers: Record<string, string[]> = Object.create(null);
@@ -460,7 +531,7 @@ function Questions({ request, respond }: { request: Interaction; respond: Respon
               }
               setBusy(true);
               try {
-                if (await respond(request, { answers })) pop();
+                if (await respond(request, { answers })) close();
               } finally {
                 setBusy(false);
               }
@@ -473,7 +544,7 @@ function Questions({ request, respond }: { request: Interaction; respond: Respon
         title={request.title}
         text={request.detail || "Select options and/or enter your own answer for each question."}
       />
-      {error ? <Form.Description title="Cannot Submit" text={error} /> : null}
+      {issue || error ? <Form.Description title="Cannot Submit" text={issue || error!} /> : null}
       {questions.map((question, index) => (
         <Fragment key={question.id}>
           <Form.Description text={question.question} />
@@ -489,6 +560,84 @@ function Questions({ request, respond }: { request: Interaction; respond: Respon
       ))}
     </Form>
   );
+}
+
+// This mounted review owns a live subscription, rather than a frozen pushed request/callback.
+function InteractionReview({
+  request,
+  bindingId,
+  profileId,
+  connectionKey,
+  generation,
+}: {
+  request: Interaction;
+  bindingId: string;
+  profileId: string;
+  connectionKey?: string;
+  generation: string;
+}) {
+  const feed = useHub(bindingId, profileId, connectionKey);
+  const [, setTick] = useState(0);
+  const submitting = useRef(false);
+  const [decisionIssue, setDecisionIssue] = useState<string>();
+  const client = feed.hub.current;
+  useEffect(() => {
+    const time = client?.now();
+    if (time === undefined || time >= request.expiresAt) return;
+    const timer = setTimeout(
+      () => setTick((value) => value + 1),
+      Math.min(request.expiresAt - time + 1, 2_147_483_647),
+    );
+    return () => clearTimeout(timer);
+  }, [client, feed.snapshot, request.expiresAt]);
+  const issue =
+    decisionIssue ||
+    (feed.loading
+      ? "Checking the current request…"
+      : feed.error ||
+        (feed.connection !== "live"
+          ? "Bridge disconnected. Reconnect before approving."
+          : !feed.snapshot || !client
+            ? "Request unavailable. Return to the conversation."
+            : interactionIssue(feed.snapshot, generation, request, client.now())));
+  const respond: Respond = async (reviewed, answer) => {
+    if (submitting.current) return false;
+    if (issue || !client) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Decision Not Submitted",
+        message: issue || "Bridge disconnected.",
+      });
+      return false;
+    }
+    submitting.current = true;
+    try {
+      await client.answerInteraction(bindingId, generation, reviewed, answer);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Decision Submitted",
+        message: "Sent to the bridge. Native Agent confirmation is separate.",
+      });
+      return true;
+    } catch (cause) {
+      const message =
+        cause instanceof HubError
+          ? cause.message
+          : "Decision delivery is unknown. Check the original Agent; do not submit it again.";
+      setDecisionIssue(message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: cause instanceof HubError ? "Decision Not Submitted" : "Decision Delivery Unknown",
+        message,
+      });
+      await feed.refresh();
+      return false;
+    } finally {
+      submitting.current = false;
+    }
+  };
+  const props = { request, respond, issue, now: () => client?.now() };
+  return request.kind === "approval" ? <Approval {...props} /> : <Questions {...props} />;
 }
 
 type ConversationSelection = { generation?: string; selectedItemId?: string; replyTo?: string };
@@ -695,31 +844,6 @@ function Conversation({
     return sent;
   }
   latestSend.current = send;
-  const respond: Respond = async (request, answer) => {
-    const client = feed.hub.current;
-    if (connectionChanged || !session || !client) return false;
-    // Re-read before approval/question submission; a Detail/Form may have remained open across a rebind.
-    return run(async () => {
-      const current = await client.snapshot(bindingId);
-      const fresh = current.interactions.find((item) => item.requestId === request.requestId);
-      if (
-        current.session.generation !== session.generation ||
-        !knownOnline(current.session) ||
-        !fresh ||
-        fresh.state !== "pending" ||
-        fresh.expiresAt <= Date.now() ||
-        fresh.kind !== request.kind ||
-        fresh.title !== request.title ||
-        fresh.detail !== request.detail ||
-        JSON.stringify(fresh.questions) !== JSON.stringify(request.questions)
-      )
-        throw new HubError(409);
-      await client.mutate(bindingId, `/interactions/${encodeURIComponent(request.requestId)}`, {
-        generation: session.generation,
-        ...answer,
-      });
-    }, "Response submitted");
-  };
 
   const canAct = Boolean(
     !connectionChanged &&
@@ -1006,7 +1130,8 @@ function Conversation({
         />
       ) : null}
       {(snapshot?.interactions || []).map((request) => {
-        const pending = request.state === "pending" && request.expiresAt > Date.now();
+        const bridgeNow = feed.hub.current?.now();
+        const pending = request.state === "pending" && (bridgeNow === undefined || request.expiresAt > bridgeNow);
         const supported =
           request.kind === "approval" ? session?.capabilities.approvals : session?.capabilities.questions;
         return (
@@ -1027,11 +1152,13 @@ function Conversation({
                   <Action.Push
                     title={request.kind === "approval" ? "Review Approval" : "Answer Questions"}
                     target={
-                      request.kind === "approval" ? (
-                        <Approval request={request} respond={respond} />
-                      ) : (
-                        <Questions request={request} respond={respond} />
-                      )
+                      <InteractionReview
+                        request={request}
+                        bindingId={bindingId}
+                        profileId={profileId}
+                        connectionKey={identity}
+                        generation={session!.generation}
+                      />
                     }
                   />
                 ) : null}
