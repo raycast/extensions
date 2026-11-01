@@ -16,7 +16,6 @@ import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-di
 import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
-import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 import { joinMetadataSections, type MetadataSection } from "./_common/metadata";
 
 function formatDate(iso: string): string | undefined {
@@ -80,6 +79,11 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
   ];
 
   const localInfoDetailsSection: MetadataSection = [
+    <List.Item.Detail.Metadata.Label
+      key="local-info-management"
+      title="Management"
+      text={skill.managedBySkillsCli ? "Skills CLI" : "Local / externally managed"}
+    />,
     installedDate && (
       <List.Item.Detail.Metadata.Label
         key="skill-lock-installed"
@@ -261,10 +265,11 @@ function BaseInstalledSkillListItem({
             />
             {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            {skill.hasUpdate && <UpdateSkillAction skillName={skill.name} mutate={mutate} />}
-            <RemoveSkillAction skill={skill} mutate={mutate} />
-          </ActionPanel.Section>
+          {skill.managedBySkillsCli && (skill.mutableAgents?.length ?? 0) > 0 && (
+            <ActionPanel.Section>
+              <RemoveSkillAction skill={skill} mutate={mutate} />
+            </ActionPanel.Section>
+          )}
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
             icon={Icon.Sidebar}
