@@ -48,6 +48,9 @@ function FolderCardsView({ folder }: { folder: RaycastFolder }) {
 const cardCountLabel = (folder: RaycastFolder): string =>
   `${folder.cardCount ?? 0} card${folder.cardCount === 1 ? "" : "s"}`;
 
+const folderCountLabel = (count: number, noun: string): string =>
+  `${count} ${noun}${count === 1 ? "" : "s"}`;
+
 export default function FoldersCommand() {
   const {
     isAuthenticated,
@@ -186,12 +189,18 @@ export default function FoldersCommand() {
         />
       ) : null}
       {manual.length > 0 ? (
-        <List.Section subtitle={`${manual.length}`} title="Folders">
+        <List.Section
+          subtitle={folderCountLabel(manual.length, "folder")}
+          title="Folders"
+        >
           {manual.map(renderFolder)}
         </List.Section>
       ) : null}
       {smart.length > 0 ? (
-        <List.Section subtitle={`${smart.length}`} title="Smart Folders">
+        <List.Section
+          subtitle={folderCountLabel(smart.length, "smart folder")}
+          title="Smart Folders"
+        >
           {smart.map(renderFolder)}
         </List.Section>
       ) : null}
