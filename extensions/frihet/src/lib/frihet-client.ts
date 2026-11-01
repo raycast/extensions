@@ -643,9 +643,24 @@ export class FrihetRestClient {
       }
     }
 
-    let response: Response;
+    const throwIfAborted = (): never => {
+      const reason = controller.signal.reason ?? options?.signal?.reason;
+      if (reason instanceof Error && reason.message === "request_timeout") {
+        throw new FrihetApiError(
+          408,
+          "request_timeout",
+          `Request to ${path} timed out after ${Math.round(this.timeoutMs / 1000)}s.`,
+        );
+      }
+      throw new FrihetApiError(
+        499,
+        "request_aborted",
+        "Search request cancelled.",
+      );
+    };
+
     try {
-      response = await this.fetchImpl(url.toString(), {
+      const response = await this.fetchImpl(url.toString(), {
         method: "GET",
         redirect: "manual",
         headers: {
@@ -656,90 +671,87 @@ export class FrihetRestClient {
         },
         signal: controller.signal,
       });
-    } catch {
-      clearTimeout(timeoutId);
-      complete();
-      if (options?.signal) {
-        options.signal.removeEventListener("abort", onExternalAbort);
+
+      // Refuse HTTP redirects so the API key is never forwarded to another host.
+      if (response.status >= 300 && response.status < 400) {
+        throw new FrihetApiError(
+          502,
+          "unexpected_redirect",
+          "Refused unexpected HTTP redirect from API endpoint.",
+        );
       }
-      if (controller.signal.aborted) {
-        const reason = controller.signal.reason;
-        if (reason instanceof Error && reason.message === "request_timeout") {
-          throw new FrihetApiError(
-            408,
-            "request_timeout",
-            `Request to ${path} timed out after ${Math.round(this.timeoutMs / 1000)}s.`,
-          );
+
+      if (!response.ok) {
+        let errorCode = `http_${response.status}`;
+        let message = response.statusText || `HTTP ${response.status}`;
+        let requestId = response.headers.get("x-request-id") ?? undefined;
+        try {
+          const errJson = (await response.json()) as Record<string, unknown>;
+          if (typeof errJson.error === "string" && errJson.error.trim()) {
+            errorCode = errJson.error.trim();
+            message = errorCode;
+          }
+          if (typeof errJson.message === "string" && errJson.message.trim()) {
+            message = errJson.message.trim();
+          }
+          if (
+            typeof errJson.meta === "object" &&
+            errJson.meta !== null &&
+            typeof (errJson.meta as Record<string, unknown>).requestId ===
+              "string"
+          ) {
+            requestId = (errJson.meta as Record<string, string>).requestId;
+          }
+        } catch {
+          // Ignore non-JSON error body
+        }
+        if (controller.signal.aborted || options?.signal?.aborted) {
+          throwIfAborted();
         }
         throw new FrihetApiError(
-          499,
-          "request_aborted",
-          "Search request cancelled.",
+          response.status,
+          errorCode,
+          message,
+          requestId,
         );
+      }
+
+      const raw = (await response.json()) as unknown;
+      if (controller.signal.aborted || options?.signal?.aborted) {
+        throwIfAborted();
+      }
+      if (raw === null || raw === undefined) {
+        throw new FrihetApiError(
+          200,
+          "empty_response",
+          "Frihet API returned an empty JSON body.",
+        );
+      }
+
+      if (cacheKey) {
+        this.cache.set(this.tenantNamespace, cacheKey, raw, generation);
+      }
+
+      return raw as T;
+    } catch (err) {
+      if (err instanceof FrihetApiError) {
+        throw err;
+      }
+      if (controller.signal.aborted || options?.signal?.aborted) {
+        throwIfAborted();
       }
       throw new FrihetApiError(
         503,
         "network_error",
         "Network error while connecting to Frihet API.",
       );
-    }
-
-    clearTimeout(timeoutId);
-    complete();
-    if (options?.signal) {
-      options.signal.removeEventListener("abort", onExternalAbort);
-    }
-
-    // Refuse HTTP redirects so the API key is never forwarded to another host.
-    if (response.status >= 300 && response.status < 400) {
-      throw new FrihetApiError(
-        502,
-        "unexpected_redirect",
-        "Refused unexpected HTTP redirect from API endpoint.",
-      );
-    }
-
-    if (!response.ok) {
-      let errorCode = `http_${response.status}`;
-      let message = response.statusText || `HTTP ${response.status}`;
-      let requestId = response.headers.get("x-request-id") ?? undefined;
-      try {
-        const errJson = (await response.json()) as Record<string, unknown>;
-        if (typeof errJson.error === "string" && errJson.error.trim()) {
-          errorCode = errJson.error.trim();
-          message = errorCode;
-        }
-        if (typeof errJson.message === "string" && errJson.message.trim()) {
-          message = errJson.message.trim();
-        }
-        if (
-          typeof errJson.meta === "object" &&
-          errJson.meta !== null &&
-          typeof (errJson.meta as Record<string, unknown>).requestId ===
-            "string"
-        ) {
-          requestId = (errJson.meta as Record<string, string>).requestId;
-        }
-      } catch {
-        // Ignore non-JSON error body
+    } finally {
+      clearTimeout(timeoutId);
+      complete();
+      if (options?.signal) {
+        options.signal.removeEventListener("abort", onExternalAbort);
       }
-      throw new FrihetApiError(response.status, errorCode, message, requestId);
     }
-
-    const raw = (await response.json()) as unknown;
-    if (raw === null || raw === undefined) {
-      throw new FrihetApiError(
-        200,
-        "empty_response",
-        "Frihet API returned an empty JSON body.",
-      );
-    }
-
-    if (cacheKey) {
-      this.cache.set(this.tenantNamespace, cacheKey, raw, generation);
-    }
-
-    return raw as T;
   }
 
   private unwrapSingle<T>(raw: unknown): T {
@@ -1034,26 +1046,56 @@ export class FrihetRestClient {
           signal: params?.signal,
         });
         const unfilteredPage = this.unwrapPaginated<ProductRecord>(rawFallback);
-        const filteredRows = filterProductsByActiveMode(
-          unfilteredPage.data,
+        let currentUnfiltered = unfilteredPage;
+        let filteredRows = filterProductsByActiveMode(
+          currentUnfiltered.data,
           filter,
         );
+
+        // Keep fetching up to 3 pages if the current page has 0 matches after filtering
+        let loopCount = 0;
+        while (
+          filteredRows.length === 0 &&
+          currentUnfiltered.nextCursor &&
+          loopCount < 3
+        ) {
+          loopCount += 1;
+          const nextQuery = {
+            ...baseQuery,
+            cursor: currentUnfiltered.nextCursor,
+          };
+          const nextFallbackKey = `products:fallback:${JSON.stringify(nextQuery)}`;
+          const nextRawFallback = await this.requestJson<unknown>("/products", {
+            query: nextQuery,
+            slotKey: "products:list",
+            cacheKey: nextFallbackKey,
+            bypassCache: params?.bypassCache,
+            signal: params?.signal,
+          });
+          currentUnfiltered =
+            this.unwrapPaginated<ProductRecord>(nextRawFallback);
+          filteredRows = filterProductsByActiveMode(
+            currentUnfiltered.data,
+            filter,
+          );
+        }
+
         const fallbackCoveragePartial =
-          unfilteredPage.total > unfilteredPage.data.length ||
-          Boolean(unfilteredPage.nextCursor) ||
-          Boolean(unfilteredPage.truncated);
+          currentUnfiltered.total > currentUnfiltered.data.length ||
+          Boolean(currentUnfiltered.nextCursor) ||
+          Boolean(currentUnfiltered.truncated);
         return {
           data: filteredRows,
           total: fallbackCoveragePartial
-            ? unfilteredPage.total
+            ? currentUnfiltered.total
             : filteredRows.length,
-          limit: unfilteredPage.limit,
-          offset: unfilteredPage.offset,
-          ...(unfilteredPage.nextCursor
-            ? { nextCursor: unfilteredPage.nextCursor }
+          limit: currentUnfiltered.limit,
+          offset: currentUnfiltered.offset,
+          ...(currentUnfiltered.nextCursor
+            ? { nextCursor: currentUnfiltered.nextCursor }
             : {}),
-          ...(typeof unfilteredPage.truncated === "boolean"
-            ? { truncated: unfilteredPage.truncated }
+          ...(typeof currentUnfiltered.truncated === "boolean"
+            ? { truncated: currentUnfiltered.truncated }
             : {}),
           usedClientFallback: true,
           usedClientSideFallback: true,

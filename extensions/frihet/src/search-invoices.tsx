@@ -66,13 +66,21 @@ function renderInvoiceMarkdown(invoice: InvoiceRecord): string {
     lines.push(
       "## Line Items",
       "",
-      "| Description | Qty | Unit Price | Line Subtotal |",
-      "|---|---:|---:|---:|",
+      "| Description | Qty | Unit Price | Discount | Line Subtotal |",
+      "|---|---:|---:|---:|---:|",
     );
     for (const item of invoice.items) {
-      const subtotal = (item.quantity ?? 0) * (item.unitPrice ?? 0);
+      const gross = (item.quantity ?? 0) * (item.unitPrice ?? 0);
+      const discountPct =
+        typeof item.discount === "number"
+          ? item.discount
+          : typeof (item as { discountRate?: number }).discountRate === "number"
+            ? (item as { discountRate?: number }).discountRate!
+            : 0;
+      const subtotal = gross * (1 - discountPct / 100);
+      const discountText = discountPct > 0 ? `${discountPct}%` : "—";
       lines.push(
-        `| ${item.description} | ${item.quantity} | ${formatCurrencyAmount(item.unitPrice, resolved.currency)} | ${formatCurrencyAmount(subtotal, resolved.currency)} |`,
+        `| ${item.description} | ${item.quantity} | ${formatCurrencyAmount(item.unitPrice, resolved.currency)} | ${discountText} | ${formatCurrencyAmount(subtotal, resolved.currency)} |`,
       );
     }
     lines.push("");
@@ -219,6 +227,7 @@ export default function SearchInvoicesCommand() {
           <List.Dropdown.Item title="Sent (Open)" value="sent" />
           <List.Dropdown.Item title="Overdue" value="overdue" />
           <List.Dropdown.Item title="Paid" value="paid" />
+          <List.Dropdown.Item title="Cancelled" value="cancelled" />
         </List.Dropdown>
       }
     >

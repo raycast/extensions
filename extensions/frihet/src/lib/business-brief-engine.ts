@@ -30,6 +30,7 @@ import {
   buildFrihetDeepLink,
   formatCurrencyAmount,
   formatProvenancedAmount,
+  FrihetApiError,
   resolveDocumentAmount,
   sumProvenancedAmounts,
 } from "./frihet-client.js";
@@ -331,11 +332,38 @@ export async function generateOperationalBusinessBrief(
   const clientsToInspect = clientsPage.data.slice(0, maxCrmClients);
   const activitiesPerClient = await Promise.all(
     clientsToInspect.map(async (cli) => {
-      const page = await client.listClientActivities(cli.id, {
-        limit: 5,
-        ...reqOpts,
-      });
-      return { client: cli, activities: page.data, total: page.total };
+      try {
+        const page = await client.listClientActivities(cli.id, {
+          limit: 5,
+          ...reqOpts,
+        });
+        return {
+          client: cli,
+          activities: page.data,
+          total: page.total,
+          nextCursor: page.nextCursor,
+          truncated: page.truncated,
+          failed: false,
+          errorMessage: undefined as string | undefined,
+        };
+      } catch (err) {
+        if (
+          (err instanceof FrihetApiError &&
+            err.errorCode === "request_aborted") ||
+          reqOpts.signal?.aborted
+        ) {
+          throw err;
+        }
+        return {
+          client: cli,
+          activities: [] as ClientActivityRecord[],
+          total: undefined,
+          nextCursor: undefined,
+          truncated: true,
+          failed: true,
+          errorMessage: err instanceof Error ? err.message : String(err),
+        };
+      }
     }),
   );
 
@@ -367,6 +395,7 @@ export async function generateOperationalBusinessBrief(
     clientsPage.total ?? clientsPage.data.length,
     clientsPage.data.length,
   );
+  const failedCrmEntries = activitiesPerClient.filter((e) => e.failed);
   const crmCov: ResourceCoverageItem = {
     resource: "client_activities",
     collection: "client_activities",
@@ -378,6 +407,9 @@ export async function generateOperationalBusinessBrief(
       clientsToInspect.length >= crmTotalClients &&
       activitiesPerClient.every(
         (entry) =>
+          !entry.failed &&
+          !entry.nextCursor &&
+          !entry.truncated &&
           entry.activities.length >= (entry.total ?? entry.activities.length),
       ),
   };
@@ -717,29 +749,46 @@ export async function generateOperationalBusinessBrief(
     }
   }
 
-  // Incomplete expenses (missing vendor or category ONLY; taxDeductible=false is NEVER flagged as an error)
+  // Incomplete expenses (missing vendor, category, or valid amount; taxDeductible=false is NEVER flagged as an error)
   if (incompleteExpenses.length > 0) {
     const incAmounts = incompleteExpenses.map((e) =>
       resolveDocumentAmount(e, currency),
     );
     const incSum = sumProvenancedAmounts(incAmounts, currency);
-    const labels = incompleteExpenses.map(
-      (e) =>
-        `${e.description || e.id} (missing ${!(e.vendor ?? "").trim() ? "vendor" : "category"})`,
-    );
+    const allReasons = new Set<string>();
+    const labels = incompleteExpenses.map((e) => {
+      const reasons: string[] = [];
+      if (typeof e.vendor !== "string" || !e.vendor.trim()) {
+        reasons.push("vendor");
+      }
+      if (typeof e.category !== "string" || !e.category.trim()) {
+        reasons.push("category");
+      }
+      const resolvedAmt = resolveDocumentAmount(e, currency);
+      if (resolvedAmt.amount === null || resolvedAmt.amount <= 0) {
+        reasons.push("valid amount");
+      }
+      for (const r of reasons) allReasons.add(r);
+      const reasonText =
+        reasons.length > 0
+          ? `missing ${reasons.join(", ")}`
+          : "incomplete metadata";
+      return `${e.description || e.id} (${reasonText})`;
+    });
+
+    const reasonsList = Array.from(allReasons).join(", ");
     reviewItems.push({
       id: "review-incomplete-expenses",
       priority: "MEDIUM",
       category: "incomplete_expense",
-      title: `${incompleteExpenses.length} Expense${incompleteExpenses.length === 1 ? "" : "s"} Missing Vendor or Category`,
-      subtitle: `${formatCurrencyAmount(incSum.amount, incSum.currency)} (${incSum.provenance})`,
-      why: `Expense record(s) ${labels.join(", ")} lack a linked vendor or category for quarterly bookkeeping. (Note: ${nonDeductibleExpenses.length} non-deductible expense(s) are treated as valid fiscal classifications, not errors.)`,
+      title: `${incompleteExpenses.length} Expense${incompleteExpenses.length === 1 ? "" : "s"} with Incomplete Details (${reasonsList})`,
+      subtitle: `${formatProvenancedAmount(incSum)} (${incSum.provenance})`,
+      why: `Expense record(s) ${labels.join("; ")} lack required metadata (${reasonsList}) for quarterly bookkeeping and tax filing. (Note: ${nonDeductibleExpenses.length} non-deductible expense(s) are treated as valid fiscal classifications, not errors.)`,
       recordIds: incompleteExpenses.map((e) => e.id),
       recordLabels: labels,
       amount: incSum,
       deepLink: buildFrihetDeepLink("expenses"),
-      suggestedAction:
-        "Complete the missing supplier or category metadata in Frihet Expenses.",
+      suggestedAction: `Complete the missing ${reasonsList} in Frihet Expenses.`,
     });
   }
 
@@ -832,6 +881,16 @@ export async function generateOperationalBusinessBrief(
     );
     blindSpots.push(
       `Partial workspace sample: inspected ${invoicesCov.inspected}/${invoicesCov.total} invoices, ${quotesCov.inspected}/${quotesCov.total} quotes, ${expensesCov.inspected}/${expensesCov.total} expenses, and ${crmCov.inspected}/${crmCov.total} client activity timelines. Figures reflect the inspected sample, not the full historical ledger.`,
+    );
+  }
+  if (failedCrmEntries.length > 0) {
+    blindSpots.push(
+      `CRM client activity enrichment was unavailable for ${failedCrmEntries.length} client(s) (${failedCrmEntries
+        .map((e) => `${e.client.name}: ${e.errorMessage ?? "unavailable"}`)
+        .slice(0, 3)
+        .join(
+          "; ",
+        )}). Financial and invoice/expense metrics remain fully available.`,
     );
   }
   blindSpots.push(

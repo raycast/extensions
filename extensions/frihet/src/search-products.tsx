@@ -198,14 +198,29 @@ export default function SearchProductsCommand() {
       ) : (
         <List.EmptyView
           icon={Icon.Box}
-          title="No Matching Products"
+          title={
+            nextCursor
+              ? "No Matching Products on This Page"
+              : "No Matching Products"
+          }
           description={
-            searchText || activeFilter !== "all"
-              ? `No catalogue items matched "${searchText}" (${activeFilter}).`
-              : "Your Frihet product & service catalogue is empty."
+            nextCursor
+              ? `No items matched on the current page (${activeFilter}), but more catalogue items exist. Select "Load Next Page" below to continue searching.`
+              : searchText || activeFilter !== "all"
+                ? `No catalogue items matched "${searchText}" (${activeFilter}).`
+                : "Your Frihet product & service catalogue is empty."
           }
           actions={
             <ActionPanel>
+              {nextCursor ? (
+                <Action
+                  title="Load Next Page"
+                  icon={Icon.ArrowDown}
+                  onAction={() =>
+                    void fetchProducts({ cursor: nextCursor, append: true })
+                  }
+                />
+              ) : null}
               <Action
                 title="Refresh Catalogue"
                 icon={Icon.RotateClockwise}

@@ -18,7 +18,7 @@ import {
 } from "./lib/business-brief-engine.js";
 import {
   buildFrihetDeepLink,
-  formatCurrencyAmount,
+  formatProvenancedAmount,
   FrihetApiError,
 } from "./lib/frihet-client.js";
 import {
@@ -49,12 +49,12 @@ function renderSummaryMarkdown(brief: OperationalBusinessBrief): string {
     "## 4-Way Financial Activity Separation (Operational Sample vs Current Month)",
     "| Bucket | Count | Total | Provenance | Fiscal Meaning |",
     "|---|---:|---:|---|---|",
-    `| **1. Drafts (Unissued)** | ${financials.drafts.invoiceDraftsCount} inv / ${financials.drafts.quoteDraftsCount} quo | ${formatCurrencyAmount(financials.drafts.invoiceDraftsTotal.amount, financials.drafts.invoiceDraftsTotal.currency)} | \`${financials.drafts.invoiceDraftsTotal.provenance}\` | Not issued; **0.00 ${cur}** revenue |`,
-    `| **2. Issued Revenue (Sample)** | ${financials.issuedRevenue.count} inv | **${formatCurrencyAmount(financials.issuedRevenue.total.amount, financials.issuedRevenue.total.currency)}** | \`${financials.issuedRevenue.total.provenance}\` | Sent + Overdue + Paid |`,
-    `| **3. Recorded Paid** | ${financials.recordedPaid.count} inv | ${formatCurrencyAmount(financials.recordedPaid.total.amount, financials.recordedPaid.total.currency)} | \`${financials.recordedPaid.total.provenance}\` | Marked paid in Frihet |`,
-    `| **4. Importe nominal de facturas no marcadas como pagadas (saldo pendiente real no determinable sin cobros parciales)** | ${financials.outstandingBalance.totalCount} inv (${financials.outstandingBalance.overdueCount} overdue) | **${formatCurrencyAmount(financials.outstandingBalance.totalAmount.amount, financials.outstandingBalance.totalAmount.currency)}** | \`${financials.outstandingBalance.totalAmount.provenance}\` | ${formatCurrencyAmount(financials.outstandingBalance.overdueAmount.amount, financials.outstandingBalance.overdueAmount.currency)} overdue · ${formatCurrencyAmount(financials.outstandingBalance.onTimeAmount.amount, financials.outstandingBalance.onTimeAmount.currency)} on-time |`,
-    `| **5. Recorded Expenses** | ${financials.expensesSummary.count} exp (${financials.expensesSummary.incompleteMetadataCount} incomplete) | ${formatCurrencyAmount(financials.expensesSummary.total.amount, financials.expensesSummary.total.currency)} | \`${financials.expensesSummary.total.provenance}\` | ${financials.expensesSummary.nonDeductibleCount} non-deductible (neutral) |`,
-    `| **6. Current Month (${financials.currentMonthActivity.referenceMonth})** | ${financials.currentMonthActivity.issuedInvoicesInMonthCount} issued / ${financials.currentMonthActivity.invoiceDraftsInMonthCount} draft / ${financials.currentMonthActivity.expensesInMonthCount} exp | ${formatCurrencyAmount(financials.currentMonthActivity.issuedInvoicesInMonthTotal.amount, financials.currentMonthActivity.issuedInvoicesInMonthTotal.currency)} | \`${financials.currentMonthActivity.issuedInvoicesInMonthTotal.provenance}\` | Filtered by document date in ${financials.currentMonthActivity.referenceMonth} |`,
+    `| **1. Drafts (Unissued)** | ${financials.drafts.invoiceDraftsCount} inv / ${financials.drafts.quoteDraftsCount} quo | ${formatProvenancedAmount(financials.drafts.invoiceDraftsTotal)} | \`${financials.drafts.invoiceDraftsTotal.provenance}\` | Not issued; **0.00 ${cur}** revenue |`,
+    `| **2. Issued Revenue (Sample)** | ${financials.issuedRevenue.count} inv | **${formatProvenancedAmount(financials.issuedRevenue.total)}** | \`${financials.issuedRevenue.total.provenance}\` | Sent + Overdue + Paid |`,
+    `| **3. Recorded Paid** | ${financials.recordedPaid.count} inv | ${formatProvenancedAmount(financials.recordedPaid.total)} | \`${financials.recordedPaid.total.provenance}\` | Marked paid in Frihet |`,
+    `| **4. Importe nominal de facturas no marcadas como pagadas (saldo pendiente real no determinable sin cobros parciales)** | ${financials.outstandingBalance.totalCount} inv (${financials.outstandingBalance.overdueCount} overdue) | **${formatProvenancedAmount(financials.outstandingBalance.totalAmount)}** | \`${financials.outstandingBalance.totalAmount.provenance}\` | ${formatProvenancedAmount(financials.outstandingBalance.overdueAmount)} overdue · ${formatProvenancedAmount(financials.outstandingBalance.onTimeAmount)} on-time |`,
+    `| **5. Recorded Expenses** | ${financials.expensesSummary.count} exp (${financials.expensesSummary.incompleteMetadataCount} incomplete) | ${formatProvenancedAmount(financials.expensesSummary.total)} | \`${financials.expensesSummary.total.provenance}\` | ${financials.expensesSummary.nonDeductibleCount} non-deductible (neutral) |`,
+    `| **6. Current Month (${financials.currentMonthActivity.referenceMonth})** | ${financials.currentMonthActivity.issuedInvoicesInMonthCount} issued / ${financials.currentMonthActivity.invoiceDraftsInMonthCount} draft / ${financials.currentMonthActivity.expensesInMonthCount} exp | ${formatProvenancedAmount(financials.currentMonthActivity.issuedInvoicesInMonthTotal)} | \`${financials.currentMonthActivity.issuedInvoicesInMonthTotal.provenance}\` | Filtered by document date in ${financials.currentMonthActivity.referenceMonth} |`,
     "",
     "## Explicit Blind Spots & Boundaries",
     ...brief.blindSpots.map((b) => `- ${b}`),
@@ -73,7 +73,7 @@ function renderReviewItemMarkdown(
     "",
     ...(item.amount
       ? [
-          `**Amount & Provenance:** **${formatCurrencyAmount(item.amount.amount, item.amount.currency)}** (\`${item.amount.provenance}\` — ${item.amount.formula})`,
+          `**Amount & Provenance:** **${formatProvenancedAmount(item.amount)}** (\`${item.amount.provenance}\` — ${item.amount.formula})`,
           "",
         ]
       : []),
@@ -253,7 +253,7 @@ export default function BusinessBriefCommand() {
                         {item.amount ? (
                           <List.Item.Detail.Metadata.Label
                             title="Amount & Provenance"
-                            text={`${formatCurrencyAmount(item.amount.amount, item.amount.currency)} (${item.amount.provenance})`}
+                            text={`${formatProvenancedAmount(item.amount)} (${item.amount.provenance})`}
                           />
                         ) : null}
                       </List.Item.Detail.Metadata>
@@ -299,7 +299,7 @@ export default function BusinessBriefCommand() {
               id="summary-separation"
               icon={{ source: Icon.BarChart, tintColor: Color.Blue }}
               title="4-Way Activity Separation (Drafts vs Issued vs Paid vs Outstanding)"
-              subtitle={`Issued: ${formatCurrencyAmount(brief.financials.issuedRevenue.total.amount, brief.currency)} · Drafts: ${formatCurrencyAmount(brief.financials.drafts.invoiceDraftsTotal.amount, brief.currency)}`}
+              subtitle={`Issued: ${formatProvenancedAmount(brief.financials.issuedRevenue.total)} · Drafts: ${formatProvenancedAmount(brief.financials.drafts.invoiceDraftsTotal)}`}
               accessories={[
                 {
                   tag: {

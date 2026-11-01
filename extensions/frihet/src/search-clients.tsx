@@ -36,9 +36,14 @@ function formatAddress(addr?: ClientAddress | string): string {
   return parts.length > 0 ? parts.join(", ") : "—";
 }
 
+type ClientActivitiesState =
+  | { status: "loading" }
+  | { status: "success"; data: ClientActivityRecord[] }
+  | { status: "error"; message: string };
+
 function renderClientMarkdown(
   client: ClientRecord,
-  activities?: ClientActivityRecord[],
+  state?: ClientActivitiesState,
 ): string {
   const lines: string[] = [
     `# ${client.name}`,
@@ -52,14 +57,22 @@ function renderClientMarkdown(
     "",
   ];
 
-  if (!activities) {
+  if (!state) {
     lines.push(
       "_Select this client or press **Enter** to load recent CRM activities._",
     );
-  } else if (activities.length === 0) {
+  } else if (state.status === "loading") {
+    lines.push("_Loading recent CRM activities..._");
+  } else if (state.status === "error") {
+    lines.push(
+      `> ⚠️ **Could not load CRM activities:** ${state.message}`,
+      "",
+      "_Select **Retry Loading CRM Activities** from the actions menu to try again._",
+    );
+  } else if (state.data.length === 0) {
     lines.push("_No recorded CRM activities for this client._");
   } else {
-    for (const act of activities) {
+    for (const act of state.data) {
       const dateStr =
         (act.date ?? act.createdAt ?? "").slice(0, 10) || "Recent";
       const typeLabel = (act.type ?? "activity").toUpperCase();
@@ -75,7 +88,7 @@ export default function SearchClientsCommand() {
   const [searchText, setSearchText] = useState("");
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [activitiesByClient, setActivitiesByClient] = useState<
-    Record<string, ClientActivityRecord[]>
+    Record<string, ClientActivitiesState>
   >({});
   const [total, setTotal] = useState<number>(0);
   const [nextCursor, setNextCursor] = useState<string | undefined>(undefined);
@@ -151,15 +164,30 @@ export default function SearchClientsCommand() {
   }, [fetchClients]);
 
   const loadClientActivities = useCallback(
-    async (clientId: string) => {
-      if (activitiesByClient[clientId]) return;
+    async (clientId: string, opts?: { force?: boolean }) => {
+      const existing = activitiesByClient[clientId];
+      if (existing && !opts?.force) {
+        if (existing.status === "loading" || existing.status === "success") {
+          return;
+        }
+      }
+      setActivitiesByClient((prev) => ({
+        ...prev,
+        [clientId]: { status: "loading" },
+      }));
       try {
         const api = createClientFromPreferences();
         const page = await api.listClientActivities(clientId, { limit: 10 });
-        setActivitiesByClient((prev) => ({ ...prev, [clientId]: page.data }));
-      } catch {
-        // Activities are optional enrichment; do not fail the main list view
-        setActivitiesByClient((prev) => ({ ...prev, [clientId]: [] }));
+        setActivitiesByClient((prev) => ({
+          ...prev,
+          [clientId]: { status: "success", data: page.data },
+        }));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setActivitiesByClient((prev) => ({
+          ...prev,
+          [clientId]: { status: "error", message },
+        }));
       }
     },
     [activitiesByClient],
@@ -288,11 +316,15 @@ export default function SearchClientsCommand() {
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
-                        title="CRM Activities Loaded"
+                        title="CRM Activities"
                         text={
-                          activities
-                            ? `${activities.length} record(s)`
-                            : "Select to load"
+                          !activities
+                            ? "Select to load"
+                            : activities.status === "loading"
+                              ? "Loading..."
+                              : activities.status === "error"
+                                ? "Failed to load (Select retry)"
+                                : `${activities.data.length} record(s)`
                         }
                       />
                     </List.Item.Detail.Metadata>
@@ -324,11 +356,24 @@ export default function SearchClientsCommand() {
                       title="Copy Client ID"
                       content={cli.id}
                     />
-                    <Action
-                      title="Load CRM Activities"
-                      icon={Icon.Clock}
-                      onAction={() => void loadClientActivities(cli.id)}
-                    />
+                    {activities?.status === "error" ? (
+                      <Action
+                        title="Retry Loading CRM Activities"
+                        icon={Icon.RotateClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={() =>
+                          void loadClientActivities(cli.id, { force: true })
+                        }
+                      />
+                    ) : (
+                      <Action
+                        title="Load CRM Activities"
+                        icon={Icon.Clock}
+                        onAction={() =>
+                          void loadClientActivities(cli.id, { force: true })
+                        }
+                      />
+                    )}
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Workspace & Pagination">
                     {nextCursor ? (

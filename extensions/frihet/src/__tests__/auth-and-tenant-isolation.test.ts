@@ -261,6 +261,56 @@ describe("AUTH-02 — Cross-Tenant Cache Isolation & In-Flight Request Cancellat
     assert.equal(secondResult.data[0]?.name, "Acme SL");
   });
 
+  test("aborts request and rejects even when aborted while reading response body without leaking to cache", async () => {
+    const cache = new TenantScopedCache();
+    const externalController = new AbortController();
+
+    const client = new FrihetRestClient({
+      apiKey: "fri_body_abort_test_key",
+      cache,
+      fetchImpl: async () => {
+        // Return a mock response where .json() takes time
+        return {
+          status: 200,
+          ok: true,
+          headers: new Headers({ "Content-Type": "application/json" }),
+          json: async () => {
+            // Abort while json() is running
+            externalController.abort();
+            return {
+              data: [{ id: "stale_prod", name: "Stale Product" }],
+              total: 1,
+              limit: 25,
+              offset: 0,
+            };
+          },
+        } as unknown as Response;
+      },
+    });
+
+    await assert.rejects(
+      () =>
+        client.listProducts({
+          q: "test_abort_during_json",
+          signal: externalController.signal,
+        }),
+      (err: unknown) => {
+        assert.ok(err instanceof FrihetApiError);
+        assert.equal(err.errorCode, "request_aborted");
+        return true;
+      },
+    );
+
+    // Cache must NOT have been written
+    assert.equal(
+      cache.get(
+        client.tenantNamespace,
+        'products:{"q":"test_abort_during_json","limit":25}',
+      ),
+      undefined,
+    );
+  });
+
   test("computeTenantNamespace never exposes the raw API key", () => {
     const rawKey = "fri_live_super_secret_token_value";
     const ns = computeTenantNamespace("https://api.frihet.io/v1", rawKey);

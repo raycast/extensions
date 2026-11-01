@@ -407,9 +407,112 @@ describe("BRIEF-01 — Operational Business Brief Engine", () => {
 
     // Expense missing vendor & category is flagged under incomplete_expense
     assert.equal(brief.financials.expensesSummary.incompleteMetadataCount, 1);
-    assert.equal(
-      brief.reviewItems.some((item) => item.category === "incomplete_expense"),
-      true,
+    const incReview = brief.reviewItems.find(
+      (item) => item.category === "incomplete_expense",
     );
+    assert.ok(incReview);
+    assert.match(incReview.title, /vendor, category/u);
+    assert.match(incReview.suggestedAction, /vendor, category/u);
+  });
+
+  test("Scenario 3 (CRM Enrichment Failure): gracefully falls back to partial coverage when CRM activities fail without rejecting brief, preserving financial figures", async () => {
+    const baseClient = buildCompleteQaWorkspaceClient([]);
+    const crmFailingClient: BriefClientPort = {
+      ...baseClient,
+      listClientActivities: async () => {
+        throw new Error("HTTP 403: Forbidden (insufficient CRM scope)");
+      },
+    };
+
+    const brief = await generateOperationalBusinessBrief(crmFailingClient, {
+      asOfDate: "2026-10-28",
+    });
+
+    // Brief must NOT fail!
+    assert.ok(brief);
+    assert.equal(brief.workspaceName, "Frihet OpenAI Demo");
+
+    // Financial figures are preserved
+    assert.equal(brief.financials.drafts.invoiceDraftsCount, 2);
+    assert.equal(brief.financials.issuedRevenue.count, 3);
+    assert.equal(brief.financials.issuedRevenue.total.amount, 1936);
+
+    // CRM coverage is marked incomplete / partial
+    assert.equal(brief.coverage.resources.client_activities?.complete, false);
+    assert.equal(brief.coverage.isPartial, true);
+
+    // Blind spots disclose the failure
+    assert.ok(
+      brief.blindSpots.some((b) =>
+        /CRM client activity enrichment was unavailable for \d+ client\(s\)/u.test(
+          b,
+        ),
+      ),
+    );
+  });
+
+  test("Scenario 4 (CRM Completeness with nextCursor): marks CRM coverage incomplete when client activities page has nextCursor", async () => {
+    const baseClient = buildCompleteQaWorkspaceClient([]);
+    const crmCursorClient: BriefClientPort = {
+      ...baseClient,
+      listClientActivities: async () => ({
+        data: [
+          {
+            id: "act_1",
+            type: "call",
+            createdAt: "2026-10-28T00:00:00.000Z",
+          },
+        ],
+        total: 10,
+        limit: 5,
+        offset: 0,
+        nextCursor: "cursor_act_page_2",
+      }),
+    };
+
+    const brief = await generateOperationalBusinessBrief(crmCursorClient, {
+      asOfDate: "2026-10-28",
+    });
+
+    assert.equal(brief.coverage.resources.client_activities?.complete, false);
+    assert.equal(brief.coverage.isPartial, true);
+  });
+
+  test("Scenario 5 (Incomplete Expense with Missing Amount): accurately flags valid amount in title and labels when vendor/category exist", async () => {
+    const baseClient = buildCompleteQaWorkspaceClient([]);
+    const invalidAmountExpClient: BriefClientPort = {
+      ...baseClient,
+      listExpenses: async () => ({
+        data: [
+          {
+            id: "exp_no_amount",
+            description: "Server AWS",
+            vendor: "Amazon Web Services",
+            category: "Hosting",
+            amount: 0, // invalid / zero amount
+            currency: "EUR",
+            date: "2026-10-15",
+          },
+        ],
+        total: 1,
+        limit: 25,
+        offset: 0,
+      }),
+    };
+
+    const brief = await generateOperationalBusinessBrief(
+      invalidAmountExpClient,
+      { asOfDate: "2026-10-28" },
+    );
+
+    const incItem = brief.reviewItems.find(
+      (item) => item.category === "incomplete_expense",
+    );
+    assert.ok(incItem);
+    assert.match(incItem.title, /valid amount/u);
+    assert.equal(incItem.title.includes("vendor"), false);
+    assert.equal(incItem.title.includes("category"), false);
+    assert.match(incItem.recordLabels[0] ?? "", /missing valid amount/u);
+    assert.match(incItem.suggestedAction, /valid amount/u);
   });
 });

@@ -223,6 +223,73 @@ describe("READ-01 & FISC-01 — Invoices, Clients, Products & Legacy isActive Fa
     );
   });
 
+  test("searchProducts advances across fallback pages when first page matches zero active items", async () => {
+    const requestedQueries: string[] = [];
+    const client = new FrihetRestClient({
+      apiKey: "fri_qa_fallback_pagination_key",
+      cache: new TenantScopedCache(),
+      fetchImpl: async (input) => {
+        const urlStr = String(input);
+        requestedQueries.push(urlStr);
+        if (urlStr.includes("isActive=true")) {
+          // Simulate ERP #2944 500 error on isActive query
+          return new Response(
+            JSON.stringify({ error: "filter_not_supported" }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+        if (urlStr.includes("cursor=page2_cursor")) {
+          // Page 2 has the matching active product
+          return new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: "prod_active_page_2",
+                  name: "Active Service P2",
+                  unitPrice: 500,
+                  isActive: true,
+                },
+              ],
+              total: 2,
+              limit: 1,
+              offset: 1,
+              nextCursor: "page3_cursor",
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        // Page 1 has ONLY inactive items
+        return new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: "prod_inactive_page_1",
+                name: "Archived Item P1",
+                unitPrice: 100,
+                isActive: false,
+              },
+            ],
+            total: 2,
+            limit: 1,
+            offset: 0,
+            nextCursor: "page2_cursor",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      },
+    });
+
+    const res = await client.searchProducts({ activeFilter: "active" });
+    assert.equal(res.usedClientFallback, true);
+    assert.equal(res.data.length, 1);
+    assert.equal(res.data[0]?.id, "prod_active_page_2");
+    assert.equal(res.nextCursor, "page3_cursor");
+    assert.equal(res.fallbackCoveragePartial, true);
+  });
+
   test("listClients and listClientActivities load CRM timeline and build verified Frihet deep links", async () => {
     const client = new FrihetRestClient({
       apiKey: "fri_qa_clients_key",

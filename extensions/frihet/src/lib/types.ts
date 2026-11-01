@@ -5,11 +5,6 @@
  * authoritative Frihet REST API (`https://api.frihet.io/v1`).
  */
 
-export interface FrihetPreferences {
-  apiKey: string;
-  apiBaseUrl?: string;
-}
-
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
