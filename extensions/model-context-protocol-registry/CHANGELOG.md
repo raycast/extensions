@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Skycloak MCP Server] - 2026-11-01
+
+- Add Skycloak to the official registry: manage SSO, users, roles and applications on Skycloak, an identity-as-a-service provider built on managed Keycloak. Hosted Streamable HTTP server at https://mcp.skycloak.io with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add AdSwipeFile MCP Server] - 2026-11-01
 
 - Add AdSwipeFile to the official registry: search winning Facebook and Instagram ads by brand, niche and format, see what a brand is running, and write hooks and angles from real ads. 8 read-only tools. Hosted Streamable HTTP server at https://adswipefile.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
