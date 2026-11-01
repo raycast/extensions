@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useState, useMemo } from "react";
 import vehiclesData from "../assets/vehicles.json";
@@ -13,27 +14,41 @@ interface VehicleRecord {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const filteredVehicles = useMemo(() => {
+  const { results, sectionTitle } = useMemo(() => {
     const rawQuery = searchText.trim().toLowerCase();
     if (!rawQuery) {
       // Default initial view: showcase recent/popular models
-      return (vehiclesData as VehicleRecord[]).slice(0, 40);
+      return {
+        results: (vehiclesData as VehicleRecord[]).slice(0, 40),
+        sectionTitle: "Popular Vehicles",
+      };
     }
 
     const tokens = rawQuery.split(/\s+/).filter(Boolean);
 
-    const results: VehicleRecord[] = [];
+    let matchCount = 0;
+    const matchedVehicles: VehicleRecord[] = [];
+
     for (const car of vehiclesData as VehicleRecord[]) {
       const haystack = `${car.n} ${car.bp}`.toLowerCase();
       const allMatch = tokens.every((tok) => haystack.includes(tok));
       if (allMatch) {
-        results.push(car);
-        if (results.length >= 50) {
-          break; // Keep UI fast and responsive
+        matchCount++;
+        if (matchedVehicles.length < 50) {
+          matchedVehicles.push(car);
         }
       }
     }
-    return results;
+
+    const title =
+      matchCount > 50
+        ? `Showing First 50 of ${matchCount.toLocaleString()} Matches — Narrow Search by Year or Model`
+        : `Vehicle Fitment Results (${matchCount})`;
+
+    return {
+      results: matchedVehicles,
+      sectionTitle: title,
+    };
   }, [searchText]);
 
   return (
@@ -43,10 +58,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      <List.Section
-        title={`Vehicle Fitment Results (${filteredVehicles.length})`}
-      >
-        {filteredVehicles.map((car, idx) => {
+      <List.Section title={sectionTitle}>
+        {results.map((car, idx) => {
           const detailUrl = `https://boltpatternhq.com/${car.s}/`;
           const patternSlug = car.bp.toLowerCase().replace(/[^a-z0-9]/g, "-");
           const patternUrl = `https://boltpatternhq.com/bolt-pattern/${patternSlug}/`;
@@ -65,7 +78,7 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section title="Vehicle Fitment">
                     <Action.OpenInBrowser
-                      title="View Full Fitment on Boltpatternhq"
+                      title="View Full Fitment on BoltPatternHQ"
                       url={detailUrl}
                     />
                     <Action.CopyToClipboard
@@ -80,19 +93,14 @@ export default function Command() {
                     />
                   </ActionPanel.Section>
 
-                  <ActionPanel.Section title="Explore & Database">
+                  <ActionPanel.Section title="Explore & Compatibility">
                     <Action.OpenInBrowser
                       title={`Browse All ${car.bp} Compatible Vehicles`}
                       url={patternUrl}
                       icon={Icon.MagnifyingGlass}
                     />
                     <Action.OpenInBrowser
-                      title="Download Full Master Fitment Database"
-                      url="https://boltpatternhq.com/data/"
-                      icon={Icon.Download}
-                    />
-                    <Action.OpenInBrowser
-                      title="Visit Boltpatternhq Home"
+                      title="Visit BoltPatternHQ Home"
                       url="https://boltpatternhq.com"
                       icon={Icon.Globe}
                     />
