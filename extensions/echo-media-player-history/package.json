@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "echo",
-  "title": "Echo",
+  "name": "echo-media-player-history",
+  "title": "Echo - Media Player & History",
   "description": "Search everything you have played and resume it at the exact spot.",
   "icon": "echo-icon.png",
   "author": "theodore_hq",
