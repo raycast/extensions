@@ -1,5 +1,19 @@
 import { runAppleScript } from "@raycast/utils";
-import { showHUD, showToast, Toast, open } from "@raycast/api";
+import { LocalStorage, showHUD, showToast, Toast, open } from "@raycast/api";
+import { mergeRecent, isPlaceholderTrack, type RecentTrack } from "./history";
+import {
+  buildAddToQueue,
+  buildPlayTrackAtIndex,
+  buildPlayVideos,
+  buildRemoveFromQueue,
+  isValidVideoId,
+  parsePlayQueue,
+  type PlayQueue,
+} from "./queue";
+
+// Re-export the pure queue helpers so callers can keep importing from ./kaset.
+export * from "./queue";
+export * from "./history";
 
 // Player state types
 export type PlayerState = "playing" | "paused" | "stopped";
@@ -28,20 +42,20 @@ export interface KasetState {
   likeStatus: LikeStatus;
 }
 
-export interface SearchSong {
-  id: string;
-  title: string;
-  artist: string;
-  album?: string;
-  duration?: string;
-  artworkURL?: string;
-}
-
-const YTM_BASE_URL = "https://music.youtube.com/youtubei/v1";
-// Public YouTube Music web client key (not user-secret). This may rotate.
-const YTM_API_KEY = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
-// WEB_REMIX client version used by youtubei search requests. This may rotate.
-const YTM_CLIENT_VERSION = "1.20231204.01.00";
+// Search lives in ./search; re-exported here so existing imports keep working
+// until play-song.tsx switches over (Task 5).
+export {
+  searchYouTubeMusic,
+  searchYouTubeMusic as searchSongs,
+  searchYouTube,
+  mergeSearchResults,
+} from "./search";
+export type {
+  SongResult,
+  SongResult as SearchSong,
+  VideoResult,
+  SearchResult,
+} from "./search";
 
 // Check if Kaset is running
 export async function isKasetRunning(): Promise<boolean> {
@@ -124,14 +138,14 @@ async function getPlayerInfo(): Promise<KasetState | null> {
 export async function play(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   await runAppleScript(`tell application "Kaset" to play`);
-  await showHUD("▶️ Playing");
+  await showHUD("Playing");
 }
 
 // Pause
 export async function pause(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   await runAppleScript(`tell application "Kaset" to pause`);
-  await showHUD("⏸️ Paused");
+  await showHUD("Paused");
 }
 
 // Toggle play/pause
@@ -139,7 +153,7 @@ export async function playPause(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   const state = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to playpause`);
-  await showHUD(state?.playerState === "playing" ? "⏸️ Paused" : "▶️ Playing");
+  await showHUD(state?.playerState === "playing" ? "Paused" : "Playing");
 }
 
 // Play a specific YouTube video by video ID
@@ -158,21 +172,40 @@ export async function playVideo(videoId: string): Promise<void> {
   await runAppleScript(
     `tell application "Kaset" to play video "${normalizedId}"`,
   );
-  await showHUD("▶️ Playing selected song");
+  await showHUD("Playing selected song");
+}
+
+// Play a regular YouTube video in Kaset (docs route these via `open -a Kaset`)
+export async function playYouTubeVideo(videoId: string): Promise<void> {
+  const normalizedId = videoId.trim();
+  if (!isValidVideoId(normalizedId)) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid video ID",
+      message: "Please provide a valid YouTube video ID",
+    });
+    return;
+  }
+
+  if (!(await ensureKasetRunning())) return;
+  await runAppleScript(
+    `do shell script "open -a Kaset " & quoted form of "https://youtu.be/${normalizedId}"`,
+  );
+  await showHUD("Playing video");
 }
 
 // Next track
 export async function nextTrack(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   await runAppleScript(`tell application "Kaset" to next track`);
-  await showHUD("⏭️ Next Track");
+  await showHUD("Next Track");
 }
 
 // Previous track
 export async function previousTrack(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   await runAppleScript(`tell application "Kaset" to previous track`);
-  await showHUD("⏮️ Previous Track");
+  await showHUD("Previous Track");
 }
 
 // Set volume (0-100)
@@ -182,7 +215,7 @@ export async function setVolume(volume: number): Promise<void> {
   await runAppleScript(
     `tell application "Kaset" to set volume ${clampedVolume}`,
   );
-  await showHUD(`🔊 Volume: ${clampedVolume}%`);
+  await showHUD(`Volume: ${clampedVolume}%`);
 }
 
 // Get volume
@@ -197,7 +230,7 @@ export async function toggleShuffle(): Promise<void> {
   const stateBefore = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to toggle shuffle`);
   // State flips, so show opposite of what it was
-  await showHUD(stateBefore?.shuffling ? "➡️ Shuffle Off" : "🔀 Shuffle On");
+  await showHUD(stateBefore?.shuffling ? "Shuffle Off" : "Shuffle On");
 }
 
 // Cycle repeat mode
@@ -212,7 +245,7 @@ export async function cycleRepeat(): Promise<void> {
       : stateBefore?.repeating === "all"
         ? "One"
         : "Off";
-  await showHUD(`🔁 Repeat: ${nextMode}`);
+  await showHUD(`Repeat: ${nextMode}`);
 }
 
 // Toggle mute
@@ -220,7 +253,7 @@ export async function toggleMute(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   const stateBefore = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to toggle mute`);
-  await showHUD(stateBefore?.muted ? "🔊 Unmuted" : "🔇 Muted");
+  await showHUD(stateBefore?.muted ? "Unmuted" : "Muted");
 }
 
 // Get player state
@@ -281,9 +314,7 @@ export async function likeTrack(): Promise<void> {
   if (!(await ensureKasetRunning())) return;
   const stateBefore = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to like track`);
-  await showHUD(
-    stateBefore?.likeStatus === "liked" ? "👍 Unliked" : "👍 Liked",
-  );
+  await showHUD(stateBefore?.likeStatus === "liked" ? "Unliked" : "Liked");
 }
 
 // Dislike track (toggle)
@@ -292,234 +323,88 @@ export async function dislikeTrack(): Promise<void> {
   const stateBefore = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to dislike track`);
   await showHUD(
-    stateBefore?.likeStatus === "disliked" ? "👎 Undisliked" : "👎 Disliked",
+    stateBefore?.likeStatus === "disliked" ? "Undisliked" : "Disliked",
   );
 }
 
-export async function searchSongs(query: string): Promise<SearchSong[]> {
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) return [];
+// --- Queue commands (Kaset >= 0.14.2) ---
+
+// Get the current play queue
+export async function getPlayQueue(): Promise<PlayQueue | null> {
+  if (!(await isKasetRunning())) return null;
 
   try {
-    const response = await fetch(
-      `${YTM_BASE_URL}/search?key=${YTM_API_KEY}&prettyPrint=false`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Origin: "https://music.youtube.com",
-        },
-        body: JSON.stringify({
-          context: {
-            client: {
-              clientName: "WEB_REMIX",
-              clientVersion: YTM_CLIENT_VERSION,
-              hl: "en",
-              gl: "US",
-            },
-          },
-          query: trimmedQuery,
-          params: "EgWKAQIIAWoMEA4QChADEAQQCRAF",
-        }),
-      },
+    const result = await runAppleScript(
+      `tell application "Kaset" to get play queue`,
     );
+    if (!result || result === "{}") return null;
+    return parsePlayQueue(result);
+  } catch (e) {
+    console.error("Failed to get play queue:", e);
+    return null;
+  }
+}
 
-    if (!response.ok) {
-      throw new Error(`Search failed (${response.status})`);
-    }
+// Play a queue item by its 1-based index
+export async function playTrackAtIndex(index: number): Promise<void> {
+  if (!(await ensureKasetRunning())) return;
+  await runAppleScript(buildPlayTrackAtIndex(index));
+  await showHUD("Playing queue item");
+}
 
-    const json = (await response.json()) as Record<string, unknown>;
-    return extractSongsFromSearchResponse(json);
+// Remove a video's entries from the queue (Kaset keeps the playing copy)
+export async function removeFromQueue(id: string): Promise<void> {
+  if (!(await ensureKasetRunning())) return;
+  try {
+    await runAppleScript(buildRemoveFromQueue(id));
   } catch (error) {
-    console.error("YouTube Music search failed:", error);
+    // Kaset raises when there is nothing to remove, or when the only match is
+    // the track that is playing. Surface its reason instead of a raw failure.
     await showToast({
       style: Toast.Style.Failure,
-      title: "Search temporarily unavailable",
-      message: "YouTube Music search request failed. Please try again.",
+      title: "Could not remove from queue",
+      message: error instanceof Error ? error.message : String(error),
     });
-    return [];
+    return;
   }
+  await showHUD("Removed from queue");
 }
 
-function extractSongsFromSearchResponse(
-  response: Record<string, unknown>,
-): SearchSong[] {
-  const renderers = collectRenderers(
-    response,
-    "musicResponsiveListItemRenderer",
-  );
-  const songs = renderers
-    .map(parseSongRenderer)
-    .filter((song): song is SearchSong => song !== null);
+// Append video IDs to the queue, or insert them after the current track
+export async function addToQueue(ids: string[], next = false): Promise<void> {
+  if (!(await ensureKasetRunning())) return;
 
-  const uniqueById = new Map<string, SearchSong>();
-  for (const song of songs) {
-    if (!uniqueById.has(song.id)) {
-      uniqueById.set(song.id, song);
-    }
+  const valid = ids.filter(isValidVideoId);
+  if (valid.length === 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid video ID",
+    });
+    return;
   }
 
-  return [...uniqueById.values()];
+  await runAppleScript(buildAddToQueue(valid, next));
+  await showHUD(next ? "Playing next" : "Added to queue");
 }
 
-function parseSongRenderer(
-  renderer: Record<string, unknown>,
-): SearchSong | null {
-  const videoId = extractVideoIdFromRenderer(renderer);
-  if (!videoId) return null;
+// Replace the queue with these video IDs and start playing
+export async function playVideos(
+  ids: string[],
+  startingAt?: number,
+): Promise<void> {
+  if (!(await ensureKasetRunning())) return;
 
-  const title = extractFlexText(renderer, 0) ?? "Unknown Title";
-  const subtitleText = extractFlexText(renderer, 1) ?? "";
-  const subtitleParts = subtitleText
-    .split(" • ")
-    .map((part) => part.trim())
-    .filter(Boolean);
-  const artist = subtitleParts[0] ?? "Unknown Artist";
-  const album = subtitleParts[1];
-  const duration = extractFixedText(renderer, 0);
-  const artworkURL = extractThumbnailURL(renderer);
-
-  return {
-    id: videoId,
-    title,
-    artist,
-    album,
-    duration,
-    artworkURL,
-  };
-}
-
-function collectRenderers(
-  node: unknown,
-  rendererKey: string,
-  collected: Record<string, unknown>[] = [],
-): Record<string, unknown>[] {
-  if (!node || typeof node !== "object") return collected;
-
-  if (Array.isArray(node)) {
-    for (const item of node) {
-      collectRenderers(item, rendererKey, collected);
-    }
-    return collected;
+  const valid = ids.filter(isValidVideoId);
+  if (valid.length === 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid video ID",
+    });
+    return;
   }
 
-  const nodeRecord = node as Record<string, unknown>;
-  const renderer = nodeRecord[rendererKey];
-  if (renderer && typeof renderer === "object" && !Array.isArray(renderer)) {
-    collected.push(renderer as Record<string, unknown>);
-  }
-
-  for (const value of Object.values(nodeRecord)) {
-    collectRenderers(value, rendererKey, collected);
-  }
-
-  return collected;
-}
-
-function extractVideoIdFromRenderer(
-  renderer: Record<string, unknown>,
-): string | null {
-  const playlistItemData = asRecord(renderer["playlistItemData"]);
-  const fromPlaylistData = asString(playlistItemData?.["videoId"]);
-  if (fromPlaylistData) return fromPlaylistData;
-
-  const directNavigation = asRecord(renderer["navigationEndpoint"]);
-  const fromDirectNavigation = extractVideoIdFromNavigation(directNavigation);
-  if (fromDirectNavigation) return fromDirectNavigation;
-
-  const flexColumns = asArray(renderer["flexColumns"]);
-  for (const column of flexColumns) {
-    const columnRenderer = asRecord(column);
-    const flexRenderer = asRecord(
-      columnRenderer?.["musicResponsiveListItemFlexColumnRenderer"],
-    );
-    const text = asRecord(flexRenderer?.["text"]);
-    const runs = asArray(text?.["runs"]);
-    for (const run of runs) {
-      const runRecord = asRecord(run);
-      const navigationEndpoint = asRecord(runRecord?.["navigationEndpoint"]);
-      const videoId = extractVideoIdFromNavigation(navigationEndpoint);
-      if (videoId) return videoId;
-    }
-  }
-
-  return null;
-}
-
-function extractVideoIdFromNavigation(
-  navigationEndpoint: Record<string, unknown> | undefined,
-): string | null {
-  if (!navigationEndpoint) return null;
-  const watchEndpoint = asRecord(navigationEndpoint["watchEndpoint"]);
-  const videoId = asString(watchEndpoint?.["videoId"]);
-  return videoId ?? null;
-}
-
-function extractFlexText(
-  renderer: Record<string, unknown>,
-  index: number,
-): string | null {
-  const flexColumns = asArray(renderer["flexColumns"]);
-  const column = asRecord(flexColumns[index]);
-  const flexRenderer = asRecord(
-    column?.["musicResponsiveListItemFlexColumnRenderer"],
-  );
-  return extractTextRuns(asRecord(flexRenderer?.["text"]));
-}
-
-function extractFixedText(
-  renderer: Record<string, unknown>,
-  index: number,
-): string | undefined {
-  const fixedColumns = asArray(renderer["fixedColumns"]);
-  const column = asRecord(fixedColumns[index]);
-  const fixedRenderer = asRecord(
-    column?.["musicResponsiveListItemFixedColumnRenderer"],
-  );
-  return extractTextRuns(asRecord(fixedRenderer?.["text"])) ?? undefined;
-}
-
-function extractTextRuns(
-  text: Record<string, unknown> | undefined,
-): string | null {
-  if (!text) return null;
-  const runs = asArray(text["runs"]);
-  if (runs.length > 0) {
-    const joined = runs
-      .map((run) => asString(asRecord(run)?.["text"]))
-      .filter((run): run is string => Boolean(run))
-      .join("");
-    return joined || null;
-  }
-
-  return asString(text["simpleText"]) ?? null;
-}
-
-function extractThumbnailURL(
-  renderer: Record<string, unknown>,
-): string | undefined {
-  const thumbnail = asRecord(renderer["thumbnail"]);
-  const musicThumbnailRenderer = asRecord(
-    thumbnail?.["musicThumbnailRenderer"],
-  );
-  const thumbnailData = asRecord(musicThumbnailRenderer?.["thumbnail"]);
-  const thumbnails = asArray(thumbnailData?.["thumbnails"]);
-  const lastThumbnail = asRecord(thumbnails[thumbnails.length - 1]);
-  return asString(lastThumbnail?.["url"]) ?? undefined;
-}
-
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    return undefined;
-  return value as Record<string, unknown>;
-}
-
-function asArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
+  await runAppleScript(buildPlayVideos(valid, startingAt));
+  await showHUD("Playing");
 }
 
 // Format seconds to MM:SS
@@ -527,4 +412,71 @@ export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+// --- Recent-played log (forward-only, stored in LocalStorage) ---
+
+const RECENT_KEY = "kaset-recently-played";
+
+export async function recordPlayed(track: Track): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(RECENT_KEY);
+  let prev: RecentTrack[] = [];
+  if (raw) {
+    try {
+      prev = JSON.parse(raw) as RecentTrack[];
+    } catch {
+      prev = [];
+    }
+  }
+  if (prev[0]?.id === track.id) return;
+  await LocalStorage.setItem(
+    RECENT_KEY,
+    JSON.stringify(mergeRecent(prev, track, Date.now())),
+  );
+}
+
+export async function getRecent(): Promise<RecentTrack[]> {
+  const raw = await LocalStorage.getItem<string>(RECENT_KEY);
+  if (!raw) return [];
+  try {
+    // Filter on read as well, so placeholders logged by earlier versions vanish
+    // instead of lingering until they age out.
+    return (JSON.parse(raw) as RecentTrack[]).filter(
+      (entry) => !isPlaceholderTrack(entry),
+    );
+  } catch {
+    return [];
+  }
+}
+
+// Record a search result when the user plays it, so history does not depend on
+// the background recorder or the menu bar.
+const NOW_PLAYING_KEY = "kaset-now-playing";
+
+// A song enters the history only once it has stopped playing: remember the
+// current track and record the previous one when the track changes.
+export async function recordFinishedTrack(
+  current: Track | null,
+): Promise<void> {
+  // Kaset briefly reports an ID-only placeholder titled "Loading..." before the
+  // real metadata lands; logging it would add a junk row to the history.
+  if (current && isPlaceholderTrack(current)) return;
+
+  const raw = await LocalStorage.getItem<string>(NOW_PLAYING_KEY);
+  let previous: Track | null = null;
+  if (raw) {
+    try {
+      previous = JSON.parse(raw) as Track;
+    } catch {
+      previous = null;
+    }
+  }
+
+  if (current) {
+    await LocalStorage.setItem(NOW_PLAYING_KEY, JSON.stringify(current));
+  }
+
+  if (previous && previous.id !== current?.id) {
+    await recordPlayed(previous);
+  }
 }

@@ -1,5 +1,7 @@
+import { showError } from "@chrismessina/raycast-kit";
+import { isWindows } from "../util/platform";
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Keyboard } from "@raycast/api";
 import { closeTab, executeJavascript, openNewTab, setActiveTab, openAllBookmarksInFolder } from "../actions";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
@@ -54,23 +56,27 @@ function TabListItemActions({ tab }: { tab: Tab }) {
   return (
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
-      <Action
-        title="Move to New Window"
-        icon={Icon.Window}
-        onAction={async () => {
-          await closeTab(tab.tabIndex);
-          await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
-        }}
-      />
-      <Action
-        title="Move to Incognito Window"
-        icon={Icon.EyeDisabled}
-        onAction={async () => {
-          await closeTab(tab.tabIndex);
-          await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
-        }}
-      />
-      <Action.CopyToClipboard title="Copy URL" content={tab.url} />
+      {!isWindows && (
+        <>
+          <Action
+            title="Move to New Window"
+            icon={Icon.Window}
+            onAction={async () => {
+              await closeTab(tab.tabIndex);
+              await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, newWindow: true });
+            }}
+          />
+          <Action
+            title="Move to Private Window"
+            icon={Icon.EyeDisabled}
+            onAction={async () => {
+              await closeTab(tab.tabIndex);
+              await openNewTab({ url: tab.url, profileCurrent, openTabInProfile, incognito: true });
+            }}
+          />
+        </>
+      )}
+      <Action.CopyToClipboard title="Copy URL" content={tab.url} shortcut={Keyboard.Shortcut.Common.Copy} />
     </ActionPanel>
   );
 }
@@ -91,8 +97,8 @@ function HistoryItemActions({
     const code = url.substring("javascript:".length);
     return (
       <ActionPanel title={title}>
-        <Action onAction={() => executeJavascript(code)} icon={Icon.Play} title="Run Bookmarklet" />
-        <Action.CopyToClipboard title="Copy Code" content={code} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+        {!isWindows && <Action onAction={() => executeJavascript(code)} icon={Icon.Play} title="Run Bookmarklet" />}
+        <Action.CopyToClipboard title="Copy Code" content={code} shortcut={Keyboard.Shortcut.Common.Copy} />
       </ActionPanel>
     );
   }
@@ -101,7 +107,7 @@ function HistoryItemActions({
     <ActionPanel title={title}>
       <Action
         onAction={async () => await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
-        icon={Icon.Eye}
+        icon={Icon.Globe}
         title="Open"
       />
       <Action
@@ -110,16 +116,23 @@ function HistoryItemActions({
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, newWindow: true })
         }
+        shortcut={Keyboard.Shortcut.Common.New}
       />
       <Action
-        title="Open in Incognito Window"
+        title="Open in Private Window"
         icon={Icon.EyeDisabled}
         onAction={async () =>
           await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile, incognito: true })
         }
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "n" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+        }}
       />
       <ActionPanel.Section title={"Open in profile"}>
         <Action
+          icon={Icon.PersonCircle}
+          title={"Open in Current Profile"}
           onAction={() =>
             openNewTab({
               url,
@@ -128,9 +141,10 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in Current Profile"}
         />
         <Action
+          icon={Icon.Person}
+          title={"Open in Original Profile"}
           onAction={() =>
             openNewTab({
               url,
@@ -139,19 +153,22 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
-      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.Copy} />
     </ActionPanel>
   );
 }
 
 function GoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await closeMainWindow();
+    } catch (error) {
+      await showError(error, { title: "Could Not Switch to Tab" });
+    }
   }
 
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <Action title="Switch to Tab" icon={{ source: Icon.Switch }} onAction={handleAction} />;
 }

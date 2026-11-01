@@ -5,8 +5,8 @@ import type { FileHandle } from "node:fs/promises";
 
 /**
  * The extension has to come from what the server sent when it says, because the URL can lie.
- * When it doesn't say — d.rapidcdn.app serves everything as `application/octet-stream` — the
- * filename inside the downloader's token is the next best evidence (see `extensionFor`).
+ * When it doesn't say (`application/octet-stream`), the link's filename is the next best
+ * evidence (see `extensionFor`).
  */
 const EXTENSION_BY_CONTENT_TYPE: Record<string, string> = {
   "image/webp": "webp",
@@ -73,21 +73,6 @@ export function mediaExtensionAndId(url: string): { ext: string; fileId: string 
   return { ext, fileId };
 }
 
-/**
- * The downloader API repeats a carousel's items — a 4-image post came back as 16 entries, the
- * set four times over — and each repeat is a fresh signed wrapper, so the URL is not an
- * identity. The filename in the token is: it carries Instagram's media id.
- */
-export function uniqueMediaUrls(urls: string[]): string[] {
-  const seen = new Set<string>();
-  return urls.filter((url) => {
-    const key = getFileNameFromUrl(url) ?? url;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 export function countOf(count: number, noun: string): string {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
@@ -98,8 +83,8 @@ export function mediaBasename(shortcode: string, index: number, count: number): 
 }
 
 /**
- * The downloader's signed URLs carry the signed Instagram URL inside their token, and Instagram's
- * own carry `oh`/`oe` signatures. Logs and the Copy Error payload get pasted into bug reports,
+ * Instagram's CDN links carry `oh`/`oe` signatures, and a wrapped link can carry a signed one
+ * inside its `token`. Logs and the Copy Error payload get pasted into bug reports,
  * so they get the path only.
  */
 export function redactUrl(url: string): string {
@@ -113,8 +98,9 @@ export function redactUrl(url: string): string {
 
 /**
  * A signed URL that has expired can still answer `200` — with an HTML or JSON error page.
- * Writing that to disk as `.jpg` and reporting success is worse than failing. The downloader's
- * CDN declares no media type at all (`application/octet-stream`), so that is accepted too.
+ * Writing that to disk as `.jpg` and reporting success is worse than failing. A CDN that
+ * declares no media type at all (`application/octet-stream`) is accepted too; `extensionFor`
+ * then decides whether the file may be saved.
  */
 export function assertMediaResponse(contentType: string | null): void {
   const mime = mimeOf(contentType);
@@ -124,8 +110,17 @@ export function assertMediaResponse(contentType: string | null): void {
   }
 }
 
+/** Every extension a saved file may get; anything else could be something that runs when opened. */
+const MEDIA_EXTENSIONS = new Set([...Object.values(EXTENSION_BY_CONTENT_TYPE), "jpeg", "m4v"]);
+
+/**
+ * The saved file's extension. When the content type doesn't name the extension and the link
+ * does, the link's extension must be a media one: a link is only as trustworthy as its source.
+ */
 export function extensionFor(contentType: string | null, url: string): string {
-  return EXTENSION_BY_CONTENT_TYPE[mimeOf(contentType)] ?? mediaExtensionAndId(url).ext;
+  const ext = (EXTENSION_BY_CONTENT_TYPE[mimeOf(contentType)] ?? mediaExtensionAndId(url).ext).toLowerCase();
+  if (!MEDIA_EXTENSIONS.has(ext)) throw new Error(`The server sent a .${ext} file, which is not a media file.`);
+  return ext;
 }
 
 type Reservation = {
