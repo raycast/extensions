@@ -67,6 +67,8 @@ export type InstalledSkill = {
   ref?: string;
   installedAt?: string;
   updatedAt?: string;
+  managedBySkillsCli?: boolean;
+  mutableAgents?: string[];
 };
 
 export type SkillFrontmatter = {
