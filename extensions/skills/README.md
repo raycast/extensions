@@ -10,9 +10,9 @@ Search and manage AI agent skills from [Skills](https://skills.sh) directly in R
 - Filter available skills by owner
 - Install skills for all supported agents
 - View security audit status from `skills.sh` before installing
-- Review installed skills by management source; update and remove Skills CLI managed installs
+- Review installed skills by management source; remove verified Codex and Claude Code installs
 - View installed Claude Code and Codex plugins and manage supported installations
-- Check for skill updates — outdated skills are highlighted with an orange icon
+- Check for skill updates — outdated skills are highlighted with an orange icon for review
 - Filter installed skills by agent
 - View skill source, install date, and update date from the lock file
 - Open installed skill repositories on GitHub
@@ -31,7 +31,7 @@ Search for agent skills from skills.sh with real-time results. Results show whic
 
 ### Manage Skills
 
-View installed skills discovered by the Skills CLI, grouped by management source. Skills tracked in the CLI lock file can be updated or removed. Other local or externally managed skills remain available for reading, opening, and copying; the extension does not alter them. Outdated tracked skills are highlighted in "Updates Available". Filter by agent to see which skills are available for each AI agent.
+View installed skills discovered by the Skills CLI, grouped by management source. The extension verifies the installed GitHub skill contents against the CLI lock before enabling removal. Removal is available for verified Codex and Claude Code installations. Other local or externally managed skills remain available for reading, opening, and copying. Outdated verified skills are highlighted for review. Automatic updates are unavailable because the Skills CLI update command can change installations for other detected agents. Filter by agent to see which skills are available for each AI agent.
 
 ### Manage Plugins
 
@@ -70,3 +70,5 @@ After editing these files, fully quit and relaunch Raycast so it re-reads the co
 ![Search Skills - Details](metadata/skills-2.png)
 ![Search Skills - Installed Status](metadata/skills-3.png)
 ![Manage Skills](metadata/skills-4.png)
+![Manage Plugins](metadata/skills-5.png)
+![Inspect Agent Package](metadata/skills-6.png)

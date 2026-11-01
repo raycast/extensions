@@ -36,9 +36,3 @@ export function parseSkillLock(contents: string): Record<string, SkillLockEntry>
     ),
   ) as Record<string, SkillLockEntry>;
 }
-
-export function requireCliManagedSkill(name: string, lock: Record<string, unknown>): void {
-  if (!Object.prototype.hasOwnProperty.call(lock, name) || !isRecord(lock[name])) {
-    throw new Error(`"${name}" is not managed by the Skills CLI; open its folder to manage it manually.`);
-  }
-}

@@ -224,6 +224,49 @@ test("accepts permitted plugin names and MCP working directories", async () => {
   });
 });
 
+test("rejects a dangling plugin manifest symlink", async () => {
+  await fixture(async (root) => {
+    await symlink("missing.json", join(root, "plugin.json"));
+    const result = await inspectLocalPackage(root);
+    assert.equal(result.kind, "agent-plugin");
+    assert.equal(result.valid, false);
+    assert.match(result.issues[0].message, /dangling symlink/);
+  });
+});
+
+test("rejects remote HTTP disguised as loopback and invalid headers", async () => {
+  await fixture(async (root) => {
+    await writeFile(
+      join(root, "plugin.json"),
+      JSON.stringify({ $schema: "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json", name: "demo" }),
+    );
+    await writeFile(
+      join(root, "mcp.json"),
+      JSON.stringify({
+        $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+        mcpServers: {
+          remote: { type: "streamable-http", url: "http://127.evil.example/mcp" },
+          invalid: { type: "streamable-http", url: "https://example.com/mcp", headers: { "Bad Header": "x" } },
+          duplicate: {
+            type: "streamable-http",
+            url: "https://example.com/mcp",
+            headers: { "X-Test": "a", "x-test": "b" },
+          },
+        },
+      }),
+    );
+    const result = await inspectLocalPackage(root);
+    assert.equal(result.valid, false);
+    assert.deepEqual(
+      result.mcpServers.map((server) => server.valid),
+      [false, false, false],
+    );
+    assert.ok(result.issues.some((issue) => issue.message.includes("Invalid or insecure MCP URL")));
+    assert.ok(result.issues.some((issue) => issue.message.includes("Invalid HTTP header field")));
+    assert.ok(result.issues.some((issue) => issue.message.includes("Duplicate HTTP header name")));
+  });
+});
+
 test("rejects reserved MCP environment variables without hiding valid servers", async () => {
   await fixture(async (root) => {
     await writeFile(

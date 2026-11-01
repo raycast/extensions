@@ -1,5 +1,6 @@
 import { lstat, readdir, readFile, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
+import { isIP } from "node:net";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { parseDocument } from "yaml";
 
@@ -95,7 +96,10 @@ async function safeStat(
     }
     return await stat(target);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      if (await pathExists(path)) addIssue(result, "error", relative(result.root, path), "Path is a dangling symlink");
+      return undefined;
+    }
     addIssue(result, "error", relative(result.root, path), `Cannot inspect path: ${String(error)}`);
     return undefined;
   }
@@ -306,22 +310,30 @@ async function validServer(result: PackageInspection, name: string, value: unkno
       if (typeof value.url !== "string") throw new Error();
       const url = new URL(value.url);
       if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hash) throw new Error();
-      if (
-        url.protocol === "http:" &&
-        url.hostname !== "localhost" &&
-        !url.hostname.startsWith("127.") &&
-        url.hostname !== "::1" &&
-        url.hostname !== "[::1]"
-      )
-        throw new Error();
+      const host = url.hostname.replace(/^\[|\]$/g, "");
+      const loopback =
+        host === "localhost" || (isIP(host) === 4 && host.startsWith("127.")) || (isIP(host) === 6 && host === "::1");
+      if (url.protocol === "http:" && !loopback) throw new Error();
     } catch {
       fail("Invalid or insecure MCP URL");
     }
-    if (
-      value.headers !== undefined &&
-      (!isObject(value.headers) || Object.values(value.headers).some((item) => typeof item !== "string"))
-    )
-      fail("headers must map strings to strings");
+    if (value.headers !== undefined) {
+      if (!isObject(value.headers) || Object.values(value.headers).some((item) => typeof item !== "string")) {
+        fail("headers must map strings to strings");
+      } else {
+        const names = new Set<string>();
+        for (const [name, headerValue] of Object.entries(value.headers)) {
+          const lower = name.toLowerCase();
+          if (names.has(lower)) fail("Duplicate HTTP header name");
+          names.add(lower);
+          try {
+            new Headers([[name, headerValue as string]]);
+          } catch {
+            fail("Invalid HTTP header field");
+          }
+        }
+      }
+    }
     if (Object.keys(value).some((key) => !["type", "url", "headers"].includes(key))) fail("Unknown HTTP server field");
   } else fail("Unsupported MCP transport");
   return server;

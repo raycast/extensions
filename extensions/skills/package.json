@@ -35,7 +35,7 @@
       "name": "manage-skills",
       "title": "Manage Skills",
       "subtitle": "Skills",
-      "description": "Review installed skills and manage Skills CLI installs",
+      "description": "Review installed skills and manage verified Skills CLI installs",
       "mode": "view"
     },
     {
@@ -51,13 +51,6 @@
       "subtitle": "Skills",
       "description": "Validate a local Agent Skill or Plugin package",
       "mode": "view"
-    },
-    {
-      "name": "update-all-skills",
-      "title": "Update All Skills",
-      "subtitle": "Skills",
-      "description": "Update remote skills tracked by the Skills CLI",
-      "mode": "no-view"
     }
   ],
   "tools": [
@@ -84,7 +77,7 @@
     {
       "name": "remove-skill",
       "title": "Remove Skill",
-      "description": "Remove an installed skill. Only call after the user has confirmed."
+      "description": "Remove a verified Codex or Claude Code skill. Only call after the user has confirmed the agents."
     }
   ],
   "preferences": [

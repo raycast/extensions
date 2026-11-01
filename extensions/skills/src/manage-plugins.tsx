@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Detail, Icon, List, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { basename } from "node:path";
 import { useState } from "react";
@@ -6,9 +6,9 @@ import { withSkillAction } from "./utils/with-skill-action";
 import { getPluginCommand, pluginRowId, type InstalledPlugin } from "./utils/installed-plugins";
 import { listInstalledPlugins, runPluginAction } from "./utils/plugin-cli";
 
-type PluginProps = { plugin: InstalledPlugin; refresh: () => void };
+type PluginProps = { plugin: InstalledPlugin; refresh: () => void; onRemoved?: () => void };
 
-function PluginActions({ plugin, refresh, showDetails }: PluginProps & { showDetails: boolean }) {
+function PluginActions({ plugin, refresh, onRemoved, showDetails }: PluginProps & { showDetails: boolean }) {
   const toggle = plugin.enabled === true ? "disable" : "enable";
   const canToggle = plugin.enabled !== undefined && getPluginCommand(plugin, toggle);
   const canRemove = getPluginCommand(plugin, "remove");
@@ -67,7 +67,10 @@ function PluginActions({ plugin, refresh, showDetails }: PluginProps & { showDet
                     failureTitle: "Failed to remove plugin",
                   },
                   operation: () => runPluginAction(plugin, "remove"),
-                  onSuccess: refresh,
+                  onSuccess: () => {
+                    if (onRemoved) onRemoved();
+                    else refresh();
+                  },
                 })
               }
             />
@@ -80,26 +83,45 @@ function PluginActions({ plugin, refresh, showDetails }: PluginProps & { showDet
 }
 
 function PluginDetail({ plugin, refresh }: PluginProps) {
-  const status = plugin.enabled === undefined ? "Unknown" : plugin.enabled ? "Enabled" : "Disabled";
+  const { pop } = useNavigation();
+  const [current, setCurrent] = useState(plugin);
+  async function refreshDetail() {
+    const listed = await listInstalledPlugins();
+    const updated = listed.plugins.find((item) => pluginRowId(item) === pluginRowId(current));
+    if (updated) setCurrent(updated);
+    else pop();
+    refresh();
+  }
+  const status = current.enabled === undefined ? "Unknown" : current.enabled ? "Enabled" : "Disabled";
   const fields = [
-    ["Host", plugin.host],
+    ["Host", current.host],
     ["Status", status],
-    ["ID", plugin.id],
-    ["Version", plugin.version],
-    ["Scope", plugin.scope],
-    ["Project", plugin.projectPath],
-    ["Marketplace", plugin.marketplace],
+    ["ID", current.id],
+    ["Version", current.version],
+    ["Scope", current.scope],
+    ["Project", current.projectPath],
+    ["Marketplace", current.marketplace],
   ];
   const lines = fields.filter(([, value]) => value).map(([label, value]) => `**${label}:** ${value}`);
-  if (plugin.path) lines.push(`**Location:**\n\n\`${plugin.path}\``);
-  if (plugin.host === "Claude Code" && plugin.scope !== "user") {
+  if (current.path) lines.push(`**Location:**\n\n\`${current.path}\``);
+  if (current.host === "Claude Code" && current.scope !== "user") {
     lines.push("**Management:** Open the owning project to manage project or local plugins.");
   }
   return (
     <Detail
-      navigationTitle={plugin.name}
-      markdown={`# ${plugin.name}\n\n${lines.join("\n\n")}`}
-      actions={<PluginActions plugin={plugin} refresh={refresh} showDetails={false} />}
+      navigationTitle={current.name}
+      markdown={`# ${current.name}\n\n${lines.join("\n\n")}`}
+      actions={
+        <PluginActions
+          plugin={current}
+          refresh={refreshDetail}
+          onRemoved={() => {
+            pop();
+            refresh();
+          }}
+          showDetails={false}
+        />
+      }
     />
   );
 }

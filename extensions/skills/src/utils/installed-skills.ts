@@ -5,6 +5,7 @@ import { stripGitSuffix, type InstalledSkill, type SkillLockEntry } from "../sha
 import { listInstalledSkills } from "./skills-cli";
 import { withSkillsCliLock } from "./skills-cli-runner";
 import { readSkillLock } from "./skill-lock";
+import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 
 export async function getInstalledSkillsWithLock(): Promise<InstalledSkill[]> {
   return (await getInstalledSkillsSnapshot()).skills;
@@ -17,7 +18,7 @@ async function getInstalledSkillsSnapshot(): Promise<{
   return withSkillsCliLock(async (runLocked) => {
     const skills = await listInstalledSkills(runLocked);
     const lockEntries = await readSkillLock();
-    return { skills: mergeLockEntries(skills, lockEntries), lockEntries };
+    return { skills: await mergeLockEntries(skills, lockEntries), lockEntries };
   });
 }
 
@@ -28,23 +29,30 @@ function tildifyPath(path: string): string {
   return join("~", fromHome);
 }
 
-function mergeLockEntries(skills: InstalledSkill[], lockEntries: Record<string, SkillLockEntry>): InstalledSkill[] {
-  return skills.map((skill) => {
-    const lock = lockEntries[skill.name];
-    if (!lock) return { ...skill, managedBySkillsCli: false };
-    // Local installs record the absolute directory path as both source and sourceUrl.
-    const isLocal = lock.sourceType === "local";
-    return {
-      ...skill,
-      source: isLocal ? tildifyPath(lock.source) : lock.source,
-      sourceType: lock.sourceType,
-      sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
-      ref: lock.ref,
-      installedAt: lock.installedAt,
-      updatedAt: lock.updatedAt,
-      managedBySkillsCli: true,
-    };
-  });
+async function mergeLockEntries(
+  skills: InstalledSkill[],
+  lockEntries: Record<string, SkillLockEntry>,
+): Promise<InstalledSkill[]> {
+  return Promise.all(
+    skills.map(async (skill) => {
+      const lock = lockEntries[skill.name];
+      if (!lock || !(await isVerifiedCliSkill(skill, lock))) return { ...skill, managedBySkillsCli: false };
+      const mutableAgents = await safeMutableAgents(skill.name, skill.agents);
+      // Local installs record the absolute directory path as both source and sourceUrl.
+      const isLocal = lock.sourceType === "local";
+      return {
+        ...skill,
+        source: isLocal ? tildifyPath(lock.source) : lock.source,
+        sourceType: lock.sourceType,
+        sourceUrl: lock.sourceUrl && !isLocal ? stripGitSuffix(lock.sourceUrl) : undefined,
+        ref: lock.ref,
+        installedAt: lock.installedAt,
+        updatedAt: lock.updatedAt,
+        managedBySkillsCli: true,
+        mutableAgents,
+      };
+    }),
+  );
 }
 
 interface GitHubTreeResponse {
@@ -116,5 +124,5 @@ export async function getInstalledSkillsWithUpdateStatus(): Promise<InstalledSki
   const { skills, lockEntries } = await getInstalledSkillsSnapshot();
   const updatable = await checkForUpdates(lockEntries).catch((): string[] => []);
   const updatableSet = new Set(updatable);
-  return skills.map((skill) => ({ ...skill, hasUpdate: updatableSet.has(skill.name) }));
+  return skills.map((skill) => ({ ...skill, hasUpdate: skill.managedBySkillsCli && updatableSet.has(skill.name) }));
 }

@@ -16,7 +16,6 @@ import { formatAuditStatus, getAuditFallbackText } from "../utils/skill-audit-di
 import { CopySkillContentsAction } from "./actions/CopySkillContentsAction";
 import { OpenSecurityAuditActions } from "./actions/OpenSecurityAuditActions";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
-import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 import { joinMetadataSections, type MetadataSection } from "./_common/metadata";
 
 function formatDate(iso: string): string | undefined {
@@ -266,9 +265,8 @@ function BaseInstalledSkillListItem({
             />
             {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
-          {skill.managedBySkillsCli && (
+          {skill.managedBySkillsCli && (skill.mutableAgents?.length ?? 0) > 0 && (
             <ActionPanel.Section>
-              {skill.hasUpdate && <UpdateSkillAction skillName={skill.name} mutate={mutate} />}
               <RemoveSkillAction skill={skill} mutate={mutate} />
             </ActionPanel.Section>
           )}

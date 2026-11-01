@@ -1,7 +1,8 @@
 import { homedir } from "node:os";
 import type { InstalledSkill, Skill } from "../shared";
 import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
-import { readSkillLock, requireCliManagedSkill } from "./skill-lock";
+import { readSkillLock } from "./skill-lock";
+import { isVerifiedCliSkill, safeMutableAgents } from "./skill-ownership";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
@@ -100,26 +101,22 @@ export async function discoverAgents(): Promise<AgentDiscoveryResult> {
   return { agents: [...agentSet].sort(), skillAgentMap };
 }
 
-export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {
-  requireCliManagedSkill(skillName, await readSkillLock());
-  const args = ["remove", skillName, "-g"];
-  if (agentDisplayNames && agentDisplayNames.length > 0) {
-    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+async function verifiedManagedSkill(skillName: string): Promise<InstalledSkill> {
+  const lock = await readSkillLock();
+  const skill = (await listInstalledSkills()).find((item) => item.name === skillName);
+  if (!skill || !(await isVerifiedCliSkill(skill, lock[skillName]))) {
+    throw new Error(`"${skillName}" is no longer a verified Skills CLI installation. Refresh the list.`);
   }
+  return skill;
+}
+
+export async function removeSkill(skillName: string, agentDisplayNames: string[]): Promise<void> {
+  const skill = await verifiedManagedSkill(skillName);
+  const safe = await safeMutableAgents(skillName, skill.agents);
+  if (!agentDisplayNames.length || agentDisplayNames.some((agent) => !safe.includes(agent))) {
+    throw new Error("Only verified Codex or Claude Code installations can be removed here. Refresh the list.");
+  }
+  const args = ["remove", skillName, "-g", "-a", ...agentDisplayNames.map(agentDisplayNameToId)];
   args.push("-y");
   await runSkillsCli(args);
-}
-
-export async function updateAllSkills(): Promise<void> {
-  const lock = await readSkillLock();
-  const names = Object.keys(lock).filter((name) => lock[name].sourceType !== "local");
-  if (names.length === 0) throw new Error("No Skills CLI managed remote skills are available to update.");
-  for (const name of names) {
-    await updateSkill(name);
-  }
-}
-
-export async function updateSkill(skillName: string): Promise<void> {
-  requireCliManagedSkill(skillName, await readSkillLock());
-  await runSkillsCli(["update", skillName, "-g", "-y"]);
 }
