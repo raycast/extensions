@@ -38,6 +38,9 @@ export const keepPlaying = `(function() {
   }
 
   function check() {
+    // The installed watcher outlives the command that started it, so it reads
+    // the preference flag each pass instead of deciding once at install time.
+    if (!window.__ytmKeepPlayingWanted) return;
     var dialog = document.querySelector("ytmusic-you-there-renderer");
     if (!dialog || !visible(dialog)) {
       if (dialog) dialog.__ytmDismissedV2 = false;
@@ -197,9 +200,11 @@ export async function runJSInYouTubeMusicTab(
   // Commands that read the music player must not fall through to a regular
   // YouTube tab when the user prefers "Both" or "YouTube".
   const condition = musicOnly ? 'URL contains "music.youtube.com"' : getUrlCondition(urlPreference);
-  // The idle-prompt watcher is only installed when the user has opted in; it is
-  // idempotent and returns before running its own check on later calls.
-  const script = keepPlayingWatcher ? `${keepPlaying}\n${code}` : code;
+  // The flag is sent on every command, so switching the preference off stops a
+  // watcher that is already running in the page. The watcher itself is only
+  // installed when the user has opted in.
+  const watcherFlag = `window.__ytmKeepPlayingWanted = ${keepPlayingWatcher ? "true" : "false"};`;
+  const script = keepPlayingWatcher ? `${watcherFlag}\n${keepPlaying}\n${code}` : `${watcherFlag}\n${code}`;
 
   let result: string;
   try {

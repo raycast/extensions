@@ -14,7 +14,7 @@
 - Added: `Now Playing` command — artwork, progress, the last five tracks and the rest of the queue, with transport, rating and remove-from-queue actions.
 - Added: a preference for how many recently played tracks `Now Playing` lists.
 - Added: in-app navigation through the music app's own `yt-navigate` event, so app windows do not show a "Leave app?" prompt before loading a track.
-- Added: an opt-in **Keep Playing** preference that dismisses the "Are you still there?" prompt and resumes playback. Off by default, so answering that prompt stays the user's call.
+- Added: an opt-in **Keep Playing** preference that dismisses the "Are you still there?" prompt and resumes playback. Off by default, so answering that prompt stays the user's call, and switching it off stops a watcher that is already running.
 - Changed: upgraded to `@raycast/api` 2.8.2.
 
 ## [Fix AppleScript Error Handling] - 2026-08-15
