@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add LAYIQ Jobs MCP Server] - 2026-11-01
+
+- Add LAYIQ Jobs to the official registry: find public job listings and explore roles from LAYIQ, a candidate-first job search workspace. 2 read-only tools. Hosted Streamable HTTP server at https://www.layiq.co/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Amplify MCP Server] - 2026-11-01
 
 - Add Amplify to the official registry: make browser games, web apps and websites from your AI agent in your Amplify account, with credit spending behind a two-step price confirmation and publishing behind the owner's approval in the app. 19 tools. Hosted Streamable HTTP server at https://app.amplify.is/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
