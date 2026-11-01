@@ -90,6 +90,15 @@
       "required": false
     },
     {
+      "name": "keepPlayingWatcher",
+      "title": "Keep Playing",
+      "label": "Dismiss the \"Are you still there?\" prompt",
+      "description": "YouTube Music pauses after a long idle period and asks whether you are still listening. Leave this off to answer it yourself.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "historyLimit",
       "title": "Recently Played History",
       "description": "How many recently played tracks Now Playing shows.",

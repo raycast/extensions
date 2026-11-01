@@ -19,10 +19,13 @@ export type TabError =
 
 /**
  * YouTube Music pauses after a long idle period and asks whether you are still
- * listening. The renderer exists in the DOM from page load and is only made
- * visible later, so a hidden renderer must not be marked as handled: check that
- * it is visible before clicking, and unmark it if the click has no effect.
- * Installed once per page load, by every command.
+ * listening. Clicking that prompt on the user's behalf is opt-in (the Keep
+ * Playing preference), because answering it is the user's call.
+ *
+ * The renderer exists in the DOM from page load and is only made visible later,
+ * so a hidden renderer must not be marked as handled: check that it is visible
+ * before clicking, and unmark it if the click has no effect. Installed once per
+ * page load, by every command that opts in.
  */
 export const keepPlaying = `(function() {
   if (window.__ytmKeepPlayingV2) return "already";
@@ -177,7 +180,7 @@ export async function runJSInYouTubeMusicTab(
   options?: { silent?: boolean; musicOnly?: boolean; onError?: (reason: TabError) => void }
 ): Promise<string | undefined> {
   const preferences = getPreferenceValues<Preferences>();
-  const { browser, urlPreference } = preferences;
+  const { browser, urlPreference, keepPlayingWatcher } = preferences;
   const { silent = false, musicOnly = false, onError } = options ?? {};
   // `browser` is required in the manifest, but the generated type is optional.
   if (!browser) {
@@ -194,9 +197,9 @@ export async function runJSInYouTubeMusicTab(
   // Commands that read the music player must not fall through to a regular
   // YouTube tab when the user prefers "Both" or "YouTube".
   const condition = musicOnly ? 'URL contains "music.youtube.com"' : getUrlCondition(urlPreference);
-  // Install the idle-prompt watcher on every command; it is idempotent and
-  // returns before running its own check on later calls.
-  const script = `${keepPlaying}\n${code}`;
+  // The idle-prompt watcher is only installed when the user has opted in; it is
+  // idempotent and returns before running its own check on later calls.
+  const script = keepPlayingWatcher ? `${keepPlaying}\n${code}` : code;
 
   let result: string;
   try {
