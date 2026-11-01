@@ -4,7 +4,7 @@ Fast local file search for [Raycast](https://raycast.com) powered by [Everything
 
 **Requirements:** Windows + [Everything](https://www.voidtools.com/). The extension only talks to `127.0.0.1` — if the Everything HTTP server is off, it offers one-click setup: install Everything via winget and/or enable the server automatically.
 
-**Shortcuts:** `Enter` open · `⌘⇧O` reveal in Explorer · `⌘⇧C` copy full path · `⌘⇧N` copy filename · `⌘R` refresh · `⌘P` toggle preview · `Alt+T` cycle type filter.
+**Shortcuts:** `Enter` open · `⌘Y` toggle preview · `⌘⇧O` reveal in Explorer · `⌘⇧C` copy full path · `⌘⇧N` copy filename · `⌘R` refresh · `Alt+T` cycle type filter · `Alt+C` configure custom types.
 
 ---
 
@@ -51,7 +51,7 @@ Raycast 不支持完全自定义布局，按平台惯例做了如下映射：
 | 右侧预览面板 | 选中项右侧原生详情面板：图片内嵌预览、文本前 64KB 内容预览、其余显示元信息（大小/修改时间/创建时间/路径） |
 | 底部状态栏：类型配置 | 同一下拉「文件类型」组，选择持久保存 |
 | 底部状态栏：排序 | 同一下拉「排序方式」组：名称/路径/大小/修改时间 × 升降序（Everything 服务端排序） |
-| 底部状态栏：预览开关 | 同一下拉「右侧预览」项，或快捷键 `⌘P` 切换 |
+| 底部状态栏：预览开关 | 同一下拉「右侧预览」项，或快捷键 `⌘Y` 切换 |
 | 底部状态栏：结果数 | 列表节标题显示 `共 N 项（已载 M）· 排序方式` |
 
 选中文件的快捷操作：`Enter` 打开、`⌘⇧O` 在资源管理器中定位、`⌘⇧C` 复制完整路径、`⌘⇧N` 复制文件名、`⌘R` 刷新。

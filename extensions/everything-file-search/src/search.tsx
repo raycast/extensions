@@ -271,6 +271,16 @@ export default function SearchCommand(props: {
     setReloadTick((t) => t + 1);
   }, []);
 
+  // Alt+T: cycle the type filter (advertised in the README)
+  const cycleType = useCallback(() => {
+    const idx = typeDefs.findIndex((t) => t.id === typeId);
+    const next = typeDefs[(idx + 1) % typeDefs.length] ?? typeDefs[0];
+    if (next) {
+      setTypeId(next.id);
+      setDropdownValue(`type:${next.id}`);
+    }
+  }, [typeDefs, typeId, setTypeId]);
+
   const loadMore = useCallback(() => {
     setPage((p) => p + 1);
   }, []);
@@ -347,6 +357,12 @@ export default function SearchCommand(props: {
           description={`Current type: ${fileType?.label ?? "All"} · switch type/sort/preview in the dropdown on the right of the search bar`}
           actions={
             <ActionPanel>
+              <Action
+                title="Next Type Filter"
+                icon={Icon.Filter}
+                shortcut={{ modifiers: ["opt"], key: "t" }}
+                onAction={cycleType}
+              />
               <SetupActions host={host} port={port} onRetry={refresh} />
             </ActionPanel>
           }
@@ -382,6 +398,7 @@ export default function SearchCommand(props: {
               onTogglePreview={() =>
                 setPreviewOn(previewOn === "true" ? "false" : "true")
               }
+              onCycleType={cycleType}
               onRefresh={refresh}
               showPreview={showPreview}
             />
@@ -434,12 +451,14 @@ function FileListItem({
   file,
   typeDefs,
   onTogglePreview,
+  onCycleType,
   onRefresh,
   showPreview,
 }: {
   file: EverythingResponse["results"][number];
   typeDefs: FileType[];
   onTogglePreview: () => void;
+  onCycleType: () => void;
   onRefresh: () => void;
   showPreview: boolean;
 }) {
@@ -519,7 +538,14 @@ function FileListItem({
           <Action
             title="Toggle Preview"
             icon={Icon.Sidebar}
+            shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
             onAction={onTogglePreview}
+          />
+          <Action
+            title="Next Type Filter"
+            icon={Icon.Filter}
+            shortcut={{ modifiers: ["opt"], key: "t" }}
+            onAction={onCycleType}
           />
           <Action
             title="Reveal in Explorer"
@@ -532,10 +558,15 @@ function FileListItem({
             content={full}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <Action.CopyToClipboard title="Copy Filename" content={file.name} />
+          <Action.CopyToClipboard
+            title="Copy Filename"
+            content={file.name}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          />
           <Action.Push
             title="Configure Custom Types"
             icon={Icon.Pencil}
+            shortcut={{ modifiers: ["opt"], key: "c" }}
             target={<ManageTypesCommand />}
           />
           <Action
