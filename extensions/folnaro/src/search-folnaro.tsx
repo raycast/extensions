@@ -20,6 +20,7 @@ import {
   documentStatusKey,
   documentStatusTone,
   formatDate,
+  formatShortDate,
   formatMoney,
 } from "./lib/format";
 import { t, type StringKey } from "./lib/text";
@@ -163,7 +164,7 @@ function DocumentItem(props: SharedProps & { document: DocumentSummary }) {
   if (!props.showingDetail) {
     if (document.due_date && !document.is_draft && document.status !== "paid" && document.status !== "cancelled") {
       accessories.push({
-        text: formatDate(document.due_date),
+        text: formatShortDate(document.due_date),
         icon: Icon.Calendar,
         tooltip: t("search.dueOn", { date: formatDate(document.due_date) }),
       });

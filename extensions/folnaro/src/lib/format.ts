@@ -55,6 +55,21 @@ export function formatDate(isoDate: string, locale: string | undefined = systemL
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(date);
 }
 
+/**
+ * A date for a list accessory: day and month only when it falls in the current year, so a row with a due date,
+ * an amount and a long status still fits the window. Other years keep the full date.
+ */
+export function formatShortDate(
+  isoDate: string,
+  locale: string | undefined = systemLocale(),
+  today: Date = new Date(),
+): string {
+  const date = parseIsoDate(isoDate);
+  if (!date) return isoDate;
+  if (date.getUTCFullYear() !== today.getFullYear()) return formatDate(isoDate, locale);
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "numeric", timeZone: "UTC" }).format(date);
+}
+
 export function parseIsoDate(isoDate: string): Date | undefined {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
   if (!match) return undefined;

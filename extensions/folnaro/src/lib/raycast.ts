@@ -70,11 +70,25 @@ class FailingClient implements ToolClient {
   close(): void {}
 }
 
-/** One helper process for the lifetime of a view command, closed when the command closes. */
+/**
+ * One helper process for the lifetime of a view command, closed when the command closes.
+ *
+ * React's development mode (`ray develop`) mounts every component, unmounts it and mounts it again
+ * with the same refs. Closing the client in that first cleanup would leave the view with a closed
+ * client ("Folnaro stopped answering"), so the cleanup only schedules the close and a mount that
+ * follows cancels it.
+ */
 export function useFolnaro(): FolnaroApi {
   const ref = useRef<FolnaroApi | null>(null);
+  const closing = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   if (!ref.current) ref.current = createFolnaro();
-  useEffect(() => () => ref.current?.client.close(), []);
+  useEffect(() => {
+    clearTimeout(closing.current);
+    closing.current = undefined;
+    return () => {
+      closing.current = setTimeout(() => ref.current?.client.close(), 0);
+    };
+  }, []);
   return ref.current;
 }
 
