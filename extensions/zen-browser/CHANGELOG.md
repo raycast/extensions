@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Fix Search With Quotes and Wildcards] - {PR-MERGE-DATE}
+
+- Fixed history and bookmark search failing with an SQL error when the search text contains an apostrophe, and `%` and `_` in the search text now match literally.
+
 ## [Fix] - 2026-09-19
 
 - Fixed the **New Tab** command always searching with Google regardless of Zen's configured default search engine. Added a **Browser Default** search engine preference (now the default): queries are handed to Zen itself, which resolves them with its own default search engine.
