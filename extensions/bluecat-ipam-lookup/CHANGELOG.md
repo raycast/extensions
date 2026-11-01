@@ -1,6 +1,6 @@
 # BlueCat BAM Lookup Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-01
 
 - Search BlueCat Address Manager by IP address (IPv4/IPv6), CIDR network, or DNS name
 - Detail panel tailored to each result type: IP addresses, networks, and DNS resource records
