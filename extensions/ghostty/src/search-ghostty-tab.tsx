@@ -86,7 +86,7 @@ tell application "Ghostty"
           end if
         end try
         if length of output is greater than 0 then
-          set output to output & linefeed
+          set output to output & fieldSep
         end if
         set output to output & w & fieldSep & t & fieldSep & paneIndex & fieldSep & (id of s) & fieldSep & surfacePid & fieldSep & surfaceTty & fieldSep & surfaceCwd & fieldSep & focusedFlag & fieldSep & tabName & fieldSep & surfaceName
       end repeat
@@ -98,6 +98,8 @@ end tell
 
 // Address the surface by its stable id instead of window/tab indexes so a
 // re-render between listing and focusing can't target the wrong surface.
+// Raises an AppleScript error when the surface no longer exists, so callers
+// reach their failure handlers instead of reporting success.
 const findSurfaceScript = (
   terminalId: string,
   body: (surfaceVar: string, tabVar: string, windowVar: string) => string,
@@ -113,7 +115,7 @@ tell application "Ghostty"
       end repeat
     end repeat
   end repeat
-  return "Error: surface not found"
+  error "Ghostty surface not found"
 end tell
 `;
 
@@ -190,22 +192,27 @@ async function fetchSurfaces(): Promise<SurfaceInfo[]> {
     if (result.startsWith("Error:")) {
       return [];
     }
-    const records = result.split("\n").filter(Boolean);
-    const surfaces = records.map((record) => {
-      const parts = record.split(FIELD_SEP);
-      return {
-        windowIndex: parseInt(parts[0] ?? "1", 10),
-        tabIndex: parseInt(parts[1] ?? "1", 10),
-        paneIndex: parseInt(parts[2] ?? "1", 10),
+    // Records and fields share the same separator; every record is 10 fields.
+    const fields = result.split(FIELD_SEP);
+    const surfaces: SurfaceInfo[] = [];
+    for (let i = 0; i + 10 <= fields.length; i += 10) {
+      const parts = fields.slice(i, i + 10);
+      if (parts[0] === "") {
+        continue;
+      }
+      surfaces.push({
+        windowIndex: parseInt(parts[0], 10),
+        tabIndex: parseInt(parts[1], 10),
+        paneIndex: parseInt(parts[2], 10),
         terminalId: parts[3] ?? "",
-        pid: parseInt(parts[4] ?? "0", 10) || 0,
+        pid: parseInt(parts[4], 10) || 0,
         tty: parts[5] ?? "",
         cwd: parts[6] ?? "",
         isFocused: parts[7] === "1",
         tabName: parts[8] ?? "",
-        name: parts.slice(9).join(FIELD_SEP).trim() || "Untitled",
-      };
-    });
+        name: (parts[9] ?? "").trim() || "Untitled",
+      });
+    }
     return await markLiveSurfaces(surfaces);
   } catch (error) {
     await showFailureToast(error, {
@@ -324,7 +331,11 @@ export default function SearchGhosttyTabs() {
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
                 target={<RenameSurfaceForm surface={surface} onRenamed={revalidate} />}
               />
-              <Action.CopyToClipboard title="Copy Working Directory" content={surface.cwd} />
+              <Action.CopyToClipboard
+                title="Copy Working Directory"
+                content={surface.cwd}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+              />
             </ActionPanel>
           }
         />
