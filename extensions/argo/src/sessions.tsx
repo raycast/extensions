@@ -24,6 +24,7 @@ import { errorText, recentKey, useBridges, useDraft, useHub } from "./hooks.js";
 import { loadConnection } from "./connections.js";
 import { DiscoverBridges, Setup } from "./onboarding.js";
 import { portRange } from "./discovery.js";
+import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
 
 export type Context = { bindingId?: string; profileId?: string; connectionKey?: string; recent?: boolean };
 export const LAST_CONVERSATION_KEY = "last-conversation-v1";
@@ -372,6 +373,16 @@ type Respond = (
   answer: { decision: "allow" | "deny" } | { answers: Record<string, string[]> },
 ) => Promise<boolean>;
 
+function OriginalParametersAction({ request }: { request: Interaction }) {
+  return (
+    <Action.Push
+      title="View Original Parameters"
+      icon={Icon.Code}
+      target={<Detail navigationTitle="Original Parameters" markdown={originalParametersMarkdown(request)} />}
+    />
+  );
+}
+
 function Approval({
   request,
   respond,
@@ -433,7 +444,7 @@ function Approval({
     <Detail
       navigationTitle="Review Approval"
       isLoading={busy}
-      markdown={`# ${safeMarkdown(request.title)}\n\n**${pending ? "Pending approval — review all parameters before allowing." : safeMarkdown(unavailable!)}**\n\n${safeMarkdown(request.detail)}\n\nExpires: ${new Date(request.expiresAt).toLocaleString()}`}
+      markdown={`# ${safeMarkdown(request.title)}\n\n**${pending ? "Pending approval — review all parameters before allowing." : safeMarkdown(unavailable!)}**\n\n${interactionMarkdown(request)}\n\nExpires: ${new Date(request.expiresAt).toLocaleString()}`}
       actions={
         <ActionPanel>
           {pending ? (
@@ -450,6 +461,7 @@ function Approval({
           ) : (
             <Action title="Back to Conversation" icon={Icon.ArrowLeft} onAction={close} />
           )}
+          <OriginalParametersAction request={request} />
         </ActionPanel>
       }
     />
@@ -698,11 +710,12 @@ function RequestHistory({
           icon={request.kind === "approval" ? Icon.Shield : Icon.QuestionMarkCircle}
           detail={
             <List.Item.Detail
-              markdown={`# ${safeMarkdown(request.title)}\n\n${safeMarkdown(request.detail)}\n\nState: ${request.state === "pending" ? "expired" : request.state}\n\nRead-only history. No decision can be submitted here.`}
+              markdown={`# ${safeMarkdown(request.title)}\n\n${interactionMarkdown(request)}\n\nState: ${request.state === "pending" ? "expired" : request.state}\n\nRead-only history. No decision can be submitted here.`}
             />
           }
           actions={
             <ActionPanel>
+              <OriginalParametersAction request={request} />
               <Action title="Refresh History" icon={Icon.ArrowClockwise} onAction={feed.refresh} />
             </ActionPanel>
           }
@@ -1246,7 +1259,7 @@ function Conversation({
             icon={request.kind === "approval" ? Icon.Shield : Icon.QuestionMarkCircle}
             detail={
               <List.Item.Detail
-                markdown={`# ${safeMarkdown(request.title)}\n\n${safeMarkdown(request.detail)}\n\nState: ${pending ? "pending" : request.state === "pending" ? "expired" : request.state}`}
+                markdown={`# ${safeMarkdown(request.title)}\n\n${interactionMarkdown(request)}\n\nState: ${pending ? "pending" : request.state === "pending" ? "expired" : request.state}`}
               />
             }
             actions={
@@ -1265,6 +1278,7 @@ function Conversation({
                     }
                   />
                 ) : null}
+                <OriginalParametersAction request={request} />
                 {commonActions()}
               </ActionPanel>
             }

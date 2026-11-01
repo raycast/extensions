@@ -21,6 +21,8 @@ import {
   safeMarkdown,
 } from "./core.js";
 
+import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
+
 const token = "a".repeat(64);
 
 test("configuration accepts only credential-free loopback origins", () => {
@@ -210,6 +212,9 @@ function viewHarness() {
       RequestHistory: "RequestHistory",
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
+      interactionMarkdown,
+      originalParametersMarkdown,
+      OriginalParametersAction: "OriginalParametersAction",
       HubError,
       InteractionPreflightError,
       showToast: async () => {},
@@ -1593,4 +1598,33 @@ test("interaction grouping never hides submitted or unknown-clock pending reques
     Array.from(interactionGroups(requests, undefined).active, (r: any) => r.requestId),
     ["pending", "expired-local", "submitted"],
   );
+});
+
+test("approval review uses structured parameters and keeps raw originals read-only without changing Enter", () => {
+  const h = viewHarness();
+  const request = {
+    requestId: "codex:fixture:command",
+    kind: "approval",
+    title: "Codex approval",
+    detail: JSON.stringify({
+      command: "git diff --stat",
+      cwd: "/fixture",
+      reason: "Inspect changes",
+      threadId: "opaque",
+    }),
+    state: "pending",
+    expiresAt: Date.now() + 60000,
+  };
+  const { Approval, OriginalParametersAction } = viewLogic(["Approval", "OriginalParametersAction"], {
+    ...h.globals,
+    useNavigation: () => ({ pop() {} }),
+  });
+  const tree = Approval({ request, respond: async () => false });
+  assert.match(tree.props.markdown, /## Command/);
+  assert.ok(!tree.props.markdown.includes('"threadId"'));
+  assert.equal(views(tree).find((v) => v.type === h.globals.Action)!.props.title, "Allow Request");
+  const action = OriginalParametersAction({ request });
+  assert.equal(action.props.title, "View Original Parameters");
+  assert.ok(action.props.target.props.markdown.includes(request.detail));
+  assert.ok(!views(action.props.target).some((v) => v.props.title === "Allow Request"));
 });
