@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Skycloak MCP Server] - {PR_MERGE_DATE}
+## [Add Skycloak MCP Server] - 2026-11-01
 
 - Add Skycloak to the official registry: manage SSO, users, roles and applications on Skycloak, an identity-as-a-service provider built on managed Keycloak. Hosted Streamable HTTP server at https://mcp.skycloak.io with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
