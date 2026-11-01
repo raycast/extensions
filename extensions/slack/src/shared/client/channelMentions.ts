@@ -4,6 +4,7 @@ import { collectPaginatedResults, matchesAllWords } from "./pagination";
 import type { SlackConversation } from "./slackTypes";
 
 const MAX_MENTIONS = 50;
+const MIN_JOINED_MATCHES = 10;
 const MAX_DESCRIPTION_LENGTH = 120;
 
 type MentionChannel = {
@@ -18,9 +19,9 @@ type MentionChannel = {
 type LoadConversationsPage = (cursor?: string) => Promise<CursorPage<SlackConversation>>;
 
 type ChannelMentionSources = {
-  /** Channels the signed-in user belongs to, used for the default list. */
+  /** Channels the signed-in user belongs to, used for the default list and searched first. */
   loadMemberChannelsPage: LoadConversationsPage;
-  /** Every channel visible to the signed-in user, used when they type a query. */
+  /** Every channel visible to the signed-in user, searched when joined matches are sparse. */
   loadChannelsPage: LoadConversationsPage;
 };
 
@@ -59,27 +60,24 @@ export function toChannelMentions(channels: readonly MentionChannel[]) {
   }));
 }
 
-/**
- * An empty query lists the channels the user belongs to, which is a far better default than the first page of an
- * alphabetical workspace directory. A query scans every visible channel and ranks the user's own channels first.
- */
+/** Lists joined channels by default and searches the wider directory only when joined matches are sparse. */
 export async function searchChannelMentions(query: string, sources: ChannelMentionSources, signal?: AbortSignal) {
   const normalizedQuery = query.trim().replace(/^#/, "");
+  const joinedChannels = await collectPaginatedResults({
+    loadPage: sources.loadMemberChannelsPage,
+    transform: (conversation: SlackConversation) => {
+      const channel = toMentionChannel(conversation);
+      // users.conversations only returns joined channels but does not always set is_member.
+      return channel && { ...channel, isMember: true };
+    },
+    matches: (channel) => matchesAllWords([channel.name], normalizedQuery),
+    maxResults: Number.POSITIVE_INFINITY,
+    scanAllPages: true,
+    signal,
+  });
 
-  if (!normalizedQuery) {
-    const channels = await collectPaginatedResults({
-      loadPage: sources.loadMemberChannelsPage,
-      transform: (conversation: SlackConversation) => {
-        const channel = toMentionChannel(conversation);
-        // users.conversations only returns joined channels but does not always set is_member.
-        return channel && { ...channel, isMember: true };
-      },
-      matches: () => true,
-      maxResults: Number.POSITIVE_INFINITY,
-      scanAllPages: true,
-      signal,
-    });
-    return toChannelMentions(channels.sort(compareChannels));
+  if (!normalizedQuery || joinedChannels.length >= MIN_JOINED_MATCHES) {
+    return toChannelMentions(joinedChannels.sort(compareChannels));
   }
 
   const channels = await collectPaginatedResults({
@@ -88,10 +86,12 @@ export async function searchChannelMentions(query: string, sources: ChannelMenti
     matches: (channel) => matchesAllWords([channel.name], normalizedQuery),
     maxResults: MAX_MENTIONS,
     scanAllPages: true,
-    prioritize: (channel) => channel.isMember,
+    stopAfterMatchingPage: true,
     signal,
   });
-  return toChannelMentions(channels.sort(compareChannels));
+  const channelsById = new Map(channels.map((channel) => [channel.id, channel]));
+  for (const channel of joinedChannels) channelsById.set(channel.id, channel);
+  return toChannelMentions([...channelsById.values()].sort(compareChannels));
 }
 
 type GetChannel = (id: string) => Promise<{ ok?: boolean; error?: string; channel?: SlackConversation }>;
