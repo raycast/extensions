@@ -11,7 +11,8 @@
     "degouville",
     "mathisfoxius",
     "joaogf.dev",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "addozhang"
   ],
   "platforms": [
     "macOS"
@@ -38,7 +39,7 @@
       "name": "search-ghostty-tab",
       "title": "Search Ghostty Tabs",
       "subtitle": "Ghostty",
-      "description": "List all tabs and go to the selected.",
+      "description": "List all tabs and split surfaces; jump to a surface, rename it or copy its working directory.",
       "mode": "view"
     },
     {
