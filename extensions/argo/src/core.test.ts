@@ -207,6 +207,7 @@ function viewHarness() {
       SessionList: "SessionList",
       Compose: "Compose",
       Conversation: "Conversation",
+      RequestHistory: "RequestHistory",
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
       HubError,
@@ -534,6 +535,7 @@ test("offline conversation keeps Compose, copy and Jump to Latest Reply availabl
       "messageStatus",
       "sendUnavailable",
       "conversationSelection",
+      "interactionGroups",
       "Conversation",
     ],
     {
@@ -752,7 +754,7 @@ test("opening a valid conversation persists only its bridge, binding and nonsecr
     snapshot: { session: sessionFixture(), messages: [], interactions: [] },
     connection: "live",
     connectionKey: key,
-    hub: { current: {} },
+    hub: { current: { now: () => undefined } },
   };
   const { Conversation } = viewLogic(
     [
@@ -763,6 +765,7 @@ test("opening a valid conversation persists only its bridge, binding and nonsecr
       "messageStatus",
       "sendUnavailable",
       "conversationSelection",
+      "interactionGroups",
       "Conversation",
     ],
     {
@@ -988,6 +991,7 @@ test("confirmed send rejection releases only its pending ID, while uncertain or 
         "messageStatus",
         "sendUnavailable",
         "conversationSelection",
+        "interactionGroups",
         "Conversation",
       ],
       {
@@ -1427,4 +1431,166 @@ test("failed preflight sends no decision and permits an explicit retry after rec
   } finally {
     client.close();
   }
+});
+
+test("conversation keeps active requests above replies and moves completed requests into a separate history view", () => {
+  const h = viewHarness();
+  const interactions = Array.from({ length: 100 }, (_, i) => ({
+    requestId: `resolved-${i}`,
+    kind: "approval",
+    title: `Handled ${i}`,
+    detail: "Fixture",
+    state: "resolved",
+    expiresAt: 5000 + i,
+  }));
+  interactions.push(
+    ...["pending", "submitted", "expired"].map((state) => ({
+      requestId: state,
+      kind: "approval",
+      title: state,
+      detail: "Fixture",
+      state,
+      expiresAt: state === "expired" ? 500 : 5000,
+    })),
+  );
+  const feed = {
+    snapshot: {
+      session: sessionFixture(),
+      interactions,
+      messages: [{ id: "reply", role: "assistant", text: "Visible latest reply", state: "completed", createdAt: 1 }],
+    },
+    connection: "live",
+    connectionKey: "bridge-a",
+    hub: { current: { now: () => 1000 } },
+  };
+  const { Conversation } = viewLogic(
+    [
+      "project",
+      "title",
+      "sessionStatus",
+      "knownOnline",
+      "messageStatus",
+      "sendUnavailable",
+      "conversationSelection",
+      "interactionGroups",
+      "Conversation",
+    ],
+    {
+      ...h.globals,
+      RequestHistory: "RequestHistory",
+      useHub: () => feed,
+      useDraft: () => ({ text: "", ready: true }),
+      useNavigation: () => ({ push() {} }),
+    },
+  );
+  let tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  h.reset();
+  tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  const list = views(tree).filter((v) => v.type === h.globals.List.Item);
+  assert.deepEqual(
+    list.filter((v) => v.props.id?.startsWith("request:")).map((v) => v.props.id),
+    ["request:pending", "request:submitted"],
+  );
+  assert.ok(list.some((v) => v.props.id === "reply"));
+  assert.equal(tree.props.selectedItemId, "reply");
+  const entry = list.find((v) => v.props.id === "request-history")!;
+  assert.equal(entry.props.subtitle, "101 completed or expired");
+  const action = views(entry).find((v) => v.props.title === "View Request History")!;
+  assert.equal(action.props.target.props.connectionKey, "bridge-a");
+  assert.equal(action.props.target.type, "RequestHistory");
+  assert.ok(list.findIndex((v) => v.props.id === "reply") < list.findIndex((v) => v.props.id === "request-history"));
+  assert.equal(list.length, 4, "a hundred resolved approvals must not bury the conversation");
+  tree.props.onSelectionChange("request:pending");
+  interactions.find((r) => r.requestId === "pending")!.state = "resolved";
+  h.reset();
+  tree = Conversation({ bindingId: "session", profileId: "server", connectionKey: "bridge-a" });
+  assert.equal(
+    tree.props.selectedItemId,
+    "reply",
+    "resolved selection falls back to the conversation instead of a missing row",
+  );
+});
+
+test("request history is read-only and reveals twenty more records only on explicit activation", () => {
+  const h = viewHarness();
+  const requests = Array.from({ length: 45 }, (_, i) => ({
+    requestId: `handled-${i}`,
+    kind: "approval",
+    title: `Handled ${i}`,
+    detail: "Fixture",
+    state: "resolved",
+    expiresAt: 5000 + i,
+  }));
+  requests.push({
+    requestId: "pending",
+    kind: "approval",
+    title: "Pending",
+    detail: "Fixture",
+    state: "pending",
+    expiresAt: 9000,
+  });
+  const feed = {
+    snapshot: { interactions: requests },
+    hub: { current: { now: () => 1000 } },
+    loading: false,
+    connection: "live",
+    refresh() {},
+  };
+  const { RequestHistory } = viewLogic(["interactionGroups", "RequestHistory"], {
+    ...h.globals,
+    useHub: (binding: string, profile: string, identity: string) => {
+      assert.deepEqual([binding, profile, identity], ["session", "server", "bridge-a"]);
+      return feed;
+    },
+  });
+  const props = { bindingId: "session", profileId: "server", connectionKey: "bridge-a" };
+  const rows = (tree: View) => views(tree).filter((v) => v.props.id?.startsWith("history:"));
+  let tree = RequestHistory(props);
+  assert.equal(rows(tree).length, 20);
+  assert.equal(rows(tree)[0]!.props.id, "history:handled-44");
+  assert.ok(
+    !views(tree).some((v) => /Allow Request|Deny Request|Review Approval|Submit Answers/.test(v.props.title || "")),
+  );
+  views(tree)
+    .find((v) => v.props.title === "Show More Requests" && v.props.onAction)!
+    .props.onAction();
+  h.reset();
+  tree = RequestHistory(props);
+  assert.equal(rows(tree).length, 40);
+  views(tree)
+    .find((v) => v.props.title === "Show More Requests" && v.props.onAction)!
+    .props.onAction();
+  h.reset();
+  tree = RequestHistory(props);
+  assert.equal(rows(tree).length, 45);
+  assert.ok(!views(tree).some((v) => v.props.title === "Show More Requests"));
+  tree.props.onSearchTextChange("Handled 0");
+  h.reset();
+  tree = RequestHistory(props);
+  assert.equal(rows(tree).length, 1, "search includes records beyond the initial page");
+  assert.equal(rows(tree)[0]!.props.id, "history:handled-0");
+  tree.props.onSearchTextChange("");
+  h.reset();
+  tree = RequestHistory(props);
+  assert.equal(rows(tree).length, 20, "search resets the visible page rather than permanently expanding history");
+});
+
+test("interaction grouping never hides submitted or unknown-clock pending requests in completed history", () => {
+  const { interactionGroups } = viewLogic(["interactionGroups"]);
+  const requests = [
+    { requestId: "pending", state: "pending", expiresAt: 2000 },
+    { requestId: "expired-local", state: "pending", expiresAt: 500 },
+    { requestId: "submitted", state: "submitted", expiresAt: 500 },
+    { requestId: "resolved", state: "resolved", expiresAt: 500 },
+    { requestId: "expired", state: "expired", expiresAt: 500 },
+  ];
+  assert.deepEqual(
+    Array.from(interactionGroups(requests, 1000).active, (r: any) => r.requestId),
+    ["pending", "submitted"],
+  );
+  assert.equal(interactionGroups(requests, 1000).history.length, 3);
+  assert.deepEqual(
+    Array.from(interactionGroups(requests, undefined).active, (r: any) => r.requestId),
+    ["pending", "expired-local", "submitted"],
+  );
 });

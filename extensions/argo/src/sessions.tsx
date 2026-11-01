@@ -643,6 +643,91 @@ function InteractionReview({
   return request.kind === "approval" ? <Approval {...props} /> : <Questions {...props} />;
 }
 
+function interactionGroups(requests: Interaction[], now?: number) {
+  const active: Interaction[] = [],
+    history: Interaction[] = [];
+  for (const request of requests) {
+    if (
+      request.state === "submitted" ||
+      (request.state === "pending" && (now === undefined || request.expiresAt > now))
+    )
+      active.push(request);
+    else history.push(request);
+  }
+  return { active, history };
+}
+
+function RequestHistory({
+  bindingId,
+  profileId,
+  connectionKey,
+}: {
+  bindingId: string;
+  profileId: string;
+  connectionKey?: string;
+}) {
+  const feed = useHub(bindingId, profileId, connectionKey);
+  const [visible, setVisible] = useState(20);
+  const [search, setSearch] = useState("");
+  const requests = interactionGroups(feed.snapshot?.interactions || [], feed.hub.current?.now())
+    .history.reverse()
+    .filter((request) => `${request.title} ${request.detail}`.toLowerCase().includes(search.toLowerCase()));
+  return (
+    <List
+      navigationTitle="Approval & Question History"
+      isLoading={feed.loading}
+      isShowingDetail
+      searchBarPlaceholder="Search all completed requests…"
+      filtering={false}
+      searchText={search}
+      onSearchTextChange={(value) => {
+        setSearch(value);
+        setVisible(20);
+      }}
+    >
+      <List.EmptyView
+        title={feed.error ? "History Unavailable" : "No Completed Requests"}
+        description={feed.error || "Pending and submitted requests stay in the conversation."}
+      />
+      {requests.slice(0, visible).map((request) => (
+        <List.Item
+          key={request.requestId}
+          id={`history:${request.requestId}`}
+          title={request.title}
+          subtitle={request.state === "pending" ? "expired" : request.state}
+          icon={request.kind === "approval" ? Icon.Shield : Icon.QuestionMarkCircle}
+          detail={
+            <List.Item.Detail
+              markdown={`# ${safeMarkdown(request.title)}\n\n${safeMarkdown(request.detail)}\n\nState: ${request.state === "pending" ? "expired" : request.state}\n\nRead-only history. No decision can be submitted here.`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Refresh History" icon={Icon.ArrowClockwise} onAction={feed.refresh} />
+            </ActionPanel>
+          }
+        />
+      ))}
+      {requests.length > visible ? (
+        <List.Item
+          id="more-requests"
+          title="Show More Requests"
+          subtitle={`${Math.min(visible, requests.length)} of ${requests.length} shown`}
+          icon={Icon.Ellipsis}
+          detail={
+            <List.Item.Detail markdown="Show the next 20 completed or expired requests. This does not submit or replay any decision." />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Show More Requests" onAction={() => setVisible((previous) => previous + 20)} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+    </List>
+  );
+}
+
 type ConversationSelection = { generation?: string; selectedItemId?: string; replyTo?: string };
 type SelectionEvent =
   | { type: "snapshot"; generation: string; messages: readonly Message[] }
@@ -718,13 +803,28 @@ function Conversation({
   const snapshot = connectionChanged ? undefined : feed.snapshot;
   const session = snapshot?.session;
   const generation = session?.generation;
-  const currentSelection = snapshot
+  const requests = interactionGroups(snapshot?.interactions || [], feed.hub.current?.now());
+  let currentSelection = snapshot
     ? conversationSelection(selection, {
         type: "snapshot",
         generation: snapshot.session.generation,
         messages: snapshot.messages,
       })
     : selection;
+  if (
+    snapshot &&
+    ((currentSelection.selectedItemId?.startsWith("request:") &&
+      !requests.active.some((request) => `request:${request.requestId}` === currentSelection.selectedItemId)) ||
+      (currentSelection.selectedItemId === "empty" && requests.active.length + requests.history.length > 0))
+  ) {
+    currentSelection = {
+      ...currentSelection,
+      selectedItemId:
+        snapshot.messages.findLast((message) => message.role === "assistant")?.id ??
+        snapshot.messages.at(-1)?.id ??
+        (requests.active[0] ? `request:${requests.active[0].requestId}` : "request-history"),
+    };
+  }
   // Resolve before rendering List so its first selected item isn't the status row.
   if (currentSelection !== selection) setSelection(currentSelection);
   useEffect(() => {
@@ -1132,7 +1232,7 @@ function Conversation({
           actions={<ActionPanel>{commonActions()}</ActionPanel>}
         />
       ) : null}
-      {(snapshot?.interactions || []).map((request) => {
+      {requests.active.map((request) => {
         const bridgeNow = feed.hub.current?.now();
         const pending = request.state === "pending" && (bridgeNow === undefined || request.expiresAt > bridgeNow);
         const supported =
@@ -1214,6 +1314,27 @@ function Conversation({
           );
         })}
       </List.Section>
+      {requests.history.length ? (
+        <List.Item
+          id="request-history"
+          title="Approval & Question History"
+          subtitle={`${requests.history.length} completed or expired`}
+          icon={Icon.Clock}
+          detail={
+            <List.Item.Detail markdown="Completed and expired requests are kept in a separate read-only history, 20 at a time. Pending and submitted requests stay above the conversation." />
+          }
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="View Request History"
+                icon={Icon.Clock}
+                target={<RequestHistory bindingId={bindingId} profileId={profileId} connectionKey={identity} />}
+              />
+              {commonActions()}
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {(more ?? snapshot?.hasMore) && allMessages.length ? (
         <List.Item
           id="older"
