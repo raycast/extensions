@@ -461,7 +461,7 @@ function Approval({
           ) : (
             <Action title="Back to Conversation" icon={Icon.ArrowLeft} onAction={close} />
           )}
-          <OriginalParametersAction request={request} />
+          {!busy ? <OriginalParametersAction request={request} /> : null}
         </ActionPanel>
       }
     />

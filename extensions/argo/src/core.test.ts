@@ -1628,3 +1628,56 @@ test("approval review uses structured parameters and keeps raw originals read-on
   assert.ok(action.props.target.props.markdown.includes(request.detail));
   assert.ok(!views(action.props.target).some((v) => v.props.title === "Allow Request"));
 });
+
+test("approval cannot push original parameters during a decision, including live invalidation", async () => {
+  for (const accepted of [false, true]) {
+    const h = viewHarness();
+    let finish!: (ok: boolean) => void;
+    let popped = 0;
+    const request = {
+      requestId: "codex:fixture:busy-navigation",
+      kind: "approval",
+      title: "Synthetic approval",
+      detail: "No command executes",
+      state: "pending",
+      expiresAt: Date.now() + 60000,
+    };
+    const { Approval } = viewLogic(["Approval"], {
+      ...h.globals,
+      useNavigation: () => ({
+        pop: () => {
+          popped++;
+        },
+      }),
+    });
+    const props = {
+      request,
+      respond: () =>
+        new Promise<boolean>((resolve) => {
+          finish = resolve;
+        }),
+    };
+    let tree = Approval(props);
+    const originals = () => views(tree).filter((v) => v.type === h.globals.OriginalParametersAction);
+    assert.equal(originals().length, 1, "original inspection is available before submission");
+    const pending = views(tree)
+      .find((v) => v.props.title === "Allow Request")!
+      .props.onAction();
+    h.reset();
+    tree = Approval(props);
+    assert.equal(tree.props.isLoading, true);
+    assert.equal(originals().length, 0, "in-flight approval must not push a page that its completion could pop");
+    h.reset();
+    tree = Approval({ ...props, issue: "Decision already submitted." });
+    assert.equal(originals().length, 0, "live invalidation must not expose a push while still busy");
+    finish(accepted);
+    await pending;
+    assert.equal(popped, accepted ? 1 : 0, "only accepted decisions close the review");
+    if (!accepted) {
+      h.reset();
+      tree = Approval(props);
+      assert.equal(tree.props.isLoading, false);
+      assert.equal(originals().length, 1, "unsuccessful completion restores read-only original inspection");
+    }
+  }
+});
