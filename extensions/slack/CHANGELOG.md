@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Cache channel directory for instant local search] - {PR_MERGE_DATE}
+## [Cache channel directory for instant local search] - 2026-11-01
 
 - Open Channel now filters locally as pages arrive instead of restarting a full `conversations.list` scan on each keystroke. The workspace channel and group directory is shared across all searches and refreshed in the background at most once per hour.
 
