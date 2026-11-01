@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add SlickTrip MCP Server] - 2026-11-01
+
+- Add SlickTrip to the official registry: live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Hosted Streamable HTTP server at https://mcp.slicktrip.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Kin MCP Server] - 2026-11-01
 
 - Add Kin to the official registry: use your accounts at GitHub, Notion, Linear and other services, even two accounts of one service, each with its own rule per action (Allow, Ask me or Block). Hosted Streamable HTTP server at https://app.kinlab.ai/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
