@@ -234,6 +234,13 @@ const paletteMarkdown = (hexes: string[]): string => {
 
 const SAFE_HEX = /^#[0-9a-f]{3,8}$/i;
 
+// Every line, blank ones too, so a quote of several paragraphs stays one quote.
+const asBlockquote = (text: string): string =>
+  text
+    .split("\n")
+    .map((line) => (line ? `> ${line}` : ">"))
+    .join("\n");
+
 export const getDetailMarkdown = (card: RaycastCard): string => {
   const heroMediaUrl = getHeroMediaUrl(card);
   const swatches = (card.colors ?? [])
@@ -253,7 +260,7 @@ export const getDetailMarkdown = (card: RaycastCard): string => {
       ? paletteMarkdown(swatches)
       : "",
     content && !repeatsMetadata
-      ? `## Content\n\n${card.type === "quote" ? `> ${content}` : content}`
+      ? `## Content\n\n${card.type === "quote" ? asBlockquote(content) : content}`
       : "",
     card.notes ? `## Notes\n\n${card.notes}` : "",
     card.aiSummary ? `## Summary\n\n${card.aiSummary}` : "",

@@ -134,6 +134,15 @@ describe("card detail markdown", () => {
     expect(markdown).toContain("## Transcript\n\nSpoken words");
   });
 
+  test("keeps every paragraph of a quote inside the quote", () => {
+    const markdown = getDetailMarkdown({
+      ...baseCard,
+      type: "quote",
+      content: "First paragraph.\n\nSecond paragraph.",
+    });
+    expect(markdown).toContain("> First paragraph.\n>\n> Second paragraph.");
+  });
+
   test("skips content that only repeats a file's name", () => {
     const markdown = getDetailMarkdown({
       ...baseCard,

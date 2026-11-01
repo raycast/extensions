@@ -1,5 +1,19 @@
 # Changelog
 
+## [Palette colors, faster start and fixes] - 2026-11-01
+
+- Edit Card adds and removes a palette's colors, and the Update Teak Card AI tool can too
+- Commands open faster while you're signed in: Raycast uses your saved sign-in without asking Teak where to sign in first
+- Undo after Move to Trash puts the card back where it was, in a shuffled or oldest-first list too
+- A favorite changed in a card's details saves even when you leave right away
+- Signing out no longer opens Sign in with Teak again straight away
+- Quick Save leaves Content empty when the clipboard holds a file, and can't save the same card twice
+- Renaming a tag can change just its capitals, and a rename Teak refuses keeps what you typed
+- A failed favorite or next page now says so, and save commands keep their own error message
+- Tags in a card's details only filter where the list can filter by them
+- Quotes of several paragraphs stay quoted in the details
+- Browse Folders names its counts, like "9 smart folders"
+
 ## [Saving again, cleaner lists and fixes] - 2026-10-27
 
 - Saving a link that's already in Teak moves that card to the top of your library, and back from Archive, instead of stopping at "Already saved"

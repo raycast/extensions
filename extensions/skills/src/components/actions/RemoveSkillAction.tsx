@@ -24,10 +24,11 @@ interface RemoveSkillActionProps {
 function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
   const { pop } = useNavigation();
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const allSelected = selected.size === skill.agents.length;
+  const removableAgents = skill.mutableAgents ?? [];
+  const allSelected = selected.size === removableAgents.length;
 
   function toggleAll() {
-    setSelected(allSelected ? new Set() : new Set(skill.agents));
+    setSelected(allSelected ? new Set() : new Set(removableAgents));
   }
 
   function toggleAgent(agent: string, checked: boolean) {
@@ -68,7 +69,7 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
         failureTitle: "Failed to remove skill",
       },
       operation: () =>
-        mutate(removeSkill(skill.name, isAll ? undefined : agents), {
+        mutate(removeSkill(skill.name, agents), {
           optimisticUpdate: (skills) => {
             if (!skills) return [];
             if (isAll) return skills.filter((s) => s.name !== skill.name);
@@ -98,10 +99,10 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
         </ActionPanel>
       }
     >
-      <Form.Description text={`Select agents to remove "${skill.name}" from:`} />
+      <Form.Description text={`Select verified Codex or Claude Code installations to remove "${skill.name}" from:`} />
       <Form.Checkbox id="select-all" label="Select All" value={allSelected} onChange={toggleAll} />
       <Form.Separator />
-      {skill.agents.map((agent) => (
+      {removableAgents.map((agent) => (
         <Form.Checkbox
           key={agent}
           id={agent}
@@ -115,7 +116,9 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
 }
 
 export function RemoveSkillAction({ skill, mutate }: RemoveSkillActionProps) {
-  if (skill.agents.length > 1) {
+  const removableAgents = skill.mutableAgents ?? [];
+  if (removableAgents.length === 0) return null;
+  if (removableAgents.length > 1) {
     return (
       <Action.Push
         title="Remove Skill"
@@ -136,18 +139,31 @@ export function RemoveSkillAction({ skill, mutate }: RemoveSkillActionProps) {
         withSkillAction({
           confirm: {
             icon: { source: Icon.Trash, tintColor: Color.Red },
-            title: `Remove "${skill.name}"?`,
-            message: "This will remove the skill from all agents.",
+            title: `Remove "${skill.name}" from ${removableAgents[0]}?`,
+            message: `This will remove the verified ${removableAgents[0]} installation.`,
             primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
           },
           toast: {
             animatedTitle: "Removing skill...",
-            successTitle: "Skill removed",
+            successTitle: `Skill removed from ${removableAgents[0]}`,
             failureTitle: "Failed to remove skill",
           },
           operation: () =>
-            mutate(removeSkill(skill.name), {
-              optimisticUpdate: (skills) => (skills ? skills.filter((s) => s.name !== skill.name) : []),
+            mutate(removeSkill(skill.name, removableAgents), {
+              optimisticUpdate: (skills) =>
+                skills
+                  ? skills
+                      .map((s) =>
+                        s.name === skill.name
+                          ? {
+                              ...s,
+                              agents: s.agents.filter((agent) => agent !== removableAgents[0]),
+                              agentCount: s.agentCount - 1,
+                            }
+                          : s,
+                      )
+                      .filter((s) => s.agents.length > 0)
+                  : [],
             }),
         })
       }
