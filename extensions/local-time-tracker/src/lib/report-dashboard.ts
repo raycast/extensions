@@ -1,4 +1,4 @@
-import { getDateRange, getOverlapDurationSeconds, getStartOfToday } from "./date";
+import { getDateRange, getOverlapDurationSeconds, getStartOfToday, getStartOfWeek, isSameLocalDay } from "./date";
 import { formatDuration } from "./duration";
 import { createReport } from "./reports";
 import type { ActiveTimer, Project, ReportPeriod, WorkLog } from "./types";
@@ -13,6 +13,7 @@ export type DashboardModel = {
   projectCount: number;
   running: boolean;
   days: DashboardDay[];
+  weekDays: DashboardDay[];
   distribution: { name: string; seconds: number }[];
 };
 
@@ -46,20 +47,31 @@ export function createDashboard(
     ...selectedLogs,
     ...(running ? [{ startedAt: selectedTimer!.startedAt, endedAt: now.toISOString() }] : []),
   ];
-  const days = Array.from({ length: 35 }, (_, index) => {
-    const date = getStartOfToday(now);
-    date.setDate(date.getDate() - 34 + index);
+  function dayTotal(date: Date): DashboardDay {
     const end = new Date(date);
     end.setDate(end.getDate() + 1);
     // Keep today's bars consistent with the report, excluding future entries.
     const cutoff = new Date(Math.min(end.getTime(), now.getTime()));
     return {
       date,
-      seconds: intervals.reduce(
-        (sum, log) => sum + getOverlapDurationSeconds(log.startedAt, log.endedAt, date, cutoff),
-        0,
-      ),
+      seconds:
+        date > now
+          ? 0
+          : intervals.reduce(
+              (sum, log) => sum + getOverlapDurationSeconds(log.startedAt, log.endedAt, date, cutoff),
+              0,
+            ),
     };
+  }
+  const days = Array.from({ length: 35 }, (_, index) => {
+    const date = getStartOfToday(now);
+    date.setDate(date.getDate() - 34 + index);
+    return dayTotal(date);
+  });
+  const weekDays = Array.from({ length: 7 }, (_, index) => {
+    const date = getStartOfWeek(now);
+    date.setDate(date.getDate() + index);
+    return dayTotal(date);
   });
   return {
     title,
@@ -72,6 +84,7 @@ export function createDashboard(
     projectCount: report.projects.length,
     running,
     days,
+    weekDays,
     distribution: report.projects.map((project) => ({ name: project.projectName, seconds: project.seconds })),
   };
 }
@@ -189,15 +202,17 @@ export function dashboardSvg(
     text(326, y, formatDuration(item.seconds), 12, colors.text);
   });
   if (!visible.length) text(24, 209, "No tracked time in this period", 12);
-  text(24, 251 + extraHeight, "LAST 7 DAYS", 11);
-  const week = model.days.slice(-7);
+  text(24, 251 + extraHeight, "THIS WEEK", 11);
+  const week = model.weekDays;
   const max = Math.max(1, ...week.map((day) => day.seconds));
   week.forEach((day, index) => {
     const x = 29 + index * 56;
     const height = Math.round((day.seconds / max) * 27);
     rect(x, 262 + extraHeight, 40, 27, colors.empty);
-    if (height) rect(x, 289 + extraHeight - height, 40, height, index === 6 ? colors.accent : colors.bar);
-    text(x, 306 + extraHeight, `${day.date.getMonth() + 1}/${day.date.getDate()}`, 10);
+    const today = isSameLocalDay(day.date, model.days[model.days.length - 1].date);
+    if (height) rect(x, 289 + extraHeight - height, 40, height, today ? colors.accent : colors.bar);
+    text(x, 301 + extraHeight, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index], 10);
+    text(x, 314 + extraHeight, `${day.date.getMonth() + 1}/${day.date.getDate()}`, 10);
   });
   text(24, 327 + extraHeight, "35-DAY ACTIVITY", 11);
   const levels = colors.levels;

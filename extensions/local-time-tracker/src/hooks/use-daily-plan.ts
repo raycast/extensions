@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { showFailure } from "../lib/errors";
 import { createPlanClock, planClockKey } from "../lib/plan-model";
 import { loadPlanData } from "../lib/plan-state";
+import { carryOverPlansToToday } from "../lib/planning-service";
+import { localDateKey } from "../lib/planning";
 
-export function useDailyPlan(date: string) {
+export function useDailyPlan(date: string, autoCarryover = false) {
   const [saved, setSaved] = useState<{ date: string; clock: ReturnType<typeof createPlanClock> }>();
   const [now, setNow] = useState(new Date());
   const [error, setError] = useState<string>();
@@ -17,10 +19,16 @@ export function useDailyPlan(date: string) {
   const request = useRef(0);
   const reading = useRef(false);
   const mutating = useRef(false);
+  const carriedDate = useRef<string | undefined>(undefined);
   const reload = useCallback(async () => {
     const id = ++request.current;
     reading.current = true;
     try {
+      const today = localDateKey(new Date());
+      if (autoCarryover && date === today && carriedDate.current !== today) {
+        await carryOverPlansToToday(today);
+        carriedDate.current = today;
+      }
       const data = await loadPlanData(date);
       if (mounted.current && id === request.current && currentDate.current === date) {
         const key = `${date}:${JSON.stringify(data)}`;
@@ -41,7 +49,7 @@ export function useDailyPlan(date: string) {
     } finally {
       if (id === request.current) reading.current = false;
     }
-  }, [date]);
+  }, [date, autoCarryover]);
   useEffect(() => {
     mounted.current = true;
     setError(undefined);
