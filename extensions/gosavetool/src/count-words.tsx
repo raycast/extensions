@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, LaunchProps } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { duration, LIMITS, stats } from "./lib/text";
+import { duration, limits, stats } from "./lib/text";
 import { fmt, readInput, SOURCE_LABEL } from "./lib/input";
 import { toolUrl } from "./lib/site";
 
@@ -20,14 +20,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.CountW
     `Speaking time: ${duration(s.speakSeconds)}`,
   ].join("\n");
 
-  const left = (limit: number) => (limit >= s.chars ? fmt(limit - s.chars) : `**${fmt(s.chars - limit)} over**`);
   const markdown =
     data?.source === "none"
       ? "## Nothing to count\n\nSelect some text or copy it to the clipboard, then run the command again. You can also type the text as the command argument."
       : `# ${fmt(s.words)} words · ${fmt(s.chars)} characters\n\n` +
         "| Platform | Limit | Left |\n| --- | ---: | ---: |\n" +
-        LIMITS.map((l) => `| ${l.label} | ${fmt(l.limit)} | ${left(l.limit)} |`).join("\n") +
-        `\n\nReading time uses 238 words a minute. More text tools on [GoSaveTool](${toolUrl("character-counter")}).`;
+        limits(text)
+          .map((l) => `| ${l.label} | ${fmt(l.limit)} | ${l.left >= 0 ? fmt(l.left) : `**${fmt(-l.left)} over**`} |`)
+          .join("\n") +
+        "\n\nX counts emoji and CJK characters as 2 and every link as 23. Reading time uses 238 words a minute. " +
+        `More text tools on [GoSaveTool](${toolUrl("character-counter")}).`;
 
   return (
     <Detail

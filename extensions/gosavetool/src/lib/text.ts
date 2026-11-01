@@ -44,7 +44,8 @@ export function stats(s: string): TextStats {
     chars: [...s].length,
     charsNoSpaces: [...s.replace(/\s/g, "")].length,
     lines: s === "" ? 0 : s.split(/\r\n|\r|\n/).length,
-    sentences: (s.match(/[^.!?…]+[.!?…]+/g) || []).length,
+    // a trailing sentence without its final period still counts
+    sentences: (s.match(/[^.!?…]*[\p{L}\p{N}][^.!?…]*(?:[.!?…]+|$)/gu) || []).length,
     paragraphs: s.split(/(?:\r?\n){2,}/).filter((p) => p.trim()).length,
     // 238 words a minute: the average silent reading speed for English non-fiction
     readSeconds: Math.round((words / 238) * 60),
@@ -54,6 +55,7 @@ export function stats(s: string): TextStats {
 
 export function words(s: string): string[] {
   return s
+    .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, "$1 $2") // APIKey → API Key
     .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, "$1 $2")
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
@@ -91,16 +93,25 @@ const FOLD: Record<string, string> = {
   ü: "u",
   Ü: "u",
   ß: "ss",
+  ẞ: "ss",
   æ: "ae",
+  Æ: "ae",
   ø: "o",
+  Ø: "o",
   đ: "d",
+  Đ: "d",
   ł: "l",
+  Ł: "l",
+  œ: "oe",
+  Œ: "oe",
+  þ: "th",
+  Þ: "th",
 };
 
 /** "Ölçü Birimi & Çeviri!" → "olcu-birimi-ceviri" */
 export function slug(s: string): string {
   return s
-    .replace(/[ıİşŞğĞçÇöÖüÜßæøđł]/g, (c) => FOLD[c])
+    .replace(/[ıİşŞğĞçÇöÖüÜßẞæÆøØđĐłŁœŒþÞ]/g, (c) => FOLD[c])
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
@@ -139,9 +150,70 @@ export function clean(s: string): string {
     .replace(new RegExp("(" + nl + "){3,}", "g"), nl + nl);
 }
 
+// X weights text like twitter-text: Latin and common punctuation count 1, other scripts (CJK and more) 2,
+// an emoji (with its modifiers and joiners) 2, and every link 23 whatever its length
+const X_LIGHT = [
+  [0, 4351],
+  [8192, 8205],
+  [8208, 8223],
+  [8242, 8247],
+];
+const URL_RE = /https?:\/\/\S+|\bwww\.\S+/giu;
+const EMOJI_RE = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u;
+const graphemes = new Intl.Segmenter("en", { granularity: "grapheme" });
+
+function xParts(s: string): { text: string; weight: number }[] {
+  const out: { text: string; weight: number }[] = [];
+  let last = 0;
+  const plain = (t: string) => {
+    for (const { segment } of graphemes.segment(t)) {
+      if (EMOJI_RE.test(segment)) out.push({ text: segment, weight: 2 });
+      else
+        out.push({
+          text: segment,
+          weight: [...segment].reduce((n, c) => {
+            const cp = c.codePointAt(0) ?? 0;
+            return n + (X_LIGHT.some(([a, b]) => cp >= a && cp <= b) ? 1 : 2);
+          }, 0),
+        });
+    }
+  };
+  for (const m of s.matchAll(URL_RE)) {
+    plain(s.slice(last, m.index));
+    out.push({ text: m[0], weight: 23 });
+    last = m.index + m[0].length;
+  }
+  plain(s.slice(last));
+  return out;
+}
+
+/** Length as X counts it toward the 280 limit */
+export const xLength = (s: string) => xParts(s).reduce((n, p) => n + p.weight, 0);
+
+/** The longest start of the text that fits the limit as X counts it */
+export function xSlice(s: string, limit: number): string {
+  let n = 0,
+    out = "";
+  for (const p of xParts(s)) {
+    if ((n += p.weight) > limit) break;
+    out += p.text;
+  }
+  return out;
+}
+
+export interface Limit {
+  key: string;
+  label: string;
+  limit: number;
+  used: number;
+  left: number;
+  /** the longest start of the text that fits */
+  fit: string;
+}
+
 // Character limits of common fields; SEO values are the length search results show before cutting
 export const LIMITS = [
-  { key: "x-post", label: "X Post", limit: 280 },
+  { key: "x-post", label: "X Post", limit: 280, x: true },
   { key: "instagram-caption", label: "Instagram Caption", limit: 2200 },
   { key: "tiktok-caption", label: "TikTok Caption", limit: 4000 },
   { key: "youtube-title", label: "YouTube Title", limit: 100 },
@@ -151,6 +223,17 @@ export const LIMITS = [
   { key: "seo-title", label: "SEO Title", limit: 60 },
   { key: "meta-description", label: "Meta Description", limit: 160 },
 ] as const;
+
+/** How the text meets every limit, with X counted its own way */
+export function limits(s: string): Limit[] {
+  const chars = [...s],
+    xLen = xLength(s);
+  return LIMITS.map((l) => {
+    const used = "x" in l ? xLen : chars.length;
+    const fit = "x" in l ? xSlice(s, l.limit) : chars.slice(0, l.limit).join("");
+    return { key: l.key, label: l.label, limit: l.limit, used, left: l.limit - used, fit };
+  });
+}
 
 export function duration(sec: number): string {
   if (sec < 60) return `${sec} sec`;
