@@ -5,6 +5,7 @@ import { TEAK_API_KEYS_URL } from "../lib/constants";
 import { authorizeTeak } from "../lib/oauth";
 import { SetApiKeyAction } from "./SetApiKeyAction";
 import { SignInWithBrowserAction } from "./SignInWithBrowserAction";
+import { hasSignedOutThisRun } from "./SignOutAction";
 
 interface MissingApiKeyDetailProps {
   error?: string | null;
@@ -13,19 +14,20 @@ interface MissingApiKeyDetailProps {
 
 /**
  * A signed-out command opens Raycast's "Sign in with Teak" prompt straight
- * away. This view only shows when that prompt is closed or fails, so there is
- * always a way to try again.
+ * away, unless the person just signed out here. This view only shows when that
+ * prompt is skipped, closed or fails, so there is always a way to sign in.
  */
 export function MissingApiKeyDetail({
   onSignedIn,
   error,
 }: MissingApiKeyDetailProps) {
   const [signInError, setSignInError] = useState<string | null>(null);
-  const [isSigningIn, setIsSigningIn] = useState(!error);
+  const [signedOut] = useState(hasSignedOutThisRun);
+  const [isSigningIn, setIsSigningIn] = useState(!(error || signedOut));
   const started = useRef(false);
 
   useEffect(() => {
-    if (error || started.current) {
+    if (error || signedOut || started.current) {
       return;
     }
     started.current = true;
@@ -35,7 +37,7 @@ export function MissingApiKeyDetail({
         setSignInError(getUserFacingErrorMessage(authorizeError));
         setIsSigningIn(false);
       });
-  }, [error, onSignedIn]);
+  }, [error, onSignedIn, signedOut]);
 
   if (error) {
     return (
@@ -58,6 +60,13 @@ export function MissingApiKeyDetail({
     return <Detail isLoading markdown="" />;
   }
 
+  let status = "Sign-in didn't finish.";
+  if (signInError) {
+    status = `Sign-in didn't finish: ${signInError}`;
+  } else if (signedOut) {
+    status = "You're signed out.";
+  }
+
   return (
     <Detail
       actions={
@@ -73,9 +82,7 @@ export function MissingApiKeyDetail({
       markdown={[
         "## Sign in to Teak",
         "",
-        signInError
-          ? `Sign-in didn't finish: ${signInError}`
-          : "Sign-in didn't finish.",
+        status,
         "",
         "Press **Enter** to sign in with your browser, or use **Set API Key** to paste a key from **Teak Settings → Integrations → API keys**.",
       ].join("\n")}

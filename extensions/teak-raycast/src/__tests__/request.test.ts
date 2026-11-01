@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { createRaycastApiMock } from "./raycastApiMock";
+import {
+  createRaycastApiMock,
+  raycastLocalStorageMock,
+} from "./raycastApiMock";
 
 const getPreferenceValuesMock = mock(() => ({ apiKey: "valid-test-key" }));
 const authorizeMock = mock(() => Promise.resolve("oauth-access-token"));
@@ -135,6 +138,10 @@ const withDiscovery = (transport: typeof fetch): typeof fetch =>
             workosClient,
           ]),
         ),
+        resource: "https://teakvault.com/mcp",
+        authorization_endpoint: `${issuer}/authorize`,
+        token_endpoint: `${issuer}/oauth2/token`,
+        code_challenge_methods_supported: ["S256"],
       };
     } else if (url.includes("oauth-authorization-server")) {
       metadata = {
@@ -543,6 +550,10 @@ describe("raycast request handling", () => {
 
   test("discovery outage remains a connection failure without opening sign-in", async () => {
     getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "" }));
+    // Without a saved connection, even a fresh token waits for discovery.
+    for (const key of Object.keys(await raycastLocalStorageMock.allItems())) {
+      await raycastLocalStorageMock.removeItem(key);
+    }
     getTokensMock.mockResolvedValue({ accessToken: "saved" });
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(null, { status: 503 })),

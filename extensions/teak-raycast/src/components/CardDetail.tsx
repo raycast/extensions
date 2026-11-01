@@ -49,7 +49,8 @@ const MAX_METADATA_URL_LENGTH = 64;
 
 interface FavoriteMutationState {
   desired: boolean;
-  inFlight: boolean;
+  /** The commit running now; it resolves false when the card is gone. */
+  inFlight: Promise<boolean> | null;
   lastServer: boolean;
   timer: ReturnType<typeof setTimeout> | null;
 }
@@ -58,7 +59,8 @@ export interface CardDetailProps {
   card: RaycastCard;
   onCardDeleted: (cardId: string) => void;
   onCardUpdated: (next: RaycastCard) => void;
-  onFilterByTag: (tag: string) => void;
+  /** Left out where the list can't filter by another tag; tags then don't click. */
+  onFilterByTag?: (tag: string) => void;
   onNavigateBackAfterDelete: () => void;
   /** Lets the list behind this card check its sign-in again. */
   onSignedOut?: () => void;
@@ -112,9 +114,10 @@ export function CardDetail({
     Pick<RaycastCard, "backlinks" | "links">
   >({ backlinks: card.backlinks, links: card.links });
   const cardStateRef = useRef(card);
+  const isOpenRef = useRef<boolean>(true);
   const favoriteMutationRef = useRef<FavoriteMutationState>({
     desired: card.isFavorited,
-    inFlight: false,
+    inFlight: null,
     lastServer: card.isFavorited,
     timer: null,
   });
@@ -144,15 +147,13 @@ export function CardDetail({
     [onCardUpdated],
   );
 
-  const flushFavoriteCommit = useCallback(async () => {
+  const flushFavoriteCommit = useCallback((): Promise<boolean> => {
     const mutationState = favoriteMutationRef.current;
     if (mutationState.inFlight) {
-      return;
+      return mutationState.inFlight;
     }
 
-    mutationState.inFlight = true;
-
-    try {
+    const commit = async (): Promise<boolean> => {
       while (mutationState.desired !== mutationState.lastServer) {
         const current = cardStateRef.current;
         const desiredValue = mutationState.desired;
@@ -173,24 +174,40 @@ export function CardDetail({
               title: "Card no longer exists",
               message: "It was removed from your list.",
             });
-            pop();
-            return;
+            if (isOpenRef.current) {
+              isOpenRef.current = false;
+              pop();
+            }
+            return false;
           }
 
           mutationState.desired = mutationState.lastServer;
-          patchFavorite(mutationState.lastServer);
+          // Straight to the list too: a commit flushed on the way out has no
+          // detail left to patch.
+          emitCardUpdate({
+            ...cardStateRef.current,
+            isFavorited: mutationState.lastServer,
+          });
           await showToast({
             style: Toast.Style.Failure,
             title: "Favorite update failed",
             message: toToastMessage(error),
           });
-          return;
+          return true;
         }
       }
-    } finally {
-      mutationState.inFlight = false;
-    }
-  }, [emitCardUpdate, onCardDeleted, patchFavorite, pop]);
+      return true;
+    };
+
+    mutationState.inFlight = commit().finally(() => {
+      mutationState.inFlight = null;
+    });
+    return mutationState.inFlight;
+  }, [emitCardUpdate, onCardDeleted, pop]);
+  const flushFavoriteCommitRef = useRef(flushFavoriteCommit);
+  useEffect(() => {
+    flushFavoriteCommitRef.current = flushFavoriteCommit;
+  }, [flushFavoriteCommit]);
 
   const queueFavoriteCommit = useCallback(
     (nextValue: boolean) => {
@@ -209,6 +226,17 @@ export function CardDetail({
     [flushFavoriteCommit],
   );
 
+  // Sends a favorite still waiting on its debounce before the card leaves the
+  // list, so the answer can't put a trashed card back. False when it's gone.
+  const settleFavorite = useCallback(() => {
+    const mutationState = favoriteMutationRef.current;
+    if (mutationState.timer) {
+      clearTimeout(mutationState.timer);
+      mutationState.timer = null;
+    }
+    return flushFavoriteCommit();
+  }, [flushFavoriteCommit]);
+
   const handleToggleFavorite = useCallback(() => {
     const nextValue = !cardStateRef.current.isFavorited;
     patchFavorite(nextValue);
@@ -226,6 +254,9 @@ export function CardDetail({
     }
     setIsDeleting(true);
     try {
+      if (!(await settleFavorite())) {
+        return;
+      }
       const moved = await moveCardToTrash(cardStateRef.current, {
         onRemoved: onCardDeleted,
         onRestored: onCardUpdated,
@@ -236,25 +267,34 @@ export function CardDetail({
     } finally {
       setIsDeleting(false);
     }
-  }, [isDeleting, leaveDetail, onCardDeleted, onCardUpdated]);
+  }, [isDeleting, leaveDetail, onCardDeleted, onCardUpdated, settleFavorite]);
 
   const handleRestore = useCallback(async () => {
+    if (!(await settleFavorite())) {
+      return;
+    }
     if (await restoreFromTrash(cardStateRef.current, onCardDeleted)) {
       leaveDetail();
     }
-  }, [leaveDetail, onCardDeleted]);
+  }, [leaveDetail, onCardDeleted, settleFavorite]);
 
   const handleDeleteForever = useCallback(async () => {
+    if (!(await settleFavorite())) {
+      return;
+    }
     if (await deleteCardForever(cardStateRef.current, onCardDeleted)) {
       leaveDetail();
     }
-  }, [leaveDetail, onCardDeleted]);
+  }, [leaveDetail, onCardDeleted, settleFavorite]);
 
-  const handleTagAction = useCallback(
-    (tag: string) => {
-      onFilterByTag(tag);
-      pop();
-    },
+  const tagAction = useCallback(
+    (tag: string) =>
+      onFilterByTag
+        ? () => {
+            onFilterByTag(tag);
+            pop();
+          }
+        : undefined,
     [onFilterByTag, pop],
   );
 
@@ -269,7 +309,7 @@ export function CardDetail({
 
     favoriteMutationRef.current = {
       desired: card.isFavorited,
-      inFlight: false,
+      inFlight: null,
       lastServer: card.isFavorited,
       timer: null,
     };
@@ -289,15 +329,20 @@ export function CardDetail({
     };
   }, [card.id]);
 
-  useEffect(
-    () => () => {
+  // Leaving the detail sends a favorite change still waiting on its debounce,
+  // since the list already shows it.
+  useEffect(() => {
+    isOpenRef.current = true;
+    return () => {
+      isOpenRef.current = false;
       const mutationState = favoriteMutationRef.current;
       if (mutationState.timer) {
         clearTimeout(mutationState.timer);
+        mutationState.timer = null;
+        void flushFavoriteCommitRef.current();
       }
-    },
-    [],
-  );
+    };
+  }, []);
 
   const openableUrl = getOpenableUrl(cardState);
   const domain = getCardDomain(cardState);
@@ -428,9 +473,14 @@ export function CardDetail({
             </ActionPanel.Section>
           )}
           <AccountActions
+            // A favorite saved after Sign Out would ask to sign in again.
+            beforeSignOut={settleFavorite}
             onSignedOut={() => {
               onSignedOut?.();
-              pop();
+              // A favorite that found the card gone has already left the view.
+              if (isOpenRef.current) {
+                pop();
+              }
             }}
           />
         </ActionPanel>
@@ -452,9 +502,7 @@ export function CardDetail({
               {cardState.tags.map((tag) => (
                 <Detail.Metadata.TagList.Item
                   key={`tag-${tag}`}
-                  onAction={() => {
-                    handleTagAction(tag);
-                  }}
+                  onAction={tagAction(tag)}
                   text={tag}
                 />
               ))}
@@ -465,9 +513,7 @@ export function CardDetail({
               {cardState.aiTags.map((tag) => (
                 <Detail.Metadata.TagList.Item
                   key={`ai-tag-${tag}`}
-                  onAction={() => {
-                    handleTagAction(tag);
-                  }}
+                  onAction={tagAction(tag)}
                   text={tag}
                 />
               ))}

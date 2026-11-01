@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { act, createElement } from "react";
-import { mockRaycastUi } from "./raycastUiMock";
+import { mockRaycastUi, shownToasts } from "./raycastUiMock";
 
 const transportGlobals = {
   Response,
@@ -195,4 +195,69 @@ test("a row dates the card by its last save and lists every tag", async () => {
   expect(text).toContain(`Saved ${formatDateTime(savedAt)}`);
   expect(text).toContain("Tags: design, type, print");
   expect(text).toContain("Also tagged type, print");
+});
+
+test("Undo after Move to Trash puts the card back where it was", async () => {
+  const older = {
+    ...linkCard,
+    createdAt: 1_700_000_000_000,
+    id: "k17olderolderol1234567890olderolder",
+    metadataTitle: "Older card",
+  };
+  const newer = {
+    ...linkCard,
+    createdAt: 1_800_000_000_000,
+    id: "k17newernewerne1234567890newernewer",
+    metadataTitle: "Newer card",
+  };
+  // The API's order, oldest first, as `sort:oldest` or a shuffle gives it.
+  serve(() => [older, newer]);
+  await render();
+  await press("Move to Trash");
+  expect(container.textContent).not.toContain("Older card");
+
+  const undo = shownToasts.at(-1)?.primaryAction as
+    | { onAction: (toast: unknown) => Promise<void> }
+    | undefined;
+  expect(undo, "an Undo action on the toast").toBeDefined();
+  await act(async () => undo?.onAction(shownToasts.at(-1)));
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+
+  const text = container.textContent ?? "";
+  expect(text.indexOf("Older card")).toBeGreaterThan(-1);
+  expect(text.indexOf("Older card")).toBeLessThan(text.indexOf("Newer card"));
+});
+
+test("Undo after the list reloads places the card by the new order", async () => {
+  const older = {
+    ...linkCard,
+    createdAt: 1_700_000_000_000,
+    id: "k17olderolderol1234567890olderolder",
+    metadataTitle: "Older card",
+  };
+  const newer = {
+    ...linkCard,
+    createdAt: 1_800_000_000_000,
+    id: "k17newernewerne1234567890newernewer",
+    metadataTitle: "Newer card",
+  };
+  // Oldest first at the start; after the shuffle the trashed card is gone.
+  serve((url) =>
+    url.searchParams.get("sort") === "shuffle" ? [newer] : [older, newer],
+  );
+  await render();
+  await press("Move to Trash");
+  const trashToast = shownToasts.at(-1);
+  await press("Shuffle");
+
+  const undo = trashToast?.primaryAction as
+    | { onAction: (toast: unknown) => Promise<void> }
+    | undefined;
+  await act(async () => undo?.onAction(trashToast));
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+
+  const text = container.textContent ?? "";
+  expect(text.indexOf("Older card")).toBeGreaterThan(
+    text.indexOf("Newer card"),
+  );
 });

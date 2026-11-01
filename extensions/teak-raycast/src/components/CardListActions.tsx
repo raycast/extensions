@@ -55,7 +55,9 @@ export function CardListActions(props: CardListActionsProps) {
               card={card}
               onCardDeleted={onCardRemoved}
               onCardUpdated={onCardUpdated}
-              onFilterByTag={onFilterByTag}
+              onFilterByTag={
+                props.removeTagFilterFromList ? undefined : onFilterByTag
+              }
               onNavigateBackAfterDelete={() => undefined}
               onSignedOut={onSignedOut}
             />

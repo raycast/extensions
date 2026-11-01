@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type CardSearchInput,
@@ -7,6 +15,7 @@ import {
   type RaycastCard,
   setCardFavorite,
 } from "../lib/api";
+import { failureMessage } from "../lib/cardActions";
 import { getCardTitle } from "../lib/cardDetailModel";
 import { getCardListIcon } from "../lib/cardIcons";
 import { removeCardById, upsertCard } from "../lib/cardListState";
@@ -128,6 +137,8 @@ export function CardsListCommand({
       try {
         const response = await loadCards(input);
         if (generation === requestGeneration.current) {
+          // A new page has its own order, so old Undo positions no longer fit.
+          removedAt.current.clear();
           setItems(response.items);
           setNextCursor(response.nextCursor);
           setSimilarity(response.similarity);
@@ -167,8 +178,13 @@ export function CardsListCommand({
         setNextCursor(response.nextCursor);
       }
     } catch (requestError) {
+      // The cards already shown stay; only an empty list shows the error view.
       if (generation === requestGeneration.current) {
-        setError(getUserFacingErrorMessage(requestError));
+        await showToast({
+          message: failureMessage(requestError),
+          style: Toast.Style.Failure,
+          title: "Couldn't load more cards",
+        });
       }
     } finally {
       if (generation === requestGeneration.current) {
@@ -232,7 +248,13 @@ export function CardsListCommand({
   );
 
   const handleCardRemoved = useCallback((cardId: string) => {
-    setItems((previous) => removeCardById(previous, cardId).cards);
+    setItems((previous) => {
+      const index = previous.findIndex((card) => card.id === cardId);
+      if (index !== -1) {
+        removedAt.current.set(cardId, index);
+      }
+      return removeCardById(previous, cardId).cards;
+    });
   }, []);
 
   const handleFilterByTag = useCallback((tag: string) => {
@@ -253,8 +275,13 @@ export function CardsListCommand({
         handleCardUpdated(
           await setCardFavorite(card.id, !previousState, "interactive"),
         );
-      } catch {
+      } catch (error) {
         handleCardUpdated(card);
+        await showToast({
+          message: failureMessage(error),
+          style: Toast.Style.Failure,
+          title: "Favorite update failed",
+        });
       }
     },
     [handleCardUpdated],

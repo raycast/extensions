@@ -205,7 +205,6 @@ export default function RandomCardsCommand() {
                           card={card}
                           onCardDeleted={handleRemoved}
                           onCardUpdated={handleUpdated}
-                          onFilterByTag={() => undefined}
                           onNavigateBackAfterDelete={() => undefined}
                           onSignedOut={refreshAuth}
                         />
