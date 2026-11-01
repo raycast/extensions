@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Detail, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { WiiMAPI } from "./wiim/api";
 import { broadcastDiscoverAll } from "./wiim/discovery";
-import { setSelectedDeviceIP } from "./wiim/preferences";
+import { getSelectedDeviceIP, setSelectedDeviceIP } from "./wiim/preferences";
 import { WiiMDevice } from "./wiim/types";
 
 type WiiMDeviceWithName = WiiMDevice & { name?: string };
@@ -41,6 +41,7 @@ async function handleSelect(device: WiiMDevice) {
 
 export default function SelectDevice() {
   const [devices, setDevices] = useState<WiiMDeviceWithName[]>([]);
+  const [selectedIP, setSelectedIP] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +49,7 @@ export default function SelectDevice() {
     async function discover() {
       try {
         setIsLoading(true);
+        setSelectedIP(await getSelectedDeviceIP());
         const found = await broadcastDiscoverAll();
         const devicesWithNames = await mapDevicesWithNames(found);
         setDevices(devicesWithNames);
@@ -63,7 +65,7 @@ export default function SelectDevice() {
       }
     }
 
-    discover();
+    void discover();
   }, []);
 
   if (error && !isLoading) {
@@ -80,9 +82,20 @@ export default function SelectDevice() {
             key={device.ip}
             title={device.name || `WiiM Device`}
             subtitle={device.ip}
+            accessories={
+              device.ip === selectedIP
+                ? [{ icon: Icon.CheckCircle, text: "Selected", tooltip: "Currently selected device" }]
+                : undefined
+            }
             actions={
               <ActionPanel>
-                <Action title="Select Device" onAction={() => handleSelect(device)} />
+                <Action
+                  title="Select Device"
+                  onAction={async () => {
+                    await handleSelect(device);
+                    setSelectedIP(device.ip);
+                  }}
+                />
               </ActionPanel>
             }
           />

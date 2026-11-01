@@ -12,7 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "ignoreDeprecations": "6.0"
   }
 }

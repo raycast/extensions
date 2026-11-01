@@ -1,17 +1,17 @@
-import https from "node:https";
-import { beforeEach, describe, expect, jest, test } from "@jest/globals";
+import * as https from "node:https";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { WiiMAPI } from "./api";
 import EventEmitter from "node:events";
 import { ClientRequest, IncomingMessage } from "node:http";
 import { DeviceChannel, DeviceMode, DeviceType, LoopMode } from "./types";
 
-jest.mock("https", () => ({
-  Agent: jest.fn(),
-  get: jest.fn(),
+vi.mock("node:https", () => ({
+  Agent: vi.fn(),
+  get: vi.fn(),
 }));
 
 const spyOnGet = function (data: string, statusCode: number = 200) {
-  const spy = jest.spyOn(https, "get");
+  const spy = vi.spyOn(https, "get");
 
   spy.mockImplementation((url, options, callback) => {
     const req = new EventEmitter() as ClientRequest & IncomingMessage;
@@ -36,7 +36,7 @@ describe("Wiim API", () => {
   const apiUrl = "https://127.0.0.1:8080/httpapi.asp";
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("Toggle Play/Pause", async () => {
@@ -87,7 +87,7 @@ describe("Wiim API", () => {
   });
 
   test("Volume Up", async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(https, "get")
       .mockImplementationOnce((url, options, callback) => {
         const req = new EventEmitter() as ClientRequest & IncomingMessage;
@@ -120,7 +120,7 @@ describe("Wiim API", () => {
   });
 
   test("Volume Down", async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(https, "get")
       .mockImplementationOnce((url, options, callback) => {
         const req = new EventEmitter() as ClientRequest & IncomingMessage;
