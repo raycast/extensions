@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Browse Items] - {PR_MERGE_DATE}
+## [Browse Items] - 2026-11-01
 
 - Search Items and List Vaults become one screen, Browse Items. It opens on the items, and Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens it on the vault list
 - Search Items is now named Browse Items. The hotkeys and aliases of both commands keep working, and so do your preferences
