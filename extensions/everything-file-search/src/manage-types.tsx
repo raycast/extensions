@@ -15,8 +15,8 @@ import { loadCustomTypes, saveCustomTypes } from "./lib/file-types-store.js";
 
 function parseExtensions(raw: string): string[] {
   return raw
-    .split(/[;,\\s]+/)
-    .map((s) => s.trim().replace(/^\\./, "").toLowerCase())
+    .split(/[;,\s]+/)
+    .map((s) => s.trim().replace(/^\./, "").toLowerCase())
     .filter(Boolean);
 }
 
@@ -58,47 +58,45 @@ export default function ManageTypesCommand() {
   return (
     <List isLoading={!loaded}>
       <List.Section title={`Custom Types (${custom.length})`}>
-        {custom.length === 0 ? (
+        <List.Item
+          icon={Icon.Plus}
+          title="Add Custom Type"
+          subtitle="e.g. Design: ai;fig;sketch;xd"
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add Custom Type"
+                icon={Icon.Plus}
+                target={addForm}
+              />
+            </ActionPanel>
+          }
+        />
+        {custom.map((t) => (
           <List.Item
-            icon={Icon.Plus}
-            title="Add a custom type (e.g. Design: ai;fig;sketch;xd)"
+            key={t.id}
+            icon={t.icon}
+            title={t.label}
+            subtitle={t.extensions?.join(" / ") ?? ""}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Add Custom Type"
-                  icon={Icon.Plus}
-                  target={addForm}
+                  title={`Edit ${t.label}`}
+                  icon={Icon.Pencil}
+                  target={
+                    <TypeForm onSubmit={upsert} initial={t} nextId={t.id} />
+                  }
+                />
+                <Action
+                  title={`Delete ${t.label}`}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => remove(t.id)}
                 />
               </ActionPanel>
             }
           />
-        ) : (
-          custom.map((t) => (
-            <List.Item
-              key={t.id}
-              icon={t.icon}
-              title={t.label}
-              subtitle={t.extensions?.join(" / ") ?? ""}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title={`Edit ${t.label}`}
-                    icon={Icon.Pencil}
-                    target={
-                      <TypeForm onSubmit={upsert} initial={t} nextId={t.id} />
-                    }
-                  />
-                  <Action
-                    title={`Delete ${t.label}`}
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => remove(t.id)}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))
-        )}
+        ))}
       </List.Section>
       <List.Section title="Built-in Types (toggle in Extension Preferences)">
         {FILE_TYPES.map((t) => (

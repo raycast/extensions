@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { exec } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import {
   Action,
@@ -23,11 +23,7 @@ import {
   type SortField,
 } from "./lib/everything.js";
 import { iconForFile, type FileType } from "./lib/file-types.js";
-import {
-  buildTypeDefs,
-  loadCustomTypes,
-  type TypePrefs,
-} from "./lib/file-types-store.js";
+import { buildTypeDefs, loadCustomTypes } from "./lib/file-types-store.js";
 import {
   filetimeToDate,
   formatDateTime,
@@ -47,12 +43,6 @@ import {
   installEverythingAndEnableHttp,
   type EverythingStatus,
 } from "./lib/setup.js";
-
-type Preferences = TypePrefs & {
-  host: string;
-  port: string;
-  maxResults: string;
-};
 
 const SORT_OPTIONS: {
   key: string;
@@ -119,6 +109,10 @@ const SORT_OPTIONS: {
   },
 ];
 
+function resultKey(f: EverythingResponse["results"][number]): string {
+  return `${f.type}|${f.path}|${f.name}`;
+}
+
 function useDebounced<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -148,9 +142,8 @@ function usePersistentState(
   return [value, set];
 }
 
-export default function SearchCommand(props: {
-  arguments?: { query?: string };
-}) {
+// Preference and argument shapes come from the generated raycast-env.d.ts
+export default function SearchCommand(props: { arguments?: Arguments.Search }) {
   const { push } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
   const host = prefs.host?.trim() || "127.0.0.1";
@@ -188,7 +181,6 @@ export default function SearchCommand(props: {
     "everything.preview",
     "true",
   );
-  const [dropdownValue, setDropdownValue] = useState<string>("type:all");
   const [reloadTick, setReloadTick] = useState(0);
 
   const debouncedQuery = useDebounced(query, 250);
@@ -199,54 +191,89 @@ export default function SearchCommand(props: {
   const sort = SORT_OPTIONS.find((s) => s.key === sortKey) ?? SORT_OPTIONS[0];
   const showPreview = previewOn === "true";
 
-  // Pagination: reset to first page and clear accumulated results when the query changes
+  // Pagination: reset to first page and clear accumulated results when the query,
+  // the type filter (including edits made to the active custom type) or the sort changes
   const [page, setPage] = useState(0);
   const [allResults, setAllResults] = useState<EverythingResponse["results"]>(
     [],
   );
   const [total, setTotal] = useState(0);
+
+  const activeExtensions = fileType?.onlyFolders
+    ? undefined
+    : fileType?.extensions;
+  const onlyFolders = fileType?.onlyFolders ?? false;
+  const onlyFiles =
+    !onlyFolders && fileType?.id !== "all" && !!fileType?.extensions;
+  const sortField = sort.field;
+  const sortAscending = sort.ascending;
+
   useEffect(() => {
     setPage(0);
     setAllResults([]);
-  }, [debouncedQuery, typeId, sortKey]);
+  }, [
+    debouncedQuery,
+    typeId,
+    activeExtensions,
+    onlyFolders,
+    onlyFiles,
+    sortKey,
+  ]);
 
-  const skipFetch = !debouncedQuery.trim() && typeId === "all";
+  const skipFetch = !debouncedQuery.trim() && !activeExtensions && !onlyFolders;
   const { isLoading, data, error } = usePromise(
     async (
       q: string,
-      typeArg: string,
-      sortArg: string,
+      ext: string[] | undefined,
+      folders: boolean,
+      files: boolean,
+      field: SortField,
+      ascending: boolean,
       pageArg: number,
       _tick: number,
     ) => {
-      if (!q.trim() && typeArg === "all") return null;
-      const ft = typeDefs.find((t) => t.id === typeArg) ?? typeDefs[0];
-      const st = SORT_OPTIONS.find((s) => s.key === sortArg) ?? SORT_OPTIONS[0];
-      return searchEverything({
+      if (!q.trim() && !ext && !folders) return null;
+      const resp = await searchEverything({
         host,
         port,
         query: q,
-        extensions: ft.extensions,
-        onlyFolders: ft.onlyFolders,
-        onlyFiles: !ft.onlyFolders && ft.id !== "all" && !!ft.extensions,
-        sort: { field: st.field, ascending: st.ascending },
+        extensions: ext,
+        onlyFolders: folders,
+        onlyFiles: files,
+        sort: { field, ascending },
         count: maxResults,
         offset: pageArg * maxResults,
         timeoutMs: 6000,
       });
+      return {
+        page: pageArg,
+        results: resp.results,
+        totalResults: resp.totalResults,
+      };
     },
-    [debouncedQuery, typeId, sortKey, page, reloadTick],
+    [
+      debouncedQuery,
+      activeExtensions,
+      onlyFolders,
+      onlyFiles,
+      sortField,
+      sortAscending,
+      page,
+      reloadTick,
+    ],
   );
 
-  // Accumulate paginated results (first page replaces, later pages append)
+  // Apply only the response that matches the current page — while the next page
+  // is loading, usePromise still holds the previous response, and appending it
+  // again would duplicate rows. Dedupe by file identity as a safety net.
   useEffect(() => {
-    if (!data) return;
+    if (!data || data.page !== page) return;
     setTotal(data.totalResults);
-    setAllResults((prev) =>
-      page === 0 || prev.length === 0
-        ? data.results
-        : [...prev, ...data.results],
-    );
+    setAllResults((prev) => {
+      if (data.page === 0 || prev.length === 0) return data.results;
+      const seen = new Set(prev.map(resultKey));
+      return [...prev, ...data.results.filter((f) => !seen.has(resultKey(f)))];
+    });
   }, [data, page]);
 
   const results = allResults;
@@ -255,7 +282,6 @@ export default function SearchCommand(props: {
   const onDropdownChange = (value: string) => {
     if (value.startsWith("type:")) {
       setTypeId(value.slice(5));
-      setDropdownValue(value);
     } else if (value.startsWith("sort:")) {
       setSortKey(value.slice(5));
     } else if (value === "preview:toggle") {
@@ -267,7 +293,11 @@ export default function SearchCommand(props: {
     }
   };
 
+  // Refresh re-fetches from the first page; without the reset the effect would
+  // append the re-fetched page to the already accumulated rows (duplicates)
   const refresh = useCallback(() => {
+    setPage(0);
+    setAllResults([]);
     setReloadTick((t) => t + 1);
   }, []);
 
@@ -275,10 +305,7 @@ export default function SearchCommand(props: {
   const cycleType = useCallback(() => {
     const idx = typeDefs.findIndex((t) => t.id === typeId);
     const next = typeDefs[(idx + 1) % typeDefs.length] ?? typeDefs[0];
-    if (next) {
-      setTypeId(next.id);
-      setDropdownValue(`type:${next.id}`);
-    }
+    if (next) setTypeId(next.id);
   }, [typeDefs, typeId, setTypeId]);
 
   const loadMore = useCallback(() => {
@@ -302,7 +329,7 @@ export default function SearchCommand(props: {
       searchBarAccessory={
         <List.Dropdown
           tooltip="File type / sort / preview / settings"
-          value={dropdownValue}
+          value={`type:${typeId}`}
           onChange={onDropdownChange}
         >
           <List.Dropdown.Section title="File Type">
@@ -465,7 +492,9 @@ function FileListItem({
   const full = fullPathOf(file);
   const isFolder = file.type === "folder";
   const dm = filetimeToDate(file.date_modified);
-  const needsText = !isFolder && isTextPreviewable(file.name);
+  // Only read text when the preview pane is on — otherwise a page of results
+  // would open hundreds of files that are never shown
+  const needsText = showPreview && !isFolder && isTextPreviewable(file.name);
   const [textContent, setTextContent] = useState<string | null | undefined>(
     needsText ? undefined : null,
   );
@@ -477,10 +506,13 @@ function FileListItem({
     fs.promises
       .open(full, "r")
       .then(async (fh) => {
-        const buf = Buffer.alloc(64 * 1024);
-        const { bytesRead } = await fh.read(buf, 0, buf.length, 0);
-        await fh.close();
-        return buf.slice(0, bytesRead);
+        try {
+          const buf = Buffer.alloc(64 * 1024);
+          const { bytesRead } = await fh.read(buf, 0, buf.length, 0);
+          return buf.slice(0, bytesRead);
+        } finally {
+          await fh.close();
+        }
       })
       .then((buf) => {
         if (!cancelled)
@@ -495,7 +527,12 @@ function FileListItem({
   }, [full, needsText]);
 
   const showInExplorer = () => {
-    exec(`explorer /select,"${full}"`);
+    // spawn with separated arguments — the path must never go through a shell
+    spawn("explorer", ["/select,", full], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    }).unref();
   };
 
   const sizeText =

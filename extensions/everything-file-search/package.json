@@ -178,7 +178,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray fix-lint",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "build:raycast": "ray build -o ./dist && node -e \"const fs=require('fs');for(const f of fs.readdirSync('dist').filter(f=>f.endsWith('.js')))fs.copyFileSync('dist/'+f,f)\""
   }

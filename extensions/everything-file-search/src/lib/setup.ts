@@ -117,7 +117,9 @@ export async function ensureHttpServer(
 
   const iniPath = findEverythingIni(exePath);
   if (!iniPath) {
-    // Never ran: start once so the ini gets created
+    // Never ran: start once so the ini gets created, then EXIT that instance —
+    // a running Everything flushes its in-memory settings back to the ini on
+    // exit and would overwrite our edit, leaving the HTTP server off
     spawn(exePath, ["-startup"], {
       detached: true,
       stdio: "ignore",
@@ -127,6 +129,12 @@ export async function ensureHttpServer(
     const ini = findEverythingIni(exePath);
     if (!ini)
       return "Everything.ini not found — run Everything once manually, then retry";
+    spawn(exePath, ["-exit"], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    }).unref();
+    await sleep(1500);
     return writeIniAndRestart(ini, exePath, port);
   }
   return writeIniAndRestart(iniPath, exePath, port);
@@ -139,17 +147,28 @@ async function writeIniAndRestart(
 ): Promise<string | undefined> {
   try {
     const raw = fs.readFileSync(iniPath, "utf8");
-    const updated = raw
-      .split(/\r?\n/)
-      .map((line) => {
-        if (/^http_server_enabled=/.test(line)) return "http_server_enabled=1";
-        if (/^http_server_port=/.test(line)) return `http_server_port=${port}`;
-        if (/^http_server_bindings=/.test(line))
-          return "http_server_bindings=127.0.0.1";
-        return line;
-      })
-      .join("\r\n");
-    fs.writeFileSync(iniPath, updated, "utf8");
+    // Replace existing keys, and INSERT them when absent — a fresh ini may not
+    // contain the http_server_* keys at all, in which case the loopback-only
+    // binding would never be applied
+    const wanted: Record<string, string> = {
+      http_server_enabled: "1",
+      http_server_port: String(port),
+      http_server_bindings: "127.0.0.1",
+    };
+    const seen = new Set<string>();
+    const lines = raw.split(/\r?\n/).map((line) => {
+      for (const [key, value] of Object.entries(wanted)) {
+        if (line.startsWith(`${key}=`)) {
+          seen.add(key);
+          return `${key}=${value}`;
+        }
+      }
+      return line;
+    });
+    for (const [key, value] of Object.entries(wanted)) {
+      if (!seen.has(key)) lines.push(`${key}=${value}`);
+    }
+    fs.writeFileSync(iniPath, lines.join("\r\n"), "utf8");
   } catch (e) {
     return `Failed to write config: ${e instanceof Error ? e.message : String(e)}`;
   }
@@ -168,12 +187,28 @@ async function writeIniAndRestart(
   return `Everything restarted, but port ${port} is still unreachable; check Everything Options > HTTP server and confirm the port`;
 }
 
+/** Run winget asynchronously — a synchronous spawn would block the JS thread
+ * and freeze the command's UI for the whole (possibly minutes-long) install. */
+function runWinget(args: string[], timeoutMs: number): Promise<number | null> {
+  return new Promise((resolve) => {
+    const child = spawn("winget.exe", args, { shell: true, windowsHide: true });
+    const timer = setTimeout(() => child.kill(), timeoutMs);
+    child.on("error", () => {
+      clearTimeout(timer);
+      resolve(-1);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      resolve(code);
+    });
+  });
+}
+
 /** Install Everything via winget, then enable the HTTP server. Returns an error string or undefined. */
 export async function installEverythingAndEnableHttp(
   port = 8085,
 ): Promise<string | undefined> {
-  const r = spawnSync(
-    "winget.exe",
+  const code = await runWinget(
     [
       "install",
       "-e",
@@ -183,11 +218,11 @@ export async function installEverythingAndEnableHttp(
       "--accept-source-agreements",
       "--accept-package-agreements",
     ],
-    { encoding: "utf8", timeout: 600_000, shell: true },
+    600_000,
   );
   // The winget installer auto-starts Everything
-  if (!findEverythingExe()) {
-    return `winget install failed (exit ${r.status}); install manually from https://www.voidtools.com/downloads/`;
+  if (code !== 0 || !findEverythingExe()) {
+    return `winget install failed (exit ${code}); install manually from https://www.voidtools.com/downloads/`;
   }
   await sleep(1500);
   return ensureHttpServer(port);
