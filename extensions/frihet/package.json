@@ -71,11 +71,11 @@
   "scripts": {
     "build": "ray build -e dist",
     "build:dist": "ray build -e dist -o dist",
-    "build:tsc": "tsc -p tsconfig.build.json",
+    "build:tsc": "ray build -e dist && tsc -p tsconfig.build.json",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ray build -e dist && tsc --noEmit",
     "test": "npm run build:tsc && node --test dist/__tests__/*.test.js"
   },
   "dependencies": {
