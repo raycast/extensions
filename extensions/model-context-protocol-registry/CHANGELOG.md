@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Fictura MCP Server] - {PR_MERGE_DATE}
+## [Add Fictura MCP Server] - 2026-11-01
 
 - Add Fictura to the official registry: growth data for Expo and React Native apps, covering paywalls and onboarding flows, subscription analytics and funnels, A/B experiments, attribution and ad spend, deep links, App Store and Google Play analytics, and error reports. Mostly read-only; it can create and edit draft paywalls and onboarding flows, never live ones. Hosted Streamable HTTP server at https://mcp.fictura.co/mcp with OAuth 2.1 sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
