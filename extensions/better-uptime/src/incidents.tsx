@@ -211,7 +211,10 @@ function Incident({ item, onDeleted }: { item: IncidentItem; onDeleted: () => vo
           {item.attributes.response_url && (
             <Action.OpenInBrowser title="View Response Body" url={item.attributes.response_url} />
           )}
-          <ActionDeleteIncident item={item} onDeleted={onDeleted} />
+          <Action.CopyToClipboard title="Copy Incident ID" content={item.id} />
+          <ActionPanel.Section>
+            <ActionDeleteIncident item={item} onDeleted={onDeleted} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

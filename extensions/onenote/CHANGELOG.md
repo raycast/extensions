@@ -1,5 +1,9 @@
 # OneNote Changelog
 
+## [Fix search crash on Raycast 2.9] - 2026-10-26
+
+- Fixed a "Value is too large to be represented as a JavaScript number" error when searching notes.
+
 ## [Fix note search and loading errors] - 2026-10-06
 
 - Search note content as well as titles, including text beyond the preview.

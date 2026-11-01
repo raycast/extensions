@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.tsbuildinfo
+
+# Project notes, kept out of the Store submission
+/docs/

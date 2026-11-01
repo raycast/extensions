@@ -41,6 +41,7 @@ test("daily planning integrates with existing timers, logs and recoverable stora
     const load = createRequire(join(process.cwd(), "tests/planning-service.test.ts"));
     const storage = load("../src/lib/storage.ts") as typeof import("../src/lib/storage");
     const service = load("../src/lib/planning-service.ts") as typeof import("../src/lib/planning-service");
+    const templates = load("../src/lib/plan-template-service.ts") as typeof import("../src/lib/plan-template-service");
     const timer = load("../src/lib/timer.ts") as typeof import("../src/lib/timer");
     const { getPomodoro } = load("../src/lib/reminder-service.ts") as typeof import("../src/lib/reminder-service");
     const { planContent, isPlanComplete, localDateKey } = load(
@@ -665,116 +666,413 @@ test("daily planning integrates with existing timers, logs and recoverable stora
       await assertAdvanced(() => service.removePlannedItem({ goalId: saved.id, taskId: saved.tasks[0].id }, date));
     });
 
-    await t.test("one import carries only the last nonempty day's incomplete plans and retries safely", async () => {
+    await t.test(
+      "automatic carryover moves only the latest day once, retaining completed steps, order, and running work",
+      async () => {
+        const previousItems = new Map(items);
+        items.clear();
+        try {
+          await storage.saveProjects([project]);
+          const day = (offset: number) => {
+            const instant = new Date();
+            instant.setDate(instant.getDate() + offset);
+            return localDateKey(instant);
+          };
+          const sourceDate = day(-3);
+          const draft = async (date: string, content: string) => {
+            const saved = await service.savePlanDraft({ date, content, projectId: project.id });
+            return (await storage.getPlan(saved.id))!;
+          };
+          const current = await draft(date, "Already today");
+          const older = await draft(day(-5), "Older unfinished plan");
+          const leaf = await draft(sourceDate, "Unfinished standalone");
+          let parent = await draft(sourceDate, "Workflow\nFinished step\nPending step");
+          await timer.completePlannedItem({ goalId: parent.id, taskId: parent.tasks[0].id }, true, sourceDate);
+          parent = (await storage.getPlan(parent.id))!;
+          const finished = await draft(sourceDate, "Fully complete\nDone");
+          await timer.completePlannedItem({ goalId: finished.id }, true, sourceDate);
+          await storage.savePlanOrder(sourceDate, [parent.id, leaf.id, finished.id]);
+          const future = await draft(day(1), "Future plan");
+          await storage.savePlan({ ...future, previousDates: [day(-1)] });
+          const historical = {
+            id: "latest-import-history",
+            projectId: project.id,
+            description: "Finished step",
+            plan: { goalId: parent.id, taskId: parent.tasks[0].id },
+            startedAt: new Date(`${sourceDate}T10:00:00`).toISOString(),
+            endedAt: new Date(`${sourceDate}T10:20:00`).toISOString(),
+            createdAt: now,
+            updatedAt: now,
+          };
+          items.set(`workLog:${historical.id}`, JSON.stringify(historical));
+          const logs = await storage.getWorkLogs();
+          const running = await timer.startPlannedTimer({ goalId: current.id }, true);
+          const pomodoro = await getPomodoro(running);
+          const { readDailyPlan } = load("../src/lib/plan-state.ts") as typeof import("../src/lib/plan-state");
+          const { createReport } = load("../src/lib/reports.ts") as typeof import("../src/lib/reports");
+          const reportDate = new Date(`${sourceDate}T12:00:00`);
+          const report = createReport("today", logs, [project], null, reportDate);
+          assert.equal((await readDailyPlan(date)).previousPlanDate, sourceDate);
+
+          const results = await Promise.allSettled([
+            service.carryOverPlansToToday(date),
+            service.carryOverPlansToToday(date),
+          ]);
+          assert.equal(
+            results.reduce((sum, result) => sum + (result.status === "fulfilled" ? result.value.count : 0), 0),
+            2,
+          );
+          assert.deepEqual(
+            (await storage.getPlans(date)).map((goal) => goal.id),
+            [current.id, parent.id, leaf.id],
+          );
+          assert.deepEqual(
+            (await storage.getPlan(parent.id))!.tasks,
+            parent.tasks.map((task) => ({ ...task, date })),
+          );
+          assert.deepEqual(
+            (await storage.getPlans(sourceDate)).map((goal) => goal.id),
+            [finished.id],
+          );
+          assert.deepEqual(await storage.getPlan(older.id), JSON.parse(JSON.stringify(older)));
+          assert.equal((await storage.getPlan(future.id))!.date, day(1));
+          const todayParent = (await readDailyPlan(date)).goals.find((goal) => goal.id === parent.id)!;
+          assert.equal(todayParent.seconds, 0);
+          assert.deepEqual(
+            todayParent.tasks.map((task) => task.seconds),
+            [0, 0],
+          );
+          assert.deepEqual(await storage.getWorkLogs(), logs);
+          assert.deepEqual(createReport("today", await storage.getWorkLogs(), [project], null, reportDate), report);
+          assert.deepEqual(await storage.getActiveTimer(), running);
+          assert.deepEqual(await getPomodoro(running), pomodoro);
+          // The latest day is now fully complete: do not silently reach back to older work.
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+        } finally {
+          failWrite = undefined;
+          items.clear();
+          previousItems.forEach((value, key) => items.set(key, value));
+        }
+      },
+    );
+    await t.test(
+      "automatic carryover resumes after order, plan, or completion-marker failures without reaching older days",
+      async () => {
+        const previousItems = new Map(items);
+        items.clear();
+        try {
+          await storage.saveProjects([project]);
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const sourceDate = localDateKey(yesterday);
+          const olderDay = new Date(yesterday);
+          olderDay.setDate(olderDay.getDate() - 2);
+          const older = await service.savePlanDraft({
+            date: localDateKey(olderDay),
+            content: "Older unfinished",
+            projectId: project.id,
+          });
+          const first = await service.savePlanDraft({ date: sourceDate, content: "First", projectId: project.id });
+          const second = await service.savePlanDraft({
+            date: sourceDate,
+            content: "Second\nA\nB",
+            projectId: project.id,
+          });
+          await storage.savePlanOrder(sourceDate, [first.id, second.id]);
+          failWrite = `dailyGoalOrder:${date}`;
+          await assert.rejects(service.carryOverPlansToToday(date), /disk full/);
+          assert.deepEqual(await storage.getPlan(first.id), JSON.parse(JSON.stringify(first)));
+          failWrite = `dailyGoal:${second.id}`;
+          await assert.rejects(service.carryOverPlansToToday(date), /disk full/);
+          assert.equal((await storage.getPlan(first.id))!.date, date);
+          assert.deepEqual(await storage.getPlan(second.id), JSON.parse(JSON.stringify(second)));
+          // The prepared journal already exists, so fail only its final completion write.
+          failWrite = "dailyPlanCarryover";
+          await assert.rejects(service.carryOverPlansToToday(date), /disk full/);
+          assert.equal((await storage.getPlans(sourceDate)).length, 0);
+          failWrite = undefined;
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+          assert.equal((await storage.getPlan(older.id))!.date, older.date);
+          const todayIds = (await storage.getPlans(date)).map((goal) => goal.id);
+          assert.deepEqual(todayIds, [first.id, second.id]);
+          assert.equal(new Set(todayIds).size, todayIds.length);
+          assert.equal((await storage.getPlanCarryover())?.complete, true);
+        } finally {
+          failWrite = undefined;
+          items.clear();
+          previousItems.forEach((value, key) => items.set(key, value));
+        }
+      },
+    );
+
+    await t.test(
+      "automatic carryover handles empty and completed days, rejects stale dates, and runs again after midnight",
+      async (context) => {
+        const previousItems = new Map(items);
+        items.clear();
+        const instant = new Date();
+        context.mock.timers.enable({ apis: ["Date"], now: instant.getTime() });
+        try {
+          await storage.saveProjects([project]);
+          const yesterday = new Date(instant);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayDate = localDateKey(yesterday);
+          const before = new Map(items);
+          assert.deepEqual(await service.carryOverPlansToToday(yesterdayDate), { date, count: 0 });
+          assert.deepEqual(items, before);
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+          const once = new Map(items);
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+          assert.deepEqual(items, once);
+          const pending = await service.savePlanDraft({ date, content: "For tomorrow", projectId: project.id });
+          const finished = await service.savePlanDraft({ date, content: "Already finished", projectId: project.id });
+          await timer.completePlannedItem({ goalId: finished.id }, true, date);
+          const tomorrow = new Date(instant);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(0, 0, 0, 0);
+          context.mock.timers.setTime(tomorrow.getTime());
+          const tomorrowDate = localDateKey(tomorrow);
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date: tomorrowDate, count: 0 });
+          assert.deepEqual(await service.carryOverPlansToToday(tomorrowDate), { date: tomorrowDate, count: 1 });
+          assert.equal((await storage.getPlan(pending.id))!.date, tomorrowDate);
+          assert.equal((await storage.getPlan(finished.id))!.date, date);
+          context.mock.timers.setTime(instant.getTime());
+          const completed = new Map(items);
+          assert.deepEqual(await service.carryOverPlansToToday(date), { date, count: 0 });
+          assert.deepEqual(items, completed);
+          // A fully completed latest day must not reach back to earlier unfinished plans.
+          context.mock.timers.setTime(tomorrow.getTime());
+          items.delete("dailyPlanCarryover");
+          await timer.completePlannedItem({ goalId: pending.id }, true, tomorrowDate);
+          const older = await service.savePlanDraft({
+            date: yesterdayDate,
+            content: "Intentionally old",
+            projectId: project.id,
+          });
+          const dayAfter = new Date(tomorrow);
+          dayAfter.setDate(dayAfter.getDate() + 1);
+          context.mock.timers.setTime(dayAfter.getTime());
+          assert.deepEqual(await service.carryOverPlansToToday(localDateKey(dayAfter)), {
+            date: localDateKey(dayAfter),
+            count: 0,
+          });
+          assert.deepEqual(await storage.getPlan(older.id), JSON.parse(JSON.stringify(older)));
+          items.set("dailyPlanCarryover", "{broken");
+          const broken = new Map(items);
+          await assert.rejects(service.carryOverPlansToToday(localDateKey(dayAfter)), /Could not parse/);
+          assert.deepEqual(items, broken);
+          items.set(
+            "dailyPlanCarryover",
+            JSON.stringify({ date: localDateKey(dayAfter), goalIds: "invalid", complete: false }),
+          );
+          const invalid = new Map(items);
+          await assert.rejects(service.carryOverPlansToToday(localDateKey(dayAfter)), /invalid/);
+          assert.deepEqual(items, invalid);
+        } finally {
+          context.mock.timers.reset();
+          items.clear();
+          previousItems.forEach((value, key) => items.set(key, value));
+        }
+      },
+    );
+    await t.test("an interrupted carryover resumes after midnight before the new day's carryover", async (context) => {
+      const previousItems = new Map(items);
+      items.clear();
+      const instant = new Date();
+      context.mock.timers.enable({ apis: ["Date"], now: instant.getTime() });
+      try {
+        await storage.saveProjects([project]);
+        const yesterday = new Date(instant);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const sourceDate = localDateKey(yesterday);
+        const first = await service.savePlanDraft({ date: sourceDate, content: "First", projectId: project.id });
+        const second = await service.savePlanDraft({ date: sourceDate, content: "Second", projectId: project.id });
+        await storage.savePlanOrder(sourceDate, [first.id, second.id]);
+        failWrite = `dailyGoal:${second.id}`;
+        await assert.rejects(service.carryOverPlansToToday(date), /disk full/);
+        assert.equal((await storage.getPlan(first.id))!.date, date);
+        failWrite = undefined;
+        const tomorrow = new Date(instant);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+        context.mock.timers.setTime(tomorrow.getTime());
+        const tomorrowDate = localDateKey(tomorrow);
+        assert.deepEqual(await service.carryOverPlansToToday(tomorrowDate), { date: tomorrowDate, count: 2 });
+        assert.deepEqual(
+          (await storage.getPlans(tomorrowDate)).map((goal) => goal.id),
+          [first.id, second.id],
+        );
+        assert.equal((await storage.getPlans(sourceDate)).length, 0);
+        assert.equal((await storage.getPlans(date)).length, 0);
+      } finally {
+        failWrite = undefined;
+        context.mock.timers.reset();
+        items.clear();
+        previousItems.forEach((value, key) => items.set(key, value));
+      }
+    });
+    await t.test("automatic carryover retries brief contention with menu-bar reminder operations", async () => {
+      const { withReminderOperation } = load(
+        "../src/lib/reminder-service.ts",
+      ) as typeof import("../src/lib/reminder-service");
+      let pending: Promise<{ date: string; count: number }> | undefined;
+      await withReminderOperation(async () => {
+        pending = service.carryOverPlansToToday(date);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+      assert.deepEqual(await pending, { date, count: 0 });
+    });
+
+    async function withTemplateFixture(run: () => Promise<void>) {
       const previousItems = new Map(items);
       items.clear();
       try {
         await storage.saveProjects([project]);
-        const day = (offset: number) => {
-          const instant = new Date();
-          instant.setDate(instant.getDate() + offset);
-          return localDateKey(instant);
-        };
-        const sourceDate = day(-3);
-        const draft = async (date: string, content: string) => {
-          const saved = await service.savePlanDraft({ date, content, projectId: project.id });
-          return (await storage.getPlan(saved.id))!;
-        };
-        const current = await draft(date, "Already today");
-        const beforeEmptyImport = new Map(items);
-        assert.deepEqual(await service.importLatestPlansToToday(), { date, count: 0 });
-        assert.deepEqual(items, beforeEmptyImport);
-        const older = await draft(day(-5), "Older unfinished plan");
-        const leaf = await draft(sourceDate, "Unfinished standalone");
-        let parent = await draft(sourceDate, "Workflow\nFinished step\nPending step");
-        await timer.completePlannedItem({ goalId: parent.id, taskId: parent.tasks[0].id }, true, sourceDate);
-        parent = (await storage.getPlan(parent.id))!;
-        const finished = await draft(sourceDate, "Fully complete\nDone");
-        await timer.completePlannedItem({ goalId: finished.id }, true, sourceDate);
-        await storage.savePlanOrder(sourceDate, [parent.id, leaf.id, finished.id]);
-        const future = await draft(day(1), "Future plan");
-        await storage.savePlan({ ...future, previousDates: [day(-1)] });
-        const historical = {
-          id: "latest-import-history",
-          projectId: project.id,
-          description: "Finished step",
-          plan: { goalId: parent.id, taskId: parent.tasks[0].id },
-          startedAt: new Date(`${sourceDate}T10:00:00`).toISOString(),
-          endedAt: new Date(`${sourceDate}T10:20:00`).toISOString(),
-          createdAt: now,
-          updatedAt: now,
-        };
-        items.set(`workLog:${historical.id}`, JSON.stringify(historical));
-        const logs = await storage.getWorkLogs();
-        const running = await timer.startPlannedTimer({ goalId: current.id }, true);
-        const pomodoro = await getPomodoro(running);
-        const { readDailyPlan } = load("../src/lib/plan-state.ts") as typeof import("../src/lib/plan-state");
-        const { createReport } = load("../src/lib/reports.ts") as typeof import("../src/lib/reports");
-        const reportDate = new Date(`${sourceDate}T12:00:00`);
-        const report = createReport("today", logs, [project], null, reportDate);
-        assert.equal((await readDailyPlan(date)).previousPlanDate, sourceDate);
-
-        const results = await Promise.allSettled([
-          service.importLatestPlansToToday(sourceDate),
-          service.importLatestPlansToToday(sourceDate),
-        ]);
-        assert.equal(
-          results.reduce((sum, result) => sum + (result.status === "fulfilled" ? result.value.count : 0), 0),
-          2,
-        );
-        assert.deepEqual(
-          (await storage.getPlans(date)).map((goal) => goal.id),
-          [current.id, parent.id, leaf.id],
-        );
-        assert.deepEqual(
-          (await storage.getPlan(parent.id))!.tasks,
-          parent.tasks.map((task) => ({ ...task, date })),
-        );
-        assert.deepEqual(
-          (await storage.getPlans(sourceDate)).map((goal) => goal.id),
-          [finished.id],
-        );
-        assert.deepEqual(await storage.getPlan(older.id), older);
-        assert.equal((await storage.getPlan(future.id))!.date, day(1));
-        const todayParent = (await readDailyPlan(date)).goals.find((goal) => goal.id === parent.id)!;
-        assert.equal(todayParent.seconds, 0);
-        assert.deepEqual(
-          todayParent.tasks.map((task) => task.seconds),
-          [0, 0],
-        );
-        assert.deepEqual(await storage.getWorkLogs(), logs);
-        assert.deepEqual(createReport("today", await storage.getWorkLogs(), [project], null, reportDate), report);
-        assert.deepEqual(await storage.getActiveTimer(), running);
-        assert.deepEqual(await getPomodoro(running), pomodoro);
-        // The latest day is now fully complete: do not silently reach back to older work.
-        assert.deepEqual(await service.importLatestPlansToToday(sourceDate), { date, count: 0 });
-        await assert.rejects(service.importLatestPlansToToday(older.date), /latest plan date has changed/);
-
-        const firstRetry = await draft(day(-1), "Retry first");
-        const secondRetry = await draft(day(-1), "Retry second\nA\nB");
-        await storage.savePlanOrder(day(-1), [firstRetry.id, secondRetry.id]);
-        failWrite = `dailyGoalOrder:${date}`;
-        await assert.rejects(service.importLatestPlansToToday(day(-1)), /disk full/);
-        assert.deepEqual(await storage.getPlan(firstRetry.id), firstRetry);
-        failWrite = `dailyGoal:${secondRetry.id}`;
-        await assert.rejects(service.importLatestPlansToToday(day(-1)), /1 plan imported.*Retry.*disk full/);
-        failWrite = undefined;
-        assert.equal((await storage.getPlan(firstRetry.id))!.date, date);
-        assert.deepEqual(await storage.getPlan(secondRetry.id), secondRetry);
-        assert.deepEqual(await service.importLatestPlansToToday(day(-1)), { date, count: 1 });
-        const todayIds = (await storage.getPlans(date)).map((goal) => goal.id);
-        assert.deepEqual(todayIds, [current.id, parent.id, leaf.id, firstRetry.id, secondRetry.id]);
-        assert.equal(new Set(todayIds).size, todayIds.length);
-        await assert.rejects(service.importLatestPlansToToday(day(-1)), /latest plan date has changed/);
-        assert.deepEqual(await storage.getWorkLogs(), logs);
-        assert.deepEqual(await storage.getActiveTimer(), running);
-        assert.deepEqual(await getPomodoro(running), pomodoro);
+        await run();
       } finally {
         failWrite = undefined;
         items.clear();
         previousItems.forEach((value, key) => items.set(key, value));
       }
-    });
+    }
+
+    await t.test(
+      "templates reuse plan text and project while creating fresh task identities, completion states, and time totals",
+      async () => {
+        await withTemplateFixture(async () => {
+          let source = await service.savePlanDraft({
+            date,
+            content: "Daily work\nReview\nImplement",
+            projectId: project.id,
+          });
+          await timer.completePlannedItem({ goalId: source.id }, true, date);
+          source = (await storage.getPlan(source.id))!;
+          const log = {
+            id: "template-source-time",
+            projectId: project.id,
+            description: "Review",
+            plan: { goalId: source.id, taskId: source.tasks[0].id },
+            startedAt: new Date(Date.now() - 60000).toISOString(),
+            endedAt: new Date().toISOString(),
+            createdAt: now,
+            updatedAt: now,
+          };
+          await storage.upsertWorkLog(log);
+          const saved = await templates.savePlanTemplate({
+            name: " Daily development ",
+            projectId: source.projectId,
+            content: planContent(source),
+          });
+          assert.equal(saved.name, "Daily development");
+          assert.equal(saved.content, "Daily work\nReview\nImplement");
+          assert.deepEqual(
+            Object.keys(saved).sort(),
+            ["id", "name", "projectId", "content", "createdAt", "updatedAt"].sort(),
+          );
+          const first = await service.savePlanDraft({ date, projectId: saved.projectId, content: saved.content });
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const second = await service.savePlanDraft({
+            date: localDateKey(tomorrow),
+            projectId: saved.projectId,
+            content: saved.content,
+          });
+          const ids = [source, first, second].flatMap((goal) => [goal.id, ...goal.tasks.map((task) => task.id)]);
+          assert.equal(new Set(ids).size, ids.length);
+          assert.ok(
+            [first, second].every(
+              (goal) => !goal.completedAt && goal.tasks.every((task) => !task.completedAt && !task.date),
+            ),
+          );
+          const { readDailyPlan } = load("../src/lib/plan-state.ts") as typeof import("../src/lib/plan-state");
+          assert.equal((await readDailyPlan(date)).goals.find((goal) => goal.id === first.id)!.seconds, 0);
+          assert.deepEqual(await storage.getPlan(source.id), source);
+          assert.deepEqual(await storage.getWorkLogs(), [log]);
+          await service.savePlanDraft({
+            ...first,
+            expectedUpdatedAt: first.updatedAt,
+            content: "Only this instance\nChanged",
+          });
+          assert.deepEqual((await storage.getPlanTemplates())[0], saved);
+          assert.deepEqual(await storage.getPlan(source.id), source);
+        });
+      },
+    );
+
+    await t.test(
+      "template edits and deletion reject stale changes and never modify plans already created",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const saved = await templates.savePlanTemplate(draft);
+          const added = await service.savePlanDraft({ date, projectId: saved.projectId, content: saved.content });
+          const snapshot = await storage.getPlan(added.id);
+          const edited = await templates.savePlanTemplate({
+            ...saved,
+            expectedUpdatedAt: saved.updatedAt,
+            content: "New routine\nNew step",
+          });
+          assert.ok(edited.updatedAt > saved.updatedAt);
+          await assert.rejects(templates.savePlanTemplate({ ...saved, expectedUpdatedAt: saved.updatedAt }), /changed/);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /changed/);
+          await templates.deletePlanTemplate(edited.id, edited.updatedAt);
+          assert.deepEqual(await storage.getPlanTemplates(), []);
+          assert.deepEqual(await storage.getPlan(added.id), snapshot);
+        });
+      },
+    );
+
+    await t.test(
+      "templates require valid names, content, and projects, and adding a plan requires an active project",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const before = new Map(items);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, name: " " }), /template name/);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, content: "\nMissing goal" }), /first line/);
+          await assert.rejects(templates.savePlanTemplate({ ...draft, projectId: "deleted" }), /existing project/);
+          assert.deepEqual(items, before);
+          const saved = await templates.savePlanTemplate(draft);
+          await storage.saveProjects([{ ...project, isActive: false }]);
+          await assert.rejects(
+            service.savePlanDraft({ date, content: saved.content, projectId: saved.projectId }),
+            /active project/,
+          );
+          assert.deepEqual(await storage.getPlans(), []);
+          await storage.saveProjects([]);
+          assert.deepEqual((await storage.getPlanTemplates())[0], saved);
+          await assert.rejects(
+            service.savePlanDraft({ date, content: saved.content, projectId: saved.projectId }),
+            /active project/,
+          );
+        });
+      },
+    );
+
+    await t.test(
+      "corrupt templates, duplicate identities, and failed writes preserve saved templates and work data",
+      async () => {
+        await withTemplateFixture(async () => {
+          const draft = { name: "Routine", projectId: project.id, content: "Routine\nCheck" };
+          const saved = await templates.savePlanTemplate(draft);
+          const before = new Map(items);
+          failWrite = "planTemplates";
+          await assert.rejects(templates.savePlanTemplate({ ...draft, name: "Second" }), /disk full/);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /disk full/);
+          assert.deepEqual(items, before);
+          failWrite = undefined;
+          items.set("planTemplates", "{broken");
+          const broken = new Map(items);
+          await assert.rejects(templates.savePlanTemplate(draft), /Could not parse/);
+          assert.deepEqual(items, broken);
+          items.set("planTemplates", JSON.stringify([saved, saved]));
+          const duplicates = new Map(items);
+          await assert.rejects(templates.deletePlanTemplate(saved.id, saved.updatedAt), /duplicate IDs/);
+          assert.deepEqual(items, duplicates);
+        });
+      },
+    );
   } finally {
     hooks.deregister();
     delete globals.planningTestAPI;

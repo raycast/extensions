@@ -18,7 +18,7 @@ import {
   uploadImage,
   type OutputFormat,
   type UploadOverrides,
-} from "@mcdays/cloudflare-images-core";
+} from "./cloudflare-core.js";
 import {
   buildCloudflareConfig,
   buildCompressionConfig,

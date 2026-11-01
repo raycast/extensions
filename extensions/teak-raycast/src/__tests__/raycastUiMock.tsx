@@ -57,6 +57,8 @@ export const mockRaycastUi = () =>
     Detail: component("Detail"),
     Form: component("Form"),
     Icon: constants(),
+    Image: { Mask: constants() },
+    Keyboard: { Shortcut: { Common: constants() } },
     List: component("List"),
     Toast: {
       Style: { Animated: "animated", Failure: "failure", Success: "success" },

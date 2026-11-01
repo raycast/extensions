@@ -159,3 +159,53 @@ test("real auth hook reports discovery failure and Retry recovers saved credenti
   expect(container.textContent).toBe("Saved session accepted");
   expect(browserCount).toBe(0);
 });
+
+test("a signed-out view starts sign-in right away and reuses a saved session", async () => {
+  const issuer = "https://scholarly-hay-77.authkit.app";
+  globalThis.fetch = ((input) => {
+    const url = String(input);
+    if (url.includes("oauth-protected-resource")) {
+      return Promise.resolve(
+        Response.json({
+          authorization_servers: [issuer],
+          resource: "https://teakvault.com/mcp",
+        }),
+      );
+    }
+    if (url.includes("teak-oauth-clients")) {
+      return Promise.resolve(
+        Response.json({
+          clients: Object.fromEntries(
+            ["cli", "raycast", "chrome", "firefox", "safari"].map((surface) => [
+              surface,
+              "client_01M47GV3CYKFW0H78W0XYKGTM5",
+            ]),
+          ),
+          issuer,
+          primary: "workos",
+        }),
+      );
+    }
+    return Promise.resolve(
+      Response.json({
+        authorization_endpoint: `${issuer}/authorize`,
+        code_challenge_methods_supported: ["S256"],
+        issuer,
+        token_endpoint: `${issuer}/oauth2/token`,
+      }),
+    );
+  }) as typeof fetch;
+  let signedIn = 0;
+  await act(async () =>
+    root.render(
+      createElement(MissingApiKeyDetail, {
+        onSignedIn: () => {
+          signedIn += 1;
+        },
+      }),
+    ),
+  );
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+  expect(signedIn).toBe(1);
+  expect(browserCount).toBe(0);
+});

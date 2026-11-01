@@ -40,7 +40,7 @@ const withMaxLength = (value: string, maxLength: number): string => {
 };
 
 const fallbackTitle = (card: RaycastCard): string =>
-  `${card.type.toUpperCase()} Card`;
+  normalizeWhitespace(card.fileName ?? "") || `Untitled ${card.type}`;
 
 export const getCardTitle = (card: RaycastCard, maxLength = 88): string => {
   const metadataTitle = normalizeWhitespace(card.metadataTitle ?? "");
@@ -122,39 +122,24 @@ export const getHeroMediaUrl = (card: RaycastCard): string | null => {
 };
 
 export interface DetailStatusChip {
-  kind:
-    | "type"
-    | "favorite"
-    | "aiSummary"
-    | "aiTags"
-    | "done"
-    | "archived"
-    | "hidden";
+  kind: "type" | "favorite" | "done" | "archived" | "hidden";
   text: string;
 }
 
+/** The card's type, then only the states that are true for it. */
 export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => [
   {
     kind: "type",
-    text: card.type,
+    text: `${card.type.charAt(0).toUpperCase()}${card.type.slice(1)}`,
   },
-  {
-    kind: "favorite",
-    text: card.isFavorited ? "Favorited" : "Not Favorited",
-  },
+  ...(card.isFavorited
+    ? [{ kind: "favorite" as const, text: "Favorite" }]
+    : []),
   ...(isDone(card)
     ? [{ kind: "done" as const, text: doneStatusLabel(card) }]
     : []),
   ...(card.isArchived ? [{ kind: "archived" as const, text: "Archived" }] : []),
   ...(card.isHidden ? [{ kind: "hidden" as const, text: "Hidden" }] : []),
-  {
-    kind: "aiSummary",
-    text: card.aiSummary ? "Teak Summary" : "No Teak Summary",
-  },
-  {
-    kind: "aiTags",
-    text: card.aiTags.length > 0 ? "Teak Tags" : "No Teak Tags",
-  },
 ];
 
 /** "USD 29.99" style price, in the page's currency when it has one. */
@@ -254,19 +239,24 @@ export const getDetailMarkdown = (card: RaycastCard): string => {
   const swatches = (card.colors ?? [])
     .map((color) => color.hex)
     .filter((hex) => SAFE_HEX.test(hex));
-  const isFileCard = Boolean(card.fileName);
   const content = renderCardLinks(card.content.trim(), card.links);
+  // A link's content is its address and a file's is its name, which the
+  // sidebar already shows; a short note or palette name is the title itself.
+  const repeatsMetadata =
+    content === card.fileName ||
+    (card.type === "link" && content === card.url) ||
+    normalizeWhitespace(cardLinksToText(content)) === getCardTitle(card);
   const sections = [
     `# ${getCardTitle(card)}`,
     heroMediaUrl ? `![](${heroMediaUrl})` : "",
     card.type === "palette" && swatches.length > 0
       ? paletteMarkdown(swatches)
       : "",
-    content && !(isFileCard && content === card.fileName)
+    content && !repeatsMetadata
       ? `## Content\n\n${card.type === "quote" ? `> ${content}` : content}`
       : "",
     card.notes ? `## Notes\n\n${card.notes}` : "",
-    card.aiSummary ? `## Teak Summary\n\n${card.aiSummary}` : "",
+    card.aiSummary ? `## Summary\n\n${card.aiSummary}` : "",
     card.aiTranscript ? `## Transcript\n\n${card.aiTranscript}` : "",
     backlinksMarkdown(card.backlinks ?? []),
   ];

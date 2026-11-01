@@ -17,7 +17,7 @@ related_components:
   - src/hooks/useThrottledValue.ts
   - src/views/ArticleDetailView.tsx (memo)
 tags: [oom, heap, raycast, detail-view, streaming, ai-summary, react-memo, throttle]
-pull_request: "raycast/extensions#32483, open and unmerged as of 2026-10-17"
+shipped: "raycast/extensions#32483 (merged 2026-10-18)"
 ---
 
 # Streaming a summary re-sent the whole article on every token
@@ -70,4 +70,4 @@ A Raycast extension's UI is a description that is serialized and sent to the hos
 ## Related Issues
 
 - [../integration-issues/teaser-in-the-reader-is-not-proof-of-a-paywall.md](../integration-issues/teaser-in-the-reader-is-not-proof-of-a-paywall.md): the payload flattening heap crashes and their fixes.
-- Proposed in raycast/extensions#32483, open and unmerged as of 2026-10-17.
+- Shipped in raycast/extensions#32483, merged 2026-10-18.

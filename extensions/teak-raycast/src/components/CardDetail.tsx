@@ -1,8 +1,10 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Detail,
   Icon,
+  Keyboard,
   showToast,
   Toast,
   useNavigation,
@@ -37,10 +39,10 @@ import {
   moveCardToTrash,
   restoreFromTrash,
 } from "../lib/trashActions";
-import { CardOrganizeActions } from "./CardOrganizeActions";
+import { AccountActions } from "./AccountActions";
+import { CardCopyActions, CardOrganizeActions } from "./CardOrganizeActions";
+import { getCardSavedAt } from "./cardListItem";
 import { EditCardForm } from "./EditCardForm";
-import { SetApiKeyAction } from "./SetApiKeyAction";
-import { SignOutAction } from "./SignOutAction";
 
 const FAVORITE_MUTATION_DEBOUNCE_MS = 300;
 const MAX_METADATA_URL_LENGTH = 64;
@@ -58,6 +60,8 @@ export interface CardDetailProps {
   onCardUpdated: (next: RaycastCard) => void;
   onFilterByTag: (tag: string) => void;
   onNavigateBackAfterDelete: () => void;
+  /** Lets the list behind this card check its sign-in again. */
+  onSignedOut?: () => void;
 }
 
 const truncateMiddle = (value: string, maxLength: number): string => {
@@ -85,10 +89,6 @@ const statusColor = (
       return "#2563EB";
     case "favorite":
       return "#D97706";
-    case "aiSummary":
-      return "#7C3AED";
-    case "aiTags":
-      return "#7C3AED";
     case "done":
       return "#16A34A";
     default:
@@ -102,6 +102,7 @@ export function CardDetail({
   onCardUpdated,
   onFilterByTag,
   onNavigateBackAfterDelete,
+  onSignedOut,
 }: CardDetailProps) {
   const { pop } = useNavigation();
   const [cardState, setCardState] = useState(card);
@@ -321,6 +322,16 @@ export function CardDetail({
   const linkFacts = cardState.linkFacts ?? [];
 
   const statusChips = getDetailStatusChips(cardState);
+  const hasSourceFacts = Boolean(
+    cardState.url ||
+    cardState.fileName ||
+    cardState.linkCategory ||
+    cardState.linkPrice ||
+    byline ||
+    publishedDate ||
+    source ||
+    linkFacts.length > 0,
+  );
 
   const urlMetadataFallback = cardState.url ? (
     <Detail.Metadata.Label text={metadataUrl ?? cardState.url} title="URL" />
@@ -329,25 +340,28 @@ export function CardDetail({
   return (
     <Detail
       actions={
-        <ActionPanel>
-          {openableUrl ? (
-            <Action.OpenInBrowser title="Open URL" url={openableUrl} />
-          ) : (
-            <Action.CopyToClipboard
-              content={cardState.content}
-              title="Copy Content"
-            />
-          )}
-          {cardState.fileUrl ? (
+        <ActionPanel title={getCardTitle(cardState, 40)}>
+          <ActionPanel.Section>
+            {openableUrl ? (
+              <Action.OpenInBrowser title="Open URL" url={openableUrl} />
+            ) : null}
+            {cardState.fileUrl ? (
+              <Action.OpenInBrowser
+                icon={Icon.Paperclip}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
+                title="Open File"
+                url={cardState.fileUrl}
+              />
+            ) : null}
             <Action.OpenInBrowser
-              icon={Icon.Paperclip}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-              title="Open File"
-              url={cardState.fileUrl}
+              icon={Icon.AppWindow}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              title="Open in Teak"
+              url={getTeakUrl(cardState)}
             />
-          ) : null}
+          </ActionPanel.Section>
           {inTrash ? (
-            <ActionPanel.Section>
+            <ActionPanel.Section title="Trash">
               <Action
                 icon={Icon.ArrowCounterClockwise}
                 onAction={() => void handleRestore()}
@@ -357,24 +371,25 @@ export function CardDetail({
               <Action
                 icon={Icon.Trash}
                 onAction={() => void handleDeleteForever()}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title="Delete Forever"
               />
             </ActionPanel.Section>
           ) : (
-            <ActionPanel.Section>
+            <CardOrganizeActions
+              card={cardState}
+              onCardUpdated={emitCardUpdate}
+            >
               <Action
-                icon={Icon.Star}
+                icon={cardState.isFavorited ? Icon.StarDisabled : Icon.Star}
                 onAction={handleToggleFavorite}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
-                title={
-                  cardState.isFavorited ? "Remove Favorite" : "Add Favorite"
-                }
+                title={cardState.isFavorited ? "Unfavorite" : "Favorite"}
               />
               <Action.Push
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={
                   <EditCardForm
                     card={cardState}
@@ -383,59 +398,100 @@ export function CardDetail({
                 }
                 title="Edit Card"
               />
+            </CardOrganizeActions>
+          )}
+          <CardCopyActions card={cardState}>
+            {colors.length > 0 ? (
+              <ActionPanel.Submenu icon={Icon.Swatch} title="Copy Color">
+                {colors.map((color) => (
+                  <Action.CopyToClipboard
+                    content={color.hex}
+                    icon={{ source: Icon.CircleFilled, tintColor: color.hex }}
+                    key={color.hex}
+                    title={
+                      color.name ? `${color.name} ${color.hex}` : color.hex
+                    }
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            ) : null}
+          </CardCopyActions>
+          {inTrash ? null : (
+            <ActionPanel.Section>
               <Action
                 icon={Icon.Trash}
                 onAction={() => void handleMoveToTrash()}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title={isDeleting ? "Moving to Trash…" : "Move to Trash"}
               />
             </ActionPanel.Section>
           )}
-          {inTrash ? null : (
-            <CardOrganizeActions
-              card={cardState}
-              onCardUpdated={emitCardUpdate}
-            />
-          )}
-          {colors.length > 0 ? (
-            <ActionPanel.Submenu icon={Icon.Swatch} title="Copy Color">
-              {colors.map((color) => (
-                <Action.CopyToClipboard
-                  content={color.hex}
-                  icon={{ source: Icon.CircleFilled, tintColor: color.hex }}
-                  key={color.hex}
-                  title={color.name ? `${color.name} ${color.hex}` : color.hex}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          ) : null}
-          {openableUrl ? (
-            <Action.CopyToClipboard
-              content={cardState.content}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-              title="Copy Content"
-            />
-          ) : null}
-          {cardState.url ? (
-            <Action.CopyToClipboard
-              content={cardState.url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              title="Copy URL"
-            />
-          ) : null}
-          <Action.OpenInBrowser
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            title="Open in Teak"
-            url={getTeakUrl(cardState)}
+          <AccountActions
+            onSignedOut={() => {
+              onSignedOut?.();
+              pop();
+            }}
           />
-          <SetApiKeyAction />
-          <SignOutAction />
         </ActionPanel>
       }
       markdown={markdown}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            {statusChips.map((chip) => (
+              <Detail.Metadata.TagList.Item
+                color={statusColor(chip.kind)}
+                key={chip.kind}
+                text={chip.text}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+          {cardState.tags.length > 0 ? (
+            <Detail.Metadata.TagList title="Tags">
+              {cardState.tags.map((tag) => (
+                <Detail.Metadata.TagList.Item
+                  key={`tag-${tag}`}
+                  onAction={() => {
+                    handleTagAction(tag);
+                  }}
+                  text={tag}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          ) : null}
+          {cardState.aiTags.length > 0 ? (
+            <Detail.Metadata.TagList title="AI Tags">
+              {cardState.aiTags.map((tag) => (
+                <Detail.Metadata.TagList.Item
+                  key={`ai-tag-${tag}`}
+                  onAction={() => {
+                    handleTagAction(tag);
+                  }}
+                  text={tag}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          ) : null}
+          {colors.length > 0 ? (
+            <Detail.Metadata.TagList title="Colors">
+              {colors.map((color) => (
+                <Detail.Metadata.TagList.Item
+                  color={color.hex}
+                  key={`color-${color.hex}`}
+                  text={color.hex}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          ) : null}
+          {isDone(cardState) && typeof cardState.completedAt === "number" ? (
+            <Detail.Metadata.Label
+              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+              text={formatDateTime(cardState.completedAt)}
+              title={doneStatusLabel(cardState)}
+            />
+          ) : null}
+          {hasSourceFacts ? <Detail.Metadata.Separator /> : null}
           {openableUrl ? (
             <Detail.Metadata.Link
               target={openableUrl}
@@ -445,11 +501,7 @@ export function CardDetail({
           ) : (
             urlMetadataFallback
           )}
-          {cardState.url ? <Detail.Metadata.Separator /> : null}
-          {domain ? (
-            <Detail.Metadata.Label text={domain} title="Domain" />
-          ) : null}
-          {domain ? <Detail.Metadata.Separator /> : null}
+          {domain ? <Detail.Metadata.Label text={domain} title="Site" /> : null}
           {cardState.fileName ? (
             <Detail.Metadata.Label
               icon={Icon.Paperclip}
@@ -487,7 +539,7 @@ export function CardDetail({
             <Detail.Metadata.Link
               target={source.url}
               text={source.label}
-              title="Source"
+              title="Saved From"
             />
           ) : null}
           {linkFacts.map((fact) => (
@@ -497,24 +549,7 @@ export function CardDetail({
               title={fact.label}
             />
           ))}
-          {isDone(cardState) && typeof cardState.completedAt === "number" ? (
-            <Detail.Metadata.Label
-              icon={Icon.CheckCircle}
-              text={formatDateTime(cardState.completedAt)}
-              title={doneStatusLabel(cardState)}
-            />
-          ) : null}
-          {colors.length > 0 ? (
-            <Detail.Metadata.TagList title="Colors">
-              {colors.map((color) => (
-                <Detail.Metadata.TagList.Item
-                  color={color.hex}
-                  key={`color-${color.hex}`}
-                  text={color.hex}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          ) : null}
+          <Detail.Metadata.Separator />
           {inTrash ? (
             <Detail.Metadata.Label
               icon={Icon.Trash}
@@ -522,52 +557,16 @@ export function CardDetail({
               title="In Trash"
             />
           ) : null}
-          <Detail.Metadata.TagList title="Status">
-            {statusChips.map((chip) => (
-              <Detail.Metadata.TagList.Item
-                color={statusColor(chip.kind)}
-                key={chip.kind}
-                text={chip.text}
-              />
-            ))}
-          </Detail.Metadata.TagList>
-          {cardState.tags.length > 0 ? <Detail.Metadata.Separator /> : null}
-          {cardState.tags.length > 0 ? (
-            <Detail.Metadata.TagList title="Tags">
-              {cardState.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item
-                  key={`tag-${tag}`}
-                  onAction={() => {
-                    handleTagAction(tag);
-                  }}
-                  text={tag}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          ) : null}
-          {cardState.aiTags.length > 0 ? <Detail.Metadata.Separator /> : null}
-          {cardState.aiTags.length > 0 ? (
-            <Detail.Metadata.TagList title="AI Tags">
-              {cardState.aiTags.map((tag) => (
-                <Detail.Metadata.TagList.Item
-                  key={`ai-tag-${tag}`}
-                  onAction={() => {
-                    handleTagAction(tag);
-                  }}
-                  text={tag}
-                />
-              ))}
-            </Detail.Metadata.TagList>
-          ) : null}
-          <Detail.Metadata.Separator />
           <Detail.Metadata.Label
-            text={formatDateTime(cardState.createdAt)}
-            title="Created At"
+            text={formatDateTime(getCardSavedAt(cardState))}
+            title="Saved"
           />
-          <Detail.Metadata.Label
-            text={formatDateTime(cardState.updatedAt)}
-            title="Updated At"
-          />
+          {cardState.updatedAt > getCardSavedAt(cardState) ? (
+            <Detail.Metadata.Label
+              text={formatDateTime(cardState.updatedAt)}
+              title="Updated"
+            />
+          ) : null}
         </Detail.Metadata>
       }
       navigationTitle={title}

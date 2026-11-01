@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { InvalidApiKeyView } from "./components/invalid-api-key";
 import { NoWishlistsView } from "./components/no-wishlists";
 import { UnauthorizedError, apiFetch, useWishlists } from "./lib/api";
-import { CURRENCIES, CURRENCY_CODES } from "./lib/currencies";
+import { CURRENCIES } from "./lib/currencies";
 import { FETCH_DETAILS, PREVIEW_IMAGE, PREVIEW_IMAGE_HINT, SUBMIT_FORM, SUBMIT_HINT } from "./lib/shortcuts";
 import type { CreateItemInput, ProductInfoResponse, Wishlist } from "./lib/types";
 import { ALLOWED_IMAGE_EXTENSIONS, isAllowedImagePath, uploadItemImage } from "./lib/upload";
@@ -184,11 +184,6 @@ function AddForm({ onUnauthorized }: { onUnauthorized: () => void }) {
 
   const hasUrl = httpsUrl(values.url) !== undefined;
   const titleEmpty = values.title.trim().length === 0;
-  // A scraped or wishlist-default currency may not be in the curated list (an
-  // uncommon ISO code, say). Surface it as its own item so the dropdown can
-  // still display the current selection.
-  const selectedCurrency = values.currency.trim();
-  const currencyMissing = selectedCurrency.length > 0 && !CURRENCY_CODES.has(selectedCurrency);
   // When the user pasted a URL but hasn't set a title, promote "Fetch Details"
   // into the primary submit slot so it reads as the expected next step.
   const fetchIsPrimary = hasUrl && titleEmpty;
@@ -309,7 +304,6 @@ function AddForm({ onUnauthorized }: { onUnauthorized: () => void }) {
           value={values.currency}
           onChange={(currency) => setValues((previous) => ({ ...previous, currency }))}
         >
-          {currencyMissing && <Form.Dropdown.Item value={selectedCurrency} title={selectedCurrency} />}
           {CURRENCIES.map((currency) => (
             <Form.Dropdown.Item
               key={currency.code}

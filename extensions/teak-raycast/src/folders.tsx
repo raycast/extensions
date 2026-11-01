@@ -1,9 +1,15 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AccountActions } from "./components/AccountActions";
 import { CardsListCommand } from "./components/CardsListCommand";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
-import { SetApiKeyAction } from "./components/SetApiKeyAction";
-import { SignOutAction } from "./components/SignOutAction";
 import {
   getUserFacingErrorMessage,
   listFolders,
@@ -29,18 +35,18 @@ function FolderCardsView({ folder }: { folder: RaycastFolder }) {
       }
       emptyIcon={Icon.Folder}
       emptyTitle="No cards in this folder"
-      latestSectionTitle={folder.name}
       loadCards={loadCards}
       navigationTitle={`Folder: ${folder.name}`}
-      searchBarPlaceholder={`Search "${folder.name}" or use type:, tag:, sort:oldest`}
+      searchBarPlaceholder={`Search "${folder.name}", or filter with tag:, sort:oldest`}
+      sectionTitle={
+        folder.kind === "smart" ? "Matching Cards" : "In This Folder"
+      }
     />
   );
 }
 
 const cardCountLabel = (folder: RaycastFolder): string =>
-  folder.kind === "smart"
-    ? (folder.query ?? "Smart folder")
-    : `${folder.cardCount ?? 0} card${folder.cardCount === 1 ? "" : "s"}`;
+  `${folder.cardCount ?? 0} card${folder.cardCount === 1 ? "" : "s"}`;
 
 export default function FoldersCommand() {
   const {
@@ -90,9 +96,29 @@ export default function FoldersCommand() {
   const manual = visible.filter((folder) => folder.kind === "manual");
   const smart = visible.filter((folder) => folder.kind === "smart");
 
+  const searchBar = {
+    onSearchTextChange: setSearchText,
+    searchBarPlaceholder: "Filter folders…",
+    searchText,
+  };
+
   if (isCheckingAuth) {
-    return <List isLoading navigationTitle="Teak Folders" />;
+    return <List isLoading {...searchBar} />;
   }
+
+  const listActions = (
+    <>
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.ArrowClockwise}
+          onAction={() => void load()}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Reload Folders"
+        />
+      </ActionPanel.Section>
+      <AccountActions onSignedOut={refreshAuth} />
+    </>
+  );
 
   if (!isAuthenticated) {
     return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
@@ -102,29 +128,27 @@ export default function FoldersCommand() {
     <List.Item
       accessories={
         folder.kind === "smart"
-          ? [{ icon: Icon.MagnifyingGlass, tooltip: "Smart folder" }]
-          : []
+          ? [
+              {
+                icon: Icon.MagnifyingGlass,
+                tooltip: "Smart folder: lists what its search finds",
+              },
+            ]
+          : [{ text: cardCountLabel(folder), tooltip: "Cards in this folder" }]
       }
       actions={
-        <ActionPanel>
+        <ActionPanel title={folder.name}>
           <Action
-            icon={Icon.Eye}
+            icon={Icon.ArrowRight}
             onAction={() => push(<FolderCardsView folder={folder} />)}
             title="Open Folder"
           />
-          <Action
-            icon={Icon.ArrowClockwise}
-            onAction={() => void load()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            title="Reload Folders"
-          />
           <Action.CopyToClipboard
             content={folder.name}
-            shortcut={{ key: "c", modifiers: ["cmd"] }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
             title="Copy Folder Name"
           />
-          <SetApiKeyAction />
-          <SignOutAction onSignedOut={refreshAuth} />
+          {listActions}
         </ActionPanel>
       }
       icon={{
@@ -132,37 +156,26 @@ export default function FoldersCommand() {
         tintColor: folderTint(folder.color),
       }}
       key={folder.id}
-      subtitle={cardCountLabel(folder)}
+      subtitle={
+        folder.kind === "smart" ? (folder.query ?? undefined) : undefined
+      }
       title={folder.name}
     />
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Teak Folders"
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Filter folders..."
-      searchText={searchText}
-    >
+    <List isLoading={isLoading} {...searchBar}>
       {error ? (
         <List.EmptyView
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                onAction={() => void load()}
-                title="Retry"
-              />
-            </ActionPanel>
-          }
-          description="Check your API key and network connection, then retry."
+          actions={<ActionPanel>{listActions}</ActionPanel>}
+          description="Check your connection, then reload."
           icon={Icon.ExclamationMark}
           title={error}
         />
       ) : null}
       {!(error || isLoading) && visible.length === 0 ? (
         <List.EmptyView
+          actions={<ActionPanel>{listActions}</ActionPanel>}
           description={
             searchText.trim()
               ? "Try a different keyword to find folders."
@@ -173,10 +186,12 @@ export default function FoldersCommand() {
         />
       ) : null}
       {manual.length > 0 ? (
-        <List.Section title="Folders">{manual.map(renderFolder)}</List.Section>
+        <List.Section subtitle={`${manual.length}`} title="Folders">
+          {manual.map(renderFolder)}
+        </List.Section>
       ) : null}
       {smart.length > 0 ? (
-        <List.Section title="Smart Folders">
+        <List.Section subtitle={`${smart.length}`} title="Smart Folders">
           {smart.map(renderFolder)}
         </List.Section>
       ) : null}

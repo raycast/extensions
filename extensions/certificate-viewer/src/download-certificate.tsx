@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useState } from "react";
 import * as tls from "tls";
+import { isIP } from "node:net";
 import { CertificateView } from "./views/CertificateView";
 
 export default function Command() {
@@ -27,10 +28,11 @@ export default function Command() {
       }
 
       const parsedUrl = new URL(formattedUrl);
+      const host = parsedUrl.hostname.replace(/^\[|\]$/g, "");
       const options = {
-        host: parsedUrl.hostname,
+        host,
         port: parsedUrl.port ? Number(parsedUrl.port) : 443,
-        servername: parsedUrl.hostname,
+        servername: isIP(host) ? undefined : host,
         rejectUnauthorized: false,
       };
 

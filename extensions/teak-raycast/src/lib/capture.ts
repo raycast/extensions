@@ -4,7 +4,6 @@ import { parseTags } from "teak-sdk";
 import {
   type CreateCardInput,
   createCard,
-  findSavedCardId,
   getRecoveryHint,
   getUserFacingErrorMessage,
   MAX_UPLOAD_BYTES,
@@ -89,7 +88,8 @@ export const extractFirstHttpUrl = (value: string): string | null => {
     return null;
   }
 
-  if (isHttpUrl(trimmed)) {
+  // `new URL` encodes spaces, so a whole sentence would pass as one link.
+  if (!/\s/.test(trimmed) && isHttpUrl(trimmed)) {
     return trimmed;
   }
 
@@ -196,27 +196,22 @@ export const saveFilesWithFeedback = async (
   return saved;
 };
 
-export const showIfAlreadySaved = async (url: string): Promise<boolean> => {
-  let cardId: string | null = null;
-  try {
-    cardId = await findSavedCardId(url, "silent");
-  } catch {
-    return false;
+/**
+ * The success toast's words. Saving a link already in Teak moves that card to
+ * the top (and back from Archive) instead of making a second one.
+ */
+export const savedToastText = (
+  result: Pick<QuickSaveResponse, "resaved" | "wasArchived">,
+): { message?: string; title: string } => {
+  if (!result.resaved) {
+    return { title: "Saved to Teak" };
   }
-  if (!cardId) {
-    return false;
-  }
-  await showToast({
-    primaryAction: {
-      onAction: () => {
-        void open(getTeakCardUrl(cardId));
-      },
-      title: "Open Card",
-    },
-    style: Toast.Style.Success,
+  return {
+    message: result.wasArchived
+      ? "Moved back from Archive"
+      : "Moved to the top",
     title: "Already saved",
-  });
-  return true;
+  };
 };
 
 export const saveCardWithFeedback = async (
@@ -253,8 +248,10 @@ export const saveCardWithFeedback = async (
       };
     }
 
+    const { message, title } = savedToastText(result);
     toast.style = Toast.Style.Success;
-    toast.title = "Saved to Teak";
+    toast.title = title;
+    toast.message = message;
 
     return result;
   } catch (error) {

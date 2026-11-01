@@ -12,7 +12,7 @@ import {
   withExtraArgument,
   projectsFrom,
   slugify,
-  terminalCreateArgs,
+  agentLaunchArgs,
   terminalSendArgs,
   worktreeCreateArgs,
 } from "../src/prompt.ts";
@@ -57,14 +57,16 @@ test("a typed worktree name is slugified too — it becomes a branch and a direc
   assert.equal(args[args.indexOf("--name") + 1], "fix-export");
 });
 
-test("without a worktree the agent starts in the project folder", () => {
-  assert.deepEqual(terminalCreateArgs({ ...spec, createWorktree: false }), [
-    "terminal",
-    "create",
+test("without a worktree Orca launches the agent with the prompt in the project folder", () => {
+  assert.deepEqual(agentLaunchArgs({ ...spec, createWorktree: false }), [
+    "agent",
+    "launch",
+    "--agent",
+    "claude",
     "--worktree",
     "path:/Users/you/code/checkout",
-    "--command",
-    "claude",
+    "--prompt",
+    "Почини экспорт отчётов",
     "--json",
   ]);
   assert.deepEqual(terminalSendArgs("term_1", "hi"), [
@@ -76,6 +78,27 @@ test("without a worktree the agent starts in the project folder", () => {
     "hi",
     "--enter",
     "--json",
+  ]);
+});
+
+test("a fresh pane gets its prompt from Orca, not typed in while the agent starts", async () => {
+  const calls: string[][] = [];
+  const exec = async (_path: string, args: string[]) => {
+    calls.push(args);
+    return {
+      stdout: JSON.stringify({ ok: true, result: { outcome: { kind: "terminal", handle: "new" } } }),
+    };
+  };
+
+  const handle = await runPrompt(
+    { ...spec, createWorktree: false, worktreePath: "/code/checkout", target: "new", prompt: "go" },
+    "orca",
+    exec,
+  );
+
+  assert.equal(handle, "new");
+  assert.deepEqual(calls, [
+    ["agent", "launch", "--agent", "claude", "--worktree", "path:/code/checkout", "--prompt", "go", "--json"],
   ]);
 });
 
@@ -218,7 +241,7 @@ test("targeting the last agent sends to its pane instead of opening one", async 
   );
 
   assert.equal(handle, "busy");
-  assert.ok(!calls.some((args) => args[1] === "create"), "must not create a pane");
+  assert.ok(!calls.some((args) => args[0] === "agent"), "must not launch another agent");
   assert.deepEqual(calls.at(-1), ["terminal", "send", "--terminal", "busy", "--text", "go", "--enter", "--json"]);
 });
 
@@ -229,8 +252,8 @@ test("with no agent running, the last-agent target falls back to a fresh pane", 
     if (args[0] === "terminal" && args[1] === "list") {
       return { stdout: JSON.stringify({ ok: true, result: { terminals: [] } }) };
     }
-    if (args[0] === "terminal" && args[1] === "create") {
-      return { stdout: JSON.stringify({ ok: true, result: { terminal: { handle: "new" } } }) };
+    if (args[0] === "agent" && args[1] === "launch") {
+      return { stdout: JSON.stringify({ ok: true, result: { outcome: { kind: "terminal", handle: "new" } } }) };
     }
     return { stdout: JSON.stringify({ ok: true, result: {} }) };
   };
@@ -242,7 +265,8 @@ test("with no agent running, the last-agent target falls back to a fresh pane", 
   );
 
   assert.equal(handle, "new");
-  assert.ok(calls.some((args) => args[1] === "create"));
+  assert.deepEqual(calls.at(-1)?.slice(0, 2), ["agent", "launch"]);
+  assert.ok(!calls.some((args) => args[1] === "send"), "the prompt goes with the launch");
 });
 
 test("the preview says when the prompt goes to an agent already running", () => {

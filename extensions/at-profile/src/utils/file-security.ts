@@ -1,5 +1,4 @@
-import { basename, resolve } from "path";
-import { homedir } from "os";
+import { basename, dirname, resolve } from "path";
 
 /**
  * Safely validate and sanitize filename to prevent path traversal attacks
@@ -29,14 +28,11 @@ export function validateAndSanitizeFilename(filename: string): string {
 }
 
 /**
- * Validate that the resolved path is within the home directory
+ * Validate that the resolved path is a file directly inside `directory`. The directory itself is the user's
+ * choice (the Export Directory preference), so it may be anywhere, including an external drive.
  */
-export function validateSecurePath(filePath: string): void {
-  const homeDir = homedir();
-  const resolvedPath = resolve(filePath);
-  const resolvedHomeDir = resolve(homeDir);
-
-  if (!resolvedPath.startsWith(resolvedHomeDir)) {
-    throw new Error("Security error: file path must be within the home directory");
+export function validatePathInDirectory(filePath: string, directory: string): void {
+  if (dirname(resolve(filePath)) !== resolve(directory)) {
+    throw new Error("Security error: file path must be inside the export directory");
   }
 }

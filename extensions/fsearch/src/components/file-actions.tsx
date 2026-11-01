@@ -6,6 +6,8 @@ import { fileName, tildify } from "../lib/format";
 interface Props {
   path: string;
   isFolder: boolean;
+  /** Removes the item from the current results after it reaches the Trash. */
+  onTrash: (path: string) => void;
   /** Actions that go first, ahead of Open: Open at Line for a content match. */
   primary?: ReactNode;
   /** Command-specific actions, shown after the file actions. */
@@ -16,7 +18,16 @@ interface Props {
   isShowingDetail?: boolean;
 }
 
-export function FileActions({ path, isFolder, primary, children, onSearchIn, onToggleDetail, isShowingDetail }: Props) {
+export function FileActions({
+  path,
+  isFolder,
+  onTrash,
+  primary,
+  children,
+  onSearchIn,
+  onToggleDetail,
+  isShowingDetail,
+}: Props) {
   const folder = isFolder ? path : dirname(path);
   return (
     <ActionPanel title={fileName(path)}>
@@ -55,7 +66,7 @@ export function FileActions({ path, isFolder, primary, children, onSearchIn, onT
         <Action.CopyToClipboard title="Copy Folder Path" content={tildify(folder)} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <Action.Trash paths={path} shortcut={Keyboard.Shortcut.Common.Remove} />
+        <Action.Trash paths={path} shortcut={Keyboard.Shortcut.Common.Remove} onTrash={() => onTrash(path)} />
       </ActionPanel.Section>
     </ActionPanel>
   );

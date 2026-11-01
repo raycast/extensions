@@ -388,12 +388,6 @@ export const permanentlyDeleteCard = async (
   );
 };
 
-export const findSavedCardId = (
-  url: string,
-  auth: AuthMode,
-): Promise<string | null> =>
-  withClient(auth, (client) => client.cards.duplicate(url));
-
 const MIME_BY_EXTENSION: Record<string, string> = {
   avif: "image/avif",
   gif: "image/gif",

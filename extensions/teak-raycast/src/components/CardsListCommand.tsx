@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type CardSearchInput,
@@ -8,8 +8,9 @@ import {
   setCardFavorite,
 } from "../lib/api";
 import { getCardTitle } from "../lib/cardDetailModel";
-import { getCardTypeIcon } from "../lib/cardIcons";
+import { getCardListIcon } from "../lib/cardIcons";
 import { removeCardById, upsertCard } from "../lib/cardListState";
+import { TEAK_HOME_URL } from "../lib/constants";
 import {
   HIDDEN_CARDS_HINT,
   isHiddenTag,
@@ -17,8 +18,11 @@ import {
   shouldCheckForHiddenCards,
 } from "../lib/hiddenTags";
 import {
+  applyArchivedFilter,
   applySortFilter,
   applyTagFilter,
+  applyTrashedFilter,
+  applyTypeFilter,
   clearSearchFilters,
   parseSearchFilters,
   toApiQuery,
@@ -26,11 +30,11 @@ import {
 import { newShuffleSeed } from "../lib/shuffleSeed";
 import { useHiddenCardsHint } from "../lib/useHiddenCardsHint";
 import { useTeakAuth } from "../lib/useTeakAuth";
+import { AccountActions } from "./AccountActions";
 import { CardListActions } from "./CardListActions";
+import { CardTypeDropdown } from "./CardTypeDropdown";
 import { getCardAccessories, getCardSubtitle } from "./cardListItem";
 import { MissingApiKeyDetail } from "./MissingApiKeyDetail";
-import { SetApiKeyAction } from "./SetApiKeyAction";
-import { SignOutAction } from "./SignOutAction";
 
 const PAGE_SIZE = 50;
 
@@ -40,17 +44,22 @@ interface CardsListCommandProps {
   emptyDescription: string;
   emptyIcon: Icon;
   emptyTitle: string;
-  latestSectionTitle: string;
   loadCards: (input: CardSearchInput) => Promise<CardsResponse>;
-  navigationTitle: string;
+  /** Only for pushed lists; a root command keeps Raycast's own title. */
+  navigationTitle?: string;
   removeTagFilterFromList?: boolean;
   removeUnfavoritedFromList?: boolean;
   /** The tag this list is scoped to, so a hidden tag's list keeps its cards. */
   scopeTag?: string;
   searchBarPlaceholder: string;
+  /** Heads the list until a search or filter is typed. */
+  sectionTitle: string;
   /** Keeps the API's own order (closest first) until a sort is typed. */
   serverOrder?: boolean;
 }
+
+const countLabel = (count: number, hasMore: boolean): string =>
+  `${count}${hasMore ? "+" : ""} card${count === 1 && !hasMore ? "" : "s"}`;
 
 // A whole number the API takes as a shuffle seed; the same seed gives the
 // same order on every page.
@@ -59,13 +68,13 @@ export function CardsListCommand({
   emptyDescription,
   emptyIcon,
   emptyTitle,
-  latestSectionTitle,
   loadCards,
   navigationTitle,
   removeTagFilterFromList = false,
   removeUnfavoritedFromList = false,
   scopeTag,
   searchBarPlaceholder,
+  sectionTitle,
   serverOrder = false,
 }: CardsListCommandProps) {
   const [query, setQuery] = useState("");
@@ -259,7 +268,15 @@ export function CardsListCommand({
   );
 
   if (isCheckingAuth) {
-    return <List isLoading navigationTitle={navigationTitle} />;
+    return (
+      <List
+        isLoading
+        navigationTitle={navigationTitle}
+        onSearchTextChange={setQuery}
+        searchBarPlaceholder={searchBarPlaceholder}
+        searchText={query}
+      />
+    );
   }
 
   if (!isAuthenticated) {
@@ -267,7 +284,7 @@ export function CardsListCommand({
   }
 
   const isFiltered = Boolean(parsedFilters.rawQuery.trim());
-  let title = isFiltered ? navigationTitle : latestSectionTitle;
+  let title = isFiltered ? "Results" : sectionTitle;
   let empty = isFiltered
     ? {
         description: "Try a different keyword or clear your filters.",
@@ -308,57 +325,103 @@ export function CardsListCommand({
     empty = { ...empty, description: HIDDEN_CARDS_HINT };
   }
 
+  const hasMore = Boolean(nextCursor);
+  const subtitle =
+    items.length > 0
+      ? [
+          countLabel(items.length, hasMore),
+          inTrash ? "emptied after 30 days" : undefined,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : undefined;
+
+  // An empty list has no card to hold the filter and account actions, so it
+  // carries its own way back.
+  const recoveryActions = (
+    <>
+      <ActionPanel.Section>
+        {inTrash ? (
+          <Action
+            icon={Icon.ArrowLeft}
+            onAction={() =>
+              setQuery((previous) => applyTrashedFilter(previous, undefined))
+            }
+            title="Leave Trash"
+          />
+        ) : null}
+        {archivedView && !inTrash ? (
+          <Action
+            icon={Icon.ArrowLeft}
+            onAction={() =>
+              setQuery((previous) => applyArchivedFilter(previous, undefined))
+            }
+            title="Leave Archive"
+          />
+        ) : null}
+        {parsedFilters.hasExplicitFilters ? (
+          <Action
+            icon={Icon.XMarkCircle}
+            onAction={() =>
+              setQuery((previous) => clearSearchFilters(previous))
+            }
+            title="Clear Filters"
+          />
+        ) : null}
+        <Action
+          icon={Icon.ArrowClockwise}
+          onAction={() => void load(requestInput)}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Reload"
+        />
+        <Action.OpenInBrowser
+          shortcut={Keyboard.Shortcut.Common.Open}
+          title="Open Teak"
+          url={TEAK_HOME_URL}
+        />
+      </ActionPanel.Section>
+      <AccountActions onSignedOut={refreshAuth} />
+    </>
+  );
+
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={title}
+      navigationTitle={navigationTitle}
       onSearchTextChange={setQuery}
       pagination={{
-        hasMore: Boolean(nextCursor),
+        hasMore,
         onLoadMore: () => void loadMore(),
         pageSize: PAGE_SIZE,
       }}
+      searchBarAccessory={
+        <CardTypeDropdown
+          onChange={(type) =>
+            setQuery((previous) => applyTypeFilter(previous, type))
+          }
+          type={parsedFilters.type}
+        />
+      }
       searchBarPlaceholder={searchBarPlaceholder}
       searchText={query}
       throttle
     >
       {error ? (
         <List.EmptyView
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                onAction={() => {
-                  void load(requestInput);
-                }}
-                title="Retry"
-              />
-              {parsedFilters.hasExplicitFilters ? (
-                <Action
-                  icon={Icon.XMarkCircle}
-                  onAction={() => {
-                    setQuery((previous) => clearSearchFilters(previous));
-                  }}
-                  title="Clear Filters"
-                />
-              ) : null}
-              <SetApiKeyAction />
-              <SignOutAction onSignedOut={refreshAuth} />
-            </ActionPanel>
-          }
-          description="Check your API key and network connection, then retry."
+          actions={<ActionPanel>{recoveryActions}</ActionPanel>}
+          description="Check your connection, then reload."
           icon={Icon.ExclamationMark}
           title={error}
         />
       ) : null}
 
-      <List.Section
-        subtitle={inTrash ? "Teak empties Trash after 30 days" : undefined}
-        title={inTrash ? "Trash" : undefined}
-      >
+      <List.Section subtitle={subtitle} title={title}>
         {items.map((card) => (
           <List.Item
-            accessories={getCardAccessories(card)}
+            accessories={getCardAccessories(card, {
+              inArchive: archivedView && !inTrash,
+              inFavorites: removeUnfavoritedFromList,
+            })}
             actions={
               <CardListActions
                 canSaveSmartFolder={canSaveSmartFolder}
@@ -377,7 +440,8 @@ export function CardsListCommand({
                 showFavoritesFilter={!removeUnfavoritedFromList}
               />
             }
-            icon={getCardTypeIcon(card)}
+            icon={getCardListIcon(card)}
+            id={card.id}
             key={card.id}
             subtitle={getCardSubtitle(card)}
             title={getCardTitle(card)}
@@ -387,6 +451,7 @@ export function CardsListCommand({
 
       {!(isLoading || error) && items.length === 0 ? (
         <List.EmptyView
+          actions={<ActionPanel>{recoveryActions}</ActionPanel>}
           description={empty.description}
           icon={empty.icon}
           title={empty.title}

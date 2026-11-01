@@ -2,16 +2,16 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { AccountActions } from "./components/AccountActions";
 import { CardDetail } from "./components/CardDetail";
 import { getCardAccessories, getCardSubtitle } from "./components/cardListItem";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
-import { SetApiKeyAction } from "./components/SetApiKeyAction";
-import { SignOutAction } from "./components/SignOutAction";
 import { SimilarCardsView } from "./components/SimilarCardsView";
 import {
   getUserFacingErrorMessage,
@@ -24,8 +24,9 @@ import {
   getOpenableUrl,
   getTeakUrl,
 } from "./lib/cardDetailModel";
-import { getCardTypeIcon } from "./lib/cardIcons";
+import { getCardListIcon } from "./lib/cardIcons";
 import { removeCardById } from "./lib/cardListState";
+import { TEAK_HOME_URL } from "./lib/constants";
 import { newShuffleSeed } from "./lib/shuffleSeed";
 import { useTeakAuth } from "./lib/useTeakAuth";
 
@@ -43,6 +44,8 @@ export default function RandomCardsCommand() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seed, setSeed] = useState(newShuffleSeed);
+  // How many cards the last shuffle dealt, so an empty vault isn't "done".
+  const [dealt, setDealt] = useState(0);
 
   useEffect(() => {
     if (isCheckingAuth) {
@@ -63,6 +66,7 @@ export default function RandomCardsCommand() {
       .then((response) => {
         if (isCurrent) {
           setCards(response.items);
+          setDealt(response.items.length);
         }
       })
       .catch((requestError) => {
@@ -110,7 +114,9 @@ export default function RandomCardsCommand() {
   );
 
   if (isCheckingAuth) {
-    return <List isLoading navigationTitle="Random Teak Cards" />;
+    return (
+      <List isLoading searchBarPlaceholder="Revisit a few cards you saved" />
+    );
   }
 
   if (!isAuthenticated) {
@@ -118,111 +124,133 @@ export default function RandomCardsCommand() {
   }
 
   const reshuffle = () => setSeed(newShuffleSeed());
+  const deckActions = (
+    <>
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.Shuffle}
+          onAction={reshuffle}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Shuffle Again"
+        />
+        <Action.OpenInBrowser
+          icon={Icon.AppWindow}
+          title="Open Teak"
+          url={TEAK_HOME_URL}
+        />
+      </ActionPanel.Section>
+      <AccountActions onSignedOut={refreshAuth} />
+    </>
+  );
 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Random Teak Cards"
       searchBarPlaceholder="Revisit a few cards you saved"
     >
       {error ? (
         <List.EmptyView
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.ArrowClockwise}
-                onAction={reshuffle}
-                title="Try Again"
-              />
-            </ActionPanel>
-          }
-          description="Check your API key and network connection, then retry."
+          actions={<ActionPanel>{deckActions}</ActionPanel>}
+          description="Check your connection, then shuffle again."
           icon={Icon.ExclamationMark}
           title={error}
         />
       ) : null}
       {!(error || isLoading) && cards.length === 0 ? (
         <List.EmptyView
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Shuffle}
-                onAction={reshuffle}
-                title="Shuffle Again"
-              />
-            </ActionPanel>
+          actions={<ActionPanel>{deckActions}</ActionPanel>}
+          description={
+            dealt > 0
+              ? "You've gone through this set. Shuffle for another."
+              : "Save a few cards to Teak, then come back to revisit them."
           }
-          description="You've gone through this set. Shuffle for another."
           icon={Icon.Shuffle}
-          title="Nothing left to revisit"
+          title={
+            dealt > 0 ? "Nothing left to revisit" : "No cards to shuffle yet"
+          }
         />
       ) : null}
-      {cards.map((card) => {
-        const openableUrl = getOpenableUrl(card);
-        return (
-          <List.Item
-            accessories={getCardAccessories(card)}
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={Icon.Checkmark}
-                  onAction={() => void handleKeep(card)}
-                  title="Keep"
-                />
-                <Action
-                  icon={Icon.Box}
-                  onAction={() => void archiveCard(card, handleUpdated)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                  title="Archive Card"
-                />
-                <Action.Push
-                  icon={Icon.Eye}
-                  target={
-                    <CardDetail
-                      card={card}
-                      onCardDeleted={handleRemoved}
-                      onCardUpdated={handleUpdated}
-                      onFilterByTag={() => undefined}
-                      onNavigateBackAfterDelete={() => undefined}
+      <List.Section
+        subtitle={
+          cards.length > 0 ? `${cards.length} of ${dealt} left` : undefined
+        }
+        title="Shuffled"
+      >
+        {cards.map((card) => {
+          const openableUrl = getOpenableUrl(card);
+          return (
+            <List.Item
+              accessories={getCardAccessories(card)}
+              actions={
+                <ActionPanel title={getCardTitle(card, 40)}>
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.Checkmark}
+                      onAction={() => void handleKeep(card)}
+                      title="Keep"
                     />
-                  }
-                  title="View Card"
-                />
-                {openableUrl ? (
-                  <Action.OpenInBrowser title="Open URL" url={openableUrl} />
-                ) : null}
-                <Action.OpenInBrowser
-                  title="Open in Teak"
-                  url={getTeakUrl(card)}
-                />
-                <Action.Push
-                  icon={Icon.Stars}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  target={
-                    <SimilarCardsView
-                      cardId={card.id}
-                      title={getCardTitle(card)}
+                    <Action
+                      icon={Icon.Box}
+                      onAction={() => void archiveCard(card, handleUpdated)}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                      title="Archive"
                     />
-                  }
-                  title="Find Similar"
-                />
-                <Action
-                  icon={Icon.Shuffle}
-                  onAction={reshuffle}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  title="Shuffle Again"
-                />
-                <SetApiKeyAction />
-                <SignOutAction onSignedOut={refreshAuth} />
-              </ActionPanel>
-            }
-            icon={getCardTypeIcon(card)}
-            key={card.id}
-            subtitle={getCardSubtitle(card)}
-            title={getCardTitle(card)}
-          />
-        );
-      })}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action.Push
+                      icon={Icon.Sidebar}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                      target={
+                        <CardDetail
+                          card={card}
+                          onCardDeleted={handleRemoved}
+                          onCardUpdated={handleUpdated}
+                          onFilterByTag={() => undefined}
+                          onNavigateBackAfterDelete={() => undefined}
+                          onSignedOut={refreshAuth}
+                        />
+                      }
+                      title="View Card"
+                    />
+                    {openableUrl ? (
+                      <Action.OpenInBrowser
+                        shortcut={{
+                          modifiers: ["cmd", "shift"],
+                          key: "return",
+                        }}
+                        title="Open URL"
+                        url={openableUrl}
+                      />
+                    ) : null}
+                    <Action.OpenInBrowser
+                      icon={Icon.AppWindow}
+                      shortcut={Keyboard.Shortcut.Common.Open}
+                      title="Open in Teak"
+                      url={getTeakUrl(card)}
+                    />
+                    <Action.Push
+                      icon={Icon.Stars}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      target={
+                        <SimilarCardsView
+                          cardId={card.id}
+                          title={getCardTitle(card)}
+                        />
+                      }
+                      title="More Like This"
+                    />
+                  </ActionPanel.Section>
+                  {deckActions}
+                </ActionPanel>
+              }
+              icon={getCardListIcon(card)}
+              key={card.id}
+              subtitle={getCardSubtitle(card)}
+              title={getCardTitle(card)}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }
