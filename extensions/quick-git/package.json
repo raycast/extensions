@@ -51,6 +51,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/ini": "^4.1.1",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "prettier": "^3.9.10",
