@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Wiro AI MCP Server] - 2026-11-01
+
+- Add Wiro AI to the official registry: search 3,500+ AI models for images, video, audio, speech, music and text, check each model's parameters and price, run it and get the results back. Hosted Streamable HTTP server at https://mcp.wiro.ai/v1 with OAuth 2.1 browser sign-in or a Wiro API key as a Bearer token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add Melso Fiscal MCP] - 2026-10-31
 
 - Add Melso as an official hosted MCP server for Spanish fiscal records and S.L. incorporation requests, with direct OAuth connection and a local proxy fallback.
