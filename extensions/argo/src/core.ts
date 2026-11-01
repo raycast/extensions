@@ -1,7 +1,7 @@
 import { open } from "node:fs/promises";
 import { homedir } from "node:os";
 import { isAbsolute, join } from "node:path";
-import { localUrl } from "./protocol.js";
+import { id, localUrl } from "./protocol.js";
 import type { Answer, BridgeEvent, Interaction, Pairing, Session, Snapshot } from "./protocol.js";
 
 export type ClientConfig = { url: string; token: string; bridgeId?: string };
@@ -102,6 +102,9 @@ export class HubError extends Error {
     );
   }
 }
+
+// Only preflight failures are known not to have sent a decision POST.
+export class InteractionPreflightError extends Error {}
 
 /** Standard SSE framing, including CRLF, comments, multiline data, and chunk boundaries. */
 export async function consumeEvents(
@@ -254,14 +257,25 @@ export class Hub {
   }
   async answerInteraction(bindingId: string, generation: string, reviewed: Interaction, answer: Answer): Promise<void> {
     const check = (snapshot: Snapshot) => interactionIssue(snapshot, generation, reviewed, this.now());
-    const issue = check(await this.snapshot(bindingId));
+    let snapshot: Snapshot;
+    try {
+      id.parse(reviewed.requestId); // Raw colons are route-safe; reject separators and encoded input.
+      snapshot = await this.snapshot(bindingId);
+    } catch (cause) {
+      throw new InteractionPreflightError(
+        cause instanceof HubError
+          ? cause.message
+          : "Could not verify the current request. No decision was sent. Reconnect and try again.",
+      );
+    }
+    const issue = check(snapshot);
     if (issue) {
       const error = new HubError(409);
       error.message = issue;
       throw error;
     }
     try {
-      await this.mutate(bindingId, `/interactions/${encodeURIComponent(reviewed.requestId)}`, {
+      await this.mutate(bindingId, `/interactions/${reviewed.requestId}`, {
         generation,
         ...answer,
       });

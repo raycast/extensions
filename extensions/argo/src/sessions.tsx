@@ -19,7 +19,7 @@ import {
 import type { LaunchProps } from "@raycast/api";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { Interaction, Message, Session } from "./protocol.js";
-import { Hub, HubError, interactionIssue, safeMarkdown } from "./core.js";
+import { Hub, HubError, InteractionPreflightError, interactionIssue, safeMarkdown } from "./core.js";
 import { errorText, recentKey, useBridges, useDraft, useHub } from "./hooks.js";
 import { loadConnection } from "./connections.js";
 import { DiscoverBridges, Setup } from "./onboarding.js";
@@ -621,13 +621,16 @@ function InteractionReview({
       return true;
     } catch (cause) {
       const message =
-        cause instanceof HubError
+        cause instanceof HubError || cause instanceof InteractionPreflightError
           ? cause.message
           : "Decision delivery is unknown. Check the original Agent; do not submit it again.";
-      setDecisionIssue(message);
+      if (!(cause instanceof InteractionPreflightError)) setDecisionIssue(message);
       await showToast({
         style: Toast.Style.Failure,
-        title: cause instanceof HubError ? "Decision Not Submitted" : "Decision Delivery Unknown",
+        title:
+          cause instanceof HubError || cause instanceof InteractionPreflightError
+            ? "Decision Not Submitted"
+            : "Decision Delivery Unknown",
         message,
       });
       await feed.refresh();

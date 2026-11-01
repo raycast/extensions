@@ -14,6 +14,7 @@ import {
   Hub,
   HubError,
   interactionIssue,
+  InteractionPreflightError,
   parseConfig,
   readConfig,
   remotePrompt,
@@ -209,6 +210,7 @@ function viewHarness() {
       Toast: { Style: { Failure: "failure", Success: "success" } },
       safeMarkdown,
       HubError,
+      InteractionPreflightError,
       showToast: async () => {},
     },
   };
@@ -1319,5 +1321,110 @@ test("closing an in-flight approval or question cannot pop another view after su
     finish(true);
     await pending;
     assert.equal(popped, method === "approval-action" ? 1 : 0, method);
+  }
+});
+
+test("approval paths preserve protocol-safe colons and reject path injection before POST", async () => {
+  const posted: string[] = [];
+  const server = createServer((req, res) => {
+    if (req.method === "GET") res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(snapshot));
+    else {
+      posted.push(req.url!);
+      res.writeHead(req.url!.includes("%") ? 404 : 202).end();
+    }
+  });
+  const request = {
+    requestId: "codex:fixture:abcdef0123456789",
+    kind: "approval" as const,
+    title: "Fixture",
+    detail: "No command",
+    state: "pending" as const,
+    expiresAt: Date.now() + 60000,
+  };
+  const snapshot = {
+    session: sessionFixture({
+      capabilities: { send: true, streaming: false, interrupt: false, approvals: true, questions: true },
+    }),
+    interactions: [request],
+    messages: [],
+    cursor: 1,
+    hasMore: false,
+  };
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  const address = server.address();
+  assert.ok(address && typeof address === "object");
+  const hub = new Hub({ url: `http://127.0.0.1:${address.port}`, token });
+  try {
+    await hub.answerInteraction("session", "g1", request, { decision: "allow" });
+    assert.deepEqual(posted, [`/v1/sessions/session/interactions/${request.requestId}`]);
+    for (const invalid of ["../messages", "bad/id", "bad?query", "bad#fragment", "%3A", "x".repeat(201)]) {
+      snapshot.interactions = [{ ...request, requestId: invalid }];
+      await assert.rejects(hub.answerInteraction("session", "g1", snapshot.interactions[0]!, { decision: "allow" }));
+    }
+    assert.equal(posted.length, 1, "invalid identifiers must never reach a mutation route");
+  } finally {
+    hub.close();
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
+test("failed preflight sends no decision and permits an explicit retry after reconnect", async () => {
+  const h = viewHarness(),
+    toasts: any[] = [];
+  const request = {
+    requestId: "codex:preflight:fixture",
+    kind: "approval" as const,
+    title: "Fixture",
+    detail: "No command",
+    state: "pending" as const,
+    expiresAt: Date.now() + 60000,
+  };
+  const snapshot = {
+    session: sessionFixture({
+      capabilities: { send: true, streaming: false, interrupt: false, approvals: true, questions: false },
+    }),
+    interactions: [request],
+    messages: [],
+    cursor: 1,
+    hasMore: false,
+  };
+  const client = new Hub({ url: "http://127.0.0.1:1", token });
+  let fail = true,
+    posted = 0;
+  client.now = () => request.expiresAt - 30000;
+  client.snapshot = async () => {
+    if (fail) throw Error("private network detail");
+    return snapshot;
+  };
+  client.mutate = async () => {
+    posted++;
+  };
+  const feed = { snapshot, connection: "live", hub: { current: client }, refresh: async () => {} };
+  const { InteractionReview } = viewLogic(["InteractionReview"], {
+    ...h.globals,
+    InteractionPreflightError,
+    interactionIssue,
+    useHub: () => feed,
+    Approval: "Approval",
+    Questions: "Questions",
+    showToast: async (t: any) => toasts.push(t),
+  });
+  const props = { request, bindingId: "session", profileId: "fixture", generation: "g1" };
+  try {
+    let tree = InteractionReview(props);
+    assert.equal(await tree.props.respond(request, { decision: "allow" }), false);
+    assert.equal(posted, 0);
+    assert.equal(toasts[0].title, "Decision Not Submitted");
+    assert.doesNotMatch(toasts[0].message, /unknown|private network/);
+    fail = false;
+    h.reset();
+    tree = InteractionReview(props);
+    assert.equal(tree.props.issue, undefined, "a failed GET must not permanently disable the review");
+    assert.equal(await tree.props.respond(request, { decision: "allow" }), true);
+    assert.equal(posted, 1, "only a new explicit activation can submit after recovery");
+  } finally {
+    client.close();
   }
 });
