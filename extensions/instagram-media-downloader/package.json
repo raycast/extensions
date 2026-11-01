@@ -21,14 +21,14 @@
     {
       "name": "download-instagram-media",
       "title": "Download Instagram Media",
-      "description": "Download Instagram post and reels with URL",
+      "description": "Download a post, reel or story from its link",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instagramUrl",
-          "description": "Post or reel URL",
+          "description": "Post, reel or story URL",
           "type": "text",
-          "placeholder": "Post or reel URL",
+          "placeholder": "Post, reel or story URL",
           "required": true
         }
       ]
@@ -71,6 +71,24 @@
       "description": "Path to save downloaded media",
       "type": "directory",
       "required": false
+    },
+    {
+      "name": "downloadMethod",
+      "title": "Download Method",
+      "type": "dropdown",
+      "required": false,
+      "default": "browser",
+      "description": "Browser Tab needs the Raycast browser extension; Instagram may rate-limit.",
+      "data": [
+        {
+          "title": "Browser Tab",
+          "value": "browser"
+        },
+        {
+          "title": "Instagram Directly",
+          "value": "instagram"
+        }
+      ]
     },
     {
       "name": "verboseLogging",
