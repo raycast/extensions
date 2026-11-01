@@ -8,7 +8,7 @@
 - The menu bar shows the time left on a timer, and Doorstopper Status shows it in its subtitle.
 - Added a Default Duration preference for Toggle Doorstopper. It defaults to Indefinitely, so Toggle works as before.
 - Without the rule, Enable, Disable and Toggle keep asking for Touch ID or your password as before.
-- Updated `@raycast/api` to `^2.7.3` and added tests.
+- Updated `@raycast/api` to `^2.7.3`.
 
 ## [Fix Menu Bar Toast] - 2026-08-12
 

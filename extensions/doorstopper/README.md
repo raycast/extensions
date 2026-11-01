@@ -63,7 +63,7 @@ To install the Doorstopper extension, follow these steps:
 Once installed, simply trigger the Raycast command palette and search for the Doorstopper commands.
 
 <p align="center">
-  <img src="metadata/doorstopper-3.png" alt="Raycast Command Palette for Doorstopper">
+  <img src="media/doorstopper-3.png" alt="Raycast Command Palette for Doorstopper">
 </p>
 
 ## Features ✨
