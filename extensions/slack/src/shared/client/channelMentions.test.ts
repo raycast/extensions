@@ -111,6 +111,26 @@ test("fewer than ten joined matches scan the directory only through the first ma
   );
 });
 
+test("directory search skips pages containing only joined matches", async () => {
+  const joined = channel("team-zebra", { topic: { value: "Joined metadata" } });
+  const directory = pages(
+    [{ ...joined, is_member: false, topic: { value: "Directory metadata" } }],
+    [channel("team-alpha")],
+    [channel("team-later")],
+  );
+  const results = await searchChannelMentions("team", {
+    loadMemberChannelsPage: pages([joined]).load,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(directory.requested, [undefined, "1"]);
+  assert.deepEqual(
+    results.map((result) => result.title),
+    ["#team-zebra", "#team-alpha"],
+  );
+  assert.equal(results[0].description, "Joined metadata");
+});
+
 test("joined channels win duplicate IDs and sort before other directory matches", async () => {
   const joined = channel("team-zebra", { topic: { value: "Joined metadata" } });
   const member = pages([joined, channel("team-beta")]);

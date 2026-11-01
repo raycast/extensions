@@ -3,7 +3,7 @@
 ## [Faster Channel Mentions in AI Chat] - {PR_MERGE_DATE}
 
 - Speed up **Channels** mention search in AI Chat by searching channels you've joined first.
-- When fewer than 10 joined channels match, include results from the first matching page of the workspace directory. Keep joined channels first and remove duplicates.
+- When fewer than 10 joined channels match, include results from the first page with additional matches in the workspace directory. Keep joined channels first and remove duplicates.
 
 ## [Channel Mentions in AI Chat] - 2026-10-31
 

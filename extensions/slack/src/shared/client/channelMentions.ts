@@ -80,10 +80,11 @@ export async function searchChannelMentions(query: string, sources: ChannelMenti
     return toChannelMentions(joinedChannels.sort(compareChannels));
   }
 
+  const joinedChannelIds = new Set(joinedChannels.map((channel) => channel.id));
   const channels = await collectPaginatedResults({
     loadPage: sources.loadChannelsPage,
     transform: toMentionChannel,
-    matches: (channel) => matchesAllWords([channel.name], normalizedQuery),
+    matches: (channel) => !joinedChannelIds.has(channel.id) && matchesAllWords([channel.name], normalizedQuery),
     maxResults: MAX_MENTIONS,
     scanAllPages: true,
     stopAfterMatchingPage: true,
