@@ -11,6 +11,9 @@
     "Web"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "keywords": [
     "browser",
     "tabs",
@@ -442,7 +445,404 @@
     }
   ],
   "ai": {
-    "instructions": "Yab is a web browser. A window has spaces; each space has pins (location topApp), kept tabs (pinned) and today's tabs (unpinned). Assume the space on screen unless the user names another. When the user says 'this tab' or 'the page I'm on', use get-focused-tab. Tab and space ids come only from get-tabs, get-focused-tab and get-spaces; never invent one. Close only the tabs the user asked to close. search-history matches the words inside pages too, so use it for 'that article about X I read'. Use run-task only for work that needs a browser session (signing in, reading a logged-in site, filling a form); answer simple questions yourself."
+    "instructions": "Yab is a web browser. A window has spaces; each space has pins (location topApp), kept tabs (pinned) and today's tabs (unpinned). Assume the space on screen unless the user names another. When the user says 'this tab' or 'the page I'm on', use get-focused-tab. Tab and space ids come only from get-tabs, get-focused-tab and get-spaces; never invent one. Close only the tabs the user asked to close. search-history matches the words inside pages too, so use it for 'that article about X I read'. Use run-task only for work that needs a browser session (signing in, reading a logged-in site, filling a form); answer simple questions yourself.",
+    "evals": [
+      {
+        "input": "@yab what tabs do I have open?",
+        "mocks": {
+          "get-tabs": [
+            {
+              "id": "t1",
+              "title": "My Issues · Linear",
+              "url": "https://linear.app/acme/my-issues",
+              "location": "topApp",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t2",
+              "title": "Pull requests · acme/web",
+              "url": "https://github.com/acme/web/pulls",
+              "location": "pinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t3",
+              "title": "acme-web – Deployments – Vercel",
+              "url": "https://vercel.com/acme/acme-web/deployments",
+              "location": "unpinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": true
+            },
+            {
+              "id": "t4",
+              "title": "Kyoto trip",
+              "url": "https://notion.so/kyoto-trip",
+              "location": "unpinned",
+              "spaceId": "s2",
+              "spaceTitle": "Personal",
+              "spaceIcon": "🏠",
+              "active": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-tabs"
+          },
+          {
+            "includes": "Linear"
+          }
+        ]
+      },
+      {
+        "input": "@yab what page am I on?",
+        "mocks": {
+          "get-focused-tab": {
+            "id": "t3",
+            "title": "acme-web – Deployments – Vercel",
+            "url": "https://vercel.com/acme/acme-web/deployments",
+            "location": "unpinned",
+            "spaceId": "s1",
+            "spaceTitle": "Work",
+            "spaceIcon": "💼",
+            "active": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-focused-tab"
+          },
+          {
+            "includes": "Vercel"
+          }
+        ]
+      },
+      {
+        "input": "@yab which spaces do I have?",
+        "mocks": {
+          "get-spaces": [
+            {
+              "id": "s1",
+              "title": "Work",
+              "icon": "💼",
+              "active": true,
+              "pins": 1,
+              "kept": 1,
+              "today": 1
+            },
+            {
+              "id": "s2",
+              "title": "Personal",
+              "icon": "🏠",
+              "active": false,
+              "pins": 0,
+              "kept": 0,
+              "today": 1
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-spaces"
+          },
+          {
+            "includes": "Personal"
+          }
+        ]
+      },
+      {
+        "input": "@yab go to my GitHub pull requests tab",
+        "mocks": {
+          "get-tabs": [
+            {
+              "id": "t1",
+              "title": "My Issues · Linear",
+              "url": "https://linear.app/acme/my-issues",
+              "location": "topApp",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t2",
+              "title": "Pull requests · acme/web",
+              "url": "https://github.com/acme/web/pulls",
+              "location": "pinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t3",
+              "title": "acme-web – Deployments – Vercel",
+              "url": "https://vercel.com/acme/acme-web/deployments",
+              "location": "unpinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": true
+            },
+            {
+              "id": "t4",
+              "title": "Kyoto trip",
+              "url": "https://notion.so/kyoto-trip",
+              "location": "unpinned",
+              "spaceId": "s2",
+              "spaceTitle": "Personal",
+              "spaceIcon": "🏠",
+              "active": false
+            }
+          ],
+          "select-tab": "Done"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "select-tab",
+              "arguments": {
+                "tabId": "t2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab close my Vercel tab",
+        "mocks": {
+          "get-tabs": [
+            {
+              "id": "t1",
+              "title": "My Issues · Linear",
+              "url": "https://linear.app/acme/my-issues",
+              "location": "topApp",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t2",
+              "title": "Pull requests · acme/web",
+              "url": "https://github.com/acme/web/pulls",
+              "location": "pinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": false
+            },
+            {
+              "id": "t3",
+              "title": "acme-web – Deployments – Vercel",
+              "url": "https://vercel.com/acme/acme-web/deployments",
+              "location": "unpinned",
+              "spaceId": "s1",
+              "spaceTitle": "Work",
+              "spaceIcon": "💼",
+              "active": true
+            },
+            {
+              "id": "t4",
+              "title": "Kyoto trip",
+              "url": "https://notion.so/kyoto-trip",
+              "location": "unpinned",
+              "spaceId": "s2",
+              "spaceTitle": "Personal",
+              "spaceIcon": "🏠",
+              "active": false
+            }
+          ],
+          "close-tab": "Closed"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "close-tab",
+              "arguments": {
+                "tabIds": {
+                  "eq": [
+                    "t3"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab open raycast.com",
+        "mocks": {
+          "new-tab": "Opened"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-tab",
+              "arguments": {
+                "query": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab find that article about write-ahead logging I read",
+        "mocks": {
+          "search-history": [
+            {
+              "title": "Write-Ahead Logging",
+              "url": "https://sqlite.org/wal.html",
+              "lastVisit": "2026-10-20T09:18:00.000Z",
+              "visits": 2,
+              "passage": "the original content is preserved in the database file and the changes are appended to a separate WAL file"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-history",
+              "arguments": {
+                "query": {
+                  "includes": "ahead"
+                }
+              }
+            }
+          },
+          {
+            "includes": "sqlite.org"
+          }
+        ]
+      },
+      {
+        "input": "@yab find my bookmark for the Kyoto Station guide",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "title": "Kyoto Station area guide",
+              "url": "https://example.com/kyoto-station",
+              "folder": "Travel › Japan"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": {
+                  "includes": "kyoto"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab find the invoice I downloaded",
+        "mocks": {
+          "search-downloads": [
+            {
+              "name": "invoice-1042.pdf",
+              "path": "/Users/you/Downloads/invoice-1042.pdf",
+              "from": "billing.example.com",
+              "stillThere": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-downloads",
+              "arguments": {
+                "query": {
+                  "includes": "invoice"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab find the email from Ava about the Kyoto trip",
+        "mocks": {
+          "search-mail": [
+            {
+              "id": "m1",
+              "account": "you@example.com",
+              "from": "Ava Lee",
+              "subject": "Kyoto trip dates",
+              "snippet": "Does the second week of April still work?",
+              "when": "Oct 20",
+              "labels": [
+                "inbox"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-mail",
+              "arguments": {
+                "query": {
+                  "includes": "kyoto"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@yab sign in to Stripe and tell me the total of my last invoice",
+        "mocks": {
+          "run-task": "The last invoice is $120.00, paid on October 1."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-task",
+              "arguments": {
+                "task": {
+                  "includes": "stripe"
+                }
+              }
+            }
+          },
+          {
+            "includes": "120"
+          }
+        ]
+      },
+      {
+        "input": "@yab what is the capital of Japan?",
+        "mocks": {
+          "run-task": "Tokyo"
+        },
+        "expected": [
+          {
+            "not": {
+              "callsTool": "run-task"
+            }
+          },
+          {
+            "includes": "Tokyo"
+          }
+        ],
+        "usedAsExample": false
+      }
+    ]
   },
   "preferences": [
     {
@@ -504,6 +904,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { AskView, FollowUp } from "./ask-view";
 import { SessionRow } from "./parse";
 import { ago, Group, groupOf, listSessions } from "./sessions";
@@ -74,15 +74,8 @@ export default function Command() {
                         shortcut={Keyboard.Shortcut.Common.Remove}
                         onAction={async () => {
                           const stopped = await cli(["session", "stop", r.id]);
-                          await showToast(
-                            stopped.code === 0
-                              ? { style: Toast.Style.Success, title: "Stopped" }
-                              : {
-                                  style: Toast.Style.Failure,
-                                  title: "Couldn't stop it",
-                                  message: stopped.stdout.trim(),
-                                },
-                          );
+                          if (stopped.code === 0) await showToast({ style: Toast.Style.Success, title: "Stopped" });
+                          else await showFailureToast(stopped.stdout.trim(), { title: "Couldn't stop it" });
                           revalidate();
                         }}
                       />

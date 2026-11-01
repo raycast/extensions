@@ -19,7 +19,7 @@ export function TabsList({ onlyOnScreen }: { onlyOnScreen: boolean }) {
 
   if (error && isAutomationDenied(error)) {
     return (
-      <List>
+      <List isLoading={isLoading}>
         <AutomationEmptyView />
       </List>
     );

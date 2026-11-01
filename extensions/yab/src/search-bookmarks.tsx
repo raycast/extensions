@@ -6,9 +6,9 @@ import { bookmarks, domainOf } from "./data";
 export default function Command(props: LaunchProps) {
   const [text, setText] = useState(props.fallbackText ?? "");
   const items = useMemo(() => bookmarks(), []);
-  const { data: window } = useYabWindow({ launch: false });
+  const { data: window, isLoading } = useYabWindow({ launch: false });
   return (
-    <List searchBarPlaceholder="Search bookmarks…" searchText={text} onSearchTextChange={setText}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search bookmarks…" searchText={text} onSearchTextChange={setText}>
       <List.EmptyView icon={Icon.Bookmark} title="No bookmarks" description="Yab's bookmarks bar shows here." />
       {items.map((b) => (
         <List.Item

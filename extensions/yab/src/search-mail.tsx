@@ -11,7 +11,7 @@ import {
   Keyboard,
   LaunchProps,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { attempt } from "./components";
 import { MailHit, mailHits, mailMarkdown } from "./parse";
@@ -34,11 +34,7 @@ async function act(hit: MailHit, action: string, done: string, until?: string) {
     await callTool("mail_act", { thread: hit.id, do: action, ...(until ? { until } : {}) });
     await showToast({ style: Toast.Style.Success, title: done });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Yab couldn't do that",
-      message: String((error as Error).message),
-    });
+    await showFailureToast(error, { title: "Yab couldn't do that" });
   }
 }
 

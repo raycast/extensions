@@ -23,7 +23,6 @@ export default function Command(props: LaunchProps) {
       throttle
       searchText={text}
       onSearchTextChange={setText}
-      navigationTitle={host ? `History · ${host.replace(/^www\./, "")}` : "Search History"}
       searchBarPlaceholder={
         host ? `Search ${host.replace(/^www\./, "")}…` : "Search titles, addresses and the words in pages…"
       }

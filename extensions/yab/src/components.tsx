@@ -12,7 +12,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { bundleID, faviconFile, isSymbol } from "./data";
 import {
   closeTab,
@@ -138,13 +138,10 @@ export async function attempt(title: string, work: () => Promise<unknown>, close
     await work();
     if (close) await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-      message: isAutomationDenied(error)
-        ? "Allow Raycast to control Yab in Privacy & Security › Automation"
-        : String(error),
-    });
+    await showFailureToast(
+      isAutomationDenied(error) ? "Allow Raycast to control Yab in Privacy & Security › Automation" : error,
+      { title },
+    );
   }
 }
 

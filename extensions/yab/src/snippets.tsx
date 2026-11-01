@@ -50,12 +50,12 @@ function PlacesForm({ snippet }: { snippet: Snippet }) {
 
 export default function Command() {
   const all = useMemo(() => snippets(), []);
-  const { data: front } = usePromise(() => getFrontmostApplication().catch(() => undefined));
+  const { data: front, isLoading } = usePromise(() => getFrontmostApplication().catch(() => undefined));
   const { push } = useNavigation();
   const inYab = front?.bundleId === bundleID();
   const shown = all.filter((s) => inYab || !s.mailOnly);
   return (
-    <List isShowingDetail={shown.length > 0} searchBarPlaceholder="Search snippets…">
+    <List isLoading={isLoading} isShowingDetail={shown.length > 0} searchBarPlaceholder="Search snippets…">
       <List.EmptyView
         icon={Icon.Text}
         title="No snippets yet"

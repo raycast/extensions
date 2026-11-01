@@ -10,6 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { spawn, ChildProcess } from "child_process";
 import { useEffect, useRef, useState } from "react";
 import { attempt } from "./components";
@@ -178,11 +179,7 @@ export function AskView(props: { prompt: string; resume?: string; title?: string
               onAction={async () => {
                 const stopped = await cli(["session", "stop", run.session!]);
                 if (stopped.code !== 0) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Couldn't stop it",
-                    message: stopped.stdout.trim(),
-                  });
+                  await showFailureToast(stopped.stdout.trim(), { title: "Couldn't stop it" });
                   return;
                 }
                 child.current?.kill("SIGINT");
@@ -217,11 +214,7 @@ export function FollowUp({ session, steer }: { session: string; steer?: boolean 
               if (!steer) return push(<AskView prompt={text} resume={session} />);
               const told = await cli(["session", "steer", session, text]);
               if (told.code !== 0) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Couldn't tell the agent",
-                  message: told.stdout.trim(),
-                });
+                await showFailureToast(told.stdout.trim(), { title: "Couldn't tell the agent" });
                 return;
               }
               await showToast({ style: Toast.Style.Success, title: "Told the agent" });
