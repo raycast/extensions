@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Bowmark MCP Server] - 2026-11-01
+
+- Add Bowmark to the built-in registry: typed, tested functions for live websites (LinkedIn, YouTube, Amazon, Reddit, flights and more). Hosted Streamable HTTP server at https://api.bowmark.ai/mcp, connected through `mcp-remote` with a Bowmark API key header.
+
 ## [Add LAYIQ Jobs MCP Server] - 2026-11-01
 
 - Add LAYIQ Jobs to the official registry: find public job listings and explore roles from LAYIQ, a candidate-first job search workspace. 2 read-only tools. Hosted Streamable HTTP server at https://www.layiq.co/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
