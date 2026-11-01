@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add LAYIQ Jobs MCP Server] - {PR_MERGE_DATE}
+## [Add LAYIQ Jobs MCP Server] - 2026-11-01
 
 - Add LAYIQ Jobs to the official registry: find public job listings and explore roles from LAYIQ, a candidate-first job search workspace. 2 read-only tools. Hosted Streamable HTTP server at https://www.layiq.co/mcp with no sign-in and no API key, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
