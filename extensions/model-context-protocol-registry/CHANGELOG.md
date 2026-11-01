@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add PandaDoc MCP Server] - {PR_MERGE_DATE}
+## [Add PandaDoc MCP Server] - 2026-11-01
 
 - Add PandaDoc to the official registry: create documents from templates, send them for e-signature, and track status, recipients and audit trail; manage templates, contacts, quotes and the product catalog. 44 tools. Hosted Streamable HTTP server at https://mcp.pandadoc.com/v1/mcp (EU: https://mcp.pandadoc.eu/v1/mcp) with OAuth 2.1 sign-in (dynamic client registration), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
