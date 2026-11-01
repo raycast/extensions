@@ -1,6 +1,6 @@
 # Passig Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-01
 
 - Search your vault and copy or paste usernames, passwords and TOTP codes
 - Save new logins with the built-in password generator
