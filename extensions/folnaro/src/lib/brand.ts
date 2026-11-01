@@ -2,8 +2,7 @@ import type { StatusTone } from "./format";
 
 /**
  * Brand colors from docs/brand/tokens.json (version 2.1 "Quiet Glass / Luminous Teal"), light and
- * dark appearance. `test/brand.test.ts` compares them with the token file, so a palette change
- * there fails until this copy follows. Color never carries meaning alone: every status also has text.
+ * dark appearance, kept in step with the token file. Color never carries meaning alone: every status also has text.
  */
 export interface ThemedColor {
   light: string;

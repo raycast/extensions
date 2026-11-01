@@ -78,29 +78,3 @@ client (`src/lib/mcp-client.ts`) spawns the helper, runs the `initialize` handsh
 missing, helper stopped, timeout, switch off, read-only mode, timer already running or not running. Tool
 names, arguments and result shapes come from Folnaro's MCP reference (`docs/mcp/*.md` in the Folnaro
 repository).
-
-## Development
-
-```sh
-npm install
-npm run dev        # ray develop, needs Raycast on a Mac
-npm test           # vitest with a mock helper replaying JSON-RPC fixtures
-FOLNARO_MCP_BIN=<path to folnaro-mcp> npm test   # also against the real helper on a temp database
-npm run lint       # ray lint (validates the author against raycast.com, so it needs network)
-npm run build      # ray build -e dist
-```
-
-The tests start `test/mock-mcp-server.mjs` as the helper. It replays the fixtures in `test/fixtures/`, which
-`node test/fixtures/make-fixtures.mjs` writes from the documented result shapes and the helper's own error
-texts, with a fictional demo business. To try the extension without real data, set **Helper Path** to the
-full path of `test/mock-mcp-server.mjs`; it then serves `test/fixtures/demo.json`. Writes against the demo
-fixture answer like Folnaro would but change nothing.
-
-`test/real-helper.test.ts` checks the client against the real `folnaro-mcp` (build it with
-`swift build --product folnaro-mcp` in `mac/Packages/FolnaroKit` of the Folnaro repository). It runs only
-when `FOLNARO_MCP_BIN` is set and works on a fresh database in a temporary folder (`FOLNARO_DATABASE`),
-never on your books.
-
-Icons and screenshots are generated: `dev/icons/generate-icons.mjs` draws the command icons in the brand
-petrol, `dev/screenshots/render.mjs` renders the Store screenshots from the mock helper's demo data. The
-extension icon is Folnaro's approved app icon, unchanged.

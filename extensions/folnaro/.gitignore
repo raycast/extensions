@@ -3,6 +3,4 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
-dev/screenshots/node_modules
-dev/screenshots/out-*
 dist
