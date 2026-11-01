@@ -1,6 +1,6 @@
 # Changelog
 
-## [Dark Airline Logos] - {PR_MERGE_DATE}
+## [Dark Airline Logos] - 2026-11-01
 
 - Use dark airline logos in dark appearance, in both the flight lists and the menu bar.
 
