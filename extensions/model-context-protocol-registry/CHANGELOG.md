@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Viral Swipe File MCP Server] - {PR_MERGE_DATE}
+## [Add Viral Swipe File MCP Server] - 2026-11-01
 
 - Add Viral Swipe File to the official registry: viral TikToks and Instagram Reels by niche and format, with each video's hook, views and viral factor, for writing hooks and content ideas from real posts. 6 read-only tools. Hosted Streamable HTTP server at https://viralswipefile.com/api/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
