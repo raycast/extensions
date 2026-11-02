@@ -33,7 +33,7 @@ type WorkflowTaskResponse = {
           | {
               type: string;
               spec?: {
-                // Zadig leaves out the commit fields for a repository built without a pinned commit.
+                // Zadig leaves out the commit fields when it cannot look up the branch's latest commit.
                 repos?:
                   | { repo_name: string; branch: string; commit_id?: string | null; commit_message?: string | null }[]
                   | null;
@@ -98,11 +98,13 @@ export async function getWorkflowTask(workflowKey: string, taskId: number): Prom
     // NOTE: Choice parameters hold picked options such as the target environment, while free-text parameters may hold secrets.
     choices: (task.params ?? []).filter(param => param.type === "choice").map(({ name, value }) => ({ name, value })),
     stages: stages.map(({ name, status }) => ({ name, status })),
-    // NOTE: Several build jobs often build the same commit for different services, so each commit is listed once.
+    // NOTE: Several build jobs often build the same commit for different services, so each branch and commit is listed once.
     builds: builds.filter(
       (build, index) =>
-        builds.findIndex(({ repoName, commitId }) => repoName === build.repoName && commitId === build.commitId) ===
-        index,
+        builds.findIndex(
+          ({ repoName, branch, commitId }) =>
+            repoName === build.repoName && branch === build.branch && commitId === build.commitId,
+        ) === index,
     ),
   };
 }
