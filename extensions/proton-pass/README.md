@@ -58,7 +58,7 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
-  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from Raycast's favicon provider, which receives the domains (off by default)
+  - Show website icons instead of initials, in Browse Items and Get TOTP Code, from the Favicon Provider chosen in Raycast's Advanced settings, which receives the domains (off by default). With no provider chosen there, initials show
 
 ### Generate Password
 

@@ -318,7 +318,7 @@
       "type": "checkbox",
       "title": "",
       "label": "Show website icons",
-      "description": "From Raycast's favicon provider, which receives the domains.",
+      "description": "Needs a Favicon Provider chosen in Raycast's Advanced settings, which receives the domains.",
       "default": false,
       "required": false
     }
