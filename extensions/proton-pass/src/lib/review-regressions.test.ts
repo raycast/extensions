@@ -1239,7 +1239,7 @@ function totpCommandFixture(
   };
 }
 
-test("the TOTP countdown uses Raycast's own circles, in five steps, and turns from green to yellow to red", () => {
+test("the TOTP countdown uses Raycast's own circles, in quarters, and turns from green to yellow to red with them", () => {
   const icons = {
     CircleProgress100: "100",
     CircleProgress75: "75",
@@ -1251,17 +1251,21 @@ test("the TOTP countdown uses Raycast's own circles, in five steps, and turns fr
     "@raycast/api": { Color: { Green: "green", Yellow: "yellow", Red: "red" }, Icon: icons },
   }) as unknown as {
     totpProgressIcon: (remaining: number, period: number, tint?: string) => unknown;
-    totpTimerColor: (remaining: number) => string;
+    totpTimerColor: (remaining: number, period?: number) => string;
   };
   assert.equal(
-    [30, 26, 19, 18, 11, 4, 3, 1].map((seconds) => totpProgressIcon(seconds, 30)).join(),
-    "100,75,75,50,25,25,empty,empty",
+    [30, 23, 22, 16, 15, 8, 7, 1].map((seconds) => totpProgressIcon(seconds, 30)).join(),
+    "100,100,75,75,50,50,25,25",
   );
   assert.deepEqual(JSON.parse(JSON.stringify(totpProgressIcon(30, 30, "green"))), {
     source: "100",
     tintColor: "green",
   });
-  assert.equal([30, 11, 10, 6, 5, 1].map(totpTimerColor).join(), "green,green,yellow,yellow,red,red");
+  assert.equal(
+    [30, 16, 15, 8, 7, 1].map((seconds) => totpTimerColor(seconds)).join(),
+    "green,green,yellow,yellow,red,red",
+  );
+  assert.equal([31, 30, 16, 15].map((seconds) => totpTimerColor(seconds, 60)).join(), "green,yellow,yellow,red");
 });
 
 test("logins show their initials, or their website's icon with Show Website Icons, in Browse Items and Get TOTP", () => {

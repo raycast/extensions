@@ -1,34 +1,36 @@
 import { Color, Icon, Image } from "@raycast/api";
 import { Item, ItemType } from "./types";
 
-/** Green while a TOTP code has more than 10 seconds left, then yellow, and red for its last 5 seconds. */
-export function totpTimerColor(remainingSeconds: number): Color {
-  if (remainingSeconds > 10) return Color.Green;
-  if (remainingSeconds > 5) return Color.Yellow;
+/**
+ * Green for the first half of a TOTP code's period, yellow for the next quarter and red for the last one: the color
+ * changes with the progress circle.
+ */
+export function totpTimerColor(remainingSeconds: number, period = 30): Color {
+  const left = remainingSeconds / period;
+  if (left > 0.5) return Color.Green;
+  if (left > 0.25) return Color.Yellow;
   return Color.Red;
 }
 
 /**
  * The time a TOTP code has left, as one of Raycast's own progress circles: drawn like its other icons, they don't
- * flicker when they change, unlike an image redrawn every second. Five steps, from full to empty.
+ * flicker when they change, unlike an image redrawn every second. Four steps, a quarter of the period each.
  */
 export function totpProgressIcon(remainingSeconds: number, period: number, tintColor?: Color): Image.ImageLike {
   const source = totpCircle(remainingSeconds, period);
   return tintColor ? { source, tintColor } : source;
 }
 
-/** The progress circle for the time a TOTP code has left, from full to empty in five steps. */
+/** The progress circle for the time a TOTP code has left, by quarters of its period: full, then 3/4, 1/2 and 1/4. */
 export function totpCircle(remainingSeconds: number, period: number): Icon {
   const left = remainingSeconds / period;
-  return left > 0.875
+  return left > 0.75
     ? Icon.CircleProgress100
-    : left > 0.625
+    : left > 0.5
       ? Icon.CircleProgress75
-      : left > 0.375
+      : left > 0.25
         ? Icon.CircleProgress50
-        : left > 0.125
-          ? Icon.CircleProgress25
-          : Icon.Circle;
+        : Icon.CircleProgress25;
 }
 
 /** TOTP's symbol where no countdown runs, e.g. on actions: a circle, like the countdown. */

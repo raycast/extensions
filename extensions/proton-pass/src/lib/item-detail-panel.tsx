@@ -38,7 +38,7 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
         ? monospace(formatTotpCode(value.code))
         : {
             value: totpWithCountdown(formatTotpCode(value.code), value.remainingSeconds),
-            color: totpTimerColor(value.remainingSeconds),
+            color: totpTimerColor(value.remainingSeconds, value.period),
           };
   }
 }
@@ -69,7 +69,11 @@ export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRo
     // A circle that empties with the time the TOTP code has left, instead of the clock.
     const { value } = row;
     if (value.kind === "code" && value.remainingSeconds !== undefined && value.period) {
-      return totpProgressIcon(value.remainingSeconds, value.period, totpTimerColor(value.remainingSeconds));
+      return totpProgressIcon(
+        value.remainingSeconds,
+        value.period,
+        totpTimerColor(value.remainingSeconds, value.period),
+      );
     }
     return ROW_ICONS[row.id];
   };
