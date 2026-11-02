@@ -558,6 +558,25 @@ test("vault and shared item listings run at most 8 pass-cli commands at once, to
   assert.equal(most, 8);
 });
 
+test("overlapping listings, e.g. the vault list and the item list it opens, still run at most 8 commands at once", async () => {
+  let running = 0;
+  let most = 0;
+  const api = passCliWithAdapter({
+    listVaults: async () => Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" })),
+    listItemShares: async () => [],
+    listItems: async (shareId: string, vaultName: string) => {
+      running++;
+      most = Math.max(most, running);
+      await new Promise(setImmediate);
+      running--;
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const [first, second] = await Promise.all([api.listVaultsAndItems(), api.listVaultsAndItems()]);
+  assert.equal(first.items.length + second.items.length, 24);
+  assert.equal(most, 8);
+});
+
 test("Shared with Me failing to load doesn't hold the vaults back, unlike an ended session", async () => {
   let shareError = new PassCliError("Network unavailable", "network_error");
   const api = passCliWithAdapter({

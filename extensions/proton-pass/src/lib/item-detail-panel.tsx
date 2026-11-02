@@ -1,5 +1,6 @@
 import { Color, Detail, Icon, Image, List, open } from "@raycast/api";
 import { memo } from "react";
+import { totpWithCountdown } from "./format";
 import { getPanelRows, PanelRow, PanelRows, PanelValue } from "./item-panel";
 import { Item, ItemDetail } from "./types";
 import { useTotpCode } from "./use-totp-code";
@@ -36,7 +37,7 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
       return value.remainingSeconds === undefined
         ? formatTotpCode(value.code)
         : {
-            value: `${formatTotpCode(value.code)}  ·  ${value.remainingSeconds}s`,
+            value: totpWithCountdown(formatTotpCode(value.code), value.remainingSeconds),
             color: value.remainingSeconds <= 5 ? Color.Orange : undefined,
           };
   }

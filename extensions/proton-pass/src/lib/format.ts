@@ -4,6 +4,11 @@ export function itemKey(item: { shareId: string; itemId: string }): string {
   return `${item.shareId}-${item.itemId}`;
 }
 
+/** "09s  ·  418 877": the countdown comes first, on two digits, so that the code stays put while the seconds change. */
+export function totpWithCountdown(formattedCode: string, remainingSeconds: number): string {
+  return `${String(remainingSeconds).padStart(2, "0")}s  ·  ${formattedCode}`;
+}
+
 /** "https://www.example.com/login" or "example.com/login" -> "example.com". Values that aren't URLs are returned unchanged. */
 export function hostnameOf(url: string): string {
   try {

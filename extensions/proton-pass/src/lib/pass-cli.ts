@@ -213,19 +213,6 @@ async function listItemShares(): Promise<string[]> {
 // for accounts with many vaults. Run a bounded number of calls in parallel instead.
 const VAULT_LIST_CONCURRENCY = 8;
 
-async function mapWithConcurrency<T, R>(values: T[], limit: number, fn: (value: T) => Promise<R>): Promise<R[]> {
-  const results = new Array<R>(values.length);
-  let next = 0;
-  async function worker() {
-    while (next < values.length) {
-      const index = next++;
-      results[index] = await fn(values[index]);
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
-  return results;
-}
-
 /** Runs at most `limit` tasks at once, in the order they come: for listings that start at different times. */
 function createLimiter(limit: number) {
   let running = 0;
@@ -244,7 +231,11 @@ function createLimiter(limit: number) {
   };
 }
 
-type Limiter = ReturnType<typeof createLimiter>;
+/**
+ * Shared by every listing: they can overlap, e.g. the vault list, the item list it opens and a refresh, and together
+ * still run at most 8 pass-cli commands at once.
+ */
+const listingCommands = createLimiter(VAULT_LIST_CONCURRENCY);
 
 /** A vault whose items couldn't be listed. */
 export interface VaultFailure {
@@ -268,10 +259,7 @@ const vaultSources = (vaults: Vault[]): ItemSource[] =>
 const sharedSources = (shareIds: string[]): ItemSource[] =>
   shareIds.map((shareId) => ({ shareId, vault: SHARED_WITH_ME }));
 
-async function listItemsOfSources(
-  sources: ItemSource[],
-  run: Limiter = createLimiter(VAULT_LIST_CONCURRENCY),
-): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
+async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[]; failedVaults: VaultFailure[] }> {
   const failures = new Map<string, VaultFailure>();
   const listSource = async ({ shareId, vault }: ItemSource): Promise<Item[]> => {
     try {
@@ -288,7 +276,7 @@ async function listItemsOfSources(
       return [];
     }
   };
-  const itemsPerSource = await Promise.all(sources.map((source) => run(() => listSource(source))));
+  const itemsPerSource = await Promise.all(sources.map((source) => listingCommands(() => listSource(source))));
   return { items: itemsPerSource.flat(), failedVaults: [...failures.values()] };
 }
 
@@ -324,14 +312,13 @@ export async function listVaultsAndItems(): Promise<{ vaults: Vault[]; items: It
   }
 
   // The vaults' items and the shared ones each start as soon as their shares are known, which can take seconds for the
-  // shared ones, and share the parallel pass-cli calls.
-  const run = createLimiter(VAULT_LIST_CONCURRENCY);
+  // shared ones.
   const ownListing = listVaults().then(async (vaults) => ({
     vaults,
-    ...(await listItemsOfSources(vaultSources(vaults), run)),
+    ...(await listItemsOfSources(vaultSources(vaults))),
   }));
   const sharedListing = listItemShares().then(
-    (shareIds) => listItemsOfSources(sharedSources(shareIds), run),
+    (shareIds) => listItemsOfSources(sharedSources(shareIds)),
     (error: unknown) => {
       // A failure only concerns Shared with Me.
       if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
@@ -364,14 +351,14 @@ export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
   const adapter = await getAdapter();
   const roles = Array.from(await adapter.listVaultRoles());
   return new Map(
-    await mapWithConcurrency(
-      roles,
-      VAULT_LIST_CONCURRENCY,
-      async ([shareId, role]): Promise<[string, VaultSharing]> => {
-        if (role !== "owner") return [shareId, { role, isShared: true }];
-        const members = await (await getAdapter()).countVaultMembers(shareId).catch(() => undefined);
-        return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
-      },
+    await Promise.all(
+      roles.map(([shareId, role]) =>
+        listingCommands(async (): Promise<[string, VaultSharing]> => {
+          if (role !== "owner") return [shareId, { role, isShared: true }];
+          const members = await (await getAdapter()).countVaultMembers(shareId).catch(() => undefined);
+          return [shareId, { role, isShared: members === undefined ? undefined : members > 1 }];
+        }),
+      ),
     ),
   );
 }

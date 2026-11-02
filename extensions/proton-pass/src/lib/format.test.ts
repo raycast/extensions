@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { escapeMarkdown, formatRelativeTime, hostnameOf, noteToMarkdown, toOpenableUrl, websiteLabels } from "./format";
+import {
+  escapeMarkdown,
+  formatRelativeTime,
+  hostnameOf,
+  noteToMarkdown,
+  toOpenableUrl,
+  totpWithCountdown,
+  websiteLabels,
+} from "./format";
 
 test("shows the hostname of a URL without www", () => {
   assert.equal(hostnameOf("https://www.example.com/login?next=/"), "example.com");
@@ -66,4 +74,9 @@ test("tells websites on the same hostname apart by their path", () => {
     "example.com/a",
     "example.com/a",
   ]);
+});
+
+test("puts the TOTP countdown first, on two digits, so that the code doesn't move", () => {
+  assert.equal(totpWithCountdown("418 877", 9), "09s  ·  418 877");
+  assert.equal(totpWithCountdown("418 877", 30), "30s  ·  418 877");
 });
