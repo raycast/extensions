@@ -1,22 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  List,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { existsSync } from "node:fs";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import type { ReactElement } from "react";
-import { BRIDGE_SCRIPT } from "./lib/bridge";
-import { CONNECT_COMMAND, useUsage } from "./lib/use-usage";
-import { USAGE_PAGE } from "./lib/usage-api";
-import { deriveView, errorBanner, type Banner, type Level, type Row, type View } from "./lib/view";
+import { CONNECT_COMMAND, USAGE_PAGE } from "./lib/constants";
+import { openCommand, useUsage } from "./lib/use-usage";
+import { deriveView, type Banner, type Level, type Row, type View } from "./lib/view";
 
 const LEVEL_COLORS: Record<Level, Color> = {
   normal: Color.SecondaryText,
@@ -25,44 +11,23 @@ const LEVEL_COLORS: Record<Level, Color> = {
 };
 
 const BANNER_ICONS: Record<Banner["kind"], List.Item.Props["icon"]> = {
-  error: { source: Icon.Warning, tintColor: Color.Orange },
-  paused: { source: Icon.Pause, tintColor: Color.SecondaryText },
-  stale: { source: Icon.Clock, tintColor: Color.SecondaryText },
-  locked: { source: Icon.XMarkCircle, tintColor: Color.Red },
+  setup: { source: Icon.Plug, tintColor: Color.Orange },
+  limit: { source: Icon.XMarkCircle, tintColor: Color.Red },
 };
 
 export default function Command() {
-  const { snap, prefs, isLoading, revalidate } = useUsage({ syncMenuBar: true });
-  const view = deriveView(snap, prefs, Date.now());
+  const { state, prefs, isLoading, revalidate } = useUsage({ sync: true });
+  const view = deriveView(state, prefs, Date.now());
+  const actions = <UsageActions view={view} connected={state.connected} onRefresh={revalidate} />;
 
-  async function refreshNow() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing usage" });
-    const next = await revalidate();
-    if (next.lastError?.kind === "rate_limited") {
-      toast.style = Toast.Style.Success;
-      toast.title = "Showing latest usage";
-      toast.message = errorBanner(next.lastError.kind, next.backoffUntil, prefs.credentialsSource);
-    } else if (next.lastError) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't refresh usage";
-      toast.message = errorBanner(next.lastError.kind, next.backoffUntil, prefs.credentialsSource);
-    } else {
-      toast.style = Toast.Style.Success;
-      toast.title = "Usage updated";
-    }
-  }
-
-  const actions = <UsageActions view={view} onRefresh={refreshNow} />;
-
-  if (!snap.usage) {
-    const error = view.banners.find((b) => b.kind === "error");
+  if (!state.usage) {
     return (
       <List isLoading={isLoading}>
         {!isLoading && (
           <List.EmptyView
-            icon={error ? Icon.Warning : Icon.CircleProgress}
-            title={error ? "Couldn't Load Claude Usage" : "No Usage Data Yet"}
-            description={error?.text ?? "Press ⌘R to fetch your Claude usage."}
+            icon={Icon.Plug}
+            title={state.connected ? "Waiting for Claude Code" : "Connect Claude Code"}
+            description={view.banners[0]?.text}
             actions={actions}
           />
         )}
@@ -81,26 +46,13 @@ export default function Command() {
       )}
 
       <List.Section title="Limits">
-        {[...view.rows, ...view.extraRows].map((row) => (
+        {view.rows.map((row) => (
           <UsageItem key={row.key} row={row} actions={actions} />
         ))}
       </List.Section>
 
-      <List.Section title="Account">
-        {view.planLabel && (
-          <List.Item
-            icon={Icon.Person}
-            title={view.planLabel.replace(/^Plan: /, "")}
-            subtitle="Plan"
-            actions={actions}
-          />
-        )}
-        <List.Item
-          icon={Icon.Clock}
-          title={view.updatedLabel}
-          accessories={view.dim ? [{ tag: { value: "Stale", color: Color.Orange } }] : []}
-          actions={actions}
-        />
+      <List.Section title="Source">
+        <List.Item icon={Icon.Clock} title={view.updatedLabel} actions={actions} />
       </List.Section>
     </List>
   );
@@ -119,10 +71,12 @@ function UsageItem({ row, actions }: { row: Row; actions: ReactElement }) {
   );
 }
 
-function UsageActions({ view, onRefresh }: { view: View; onRefresh: () => void }) {
+function UsageActions({ view, connected, onRefresh }: { view: View; connected: boolean; onRefresh: () => void }) {
+  const connect = <Action title="Connect Claude Code" icon={Icon.Plug} onAction={() => openCommand(CONNECT_COMMAND)} />;
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        {!connected && connect}
         <Action.OpenInBrowser title="Open Usage Page" url={USAGE_PAGE} />
         <Action
           title="Refresh Usage"
@@ -139,13 +93,6 @@ function UsageActions({ view, onRefresh }: { view: View; onRefresh: () => void }
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {!existsSync(BRIDGE_SCRIPT) && (
-          <Action
-            title="Connect Claude Code"
-            icon={Icon.Plug}
-            onAction={() => launchCommand({ name: CONNECT_COMMAND, type: LaunchType.UserInitiated })}
-          />
-        )}
         <Action title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </ActionPanel.Section>
     </ActionPanel>

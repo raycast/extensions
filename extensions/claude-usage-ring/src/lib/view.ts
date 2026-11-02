@@ -1,8 +1,6 @@
-import type { ErrorKind, Prefs, Snapshot, UsageWindow } from "../types";
-import { formatAgo, formatClock, formatPercent, formatPlan, formatReset } from "./format";
+import type { UsageState, UsageWindow } from "../types";
+import { formatAgo, formatPercent, formatReset } from "./format";
 import { AMBER, colorFor, RED, ringIcon, type Arc, type IconPair } from "./ring";
-
-export const STALE_MS = 15 * 60_000;
 
 export type Level = "normal" | "warning" | "critical";
 
@@ -16,7 +14,7 @@ export type Row = {
   icon: IconPair;
 };
 
-export type Banner = { kind: "error" | "paused" | "stale" | "locked"; text: string };
+export type Banner = { kind: "setup" | "limit"; text: string };
 
 export type View = {
   icon: IconPair;
@@ -24,16 +22,18 @@ export type View = {
   tooltip: string;
   banners: Banner[];
   rows: Row[];
-  extraRows: Row[];
-  planLabel: string | null;
   updatedLabel: string;
   summary: string;
-  dim: boolean;
 };
+
+export type ViewPrefs = Pick<Preferences, "ringMode" | "showPercentText" | "warnThreshold" | "critThreshold">;
 
 export type Thresholds = { warn: number; crit: number };
 
-export function parseThresholds(prefs: Pick<Prefs, "warnThreshold" | "critThreshold">): Thresholds {
+export const NOT_CONNECTED = "Not connected. Run Connect Claude Code to start.";
+export const WAITING = "Waiting for Claude Code. Send a message in Claude Code (Pro or Max plan).";
+
+export function parseThresholds(prefs: Pick<ViewPrefs, "warnThreshold" | "critThreshold">): Thresholds {
   const num = (s: string | undefined, fallback: number) => {
     const n = Number.parseFloat(String(s ?? "").trim());
     return Number.isFinite(n) && n >= 0 && n <= 100 ? n : fallback;
@@ -44,44 +44,15 @@ export function parseThresholds(prefs: Pick<Prefs, "warnThreshold" | "critThresh
 }
 
 export function effectiveWindow(w: UsageWindow | null, now: number): UsageWindow | null {
-  if (w?.resetsAt && new Date(w.resetsAt).getTime() <= now) {
-    return { utilization: 0, resetsAt: null, lockedReason: null };
-  }
+  if (w?.resetsAt && new Date(w.resetsAt).getTime() <= now) return { utilization: 0, resetsAt: null };
   return w;
 }
 
-export function errorBanner(kind: ErrorKind, backoffUntil: number | null, source: Prefs["credentialsSource"]): string {
-  switch (kind) {
-    case "not_found":
-      return "Not logged in to Claude Code. Run `claude` and /login.";
-    case "denied":
-      return source === "keychain"
-        ? "Keychain access denied. Re-run and click Always Allow."
-        : "Can't read ~/.claude/.credentials.json.";
-    case "malformed":
-      return "Claude Code credentials are unreadable. Run /login again.";
-    case "expired":
-    case "unauthorized":
-      return "Login expired. Open Claude Code once to refresh it.";
-    case "rate_limited":
-      return backoffUntil
-        ? `Paused by Anthropic, retrying at ${formatClock(new Date(backoffUntil))}`
-        : "Paused by Anthropic";
-    case "server":
-    case "network":
-      return "Can't reach Anthropic";
-    case "schema":
-      return "Usage format changed. Extension needs an update.";
-    case "not_connected":
-      return "Waiting for Claude Code. Run Connect Claude Code, then send a message in Claude Code.";
-  }
-}
-
-const shownPct = (w: UsageWindow | null) => (w?.lockedReason ? 100 : (w?.utilization ?? 0));
+const pctOf = (w: UsageWindow | null) => w?.utilization ?? 0;
 
 function arcFor(w: UsageWindow | null, t: Thresholds): Arc {
-  const pct = shownPct(w);
-  return { pct, color: colorFor(pct, t.warn, t.crit, !!w?.lockedReason) };
+  const pct = pctOf(w);
+  return { pct, color: colorFor(pct, t.warn, t.crit) };
 }
 
 function row(key: string, title: string, w: UsageWindow | null, t: Thresholds, now: number): Row {
@@ -99,26 +70,19 @@ function row(key: string, title: string, w: UsageWindow | null, t: Thresholds, n
   };
 }
 
-export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
+export function deriveView(state: UsageState, prefs: ViewPrefs, now: number): View {
   const t = parseThresholds(prefs);
-  const u = snap.usage;
-
+  const u = state.usage;
   const five = u ? effectiveWindow(u.fiveHour, now) : null;
   const week = u ? effectiveWindow(u.sevenDay, now) : null;
-  const opus = u ? effectiveWindow(u.sevenDayOpus, now) : null;
-  const sonnet = u ? effectiveWindow(u.sevenDaySonnet, now) : null;
-
-  const stale = !!u && now - u.fetchedAt > STALE_MS;
-  const paused = snap.lastError?.kind === "rate_limited";
-  const dim = !!u && (stale || (!!snap.lastError && !paused));
 
   let icon: IconPair;
-  if (!u && snap.lastError) icon = ringIcon({ error: true });
-  else if (prefs.ringMode === "dual") icon = ringIcon({ outer: arcFor(week, t), inner: arcFor(five, t), dim });
-  else icon = ringIcon({ inner: arcFor(prefs.ringMode === "weekly" ? week : five, t), dim });
+  if (!u) icon = ringIcon({ error: true });
+  else if (prefs.ringMode === "dual") icon = ringIcon({ outer: arcFor(week, t), inner: arcFor(five, t) });
+  else icon = ringIcon({ inner: arcFor(prefs.ringMode === "weekly" ? week : five, t) });
 
-  const p5 = formatPercent(shownPct(five));
-  const p7 = formatPercent(shownPct(week));
+  const p5 = formatPercent(pctOf(five));
+  const p7 = formatPercent(pctOf(week));
 
   let title: string | undefined;
   if (prefs.showPercentText && u) {
@@ -126,29 +90,18 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
   }
 
   const banners: Banner[] = [];
-  if (snap.lastError) {
-    banners.push({
-      kind: paused ? "paused" : "error",
-      text: errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource),
-    });
-  }
-  if (u && stale) banners.push({ kind: "stale", text: `Data from ${formatAgo(u.fetchedAt, now)}` });
+  if (!state.connected) banners.push({ kind: "setup", text: NOT_CONNECTED });
+  else if (!u) banners.push({ kind: "setup", text: WAITING });
   for (const [label, w] of [
     ["Session", five],
     ["Weekly", week],
   ] as const) {
-    if (!w?.lockedReason) continue;
+    if (!w || w.utilization < 100) continue;
     const when = w.resetsAt ? `, resets ${formatReset(new Date(w.resetsAt), now)}` : "";
-    banners.push({ kind: "locked", text: `${label} limit reached: ${w.lockedReason}${when}` });
+    banners.push({ kind: "limit", text: `${label} limit reached${when}` });
   }
 
-  const extraRows: Row[] = [];
-  if (opus) extraRows.push(row("opus", "Opus Weekly", opus, t, now));
-  if (sonnet) extraRows.push(row("sonnet", "Sonnet Weekly", sonnet, t, now));
-
-  const plan = formatPlan(snap.plan?.subscriptionType, snap.plan?.rateLimitTier);
   const rows = [row("five", "Session (5h)", five, t, now), row("week", "Weekly", week, t, now)];
-  const summary = [...rows, ...extraRows].map((r) => `${r.title}: ${r.subtitle}`).join("\n");
 
   return {
     icon,
@@ -156,12 +109,7 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
     tooltip: u ? `Claude: 5h ${p5} · week ${p7}` : "Claude usage: no data yet",
     banners,
     rows,
-    extraRows,
-    planLabel: plan ? `Plan: ${plan}` : null,
-    updatedLabel: u
-      ? `Updated ${formatAgo(u.fetchedAt, now)}${u.origin === "claude-code" ? " via Claude Code" : ""}`
-      : "Not updated yet",
-    summary,
-    dim,
+    updatedLabel: u ? `Updated ${formatAgo(u.fetchedAt, now)} from Claude Code` : "No data yet",
+    summary: u ? rows.map((r) => `${r.title}: ${r.subtitle}`).join("\n") : "",
   };
 }

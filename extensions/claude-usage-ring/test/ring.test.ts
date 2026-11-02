@@ -38,8 +38,7 @@ describe("ringSvg", () => {
     expect(s).toContain('r="15"');
     expect(s).toContain('r="9"');
   });
-  it("dim and error", () => {
-    expect(ringSvg({ inner: { pct: 5, color: "#000" }, dim: true }, "#000")).toContain('opacity="0.5"');
+  it("error ring has an exclamation mark", () => {
     expect(ringSvg({ error: true }, "#000")).toContain("<rect");
   });
 });
@@ -62,5 +61,4 @@ describe("colorFor", () => {
     [85.1, RED],
     [100, RED],
   ])("%d → %s", (p, c) => expect(colorFor(p, 60, 85)).toBe(c));
-  it("locked → red", () => expect(colorFor(3, 60, 85, true)).toBe(RED));
 });

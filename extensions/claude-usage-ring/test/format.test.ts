@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatAgo, formatPercent, formatPlan, formatReset } from "../src/lib/format";
+import { formatAgo, formatPercent, formatReset } from "../src/lib/format";
 
 const now = new Date(2026, 10, 2, 14, 16, 0).getTime();
 
@@ -32,15 +32,9 @@ describe("formatAgo", () => {
   ])("%i ms → %s", (d, s) => expect(formatAgo(now - d, now)).toBe(s));
 });
 
-describe("formatPercent / formatPlan", () => {
+describe("formatPercent", () => {
   it("rounds", () => {
     expect(formatPercent(7.6)).toBe("8%");
     expect(formatPercent(0)).toBe("0%");
-  });
-  it("plan labels", () => {
-    expect(formatPlan("team", "default_claude_max_5x")).toBe("Team · Max 5x");
-    expect(formatPlan("max", "default_claude_max_20x")).toBe("Max 20x");
-    expect(formatPlan("pro", "default_claude_ai")).toBe("Pro");
-    expect(formatPlan(undefined, undefined)).toBeNull();
   });
 });

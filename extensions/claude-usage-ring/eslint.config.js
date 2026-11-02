@@ -1,4 +1,4 @@
 const { defineConfig } = require("eslint/config");
 const raycastConfig = require("@raycast/eslint-config");
 
-module.exports = defineConfig([...raycastConfig, { ignores: ["scripts/**", "vitest.config.mjs"] }]);
+module.exports = defineConfig([...raycastConfig, { ignores: ["vitest.config.mjs"] }]);

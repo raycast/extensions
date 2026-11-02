@@ -1,52 +1,31 @@
-import { environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Prefs, Snapshot } from "../types";
+import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { existsSync } from "node:fs";
+import { EMPTY_STATE, type UsageState } from "../types";
+import { BRIDGE_SCRIPT } from "./bridge";
 import { readClaudeCodeUsage } from "./claude-code-source";
-import { refresh } from "./refresh";
-import { oauthSource } from "./usage-api";
-import { readSnapshot, writeSnapshot } from "./usage-store";
+import { MENU_BAR_COMMAND } from "./constants";
 
-export const MENU_BAR_COMMAND = "usage-menu-bar";
-export const CONNECT_COMMAND = "connect-claude-code";
+export async function loadUsageState(): Promise<UsageState> {
+  return { connected: existsSync(BRIDGE_SCRIPT), usage: await readClaudeCodeUsage() };
+}
 
-export function useUsage({ force = false, syncMenuBar = false }: { force?: boolean; syncMenuBar?: boolean } = {}) {
-  const prefs = getPreferenceValues<Prefs>();
-  const [snap, setSnap] = useState<Snapshot>(readSnapshot);
-  const [isLoading, setIsLoading] = useState(true);
-  const snapRef = useRef(snap);
+export async function syncMenuBar(): Promise<void> {
+  await launchCommand({ name: MENU_BAR_COMMAND, type: LaunchType.Background }).catch(() => undefined);
+}
 
-  const load = useCallback(
-    async (forceFetch: boolean) => {
-      setIsLoading(true);
-      try {
-        const current = snapRef.current;
-        const api = prefs.dataSource === "claude-code" ? undefined : oauthSource(prefs.credentialsSource);
-        const next = await refresh(
-          current,
-          { api, local: readClaudeCodeUsage },
-          {
-            force: forceFetch,
-            userInitiated: environment.launchType === LaunchType.UserInitiated,
-          },
-        );
-        if (next === current) return current;
-        writeSnapshot(next);
-        snapRef.current = next;
-        setSnap(next);
-        if (syncMenuBar) {
-          await launchCommand({ name: MENU_BAR_COMMAND, type: LaunchType.Background }).catch(() => undefined);
-        }
-        return next;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [prefs.credentialsSource, prefs.dataSource, syncMenuBar],
-  );
+export async function openCommand(name: string): Promise<void> {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch {
+    await showHUD("Couldn't open the command. Make sure it is enabled in Raycast Settings.");
+  }
+}
 
-  useEffect(() => {
-    load(force).catch(() => undefined);
-  }, []);
-
-  return { snap, prefs, isLoading, revalidate: () => load(true) };
+export function useUsage({ sync = false }: { sync?: boolean } = {}) {
+  const prefs = getPreferenceValues<Preferences>();
+  const { data, isLoading, revalidate } = useCachedPromise(loadUsageState, [], {
+    onData: sync ? syncMenuBar : undefined,
+  });
+  return { state: data ?? EMPTY_STATE, prefs, isLoading, revalidate };
 }

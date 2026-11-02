@@ -17,19 +17,15 @@ describe("parseRateLimits", () => {
       123,
     );
     expect(u).toEqual({
-      fiveHour: { utilization: 23.5, resetsAt: "2025-02-01T16:00:00.000Z", lockedReason: null },
-      sevenDay: { utilization: 4, resetsAt: new Date(1738900000 * 1000).toISOString(), lockedReason: null },
-      sevenDayOpus: null,
-      sevenDaySonnet: null,
+      fiveHour: { utilization: 23.5, resetsAt: "2025-02-01T16:00:00.000Z" },
+      sevenDay: { utilization: 4, resetsAt: new Date(1738900000 * 1000).toISOString() },
       fetchedAt: 123,
-      origin: "claude-code",
     });
   });
   it("tolerates absent windows, clamps, and rejects empty input", () => {
     expect(parseRateLimits({ five_hour: { used_percentage: 120 } }, 1)?.fiveHour).toEqual({
       utilization: 100,
       resetsAt: null,
-      lockedReason: null,
     });
     expect(parseRateLimits({ spend_limit: { used_percentage: 5 } }, 1)).toBeNull();
     expect(parseRateLimits(null, 1)).toBeNull();

@@ -6,7 +6,6 @@ export type Arc = { pct: number; color?: string };
 export type RingOptions = {
   outer?: Arc;
   inner?: Arc;
-  dim?: boolean;
   error?: boolean;
 };
 
@@ -49,8 +48,7 @@ export function ringSvg(o: RingOptions, fg: string): string {
   } else {
     body = ring(o.inner, 14, 4, fg);
   }
-  const opacity = o.dim ? ` opacity="0.5"` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}"${opacity}>${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${body}</svg>`;
 }
 
 export function svgDataUri(svg: string): string {
@@ -64,8 +62,8 @@ export function ringIcon(o: RingOptions): IconPair {
   };
 }
 
-export function colorFor(pct: number, warn: number, crit: number, locked = false): string | undefined {
-  if (locked || pct >= 100 || pct > crit) return RED;
+export function colorFor(pct: number, warn: number, crit: number): string | undefined {
+  if (pct >= 100 || pct > crit) return RED;
   if (pct >= warn) return AMBER;
   return undefined;
 }

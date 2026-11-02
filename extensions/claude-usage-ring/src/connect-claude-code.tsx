@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Detail,
-  Icon,
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { BRIDGE_DATA_FILE } from "./lib/claude-code-source";
 import {
@@ -21,8 +10,9 @@ import {
   uninstallBridge,
   type BridgeStatus,
 } from "./lib/bridge";
+import { CHECK_COMMAND } from "./lib/constants";
 import { formatAgo } from "./lib/format";
-const CHECK_COMMAND = "check-usage";
+import { openCommand, syncMenuBar } from "./lib/use-usage";
 
 function markdown(status: BridgeStatus | undefined): string {
   const intro = [
@@ -31,8 +21,8 @@ function markdown(status: BridgeStatus | undefined): string {
     "Claude Code already knows your 5-hour and weekly usage and hands it to its **status line** after every reply.",
     "Connecting installs a tiny status line script that saves just those numbers to `~/.claude/usage-ring.json`.",
     "",
-    "- The ring then updates **while you use Claude Code**, without calling Anthropic and without touching your login.",
-    "- When Claude Code hasn't run for a few minutes, the extension falls back to the usage API (unless you chose *Claude Code only* in preferences).",
+    "- The ring then updates **while you use Claude Code**. The extension never reads your login and never calls Anthropic.",
+    "- Between sessions you see the last numbers. A window shows 0% once its reset time has passed.",
     "- Only the `rate_limits` numbers are written. Paths, prompts and session details are not.",
     "- Requires a Pro or Max subscription in Claude Code.",
   ];
@@ -75,6 +65,7 @@ export default function Command() {
       toast.title = "Claude Code connected";
       toast.message = "Send a message in Claude Code to start updates";
       revalidate();
+      await syncMenuBar();
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't connect Claude Code";
@@ -93,6 +84,7 @@ export default function Command() {
       await uninstallBridge();
       await showToast({ style: Toast.Style.Success, title: "Claude Code disconnected" });
       revalidate();
+      await syncMenuBar();
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -129,11 +121,7 @@ export default function Command() {
         <ActionPanel>
           {status?.installed ? (
             <>
-              <Action
-                title="Show Usage"
-                icon={Icon.Gauge}
-                onAction={() => launchCommand({ name: CHECK_COMMAND, type: LaunchType.UserInitiated })}
-              />
+              <Action title="Show Usage" icon={Icon.Gauge} onAction={() => openCommand(CHECK_COMMAND)} />
               <Action title="Disconnect" icon={Icon.Eject} style={Action.Style.Destructive} onAction={disconnect} />
             </>
           ) : (

@@ -35,17 +35,3 @@ export function formatAgo(at: number, now: number): string {
   if (h < 48) return `${h} h ago`;
   return `${Math.floor(h / 24)} d ago`;
 }
-
-const cap = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-
-export function formatPlan(subscriptionType?: string, rateLimitTier?: string): string | null {
-  const parts: string[] = [];
-  if (subscriptionType) parts.push(cap(subscriptionType));
-  if (rateLimitTier) {
-    const max = /max_(\d+)x/i.exec(rateLimitTier);
-    if (max) parts.push(`Max ${max[1]}x`);
-    else if (!/^default/i.test(rateLimitTier)) parts.push(rateLimitTier);
-  }
-  if (parts[0] === "Max" && parts[1]?.startsWith("Max")) parts.shift();
-  return parts.length ? parts.join(" · ") : null;
-}
