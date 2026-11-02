@@ -63,7 +63,7 @@
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.25",
+    "@raycast/api": "^2.10.1",
     "@raycast/utils": "^2.3.3",
     "javascript-time-ago": "^2.5.10",
     "node-fetch": "^3.3.2",
