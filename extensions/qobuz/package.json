@@ -25,6 +25,31 @@
       "mode": "view"
     },
     {
+      "name": "open-shared-music",
+      "title": "Open Shared Music",
+      "subtitle": "Qobuz",
+      "description": "Bring a Spotify or YouTube Music track or album over to Qobuz, or see a Qobuz track on every other service. Uses the link you pass, else a track or album link on the clipboard.",
+      "keywords": [
+        "convert",
+        "link",
+        "share",
+        "spotify",
+        "youtube music",
+        "album",
+        "track",
+        "url"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "link",
+          "placeholder": "Track or album link",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "copy-share-links",
       "title": "Copy Share Links",
       "subtitle": "Qobuz",

@@ -4,18 +4,19 @@ import { useMemo, useState } from "react";
 
 import { BrowserItem } from "./components/browser-item";
 import { filterBookmarks, loadBookmarks } from "./lib/bookmarks";
-import { buildFaviconIndex, faviconForUrl, loadFaviconRows } from "./lib/favicons";
+import { faviconForUrl, loadFaviconIndex } from "./lib/favicons";
 import { activeProfilePath } from "./lib/profile";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data: bookmarks = [], isLoading, error } = usePromise(loadBookmarks, []);
-  const { data: faviconRows = [] } = usePromise(async () => {
-    const path = await activeProfilePath("Favicons");
-    return loadFaviconRows(path);
-  }, []);
-  const faviconIndex = useMemo(() => buildFaviconIndex(faviconRows), [faviconRows]);
   const filteredBookmarks = useMemo(() => filterBookmarks(bookmarks, searchText), [bookmarks, searchText]);
+  const faviconUrls = useMemo(() => bookmarks.map((bookmark) => bookmark.url), [bookmarks]);
+  const { data: faviconIndex } = usePromise(
+    async (urls: string[]) => loadFaviconIndex(await activeProfilePath("Favicons"), urls),
+    [faviconUrls],
+    { execute: faviconUrls.length > 0 },
+  );
 
   return (
     <List
@@ -42,7 +43,7 @@ export default function Command() {
             key={`${bookmark.id}-${index}`}
             title={bookmark.title}
             url={bookmark.url}
-            icon={faviconForUrl(faviconIndex, bookmark.url)}
+            icon={faviconIndex ? faviconForUrl(faviconIndex, bookmark.url) : undefined}
             path={bookmark.path}
           />
         ))

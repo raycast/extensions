@@ -1,8 +1,11 @@
 import type { RaycastCard } from "./api";
 import { isDone } from "./doneStates";
 
-const sortByCreatedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
-  [...cards].sort((left, right) => right.createdAt - left.createdAt);
+/** Lists are newest first by when a card was last saved, as Teak orders them. */
+const savedTime = (card: RaycastCard): number => card.savedAt ?? card.createdAt;
+
+const sortBySavedAtDesc = (cards: RaycastCard[]): RaycastCard[] =>
+  [...cards].sort((left, right) => savedTime(right) - savedTime(left));
 
 export interface UpsertOptions {
   /** The list shows archived cards only (true) or leaves them out (false). */
@@ -38,7 +41,7 @@ export const upsertCard = (
       const at = Math.min(Math.max(options.insertIndex, 0), cards.length);
       return [...cards.slice(0, at), next, ...cards.slice(at)];
     }
-    return sortByCreatedAtDesc([...cards, next]);
+    return sortBySavedAtDesc([...cards, next]);
   }
 
   const updated = [...cards];

@@ -8,7 +8,7 @@
   "contributors": [
     "ridemountainpig",
     "INCHMAN1900",
-    "arjan",
+    "arjan.flac",
     "dans_huang"
   ],
   "categories": [
@@ -32,7 +32,7 @@
   ],
   "preferences": [
     {
-      "title": "Advanced",
+      "title": "Copy Tip",
       "name": "showCopyTip",
       "type": "checkbox",
       "required": false,
@@ -41,12 +41,21 @@
       "default": true
     },
     {
+      "name": "showHudEmoji",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show emoji",
+      "description": "Show a file, folder, or link emoji in copy tips.",
+      "default": true
+    },
+    {
       "name": "showLastCopy",
       "type": "checkbox",
       "required": false,
       "label": "Show Last Copy",
       "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
-      "default": true
+      "default": true,
+      "title": "Advanced"
     },
     {
       "name": "showTabTitle",
@@ -70,11 +79,11 @@
       "required": false,
       "title": "Multi-path Separator",
       "description": "The separator between paths when copying multiple file paths.",
-      "default": "\n",
+      "default": "\\n",
       "data": [
         {
           "title": "⏎",
-          "value": "\n"
+          "value": "\\n"
         },
         {
           "title": "␣",
@@ -168,7 +177,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

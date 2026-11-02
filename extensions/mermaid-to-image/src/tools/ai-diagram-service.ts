@@ -29,7 +29,7 @@ export interface AiDiagramGenerationDependencies {
 export interface AiDiagramGenerationResult {
   outputPath: string;
   format: "svg" | "png";
-  engine: "beautiful" | "mmdc";
+  engine: DiagramResult["engine"];
   message: string;
 }
 
@@ -59,6 +59,7 @@ export async function generateAiDiagramArtifact(
   try {
     result = await dependencies.generateDiagram(cleanedCode, options.tempFileRef, {
       ...renderOptions,
+      useOndineInAuto: false,
       usePersistentOutputDir: true,
       scale: options.scale,
       width: options.width,

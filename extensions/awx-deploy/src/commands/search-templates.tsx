@@ -6,14 +6,15 @@ import { confirmAndLaunch } from "../common/launch";
 import { WorkflowStagesList } from "../components/workflow-stages-list";
 import {
   JobTemplate,
+  LaunchPrompts,
   Paginated,
+  UnifiedJobTemplate,
   WorkflowJobTemplate,
   apiBase,
   authHeaders,
   jobWebUrl,
   launchTemplate,
   launchWorkflow,
-  surveySpecUrl,
   templateWebUrl,
   workflowJobWebUrl,
   workflowTemplateWebUrl,
@@ -22,13 +23,8 @@ import { statusColor, statusIcon } from "../common/format";
 
 const PAGE_SIZE = 30;
 
-type View = "workflows" | "job_templates";
-
 export default function SearchTemplates() {
   const [searchText, setSearchText] = useState("");
-  const [view, setView] = useState<View>("workflows");
-
-  const endpoint = view === "workflows" ? "workflow_job_templates" : "job_templates";
 
   const { isLoading, data, pagination, revalidate } = useFetch(
     (options: { page: number }) => {
@@ -36,14 +32,15 @@ export default function SearchTemplates() {
         page: String(options.page + 1),
         page_size: String(PAGE_SIZE),
         order_by: "name",
+        type: "job_template,workflow_job_template",
       });
       if (searchText.trim()) params.set("search", searchText.trim());
-      return `${apiBase()}/${endpoint}/?${params.toString()}`;
+      return `${apiBase()}/unified_job_templates/?${params.toString()}`;
     },
     {
       headers: authHeaders(),
       keepPreviousData: true,
-      mapResult(result: Paginated<JobTemplate | WorkflowJobTemplate>) {
+      mapResult(result: Paginated<UnifiedJobTemplate>) {
         return { data: result.results, hasMore: Boolean(result.next) };
       },
       onError(error) {
@@ -57,23 +54,17 @@ export default function SearchTemplates() {
       isLoading={isLoading}
       pagination={pagination}
       throttle
-      searchBarPlaceholder={view === "workflows" ? "Search workflows…" : "Search job templates…"}
+      searchBarPlaceholder="Search workflows and job templates…"
       onSearchTextChange={setSearchText}
-      searchBarAccessory={
-        <List.Dropdown tooltip="Template type" value={view} onChange={(v) => setView(v as View)}>
-          <List.Dropdown.Item title="Workflows" value="workflows" icon={Icon.Layers} />
-          <List.Dropdown.Item title="Job Templates" value="job_templates" icon={Icon.Terminal} />
-        </List.Dropdown>
-      }
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found" />
-      {view === "workflows"
-        ? (data as WorkflowJobTemplate[] | undefined)?.map((wf) => (
-            <WorkflowRow key={wf.id} workflow={wf} onRefresh={revalidate} />
-          ))
-        : (data as JobTemplate[] | undefined)?.map((jt) => (
-            <JobTemplateRow key={jt.id} template={jt} onRefresh={revalidate} />
-          ))}
+      {data?.map((t) =>
+        t.type === "workflow_job_template" ? (
+          <WorkflowRow key={`wf-${t.id}`} workflow={t} onRefresh={revalidate} />
+        ) : (
+          <JobTemplateRow key={`jt-${t.id}`} template={t} onRefresh={revalidate} />
+        ),
+      )}
     </List>
   );
 }
@@ -92,7 +83,7 @@ function WorkflowRow({ workflow, onRefresh }: { workflow: WorkflowJobTemplate; o
   const status = statusAccessory(workflow.summary_fields?.last_job?.status);
   if (status) accessories.push(status);
 
-  const launch = (extraVars?: string) => launchWorkflow(workflow.id, extraVars);
+  const launch = (extraVars?: string, prompts?: LaunchPrompts) => launchWorkflow(workflow.id, extraVars, prompts);
 
   return (
     <List.Item
@@ -110,7 +101,7 @@ function WorkflowRow({ workflow, onRefresh }: { workflow: WorkflowJobTemplate; o
                   name={workflow.name}
                   launch={launch}
                   jobUrl={workflowJobWebUrl}
-                  surveyEndpoint={surveySpecUrl("workflow_job_templates", workflow.id)}
+                  template={{ kind: "workflow_job_templates", id: workflow.id }}
                 />
               }
             />
@@ -170,7 +161,7 @@ function JobTemplateRow({ template, onRefresh }: { template: JobTemplate; onRefr
   const status = statusAccessory(template.summary_fields?.last_job?.status);
   if (status) accessories.push(status);
 
-  const launch = (extraVars?: string) => launchTemplate(template.id, extraVars);
+  const launch = (extraVars?: string, prompts?: LaunchPrompts) => launchTemplate(template.id, extraVars, prompts);
 
   return (
     <List.Item
@@ -188,7 +179,7 @@ function JobTemplateRow({ template, onRefresh }: { template: JobTemplate; onRefr
                   name={template.name}
                   launch={launch}
                   jobUrl={jobWebUrl}
-                  surveyEndpoint={surveySpecUrl("job_templates", template.id)}
+                  template={{ kind: "job_templates", id: template.id }}
                 />
               }
             />

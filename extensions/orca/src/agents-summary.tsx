@@ -6,19 +6,16 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 
 import {
   AgentFilter,
   StatusFilter,
   SummaryMode,
+  execOrca,
   filterRows,
   loadAgents,
   summarize,
 } from "./orca.ts";
-
-const execFileAsync = promisify(execFile);
 
 /** Shown when nobody is blocked; searching "orca" matches on it. */
 const EXTENSION_NAME = "Orca";
@@ -36,7 +33,7 @@ export default async function Command() {
     // The same agent types List All Agents shows: with Claude Only set, a
     // waiting Codex pane must not surface here either.
     const rows = filterRows(
-      await loadAgents(orcaPath, execFileAsync),
+      await loadAgents(orcaPath, execOrca),
       "all",
       agentFilter as AgentFilter,
     );

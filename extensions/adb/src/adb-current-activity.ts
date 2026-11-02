@@ -14,7 +14,7 @@ export default async function currentActivity() {
   let result;
   try {
     result = cmdResult.split("/")[1].split("}")[0];
-  } catch (e) {
+  } catch {
     result = cmdResult;
   }
   await Clipboard.copy({

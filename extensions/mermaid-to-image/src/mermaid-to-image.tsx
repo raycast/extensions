@@ -2,12 +2,21 @@ import { Action, ActionPanel, Detail, Icon, environment, getPreferenceValues } f
 import { ImagePreview } from "./components/ImagePreview";
 import { getManagedBrowserSupportRoot } from "./utils/browser-manager";
 import { useManualMermaidCommand } from "./hooks/use-manual-mermaid-command";
-import { Preferences } from "./types";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const {
-    state: { isLoading, error, browserSetup, imagePath, imageFormat, engineUsed, svgRasterStrategy, mermaidCode },
+    state: {
+      isLoading,
+      error,
+      browserSetup,
+      imagePath,
+      imageFormat,
+      engineUsed,
+      svgRasterStrategy,
+      mermaidCode,
+      rendererMetadata,
+    },
     actions: {
       runFromSelection,
       runFromClipboardOnly,
@@ -117,6 +126,7 @@ The managed browser is used for compatible rendering and for SVG preview/copy ca
         engineLabel={engineUsed}
         svgRasterStrategy={svgRasterStrategy}
         mermaidCode={mermaidCode}
+        rendererMetadata={rendererMetadata}
       />
     );
   }

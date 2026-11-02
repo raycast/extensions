@@ -10,6 +10,7 @@ import {
   Clipboard,
   LocalStorage,
   getPreferenceValues,
+  Cache,
   Detail,
 } from "@raycast/api";
 import React, { useState, useEffect, useRef } from "react";
@@ -42,12 +43,37 @@ import {
   getSavedEmoteMatches,
 } from "./search-state";
 
+const GRID_COLUMNS = { small: 8, medium: 6, large: 4 };
+type GridSize = keyof typeof GRID_COLUMNS;
+const cache = new Cache();
+
 const validSelections = PROVIDERS.flatMap((provider) =>
   provider.sorts.map((sort) => `${provider.id}:${sort}`),
 );
 
 export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
-  const defaultSize = Number(getPreferenceValues<Preferences>().size);
+  const extensionPreferences = getPreferenceValues<Preferences>();
+  const defaultSize = Number(extensionPreferences.size);
+
+  // A Grid Size picked from the Action Panel is kept until the preference itself changes.
+  const [gridSize, setGridSize] = useState<GridSize>(() => {
+    const saved = JSON.parse(cache.get("gridSize") ?? "null");
+    if (saved?.preference === extensionPreferences.gridSize) return saved.value;
+    cache.remove("gridSize");
+    return extensionPreferences.gridSize;
+  });
+
+  const changeGridSize = (value: GridSize) => {
+    setGridSize(value);
+    cache.set(
+      "gridSize",
+      JSON.stringify({
+        preference: extensionPreferences.gridSize,
+        value,
+      }),
+    );
+  };
+
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
   const [favorites, setFavorites] = useState<Emote[]>([]);
@@ -161,7 +187,7 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
     const controller = new AbortController();
     setIsLoading(true);
     setErrorMessage(undefined);
-    const timeout = setTimeout(async () => {
+    void (async () => {
       try {
         const result = await (source?.load ?? searchEmotes)(
           {
@@ -197,11 +223,8 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
       } finally {
         if (fetchId === fetchIdRef.current) setIsLoading(false);
       }
-    }, 300);
-    return () => {
-      controller.abort();
-      clearTimeout(timeout);
-    };
+    })();
+    return () => controller.abort();
   }, [
     preferencesLoaded,
     source,
@@ -224,6 +247,7 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
     setErrorMessage(undefined);
     setPage(1);
   }
+
   function changeSearch(text: string) {
     if (text === searchText) return;
     resetResults();
@@ -231,6 +255,7 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
       updatePreferences({ selection: "bttv:popular" });
     setSearchText(text);
   }
+
   function changeSelection(value: string) {
     if (value === selection) return;
     resetResults();
@@ -413,6 +438,7 @@ export function EmoteBrowser({ source }: { source?: UserEmoteSource }) {
             ))}
           </ActionPanel.Submenu>
         </ActionPanel.Section>
+
         <ActionPanel.Section>
           {renderFilterAction()}
           <Action
@@ -459,6 +485,18 @@ This status applies to 7TV personal emote sets. It does not describe general per
               }
             />
           )}
+          {isGridView && (
+            <ActionPanel.Submenu title="Grid Size" icon={Icon.AppWindowGrid3x3}>
+              {(["small", "medium", "large"] as const).map((value) => (
+                <Action
+                  key={value}
+                  title={value[0].toUpperCase() + value.slice(1)}
+                  icon={value === gridSize ? Icon.Checkmark : undefined}
+                  onAction={() => changeGridSize(value)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
         </ActionPanel.Section>
       </ActionPanel>
     );
@@ -481,6 +519,7 @@ This status applies to 7TV personal emote sets. It does not describe general per
         ))}
       </Dropdown.Section>
     ));
+
   const savedMatches = source
     ? { favorites: [], history: [] }
     : getSavedEmoteMatches(
@@ -491,6 +530,7 @@ This status applies to 7TV personal emote sets. It does not describe general per
       );
   const hasSavedMatches =
     savedMatches.favorites.length > 0 || savedMatches.history.length > 0;
+
   const pagination = {
     pageSize: provider === "bttv" ? BTTV_PAGE_SIZE : PAGE_SIZE,
     hasMore,
@@ -544,6 +584,7 @@ This status applies to 7TV personal emote sets. It does not describe general per
   if (isGridView) {
     return (
       <Grid
+        throttle
         isLoading={isLoading}
         onSearchTextChange={changeSearch}
         searchText={searchText}
@@ -566,7 +607,8 @@ This status applies to 7TV personal emote sets. It does not describe general per
             </Grid.Dropdown>
           )
         }
-        columns={6}
+        columns={GRID_COLUMNS[gridSize]}
+        inset={gridSize === "small" ? Grid.Inset.Small : undefined}
         fit={Grid.Fit.Contain}
       >
         {savedMatches.favorites.length > 0 &&

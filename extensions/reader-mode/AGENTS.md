@@ -108,7 +108,8 @@ src/
 │   ├── html-cleaner.ts  # Pre-cleaning logic using site configs
 │   ├── readability.ts   # Main extraction pipeline (one DOM: metadata → data payload → clean → parse)
 │   ├── data-payload.ts  # Reads an article from a Nuxt or Next.js data payload (teaser pages)
-│   ├── markdown-source.ts   # .md URLs and <link rel="alternate" type="text/markdown"> pages
+│   ├── markdown-source.ts   # .md URLs, <link rel="alternate" type="text/markdown"> pages, and Markdown sent for Accept: text/markdown
+│   │                        #   (article-loader.ts's judgeMarkdown decides whether that Markdown or the HTML article is shown)
 │   ├── paywall-detector.ts  # Evidence-based paywall scoring (no domain allowlist)
 │   ├── host-api.ts      # Bounded/guarded Raycast host API calls (Windows-safe)
 │   └── ...

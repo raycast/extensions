@@ -4,7 +4,6 @@ import { ensureSupportDir } from "./utils/ensure-support-dir";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { isInvalidCustomNpxPathError, isNpxResolutionError, isSkillsCliBusyError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
-import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
 ensureSupportDir();
 
@@ -18,7 +17,7 @@ function describeSkillsError(error: Error): SkillsErrorDescription {
     return {
       errorTitle: "Another Skills Command Is Running",
       errorDetails:
-        "Only one skills command can use the Skills CLI at a time, and the one holding it has not finished yet.\n\n1. Wait for the running command, such as **Update All Skills**, to finish.\n2. Press **Retry** to load the list again.",
+        "Only one skills command can use the Skills CLI at a time, and the one holding it has not finished yet.\n\n1. Wait for the running command to finish.\n2. Press **Retry** to load the list again.",
     };
   }
 
@@ -81,7 +80,8 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
-  // Global count — "Update All" applies to all agents regardless of filter
+  const cliManagedSkills = filteredSkills.filter((skill) => skill.managedBySkillsCli);
+  const localSkills = filteredSkills.filter((skill) => !skill.managedBySkillsCli);
   const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
   return (
@@ -106,7 +106,7 @@ export default function Command() {
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills from Search Skills to manage them here."
+          description="The Skills CLI did not find skills installed for its supported agents."
           icon={Icon.Box}
           actions={
             <ActionPanel>
@@ -143,16 +143,15 @@ export default function Command() {
               subtitle={`${updatableCount} skill${updatableCount > 1 ? "s" : ""}`}
             >
               <List.Item
-                title="Update All"
+                title="Review Available Updates"
                 icon={{ source: Icon.ArrowClockwise, tintColor: Color.Orange }}
                 detail={
                   <List.Item.Detail
-                    markdown={`# Update All Skills\n\nPress **Enter** to update all **${updatableCount}** outdated skill${updatableCount > 1 ? "s" : ""} at once.`}
+                    markdown={`# Available Updates\n\n${updatableCount} skill${updatableCount > 1 ? "s have" : " has"} a newer source version. The Skills CLI update command may change installations for other detected agents, so this extension shows update availability without running it. Review the highlighted skills below.`}
                   />
                 }
                 actions={
                   <ActionPanel>
-                    <UpdateSkillAction mutate={mutate} />
                     <Action
                       title="Refresh Installed Skills"
                       onAction={revalidate}
@@ -164,8 +163,21 @@ export default function Command() {
               />
             </List.Section>
           )}
-          <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>
-            {filteredSkills.map((skill) => (
+          <List.Section title="Skills CLI Managed" subtitle={`${cliManagedSkills.length} skills`}>
+            {cliManagedSkills.map((skill) => (
+              <InstalledSkillListItem
+                key={skill.name}
+                skill={skill}
+                isSelected={selectedId === skill.name}
+                isShowingDetail={isShowingDetail}
+                mutate={mutate}
+                onToggleDetail={toggleDetail}
+                onRefresh={revalidate}
+              />
+            ))}
+          </List.Section>
+          <List.Section title="Local or Externally Managed" subtitle={`${localSkills.length} skills`}>
+            {localSkills.map((skill) => (
               <InstalledSkillListItem
                 key={skill.name}
                 skill={skill}

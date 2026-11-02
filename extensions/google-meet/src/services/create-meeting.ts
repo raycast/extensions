@@ -134,7 +134,7 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
   }
 
   const browser = await resolveCreationBrowser();
-  const adapter = getAdapterForBrowser(browser.name);
+  const adapter = getAdapterForBrowser(browser.name, browser.application);
   const creationUrl = buildCreationUrl(options.profile);
 
   const previousClipboardText = adapter.usesClipboardFallback
@@ -142,7 +142,11 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
     : undefined;
 
   try {
-    await open(creationUrl, browser.application);
+    if (adapter.openCreationUrl) {
+      await adapter.openCreationUrl(creationUrl);
+    } else {
+      await open(creationUrl, browser.application);
+    }
 
     const rawUrl = await waitForMeetingUrl(() => adapter.getCandidateUrls(), {
       timeoutMs: getPollTimeoutMs(),

@@ -12,8 +12,15 @@ Browse and set wallpapers without leaving Raycast. The collection is classic pai
 
 **Ask Art Wallpapers**
 
-Use Raycast AI to browse today's artworks, find a random wallpaper, review your history, or set and download wallpapers.
+Use Raycast AI to search the full gallery, browse today's artworks, find a random wallpaper, review your history, or set and download wallpapers.
+Gallery searches return 10 artworks at a time, with a maximum of 20 per page. Ask for more results to continue browsing.
 Search history by words, artist, artwork year, usage dates, or action type, and set a wallpaper from the results. History date ranges include both days in your local timezone.
+
+**Search Wallpapers**
+
+Search the same live gallery as [anotherboring.day](https://anotherboring.day/) by title, artist, subject, color, mood, genre, or movement. Try `Monet`, `blue`, or `calm sea`. Clear the search to browse all artworks, preview a result, then set it as your wallpaper, download it, or open its artwork page.
+
+Search follows the website's matching rules: accents and case are ignored, all query words must match, exact artist matches take priority, and prefixes, word endings, spelling variations, and similar-sounding artist names are supported. Raycast's additional fuzzy filtering is disabled so it does not hide matching results. The catalog refreshes when the command opens; use **Reload Wallpapers** to refresh it again.
 
 **Today's Wallpapers**
 
