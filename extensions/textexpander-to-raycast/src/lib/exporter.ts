@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { open, unlink, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import type { RaycastSnippet } from "./types";
 
@@ -24,6 +24,15 @@ export async function exportSnippets(options: {
     text,
     ...(keyword ? { keyword } : {}),
   }));
-  await writeFile(filePath, `${JSON.stringify(snippets, null, 2)}\n`, { flag: "wx", mode: 0o600 });
+  const data = `${JSON.stringify(snippets, null, 2)}\n`;
+  const file = await open(filePath, "wx", 0o600);
+  try {
+    await writeFile(file, data);
+  } catch (error) {
+    await unlink(filePath);
+    throw error;
+  } finally {
+    await file.close();
+  }
   return filePath;
 }

@@ -113,6 +113,11 @@ export function parseLibrary(value: unknown): Library {
   let suggestedCount = 0;
 
   if ("snippetsTE2" in value || "groupsTE2" in value) {
+    const groupInfo = value.groupInfo;
+    if (groupInfo !== undefined && !isRecord(groupInfo)) {
+      throw new Error("Invalid TextExpander group info: expected a dictionary.");
+    }
+    const exportedGroup = groupInfo ? stringField(groupInfo, "groupName") || "Ungrouped" : "Ungrouped";
     const groups = arrayField(value, "groupsTE2");
     const groupById = new Map<string, string>();
     const excludedIds = new Set<string>();
@@ -128,11 +133,11 @@ export function parseLibrary(value: unknown): Library {
     for (const [index, item] of arrayField(value, "snippetsTE2").entries()) {
       if (!isRecord(item)) throw new Error("Invalid TextExpander snippet: expected a dictionary.");
       const id = stringField(item, "uuidString");
-      if (excludedIds.has(id)) {
+      if (isSuggested(exportedGroup) || excludedIds.has(id)) {
         suggestedCount++;
         continue;
       }
-      snippets.push(readSnippet(item, groupById.get(id) || "Ungrouped", `legacy-${index}`));
+      snippets.push(readSnippet(item, groupById.get(id) || exportedGroup, `legacy-${index}`));
     }
   } else if ("snippetPlists" in value) {
     const name = stringField(value, "name") || "Ungrouped";

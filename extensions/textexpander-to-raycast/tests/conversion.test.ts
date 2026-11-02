@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import fs from "node:fs/promises";
 import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -22,6 +23,32 @@ function snippet(overrides: Record<string, unknown> = {}) {
 
 function groupData() {
   return { name: "Email", snippetPlists: [snippet()] };
+}
+
+for (const { source, group } of [
+  { source: "legacy-settings.textexpander", group: "Legacy Examples" },
+  { source: "group-export.textexpander", group: "Exported Examples" },
+  { source: "Settings.textexpandersettings", group: "Bundle Examples" },
+]) {
+  test(`reads real TextExpander fixture: ${source}`, async () => {
+    const library = await readLibrary(join(__dirname, "fixtures", source));
+    assert.equal(library.suggestedCount, 0);
+    assert.deepEqual(
+      library.snippets.map((item) => item.group),
+      [group, group],
+    );
+    assert.deepEqual(
+      library.snippets.map((item) => item.kind),
+      ["plain", "plain"],
+    );
+    assert.deepEqual(
+      convertLibrary(library, true).snippets.map((item) => item.snippet),
+      [
+        { name: `[${group}] Greeting`, text: "Hello, world!\n", keyword: ";hello" },
+        { name: `[${group}] ;sig`, text: "Best,\nExample", keyword: ";sig" },
+      ],
+    );
+  });
 }
 
 test("legacy settings join snippets to groups and always exclude suggested snippets", () => {
@@ -59,6 +86,13 @@ test("suggested group exports are excluded before reading snippet content", () =
     snippets: [],
     suggestedCount: 1,
   });
+  assert.deepEqual(
+    parseLibrary({ groupInfo: { groupName: " Suggested Snippets " }, snippetsTE2: [{ plainText: 123 }] }),
+    {
+      snippets: [],
+      suggestedCount: 1,
+    },
+  );
 });
 
 test("missing UUIDs receive stable independent preview IDs", () => {
@@ -77,6 +111,8 @@ test("malformed and unrelated property lists fail instead of producing a partial
     { snippetsTE2: [null] },
     { snippetsTE2: [snippet({ plainText: 123 })] },
     { groupsTE2: [{ snippetUUIDs: [7] }] },
+    { snippetsTE2: [], groupInfo: null },
+    { snippetsTE2: [], groupInfo: { groupName: 123 } },
   ]) {
     assert.throws(() => parseLibrary(data));
   }
@@ -260,6 +296,31 @@ test("export writes exact Raycast JSON, keeps permissions private, and never ove
     );
     assert.deepEqual(JSON.parse(await readFile(file, "utf8")), snippets);
     await assert.rejects(exportSnippets({ directory, filename: "empty.json", snippets: [] }), /at least one/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("a failed write removes the partial export and allows retrying the same filename", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "textexpander-failed-export-"));
+  const filePath = join(directory, "snippets.json");
+  const snippets = [{ name: "Greeting", text: "Hello!", keyword: ";hello" }];
+  const failure = Object.assign(new Error("No space left on device"), { code: "ENOSPC" });
+  const realWrite = fs.writeFile;
+  t.mock.method(
+    fs,
+    "writeFile",
+    async (...args: Parameters<typeof fs.writeFile>) => {
+      await realWrite(args[0], "[", args[2]);
+      throw failure;
+    },
+    { times: 1 },
+  );
+  try {
+    await assert.rejects(exportSnippets({ directory, filename: "snippets.json", snippets }), failure);
+    await assert.rejects(stat(filePath), { code: "ENOENT" });
+    const retry = await exportSnippets({ directory, filename: "snippets.json", snippets });
+    assert.deepEqual(JSON.parse(await readFile(retry, "utf8")), snippets);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
