@@ -1280,6 +1280,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "lurkapi",
+    title: "LurkAPI",
+    description:
+      "Public social media data for your AI: profiles, posts, comments, video transcripts and ad library results (Meta, Google, TikTok and LinkedIn) from 16 platforms, including TikTok, Instagram, YouTube, Reddit, X and LinkedIn. One read-only tool per endpoint; it never logs in to anyone's account and can't post or message. Hosted remote Streamable HTTP server at https://api.lurkapi.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Paid per call (most calls cost 1 credit), with 100 free credits at signup and no card.",
+    icon: "https://raw.githubusercontent.com/mesmerlord/lurkapi-claude-plugin/df407d8556a0752da3864f3673fb6bf72f864af9/logo.png",
+    homepage: "https://lurkapi.com/docs#claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.lurkapi.com/mcp"],
+    },
+    remoteUrl: "https://api.lurkapi.com/mcp",
+  },
+  {
     name: "maqami-travel",
     title: "MAQAMI Travel",
     description:

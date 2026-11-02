@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add LurkAPI MCP Server] - {PR_MERGE_DATE}
+
+- Add LurkAPI to the official registry: public profiles, posts, comments, video transcripts and ad library results from 16 social platforms, one read-only tool per endpoint. Hosted Streamable HTTP server at https://api.lurkapi.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. Paid per call, with 100 free credits at signup.
+
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
 - Add SlickTrip to the official registry: live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Hosted Streamable HTTP server at https://mcp.slicktrip.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
