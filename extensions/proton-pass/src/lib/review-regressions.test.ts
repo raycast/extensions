@@ -425,7 +425,8 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
     // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-    "./lib/format": { monospace: (text: string) => text },
+    "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+    "./lib/item-icon": { getListIcon: () => "" },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
       totpProgressIcon: () => "",
@@ -914,7 +915,7 @@ test("hiding item details stops automatic secret loads while showing them select
         useCallback: (callback: unknown) => callback,
         useEffect: () => undefined,
       },
-      "./avatar": { getInitialIconDataUri: () => "" },
+      "./item-icon": { getListIcon: () => "" },
       "./format": format,
       "./item-actions": {},
       "./item-detail-panel": {},
@@ -959,7 +960,7 @@ function loadItemList() {
       useCachedState: () => [true, () => undefined],
       useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }),
     },
-    "./avatar": { getInitialIconDataUri: () => "" },
+    "./item-icon": { getListIcon: () => "" },
     "./format": format,
     "./item-actions": {},
     "./item-detail-panel": {},
@@ -1100,7 +1101,8 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text },
+      "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+      "./lib/item-icon": { getListIcon: () => "" },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1185,7 +1187,8 @@ function totpCommandFixture(
       "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text },
+      "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
+      "./lib/item-icon": { getListIcon: () => "" },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1259,6 +1262,36 @@ test("the TOTP countdown uses Raycast's own circles, in five steps, and turns fr
     tintColor: "green",
   });
   assert.equal([30, 11, 10, 6, 5, 1].map(totpTimerColor).join(), "green,green,yellow,yellow,red,red");
+});
+
+test("logins show their initials, or their website's icon with Show Website Icons, in Browse Items and Get TOTP", () => {
+  const favicons: string[] = [];
+  const { getListIcon } = loadView("item-icon.ts", {
+    "@raycast/api": { Image: { Mask: { RoundedRectangle: "rounded" } } },
+    "@raycast/utils": {
+      getFavicon: (url: string, options: { fallback: string }) => {
+        favicons.push(url);
+        return { favicon: url, fallback: options.fallback };
+      },
+    },
+    "./avatar": { getInitialIconDataUri: (title: string) => `initials:${title}` },
+    "./utils": { getItemIcon: (type: string) => `type:${type}` },
+  }) as unknown as { getListIcon: (item: Item, showWebsiteIcons: boolean) => unknown };
+  // Plain copies: objects made in the module's context don't share this one's prototypes.
+  const iconOf = (entry: Item, showWebsiteIcons: boolean) =>
+    JSON.parse(JSON.stringify(getListIcon(entry, showWebsiteIcons)));
+  const login = { ...item, type: "login" as const, urls: ["example.com/login"] };
+  assert.deepEqual(iconOf(login, false), { source: `initials:${login.title}`, fallback: "type:login" });
+  assert.deepEqual(iconOf(login, true), {
+    favicon: "https://example.com/login",
+    fallback: `initials:${login.title}`,
+  });
+  assert.deepEqual(iconOf({ ...login, urls: [] }, true), {
+    source: `initials:${login.title}`,
+    fallback: "type:login",
+  });
+  assert.equal(iconOf({ ...item, type: "note" }, true), "type:note");
+  assert.deepEqual(favicons, ["https://example.com/login"]);
 });
 
 test("TOTP codes have their halves set apart like Proton Authenticator's, and longer codes stay whole", () => {

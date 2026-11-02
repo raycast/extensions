@@ -13,15 +13,9 @@ import {
 import { useState, useEffect, useRef, useMemo } from "react";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
-import {
-  getItemIcon,
-  getTotpRemainingSeconds,
-  formatTotpCode,
-  TOTP_ICON,
-  totpProgressIcon,
-  totpTimerColor,
-} from "./lib/utils";
-import { monospace } from "./lib/format";
+import { getTotpRemainingSeconds, formatTotpCode, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./lib/utils";
+import { itemKey, monospace } from "./lib/format";
+import { getListIcon } from "./lib/item-icon";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -68,6 +62,12 @@ export default function Command() {
   const hasLoadedFromCache = useRef(false);
   const loads = useMemo(createRequestTracker, []);
   const cacheWrites = useMemo(createSerialQueue, []);
+  const showWebsiteIcons = preferences.showWebsiteIcons ?? false;
+  // As in Browse Items. Made once per list rather than on every second of the countdown.
+  const icons = useMemo(
+    () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
+    [items, showWebsiteIcons],
+  );
 
   useEffect(() => {
     loadTotpItems();
@@ -254,7 +254,7 @@ export default function Command() {
         return (
           <List.Item
             key={`${item.shareId}-${item.itemId}`}
-            icon={getItemIcon(item.type)}
+            icon={icons.get(itemKey(item))}
             title={item.title}
             subtitle={item.vaultName}
             accessories={[

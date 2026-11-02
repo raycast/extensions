@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
-import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
+import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getInitialIconDataUri } from "./avatar";
-import { hostnameOf, itemKey, toOpenableUrl } from "./format";
+import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
+import { getListIcon } from "./item-icon";
 import { Item } from "./types";
-import { getItemIcon, getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
+import { getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
 
 /**
  * Seconds left in the current 30-second TOTP period, for the items' progress circles. Updated only when the circle
@@ -25,16 +25,6 @@ function useTotpSeconds(isCounting: boolean): number {
     return () => clearInterval(timer);
   }, [isCounting]);
   return seconds;
-}
-
-function getListIcon(item: Item, showWebsiteIcons: boolean): Image.ImageLike {
-  if (item.type !== "login") return getItemIcon(item.type);
-  const initials = getInitialIconDataUri(item.title);
-  const url = item.urls?.[0];
-  // Website icons come from the favicon provider set in Raycast, which receives the domain, so they're opt-in.
-  return showWebsiteIcons && url
-    ? getFavicon(toOpenableUrl(url), { fallback: initials, mask: Image.Mask.RoundedRectangle })
-    : { source: initials, fallback: getItemIcon(item.type) };
 }
 
 function getKeywords(item: Item): string[] {
