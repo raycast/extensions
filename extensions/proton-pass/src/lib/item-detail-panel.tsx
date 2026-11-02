@@ -63,9 +63,9 @@ function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
 /** The rows of an item, shared by the details panel and the item view. */
 export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRows, error?: string) {
   const iconOf = (row: PanelRow) => {
+    // A row without a value shows its dash alone: an icon there would only add clutter.
+    if (row.value.kind === "empty") return undefined;
     if (row.id === "type") return getItemIcon(item.type);
-    // Without a TOTP code, the clock would only add clutter.
-    if (row.id === "totp" && row.value.kind === "empty") return undefined;
     // A circle that empties with the time the TOTP code has left, instead of the clock.
     const { value } = row;
     if (value.kind === "code" && value.remainingSeconds !== undefined && value.period) {

@@ -10,7 +10,7 @@
 - The browser login screens show a spinning toast while waiting for the browser, finishing the login and loading your items
 - Once logged in, the Login command's main action is Logout, which asks for confirmation. Re-Run Browser Login is gone: logging in again is only needed after logging out
 - The TOTP code and its countdown no longer move every second, in the item details and in Get TOTP Code: they're written in fixed-width digits, with the countdown first in the details. A Raycast progress circle empties as the code's time runs out, green, then yellow, then red for the last 5 seconds, in both places
-- TOTP has a shield icon instead of a clock, which looked like loading: in the item list, the details and the Copy and Paste TOTP Code actions. The details no longer show it for items without a TOTP code
+- TOTP has a shield icon instead of a clock, which looked like loading: in the item list, the details and the Copy and Paste TOTP Code actions. In the details, rows without a value no longer show an icon next to their dash
 - Generate Password's preferences say which type they apply to, with "Random:" or "Passphrase:" in their titles, since Raycast can't gray out the other type's. Passphrases have their own Include Numbers setting, on by default, instead of sharing Numbers with random passwords
 
 ## [Browse Items] - 2026-11-01
