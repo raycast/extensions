@@ -2,7 +2,7 @@
 
 Search [Zadig](https://koderover.com) workflow runs and environments, and manage sub-environments from Raycast.
 
-![Search Workflows showing a run's repositories and stages](media/search-workflows-1-runs.png)
+![Search Workflows showing a run's repositories and stages](metadata/search-workflows-1-runs.png)
 
 ## Commands
 
