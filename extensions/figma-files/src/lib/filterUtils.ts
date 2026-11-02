@@ -20,10 +20,10 @@ export function createTeamFilter(teamName: string): string {
 }
 
 /**
- * Creates a project filter value
+ * Creates a folder filter value
  */
-export function createProjectFilter(teamName: string, projectName: string): string {
-  return `${teamName}${SEPARATORS.TEAM_PROJECT}${projectName}`;
+export function createProjectFilter(teamName: string, folderId: string): string {
+  return `${teamName}${SEPARATORS.TEAM_PROJECT}${folderId}`;
 }
 
 /**
@@ -32,7 +32,7 @@ export function createProjectFilter(teamName: string, projectName: string): stri
 export function parseFilterValue(value: string): {
   type: "all" | "team" | "project";
   teamName?: string;
-  projectName?: string;
+  folderId?: string;
 } {
   if (value === FILTER_TYPES.ALL) {
     return { type: "all" };
@@ -46,8 +46,8 @@ export function parseFilterValue(value: string): {
   }
 
   if (value.includes(SEPARATORS.TEAM_PROJECT)) {
-    const [teamName, projectName] = value.split(SEPARATORS.TEAM_PROJECT);
-    return { type: "project", teamName, projectName };
+    const [teamName, folderId] = value.split(SEPARATORS.TEAM_PROJECT);
+    return { type: "project", teamName, folderId };
   }
 
   // Fallback for unknown formats
@@ -62,19 +62,22 @@ export function filterTeamsByName(teams: TeamFiles[], teamName: string): TeamFil
 }
 
 /**
- * Filters teams and projects to get a specific project
+ * Filters teams down to a specific folder and its subfolders
  */
-export function filterToSpecificProject(teams: TeamFiles[], teamName: string, projectName: string): TeamFiles[] {
+export function filterToSpecificProject(teams: TeamFiles[], teamName: string, folderId: string): TeamFiles[] {
   const team = teams.find((t) => t.name === teamName);
   if (!team) return [];
 
-  const project = team.files.find((p) => p.name === projectName);
-  if (!project) return [];
+  const included = new Set([folderId]);
+  // Folders are ordered parent-first, so one pass collects every descendant
+  const folders = team.folders.filter((folder) => {
+    if (included.has(folder.id) || (folder.parentId && included.has(folder.parentId))) {
+      included.add(folder.id);
+      return true;
+    }
+    return false;
+  });
+  if (folders.length === 0) return [];
 
-  return [
-    {
-      name: teamName,
-      files: [project],
-    },
-  ];
+  return [{ ...team, folders }];
 }

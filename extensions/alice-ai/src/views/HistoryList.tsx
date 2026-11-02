@@ -4,7 +4,9 @@ import HistoryView from "./HistoryView";
 
 export default function HistoryList() {
   const navigation = useNavigation();
-  const history = useHistoryState((state) => state.history.sort((a, b) => b.timestamp - a.timestamp));
+  const history = useHistoryState((state) => state.history)
+    .slice()
+    .sort((a, b) => b.timestamp - a.timestamp);
 
   const removeHistoryItem = useHistoryState((state) => state.removeItem);
   const removeAllHistory = useHistoryState((state) => state.removeAll);

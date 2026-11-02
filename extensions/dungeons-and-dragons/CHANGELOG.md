@@ -1,5 +1,9 @@
 # Dungeons & Dragons Changelog
 
+## [Fix spell damage details] - 2026-10-27
+
+- Fix spell details failing to load when damage has no type, and display damage from the updated API response.
+
 ## [Maintenance] - 2025-12-07
 - Add support for Windows platform.
 - Bump all dependencies to the latest.
@@ -15,4 +19,4 @@
   - Random Encounter - Generate party encounters based on levels and location. Requires Raycast AI.
   - Roll Dice - Flip a coin or roll various dice types and custom rolls.
   - Rules Lookup - Access over 30 D&D rules categories.
-  - Spell Lookup - View details on 300+ D&D spells by level and school of magic. 
+  - Spell Lookup - View details on 300+ D&D spells by level and school of magic.

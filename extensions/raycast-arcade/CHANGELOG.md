@@ -1,5 +1,9 @@
 # Raycast Arcade Changelog
 
+## [Fix 2048 Board] - 2026-10-13
+
+- Fix the 2048 board not showing: the SVG was missing its `xmlns` namespace and had invalid `##` colours, so only stray text was rendered ([#30885](https://github.com/raycast/extensions/issues/30885))
+
 ## [Snake and 2048 Update] - 2023-08-13
 
 ✨ It's update time! Get ready for new features, new games, fixes, and more...

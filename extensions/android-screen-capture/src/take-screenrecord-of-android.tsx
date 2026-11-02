@@ -3,7 +3,7 @@ import { Clipboard } from "@raycast/api";
 import { closeMainWindow } from "@raycast/api";
 import { showToast } from "@raycast/api";
 import * as path from "path";
-import { getAdbDir, getDevices, existsAdb, getScreenshotSaveLocation } from "./android-utils";
+import { getAdbDir, getDevices, existsAdb, getScreenshotSaveLocation, shellQuote } from "./android-utils";
 import { ExecException, exec } from "child_process";
 import { useEffect, useState } from "react";
 type Values = {
@@ -21,8 +21,10 @@ async function onSubmit(values: Form.Values) {
   const filePath = path.join(getScreenshotSaveLocation(), adbCaptureFilename);
   const bugReportSegment = bugreport ? "--bugreport" : "";
   const adbDir = getAdbDir();
-  const adb = `${adbDir}/adb  -s ${device} `;
-  const shellscript = `${adb} shell mkdir -p ${adbCaptureFolder} && ${adb} shell screenrecord ${bugReportSegment} --time-limit=${timelimit} ${recordAdbFilePath} && ${adb} pull ${recordAdbFilePath} ${filePath}`;
+  const adb = `${shellQuote(`${adbDir}/adb`)}  -s ${device} `;
+  const shellscript = `${adb} shell mkdir -p ${adbCaptureFolder} && ${adb} shell screenrecord ${bugReportSegment} --time-limit=${timelimit} ${recordAdbFilePath} && ${adb} pull ${recordAdbFilePath} ${shellQuote(
+    filePath
+  )}`;
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `Recording screen in ${timelimit}s`,

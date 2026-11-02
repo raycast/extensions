@@ -1,5 +1,15 @@
 # Aktar Changelog
 
+## [Short Links] - 2026-10-12
+
+- Uploads get the short link from the link shortener set up for their destination in Aktar (Shlink, YOURLS, Kutt, Dub, Short.io, or your own HTTP request), and the extension copies and pastes it like Aktar does. Show QR Code uses it too
+- Search Uploads shows an upload's short link with its shortener, clicks, and last click. Copy Short Link (⌘⇧L, Ctrl+Shift+L on Windows) and Copy Original Link copy either one, and Create Short Link makes one for an upload that has none
+- Upload File has a Short Link choice: the destination's setting, always make one, or keep the original link
+- When a short link can't be made, the upload still works, the original link is copied, and the message says why
+- Renaming or moving a file in Browse Buckets says when its short link now points to the new key, or when it couldn't be moved along
+- New AI tool: ask `@aktar` for a short link to an upload. Raycast asks before the AI makes one, since the shortener sees the link
+- Search Uploads finds an upload by its short link, and shows a link icon for uploads that have one
+
 ## [Security Improvements] - 2026-10-09
 
 - Before sending its token, the extension asks the app on Aktar's port to prove it has the same token, so if Aktar isn't running and another program listens on its port, that program gets neither the token nor your files. Needs Aktar for Mac 0.18.0 or Aktar for Windows 0.11.0 or later; older versions show a message asking you to update

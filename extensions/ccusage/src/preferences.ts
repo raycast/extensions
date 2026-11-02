@@ -4,9 +4,14 @@ import { sep } from "path";
 import type { Image } from "@raycast/api";
 import { Icon } from "@raycast/api";
 import type { ProgressBarStyle } from "./utils/usage-limits-formatter";
+import { getCommandConfiguration } from "./utils/command-sections";
 
 export const preferences = getPreferenceValues<Preferences>();
 const menuBarPreferences = getPreferenceValues<Preferences.MenubarCcusage>();
+
+// Command preferences are scoped by Raycast. Other commands do not receive
+// these keys and keep their existing summary sections through the defaults.
+export const getUsageCommandConfiguration = () => getCommandConfiguration(getPreferenceValues<Preferences.Ccusage>());
 
 export const showRemainingUsage = (): boolean => (preferences.showRemainingUsage as string) === "remaining";
 

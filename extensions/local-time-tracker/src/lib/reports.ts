@@ -10,8 +10,6 @@ export type ProjectTotal = {
 
 export type Report = {
   totalSeconds: number;
-  clientSeconds: number;
-  internalSeconds: number;
   unknownSeconds: number;
   categorySeconds: Record<string, number>;
   projects: ProjectTotal[];
@@ -44,8 +42,6 @@ export function createReport(
   }
 
   const projectTotals = [...totals.values()].filter((item) => item.seconds > 0).sort((a, b) => b.seconds - a.seconds);
-  const clientSeconds = sumByType(projectTotals, "client");
-  const internalSeconds = sumByType(projectTotals, "internal");
   const unknownSeconds = sumByType(projectTotals, "unknown");
   const categorySeconds = Object.fromEntries(
     projectTotals
@@ -57,8 +53,6 @@ export function createReport(
 
   return {
     totalSeconds: projectTotals.reduce((sum, item) => sum + item.seconds, 0),
-    clientSeconds,
-    internalSeconds,
     unknownSeconds,
     categorySeconds,
     projects: projectTotals,

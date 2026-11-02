@@ -1,41 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar, Color } from "@raycast/api";
+import { Icon, List, Action, ActionPanel, closeMainWindow, clearSearchBar } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions, connectToSession, Session } from "./sesh";
+import { getSessions, connectToSession } from "./sesh";
 import { checkSetup, isSetupError, renderSetupEmptyView } from "./setup";
 import { openApp } from "./app";
+import { getIcon } from "./sessions";
 import { WindowList } from "./windows";
-
-function getIcon(session: Session) {
-  if (session.Icon) {
-    return session.Icon;
-  }
-  switch (session.Src) {
-    case "tmux":
-      return {
-        source: Icon.Bolt,
-        tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
-        tooltip: session.Attached >= 1 ? "Attached" : "Detached",
-      };
-    case "tmuxinator":
-      return {
-        source: Icon.Box,
-        tintColor: Color.Magenta,
-      };
-    case "config":
-      return {
-        source: Icon.Cog,
-        tintColor: Color.SecondaryText,
-      };
-    case "zoxide":
-    default:
-      return {
-        source: Icon.Folder,
-        tintColor: Color.SecondaryText,
-      };
-  }
-}
 
 const ALIAS_AUTO_CONNECT_DELAY_MS = 150;
 const ALIAS_PREFIX = "/";

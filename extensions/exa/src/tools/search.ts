@@ -10,6 +10,10 @@ type Input = {
    */
   numResults?: number;
   /**
+   * Search mode: auto (default) balances quality and speed; lite prioritizes speed and cost and returns cached content; deep performs multi-step research.
+   */
+  type?: "lite" | "auto" | "deep" | "deep-reasoning";
+  /**
    * Restrict results to these domains, separated by commas or new lines.
    */
   includeDomains?: string;

@@ -70,7 +70,7 @@ jobs:
 
   merge:
     needs: require_admin_or_write_approval
-    runs-on: macos-14
+    runs-on: macos-26
     name: Merge PR
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}

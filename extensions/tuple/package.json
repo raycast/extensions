@@ -307,7 +307,9 @@
     "test:canonical": "node --test tests/canonical-cli.integration.cjs"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion@1": "1.1.21",
+    "brace-expansion@2": "2.1.7",
+    "brace-expansion@5": "5.0.12",
     "esbuild": "0.28.1",
     "js-yaml@4": "4.3.2"
   }

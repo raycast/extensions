@@ -1,7 +1,5 @@
 import {
   getSelectedText,
-  showToast,
-  Toast,
   closeMainWindow,
   popToRoot,
   open,
@@ -9,46 +7,42 @@ import {
   Clipboard,
   getPreferenceValues,
 } from "@raycast/api";
-import { nanoid } from "nanoid";
-import { getSearchHistory } from "./utils/handleResults";
-import { SearchResult, HISTORY_KEY, Preferences } from "./utils/types";
+import { getSearchHistory, getStaticResult } from "./utils/handleResults";
+import { showErrorToast } from "./utils/showErrorToast";
+import { HISTORY_KEY } from "./utils/types";
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchSelectText>();
 
   try {
-    // Try to get selected text first, fall back to clipboard if enabled
-    let searchText: string;
+    // Try to get selected text first, fall back to clipboard if enabled. A blank
+    // selection counts as no selection.
+    let searchText = "";
     try {
-      searchText = await getSelectedText();
+      searchText = (await getSelectedText()).trim();
     } catch {
-      if (!preferences.useClipboardFallback) {
-        throw new Error("No text selected");
+      // Nothing selected
+    }
+    if (!searchText && preferences.useClipboardFallback) {
+      searchText = (await Clipboard.readText())?.trim() ?? "";
+      if (!searchText) {
+        throw new Error("No text selected, and the clipboard has no text");
       }
-      const clipboardText = await Clipboard.readText();
-      if (!clipboardText) {
-        throw new Error("No text selected and clipboard is empty");
-      }
-      searchText = clipboardText;
+    }
+    if (!searchText) {
+      throw new Error("No text selected");
     }
     await open(`https://www.google.com/search?q=${encodeURIComponent(searchText)}`);
     await closeMainWindow();
     await popToRoot({ clearSearchBar: true });
 
-    const history = await getSearchHistory();
-    const newSearch: SearchResult = {
-      id: nanoid(),
-      query: searchText,
-      description: `Search Google for '${searchText}'`,
-      url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
-    };
-    history.unshift(newSearch);
-    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    if (preferences.rememberSearchHistory) {
+      const newSearch = { ...getStaticResult(searchText)[0], isHistory: true };
+      const history = (await getSearchHistory()).filter((item) => item.url !== newSearch.url);
+      history.unshift(newSearch);
+      await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No text available",
-      message: String(error),
-    });
+    await showErrorToast("No text available", error);
   }
 }

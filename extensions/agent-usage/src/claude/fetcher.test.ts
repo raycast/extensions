@@ -154,15 +154,15 @@ test("claudeKeychainService uses the bare service name for the default Claude ho
 test("claudeKeychainService derives the per-profile suffix from the config dir path", async () => {
   const { claudeKeychainService } = await import("./fetcher.ts");
 
-  // The suffix is sha256(<absolute config dir>) truncated to 8 hex characters —
-  // the shape Claude Code was observed to create on a real macOS install.
+  // Fixed SHA-256 fixtures for native absolute paths, including the observed macOS suffixes
+  const home = process.platform === "win32" ? "C:\\Users\\someone" : "/Users/someone";
   assert.equal(
-    claudeKeychainService("/Users/someone/.claude-work", "/Users/someone"),
-    "Claude Code-credentials-18cc900a",
+    claudeKeychainService(path.join(home, ".claude-work"), home),
+    process.platform === "win32" ? "Claude Code-credentials-9b594df7" : "Claude Code-credentials-18cc900a",
   );
   assert.equal(
-    claudeKeychainService("/Users/someone/.claude-personal", "/Users/someone"),
-    "Claude Code-credentials-c160e579",
+    claudeKeychainService(path.join(home, ".claude-personal"), home),
+    process.platform === "win32" ? "Claude Code-credentials-6eb81ddd" : "Claude Code-credentials-c160e579",
   );
 });
 

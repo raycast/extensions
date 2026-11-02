@@ -41,7 +41,8 @@ Digger surfaces contextual information about any website without needing to open
 
 - Robots meta directives
 - Canonical URL
-- Sitemap detection and viewer
+- Sitemap detection, and a searchable list of its pages that follows nested sitemaps up to
+  a size limit and says what it didn't reach
 - robots.txt and llms.txt detection
 - Content-Signal directives (from robots.txt)
 - Payment Required (x402) detection — HTTP 402 status code and payment protocol headers
@@ -82,28 +83,37 @@ Digger surfaces contextual information about any website without needing to open
 - JSON-LD structured data viewer
 - Host metadata discovery (RFC 6415 XRD/JRD)
 
-### Quick Input Options
+### Starting a Dig
 
-Configure these in Raycast preferences (`⌘ ,`):
+- **Digger** digs the URL you type. Leave it empty and it falls back, in order, to
+  these options in its preferences (`⌘ ,`). The first two are on by default:
 
-| Option                           | Description                                                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Auto Load from Clipboard**     | Automatically analyze URLs copied to clipboard                                                                    |
-| **Auto Load from Selected Text** | Analyze highlighted URLs in any app                                                                               |
-| **Browser Extension Support**    | Analyze the current browser tab (requires [Raycast Browser Extension](https://www.raycast.com/browser-extension)) |
+| Option                      | Digs                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Use Selected Text**       | A URL in the text selected in the frontmost app                                                                     |
+| **Use Clipboard**           | A URL on the clipboard                                                                                              |
+| **Use Current Browser Tab** | The active browser tab (macOS; requires the [Raycast Browser Extension](https://www.raycast.com/browser-extension)) |
+
+- **Open Current Tab in Digger** digs the active browser tab (macOS; requires the Raycast
+  Browser Extension).
+- **Open Clipboard in Digger** digs the URL on the clipboard.
+
+Both are off by default; enable them in Raycast's Extensions settings. When none of
+these finds a URL, Digger says what each place held and lets you type one. If a dig
+fails, the search bar shows the URL that failed: correct it and press ↵ to dig again.
 
 ### Keyboard Shortcuts
 
-| macOS     | Windows        | Action                    |
-| --------- | -------------- | ------------------------- |
-| `↑` / `↓` | `↑` / `↓`      | Navigate between sections |
-| `⌘ R`     | `Ctrl R`       | Refresh data              |
-| `⌘ ⇧ C`   | `Ctrl ⇧ C`     | Copy URL                  |
-| `⌘ ⇧ J`   | `Ctrl ⇧ J`     | Copy as JSON              |
-| `⌘ ⇧ M`   | `Ctrl ⇧ M`     | Copy as Markdown          |
-| `⌘ O`     | `Ctrl O`       | Open in browser           |
-| `⌘ ⇧ W`   | `Ctrl ⇧ W`     | Open in Wayback Machine   |
-| `⌘ ⇧ G`   | `Ctrl ⇧ G`     | View on Google            |
+| macOS     | Windows    | Action                    |
+| --------- | ---------- | ------------------------- |
+| `↑` / `↓` | `↑` / `↓`  | Navigate between sections |
+| `⌘ R`     | `Ctrl R`   | Refresh data              |
+| `⌘ ⇧ C`   | `Ctrl ⇧ C` | Copy URL                  |
+| `⌘ ⇧ J`   | `Ctrl ⇧ J` | Copy as JSON              |
+| `⌘ ⇧ M`   | `Ctrl ⇧ M` | Copy as Markdown          |
+| `⌘ O`     | `Ctrl O`   | Open in browser           |
+| `⌘ ⇧ W`   | `Ctrl ⇧ W` | Open in Wayback Machine   |
+| `⌘ ⇧ G`   | `Ctrl ⇧ G` | View on Google            |
 
 In the HTTP Headers list, `⌘ ⇧ C` copies a header's value and `⌘ ⌥ C` copies its
 name. Press `⌘ K` on any section to see every action available there.
@@ -134,7 +144,7 @@ name — `?sid=`, `?u=`, a document id — can still appear in full.
 
 **Strict Redaction** (also in preferences, off by default) closes that gap: every URL query
 string and fragment is masked to `?***` / `#***`, including values no pattern can recognize.
-It applies to lines written *after* you enable it — it cannot clean up console output that
+It applies to lines written _after_ you enable it — it cannot clean up console output that
 already exists — so turn it on first, reproduce the problem, then share the new lines. It is off by default because the query string
 is frequently the thing you are trying to diagnose.
 

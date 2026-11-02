@@ -1,5 +1,5 @@
 import {Form} from "@raycast/api"
-import {useFetchLists} from "api/hooks"
+import {useFetchLists} from "../../api/hooks"
 import {sortBy} from "lodash"
 import {forwardRef, Ref, useEffect, useMemo} from "react"
 

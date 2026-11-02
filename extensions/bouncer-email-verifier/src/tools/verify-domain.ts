@@ -1,5 +1,6 @@
 import { verifyDomain } from "../lib/bouncer";
 import { isValidDomain, normalizeDomain } from "../lib/domain";
+import { saveToHistory } from "../lib/history";
 import { formatFlag } from "../lib/verdict";
 
 type Input = {
@@ -18,10 +19,17 @@ export default async function verifyDomainTool(input: Input) {
   const domain = normalizeDomain(input.domain);
 
   if (!isValidDomain(domain)) {
-    throw new Error(`"${input.domain}" is not a valid domain, so it was not sent to Bouncer.`);
+    throw new Error(`"${input.domain}" is not a valid domain, so it was not sent to Bouncer and no credit was spent.`);
   }
 
   const record = await verifyDomain(domain);
+  // verifyDomain always fills in the name, so the row has a subject.
+  await saveToHistory({
+    kind: "domain",
+    subject: record.domain?.name ?? domain,
+    record,
+    verifiedAt: Date.now(),
+  }).catch(() => undefined);
 
   return {
     domain: record.domain?.name,
@@ -35,5 +43,6 @@ export default async function verifyDomainTool(input: Input) {
       toxic: formatFlag(record.toxic),
     },
     creditsSpent: 1,
+    note: "Bouncer reports the mail record and provider it found. It does not test delivery, so this does not show whether the domain receives mail.",
   };
 }

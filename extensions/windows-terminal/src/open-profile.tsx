@@ -4,7 +4,6 @@ import {
   Icon,
   Keyboard,
   List,
-  Toast,
   closeMainWindow,
   getPreferenceValues,
   showToast,
@@ -14,6 +13,8 @@ import fs from "node:fs";
 import os from "node:os";
 import { useEffect, useMemo } from "react";
 import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
+import { isIncorrectPortableConfig, profilesPath, wtPath } from "./utils/constants";
+import { showFailureToast } from "@raycast/utils";
 
 interface WindowsTerminalSettings {
   defaultProfile?: string;
@@ -23,12 +24,7 @@ interface WindowsTerminalSettings {
   newTabMenu?: NewTabMenuEntry[];
 }
 
-const PROFILES = JSON.parse(
-  fs.readFileSync(
-    `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
-    "utf8",
-  ),
-) as WindowsTerminalSettings;
+const PROFILES = JSON.parse(fs.readFileSync(profilesPath, "utf8")) as WindowsTerminalSettings;
 
 function getWindowsTerminalEnv() {
   const env = { ...process.env };
@@ -70,7 +66,7 @@ function launchElevated(name: string) {
     "-NoProfile",
     "-Command",
     "Start-Process",
-    "wt.exe",
+    `'${wtPath.replace(/'/g, "''")}'`,
     "-ArgumentList",
     argumentList,
     "-WorkingDirectory",
@@ -93,7 +89,7 @@ function Actions(props: { name: string; quake: boolean }) {
           const args = props.quake
             ? ["-w", "_quake", "new-tab", "-p", props.name]
             : ["-w", "0", "new-tab", "-p", props.name];
-          execFile("wt.exe", args, getSpawnOptions());
+          execFile(wtPath, args, getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -103,7 +99,7 @@ function Actions(props: { name: string; quake: boolean }) {
         onAction={async () => {
           // -w -1 forces a new window even if the user set windowingBehavior to
           // useExisting/useAnyExisting.
-          execFile("wt.exe", ["-w", "-1", "new-tab", "-p", props.name], getSpawnOptions());
+          execFile(wtPath, ["-w", "-1", "new-tab", "-p", props.name], getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -124,7 +120,7 @@ function Actions(props: { name: string; quake: boolean }) {
           icon={Icon.Code}
           shortcut={Keyboard.Shortcut.Common.Edit}
           title="Open settings.json"
-          target={`C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`}
+          target={profilesPath}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -178,6 +174,13 @@ function ProfileItem(props: { item: Profile; quake: boolean }) {
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
 
+  if (isIncorrectPortableConfig) {
+    showToast({
+      title: "Missing settings folder.",
+      message: "Windows Terminal is in portable mode. Launch it to generate the settings folder.",
+    });
+  }
+
   // A matchProfiles pattern this extension can't evaluate (valid for Windows Terminal, but past
   // what the matcher implements or affords) means the resolved order can't be trusted — so fall
   // back to the default sections below and say which pattern, instead of quietly dropping or
@@ -197,11 +200,7 @@ export default function Command() {
 
   useEffect(() => {
     if (!unsupported) return;
-    showToast({
-      style: Toast.Style.Failure,
-      title: "New Tab Menu order not applied",
-      message: unsupported.message,
-    });
+    showFailureToast(unsupported.message, { title: "New Tab Menu order not applied" });
   }, [unsupported]);
 
   // The New Tab Menu can interleave regular, SSH, and WSL profiles, so honoring its order means

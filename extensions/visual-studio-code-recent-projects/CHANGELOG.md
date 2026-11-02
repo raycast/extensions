@@ -1,5 +1,11 @@
 # Visual Studio Code Changelog
 
+## [Fix Open Agents Window on macOS] - 2026-10-15
+
+- Fix `Open Agents Window` failing on macOS with `spawnSync ENOENT` by not quoting the CLI executable path when spawning without a shell. Fixes [#32324](https://github.com/raycast/extensions/issues/32324).
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Open Agents Window command and enhancements] - 2026-09-28
 
 - Add `Open Agents Window` command: opens Agents Window for VSCode, opens Antigravity 2.0 for Antigravity IDE

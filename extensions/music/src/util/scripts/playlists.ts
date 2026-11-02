@@ -1,7 +1,7 @@
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
-import { tell, runScript, createQueryString, escapeAppleScriptString } from "../apple-script";
+import { tell, runScript, createQueryString, escapeAppleScriptString, NOT_IN_LIBRARY_ERROR } from "../apple-script";
 import { PlaylistKind, ScriptError } from "../models";
 
 import { general } from ".";
@@ -55,3 +55,27 @@ export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =
         end tell
 	return output
 `);
+
+/** Play a recommended playlist's copy in Music.app, matched by name within
+ * the right class: the user's own playlists are "user playlist", anything
+ * added from Apple Music (including other people's shared playlists) is
+ * "subscription playlist", and Music.app filters by exact class — so a
+ * same-named pair across the two can't be confused. Raises
+ * NOT_IN_LIBRARY_ERROR when Music.app hasn't synced the playlist yet. */
+export const playMatching =
+  (shuffle = false) =>
+  ({ name, own }: { name: string; own: boolean }) => {
+    const playlistClass = own ? "user playlist" : "subscription playlist";
+    return pipe(
+      general.setShuffle(shuffle),
+      TE.chain(() =>
+        runScript(`
+	tell application "Music"
+		set matches to (every ${playlistClass} whose name is "${escapeAppleScriptString(name)}")
+		if (count of matches) = 0 then error "Not found in library" number ${NOT_IN_LIBRARY_ERROR}
+		play (item 1 of matches)
+	end tell
+`),
+      ),
+    );
+  };

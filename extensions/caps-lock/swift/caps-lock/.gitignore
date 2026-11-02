@@ -1,0 +1,4 @@
+.build/
+.swiftpm/
+.raycast-swift-build/
+compiled_raycast_swift/

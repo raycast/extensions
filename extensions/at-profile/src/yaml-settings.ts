@@ -1,304 +1,314 @@
-import * as yaml from "js-yaml";
-import { getSelectedFinderItems } from "@raycast/api";
-import { showError, showSuccess, handleError, safeAsyncOperation } from "./utils/errors";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
+import { mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
-import { join } from "path";
-import { getCustomApps, getAppSettings, updateAppSettings, addToUsageHistory, getUsageHistory } from "./helpers/apps";
-import { defaultApps } from "./utils/default-apps";
-import { addCustomApp, addCustomAppForImport } from "./helpers/custom-app-utils";
-import { validateAndSanitizeFilename, validateSecurePath } from "./utils/file-security";
-import { parseYaml } from "./utils/yaml";
-import { YAMLSettings, AppSetting } from "./types";
+import { extname, join } from "path";
+import { countOf } from "@chrismessina/raycast-kit/plural";
+import * as yaml from "js-yaml";
+import { getPreferenceValues } from "@raycast/api";
+import { getAppEntries, importCustomApp, mergeAppVisibility } from "./helpers/apps";
+import { getHistoryPairKey, MAX_HISTORY_ITEMS, sortHistory } from "./helpers/history";
+import { getUsageHistory, isValidTimestamp, setUsageHistory, toOpenCount, withStorageLock } from "./helpers/storage";
+import { UsageHistoryItem, YAMLSettings } from "./types";
+import { isDefaultApp } from "./utils/default-apps";
+import { validateAndSanitizeFilename, validatePathInDirectory } from "./utils/file-security";
 
 /**
  * Export all settings to YAML format
  */
 export async function exportSettingsToYAML(): Promise<string> {
-  try {
-    const usageHistory = await getUsageHistory();
-    const appSettings = await getAppSettings();
-    const customApps = await getCustomApps();
+  const [entries, usageHistory] = await Promise.all([getAppEntries(), getUsageHistory()]);
 
-    // Convert app settings to a more readable format
-    const appSettingsMap: Record<string, boolean> = {};
+  const settings: YAMLSettings = {
+    version: "1.0",
+    usageHistory: sortHistory(usageHistory),
+    visible: Object.fromEntries(
+      entries.filter((entry) => entry.isDefault).map((entry) => [entry.value, entry.visible]),
+    ),
+    customApps: entries
+      .filter((entry) => !entry.isDefault)
+      .map(({ name, value, urlTemplate, visible }) => ({ name, value, urlTemplate, visible })),
+  };
 
-    // Create a set of custom app values to exclude from appSettings
-    const customAppValues = new Set(customApps.map((app) => app.value));
-
-    // Add all default apps to settings map with current visible status
-    for (const app of defaultApps) {
-      appSettingsMap[app.value] = true; // Default to visible
-    }
-
-    // Override with actual stored settings, but exclude custom apps
-    // (custom apps will be handled in the customApps section with their visible state)
-    appSettings.forEach((setting) => {
-      if (!customAppValues.has(setting.value)) {
-        appSettingsMap[setting.value] = setting.visible;
-      }
-    });
-
-    const yamlSettings: YAMLSettings = {
-      version: "1.0",
-      usageHistory,
-      visible: appSettingsMap,
-      customApps: customApps.map((app) => {
-        // Find the actual visible state from app settings
-        const appSetting = appSettings.find((setting) => setting.value === app.value);
-        return {
-          name: app.name,
-          value: app.value,
-          urlTemplate: app.urlTemplate,
-          visible: appSetting ? appSetting.visible : true, // Use actual state or default to visible
-        };
-      }),
-    };
-
-    return yaml.dump(yamlSettings, {
-      indent: 2,
-      lineWidth: 120,
-      noRefs: true,
-    });
-  } catch (error) {
-    console.error("Error exporting settings to YAML:", error);
-    throw new Error(`Failed to export settings: ${error instanceof Error ? error.message : "Unknown error"}`);
-  }
+  return yaml.dump(settings, { indent: 2, lineWidth: 120, noRefs: true });
 }
 
 /**
- * Import settings from YAML format
+ * Counts reported back to the caller after an import
  */
-export async function importSettingsFromYAML(yamlContent: string): Promise<void> {
-  try {
-    const settings = parseYaml(yamlContent) as YAMLSettings;
+export interface ImportSummary {
+  appsAdded: number;
+  appsPresent: number;
+  appsFailed: number;
+  historyAdded: number;
+  historyUpdated: number;
+  historySkipped: number;
+  /** Rows from the file that were older than everything History keeps */
+  historyTooOld: number;
+  /** Apps the import showed or hid, counting only real changes */
+  appsShown: number;
+  appsHidden: number;
+  /** The file's version, when it isn't one this version of @ Profile writes */
+  unknownVersion?: string;
+  firstError?: string;
+}
 
-    if (!settings || typeof settings !== "object") {
-      throw new Error("Invalid YAML format");
-    }
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
 
-    // Validate required fields
-    if (!settings.version) {
-      throw new Error("Missing version field in YAML settings");
-    }
-
-    // Check version compatibility
-    if (settings.version !== "1.0") {
-      console.warn(`Unknown settings version: ${settings.version}, attempting import anyway...`);
-    }
-
-    // Import usage history and create missing apps
-    if (settings.usageHistory && Array.isArray(settings.usageHistory)) {
-      // Get existing apps to check against
-      const existingCustomApps = await getCustomApps();
-      const allExistingApps = [...defaultApps, ...existingCustomApps];
-      const existingAppValues = new Set(allExistingApps.map((app) => app.value));
-      const appsToCreate = new Map<string, { name: string; value: string }>();
-
-      // First pass: identify apps that need to be created
-      for (const item of settings.usageHistory) {
-        if (item && typeof item === "object" && item.profile && item.app && item.appName) {
-          if (!existingAppValues.has(item.app)) {
-            appsToCreate.set(item.app, {
-              name: item.appName,
-              value: item.app,
-            });
-          }
-        }
-      }
-
-      // Create missing custom apps with placeholder URL templates
-      for (const [, appInfo] of appsToCreate) {
-        const customAppInput = {
-          name: appInfo.name,
-          urlTemplate: `https://example.com/{profile}`, // Placeholder URL template
-          enabled: true,
-        };
-
-        const result = await safeAsyncOperation(
-          () => addCustomApp(customAppInput),
-          `Create custom app for usage history: ${appInfo.name}`,
-          { showToastOnError: false }, // Don't show toast for individual items
-        );
-
-        if (result?.success) {
-          console.log(`Created custom app for imported usage history: ${appInfo.name}`);
-        } else if (result) {
-          console.log(`Custom app already exists for usage history: ${appInfo.name}`);
-        }
-      }
-
-      // Second pass: import usage history
-      for (const item of [...settings.usageHistory].reverse()) {
-        if (item && typeof item === "object" && item.profile && item.app && item.appName) {
-          await safeAsyncOperation(
-            () => addToUsageHistory(item.profile, item.app, item.appName),
-            `Import usage history for ${item.profile} on ${item.appName}`,
-            { showToastOnError: false }, // Don't show toast for individual items
-          );
-        }
-      }
-    }
-
-    // Import app settings
-    if (settings.visible && typeof settings.visible === "object") {
-      const appSettings: AppSetting[] = [];
-
-      for (const [appValue, visible] of Object.entries(settings.visible)) {
-        if (typeof visible === "boolean") {
-          appSettings.push({
-            value: appValue,
-            visible,
-          });
-        }
-      }
-
-      const settingsResult = await safeAsyncOperation(
-        () => updateAppSettings(appSettings),
-        "Update app visibility settings",
-        { rethrow: true },
-      );
-
-      if (settingsResult === undefined) {
-        throw new Error("Failed to update app visibility settings");
-      }
-    }
-
-    // Import custom apps with duplicate checking
-    if (settings.customApps && Array.isArray(settings.customApps)) {
-      const importResults: {
-        imported: number;
-        skipped: number;
-        failed: number;
-        firstError?: string;
-      } = {
-        imported: 0,
-        skipped: 0,
-        failed: 0,
-      };
-
-      for (const app of settings.customApps) {
-        if (app && typeof app === "object" && app.name && app.value && app.urlTemplate) {
-          // Support both new 'visible' and legacy 'enabled' properties
-          const appWithLegacy = app as typeof app & { enabled?: boolean };
-          const customAppInput = {
-            name: app.name.trim(),
-            urlTemplate: app.urlTemplate.trim(),
-            visible:
-              typeof app.visible === "boolean"
-                ? app.visible
-                : typeof appWithLegacy.enabled === "boolean"
-                  ? appWithLegacy.enabled
-                  : true,
-          };
-
-          const result = await addCustomAppForImport(customAppInput);
-
-          if (result?.success) {
-            importResults.imported++;
-            console.log(`Successfully imported custom app: ${app.name}`);
-          } else if (result?.isDuplicate) {
-            importResults.skipped++;
-            console.log(`Skipped duplicate custom app: ${app.name} (already exists)`);
-          } else {
-            importResults.failed++;
-            const errorMessage = result?.error || "Unknown error";
-            console.error(`Failed to import custom app "${app.name}" (value: ${app.value}):`, errorMessage);
-            // Store first error for user feedback
-            if (importResults.failed === 1) {
-              importResults.firstError = `Failed to import "${app.name}": ${errorMessage}`;
-            }
-          }
-        }
-      }
-
-      console.log(
-        `Import summary - Imported: ${importResults.imported}, Skipped: ${importResults.skipped}, Failed: ${importResults.failed}`,
-      );
-
-      // Show comprehensive import summary toast
-      const totalApps = importResults.imported + importResults.skipped + importResults.failed;
-      if (totalApps > 0) {
-        let summaryMessage = `${importResults.imported} imported`;
-        if (importResults.skipped > 0) {
-          summaryMessage += `, ${importResults.skipped} skipped (duplicates)`;
-        }
-        if (importResults.failed > 0) {
-          summaryMessage += `, ${importResults.failed} failed`;
-        }
-
-        const toastTitle = importResults.failed > 0 ? "Import Completed with Issues" : "Import Completed";
-        if (importResults.failed > 0) {
-          await showError(summaryMessage, toastTitle);
-        } else {
-          await showSuccess(toastTitle, summaryMessage);
-        }
-
-        // If there were failures, still throw an error but after showing the summary
-        if (importResults.failed > 0 && importResults.firstError) {
-          throw new Error(importResults.firstError);
-        }
-      }
-    }
-  } catch (error) {
-    await handleError(error, "YAML Settings Import", true, "Import Failed");
-    throw error;
-  }
+function toText(value: unknown): string {
+  if (typeof value === "number") return String(value);
+  return typeof value === "string" ? value.trim() : "";
 }
 
 /**
- * Export settings to a YAML file in the user's home directory
+ * Import settings from YAML format.
+ *
+ * Order matters: custom apps first, so usage history can reference them; then visibility, merged
+ * into the existing settings rather than replacing them; then history, merged by profile + app with
+ * the file's timestamps kept. History for an app that exists neither as a default nor as a custom
+ * app is skipped instead of inventing a placeholder app for it.
+ */
+export function importSettingsFromYAML(yamlContent: string): Promise<ImportSummary> {
+  // One lock for the whole import, so another command can't write between its apps, settings and History
+  return withStorageLock(() => importLocked(yamlContent));
+}
+
+async function importLocked(yamlContent: string): Promise<ImportSummary> {
+  const settings = yaml.load(yamlContent) as Partial<YAMLSettings> | null;
+
+  if (!settings || typeof settings !== "object") {
+    throw new Error("This file isn't an @ Profile export");
+  }
+  if (!settings.version) {
+    throw new Error("Missing version field: this file isn't an @ Profile export");
+  }
+
+  const summary: ImportSummary = {
+    appsAdded: 0,
+    appsPresent: 0,
+    appsFailed: 0,
+    historyAdded: 0,
+    historyUpdated: 0,
+    historySkipped: 0,
+    historyTooOld: 0,
+    appsShown: 0,
+    appsHidden: 0,
+    // A file from a newer @ Profile still imports, but fields this version doesn't know are dropped; say so
+    // An unquoted `version: 1.0` reads as the number 1
+    unknownVersion: ["1", "1.0"].includes(String(settings.version)) ? undefined : String(settings.version),
+  };
+
+  // 1. Custom apps
+  const storedIdByFileValue = new Map<string, string>();
+  const visibilityUpdates = new Map<string, boolean>();
+
+  if (Array.isArray(settings.customApps)) {
+    for (const app of settings.customApps) {
+      const label = isNonEmptyString(app?.name) ? app.name : "(unnamed app)";
+      if (!app || typeof app !== "object" || !isNonEmptyString(app.name) || !isNonEmptyString(app.urlTemplate)) {
+        summary.appsFailed++;
+        summary.firstError ??= `Skipped "${label}": a custom app needs a name and a URL template`;
+        continue;
+      }
+      const appWithLegacy = app as typeof app & { enabled?: boolean };
+      const visible =
+        typeof app.visible === "boolean"
+          ? app.visible
+          : typeof appWithLegacy.enabled === "boolean"
+            ? appWithLegacy.enabled
+            : true;
+
+      const result = await importCustomApp({ name: app.name, urlTemplate: app.urlTemplate });
+      if (result.status === "invalid") {
+        summary.appsFailed++;
+        summary.firstError ??= `Couldn't import "${label}": ${result.error}`;
+        continue;
+      }
+      if (result.status === "added") summary.appsAdded++;
+      else summary.appsPresent++;
+
+      if (isNonEmptyString(app.value)) storedIdByFileValue.set(app.value, result.value);
+      if (!isDefaultApp(result.value)) {
+        visibilityUpdates.set(result.value, visible);
+      }
+    }
+  }
+
+  const toStoredId = (value: string) => storedIdByFileValue.get(value) ?? value;
+
+  // 2. Visibility for default apps, merged over the stored settings
+  if (settings.visible && typeof settings.visible === "object") {
+    for (const [appValue, visible] of Object.entries(settings.visible)) {
+      if (typeof visible !== "boolean") continue;
+      const resolved = toStoredId(appValue);
+      if (resolved !== appValue && isDefaultApp(resolved)) continue;
+      visibilityUpdates.set(resolved, visible);
+    }
+  }
+  const visibilityChanges = await mergeAppVisibility(visibilityUpdates);
+  summary.appsShown = visibilityChanges.shown;
+  summary.appsHidden = visibilityChanges.hidden;
+
+  // 3. Usage history, keyed by profile + app. An imported entry replaces a stored one for the same pair, keeping
+  // the larger open count; when the file holds the same pair twice (e.g. "Alice" and "alice"), the newer wins.
+  if (Array.isArray(settings.usageHistory)) {
+    const knownApps = new Map((await getAppEntries()).map((entry) => [entry.value, entry.name]));
+    const stored = new Map<string, UsageHistoryItem>();
+    const fromFile = new Map<string, UsageHistoryItem>();
+
+    // Stored history can hold case variants of one pair ("alice", "ALICE"); keep the most recent visit
+    for (const item of await getUsageHistory()) {
+      const key = getHistoryPairKey(item.profile, item.app);
+      const previous = stored.get(key);
+      if (!previous || item.timestamp > previous.timestamp) stored.set(key, item);
+    }
+
+    for (const item of settings.usageHistory) {
+      if (!item || typeof item !== "object") {
+        summary.historySkipped++;
+        continue;
+      }
+
+      // YAML reads an unquoted 12345 as a number, so accept numbers for the text fields and store strings
+      const profile = toText(item.profile);
+      const app = toText(item.app);
+      const appName = toText(item.appName);
+      // A row without its timestamp is incomplete; inventing "now" would let it displace real visits
+      if (!profile || !app || !appName || !isValidTimestamp(item.timestamp)) {
+        summary.historySkipped++;
+        continue;
+      }
+
+      const appValue = toStoredId(app);
+      const knownName = knownApps.get(appValue);
+      if (!knownName) {
+        summary.historySkipped++;
+        continue;
+      }
+
+      const count = toOpenCount(item.count);
+      const key = getHistoryPairKey(profile, appValue);
+      const previous = fromFile.get(key);
+      if (previous && previous.timestamp >= item.timestamp) {
+        previous.count = Math.max(previous.count, count);
+        continue;
+      }
+
+      fromFile.set(key, {
+        profile,
+        app: appValue,
+        appName: appValue === app ? appName : knownName,
+        timestamp: item.timestamp,
+        count: Math.max(count, previous?.count ?? 0),
+      });
+    }
+
+    const merged = new Map(stored);
+    for (const [key, entry] of fromFile) {
+      merged.set(key, { ...entry, count: Math.max(entry.count, stored.get(key)?.count ?? 0) });
+    }
+    const kept = sortHistory(Array.from(merged.values())).slice(0, MAX_HISTORY_ITEMS);
+    const keptKeys = new Set(kept.map((item) => getHistoryPairKey(item.profile, item.app)));
+
+    // Count against what is actually kept, so a row the cap drops isn't reported as added
+    for (const [key, entry] of fromFile) {
+      const existing = stored.get(key);
+      const next = merged.get(key) ?? entry;
+      if (!keptKeys.has(key)) {
+        if (!existing) summary.historyTooOld++;
+      } else if (!existing) {
+        summary.historyAdded++;
+      } else if (
+        existing.timestamp !== next.timestamp ||
+        existing.count !== next.count ||
+        existing.profile !== next.profile
+      ) {
+        summary.historyUpdated++;
+      }
+    }
+
+    await setUsageHistory(kept);
+  }
+
+  return summary;
+}
+
+/**
+ * One-line description of an import, for a toast message.
+ * e.g. "1 app added (2 already set up) · 19 profiles added to History"
+ */
+export function describeImportSummary(summary: ImportSummary): string {
+  let apps = summary.appsAdded === 0 ? "No apps added" : `${countOf(summary.appsAdded, "app")} added`;
+  if (summary.appsPresent > 0) apps += ` (${summary.appsPresent} already set up)`;
+  if (summary.appsFailed > 0) apps += `, ${summary.appsFailed} rejected`;
+
+  const historyChanges: string[] = [];
+  if (summary.historyAdded > 0) historyChanges.push(`${countOf(summary.historyAdded, "profile")} added to History`);
+  if (summary.historyUpdated > 0) {
+    historyChanges.push(
+      summary.historyAdded > 0
+        ? `${summary.historyUpdated} updated`
+        : `${countOf(summary.historyUpdated, "History profile")} updated`,
+    );
+  }
+  let history = historyChanges.length > 0 ? historyChanges.join(", ") : "History unchanged";
+  const notKept: string[] = [];
+  if (summary.historySkipped > 0) notKept.push(`${summary.historySkipped} skipped`);
+  if (summary.historyTooOld > 0) notKept.push(`${summary.historyTooOld} older than the ${MAX_HISTORY_ITEMS} kept`);
+  if (notKept.length > 0) history += ` (${notKept.join(", ")})`;
+
+  const visibility: string[] = [];
+  if (summary.appsHidden > 0) visibility.push(`${countOf(summary.appsHidden, "app")} hidden`);
+  if (summary.appsShown > 0) {
+    visibility.push(
+      summary.appsHidden > 0 ? `${summary.appsShown} shown` : `${countOf(summary.appsShown, "app")} shown`,
+    );
+  }
+
+  const description = [apps, visibility.join(", "), history].filter(Boolean).join(" · ");
+  return summary.unknownVersion ? `${description} · From a newer version: some settings may not import` : description;
+}
+
+/**
+ * The Export Directory preference, defaulting to ~/Downloads
+ */
+function getExportDirectory(): string {
+  const { exportDirectory } = getPreferenceValues<Preferences>();
+  if (!exportDirectory?.trim()) return join(homedir(), "Downloads");
+  return exportDirectory.replace(/^~(?=$|\/)/, homedir());
+}
+
+/**
+ * Export settings to a YAML file in the export directory. An existing file is never replaced: like the Finder,
+ * the next free name gets a number ("… 2.yaml").
  */
 export async function exportSettingsToFile(filename?: string): Promise<string> {
   const yamlContent = await exportSettingsToYAML();
   const defaultFilename = `at-profile-settings-${new Date().toISOString().split("T")[0]}.yaml`;
 
-  // Validate and sanitize filename if provided
   const fileName = filename ? validateAndSanitizeFilename(filename) : defaultFilename;
-  const filePath = join(homedir(), fileName);
+  const directory = getExportDirectory();
+  await mkdir(directory, { recursive: true });
 
-  // Validate that the path is secure
-  validateSecurePath(filePath);
-
-  try {
-    writeFileSync(filePath, yamlContent, "utf8");
-    return filePath;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    throw new Error(errorMessage);
+  const extension = extname(fileName);
+  const base = fileName.slice(0, fileName.length - extension.length);
+  for (let copy = 1; ; copy++) {
+    const filePath = join(directory, copy === 1 ? fileName : `${base} ${copy}${extension}`);
+    validatePathInDirectory(filePath, directory);
+    try {
+      // "wx" fails instead of overwriting, without the race an existsSync check would have
+      await writeFile(filePath, yamlContent, { encoding: "utf8", flag: "wx" });
+      return filePath;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code !== "EEXIST") throw error;
+    }
   }
 }
 
 /**
  * Import settings from a YAML file
  */
-export async function importSettingsFromFile(filePath?: string): Promise<void> {
-  try {
-    let targetPath = filePath;
-
-    // If no file path provided, try to get from Finder selection
-    if (!targetPath) {
-      try {
-        const finderItems = await getSelectedFinderItems();
-        if (finderItems.length > 0) {
-          const selectedFile = finderItems[0].path;
-          if (selectedFile.toLowerCase().endsWith(".yaml") || selectedFile.toLowerCase().endsWith(".yml")) {
-            targetPath = selectedFile;
-          }
-        }
-      } catch {
-        // Finder selection failed, continue without it
-      }
-    }
-
-    if (!targetPath) {
-      throw new Error("Please specify a YAML file path or select a YAML file in Finder");
-    }
-
-    const yamlContent = readFileSync(targetPath, "utf8");
-    await importSettingsFromYAML(yamlContent);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    throw new Error(errorMessage);
-  }
+export async function importSettingsFromFile(filePath: string): Promise<ImportSummary> {
+  return importSettingsFromYAML(readFileSync(filePath, "utf8"));
 }

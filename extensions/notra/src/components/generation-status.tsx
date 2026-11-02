@@ -1,23 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getBrandIdentityGenerationStatus, getPostGenerationStatus } from "../lib/notra";
-import { notraUrl } from "../utils";
-import type { GenerationEvent, GenerationJobStatus } from "../types";
+import { notraOrganizationUrl } from "../utils";
+import type { GenerationEvent, GenerationJobStatus, GenerationStatusProps } from "../types";
 import { BrandIdentityDetail } from "./brand-identity-detail";
-
-interface PostGenerationStatusProps {
-  jobId: string;
-  onComplete?: () => void;
-  type: "post";
-}
-
-interface BrandIdentityGenerationStatusProps {
-  jobId: string;
-  onComplete?: () => void;
-  type: "brand-identity";
-}
-
-type GenerationStatusProps = PostGenerationStatusProps | BrandIdentityGenerationStatusProps;
 
 const STATUS_ICONS: Record<GenerationJobStatus, { icon: Icon; color: Color }> = {
   queued: { icon: Icon.Clock, color: Color.SecondaryText },
@@ -35,8 +21,8 @@ function formatEventType(type: string): string {
   return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-async function fetchPostStatus(jobId: string) {
-  const result = await getPostGenerationStatus(jobId);
+async function fetchPostStatus(jobId: string, organizationId: string) {
+  const result = await getPostGenerationStatus(jobId, organizationId);
   return {
     status: result.job.status,
     events: result.events,
@@ -45,8 +31,8 @@ async function fetchPostStatus(jobId: string) {
   };
 }
 
-async function fetchBrandIdentityStatus(jobId: string) {
-  const result = await getBrandIdentityGenerationStatus(jobId);
+async function fetchBrandIdentityStatus(jobId: string, organizationId: string) {
+  const result = await getBrandIdentityGenerationStatus(jobId, organizationId);
   return {
     status: result.job.status,
     events: [] as GenerationEvent[],
@@ -59,7 +45,7 @@ function isTerminal(s: GenerationJobStatus) {
   return s === "completed" || s === "failed";
 }
 
-export function GenerationStatus({ type, jobId, onComplete }: GenerationStatusProps) {
+export function GenerationStatus({ type, jobId, onComplete, organization }: GenerationStatusProps) {
   const { push } = useNavigation();
   const [status, setStatus] = useState<GenerationJobStatus>("queued");
   const [events, setEvents] = useState<GenerationEvent[]>([]);
@@ -77,7 +63,7 @@ export function GenerationStatus({ type, jobId, onComplete }: GenerationStatusPr
 
     async function poll() {
       try {
-        const result = await fetcher(jobId);
+        const result = await fetcher(jobId, organization.id);
         if (cancelled) {
           return;
         }
@@ -111,14 +97,14 @@ export function GenerationStatus({ type, jobId, onComplete }: GenerationStatusPr
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [jobId, type, onComplete]);
+  }, [jobId, type, onComplete, organization.id]);
 
   useEffect(() => {
     if (type === "brand-identity" && status === "completed" && resultId && !didNavigate.current) {
       didNavigate.current = true;
-      push(<BrandIdentityDetail brandIdentityId={resultId} />);
+      push(<BrandIdentityDetail brandIdentityId={resultId} organization={organization} />);
     }
-  }, [type, status, resultId, push]);
+  }, [type, status, resultId, push, organization]);
 
   const statusInfo = STATUS_ICONS[status];
   const title = type === "post" ? "Post Generation" : "Brand Identity Generation";
@@ -148,10 +134,18 @@ export function GenerationStatus({ type, jobId, onComplete }: GenerationStatusPr
       actions={
         <ActionPanel>
           {status === "completed" && resultId && type === "post" && (
-            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl(`/content/${resultId}`)} />
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="View on Notra"
+              url={notraOrganizationUrl(`/content/${resultId}`, organization.slug)}
+            />
           )}
           {status === "completed" && type === "brand-identity" && (
-            <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl("/settings/brand")} />
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="View on Notra"
+              url={notraOrganizationUrl("/brand/identity", organization.slug)}
+            />
           )}
           <Action.CopyToClipboard content={jobId} title="Copy Job ID" />
         </ActionPanel>

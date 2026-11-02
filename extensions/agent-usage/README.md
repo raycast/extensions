@@ -81,6 +81,10 @@ Manual preferences take priority, followed by OpenCode and environment variables
 
 Which balance is shown depends on the key type. A **provisioning key** can read the account ledger (`/api/v1/credits`), so the row shows account-wide credits purchased minus credits used. A regular **inference key** cannot read that ledger, so Agent Usage falls back to the key endpoint (`/api/v1/key`) and shows that key's own spending cap instead — or `$X.XX used` when the key has no cap.
 
+### Cursor Credentials
+
+Sign in to Cursor to use its local session automatically. On Windows, Agent Usage reads the active token from `%APPDATA%\Cursor\User\globalStorage\state.vscdb`, with `%APPDATA%\Cursor\auth.json` as a fallback. On macOS it reads the Cursor state database. The **Cursor Cookie Header** preference overrides local discovery. Expired tokens require signing in again in Cursor, the extension does not refresh tokens or modify Cursor's credential stores.
+
 ### Raycast Credentials
 
 Agent Usage shows your remaining Raycast AI credits, plan, and next renewal date. Sign in at [Raycast Settings](https://www.raycast.com/settings), copy the `__raycast_session` cookie value from your browser's developer tools, and paste it into the **Raycast Session Cookie** extension preference. A full Cookie header containing it also works.

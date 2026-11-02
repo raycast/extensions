@@ -1,22 +1,18 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
-import { listItems, listVaultsAndItems, VaultFailure } from "./pass-cli";
+import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
 import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from "./cache";
 import { renderErrorView } from "./error-views";
-import { NotLoggedInView, loginWithBrowserAndReload } from "./login-view";
+import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
-import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves } from "./refresh";
+import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
-  return Promise.race([promise, new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), ms))]);
-}
 
 function originOf(raw?: string): string | undefined {
   if (!raw) return undefined;
@@ -39,7 +35,7 @@ interface VaultDropdownProps {
   vaults: Vault[];
   /** Number of items in each vault, once known. */
   itemCounts: Map<string, number>;
-  /** Vault to show, for a vault opened from List Vaults. Otherwise the last selection is restored. */
+  /** Vault to show, for a vault opened from the vault list. Otherwise the last selection is restored. */
   value?: string;
   onVaultChange: (vaultId: string) => void;
 }
@@ -73,11 +69,20 @@ function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdo
   );
 }
 
-/** Search Items, also opened from List Vaults with that vault preselected. */
-export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
+interface SearchItemsViewProps {
+  /** Vault opened from the vault list. */
+  initialVault?: Vault;
+  /** Opened from All Vaults in the vault list: shows every vault rather than the last selection. */
+  allVaults?: boolean;
+  /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
+  sessionConfirmed?: boolean;
+}
+
+/** The item list of Browse Items, with every vault, or the one opened from the vault list. */
+export function SearchItemsView({ initialVault, allVaults = false, sessionConfirmed = false }: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
-  // A vault opened from List Vaults brings its count, kept if its own listing fails.
+  // A vault opened from the vault list brings its count, kept if its own listing fails.
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(
     new Map(initialVault?.itemCount === undefined ? [] : [[initialVault.shareId, initialVault.itemCount]]),
   );
@@ -122,14 +127,23 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
 
   async function loadItems() {
     const isLatest = loads.start();
-    setError(null);
+    // The login screen stays while loading after a login or Check Again, until there's something to show.
+    if (error?.type !== "not_authenticated") setError(null);
+    // Loading from the start, so that an empty list doesn't say "No Items Found" meanwhile.
+    setIsLoading(true);
     setFailedVaults([]);
     setLoadFailureMessage(undefined);
 
-    const [sharedItems, cachedVaults, legacyItems] = await Promise.all([
+    // Saved items wait for pass-cli to confirm the session: an ended one shows the login screen right away, rather
+    // than items whose passwords can't load. When pass-cli is slow, they show anyway after a moment, and the login
+    // screen replaces them once it answers that the session has ended.
+    const sessionCheck =
+      hasLoadedFromCache.current || sessionConfirmed ? Promise.resolve(undefined) : endedSessionError();
+    const [sharedItems, cachedVaults, legacyItems, sessionEnded] = await Promise.all([
       getCachedItems(),
       getCachedVaults(),
       initialVault ? getCachedItems(initialVault.shareId) : null,
+      withTimeout(sessionCheck, SESSION_CHECK_WAIT_MS),
     ]);
     const sharedHasVault = sharedItems?.data.some((item) => item.shareId === initialVault?.shareId);
     // Prefer a newer vault snapshot, or fill a gap from an earlier partial account listing.
@@ -145,8 +159,9 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
           }
         : sharedItems;
     if (!isLatest()) return;
-    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current) {
-      // Show cached metadata right away, even when stale: the first pass-cli call can take
+    let isFresh = false;
+    if (cachedItems && (cachedVaults || initialVault) && !hasLoadedFromCache.current && !sessionEnded) {
+      // Show cached metadata once the session is confirmed, even when stale: listing everything can take
       // several seconds, so waiting for it before rendering anything feels broken.
       updateItems(cachedItems.data);
       setVaults(cachedVaults?.data ?? (initialVault ? [initialVault] : []));
@@ -155,14 +170,14 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       hasLoadedFromCache.current = true;
 
       const isStale = cachedItems.isStale || cachedVaults?.isStale === true;
-      if (!isStale && !backgroundRefreshEnabled) {
-        setIsLoading(false);
-        return;
-      }
+      isFresh = !isStale && !backgroundRefreshEnabled;
     }
 
-    setIsLoading(true);
     try {
+      const ended = await sessionCheck;
+      if (!isLatest()) return;
+      if (ended) throw ended;
+      if (isFresh) return;
       if (initialVault && itemsRef.current.length === 0) {
         // Nothing cached yet: show the opened vault first, without waiting for every other vault.
         const vaultItems = await listItems(initialVault.shareId, [initialVault]).catch((err: unknown) => {
@@ -170,7 +185,10 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
           return []; // The full listing below reports the failure.
         });
         if (!isLatest()) return;
-        if (vaultItems.length > 0) updateItems(vaultItems);
+        if (vaultItems.length > 0) {
+          updateItems(vaultItems);
+          setError(null);
+        }
       }
 
       const listing = listingSaves.start();
@@ -184,12 +202,13 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       setItemCounts((previous) =>
         refreshItemCounts(previous, freshVaults, nextItems, new Set(failures.map(({ vault }) => vault.shareId))),
       );
+      setError(null);
 
       // A failed listing with nothing to show must stay an error, rather than a successful empty result.
       if (failureMessage) throw new Error(failureMessage);
 
       // Only complete listings renew the cache; partial failures must remain eligible for a retry.
-      // Saves follow the order listings started, also across List Vaults, so an older one can't replace a newer one.
+      // Saves follow the order listings started, also across the vault list, so an older one can't replace a newer one.
       if (isComplete && isLatest()) {
         await listingSaves.save(listing, () =>
           Promise.all([setCachedItems(nextItems, true), setCachedVaults(freshVaults)]),
@@ -208,12 +227,14 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       if (!isLatest()) return;
       const type = err instanceof PassCliError ? err.type : "unknown";
       const message = err instanceof Error ? err.message : "An unknown error occurred";
-      // Items belong to the session that listed them: once it has ended, they must not show up again.
+      // Items, vaults and counts belong to the session that listed them: once it has ended, they must not show up again.
       if (type === "not_authenticated") {
         updateItems([]);
+        setVaults([]);
         setItemCounts(new Map());
       }
-      if (itemsRef.current.length === 0) {
+      // Without pass-cli, passwords, notes and details can't load: the screen saying how to fix it comes first.
+      if (itemsRef.current.length === 0 || type === "not_installed") {
         setError({ type, message });
       } else {
         setLoadFailureMessage(message);
@@ -242,7 +263,7 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
   }, [activeOrigin, filteredItems, webIntegrationEnabled]);
 
   if (error?.type === "not_authenticated") {
-    return <NotLoggedInView onLogin={() => loginWithBrowserAndReload(loadItems)} />;
+    return <NotLoggedInView reload={loadItems} />;
   }
   const errorView = renderErrorView(error?.type ?? null, loadItems, "Load Items", error?.message);
   if (errorView) return errorView;
@@ -254,13 +275,12 @@ export function SearchItemsView({ initialVault }: { initialVault?: Vault }) {
       suggestedItems={suggestedItems}
       suggestionsTitle={activeOrigin ? `Suggested for ${hostnameOf(activeOrigin)}` : undefined}
       isLoading={isLoading || isLoadingActiveTab}
-      navigationTitle={initialVault ? "Search Items" : undefined}
       searchBarAccessory={
         <VaultDropdown
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
           itemCounts={itemCounts}
-          value={initialVault ? selectedVaultId : undefined}
+          value={initialVault || allVaults ? selectedVaultId : undefined}
           onVaultChange={setSelectedVaultId}
         />
       }

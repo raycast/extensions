@@ -1,5 +1,15 @@
 # Google Translate Changelog
 
+## [Refresh selected text on every Quick Translate invocation] - 2026-10-16
+
+- Read the current selection in a no-view launcher and pass it to Quick Translate Results, so invoking the existing command again uses fresh text even when Raycast retained its previous view.
+
+## [Fix translation with an HTTP proxy] - 2026-10-15
+
+- Fixed translations failing with a constructor error when an HTTP proxy is configured
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Use the built-in fetch client] - 2026-09-16
 
 - Switched translation and token requests to the platform's global `fetch`; `undici` (translation proxy) and `https-proxy-agent` (text-to-speech proxy) are now loaded lazily and only when an HTTP proxy is set
@@ -30,7 +40,7 @@
 
 ## [Feature] - 2026-04-15
 
- - Added pronunciation text to quick translate command
+- Added pronunciation text to quick translate command
 
 ## [Cross Platform Shortcuts + Modernize] - 2025-12-24
 
@@ -41,7 +51,7 @@
 
 ## [Feature] - 2025-10-02
 
- - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
+- Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
 
 ## [Feature] - 2025-07-01
 

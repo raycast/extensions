@@ -19,7 +19,7 @@
         {
           "name": "delay",
           "title": "Delay",
-          "description": "Specify delay required before running shortcut for the application",
+          "description": "Seconds (0–5) to wait before running a shortcut in the application",
           "default": "0",
           "required": false,
           "type": "textfield"
@@ -35,7 +35,7 @@
         {
           "name": "delay",
           "title": "Delay",
-          "description": "Specify delay required before running shortcut on the app",
+          "description": "Seconds (0–5) to wait before running a shortcut in the app",
           "required": false,
           "default": "0",
           "type": "textfield"
@@ -51,7 +51,7 @@
         {
           "name": "delay",
           "title": "Delay",
-          "description": "Specify delay required before running shortcut on the web page",
+          "description": "Seconds (0–5) to wait before running a shortcut on the web page",
           "required": false,
           "default": "0",
           "type": "textfield"
@@ -66,23 +66,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.2",
-    "@supabase/supabase-js": "2.110.2",
-    "ws": "8.21.1"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "@supabase/supabase-js": "^2.117.3",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/eslint-config": "^2.1.1",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.9.2",
-    "@types/react": "19.2.2",
-    "@types/ws": "8.18.1",
-    "eslint": "^9.39.0",
-    "jest": "^30.2.0",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.4.5",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/ws": "^8.18.2",
+    "eslint": "^9.39.5",
+    "jest": "^30.5.2",
+    "prettier": "^3.9.10",
+    "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },

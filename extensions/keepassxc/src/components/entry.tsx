@@ -12,6 +12,7 @@ import {
   showToast,
   showHUD,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
@@ -122,7 +123,10 @@ export default function Entry({
             <Action
               title="Paste URL"
               icon={Icon.BlankDocument}
-              shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+              shortcut={{
+                macOS: { modifiers: ["ctrl"], key: "enter" },
+                Windows: { modifiers: ["ctrl"], key: "enter" },
+              }}
               onAction={() => {
                 if (entry[4] !== "") {
                   const processedUrl = processPlaceholders(entry[4], arrayToEntry(entry));
@@ -137,7 +141,7 @@ export default function Entry({
             <Action
               title="Copy Password"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "g" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "g" }, Windows: { modifiers: ["ctrl"], key: "g" } }}
               onAction={() => {
                 if (entry[3] !== "") {
                   const processedPassword = processPlaceholders(entry[3], arrayToEntry(entry));
@@ -149,7 +153,7 @@ export default function Entry({
             <Action
               title="Copy Username"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "b" }, Windows: { modifiers: ["ctrl"], key: "b" } }}
               onAction={() => {
                 if (entry[2] !== "") {
                   const processedUsername = processPlaceholders(entry[2], arrayToEntry(entry));
@@ -161,7 +165,7 @@ export default function Entry({
             <Action
               title="Copy TOTP"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
               onAction={() => {
                 if (entry[6] !== "") {
                   try {
@@ -176,7 +180,7 @@ export default function Entry({
             <Action
               title="Copy URL"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd"], key: "u" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "u" }, Windows: { modifiers: ["ctrl"], key: "u" } }}
               onAction={() => {
                 if (entry[4] !== "") {
                   const processedUrl = processPlaceholders(entry[4], arrayToEntry(entry));
@@ -191,7 +195,10 @@ export default function Entry({
           <Action
             title="Open URL"
             icon={Icon.Globe}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
+            shortcut={{
+              macOS: { modifiers: ["shift", "cmd"], key: "u" },
+              Windows: { modifiers: ["shift", "ctrl"], key: "u" },
+            }}
             onAction={() => {
               if (entry[4] !== "") {
                 open(entry[4]);
@@ -203,7 +210,7 @@ export default function Entry({
           <Action
             title={isPinned ? "Unpin Entry" : "Pin Entry"}
             icon={isPinned ? Icon.StarDisabled : Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onAction={() => {
               const newPinnedIds = new Set(pinnedIds);
               if (newPinnedIds.has(entryId)) {

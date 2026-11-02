@@ -40,6 +40,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-sessions",
+      "title": "Manage Sessions",
+      "description": "List active CLI sessions, open a URL in a selected session, or close it after confirmation",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -158,6 +164,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc -p tests/tsconfig.json && node --test .build/tests/tests/session-cli.test.js .build/tests/tests/sessions.test.js .build/tests/tests/session-resources.test.js"
   }
 }

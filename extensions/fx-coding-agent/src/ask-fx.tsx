@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, useNavigation } from "@raycast/api";
+import { useRef, useState } from "react";
 import { FormValidation, useForm, usePromise } from "@raycast/utils";
 
 import { FxErrorActions } from "./components/fx-error-actions";
@@ -24,24 +25,34 @@ function AskResult({
   resumeSessionId?: string;
 }) {
   const { fxPath } = getFxPreferences();
+  const abortable = useRef<AbortController | null>(null);
+  const [cancelled, setCancelled] = useState(false);
   const { data, error, isLoading, revalidate } = usePromise(
     async () => {
+      const signal = abortable.current?.signal;
+      setCancelled(false);
       const args = ["ask", "--json"];
       if (resumeSessionId) args.push("--resume", resumeSessionId);
       args.push(prompt);
-      return runFxJson<FxAskResponse>(fxPath, args, { cwd: workspace, timeoutMs: 30 * 60 * 1000 });
+      return runFxJson<FxAskResponse>(fxPath, args, {
+        cwd: workspace,
+        timeoutMs: 30 * 60 * 1000,
+        signal,
+      });
     },
     [],
-    { failureToastOptions: { title: "Could Not Ask fx" } },
+    { abortable, failureToastOptions: { title: "Could Not Ask fx" } },
   );
 
-  const output = data?.output || data?.error || (error ? `# Could Not Ask fx\n\n${error.message}` : "");
+  const output = cancelled
+    ? "# Request Cancelled"
+    : data?.output || data?.error || (error ? `# Could Not Ask fx\n\n${error.message}` : "");
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={isLoading && !cancelled}
       markdown={output}
       metadata={
-        data ? (
+        data && !cancelled && !isLoading ? (
           <Detail.Metadata>
             {data.model ? <Detail.Metadata.Label title="Model" text={data.model} /> : null}
             {data.session_id ? <Detail.Metadata.Label title="Session ID" text={data.session_id} /> : null}
@@ -57,7 +68,22 @@ function AskResult({
         ) : null
       }
       actions={
-        error ? (
+        cancelled ? (
+          <ActionPanel>
+            <Action title="Run Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          </ActionPanel>
+        ) : isLoading ? (
+          <ActionPanel>
+            <Action
+              title="Cancel"
+              icon={Icon.XMarkCircle}
+              onAction={() => {
+                abortable.current?.abort();
+                setCancelled(true);
+              }}
+            />
+          </ActionPanel>
+        ) : error ? (
           <FxErrorActions error={error} retry={revalidate} />
         ) : data ? (
           <ActionPanel>

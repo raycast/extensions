@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import React, { useState } from "react";
 import { useCost } from "../hooks";
-import { getModelName } from "../lib/OpenAI";
+import { ReasoningLevels, getModelName, getReasoningLevel, isReasoningModel, supportsTemperature } from "../lib/OpenAI";
 import { History } from "../types";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 export default function HistoryDetails({ history }: Props) {
   const [displayPrompt, setDisplayPrompt] = useState<boolean>(false);
 
-  const cost = useCost(history.action.model, history.tokens.input, history.tokens.output);
+  const cost = useCost(history.action.model, history.tokens.input, history.tokens.output, history.timestamp);
 
   return (
     <Detail
@@ -22,7 +22,15 @@ export default function HistoryDetails({ history }: Props) {
           <Detail.Metadata.Label title="Action" text={history.action.name} />
           <Detail.Metadata.Label title="Timestamp" text={new Date(history.timestamp).toLocaleString()} />
           <Detail.Metadata.Label title="System Prompt" text={history.action.systemPrompt} />
-          <Detail.Metadata.Label title="Temperature" text={history.action.temperature.toString()} />
+          {isReasoningModel(history.action.model) && (
+            <Detail.Metadata.Label
+              title="Reasoning Level"
+              text={ReasoningLevels[getReasoningLevel(history.action.model, history.action.reasoningLevel)]}
+            />
+          )}
+          {supportsTemperature(history.action.model, history.action.reasoningLevel) && (
+            <Detail.Metadata.Label title="Temperature" text={history.action.temperature.toString()} />
+          )}
           <Detail.Metadata.Label title="Max Tokens" text={history.action.maxTokens.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Model">

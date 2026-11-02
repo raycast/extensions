@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Enhancement] - 2026-10-15
+
+- Add "Prevent system sleep on AC power" preference (`caffeinate -s`), which stops the system from sleeping while it runs on AC power ([#31139](https://github.com/raycast/extensions/issues/31139)).
+
 ## [Fix] - 2026-09-29
 
 - Use cache API to prevent menu bar icon flicker on background update cycles.

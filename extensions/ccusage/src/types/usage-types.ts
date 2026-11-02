@@ -115,6 +115,21 @@ export const SessionUsageCommandResponseSchema = z.preprocess(
   }),
 );
 
+export const SummaryUsageReportSchema = TotalUsageResponseSchema.extend({
+  weekly: z.array(WeeklyUsageResponseSchema),
+  monthly: z.array(MonthlyUsageResponseSchema),
+}).partial({ daily: true, weekly: true, monthly: true });
+
+export type SummaryUsageReport = z.infer<typeof SummaryUsageReportSchema>;
+
+// Cache the displayed rows, with model totals calculated from the full history.
+// Full session histories can exceed Raycast's 10 MB default cache capacity.
+export const SessionUsageReportSchema = z.object({
+  recentSessions: z.array(SessionResponseSchema),
+  topModels: z.array(ModelUsageSchema),
+});
+export type SessionUsageReport = z.infer<typeof SessionUsageReportSchema>;
+
 export const LimitWindowSchema = z.object({
   utilization: z.number(),
   resets_at: z.string().nullable(),

@@ -1,6 +1,7 @@
 ---
 title: An AbortSignal cannot tell self-cancellation from supersession
 date: 2026-08-11
+last_updated: 2026-09-30
 category: logic-errors
 module: useFetchSite
 problem_type: logic_error
@@ -54,11 +55,11 @@ start. The `await` in the failure path is what makes the window real.
 
 Ask the ref, not the signal and not a flag. The ref points at whichever request is
 current, so identity against it answers the ownership question directly and cannot
-go stale (`/Users/messina/Developer/GitHub/chrismessina/raycast-digger/src/hooks/useFetchSite.ts:366`):
+go stale (`/Users/messina/Developer/GitHub/chrismessina/raycast-digger/src/hooks/useFetchSite.ts:399`):
 
 ```ts
 const abortController = new AbortController();
-abortControllerRef.current = abortController;          // :291
+abortControllerRef.current = abortController;          // :357
 
 // "has a newer request taken over?" — cannot go stale
 const ownsView = () => abortControllerRef.current === abortController;
@@ -66,10 +67,10 @@ const ownsView = () => abortControllerRef.current === abortController;
 
 ```ts
 } catch (err) {
-  if (!ownsView()) { log.log("fetch:aborted", { targetUrl }); return; }   // :1185
+  if (!ownsView()) { log.log("fetch:aborted", { targetUrl }); return; }   // :1443
   // ... classify, setError, await toast
 } finally {
-  if (ownsView()) setIsLoading(false);                                    // :1231
+  if (ownsView()) setIsLoading(false);                                    // :1489
 }
 ```
 

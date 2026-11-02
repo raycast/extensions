@@ -139,6 +139,26 @@ test("volume hotkeys read and set volume in one time-limited Music call", async 
   assert.match(calls[1][0], /set nextVolume to \(sound volume\) \+ \(-5\)/);
 });
 
+test("rewind and fast forward clamp the position inside one time-limited Music call", async () => {
+  const calls = [];
+  const player = loadSource("src/util/scripts/player-controls.ts", async (...args) => {
+    calls.push(args);
+    return "42.5";
+  });
+
+  assert.deepEqual(await player.position.rewind(15)(), { _tag: "Right", right: 42.5 });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][2].timeout, 5_000);
+  assert.match(calls[0][0], /if player state is stopped then error/);
+  assert.match(calls[0][0], /set nextPosition to \(player position\) \+ \(-15\)/);
+  assert.match(calls[0][0], /if nextPosition < 0 then set nextPosition to 0/);
+  assert.match(calls[0][0], /if nextPosition > trackDuration then set nextPosition to trackDuration/);
+
+  await player.position.fastForward(30)();
+  assert.equal(calls.length, 2);
+  assert.match(calls[1][0], /set nextPosition to \(player position\) \+ \(30\)/);
+});
+
 test("playlist insertion is bounded, escaped, and is not retried after a failure", async () => {
   const scripts = [];
   const currentTrack = loadSource("src/util/scripts/current-track.ts", async (script) => {

@@ -738,6 +738,24 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
     await showToast(Toast.Style.Success, "Deleted successfully");
   }
 
+  // Replace the folder with its contents, in the same position
+  async function deleteFolderKeepContents(folder: FolderItem) {
+    const ok = await confirmAlert({
+      title: "Delete folder and keep its contents?",
+      message: `The folder is removed and its ${folder.items.length} item(s) move up to this level.`,
+      primaryAction: { title: "Delete Folder", style: Alert.ActionStyle.Destructive },
+    });
+    if (!ok) return;
+
+    const d = loadLinks();
+    updateFolder(d, folderId, (items) =>
+      items.flatMap((i) => (i.id === folder.id && i.type === "folder" ? i.items : [i])),
+    );
+    saveLinks(d);
+    triggerRefresh();
+    await showToast(Toast.Style.Success, "Folder deleted, contents kept");
+  }
+
   const ListAddActions = () => (
     <ActionPanel.Section title="Add & Create">
       <Action.Push
@@ -878,6 +896,15 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                   onAction={() => deleteItem(item.id)}
                 />
+                {item.type === "folder" && (
+                  <Action
+                    title="Delete Folder, Keep Contents"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+                    onAction={() => deleteFolderKeepContents(item)}
+                  />
+                )}
               </ActionPanel.Section>
 
               <ListAddActions />

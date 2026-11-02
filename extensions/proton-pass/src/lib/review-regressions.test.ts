@@ -52,7 +52,7 @@ function loadView(
 function actions(element: unknown): Element["props"][] {
   if (!element || typeof element !== "object" || !("props" in element)) return [];
   const props = (element as Element).props;
-  return [props, ...[props.children].flat().flatMap(actions)];
+  return [props, ...[props.children].flat(Infinity).flatMap(actions)];
 }
 
 test("autofill keeps the original external target when closing changes focus and rejects Raycast", async () => {
@@ -297,6 +297,7 @@ test("a failed full load keeps early vault items visible and offers a working Re
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [item],
       listVaultsAndItems: async () => {
         calls++;
@@ -329,13 +330,119 @@ test("a failed full load keeps early vault items visible and offers a working Re
   assert.deepEqual(render().props.items, [item]);
 });
 
+test("the pass-cli not found screen opens the extension preferences first", async () => {
+  let opened = 0;
+  const { CliNotFoundView } = loadView("error-views.tsx", {
+    react: {},
+    "@raycast/api": {
+      List: { EmptyView: {} },
+      ActionPanel: {},
+      Action: { OpenInBrowser: {} },
+      Icon: {},
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      openExtensionPreferences: async () => {
+        opened++;
+      },
+    },
+    "./types": { PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+    "./cli": { clearCliCache: async () => undefined },
+    "./login-view": {},
+  });
+
+  // The empty view holds its actions in a prop rather than in its children.
+  const emptyView = actions(CliNotFoundView({})).find((props) => "description" in props);
+  assert.equal(emptyView?.title, "Proton Pass CLI Not Found");
+  const [fix, guide] = actions(emptyView?.actions).filter((props) => "title" in props);
+  // The CLI Path preference is the fix, so its action is the one Enter runs.
+  assert.equal(fix.title, "Open Extension Preferences");
+  await (fix.onAction as () => Promise<void>)();
+  assert.equal(opened, 1);
+  assert.equal(guide.title, "Open Installation Guide");
+  assert.equal(guide.url, "https://example.com/docs");
+});
+
+test("pass-cli not found shows its screen instead of the cached items, which can't load passwords or codes", async () => {
+  const notFound = async (): Promise<never> => {
+    throw new PassCliError("pass-cli not found at '/example/pass-cli'.", "not_installed");
+  };
+  const errorViews = { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) };
+
+  const search = hookHarness();
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: search.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: { Failure: "failure" } },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listItems: notFound,
+      listVaultsAndItems: notFound,
+    },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
+    },
+    "./error-views": errorViews,
+    "./login-view": {},
+    "./format": {},
+    "./item-counts": itemCounts,
+    "./item-list": {},
+    "./refresh": refresh,
+  });
+  search.render(SearchItemsView, {});
+  search.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(search.render(SearchItemsView, {}).props.error, "not_installed");
+
+  const totp = hookHarness();
+  const { default: Command } = loadView("../get-totp.tsx", {
+    react: totp.react,
+    "@raycast/api": {
+      List: { Section: {}, EmptyView: {} },
+      Action: {},
+      ActionPanel: {},
+      Icon: {},
+      Color: { Green: "green" },
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+      getPreferenceValues: () => ({}),
+    },
+    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound },
+    "./lib/types": { PassCliError },
+    "./lib/utils": {
+      getTotpRemainingSeconds: () => 30,
+      getItemIcon: () => "",
+      formatTotpCode: (code: string) => code,
+    },
+    "./lib/cache": {
+      getCachedItems: async () => ({ data: [{ ...item, hasTotp: true }] }),
+      setCachedItems: async () => undefined,
+      clearCache: async () => undefined,
+    },
+    "./lib/refresh": refresh,
+    "./lib/error-views": errorViews,
+  });
+  totp.render(Command, {});
+  totp.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(totp.render(Command, {}).props.error, "not_installed");
+});
+
 test("item-list authentication failures clear saved session metadata on both listing paths", async () => {
   let clears = 0;
   const vault = { shareId: "vault", name: "Personal" };
   const api = loadView("pass-cli.ts", {
-    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
     "node:os": { homedir: () => "/fixture" },
-    "node:path": { delimiter: ":" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": {
       clearCache: async () => {
         clears++;
@@ -350,7 +457,7 @@ test("item-list authentication failures clear saved session metadata on both lis
         },
       }),
     },
-    "./core/login": {},
+    "./core/login": { isDetachedLoginRunning: async () => false },
     "./mock-data": {},
     "./types": { PassCliError },
   }) as unknown as {
@@ -365,9 +472,9 @@ test("item-list authentication failures clear saved session metadata on both lis
 test("only the user's own vaults have their members counted, to know whether they're shared", async () => {
   const counted: string[] = [];
   const api = loadView("pass-cli.ts", {
-    "@raycast/api": { environment: { isDevelopment: false }, getPreferenceValues: () => ({}) },
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
     "node:os": { homedir: () => "/fixture" },
-    "node:path": { delimiter: ":" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
     "./cache": {},
     "./cli": { ensureCli: async () => "/fixture-cli" },
     "./core/adapter": {
@@ -386,7 +493,7 @@ test("only the user's own vaults have their members counted, to know whether the
         },
       }),
     },
-    "./core/login": {},
+    "./core/login": { isDetachedLoginRunning: async () => false },
     "./mock-data": {},
     "./types": { PassCliError },
   }) as unknown as { listVaultSharing: () => Promise<Map<string, unknown>> };
@@ -401,6 +508,56 @@ test("only the user's own vaults have their members counted, to know whether the
     ["offline", { role: "owner" }],
   ]);
 });
+
+for (const stalled of ["roles", "members"]) {
+  test(`sharing refresh starts no member commands after login begins during ${stalled}`, async () => {
+    let release!: () => void;
+    const pause = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let loginRunning = false;
+    const counted: boolean[] = [];
+    const api = loadView("pass-cli.ts", {
+      "@raycast/api": {
+        environment: { isDevelopment: false, supportPath: "/fixture" },
+        getPreferenceValues: () => ({}),
+      },
+      "node:os": { homedir: () => "/fixture" },
+      "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+      "./cache": {},
+      "./cli": { ensureCli: async () => "/fixture-cli" },
+      "./core/adapter": {
+        createPassCliAdapter: () => ({
+          listVaultRoles: async () => {
+            if (stalled === "roles") await pause;
+            return new Map(Array.from({ length: 9 }, (_, i) => [`vault-${i}`, "owner"]));
+          },
+          countVaultMembers: async () => {
+            counted.push(loginRunning);
+            if (stalled === "members") await pause;
+            return 2;
+          },
+        }),
+      },
+      "./core/login": { isDetachedLoginRunning: async () => loginRunning },
+      "./mock-data": {},
+      "./types": { PassCliError },
+    }) as unknown as { listVaultSharing: () => Promise<Map<string, unknown>> };
+
+    const result = api.listVaultSharing().then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    await new Promise(setImmediate);
+    assert.equal(counted.length, stalled === "roles" ? 0 : 8);
+    loginRunning = true;
+    release();
+    const error = await result;
+    assert.equal(counted.filter(Boolean).length, 0);
+    assert.ok(error instanceof PassCliError);
+    assert.equal(error.type, "not_authenticated");
+  });
+}
 
 test("opening a vault offline preserves its earlier per-vault item cache", async () => {
   const other = { ...item, shareId: "other" };
@@ -445,6 +602,7 @@ test("opening a vault offline preserves its earlier per-vault item cache", async
       },
       "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
       "./pass-cli": {
+        endedSessionError: async () => undefined,
         listItems: async () => {
           throw new PassCliError("Offline", "network_error");
         },
@@ -487,6 +645,7 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultsAndItems: async () => {
         calls++;
         return {
@@ -1238,6 +1397,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     },
     "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => [],
       listVaultsAndItems: async () => {
         calls++;
@@ -1283,7 +1443,7 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
   assert.equal(typeof retriedEmpty.onRetry, "function");
 });
 
-function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown }) {
+function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknown; "./item-counts"?: unknown }) {
   const harness = hookHarness();
   const { SearchItemsView } = loadView("search-items-view.tsx", {
     react: harness.react,
@@ -1307,13 +1467,115 @@ function searchItemsFixture(services: { "./pass-cli": unknown; "./cache": unknow
   return { harness, SearchItemsView };
 }
 
-test("List Vaults saves sharing on its own, and vaults with items from complete listings only", async () => {
-  const personal = { shareId: "vault", name: "Personal" };
-  const added = { shareId: "added", name: "Added" };
-  const saved: string[] = [];
-  let failing = true;
+test("an ended session shows the login screen at once, without showing the saved items first", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => new PassCliError("Not authenticated.", "not_authenticated"),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(shownSaved, false);
+  assert.equal(listings, 0);
+  // NotLoggedInView, which reloads once logged in.
+  assert.equal(typeof render().props.reload, "function");
+});
+
+test("a slow session check doesn't hold the saved items back, and an ended session still shows the login screen", async () => {
+  let shownSaved = false;
+  let listings = 0;
+  let endSession: (error: PassCliError) => void = () => undefined;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      SESSION_CHECK_WAIT_MS: 5,
+      endedSessionError: () =>
+        new Promise((resolve) => {
+          endSession = resolve;
+        }),
+      listItems: async () => [],
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [], items: [], failedVaults: [] };
+      },
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+    "./item-counts": {
+      ...itemCounts,
+      // Counted when the saved items show.
+      countItemsByVault: (...args: Parameters<typeof itemCounts.countItemsByVault>) => {
+        shownSaved = true;
+        return itemCounts.countItemsByVault(...args);
+      },
+    },
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(shownSaved, true);
+  // The listing waits for the answer.
+  assert.equal(listings, 0);
+
+  endSession(new PassCliError("Not authenticated.", "not_authenticated"));
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(typeof render().props.reload, "function");
+  assert.equal(listings, 0);
+});
+
+test("an item list opened from the vault list once the session is confirmed doesn't ask pass-cli again", async () => {
+  let checks = 0;
+  const { harness, SearchItemsView } = searchItemsFixture({
+    "./pass-cli": {
+      endedSessionError: async () => {
+        checks++;
+        return undefined;
+      },
+      listItems: async () => [],
+      // Still listing: the saved items are on screen.
+      listVaultsAndItems: () => new Promise(() => undefined),
+    },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
+    },
+  });
+  const props = { initialVault: { shareId: "vault", name: "Personal" }, sessionConfirmed: true };
+  harness.render(SearchItemsView, props);
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  assert.equal(checks, 0);
+  // The saved items show at once, rather than after pass-cli answers.
+  assert.equal((harness.render(SearchItemsView, props).props.items as Item[]).length, 1);
+});
+
+test("the vault list passes on a session it confirmed to the item lists it opens", async () => {
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1322,19 +1584,79 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
-      listVaultSharing: async () => new Map([["vault", { role: "owner", isShared: true }]]),
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [{ shareId: "vault", name: "Personal" }],
+        items: [],
+        failedVaults: [],
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const confirmed = () =>
+    actions(harness.render(VaultsView, { startOnItems: false }))
+      .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
+      .filter((entry) => entry.title === "View Items")
+      .map((entry) => (entry.target as Element).props.sessionConfirmed);
+  harness.render(VaultsView, { startOnItems: false });
+  const [load] = harness.effects;
+  load();
+  await new Promise(setImmediate);
+  // All Vaults and the vault.
+  assert.equal(confirmed().join(), "true,true");
+});
+
+test("the vault list shows and saves items before optional sharing, from complete listings only", async () => {
+  const personal = { shareId: "vault", name: "Personal" };
+  const added = { shareId: "added", name: "Added" };
+  const saved: string[] = [];
+  const pendingSharing: ((sharing: Map<string, unknown>) => void)[] = [];
+  let failing = true;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: () => new Promise((resolve) => pendingSharing.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [personal, added],
         items: [item],
         failedVaults: failing ? [{ vault: added, message: "Offline" }] : [],
       }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1348,31 +1670,49 @@ test("List Vaults saves sharing on its own, and vaults with items from complete 
         saved.push("vaults");
       },
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
+  const view = harness.render(VaultsView, { startOnItems: false });
+  assert.equal(view.props.isLoading, false);
+  const row = actions(view).find((entry) => entry.title === personal.name)!;
+  assert.ok(row);
+  assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [{ text: "1 item" }]);
+  assert.deepEqual(saved, []);
+  pendingSharing[0](new Map([["vault", { role: "owner", isShared: true }]]));
+  await new Promise(setImmediate);
+  const sharedRow = actions(harness.render(VaultsView, { startOnItems: false })).find(
+    (entry) => entry.title === personal.name,
+  )!;
+  assert.deepEqual(JSON.parse(JSON.stringify(sharedRow.accessories)), [
+    { tooltip: "Shared by you" },
+    { text: "1 item" },
+  ]);
   // Saved without its items, the vault that failed would count 0 items on the next open.
   assert.deepEqual(saved, ["sharing"]);
 
   failing = false;
   load();
   await new Promise(setImmediate);
+  assert.deepEqual(saved.sort(), ["items", "sharing", "vaults"]);
+  pendingSharing[1](new Map([["vault", { role: "owner", isShared: true }]]));
+  await new Promise(setImmediate);
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
 });
 
-test("an older List Vaults load can't replace newer sharing or displayed counts", async () => {
+test("an older vault list load can't replace newer sharing or displayed counts", async () => {
   const vault = { shareId: "vault", name: "Personal" };
   const savedSharing: unknown[] = [];
   const pending: ((sharing: Map<string, unknown>) => void)[] = [];
   let listings = 0;
   const harness = hookHarness();
-  const { default: Command } = loadView("../list-vaults.tsx", {
+  const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
     "@raycast/api": {
       List: { Item: {}, EmptyView: {} },
@@ -1381,8 +1721,10 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
       Icon: {},
       Keyboard: { Shortcut: { Common: { Copy: {} } } },
       getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
     },
-    "./lib/pass-cli": {
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
       listVaultSharing: () => new Promise((resolve) => pending.push(resolve)),
       listVaultsAndItems: async () => ({
         vaults: [vault],
@@ -1390,10 +1732,11 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
         failedVaults: [],
       }),
     },
-    "./lib/types": { PassCliError },
-    "./lib/search-items-view": {},
-    "./lib/login-view": {},
-    "./lib/cache": {
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
       getCachedItems: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
@@ -1403,12 +1746,12 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
       setCachedItems: async () => undefined,
       setCachedVaults: async () => undefined,
     },
-    "./lib/item-counts": itemCounts,
-    "./lib/refresh": refresh,
-    "./lib/shortcuts": shortcuts,
-    "./lib/vault-sharing": vaultSharing,
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
   });
-  harness.render(Command, {});
+  harness.render(VaultsView, { startOnItems: false });
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -1421,17 +1764,81 @@ test("an older List Vaults load can't replace newer sharing or displayed counts"
   pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
   await new Promise(setImmediate);
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
-  const row = actions(harness.render(Command, {})).find((entry) => entry.title === vault.name)!;
+  const row = actions(harness.render(VaultsView, { startOnItems: false })).find((entry) => entry.title === vault.name)!;
   assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [
     { tooltip: "Shared with you · Viewer" },
     { text: "2 items" },
   ]);
 });
 
-test("a vault opened from List Vaults keeps its count when its items can't be listed", async () => {
+test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
+  const pushed: { view: Element; onPop?: () => void }[] = [];
+  let listings = 0;
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({
+        push: (view: Element, onPop?: () => void) => {
+          pushed.push({ view, onPop });
+        },
+      }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => {
+        listings++;
+        return { vaults: [{ shareId: "vault", name: "Personal" }], items: [item], failedVaults: [] };
+      },
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  const render = () => harness.render(VaultsView, { startOnItems: true });
+  render();
+  // Twice, as React does in development: a second copy of the items would take a second Esc to leave.
+  harness.effects.forEach((effect) => effect());
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  // All items, rather than a vault, and nothing listed for the vaults underneath meanwhile.
+  assert.equal(pushed.length, 1);
+  assert.equal(pushed[0].view.props.initialVault, undefined);
+  assert.equal(listings, 0);
+
+  pushed[0].onPop?.();
+  await new Promise(setImmediate);
+  assert.equal(listings, 1);
+  const rows = (render().props.children as { props: { children: unknown[] } }).props.children.flat();
+  const titles = rows.flatMap((row) => (row && typeof row === "object" ? [(row as Element).props.title] : []));
+  assert.equal(titles.join(", "), "All Vaults, Personal");
+});
+
+test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {
   const failed = { shareId: "vault", name: "Personal" };
   const { harness, SearchItemsView } = searchItemsFixture({
     "./pass-cli": {
+      endedSessionError: async () => undefined,
       listItems: async () => {
         throw new PassCliError("Offline", "network_error");
       },
@@ -1449,4 +1856,337 @@ test("a vault opened from List Vaults keeps its count when its items can't be li
   await new Promise(setImmediate);
   const dropdown = render().props.searchBarAccessory as Element;
   assert.deepEqual(Object.fromEntries(dropdown.props.itemCounts as Map<string, number>), { vault: 7, other: 1 });
+});
+
+test("Check Again in Search Items keeps the login screen until the items have loaded", async () => {
+  const harness = hookHarness();
+  const vault = { shareId: "vault", name: "Personal" };
+  let isLoggedIn = false;
+  const { SearchItemsView } = loadView("search-items-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Dropdown: { Section: {}, Item: {} } },
+      Icon: {},
+      getPreferenceValues: () => ({}),
+      Toast: { Style: {} },
+      showToast: async () => undefined,
+    },
+    "@raycast/utils": { usePromise: () => ({ isLoading: false }) },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultsAndItems: async () => {
+        if (!isLoggedIn) throw new PassCliError("Session ended", "not_authenticated");
+        return { vaults: [vault], items: [item], failedVaults: [] };
+      },
+    },
+    "./types": { PassCliError },
+    "./cache": {
+      getCachedItems: async () => ({ data: [item], timestamp: 0, isStale: true }),
+      getCachedVaults: async () => ({ data: [vault], timestamp: 0, isStale: true }),
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
+    "./login-view": {},
+    "./format": {},
+    "./item-list": {},
+    "./refresh": refresh,
+    "./item-counts": itemCounts,
+  });
+  const render = () => harness.render(SearchItemsView, {});
+  render();
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const notLoggedIn = render();
+  assert.equal(typeof notLoggedIn.props.reload, "function");
+
+  isLoggedIn = true;
+  const checking = (notLoggedIn.props.reload as () => Promise<void>)();
+  // No empty list, nor the ended session's vaults, while the items load.
+  assert.equal(typeof render().props.reload, "function");
+  assert.equal("items" in render().props, false);
+
+  await checking;
+  assert.deepEqual(render().props.items, [item]);
+});
+
+test("Login with Browser shows what's left to do, then reloads once the login succeeded", async () => {
+  const harness = hookHarness();
+  const url = "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+  const statuses: unknown[] = [{ state: "none" }, { state: "succeeded" }];
+  let reloads = 0;
+  let finishReload = () => {};
+  const reload = () => {
+    reloads++;
+    return new Promise<void>((done) => {
+      finishReload = done;
+    });
+  };
+  const { NotLoggedInView, LoginScreen } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => ({ hide: async () => undefined }),
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => url,
+      checkBrowserLogin: async () => statuses.shift(),
+      cancelBrowserLogin: async () => undefined,
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const screen = () => LoginScreen(harness.render(NotLoggedInView, { reload }).props);
+  // The empty view holds its actions in a prop rather than in its children.
+  const tree = (element: unknown): Element["props"][] =>
+    actions(element).flatMap((props) => [props, ...(props.actions ? tree(props.actions) : [])]);
+  const action = (title: string) => tree(screen()).find((props) => props.title === title);
+
+  screen();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  await (action("Login with Browser")?.onAction as () => Promise<void>)();
+
+  const title = () => tree(screen()).find((props) => "description" in props)?.title;
+  assert.equal(title(), "Log In in Your Browser");
+  assert.equal(action("Open Login Page Again")?.url, url);
+  assert.equal(reloads, 0);
+
+  // The view checks on the login while it waits.
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(reloads, 1);
+  // Rather than an empty list, until the view has loaded.
+  assert.equal(title(), "You're Logged In");
+
+  // Still on screen once the view has loaded, the login didn't hold: the actions are back.
+  finishReload();
+  await new Promise(setImmediate);
+  assert.equal(title(), "Not Logged In");
+  assert.equal(typeof action("Login with Browser")?.onAction, "function");
+});
+
+test("a login started while a check is in flight lets it finish, and keeps its own status", async () => {
+  const harness = hookHarness();
+  const events: string[] = [];
+  let finishCheck: (status: unknown) => void = () => undefined;
+  const { NotLoggedInView } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => ({ hide: async () => undefined }),
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => {
+        events.push("start login");
+        return "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+      },
+      checkBrowserLogin: () => {
+        events.push("check");
+        return new Promise((resolve) => {
+          finishCheck = (status) => {
+            events.push("check done");
+            resolve(status);
+          };
+        });
+      },
+      cancelBrowserLogin: async () => undefined,
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const login = () =>
+    harness.render(NotLoggedInView, { reload: () => undefined }).props.login as {
+      start: () => Promise<void>;
+      status: { state: string };
+    };
+
+  login();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  // As Re-Run Browser Login does, in the Login command, while the check of an earlier login is still running.
+  const starting = login().start();
+  await new Promise(setImmediate);
+  // That check would remove the new login's files, and report its own result over the new login's.
+  assert.deepEqual(events, ["check"]);
+
+  finishCheck({ state: "none" });
+  await starting;
+  assert.deepEqual(events, ["check", "check done", "start login"]);
+  assert.equal(login().status.state, "waiting");
+});
+
+test("no check runs while a login is canceled, which would put it back on screen", async () => {
+  const harness = hookHarness();
+  const waiting = { state: "waiting", url: "https://account.proton.me/desktop/login?app=pass", isFinishing: false };
+  let checks = 0;
+  let finishCancel = () => {};
+  const { NotLoggedInView } = loadView("login-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      Action: { OpenInBrowser: {}, Style: { Destructive: "destructive" } },
+      ActionPanel: {},
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Refresh: {} } } },
+      List: { EmptyView: {} },
+      Toast: { Style: { Success: "success" } },
+      showToast: async () => ({ hide: async () => undefined }),
+    },
+    "./core/login": {},
+    "./pass-cli": {
+      startBrowserLogin: async () => waiting.url,
+      // Still running for the extension, until its files are removed.
+      checkBrowserLogin: async () => {
+        checks++;
+        return waiting;
+      },
+      cancelBrowserLogin: () =>
+        new Promise<void>((done) => {
+          finishCancel = done;
+        }),
+    },
+    "./shortcuts": shortcuts,
+    "./terminal": { openTerminalForLogin: () => undefined },
+    "./types": { PassCliError, PROTON_PASS_CLI_DOCS: "https://example.com/docs" },
+  });
+  const login = () =>
+    harness.render(NotLoggedInView, { reload: () => undefined }).props.login as {
+      cancel: () => Promise<void>;
+      status: { state: string };
+    };
+
+  login();
+  const [checkLogin] = harness.effects;
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(login().status.state, "waiting");
+
+  const canceling = login().cancel();
+  await new Promise(setImmediate);
+  // The view checks on the login every second while it waits.
+  checkLogin();
+  await new Promise(setImmediate);
+  assert.equal(checks, 1);
+
+  finishCancel();
+  await canceling;
+  assert.equal(login().status.state, "none");
+});
+
+test("no pass-cli command starts while a browser login is saving its session", async () => {
+  let adapters = 0;
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": { environment: { isDevelopment: false, supportPath: "/fixture" }, getPreferenceValues: () => ({}) },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": { clearCache: async () => undefined },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => {
+        adapters++;
+        return { listVaults: async () => [], checkAuth: async () => true };
+      },
+    },
+    "./core/login": { isDetachedLoginRunning: async () => true },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { listVaults: () => Promise<unknown>; checkAuth: () => Promise<boolean> };
+
+  // pass-cli could log out "for security" and delete the session being saved.
+  await assert.rejects(api.listVaults(), (error: unknown) => {
+    assert.equal((error as PassCliError).type, "not_authenticated");
+    return true;
+  });
+  await assert.rejects(api.checkAuth());
+  assert.equal(adapters, 0);
+});
+
+test("a browser login clears the previous account's cache, and is canceled when the browser can't open", async () => {
+  const events: string[] = [];
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": {
+      environment: { isDevelopment: false, supportPath: "/fixture" },
+      getPreferenceValues: () => ({}),
+      open: async () => {
+        throw new Error("No browser");
+      },
+    },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {
+      clearCache: async () => {
+        events.push("clear cache");
+      },
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {},
+    "./core/login": {
+      startDetachedLogin: async () => {
+        events.push("start login");
+        return "https://account.proton.me/desktop/login?app=pass#payload=FAKE_PAYLOAD_TOKEN";
+      },
+      cancelDetachedLogin: async () => {
+        events.push("cancel login");
+      },
+    },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { startBrowserLogin: () => Promise<string | undefined> };
+
+  await assert.rejects(api.startBrowserLogin(), /No browser/);
+  // Nobody could finish that login, and while it ran, no other pass-cli command would.
+  assert.deepEqual(events, ["clear cache", "start login", "cancel login"]);
+});
+
+test("Logout forgets the login that was over when it started, and only that one", async () => {
+  const events: string[] = [];
+  const api = loadView("pass-cli.ts", {
+    "@raycast/api": {
+      environment: { isDevelopment: false, supportPath: "/fixture" },
+      getPreferenceValues: () => ({}),
+    },
+    "node:os": { homedir: () => "/fixture" },
+    "node:path": { delimiter: ":", join: (...parts: string[]) => parts.join("/") },
+    "./cache": {
+      clearCache: async () => {
+        events.push("clear cache");
+      },
+    },
+    "./cli": { ensureCli: async () => "/fixture-cli" },
+    "./core/adapter": {
+      createPassCliAdapter: () => ({
+        logout: async () => {
+          events.push("log out");
+        },
+      }),
+    },
+    "./core/login": {
+      isDetachedLoginRunning: async () => false,
+      savedDetachedLogin: async () => ({ pid: 1, attempt: "ended", startedAt: 0 }),
+      forgetDetachedLogin: async (_dir: string, login: { attempt: string }) => {
+        events.push(`forget ${login.attempt}`);
+      },
+    },
+    "./mock-data": {},
+    "./types": { PassCliError },
+  }) as unknown as { logout: () => Promise<void> };
+
+  await api.logout();
+  assert.deepEqual(events, ["log out", "clear cache", "forget ended"]);
 });

@@ -165,6 +165,7 @@ export type FxAskResponse = {
 type RunOptions = {
   cwd?: string;
   timeoutMs?: number;
+  signal?: AbortSignal;
 };
 
 const DEFAULT_TIMEOUT_MS = 20_000;
@@ -213,6 +214,12 @@ function commandEnvironment(): NodeJS.ProcessEnv {
 
 export function runFx(executable: string, args: string[], options: RunOptions = {}): Promise<string> {
   return new Promise((resolve, reject) => {
+    const signal = options.signal;
+    const abortError = () => Object.assign(new Error("fx request cancelled."), { name: "AbortError" });
+    if (signal?.aborted) {
+      reject(abortError());
+      return;
+    }
     const cwd = defaultWorkingDirectory(options.cwd);
     try {
       if (!statSync(cwd).isDirectory()) throw new Error("not a directory");
@@ -225,26 +232,64 @@ export function runFx(executable: string, args: string[], options: RunOptions = 
       env: commandEnvironment(),
       shell: false,
       windowsHide: true,
+      // macOS (the published platform) needs a separate process group so tools
+      // spawned by fx are stopped too. Windows does not support group signals.
+      detached: process.platform !== "win32",
     });
     let stdout = "";
     let stderr = "";
     let settled = false;
 
-    const timer = setTimeout(() => {
-      child.kill();
-      if (!settled) {
-        settled = true;
-        reject(new FxCommandError("fx did not respond before the command timed out.", "timeout", stdout));
+    let terminationTimer: NodeJS.Timeout | undefined;
+    const kill = (killSignal: NodeJS.Signals) => {
+      try {
+        if (process.platform !== "win32" && child.pid) process.kill(-child.pid, killSignal);
+        else child.kill(killSignal);
+      } catch (error) {
+        // The process group may have already exited between signals.
+        if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
       }
+    };
+    const stop = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      try {
+        kill("SIGTERM");
+        // Keep this timer even if the leader exits: a tool may ignore SIGTERM.
+        terminationTimer = setTimeout(() => {
+          try {
+            kill("SIGKILL");
+          } catch (error) {
+            console.error("Could not terminate fx process group:", error);
+          }
+        }, 1_000);
+      } catch (terminationError) {
+        reject(terminationError);
+        return;
+      }
+      reject(error);
+    };
+    const onAbort = () => stop(abortError());
+    const timer = setTimeout(() => {
+      stop(new FxCommandError("fx did not respond before the command timed out.", "timeout", stdout));
     }, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    const cleanup = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+    // Also cover cancellation between the preflight check and listener setup.
+    if (signal?.aborted) onAbort();
 
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => (stdout += chunk));
     child.stderr.on("data", (chunk: string) => (stderr += chunk));
     child.on("error", (error) => {
-      clearTimeout(timer);
+      cleanup();
       if (settled) return;
+      clearTimeout(terminationTimer);
       settled = true;
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         reject(
@@ -258,8 +303,9 @@ export function runFx(executable: string, args: string[], options: RunOptions = 
       reject(new FxCommandError(`Could not run fx: ${error.message}`, "failed", stdout));
     });
     child.on("close", (code) => {
-      clearTimeout(timer);
+      cleanup();
       if (settled) return;
+      clearTimeout(terminationTimer);
       settled = true;
       if (code === 0) resolve(stdout);
       else reject(new FxCommandError(stderr.trim() || `fx exited with status ${code ?? "unknown"}.`, "failed", stdout));
@@ -272,7 +318,7 @@ export async function runFxJson<T>(executable: string, args: string[], options: 
   try {
     output = await runFx(executable, args, options);
   } catch (error) {
-    if (!(error instanceof FxCommandError) || !error.stdout.trim()) throw error;
+    if (!(error instanceof FxCommandError) || error.kind !== "failed" || !error.stdout.trim()) throw error;
     output = error.stdout;
   }
 

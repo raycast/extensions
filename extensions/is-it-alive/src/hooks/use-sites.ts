@@ -97,6 +97,17 @@ export function useSites() {
     [mutateSites],
   );
 
+  const updateProviders = useCallback(
+    async (providers: Record<string, SiteProvider>) => {
+      await mutateSites((currentSites) =>
+        currentSites.map((site) =>
+          providers[site.id] ? { ...site, provider: providers[site.id] } : site,
+        ),
+      );
+    },
+    [mutateSites],
+  );
+
   const deleteSite = useCallback(
     async (id: string) => {
       await mutateSites((currentSites) =>
@@ -112,6 +123,7 @@ export function useSites() {
     addSite,
     addSites,
     updateSite,
+    updateProviders,
     deleteSite,
   };
 }

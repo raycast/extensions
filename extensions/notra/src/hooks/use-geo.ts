@@ -6,13 +6,15 @@ import {
   getNotraRequestInit,
   NOTRA_API_URL,
 } from "../lib/notra";
+import type { WorkspaceScopedOptions } from "../types";
 import type { ListGeoProjectsResponse } from "../types/geo";
 
-export function useGeoProjects() {
+export function useGeoProjects({ execute, organizationId }: WorkspaceScopedOptions = {}) {
   return useFetch<ListGeoProjectsResponse, ListGeoProjectsResponse, ListGeoProjectsResponse>(
     `${NOTRA_API_URL}/v1/projects`,
     {
-      ...getNotraRequestInit(),
+      ...getNotraRequestInit({ organizationId }),
+      execute,
       initialData: {
         organization: { id: "", logo: null, name: "", slug: "" },
         projects: [],

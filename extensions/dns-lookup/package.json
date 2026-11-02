@@ -18,31 +18,62 @@
     {
       "name": "dns-lookup",
       "title": "DNS Lookup",
-      "description": "Check DNS propagation instantly using DoH (Google, Cloudflare, Alibaba, DNS.SB) or global propagation with worldwide DNS servers.",
-      "mode": "view"
+      "description": "Check DNS propagation instantly with Google, Cloudflare, Alibaba and DNS.SB (DoH or classic DNS) or global propagation with worldwide DNS servers.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
+    {
+      "name": "fastCheckTransport",
+      "type": "dropdown",
+      "required": false,
+      "title": "Fast Check Transport",
+      "description": "How Fast Check reaches the public resolvers. Auto uses DNS over HTTPS and falls back to classic DNS (UDP port 53) when HTTPS lookups are blocked.",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (DoH, Fallback to UDP 53)",
+          "value": "auto"
+        },
+        {
+          "title": "DNS over HTTPS Only",
+          "value": "doh"
+        },
+        {
+          "title": "Classic DNS Only (UDP 53)",
+          "value": "udp"
+        }
+      ]
+    },
     {
       "name": "globalpingToken",
       "type": "password",
       "required": false,
       "title": "Globalping API Key",
-      "description": "Optional: Get a free API key from https://www.globalping.io/ to use Global Check feature with higher limits.",
+      "description": "Optional: get a free API key from https://www.globalping.io/ to use the Global Check feature with higher limits.",
       "placeholder": "gp_abc123..."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.3",
+    "globalping": "^0.4.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

@@ -131,3 +131,43 @@ test("revoked refresh tokens clear the session; temporary errors retain it for r
     assert.equal(removed, code === "invalid_grant");
   }
 });
+
+test("a stale refresh failure cannot clear replacement tokens saved by another command", async () => {
+  let current = { accessToken: "old", refreshToken: "old-refresh", isExpired: () => true };
+  const get = createTokenReader(
+    {
+      getTokens: async () => current,
+      setTokens: async () => assert.fail("the other command already saved replacement tokens"),
+      removeTokens: async () => assert.fail("must not erase the new connection"),
+    },
+    async () => {
+      current = { accessToken: "new", refreshToken: "rotated", isExpired: () => false };
+      throw new OAuthTokenError("invalid_grant", "Already rotated");
+    },
+  );
+  assert.equal(await get(), "new");
+});
+
+test("refresh cannot overwrite a new sign-in or restore tokens after logout", async () => {
+  for (const signedOut of [false, true]) {
+    let current: { accessToken: string; refreshToken: string; isExpired(): boolean } | undefined = {
+      accessToken: "old",
+      refreshToken: "old-refresh",
+      isExpired: () => true,
+    };
+    const get = createTokenReader(
+      {
+        getTokens: async () => current,
+        setTokens: async () => assert.fail("must not overwrite a changed session"),
+        removeTokens: async () => assert.fail("must not clear a changed session"),
+      },
+      async () => {
+        current = signedOut
+          ? undefined
+          : { accessToken: "new-login", refreshToken: "new-refresh", isExpired: () => false };
+        return response;
+      },
+    );
+    assert.equal(await get(), signedOut ? undefined : "new-login");
+  }
+});

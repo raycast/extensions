@@ -7,15 +7,20 @@ function useTurndown() {
   const { data: ankiMediaPath, isLoading, error } = useCachedPromise(mediaActions.getMediaDirPath);
 
   const turndown = useMemo((): TurndownService | undefined => {
-    if (isLoading || error || !ankiMediaPath) return;
+    if (!ankiMediaPath) return;
 
-    TurndownService.prototype.escape = (text: string) => text;
     const td = new TurndownService();
+    td.escape = (text: string) => text;
     td.addRule('image', {
       filter: 'img',
       replacement: (_, node) => {
         const imgNode = node as HTMLImageElement;
-        return `![](<${ankiMediaPath}/${imgNode.getAttribute('src')}>)`;
+        const src = imgNode.getAttribute('src');
+        if (!src) return '';
+        const imagePath = /^(?:https?:|data:|file:|\/)/i.test(src)
+          ? src
+          : `${ankiMediaPath}/${src}`;
+        return `![](<${imagePath}>)`;
       },
     });
 
@@ -25,10 +30,12 @@ function useTurndown() {
     });
 
     return td;
-  }, [ankiMediaPath, isLoading, error]);
+  }, [ankiMediaPath]);
 
   return {
     turndown,
+    isLoading,
+    error,
   };
 }
 export default useTurndown;

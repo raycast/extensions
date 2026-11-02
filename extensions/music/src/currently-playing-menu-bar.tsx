@@ -1,16 +1,24 @@
-import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, Image, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
+import fs from "node:fs";
 
 import * as music from "./util/scripts";
+import { getArtworkPath } from "./util/artwork";
 import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
 
-const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
+const { hideArtistName, hideTrackTitle, maxTextLength, cleanupTitle, hideIconWhenIdle, iconType } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+const showCoverImage = iconType === "cover-image";
+
+const DROPDOWN_TRACK_MAX = 60;
+const DROPDOWN_ARTIST_MAX = 40;
+const DROPDOWN_ARTIST_GAP = " ";
+
+const truncate = (text: string, max: number) => (text.length <= max ? text : text.substring(0, max).trim() + "…");
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
   const handledTask = pipe(
@@ -30,14 +38,26 @@ export default function CurrentlyPlayingMenuBarCommand() {
     data: snapshot,
     mutate,
   } = useCachedPromise(
-    () =>
-      pipe(
+    async () => {
+      const result = await pipe(
         music.currentTrack.getMenuBarSnapshot(),
         TE.matchW(
           () => ({ kind: "not-running" }) as const,
           (value) => value,
         ),
-      )(),
+      )();
+
+      // Resolved in the same step as the snapshot so Raycast keeps the command
+      // alive until the artwork is ready. Cache hits cost only a file check.
+      let artworkPath: string | undefined;
+      if (showCoverImage && result.kind === "ok") {
+        artworkPath = await getArtworkPath(result.track.artist, result.track.album, result.track.name).catch(
+          () => undefined,
+        );
+      }
+
+      return { ...result, artworkPath };
+    },
     [],
     { keepPreviousData: true },
   );
@@ -47,49 +67,53 @@ export default function CurrentlyPlayingMenuBarCommand() {
   const isPlaying = playerState === PlayerState.PLAYING;
   const isFavorited = currentTrack?.favorited === "true";
 
+  const artworkPath = snapshot?.artworkPath;
+  const coverPath = showCoverImage && artworkPath && fs.existsSync(artworkPath) ? artworkPath : undefined;
+  // The chosen icon is used both in the Menu Bar and in the dropdown's top row.
+  const trackIcon: Image.ImageLike | undefined =
+    iconType === "none" ? undefined : coverPath ? { source: coverPath, mask: Image.Mask.RoundedRectangle } : "icon.png";
+
   const title = currentTrack
     ? formatTitle({
         name: currentTrack.name,
         artistName: currentTrack.artist,
         hideArtistName,
+        hideTrackTitle,
         maxTextLength,
         cleanupTitle,
       })
     : "";
+  // Icon, title and artist are chosen independently. The only exception: if all
+  // three are hidden, show the Apple Music icon so the item stays clickable.
+  const menuBarIcon: Image.ImageLike | undefined = !trackIcon && !title ? "icon.png" : trackIcon;
 
-  const DROPDOWN_MAX = 40;
-  const fullTitle = currentTrack
+  // Open menus don't redraw, so a scrolling title would just freeze at a random
+  // point. The dropdown always shows the track and artist statically, whatever
+  // is hidden in the Menu Bar, capped so very long names don't make the menu
+  // excessively wide.
+  const dropdownTrack = currentTrack
     ? formatTitle({
         name: currentTrack.name,
         artistName: currentTrack.artist,
-        hideArtistName,
-        maxTextLength: "999",
+        hideArtistName: true,
+        maxTextLength: String(DROPDOWN_TRACK_MAX),
         cleanupTitle,
       })
     : "";
-  const needsScroll = fullTitle.length > DROPDOWN_MAX;
-  const SEPARATOR = "   ·   ";
-  const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
-
-  const [scrollOffset, setScrollOffset] = useState(0);
-
-  useEffect(() => {
-    setScrollOffset(0);
-  }, [currentTrack?.id]);
-
-  useEffect(() => {
-    if (!needsScroll) return;
-
-    const interval = setInterval(() => {
-      setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [needsScroll, paddedTitle.length]);
-
-  const dropdownTitle = needsScroll
-    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
-    : fullTitle;
+  // A leading space adds a little separation between title and artist.
+  const dropdownArtist = currentTrack
+    ? `${DROPDOWN_ARTIST_GAP}${truncate(currentTrack.artist, DROPDOWN_ARTIST_MAX)}`
+    : undefined;
+  // Full, untruncated text on hover in case either part was cut off.
+  const dropdownTooltip = currentTrack
+    ? formatTitle({
+        name: currentTrack.name,
+        artistName: currentTrack.artist,
+        hideArtistName: false,
+        maxTextLength: "999",
+        cleanupTitle,
+      })
+    : undefined;
 
   if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
@@ -100,11 +124,13 @@ export default function CurrentlyPlayingMenuBarCommand() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={menuBarIcon} title={title || undefined}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon="icon.png"
-          title={dropdownTitle}
+          icon={trackIcon}
+          title={dropdownTrack}
+          subtitle={dropdownArtist}
+          tooltip={dropdownTooltip}
           shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open("music://")}
         />

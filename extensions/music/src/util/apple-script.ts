@@ -52,3 +52,9 @@ export const parseQueryString =
       }),
     ) as T;
   };
+
+/** Error number raised by the library matchers (tracks, albums, playlists)
+ * when nothing in Music.app lines up. Lets callers tell "not synced locally
+ * yet" apart from a genuine script failure. */
+export const NOT_IN_LIBRARY_ERROR = 7001;
+export const isNotInLibraryError = (error: Error) => error.message.includes(`(${NOT_IN_LIBRARY_ERROR})`);

@@ -1,209 +1,159 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "node-fetch";
-import { CertificateHealth, Item, Preferences, Site, Uptime, User } from "./interface";
-import { ohdearUrl } from "./utils/constants";
+import {
+  BrokenLinks,
+  CertificateHealth,
+  DNSRecords,
+  Downtimes,
+  Item,
+  MixedContents,
+  PerformanceRecords,
+  Preferences,
+  Site,
+  Sites,
+  Uptime,
+  User,
+} from "./interface";
+import { errorMessages, ohdearUrl } from "./utils/constants";
 import { getDateRange } from "./utils/get-range";
 import { sortSites } from "./utils/site-sorting";
 
-export function getUserInfo() {
-  const preferences = getPreferenceValues<Preferences>();
+function getHeaders() {
+  const { apiKey } = getPreferenceValues<Preferences>();
 
-  return useFetch(`${ohdearUrl}/api/me`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+}
+
+function useOhDear<T>(path: string, parseResponse: (response: Response) => Promise<T>) {
+  return useFetch(`${ohdearUrl}/api${path}`, {
+    headers: getHeaders(),
     keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as User;
-      return data;
-    },
+    parseResponse,
+  });
+}
+
+export function getUserInfo() {
+  return useOhDear("/me", async (response) => {
+    const data = (await response.json()) as User;
+    return data;
   });
 }
 
 export function getSites() {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return useFetch(`${ohdearUrl}/api/sites`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as any;
-      const sortedSites = sortSites(data?.data);
-      return sortedSites as { [key: string]: Site[] };
-    },
+  return useOhDear("/sites", async (response) => {
+    const data = (await response.json()) as Sites;
+    const sortedSites = sortSites(data?.data);
+    return sortedSites;
   });
 }
 
 export function getUptime(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
+  const [formattedStartDate, formattedEndDate] = getDateRange();
 
-  const dateRange = getDateRange();
-  const formattedStartDate = dateRange[0];
-  const formattedEndDate = dateRange[1];
-
-  return useFetch(
-    `${ohdearUrl}/api/sites/${site.id}/uptime?filter[started_at]=${formattedStartDate}&filter[ended_at]=${formattedEndDate}&split=day`,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      keepPreviousData: true,
-      async parseResponse(response) {
-        const data = (await response.json()) as Uptime[];
-        return data;
-      },
-    }
+  return useOhDear(
+    `/sites/${site.id}/uptime?filter[started_at]=${formattedStartDate}&filter[ended_at]=${formattedEndDate}&split=day`,
+    async (response) => {
+      const data = (await response.json()) as Uptime[];
+      return data;
+    },
   );
 }
 
 export function getDowntime(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
+  const [formattedStartDate, formattedEndDate] = getDateRange();
 
-  const dateRange = getDateRange();
-  const formattedStartDate = dateRange[0];
-  const formattedEndDate = dateRange[1];
-
-  return useFetch(
-    `${ohdearUrl}/api/sites/${site.id}/downtime?filter[started_at]=${formattedStartDate}&filter[ended_at]=${formattedEndDate}&split=day`,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      keepPreviousData: true,
-      async parseResponse(response) {
-        const data = (await response.json()) as any;
-        return data?.data;
-      },
-    }
+  return useOhDear(
+    `/sites/${site.id}/downtime?filter[started_at]=${formattedStartDate}&filter[ended_at]=${formattedEndDate}&split=day`,
+    async (response) => {
+      const data = (await response.json()) as Downtimes;
+      return data?.data;
+    },
   );
 }
 
 export function getBrokenLinks(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return useFetch(`${ohdearUrl}/api/broken-links/${site.id}`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as any;
-      return data?.data;
-    },
+  return useOhDear(`/broken-links/${site.id}`, async (response) => {
+    const data = (await response.json()) as BrokenLinks;
+    return data?.data;
   });
 }
 
 export function getCertificateHealth(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return useFetch(`${ohdearUrl}/api/certificate-health/${site.id}`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as CertificateHealth;
-      return data;
-    },
+  return useOhDear(`/certificate-health/${site.id}`, async (response) => {
+    const data = (await response.json()) as CertificateHealth;
+    return data;
   });
 }
 
 export function getMixedContent(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return useFetch(`${ohdearUrl}/api/mixed-content/${site.id}`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as any;
-      return data?.data;
-    },
+  return useOhDear(`/mixed-content/${site.id}`, async (response) => {
+    const data = (await response.json()) as MixedContents;
+    return data?.data;
   });
 }
 
 export function getPerformanceRecords(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
+  const [formattedStartDate, formattedEndDate] = getDateRange();
 
-  const dateRange = getDateRange();
-  const formattedStartDate = dateRange[0];
-  const formattedEndDate = dateRange[1];
-
-  return useFetch(
-    `${ohdearUrl}/api/sites/${site.id}/performance-records?filter[start]=${formattedStartDate}&filter[end]=${formattedEndDate}&split=day&filter[group_by]=minute`,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.apiKey}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      keepPreviousData: true,
-      async parseResponse(response) {
-        const data = (await response.json()) as any;
-        return data?.data;
-      },
-    }
+  return useOhDear(
+    `/sites/${site.id}/performance-records?filter[start]=${formattedStartDate}&filter[end]=${formattedEndDate}&split=day&filter[group_by]=minute`,
+    async (response) => {
+      const data = (await response.json()) as PerformanceRecords;
+      return data?.data;
+    },
   );
 }
 
 export function getDNSRecords(site: Site) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return useFetch(`${ohdearUrl}/api/sites/${site.id}/dns-history-items`, {
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    keepPreviousData: true,
-    async parseResponse(response) {
-      const data = (await response.json()) as any;
-      return data?.data;
-    },
+  return useOhDear(`/sites/${site.id}/dns-history-items`, async (response) => {
+    const data = (await response.json()) as DNSRecords;
+    return data?.data;
   });
+}
+
+async function checkResponse(response: Response) {
+  if (response.ok) {
+    return;
+  }
+
+  let message = `Oh Dear returned HTTP ${response.status} ${response.statusText}`.trim();
+  try {
+    const data: unknown = await response.json();
+    if (
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof data.message === "string" &&
+      data.message.trim()
+    ) {
+      message = errorMessages[data.message] ?? data.message;
+    }
+  } catch {
+    // Keep the HTTP status when the error response isn't JSON.
+  }
+
+  throw new Error(message);
 }
 
 export async function createSite(item: Item) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return await fetch(`${ohdearUrl}/api/sites`, {
+  const response = await fetch(`${ohdearUrl}/api/sites`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers: getHeaders(),
     body: JSON.stringify(item),
   });
+
+  await checkResponse(response);
 }
 
-export function deleteSite(item: Site) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  return fetch(`${ohdearUrl}/api/sites/${item.id}`, {
+export async function deleteSite(item: Site) {
+  const response = await fetch(`${ohdearUrl}/api/sites/${item.id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${preferences.apiKey}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
+    headers: getHeaders(),
   });
+
+  await checkResponse(response);
 }

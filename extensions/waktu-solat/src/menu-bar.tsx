@@ -89,14 +89,14 @@ export default function Command() {
           {prayerState.upcomingPrayers.length > 0 && (
             <MenuBarExtra.Section title="Upcoming">
               {prayerState.upcomingPrayers.map((item) => (
-                <PrayerMenuItem item={item} icon={Icon.Circle} />
+                <PrayerMenuItem key={item.label} item={item} icon={Icon.Circle} />
               ))}
             </MenuBarExtra.Section>
           )}
           {prayerState.pastPrayers.length > 0 && (
             <MenuBarExtra.Section title="Past">
               {prayerState.pastPrayers.map((item) => (
-                <PrayerMenuItem item={item} icon={Icon.CircleProgress100} />
+                <PrayerMenuItem key={item.label} item={item} icon={Icon.CircleProgress100} />
               ))}
             </MenuBarExtra.Section>
           )}

@@ -1,4 +1,12 @@
-# Shopify Shop
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/extension-icon.png" alt="Shopify Shop" width="100"/>
+    <h3>Shopify Shop</h3>
+    <p>Browse and search products from a Shopify store.</p>
+    <br/>
+    <br/>
+</div>
 
 Browse and search products from any public Shopify storefront directly in Raycast.
 

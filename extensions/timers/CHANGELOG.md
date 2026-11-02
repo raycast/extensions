@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Revert timer update] - {PR_MERGE_DATE}
+
+- Reverted the update from #32458 to restore the previous implementation while the extension author reviews and coordinates the larger changes.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

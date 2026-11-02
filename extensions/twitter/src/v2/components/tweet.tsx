@@ -8,6 +8,7 @@ import { compactNumberFormat, padStart, replaceAll } from "../../utils";
 import {
   DeleteTweetAction,
   BookmarkTweetAction,
+  CopyTweetUrlAction,
   LikeTweetAction,
   LogoutAction,
   OpenTweetInBrowerAction,
@@ -269,6 +270,9 @@ export function TweetListItem(props: {
               <ToggleDetailsAction isShowingDetail={Boolean(withDetail)} onToggle={props.onToggleDetails} />
             )}
             <LogoutAction />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyTweetUrlAction tweet={t} />
           </ActionPanel.Section>
         </ActionPanel>
       }

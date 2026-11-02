@@ -1,8 +1,3 @@
-export const RAILWAY_HOSTS = new Set([
-  "status.railway.app",
-  "status.railway.com",
-]);
-
 export function normalizeSiteUrl(input: string): string {
   const trimmed = input.trim();
   if (!trimmed) {
@@ -27,12 +22,4 @@ export function normalizeSiteUrl(input: string): string {
 
 export function getOrigin(siteUrl: string): string {
   return new URL(siteUrl).origin;
-}
-
-export function isRailwayHost(siteUrl: string): boolean {
-  try {
-    return RAILWAY_HOSTS.has(new URL(siteUrl).hostname);
-  } catch {
-    return false;
-  }
 }

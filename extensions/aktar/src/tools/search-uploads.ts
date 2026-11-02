@@ -17,7 +17,7 @@ type Input = {
 
 /**
  * Search the files the user uploaded with Aktar, newest first. Returns each
- * file's public link along with ready-to-paste Markdown.
+ * file's public link, its short link when it has one, and ready-to-paste Markdown.
  */
 export default async function tool(input: Input) {
   const destination = input.destination ? await findDestination(input.destination) : undefined;
@@ -33,6 +33,8 @@ export default async function tool(input: Input) {
       /** Exact object key: pass it back to other tools as it is. */
       key: upload.objectKey,
       url: upload.url,
+      /** The upload's short link, or null; markdown uses it when there is one. */
+      shortUrl: upload.shortUrl ?? null,
       markdown: upload.formats.markdown,
       destination: upload.destinationName,
       size: formatBytes(upload.size),

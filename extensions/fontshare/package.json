@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fontshare",
+  "title": "Fontshare",
+  "description": "Search, preview and download the free fonts and font pairings of Fontshare",
+  "icon": "extension-icon.png",
+  "author": "Berenger",
+  "license": "MIT",
+  "categories": [
+    "Design Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-fonts",
+      "title": "Search Fonts",
+      "subtitle": "Fontshare",
+      "description": "Search the Fontshare catalogue by name, designer, category or tag",
+      "mode": "view"
+    },
+    {
+      "name": "search-pairings",
+      "title": "Search Font Pairings",
+      "subtitle": "Fontshare",
+      "description": "Browse the font pairings curated by Fontshare",
+      "mode": "view"
+    },
+    {
+      "name": "preview-text",
+      "title": "Preview Text",
+      "subtitle": "Fontshare",
+      "description": "Preview your own text in every Fontshare font",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "opentype.js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/opentype.js": "^1.3.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

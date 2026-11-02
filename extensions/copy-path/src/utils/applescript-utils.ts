@@ -27,21 +27,36 @@ export const getFocusFinderPath = async () => {
 export const scriptQSpacePath = `
 tell application id "com.jinghaoshe.qspace.pro"
   set urlList to {}
+  set hasUnifiedSelection to false
+  set currentSelection to {}
 
+  -- Newer QSpace versions choose the front window or active desktop for us.
+  -- An empty selection is meaningful: do not pick up a stale desktop selection.
   try
-    repeat with itemRef in selected items
-      set end of urlList to urlstr of itemRef
-    end repeat
+    set currentSelection to get selection
+    set hasUnifiedSelection to true
   end try
 
-  if (count of urlList) = 0 then
+  if hasUnifiedSelection then
+    repeat with itemRef in currentSelection
+      set end of urlList to urlstr of itemRef
+    end repeat
+  else
+    -- Retain compatibility with versions that only expose selected items.
     try
-      repeat with desktopRef in qs desktops
-        repeat with itemRef in selected items of desktopRef
-          set end of urlList to urlstr of itemRef
-        end repeat
+      repeat with itemRef in selected items
+        set end of urlList to urlstr of itemRef
       end repeat
     end try
+    if (count of urlList) = 0 then
+      try
+        repeat with desktopRef in qs desktops
+          repeat with itemRef in selected items of desktopRef
+            set end of urlList to urlstr of itemRef
+          end repeat
+        end repeat
+      end try
+    end if
   end if
 
   if (count of urlList) = 0 then

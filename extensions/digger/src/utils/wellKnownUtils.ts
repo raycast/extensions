@@ -140,7 +140,7 @@ async function mapWithConcurrency<T>(
  *
  * Without it, a host that returns 200 `application/json` `{"error":"not found"}`
  * for unknown paths reports all 110 paths as published. One extra request
- * settles what no amount of per-path judgement can.
+ * settles what no amount of per-path judgment can.
  */
 const CONTROL_PATH = "digger-control-probe-0e6f1a";
 

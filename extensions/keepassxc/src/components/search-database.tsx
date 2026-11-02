@@ -1,12 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { JSX } from "react/jsx-runtime";
 import { List } from "@raycast/api";
+import Fuse from "fuse.js";
+import { Fzf, byLengthAsc } from "fzf";
 
 import Entry from "./entry";
 import FolderFilterDropdown from "./folder-filter-dropdown";
 import { KeePassLoader, showToastKeepassxcCliErrors } from "../utils/keepass-loader";
 import { PinLoader } from "../utils/pin-loader";
 import { getEntryId, getFolders } from "../utils/entry-helper";
+import { parseSearchQuery } from "../utils/search-query";
+
+const FUSE_OPTIONS = { keys: ["1", "2", "4", "0"], ignoreLocation: true, threshold: 0.3 }; // title, username, URL, folder
+const FZF_OPTIONS = { casing: "case-insensitive" as const, tiebreakers: [byLengthAsc<string[]>] };
+const FZF_FIELDS = [1, 2, 0]; // title, username, folder
+
+/**
+ * Search entries for a single term
+ *
+ * fzf results (abbreviations) come first: titles starting with the term, then by score across
+ * the title, username and folder. The remaining Fuse results (typos) follow
+ *
+ * @param {string[][]} entries - The KeePass database entries to search
+ * @param {string} term - The search term
+ * @returns {string[][]} - The matching entries, best first
+ */
+function searchEntries(entries: string[][], term: string): string[][] {
+  const fzfResults = FZF_FIELDS.flatMap((field) =>
+    new Fzf(entries, { ...FZF_OPTIONS, selector: (entry) => entry[field] })
+      .find(term)
+      .map((result) => ({ ...result, titleStart: field === 1 && result.start === 0 })),
+  ).sort((a, b) => Number(b.titleStart) - Number(a.titleStart) || b.score - a.score);
+  const results = [...fzfResults, ...new Fuse(entries, FUSE_OPTIONS).search(term)];
+  return [...new Set(results.map((result) => result.item))];
+}
 
 /**
  * Component for searching and displaying KeePass database entries
@@ -30,6 +57,7 @@ export default function SearchDatabase({
   const [entriesFolder, setEntriesFolder] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [searchText, setSearchText] = useState<string>("");
 
   const errorHandler = (e: { message: string }) => {
     setIsUnlocked(false);
@@ -61,7 +89,14 @@ export default function SearchDatabase({
       });
   }, []);
 
-  const filteredEntries = entries.filter((entry) => entry[0].startsWith(entriesFolder) && entry[1] !== "");
+  const filteredEntries = useMemo(() => {
+    const query = parseSearchQuery(searchText);
+    const matchingEntries = entries.filter(
+      (entry) => entry[0].startsWith(entriesFolder) && entry[1] !== "" && query.matches(entry),
+    );
+    // each term narrows down the results of the previous one
+    return query.text ? query.text.split(/\s+/).reduce(searchEntries, matchingEntries) : matchingEntries;
+  }, [entries, entriesFolder, searchText]);
   const pinnedEntries = filteredEntries.filter((entry) => pinnedIds.has(getEntryId(entry)));
   const unpinnedEntries = filteredEntries.filter((entry) => !pinnedIds.has(getEntryId(entry)));
 
@@ -72,6 +107,8 @@ export default function SearchDatabase({
       searchBarAccessory={
         folders.length > 0 ? <FolderFilterDropdown folders={folders} onFolderChange={setEntriesFolder} /> : undefined
       }
+      filtering={false}
+      onSearchTextChange={setSearchText}
       throttle={true}
     >
       {pinnedEntries.length > 0 && (

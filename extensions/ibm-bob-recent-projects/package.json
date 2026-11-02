@@ -56,6 +56,24 @@
   ],
   "preferences": [
     {
+      "name": "build",
+      "title": "Bob Version",
+      "type": "dropdown",
+      "required": false,
+      "default": "IBM Bob",
+      "description": "Select which IBM Bob build to use",
+      "data": [
+        {
+          "value": "IBM Bob",
+          "title": "Standard"
+        },
+        {
+          "value": "IBM Bob - Insiders",
+          "title": "Insiders"
+        }
+      ]
+    },
+    {
       "name": "layout",
       "title": "View Layout",
       "type": "dropdown",

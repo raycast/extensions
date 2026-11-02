@@ -46,6 +46,18 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "open-repo-wiki",
+      "title": "Open Repository Wiki",
+      "description": "Open the Code Wiki documentation for a GitHub repository"
+    },
+    {
+      "name": "search-repo-wikis",
+      "title": "Get Repository Search Link",
+      "description": "Get a Code Wiki repository search link without opening the browser or listing results"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^1.17.0"

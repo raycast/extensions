@@ -59,8 +59,11 @@ describe("firehydrantAdapter", () => {
     await expect(
       firehydrantAdapter.detect?.("https://status.redis.io"),
     ).resolves.toBe(true);
+    // A rejected detect counts as "not this platform".
     await expect(
-      firehydrantAdapter.detect?.("https://www.githubstatus.com"),
+      firehydrantAdapter
+        .detect?.("https://www.githubstatus.com")
+        .catch(() => false),
     ).resolves.toBe(false);
   });
 
@@ -76,6 +79,7 @@ describe("firehydrantAdapter", () => {
 
     const snapshot = await firehydrantAdapter.fetchSnapshot({
       url: "https://status.redis.io",
+      includeHistory: true,
     });
 
     expect(snapshot.error).toBeUndefined();

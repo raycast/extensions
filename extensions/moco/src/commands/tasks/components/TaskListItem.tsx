@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { Task } from "../types";
 import { ActivityStart } from "../../activities/components/ActivityStart";
 

@@ -1,13 +1,8 @@
 import { useEffect } from "react";
 import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { confirmClearRecentUploads } from "./lib/clear-history";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  clearRecentUploads,
-  getNonExpiredUploads,
-  getExpiresAt,
-  removeRecentUpload,
-  type StoredUpload,
-} from "./lib/storage";
+import { getNonExpiredUploads, getExpiresAt, removeRecentUpload, type StoredUpload } from "./lib/storage";
 
 function formatExpiry(upload: StoredUpload): string {
   const expiresAt = getExpiresAt(upload);
@@ -43,9 +38,17 @@ export default function RecentUploads() {
   };
 
   const handleClearAll = async () => {
-    await clearRecentUploads();
-    await revalidate();
-    showToast(Toast.Style.Success, "Recent uploads cleared");
+    try {
+      if (!(await confirmClearRecentUploads())) return;
+      await revalidate();
+      await showToast(Toast.Style.Success, "Recent uploads cleared");
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Could not clear recent uploads",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   };
 
   return (
@@ -78,7 +81,12 @@ export default function RecentUploads() {
                 shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               {uploads && uploads.length > 0 && (
-                <Action icon={Icon.Trash} title="Clear All Recent Uploads" onAction={handleClearAll} />
+                <Action
+                  icon={Icon.Trash}
+                  title="Clear All Recent Uploads"
+                  style={Action.Style.Destructive}
+                  onAction={handleClearAll}
+                />
               )}
             </ActionPanel>
           }

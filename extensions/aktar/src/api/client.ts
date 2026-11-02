@@ -4,7 +4,17 @@ import { stat } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { helloNonce, isValidHello, OUTDATED_APP_MESSAGE, unverifiedMessage } from "./hello";
-import type { BucketListing, Destination, Status, TemporaryLink, Upload, WatchedFolder, WatchedFolders } from "./types";
+import type {
+  BucketListing,
+  Destination,
+  ShortLink,
+  ShortLinkMoveStatus,
+  Status,
+  TemporaryLink,
+  Upload,
+  WatchedFolder,
+  WatchedFolders,
+} from "./types";
 
 export const DEFAULT_PORT = 47913;
 const CONNECTION_KEY = "connection";
@@ -243,6 +253,8 @@ export async function deleteUpload(id: string) {
  * with a `prefix`, and 0 or undefined keeps it forever.
  * `filename` renames the upload (it's what replaces {filename} and {ext} in
  * the path template, and what history shows); it defaults to the file's name.
+ * `short` true makes a short link even when the destination's rules would skip
+ * this file, false makes none, and undefined leaves it to the destination.
  */
 export async function uploadFile(
   filePath: string,
@@ -251,6 +263,7 @@ export async function uploadFile(
     prefix?: string;
     expires?: number;
     filename?: string;
+    short?: boolean;
     onProgress?: (fraction: number) => void;
   } = {},
 ) {
@@ -261,6 +274,7 @@ export async function uploadFile(
       prefix: options.prefix,
       // Left out when keeping forever, so Aktar versions without auto-delete keep working.
       expires: options.expires || undefined,
+      short: shortQuery(options.short),
     },
     file: { path: filePath, onProgress: options.onProgress },
   });
@@ -311,6 +325,26 @@ export async function uploadClipboard(options: { destinationId?: string; expires
   return unwrapUpload(response);
 }
 
+function shortQuery(short: boolean | undefined) {
+  return short === undefined ? undefined : short ? 1 : 0;
+}
+
+// MARK: - Short links
+
+/** The upload's active short link with its clicks (when the shortener reports them), or null. */
+export async function getShortLink(id: string) {
+  return (await request<{ shortLink: ShortLink | null }>("GET", `uploads/${encodeURIComponent(id)}/short-link`))
+    .shortLink;
+}
+
+/**
+ * Makes a short link for the upload with its destination's link shortener,
+ * or returns the one it has. 409 when the destination has no shortener.
+ */
+export function createShortLink(id: string) {
+  return request<{ shortLink: ShortLink; upload: Upload }>("POST", `uploads/${encodeURIComponent(id)}/short-link`);
+}
+
 /** Aktar for Mac puts `reused` in the upload, Aktar for Windows next to it. */
 type UploadReply = { upload: Upload; reused?: boolean };
 
@@ -332,8 +366,16 @@ export async function deleteObject(destinationId: string, key: string) {
   await request("DELETE", bucketRoute(destinationId, "objects"), { query: { key } });
 }
 
+/** Moves or renames an object; the reply says what happened to the file's short links. */
 export async function moveObject(destinationId: string, from: string, to: string) {
-  await request("POST", bucketRoute(destinationId, "objects/move"), { json: { from, to } });
+  const reply = await request<{ shortLinkStatus?: ShortLinkMoveStatus }>(
+    "POST",
+    bucketRoute(destinationId, "objects/move"),
+    {
+      json: { from, to },
+    },
+  );
+  return reply.shortLinkStatus ?? "none";
 }
 
 export async function createFolder(destinationId: string, prefix: string, name: string) {

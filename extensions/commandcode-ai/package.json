@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commandcode-ai",
+  "title": "Command Code AI",
+  "description": "Use your Command Code subscription in Raycast — Command Code models in AI Chat, Quick AI and AI Commands",
+  "icon": "extension-icon.png",
+  "author": "alhassanaraouf",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-commandcode-ai",
+      "title": "Ask Command Code AI",
+      "subtitle": "Command Code",
+      "description": "Ask questions using Command Code models, with conversation history",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-models",
+      "title": "Refresh Models",
+      "subtitle": "Command Code",
+      "description": "Fetch the latest Command Code model list and update Raycast AI's model picker",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "COMMANDCODE_API_KEY",
+      "type": "password",
+      "required": false,
+      "description": "Command Code API key from Command Code Studio. Leave empty to use the key from the Command Code CLI (`cmd login`, stored in ~/.commandcode/auth.json)."
+    },
+    {
+      "title": "Default Model",
+      "name": "COMMANDCODE_MODEL",
+      "type": "textfield",
+      "required": false,
+      "default": "deepseek/deepseek-v4-flash",
+      "description": "Model preselected in Ask Command Code AI, e.g. deepseek/deepseek-v4-flash or claude-sonnet-5"
+    }
+  ],
+  "ai": {
+    "modelProvider": "models"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.78",
+    "@ai-sdk/openai-compatible": "^3.0.67",
+    "@raycast/api": "^2.5.1",
+    "@raycast/utils": "^2.2.7",
+    "ai": "^7.0.137"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -5,6 +5,13 @@
   "description": "Find out how long it takes to watch every episode in a TV series or every movie in a marathon.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "muhammadrizo"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Other"
   ],
@@ -19,16 +26,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.8.0",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "^19.0.10",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -37,7 +44,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": [
-    "macOS"
-  ]
+  "allowScripts": {
+    "esbuild": true
+  }
 }

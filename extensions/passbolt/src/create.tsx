@@ -1,12 +1,12 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useState } from "react";
-import { PassboltClient } from "./lib/passbolt";
+import { getPassboltClient } from "./lib/passbolt";
 import { generatePassword, getDefaultPasswordOptions } from "./utils/password-generator";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
-  const [client] = useState(() => new PassboltClient());
+  const [client] = useState(() => getPassboltClient());
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 

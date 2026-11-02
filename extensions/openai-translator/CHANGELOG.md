@@ -1,5 +1,10 @@
 # OpenAI Translator Changelog
 
+## [Fix Extension Crash and Language Detection] - 2026-10-13
+
+- Upgrade `@anthropic-ai/sdk` to fix the `Package subpath './_shims/auto/runtime' is not defined by "exports"` crash on launch
+- Fix language auto-detection failing on first run, which caused Chinese input to be treated as English
+
 ## [Update Raycast AI Model] - 2025-11-27
 
 - Update Raycast AI Model to OpenAI_GPT-4.1

@@ -4,14 +4,16 @@ import { fetchLinks } from "./api";
 import { Link } from "./types";
 
 export default function UnreadLinks() {
-  const { data, isLoading } = useCachedPromise(() => fetchLinks({ limit: 5, read: "unread", sort: "newest" }));
+  const { data, isLoading, error } = useCachedPromise(() => fetchLinks({ limit: 5, read: "unread", sort: "newest" }));
 
   const total = data?.total ?? 0;
   const links = data?.links ?? [];
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} title={total > 0 ? String(total) : undefined} isLoading={isLoading}>
-      {total === 0 ? (
+      {error ? (
+        <MenuBarExtra.Item title="Could not load unread links" subtitle={error.message} />
+      ) : total === 0 ? (
         <MenuBarExtra.Item title="No unread links" />
       ) : (
         <MenuBarExtra.Section title={`${total} Unread`}>

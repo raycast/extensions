@@ -17,17 +17,20 @@ function limitConversationLength(chats: Chat[]) {
   const newChats: Chat[] = [];
   let tokens = 0;
 
-  for (const chat of chats) {
+  // Walk from the newest chat back so the most recent turns are kept when the budget runs out.
+  // The newest turn is always kept, even if it alone exceeds the budget, so a follow-up never loses all context.
+  for (let i = chats.length - 1; i >= 0; i--) {
+    const chat = chats[i];
     const questionTokens = countOpenAITokens(chat.question);
     const answerTokens = countOpenAITokens(chat.answer);
 
     tokens = tokens + questionTokens + answerTokens;
 
-    if (tokens > maxTokens) {
+    if (tokens > maxTokens && newChats.length > 0) {
       break;
     }
 
-    newChats.push(chat);
+    newChats.unshift(chat);
   }
 
   return newChats;

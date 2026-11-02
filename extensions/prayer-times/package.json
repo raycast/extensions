@@ -1,0 +1,591 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prayer-times",
+  "title": "Prayer Times",
+  "description": "Prayer times in root search and the menu bar, kept in Apple Reminders two weeks ahead with start, jamaat and ending notifications.",
+  "icon": "icon.png",
+  "author": "smrehan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "next-prayer",
+      "title": "Next Prayer",
+      "subtitle": "Prayer Times",
+      "description": "Keeps the next prayer in its root search subtitle and keeps prayer reminders filled ahead. Open it to see today's prayers.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Prayer Menu Bar",
+      "subtitle": "Prayer Times",
+      "description": "Shows the prayer in the menu bar when it starts, before jamaat, and before it ends until you mark it prayed.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "today",
+      "title": "Today's Prayers",
+      "subtitle": "Prayer Times",
+      "description": "Start and jamaat times for today, prayed status, and the last 7 days.",
+      "mode": "view"
+    },
+    {
+      "name": "prayer-calendar",
+      "title": "Prayer Calendar",
+      "subtitle": "Prayer Times",
+      "description": "A month calendar of prayer status. Open any day to see its prayers, mark or change them, and expand each one for its times.",
+      "mode": "view"
+    },
+    {
+      "name": "set-location",
+      "title": "Set Prayer Location",
+      "subtitle": "Prayer Times",
+      "description": "Pick your country and city from searchable lists, or use your current location, refreshed 30 minutes before each prayer.",
+      "mode": "view"
+    },
+    {
+      "name": "jamaat-formulas",
+      "title": "Jamaat Formula Guide",
+      "subtitle": "Prayer Times",
+      "description": "How to write a jamaat rule as a formula, like ceil(start, 15) + 15, with today's result or error for each prayer.",
+      "mode": "view"
+    },
+    {
+      "name": "prayer-alert",
+      "title": "Prayer Alert",
+      "subtitle": "Prayer Times",
+      "description": "Optional Raycast popup for prayer start, jamaat and ending, with snooze. Off unless Alert Style includes the popup.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "school",
+      "title": "School",
+      "type": "dropdown",
+      "required": false,
+      "default": "hanafi",
+      "description": "School of fiqh for when each prayer's time starts, when it ends, and when delaying it becomes disliked (makruh). Each rule below can override it.",
+      "data": [
+        {
+          "title": "Hanafi",
+          "value": "hanafi"
+        },
+        {
+          "title": "Shafi'i",
+          "value": "shafi"
+        },
+        {
+          "title": "Maliki",
+          "value": "maliki"
+        },
+        {
+          "title": "Hanbali",
+          "value": "hanbali"
+        },
+        {
+          "title": "Ja'fari (Shia)",
+          "value": "jafari"
+        }
+      ]
+    },
+    {
+      "name": "method",
+      "title": "Calculation Method",
+      "description": "Fajr and Isha angles. Tehran and Ja'fari also set Maghrib after the eastern redness.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Karachi",
+      "data": [
+        {
+          "title": "University of Islamic Sciences, Karachi",
+          "value": "Karachi"
+        },
+        {
+          "title": "Muslim World League",
+          "value": "MuslimWorldLeague"
+        },
+        {
+          "title": "Egyptian",
+          "value": "Egyptian"
+        },
+        {
+          "title": "Umm al-Qura",
+          "value": "UmmAlQura"
+        },
+        {
+          "title": "Dubai",
+          "value": "Dubai"
+        },
+        {
+          "title": "Qatar",
+          "value": "Qatar"
+        },
+        {
+          "title": "Kuwait",
+          "value": "Kuwait"
+        },
+        {
+          "title": "Moonsighting Committee",
+          "value": "MoonsightingCommittee"
+        },
+        {
+          "title": "Singapore",
+          "value": "Singapore"
+        },
+        {
+          "title": "Turkey",
+          "value": "Turkey"
+        },
+        {
+          "title": "Tehran",
+          "value": "Tehran"
+        },
+        {
+          "title": "Ja'fari (Leva Institute, Qom)",
+          "value": "Jafari"
+        },
+        {
+          "title": "North America (ISNA)",
+          "value": "NorthAmerica"
+        }
+      ]
+    },
+    {
+      "name": "madhab",
+      "title": "Asr Starts At",
+      "description": "When an object's shadow is once or twice its length (plus its shadow at noon).",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "One Shadow Length (Shafi'i, Maliki, Hanbali, Ja'fari)",
+          "value": "shafi"
+        },
+        {
+          "title": "Two Shadow Lengths (Hanafi)",
+          "value": "hanafi"
+        }
+      ]
+    },
+    {
+      "name": "asrPreferred",
+      "title": "Asr Preferred Until",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "description": "Asr stays valid until sunset; after this, delaying it is disliked.",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Sun Turns Yellow, About 20 Min Before Sunset (Hanafi, Maliki)",
+          "value": "yellow"
+        },
+        {
+          "title": "Shadow Twice Its Length (Shafi'i, Hanbali)",
+          "value": "twoShadows"
+        },
+        {
+          "title": "No Preferred End",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "dhuhrEndsAtShafiAsr",
+      "title": "Dhuhr Ends At",
+      "label": "End Dhuhr at the earlier (Shafi'i) Asr time",
+      "description": "With two-shadow Asr: end Dhuhr when the shadow equals the object's length. Off by default: Dhuhr stays valid until Asr, and that earlier time is its preferred end. Not used for Ja'fari, whose Dhuhr is valid until sunset.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "adjustments",
+      "title": "Minute Adjustments",
+      "description": "Shift start times to match your local timetable: Fajr,Dhuhr,Asr,Maghrib,Isha in minutes, e.g. 0,2,0,3,0.",
+      "type": "textfield",
+      "required": false,
+      "default": "0,0,0,0,0"
+    },
+    {
+      "name": "maghribStart",
+      "title": "Maghrib Starts At",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "description": "Sunset (Sunni schools) or once the eastern redness has gone, about 15–20 min later (Ja'fari).",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Sunset",
+          "value": "sunset"
+        },
+        {
+          "title": "Eastern Redness Gone (Ja'fari)",
+          "value": "easternRedness"
+        }
+      ]
+    },
+    {
+      "name": "maghribEnd",
+      "title": "Maghrib Ends At",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "description": "After this Maghrib is late. Isha's start follows the calculation method's Isha angle.",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Isha Starts",
+          "value": "isha"
+        },
+        {
+          "title": "Red Twilight Gone, 15°",
+          "value": "red15"
+        },
+        {
+          "title": "Red Twilight Gone, 12° (Cautious)",
+          "value": "red12"
+        },
+        {
+          "title": "Islamic Midnight (Ja'fari)",
+          "value": "midnight"
+        }
+      ]
+    },
+    {
+      "name": "maghribPreferred",
+      "title": "Maghrib Preferred Until",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "description": "After this, delaying Maghrib is disliked.",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Stars Appear, About 35 Min After Sunset (Hanafi)",
+          "value": "stars"
+        },
+        {
+          "title": "Short Window, About 25 Min After Sunset (Maliki)",
+          "value": "short"
+        },
+        {
+          "title": "Isha Starts (Ja'fari)",
+          "value": "isha"
+        },
+        {
+          "title": "No Preferred End",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "ishaEnd",
+      "title": "Isha Ends At",
+      "description": "After this Isha is late.",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Islamic Midnight (Ja'fari)",
+          "value": "midnight"
+        },
+        {
+          "title": "Fajr (Sunni Schools)",
+          "value": "fajr"
+        }
+      ]
+    },
+    {
+      "name": "ishaPreferred",
+      "title": "Isha Preferred Until",
+      "type": "dropdown",
+      "required": false,
+      "default": "school",
+      "description": "After this, delaying Isha is disliked.",
+      "data": [
+        {
+          "title": "School Default",
+          "value": "school"
+        },
+        {
+          "title": "Islamic Midnight (Hanafi)",
+          "value": "midnight"
+        },
+        {
+          "title": "First Third of the Night (Shafi'i, Maliki, Hanbali, Ja'fari)",
+          "value": "firstThird"
+        },
+        {
+          "title": "No Preferred End",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "lateAt",
+      "title": "Counts as Late After",
+      "type": "dropdown",
+      "required": false,
+      "default": "valid",
+      "description": "Which end the ending reminder, the red menu bar countdown and on-time history use. After a prayer's preferred end the menu bar turns orange either way.",
+      "data": [
+        {
+          "title": "End of the Prayer's Time",
+          "value": "valid"
+        },
+        {
+          "title": "End of Its Preferred Time",
+          "value": "preferred"
+        }
+      ]
+    },
+    {
+      "name": "jamaatFajr",
+      "title": "Fajr Jamaat",
+      "description": "Fixed HH:MM (24h), +N minutes after start, floor5+N (round start down to 5 min, add N), ceil5+N, end-N (N minutes before the prayer time ends), a formula such as ceil(start, 15) + 15 (see Jamaat Formula Guide), or empty for none.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatDhuhr",
+      "title": "Dhuhr Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatJumuah",
+      "title": "Jumu'ah Jamaat",
+      "description": "Friday Dhuhr, same format as Fajr Jamaat. Empty uses the Dhuhr rule.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "jamaatAsr",
+      "title": "Asr Jamaat",
+      "description": "Same format as Fajr Jamaat, or dhuhr+N for N minutes after Dhuhr's jamaat (prayed together, Ja'fari).",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "jamaatMaghrib",
+      "title": "Maghrib Jamaat",
+      "description": "Same format as Fajr Jamaat.",
+      "type": "textfield",
+      "required": false,
+      "default": "+5"
+    },
+    {
+      "name": "jamaatIsha",
+      "title": "Isha Jamaat",
+      "description": "Same format as Fajr Jamaat, or maghrib+N for N minutes after Maghrib's jamaat (prayed together, Ja'fari).",
+      "type": "textfield",
+      "required": false,
+      "default": "floor5+15"
+    },
+    {
+      "name": "dueAt",
+      "title": "Reminder Due Time",
+      "description": "When each prayer reminder is due. Jamaat falls back to start for prayers without a jamaat rule.",
+      "type": "dropdown",
+      "required": false,
+      "default": "start",
+      "data": [
+        {
+          "title": "Prayer Start",
+          "value": "start"
+        },
+        {
+          "title": "Jamaat",
+          "value": "jamaat"
+        }
+      ]
+    },
+    {
+      "name": "headsUpMinutes",
+      "title": "Heads-Up (Minutes)",
+      "description": "Extra notification this many minutes before the due time (start or jamaat); the menu bar countdown turns yellow from then. 0 turns it off.",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
+      "name": "startWindowMinutes",
+      "title": "Just Started (Minutes)",
+      "description": "For this many minutes after a prayer starts, its menu bar count (e.g. \"Asr +3\") shows in green, then blue.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "preferredReminderMinutes",
+      "title": "Before Preferred End (Minutes)",
+      "description": "The menu bar masjid turns from dark to light green this many minutes before the preferred time ends.",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
+      "name": "endingReminderMinutes",
+      "title": "Ending Soon (Minutes)",
+      "description": "Notify this many minutes before the prayer time ends; the menu bar masjid turns red from then. The menu bar keeps showing it until marked prayed.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "jamaatReminderMinutes",
+      "title": "Jamaat Reminder (Minutes)",
+      "description": "Notify this many minutes before jamaat; the menu bar shows it from then.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "useReminders",
+      "title": "Apple Reminders",
+      "label": "Keep prayers in Apple Reminders",
+      "description": "Off: prayed status and history stay in Raycast only, and no reminders are created.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "alerts",
+      "title": "Notifications",
+      "description": "Reminders alarms work on your iPhone and without Raycast running. The popup has Mark as Prayed and Snooze, but only while Raycast runs. The banner is the extension's own macOS notification, also only while Raycast runs.",
+      "type": "dropdown",
+      "required": false,
+      "default": "reminders",
+      "data": [
+        {
+          "title": "Reminders Alarms",
+          "value": "reminders"
+        },
+        {
+          "title": "Raycast Popup",
+          "value": "popup"
+        },
+        {
+          "title": "Reminders Alarms + Raycast Popup",
+          "value": "both"
+        },
+        {
+          "title": "macOS Banner",
+          "value": "banner"
+        },
+        {
+          "title": "None",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "menuBarShowNext",
+      "label": "Always show the next prayer in the menu bar",
+      "description": "A started prayer shows its time left (e.g. \"Asr (-40)\") until marked prayed or its time ends. The next prayer's countdown (\"Maghrib -5\") shows during the heads-up window, or all the time with this on.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Menu Bar"
+    },
+    {
+      "name": "remindersList",
+      "title": "Reminders List",
+      "description": "Apple Reminders list for prayer reminders. Created if missing.",
+      "type": "textfield",
+      "required": false,
+      "default": "Prayer"
+    },
+    {
+      "name": "prayerNames",
+      "title": "Prayer Names",
+      "description": "English or Arabic names for the prayers in the menu bar, alerts and reminder titles.",
+      "type": "dropdown",
+      "required": false,
+      "default": "english",
+      "data": [
+        {
+          "title": "English (Fajr, Dhuhr…)",
+          "value": "english"
+        },
+        {
+          "title": "Arabic (فجر، ظهر…)",
+          "value": "arabic"
+        }
+      ]
+    },
+    {
+      "name": "daysAhead",
+      "title": "Days Ahead",
+      "description": "How many days of reminders to keep filled, starting today (1–31).",
+      "type": "textfield",
+      "required": false,
+      "default": "14"
+    },
+    {
+      "name": "cleanMissedAfterDays",
+      "title": "Clean Missed After (Days)",
+      "description": "A missed prayer stays dated, showing as overdue in Reminders and Calendar, for this many days. After that its date is removed; it still counts as missed in history. 0 never removes it.",
+      "type": "textfield",
+      "required": false,
+      "default": "7"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.1",
+    "@raycast/utils": "^2.3.2",
+    "adhan": "^4.4.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "~26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { fetchSnapshot } from "@/adapters";
 import { outagedeckAdapter } from "@/adapters/outagedeck";
 
 afterEach(() => {
@@ -98,6 +99,7 @@ describe("outagedeckAdapter", () => {
 
     const snapshot = await outagedeckAdapter.fetchSnapshot({
       url: "https://outagedeck.com/providers/github",
+      includeHistory: true,
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -138,8 +140,9 @@ describe("outagedeckAdapter", () => {
       ),
     );
 
-    const snapshot = await outagedeckAdapter.fetchSnapshot({
+    const snapshot = await fetchSnapshot({
       url: "https://outagedeck.com/providers/slack",
+      provider: "outagedeck",
     });
 
     expect(snapshot.error).toBe("HTTP 503");

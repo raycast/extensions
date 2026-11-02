@@ -1,107 +1,122 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { useEffect } from "react";
 import { Task } from "../../tasks/types";
 import { startActivity } from "../api";
 import { fetchProjects } from "../../projects/api";
 import { Project } from "../../projects/types";
-import { toDecimalTime } from "../utils";
+import { localDate, parseHours, validateTime } from "../utils";
 
 interface ActivityStartProps {
   task?: Task;
   projectID?: number | null;
+  // Called after a successful submit. Defaults to popping the form.
+  onSubmitted?: () => Promise<void>;
 }
 
-export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID }) => {
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
-  const [startTimer, setStartTimer] = useState<boolean>(true);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProjectID, setSelectedProjectID] = useState<string>("0");
-  const [taskProjectID, setTaskProjectID] = useState<number | null>(
-    projectID ? projectID : task ? task.projectID : null,
-  );
-  const [taskID, setTaskID] = useState<number | null>(task ? task.id : null);
+interface ActivityStartValues {
+  projectDropdown: string;
+  taskDropdown: string;
+  description: string;
+  date: Date | null;
+  hours: string;
+}
 
+export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID, onSubmitted }) => {
   const navi = useNavigation();
+  // With a given task the dropdowns are hidden, so the projects are not needed.
+  const { data: projects = [], isLoading } = useCachedPromise(fetchProjects, [], {
+    execute: task === undefined,
+    keepPreviousData: true,
+  });
 
-  function dropDescriptionErrorIfNeeded() {
-    if (descriptionError && descriptionError.length > 0) {
-      setDescriptionError(undefined);
-    }
-  }
+  const { handleSubmit, itemProps, values, setValue } = useForm<ActivityStartValues>({
+    initialValues: { description: "", date: new Date(), hours: "" },
+    validation: {
+      projectDropdown: task ? undefined : FormValidation.Required,
+      taskDropdown: task ? undefined : FormValidation.Required,
+      description: FormValidation.Required,
+      hours: validateTime,
+    },
+    onSubmit: async (values) => {
+      const success = await startActivity({
+        description: values.description,
+        hours: values.hours.trim() === "" ? "" : parseHours(values.hours),
+        date: localDate(values.date ?? new Date()),
+        projectID: task ? task.projectID : values.projectDropdown ? Number(values.projectDropdown) : projectID,
+        taskID: task ? task.id : Number(values.taskDropdown),
+      });
+      if (success !== true) {
+        return;
+      }
+      if (onSubmitted) {
+        await onSubmitted();
+      } else {
+        navi.pop();
+      }
+    },
+  });
 
-  const refreshItems = async () => {
-    setProjects(await fetchProjects());
-  };
+  const startTimer = values.hours.trim() === "";
+  const projectsByCustomer = projects.reduce((result: Record<string, Project[]>, project: Project) => {
+    const customerName = project.customer?.name ?? "Other";
+    (result[customerName] = result[customerName] || []).push(project);
+    return result;
+  }, {});
+  const selectedProject = projects.find((project) => String(project.id) === values.projectDropdown);
 
+  // The task dropdown is controlled: after a project change, reset a task that belongs to another project.
+  // setValue always creates a new values object, so only call it on a real change (else it re-renders endlessly).
   useEffect(() => {
-    refreshItems();
-  }, []);
+    if (task) {
+      return;
+    }
+    const tasks = selectedProject?.tasks ?? [];
+    const current = values.taskDropdown;
+    const next = tasks.some((t) => String(t.id) === current) ? current : tasks.length > 0 ? String(tasks[0].id) : "";
+    if (next !== current) {
+      setValue("taskDropdown", next);
+    }
+  }, [task, selectedProject, values.taskDropdown]);
 
   return (
     <Form
+      isLoading={isLoading}
       navigationTitle={task ? `${task.projectName}/${task.name}` : "New Activity"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             icon={startTimer ? Icon.Stopwatch : Icon.SaveDocument}
-            title={`${startTimer ? "Start Timer" : "Log Work"}`}
-            onSubmit={(values) =>
-              startActivity({
-                ...values,
-                hours: values.hours.includes(":") ? toDecimalTime(values.hours) : values.hours,
-                date: values.date.toISOString().split("T")[0],
-                projectID: values.projectDropdown ? values.projectDropdown : taskProjectID,
-                taskID: values.taskDropdown ? values.taskDropdown : taskID,
-              }).then(() => navi.pop())
-            }
+            title={startTimer ? "Start Timer" : "Log Work"}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
       {!task ? (
-        <Form.Dropdown id="projectDropdown" title="Project" value={selectedProjectID} onChange={setSelectedProjectID}>
-          {projects.map((project, index) => (
-            <Form.Dropdown.Item title={project.name} key={index} value={project.id!.toString()} />
+        <Form.Dropdown title="Project" {...itemProps.projectDropdown}>
+          {Object.entries(projectsByCustomer).map(([customerName, customerProjects]) => (
+            <Form.Dropdown.Section key={customerName} title={customerName}>
+              {customerProjects.map((project) => (
+                <Form.Dropdown.Item key={project.id} title={project.name} value={project.id.toString()} />
+              ))}
+            </Form.Dropdown.Section>
           ))}
         </Form.Dropdown>
       ) : null}
       {!task ? (
-        <Form.Dropdown id="taskDropdown" title="Task">
-          {selectedProjectID !== "0"
-            ? projects
-                .filter((project) => project.id === parseInt(selectedProjectID!))[0]
-                .tasks.map((task, index) => (
-                  <Form.Dropdown.Item title={task.name} key={index} value={task.id!.toString()} />
-                ))
-            : null}
+        <Form.Dropdown title="Task" {...itemProps.taskDropdown}>
+          {(selectedProject?.tasks ?? []).map((task) => (
+            <Form.Dropdown.Item key={task.id} title={task.name} value={task.id.toString()} />
+          ))}
         </Form.Dropdown>
       ) : null}
-      <Form.TextArea
-        id="description"
-        title="Add Description"
-        placeholder="Describe what you are doing"
-        error={descriptionError}
-        onChange={dropDescriptionErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setDescriptionError("The field shouldn't be empty!");
-          } else {
-            dropDescriptionErrorIfNeeded();
-          }
-        }}
-      />
-      <Form.DatePicker id="date" type={Form.DatePicker.Type.Date} title="Booking Date" defaultValue={new Date()} />
+      <Form.TextArea title="Add Description" placeholder="Describe what you are doing" {...itemProps.description} />
+      <Form.DatePicker type={Form.DatePicker.Type.Date} title="Booking Date" {...itemProps.date} />
       <Form.TextField
-        id="hours"
-        onChange={(event) => {
-          if (event.length == 0) {
-            setStartTimer(true);
-          } else {
-            setStartTimer(false);
-          }
-        }}
         title="Hours Worked"
         placeholder="Leaving this field empty will start a timer"
+        {...itemProps.hours}
       />
     </Form>
   );

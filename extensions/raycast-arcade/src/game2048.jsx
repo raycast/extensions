@@ -115,7 +115,7 @@ export default function Game2048() {
 
   let generateBoard = (board) => {
     let svg = `
-    <svg width="2250" height="1000">
+    <svg width="2250" height="1000" xmlns="http://www.w3.org/2000/svg">
     <rect x="625" y="0" width="1000" height="1000" fill="#BCAC9F" rx="20" />
     `;
     for (let i in board) {
@@ -173,15 +173,16 @@ export default function Game2048() {
         let size = Math.log(square.length) / Math.log(0.96) + 100;
 
         svg += `
-        <rect x="${(30 + 213) * j + 30 + 625}" y="${(30 + 213) * i + 30}" width="213" height="213" fill="#${
+        <rect x="${(30 + 213) * j + 30 + 625}" y="${(30 + 213) * i + 30}" width="213" height="213" fill="${
           square === "" ? "#CCC1B4" : colors[square]?.tile ?? "#3C3A31"
         }" rx="20" />
         ${
-          square !== "" &&
-          `
+          square === ""
+            ? ""
+            : `
           <text x="${(30 + 213) * j + 30 + 625 + 213 / 2}" y="${
             (30 + 213) * i + 30 + 213 / 2 + size / 2
-          }" height="213" width="213" font-size="${size}" fill="#${
+          }" height="213" width="213" font-size="${size}" fill="${
             colors[square]?.color ?? "#FFFFFF"
           }" dominant-baseline="middle" text-anchor="middle" startoffset="1" font-family="Helvetica Neue" font-weight="bold">${square}</text>
         `

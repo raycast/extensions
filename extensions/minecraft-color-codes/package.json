@@ -4,9 +4,10 @@
   "title": "Minecraft Color Codes",
   "description": "View and copy Minecraft chat color codes.",
   "icon": "extension_icon.png",
-  "author": "lafkpages",
+  "author": "luisafk",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "muhammadrizo"
   ],
   "categories": [
     "Productivity",
@@ -49,16 +50,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.16.3"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -69,5 +70,9 @@
   },
   "trustedDependencies": [
     "@raycast/api"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ]
 }

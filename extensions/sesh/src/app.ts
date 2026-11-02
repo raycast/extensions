@@ -4,7 +4,10 @@ import { getEnv } from "./env";
 
 export function openApp() {
   const { openWithApp } = getPreferenceValues<
-    Preferences.CmdConnect | Preferences.CmdConnectWindow | Preferences.CmdConnectBrowserWorktree
+    | Preferences.CmdConnect
+    | Preferences.CmdConnectWindow
+    | Preferences.CmdSearch
+    | Preferences.CmdConnectBrowserWorktree
   >();
   if (!openWithApp) {
     return Promise.reject(new Error("No app selected"));

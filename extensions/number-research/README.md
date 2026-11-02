@@ -1,4 +1,12 @@
-# Number Research
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="Number Research" width="100"/>
+    <h3>Number Research</h3>
+    <p>Research numbers and discover if they have been searched before on numberresearch.xyz</p>
+    <br/>
+    <br/>
+</div>
 
 Research numbers and discover if they have been searched before on [numberresearch.xyz](https://numberresearch.xyz).
 

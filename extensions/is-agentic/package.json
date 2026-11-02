@@ -25,7 +25,7 @@
           "name": "url",
           "type": "text",
           "placeholder": "https://example.com",
-          "optional": true
+          "required": false
         }
       ]
     },
@@ -131,6 +131,7 @@
     "@types/react": "19.0.10",
     "eslint": "^10.5.0",
     "prettier": "^3.8.5",
+    "react-test-renderer": "19.0.0",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -139,6 +140,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/*.test.cjs",
+    "type-check": "tsc --noEmit"
   }
 }

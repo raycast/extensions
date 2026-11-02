@@ -32,7 +32,7 @@ test("splits a cross-midnight log at the local day boundary", () => {
 
   const report = createReport("today", workLogs, projects, null, now);
   assert.equal(report.totalSeconds, 30 * 60);
-  assert.equal(report.clientSeconds, 30 * 60);
+  assert.equal(report.categorySeconds.client, 30 * 60);
 });
 
 test("includes unknown projects in the total", () => {

@@ -1,5 +1,14 @@
 # Xcode Changelog
 
+## [Improve Xcode project discovery] - 2026-10-29
+
+- Include Xcode projects in hidden git worktrees
+
+## [Respect the Default Simulator Viewer] - 2026-10-10
+
+- Open simulators using the system's default `devices://` handler, with a fallback to Apple's Device Hub or Simulator.
+- Show the selected simulator when launching an app even if the simulator is already booted.
+
 ## [Simulator Appearance & Device Hub Support] - 2026-09-24
 
 - Added "Toggle Dark/Light Mode" action for booted simulators (⌘D).

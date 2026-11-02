@@ -1,7 +1,7 @@
 import { runPowerShellScript } from "@raycast/utils";
 import type { AtomicShortcut } from "../model/internal/internal-models";
 import { Modifiers } from "../model/internal/modifiers";
-import { parseDelay, validateTarget, type WindowsExecutionTarget } from "./execution-target";
+import { executionError, parseDelay, validateTarget, type WindowsExecutionTarget } from "./execution-target";
 import { decodePowerShellJson, windowsNativeScript, powerShellProgram } from "./windows-native";
 
 const modifiers = new Map<Modifiers, number>([
@@ -114,8 +114,9 @@ export async function runWindowsShortcuts(
   const script = buildPowerShellScript(target, parseDelay(delaySeconds) * 1000, sequence);
   try {
     await runPowerShellScript(script, { timeout: 20000 });
-  } catch {
-    throw new Error(
+  } catch (error) {
+    throw executionError(
+      error,
       "Shortcut execution stopped. Check the target window, held modifiers, and application elevation. Earlier chords may have run; retry manually."
     );
   }

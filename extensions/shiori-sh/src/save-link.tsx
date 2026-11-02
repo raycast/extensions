@@ -1,5 +1,5 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { createLink } from "./api";
+import { createLink, normalizeUrl } from "./api";
 
 export default async function SaveLink(props: LaunchProps<{ arguments: { title: string; url: string } }>) {
   const { title, url } = props.arguments;
@@ -12,7 +12,7 @@ export default async function SaveLink(props: LaunchProps<{ arguments: { title: 
   const toast = await showToast(Toast.Style.Animated, "Saving link...");
 
   try {
-    const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
+    const normalizedUrl = normalizeUrl(url);
     const result = await createLink(normalizedUrl, title?.trim() || undefined);
 
     if (result.duplicate) {

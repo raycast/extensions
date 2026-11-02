@@ -2,9 +2,9 @@ import { Color, environment, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { ForecastActions } from "./components/forecast-actions";
 import { ForecastHistoryItem, ResetDetail } from "./components/forecast-history-item";
-import { forecastSummary, historySummary, outlookMarkdown } from "./domain/forecast-copy";
+import { alertMarkdown, alertTitle, forecastSummary, historySummary, outlookMarkdown } from "./domain/forecast-copy";
 import { formatCompactDurationSince } from "./domain/format-forecast";
-import { latestReset, resetHistory, type HistoryFilter } from "./domain/reset-history";
+import { latestReset, resetHistory, safeSourceUrl, type HistoryFilter } from "./domain/reset-history";
 import { useForecast } from "./hooks/use-forecast";
 
 export default function Command() {
@@ -17,7 +17,7 @@ export default function Command() {
       <List isLoading={isLoading} searchBarPlaceholder="Search Reset History...">
         <List.EmptyView
           icon={isLoading ? Icon.Clock : Icon.Warning}
-          title={isLoading ? "Loading Reset Monitor" : "Reset Monitor Unavailable"}
+          title={isLoading ? "Loading Reset Forecast" : "Reset Forecast Unavailable"}
           description={
             isLoading
               ? "Fetching the latest outlook and reset records."
@@ -31,6 +31,23 @@ export default function Command() {
 
   const records = resetHistory(response, filter);
   const reset = latestReset(response);
+  const notice = response.forecast?.latestAlert;
+  const resetNotice =
+    notice?.kind === "reset" &&
+    notice.state === "confirmed" &&
+    reset &&
+    Date.parse(notice.source_at) === Date.parse(reset.dateTime)
+      ? notice
+      : undefined;
+  const resetWithNotice =
+    reset && resetNotice
+      ? {
+          ...reset,
+          title: alertTitle(resetNotice),
+          description: resetNotice.observation_message || resetNotice.summary,
+          sourceUrl: safeSourceUrl(resetNotice.confirmation_url) ?? safeSourceUrl(resetNotice.url) ?? reset.sourceUrl,
+        }
+      : reset;
 
   return (
     <List
@@ -44,8 +61,8 @@ export default function Command() {
           onChange={(value) => setFilter(value as HistoryFilter)}
         >
           <List.Dropdown.Item title="All Records" value="all" />
-          <List.Dropdown.Item title="Confirmed Resets" value="resets" />
-          <List.Dropdown.Item title="Announcements" value="announcements" />
+          <List.Dropdown.Item title="Resets" value="resets" />
+          <List.Dropdown.Item title="Notes" value="announcements" />
           <List.Dropdown.Item title="Banked Resets" value="banked" />
         </List.Dropdown>
       }
@@ -55,10 +72,10 @@ export default function Command() {
         description="Try a different search or history filter."
         actions={<ForecastActions onRefresh={revalidate} />}
       />
-      <List.Section title="Outlook" subtitle={warning ? "Needs Refresh" : "Codex Reset Monitor"}>
+      <List.Section title="Outlook" subtitle={warning ? "Needs Refresh" : "Data: codex-reset.com"}>
         <List.Item
           id="outlook"
-          title="Reset Outlook"
+          title="Model Outlook"
           icon={{ source: warning ? Icon.Warning : Icon.Gauge, tintColor: warning ? Color.Yellow : Color.Blue }}
           accessories={[{ text: "24h / 48h" }]}
           detail={
@@ -70,27 +87,36 @@ export default function Command() {
         />
         <List.Item
           id="last-reset"
-          title="Last Confirmed Reset"
+          title="Last Global Reset"
           icon={{ source: Icon.ArrowClockwise, tintColor: Color.Green }}
           accessories={[{ text: reset ? formatCompactDurationSince(reset.dateTime) : "Unknown" }]}
           detail={
-            reset ? (
-              <ResetDetail record={reset} />
+            resetWithNotice ? (
+              <ResetDetail record={resetWithNotice} />
             ) : (
               <List.Item.Detail markdown="# No confirmed reset recorded\n\nThe source has not supplied a completed reset record yet." />
             )
           }
           actions={
             <ForecastActions
-              sourceUrl={reset?.sourceUrl}
-              copyContent={reset ? historySummary(reset) : undefined}
+              sourceUrl={resetWithNotice?.sourceUrl}
+              copyContent={resetWithNotice ? historySummary(resetWithNotice) : undefined}
               copyTitle="Copy Reset Record"
               onRefresh={revalidate}
             />
           }
         />
+        {notice && !resetNotice ? (
+          <List.Item
+            id="latest-notice"
+            title={alertTitle(notice)}
+            icon={notice.kind === "reset" ? Icon.CheckCircle : Icon.Megaphone}
+            detail={<List.Item.Detail markdown={alertMarkdown(notice)} />}
+            actions={<ForecastActions sourceUrl={notice.url} onRefresh={revalidate} />}
+          />
+        ) : null}
       </List.Section>
-      <List.Section title="Reset History" subtitle={`${records.length} records`}>
+      <List.Section title="Timeline" subtitle={`${records.length} records`}>
         {records.length ? (
           records.map((record) => <ForecastHistoryItem key={record.id} record={record} onRefresh={revalidate} />)
         ) : (

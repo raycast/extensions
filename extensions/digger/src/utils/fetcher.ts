@@ -17,7 +17,7 @@ const log = getLogger("fetcher");
  * It reads a PREFERENCE rather than the machine locale, because the Store
  * guidelines are explicit: "If the locale might affect functionality … please use
  * the preferences API." Deriving it from `Intl` also made the result depend on a
- * setting the user cannot see from inside Raycast, so two machines analysing the
+ * setting the user cannot see from inside Raycast, so two machines analyzing the
  * same URL could legitimately disagree about its title.
  */
 export function preferredLanguage(): string {

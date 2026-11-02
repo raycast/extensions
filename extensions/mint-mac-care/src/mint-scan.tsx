@@ -218,7 +218,9 @@ function FreeDisk({ cli, version }: { cli: string; version: MintCLIVersion }) {
       // is struck then.
       const done = result.blockedCount ? [] : finishedRows(entries, result.failedCount ?? 0, result.failures);
       const problems = [
-        result.blockedCount ? `${plural(result.blockedCount, "item")} held back: the free 1 GB is used up` : undefined,
+        result.blockedCount
+          ? `${plural(result.blockedCount, "item")} held back by Mint's available free allowance`
+          : undefined,
         result.failedCount
           ? `${result.failedCount} kept: ${result.failures?.[0]?.reason ?? "macOS refused"}`
           : undefined,

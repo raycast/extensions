@@ -1,5 +1,7 @@
 # Google Chrome Changelog
 
+## [Added new screenshots] - 2026-10-13
+
 ## [Sort Bookmarks by Frecency] - 2026-09-14
 
 - Rank bookmarks opened from Raycast above rarely used ones in Search Bookmarks and Search All.

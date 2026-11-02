@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SurfaceActions } from "./surface-actions";
 import {
   discoverDomainStream,
   domainPageUrl,
@@ -191,6 +192,18 @@ export function SurfaceDetail({ domain }: { domain: string }) {
           )}
           {state !== "loading" && state !== "discovering" && (
             <Action title="Reload Surface" icon={Icon.ArrowClockwise} onAction={loadExistingSurface} />
+          )}
+          {state === "done" && doc && (
+            <ActionPanel.Section title="Surfaces">
+              {doc.surfaces.map((surface) => (
+                <SurfaceActions
+                  key={surface.slug}
+                  domain={doc.domain}
+                  surface={surface}
+                  credentials={doc.credentials}
+                />
+              ))}
+            </ActionPanel.Section>
           )}
           <ActionPanel.Section>
             <Action.CopyToClipboard

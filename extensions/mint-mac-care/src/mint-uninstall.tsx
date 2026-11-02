@@ -200,7 +200,9 @@ function InstalledApps({ cli }: { cli: string }) {
         .filter((item) => finished.has(item.id) && !(result.adminAuthorizationWasCancelled && item.requiresAdmin))
         .map((item) => item.id);
       const problems = [
-        result.quotaBlockedCount ? `${result.quotaBlockedCount} held back: the free 1 GB is used up` : undefined,
+        result.quotaBlockedCount
+          ? `${result.quotaBlockedCount} held back by Mint's available free allowance`
+          : undefined,
         result.adminAuthorizationWasCancelled ? "the password was cancelled" : undefined,
         result.failedCount
           ? `${result.failedCount} kept: ${result.failures?.[0]?.reason ?? "macOS refused"}`

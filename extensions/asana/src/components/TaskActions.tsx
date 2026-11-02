@@ -323,6 +323,15 @@ export default function TaskActions({
             Windows: { modifiers: ["ctrl"], key: "i" },
           }}
         />
+
+        <Action.CopyToClipboard
+          title="Copy Task Short URL"
+          content={`https://app.asana.com/0/0/${task.gid}`}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "ctrl"], key: "," },
+            Windows: { modifiers: ["ctrl", "alt"], key: "," },
+          }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

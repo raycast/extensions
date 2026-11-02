@@ -30,6 +30,7 @@ import { escapeMarkdown, markdownURL } from "../lib/markdown";
 import { isWindows, primaryShortcut } from "../lib/platform";
 import { thumbnailIcon, thumbnailMarkdown, useDetailThumbnail, useThumbnailIcons } from "../lib/thumbnails";
 import { resolveFormat } from "../lib/output";
+import { moveStatusNote } from "../lib/short-links";
 import { ConnectionEmptyView } from "./ConnectionEmptyView";
 import { QRCodeView } from "./QRCodeView";
 import { ReplaceForm } from "./ReplaceForm";
@@ -444,10 +445,11 @@ function MoveForm({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Moving ${object.name}` });
       try {
-        await moveObject(destination.id, object.key, values.key.trim());
-        toast.style = Toast.Style.Success;
+        const shortLinkStatus = await moveObject(destination.id, object.key, values.key.trim());
+        const note = moveStatusNote(shortLinkStatus);
+        toast.style = note?.warning ? Toast.Style.Failure : Toast.Style.Success;
         toast.title = "Moved";
-        toast.message = values.key.trim();
+        toast.message = note ? `${values.key.trim()}. ${note.message}` : values.key.trim();
         onMoved();
         pop();
       } catch (error) {
@@ -467,7 +469,7 @@ function MoveForm({
     >
       <Form.TextField
         title="Key"
-        info="The full path inside the bucket. Change the name to rename, or the folder part to move. Links to the old key stop working."
+        info="The full path inside the bucket. Change the name to rename, or the folder part to move. Links to the old key stop working. Aktar points the file's short link at the new key when its shortener can."
         {...itemProps.key}
       />
       <Form.Description text="S3 has no real rename: Aktar copies the file to the new key, then deletes the old one." />

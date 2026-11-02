@@ -1,7 +1,7 @@
-import type { ForecastResponse, ResetEvidence, ResetRecord } from "../api/forecast-schema";
+import type { ForecastResponse, ResetRecord } from "../api/forecast-schema";
 
 export type HistoryFilter = "all" | "resets" | "announcements" | "banked";
-export type HistoryItem = ResetRecord & { evidence?: ResetEvidence };
+export type HistoryItem = ResetRecord;
 
 export function safeSourceUrl(value: string | null | undefined): string | undefined {
   if (!value) return undefined;
@@ -12,44 +12,30 @@ export function safeSourceUrl(value: string | null | undefined): string | undefi
     return undefined;
   }
 }
-
 export function isConfirmedReset(record: ResetRecord): boolean {
-  return record.type === "forced-reset" || record.type === "compensation";
+  return record.type === "reset";
 }
-
 export function latestReset(response: ForecastResponse, now = new Date()): HistoryItem | undefined {
-  return resetHistory(response).find(
-    (record) => isConfirmedReset(record) && Date.parse(record.dateTime) <= now.getTime(),
-  );
+  const records = resetHistory(response, "resets").filter((record) => Date.parse(record.dateTime) <= now.getTime());
+  const timestamp = response.lastResetAt;
+  if (!timestamp || Date.parse(timestamp) > now.getTime()) return records[0];
+  const match = records.find((record) => Date.parse(record.dateTime) === Date.parse(timestamp));
+  if (match) return match;
+  // The separately published timeline may briefly lag the forecast's canonical clock.
+  return {
+    id: `last-reset:${timestamp}`,
+    sourceDate: new Date(timestamp).toISOString().slice(0, 10),
+    dateTime: timestamp,
+    title: "Last global reset",
+    description:
+      "The latest reset timestamp reported by codex-reset.com. The timeline has not supplied a matching record yet.",
+    type: "reset",
+    sourceLabel: "codex-reset.com",
+    sourceUrl: "https://codex-reset.com/",
+  };
 }
-
 export function resetHistory(response: ForecastResponse, filter: HistoryFilter = "all"): HistoryItem[] {
-  const evidenceBySource = new Map(
-    response.evidence.filter((item) => item.sourceUrl).map((item) => [item.sourceUrl, item]),
-  );
-  const recordedSources = new Set(response.history.map((record) => record.sourceUrl).filter(Boolean));
-  const records: HistoryItem[] = response.history.map((record) => ({
-    ...record,
-    evidence: record.sourceUrl ? evidenceBySource.get(record.sourceUrl) : undefined,
-  }));
-
-  // Ledger records supersede their original announcement. Keep reset-intent
-  // evidence that has not yet been classified in the ledger as an announcement.
-  for (const evidence of response.evidence) {
-    if (evidence.kind !== "reset-intent" || (evidence.sourceUrl && recordedSources.has(evidence.sourceUrl))) continue;
-    records.push({
-      id: `announcement:${evidence.id}`,
-      dateTime: evidence.createdAt,
-      title: "Reset announcement",
-      description: evidence.reasoning,
-      type: "announcement",
-      sourceLabel: evidence.author,
-      sourceUrl: evidence.sourceUrl,
-      evidence,
-    });
-  }
-
-  return records
+  return response.history
     .filter((record) => {
       if (filter === "resets") return isConfirmedReset(record);
       if (filter === "announcements") return record.type === "announcement";
@@ -58,18 +44,22 @@ export function resetHistory(response: ForecastResponse, filter: HistoryFilter =
     })
     .sort((a, b) => Date.parse(b.dateTime) - Date.parse(a.dateTime) || a.id.localeCompare(b.id));
 }
-
 export function recordLabel(record: ResetRecord): string {
   switch (record.type) {
-    case "forced-reset":
-      return "Confirmed Reset";
-    case "compensation":
-      return "Compensation";
+    case "reset":
+      return "Reset";
     case "banked-reset":
-      return "Banked Reset";
+      return "Banked";
     case "announcement":
-      return "Announcement";
+      return "Note";
     default:
-      return "Other Record";
+      return record.title;
   }
+}
+
+export function bankedStatusLabel(record: ResetRecord): string | undefined {
+  const state = record.bankedState;
+  if (!state) return undefined;
+  // The site's timeline renders its "unknown" banked state as "UPDATE".
+  return state === "unknown" ? "Update" : state.charAt(0).toUpperCase() + state.slice(1);
 }

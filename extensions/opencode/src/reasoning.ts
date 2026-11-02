@@ -1,14 +1,14 @@
 import { Cache } from "@raycast/api";
 import type { JSONValue } from "ai";
 import { z } from "zod";
-import type { Format } from "./console";
+import type { Format, Source } from "./console";
 
 // Mirrors OpenCode's Variant.resolve (packages/core/src/variant.ts): models.dev lists which reasoning
 // options each model supports, and the API format decides how each option is sent.
 
 const MODELS_DEV_URL = "https://models.dev/api.json";
 const CACHE_KEY = "reasoning-variants";
-const SUPPORT_CACHE_KEY = "reasoning-support";
+const SUPPORT_CACHE_KEY = "reasoning-support-v2";
 const SUPPORT_TTL = 30 * 60 * 1000;
 const EFFORTS = ["low", "medium", "high"];
 const ADAPTIVE_THINKING = { type: "adaptive", display: "summarized" };
@@ -23,20 +23,23 @@ const Support = z.discriminatedUnion("type", [
 ]);
 type Support = z.infer<typeof Support>;
 
-const ModelsDev = z.object({
-  opencode: z.object({
-    models: z.record(z.string(), z.object({ reasoning_options: z.array(z.unknown()).optional() })),
-  }),
+const ModelsDevProvider = z.object({
+  models: z.record(z.string(), z.object({ reasoning_options: z.array(z.unknown()).optional() })),
 });
+
+const ModelsDev = z.object({ opencode: ModelsDevProvider, "opencode-go": ModelsDevProvider.optional() });
+
+type Supports = Record<Source, Record<string, Support[]>>;
+const NO_SUPPORT: Supports = { zen: {}, go: {} };
 
 type Options = Record<string, Record<string, JSONValue>>;
 type Variant = [id: string, options: Options];
 type Model = { id: string; format: Format; outputLimit?: number };
 type Protocol = (model: Model, support: Support) => Variant[];
 
-type SupportCache = { fetchedAt: number; etag: string | null; supports: Record<string, Support[]> };
+type SupportCache = { fetchedAt: number; etag: string | null; supports: Supports };
 
-export async function loadReasoningSupport(): Promise<Record<string, Support[]>> {
+export async function loadReasoningSupport(): Promise<Supports> {
   const cached = readSupportCache();
   if (cached && Date.now() - cached.fetchedAt < SUPPORT_TTL) return cached.supports;
   try {
@@ -46,22 +49,26 @@ export async function loadReasoningSupport(): Promise<Record<string, Support[]>>
       signal: AbortSignal.timeout(3_000),
     });
     if (response.status === 304 && cached) return writeSupportCache({ ...cached, fetchedAt: Date.now() });
-    if (!response.ok) return cached?.supports ?? {};
-    const { opencode } = ModelsDev.parse(await response.json());
-    const supports = Object.fromEntries(
-      Object.entries(opencode.models).map(([id, model]) => [
-        id,
-        (model.reasoning_options ?? []).flatMap((option) => {
-          const parsed = Support.safeParse(option);
-          return parsed.success ? [parsed.data] : [];
-        }),
-      ]),
-    );
+    if (!response.ok) return cached?.supports ?? NO_SUPPORT;
+    const catalog = ModelsDev.parse(await response.json());
+    const supports = { zen: parseSupports(catalog.opencode), go: parseSupports(catalog["opencode-go"]) };
     return writeSupportCache({ fetchedAt: Date.now(), etag: response.headers.get("etag"), supports });
   } catch {
     // Reasoning controls are optional; models still load without them.
-    return cached?.supports ?? {};
+    return cached?.supports ?? NO_SUPPORT;
   }
+}
+
+function parseSupports(provider: z.infer<typeof ModelsDevProvider> | undefined): Record<string, Support[]> {
+  return Object.fromEntries(
+    Object.entries(provider?.models ?? {}).map(([id, model]) => [
+      id,
+      (model.reasoning_options ?? []).flatMap((option) => {
+        const parsed = Support.safeParse(option);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ]),
+  );
 }
 
 function readSupportCache(): SupportCache | undefined {

@@ -1,56 +1,69 @@
 import { describe, expect, it } from "vitest";
 import fixture from "./fixtures/forecast-valid.json";
-import wire from "./fixtures/snapshot-wire.json";
-import { parseForecastResponse, parseSnapshotPayload } from "../src/api/forecast-schema";
+import forecast from "./fixtures/forecast-api.json";
+import timeline from "./fixtures/timeline-api.json";
+import { parseForecastResponse, parseSourceResponses } from "../src/api/forecast-schema";
+import { latestReset, recordLabel, resetHistory } from "../src/domain/reset-history";
 
-describe("Codex Reset Monitor contract", () => {
-  it("decodes a captured homepage server response", () => {
-    const result = parseSnapshotPayload(wire);
-    expect(result.forecast?.score24h).toBe(24);
-    expect(result.forecast?.score48h).toBe(43);
-    expect(result.history).toHaveLength(26);
-    expect(result.history[0].dateTime).toBe("2026-09-08T04:05:53.000Z");
-    expect(result.ingestion?.accountsSucceeded).toBe(5);
+const now = new Date("2026-10-18T03:00:00Z");
+describe("codex-reset.com public contract", () => {
+  it("decodes captured forecast and timeline responses", () => {
+    const result = parseSourceResponses(forecast, timeline);
+    expect(result.forecast).toMatchObject({ score24h: 21, score48h: 37, confidence: "low", hasOfficialSignal: false });
+    expect(result.history).toHaveLength(78);
+    expect(latestReset(result, now)?.dateTime).toBe(forecast.last_reset_at);
+    expect(result.forecast?.latestAlert?.confirmation_source).toBe("operator_observed");
   });
-
-  it("keeps unavailable probabilities distinct from zero and allows history without a forecast", () => {
+  it("uses the website's Reset, Note, and Banked categories and source summaries", () => {
+    const result = parseSourceResponses(forecast, timeline);
+    expect(recordLabel(result.history[0])).toBe("Reset");
+    expect(recordLabel(result.history[1])).toBe("Note");
+    expect(result.history[1].title).toBe("Note");
+    expect(result.history[1].description).toBe(timeline.events[1].summary);
+    expect(recordLabel(resetHistory(result, "banked")[0])).toBe("Banked");
+  });
+  it("never counts banked grants, previews, or unverified posts as resets", () => {
+    const event = timeline.events[0];
+    const events = [
+      { ...event, id: "banked", group: "credits", confirmed: true, banked_state: "available" },
+      { ...event, id: "preview", preview: true },
+      { ...event, id: "unverified", announcement_state: "none", confirmed: true },
+      { ...event, id: "future-group", group: "unknown" },
+      { ...event, id: "verified", announcement_state: "announced", confirmed: false },
+      { ...event, id: "archive", announcement_state: undefined, confirmed: true },
+    ];
+    const result = parseSourceResponses(forecast, { ...timeline, events });
+    expect(resetHistory(result, "resets").map((record) => record.id)).toEqual(["archive", "verified"]);
+    expect(resetHistory(result, "banked")[0].bankedState).toBe("available");
+    expect(resetHistory(result, "announcements").map((record) => record.id)).toEqual(["preview", "unverified"]);
+    expect(result.history.find((record) => record.id === "future-group")?.type).toBe("other");
+  });
+  it("uses the canonical reset clock when timeline publication lags", () => {
+    const result = parseSourceResponses(forecast, { ...timeline, events: [] });
+    expect(latestReset(result, now)?.dateTime).toBe(forecast.last_reset_at);
+    expect(resetHistory(result, "resets")).toEqual([]);
+  });
+  it.each([-1, 101, Infinity, NaN, "24"])("rejects invalid probability %s", (rounded_24h) => {
+    expect(() =>
+      parseSourceResponses({ ...forecast, probabilities: { ...forecast.probabilities, rounded_24h } }, timeline),
+    ).toThrow();
+  });
+  it("rejects missing history, confirmation flags, and invalid dates", () => {
+    expect(() => parseSourceResponses(forecast, { updated_at: timeline.updated_at })).toThrow();
+    expect(() =>
+      parseSourceResponses(forecast, { ...timeline, events: [{ ...timeline.events[0], confirmed: undefined }] }),
+    ).toThrow();
+    expect(() => parseSourceResponses({ ...forecast, last_reset_at: "2026-02-30T00:00:00Z" }, timeline)).toThrow();
+  });
+  it("keeps unavailable data distinct from zero and strips undocumented fields", () => {
     expect(parseForecastResponse({ ...fixture, forecast: null }).history).toHaveLength(26);
-    expect(
-      parseForecastResponse({ ...fixture, forecast: { ...fixture.forecast, score24h: null, score48h: 0 } }).forecast,
-    ).toMatchObject({ score24h: null, score48h: 0 });
-  });
-
-  it.each([-1, 101, Infinity, NaN, "24"])("rejects invalid probability %s", (score24h) => {
-    expect(() => parseForecastResponse({ ...fixture, forecast: { ...fixture.forecast, score24h } })).toThrow();
-  });
-
-  it("rejects missing records and invalid dates instead of inventing empty history", () => {
-    expect(() => parseForecastResponse({ ...fixture, history: undefined })).toThrow();
-    expect(() =>
-      parseForecastResponse({ ...fixture, history: [{ ...fixture.history[0], dateTime: "2026-02-30T00:00:00Z" }] }),
-    ).toThrow();
-  });
-
-  it("retains and validates the source's scheduled reassessment", () => {
-    const forecast = { ...fixture.forecast, nextReassessmentAt: "2026-09-10T07:00:00Z" };
-    expect(parseForecastResponse({ ...fixture, forecast }).forecast?.nextReassessmentAt).toBe(
-      forecast.nextReassessmentAt,
-    );
-    expect(() =>
-      parseForecastResponse({ ...fixture, forecast: { ...forecast, nextReassessmentAt: "invalid" } }),
-    ).toThrow();
-  });
-
-  it("discards unused fields including upstream account telemetry", () => {
-    const parsed = parseForecastResponse({ ...fixture, quotaTelemetry: { remainingPercent: 69 }, futureField: true });
-    expect(parsed).not.toHaveProperty("quotaTelemetry");
-    expect(parsed).not.toHaveProperty("futureField");
-  });
-
-  it("rejects an incomplete forecast and invalid server envelopes", () => {
-    expect(() =>
-      parseForecastResponse({ fetchedAt: fixture.updatedAt, forecast: { score: 64 }, history: [] }),
-    ).toThrow();
-    expect(() => parseSnapshotPayload({ result: fixture })).toThrow();
+    const result = parseForecastResponse({
+      ...fixture,
+      forecast: { ...fixture.forecast, score24h: null, score48h: 0 },
+      quotaTelemetry: { remaining: 50 },
+    });
+    expect(result.forecast).toMatchObject({ score24h: null, score48h: 0 });
+    expect(result).not.toHaveProperty("quotaTelemetry");
+    expect(parseSourceResponses(forecast, timeline)).not.toHaveProperty("model");
   });
 });

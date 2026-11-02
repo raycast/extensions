@@ -1,18 +1,16 @@
 import { useRef } from "react";
 
-export default function useInputRateLimiter(limit: number, timeWindowMs: number) {
+export function useInputRateLimiter(minIntervalMs: number) {
   const lastRequestTime = useRef<number>(0);
 
-  function canExecute() {
+  return function canExecute() {
     const currentTime = Date.now();
 
-    if (currentTime - lastRequestTime.current < timeWindowMs / limit) {
+    if (currentTime - lastRequestTime.current < minIntervalMs) {
       return false;
     }
 
     lastRequestTime.current = currentTime;
     return true;
-  }
-
-  return { canExecute };
+  };
 }

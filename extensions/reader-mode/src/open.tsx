@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { LaunchProps } from "@raycast/api";
 import { useArticleReader } from "./hooks/useArticleReader";
-import { ArticleReaderView } from "./views/ArticleReaderView";
 import { resolveUrl } from "./utils/url-resolver";
+import { ArticleReaderView } from "./views/ArticleReaderView";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Open }>) {
   const [showUrlForm, setShowUrlForm] = useState(false);

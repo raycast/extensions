@@ -1,4 +1,12 @@
-# Word Research
+<div align="center">
+    <br/>
+    <br/>
+    <img src="./assets/icon.png" alt="Word Research" width="100"/>
+    <h3>Word Research</h3>
+    <p>Research words and discover whether they have been searched before on wordresearch.xyz</p>
+    <br/>
+    <br/>
+</div>
 
 Research words and discover whether they have been searched before on [wordresearch.xyz](https://wordresearch.xyz).
 

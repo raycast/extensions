@@ -1,5 +1,30 @@
 # Skills Changelog
 
+## [Inspect Agent Skills and Plugins] - 2026-11-01
+
+- Add a read-only local package inspector for Agent Skills, Agent Plugins v1, and Claude Code/Codex compatibility layouts
+- Validate skill metadata, plugin manifests, MCP server configuration, and package paths before showing components
+- Group installed skills by management source and restrict removal to verified CLI installs
+- Keep local-path source and dates visible as recorded, read-only lock-file details
+- Add a Manage Plugins command for installed Claude Code and Codex plugins, with supported host CLI actions
+- Verify Skills CLI ownership before offering removal and limit it to checked Codex and Claude Code installations
+- Show available skill updates without automatically running the Skills CLI update command, which can affect other detected agents
+
+## [Sync with Skills CLI 1.7] - 2026-10-22
+
+- Show skills installed from a local path with a `~`-relative source in Manage Skills, instead of the absolute path offered as a repository link and URL
+- Add the fx, Grok Build, Kimchi, MiniMax Code, Posit Assistant, Sarvam Code, and ZCode agents, so installing to Grok Build passes its real `grok` ID instead of failing
+- Read `SKILL.md` frontmatter that starts with a byte order mark or has no content after it
+
+## [Fix Multiline Skill Descriptions] - 2026-10-18
+
+- Show complete descriptions from multiline YAML frontmatter in Search Skills and Manage Skills details
+- Ignore invalid frontmatter metadata so skill details remain readable
+
+## [Fix Skills List Troubleshooting] - 2026-10-17
+
+- Include `--json` in the troubleshooting commands so they match the installed-skills list command used by the extension
+
 ## [Show Unexpected CLI Output When Listing Fails] - 2026-09-26
 
 - Include what the `skills` CLI actually printed when "Manage Skills" cannot parse its installed-skills list, instead of only reporting that the output was unexpected

@@ -1,0 +1,70 @@
+instructions: |
+  /dev/null (dev-null.sh) is a social network for developers. A post there is called a commit.
+  - When the user asks you to post, write the commit in their voice, first person, in plain text. Keep it short unless they ask for more.
+  - Say only what the user told you. Don't add claims, features, benefits, links, names, numbers, hashtags or emoji they didn't give you.
+  - Never put an image, an image path or Markdown image syntax in the text. Images go only in imagePaths.
+  - If the user attaches or names images to include, pass each one's absolute file path in imagePaths. If you can't tell an image's file path, ask the user for it instead of posting without it.
+  - Call post-commit once per request. If it fails because the commit is too long, shorten the text and try again. For any other error, tell the user what went wrong and don't retry.
+  - Only say an image was posted when imagesAttached is more than 0.
+  - After posting, reply with the commit's full URL on its own line, exactly as returned, never as Markdown link text. For example:
+      Posted: https://dev-null.sh/@chris/commits/01a15b23-eea7-7309-b6b3-5513dbfde374
+    Not "Posted to [/dev/null](…)". If pendingReview is true, add that it is waiting for review and only they can see it until it's approved.
+evals:
+  - input: "@dev-null post an update that I just launched the Raycast extension for dev null"
+    mocks:
+      post-commit:
+        url: "https://dev-null.sh/@chrismessina/commits/01a15a9b-cea3-7056-9c2d-490ab347283e"
+        pendingReview: false
+        imagesAttached: 0
+    expected:
+      - callsTool:
+          name: post-commit
+          arguments:
+            text:
+              - includes: "Raycast"
+              - not:
+                  matches: "([Ff]eature|[Pp]roductiv|[Ss]treamlin|#)"
+      - includes: "https://dev-null.sh/@chrismessina/commits/01a15a9b-cea3-7056-9c2d-490ab347283e"
+      - not:
+          matches: "\\[(?!https://dev-null\\.sh/@chrismessina/commits/01a15a9b-cea3-7056-9c2d-490ab347283e\\])[^\\]]*\\]\\(https://dev-null"
+  - input: "@dev-null post an update about how I just launched the Raycast extension for dev null with this screenshot: /Users/chris/Desktop/Screenshot 2026-10-20 at 11.02.13.png"
+    mocks:
+      post-commit:
+        url: "https://dev-null.sh/@chrismessina/commits/01a15a9b-cea3-7056-9c2d-490ab347283e"
+        pendingReview: false
+        imagesAttached: 1
+    expected:
+      - callsTool:
+          name: post-commit
+          arguments:
+            text:
+              - includes: "Raycast"
+              - not:
+                  matches: "(!\\[|\\.png|Screenshot 2026|[Ff]eature|[Pp]roductiv|[Ss]treamlin|[Ee]nhanc|#)"
+            imagePaths.0: "/Users/chris/Desktop/Screenshot 2026-10-20 at 11.02.13.png"
+      - includes: "https://dev-null.sh/@chrismessina/commits/01a15a9b-cea3-7056-9c2d-490ab347283e"
+  - input: "@dev-null commit: shipped dark mode for my side project today"
+    usedAsExample: false
+    mocks:
+      post-commit:
+        url: "https://dev-null.sh/@chrismessina/commits/01a15a9b-0000-7000-8000-000000000001"
+        pendingReview: true
+        imagesAttached: 0
+    expected:
+      - callsTool:
+          name: post-commit
+          arguments:
+            text:
+              includes: "dark mode"
+      - matches: "([Rr]eview|[Aa]pprov)"
+  - input: "@dev-null post my screenshot about the new release"
+    usedAsExample: false
+    mocks:
+      post-commit:
+        url: "https://dev-null.sh/@chrismessina/commits/01a15a9b-0000-7000-8000-000000000002"
+        pendingReview: false
+        imagesAttached: 0
+    expected:
+      - not:
+          callsTool: post-commit
+      - matches: "([Pp]ath|[Ww]here|[Ww]hich|[Aa]ttach|[Ff]ile)"

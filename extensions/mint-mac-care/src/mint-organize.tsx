@@ -437,7 +437,7 @@ function AddFolder({ cli, onAdded }: { cli: string; onAdded: () => void }) {
           <Form.Dropdown.Item key={template.id} value={template.id} title={template.title} />
         ))}
       </Form.Dropdown>
-      <Form.Description text="Nothing moves when you add it. Preview first, then organize; every move can be undone." />
+      <Form.Description text="Nothing moves when you add it. Preview first, then organize. Undo needs the moved files and their recovery records to remain available." />
     </Form>
   );
 }

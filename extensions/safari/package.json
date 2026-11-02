@@ -202,6 +202,13 @@
       "subtitle": "Safari",
       "description": "Open a new Safari private window",
       "mode": "no-view"
+    },
+    {
+      "name": "duplicate-tab",
+      "title": "Duplicate Tab",
+      "subtitle": "Safari",
+      "description": "Duplicate the current Safari tab",
+      "mode": "no-view"
     }
   ],
   "preferences": [

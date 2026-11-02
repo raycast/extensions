@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-bookmarks",
   "title": "Browser Bookmarks",
-  "description": "Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Dia, DuckDuckGo, Edge, Firefox, Safari, Arc, Vivaldi, Vivaldi Snapshot, Zen, Whale, or Helium.",
+  "description": "Integrate bookmarks from Brave, ChatGPT Atlas, Chrome, Dia, DuckDuckGo, Edge, Firefox, Safari, Arc, Vivaldi, Vivaldi Snapshot, Zen, Whale, Helium, or Search.",
   "icon": "extension-icon.png",
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
   "contributors": [
+    "chahine-tech",
     "sasivarnan",
     "ahp",
     "juang970",
@@ -75,6 +76,28 @@
         {
           "title": "⌘ ⌥ C (Ctrl+Alt+C on Windows)",
           "value": "cmd-opt-c"
+        }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "title": "Search Strictness",
+      "name": "searchStrictness",
+      "description": "How closely a bookmark must match your search. A stricter search hides loose matches on short queries.",
+      "default": "0.4",
+      "required": false,
+      "data": [
+        {
+          "title": "Loose",
+          "value": "0.4"
+        },
+        {
+          "title": "Balanced",
+          "value": "0.3"
+        },
+        {
+          "title": "Strict",
+          "value": "0.2"
         }
       ]
     }

@@ -4,6 +4,8 @@ import {
   Action,
   Icon,
   Color,
+  Image,
+  Keyboard,
   showToast,
   Toast,
   LaunchProps,
@@ -11,8 +13,10 @@ import {
   open,
   openExtensionPreferences,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { getFavicon, showFailureToast, useCachedState } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
+import { Globalping, type MeasurementLocationOption } from "globalping";
+import { RECORD_TYPES, RecordType, Via, formatRecord, getFastResolvers, normalizeDomain, sortRecords } from "./dns";
 
 // --- UTILS ---
 const getFlagEmoji = (countryCode: string) => {
@@ -24,149 +28,173 @@ const getFlagEmoji = (countryCode: string) => {
   return String.fromCodePoint(...codePoints);
 };
 
-interface DohResponse {
-  Answer?: { data: string; type: number }[];
-  Authority?: { data: string; type: number }[];
-}
-
-interface GlobalpingAnswer {
-  value?: string;
-  target?: string;
-  port?: number;
-  priority?: number;
-  weight?: number;
-  exchange?: string;
-  preference?: number;
-}
-
-interface GlobalpingPostResponse {
-  id: string;
-}
-interface GlobalpingGetResponse {
-  results: {
-    probe: { city: string; country: string; network: string };
-    result: { answers?: GlobalpingAnswer[]; status: string };
-  }[];
-}
+// --- TYPES ---
+type Status = "success" | "error" | "loading" | "warning";
 
 interface DnsResult {
   id: string;
   provider: string;
-  serverInfo: string;
-  flag: string;
-  result: string;
-  status: "success" | "error" | "loading" | "warning";
-  type: "fast" | "global";
+  icon: Image.ImageLike;
+  // Resolver or probe details, shown in the tooltip and the detail panel
+  info: { title: string; text: string }[];
+  records: string[];
+  // Shown when there are no records
+  message: string;
+  status: Status;
+  via?: Via;
 }
 
 // Props for DnsListItem component
 interface DnsListItemProps {
   item: DnsResult;
+  recordType: RecordType;
+  isShowingDetail: boolean;
+  onToggleDetail: () => void;
   onRefresh: () => void;
   onSwitchToGlobal?: () => void;
   onSwitchToFast?: () => void;
 }
 
-const RECORD_TYPES = ["A", "AAAA", "CNAME", "MX", "NS", "TXT", "SOA", "SRV"];
+// --- CONSTANTS ---
+const VIA_LABELS: Record<Via, string> = {
+  DoH: "DNS over HTTPS (encrypted)",
+  UDP: "Classic DNS, UDP 53 (unencrypted)",
+};
 
-export default function Command(props: LaunchProps<{ arguments: { domain?: string } }>) {
+const VIA_TOOLTIPS: Record<Via, string> = {
+  DoH: "Answered over DNS over HTTPS",
+  UDP: "Answered over classic DNS (UDP port 53). A network that intercepts port 53 may answer instead of this resolver.",
+};
+
+const VIA_ICONS: Record<Via, Image.ImageLike> = {
+  DoH: { source: Icon.Lock, tintColor: Color.SecondaryText },
+  UDP: { source: Icon.LockUnlocked, tintColor: Color.SecondaryText },
+};
+
+const STATUS_COLORS: Record<Status, Color> = {
+  success: Color.Green,
+  loading: Color.Yellow,
+  warning: Color.Orange,
+  error: Color.Red,
+};
+
+const STATUS_ICONS: Record<Status, Image.ImageLike> = {
+  success: { source: Icon.Check, tintColor: STATUS_COLORS.success },
+  loading: { source: Icon.Circle, tintColor: STATUS_COLORS.loading },
+  warning: { source: Icon.MinusCircle, tintColor: STATUS_COLORS.warning },
+  error: { source: Icon.Xmark, tintColor: STATUS_COLORS.error },
+};
+
+const getStatusText = ({ status, records, message }: DnsResult) =>
+  status === "success" && records.length > 0 ? "Resolved" : message;
+
+// Markdown code span whose delimiter is longer than any backtick run in the value (CommonMark)
+const toInlineCode = (value: string) => {
+  const fence = "`".repeat(Math.max(0, ...Array.from(value.matchAll(/`+/g), ([run]) => run.length)) + 1);
+  const padding = value.startsWith("`") || value.endsWith("`") ? " " : "";
+  return `${fence}${padding}${value}${padding}${fence}`;
+};
+
+const SWITCH_MODE_SHORTCUT: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+};
+
+const TOGGLE_DETAIL_SHORTCUT: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd"], key: "d" },
+  Windows: { modifiers: ["ctrl"], key: "d" },
+};
+
+const GLOBALPING_USER_AGENT = "dns-lookup-raycast (https://www.raycast.com/valentin_denis/dns-lookup)";
+
+const GLOBAL_LOCATIONS: MeasurementLocationOption[] = ["US", "GB", "FR", "DE", "JP", "IN", "BR", "AU"].map(
+  (country) => ({ country }),
+);
+
+// Tells whether every row returned the same answer, once they are all settled
+const getConcordance = (items: DnsResult[], recordType: RecordType) => {
+  if (items.length === 0 || items.some((item) => item.status === "loading")) return undefined;
+
+  // DNS names are case-insensitive, TXT values are not
+  const toKey = ({ status, records, message }: DnsResult) => {
+    const values = recordType === "TXT" ? records : sortRecords(records.map((r) => r.toLowerCase()));
+    return `${status}|${values.join("\n") || message}`;
+  };
+
+  // Failed rows are not a different answer, they only lower the ratio
+  const answered = items.filter((item) => item.status !== "error");
+  const answers = new Set(answered.map(toKey));
+  if (answers.size === 0) return undefined;
+  if (answers.size > 1) return "Answers differ";
+  return answered.length === items.length ? "All identical" : `${answered.length}/${items.length} identical`;
+};
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.DnsLookup }>) {
   const [domain, setDomain] = useState<string>(props.arguments.domain || "");
-  const [recordType, setRecordType] = useState<string>("A");
+  const [recordType, setRecordType] = useState<RecordType>("A");
 
   // UX States
   const [viewMode, setViewMode] = useState<"fast" | "global">("fast");
   const [results, setResults] = useState<DnsResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState<boolean>("is-showing-detail", false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const preferences = getPreferenceValues<Preferences>();
 
-  const formatSOA = (rawData: string) => {
-    const parts = rawData.split(" ");
-    if (parts.length < 7) return rawData;
-    return `Serial: ${parts[2]} | TTL: ${parts[6]}`;
+  // Cancels the running check so its late answers never overwrite the new one
+  const startRequest = () => {
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    return controller;
   };
 
   // --- FAST CHECK ---
-  const runFastCheck = async (targetDomain: string, rType: string) => {
-    if (!targetDomain || !targetDomain.includes(".")) return;
+  const runFastCheck = async (input: string, rType: RecordType) => {
+    const targetDomain = normalizeDomain(input);
+    if (!targetDomain) return;
 
     setViewMode("fast");
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
+    const { signal } = startRequest();
     setIsLoading(true);
 
-    const providers = [
-      { id: "google", name: "Google", displayIp: "8.8.8.8", url: "https://dns.google/resolve", flag: "🇺🇸" },
-      {
-        id: "cloudflare",
-        name: "Cloudflare",
-        displayIp: "1.1.1.1",
-        url: "https://cloudflare-dns.com/dns-query",
-        flag: "☁️",
-      },
-      { id: "dnssb", name: "DNS.SB", displayIp: "185.222.222.222", url: "https://doh.dns.sb/dns-query", flag: "🇩🇪" },
-      { id: "alidns", name: "Alibaba", displayIp: "223.5.5.5", url: "https://dns.alidns.com/resolve", flag: "🇨🇳" },
-    ];
+    const resolvers = getFastResolvers(preferences.fastCheckTransport);
+    setResults(
+      resolvers.map((r) => ({
+        id: r.id,
+        provider: r.name,
+        icon: r.website ? getFavicon(r.website, { fallback: Icon.Globe }) : Icon.Network,
+        info: [{ title: r.id === "system" ? "Servers" : "Server", text: r.serverInfo }],
+        records: [],
+        message: "Resolving...",
+        status: "loading",
+      })),
+    );
 
-    const fastPlaceholders: DnsResult[] = providers.map((p) => ({
-      id: p.id,
-      provider: p.name,
-      serverInfo: p.displayIp,
-      flag: p.flag,
-      result: "...",
-      status: "loading",
-      type: "fast",
-    }));
-    setResults(fastPlaceholders);
+    const updateResult = (id: string, update: Partial<DnsResult>) =>
+      setResults((prev) => prev.map((item) => (item.id === id ? { ...item, ...update } : item)));
 
-    const fetchPromises = providers.map(async (p) => {
-      try {
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const response = await fetch(`${p.url}?name=${targetDomain}&type=${rType}`, {
-          headers: { Accept: "application/dns-json" },
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error("Service unavailable");
+    await Promise.allSettled(
+      resolvers.map(async (r) => {
+        try {
+          const { status, records, message, via } = await r.lookup(targetDomain, rType, signal);
+          if (signal.aborted) return;
+          updateResult(r.id, { status, records: sortRecords(records), message: message ?? "No records found", via });
+        } catch {
+          if (signal.aborted) return;
+          updateResult(r.id, { status: "error", message: "Unavailable" });
         }
+      }),
+    );
 
-        const data = (await response.json()) as DohResponse;
-
-        let output = "No records found";
-        const status = "success";
-
-        let records = data.Answer;
-        if ((!records || records.length === 0) && (rType === "SOA" || rType === "NS")) {
-          records = data.Authority;
-        }
-
-        if (records && Array.isArray(records) && records.length > 0) {
-          output = records.map((a) => (rType === "SOA" ? formatSOA(a.data) : a.data)).join(", ");
-        }
-
-        setResults((prev) =>
-          prev.map((item) => (item.id === p.id ? { ...item, result: output, status: status } : item)),
-        );
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
-
-        setResults((prev) =>
-          prev.map((item) => (item.id === p.id ? { ...item, result: "Unavailable", status: "error" } : item)),
-        );
-      }
-    });
-
-    await Promise.allSettled(fetchPromises);
-    setIsLoading(false);
+    if (!signal.aborted) setIsLoading(false);
   };
 
   // --- GLOBAL CHECK ---
-  const runGlobalCheck = async (isRefresh = false) => {
-    if (!domain || !domain.includes(".")) {
+  const runGlobalCheck = async (rType: RecordType, isRefresh = false) => {
+    const targetDomain = normalizeDomain(domain);
+    if (!targetDomain) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid Domain",
@@ -176,14 +204,14 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
     }
 
     setViewMode("global");
+    const { signal } = startRequest();
     setIsLoading(true);
 
-    const preferences = getPreferenceValues<Preferences>();
     const hasToken = !!preferences.globalpingToken;
 
     if (isRefresh && results.length > 0) {
       // Refresh mode: keep the items but show they are loading
-      setResults((prev) => prev.map((r) => ({ ...r, status: "loading", result: "Refreshing..." })));
+      setResults((prev) => prev.map((r) => ({ ...r, status: "loading", message: "Refreshing..." })));
     } else {
       // New search mode: clear everything
       // This will trigger the display of the EmptyView "Loading" while keeping the progress bar
@@ -191,37 +219,26 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
     }
 
     try {
-      const payload = {
-        type: "dns",
-        target: domain,
-        limit: 8,
-        locations: [
-          { country: "US" },
-          { country: "GB" },
-          { country: "FR" },
-          { country: "DE" },
-          { country: "JP" },
-          { country: "IN" },
-          { country: "BR" },
-          { country: "AU" },
-        ],
-        measurementOptions: { query: { type: recordType } },
-      };
-
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (hasToken) headers["Authorization"] = `Bearer ${preferences.globalpingToken}`;
-
-      const postRes = await fetch("https://api.globalping.io/v1/measurements", {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(payload),
+      const globalping = new Globalping({
+        auth: preferences.globalpingToken || undefined,
+        userAgent: GLOBALPING_USER_AGENT,
       });
 
-      if (!postRes.ok) {
-        if (postRes.status === 429) {
+      const created = await globalping.createMeasurement({
+        type: "dns",
+        target: targetDomain,
+        limit: 8,
+        locations: GLOBAL_LOCATIONS,
+        measurementOptions: { query: { type: rType } },
+      });
+      // createMeasurement does not accept a signal
+      if (signal.aborted) return;
+
+      if (!created.ok) {
+        if (Globalping.isHttpStatus(429, created)) {
           if (hasToken) {
             await showFailureToast("Globalping Rate Limit Exceeded", {
-              message: "Please consider to try again later or get more credits on globalping.io.",
+              message: "Try again later or get more credits on globalping.io.",
               primaryAction: {
                 title: "Get More Credits",
                 onAction: async (toast) => {
@@ -232,7 +249,7 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
             });
           } else {
             await showFailureToast("Globalping Rate Limit Exceeded", {
-              message: "Please consider to try again later or adding a free Globalping API key for higher limits.",
+              message: "Try again later or add a free Globalping API key for higher limits.",
               primaryAction: {
                 title: "Open Preferences",
                 onAction: async (toast) => {
@@ -245,7 +262,7 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
           return;
         }
 
-        if (postRes.status === 401) {
+        if (created.response.status === 401) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Invalid API Key",
@@ -261,49 +278,46 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
           return;
         }
 
-        throw new Error("Unable to connect to Globalping");
+        throw new Error(created.data.error.message);
       }
 
-      const postData = (await postRes.json()) as GlobalpingPostResponse;
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      const getRes = await fetch(`https://api.globalping.io/v1/measurements/${postData.id}`);
-      if (!getRes.ok) {
-        throw new Error("Unable to retrieve results");
+      const measurement = await globalping.awaitMeasurement(created.data.id, { signal });
+      if (!measurement.ok) {
+        throw new Error(measurement.data.error.message);
       }
+      Globalping.assertMeasurementType("dns", measurement.data);
 
-      const data = (await getRes.json()) as GlobalpingGetResponse;
+      const globalResults: DnsResult[] = measurement.data.results.map((r, index) => {
+        const info = [
+          { title: "Location", text: `${r.probe.city}, ${r.probe.country}` },
+          { title: "Network", text: `${r.probe.network} (AS${r.probe.asn})` },
+        ];
+        let records: string[] = [];
+        let status: Status = "error";
+        let message = r.result.status === "offline" ? "Probe offline" : "Probe error";
 
-      const globalResults: DnsResult[] = data.results.map((r) => {
-        let finalResult = "No records found";
-        let finalStatus: "success" | "error" | "warning" = "success";
-
-        if (r.result.status === "finished" && r.result.answers && r.result.answers.length > 0) {
-          finalResult = r.result.answers
-            .map((a) => {
-              if (a.value) return a.value;
-              if (a.target) return `${a.priority || 0} ${a.weight || 0} ${a.port || 0} ${a.target}`;
-              if (a.exchange) return `${a.preference || 0} ${a.exchange}`;
-              return JSON.stringify(a);
-            })
-            .join(", ");
-        } else if (r.result.status === "finished") {
-          finalResult = "No records found";
-          finalStatus = "success";
-        } else if (r.result.status === "failed") {
-          finalResult = "Probe Error";
-          finalStatus = "error";
+        if (r.result.status === "finished" && "answers" in r.result) {
+          info.push({ title: "Resolver", text: r.result.resolver });
+          records = r.result.answers.filter((a) => a.type === rType).map((a) => formatRecord(rType, a.value));
+          if (r.result.statusCodeName === "NOERROR") {
+            status = "success";
+            message = "No records found";
+          } else if (r.result.statusCodeName === "NXDOMAIN") {
+            status = "warning";
+            message = "Not found (NXDOMAIN)";
+          } else {
+            message = r.result.statusCodeName;
+          }
         }
 
         return {
-          id: `global-${r.probe.country}-${r.probe.city}-${r.probe.network}`,
-          provider: `${r.probe.city}`,
-          serverInfo: r.probe.network || r.probe.country,
-          flag: getFlagEmoji(r.probe.country),
-          result: finalResult,
-          status: finalStatus,
-          type: "global",
+          id: `global-${index}-${r.probe.country}-${r.probe.city}`,
+          provider: r.probe.city,
+          icon: getFlagEmoji(r.probe.country),
+          info,
+          records: sortRecords(records),
+          message,
+          status,
         };
       });
 
@@ -320,6 +334,7 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
         });
       }
     } catch (err) {
+      if (signal.aborted) return;
       const errorMessage = err instanceof Error ? err.message : "Something went wrong";
 
       await showToast({
@@ -329,10 +344,10 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
       });
 
       if (isRefresh) {
-        setResults((prev) => prev.map((r) => ({ ...r, status: "error", result: "Update failed" })));
+        setResults((prev) => prev.map((r) => ({ ...r, status: "error", records: [], message: "Update failed" })));
       }
     } finally {
-      setIsLoading(false);
+      if (!signal.aborted) setIsLoading(false);
     }
   };
 
@@ -340,25 +355,31 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
     if (props.arguments.domain) {
       runFastCheck(props.arguments.domain, "A");
     }
+    return () => abortControllerRef.current?.abort();
   }, []);
 
   // --- RENDER ---
+
+  // The detail panel leaves no room for a section subtitle
+  const concordance = isShowingDetail ? undefined : getConcordance(results, recordType);
 
   return (
     <List
       searchText={domain}
       onSearchTextChange={(text) => setDomain(text)}
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail && results.length > 0}
       searchBarPlaceholder="Enter domain (e.g., google.com)"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Record Type"
           value={recordType}
           onChange={(newValue) => {
-            setRecordType(newValue);
-            if (domain.includes(".")) {
-              if (viewMode === "fast") runFastCheck(domain, newValue);
-              else runGlobalCheck(false);
+            const rType = newValue as RecordType;
+            setRecordType(rType);
+            if (normalizeDomain(domain)) {
+              if (viewMode === "fast") runFastCheck(domain, rType);
+              else runGlobalCheck(rType);
             }
           }}
         >
@@ -386,15 +407,18 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
           }
         />
       ) : (
-        <List.Section
-          title={viewMode === "fast" ? "🚀 Fast Check (Instant)" : "🌍 Global Check (Worldwide Propagation)"}
-        >
+        <List.Section title={viewMode === "fast" ? "Fast Check" : "Global Check"} subtitle={concordance}>
           {results.map((item) => (
             <DnsListItem
               key={item.id}
               item={item}
-              onRefresh={() => (viewMode === "fast" ? runFastCheck(domain, recordType) : runGlobalCheck(true))}
-              onSwitchToGlobal={viewMode === "fast" ? () => runGlobalCheck(false) : undefined}
+              recordType={recordType}
+              isShowingDetail={isShowingDetail}
+              onToggleDetail={() => setIsShowingDetail((value) => !value)}
+              onRefresh={() =>
+                viewMode === "fast" ? runFastCheck(domain, recordType) : runGlobalCheck(recordType, true)
+              }
+              onSwitchToGlobal={viewMode === "fast" ? () => runGlobalCheck(recordType) : undefined}
               onSwitchToFast={viewMode === "global" ? () => runFastCheck(domain, recordType) : undefined}
             />
           ))}
@@ -404,47 +428,65 @@ export default function Command(props: LaunchProps<{ arguments: { domain?: strin
   );
 }
 
-// --- ITEMS & DRILLDOWN ---
+// --- ITEMS & DETAIL ---
 
-function DnsListItem({ item, onRefresh, onSwitchToGlobal, onSwitchToFast }: DnsListItemProps) {
-  const hasMultipleResults = item.result.includes(", ");
+function DnsListItem({
+  item,
+  recordType,
+  isShowingDetail,
+  onToggleDetail,
+  onRefresh,
+  onSwitchToGlobal,
+  onSwitchToFast,
+}: DnsListItemProps) {
+  const { records, status, via } = item;
+  const isSettledWithoutRecords = records.length === 0 && status !== "loading";
+  const statusAccessory: List.Item.Accessory = { icon: STATUS_ICONS[status], tooltip: getStatusText(item) };
+
+  // Fixed-width accessories so the status icon always stays visible
+  const accessories: List.Item.Accessory[] = [];
+  if (records.length > 1) accessories.push({ tag: `+${records.length - 1}`, tooltip: records.join("\n") });
+  if (isSettledWithoutRecords && status !== "success") {
+    accessories.push({ text: { value: item.message, color: STATUS_COLORS[status] } });
+  }
+  if (via) accessories.push({ icon: VIA_ICONS[via], tooltip: VIA_TOOLTIPS[via] });
+  accessories.push(statusAccessory);
+
+  const subtitle = records.length > 0 ? records[0] : status === "success" || status === "loading" ? item.message : "";
 
   return (
     <List.Item
-      icon={item.flag}
-      title={item.provider}
-      subtitle={item.serverInfo}
-      accessories={[
-        {
-          text: {
-            value: item.result,
-            color: item.status === "error" ? Color.Red : item.status === "warning" ? Color.Orange : Color.PrimaryText,
-          },
-          tooltip: item.result.split(", ").join("\n"),
-        },
-        {
-          icon:
-            item.status === "success"
-              ? { source: Icon.Check, tintColor: Color.Green }
-              : item.status === "loading"
-                ? { source: Icon.Circle, tintColor: Color.Yellow }
-                : item.status === "warning"
-                  ? { source: Icon.MinusCircle, tintColor: Color.Orange }
-                  : { source: Icon.Xmark, tintColor: Color.Red },
-        },
-      ]}
+      icon={item.icon}
+      title={{ value: item.provider, tooltip: item.info.map((i) => `${i.title}: ${i.text}`).join("\n") }}
+      subtitle={isShowingDetail ? undefined : { value: subtitle, tooltip: records.join("\n") || item.message }}
+      accessories={isShowingDetail ? [statusAccessory] : accessories}
+      detail={<ResultDetail item={item} recordType={recordType} />}
       actions={
         <ActionPanel>
-          {hasMultipleResults && item.status === "success" ? (
-            <Action.Push title="View Details" icon={Icon.List} target={<DrillDownView item={item} />} />
-          ) : (
-            <Action.CopyToClipboard content={item.result} title="Copy Result" />
+          {records.length > 0 && (
+            <Action.CopyToClipboard
+              title={records.length > 1 ? "Copy All Records" : "Copy Record"}
+              content={records.join("\n")}
+            />
+          )}
+          <Action
+            title={isShowingDetail ? "Hide Details" : "Show Details"}
+            icon={Icon.AppWindowSidebarRight}
+            shortcut={TOGGLE_DETAIL_SHORTCUT}
+            onAction={onToggleDetail}
+          />
+          {records.length > 1 && (
+            <ActionPanel.Submenu title="Copy Record" icon={Icon.Clipboard}>
+              {records.map((record, index) => (
+                <Action.CopyToClipboard key={index} title={record} content={record} />
+              ))}
+            </ActionPanel.Submenu>
           )}
           {onSwitchToGlobal && (
             <Action
               title="Run Global Check"
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={SWITCH_MODE_SHORTCUT}
               onAction={onSwitchToGlobal}
             />
           )}
@@ -452,43 +494,50 @@ function DnsListItem({ item, onRefresh, onSwitchToGlobal, onSwitchToFast }: DnsL
             <Action
               title="Return to Fast Check"
               icon={Icon.Bolt}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              shortcut={SWITCH_MODE_SHORTCUT}
               onAction={onSwitchToFast}
             />
           )}
           <Action
             title="Refresh"
             icon={Icon.RotateClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onRefresh}
           />
-          {hasMultipleResults && <Action.CopyToClipboard title="Copy All Results" content={item.result} />}
         </ActionPanel>
       }
     />
   );
 }
 
-function DrillDownView({ item }: { item: DnsResult }) {
-  const records = item.result.split(", ");
+function ResultDetail({ item, recordType }: { item: DnsResult; recordType: RecordType }) {
+  const { records, status, via } = item;
+  const markdown =
+    records.length > 0
+      ? [
+          `### ${records.length} ${recordType} record${records.length > 1 ? "s" : ""}`,
+          "",
+          ...records.map((r) => `- ${toInlineCode(r)}`),
+        ].join("\n")
+      : `### ${item.message}`;
+
   return (
-    <List navigationTitle={`${item.provider} - Details`}>
-      <List.Section title={`Results via ${item.serverInfo}`}>
-        {records.map((record: string, index: number) => (
-          <List.Item
-            key={index}
-            title={record}
-            icon={{ source: Icon.Dot, tintColor: Color.Blue }}
-            accessories={[{ tooltip: record }]}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={record} />
-                <Action.CopyToClipboard title="Copy All" content={item.result} />
-              </ActionPanel>
-            }
+    <List.Item.Detail
+      markdown={markdown}
+      metadata={
+        <List.Item.Detail.Metadata>
+          {item.info.map((i) => (
+            <List.Item.Detail.Metadata.Label key={i.title} title={i.title} text={i.text} />
+          ))}
+          {via && <List.Item.Detail.Metadata.Label title="Transport" text={VIA_LABELS[via]} icon={VIA_ICONS[via]} />}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Status"
+            text={{ value: getStatusText(item), color: STATUS_COLORS[status] }}
+            icon={STATUS_ICONS[status]}
           />
-        ))}
-      </List.Section>
-    </List>
+        </List.Item.Detail.Metadata>
+      }
+    />
   );
 }

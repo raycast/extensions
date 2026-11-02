@@ -97,6 +97,8 @@ export function stripHtmlTags(html: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'");
 
+  // Drop style, script and head blocks and comments whole, so CSS such as `color: #999999` is not read as a code
+  text = text.replace(/<(style|script|head)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "").replace(/<!--[\s\S]*?-->/g, "");
   // Replace <br> tags with newlines for better readability
   text = text.replace(/<br\s*\/?>/gi, "\n");
   // Remove all other HTML tags

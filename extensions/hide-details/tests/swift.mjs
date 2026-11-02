@@ -22,6 +22,8 @@ export function redactImage({
   extraWords = "",
   recognition = "fast",
   customRegex = "",
+  forReview = false,
+  blurFaces = false,
 }) {
   return callSwift(
     "redactImage",
@@ -33,5 +35,7 @@ export function redactImage({
     recognition,
     customRegex,
     inputPath,
+    forReview,
+    blurFaces,
   );
 }

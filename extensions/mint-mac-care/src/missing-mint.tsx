@@ -24,13 +24,15 @@ A \`mint-cli\` was found, but it is not signed by DZG Studio, so the extension w
 
 Mint does the scanning, cleaning and organizing on your Mac. These commands are its shortcuts in Raycast.
 
-1. **Download Mint.** It is free: scanning, organizing and freeing memory stay free, and so does your first 1 GB of cleanup.
+1. **Download Mint Direct.** Scans and memory release are free and unlimited. Cleaning, organizing, Optimize and app uninstall share one free 1 GB each week.
 2. **Open Mint** from Applications once.
 3. **Come back here** and press ↵.
 
 With Homebrew, one line does the first step: \`${MINT_BREW_INSTALL}\`
 
-Mint from the Mac App Store or Setapp does not include the command-line tool these commands use.`;
+Auto Care is included and counts toward the same 1 GB. Setup does not count. Mint Unlimited removes the limit.
+
+This extension works with Mint Direct. Mint from the Mac App Store or Setapp does not include its command-line tool, and those editions have their own features and access.`;
 
   return (
     <Detail

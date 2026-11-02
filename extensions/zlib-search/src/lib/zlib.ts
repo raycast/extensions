@@ -17,6 +17,39 @@ export function truncate(text: string, max = 40): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+const DEFAULT_WEBSITE_DOMAIN = "https://z-library.sk";
+
+function toOrigin(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  try {
+    return new URL(
+      /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`,
+    ).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Builds the Z-Library website's own search URL for a query. The CLI can be
+ * logged in to a backend whose index differs from the website's, so this lets
+ * users reach results the CLI search doesn't return. Domain preference order:
+ * the user's Domain Override, then the domain of a result we already have,
+ * then a default.
+ */
+export function websiteSearchUrl(
+  query: string,
+  configuredDomain?: string,
+  sampleBookUrl?: string,
+): string {
+  const origin =
+    toOrigin(configuredDomain ?? "") ??
+    toOrigin(sampleBookUrl ?? "") ??
+    DEFAULT_WEBSITE_DOMAIN;
+  return `${origin}/s/${encodeURIComponent(query.trim())}`;
+}
+
 export function buildExecEnv(zlibDomain?: string): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env };
   if (zlibDomain) env.ZLIB_DOMAIN = zlibDomain;

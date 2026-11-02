@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 260 270" role="img" aria-labelledby="title">
+  <title id="title">Chiikawa blinks and gives a shy wave</title>
+  <ellipse cx="130" cy="249" rx="73" ry="9" fill="#f7ced8" opacity="0.65"/>
+  <g stroke="#292321" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="#fffdf7"><path d="M102 225q-17 11 -12 18q5 8 23 0l3 -16"/><path d="M144 227l3 16q18 8 23 0q5 -7 -12 -18"/></g><path d="M95 171Q79 191 88 219Q93 237 130 239Q167 237 172 219Q181 191 165 171Z" fill="#fffdf7"/><g data-part="left-arm">
+    
+    <path d="M96 178Q86 175 78 186L65 198Q61 204 67 208Q73 211 79 204L99 192" fill="#fffdf7"/>
+  </g><g data-part="right-arm">
+    <animateTransform attributeName="transform" type="rotate" values="0 168 185;0 168 185;-28 168 185;8 168 185;-28 168 185;0 168 185;0 168 185" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="4.8s" repeatCount="indefinite"/>
+    <path d="M164 178Q174 175 182 186L195 198Q199 204 193 208Q187 211 181 204L161 192" fill="#fffdf7"/>
+  </g><g data-part="left-ear"><animateTransform attributeName="transform" type="rotate" values="0 90 90;0 90 90;-5 90 90;3 90 90;-5 90 90;0 90 90;0 90 90" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="6.4s" repeatCount="indefinite"/>
+      <path d="M75 94Q73 66 90 67Q107 68 105 94" fill="#fffdf7"/></g><g data-part="right-ear"><animateTransform attributeName="transform" type="rotate" values="0 170 90;0 170 90;7 170 90;-3 170 90;7 170 90;0 170 90;0 170 90" keyTimes="0;0.3;0.4;0.5;0.6;0.7;1" dur="6.4s" repeatCount="indefinite"/>
+      <path d="M155 94Q153 66 170 67Q187 68 185 94" fill="#fffdf7"/></g><path d="M72 94C44 112 45 158 67 174C82 186 109 189 130 188C156 189 180 185 194 172C216 153 213 112 187 94C164 75 96 75 72 94Z" fill="#fffdf7"/><path d="M94 115q7 -5 13 -3 M153 112q7 -2 13 3" fill="none" stroke-width="3"/><g transform="translate(0 132)"><g data-part="eyes">
+    <animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 0.08;1 1;1 1;1 0.08;1 1;1 1" keyTimes="0;0.54;0.56;0.58;0.64;0.66;0.68;1" dur="5.2s" repeatCount="indefinite"/>
+    <ellipse cx="102" cy="0" rx="8.5" ry="9" fill="#292321" stroke="none"/><circle cx="100.5" cy="-3.5" r="2.6" fill="white" stroke="none"/><path d="M98 3.5q4 2.5 8 0" fill="none" stroke="white" stroke-width="1.8"/><ellipse cx="158" cy="0" rx="8.5" ry="9" fill="#292321" stroke="none"/><circle cx="156.5" cy="-3.5" r="2.6" fill="white" stroke="none"/><path d="M154 3.5q4 2.5 8 0" fill="none" stroke="white" stroke-width="1.8"/>
+  </g></g><g stroke="none" fill="#f5b5bd"><ellipse cx="83" cy="150" rx="14" ry="9"/><ellipse cx="177" cy="150" rx="14" ry="9"/></g>
+    <path d="M75.5 147l-3 6M81.5 147l-3 6M87.5 147l-3 6M93.5 147l-3 6M169.5 147l-3 6M175.5 147l-3 6M181.5 147l-3 6M187.5 147l-3 6" fill="none" stroke-width="2"/><g data-part="mouth" transform="translate(130 151)">
+    <g><animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 1.2;1 1;1 1" keyTimes="0;0.3;0.45;0.6;1" dur="4.8s" repeatCount="indefinite"/>
+      
+      <path d="M-11 0q2 9 11 3q9 6 11 -3" fill="none" stroke-width="3.4"/>
+      <path d="M-4 13q4 2 8 0" fill="none" stroke-width="3"/>
+    </g>
+  </g>
+  </g>
+</svg>

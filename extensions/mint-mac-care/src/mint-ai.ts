@@ -7,7 +7,8 @@ import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { formatBytes, parseMintCommandJSON, resolveMintCLI } from "./mint-cli";
+import { formatBytes, MINIMUM_APP_VERSION, parseMintCommandJSON, resolveMintCLI } from "./mint-cli";
+import type { MintCLIResolution, MintCommandEnvelope } from "./mint-cli";
 import { growers, parseAtlasHistory, windowStartIndex } from "./mint-model";
 import type { AtlasHistoryLine, StatusJSON } from "./mint-model";
 import { pilesOf } from "./mint-panes";
@@ -17,10 +18,12 @@ import type { MemoryScan } from "./mint-panes";
 export const MINT_AI_DOWNLOAD_URL = "https://mintstorage.app/r/raycast-ai";
 
 const SUPPORT = join(homedir(), "Library", "Application Support", "Mint");
+const GIB = 1024 ** 3;
 
-export type StatusAnswer = StatusJSON & {
-  groups?: StatusJSON["groups"] & { scannedAt?: string };
-};
+export type StatusAnswer = StatusJSON &
+  Partial<MintCommandEnvelope> & {
+    groups?: StatusJSON["groups"] & { scannedAt?: string };
+  };
 
 type Group = { name: string; bytes: number; size: string; what: string };
 
@@ -45,8 +48,11 @@ const GROUPS: Array<{ key: keyof NonNullable<StatusJSON["groups"]>; name: string
 
 /** The disk as the menu bar's ring states it: used and free now, and the four groups of the last Scan. */
 export function diskOverview(status: StatusAnswer | undefined, saved?: StatusJSON["groups"]) {
-  const total = status?.volume?.totalBytes ?? (status?.disk?.totalGB ? status.disk.totalGB * 1e9 : undefined);
-  const free = status?.volume?.freeBytes ?? (status?.disk?.freeGB ? status.disk.freeGB * 1e9 : undefined);
+  // `volume` is exact bytes; an older CLI states only `disk`, whose GB are GiB
+  // (mint-model reads them the same way). A full disk's 0 is still a size.
+  const total =
+    status?.volume?.totalBytes ?? (status?.disk?.totalGB !== undefined ? status.disk.totalGB * GIB : undefined);
+  const free = status?.volume?.freeBytes ?? (status?.disk?.freeGB !== undefined ? status.disk.freeGB * GIB : undefined);
   const groups = status?.groups ?? saved;
   const listed: Group[] = groups
     ? GROUPS.map((group) => {
@@ -131,24 +137,39 @@ export function growthOverview(lines: AtlasHistoryLine[], days = 7, limit = 8) {
 // --- Reading Mint ------------------------------------------------------------
 
 /** The signed mint-cli, or an error Raycast AI can say in plain words. */
-export function readyMintCLI(): string {
-  const resolution = resolveMintCLI();
+export function readyMintCLI(resolution: MintCLIResolution = resolveMintCLI()): string {
   if (resolution.status === "ready") return resolution.path;
   if (resolution.status === "incompatible") {
-    throw new Error("Mint is older than 1.0.80. Open Mint and choose Check for Updates, then ask again.");
+    throw new Error(
+      `These commands need Mint Direct ${MINIMUM_APP_VERSION} or later with the supported command-line tool. Open Mint and choose Check for Updates, then ask again.`,
+    );
+  }
+  if (resolution.status === "untrusted") {
+    throw new Error(
+      `Mint's command-line tool was found, but its DZG Studio signature could not be verified. Download Mint Direct again from ${MINT_AI_DOWNLOAD_URL}; open it once, then ask again.`,
+    );
   }
   throw new Error(
-    `Mint is not installed. It is free to download from ${MINT_AI_DOWNLOAD_URL}; open it once, then ask again.`,
+    `Mint Direct's command-line tool was not found. The Mac App Store and Setapp editions do not include it. Download Mint Direct for free from ${MINT_AI_DOWNLOAD_URL}; open it once from Applications, then ask again.`,
   );
 }
 
-export function readStatus(cli: string): Promise<StatusAnswer | undefined> {
-  return new Promise((resolve) => {
+/** Mint's status, or an error that says Mint did not answer: never "not scanned yet" for a failed read. */
+export function readStatus(cli: string): Promise<StatusAnswer> {
+  return new Promise((resolve, reject) => {
     execFile(
       cli,
       ["status", "--json"],
       { encoding: "utf8", timeout: 30_000, maxBuffer: 8 * 1024 * 1024 },
-      (_, stdout) => resolve(parseMintCommandJSON<StatusAnswer>(stdout || undefined, "status.v1")),
+      (error, stdout, stderr) => {
+        const answer = parseMintCommandJSON<StatusAnswer>(stdout || undefined, "status.v1");
+        if (answer && !answer.error && !error) {
+          resolve(answer);
+        } else {
+          const detail = answer?.error || stderr?.trim() || error?.message || "no valid answer";
+          reject(new Error(`Mint did not report the disk (${detail}). Try again in a moment.`));
+        }
+      },
     );
   });
 }

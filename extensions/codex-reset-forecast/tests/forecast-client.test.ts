@@ -1,10 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { toCrossJSON } from "seroval";
-import fixture from "./fixtures/forecast-valid.json";
-import { fetchForecast, FORECAST_URL, type ForecastSnapshot, type ForecastStore } from "../src/api/forecast-client";
+import forecast from "./fixtures/forecast-api.json";
+import timeline from "./fixtures/timeline-api.json";
+import {
+  fetchForecast,
+  FORECAST_URL,
+  TIMELINE_URL,
+  USER_AGENT,
+  type ForecastSnapshot,
+  type ForecastStore,
+  type RefreshState,
+} from "../src/api/forecast-client";
 
 class MemoryStore implements ForecastStore {
   snapshot?: ForecastSnapshot;
+  refresh?: RefreshState;
   writes: ForecastSnapshot[] = [];
   read() {
     return this.snapshot;
@@ -13,94 +22,220 @@ class MemoryStore implements ForecastStore {
     this.writes.push(snapshot);
     this.snapshot = snapshot;
   }
+  readRefreshState() {
+    return this.refresh;
+  }
+  writeRefreshState(state: RefreshState) {
+    this.refresh = state;
+  }
 }
-const now = () => new Date("2026-09-09T07:05:00Z");
-const jsonResponse = (value = fixture) =>
-  new Response(JSON.stringify(toCrossJSON({ result: value, error: undefined, context: {} })));
+const start = Date.parse("2026-10-18T03:00:00Z");
+const now =
+  (seconds = 0) =>
+  () =>
+    new Date(start + seconds * 1000);
+const jsonResponse = (value: unknown, headers?: Record<string, string>) =>
+  new Response(JSON.stringify(value), { headers });
+function successfulFetch(f = forecast, t = timeline) {
+  return vi.fn<typeof fetch>(async (url) => jsonResponse(url === FORECAST_URL ? f : t));
+}
+async function seed(store: MemoryStore) {
+  return fetchForecast({ store, fetchImpl: successfulFetch(), now: now() });
+}
 
 describe("fetchForecast", () => {
-  it("fetches and validates the same structured endpoint as the website", async () => {
+  it("fetches both public APIs with identifying headers and writes one complete snapshot", async () => {
     const store = new MemoryStore();
-    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse());
-    const result = await fetchForecast({ store, fetchImpl, now });
-    expect(fetchImpl.mock.calls[0][0]).toBe(FORECAST_URL);
-    expect(new Headers(fetchImpl.mock.calls[0][1]?.headers).get("x-tsr-serverFn")).toBe("true");
-    expect(result.response.forecast?.score48h).toBe(43);
+    const fetchImpl = successfulFetch();
+    const result = await fetchForecast({ store, fetchImpl, now: now() });
+    expect(fetchImpl.mock.calls.map(([url]) => url)).toEqual([FORECAST_URL, TIMELINE_URL]);
+    for (const [, options] of fetchImpl.mock.calls) {
+      expect(new Headers(options?.headers).get("User-Agent")).toBe(USER_AGENT);
+      expect(new Headers(options?.headers).get("x-tsr-serverFn")).toBeNull();
+    }
+    expect(result.response.forecast?.score48h).toBe(37);
+    expect(result.response.history).toHaveLength(78);
     expect(store.writes).toHaveLength(1);
-    expect(result.lastSuccessfulRequestAt).toBe(now().toISOString());
+    expect(result.lastSuccessfulRequestAt).toBe(now()().toISOString());
   });
-
-  it("keeps the snapshot and last successful check time through repeated failed refreshes", async () => {
+  it("reuses cached data across commands within the one-minute refresh interval", async () => {
     const store = new MemoryStore();
+    const saved = await seed(store);
+    const fetchImpl = successfulFetch();
+    expect(await fetchForecast({ store, fetchImpl, now: now(59) })).toBe(saved);
+    expect(fetchImpl).not.toHaveBeenCalled();
+    await fetchForecast({ store, fetchImpl, now: now(60) });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+  it("keeps the snapshot and successful timestamp through repeated failures", async () => {
+    const store = new MemoryStore();
+    const saved = await seed(store);
     const onCacheFallback = vi.fn();
-    const saved = await fetchForecast({
-      store,
-      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()),
-      now,
-    });
-    for (const hours of [1, 2, 3]) {
+    for (const seconds of [60, 120, 180]) {
       const result = await fetchForecast({
         store,
         fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
-        now: () => new Date(now().getTime() + hours * 3_600_000),
+        now: now(seconds),
         onCacheFallback,
       });
       expect(result).toBe(saved);
-      expect(result.lastSuccessfulRequestAt).toBe(now().toISOString());
     }
     expect(store.writes).toHaveLength(1);
     expect(onCacheFallback).toHaveBeenCalledTimes(3);
-    expect(onCacheFallback.mock.calls[0][0].message).toBe("offline");
   });
-
   it.each([
-    () => new Response("unavailable", { status: 503 }),
+    () => new Response("unavailable", { status: 404 }),
     () => new Response("<html>broken</html>"),
-    () => new Response(JSON.stringify(toCrossJSON({ result: { broken: true } }))),
-  ])("does not replace valid data after an HTTP, decode, or schema failure", async (failure) => {
+    () => jsonResponse({ events: [] }),
+  ])("does not cache a partial update when the timeline fails", async (failure) => {
     const store = new MemoryStore();
-    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()), now });
-    const result = await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(failure()), now });
-    expect(result).toBe(store.snapshot);
+    const saved = await seed(store);
+    const fetchImpl = vi.fn<typeof fetch>(async (url) =>
+      url === FORECAST_URL
+        ? jsonResponse({ ...forecast, probabilities: { ...forecast.probabilities, rounded_24h: 80 } })
+        : failure(),
+    );
+    expect(await fetchForecast({ store, fetchImpl, now: now(60) })).toBe(saved);
     expect(store.writes).toHaveLength(1);
   });
-
-  it("reports an uncached failure", async () => {
+  it.each(["120", "Sun, 18 Oct 2026 03:03:00 GMT"])(
+    "persists Retry-After %s and avoids early retries",
+    async (retryAfter) => {
+      const store = new MemoryStore();
+      const fetchImpl = vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(new Response(null, { status: 429, headers: { "Retry-After": retryAfter } }));
+      await expect(fetchForecast({ store, fetchImpl, now: now() })).rejects.toThrow(/rate limiting/);
+      await expect(fetchForecast({ store, fetchImpl, now: now(61) })).rejects.toThrow(/rate limiting/);
+      expect(fetchImpl).toHaveBeenCalledTimes(2);
+      expect(Date.parse(store.refresh!.nextRequestAt)).toBeGreaterThanOrEqual(start + 120_000);
+    },
+  );
+  it("reports an uncached HTTP failure", async () => {
     await expect(
       fetchForecast({
         store: new MemoryStore(),
         fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 500 })),
-        now,
+        now: now(),
       }),
     ).rejects.toThrow("HTTP 500");
   });
-
   it("aborts a hung request and retains the cache", async () => {
     const store = new MemoryStore();
-    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse()), now });
+    const saved = await seed(store);
     const fetchImpl: typeof fetch = (_url, options) =>
       new Promise((_resolve, reject) => options?.signal?.addEventListener("abort", () => reject(new Error("aborted"))));
-    const result = await fetchForecast({ store, fetchImpl, now, timeoutMilliseconds: 5 });
-    expect(result).toBe(store.snapshot);
+    expect(await fetchForecast({ store, fetchImpl, now: now(60), timeoutMilliseconds: 5 })).toBe(saved);
+    expect(store.refresh?.error).toMatch(/timed out/);
+  });
+  it.each(["forecast", "timeline"])("does not roll back a newer %s snapshot", async (part) => {
+    const store = new MemoryStore();
+    const saved = await seed(store);
+    const older = "2026-10-17T00:00:00Z";
+    const fetchImpl = successfulFetch(
+      part === "forecast" ? { ...forecast, updated_at: older } : forecast,
+      part === "timeline" ? { ...timeline, updated_at: older } : timeline,
+    );
+    expect(await fetchForecast({ store, fetchImpl, now: now(60) })).toBe(saved);
     expect(store.writes).toHaveLength(1);
   });
-
-  it("does not roll back a newer snapshot when an older request completes later", async () => {
+  it("preserves the earliest publication expiry for source freshness warnings", async () => {
     const store = new MemoryStore();
-    let resolve!: (response: Response) => void;
-    const delayed = fetchForecast({
-      store,
-      fetchImpl: () =>
-        new Promise((done) => {
-          resolve = done;
-        }),
-      now,
+    const expires = "2026-10-18T03:01:00Z";
+    const fetchImpl = vi.fn<typeof fetch>(async (url) =>
+      jsonResponse(url === FORECAST_URL ? forecast : timeline, {
+        "x-published-expires-at": url === FORECAST_URL ? expires : "2026-10-18T03:02:00Z",
+      }),
+    );
+    expect((await fetchForecast({ store, fetchImpl, now: now() })).response.publishedExpiresAt).toBe(
+      new Date(expires).toISOString(),
+    );
+  });
+  it("shares an in-flight first load without a spurious uncached cooldown error", async () => {
+    const store = new MemoryStore();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
     });
-    const newer = { ...fixture, updatedAt: "2026-09-09T08:00:00Z", forecast: { ...fixture.forecast, score24h: 60 } };
-    await fetchForecast({ store, fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(newer)), now });
-    resolve(jsonResponse());
-    const result = await delayed;
-    expect(result.response.forecast?.score24h).toBe(60);
-    expect(store.writes).toHaveLength(1);
+    const fetchImpl = vi.fn<typeof fetch>(async (url) => {
+      await gate;
+      return jsonResponse(url === FORECAST_URL ? forecast : timeline);
+    });
+    const both = Promise.all([
+      fetchForecast({ store, fetchImpl, now: now() }),
+      fetchForecast({ store, fetchImpl, now: now() }),
+    ]);
+    release();
+    const [first, second] = await both;
+    expect(first).toBe(second);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+  it("waits for the first snapshot shared by a separate command runtime without refetching", async () => {
+    const store = new MemoryStore();
+    // Separate command runtimes have distinct store objects backed by the same Raycast cache.
+    const otherStore: ForecastStore = {
+      read: () => store.read(),
+      write: (snapshot) => store.write(snapshot),
+      readRefreshState: () => store.readRefreshState(),
+      writeRefreshState: (state) => store.writeRefreshState(state),
+    };
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fetchImpl = vi.fn<typeof fetch>(async (url) => {
+      await gate;
+      return jsonResponse(url === FORECAST_URL ? forecast : timeline);
+    });
+    const both = Promise.all([
+      fetchForecast({ store, fetchImpl, now: now() }),
+      fetchForecast({ store: otherStore, fetchImpl, now: now() }),
+    ]);
+    release();
+    const [first, second] = await both;
+    expect(second).toBe(first);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+  it("reports a first-load failure published by another command without refetching", async () => {
+    vi.useFakeTimers();
+    try {
+      const store = new MemoryStore();
+      store.refresh = { nextRequestAt: now(60)().toISOString() };
+      const fetchImpl = successfulFetch();
+      const result = fetchForecast({ store, fetchImpl, now: now(), timeoutMilliseconds: 1000 });
+      const failure = expect(result).rejects.toThrow("HTTP 500");
+      store.refresh = { ...store.refresh, error: "codex-reset.com returned HTTP 500." };
+      await vi.advanceTimersByTimeAsync(100);
+      await failure;
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("bounds the first-load wait if another command exits before saving data", async () => {
+    vi.useFakeTimers();
+    try {
+      const store = new MemoryStore();
+      store.refresh = { nextRequestAt: now(60)().toISOString() };
+      const fetchImpl = successfulFetch();
+      const result = fetchForecast({ store, fetchImpl, now: now(), timeoutMilliseconds: 250 });
+      const failure = expect(result).rejects.toThrow(/one refresh per minute/);
+      await vi.advanceTimersByTimeAsync(250);
+      await failure;
+      expect(fetchImpl).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("honours a rate limit even when the other endpoint has a network error", async () => {
+    const store = new MemoryStore();
+    const fetchImpl = vi.fn<typeof fetch>(async (url) => {
+      if (url === FORECAST_URL) throw new Error("offline");
+      return new Response(null, { status: 429, headers: { "Retry-After": "300" } });
+    });
+    await expect(fetchForecast({ store, fetchImpl, now: now() })).rejects.toThrow(/rate limiting/);
+    expect(Date.parse(store.refresh!.nextRequestAt)).toBe(start + 300_000);
   });
 });

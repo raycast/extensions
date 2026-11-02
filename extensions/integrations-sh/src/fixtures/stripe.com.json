@@ -1,0 +1,91 @@
+{
+  "version": 3,
+  "domain": "stripe.com",
+  "credentials": {
+    "stripe_api_key": {
+      "type": "api_key",
+      "label": "Stripe API key",
+      "generateUrl": "https://dashboard.stripe.com/test/apikeys",
+      "setup": ""
+    },
+    "stripe_mcp_oauth": {
+      "type": "oauth2",
+      "label": "Stripe MCP OAuth authorization",
+      "setup": ""
+    },
+    "stripe_cli_session": {
+      "type": "compound",
+      "label": "Stripe CLI authenticated session / CLI-generated restricted key",
+      "generateUrl": "https://docs.stripe.com/stripe-cli/install#login-account",
+      "setup": ""
+    }
+  },
+  "surfaces": [
+    {
+      "type": "mcp",
+      "url": "https://mcp.stripe.com",
+      "transports": ["streamable-http"],
+      "slug": "stripe-mcp-server",
+      "name": "Stripe MCP server",
+      "docs": "https://docs.stripe.com/mcp",
+      "auth": {
+        "status": "required",
+        "entries": [
+          {
+            "use": [
+              {
+                "id": "stripe_mcp_oauth"
+              }
+            ]
+          },
+          {
+            "use": [
+              {
+                "id": "stripe_api_key"
+              },
+              {
+                "id": "stripe_api_key"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "cli",
+      "packages": [
+        {
+          "registryType": "homebrew",
+          "identifier": "stripe/stripe-cli/stripe"
+        },
+        {
+          "registryType": "npm",
+          "identifier": "@stripe/cli"
+        }
+      ],
+      "command": "stripe",
+      "slug": "stripe-cli",
+      "name": "Stripe CLI",
+      "docs": "https://docs.stripe.com/stripe-cli",
+      "auth": {
+        "status": "required",
+        "entries": [
+          {
+            "use": [
+              {
+                "id": "stripe_cli_session"
+              }
+            ]
+          },
+          {
+            "use": [
+              {
+                "id": "stripe_api_key"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

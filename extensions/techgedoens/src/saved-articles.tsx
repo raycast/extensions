@@ -14,6 +14,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { ArticleCopyActions } from "./article-copy-actions";
+import { FindRelatedArticlesAction } from "./related-articles";
 import {
   ArchivedArticle,
   normalizeArticleRetention,
@@ -157,6 +158,7 @@ function SavedArticleItem({
           ) : (
             <Action title={translations.openInBrowser} icon={Icon.Globe} onAction={openInBrowser} />
           )}
+          <FindRelatedArticlesAction article={article} translations={translations} />
           <Action
             title={article.isRead ? translations.markUnread : translations.markRead}
             icon={article.isRead ? Icon.EyeDisabled : Icon.Eye}
@@ -199,6 +201,7 @@ function SavedArticleDetail({
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title={translations.openInBrowser} url={article.url} />
+          <FindRelatedArticlesAction article={article} translations={translations} />
           <Action
             title={translations.removeReadLater}
             icon={Icon.StarDisabled}

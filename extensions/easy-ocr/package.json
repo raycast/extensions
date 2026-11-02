@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Rafo94",
   "contributors": [
-    "quiknull"
+    "quiknull",
+    "noice_anas"
   ],
   "categories": [
     "Productivity"
@@ -21,6 +22,33 @@
     }
   ],
   "preferences": [
+    {
+      "name": "ocr_engine",
+      "type": "dropdown",
+      "required": false,
+      "title": "OCR Engine",
+      "description": "Tesseract needs a local install. Apple Vision is the engine behind macOS Live Text, needs no install and reads Arabic more reliably.",
+      "data": [
+        {
+          "title": "Tesseract",
+          "value": "tesseract"
+        },
+        {
+          "title": "Apple Vision (Live Text)",
+          "value": "vision"
+        }
+      ],
+      "default": "tesseract"
+    },
+    {
+      "name": "vision_languages",
+      "type": "textfield",
+      "required": false,
+      "title": "Apple Vision Languages",
+      "description": "Comma-separated languages for Apple Vision in priority order, e.g. ar-SA,en-US. Only used when OCR Engine is set to Apple Vision.",
+      "placeholder": "en-US",
+      "default": "en-US"
+    },
     {
       "name": "tesseract_path",
       "type": "textfield",

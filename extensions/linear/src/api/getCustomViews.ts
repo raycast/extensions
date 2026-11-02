@@ -4,10 +4,12 @@ import { IssueFragment, IssueResult } from "../api/getIssues";
 import { getLinearClient } from "../api/linearClient";
 import { getPaginated, PageInfo } from "../api/pagination";
 
-export type CustomViewResult = Pick<CustomView, "id" | "name" | "icon" | "color" | "shared"> & {
+type CustomViewNode = Pick<CustomView, "id" | "name" | "icon" | "color" | "shared"> & {
   modelName: string;
   team?: Pick<Team, "id" | "name" | "key">;
 };
+
+export type CustomViewResult = CustomViewNode & { url: string };
 
 export async function getCustomViews(): Promise<CustomViewResult[]> {
   const { graphQLClient } = getLinearClient();
@@ -15,7 +17,7 @@ export async function getCustomViews(): Promise<CustomViewResult[]> {
   const allViews = await getPaginated(
     async (cursor) =>
       graphQLClient.rawRequest<
-        { customViews: { nodes: CustomViewResult[]; pageInfo: PageInfo } },
+        { customViews: { nodes: CustomViewNode[]; pageInfo: PageInfo } },
         Record<string, unknown>
       >(
         `
@@ -44,12 +46,24 @@ export async function getCustomViews(): Promise<CustomViewResult[]> {
         { cursor },
       ),
     (r) => r.data?.customViews?.pageInfo,
-    (accumulator: CustomViewResult[], currentValue) => accumulator.concat(currentValue.data?.customViews?.nodes ?? []),
+    (accumulator: CustomViewNode[], currentValue) => accumulator.concat(currentValue.data?.customViews?.nodes ?? []),
     [],
     5,
   );
 
-  return allViews.filter((v) => v.modelName === "Issue");
+  const { data } = await graphQLClient.rawRequest<{ organization: { urlKey: string } }, Record<string, unknown>>(
+    `
+      query {
+        organization {
+          urlKey
+        }
+      }
+    `,
+  );
+
+  return allViews
+    .filter((v) => v.modelName === "Issue")
+    .map((v) => ({ ...v, url: `https://linear.app/${data?.organization.urlKey}/view/${v.id}` }));
 }
 
 export async function getCustomViewIssues(viewId: string): Promise<IssueResult[]> {

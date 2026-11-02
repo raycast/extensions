@@ -1,5 +1,5 @@
-export type RenderEngine = "auto" | "beautiful" | "compatible";
-export type ResolvedEngine = "beautiful" | "mmdc";
+export type RenderEngine = "auto" | "beautiful" | "compatible" | "ondine";
+export type ResolvedEngine = "beautiful" | "mmdc" | "ondine";
 export type DiagramFormat = "svg" | "png";
 export type SvgRasterStrategy = "macos" | "browser";
 
@@ -8,6 +8,8 @@ export interface DiagramRequest {
   format: DiagramFormat;
   requestedEngine: RenderEngine;
   outputPath: string;
+  useOndineInAuto?: boolean;
+  originalSource?: string;
 }
 
 export interface DiagramResult {
@@ -15,6 +17,13 @@ export interface DiagramResult {
   format: DiagramFormat;
   outputPath: string;
   svgRasterStrategy?: SvgRasterStrategy;
+  rendererMetadata?: RendererMetadata;
+}
+
+export interface RendererMetadata {
+  version: string;
+  theme: string;
+  warnings: string[];
 }
 
 export interface DiagramRenderer {

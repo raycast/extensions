@@ -51,6 +51,7 @@ export async function solveProofOfWork(
     signal?.throwIfAborted();
     const hash = await sha256Hex(`${normalizedWord}|${timestamp}|${nonce}`);
 
+    signal?.throwIfAborted();
     if (hash.startsWith(PROOF_OF_WORK_PREFIX)) {
       return { nonce: String(nonce), timestamp };
     }
@@ -60,6 +61,7 @@ export async function solveProofOfWork(
 }
 
 export async function checkWord(word: string, signal?: AbortSignal): Promise<CheckResult> {
+  signal?.throwIfAborted();
   const normalizedWord = word.trim().toLowerCase();
   const now = Date.now();
   const recentCheck = recentChecks.get(normalizedWord);
@@ -69,6 +71,7 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
   }
 
   const { nonce, timestamp } = await solveProofOfWork(normalizedWord, signal);
+  signal?.throwIfAborted();
   const res = await fetch(`${API_BASE}/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -76,6 +79,7 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
     signal,
   });
 
+  signal?.throwIfAborted();
   if (!res.ok) {
     let errorMessage = `Request failed (${res.status})`;
     try {
@@ -88,6 +92,7 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
   }
 
   const result = (await res.json()) as CheckResult;
+  signal?.throwIfAborted();
 
   // Cancel any previously scheduled expiry for this word before setting a fresh entry
   const existing = recentChecks.get(normalizedWord);

@@ -123,7 +123,7 @@ export default function Command() {
 
   if (error && credentials.length === 0) {
     return (
-      <List navigationTitle="Credentials">
+      <List>
         <List.EmptyView icon={Icon.ExclamationMark} title="Error Loading Credentials" description={error} />
       </List>
     );
@@ -132,11 +132,7 @@ export default function Command() {
   const grouped = groupCredentials(credentials).filter(([group]) => !typeFilter || group === typeFilter);
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Credentials"
-      searchBarAccessory={<TypeDropdown onTypeChange={setTypeFilter} />}
-    >
+    <List isLoading={isLoading} searchBarAccessory={<TypeDropdown onTypeChange={setTypeFilter} />}>
       {credentials.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.List}

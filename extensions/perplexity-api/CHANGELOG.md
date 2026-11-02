@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Fix Launch Crash] - 2026-10-18
+
+- Fixed a crash on launch caused by a missing `_shims/auto/runtime` export in the bundled OpenAI SDK. The extension was updated in an earlier release to use Perplexity's Agent API (`client.responses.create()`), which requires openai v5+, but `package.json` still pinned `^4.104.0`. Upgraded the openai dependency to `^7.36.0`.
+
 ## [Migrate to the Agent API] - 2026-10-01
 
 - Moved all requests from the Sonar chat completions endpoint to Perplexity's Agent API (`/v1/responses`).

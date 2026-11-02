@@ -1,15 +1,12 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { copyRedacted, disposeScan, redactClipboard, type Scan } from "./redaction";
+import { copiedMessage, copyRedacted, disposeScan, redactClipboard, type Scan } from "./redaction";
 
 export default async function Command() {
   let scan: Scan | undefined;
   try {
-    scan = await redactClipboard();
+    scan = await redactClipboard({ fallbackToHistory: true, guardClipboard: true });
     await copyRedacted(scan, { requireOriginalClipboard: true });
-    const n = scan.regionCount;
-    await showHUD(
-      n === 0 ? "Copied image. No details detected." : `Copied image with ${n} masked region${n === 1 ? "" : "s"}`,
-    );
+    await showHUD(copiedMessage(scan));
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

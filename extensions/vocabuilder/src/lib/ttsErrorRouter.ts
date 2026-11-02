@@ -1,5 +1,5 @@
 import { defaultToastFor } from "./errorToast";
-import { isGeminiError, isTransient } from "./geminiError";
+import { isProviderError, isTransient } from "./providerError";
 import { hasMacOsFallback } from "./tts";
 
 export type TtsErrorRouting = { title: string; message: string; fallback: boolean };
@@ -13,17 +13,20 @@ export type TtsErrorRouting = { title: string; message: string; fallback: boolea
  * kinds therefore swap to the neutral "Using system voice for now." copy.
  */
 export function routeTtsError(err: unknown, languageCode: string): TtsErrorRouting {
-  if (isGeminiError(err)) {
+  if (isProviderError(err)) {
     const base = defaultToastFor(err.cause);
     if (isTransient(err)) {
       return { ...base, message: "Using system voice for now.", fallback: true };
     }
     return { ...base, fallback: false };
   }
-  const error = err instanceof Error ? err : new Error(String(err));
+  // Anything reaching here is an fs/exec failure whose message carries absolute
+  // paths and command text. tts.ts already logs the original; the toast gets
+  // fixed copy. See AGENTS.md → Security Guardrails.
+  const fallback = hasMacOsFallback(languageCode);
   return {
     title: "Pronunciation failed",
-    message: error.message || "Unknown error.",
-    fallback: hasMacOsFallback(languageCode),
+    message: fallback ? "Using system voice for now." : "Could not play the pronunciation. Please try again.",
+    fallback,
   };
 }

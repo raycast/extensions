@@ -75,6 +75,7 @@ describe("incidentIoAdapter", () => {
 
     const snapshot = await incidentIoAdapter.fetchSnapshot({
       url: "https://status.linear.app",
+      includeHistory: true,
     });
 
     expect(snapshot.error).toBeUndefined();

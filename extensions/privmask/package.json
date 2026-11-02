@@ -18,7 +18,7 @@
     {
       "name": "mask-text",
       "title": "Mask Text",
-      "description": "Review the personal information found in your selection or clipboard, then copy the masked text.",
+      "description": "Review the personal information found in your selection or clipboard. The masked text is copied as soon as it is ready.",
       "mode": "view"
     }
   ],

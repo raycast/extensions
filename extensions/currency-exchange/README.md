@@ -28,7 +28,7 @@ exchange with historical currency
 
 ## How to get API Keys
 
-The extension supports two providers; pick one in the **Rate Provider** preference and supply that provider's key.
+The extension supports three providers; pick one in the **Rate Provider** preference and supply that provider's key (AllRatesToday needs none).
 
 ### ExchangeRate-API (default)
 
@@ -40,6 +40,12 @@ The extension supports two providers; pick one in the **Rate Provider** preferen
 - Go to https://unirateapi.com/ and register, it is free
 - Copy your key from https://unirateapi.com/dashboard
 - Free tier covers latest rates; historical rates require a Pro plan
+
+### AllRatesToday (no API key)
+
+- Serves the European Central Bank's daily reference rates from https://allratestoday.com/api/open/central-bank/ecb
+- No registration; leave the API Key field empty
+- Covers the ~30 currencies in the ECB table (EUR base, cross rates derived); no historical rates
 
 currency rate will be queried every 24 hours to reduce API usage.
 

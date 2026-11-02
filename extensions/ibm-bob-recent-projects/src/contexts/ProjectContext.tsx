@@ -2,6 +2,7 @@ import { open, showHUD } from "@raycast/api";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import { createContext, ReactNode, useContext } from "react";
 import { runAppleScriptSync } from "run-applescript";
+import { getBobAppName } from "../lib/bob";
 import { LaunchContext } from "../integrations/types";
 
 interface ProjectContextType {
@@ -13,10 +14,11 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 export function ProjectProvider({ children, launchContext }: { children: ReactNode; launchContext?: LaunchContext }) {
   const openProject = async (uri: string, closeOtherWindows: boolean) => {
     try {
+      const appName = getBobAppName();
       if (closeOtherWindows) {
         runAppleScriptSync(`
             tell application "System Events"
-              tell process "IBM Bob"
+              tell process "${appName}"
                 repeat while window 1 exists
                   click button 1 of window 1
                 end repeat
@@ -24,7 +26,7 @@ export function ProjectProvider({ children, launchContext }: { children: ReactNo
             end tell
             `);
       }
-      await open(uri, "IBM Bob");
+      await open(uri, appName);
 
       const { callbackLaunchOptions } = launchContext || {};
 

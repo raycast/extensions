@@ -1,5 +1,11 @@
 # Brew Changelog
 
+## [Better search ranking] - 2026-10-31
+
+- Improved: Search now lists exact name matches first, then names that start with what you typed, then names containing it, and description-only matches last. Searching `dia` finds Dia before AirMedia
+
+## [Added new screenshots] - 2026-10-13
+
 ## [Remove Tap fix] - 2026-10-04
 
 - Fixed: on Homebrew 6.0.12 and earlier, Remove Tap left the tap's installed packages behind although its confirmation said they would be uninstalled. It now uninstalls them, then removes the tap, on every Homebrew version, and keeps the tap if a package can't be uninstalled

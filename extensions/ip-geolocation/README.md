@@ -2,6 +2,17 @@
 
 Show local and public IPv4/IPv6 address.
 Query geolocation for any IP address or domain.
+Compare geolocation across multiple providers.
+
+## Compare IP Providers
+
+Look up an IP address across five free geolocation and registry providers in parallel to see where they agree or differ:
+
+- [ip-api.com](https://ip-api.com)
+- [ipwho.is](https://ipwho.is)
+- [ipapi.is](https://ipapi.is)
+- [ipinfo.io](https://ipinfo.io)
+- [rdap.org](https://rdap.org)
 
 **IP Geolocation** Query Service from [ip-api.com](https://ip-api.com). The following notes are from the official website
 

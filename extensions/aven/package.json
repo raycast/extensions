@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aven",
+  "title": "Aven",
+  "description": "Raycast extension for the aven task manager.",
+  "icon": "icon.png",
+  "author": "Infonautica",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Adds a new task to specified Workspace and project in aven CLI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultWorkspace",
+      "title": "Default Workspace",
+      "description": "Workspace key to preselect when adding a task. Falls back to the first available workspace if not found.",
+      "type": "textfield",
+      "placeholder": "e.g. default",
+      "required": false
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project",
+      "description": "Project key to preselect when adding a task. Falls back to the first available project in the selected workspace if not found.",
+      "type": "textfield",
+      "placeholder": "e.g. your-project",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -5,7 +5,6 @@ import {
   confirmAlert,
   FileIcon,
   Icon,
-  popToRoot,
   showHUD,
   showToast,
   Toast,
@@ -179,7 +178,8 @@ const createFavoriteActions = (
 
 const createDestructiveActions = (
   file: File,
-  onFileUpdated?: (file: File) => void
+  onFileUpdated?: (file: File) => void,
+  onFileDeleted?: (file: File) => void
 ): ActionGroup<DetailActionPreference> => ({
   key: "destructive",
   useDivider: "always",
@@ -216,8 +216,11 @@ const createDestructiveActions = (
           if (confirm) {
             try {
               await methods.deleteFile(file);
-              await showHUD("Bookmark deleted");
-              await popToRoot();
+              onFileDeleted?.(file);
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Bookmark deleted",
+              });
             } catch (error) {
               await showToast({
                 style: Toast.Style.Failure,
@@ -247,6 +250,7 @@ export type DetailsActionsProps = {
   showDetail: boolean;
   setShowDetail: Dispatch<SetStateAction<boolean>>;
   onFileUpdated?: (file: File) => void;
+  onFileDeleted?: (file: File) => void;
 };
 export default function DetailsActions({
   file,
@@ -254,6 +258,7 @@ export default function DetailsActions({
   showDetail,
   setShowDetail,
   onFileUpdated,
+  onFileDeleted,
 }: DetailsActionsProps): React.JSX.Element {
   const { value: obsidianFileIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultItemAction");
@@ -297,9 +302,19 @@ export default function DetailsActions({
       createBrowserActions(file),
       createFavoriteActions(file, files, applyFavorites),
       createObsidianActions(file, obsidianFileIcon),
-      createDestructiveActions(file, onFileUpdated),
+      createDestructiveActions(file, onFileUpdated, onFileDeleted),
     ];
-  }, [file, files, obsidianFileIcon, showDetail, setShowDetail, editBookmark, applyFavorites, onFileUpdated]);
+  }, [
+    file,
+    files,
+    obsidianFileIcon,
+    showDetail,
+    setShowDetail,
+    editBookmark,
+    applyFavorites,
+    onFileUpdated,
+    onFileDeleted,
+  ]);
 
   return <OrderedActionPanel groups={groups} defaultAction={defaultAction} />;
 }

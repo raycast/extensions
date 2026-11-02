@@ -1,6 +1,5 @@
-import { Clipboard, Tool } from "@raycast/api";
-import { createPaste } from "../api";
-import { addToHistory } from "../history";
+import { Tool, getPreferenceValues } from "@raycast/api";
+import { createAndCopyPaste } from "../copy-paste";
 
 type Input = {
   /**
@@ -31,15 +30,15 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
  * instead of asking for confirmation in your reply.
  */
 export default async function tool(input: Input) {
-  const result = await createPaste(input.content);
-  await addToHistory({ url: result.url, content: input.content, partial: result.partial });
-  await Clipboard.copy(result.url);
+  const { language = "" } = getPreferenceValues<Preferences>();
+  const result = await createAndCopyPaste(input.content, language);
 
   return {
     url: result.url,
     partial: result.partial,
-    message: result.partial
-      ? `Content exceeded paste.rs's size limit, so only part of it was uploaded. Partial URL: ${result.url}`
-      : `Paste created: ${result.url}`,
+    message:
+      (result.partial
+        ? `Content exceeded paste.rs's size limit, so only part of it was uploaded. Partial URL: ${result.url}`
+        : `Paste created: ${result.url}`) + (result.historySaved ? "" : " Local history could not be saved."),
   };
 }

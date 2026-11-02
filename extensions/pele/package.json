@@ -1,0 +1,302 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pele",
+  "title": "Pele",
+  "description": "Create Mermaid diagrams with Pele. Preview, copy, and save PNG or SVG images locally.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pele",
+      "title": "Create Diagram",
+      "subtitle": "Pele",
+      "description": "Render Mermaid code from selected text or the clipboard, or write a diagram with themes and PNG or SVG export.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-diagram",
+      "title": "Generate Diagram",
+      "description": "Render complete Mermaid syntax with Pele and save a PNG or SVG image locally. Returns a link to the actual rendered file and its dimensions. Local images cannot be displayed inline in Raycast AI Chat."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.2.7",
+    "@resvg/resvg-wasm": "2.6.2",
+    "@xmldom/xmldom": "^0.9.12",
+    "fontkit": "^2.0.4",
+    "pele": "1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/fontkit": "^2.0.9",
+    "@types/node": "22.19.17",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "pngjs": "^7.0.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Default Theme",
+      "description": "Theme used for new diagrams. You can change it in the editor.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Match Raycast",
+          "value": "auto"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        },
+        {
+          "title": "Flexoki Light",
+          "value": "flexoki-light"
+        },
+        {
+          "title": "Flexoki Dark",
+          "value": "flexoki-dark"
+        }
+      ]
+    },
+    {
+      "name": "scale",
+      "title": "PNG Resolution",
+      "description": "Resolution multiplier for PNG images. Large diagrams are limited to 16 megapixels or 8,192 pixels per side.",
+      "type": "dropdown",
+      "required": false,
+      "default": "2",
+      "data": [
+        {
+          "title": "1\u00d7",
+          "value": "1"
+        },
+        {
+          "title": "2\u00d7",
+          "value": "2"
+        },
+        {
+          "title": "3\u00d7",
+          "value": "3"
+        },
+        {
+          "title": "4\u00d7",
+          "value": "4"
+        }
+      ]
+    },
+    {
+      "name": "transparent",
+      "title": "Transparent Background",
+      "label": "Use a transparent canvas background",
+      "description": "Node fills and labels retain the theme colors.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "saveFolder",
+      "title": "Save Folder",
+      "description": "Folder for exported diagrams. Defaults to Downloads/Pele.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "When asked to create or convert a diagram, produce complete valid Mermaid syntax and pass it as mermaid to generate-diagram. Preserve supplied YAML frontmatter config. Express requested diagram settings such as Sankey showValues, nodeWidth, and nodePadding in the frontmatter config. Use the requested theme, format, and transparency when specified. The tool renders locally with Pele and saves the file. After success, output the returned markdown verbatim as your response. It links to the actual Pele image and explains that Raycast AI Chat cannot display local images inline. Never output a Mermaid code block as a preview: Raycast would redraw it with a different renderer, layout, and styling. Do not replace the link with a bare file path, invent sandbox paths, or use Markdown image tags for local files. Do not claim the image was copied, opened, uploaded, or displayed inline. Do not call the tool again after a successful result unless the user requests a change. Pele supports built-in Mermaid diagram types, but uses its own layout and themes. Remote images and links are disabled.",
+    "evals": [
+      {
+        "input": "@pele Create a flowchart for user login and save it as a PNG.",
+        "mocks": {
+          "generate-diagram": {
+            "filePath": "/Users/example/Downloads/Pele/flowchart-example.png",
+            "format": "png",
+            "diagramType": "flowchart",
+            "theme": "light",
+            "width": 1000,
+            "height": 600,
+            "fileUrl": "file:///Users/example/Downloads/Pele/flowchart-example.png",
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/flowchart-example.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-diagram",
+              "arguments": {
+                "mermaid": {
+                  "matches": "(flowchart|graph)"
+                }
+              }
+            }
+          },
+          {
+            "includes": ".png"
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/flowchart-example.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
+          }
+        ]
+      },
+      {
+        "input": "@pele Draw a sequence diagram of a browser requesting data from an API. Save a dark SVG with a transparent background.",
+        "mocks": {
+          "generate-diagram": {
+            "filePath": "/Users/example/Downloads/Pele/sequence-example.svg",
+            "format": "svg",
+            "diagramType": "sequence",
+            "theme": "dark",
+            "width": 500,
+            "height": 300,
+            "fileUrl": "file:///Users/example/Downloads/Pele/sequence-example.svg",
+            "markdown": "[Open Pele SVG](<file:///Users/example/Downloads/Pele/sequence-example.svg>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-diagram",
+              "arguments": {
+                "mermaid": {
+                  "includes": "sequenceDiagram"
+                },
+                "theme": "dark",
+                "format": "svg",
+                "transparent": true
+              }
+            }
+          },
+          {
+            "includes": ".svg"
+          },
+          {
+            "includes": "[Open Pele SVG](<file:///Users/example/Downloads/Pele/sequence-example.svg>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
+          }
+        ]
+      },
+      {
+        "input": "@pele Save this Mermaid diagram as a PNG, preserving its config:\n---\nconfig:\n  sankey:\n    showValues: false\n    nodeWidth: 15\n    nodePadding: 20\n---\nsankey\n\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,Industry,342.165\nElectricity grid,Losses,56.691",
+        "mocks": {
+          "generate-diagram": {
+            "filePath": "/Users/example/Downloads/Pele/sankey-example.png",
+            "format": "png",
+            "diagramType": "sankey",
+            "theme": "light",
+            "width": 1296,
+            "height": 896,
+            "fileUrl": "file:///Users/example/Downloads/Pele/sankey-example.png",
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/sankey-example.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-diagram",
+              "arguments": {
+                "mermaid": {
+                  "includes": "showValues: false"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "generate-diagram",
+              "arguments": {
+                "mermaid": {
+                  "includes": "nodeWidth: 15"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "generate-diagram",
+              "arguments": {
+                "mermaid": {
+                  "includes": "nodePadding: 20"
+                }
+              }
+            }
+          },
+          {
+            "includes": ".png"
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/sankey-example.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
+          }
+        ]
+      },
+      {
+        "input": "@pele Create a frog life cycle diagram as a closed loop and show it here.",
+        "mocks": {
+          "generate-diagram": {
+            "filePath": "/Users/example/Downloads/Pele/frog.png",
+            "fileUrl": "file:///Users/example/Downloads/Pele/frog.png",
+            "format": "png",
+            "diagramType": "flowchart",
+            "theme": "light",
+            "width": 1200,
+            "height": 800,
+            "markdown": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/frog.png>)\n\nRaycast AI Chat cannot display the local image inline. Open the file to see the rendered diagram."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "generate-diagram"
+            }
+          },
+          {
+            "includes": "[Open Pele PNG](<file:///Users/example/Downloads/Pele/frog.png>)"
+          },
+          {
+            "includes": "cannot display the local image inline"
+          }
+        ]
+      }
+    ]
+  }
+}

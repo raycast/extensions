@@ -32,17 +32,21 @@ export function DailyUsage() {
     [dailyUsage?.totalCost, dailyUsage?.totalTokens],
   );
 
-  const accessories: List.Item.Accessory[] = error
-    ? STANDARD_ACCESSORIES.ERROR
-    : dailyUsage === undefined
-      ? STANDARD_ACCESSORIES.LOADING
-      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+  const accessories: List.Item.Accessory[] =
+    error && !dailyUsage
+      ? STANDARD_ACCESSORIES.ERROR
+      : dailyUsage === undefined
+        ? isLoading
+          ? STANDARD_ACCESSORIES.LOADING
+          : STANDARD_ACCESSORIES.NO_DATA
+        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
-    if (error || !dailyUsage) {
+    if (!dailyUsage) {
       return (
         <ErrorMetadata
           error={error}
+          isLoading={isLoading}
           noDataMessage={!dailyUsage ? "No usage recorded for today" : undefined}
           noDataSubMessage={!dailyUsage ? `Date: ${currentDate || "Loading..."}` : undefined}
         />
@@ -51,6 +55,7 @@ export function DailyUsage() {
 
     return (
       <List.Item.Detail.Metadata>
+        {error && <List.Item.Detail.Metadata.Label title="Refresh Error" text={error.message} />}
         <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
         {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
           <List.Item.Detail.Metadata.Label

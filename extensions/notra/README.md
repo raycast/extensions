@@ -5,8 +5,14 @@ View GEO analytics, manage content, and create content with [Notra](https://www.
 ## Setup
 
 1. Sign in to your account at [app.usenotra.com](https://app.usenotra.com)
-2. Navigate to the `API Keys` page and create an organization-scoped API key with read and write permissions
+2. Navigate to the `API Keys` page and create an API key with read and write permissions
+   - An **organization key** works in that one workspace
+   - An **account key** works in every workspace you're a member of
 3. Open any Notra command in Raycast and enter your API key when prompted
+
+## Workspaces
+
+With an account key that belongs to more than one workspace, pick the workspace from the dropdown in the search bar (GEO, brand identities, integrations), the Workspace field (create commands), or the `Switch Workspace` action (content list). Raycast remembers your choice across commands. With an organization key, or an account in a single workspace, there's nothing to choose.
 
 ## Commands
 

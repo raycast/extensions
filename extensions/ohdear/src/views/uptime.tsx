@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
 import { getUptime } from "../api";
 import { EmptyView } from "../components/empty-view";
-import { Site } from "../interface";
+import { Uptime, Site } from "../interface";
 import dayjs from "dayjs";
 
-export default function UptimeCommand({ item }: { item: Site }): JSX.Element {
+export default function UptimeCommand({ item }: { item: Site }) {
   const { data, isLoading } = getUptime(item);
 
   return (
@@ -12,7 +12,7 @@ export default function UptimeCommand({ item }: { item: Site }): JSX.Element {
       <EmptyView title={Array.isArray(data) && data?.length ? "No Results Found" : "No Uptime Logs Available"} />
       <List.Section title="Showing Last 30 Days">
         {Array.isArray(data) &&
-          data?.map((item: any, index: number) => {
+          data?.map((item: Uptime, index: number) => {
             const checkDate = dayjs.utc(item.datetime).local().format("YYYY-MM-DD HH:mm:ss");
             return <List.Item key={index} title={`${item.uptime_percentage}% Uptime`} subtitle={checkDate} />;
           })}

@@ -111,6 +111,24 @@ export async function checkPageSuppliedUrl(rawUrl: string, pageUrl: string): Pro
   return { allowed: true };
 }
 
+/**
+ * `promise`, or a rejection as soon as `signal` aborts.
+ *
+ * The guard's `dns.lookup` takes no signal and can stall for as long as the
+ * resolver does. Without this, a caller's deadline only starts to apply at the
+ * `fetch`, so a hung lookup holds the caller's spinner past every timeout it set.
+ * The lookup itself keeps running; its answer is simply no longer awaited.
+ */
+export function untilAborted<T>(promise: Promise<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (!signal) return promise;
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener("abort", onAbort));
+  });
+}
+
 /** Redirect hops followed before giving up. Matches what a browser considers reasonable. */
 const MAX_REDIRECTS = 5;
 
@@ -130,7 +148,7 @@ export async function fetchPageSuppliedUrl(
   let current = rawUrl;
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    const verdict = await checkPageSuppliedUrl(current, pageUrl);
+    const verdict = await untilAborted(checkPageSuppliedUrl(current, pageUrl), init.signal);
     if (!verdict.allowed) throw new Error(`Refused: ${verdict.reason}`);
 
     const response = await fetch(current, { ...init, redirect: "manual" });

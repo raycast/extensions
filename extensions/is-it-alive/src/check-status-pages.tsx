@@ -2,14 +2,15 @@ import {
   Action,
   ActionPanel,
   Color,
+  environment,
   Icon,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { detectProvider, fetchAllSnapshots, fetchSnapshot } from "@/adapters";
+import { detectProvider, fetchAllSnapshots, fetchStatus } from "@/adapters";
 import { mapPool } from "@/lib/async-pool";
 import { SiteDetail } from "@/components/site-detail";
 import { SiteForm } from "@/components/site-form";
@@ -31,6 +32,7 @@ export default function Command() {
     addSites,
     deleteSite,
     updateSite,
+    updateProviders,
   } = useSites();
   const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
   const [addingUrls, setAddingUrls] = useState<string[]>([]);
@@ -48,7 +50,26 @@ export default function Command() {
       return fetchAllSnapshots(siteList);
     },
     [sites],
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      onData: (data) => {
+        const providers = Object.fromEntries(
+          sites.flatMap((site) => {
+            const provider = data[site.id]?.redetectedProvider;
+            return provider && provider !== site.provider
+              ? [[site.id, provider]]
+              : [];
+          }),
+        );
+        if (Object.keys(providers).length > 0) {
+          updateProviders(providers).catch((error) =>
+            showFailureToast(error, {
+              title: "Failed to save the new adapter",
+            }),
+          );
+        }
+      },
+    },
   );
 
   const suggestedSections = unusedSuggestedSitesBySection(
@@ -184,6 +205,9 @@ export default function Command() {
         subtitle={subtitle}
         icon={icon}
         accessories={[
+          ...(environment.isDevelopment
+            ? [{ tag: site.provider, tooltip: "Adapter" }]
+            : []),
           ...(snapshot?.incidents?.length
             ? [
                 {
@@ -377,7 +401,7 @@ export default function Command() {
 async function resolveSuggestedSite(site: SuggestedSite): Promise<SiteInput> {
   const url = normalizeSiteUrl(site.url);
   const provider = await detectProvider(url);
-  const snapshot = await fetchSnapshot({ url, provider });
+  const snapshot = await fetchStatus({ url, provider });
 
   if (snapshot.error) {
     throw new Error(snapshot.error);

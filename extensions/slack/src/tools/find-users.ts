@@ -47,6 +47,9 @@ async function findUsers(input: Input) {
           email: user.profile?.email,
           status: user.profile?.status_text,
           timezone: user.tz_label,
+          // Slack only provides 1024px for uploaded photos; default avatars and Gravatars stop at 512px.
+          photoUrl: user.profile?.image_1024 ?? user.profile?.image_512,
+          hasCustomPhoto: user.profile?.is_custom_image ?? false,
         });
       }
     }

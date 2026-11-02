@@ -2,6 +2,13 @@
 
 This extension is used for generating text from screen captured images, detect language with Raycast AI or any few other famous libraries, and it requires Tesseract binary in order to work!
 
+## OCR engines
+
+Easy OCR can use one of two engines, chosen with the **OCR Engine** preference:
+
+- **Tesseract** (default): open source, needs a local install (see below).
+- **Apple Vision**: the engine behind macOS Live Text. It is built into macOS, so nothing needs installing. It reads Arabic noticeably better than Tesseract on small screen captures. Set the languages to read in **Apple Vision Languages** as a comma-separated list in priority order, for example `ar-SA,en-US`. If a language isn't supported by your macOS version, the extension tells you which one.
+
 ## Tesseract
 Tesseract is open source OCR engine, and it needs to be installed locally on your machine.
 

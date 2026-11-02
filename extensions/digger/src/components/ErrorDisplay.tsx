@@ -10,6 +10,10 @@ interface ErrorDisplayProps {
   /** The URL that failed. Included in the copied detail — an error report that
    *  omits what was being dug is most of the way to useless. */
   url?: string;
+  /** The search bar changed from `url`: what it holds now, and the URL in it, if any. */
+  edited?: { text: string; url: string | null };
+  /** Dig the edited URL in place of the one that failed. */
+  onDig?: (url: string) => void;
 }
 
 /** Get icon and color based on error type */
@@ -41,11 +45,11 @@ function getErrorIcon(errorType: ErrorType | null): { icon: Icon; color: Color }
  * in the sidebar, duplicating the detail pane beside it and implying there was a
  * list of things to pick from. The empty state is the honest shape.
  *
- * Modelled on karakeep's ConnectionErrorView. A PARTIAL failure is different and
+ * Modeled on karakeep's ConnectionErrorView. A PARTIAL failure is different and
  * is not shown here at all: each section reports its own lookup, so the record
  * survives a cache hit that component state would not.
  */
-export function ErrorDisplay({ error, errorType, fetchErrors, onRetry, url }: ErrorDisplayProps) {
+export function ErrorDisplay({ error, errorType, fetchErrors, onRetry, url, edited, onDig }: ErrorDisplayProps) {
   const { icon, color } = getErrorIcon(errorType);
   const title = getErrorTitle(errorType);
   const isRecoverable = fetchErrors.length === 0 || fetchErrors.some((e) => e.recoverable);
@@ -59,14 +63,22 @@ export function ErrorDisplay({ error, errorType, fetchErrors, onRetry, url }: Er
   // cause shape structurally — no mapping needed.
   const detail = buildErrorReport({ errorType, message: error, url, causes: fetchErrors });
 
+  // A corrected URL in the search bar takes over the primary action: Retry would
+  // dig the URL that just failed, which is not what typing a new one asked for.
+  const next = edited?.url;
+  const notAUrl = edited && !edited.url ? edited.text : undefined;
+
   return (
     <List.EmptyView
-      icon={{ source: icon, tintColor: color }}
-      title={title}
-      description={error}
+      icon={notAUrl ? Icon.Warning : { source: icon, tintColor: color }}
+      title={notAUrl ? `“${notAUrl.length > 40 ? `${notAUrl.slice(0, 40)}…` : notAUrl}” isn't a URL` : title}
+      description={notAUrl ? "Type a website address, like raycast.com." : error}
       actions={
         <ActionPanel>
-          {isRecoverable && (
+          {next && onDig ? (
+            <Action title="Dig This URL" icon={Icon.MagnifyingGlass} onAction={() => onDig(next)} />
+          ) : null}
+          {isRecoverable && !notAUrl && (
             <Action
               title="Retry"
               icon={Icon.ArrowClockwise}

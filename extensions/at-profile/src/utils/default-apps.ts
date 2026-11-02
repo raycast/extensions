@@ -85,3 +85,9 @@ export const defaultApps: App[] = [
     placeholder: "username",
   },
 ];
+
+const defaultAppValues = new Set(defaultApps.map((app) => app.value));
+
+export function isDefaultApp(value: string): boolean {
+  return defaultAppValues.has(value);
+}

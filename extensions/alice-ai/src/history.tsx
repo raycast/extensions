@@ -1,22 +1,20 @@
 import { Detail, LaunchProps } from "@raycast/api";
 import "./lib/OpenAI";
 import { useActionsAreReady } from "./store/actions";
+import { ItemLaunchContext } from "./types";
 import HistoryList from "./views/HistoryList";
 import HistoryView from "./views/HistoryView";
 
-interface Arguments {
-  id?: string;
-}
-
-export default function HistoryCommand(props: LaunchProps<{ arguments: Arguments }>) {
+export default function HistoryCommand(props: LaunchProps<{ arguments: ItemLaunchContext; launchContext: ItemLaunchContext }>) {
   const ready = useActionsAreReady();
 
   if (!ready) {
     return <Detail />;
   }
 
-  if (props.arguments.id !== undefined) {
-    return <HistoryView id={props.arguments.id} />;
+  const id = props.launchContext?.id ?? props.arguments?.id;
+  if (id !== undefined) {
+    return <HistoryView id={id} />;
   }
 
   return <HistoryList />;

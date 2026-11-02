@@ -40,7 +40,7 @@
     "@ai-sdk/google": "^4.0.82",
     "@ai-sdk/openai": "^4.0.78",
     "@ai-sdk/openai-compatible": "^3.0.57",
-    "@raycast/api": "^2.5.2",
+    "@raycast/api": "^2.8.2",
     "ai": "^7.0.116",
     "zod": "^4.6.5"
   },

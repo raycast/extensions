@@ -433,3 +433,30 @@ export async function newPrivateWindow() {
     { timeout: 45000 },
   );
 }
+
+export async function duplicateTab() {
+  const activationRetries = 10;
+  const activationDelaySeconds = 0.2;
+
+  await runAppleScript(`
+    tell application "${safariAppIdentifier}"
+      if (count of windows) is 0 then error "Safari has no open window."
+      tell front window
+        set curTab to current tab
+        set tabUrl to URL of curTab
+        if tabUrl is missing value or tabUrl is "" then
+          set newTab to make new tab at after curTab
+        else
+          set newTab to make new tab at after curTab with properties {URL:tabUrl}
+        end if
+        set current tab to newTab
+      end tell
+      repeat ${activationRetries} times
+        activate
+        if frontmost then exit repeat
+        delay ${activationDelaySeconds}
+      end repeat
+      if not frontmost then error "Tab duplicated, but ${safariAppIdentifier} did not take focus"
+    end tell
+  `);
+}

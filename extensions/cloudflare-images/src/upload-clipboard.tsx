@@ -1,5 +1,5 @@
 import { type LaunchProps } from "@raycast/api";
-import type { OutputFormat } from "@mcdays/cloudflare-images-core";
+import type { OutputFormat } from "./lib/cloudflare-core.js";
 import { runUploadClipboard } from "./lib/upload-clipboard-impl.js";
 
 /**

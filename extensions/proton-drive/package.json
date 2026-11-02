@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proton-drive",
+  "title": "Proton Drive",
+  "description": "Search, open, download and upload files in Proton Drive using the official Proton Drive CLI.",
+  "icon": "extension-icon.png",
+  "author": "bastien",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "proton",
+    "drive",
+    "cloud",
+    "files",
+    "storage",
+    "encrypted"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "Proton Drive",
+      "description": "Browse and search your Proton Drive",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "description": "What Enter does on a file.",
+          "default": "open",
+          "required": false,
+          "data": [
+            {
+              "title": "Open",
+              "value": "open"
+            },
+            {
+              "title": "Download",
+              "value": "download"
+            }
+          ]
+        },
+        {
+          "name": "downloadDirectory",
+          "type": "directory",
+          "title": "Download Directory",
+          "description": "Where Download saves files.",
+          "default": "~/Downloads",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "upload-files",
+      "title": "Upload Files",
+      "subtitle": "Proton Drive",
+      "description": "Upload the Finder selection, or files you choose, to a Proton Drive folder",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Log In to Proton Drive",
+      "subtitle": "Proton Drive",
+      "description": "Check authentication status and log in",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-index",
+      "title": "Refresh Search Index",
+      "subtitle": "Proton Drive",
+      "description": "Rebuild the local index used by Search Files",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "title": "CLI Path",
+      "description": "Command name or full path of the proton-drive executable. A name is looked up in /opt/homebrew/bin, /usr/local/bin, ~/.local/bin, ~/bin and PATH.",
+      "required": false,
+      "default": "proton-drive"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.1",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

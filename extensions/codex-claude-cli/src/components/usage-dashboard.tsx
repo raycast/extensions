@@ -1,10 +1,20 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Icon, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useRef } from "react";
+
+import { connectClaudeStatusLine, disconnectClaudeStatusLine } from "../lib/claude-statusline";
+import { escapeUsageMarkdown, usageGaugeMarkdown } from "../lib/usage-gauge";
 
 import { useUsage } from "../hooks/use-usage";
 import { providerIcon } from "../lib/presentation";
-import { shortcut, shortcutLabel, useShortcutStore } from "../lib/shortcuts";
+import { shortcut, useShortcutStore } from "../lib/shortcuts";
 import {
   providerRemainingPercent,
+  currentUsageWindows,
+  invalidateUsageCache,
+  isUsageStateFresh,
+  refreshUsageState,
+  usageProviderName,
   type ProviderUsageState,
   type UsageCredits,
   type UsageTokenStats,
@@ -25,10 +35,10 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 
 export function UsageDashboard() {
   useShortcutStore();
-  const { snapshot, isLoading, error, refresh } = useUsage();
+  const { snapshot, isLoading, error, refresh } = useUsage({ refreshIntervalMilliseconds: 60_000 });
 
   return (
-    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder={"Claude and Codex usage…"}>
+    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder={"Provider usage…"}>
       {providerOrder.map((provider) => {
         const state = snapshot?.providers[provider] || {
           provider,
@@ -37,13 +47,48 @@ export function UsageDashboard() {
         };
         return <UsageProviderItem key={provider} state={state} onRefresh={() => refresh(true)} />;
       })}
+      {snapshot?.customProviders.map((state) => (
+        <UsageProviderItem key={state.provider} state={state} onRefresh={() => refresh(true)} />
+      ))}
     </List>
   );
 }
 
 function UsageProviderItem({ state, onRefresh }: { state: ProviderUsageState; onRefresh: () => Promise<void> }) {
-  const providerTitle = state.provider === "claude" ? "Claude" : "Codex";
-  const remainingPercent = providerRemainingPercent(state.data);
+  state = refreshUsageState(state);
+  const providerTitle = usageProviderName(state);
+  const changingConnection = useRef(false);
+  const remainingPercent = isUsageStateFresh(state)
+    ? providerRemainingPercent(state.data && { ...state.data, windows: currentUsageWindows(state) })
+    : undefined;
+  async function changeConnection(connect: boolean) {
+    if (changingConnection.current) return;
+    changingConnection.current = true;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: connect ? "Connecting Claude Code" : "Disconnecting Claude Code",
+    });
+    try {
+      await invalidateUsageCache();
+      try {
+        if (connect) await connectClaudeStatusLine();
+        else await disconnectClaudeStatusLine();
+      } finally {
+        await invalidateUsageCache();
+        await onRefresh();
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = connect ? "Claude Code connected" : "Claude Code disconnected";
+      if (connect) toast.message = "Restart Claude Code, then continue a conversation to update usage.";
+    } catch (error) {
+      await toast.hide();
+      await showFailureToast(error, {
+        title: connect ? "Could not connect Claude Code" : "Could not disconnect Claude Code",
+      });
+    } finally {
+      changingConnection.current = false;
+    }
+  }
   const accessories: List.Item.Accessory[] = [];
   if (remainingPercent !== undefined) {
     accessories.push({
@@ -69,19 +114,28 @@ function UsageProviderItem({ state, onRefresh }: { state: ProviderUsageState; on
   return (
     <List.Item
       id={state.provider}
-      icon={providerIcon(state.provider)}
+      icon={state.provider === "claude" || state.provider === "codex" ? providerIcon(state.provider) : Icon.Gauge}
       title={providerTitle}
       subtitle={subtitle}
       accessories={accessories}
       detail={<UsageDetail state={state} />}
       actions={
         <ActionPanel>
+          {state.provider === "claude" && state.needsConnection ? (
+            <Action title="Connect Claude Code" icon={Icon.Plug} onAction={() => changeConnection(true)} />
+          ) : null}
           <Action
             title={"Refresh Usage"}
             icon={Icon.ArrowClockwise}
             shortcut={shortcut("common.refresh")}
             onAction={onRefresh}
           />
+          {state.provider === "claude" && state.bridgeConnected ? (
+            <Action title="Disconnect Claude Code" icon={Icon.Plug} onAction={() => changeConnection(false)} />
+          ) : null}
+          {safeDashboardUrl(state.data?.dashboardUrl) ? (
+            <Action.OpenInBrowser title="Open Provider Dashboard" url={safeDashboardUrl(state.data?.dashboardUrl)!} />
+          ) : null}
           {state.data ? (
             <Action.CopyToClipboard
               title={"Copy Summary"}
@@ -101,35 +155,34 @@ function UsageDetail({ state }: { state: ProviderUsageState }) {
 
 function usageMarkdown(state: ProviderUsageState): string {
   if (!state.data) {
-    const unavailable = [`**${"Usage unavailable"}**`];
-    if (state.error) unavailable.push("", state.error);
+    const unavailable = [
+      `# ${escapeUsageMarkdown(usageProviderName(state))}`,
+      "",
+      state.needsConnection
+        ? "Connect Claude Code to read its status-line usage. Your existing status line is preserved."
+        : state.bridgeConnected
+          ? "Waiting for Claude Code. Restart it, then continue a conversation to update usage."
+          : "**Usage unavailable**",
+    ];
+    if (state.error) unavailable.push("", escapeUsageMarkdown(state.error));
     if (state.lastAttemptAt) {
       unavailable.push("", `_${"Last attempt"} · ${dateFormatter.format(state.lastAttemptAt)}_`);
     }
     return unavailable.join("\n");
   }
 
-  const providerTitle = state.provider === "claude" ? "Claude" : "Codex";
-  const remaining = providerRemainingPercent(state.data);
+  const fresh = isUsageStateFresh(state);
   const sections = [
-    `# ${providerTitle}`,
-    remaining === undefined ? `## ${"Usage unavailable"}` : `## ${formatPercent(remaining)} ${"available"}`,
-    `**${planTitle(state.data.plan) || "Plan unavailable"}**  ·  ${sourceLabel(state)}`,
+    `# ${escapeUsageMarkdown(usageProviderName(state))}`,
+    escapeUsageMarkdown([planTitle(state.data.plan), sourceLabel(state)].filter(Boolean).join(" · ")),
   ];
-  if (state.source === "cache") {
-    sections.push(
-      "",
-      `> **${"Recent cache"}** · ${"Use"} \`${shortcutLabel("common.refresh")}\` ${"to request a live value."}`,
-    );
-  } else if (state.source === "stale") {
-    sections.push("", `> ${"Last valid value"} · ${state.error || "Refresh failed."}`);
-  }
-
-  if (state.data.windows.length === 0) {
-    sections.push("", "---", "", `## ${"Limits"}`, "", "No limits are available for this account.");
+  if (!fresh)
+    sections.push("", `> Last observation · ${escapeUsageMarkdown(state.error || "Waiting for a fresh reading.")}`);
+  const windows = fresh ? currentUsageWindows(state) : state.data.windows;
+  if (windows.length === 0) {
+    sections.push("", "No limits are available for this account.");
   } else {
-    sections.push("", "---", "", `## ${"Limits"}`);
-    for (const window of state.data.windows) sections.push("", usageWindowMarkdown(window));
+    for (const window of windows) sections.push("", usageWindowMarkdown(window, !fresh));
   }
 
   const credits = creditsMarkdown(state.data.credits);
@@ -142,18 +195,31 @@ function usageMarkdown(state: ProviderUsageState): string {
   return sections.join("\n");
 }
 
-function usageWindowMarkdown(window: UsageWindow): string {
+function usageWindowMarkdown(window: UsageWindow, stale: boolean): string {
   const rows = [
-    `### ${window.title}`,
+    `### ${escapeUsageMarkdown(window.title)}`,
     "",
-    `**${formatPercent(window.remainingPercent)} ${"remaining"}**`,
-    "",
-    progressBarMarkdown(window.remainingPercent),
+    usageGaugeMarkdown(window.remainingPercent, window.title, environment.appearance === "dark", stale),
   ];
   if (window.resetsAt) {
-    rows.push("", `**${"Reset"}** · ${formatResetCompact(window.resetsAt)}`);
+    rows.push(
+      "",
+      window.resetsAt <= Date.now()
+        ? "**Reset passed** · waiting for an update"
+        : `**Resets in ${formatResetCompact(window.resetsAt)}**`,
+    );
   }
   return rows.join("\n");
+}
+
+function safeDashboardUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function creditsMarkdown(credits: UsageCredits | undefined): string | undefined {
@@ -176,7 +242,7 @@ function creditsMarkdown(credits: UsageCredits | undefined): string | undefined 
     rows.push(`${formatPercent(credits.remainingPercent)} ${"available"}`);
   }
   if (credits.resetsAt) rows.push(`${"reset"} ${formatResetCompact(credits.resetsAt)}`);
-  return rows.length > 0 ? rows.join(" · ") : undefined;
+  return rows.length > 0 ? escapeUsageMarkdown(rows.join(" · ")) : undefined;
 }
 
 function tokensMarkdown(tokens: UsageTokenStats | undefined): string | undefined {
@@ -194,23 +260,30 @@ function tokensMarkdown(tokens: UsageTokenStats | undefined): string | undefined
   if (tokens.longestStreakDays !== undefined) rows.push(`${"best streak"} ${tokens.longestStreakDays} ${"days"}`);
   const latestBucket = tokens.dailyBuckets?.at(-1);
   if (latestBucket) rows.push(`${latestBucket.date} ${formatTokens(latestBucket.tokens)}`);
-  return rows.length > 0 ? rows.join(" · ") : undefined;
+  return rows.length > 0 ? escapeUsageMarkdown(rows.join(" · ")) : undefined;
 }
 
 function plainUsageSummary(state: ProviderUsageState): string {
   if (!state.data) return state.error || "No usage data";
-  const title = state.provider === "claude" ? "Claude" : "Codex";
+  const title = usageProviderName(state);
   const windows = state.data.windows.map(
     (window) =>
       `${window.title}: ${formatPercent(window.remainingPercent)} ${"remaining"}${
         window.resetsAt ? `, ${"resets"} ${formatReset(window.resetsAt)}` : ""
       }`,
   );
-  return [`${title} · ${planTitle(state.data.plan) || "Plan unavailable"}`, ...windows].join("\n");
+  return [
+    `${title} · ${planTitle(state.data.plan) || "Plan unavailable"} · ${sourceLabel(state)}`,
+    ...windows,
+    `Observed ${dateFormatter.format(state.data.fetchedAt)}`,
+  ].join("\n");
 }
 
 function sourceLabel(state: ProviderUsageState): string {
-  if (state.source === "live") return "Live";
+  if (state.needsConnection) return "Connect";
+  if (state.bridgeConnected && !state.data) return "Waiting for Claude Code";
+  if (state.source === "live")
+    return state.provider === "claude" || state.provider.startsWith("custom-") ? "Latest observation" : "Live";
   if (state.source === "cache") return "Recent cache";
   if (state.source === "stale") return "Last valid value";
   return state.error ? "Error" : "Checking";
@@ -243,20 +316,6 @@ function progressIcon(remainingPercent: number): Icon {
   if (remainingPercent >= 38) return Icon.CircleProgress50;
   if (remainingPercent >= 13) return Icon.CircleProgress25;
   return Icon.Circle;
-}
-
-function progressBarMarkdown(remainingPercent: number): string {
-  const width = 640;
-  const height = 14;
-  const progressWidth = Math.round((clamp(remainingPercent, 0, 100) / 100) * width);
-  const fill = remainingPercent <= 15 ? "#FF6262" : remainingPercent <= 35 ? "#F6C453" : "#58D49C";
-  const svg = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
-    `<rect width="${width}" height="${height}" rx="7" fill="#687080" opacity=".26"/>`,
-    `<rect width="${progressWidth}" height="${height}" rx="7" fill="${fill}"/>`,
-    "</svg>",
-  ].join("");
-  return `![${formatPercent(remainingPercent)}](data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")})`;
 }
 
 function formatPercent(value: number): string {

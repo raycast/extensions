@@ -1,13 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { z } from "zod";
 import VocabuilderTranslateWordProvider, {
   EvalVarsSchema,
-  ReasoningLevelSchema,
   describeFailure,
   parseOrThrow,
   projectKnownErrorOrNull,
 } from "./provider";
-import { geminiError } from "../../src/lib/geminiError";
+import { providerError } from "../../src/lib/providerError";
 import type { LanguagePair } from "../../src/lib/languages";
 
 describe("EvalVarsSchema", () => {
@@ -75,27 +74,14 @@ describe("parseOrThrow", () => {
   });
 });
 
-describe("ReasoningLevelSchema", () => {
-  it("accepts the manifest reasoning defaults and selectable values", () => {
-    expect(ReasoningLevelSchema.parse("none")).toBe("none");
-    expect(ReasoningLevelSchema.parse("low")).toBe("low");
-    expect(ReasoningLevelSchema.parse("medium")).toBe("medium");
-    expect(ReasoningLevelSchema.parse("high")).toBe("high");
-  });
-
-  it("rejects invalid manifest reasoning values instead of relying on a cast", () => {
-    expect(() => ReasoningLevelSchema.parse("minimal")).toThrow();
-  });
-});
-
 describe("projectKnownErrorOrNull", () => {
   const pair: LanguagePair = {
     source: { code: "en", name: "English" },
     target: { code: "uk", name: "Ukrainian" },
   };
 
-  it("projects word-not-found outcome (Gemini said notAWord) as an app-level eval error", () => {
-    const err = geminiError({ domain: "outcome", kind: "word-not-found", surface: "translate" });
+  it("projects word-not-found outcome (the model said notAWord) as an app-level eval error", () => {
+    const err = providerError({ domain: "outcome", kind: "word-not-found", surface: "translate" });
     expect(projectKnownErrorOrNull(err, "xqfjvbn", pair)).toEqual({
       status: "error",
       input: "xqfjvbn",
@@ -105,7 +91,7 @@ describe("projectKnownErrorOrNull", () => {
   });
 
   it("projects invalid-word-input outcome (failed normalizeWordInput) as an app-level eval error", () => {
-    const err = geminiError({ domain: "outcome", kind: "invalid-word-input", surface: "translate" });
+    const err = providerError({ domain: "outcome", kind: "invalid-word-input", surface: "translate" });
     expect(projectKnownErrorOrNull(err, "", pair)).toMatchObject({
       status: "error",
       error: "invalid-word-input",
@@ -113,22 +99,28 @@ describe("projectKnownErrorOrNull", () => {
   });
 
   // Infrastructure errors — including invalid-response — should NOT be projected
-  // as app-level outputs. The schema failure means Gemini misbehaved, not that
+  // as app-level outputs. The schema failure means the provider misbehaved, not that
   // the input was deterministically rejected; the eval should error/skip the
   // case, not pass an assertion against it.
   it("returns null for infrastructure-domain errors so the caller surfaces them as provider failures", () => {
     const cases = [
-      geminiError({ domain: "infrastructure", kind: "network-offline", surface: "translate" }),
-      geminiError({ domain: "infrastructure", kind: "invalid-response", surface: "translate" }),
-      geminiError({ domain: "infrastructure", kind: "request-failed", surface: "translate", status: 500 }),
-      geminiError({ domain: "infrastructure", kind: "invalid-api-key", surface: "translate" }),
+      providerError({ domain: "infrastructure", provider: "gemini", kind: "network-offline", surface: "translate" }),
+      providerError({ domain: "infrastructure", provider: "gemini", kind: "invalid-response", surface: "translate" }),
+      providerError({
+        domain: "infrastructure",
+        provider: "gemini",
+        kind: "request-failed",
+        surface: "translate",
+        status: 500,
+      }),
+      providerError({ domain: "infrastructure", provider: "gemini", kind: "invalid-api-key", surface: "translate" }),
     ];
     for (const err of cases) {
       expect(projectKnownErrorOrNull(err, "hello", pair)).toBeNull();
     }
   });
 
-  it("returns null for non-Gemini errors (legacy SCREAMING_SNAKE strings, plain Error, etc.)", () => {
+  it("returns null for non-provider errors (legacy SCREAMING_SNAKE strings, plain Error, etc.)", () => {
     expect(projectKnownErrorOrNull(new Error("WORD_NOT_FOUND"), "x", pair)).toBeNull();
     expect(projectKnownErrorOrNull(new Error("anything-else"), "x", pair)).toBeNull();
     expect(projectKnownErrorOrNull("not even an error", "x", pair)).toBeNull();
@@ -137,13 +129,19 @@ describe("projectKnownErrorOrNull", () => {
 
 describe("describeFailure", () => {
   it("returns the bare kind for an infrastructure error with no status or body", () => {
-    const err = geminiError({ domain: "infrastructure", kind: "network-offline", surface: "translate" });
+    const err = providerError({
+      domain: "infrastructure",
+      provider: "gemini",
+      kind: "network-offline",
+      surface: "translate",
+    });
     expect(describeFailure(err)).toBe("network-offline");
   });
 
   it("folds HTTP status and response body into the reason", () => {
-    const err = geminiError({
+    const err = providerError({
       domain: "infrastructure",
+      provider: "gemini",
       kind: "request-failed",
       surface: "translate",
       status: 400,
@@ -153,8 +151,9 @@ describe("describeFailure", () => {
   });
 
   it("surfaces rate-limit retryDelay and message for a 429", () => {
-    const err = geminiError({
+    const err = providerError({
       domain: "infrastructure",
+      provider: "gemini",
       kind: "request-failed",
       surface: "translate",
       status: 429,
@@ -165,7 +164,7 @@ describe("describeFailure", () => {
     expect(describeFailure(err)).toBe("request-failed — HTTP 429 — retryDelay 21s — Quota exceeded");
   });
 
-  it("uses name and message for a non-Gemini Error", () => {
+  it("uses name and message for a non-provider Error", () => {
     expect(describeFailure(new TypeError("boom"))).toBe("TypeError: boom");
   });
 
@@ -174,18 +173,136 @@ describe("describeFailure", () => {
   });
 });
 
-describe("VocabuilderTranslateWordProvider constructor", () => {
-  // Promptfoo silently treating a missing temperature as 0 would mask config bugs
-  // and let two YAMLs diverge from the documented eval setup. Fail loud at load.
-  it("throws when promptfoo passes no config", () => {
-    expect(() => new VocabuilderTranslateWordProvider()).toThrow(/temperature/);
+describe("VocabuilderTranslateWordProvider", () => {
+  const vars = {
+    input: "hello",
+    sourceLanguageCode: "en",
+    sourceLanguageName: "English",
+    targetLanguageCode: "uk",
+    targetLanguageName: "Ukrainian",
+  };
+  const callWith = (provider: VocabuilderTranslateWordProvider) =>
+    provider.callApi("hello", { vars } as unknown as Parameters<typeof provider.callApi>[1]);
+
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    for (const name of [
+      "GEMINI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "OPENAI_API_KEY",
+      "OPENAI_COMPATIBLE_API_KEY",
+      "OPENAI_COMPATIBLE_BASE_URL",
+    ]) {
+      vi.stubEnv(name, "");
+    }
+    // 401 is never retried, so each call makes exactly one request.
+    fetchMock = vi.fn(async () => new Response("{}", { status: 401 }));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  it("throws when promptfoo passes a config without temperature", () => {
-    expect(() => new VocabuilderTranslateWordProvider({ config: {} })).toThrow(/temperature/);
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
-  it("accepts a valid config", () => {
-    expect(() => new VocabuilderTranslateWordProvider({ config: { temperature: 0 } })).not.toThrow();
+  function sentRequest(): { url: string; headers: Record<string, string>; body: Record<string, unknown> } {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    return {
+      url,
+      headers: init.headers as Record<string, string>,
+      body: JSON.parse(init.body as string) as Record<string, unknown>,
+    };
+  }
+
+  it("rejects a YAML entry without a known provider id", () => {
+    expect(() => new VocabuilderTranslateWordProvider({ config: {} })).toThrow(/^Invalid provider config \(provider\)/);
+    expect(() => new VocabuilderTranslateWordProvider({ config: { provider: "mistral" } })).toThrow(
+      /Invalid provider config \(provider\)/,
+    );
+  });
+
+  it("names itself after its provider so side-by-side results stay distinct", () => {
+    expect(new VocabuilderTranslateWordProvider({ config: { provider: "anthropic" } }).id()).toBe(
+      "vocabuilder-anthropic",
+    );
+  });
+
+  // `promptfoo validate` instantiates every entry, so a missing key must not fail construction.
+  it("constructs without credentials and fails loudly on the first call, naming the missing variable", async () => {
+    const provider = new VocabuilderTranslateWordProvider({ config: { provider: "anthropic" } });
+    await expect(callWith(provider)).rejects.toThrow(/ANTHROPIC_API_KEY/);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("requires both the key and the server URL for an openai-compatible entry", async () => {
+    vi.stubEnv("OPENAI_COMPATIBLE_API_KEY", "local");
+    const provider = new VocabuilderTranslateWordProvider({
+      config: { provider: "openai-compatible", model: "llama3" },
+    });
+    await expect(callWith(provider)).rejects.toThrow(/OPENAI_COMPATIBLE_BASE_URL/);
+  });
+
+  it("sends the Anthropic key from ANTHROPIC_API_KEY to the Anthropic API", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-eval");
+    vi.stubEnv("GEMINI_API_KEY", "AIza-not-this-one");
+    const provider = new VocabuilderTranslateWordProvider({ config: { provider: "anthropic" } });
+
+    await expect(callWith(provider)).resolves.toEqual({ error: "invalid-api-key" });
+    const { url, headers } = sentRequest();
+    expect(new URL(url).host).toBe("api.anthropic.com");
+    expect(headers["x-api-key"]).toBe("sk-ant-eval");
+  });
+
+  it("uses Gemini Flash-Lite by default and keeps a custom model", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "AIza-eval");
+    await callWith(new VocabuilderTranslateWordProvider({ config: { provider: "gemini" } }));
+    expect(sentRequest().url).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+    );
+
+    fetchMock.mockClear();
+    await callWith(new VocabuilderTranslateWordProvider({ config: { provider: "gemini", model: "gemini-custom" } }));
+    expect(sentRequest().url).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-custom:generateContent",
+    );
+  });
+
+  it("uses GPT-6 Luna with no reasoning by default and keeps a custom model's effort", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "sk-eval");
+    await callWith(new VocabuilderTranslateWordProvider({ config: { provider: "openai" } }));
+    const defaulted = sentRequest();
+    expect(new URL(defaulted.url).host).toBe("api.openai.com");
+    expect(defaulted.headers.Authorization).toBe("Bearer sk-eval");
+    expect(defaulted.body.model).toBe("gpt-6-luna");
+    expect(defaulted.body.reasoning_effort).toBe("none");
+
+    fetchMock.mockClear();
+    await callWith(new VocabuilderTranslateWordProvider({ config: { provider: "openai", model: "gpt-custom" } }));
+    expect(sentRequest().body.model).toBe("gpt-custom");
+    expect(sentRequest().body).not.toHaveProperty("reasoning_effort");
+  });
+
+  it("routes an openai-compatible entry to OPENAI_COMPATIBLE_BASE_URL with its configured model", async () => {
+    vi.stubEnv("OPENAI_COMPATIBLE_API_KEY", "local");
+    vi.stubEnv("OPENAI_COMPATIBLE_BASE_URL", "http://localhost:11434/v1");
+    const provider = new VocabuilderTranslateWordProvider({
+      config: { provider: "openai-compatible", model: "llama3" },
+    });
+
+    await callWith(provider);
+    const { url, body } = sentRequest();
+    expect(url).toBe("http://localhost:11434/v1/chat/completions");
+    expect(body.model).toBe("llama3");
+  });
+
+  it("surfaces missing-model for an openai-compatible entry without a model", async () => {
+    vi.stubEnv("OPENAI_COMPATIBLE_API_KEY", "local");
+    vi.stubEnv("OPENAI_COMPATIBLE_BASE_URL", "http://localhost:11434/v1");
+    const provider = new VocabuilderTranslateWordProvider({ config: { provider: "openai-compatible" } });
+    await expect(callWith(provider)).rejects.toThrow("missing-model");
   });
 });

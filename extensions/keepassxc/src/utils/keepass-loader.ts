@@ -36,7 +36,8 @@ class KeePassLoader {
   private static databasePassword: string;
   private static keepassxcCli: string | undefined;
   private static keyFile: string;
-  private static spawn = child_process.spawn;
+  private static spawn = (command: string, args: string[]) =>
+    child_process.spawn(command, args, { env: { ...process.env, LC_ALL: "en_US.UTF-8" } });
 
   /**
    * Check if the folder is valid for a search

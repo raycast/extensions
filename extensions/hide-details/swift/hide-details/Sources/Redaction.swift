@@ -61,7 +61,22 @@ func redactionRegions(boxes: [Box], imageWidth: Int, imageHeight: Int) throws ->
   }
 }
 
-func renderRedactions(image: CGImage, regions: [RedactionRegion], style: Style) throws -> CGImage {
+struct RedactionMask: Codable {
+  let kind: String
+  let box: Box
+}
+
+func renderMasks(image: CGImage, masks: [RedactionMask], style: Style, blurFaces: Bool) throws -> (image: CGImage, regionCount: Int) {
+  func regions(_ masks: [RedactionMask]) throws -> [RedactionRegion] {
+    try redactionRegions(boxes: masks.map(\.box), imageWidth: image.width, imageHeight: image.height)
+  }
+  let all = try regions(masks)
+  let faces = blurFaces ? try regions(masks.filter { $0.kind == "face" }) : []
+  let selectedStyle = blurFaces ? try regions(masks.filter { $0.kind != "face" }) : all
+  return (try renderRedactions(image: image, regions: selectedStyle, style: style, blurRegions: faces), all.count)
+}
+
+func renderRedactions(image: CGImage, regions: [RedactionRegion], style: Style, blurRegions: [RedactionRegion] = []) throws -> CGImage {
   let colorSpace = CGColorSpaceCreateDeviceRGB()
   func bitmap(width: Int, height: Int) throws -> CGContext {
     guard let context = CGContext(
@@ -76,7 +91,9 @@ func renderRedactions(image: CGImage, regions: [RedactionRegion], style: Style) 
   context.setBlendMode(.copy)
   context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
   let ciContext = CIContext()
-  for region in regions {
+  // Text masks follow face blur so an overlap keeps the selected text style.
+  let masks = blurRegions.map { ($0, Style.blur) } + regions.map { ($0, style) }
+  for (region, style) in masks {
     let checked = try RedactionRegion(box: region.box, imageWidth: image.width, imageHeight: image.height)
     guard checked == region else {
       throw RedactionError(message: "Redaction region exceeds the image. No image was published.")

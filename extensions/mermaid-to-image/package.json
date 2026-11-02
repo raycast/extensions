@@ -90,19 +90,21 @@
     }
   ],
   "dependencies": {
-    "@puppeteer/browsers": "^2.13.0",
+    "@puppeteer/browsers": "^3.2.6",
     "@raycast/api": "^1.104.8",
     "@raycast/utils": "^2.2.3",
-    "beautiful-mermaid": "^1.1.3"
+    "beautiful-mermaid": "^1.1.3",
+    "ondine": "0.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "20.19.37",
+    "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
+    "esbuild": "0.28.2",
+    "eslint": "^9.39.1",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5",
-    "vitest": "^3.2.6"
+    "vitest": "^5.0.5"
   },
   "scripts": {
     "build": "ray build",
@@ -111,13 +113,16 @@
     "lint": "ray lint",
     "test": "vitest",
     "test:run": "vitest run",
+    "spike:ondine": "node scripts/ondine-spike/run.mjs",
+    "spike:ondine:build": "node scripts/ondine-spike/build-probes.mjs",
+    "pretypecheck": "ray build --exit-on-error",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && npm run test:run && npm run lint && npm run build",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "engines": {
-    "node": "^24.14.0 || ^22.13.0 || ^20.19.0"
+    "node": "^24.14.0 || ^22.14.0"
   },
   "preferences": [
     {
@@ -141,7 +146,7 @@
     {
       "name": "renderEngine",
       "title": "Render Engine",
-      "description": "Auto uses beautiful-mermaid for supported SVG diagrams and falls back to compatible mode",
+      "description": "Auto preserves Beautiful SVG routing, with optional Ondine SVG/PNG before Compatible for other reviewed families. Explicit Ondine is SVG only; AI is unchanged.",
       "type": "dropdown",
       "required": true,
       "default": "auto",
@@ -157,8 +162,21 @@
         {
           "title": "Compatible (mmdc)",
           "value": "compatible"
+        },
+        {
+          "title": "Ondine Experimental (SVG Only)",
+          "value": "ondine"
         }
       ]
+    },
+    {
+      "name": "useOndineInAuto",
+      "title": "Use Ondine in Auto",
+      "label": "Try Ondine Experimental for eligible Auto SVG/PNG diagrams",
+      "description": "Manual command only. Default off. Other reviewed families may use Ondine SVG or browser-backed PNG, falling back to Compatible on render failure. Preserves Beautiful SVG and its families' mmdc PNG path. Embedded configuration is bypassed. Requires Chrome/Chromium; PNG uses 3x, max edge 4096 px. Explicit Ondine stays SVG only; AI is unchanged.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     },
     {
       "name": "theme",
@@ -189,7 +207,7 @@
     {
       "name": "beautifulTheme",
       "title": "Beautiful Theme",
-      "description": "Theme for beautiful-mermaid rendering (Auto + SVG + supported syntax, or Beautiful mode)",
+      "description": "Theme for Beautiful and Ondine Experimental rendering, including opt-in Auto; Ondine maps bundled theme colors only.",
       "type": "dropdown",
       "required": true,
       "default": "github-light",

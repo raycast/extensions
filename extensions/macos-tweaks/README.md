@@ -14,6 +14,7 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 
 - **Browse Tweaks** — Browse all hidden settings by category, toggle them on/off, and see current values at a glance
 - **My Tweaks** — View only your modified settings, reset individually or all at once, export as shell commands
+- **Add Dock Spacer** — Add an empty tile to the Dock to split your apps into groups, small or regular, on either side of the divider
 - **Tweaks Menu Bar** — Quick access from the menu bar with badge showing how many tweaks are active
 
 ## Features
@@ -27,14 +28,15 @@ Discover and toggle hidden macOS settings without the Terminal. Browse a curated
 - Export all modified tweaks as a shell script
 - Safety warnings for moderate-risk settings
 - Automatic process restart (Finder, Dock, SystemUIServer) after applying changes
+- Dock spacers: add them from the **Add Dock Spacer** command or the Dock section of Browse Tweaks, which also counts them and removes them all at once
 - Quick toggle directly from the menu bar
 
 ## Categories
 
 | Category                | Tweaks | Examples                                                                                                    |
 | ----------------------- | -----: | ----------------------------------------------------------------------------------------------------------- |
-| Finder                  |     22 | Hidden files, path bar, POSIX path in title, .DS_Store on network/USB, allow quitting, drives on desktop    |
-| Dock                    |     16 | Autohide delay & speed, magnification + size, minimize effect, hide recents, static-only, launch bounce     |
+| Finder                  |     21 | Hidden files, path bar, POSIX path in title, .DS_Store on network shares, allow quitting, drives on desktop |
+| Dock                    |     17 | Autohide delay & speed, magnification + size, minimize effect, hide recents, static-only, dim hidden apps   |
 | Menu Bar & UI           |     13 | Clock format, Control Center icons, menu bar in full screen, graphite appearance                            |
 | Desktop & Spaces        |     12 | Hot corners and their modifier keys, auto-rearrange Spaces, reduce wallpaper tinting, switch Space          |
 | Keyboard & Input        |     10 | Key repeat rate, press-and-hold, full keyboard access, auto-correct, smart quote styles                     |

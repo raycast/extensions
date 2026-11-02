@@ -12,7 +12,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { WEBSITE_URL } from "./components/forecast-actions";
+import { SOURCE_CREDIT, WEBSITE_URL } from "./api/forecast-client";
 import { forecastIconAsset } from "./domain/forecast-icon";
 import {
   forecastTooltip,
@@ -65,9 +65,7 @@ function ForecastMenuBar({ onHide }: { onHide: () => void }) {
     <MenuBarExtra
       icon={icon}
       title={response ? menuBarTitle(response, menuBarDisplay) : "—"}
-      tooltip={
-        response ? `${forecastTooltip(response)}${warning ? ` ${warning}` : ""}` : "Codex Reset Monitor unavailable"
-      }
+      tooltip={response ? `${forecastTooltip(response)}${warning ? ` ${warning}` : ""}` : "codex-reset.com unavailable"}
       isLoading={isLoading}
     >
       {response ? (
@@ -86,7 +84,7 @@ function ForecastMenuBar({ onHide }: { onHide: () => void }) {
               onAction={openHistory}
             />
           </MenuBarExtra.Section>
-          <MenuBarExtra.Section title="Last Confirmed Reset">
+          <MenuBarExtra.Section title="Last Global Reset">
             <MenuBarExtra.Item
               title={
                 reset
@@ -127,7 +125,7 @@ function ForecastMenuBar({ onHide }: { onHide: () => void }) {
           </MenuBarExtra.Section>
         </>
       ) : (
-        <MenuBarExtra.Section title={isLoading ? "Loading Reset Monitor" : "Reset Monitor Unavailable"}>
+        <MenuBarExtra.Section title={isLoading ? "Loading Reset Forecast" : "Reset Forecast Unavailable"}>
           <MenuBarExtra.Item title={error?.message ?? "Fetching the latest forecast…"} icon={Icon.Clock} />
           <MenuBarExtra.Item title="View Outlook and Full History" icon={Icon.List} onAction={openHistory} />
         </MenuBarExtra.Section>
@@ -143,7 +141,7 @@ function ForecastMenuBar({ onHide }: { onHide: () => void }) {
         />
         <MenuBarExtra.Item title="Menu Bar Settings…" icon={Icon.Gear} onAction={openCommandPreferences} />
         <MenuBarExtra.Item title="Hide from Menu Bar" icon={Icon.EyeDisabled} onAction={onHide} />
-        <MenuBarExtra.Item title="Open Codex Reset Monitor" icon={Icon.Globe} onAction={() => open(WEBSITE_URL)} />
+        <MenuBarExtra.Item title={SOURCE_CREDIT} icon={Icon.Globe} onAction={() => open(WEBSITE_URL)} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
+import { ActionPanel, Action, Icon, openCommandPreferences } from "@raycast/api";
 import { ReactNode } from "react";
 import { getCCUsageCommand } from "../../utils/data-formatter";
 
@@ -16,7 +16,7 @@ export function StandardActions({ customActions, externalLinks }: StandardAction
   return (
     <ActionPanel>
       <Action.CopyToClipboard title="Copy ccusage Command" content={getCCUsageCommand()} icon={Icon.Clipboard} />
-      <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
 
       {customActions}
 

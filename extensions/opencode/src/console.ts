@@ -2,8 +2,11 @@ import { z } from "zod";
 
 const CONFIG_URL = "https://opencode.ai/console/api/config";
 const MANAGED_URL = "https://opencode.ai/inference/openai/v1";
+const GO_PROVIDER = "opencode-go";
 
 export type Format = "anthropic" | "openai" | "google" | "openai-compatible";
+// Zen is the pay-as-you-go catalog; Go is the subscription, served from its own provider and endpoints.
+export type Source = "zen" | "go";
 
 const Model = z.object({
   id: z.string().optional(),
@@ -34,24 +37,25 @@ export async function loadModels(apiKey: string) {
     throw new Error("OpenCode rejected the API key. Check the API Key in the extension preferences.");
   if (!response.ok) throw new Error(`Could not load OpenCode models (HTTP ${response.status}).`);
   const config = Config.parse(await response.json());
-  // Only the managed OpenCode catalog; custom connections and Go come with their own providers in the config.
-  return Object.values(config.config.provider)
-    .filter((provider) => provider.api === MANAGED_URL)
-    .flatMap((provider) =>
-      Object.entries(provider.models ?? {})
-        .filter(([, model]) => model.disabled !== true && !isFree(model))
-        .map(([modelKey, model]) => ({
-          id: model.id ?? modelKey,
-          title: model.name ?? modelKey,
-          price: model.cost,
-          format: toFormat(model.provider?.npm ?? provider.npm),
-          temperature: model.temperature !== false,
-          tools: model.tool_call ?? false,
-          vision: model.modalities?.input.includes("image") ?? false,
-          contextWindow: model.limit?.context,
-          outputLimit: model.limit?.output,
-        })),
-    );
+  // Only the managed OpenCode catalog and Go; custom connections come with their own providers in the config.
+  return Object.entries(config.config.provider).flatMap(([key, provider]) => {
+    const source: Source | undefined = key === GO_PROVIDER ? "go" : provider.api === MANAGED_URL ? "zen" : undefined;
+    if (!source) return [];
+    return Object.entries(provider.models ?? {})
+      .filter(([, model]) => model.disabled !== true && !isFree(model))
+      .map(([modelKey, model]) => ({
+        id: model.id ?? modelKey,
+        source,
+        title: model.name ?? modelKey,
+        price: model.cost,
+        format: toFormat(model.provider?.npm ?? provider.npm),
+        temperature: model.temperature !== false,
+        tools: model.tool_call ?? false,
+        vision: model.modalities?.input.includes("image") ?? false,
+        contextWindow: model.limit?.context,
+        outputLimit: model.limit?.output,
+      }));
+  });
 }
 
 // Free models only serve requests from OpenCode itself.

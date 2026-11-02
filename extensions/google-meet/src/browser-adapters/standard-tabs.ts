@@ -3,9 +3,9 @@ import { getStandardTabsScript } from "../utils/scripts";
 import type { MeetingUrlSource } from "./types";
 
 /**
- * Shared implementation for Safari and Chromium-family browsers, whose
- * AppleScript dictionaries both support enumerating `tabs of window` for
- * every window, not just the active tab of the front window.
+ * Reads Safari, whose AppleScript dictionary supports enumerating
+ * `tabs of window` for every window, not just the active tab of the front
+ * window.
  */
 export function createStandardTabsAdapter(appName: string): MeetingUrlSource {
   return {

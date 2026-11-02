@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppShortcuts } from "./load/app-shortcuts-provider";
 import { useApps } from "./load/apps-provider";
 import { ShortcutsList } from "./view/shortcuts-list";
-import { exitWithMessage } from "./view/exit-action";
+import { UnsupportedApp } from "./view/unsupported-app";
 import { getPlatform } from "./load/platform";
 import { findMatchingApps, windowsProcessName } from "./app-matching";
 import { getDesktopTarget } from "./engine/desktop-target";
@@ -27,14 +27,6 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
 
   useEffect(() => {
     if (slug || appsLoading || appIdLoading) return;
-    if (!native) {
-      exitWithMessage("Could not detect the frontmost application");
-      return;
-    }
-    if (matches.length === 0) {
-      exitWithMessage(`Shortcuts not available for application ${native.name}`);
-      return;
-    }
     if (matches.length === 1) setSlug(matches[0].slug);
   }, [native, appIdLoading, slug, matches, appsLoading]);
 
@@ -62,6 +54,25 @@ export default function AppShortcuts(props?: AppShortcutsProps) {
     : targetLoading
       ? undefined
       : selectedTarget;
+
+  if (!slug && !appsLoading && !appIdLoading && !native) {
+    return (
+      <UnsupportedApp
+        title="Could not detect the frontmost application"
+        description="Focus an application window and run the command again."
+      />
+    );
+  }
+
+  if (!slug && !appsLoading && !appIdLoading && native && matches.length === 0) {
+    return (
+      <UnsupportedApp
+        title={`No shortcuts for ${native.name} yet`}
+        description="Add this app to the public Hotkys catalog using the contribution guide, or create private shortcuts on hotkys.com."
+        identifier={getPlatform() === "windows" ? (native.windowsAppId ?? windowsProcessName(native)) : native.bundleId}
+      />
+    );
+  }
 
   if (!slug && !appsLoading && !appIdLoading && matches.length > 1) {
     return (

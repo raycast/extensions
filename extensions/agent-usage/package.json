@@ -31,16 +31,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0",
-    "undici": "^8.10.0"
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2",
+    "undici": "^8.12.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.20.1",
+    "@types/node": "22.20.5",
     "@types/react": "19.0.10",
     "eslint": "^9.39.5",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "typescript": "^5.9.3"
   },
   "icon": "extension-icon.png",
@@ -175,7 +175,7 @@
       "name": "cursorCookieHeader",
       "type": "password",
       "title": "Cursor Cookie Header (Optional)",
-      "description": "Optional fallback Cookie header from cursor.com. Usually auto-detected from your local Cursor.app login.",
+      "description": "Optional fallback Cookie header from cursor.com. Usually auto-detected from your local Cursor login.",
       "required": false
     },
     {

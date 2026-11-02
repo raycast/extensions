@@ -7,12 +7,12 @@
  */
 
 import { BrowserExtension } from "@raycast/api";
-import { urlLog } from "./logger";
-import { parseArticle } from "./readability";
-import { formatArticle } from "./markdown";
-import { getBrowserTabsSafe, hasBrowserExtension, withTimeout } from "./host-api";
-import { BrowserTab, BrowserContentResult, TabContentResult } from "../types/browser";
 import { ArticleState } from "../types/article";
+import { BrowserContentResult, BrowserTab, TabContentResult } from "../types/browser";
+import { getBrowserTabsSafe, hasBrowserExtension, withTimeout } from "./host-api";
+import { urlLog } from "./logger";
+import { formatArticle } from "./markdown";
+import { parseArticle } from "./readability";
 
 /**
  * Check if the browser extension is available.

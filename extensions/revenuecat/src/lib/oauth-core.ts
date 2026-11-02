@@ -91,7 +91,16 @@ interface TokenStore {
   setTokens(tokens: TokenResponse): Promise<void>;
   removeTokens(): Promise<void>;
 }
-export function createTokenReader(store: TokenStore, exchange = exchangeToken) {
+export type TokenLock = <T>(task: (assertHeld: () => void) => Promise<T>) => Promise<T>;
+const withoutLock: TokenLock = (task) => task(() => {});
+const sameTokens = (a: StoredTokens | undefined, b: StoredTokens) =>
+  a?.accessToken === b.accessToken && a?.refreshToken === b.refreshToken;
+function replacementToken(tokens: StoredTokens | undefined) {
+  if (!tokens) return undefined;
+  if (tokens.isExpired()) throw new Error("Your RevenueCat connection changed. Try again.");
+  return tokens.accessToken;
+}
+export function createTokenReader(store: TokenStore, exchange = exchangeToken, withLock: TokenLock = withoutLock) {
   let pending: Promise<string | undefined> | undefined;
   return function getAccessToken(): Promise<string | undefined> {
     if (pending) return pending;
@@ -99,20 +108,38 @@ export function createTokenReader(store: TokenStore, exchange = exchangeToken) {
       const tokens = await store.getTokens();
       if (!tokens) return undefined;
       if (!tokens.isExpired()) return tokens.accessToken;
-      if (!tokens.refreshToken) {
-        await store.removeTokens();
-        throw new Error("Your RevenueCat connection expired. Sign in again.");
-      }
-      try {
-        const refreshed = await exchange({ grant_type: "refresh_token", refresh_token: tokens.refreshToken });
-        if (refreshed.scope === undefined && tokens.scope) refreshed.scope = tokens.scope;
-        // RevenueCat rotates both tokens; persist the complete response before any API calls proceed.
-        await store.setTokens(refreshed);
-        return refreshed.access_token;
-      } catch (error) {
-        if (error instanceof OAuthTokenError && error.code === "invalid_grant") await store.removeTokens();
-        throw error;
-      }
+      return withLock(async (assertHeld) => {
+        // Another command may have refreshed while we waited for the shared lock.
+        const tokens = await store.getTokens();
+        assertHeld();
+        if (!tokens) return undefined;
+        if (!tokens.isExpired()) return tokens.accessToken;
+        if (!tokens.refreshToken) {
+          const current = await store.getTokens();
+          assertHeld();
+          if (!sameTokens(current, tokens)) return replacementToken(current);
+          await store.removeTokens();
+          throw new Error("Your RevenueCat connection expired. Sign in again.");
+        }
+        try {
+          const refreshed = await exchange({ grant_type: "refresh_token", refresh_token: tokens.refreshToken });
+          const current = await store.getTokens();
+          assertHeld();
+          // Never overwrite a newer sign-in or resurrect a session after logout.
+          if (!sameTokens(current, tokens)) return replacementToken(current);
+          if (refreshed.scope === undefined && tokens.scope) refreshed.scope = tokens.scope;
+          await store.setTokens(refreshed);
+          return refreshed.access_token;
+        } catch (error) {
+          if (error instanceof OAuthTokenError && error.code === "invalid_grant") {
+            const current = await store.getTokens();
+            assertHeld();
+            if (!sameTokens(current, tokens)) return replacementToken(current);
+            await store.removeTokens();
+          }
+          throw error;
+        }
+      });
     })().finally(() => {
       pending = undefined;
     });

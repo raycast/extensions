@@ -141,7 +141,7 @@
     "productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.22",
+    "@raycast/api": "^2.5.0",
     "@raycast/utils": "^2.2.7",
     "react": "^19.2.7"
   },
