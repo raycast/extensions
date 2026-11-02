@@ -1,11 +1,12 @@
 import {
+  normalizeFolder,
   normalizeItem,
   normalizeItemDetail,
   normalizeShareRoles,
   normalizeVault,
   totpUriOf,
 } from "../pass-cli-normalize";
-import { Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
+import { Folder, Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
 
 export function passwordArgs(options: PasswordOptions): string[] {
@@ -55,6 +56,10 @@ export function vaultMemberListArgs(shareId: string): string[] {
 // otherwise parse as another option ("unexpected argument '-5' found").
 export function itemListArgs(shareId: string): string[] {
   return ["item", "list", `--share-id=${shareId}`, "--output", "json", "--show-secrets"];
+}
+
+export function folderListArgs(shareId: string): string[] {
+  return ["folder", "list", `--share-id=${shareId}`, "--output", "json"];
 }
 
 export function itemViewArgs(shareId: string, itemId: string): string[] {
@@ -120,6 +125,8 @@ export interface PassCliAdapter {
   countVaultMembers(shareId: string): Promise<number>;
   /** `onTotpUri` gets the otpauth URI of each login that has one, which `Item` never holds. */
   listItems(shareId: string, vaultName: string, onTotpUri?: (itemId: string, uri: string) => void): Promise<Item[]>;
+  /** The folders of a vault, nested ones included. */
+  listFolders(shareId: string): Promise<Folder[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
@@ -187,6 +194,14 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
           if (totpUri) onTotpUri?.(item.itemId, totpUri);
           return item;
         });
+    },
+    listFolders: async (shareId) => {
+      const data = parseJson(await run(folderListArgs(shareId)), "folder list");
+      const rawFolders = Array.isArray(data) ? data : isRecord(data) ? data.folders : undefined;
+      if (!Array.isArray(rawFolders)) {
+        throw new PassCliError("Unexpected folder list output from pass-cli.", "invalid_output");
+      }
+      return rawFolders.map(normalizeFolder);
     },
     getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");

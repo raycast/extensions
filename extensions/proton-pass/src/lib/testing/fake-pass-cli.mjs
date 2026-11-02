@@ -23,6 +23,8 @@ const expectedArgs = {
   "json:item-shares": ["share", "list", "--only-items", "true", "--output", "json"],
   "json:vault-members": ["vault", "member", "list", "--share-id=vault-1", "--output", "json"],
   "json:items-full": ["item", "list", "--share-id=vault-1", "--output", "json", "--show-secrets"],
+  "json:folders": ["folder", "list", "--share-id=vault-1", "--output", "json"],
+  "json:folders-wrapper": ["folder", "list", "--share-id=vault-1", "--output", "json"],
   "json:item-view": ["item", "view", "--share-id=vault-1", "--item-id=item-login", "--output", "json"],
   "json:totps-wrapper": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
   "json:totps-flat": ["item", "totp", "--share-id=vault-1", "--item-id=item-1", "--output", "json"],
@@ -83,6 +85,7 @@ const fixtures = {
         state: "Active",
         create_time: "2025-01-15T08:00:00",
         modify_time: "2025-06-01T12:34:56",
+        folder_id: "folder-cards",
         content: {
           title: "Example Login",
           content: {
@@ -103,6 +106,12 @@ const fixtures = {
       },
     ],
   },
+  // pass/src/domain/models/folder.rs: content is FolderData, whose only field is the name.
+  folders: [
+    { id: "folder-banking", share_id: "vault-1", parent_folder_id: null, content: { name: "Banking" } },
+    { id: "folder-cards", share_id: "vault-1", parent_folder_id: "folder-banking", content: { name: "Cards" } },
+  ],
+  "folders-wrapper": { folders: [{ folder_id: "folder-banking", folder_name: "Banking", parent_id: null }] },
   "item-view": {
     item: {
       id: "item-login",

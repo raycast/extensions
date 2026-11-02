@@ -14,7 +14,8 @@ const ROW_ICONS: Partial<Record<string, Image.ImageLike>> = {
   password: Icon.Key,
   totp: TOTP_ICON,
   note: Icon.Document,
-  vault: Icon.Folder,
+  vault: Icon.Box,
+  folder: Icon.Folder,
   modified: Icon.Calendar,
 };
 

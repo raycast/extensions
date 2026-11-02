@@ -13,6 +13,7 @@ import * as fillSequence from "./fill-sequence";
 import * as keyPress from "./key-press";
 import * as sharedItems from "./shared-items";
 import * as totp from "./totp";
+import * as folders from "./folders";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -39,6 +40,7 @@ function loadView(
       if (name === "./shared-items") return sharedItems;
       if (name === "./format") return format;
       if (name === "./totp") return totp;
+      if (name === "./folders" || name === "./lib/folders") return folders;
       if (name === "./sort" || name === "./lib/sort") return sort;
       if (name === "./vault-dropdown" || name === "./lib/vault-dropdown") return vaultDropdown;
       if (name === "./lib/item-counts") return itemCounts;
@@ -541,6 +543,37 @@ test("items shared one by one are listed under Shared with Me, through their own
   assert.equal(
     items.map((entry) => `${entry.itemId} ${entry.shareId} ${entry.vaultName} ${entry.sharedWithMe === true}`).join(),
     "in-vault vault Personal false,shared item-share Shared with Me true",
+  );
+  assert.equal(failedVaults.length, 0);
+});
+
+test("folder names are listed only for vaults with items in folders, and their failure keeps the items", async () => {
+  const folderLists: string[] = [];
+  const api = passCliWithAdapter({
+    listVaults: async () => [
+      { shareId: "personal", name: "Personal" },
+      { shareId: "work", name: "Work" },
+      { shareId: "family", name: "Family" },
+    ],
+    listItemShares: async () => ["item-share"],
+    listItems: async (shareId: string, vaultName: string) => [
+      { ...item, shareId, itemId: `${shareId}-item`, vaultName, folderId: shareId === "work" ? undefined : "f" },
+    ],
+    listFolders: async (shareId: string) => {
+      folderLists.push(shareId);
+      if (shareId === "family") throw new PassCliError("Network error", "network_error");
+      return [{ folderId: "f", name: "Banking" }];
+    },
+  });
+  const { items, failedVaults } = await api.listVaultsAndItems();
+  // Work has no item in a folder, and an item shared on its own can't open its owner's folders.
+  assert.equal(folderLists.sort().join(), "family,personal");
+  assert.equal(
+    items
+      .map((entry) => `${entry.itemId}:${entry.folderPath?.map((folder) => folder.name).join("/") ?? "-"}`)
+      .sort()
+      .join(),
+    "family-item:-,item-share-item:-,personal-item:Banking,work-item:-",
   );
   assert.equal(failedVaults.length, 0);
 });

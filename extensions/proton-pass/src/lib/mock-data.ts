@@ -25,6 +25,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-2",
+    folderId: "folder-streaming",
+    folderPath: [{ id: "folder-streaming", name: "Streaming" }],
     title: "Netflix",
     type: "login",
     vaultName: "Personal",
@@ -61,6 +63,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-1",
     itemId: "item-5",
+    folderId: "folder-finance",
+    folderPath: [{ id: "folder-finance", name: "Finance" }],
     title: "Visa •••• 4242",
     type: "credit_card",
     vaultName: "Personal",
@@ -82,6 +86,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-7",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Jira",
     type: "login",
     vaultName: "Work",
@@ -91,6 +97,8 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-8",
+    folderId: "folder-engineering",
+    folderPath: [{ id: "folder-engineering", name: "Engineering" }],
     title: "Linear",
     type: "login",
     vaultName: "Work",
@@ -100,6 +108,11 @@ export const MOCK_ITEMS: Item[] = [
   {
     shareId: "vault-2",
     itemId: "item-9",
+    folderId: "folder-servers",
+    folderPath: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
     title: "Server SSH Key",
     type: "ssh_key",
     vaultName: "Work",

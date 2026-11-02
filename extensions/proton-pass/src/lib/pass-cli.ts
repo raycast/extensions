@@ -16,6 +16,7 @@ import {
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
 import { isSharedWithMe, listedUnder, SHARED_WITH_ME, withoutDuplicates } from "./shared-items";
 import { itemKey } from "./format";
+import { withFolderPaths } from "./folders";
 import { generateTotp, parseOtpauthUri } from "./totp";
 import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
@@ -198,11 +199,29 @@ export async function listVaults(): Promise<Vault[]> {
  */
 const totpUris = new Map<string, string>();
 
-async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
+/**
+ * Items with the names of their folders, which pass-cli lists apart: one more command, only for vaults with items in
+ * folders. When it fails, the items still show, without their folders.
+ */
+async function withTheirFolders(adapter: PassCliAdapter, shareId: string, vaultName: string, items: Item[]) {
+  if (!items.some((item) => item.folderId)) return items;
   try {
-    return await (
-      await getAdapter()
-    ).listItems(shareId, vaultName, (itemId, uri) => totpUris.set(itemKey({ shareId, itemId }), uri));
+    return withFolderPaths(items, await adapter.listFolders(shareId));
+  } catch (error) {
+    if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
+    console.error(`Failed to list folders of vault ${vaultName}: ${errorMessage(error)}`);
+    return items;
+  }
+}
+
+/** `withFolders`: false for an item shared with the user, whose folder, if any, is in someone else's vault. */
+async function listItemsFromVault(shareId: string, vaultName: string, withFolders = true): Promise<Item[]> {
+  try {
+    const adapter = await getAdapter();
+    const items = await adapter.listItems(shareId, vaultName, (itemId, uri) =>
+      totpUris.set(itemKey({ shareId, itemId }), uri),
+    );
+    return withFolders ? await withTheirFolders(adapter, shareId, vaultName, items) : items;
   } catch (error) {
     if (error instanceof PassCliError && error.type === "not_authenticated") {
       totpUris.clear();
@@ -283,7 +302,7 @@ async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[
   const failures = new Map<string, VaultFailure>();
   const listSource = async ({ shareId, vault }: ItemSource): Promise<Item[]> => {
     try {
-      const items = await listItemsFromVault(shareId, vault.name);
+      const items = await listItemsFromVault(shareId, vault.name, !isSharedWithMe(vault));
       // A shared item is only reachable through its own share, whichever share pass-cli prints.
       return isSharedWithMe(vault) ? items.map((item) => ({ ...item, shareId, sharedWithMe: true })) : items;
     } catch (error) {
