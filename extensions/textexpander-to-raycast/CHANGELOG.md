@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-02
 
 - Convert TextExpander settings, group exports, and CSV files into Raycast snippet JSON.
 - Preview and select snippets, filter by group, and review conversion warnings.
