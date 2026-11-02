@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geolocation",
+  "title": "Geolocation",
+  "description": "Copy location to the clipboard: your current geolocation as GPS coordinates, a Google Maps or Apple Maps link, or a geo: URI. Uses macOS Location Services for accuracy down to a few meters, not your IP address.",
+  "icon": "icon.png",
+  "author": "y87cgp",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "geo",
+    "location",
+    "copy location",
+    "my location",
+    "current location",
+    "gps",
+    "coordinates",
+    "latitude",
+    "longitude",
+    "lat long",
+    "where am i",
+    "share location"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-location",
+      "title": "Copy Location",
+      "description": "Copy your current location to the clipboard as coordinates or a map link",
+      "keywords": [
+        "geo",
+        "my location",
+        "current location",
+        "copy coordinates",
+        "gps",
+        "coordinates",
+        "where am i",
+        "latitude longitude",
+        "longitude",
+        "share location"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "format",
+      "title": "Format",
+      "description": "How the copied location is formatted",
+      "type": "dropdown",
+      "required": false,
+      "default": "coordinates",
+      "data": [
+        {
+          "title": "Coordinates (55.75580, 37.61730)",
+          "value": "coordinates"
+        },
+        {
+          "title": "Google Maps Link",
+          "value": "google-maps"
+        },
+        {
+          "title": "Apple Maps Link",
+          "value": "apple-maps"
+        },
+        {
+          "title": "Geo URI (geo:55.75580,37.61730)",
+          "value": "geo-uri"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "effect": "^4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.39.5",
+    "jiti": "^2.7.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  }
+}
