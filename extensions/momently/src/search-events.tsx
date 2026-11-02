@@ -2,7 +2,14 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, 
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { CreateEventForm } from "./create-event";
-import { deleteEvent, listEvents, MomentlyEvent, MomentlyNotInstalledError, openEvent } from "./momently";
+import {
+  deleteEvent,
+  listEvents,
+  MomentlyEvent,
+  MomentlyNotInstalledError,
+  momentlyBundleID,
+  openEvent,
+} from "./momently";
 
 function formatDate(event: MomentlyEvent) {
   const date = new Date(event.date);
@@ -69,10 +76,12 @@ export default function Command() {
   const [filterValue, setFilterValue] = useState<FilterValue>("upcoming");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  // Every filter works on the same events, so switching doesn't ask the app again
+  // Every filter works on the same events, so switching doesn't ask the app again.
+  // Keyed by the app build, so cached events never show under another build's actions.
   const { data, isLoading, error, revalidate, mutate } = useCachedPromise(
-    () => listEvents({ includingPast: true }),
-    [],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (bundleID: string) => listEvents({ includingPast: true }),
+    [momentlyBundleID()],
     {
       keepPreviousData: true,
       failureToastOptions: { title: "Couldn't load events" },
@@ -116,6 +125,15 @@ export default function Command() {
     />
   );
 
+  const refreshAction = (
+    <Action
+      title="Refresh"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={revalidate}
+    />
+  );
+
   return (
     <List
       isLoading={isLoading}
@@ -143,6 +161,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Get Momently" url="https://momently.madza.rs" />
+              {refreshAction}
             </ActionPanel>
           }
         />
@@ -151,7 +170,12 @@ export default function Command() {
           icon={Icon.Calendar}
           title={error ? "Couldn't Load Events" : filter.emptyTitle}
           description={error?.message ?? "Create one to start counting down."}
-          actions={<ActionPanel>{createAction}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {createAction}
+              {refreshAction}
+            </ActionPanel>
+          }
         />
       )}
 
@@ -223,12 +247,7 @@ export default function Command() {
                   content={event.title}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={revalidate}
-                />
+                {refreshAction}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action

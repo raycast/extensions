@@ -51,7 +51,7 @@ export class MomentlyNotInstalledError extends Error {
 
 /** The Momently build picked in the extension's preferences */
 export function momentlyBundleID(): BundleID {
-  const { app } = getPreferenceValues<{ app?: string }>();
+  const { app } = getPreferenceValues<Preferences>();
   return bundleIDs.find((id) => id === app) ?? bundleIDs[0];
 }
 
