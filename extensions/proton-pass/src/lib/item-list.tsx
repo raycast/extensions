@@ -43,7 +43,7 @@ export interface ItemListProps {
   searchBarAccessory?: List.Props["searchBarAccessory"];
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
-  /** The order chosen with Sort By, kept for the other lists opened from the same window. */
+  /** The order chosen with Sort by, kept for the other lists opened from the same window. */
   sortChoice?: MutableRefObject<SortOrder>;
 }
 

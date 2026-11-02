@@ -309,7 +309,7 @@
     {
       "name": "sortBy",
       "type": "dropdown",
-      "title": "Sort by",
+      "title": "Sort items by",
       "description": "Order of the items in Browse Items and Get TOTP Code. Sort by (⌘⇧S) changes it until the window closes.",
       "default": "mostUsed",
       "required": false,
@@ -329,6 +329,28 @@
         {
           "title": "Date Created",
           "value": "created"
+        }
+      ]
+    },
+    {
+      "name": "sortVaultsBy",
+      "type": "dropdown",
+      "title": "Sort vaults by",
+      "description": "Order of the vaults in the vault list and the vault menus. Sort by (⌘⇧S) in the vault list changes it until the window closes.",
+      "default": "name",
+      "required": false,
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Item Count",
+          "value": "itemCount"
+        },
+        {
+          "title": "Most Used",
+          "value": "mostUsed"
         }
       ]
     },

@@ -61,11 +61,13 @@ function loadView(
 // The real sorting, with the Sort By preference at its default.
 const sort = loadView("sort.tsx", {
   "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
+  "@raycast/utils": { useFrecencySorting: (data: unknown[]) => ({ data, visitItem: () => undefined }) },
   "./shortcuts": shortcuts,
 });
 
 // The vault menu's element isn't rendered here: only its constant and props matter.
 const vaultDropdown = loadView("vault-dropdown.tsx", {
+  react: { useRef: (current: unknown) => ({ current }) },
   "@raycast/api": { List: {}, Icon: {} },
   "./item-counts": itemCounts,
 });
@@ -2248,6 +2250,139 @@ test("the vault list shows and saves items before optional sharing, from complet
   pendingSharing[1](new Map([["vault", { role: "owner", isShared: true }]]));
   await new Promise(setImmediate);
   assert.deepEqual(saved.sort(), ["items", "sharing", "sharing", "vaults"]);
+});
+
+test("Sort vaults by puts vaults by name or by item count, the uncounted last", () => {
+  const sortVaults = sort.sortVaults as unknown as (
+    vaults: Vault[],
+    order: string,
+    countOf: (vault: Vault) => number | undefined,
+    mostUsed: Vault[],
+  ) => Vault[];
+  const vaults = [
+    { shareId: "w", name: "work" },
+    { shareId: "p", name: "Personal" },
+    { shareId: "a", name: "Archive" },
+  ];
+  const counts = new Map([
+    ["w", 12],
+    ["p", 40],
+  ]);
+  const names = (order: string) =>
+    sortVaults(vaults, order, (vault) => counts.get(vault.shareId), vaults.slice(1))
+      .map((vault) => vault.name)
+      .join();
+  assert.equal(names("name"), "Archive,Personal,work");
+  assert.equal(names("itemCount"), "Personal,work,Archive");
+  assert.equal(names("mostUsed"), "Personal,Archive");
+});
+
+test("the vault menu follows the vaults' order, and only a vault chosen in it counts as a use", () => {
+  const visits: string[] = [];
+  const changes: string[] = [];
+  const { VaultDropdown } = loadView("vault-dropdown.tsx", {
+    react: { useRef: (current: unknown) => ({ current }) },
+    "@raycast/api": { List: { Dropdown: { Item: {}, Section: {} } }, Icon: {} },
+    "./item-counts": itemCounts,
+    "./sort": {
+      ...sort,
+      useVaultFrecency: (data: Vault[]) => ({ data, visitItem: (vault: Vault) => visits.push(vault.shareId) }),
+    },
+  });
+  const menu = VaultDropdown({
+    vaults: [{ shareId: "w", name: "Work" }, { shareId: "p", name: "Personal" }, sharedItems.SHARED_WITH_ME],
+    itemCounts: new Map([
+      ["w", 3],
+      ["p", 1],
+    ]),
+    order: "itemCount",
+    onVaultChange: (shareId: string) => changes.push(shareId),
+  } as unknown as Record<string, unknown>);
+  assert.equal(
+    actions(menu)
+      .filter((entry) => typeof entry.value === "string")
+      .map((entry) => entry.value)
+      .join(),
+    "all,w,p,shared-with-me",
+  );
+  const onChange = menu.props.onChange as (shareId: string) => void;
+  // The vault Raycast opens on, then one the user picks.
+  onChange("w");
+  onChange("p");
+  assert.equal(changes.join(), "w,p");
+  assert.equal(visits.join(), "p");
+});
+
+test("the vault list is sorted by name by default, and Sort by reorders it and the vault menus opened from it", async () => {
+  const harness = hookHarness();
+  const { VaultsView } = loadView("vaults-view.tsx", {
+    react: harness.react,
+    "@raycast/api": {
+      List: { Item: {}, EmptyView: {} },
+      ActionPanel: {},
+      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
+      Icon: {},
+      Keyboard: { Shortcut: { Common: { Copy: {} } } },
+      getPreferenceValues: () => ({}),
+      useNavigation: () => ({ push: () => undefined }),
+    },
+    "./pass-cli": {
+      endedSessionError: async () => undefined,
+      listVaultSharing: async () => new Map(),
+      listVaultsAndItems: async () => ({
+        vaults: [
+          { shareId: "b", name: "Beta" },
+          { shareId: "a", name: "Alpha" },
+        ],
+        items: [
+          { ...item, shareId: "b", itemId: "1" },
+          { ...item, shareId: "b", itemId: "2" },
+          { ...item, shareId: "a", itemId: "3" },
+        ],
+        failedVaults: [],
+      }),
+    },
+    "./types": { PassCliError },
+    "./search-items-view": {},
+    "./error-views": {},
+    "./login-view": {},
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedSharing: async () => null,
+      setCachedSharing: async () => undefined,
+      setCachedItems: async () => undefined,
+      setCachedVaults: async () => undefined,
+    },
+    "./item-counts": itemCounts,
+    "./refresh": refresh,
+    "./shortcuts": shortcuts,
+    "./vault-sharing": vaultSharing,
+  });
+  harness.render(VaultsView, { startOnItems: false });
+  harness.effects.forEach((effect) => effect());
+  await new Promise(setImmediate);
+  const rows = () =>
+    actions(harness.render(VaultsView, { startOnItems: false })).filter(
+      (entry) => entry.actions && entry.title !== "All Vaults",
+    );
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
+  );
+  const sortMenu = actions(rows()[0].actions).find((entry) => "onChange" in entry && "value" in entry)!;
+  assert.equal(sortMenu.value, "name");
+  (sortMenu.onChange as (order: string) => void)("itemCount");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Beta,Alpha",
+  );
+  const open = actions(rows()[0].actions).find((entry) => entry.title === "View Items")!;
+  assert.equal((open.target as Element).props.vaultOrder, "itemCount");
 });
 
 test("an older vault list load can't replace newer sharing or displayed counts", async () => {

@@ -10,7 +10,7 @@ import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts } from "./item-counts";
 import { ItemList } from "./item-list";
 import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
-import { SortOrder } from "./sort";
+import { SortOrder, VaultSortOrder, preferredVaultSortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder } from "./shared-items";
 
@@ -39,8 +39,10 @@ interface SearchItemsViewProps {
   allVaults?: boolean;
   /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
   sessionConfirmed?: boolean;
-  /** The order chosen with Sort By in this window. */
+  /** The order chosen with Sort by in this window. */
   sortChoice?: MutableRefObject<SortOrder>;
+  /** The vaults' order in the vault list this was opened from. */
+  vaultOrder?: VaultSortOrder;
 }
 
 /** The item list of Browse Items, with every vault, or the one opened from the vault list. */
@@ -49,6 +51,7 @@ export function SearchItemsView({
   allVaults = false,
   sessionConfirmed = false,
   sortChoice,
+  vaultOrder,
 }: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -249,6 +252,7 @@ export function SearchItemsView({
       isLoading={isLoading || isLoadingActiveTab}
       searchBarAccessory={
         <VaultDropdown
+          order={vaultOrder ?? preferredVaultSortOrder()}
           // Until vaults are loaded, the preselected vault must still be one of the options.
           vaults={vaults.length === 0 && initialVault ? [initialVault] : vaults}
           itemCounts={itemCounts}

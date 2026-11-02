@@ -1,6 +1,8 @@
 import { Icon, List } from "@raycast/api";
+import { useRef } from "react";
 import { titleWithCount, totalItemCount } from "./item-counts";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
+import { VaultSortOrder, sortVaults, useVaultFrecency } from "./sort";
 import { Vault } from "./types";
 
 export const ALL_VAULTS_VALUE = "all";
@@ -11,12 +13,23 @@ interface VaultDropdownProps {
   itemCounts: Map<string, number>;
   /** Vault to show, for a vault opened from the vault list. Otherwise the command's last selection is restored. */
   value?: string;
+  order: VaultSortOrder;
   onVaultChange: (vaultId: string) => void;
 }
 
 /** The vault menu of Browse Items and Get TOTP Code: All Vaults, each vault, then Shared with Me. */
-export function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdownProps) {
-  const listedVaults = vaults.filter((vault) => !isSharedWithMe(vault));
+export function VaultDropdown({ vaults, itemCounts, value, order, onVaultChange }: VaultDropdownProps) {
+  const unsortedVaults = vaults.filter((vault) => !isSharedWithMe(vault));
+  const { data: mostUsed, visitItem } = useVaultFrecency(unsortedVaults);
+  const listedVaults = sortVaults(unsortedVaults, order, (vault) => itemCounts.get(vault.shareId), mostUsed);
+  // Raycast also reports the vault it opens on, restored or given: only a choice made here counts as a use.
+  const hasReportedFirst = useRef(false);
+  function onChange(vaultId: string) {
+    const vault = unsortedVaults.find((entry) => entry.shareId === vaultId);
+    if (hasReportedFirst.current && vault) visitItem(vault);
+    hasReportedFirst.current = true;
+    onVaultChange(vaultId);
+  }
   // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
   return (
     <List.Dropdown
@@ -24,7 +37,7 @@ export function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: Vaul
       storeValue={value === undefined}
       value={value}
       defaultValue={value === undefined ? ALL_VAULTS_VALUE : undefined}
-      onChange={onVaultChange}
+      onChange={onChange}
     >
       <List.Dropdown.Item
         title={titleWithCount("All Vaults", totalItemCount(vaults, itemCounts))}

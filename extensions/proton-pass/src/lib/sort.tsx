@@ -1,15 +1,24 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { platformShortcut } from "./shortcuts";
-import { Item } from "./types";
+import { Item, Vault } from "./types";
 
 export type SortOrder = "mostUsed" | "name" | "modified" | "created";
+export type VaultSortOrder = "name" | "itemCount" | "mostUsed";
 
 const SORT_ORDERS: SortOrder[] = ["mostUsed", "name", "modified", "created"];
+const VAULT_SORT_ORDERS: VaultSortOrder[] = ["name", "itemCount", "mostUsed"];
 
-/** The order lists open with, from the Sort By preference. */
+/** The order item lists open with, from the Sort items by preference. */
 export function preferredSortOrder(): SortOrder {
   const value = getPreferenceValues<Preferences>().sortBy;
   return SORT_ORDERS.find((order) => order === value) ?? "mostUsed";
+}
+
+/** The order vaults are shown in, from the Sort vaults by preference. */
+export function preferredVaultSortOrder(): VaultSortOrder {
+  const value = getPreferenceValues<Preferences>().sortVaultsBy;
+  return VAULT_SORT_ORDERS.find((order) => order === value) ?? "name";
 }
 
 export function compareNames(a: Item, b: Item): number {
@@ -32,7 +41,35 @@ export function sortItems<T extends Item>(items: T[], order: SortOrder, mostUsed
   return [...items].sort(compareDates(order === "modified" ? (item) => item.modifiedAt : (item) => item.createdAt));
 }
 
-/** Named as in the Sort By preference, the current order checked. */
+function compareVaultNames(a: Vault, b: Vault): number {
+  return a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true });
+}
+
+/** The vaults opened most from Raycast first, from the vault list or a vault menu, then the others by name. */
+export function useVaultFrecency<T extends Vault>(vaults: T[]) {
+  return useFrecencySorting(vaults, {
+    key: (vault) => vault.shareId,
+    namespace: "vaults",
+    sortUnvisited: compareVaultNames,
+  });
+}
+
+/**
+ * Vaults in the given order, Most Used given already sorted as for items. Item Count puts the vaults with the most
+ * items first, and those not counted yet last.
+ */
+export function sortVaults<T extends Vault>(
+  vaults: T[],
+  order: VaultSortOrder,
+  countOf: (vault: T) => number | undefined,
+  mostUsed: T[],
+): T[] {
+  if (order === "mostUsed") return mostUsed;
+  if (order === "name") return [...vaults].sort(compareVaultNames);
+  return [...vaults].sort((a, b) => (countOf(b) ?? -1) - (countOf(a) ?? -1) || compareVaultNames(a, b));
+}
+
+/** Named as in the Sort items by preference, the current order checked. */
 export function SortByMenu({ value, onChange }: { value: SortOrder; onChange: (order: SortOrder) => void }) {
   const icon = (order: SortOrder) => (order === value ? Icon.CheckCircle : Icon.Circle);
   return (
@@ -41,6 +78,24 @@ export function SortByMenu({ value, onChange }: { value: SortOrder; onChange: (o
       <Action title="Name" icon={icon("name")} onAction={() => onChange("name")} />
       <Action title="Last Modified" icon={icon("modified")} onAction={() => onChange("modified")} />
       <Action title="Date Created" icon={icon("created")} onAction={() => onChange("created")} />
+    </ActionPanel.Submenu>
+  );
+}
+
+/** As SortByMenu, for the vault list, named as in the Sort vaults by preference. */
+export function SortVaultsByMenu({
+  value,
+  onChange,
+}: {
+  value: VaultSortOrder;
+  onChange: (order: VaultSortOrder) => void;
+}) {
+  const icon = (order: VaultSortOrder) => (order === value ? Icon.CheckCircle : Icon.Circle);
+  return (
+    <ActionPanel.Submenu title="Sort by" icon={Icon.NumberList} shortcut={platformShortcut(["cmd", "shift"], "s")}>
+      <Action title="Name" icon={icon("name")} onAction={() => onChange("name")} />
+      <Action title="Item Count" icon={icon("itemCount")} onAction={() => onChange("itemCount")} />
+      <Action title="Most Used" icon={icon("mostUsed")} onAction={() => onChange("mostUsed")} />
     </ActionPanel.Submenu>
   );
 }
