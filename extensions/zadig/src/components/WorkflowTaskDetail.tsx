@@ -12,7 +12,7 @@ type WorkflowTaskDetailProps = {
 const toRepositoriesMarkdown = (builds: WorkflowTaskBuild[]) =>
   [
     `## Repositories (${builds.length})`,
-    ...builds.map(build =>
+    ...builds.map((build) =>
       [
         `### ${escapeMarkdown(build.repoName)}`,
         `- Branch: ${escapeMarkdown(build.branch)}`,
@@ -36,7 +36,7 @@ export default function WorkflowTaskDetail({ task }: WorkflowTaskDetailProps) {
           </List.Item.Detail.Metadata.TagList>
           {detail && detail.stages.length > 0 && (
             <List.Item.Detail.Metadata.TagList title="Stages">
-              {detail.stages.map(stage => (
+              {detail.stages.map((stage) => (
                 <List.Item.Detail.Metadata.TagList.Item
                   key={stage.name}
                   text={stage.name}
@@ -46,7 +46,7 @@ export default function WorkflowTaskDetail({ task }: WorkflowTaskDetailProps) {
               ))}
             </List.Item.Detail.Metadata.TagList>
           )}
-          {detail?.choices.map(choice => (
+          {detail?.choices.map((choice) => (
             <List.Item.Detail.Metadata.Label key={choice.name} title={choice.name} text={choice.value} />
           ))}
           <List.Item.Detail.Metadata.Label

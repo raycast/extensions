@@ -62,7 +62,7 @@ export type WorkflowTaskDetail = {
 export async function getWorkflows(projectKey: string) {
   const { workflows } = await request<{ workflows: Workflow[] | null }>("/workflows", { params: { projectKey } });
 
-  return (workflows ?? []).filter(workflow => workflow.type === "custom");
+  return (workflows ?? []).filter((workflow) => workflow.type === "custom");
 }
 
 export const getWorkflowTasks = (projectKey: string, workflowKey: string, pageNum: number, pageSize: number) =>
@@ -83,10 +83,10 @@ export async function getWorkflowTask(workflowKey: string, taskId: number): Prom
   const task = await request<WorkflowTaskResponse>("/workflows/custom/task", { params: { workflowKey, taskId } });
   const stages = task.stages ?? [];
   const builds = stages
-    .flatMap(stage => stage.jobs ?? [])
-    .filter(job => job.type === "zadig-build")
-    .flatMap(job =>
-      (job.spec?.repos ?? []).map(repo => ({
+    .flatMap((stage) => stage.jobs ?? [])
+    .filter((job) => job.type === "zadig-build")
+    .flatMap((job) =>
+      (job.spec?.repos ?? []).map((repo) => ({
         repoName: repo.repo_name,
         branch: repo.branch,
         commitId: repo.commit_id ?? undefined,
@@ -96,7 +96,7 @@ export async function getWorkflowTask(workflowKey: string, taskId: number): Prom
 
   return {
     // NOTE: Choice parameters hold picked options such as the target environment, while free-text parameters may hold secrets.
-    choices: (task.params ?? []).filter(param => param.type === "choice").map(({ name, value }) => ({ name, value })),
+    choices: (task.params ?? []).filter((param) => param.type === "choice").map(({ name, value }) => ({ name, value })),
     stages: stages.map(({ name, status }) => ({ name, status })),
     // NOTE: Several build jobs often build the same commit for different services, so each branch and commit is listed once.
     builds: builds.filter(

@@ -26,7 +26,7 @@ export default function AddServicesForm({ projectKey, environment, sourceEnviron
     initialValues: { sourceEnvironmentKey: sourceEnvironments[0]?.env_key, serviceNames: [] },
     validation: {
       sourceEnvironmentKey: FormValidation.Required,
-      serviceNames: serviceNames => (serviceNames?.length ? undefined : "Pick at least one service"),
+      serviceNames: (serviceNames) => (serviceNames?.length ? undefined : "Pick at least one service"),
     },
     async onSubmit({ serviceNames }) {
       const toast = await showToast({

@@ -35,7 +35,7 @@ export default function CreateSubEnvironmentForm({
     initialValues: { baseEnvironmentKey: defaultBaseEnvironmentKey ?? testEnvironments[0]?.env_key, serviceNames: [] },
     validation: {
       baseEnvironmentKey: FormValidation.Required,
-      name: name => {
+      name: (name) => {
         if (!name) {
           return "Name is required";
         }

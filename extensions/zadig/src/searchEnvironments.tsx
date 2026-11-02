@@ -59,7 +59,7 @@ export default function SearchEnvironments() {
   function refresh() {
     revalidateTestEnvironments();
     revalidateProductionEnvironments();
-    setRefreshCount(count => count + 1);
+    setRefreshCount((count) => count + 1);
   }
 
   async function confirmDelete(environment: Environment) {
@@ -164,10 +164,10 @@ export default function SearchEnvironments() {
     >
       {!isLoading && <List.EmptyView icon={Icon.Layers} title="No Environments Found" />}
       <List.Section title="Test">
-        {sortedTestEnvironments.map(environment => renderEnvironment(environment, visitTestEnvironment))}
+        {sortedTestEnvironments.map((environment) => renderEnvironment(environment, visitTestEnvironment))}
       </List.Section>
       <List.Section title="Production">
-        {sortedProductionEnvironments.map(environment => renderEnvironment(environment, visitProductionEnvironment))}
+        {sortedProductionEnvironments.map((environment) => renderEnvironment(environment, visitProductionEnvironment))}
       </List.Section>
     </List>
   );

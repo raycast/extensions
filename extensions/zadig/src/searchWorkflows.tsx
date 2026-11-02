@@ -14,7 +14,7 @@ export default function SearchWorkflows() {
   const isLoading = isLoadingProjects || isLoadingWorkflows;
   const { data: sortedWorkflows, visitItem } = useFrecencySorting(workflows, {
     namespace: "workflows",
-    key: workflow => `${projectKey}/${workflow.workflow_key}`,
+    key: (workflow) => `${projectKey}/${workflow.workflow_key}`,
   });
 
   return (
@@ -30,7 +30,7 @@ export default function SearchWorkflows() {
           description="Only custom workflows are listed, because only they have run endpoints in the Zadig OpenAPI."
         />
       )}
-      {sortedWorkflows.map(workflow => (
+      {sortedWorkflows.map((workflow) => (
         <List.Item
           key={workflow.workflow_key}
           title={workflow.workflow_name}

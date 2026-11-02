@@ -39,11 +39,11 @@ export default function WorkflowTaskList({ projectKey, workflow }: WorkflowTaskL
 
   const [refreshCount, setRefreshCount] = useState(0);
 
-  const uniqueTasks = [...new Map(tasks?.map(task => [task.task_id, task])).values()];
+  const uniqueTasks = [...new Map(tasks?.map((task) => [task.task_id, task])).values()];
 
   function refresh() {
     revalidate();
-    setRefreshCount(count => count + 1);
+    setRefreshCount((count) => count + 1);
   }
 
   async function confirmCancel(task: WorkflowTask) {
@@ -102,7 +102,7 @@ export default function WorkflowTaskList({ projectKey, workflow }: WorkflowTaskL
       searchBarPlaceholder="Filter loaded runs by number, creator or status"
     >
       {!isLoading && <List.EmptyView icon={Icon.Boat} title="No Runs Found" />}
-      {uniqueTasks.map(task => {
+      {uniqueTasks.map((task) => {
         const taskUrl = getWorkflowTaskUrl(projectKey, task.workflow_key, task.task_id);
 
         return (

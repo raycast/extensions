@@ -26,7 +26,7 @@ export default function EnvironmentDetail({ projectKey, environment }: Environme
         services && services.length > 0
           ? toMarkdownTable(
               ["Service", "Image tag"],
-              services.map(service => [service.serviceName, getImageTag(service.images.at(0) ?? "") ?? "-"]),
+              services.map((service) => [service.serviceName, getImageTag(service.images.at(0) ?? "") ?? "-"]),
             )
           : undefined
       }

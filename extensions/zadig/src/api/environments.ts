@@ -73,7 +73,7 @@ export const createHelmSubEnvironment = (
 // NOTE: Zadig accepts the create before the environment exists, so services can only be added once it is ready.
 export async function waitForEnvironmentToBeReady(projectKey: string, environmentKey: string) {
   for (let attempt = 1; attempt <= ENVIRONMENT_READY_POLL_ATTEMPTS; attempt++) {
-    await new Promise(resolve => setTimeout(resolve, ENVIRONMENT_READY_POLL_MILLISECONDS));
+    await new Promise((resolve) => setTimeout(resolve, ENVIRONMENT_READY_POLL_MILLISECONDS));
     const environment = (await getEnvironments(projectKey, false)).find(({ env_key }) => env_key === environmentKey);
 
     if (environment?.status === "success") {
@@ -95,7 +95,7 @@ export const addHelmServices = (projectKey: string, environment: Environment, se
     body: {
       env_name: environment.env_key,
       production: environment.production,
-      services: serviceNames.map(service_name => ({ service_name, deploy_strategy: "deploy" })),
+      services: serviceNames.map((service_name) => ({ service_name, deploy_strategy: "deploy" })),
     },
   });
 
