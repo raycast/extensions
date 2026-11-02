@@ -13,6 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { FormValidation, useForm } from "@raycast/utils";
 import { targetPath, writeJson } from "./export";
 import {
   MAX_GENERATED_BYTES,
@@ -29,6 +30,7 @@ import { allTreeItems, visibleTreeItems, type TreeItem } from "./tree";
 function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+// Keep failures local: showFailureToast adds an action that opens a GitHub issue.
 function report(error: unknown) {
   void showToast({
     style: Toast.Style.Failure,
@@ -49,27 +51,36 @@ function countLabel(value: string): string {
 }
 
 export default function Command() {
-  const [source, setSource] = useState("");
-  const [error, setError] = useState<string>();
   const { push } = useNavigation();
+  const { values, itemProps, setValue, setValidationError, handleSubmit } =
+    useForm<{ json: string }>({
+      initialValues: { json: "" },
+      validation: { json: FormValidation.Required },
+      onSubmit: ({ json }) => {
+        try {
+          push(<Result document={parseDocument(json)} />);
+        } catch (error) {
+          setValidationError("json", message(error));
+        }
+      },
+    });
+  const source = values.json;
   function run(fn: () => void) {
     try {
-      setError(undefined);
+      setValidationError("json", undefined);
       fn();
-    } catch (e) {
-      setError(message(e));
+    } catch (error) {
+      setValidationError("json", message(error));
     }
   }
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action
+          <Action.SubmitForm
             title="Format and View"
             icon={Icon.Eye}
-            onAction={() =>
-              run(() => push(<Result document={parseDocument(source)} />))
-            }
+            onSubmit={handleSubmit}
           />
           <Action
             title="Search Input with Regular Expression"
@@ -84,8 +95,8 @@ export default function Command() {
                 const value = await Clipboard.readText();
                 if (value === undefined)
                   throw new Error("Clipboard has no text");
-                setSource(value);
-                setError(undefined);
+                setValue("json", value);
+                setValidationError("json", undefined);
               } catch (e) {
                 report(e);
               }
@@ -123,15 +134,9 @@ export default function Command() {
       }
     >
       <Form.TextArea
-        id="json"
         title="JSON"
         placeholder="Paste JSON or a complete JSON string"
-        value={source}
-        onChange={(v) => {
-          setSource(v);
-          setError(undefined);
-        }}
-        error={error}
+        {...itemProps.json}
       />
       <Form.Description text={countLabel(source)} />
     </Form>
@@ -346,66 +351,53 @@ function RegexForm({
   sourceLimit?: number;
 }) {
   const { push } = useNavigation();
-  const [pattern, setPattern] = useState("");
-  const [ignoreCase, setIgnoreCase] = useState(false);
-  const [target, setTarget] = useState("current");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>();
-  async function search() {
-    setLoading(true);
-    setError(undefined);
-    try {
-      const text =
-        target === "original" && original !== undefined ? original : source;
-      const result = await searchText(
-        text,
-        pattern,
-        ignoreCase,
-        1000,
-        500,
-        target === "original" ? MAX_INPUT_BYTES : sourceLimit,
-      );
-      push(<Matches result={result} />);
-    } catch (e) {
-      setError(message(e));
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { itemProps, handleSubmit, setValidationError } = useForm<{
+    pattern: string;
+    ignoreCase: boolean;
+    target: string;
+  }>({
+    initialValues: { pattern: "", ignoreCase: false, target: "current" },
+    validation: { pattern: FormValidation.Required },
+    onSubmit: async ({ pattern, ignoreCase, target }) => {
+      setLoading(true);
+      try {
+        const text =
+          target === "original" && original !== undefined ? original : source;
+        const result = await searchText(
+          text,
+          pattern,
+          ignoreCase,
+          1000,
+          500,
+          target === "original" ? MAX_INPUT_BYTES : sourceLimit,
+        );
+        push(<Matches result={result} />);
+      } catch (error) {
+        setValidationError("pattern", message(error));
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
   return (
     <Form
       navigationTitle="Search Text"
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action title="Search" onAction={search} />
+          <Action.SubmitForm title="Search" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="pattern"
         title="Regular Expression"
         placeholder="Enter a JavaScript regular expression"
-        value={pattern}
-        onChange={(value) => {
-          setPattern(value);
-          setError(undefined);
-        }}
-        error={error}
+        {...itemProps.pattern}
       />
-      <Form.Checkbox
-        id="ignore-case"
-        label="Ignore case"
-        value={ignoreCase}
-        onChange={setIgnoreCase}
-      />
+      <Form.Checkbox label="Ignore case" {...itemProps.ignoreCase} />
       {original !== undefined && (
-        <Form.Dropdown
-          id="target"
-          title="Search In"
-          value={target}
-          onChange={setTarget}
-        >
+        <Form.Dropdown title="Search In" {...itemProps.target}>
           <Form.Dropdown.Item value="current" title="Formatted Text" />
           <Form.Dropdown.Item value="original" title="Original Input" />
         </Form.Dropdown>
