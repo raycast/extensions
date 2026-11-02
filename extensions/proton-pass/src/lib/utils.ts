@@ -95,6 +95,16 @@ export function formatTotpCode(code: string): string {
   return code;
 }
 
+/**
+ * A code hidden by dots, as wide as the code in Get TOTP Code's tags, so that Show Codes doesn't move them. Raycast
+ * spaces out every character of a tag, so there's one character per digit: a spot slightly wider than a fixed-width
+ * digit, and a narrower gap between the halves to make up for it, as measured in the tags' font.
+ */
+export function hiddenTotpCode(code: string): string {
+  if (code.length === 6) return "\u2981\u2981\u2981\u2007\u200A\u2981\u2981\u2981";
+  return "\u2981".repeat(code.length);
+}
+
 export function getPasswordStrengthLabel(passwordScore: string): string {
   return passwordScore;
 }

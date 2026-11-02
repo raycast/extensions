@@ -14,7 +14,14 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useFrecencySorting } from "@raycast/utils";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./lib/types";
-import { getTotpRemainingSeconds, formatTotpCode, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./lib/utils";
+import {
+  getTotpRemainingSeconds,
+  formatTotpCode,
+  hiddenTotpCode,
+  TOTP_ICON,
+  totpProgressIcon,
+  totpTimerColor,
+} from "./lib/utils";
 import { itemKey, monospace } from "./lib/format";
 import { getListIcon } from "./lib/item-icon";
 import { platformShortcut } from "./lib/shortcuts";
@@ -310,7 +317,7 @@ export default function Command() {
                 // Said as in Browse Items' details.
                 tag: code
                   ? {
-                      value: monospace(formatTotpCode(hideCodes && !areCodesShown ? "•".repeat(code.length) : code)),
+                      value: hideCodes && !areCodesShown ? hiddenTotpCode(code) : monospace(formatTotpCode(code)),
                       color: getTimerColor(),
                     }
                   : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
