@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "b-side",
+  "title": "B-Side",
+  "description": "Control B-Side, the Mac player for YouTube Music: play, pause, skip and start a vibe.",
+  "icon": "icon.png",
+  "author": "emilsugaipov",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-pause",
+      "title": "Play or Pause",
+      "description": "Plays or pauses B-Side.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "description": "Skips to the next track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "description": "Goes back a track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-vibe",
+      "title": "Play Vibe",
+      "description": "Starts B-Side's first vibe.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show",
+      "title": "Show Now Playing",
+      "description": "Brings B-Side forward, on Now Playing.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
