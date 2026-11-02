@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "supervoc",
+  "title": "Supervoc",
+  "description": "Capture English text with quick translation, analysis, and automatic save against your Supervoc server",
+  "icon": "icon.png",
+  "author": "vitalii_popov",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "capture",
+      "title": "Capture",
+      "description": "Translate and save selected text with Supervoc",
+      "mode": "view"
+    },
+    {
+      "name": "open-token-page",
+      "title": "Open Token Page",
+      "description": "Open the miniauth access-token page for your Supervoc server",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "prefill",
+      "type": "checkbox",
+      "required": false,
+      "title": "Prefill",
+      "label": "Prefill from selection or clipboard",
+      "default": true,
+      "description": "Prefill the form with the selected text or clipboard"
+    },
+    {
+      "name": "supervocServerURL",
+      "type": "textfield",
+      "required": true,
+      "title": "Supervoc Server URL",
+      "description": "Deployed Supervoc server (miniauth protects /token)",
+      "default": "https://supervoc.vpopov.dev",
+      "placeholder": "https://supervoc.vpopov.dev"
+    },
+    {
+      "name": "supervocAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Supervoc Access Token",
+      "description": "Bearer token from /token after miniauth sign-in"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.6.1",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
