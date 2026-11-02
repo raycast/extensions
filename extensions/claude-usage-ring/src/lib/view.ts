@@ -16,7 +16,7 @@ export type Row = {
   icon: IconPair;
 };
 
-export type Banner = { kind: "error" | "stale" | "locked"; text: string };
+export type Banner = { kind: "error" | "paused" | "stale" | "locked"; text: string };
 
 export type View = {
   icon: IconPair;
@@ -64,12 +64,16 @@ export function errorBanner(kind: ErrorKind, backoffUntil: number | null, source
     case "unauthorized":
       return "Login expired. Open Claude Code once to refresh it.";
     case "rate_limited":
-      return backoffUntil ? `Rate limited, retrying at ${formatClock(new Date(backoffUntil))}` : "Rate limited";
+      return backoffUntil
+        ? `Paused by Anthropic, retrying at ${formatClock(new Date(backoffUntil))}`
+        : "Paused by Anthropic";
     case "server":
     case "network":
       return "Can't reach Anthropic";
     case "schema":
       return "Usage format changed. Extension needs an update.";
+    case "not_connected":
+      return "Waiting for Claude Code. Run Connect Claude Code, then send a message in Claude Code.";
   }
 }
 
@@ -105,7 +109,8 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
   const sonnet = u ? effectiveWindow(u.sevenDaySonnet, now) : null;
 
   const stale = !!u && now - u.fetchedAt > STALE_MS;
-  const dim = !!u && (stale || !!snap.lastError);
+  const paused = snap.lastError?.kind === "rate_limited";
+  const dim = !!u && (stale || (!!snap.lastError && !paused));
 
   let icon: IconPair;
   if (!u && snap.lastError) icon = ringIcon({ error: true });
@@ -122,7 +127,10 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
 
   const banners: Banner[] = [];
   if (snap.lastError) {
-    banners.push({ kind: "error", text: errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource) });
+    banners.push({
+      kind: paused ? "paused" : "error",
+      text: errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource),
+    });
   }
   if (u && stale) banners.push({ kind: "stale", text: `Data from ${formatAgo(u.fetchedAt, now)}` });
   for (const [label, w] of [
@@ -150,7 +158,9 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
     rows,
     extraRows,
     planLabel: plan ? `Plan: ${plan}` : null,
-    updatedLabel: u ? `Updated ${formatAgo(u.fetchedAt, now)}` : "Not updated yet",
+    updatedLabel: u
+      ? `Updated ${formatAgo(u.fetchedAt, now)}${u.origin === "claude-code" ? " via Claude Code" : ""}`
+      : "Not updated yet",
     summary,
     dim,
   };

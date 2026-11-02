@@ -44,7 +44,14 @@ describe("parseUsage", () => {
     expect(u.sevenDay?.utilization).toBe(6);
     expect(u.sevenDayOpus).toBeNull();
     expect(u.fetchedAt).toBe(123);
-    expect(Object.keys(u).sort()).toEqual(["fetchedAt", "fiveHour", "sevenDay", "sevenDayOpus", "sevenDaySonnet"]);
+    expect(Object.keys(u).sort()).toEqual([
+      "fetchedAt",
+      "fiveHour",
+      "origin",
+      "sevenDay",
+      "sevenDayOpus",
+      "sevenDaySonnet",
+    ]);
   });
   it("accepts all-null", () => {
     const u = parseUsage(ALL_NULL);

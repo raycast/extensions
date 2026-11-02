@@ -4,13 +4,17 @@ import {
   Color,
   Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   List,
   openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
+import { existsSync } from "node:fs";
 import type { ReactElement } from "react";
-import { useUsage } from "./lib/use-usage";
+import { BRIDGE_SCRIPT } from "./lib/bridge";
+import { CONNECT_COMMAND, useUsage } from "./lib/use-usage";
 import { USAGE_PAGE } from "./lib/usage-api";
 import { deriveView, errorBanner, type Banner, type Level, type Row, type View } from "./lib/view";
 
@@ -22,6 +26,7 @@ const LEVEL_COLORS: Record<Level, Color> = {
 
 const BANNER_ICONS: Record<Banner["kind"], List.Item.Props["icon"]> = {
   error: { source: Icon.Warning, tintColor: Color.Orange },
+  paused: { source: Icon.Pause, tintColor: Color.SecondaryText },
   stale: { source: Icon.Clock, tintColor: Color.SecondaryText },
   locked: { source: Icon.XMarkCircle, tintColor: Color.Red },
 };
@@ -33,7 +38,11 @@ export default function Command() {
   async function refreshNow() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing usage" });
     const next = await revalidate();
-    if (next.lastError) {
+    if (next.lastError?.kind === "rate_limited") {
+      toast.style = Toast.Style.Success;
+      toast.title = "Showing latest usage";
+      toast.message = errorBanner(next.lastError.kind, next.backoffUntil, prefs.credentialsSource);
+    } else if (next.lastError) {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't refresh usage";
       toast.message = errorBanner(next.lastError.kind, next.backoffUntil, prefs.credentialsSource);
@@ -130,6 +139,13 @@ function UsageActions({ view, onRefresh }: { view: View; onRefresh: () => void }
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
+        {!existsSync(BRIDGE_SCRIPT) && (
+          <Action
+            title="Connect Claude Code"
+            icon={Icon.Plug}
+            onAction={() => launchCommand({ name: CONNECT_COMMAND, type: LaunchType.UserInitiated })}
+          />
+        )}
         <Action title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </ActionPanel.Section>
     </ActionPanel>

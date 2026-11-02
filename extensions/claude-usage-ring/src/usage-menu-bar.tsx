@@ -9,8 +9,10 @@ import {
   showHUD,
   type LaunchProps,
 } from "@raycast/api";
+import { existsSync } from "node:fs";
 import { useEffect } from "react";
-import { MENU_BAR_COMMAND, useUsage } from "./lib/use-usage";
+import { BRIDGE_SCRIPT } from "./lib/bridge";
+import { CONNECT_COMMAND, MENU_BAR_COMMAND, useUsage } from "./lib/use-usage";
 import { USAGE_PAGE } from "./lib/usage-api";
 import { deriveView, errorBanner, type Banner, type Row } from "./lib/view";
 
@@ -18,6 +20,7 @@ type LaunchContext = { force?: boolean };
 
 const BANNER_ICONS: Record<Banner["kind"], Icon> = {
   error: Icon.Warning,
+  paused: Icon.Pause,
   stale: Icon.Clock,
   locked: Icon.XMarkCircle,
 };
@@ -44,6 +47,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext: 
   }, [isLoading]);
 
   const view = deriveView(snap, prefs, Date.now());
+  const bridgeInstalled = existsSync(BRIDGE_SCRIPT);
 
   return (
     <MenuBarExtra icon={{ source: view.icon }} title={view.title} tooltip={view.tooltip} isLoading={isLoading}>
@@ -88,6 +92,13 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext: 
           }
         />
         <MenuBarExtra.Item title="Open Usage Page" icon={Icon.Globe} onAction={() => open(USAGE_PAGE)} />
+        {!bridgeInstalled && (
+          <MenuBarExtra.Item
+            title="Connect Claude Code…"
+            icon={Icon.Plug}
+            onAction={() => launchCommand({ name: CONNECT_COMMAND, type: LaunchType.UserInitiated })}
+          />
+        )}
         <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

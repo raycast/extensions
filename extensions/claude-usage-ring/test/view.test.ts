@@ -10,6 +10,7 @@ const prefs: Prefs = {
   showPercentText: false,
   warnThreshold: "60",
   critThreshold: "85",
+  dataSource: "auto",
   credentialsSource: "keychain",
 };
 const NOW = new Date("2026-11-02T14:16:00Z").getTime();
@@ -87,7 +88,9 @@ describe("deriveView", () => {
   it("rate limited shows retry time", () => {
     const until = new Date(2026, 10, 2, 14, 32).getTime();
     const v = deriveView(snap({ lastError: { kind: "rate_limited", at: NOW }, backoffUntil: until }), prefs, NOW);
-    expect(v.banners[0].text).toBe("Rate limited, retrying at 14:32");
+    expect(v.banners[0]).toEqual({ kind: "paused", text: "Paused by Anthropic, retrying at 14:32" });
+    expect(v.dim).toBe(false);
+    expect(decode(v.icon.light)).not.toContain('opacity="0.5"');
   });
 
   it("locked window → full red + banner", () => {
@@ -128,5 +131,15 @@ describe("deriveView", () => {
     const v = deriveView(snap({ usage: parseUsage({ five_hour: null, seven_day: null }, NOW) }), prefs, NOW);
     expect(v.rows[0].subtitle).toBe("0%");
     expect(v.tooltip).toBe("Claude: 5h 0% · week 0%");
+  });
+
+  it("labels data from Claude Code", () => {
+    const usage = { ...parseUsage(SAMPLE, NOW - 2 * MIN), origin: "claude-code" as const };
+    expect(deriveView(snap({ usage }), prefs, NOW).updatedLabel).toBe("Updated 2 min ago via Claude Code");
+  });
+
+  it("not connected explains the next step", () => {
+    const v = deriveView({ ...EMPTY_SNAPSHOT, lastError: { kind: "not_connected", at: NOW } }, prefs, NOW);
+    expect(v.banners[0].text).toContain("Connect Claude Code");
   });
 });

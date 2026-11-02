@@ -66,6 +66,7 @@ export function parseUsage(j: unknown, now = Date.now()): Usage {
     sevenDayOpus: parseWindow(o.seven_day_opus),
     sevenDaySonnet: parseWindow(o.seven_day_sonnet),
     fetchedAt: now,
+    origin: "api",
   };
 }
 

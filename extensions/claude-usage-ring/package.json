@@ -25,7 +25,13 @@
       "title": "Claude Usage Ring",
       "description": "Show Claude subscription usage as a ring in the menu bar",
       "mode": "menu-bar",
-      "interval": "2m"
+      "interval": "5m"
+    },
+    {
+      "name": "connect-claude-code",
+      "title": "Connect Claude Code",
+      "description": "Update usage live from Claude Code's status line, without extra API calls",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -74,6 +80,24 @@
       "type": "textfield",
       "required": false,
       "default": "85"
+    },
+    {
+      "name": "dataSource",
+      "title": "Data Source",
+      "description": "Where usage numbers come from. Claude Code only never reads your login and never calls the API; run Connect Claude Code first.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Automatic (Claude Code, then API)",
+          "value": "auto"
+        },
+        {
+          "title": "Claude Code Only",
+          "value": "claude-code"
+        }
+      ]
     },
     {
       "name": "credentialsSource",

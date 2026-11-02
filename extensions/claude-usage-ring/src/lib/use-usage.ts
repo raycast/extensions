@@ -1,11 +1,13 @@
 import { environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Prefs, Snapshot } from "../types";
+import { readClaudeCodeUsage } from "./claude-code-source";
 import { refresh } from "./refresh";
 import { oauthSource } from "./usage-api";
 import { readSnapshot, writeSnapshot } from "./usage-store";
 
 export const MENU_BAR_COMMAND = "usage-menu-bar";
+export const CONNECT_COMMAND = "connect-claude-code";
 
 export function useUsage({ force = false, syncMenuBar = false }: { force?: boolean; syncMenuBar?: boolean } = {}) {
   const prefs = getPreferenceValues<Prefs>();
@@ -18,10 +20,15 @@ export function useUsage({ force = false, syncMenuBar = false }: { force?: boole
       setIsLoading(true);
       try {
         const current = snapRef.current;
-        const next = await refresh(current, oauthSource(prefs.credentialsSource), {
-          force: forceFetch,
-          userInitiated: environment.launchType === LaunchType.UserInitiated,
-        });
+        const api = prefs.dataSource === "claude-code" ? undefined : oauthSource(prefs.credentialsSource);
+        const next = await refresh(
+          current,
+          { api, local: readClaudeCodeUsage },
+          {
+            force: forceFetch,
+            userInitiated: environment.launchType === LaunchType.UserInitiated,
+          },
+        );
         if (next === current) return current;
         writeSnapshot(next);
         snapRef.current = next;
@@ -34,7 +41,7 @@ export function useUsage({ force = false, syncMenuBar = false }: { force?: boole
         setIsLoading(false);
       }
     },
-    [prefs.credentialsSource, syncMenuBar],
+    [prefs.credentialsSource, prefs.dataSource, syncMenuBar],
   );
 
   useEffect(() => {
