@@ -1,6 +1,12 @@
-import { SearchItemsView } from "./lib/search-items-view";
+import { LaunchProps } from "@raycast/api";
+import { VaultsView } from "./lib/vaults-view";
 
-/** Browse Items: all items, with a menu to show one vault. The vault list is List Vaults'. */
-export default function Command() {
-  return <SearchItemsView />;
+export interface BrowseItemsContext {
+  /** Set by List Vaults, which opens Browse Items on the vault list. */
+  openOn?: "vaults";
+}
+
+/** Browse Items: all items, open on top of the vault list, which Esc goes back to. */
+export default function Command({ launchContext }: LaunchProps<{ launchContext?: BrowseItemsContext }>) {
+  return <VaultsView startOnItems={launchContext?.openOn !== "vaults"} />;
 }

@@ -295,7 +295,15 @@ export default function Command() {
     <List
       isLoading={isLoading || isRefreshing}
       searchBarPlaceholder="Search TOTP items..."
-      searchBarAccessory={<VaultDropdown vaults={vaults} itemCounts={itemCounts} onVaultChange={setSelectedVaultId} />}
+      searchBarAccessory={
+        <VaultDropdown
+          vaults={vaults}
+          itemCounts={itemCounts}
+          // By name: Sort vaults by is Browse Items' preference, which this command can't read.
+          order="name"
+          onVaultChange={setSelectedVaultId}
+        />
+      }
     >
       {shownItems.map((item) => {
         const code = currentCode(item);

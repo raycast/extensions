@@ -28,20 +28,39 @@
         "search",
         "vaults"
       ],
-      "mode": "view"
-    },
-    {
-      "name": "list-vaults",
-      "title": "List Vaults",
-      "subtitle": "Proton Pass",
-      "description": "View all your Proton Pass vaults",
       "mode": "view",
       "preferences": [
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "title": "Sort items by",
+          "description": "Order of the items. Sort by (⌘⇧S) changes it until the window closes.",
+          "default": "mostUsed",
+          "required": false,
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            },
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Last Modified",
+              "value": "modified"
+            },
+            {
+              "title": "Date Created",
+              "value": "created"
+            }
+          ]
+        },
         {
           "name": "sortVaultsBy",
           "type": "dropdown",
           "title": "Sort vaults by",
-          "description": "Order of the vaults. Sort by (⌘⇧S) changes it until the window closes.",
+          "description": "Order of the vaults in the vault list and the vault menu. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes.",
           "default": "name",
           "required": false,
           "data": [
@@ -60,6 +79,13 @@
           ]
         }
       ]
+    },
+    {
+      "name": "list-vaults",
+      "title": "List Vaults",
+      "subtitle": "Proton Pass",
+      "description": "Open Browse Items on your vaults",
+      "mode": "no-view"
     },
     {
       "name": "generate-password",
@@ -236,6 +262,32 @@
           "description": "Show dots instead of the codes until Show Codes (⌘H). Copying still works.",
           "default": false,
           "required": false
+        },
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "title": "Sort items by",
+          "description": "Order of the codes. Sort by (⌘⇧S) changes it until the window closes.",
+          "default": "mostUsed",
+          "required": false,
+          "data": [
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            },
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Last Modified",
+              "value": "modified"
+            },
+            {
+              "title": "Date Created",
+              "value": "created"
+            }
+          ]
         }
       ]
     },
@@ -327,32 +379,6 @@
         {
           "title": "30 days",
           "value": "43200"
-        }
-      ]
-    },
-    {
-      "name": "sortBy",
-      "type": "dropdown",
-      "title": "Sort items by",
-      "description": "Order of the items in Browse Items, List Vaults and Get TOTP Code. Sort by (⌘⇧S) changes it until the window closes.",
-      "default": "mostUsed",
-      "required": false,
-      "data": [
-        {
-          "title": "Most Used",
-          "value": "mostUsed"
-        },
-        {
-          "title": "Name",
-          "value": "name"
-        },
-        {
-          "title": "Last Modified",
-          "value": "modified"
-        },
-        {
-          "title": "Date Created",
-          "value": "created"
         }
       ]
     },
