@@ -2,35 +2,32 @@
 
 [English](README.md) | **简体中文**
 
-**PathSeek** 是一款适用于 macOS 的 Raycast 文件与文件夹搜索插件。它借鉴了 [Listary](https://www.listary.com/) 的快速文件定位体验，并在 MIT 许可的 Raycast 扩展 [Fuzzy File Search](https://github.com/raycast/extensions/tree/main/extensions/fuzzy-file-search) 基础上进一步开发：除了快速搜索，还可以在其他应用现有的 **Open / Save 文件选择窗口中快速选中文件或跳转目录**。
+**PathSeek** 面向 macOS 应用的 Open/Save 文件选择对话框，提供类似 Listary 的辅助路径粘贴体验：使用自己在 Raycast 中设置的快捷键查找文件或目录，再将其绝对路径粘贴回原应用。搜索基于用户主动建立的本地持久化索引。
+
+[Open/Save 操作与兼容性指南](docs/open-save-dialog.md)
 
 ## 功能
 
-- **快速搜索**：使用 `fd` 手动创建本地持久化索引，通过 `fzf` 搜索文件名、文件夹与路径。
-- **文件操作**：打开文件、用 Finder 显示位置、快速预览和复制路径。
-- **快速选择文件**：在应用的 Open / Save 窗口中启动 PathSeek，搜索并将文件或文件夹的完整路径送回原窗口。不会自动确认打开或保存。
-- **索引完全可控**：首次自行选择文件夹并构建索引；安装、搜索和启动时都**不会自动扫描或重建**。
+- **Open/Save 快速定位**：在文件选择窗口中通过全局快捷键启动 **Find in Open/Save**，搜索并使用 Raycast 的 `Action.Paste` 将选中文件或目录的完整路径粘贴回原窗口。部分应用需要先按 `⌘⇧G` 打开「前往文件夹」。PathSeek 不会代替用户点击打开或保存。
+- **手动建立索引**：选择索引目录，通过 `fd` 显式建立或重建本地持久化索引。安装、启动 Raycast 和搜索时均不会自动扫描。
+- **Raycast 内搜索**：使用 `fzf` 搜索已索引的文件名、目录和路径；支持打开、Finder 定位、快速预览和复制绝对路径。
 
 ## 安装与使用
 
-首次安装和依赖排查可参考 [安装指南（英文）](docs/first-time-setup.md)。
-
-需要 [Raycast](https://www.raycast.com/)、[fd](https://github.com/sharkdp/fd) 和 [fzf](https://github.com/junegunn/fzf)：
+需要 [Raycast](https://www.raycast.com/)、[fd](https://github.com/sharkdp/fd) 和 [fzf](https://github.com/junegunn/fzf)。命令行依赖需自行安装：
 
 ```bash
 brew install fd fzf
-git clone https://github.com/juezhong/raycast-pathseek.git
-cd raycast-pathseek
-npm ci
-npm run dev
 ```
 
-在 Raycast 中运行 **Build Index**，选择需要搜索的文件夹并手动建立索引。之后使用 **Search Files and Folders** 搜索，文件和目录操作都可以通过 `⌘K` 查看。
+1. 在 Raycast 中运行 **Build Index**，选择目录并主动建立索引。
+2. 通过 Raycast 的命令配置，为 **Find in Open/Save** 设置一次全局快捷键（建议 `⌘⇧F`，如有冲突请自选）。插件无法自动注册此快捷键。
+3. 在其他应用中打开 macOS Open/Save 对话框，按快捷键、搜索并按 **Return**，将绝对路径粘贴回原应用。如果该应用不支持直接粘贴，可以先在原窗口按 `⌘⇧G`，再调用 PathSeek。
 
-如需在其他应用的文件选择窗口中快速选择文件或跳转目录，先在 Raycast 为 **Find in Open/Save** 设置一次全局快捷键（推荐 `⌘⇧F`，如有冲突请自选）。打开目标应用的文件选择窗口后，按快捷键 → 搜索 → **Return**。在已测试的 macOS 文件选择窗口中，无需先按 `⌘⇧G`；如遇不兼容的应用，可先按 `⌘⇧G` 再搜索。更多说明见 [Open/Save 使用指南](docs/open-save-dialog.md)。
+普通文件搜索可使用 **Search Indexed Files**。安装、故障排查与兼容性细节分别见 [首次安装指南](docs/first-time-setup.md) 和 [Open/Save 使用指南](docs/open-save-dialog.md)。
 
 ## 来源与授权
 
-PathSeek 参考了 [Listary](https://www.listary.com/) 的交互理念，并基于 Raycast [Fuzzy File Search](https://github.com/raycast/extensions/tree/main/extensions/fuzzy-file-search)（原作者 `erykksc`，贡献者 `gilitos92`，MIT 许可）进行扩展。感谢原项目及其贡献者。上游版权、MIT 许可文本及其他依赖信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+PathSeek 参考了 [Listary](https://www.listary.com/) 的交互理念，并基于 Raycast [Fuzzy File Search](https://github.com/raycast/extensions/tree/main/extensions/fuzzy-file-search)（原作者 `erykksc`，贡献者 `gilitos92`，MIT 许可）进行扩展。感谢原项目及其贡献者。上游版权、MIT 许可文本和其他依赖信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-PathSeek 本身采用 [MIT License](LICENSE) 开源。当前提供本地开发安装，**尚未在 Raycast Store 正式发布**。
+PathSeek 本身采用 [MIT License](LICENSE) 开源。
