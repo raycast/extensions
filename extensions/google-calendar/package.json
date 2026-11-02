@@ -99,6 +99,14 @@
       ]
     },
     {
+      "title": "Events",
+      "name": "search-event-mentions",
+      "description": "Search events across your visible Google calendars by title, description, location, or attendee to mention in AI Chat, listing this week's events by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
+    {
       "name": "create-event",
       "title": "Create Event",
       "description": "Creates a new event in the user's Google Calendar"
