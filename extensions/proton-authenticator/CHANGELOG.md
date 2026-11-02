@@ -1,6 +1,6 @@
 # Proton Authenticator Changelog
 
-## [Fix database access on macOS 27] - {PR_MERGE_DATE}
+## [Fix database access on macOS 27] - 2026-11-02
 
 ### Fixed
 
