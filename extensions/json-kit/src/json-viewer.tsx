@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { targetPath, writeJson } from "./export";
 import {
   MAX_GENERATED_BYTES,
@@ -220,17 +220,24 @@ function TreeView({ document }: { document: JsonDocument }) {
   );
   const [query, setQuery] = useState("");
   const [pageLimit, setPageLimit] = useState(100);
-  const all = allTreeItems(document.root);
-  const pointerCounts = new Map<string, number>();
-  for (const item of all)
-    pointerCounts.set(item.pointer, (pointerCounts.get(item.pointer) ?? 0) + 1);
-  const items = query
-    ? all.filter((item) =>
-        `${item.label} ${item.pointer} ${document.source.slice(item.node.offset, item.node.offset + (item.container ? 0 : item.node.length))}`
-          .toLocaleLowerCase()
-          .includes(query.toLocaleLowerCase()),
-      )
-    : visibleTreeItems(document.root, expanded);
+  const all = useMemo(() => allTreeItems(document.root), [document.root]);
+  const pointerCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const item of all)
+      counts.set(item.pointer, (counts.get(item.pointer) ?? 0) + 1);
+    return counts;
+  }, [all]);
+  const items = useMemo(
+    () =>
+      query
+        ? all.filter((item) =>
+            `${item.label} ${item.pointer} ${document.source.slice(item.node.offset, item.node.offset + (item.container ? 0 : item.node.length))}`
+              .toLocaleLowerCase()
+              .includes(query.toLocaleLowerCase()),
+          )
+        : visibleTreeItems(all, expanded),
+    [all, query, document.source, expanded],
+  );
   function toggle(item: TreeItem) {
     const next = new Set(expanded);
     if (next.has(item.id)) next.delete(item.id);

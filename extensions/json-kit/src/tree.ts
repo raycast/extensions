@@ -53,10 +53,9 @@ export function allTreeItems(root: Node): TreeItem[] {
 }
 
 export function visibleTreeItems(
-  root: Node,
+  all: TreeItem[],
   expanded: Set<string>,
 ): TreeItem[] {
-  const all = allTreeItems(root);
   const visibility = [true];
   return all.filter((item) => {
     if (item.depth === 0) {
