@@ -22,7 +22,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: raycast/github-actions/extension-duplicate-check@47dcedb392c06f3b3d2ba96012e1fe0d472846a0
+      - uses: raycast/github-actions/extension-duplicate-check@master
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           redash-api-key: ${{ secrets.REDASH_API_KEY }}
