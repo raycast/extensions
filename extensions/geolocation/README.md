@@ -25,13 +25,11 @@ The ad hoc signature ties the permission to the exact binary. Bump `APP_VERSION`
 
 ## Development
 
-Requires Xcode 16.3 or later, plus the tools pinned in `mise.toml`.
+Requires Xcode 16.3 or later.
 
 ```sh
-just install   # install dependencies
-just dev       # run in Raycast with hot reload
-just check     # type-check, then ray lint (ESLint and Prettier)
-just build     # production build
+npm install
+npm run dev     # run in Raycast with hot reload
+npm run lint    # ESLint and Prettier
+npm run build   # production build, also type-checks
 ```
-
-The project uses npm, TypeScript 6 and Raycast's ESLint and Prettier setup because the Raycast Store CI requires `package-lock.json` and runs ESLint through typescript-eslint, which does not support TypeScript 7. The icon source is `media/icon.svg`; render it to `assets/icon.png` at 512×512.
