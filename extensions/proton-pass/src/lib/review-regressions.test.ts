@@ -520,7 +520,7 @@ function passCliWithAdapter(adapter: Record<string, unknown>) {
     listVaultsAndItems: () => Promise<{
       vaults: Vault[];
       items: Item[];
-      failedVaults: { vault: Vault; message: string }[];
+      failedVaults: { vault: Vault; message: string; shareIds?: string[] }[];
     }>;
   };
 }
@@ -638,6 +638,59 @@ test("overlapping listings, e.g. the vault list and the item list it opens, stil
   const [first, second] = await Promise.all([api.listVaultsAndItems(), api.listVaultsAndItems()]);
   assert.equal(first.items.length + second.items.length, 24);
   assert.equal(most, 8);
+});
+
+test("every listing command counts toward the 8 at once: vaults, shares, items of one vault and members", async () => {
+  let running = 0;
+  let most = 0;
+  const command =
+    <T>(result: T, ticks = 1) =>
+    async () => {
+      running++;
+      most = Math.max(most, running);
+      for (let tick = 0; tick < ticks; tick++) await new Promise(setImmediate);
+      running--;
+      return result;
+    };
+  const vaults = Array.from({ length: 12 }, (_, index) => ({ shareId: `vault-${index}`, name: "Vault" }));
+  const api = passCliWithAdapter({
+    listVaults: command(vaults),
+    // Slow, as it can be: it used to run beside 8 item listings.
+    listItemShares: command([], 5),
+    listItems: (shareId: string, vaultName: string) => command([{ ...item, shareId, itemId: shareId, vaultName }])(),
+    listVaultRoles: command(new Map(vaults.map(({ shareId }) => [shareId, "owner"]))),
+    countVaultMembers: command(1),
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{ items: Item[] }>;
+    listItems: (shareId: string, vaults: Vault[]) => Promise<Item[]>;
+    listVaultSharing: () => Promise<Map<string, unknown>>;
+  };
+  const [first, second, oneVault, sharing] = await Promise.all([
+    api.listVaultsAndItems(),
+    api.listVaultsAndItems(),
+    api.listItems("vault-0", [vaults[0]]),
+    api.listVaultSharing(),
+  ]);
+  assert.equal(first.items.length + second.items.length + oneVault.length, 25);
+  assert.equal(sharing.size, 12);
+  assert.equal(most, 8);
+});
+
+test("a shared item failing to load is named, so that the shared items that loaded aren't kept twice", async () => {
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => ["loaded-share", "failed-share"],
+    listItems: async (shareId: string, vaultName: string) => {
+      if (shareId === "failed-share") throw new PassCliError("Network unavailable", "network_error");
+      return [{ ...item, shareId, itemId: shareId, vaultName }];
+    },
+  });
+  const { items, failedVaults } = await api.listVaultsAndItems();
+  assert.equal(items.map(({ shareId }) => shareId).join(), "vault,loaded-share");
+  assert.equal(
+    JSON.stringify(failedVaults.map(({ vault, shareIds }) => ({ name: vault.name, shareIds }))),
+    JSON.stringify([{ name: "Shared with Me", shareIds: ["failed-share"] }]),
+  );
 });
 
 test("listed TOTP secrets stay in memory to generate codes, and are forgotten once the session ends", async () => {
