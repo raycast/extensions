@@ -16,10 +16,11 @@ the music from anywhere.
 The commands are `bside://` URLs, so B-Side starts if it is not running.
 Like Track and Choose Vibe need B-Side 0.3 or later.
 
-## Install
+## Development
+
+In this extension's folder:
 
 ```bash
-cd raycast
 npm install
 npm run dev
 ```

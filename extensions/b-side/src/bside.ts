@@ -13,15 +13,18 @@ export async function send(command: Command, hud: string, query = "") {
   const args = command === "show" ? [url] : ["-g", url];
   try {
     await run("open", args);
-    await closeMainWindow();
-    if (command !== "show") await showHUD(hud);
-  } catch {
+  } catch (error) {
+    // -10814: no app claims bside://, so B-Side is not installed.
+    const missing = String(error).includes("-10814");
     await showToast({
       style: Toast.Style.Failure,
-      title: "B-Side is not installed",
-      message: "Get it at b-side.anhile.com",
+      title: missing ? "B-Side is not installed" : "Could not reach B-Side",
+      message: missing ? "Get it at b-side.anhile.com" : String(error),
     });
+    return;
   }
+  await closeMainWindow();
+  if (command !== "show") await showHUD(hud);
 }
 
 /** A vibe tile, as B-Side saves it (Mood in the app). */
@@ -65,8 +68,8 @@ export function subtitle(vibe: Vibe): string {
 
 function run(command: string, args: string[], input?: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = execFile(command, args, { maxBuffer: 16 * 1024 * 1024 }, (error, stdout) =>
-      error ? reject(error) : resolve(stdout),
+    const child = execFile(command, args, { maxBuffer: 16 * 1024 * 1024 }, (error, stdout, stderr) =>
+      error ? reject(new Error(stderr.trim() || error.message)) : resolve(stdout),
     );
     if (input !== undefined) child.stdin?.end(input);
   });
