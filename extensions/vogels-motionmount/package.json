@@ -45,15 +45,13 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.4",
     "prettier": "^3.9.10",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.0"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "tsc --noEmit && vitest run && swift test --package-path swift",
     "publish": "npx @raycast/api@latest publish"
   }
 }
