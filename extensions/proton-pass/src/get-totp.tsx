@@ -249,44 +249,42 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading || isRefreshing} searchBarPlaceholder="Search TOTP items...">
-      <List.Section title="TOTP Codes" subtitle={isRefreshing ? "Refreshing..." : `Refreshing in ${remainingSeconds}s`}>
-        {items.map((item) => {
-          const code = currentCode(item);
-          return (
-            <List.Item
-              key={`${item.shareId}-${item.itemId}`}
-              icon={getItemIcon(item.type)}
-              title={item.title}
-              subtitle={item.vaultName}
-              accessories={[
-                {
-                  // Said as in Browse Items' details.
-                  tag: code
-                    ? { value: monospace(formatTotpCode(code)), color: getTimerColor() }
-                    : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
-                },
-                // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
-                // 30-second period of getTotpRemainingSeconds.
-                {
-                  text: monospace(`${String(remainingSeconds).padStart(2, "0")}s`),
-                  icon: totpProgressIcon(remainingSeconds, 30, getTimerColor()),
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  {code && <Action title="Copy TOTP Code" icon={Icon.Clipboard} onAction={() => copyTotp(item)} />}
-                  <Action
-                    title="Refresh Codes"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={refreshTotpCodes}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+      {items.map((item) => {
+        const code = currentCode(item);
+        return (
+          <List.Item
+            key={`${item.shareId}-${item.itemId}`}
+            icon={getItemIcon(item.type)}
+            title={item.title}
+            subtitle={item.vaultName}
+            accessories={[
+              {
+                // Said as in Browse Items' details.
+                tag: code
+                  ? { value: monospace(formatTotpCode(code)), color: getTimerColor() }
+                  : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
+              },
+              // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
+              // 30-second period of getTotpRemainingSeconds.
+              {
+                text: monospace(`${String(remainingSeconds).padStart(2, "0")}s`),
+                icon: totpProgressIcon(remainingSeconds, 30, getTimerColor()),
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                {code && <Action title="Copy TOTP Code" icon={Icon.Clipboard} onAction={() => copyTotp(item)} />}
+                <Action
+                  title="Refresh Codes"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={refreshTotpCodes}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
       {items.length === 0 && !isLoading && !error && (
         <List.EmptyView icon={TOTP_ICON} title="No TOTP Items" description="None of your items have TOTP configured" />
       )}
