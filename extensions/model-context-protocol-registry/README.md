@@ -50,6 +50,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Video Dept. AI](https://videodepartment.org/ai-assistant) | Plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita. |
 | [SlickTrip](https://slicktrip.com/connector) | Live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Watch any fare, stay or seat and get an email or text when the price drops; booking happens on the seller's site. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration, no API key to paste. |
 | [Melso](https://docs.melso.ai/mcp/overview) | OAuth-protected Spanish invoices, expenses and tax calendars, plus S.L. incorporation requests. The owner pays and approves incorporation in Melso; professionals complete the legal formation. Paid service and appropriate tool access required; tax-return approval and filing remain in Melso. |
 | [Paper Plane Post](https://paperplanepost.com/for/agents) | Create and send an AI-illustrated postcard anywhere in the world |
