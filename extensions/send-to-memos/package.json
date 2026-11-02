@@ -136,5 +136,8 @@
     "capture",
     "markdown",
     "bookmark"
-  ]
+  ],
+  "overrides": {
+    "minimatch": "11.0.1"
+  }
 }

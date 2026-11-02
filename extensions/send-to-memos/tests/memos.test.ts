@@ -56,7 +56,16 @@ test("composes Markdown, a source URL and normalized Chinese/nested tags", () =>
       sourceUrl: " https://example.com/article?q=1#section ",
       tags: "灵感, #阅读，#阅读 ##研究/AI",
     }),
-    "**想法**\n\n第二段\n\nhttps://example.com/article?q=1#section\n\n#灵感 #阅读 #研究/AI",
+    "  **想法**\n\n第二段  \n\nhttps://example.com/article?q=1#section\n\n#灵感 #阅读 #研究/AI",
+  );
+});
+
+test("preserves indented Markdown code blocks and trailing line breaks", () => {
+  const memo = "    const answer = 42;\n    console.log(answer);\n";
+  assert.equal(composeContent({ memo, sourceUrl: "", tags: "" }), memo);
+  assert.equal(
+    composeContent({ memo: " \t\n ", sourceUrl: "https://example.com", tags: "#reading" }),
+    "https://example.com\n\n#reading",
   );
 });
 

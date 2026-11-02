@@ -5,6 +5,7 @@ Capture thoughts, tags, and links in [Memos](https://github.com/usememos/memos),
 ## Features
 
 - Write plain text or Markdown, including Unicode content and tags.
+- Preserve the original memo text, including Markdown indentation and whitespace.
 - Add tags and an optional webpage link in a focused capture form.
 - Keep new memos private by default, or choose instance-member or public visibility.
 - Send a memo and open its permalink in your browser.

@@ -74,7 +74,8 @@ export function normalizeSourceUrl(input: string): string {
 }
 
 export function composeContent(input: Pick<MemoInput, "memo" | "tags" | "sourceUrl">): string {
-  const memo = input.memo.trim();
+  // Markdown indentation and trailing spaces can carry meaning.
+  const memo = input.memo.trim() ? input.memo : "";
   const sourceUrl = normalizeSourceUrl(input.sourceUrl);
   if (!memo && !sourceUrl) throw new MemosError("Write a memo or add a link.");
   const existingTags = new Set(Array.from(memo.matchAll(/(?:^|\s)#([^\s#,，]+)/g), (match) => match[1]));
