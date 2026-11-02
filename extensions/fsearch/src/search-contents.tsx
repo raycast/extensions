@@ -25,6 +25,7 @@ export default function Command({
   const [mode, setMode] = useState<GrepMode>((args.mode as GrepMode) || "literal");
   const { onTrash, isVisible } = useTrashedPaths();
   const folder = args.folder?.trim() ? expandHome(args.folder) : undefined;
+  const title = folder ? `Search File Contents in ${fileName(folder)}` : "Search File Contents";
   const { pattern, q } = splitContentQuery(text);
   const execute = pattern.length > 0;
 
@@ -48,7 +49,7 @@ export default function Command({
       searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder={MODES.find((m) => m.value === mode)?.placeholder}
-      navigationTitle={folder ? `Search File Contents in ${fileName(folder)}` : undefined}
+      navigationTitle={indexing ? `${title} · Indexing…` : title}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Match"
@@ -66,11 +67,17 @@ export default function Command({
           icon={Icon.Text}
           title="Search Inside Your Files"
           description={
-            "Type the text to find. Uppercase letters make it case-sensitive.\nNarrow it with ext:swift, type:code, or in:~/Developer."
+            "Uppercase letters make a search case-sensitive. Narrow it with ext:swift or in:~/Developer.\nType -- ext:pdf to find the text “ext:pdf”."
           }
         />
       ) : error ? (
         <StatusView error={error} onRetry={revalidate} />
+      ) : indexing && files.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.HardDrive}
+          title="Indexing File Contents"
+          description="Results refresh automatically as FSearch indexes your files."
+        />
       ) : files.length === 0 ? (
         <List.EmptyView
           icon={Icon.Text}

@@ -33,7 +33,9 @@ async function harness(t, command, data, launchArguments = {}) {
     Keyboard: { Shortcut: { Common: { Remove: { modifiers: ["ctrl"], key: "x" } } } },
     getPreferenceValues: () => ({}),
   };
-  let response = { data: { tookMicros: 500, ...data }, isLoading: false, indexing: false };
+  const revalidate = t.mock.fn();
+  let response = { data: { tookMicros: 500, ...data }, isLoading: false, revalidate };
+  const usePromise = t.mock.fn(() => response);
   const cache = new Map();
   function load(path) {
     if (cache.has(path)) return cache.get(path).exports;
@@ -49,8 +51,7 @@ async function harness(t, command, data, launchArguments = {}) {
     }).outputText;
     function localRequire(id) {
       if (id === "@raycast/api") return api;
-      if (id === "@raycast/utils") return { useCachedState: (_, initial) => React.useState(initial) };
-      if (id.endsWith("/use-fsearch")) return { useFSearch: () => response };
+      if (id === "@raycast/utils") return { useCachedState: (_, initial) => React.useState(initial), usePromise };
       if (id.endsWith("/file-detail")) return { FileDetail: host("FileDetail") };
       if (id.endsWith("/status-view")) return { StatusView: host("StatusView") };
       if (!id.startsWith(".")) return require(id);
@@ -68,6 +69,8 @@ async function harness(t, command, data, launchArguments = {}) {
   });
   t.after(() => act(() => renderer.unmount()));
   return {
+    revalidate,
+    searchArgs: () => usePromise.mock.calls.at(-1).arguments[1],
     list: () => renderer.root.findByType("List").props,
     items: () => renderer.root.findAllByType("List.Item"),
     sections: () => renderer.root.findAllByType("List.Section"),
@@ -104,6 +107,48 @@ const matches = (path) => ({
     { line: 1, text: "report one" },
     { line: 2, text: "report two" },
   ],
+});
+
+test("content search shows indexing, retries with matches visible, and stops when ready", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const h = await harness(t, "search-contents", { files: [], complete: true, indexing: true });
+  assert.match(h.empty()[0].props.title, /Indexing/i);
+  assert.equal(h.list().isLoading, true);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 1);
+
+  const files = [matches("/tmp/report.txt")];
+  await h.updateResults({ files, complete: true, indexing: true });
+  assert.ok(h.items().some((item) => item.props.id === "/tmp/report.txt:1"));
+  assert.match(h.list().navigationTitle, /Indexing/);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 2);
+
+  await h.updateResults({ files, complete: true, indexing: false });
+  assert.equal(h.list().isLoading, false);
+  assert.doesNotMatch(h.list().navigationTitle, /Indexing/);
+  t.mock.timers.tick(3000);
+  assert.equal(h.revalidate.mock.callCount(), 2);
+});
+
+test("clearing an indexing content search cancels its pending retry", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const h = await harness(t, "search-contents", { files: [], complete: true, indexing: true });
+  await h.changeQuery("");
+  assert.equal(h.list().isLoading, false);
+  t.mock.timers.tick(1000);
+  assert.equal(h.revalidate.mock.callCount(), 0);
+});
+
+test("a leading separator keeps filter-shaped words in the content pattern", async (t) => {
+  const h = await harness(t, "search-contents", { files: [], complete: true }, { text: "-- ext:pdf" });
+  assert.deepEqual(h.searchArgs(), ["ext:pdf", "", "literal"]);
+  await h.changeQuery("in:~/docs ext:md -- ext:pdf  !in:docs");
+  assert.deepEqual(h.searchArgs(), ["ext:pdf  !in:docs", "in:~/docs ext:md", "literal"]);
+  await h.changeQuery("git  diff -- src ext:ts");
+  assert.deepEqual(h.searchArgs(), ["git  diff -- src", "ext:ts", "literal"]);
+  await h.changeQuery("--");
+  assert.deepEqual(h.searchArgs(), ["--", "", "literal"]);
 });
 
 test("file, folder, and content results paste the selected path as text or a shell argument", async (t) => {
