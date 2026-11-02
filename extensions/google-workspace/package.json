@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-workspace",
   "title": "Google Workspace",
-  "description": "Access Google Drive files",
+  "description": "Access Google Drive files and search your Workspace directory",
   "icon": "google-logo.png",
   "owner": "raycast",
   "access": "public",
@@ -20,7 +20,8 @@
     "ViGeng",
     "xilopaint",
     "faridrashidi",
-    "anupchavan"
+    "anupchavan",
+    "victor_schmidt"
   ],
   "categories": [
     "Productivity"
@@ -140,6 +141,14 @@
       "description": "Search files in your Google Drive",
       "icon": "google-drive.png",
       "mode": "view"
+    },
+    {
+      "name": "search-google-directory",
+      "title": "Search Google Directory",
+      "description": "Search your Google Workspace directory and paste colleagues' emails",
+      "icon": "google-logo.png",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "download-google-drive-file",

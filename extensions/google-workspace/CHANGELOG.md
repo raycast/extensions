@@ -1,5 +1,11 @@
 # Google Workspace Changelog
 
+## [Search Google Directory] - {PR_MERGE_DATE}
+
+- Add an opt-in `Search Google Directory` command to search colleagues and admin-shared external contacts in your Google Workspace directory.
+- Paste a person's primary email, or copy their email, name, or phone numbers; pin people and see recently used ones first.
+- Uses a separate Google sign-in that only requests read-only directory access.
+
 ## [Drive Links & Downloads] - 2026-09-23
 
 - Paste a Google Drive, Docs, Sheets or Slides link in `Search Google Drive` to find the file or folder it points to.
