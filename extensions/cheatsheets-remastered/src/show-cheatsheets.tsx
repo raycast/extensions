@@ -755,14 +755,14 @@ function SheetView({ slug }: SheetProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard title="Copy Original Markdown" content={content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Title" content={slug} icon={Icon.CopyClipboard} />
             <Action.Push
               title="Search Within Sheet"
               icon={Icon.MagnifyingGlass}
               shortcut={shortcut("f")}
               target={<SearchSections title={slug} source={content} bundled />}
             />
-            <Action.CopyToClipboard title="Copy Original Markdown" content={content} icon={Icon.CopyClipboard} />
-            <Action.CopyToClipboard title="Copy Title" content={slug} icon={Icon.CopyClipboard} />
             <Action.OpenInBrowser url={Service.urlFor(slug)} title="Open in Browser" icon={Icon.Link} />
           </ActionPanel.Section>
           {isLocal && (
@@ -798,14 +798,14 @@ function CustomSheetView({ sheet }: CustomSheetProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
             <Action.Push
               title="Search Within Sheet"
               icon={Icon.MagnifyingGlass}
               shortcut={shortcut("f")}
               target={<SearchSections title={sheet.title} source={sheet.content} />}
             />
-            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
-            <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -1053,14 +1053,14 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
             </ActionPanel.Section>
           )}
           <ActionPanel.Section title="Actions">
+            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
             <Action.Push
               title="Search Within Sheet"
               icon={Icon.MagnifyingGlass}
               shortcut={shortcut("f")}
               target={<SearchSections title={sheet.title} source={sheet.content} />}
             />
-            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
-            <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
           </ActionPanel.Section>
         </ActionPanel>
       }

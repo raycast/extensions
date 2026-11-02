@@ -32,8 +32,16 @@ export function SearchSections({
           id={section.id}
           title={section.title}
           subtitle={section.context}
-          accessories={[{ text: `Line ${section.line}`, tooltip: `${title}, source line ${section.line}` }]}
-          detail={<List.Item.Detail markdown={displayMarkdown(section.source, bundled)} />}
+          detail={
+            <List.Item.Detail
+              markdown={displayMarkdown(section.source, bundled)}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Source Line" text={String(section.line)} />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action.Push
