@@ -67,7 +67,6 @@ const sort = loadView("sort.tsx", {
 
 // The vault menu's element isn't rendered here: only its constant and props matter.
 const vaultDropdown = loadView("vault-dropdown.tsx", {
-  react: { useRef: (current: unknown) => ({ current }) },
   "@raycast/api": { List: {}, Icon: {} },
   "./item-counts": itemCounts,
 });
@@ -2170,11 +2169,11 @@ test("the vault list passes on a session it confirmed to the item lists it opens
     "./vault-sharing": vaultSharing,
   });
   const confirmed = () =>
-    actions(harness.render(VaultsView, { startOnItems: false }))
+    actions(harness.render(VaultsView, {}))
       .flatMap((entry) => (entry.actions ? actions(entry.actions) : []))
       .filter((entry) => entry.title === "View Items")
       .map((entry) => (entry.target as Element).props.sessionConfirmed);
-  harness.render(VaultsView, { startOnItems: false });
+  harness.render(VaultsView, {});
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -2232,11 +2231,11 @@ test("the vault list shows and saves items before optional sharing, from complet
     "./shortcuts": shortcuts,
     "./vault-sharing": vaultSharing,
   });
-  harness.render(VaultsView, { startOnItems: false });
+  harness.render(VaultsView, {});
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
-  const view = harness.render(VaultsView, { startOnItems: false });
+  const view = harness.render(VaultsView, {});
   assert.equal(view.props.isLoading, false);
   const row = actions(view).find((entry) => entry.title === personal.name)!;
   assert.ok(row);
@@ -2244,9 +2243,7 @@ test("the vault list shows and saves items before optional sharing, from complet
   assert.deepEqual(saved, []);
   pendingSharing[0](new Map([["vault", { role: "owner", isShared: true }]]));
   await new Promise(setImmediate);
-  const sharedRow = actions(harness.render(VaultsView, { startOnItems: false })).find(
-    (entry) => entry.title === personal.name,
-  )!;
+  const sharedRow = actions(harness.render(VaultsView, {})).find((entry) => entry.title === personal.name)!;
   assert.deepEqual(JSON.parse(JSON.stringify(sharedRow.accessories)), [
     { tooltip: "Shared by you" },
     { text: "1 item" },
@@ -2288,43 +2285,28 @@ test("Sort vaults by puts vaults by name or by item count, the uncounted last", 
   assert.equal(names("mostUsed"), "Personal,Archive");
 });
 
-test("the vault menu follows the vaults' order, and only a vault chosen in it counts as a use", () => {
-  const visits: string[] = [];
-  const changes: string[] = [];
+test("the vault menus list vaults by name, since other commands can't read List Vaults' Sort vaults by", () => {
   const { VaultDropdown } = loadView("vault-dropdown.tsx", {
-    react: { useRef: (current: unknown) => ({ current }) },
     "@raycast/api": { List: { Dropdown: { Item: {}, Section: {} } }, Icon: {} },
     "./item-counts": itemCounts,
-    "./sort": {
-      ...sort,
-      useVaultFrecency: (data: Vault[]) => ({ data, visitItem: (vault: Vault) => visits.push(vault.shareId) }),
-    },
   });
   const menu = VaultDropdown({
-    vaults: [{ shareId: "w", name: "Work" }, { shareId: "p", name: "Personal" }, sharedItems.SHARED_WITH_ME],
+    vaults: [{ shareId: "w", name: "Work" }, { shareId: "p", name: "personal" }, sharedItems.SHARED_WITH_ME],
     itemCounts: new Map([
       ["w", 3],
       ["p", 1],
     ]),
-    order: "itemCount",
-    onVaultChange: (shareId: string) => changes.push(shareId),
+    onVaultChange: () => undefined,
   } as unknown as Record<string, unknown>);
   assert.equal(
     actions(menu)
       .filter((entry) => typeof entry.value === "string")
       .map((entry) => entry.value)
       .join(),
-    "all,w,p,shared-with-me",
+    "all,p,w,shared-with-me",
   );
-  const onChange = menu.props.onChange as (shareId: string) => void;
-  // The vault Raycast opens on, then one the user picks.
-  onChange("w");
-  onChange("p");
-  assert.equal(changes.join(), "w,p");
-  assert.equal(visits.join(), "p");
 });
-
-test("the vault list is sorted by name by default, and Sort by reorders it and the vault menus opened from it", async () => {
+test("List Vaults sorts the vaults by name by default, and Sort by reorders them", async () => {
   const harness = hookHarness();
   const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
@@ -2370,13 +2352,11 @@ test("the vault list is sorted by name by default, and Sort by reorders it and t
     "./shortcuts": shortcuts,
     "./vault-sharing": vaultSharing,
   });
-  harness.render(VaultsView, { startOnItems: false });
+  harness.render(VaultsView, {});
   harness.effects.forEach((effect) => effect());
   await new Promise(setImmediate);
   const rows = () =>
-    actions(harness.render(VaultsView, { startOnItems: false })).filter(
-      (entry) => entry.actions && entry.title !== "All Vaults",
-    );
+    actions(harness.render(VaultsView, {})).filter((entry) => entry.actions && entry.title !== "All Vaults");
   assert.equal(
     rows()
       .map((row) => row.title)
@@ -2392,8 +2372,6 @@ test("the vault list is sorted by name by default, and Sort by reorders it and t
       .join(),
     "Beta,Alpha",
   );
-  const open = actions(rows()[0].actions).find((entry) => entry.title === "View Items")!;
-  assert.equal((open.target as Element).props.vaultOrder, "itemCount");
 });
 
 test("an older vault list load can't replace newer sharing or displayed counts", async () => {
@@ -2441,7 +2419,7 @@ test("an older vault list load can't replace newer sharing or displayed counts",
     "./shortcuts": shortcuts,
     "./vault-sharing": vaultSharing,
   });
-  harness.render(VaultsView, { startOnItems: false });
+  harness.render(VaultsView, {});
   const [load] = harness.effects;
   load();
   await new Promise(setImmediate);
@@ -2454,74 +2432,11 @@ test("an older vault list load can't replace newer sharing or displayed counts",
   pending[0](new Map([["vault", { role: "owner", isShared: false }]]));
   await new Promise(setImmediate);
   assert.deepEqual(JSON.parse(JSON.stringify(savedSharing)), [{ vault: { role: "viewer", isShared: true } }]);
-  const row = actions(harness.render(VaultsView, { startOnItems: false })).find((entry) => entry.title === vault.name)!;
+  const row = actions(harness.render(VaultsView, {})).find((entry) => entry.title === vault.name)!;
   assert.deepEqual(JSON.parse(JSON.stringify(row.accessories)), [
     { tooltip: "Shared with you · Viewer" },
     { text: "2 items" },
   ]);
-});
-
-test("Browse Items opens all items over the vaults, which load only once they're shown", async () => {
-  const pushed: { view: Element; onPop?: () => void }[] = [];
-  let listings = 0;
-  const harness = hookHarness();
-  const { VaultsView } = loadView("vaults-view.tsx", {
-    react: harness.react,
-    "@raycast/api": {
-      List: { Item: {}, EmptyView: {} },
-      ActionPanel: {},
-      Action: { Push: {}, CopyToClipboard: {}, OpenInBrowser: {} },
-      Icon: {},
-      Keyboard: { Shortcut: { Common: { Copy: {} } } },
-      getPreferenceValues: () => ({}),
-      useNavigation: () => ({
-        push: (view: Element, onPop?: () => void) => {
-          pushed.push({ view, onPop });
-        },
-      }),
-    },
-    "./pass-cli": {
-      endedSessionError: async () => undefined,
-      listVaultSharing: async () => new Map(),
-      listVaultsAndItems: async () => {
-        listings++;
-        return { vaults: [{ shareId: "vault", name: "Personal" }], items: [item], failedVaults: [] };
-      },
-    },
-    "./types": { PassCliError },
-    "./search-items-view": {},
-    "./error-views": {},
-    "./login-view": {},
-    "./cache": {
-      getCachedItems: async () => null,
-      getCachedVaults: async () => null,
-      getCachedSharing: async () => null,
-      setCachedSharing: async () => undefined,
-      setCachedItems: async () => undefined,
-      setCachedVaults: async () => undefined,
-    },
-    "./item-counts": itemCounts,
-    "./refresh": refresh,
-    "./shortcuts": shortcuts,
-    "./vault-sharing": vaultSharing,
-  });
-  const render = () => harness.render(VaultsView, { startOnItems: true });
-  render();
-  // Twice, as React does in development: a second copy of the items would take a second Esc to leave.
-  harness.effects.forEach((effect) => effect());
-  harness.effects.forEach((effect) => effect());
-  await new Promise(setImmediate);
-  // All items, rather than a vault, and nothing listed for the vaults underneath meanwhile.
-  assert.equal(pushed.length, 1);
-  assert.equal(pushed[0].view.props.initialVault, undefined);
-  assert.equal(listings, 0);
-
-  pushed[0].onPop?.();
-  await new Promise(setImmediate);
-  assert.equal(listings, 1);
-  const rows = (render().props.children as { props: { children: unknown[] } }).props.children.flat();
-  const titles = rows.flatMap((row) => (row && typeof row === "object" ? [(row as Element).props.title] : []));
-  assert.equal(titles.join(", "), "All Vaults, Personal");
 });
 
 test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {

@@ -15,9 +15,9 @@ export function preferredSortOrder(): SortOrder {
   return SORT_ORDERS.find((order) => order === value) ?? "mostUsed";
 }
 
-/** The order vaults are shown in, from the Sort vaults by preference. */
+/** The order List Vaults shows the vaults in, from its Sort vaults by preference. */
 export function preferredVaultSortOrder(): VaultSortOrder {
-  const value = getPreferenceValues<Preferences>().sortVaultsBy;
+  const value = getPreferenceValues<Preferences.ListVaults>().sortVaultsBy;
   return VAULT_SORT_ORDERS.find((order) => order === value) ?? "name";
 }
 
@@ -41,11 +41,11 @@ export function sortItems<T extends Item>(items: T[], order: SortOrder, mostUsed
   return [...items].sort(compareDates(order === "modified" ? (item) => item.modifiedAt : (item) => item.createdAt));
 }
 
-function compareVaultNames(a: Vault, b: Vault): number {
+export function compareVaultNames(a: Vault, b: Vault): number {
   return a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true });
 }
 
-/** The vaults opened most from Raycast first, from the vault list or a vault menu, then the others by name. */
+/** The vaults opened most from List Vaults first, then the others by name. */
 export function useVaultFrecency<T extends Vault>(vaults: T[]) {
   return useFrecencySorting(vaults, {
     key: (vault) => vault.shareId,

@@ -35,7 +35,31 @@
       "title": "List Vaults",
       "subtitle": "Proton Pass",
       "description": "View all your Proton Pass vaults",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortVaultsBy",
+          "type": "dropdown",
+          "title": "Sort vaults by",
+          "description": "Order of the vaults. Sort by (⌘⇧S) changes it until the window closes.",
+          "default": "name",
+          "required": false,
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Item Count",
+              "value": "itemCount"
+            },
+            {
+              "title": "Most Used",
+              "value": "mostUsed"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "generate-password",
@@ -310,7 +334,7 @@
       "name": "sortBy",
       "type": "dropdown",
       "title": "Sort items by",
-      "description": "Order of the items in Browse Items and Get TOTP Code. Sort by (⌘⇧S) changes it until the window closes.",
+      "description": "Order of the items in Browse Items, List Vaults and Get TOTP Code. Sort by (⌘⇧S) changes it until the window closes.",
       "default": "mostUsed",
       "required": false,
       "data": [
@@ -329,28 +353,6 @@
         {
           "title": "Date Created",
           "value": "created"
-        }
-      ]
-    },
-    {
-      "name": "sortVaultsBy",
-      "type": "dropdown",
-      "title": "Sort vaults by",
-      "description": "Order of the vaults in the vault list and the vault menus. Sort by (⌘⇧S) in the vault list changes it until the window closes.",
-      "default": "name",
-      "required": false,
-      "data": [
-        {
-          "title": "Name",
-          "value": "name"
-        },
-        {
-          "title": "Item Count",
-          "value": "itemCount"
-        },
-        {
-          "title": "Most Used",
-          "value": "mostUsed"
         }
       ]
     },

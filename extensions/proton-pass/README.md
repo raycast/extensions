@@ -44,9 +44,11 @@ Test that the CLI is working:
 pass-cli vault list
 ```
 
-## Browse Items
+## Browse Items and List Vaults
 
-Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
+Browse Items searches all your items. The menu at the top right shows one vault, or Shared with Me: the items shared with you one by one, outside your vaults, as in Proton Pass.
+
+List Vaults lists your vaults, with All Vaults first and Shared with Me last. A vault opens its items, and Esc goes back to the vaults.
 
 ## Preferences
 
@@ -55,8 +57,7 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
-- **Sort items by**: Order of the items in Browse Items and Get TOTP Code: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) in the actions changes it until the window closes
-- **Sort vaults by**: Order of the vaults in the vault list and the vault menus: name (default), item count or most used from Raycast. Sort by (⌘⇧S) in the vault list changes it until the window closes
+- **Sort items by**: Order of the items in Browse Items, List Vaults and Get TOTP Code: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) in the actions changes it until the window closes
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
@@ -72,6 +73,10 @@ Generate Password has its own preferences for the settings it starts with. They 
 - **Passphrase: Words**: Number of words, from 3 to 10 (default: 4)
 - **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
 - **Passphrase: Options**: Capitalize words and include numbers, both on by default
+
+### List Vaults
+
+- **Sort vaults by**: Order of the vaults: name (default), item count or most used. Sort by (⌘⇧S) changes it until the window closes. The vault menus of Browse Items and Get TOTP Code list vaults by name
 
 ### Get TOTP Code
 

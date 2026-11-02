@@ -25,7 +25,7 @@ import {
 import { itemKey, monospace } from "./lib/format";
 import { getListIcon } from "./lib/item-icon";
 import { platformShortcut } from "./lib/shortcuts";
-import { SortByMenu, compareNames, preferredSortOrder, preferredVaultSortOrder, sortItems } from "./lib/sort";
+import { SortByMenu, compareNames, preferredSortOrder, sortItems } from "./lib/sort";
 import { ALL_VAULTS_VALUE, VaultDropdown } from "./lib/vault-dropdown";
 import { countItemsByVault } from "./lib/item-counts";
 import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
@@ -295,14 +295,7 @@ export default function Command() {
     <List
       isLoading={isLoading || isRefreshing}
       searchBarPlaceholder="Search TOTP items..."
-      searchBarAccessory={
-        <VaultDropdown
-          vaults={vaults}
-          itemCounts={itemCounts}
-          order={preferredVaultSortOrder()}
-          onVaultChange={setSelectedVaultId}
-        />
-      }
+      searchBarAccessory={<VaultDropdown vaults={vaults} itemCounts={itemCounts} onVaultChange={setSelectedVaultId} />}
     >
       {shownItems.map((item) => {
         const code = currentCode(item);

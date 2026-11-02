@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { endedSessionError, listVaultSharing, listVaultsAndItems, SESSION_CHECK_WAIT_MS } from "./pass-cli";
 import { Vault, PassCliError, PROTON_PASS_CLI_DOCS } from "./types";
@@ -29,12 +29,8 @@ function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
   return tooltip === undefined ? undefined : { icon: Icon.TwoPeople, tooltip };
 }
 
-/**
- * The vault list of Browse Items, under the items it opens. `startOnItems` opens all items on top of it right away, so
- * that Esc goes back to the vaults.
- */
-export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
-  const { push } = useNavigation();
+/** The vault list of List Vaults, under the items it opens: Esc goes back to the vaults. */
+export function VaultsView() {
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
@@ -44,25 +40,15 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const preferences = getPreferenceValues<Preferences>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
-  const hasOpenedItems = useRef(false);
   // Sort by holds for every item list opened from this window, then the preference's order comes back.
   const sortChoice = useRef(preferredSortOrder());
-  // The vaults' order, also given to the vault menu of the item lists opened from here.
   const [vaultOrder, setVaultOrder] = useState(preferredVaultSortOrder);
 
   // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
   const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
-    if (!startOnItems) {
-      void loadVaults();
-      return;
-    }
-    // Once only: in development, React runs this twice, and a second copy of the items would need a second Esc.
-    if (hasOpenedItems.current) return;
-    hasOpenedItems.current = true;
-    // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    push(<SearchItemsView sortChoice={sortChoice} vaultOrder={vaultOrder} />, () => void loadVaults());
+    void loadVaults();
   }, []);
 
   async function loadVaults() {
@@ -255,14 +241,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={
-                      <SearchItemsView
-                        allVaults
-                        sessionConfirmed={sessionConfirmed}
-                        sortChoice={sortChoice}
-                        vaultOrder={vaultOrder}
-                      />
-                    }
+                    target={<SearchItemsView allVaults sessionConfirmed={sessionConfirmed} sortChoice={sortChoice} />}
                   />
                   {sortMenu}
                 </ActionPanel>
@@ -288,7 +267,6 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                         initialVault={vault}
                         sessionConfirmed={sessionConfirmed}
                         sortChoice={sortChoice}
-                        vaultOrder={vaultOrder}
                       />
                     }
                     onPush={() => visitVault(vault)}
@@ -322,9 +300,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={
-                      <SearchItemsView initialVault={sharedWithMe} sortChoice={sortChoice} vaultOrder={vaultOrder} />
-                    }
+                    target={<SearchItemsView initialVault={sharedWithMe} sortChoice={sortChoice} />}
                   />
                   {sortMenu}
                 </ActionPanel>
