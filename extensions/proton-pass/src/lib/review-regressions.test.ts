@@ -12,6 +12,7 @@ import * as shortcuts from "./shortcuts";
 import * as fillSequence from "./fill-sequence";
 import * as keyPress from "./key-press";
 import * as sharedItems from "./shared-items";
+import * as totp from "./totp";
 import { Item, ItemDetail, PassCliError, Vault } from "./types";
 
 type Element = { props: Record<string, unknown> };
@@ -36,6 +37,8 @@ function loadView(
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
       if (name in services) return services[name];
       if (name === "./shared-items") return sharedItems;
+      if (name === "./format") return format;
+      if (name === "./totp") return totp;
       throw new Error(`Unexpected dependency: ${name}`);
     },
     URL,
@@ -418,7 +421,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
       showToast: async () => undefined,
       getPreferenceValues: () => ({}),
     },
-    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound },
+    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
@@ -575,6 +578,31 @@ test("overlapping listings, e.g. the vault list and the item list it opens, stil
   const [first, second] = await Promise.all([api.listVaultsAndItems(), api.listVaultsAndItems()]);
   assert.equal(first.items.length + second.items.length, 24);
   assert.equal(most, 8);
+});
+
+test("listed TOTP secrets stay in memory to generate codes, and are forgotten once the session ends", async () => {
+  const uri = "otpauth://totp/Example?secret=JBSWY3DPEHPK3PXP";
+  let ended = false;
+  const api = passCliWithAdapter({
+    listVaults: async () => [{ shareId: "vault", name: "Personal" }],
+    listItemShares: async () => [],
+    listItems: async (shareId: string, vaultName: string, onTotpUri: (itemId: string, uri: string) => void) => {
+      if (ended) throw new PassCliError("Session ended", "not_authenticated");
+      onTotpUri("login", uri);
+      return [{ ...item, shareId, vaultName, hasTotp: true }];
+    },
+  }) as unknown as {
+    listVaultsAndItems: () => Promise<{ items: Item[] }>;
+    localTotpCode: (shareId: string, itemId: string) => string | undefined;
+  };
+  assert.equal(api.localTotpCode("vault", "login"), undefined);
+  const { items } = await api.listVaultsAndItems();
+  assert.equal(JSON.stringify(items).includes("otpauth"), false);
+  assert.equal(api.localTotpCode("vault", "login"), totp.generateTotp(totp.parseOtpauthUri(uri)!).code);
+
+  ended = true;
+  await assert.rejects(api.listVaultsAndItems(), /Session ended/);
+  assert.equal(api.localTotpCode("vault", "login"), undefined);
 });
 
 test("Shared with Me failing to load doesn't hold the vaults back, unlike an ended session", async () => {
@@ -1039,6 +1067,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       react: harness.react,
       "@raycast/api": api,
       "./lib/pass-cli": {
+        localTotpCode: () => undefined,
         getTotp: async () => "123456",
         listVaultsAndItems: async () => {
           calls++;
@@ -1100,6 +1129,7 @@ function totpCommandFixture(
   getTotp: (shareId: string, itemId: string) => Promise<string> = async () => "123456",
   writeCache: (items: Item[]) => Promise<void> = async () => undefined,
   globals: Record<string, unknown> = {},
+  localTotpCode: (shareId: string, itemId: string) => string | undefined = () => undefined,
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
@@ -1129,7 +1159,7 @@ function totpCommandFixture(
           toasts.push(toast);
         },
       },
-      "./lib/pass-cli": { listVaultsAndItems, getTotp },
+      "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
@@ -1178,6 +1208,24 @@ function totpCommandFixture(
     },
   };
 }
+
+test("Get TOTP Code generates codes from the listing instead of asking pass-cli for each item", async () => {
+  let asked = 0;
+  const fixture = totpCommandFixture(
+    async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+    async () => {
+      asked++;
+      return "123456";
+    },
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title);
+  assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "654321");
+  assert.equal(asked, 0);
+});
 
 test("TOTP Retry keeps unsaved visible codes when their vault fails, then removes them after a successful deletion", async () => {
   let calls = 0;

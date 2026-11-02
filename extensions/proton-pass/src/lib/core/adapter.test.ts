@@ -163,6 +163,17 @@ test("lists active items and strips full-list secrets", async () => {
   });
 });
 
+test("hands each login's otpauth URI over apart from the item, which never holds it", async () => {
+  const uris: string[] = [];
+  const items = await createPassCliAdapter(fakeCommand("json:items-full")).listItems(
+    "vault-1",
+    "Personal",
+    (itemId, uri) => uris.push(`${itemId} ${uri}`),
+  );
+  assert.deepEqual(uris, ["item-login otpauth://totp/Example?secret=MUST_NEVER_BE_CACHED"]);
+  assert.equal(JSON.stringify(items).includes("otpauth"), false);
+});
+
 test("gets item details without adding list-only show-secrets flag", async () => {
   const detail = await createPassCliAdapter(fakeCommand("json:item-view")).getItem("vault-1", "item-login");
 

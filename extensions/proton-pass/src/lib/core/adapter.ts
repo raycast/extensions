@@ -1,4 +1,10 @@
-import { normalizeItem, normalizeItemDetail, normalizeShareRoles, normalizeVault } from "../pass-cli-normalize";
+import {
+  normalizeItem,
+  normalizeItemDetail,
+  normalizeShareRoles,
+  normalizeVault,
+  totpUriOf,
+} from "../pass-cli-normalize";
 import { Item, ItemDetail, PassCliError, PasswordOptions, Vault, VaultRole } from "../types";
 import { CommandDescriptor, ExecCliOptions, execCli, normalizeCliExecutionError } from "./exec";
 
@@ -112,7 +118,8 @@ export interface PassCliAdapter {
   listItemShares(): Promise<string[]>;
   /** Number of people with access to a vault, the user included. */
   countVaultMembers(shareId: string): Promise<number>;
-  listItems(shareId: string, vaultName: string): Promise<Item[]>;
+  /** `onTotpUri` gets the otpauth URI of each login that has one, which `Item` never holds. */
+  listItems(shareId: string, vaultName: string, onTotpUri?: (itemId: string, uri: string) => void): Promise<Item[]>;
   getItem(shareId: string, itemId: string, vaultName?: string): Promise<ItemDetail>;
   getTotpCodes(shareId: string, itemId: string): Promise<Record<string, string>>;
 }
@@ -163,7 +170,7 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
       }
       return members.length;
     },
-    listItems: async (shareId, vaultName) => {
+    listItems: async (shareId, vaultName, onTotpUri) => {
       const data = parseJson(await run(itemListArgs(shareId)), "item list");
       const rawItems = Array.isArray(data) ? data : isRecord(data) ? data.items : undefined;
       if (!Array.isArray(rawItems)) {
@@ -174,7 +181,12 @@ export function createPassCliAdapter(command: CommandDescriptor, execOptions: Ex
           (item): item is Record<string, unknown> =>
             isRecord(item) && trimOrUndefined(item.state)?.toLowerCase() !== "trashed",
         )
-        .map((item) => normalizeItem(item, vaultName, shareId));
+        .map((raw) => {
+          const item = normalizeItem(raw, vaultName, shareId);
+          const totpUri = totpUriOf(raw);
+          if (totpUri) onTotpUri?.(item.itemId, totpUri);
+          return item;
+        });
     },
     getItem: async (shareId, itemId, vaultName) => {
       const data = parseJson(await run(itemViewArgs(shareId, itemId)), "item view");

@@ -15,6 +15,8 @@ import {
 } from "./core/login";
 import { MOCK_ITEM_DETAILS, MOCK_ITEMS, MOCK_TOTP_CODES, MOCK_VAULTS } from "./mock-data";
 import { isSharedWithMe, listedUnder, SHARED_WITH_ME, withoutDuplicates } from "./shared-items";
+import { itemKey } from "./format";
+import { generateTotp, parseOtpauthUri } from "./totp";
 import { Item, ItemDetail, PassCliError, PasswordOptions, PasswordScore, Vault, VaultSharing } from "./types";
 
 const USE_MOCK_DATA = environment.isDevelopment;
@@ -190,13 +192,31 @@ export async function listVaults(): Promise<Vault[]> {
   }
 }
 
+/**
+ * The otpauth URIs of the logins this command listed, by item. They are TOTP secrets: held in memory only, never cached,
+ * so that codes can be generated here rather than asked of pass-cli one by one.
+ */
+const totpUris = new Map<string, string>();
+
 async function listItemsFromVault(shareId: string, vaultName: string): Promise<Item[]> {
   try {
-    return await (await getAdapter()).listItems(shareId, vaultName);
+    return await (
+      await getAdapter()
+    ).listItems(shareId, vaultName, (itemId, uri) => totpUris.set(itemKey({ shareId, itemId }), uri));
   } catch (error) {
-    if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
+    if (error instanceof PassCliError && error.type === "not_authenticated") {
+      totpUris.clear();
+      await clearCache();
+    }
     throw error;
   }
+}
+
+/** The current TOTP code of a listed login, generated from its otpauth URI. Nothing until the item has been listed. */
+export function localTotpCode(shareId: string, itemId: string): string | undefined {
+  const uri = totpUris.get(itemKey({ shareId, itemId }));
+  const params = uri ? parseOtpauthUri(uri) : undefined;
+  return params ? generateTotp(params).code : undefined;
 }
 
 /** Share IDs of the items shared with the user on their own, outside their vaults. */

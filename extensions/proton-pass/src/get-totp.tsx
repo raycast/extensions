@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
+import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
@@ -33,6 +33,9 @@ function currentCode(item: TotpItem): string | undefined {
 
 async function loadCode(item: TotpItem): Promise<TotpItem> {
   const timeStep = getTotpTimeStep();
+  // Generated here from the listing when possible: asking pass-cli meant one command per item every 30 seconds.
+  const local = localTotpCode(item.shareId, item.itemId);
+  if (local) return { ...item, currentTotp: local, currentTotpTimeStep: timeStep };
   try {
     const code = await getTotp(item.shareId, item.itemId);
     return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
@@ -96,12 +99,7 @@ export default function Command() {
           setItems(itemsWithPlaceholder);
           itemsRef.current = itemsWithPlaceholder;
           setError(null);
-          setIsLoading(false);
-
-          const itemsWithTotp = await Promise.all(cachedTotpItems.map(loadCode));
-          if (!isLatest()) return;
-          setItems(itemsWithTotp);
-          itemsRef.current = itemsWithTotp;
+          // Their codes come with the listing below, which brings what's needed to generate them.
         }
       }
 
