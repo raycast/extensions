@@ -24,10 +24,17 @@ private let refineFor: Duration = .seconds(5)
 private let timeout: Duration = .seconds(60)
 
 /// Waits for a fix from Core Location. Returns the first accurate fix, or the best one received
-/// within `refineFor` of the first fix.
+/// within `refineFor` of the first fix, even if no further updates arrive.
 @raycast func currentLocation() async throws -> Location {
-  let location = try await withThrowingTaskGroup(of: CLLocation?.self) { group in
-    group.addTask { try await bestFix() }
+  let fixes = Fixes()
+
+  let accurate = try await withThrowingTaskGroup(of: CLLocation?.self) { group in
+    group.addTask { try await watchUpdates(into: fixes) }
+    group.addTask {
+      try await fixes.waitForFirstFix()
+      try await Task.sleep(for: refineFor)
+      return nil
+    }
     group.addTask {
       try await Task.sleep(for: timeout)
       return nil
@@ -37,7 +44,8 @@ private let timeout: Duration = .seconds(60)
     return first
   }
 
-  guard let location else { throw LocationError.timeout }
+  let best = await fixes.best
+  guard let location = accurate ?? best else { throw LocationError.timeout }
   return Location(
     latitude: location.coordinate.latitude,
     longitude: location.coordinate.longitude,
@@ -45,22 +53,32 @@ private let timeout: Duration = .seconds(60)
   )
 }
 
-private func bestFix() async throws -> CLLocation? {
-  let clock = ContinuousClock()
-  var best: CLLocation?
-  var firstFixAt: ContinuousClock.Instant?
-
+/// Returns the first fix within `goodAccuracy`; records less accurate fixes in `fixes`.
+private func watchUpdates(into fixes: Fixes) async throws -> CLLocation? {
   for try await update in CLLocationUpdate.liveUpdates() {
     if update.authorizationDenied || update.authorizationDeniedGlobally || update.authorizationRestricted {
       throw LocationError.denied
     }
     guard let location = update.location, location.horizontalAccuracy >= 0 else { continue }
     if location.horizontalAccuracy <= goodAccuracy { return location }
-    if best.map({ location.horizontalAccuracy < $0.horizontalAccuracy }) ?? true { best = location }
-
-    let start = firstFixAt ?? clock.now
-    firstFixAt = start
-    if clock.now - start >= refineFor { return best }
+    await fixes.offer(location)
   }
-  return best
+  // The updates ended without an accurate fix: wait for the refine or overall deadline.
+  try await Task.sleep(for: timeout)
+  return nil
+}
+
+private actor Fixes {
+  private(set) var best: CLLocation?
+
+  func offer(_ location: CLLocation) {
+    if best.map({ location.horizontalAccuracy < $0.horizontalAccuracy }) ?? true { best = location }
+  }
+
+  /// Polls with a cancellable sleep, so cancelling the task group never leaves this waiting.
+  nonisolated func waitForFirstFix() async throws {
+    while await best == nil {
+      try await Task.sleep(for: .milliseconds(100))
+    }
+  }
 }

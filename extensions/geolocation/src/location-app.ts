@@ -16,7 +16,7 @@ import "swift:../swift";
  * The ad hoc signature ties the location permission to the exact binary, so the bundle is only rebuilt
  * when {@link APP_VERSION} changes: bump it when the Swift code or the Info.plist changes.
  */
-const APP_VERSION = 1;
+const APP_VERSION = 2;
 
 const APP_NAME = "Raycast Geolocation.app";
 const EXECUTABLE = "RaycastGeolocation";

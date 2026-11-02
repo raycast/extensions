@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geolocation",
   "title": "Geolocation",
-  "description": "Copy location to the clipboard: your current geolocation as GPS coordinates, a Google Maps or Apple Maps link, or a geo: URI. Uses macOS Location Services for accuracy down to a few meters, not your IP address.",
+  "description": "Copy location to the clipboard: your current geolocation as GPS coordinates, a Google Maps or Apple Maps link, or a geo: URI. Uses macOS Location Services, not your IP address, for accuracy of tens of meters.",
   "icon": "icon.png",
   "author": "y87cgp",
   "license": "MIT",
