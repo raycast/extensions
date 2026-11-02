@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-02
+
+- Update Multi Mail and Multi Calendar in the official registry: Multi Mail names any IMAP mailbox, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
+
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
 - Add SlickTrip to the official registry: live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Hosted Streamable HTTP server at https://mcp.slicktrip.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
