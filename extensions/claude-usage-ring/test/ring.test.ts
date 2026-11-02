@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AMBER, arcLength, colorFor, RED, ringIcon, ringSvg } from "../src/lib/ring";
+import { AMBER, arcLength, colorFor, GREEN, RED, ringIcon, ringSvg } from "../src/lib/ring";
 
 const decode = (uri: string) => Buffer.from(uri.split(",")[1], "base64").toString();
 
@@ -35,8 +35,8 @@ describe("ringSvg", () => {
   });
   it("dual has two tracks", () => {
     const s = ringSvg({ outer: { pct: 10, color: "#000" }, inner: { pct: 10, color: "#000" } }, "#000");
-    expect(s).toContain('r="15"');
-    expect(s).toContain('r="9"');
+    expect(s).toContain('r="14.5"');
+    expect(s).toContain('r="8"');
   });
   it("error ring has an exclamation mark", () => {
     expect(ringSvg({ error: true }, "#000")).toContain("<rect");
@@ -47,18 +47,18 @@ describe("ringIcon", () => {
   it("uses the foreground colour of each appearance when the arc has no colour", () => {
     const i = ringIcon({ inner: { pct: 30 } });
     expect(i.light.startsWith("data:image/svg+xml;base64,")).toBe(true);
-    expect(decode(i.light)).toContain('stroke="#000000" stroke-width="4" stroke-linecap');
-    expect(decode(i.dark)).toContain('stroke="#FFFFFF" stroke-width="4" stroke-linecap');
+    expect(decode(i.light)).toContain('stroke="#000000" stroke-width="6" stroke-linecap');
+    expect(decode(i.dark)).toContain('stroke="#FFFFFF" stroke-width="6" stroke-linecap');
   });
 });
 
 describe("colorFor", () => {
   it.each([
-    [0, undefined],
-    [59.9, undefined],
-    [60, AMBER],
-    [85, AMBER],
-    [85.1, RED],
+    [0, GREEN],
+    [69.9, GREEN],
+    [70, AMBER],
+    [89.9, AMBER],
+    [90, RED],
     [100, RED],
-  ])("%d → %s", (p, c) => expect(colorFor(p, 60, 85)).toBe(c));
+  ])("%d → %s", (p, c) => expect(colorFor(p, 70, 90)).toBe(c));
 });

@@ -5,7 +5,7 @@ import { openCommand, useUsage } from "./lib/use-usage";
 import { deriveView, type Banner, type Level, type Row, type View } from "./lib/view";
 
 const LEVEL_COLORS: Record<Level, Color> = {
-  normal: Color.SecondaryText,
+  normal: Color.Green,
   warning: Color.Orange,
   critical: Color.Red,
 };

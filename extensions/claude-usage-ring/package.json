@@ -67,21 +67,21 @@
     },
     {
       "name": "warnThreshold",
-      "title": "Amber Threshold (%)",
-      "description": "Ring turns amber at this utilization",
+      "title": "Orange Threshold (%)",
+      "description": "Ring turns orange from this usage. 70 means 30% or less left.",
       "type": "textfield",
       "required": false,
-      "default": "60",
-      "placeholder": "60"
+      "default": "70",
+      "placeholder": "70"
     },
     {
       "name": "critThreshold",
       "title": "Red Threshold (%)",
-      "description": "Ring turns red above this utilization",
+      "description": "Ring turns red from this usage. 90 means 10% or less left.",
       "type": "textfield",
       "required": false,
-      "default": "85",
-      "placeholder": "85"
+      "default": "90",
+      "placeholder": "90"
     }
   ],
   "dependencies": {

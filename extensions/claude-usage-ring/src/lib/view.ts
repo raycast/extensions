@@ -38,8 +38,8 @@ export function parseThresholds(prefs: Pick<ViewPrefs, "warnThreshold" | "critTh
     const n = Number.parseFloat(String(s ?? "").trim());
     return Number.isFinite(n) && n >= 0 && n <= 100 ? n : fallback;
   };
-  const a = num(prefs.warnThreshold, 60);
-  const b = num(prefs.critThreshold, 85);
+  const a = num(prefs.warnThreshold, 70);
+  const b = num(prefs.critThreshold, 90);
   return { warn: Math.min(a, b), crit: Math.max(a, b) };
 }
 

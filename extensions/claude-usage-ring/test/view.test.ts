@@ -18,9 +18,9 @@ const state = (u: Usage | null = usage(), connected = true): UsageState => ({ co
 
 describe("parseThresholds", () => {
   it("defaults on garbage, swaps inverted", () => {
-    expect(parseThresholds({ warnThreshold: "abc", critThreshold: "" })).toEqual({ warn: 60, crit: 85 });
+    expect(parseThresholds({ warnThreshold: "abc", critThreshold: "" })).toEqual({ warn: 70, crit: 90 });
     expect(parseThresholds({ warnThreshold: "90", critThreshold: "70" })).toEqual({ warn: 70, crit: 90 });
-    expect(parseThresholds({ warnThreshold: "150", critThreshold: "80" })).toEqual({ warn: 60, crit: 80 });
+    expect(parseThresholds({ warnThreshold: "150", critThreshold: "80" })).toEqual({ warn: 70, crit: 80 });
   });
 });
 
@@ -51,7 +51,7 @@ describe("deriveView", () => {
   });
 
   it("dual mode renders two rings", () => {
-    expect(decode(deriveView(state(), { ...prefs, ringMode: "dual" }, NOW).icon.dark)).toContain('r="15"');
+    expect(decode(deriveView(state(), { ...prefs, ringMode: "dual" }, NOW).icon.dark)).toContain('r="14.5"');
   });
 
   it("not connected: hollow ring and setup banner", () => {

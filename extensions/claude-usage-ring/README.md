@@ -5,6 +5,10 @@ Shows your **Claude subscription usage** as a small ring in the macOS menu bar:
 - the **5-hour session limit** (default)
 - the **weekly (7-day) limit**, or both as concentric rings
 
+The ring is green, turns orange when 30% or less is left, and red when 10% or less is left.
+
+![The ring and its dropdown in the menu bar](media/menu-bar-dropdown.png)
+
 The numbers are the ones Claude Code shows with `/usage`. They are not estimates from local logs.
 
 ## Requirements
@@ -46,8 +50,8 @@ The extension then only reads that file. It never reads your Claude login, never
 |---|---|---|
 | Ring Shows | Session (5h) | `Session`, `Weekly`, or `Both` (outer = weekly, inner = 5h) |
 | Show percentage | off | Shows `8%` next to the ring (`8% · 6%` in Both mode) |
-| Amber Threshold | 60 | Ring turns amber at this utilization |
-| Red Threshold | 85 | Ring turns red above this utilization |
+| Orange Threshold | 70 | Ring turns orange from this usage (30% or less left) |
+| Red Threshold | 90 | Ring turns red from this usage (10% or less left) |
 
 ## Troubleshooting
 

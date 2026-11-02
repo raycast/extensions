@@ -1,5 +1,6 @@
 export const AMBER = "#F5A524";
 export const RED = "#F31260";
+export const GREEN = "#34C759";
 
 export type Arc = { pct: number; color?: string };
 
@@ -40,13 +41,13 @@ export function ringSvg(o: RingOptions, fg: string): string {
   let body: string;
   if (o.error) {
     body =
-      ring(undefined, 14, 4, fg) +
+      ring(undefined, 13, 6, fg) +
       `<rect x="16.25" y="9.5" width="3.5" height="11" rx="1.75" fill="${fg}"/>` +
       `<circle cx="${C}" cy="25.25" r="2" fill="${fg}"/>`;
   } else if (o.outer) {
-    body = ring(o.outer, 15, 3, fg) + ring(o.inner, 9, 3, fg);
+    body = ring(o.outer, 14.5, 4.5, fg) + ring(o.inner, 8, 4.5, fg);
   } else {
-    body = ring(o.inner, 14, 4, fg);
+    body = ring(o.inner, 13, 6, fg);
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">${body}</svg>`;
 }
@@ -63,7 +64,7 @@ export function ringIcon(o: RingOptions): IconPair {
 }
 
 export function colorFor(pct: number, warn: number, crit: number): string | undefined {
-  if (pct >= 100 || pct > crit) return RED;
+  if (pct >= 100 || pct >= crit) return RED;
   if (pct >= warn) return AMBER;
-  return undefined;
+  return GREEN;
 }
