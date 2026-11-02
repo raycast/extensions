@@ -34,6 +34,7 @@ When using Local Database mode, use `Cmd+R` to manually refresh accounts from th
 This method provides automatic synchronization with Proton Authenticator.
 
 1. Open the extension and select **Local Database (Live)**
+   - On macOS 27 and later, also go to **System Settings > Privacy & Security > Files & Folders > Raycast** and turn on **Data shared by Proton Authenticator and affiliated apps**.
 2. The extension lists the Keychain account names of the keys your database uses. For each one:
    - Open **Keychain Access.app** (search in Spotlight)
    - Search for `me.proton.authenticator`
