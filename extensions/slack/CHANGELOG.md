@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Faster Channel Mentions] - {PR_MERGE_DATE}
+## [Faster Channel Mentions] - 2026-11-02
 
 - The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.
 - A search that finds nothing in a cache older than a minute looks again, so newly created channels still show up.
