@@ -42,6 +42,8 @@ pass-cli vault list
 
 Browse Items opens on your items. Esc goes back to the vault list, where All Vaults opens every item again. List Vaults opens Browse Items on the vault list. Items shared with you one by one, outside your vaults, are under Shared with Me, as in Proton Pass.
 
+Your Proton Pass folders follow their vault, in the vault list and in the vault menu at the top right of the items, written with their path ("Personal › Banking › Cards"). A folder shows its items and its subfolders' items. The item details say which folder an item is in, under Vault. List Folders opens Browse Items on the folders alone, by vault. Empty folders don't show: pass-cli only lists the folders of vaults with items in folders.
+
 ## Preferences
 
 Preferences shared by all commands:

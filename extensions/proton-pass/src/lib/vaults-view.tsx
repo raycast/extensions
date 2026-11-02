@@ -26,6 +26,14 @@ import {
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
+import {
+  FolderEntry,
+  folderEntries,
+  folderEntryValue,
+  folderPathLabel,
+  PATH_SEPARATOR,
+  refreshFolderEntries,
+} from "./folders";
 
 /** Only the vault list lists sharing: overlapping loads, e.g. a refresh and Retry, save it in the order they started. */
 const sharingSaves = createListingSaves();
@@ -37,13 +45,14 @@ function sharedAccessory(vault: Vault): List.Item.Accessory | undefined {
 }
 
 /**
- * The vault list of Browse Items, under the items it opens. `startOnItems` opens all items on top of it right away, so
- * that Esc goes back to the vaults.
+ * The vault list of Browse Items, under the items it opens, with each vault's folders. `openOn` "items" opens all items
+ * on top of it right away, so that Esc goes back to the vaults; "folders" shows the folders alone, by vault.
  */
-export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
+export function VaultsView({ openOn }: { openOn: "items" | "vaults" | "folders" }) {
   const { push } = useNavigation();
   const [vaults, setVaults] = useState<Vault[]>([]);
   const [itemCounts, setItemCounts] = useState<Map<string, number>>(new Map());
+  const [folders, setFolders] = useState<FolderEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<PassCliError | null>(null);
   // Once pass-cli has confirmed the session, the item lists opened from here don't ask it again.
@@ -61,7 +70,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const loads = useMemo(createRequestTracker, []);
 
   useEffect(() => {
-    if (!startOnItems) {
+    if (openOn !== "items") {
       void loadVaults();
       return;
     }
@@ -91,7 +100,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (cachedVaults && !hasLoadedFromCache.current && !sessionEnded) {
       setVaults(withSharing(cachedVaults.data, cachedSharing?.data ?? {}));
       // The items cache only holds complete listings, so every cached vault gets a count.
-      if (cachedItems) setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
+      if (cachedItems) {
+        setItemCounts(countItemsByVault(cachedVaults.data, cachedItems.data));
+        setFolders(folderEntries(cachedItems.data));
+      }
       hasLoadedFromCache.current = true;
 
       // The item list renews the vaults it saves, but only the vault list lists sharing, so its age counts too.
@@ -115,6 +127,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       setError(null);
       const failed = new Set(failedVaults.map(({ vault }) => vault.shareId));
       setItemCounts((previous) => refreshItemCounts(previous, freshVaults, items, failed));
+      setFolders((previous) => refreshFolderEntries(previous, items, failed));
       // Add and save optional sharing when ready, only if this is still the latest load.
       void freshSharing
         .then(async (fresh) => {
@@ -137,6 +150,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
       if (err instanceof PassCliError && err.type === "not_authenticated") {
         setVaults([]);
         setItemCounts(new Map());
+        setFolders([]);
         setSessionConfirmed(false);
       }
       if (!hasLoadedFromCache.current || (err instanceof PassCliError && err.type === "not_authenticated")) {
@@ -162,6 +176,42 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const sortMenu = <SortVaultsByMenu value={vaultOrder} onChange={setVaultOrder} />;
   const sharedWithMe = shownVaults.find(isSharedWithMe);
   const allItemsCount = totalItemCount(vaults, itemCounts);
+  const foldersOf = (vault: Vault) => folders.filter((folder) => folder.shareId === vault.shareId);
+
+  /** `title`: the folder's path, from its vault's name in the vault list, or within the vault under its section. */
+  function folderItem(vault: Vault, folder: FolderEntry, title: string) {
+    return (
+      <List.Item
+        key={folderEntryValue(folder)}
+        icon={Icon.Folder}
+        title={title}
+        accessories={[{ text: formatItemCount(folder.itemCount) }]}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="View Items"
+              icon={Icon.List}
+              target={
+                <SearchItemsView
+                  initialVault={vault}
+                  initialFolder={folder}
+                  sessionConfirmed={sessionConfirmed}
+                  sortChoice={sortChoice}
+                  vaultOrder={vaultOrder}
+                />
+              }
+            />
+            <Action.CopyToClipboard
+              title="Copy Folder Name"
+              content={folder.path[folder.path.length - 1].name}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            {sortMenu}
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   if (error?.type === "not_installed") {
     return <CliNotFoundView />;
@@ -241,15 +291,41 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     );
   }
 
+  if (openOn === "folders") {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search folders..."
+        searchBarAccessory={<SortVaultsByDropdown value={vaultOrder} onChange={setVaultOrder} />}
+      >
+        {folders.length === 0 && !isLoading ? (
+          <List.EmptyView
+            icon={Icon.Folder}
+            title="No Folders Found"
+            description="Your folders show here once they have items."
+          />
+        ) : (
+          listedVaults
+            .filter((vault) => foldersOf(vault).length > 0)
+            .map((vault) => (
+              <List.Section key={vault.shareId} title={vault.name}>
+                {foldersOf(vault).map((folder) => folderItem(vault, folder, folderPathLabel(folder.path)))}
+              </List.Section>
+            ))
+        )}
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search vaults..."
+      searchBarPlaceholder="Search vaults and folders..."
       searchBarAccessory={<SortVaultsByDropdown value={vaultOrder} onChange={setVaultOrder} />}
     >
       {vaults.length === 0 && !isLoading ? (
         <List.EmptyView
-          icon={Icon.Folder}
+          icon={Icon.Box}
           title="No Vaults Found"
           description="You don't have any vaults yet or they couldn't be loaded."
         />
@@ -280,10 +356,10 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
               }
             />
           )}
-          {listedVaults.map((vault) => (
+          {listedVaults.flatMap((vault) => [
             <List.Item
               key={vault.shareId}
-              icon={Icon.Folder}
+              icon={Icon.Box}
               title={vault.name}
               accessories={[
                 sharedAccessory(vault),
@@ -317,8 +393,11 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   {sortMenu}
                 </ActionPanel>
               }
-            />
-          ))}
+            />,
+            ...foldersOf(vault).map((folder) =>
+              folderItem(vault, folder, [vault.name, ...folder.path.map(({ name }) => name)].join(PATH_SEPARATOR)),
+            ),
+          ])}
           {sharedWithMe && (
             <List.Item
               key={SHARED_WITH_ME.shareId}

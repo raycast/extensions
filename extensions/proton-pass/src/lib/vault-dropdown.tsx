@@ -1,5 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { useRef } from "react";
+import { FolderEntry, folderEntryValue, PATH_SEPARATOR } from "./folders";
 import { titleWithCount, totalItemCount } from "./item-counts";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
 import { VaultSortOrder, sortVaults, useVaultFrecency } from "./sort";
@@ -14,11 +15,14 @@ interface VaultDropdownProps {
   /** Vault to show, for a vault opened from the vault list. Otherwise the command's last selection is restored. */
   value?: string;
   order: VaultSortOrder;
+  /** The folders with items, listed after their vault. */
+  folders?: FolderEntry[];
+  /** Gets a vault's share ID, Shared with Me's, a folder's value (see folderValue) or ALL_VAULTS_VALUE. */
   onVaultChange: (vaultId: string) => void;
 }
 
-/** The vault menu of Browse Items and Get TOTP Code: All Vaults, each vault, then Shared with Me. */
-export function VaultDropdown({ vaults, itemCounts, value, order, onVaultChange }: VaultDropdownProps) {
+/** The vault menu of Browse Items and Get TOTP Code: All Vaults, each vault followed by its folders, then Shared with Me. */
+export function VaultDropdown({ vaults, itemCounts, value, order, folders = [], onVaultChange }: VaultDropdownProps) {
   const unsortedVaults = vaults.filter((vault) => !isSharedWithMe(vault));
   const { data: mostUsed, visitItem } = useVaultFrecency(unsortedVaults);
   const listedVaults = sortVaults(unsortedVaults, order, (vault) => itemCounts.get(vault.shareId), mostUsed);
@@ -33,7 +37,7 @@ export function VaultDropdown({ vaults, itemCounts, value, order, onVaultChange 
   // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
   return (
     <List.Dropdown
-      tooltip="Select Vault"
+      tooltip="Select Vault or Folder"
       storeValue={value === undefined}
       value={value}
       defaultValue={value === undefined ? ALL_VAULTS_VALUE : undefined}
@@ -45,14 +49,27 @@ export function VaultDropdown({ vaults, itemCounts, value, order, onVaultChange 
         icon={Icon.Globe}
       />
       <List.Dropdown.Section title="Vaults">
-        {listedVaults.map((vault) => (
+        {listedVaults.flatMap((vault) => [
           <List.Dropdown.Item
             key={vault.shareId}
             title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
             value={vault.shareId}
-            icon={Icon.Folder}
-          />
-        ))}
+            icon={Icon.Box}
+          />,
+          ...folders
+            .filter((folder) => folder.shareId === vault.shareId)
+            .map((folder) => (
+              <List.Dropdown.Item
+                key={folderEntryValue(folder)}
+                title={titleWithCount(
+                  [vault.name, ...folder.path.map(({ name }) => name)].join(PATH_SEPARATOR),
+                  folder.itemCount,
+                )}
+                value={folderEntryValue(folder)}
+                icon={Icon.Folder}
+              />
+            )),
+        ])}
       </List.Dropdown.Section>
       {vaults.some(isSharedWithMe) && (
         <List.Dropdown.Section>
