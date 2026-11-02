@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import {
   addHelmServices,
   createHelmSubEnvironment,
@@ -61,9 +61,7 @@ export default function CreateSubEnvironmentForm({
           baseEnvironment,
         });
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = `Failed to create ${name}`;
-        toast.message = error instanceof Error ? error.message : undefined;
+        await showFailureToast(error, { title: `Failed to create ${name}` });
         return;
       }
 
@@ -85,9 +83,7 @@ export default function CreateSubEnvironmentForm({
         toast.style = Toast.Style.Success;
         toast.title = `Created ${name}`;
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = `Created ${name}, but could not add its services`;
-        toast.message = error instanceof Error ? error.message : undefined;
+        await showFailureToast(error, { title: `Created ${name}, but could not add its services` });
       }
 
       onCreate();

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useFrecencySorting } from "@raycast/utils";
 import { useState } from "react";
 import { deleteEnvironment, getEnvironments, getEnvironmentUrl, type Environment } from "./api/environments";
 import { getBaseUrl, ZadigError } from "./api/request";
@@ -81,9 +81,7 @@ export default function SearchEnvironments() {
       toast.title = `Deleted ${environment.env_key}`;
       refresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed to delete ${environment.env_key}`;
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: `Failed to delete ${environment.env_key}` });
     }
   }
 

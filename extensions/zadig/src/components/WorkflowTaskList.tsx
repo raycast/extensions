@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
   cancelWorkflowTask,
@@ -66,9 +66,7 @@ export default function WorkflowTaskList({ projectKey, workflow }: WorkflowTaskL
       toast.title = `Canceled run #${task.task_id}`;
       revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed to cancel run #${task.task_id}`;
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: `Failed to cancel run #${task.task_id}` });
     }
   }
 
@@ -91,9 +89,7 @@ export default function WorkflowTaskList({ projectKey, workflow }: WorkflowTaskL
       toast.title = `Retried run #${task.task_id}`;
       revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed to retry run #${task.task_id}`;
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: `Failed to retry run #${task.task_id}` });
     }
   }
 

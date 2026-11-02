@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getEnvironmentServices, restartService, type Environment } from "../api/environments";
 
@@ -36,9 +36,7 @@ export default function RestartServiceSubmenu({ projectKey, environment }: Resta
       toast.style = Toast.Style.Success;
       toast.title = `Restarted ${serviceName}`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed to restart ${serviceName}`;
-      toast.message = error instanceof Error ? error.message : undefined;
+      await showFailureToast(error, { title: `Failed to restart ${serviceName}` });
     }
   }
 

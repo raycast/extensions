@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { addHelmServices, getEnvironmentServices, type Environment } from "../api/environments";
 
 type AddServicesFormProps = {
@@ -41,9 +41,7 @@ export default function AddServicesForm({ projectKey, environment, sourceEnviron
         onAdd();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = `Failed to add services to ${environment.env_key}`;
-        toast.message = error instanceof Error ? error.message : undefined;
+        await showFailureToast(error, { title: `Failed to add services to ${environment.env_key}` });
       }
     },
   });
