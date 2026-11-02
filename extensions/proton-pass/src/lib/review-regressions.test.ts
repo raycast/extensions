@@ -425,7 +425,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
     // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-    "./lib/format": { monospace: (text: string) => text },
+    "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
       totpProgressIcon: () => "",
@@ -929,7 +929,13 @@ test("hiding item details stops automatic secret loads while showing them select
           return { isLoading: false };
         },
       },
-      "./utils": { getItemIcon: () => "", getTotpRemainingSeconds: () => 30, totpCircle: () => "circle" },
+      "./utils": {
+        getItemIcon: () => "",
+        getTotpRemainingSeconds: () => 30,
+        totpCircle: () => "circle",
+        totpProgressIcon: () => "circle",
+        totpTimerColor: () => "",
+      },
     });
     const list = ItemList({ items: [item], isLoading: false, emptyView: {} });
     const row = (list.props.children as Element[])[0];
@@ -968,7 +974,13 @@ function loadItemList() {
         return {};
       },
     },
-    "./utils": { getItemIcon: () => "", getTotpRemainingSeconds: () => 30, totpCircle: () => "circle" },
+    "./utils": {
+      getItemIcon: () => "",
+      getTotpRemainingSeconds: () => 30,
+      totpCircle: () => "circle",
+      totpProgressIcon: () => "circle",
+      totpTimerColor: () => "",
+    },
   });
   const render = (items: Item[], suggestedItems: Item[] = []) =>
     harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });
@@ -1088,7 +1100,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text },
+      "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1172,7 +1184,7 @@ function totpCommandFixture(
       "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text },
+      "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",

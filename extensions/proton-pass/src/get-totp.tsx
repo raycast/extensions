@@ -20,7 +20,7 @@ import {
   totpProgressIcon,
   totpTimerColor,
 } from "./lib/utils";
-import { monospace } from "./lib/format";
+import { monospace, TOTP_PLACEHOLDER } from "./lib/format";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -254,7 +254,7 @@ export default function Command() {
               accessories={[
                 {
                   tag: {
-                    value: code ? monospace(formatTotpCode(code)) : "---",
+                    value: code ? monospace(formatTotpCode(code)) : TOTP_PLACEHOLDER,
                     color: getTimerColor(),
                   },
                 },
