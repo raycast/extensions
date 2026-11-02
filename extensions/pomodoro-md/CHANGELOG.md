@@ -1,6 +1,6 @@
 # Pomodoro.md Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-02
 
 - Start, stop, and switch pomodoro timers from Raycast with a menu bar countdown
 - Manual mode: manage tasks directly in Raycast (no external files needed)
