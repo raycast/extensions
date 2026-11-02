@@ -1,13 +1,30 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getInitialIconDataUri } from "./avatar";
 import { hostnameOf, itemKey, toOpenableUrl } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { Item } from "./types";
-import { getItemIcon } from "./utils";
+import { getItemIcon, getTotpRemainingSeconds, totpCircle } from "./utils";
+
+/**
+ * Seconds left in the current 30-second TOTP period, for the items' progress circles. Updated only when the circle
+ * changes step, not every second, so that the list isn't redrawn for nothing.
+ */
+function useTotpSeconds(isCounting: boolean): number {
+  const [seconds, setSeconds] = useState(getTotpRemainingSeconds);
+  useEffect(() => {
+    if (!isCounting) return;
+    const timer = setInterval(() => {
+      const next = getTotpRemainingSeconds();
+      setSeconds((previous) => (totpCircle(previous, 30) === totpCircle(next, 30) ? previous : next));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isCounting]);
+  return seconds;
+}
 
 function getListIcon(item: Item, showWebsiteIcons: boolean): Image.ImageLike {
   if (item.type !== "login") return getItemIcon(item.type);
@@ -51,6 +68,7 @@ export function ItemList({
   const store = useMemo(() => new ItemDetailStore(), [items]);
   const { data: sortedItems, visitItem } = useFrecencySorting(items, { key: itemKey, namespace: "items" });
   const [selectedKey, setSelectedKey] = useState<string | null>();
+  const totpSeconds = useTotpSeconds(items.some((item) => item.hasTotp));
 
   const suggestedKeys = useMemo(() => new Set(suggestedItems.map(itemKey)), [suggestedItems]);
   const suggested = sortedItems.filter((item) => suggestedKeys.has(itemKey(item)));
@@ -103,7 +121,7 @@ export function ItemList({
         keywords={getKeywords(item)}
         accessories={[
           ...(item.hasNote ? [{ icon: Icon.Document, tooltip: "Has a note" }] : []),
-          ...(item.hasTotp ? [{ icon: Icon.Shield, tooltip: "Has a TOTP code" }] : []),
+          ...(item.hasTotp ? [{ icon: totpCircle(totpSeconds, 30), tooltip: "Has a TOTP code" }] : []),
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={

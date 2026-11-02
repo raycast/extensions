@@ -12,7 +12,14 @@ import {
 import { useState, useEffect, useRef, useMemo } from "react";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
-import { getItemIcon, getTotpRemainingSeconds, formatTotpCode, totpProgressIcon, totpTimerColor } from "./lib/utils";
+import {
+  getItemIcon,
+  getTotpRemainingSeconds,
+  formatTotpCode,
+  TOTP_ICON,
+  totpProgressIcon,
+  totpTimerColor,
+} from "./lib/utils";
 import { monospace } from "./lib/format";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
@@ -274,7 +281,7 @@ export default function Command() {
         })}
       </List.Section>
       {items.length === 0 && !isLoading && !error && (
-        <List.EmptyView icon={Icon.Clock} title="No TOTP Items" description="None of your items have TOTP configured" />
+        <List.EmptyView icon={TOTP_ICON} title="No TOTP Items" description="None of your items have TOTP configured" />
       )}
     </List>
   );

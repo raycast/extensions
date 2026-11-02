@@ -13,19 +13,26 @@ export function totpTimerColor(remainingSeconds: number): Color {
  * flicker when they change, unlike an image redrawn every second. Five steps, from full to empty.
  */
 export function totpProgressIcon(remainingSeconds: number, period: number, tintColor?: Color): Image.ImageLike {
-  const left = remainingSeconds / period;
-  const source =
-    left > 0.875
-      ? Icon.CircleProgress100
-      : left > 0.625
-        ? Icon.CircleProgress75
-        : left > 0.375
-          ? Icon.CircleProgress50
-          : left > 0.125
-            ? Icon.CircleProgress25
-            : Icon.Circle;
+  const source = totpCircle(remainingSeconds, period);
   return tintColor ? { source, tintColor } : source;
 }
+
+/** The progress circle for the time a TOTP code has left, from full to empty in five steps. */
+export function totpCircle(remainingSeconds: number, period: number): Icon {
+  const left = remainingSeconds / period;
+  return left > 0.875
+    ? Icon.CircleProgress100
+    : left > 0.625
+      ? Icon.CircleProgress75
+      : left > 0.375
+        ? Icon.CircleProgress50
+        : left > 0.125
+          ? Icon.CircleProgress25
+          : Icon.Circle;
+}
+
+/** TOTP's symbol where no countdown runs, e.g. on actions: a circle, like the countdown. */
+export const TOTP_ICON = Icon.CircleProgress75;
 
 export function getItemIcon(type: ItemType): Icon {
   switch (type) {

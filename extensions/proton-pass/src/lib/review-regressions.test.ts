@@ -130,6 +130,7 @@ function itemActions(primaryAction?: "details" | "copy" | "fill", selectedItem: 
       },
       showToast: async () => undefined,
     },
+    "./utils": { TOTP_ICON: "totp" },
     "./autofill": {
       canFillFrontmostApp: true,
       getTargetApp: async () => {
@@ -911,6 +912,7 @@ test("hiding item details stops automatic secret loads while showing them select
         useState: () => [undefined, () => undefined],
         useRef: (value: unknown) => ({ current: value }),
         useCallback: (callback: unknown) => callback,
+        useEffect: () => undefined,
       },
       "./avatar": { getInitialIconDataUri: () => "" },
       "./format": format,
@@ -927,7 +929,7 @@ test("hiding item details stops automatic secret loads while showing them select
           return { isLoading: false };
         },
       },
-      "./utils": { getItemIcon: () => "" },
+      "./utils": { getItemIcon: () => "", getTotpRemainingSeconds: () => 30, totpCircle: () => "circle" },
     });
     const list = ItemList({ items: [item], isLoading: false, emptyView: {} });
     const row = (list.props.children as Element[])[0];
@@ -966,7 +968,7 @@ function loadItemList() {
         return {};
       },
     },
-    "./utils": { getItemIcon: () => "" },
+    "./utils": { getItemIcon: () => "", getTotpRemainingSeconds: () => 30, totpCircle: () => "circle" },
   });
   const render = (items: Item[], suggestedItems: Item[] = []) =>
     harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });

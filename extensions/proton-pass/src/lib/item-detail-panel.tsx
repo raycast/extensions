@@ -4,7 +4,7 @@ import { monospace, totpWithCountdown } from "./format";
 import { getPanelRows, PanelRow, PanelRows, PanelValue } from "./item-panel";
 import { Item, ItemDetail } from "./types";
 import { useTotpCode } from "./use-totp-code";
-import { formatTotpCode, getItemIcon, totpProgressIcon, totpTimerColor } from "./utils";
+import { formatTotpCode, getItemIcon, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./utils";
 
 const MASKED_SECRET = "••••••••••••";
 
@@ -12,7 +12,7 @@ const ROW_ICONS: Partial<Record<string, Image.ImageLike>> = {
   username: Icon.Person,
   email: Icon.Envelope,
   password: Icon.Key,
-  totp: Icon.Shield,
+  totp: TOTP_ICON,
   note: Icon.Document,
   vault: Icon.Folder,
   modified: Icon.Calendar,

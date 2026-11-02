@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { memo } from "react";
 import { canFillFrontmostApp, fillApp, getTargetApp } from "./autofill";
+import { TOTP_ICON } from "./utils";
 import { toOpenableUrl, websiteLabels } from "./format";
 import { ItemDetailStore } from "./item-detail-store";
 import { ItemView } from "./item-view";
@@ -199,7 +200,7 @@ export const ItemActions = memo(function ItemActions({
         {item.hasTotp && (
           <Action
             title="Copy TOTP Code"
-            icon={Icon.Shield}
+            icon={TOTP_ICON}
             shortcut={platformShortcut(["cmd"], "t")}
             onAction={() => copy("TOTP Code", getTotpCode, true)}
           />
@@ -220,7 +221,7 @@ export const ItemActions = memo(function ItemActions({
           {item.hasTotp && (
             <Action
               title="Paste TOTP Code"
-              icon={Icon.Shield}
+              icon={TOTP_ICON}
               shortcut={platformShortcut(["cmd", "shift"], "t")}
               onAction={pasteTotpCode}
             />
