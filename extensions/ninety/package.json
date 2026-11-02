@@ -1,0 +1,254 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ninety",
+  "title": "Ninety",
+  "description": "Manage your Ninety.io To-Dos, Issues, Rocks, Headlines, Scorecard and Meetings from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "parterburn",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "ninety",
+    "eos",
+    "rocks",
+    "scorecard",
+    "level 10",
+    "l10"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-todos",
+      "title": "My To-Dos",
+      "subtitle": "Ninety",
+      "description": "View, complete and edit your To-Dos, or browse a Team's To-Dos.",
+      "mode": "view"
+    },
+    {
+      "name": "issues",
+      "title": "Issues",
+      "subtitle": "Ninety",
+      "description": "Browse a Team's Short-Term and Long-Term Issues and solve them.",
+      "mode": "view"
+    },
+    {
+      "name": "rocks",
+      "title": "Rocks",
+      "subtitle": "Ninety",
+      "description": "View your Rocks or a Team's Rocks, update their status and manage Milestones.",
+      "mode": "view"
+    },
+    {
+      "name": "headlines",
+      "title": "Headlines",
+      "subtitle": "Ninety",
+      "description": "Read a Team's Headlines and Cascading Messages.",
+      "mode": "view"
+    },
+    {
+      "name": "scorecard",
+      "title": "Scorecard",
+      "subtitle": "Ninety",
+      "description": "View a Team's Scorecard and enter Measurable scores.",
+      "mode": "view"
+    },
+    {
+      "name": "next-meeting",
+      "title": "Next Meeting",
+      "subtitle": "Ninety",
+      "description": "See a Team's next Meeting with its agenda and attendees.",
+      "mode": "view"
+    },
+    {
+      "name": "create-todo",
+      "title": "Create To-Do",
+      "subtitle": "Ninety",
+      "description": "Create a personal or Team To-Do.",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "subtitle": "Ninety",
+      "description": "Add an Issue to a Team's Issues List.",
+      "mode": "view"
+    },
+    {
+      "name": "create-headline",
+      "title": "Create Headline",
+      "subtitle": "Ninety",
+      "description": "Share a Headline or Cascading Message with a Team.",
+      "mode": "view"
+    },
+    {
+      "name": "create-rock",
+      "title": "Create Rock",
+      "subtitle": "Ninety",
+      "description": "Create a Rock owned by you.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-teams",
+      "title": "Get Teams",
+      "description": "List the Ninety Teams the user can read and create work for, with their Ids."
+    },
+    {
+      "name": "get-my-todos",
+      "title": "Get My To-Dos",
+      "description": "List the user's open To-Dos (personal and team), or a Team's To-Dos."
+    },
+    {
+      "name": "create-todo",
+      "title": "Create To-Do",
+      "description": "Create a personal To-Do or a To-Do on a Team."
+    },
+    {
+      "name": "complete-todo",
+      "title": "Complete To-Do",
+      "description": "Mark a To-Do as complete (or reopen it)."
+    },
+    {
+      "name": "get-issues",
+      "title": "Get Issues",
+      "description": "List a Team's open Issues (Short-Term and Long-Term)."
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Add an Issue to a Team's Issues List."
+    },
+    {
+      "name": "get-rocks",
+      "title": "Get Rocks",
+      "description": "List the user's Rocks or a Team's Rocks, with status and Milestones."
+    },
+    {
+      "name": "update-rock-status",
+      "title": "Update Rock Status",
+      "description": "Set a Rock's status to On Track, Off Track, Done or Canceled."
+    },
+    {
+      "name": "get-headlines",
+      "title": "Get Headlines",
+      "description": "List a Team's Headlines or Cascading Messages."
+    },
+    {
+      "name": "create-headline",
+      "title": "Create Headline",
+      "description": "Create a Headline or Cascading Message on a Team."
+    },
+    {
+      "name": "get-next-meeting",
+      "title": "Get Next Meeting",
+      "description": "Get a Team's next scheduled Meeting with its agenda and attendees."
+    },
+    {
+      "name": "get-scorecard",
+      "title": "Get Scorecard",
+      "description": "Read a Team's Scorecard: its Measurables with recent scores and goals."
+    }
+  ],
+  "ai": {
+    "instructions": "Ninety is an EOS (Entrepreneurial Operating System) platform. Terms: Rocks are 90-day priorities (quarterly goals) with Milestones; Issues are items on a Team's Issues List to be solved with IDS (Identify, Discuss, Solve), split into Short-Term and Long-Term; To-Dos are 7-day action items; Headlines are short good/bad news updates for a Team's meeting; Cascading Messages are Headlines sent down from leadership; the Scorecard tracks weekly Measurables (also called KPIs). Most tools need a Team Id: when the user names a Team, call get-teams first and match the name. If the Team is ambiguous, ask the user. Items created through the API are always owned by the user. When listing items, keep answers short and include due dates and status.",
+    "evals": [
+      {
+        "input": "@ninety what are my open to-dos?",
+        "mocks": {
+          "get-my-todos": [
+            {
+              "id": "t1",
+              "title": "Send proposal to Acme",
+              "dueDate": "2026-11-05T00:00:00.000Z",
+              "completed": false,
+              "isPersonal": false,
+              "teamName": "Leadership"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-my-todos"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ninety add an issue to the Leadership team: hiring plan for Q1",
+        "mocks": {
+          "get-teams": [
+            {
+              "id": "team1",
+              "name": "Leadership",
+              "isMember": true
+            }
+          ],
+          "create-issue": {
+            "id": "i1",
+            "title": "Hiring plan for Q1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-teams"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "create-issue",
+              "arguments": {
+                "teamId": "team1"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "Personal Access Token",
+      "required": true,
+      "placeholder": "Paste your Ninety token",
+      "description": "Generate one in Ninety under User Settings → Developer Settings → Generate New Token. Requires a Thrive or Legacy plan."
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "title": "Your Ninety Email",
+      "required": false,
+      "placeholder": "you@company.com",
+      "description": "Optional. Only used to look up your user if it can't be read from the token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.13",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
