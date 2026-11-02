@@ -8,7 +8,8 @@
   "contributors": [
     "ridemountainpig",
     "tm.wrnr",
-    "j3lte"
+    "j3lte",
+    "0xdhrv"
   ],
   "categories": [
     "Developer Tools",
@@ -26,7 +27,7 @@
           "name": "url",
           "placeholder": "URL",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -35,6 +36,18 @@
       "title": "Preview Open Graph (Browser Extension)",
       "description": "Preview Open Graph meta tags of a website using the browser extension",
       "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-open-graph",
+      "title": "Get Open Graph Metadata",
+      "description": "Fetch Open Graph and Twitter Card tags, resolved images, preview text, and basic validation. Requires a user-supplied URL; ask for it if missing."
+    },
+    {
+      "name": "export-open-graph",
+      "title": "Export Open Graph Metadata",
+      "description": "Return social metadata as JSON, Markdown, or HTML meta tags for a user-supplied URL; ask for it if missing. Returns text without changing the page."
     }
   ],
   "dependencies": {
@@ -51,6 +64,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

@@ -1,7 +1,7 @@
 import { BrowserExtension, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runJxa } from "run-jxa";
-import { ARC_BROWSERS, CHROMIUM_BROWSERS, SAFARI_BROWSERS } from "../helpers/browsers";
+import { ARC_BROWSERS, CHROMIUM_BROWSERS, DIA_BROWSERS, SAFARI_BROWSERS } from "../helpers/browsers";
 import { Preferences } from "../types";
 
 export interface Link {
@@ -54,7 +54,7 @@ async function getFrontmostLinkFromExtension(
 async function getFrontmostLinkFromJxa(): Promise<FrontmostProbe> {
   const result = await runJxa(
     `
-    const [chromium, safari, arc] = args;
+    const [chromium, safari, arc, dia] = args;
 
     function getFrontmostChromiumLink(bundleId) {
       const tab = Application(bundleId).windows[0].activeTab();
@@ -86,6 +86,11 @@ async function getFrontmostLinkFromJxa(): Promise<FrontmostProbe> {
       return {url: tab.url(), title: tab.name()};
     }
 
+    function getFrontmostDiaLink(bundleId) {
+      const tab = Application(bundleId).windows[0].activeTab;
+      return {url: tab.url(), title: tab.title()};
+    }
+
     function getFrontmostApp() {
       const apps = Application("System Events")
         .applicationProcesses
@@ -114,6 +119,8 @@ async function getFrontmostLinkFromJxa(): Promise<FrontmostProbe> {
         link = getFrontmostSafariLink(app);
       } else if (arc.indexOf(app) !== -1) {
         link = getFrontmostArcLink(app, windowTitle);
+      } else if (dia.indexOf(app) !== -1) {
+        link = getFrontmostDiaLink(app);
       } else {
         return null;
       }
@@ -122,7 +129,7 @@ async function getFrontmostLinkFromJxa(): Promise<FrontmostProbe> {
 
     return getFrontmostLink();
   `,
-    [CHROMIUM_BROWSERS, SAFARI_BROWSERS, ARC_BROWSERS]
+    [CHROMIUM_BROWSERS, SAFARI_BROWSERS, ARC_BROWSERS, DIA_BROWSERS]
   );
 
   if (result == null) return EMPTY_PROBE;
@@ -157,7 +164,11 @@ export async function getFrontmostLink(): Promise<Link | null> {
   // Only try browser extension if the preference is enabled
   if (useBrowserExtension) {
     const extensionLink = await getFrontmostLinkFromExtension(probe.windowTitle);
-    if (extensionLink) return extensionLink;
+    if (extensionLink) {
+      // Some browsers (Dia) report tabs without a title through the extension.
+      if (!extensionLink.title && probe.link?.url === extensionLink.url) return probe.link;
+      return extensionLink;
+    }
   } else if (isUnscriptedArcWindowInFront(probe)) {
     // Even with the preference off, the extension is the only way to read a
     // Little Arc window; require an exact title match so a miss degrades to

@@ -7,6 +7,7 @@
 raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
+rust/target/
 compiled_raycast_swift
 compiled_raycast_rust
 

@@ -2,16 +2,16 @@ import * as fs from "fs";
 import { execSync } from "child_process";
 import { Cache, getPreferenceValues } from "@raycast/api";
 import expandTilde from "expand-tilde";
+import path from "path";
 
 export async function checkAdbExists() {
   const sdk = getPreferenceValues().androidSDK;
   const sdkPath = sdk.replace("~", expandTilde("~"));
-  const adb = `${sdkPath}/platform-tools/adb`;
-
-  if (!fs.existsSync(adb)) {
+  const adb = path.join(sdkPath, "platform-tools", "adb");
+  if (!fs.existsSync(adb) && !fs.existsSync(`${adb}.exe`)) {
     throw new Error(`❗️ADB not found here: ${adb}`);
   } else {
-    return adb;
+    return `"${adb}"`;
   }
 }
 

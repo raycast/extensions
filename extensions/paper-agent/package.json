@@ -333,7 +333,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.8.2",
+    "@raycast/api": "^2.9.0",
     "js-yaml": "^4.3.2"
   },
   "devDependencies": {

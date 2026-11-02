@@ -17,6 +17,8 @@ import { currentSlot, nextSlot, AlertKind } from "./lib/state";
 import { AlertContext, describeAlert } from "./lib/alerts";
 import { snooze } from "./lib/storage";
 import { setPrayed } from "./lib/tracker";
+import { clockStatus } from "./lib/status";
+import { statusIcon } from "./lib/status-icons";
 import { formatTime, ltrName } from "./lib/format";
 
 const SNOOZE_MINUTES = [5, 10, 15, 30];
@@ -82,7 +84,7 @@ function PrayerAlert({ settings, context }: { settings: Settings; context?: Aler
         <ActionPanel>
           <Action
             title="Mark as Prayed"
-            icon={Icon.CheckCircle}
+            icon={statusIcon(clockStatus(slot, now))}
             onAction={async () => {
               try {
                 await setPrayed(slot, settings, true);

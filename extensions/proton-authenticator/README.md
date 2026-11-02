@@ -34,15 +34,16 @@ When using Local Database mode, use `Cmd+R` to manually refresh accounts from th
 This method provides automatic synchronization with Proton Authenticator.
 
 1. Open the extension and select **Local Database (Live)**
-2. Retrieve your encryption key from Keychain:
+2. The extension lists the Keychain account names of the keys your database uses. For each one:
    - Open **Keychain Access.app** (search in Spotlight)
    - Search for `me.proton.authenticator`
-   - Find the entry with account name starting with `encryptionKey-...`
+   - Find the entry whose account name matches the listed key
    - Double-click to open, then click **Show password**
    - Enter your macOS password when prompted
-   - Copy the revealed key
-3. Paste the encryption key into the extension
-4. Your accounts will load automatically and stay in sync
+   - Copy the revealed key and paste it into the extension
+3. Your accounts will load automatically and stay in sync
+
+Proton Authenticator encrypts entries with one key per device that created them, plus one key for Proton account sync, so you may need more than one key. If an entry later shows up under a new key, the extension tells you which one to add.
 
 ### Option 2: JSON Export File
 
@@ -73,6 +74,6 @@ macOS 13 or later.
 
 ## Privacy & Security
 
-- **Local Database mode**: The encryption key is stored locally in Raycast's secure storage. Your TOTP secrets are decrypted only when the extension is active.
+- **Local Database mode**: The encryption keys are stored locally in Raycast's secure storage. Your TOTP secrets are decrypted only when the extension is active.
 - **JSON mode**: The exported JSON data is stored locally in Raycast's secure storage.
 - No data is ever sent to external servers. Everything is processed locally on your machine.

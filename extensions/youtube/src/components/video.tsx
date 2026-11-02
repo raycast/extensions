@@ -3,6 +3,7 @@ import fs from "fs";
 import he from "he";
 import React from "react";
 import { Preferences, PrimaryAction, ViewLayout } from "../lib/types";
+import { videoUrl } from "../lib/urls";
 import { compactNumberFormat, formatDate } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
@@ -13,10 +14,6 @@ export interface VideoActionProps {
   video: Video;
   refresh?: () => void;
   useLiveStorage?: boolean;
-}
-
-function videoUrl(videoId: string) {
-  return `https://youtube.com/watch?v=${videoId}`;
 }
 
 function CopyVideoUrlAction({ video, refresh, useLiveStorage }: VideoActionProps) {
@@ -134,11 +131,7 @@ export function VideoItemDetail(props: VideoActionProps) {
             </React.Fragment>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="Open Video in Browser"
-            target={`https://youtube.com/watch?v=${video.id}`}
-            text={"Watch"}
-          />
+          <Detail.Metadata.Link title="Open Video in Browser" target={videoUrl(video.id)} text={"Watch"} />
         </Detail.Metadata>
       }
       actions={

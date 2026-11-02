@@ -961,6 +961,16 @@ export default function Command() {
                   />
                   <SelectProfileSubmenu
                     availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.search}
+                    name="Search"
+                    icon="search.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                    profiles={searchBrowser.profiles}
+                    currentProfile={searchBrowser.currentProfile}
+                    setCurrentProfile={searchBrowser.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
                     name="Vivaldi"
                     icon="vivaldi.png"

@@ -1,8 +1,14 @@
-import { getPrayerStatuses, movePrayerReminders, setPrayerCompleted, syncPrayerReminders } from "./helper";
+import {
+  getPrayerStatuses,
+  movePrayerReminders,
+  saveStatusLines,
+  setPrayerCompleted,
+  syncPrayerReminders,
+} from "./helper";
 import { addDays, getDaySchedule, PRAYER_KEYS, PrayerKey, PrayerSlot, toDateKey } from "./prayers";
 import { planHash, planReminders } from "./plan";
 import { Settings } from "./settings";
-import { clockStatus, countsOnTime, PrayedStatus, prayedAt, PrayerStatusValue, statusOf } from "./status";
+import { clockStatus, countsOnTime, parseStatus, prayedAt, PrayerStatusValue, statusOf, validStatus } from "./status";
 import {
   clearSnoozes,
   readLocalLog,
@@ -24,6 +30,8 @@ export interface PrayerRecord {
   onTime: boolean;
   /** How it was prayed, or missed; undefined while an unmarked prayer's time is still running. */
   status?: PrayerStatusValue;
+  /** The status as written down (a valid `prayer-status:` line or local mark), not worked out from the clock. */
+  saved?: PrayerStatusValue;
 }
 
 /** Reminder state keyed by local date, then prayer. */
@@ -86,7 +94,12 @@ async function localCompletions(from: Date, to: Date): Promise<CompletionMap> {
       const mark = typeof saved === "string" ? { at: saved } : saved;
       // Before tracking started, only saved marks count; unmarked prayers stay "no data", not missed.
       if (date < since && !mark) continue;
-      map.set(`${date}/${key}`, { isCompleted: Boolean(mark), completionDate: mark?.at, status: mark?.status });
+      const missed = mark?.status === "missed";
+      map.set(`${date}/${key}`, {
+        isCompleted: Boolean(mark) && !missed,
+        completionDate: mark?.at || undefined,
+        status: mark?.status,
+      });
     }
   }
   return map;
@@ -125,6 +138,7 @@ export async function loadHistory(settings: Settings, from: Date, to: Date): Pro
         completedAt,
         onTime: countsOnTime(value),
         status: value,
+        saved: validStatus(status.status, status.isCompleted),
       };
     }
   }
@@ -176,15 +190,17 @@ async function createPastReminder(slot: PrayerSlot, settings: Settings): Promise
 export async function setStatus(
   slot: PrayerSlot,
   settings: Settings,
-  status: PrayedStatus | undefined,
+  status: PrayerStatusValue | undefined,
   now = new Date(),
 ): Promise<void> {
-  const at = status && prayedAt(slot, status, now);
+  // Missed is written as a status on a reminder that stays open, with no prayed time.
+  const prayed = status === "missed" ? undefined : status;
+  const at = prayed && prayedAt(slot, prayed, now);
   if (!settings.reminders.enabled) {
-    await writeLocalPrayed(slot.date, slot.key, at && status ? { at: at.toISOString(), status } : undefined);
+    await writeLocalPrayed(slot.date, slot.key, status ? { at: at ? at.toISOString() : "", status } : undefined);
   } else {
     const { listName } = settings.reminders;
-    const write = () => setPrayerCompleted(listName, slot.id, Boolean(status), at, status);
+    const write = () => setPrayerCompleted(listName, slot.id, Boolean(prayed), at, status);
     let found = await write();
     if (!found) {
       if (slot.date < toDateKey(new Date())) await createPastReminder(slot, settings);
@@ -206,4 +222,54 @@ export async function setStatus(
  */
 export function setPrayed(slot: PrayerSlot, settings: Settings, completed: boolean, now = new Date()): Promise<void> {
   return setStatus(slot, settings, completed ? clockStatus(slot, now) : undefined, now);
+}
+
+/** How far back Save History looks: the Unify backfill keeps a year, plus slack. */
+const HISTORY_SAVE_DAYS = 400;
+/** Reminders written per Swift call, so each stays well inside the helper's timeout. */
+const SAVE_BATCH = 150;
+
+/** What Save History finds (and, when writing, how many it wrote). */
+export interface HistorySave {
+  entries: { key: string; status: PrayerStatusValue }[];
+  byStatus: Partial<Record<PrayerStatusValue, number>>;
+  written: number;
+}
+
+/**
+ * Store the status of every completed past prayer whose reminder has no `prayer-status:` line yet, worked out
+ * once from its completion time by the clock rule, so history stops being recalculated (and stops shifting when
+ * settings change). Never-ticked prayers are left without a line. Today and later are left alone.
+ *
+ * @param settings - Settings (Apple Reminders must be on).
+ * @param write - False for a dry run: count only.
+ * @param now - Current instant.
+ * @returns The entries found, counts per status, and how many were written.
+ */
+export async function saveHistory(settings: Settings, write: boolean, now = new Date()): Promise<HistorySave> {
+  const result: HistorySave = { entries: [], byStatus: {}, written: 0 };
+  if (!settings.reminders.enabled) return result;
+  const from = addDays(now, -HISTORY_SAVE_DAYS);
+  const to = addDays(now, -1);
+  const statuses = await getPrayerStatuses(settings.reminders.listName, toDateKey(from), toDateKey(to));
+  const slots = new Map<string, PrayerSlot>();
+  for (const status of statuses) {
+    if (!status.isCompleted || parseStatus(status.status)) continue;
+    const date = status.key.slice(0, 10);
+    if (!slots.has(`${date}/fajr`)) {
+      for (const slot of getDaySchedule(new Date(`${date}T12:00:00`), settings.schedule)) slots.set(slot.id, slot);
+    }
+    const slot = slots.get(status.key);
+    if (!slot) continue;
+    const completedAt = status.completionDate ? new Date(status.completionDate) : undefined;
+    const value = statusOf(slot, true, completedAt, undefined, now);
+    if (!value) continue;
+    result.entries.push({ key: status.key, status: value });
+    result.byStatus[value] = (result.byStatus[value] ?? 0) + 1;
+  }
+  if (!write) return result;
+  for (let i = 0; i < result.entries.length; i += SAVE_BATCH) {
+    result.written += await saveStatusLines(settings.reminders.listName, result.entries.slice(i, i + SAVE_BATCH));
+  }
+  return result;
 }

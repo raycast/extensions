@@ -69,7 +69,7 @@
     }
   ],
   "ai": {
-    "instructions": "- Each verify-email or verify-domain call spends one Bouncer credit. Verify only what the user asked about, and never re-verify something you already have a result for in this conversation.\n- Report what Bouncer returned. These tools deliberately do not include a send-or-suppress recommendation, so do not present one as though it came from Bouncer; if the user asks whether to send, say the judgement is theirs and give them the fields it rests on.\n- A signal value of \"Unknown\" means Bouncer could not determine it. Never report it as \"No\", and never treat it as evidence either way.\n- The roleAddress and freeProvider signals are heuristics over the local part and the domain, and they misfire on personal addresses such as mail@ or contact@. Report them as observations, not defects.\n- The domain endpoint returns no status or score, only the fields listed. Do not infer whether a domain can receive mail beyond what those fields say.\n- When didYouMean is returned, surface the suggested correction and offer to verify it instead.\n- If a call fails because the account is out of credits, say so plainly and stop; do not retry.",
+    "instructions": "- Each verify-email or verify-domain call spends one Bouncer credit, except addresses at sandbox.usebouncer.com, which Bouncer checks for free. The creditsSpent field says which. Verify only what the user asked about, and never re-verify something you already have a result for in this conversation.\n- Report what Bouncer returned and nothing it did not. Never give a verdict on whether to send to, keep or remove an address, or on whether it is safe, in Bouncer's voice or your own, even when the user asks directly. Say that decision is the user's and list the fields it rests on: the status, reason and score, and every signal whose value is not \"No\".\n- Start an answer about an address with Bouncer's status label (Deliverable, Risky, Undeliverable or Unknown), not with \"Yes\" or \"No\".\n- List each signal with the value Bouncer reported. Do not call signals risks, flags or warnings.\n- A signal value of \"Unknown\" means Bouncer could not determine it. Never report it as \"No\", and never treat it as evidence either way.\n- The roleAddress and freeProvider signals are heuristics over the local part and the domain, and they misfire on personal addresses such as mail@ or contact@. Report them as observations, not defects.\n- The domain endpoint reports the mail record and provider it found and does not test delivery. When asked whether a domain works or can receive mail, do not answer yes or no: report what Bouncer found, and offer to verify a specific address there.\n- When didYouMean is returned, surface the suggested correction and offer to verify it instead.\n- If a tool rejects the input as invalid, say it was not sent to Bouncer and no credit was spent. Do not judge the address beyond that.\n- If a call fails because the account is out of credits, say so plainly and stop; do not retry.\n- If a call fails because no API key is set or Bouncer rejects the key, tell the user to add or update it in the Bouncer Deliverability extension preferences and stop; do not retry.",
     "evals": [
       {
         "input": "@bouncer-email-verifier is jane@example.com deliverable?",
@@ -115,6 +115,51 @@
             "callsTool": "get-credits"
           }
         ]
+      },
+      {
+        "input": "@bouncer-email-verifier should I send my newsletter to support@example.com?",
+        "mocks": {
+          "verify-email": {
+            "email": "support@example.com",
+            "status": "deliverable",
+            "statusLabel": "Deliverable",
+            "reason": "Accepted by mail server",
+            "score": 100,
+            "signals": {
+              "freeProvider": "No",
+              "disposable": "No",
+              "acceptAll": "No",
+              "roleAddress": "Yes",
+              "disabled": "No",
+              "fullMailbox": "No",
+              "toxicity": "0"
+            },
+            "creditsSpent": 1,
+            "note": "Bouncer's findings only. Bouncer makes no send, keep or remove recommendation, and the reply must not add one."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "verify-email"
+          }
+        ]
+      },
+      {
+        "input": "@bouncer-email-verifier is deliverable@sandbox.usebouncer.com deliverable?",
+        "mocks": {
+          "verify-email": {
+            "email": "deliverable@sandbox.usebouncer.com",
+            "status": "deliverable",
+            "statusLabel": "Deliverable",
+            "score": 100,
+            "creditsSpent": 0
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "verify-email"
+          }
+        ]
       }
     ]
   },
@@ -124,7 +169,8 @@
       "type": "password",
       "required": true,
       "title": "Bouncer API Key",
-      "description": "Stored securely by Raycast and used for Bouncer requests."
+      "placeholder": "app.usebouncer.com → API",
+      "description": "Create one at app.usebouncer.com: open API in the left menu and choose Generate API Key. Raycast stores it securely."
     },
     {
       "name": "saveHistory",

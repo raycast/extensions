@@ -13,11 +13,14 @@ import {
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { loadSettings, Settings } from "./lib/settings";
 import SetLocation from "./set-location";
+import { DayView } from "./prayer-calendar";
 import { addDays, getDaySchedule, PRAYER_KEYS, prayerName, PrayerSlot, toDateKey } from "./lib/prayers";
 import { readSyncError } from "./lib/storage";
 import { History, loadHistory, prayedSet, PrayerRecord, syncReminders } from "./lib/tracker";
 import { prayerActions as actionsFor, statusAccessory } from "./lib/prayer-actions";
-import { statusIcon } from "./lib/status-icons";
+import { NOT_STARTED_GREY, STATUS_COLORS, statusIcon, toneColor } from "./lib/status-icons";
+import { dayTone } from "./lib/calendar";
+import { STATUS_LABELS } from "./lib/status";
 import { fullDayStreak, summarize } from "./lib/stats";
 import { formatTime, ltrName } from "./lib/format";
 
@@ -61,8 +64,11 @@ function TodayList({ settings }: { settings: Settings }) {
   const slots = getDaySchedule(now, settings.schedule);
 
   const pastDays = Array.from({ length: HISTORY_DAYS }, (_, i) => toDateKey(addDays(now, i - HISTORY_DAYS)));
-  const week = summarize(history, pastDays);
-  const streak = fullDayStreak(history, pastDays);
+  // Today joins the totals and streak only once all five are prayed, so an unfinished day doesn't drag them down.
+  const todayDone = PRAYER_KEYS.every((key) => history[todayKey]?.[key]?.completed);
+  const countedDays = todayDone ? [...pastDays, todayKey] : pastDays;
+  const week = summarize(history, countedDays);
+  const streak = fullDayStreak(history, countedDays);
 
   const prayerActions = (slot: PrayerSlot, record: PrayerRecord | undefined) =>
     actionsFor(slot, record, settings, now, revalidate);
@@ -119,16 +125,20 @@ function TodayList({ settings }: { settings: Settings }) {
         {slots.map((slot) => {
           const done = prayed.has(slot.id);
           const record = history[todayKey]?.[slot.key];
-          const accessories: List.Item.Accessory[] = [];
-          if (slot.jamaat) accessories.push({ text: `Jamaat ${formatTime(slot.jamaat)}`, icon: Icon.TwoPeople });
-          if (slot.preferredEnd) {
-            accessories.push({
-              text: `Preferred until ${formatTime(slot.preferredEnd)}`,
-              tooltip: "After this the prayer is still valid, but delaying it is disliked (makruh)",
-            });
-          }
-          accessories.push({ text: `Ends ${formatTime(slot.end)}` });
-          accessories.push(statusAccessory(slot, record, now));
+          // Accessories line up from the right: the status tag, whose width varies, goes first and every row
+          // keeps the same time columns (--:-- when a prayer has none).
+          const accessories: List.Item.Accessory[] = [
+            statusAccessory(slot, record, now),
+            {
+              text: `Jamaat ${slot.jamaat ? formatTime(slot.jamaat) : "--:--"}`,
+              icon: { source: "masjid.png", tintColor: Color.SecondaryText },
+            },
+            {
+              text: `Preferred until ${slot.preferredEnd ? formatTime(slot.preferredEnd) : "--:--"}`,
+              tooltip: "After this the prayer is still valid, but less preferred (for some prayers, disliked)",
+            },
+            { text: `Ends ${formatTime(slot.end)}` },
+          ];
           return (
             <List.Item
               key={slot.id}
@@ -147,7 +157,7 @@ function TodayList({ settings }: { settings: Settings }) {
         })}
       </List.Section>
       <List.Section
-        title={`Last ${HISTORY_DAYS} Days`}
+        title={`Today and Last ${HISTORY_DAYS} Days`}
         subtitle={
           week.knownDays
             ? `${week.prayed}/${week.total} prayed · ${week.onTime} on time · ${week.jamaat} with jamaat` +
@@ -164,10 +174,11 @@ function TodayList({ settings }: { settings: Settings }) {
           accessories={[{ text: `Full-day streak ${streak}` }]}
           actions={<ActionPanel>{commonActions}</ActionPanel>}
         />
-        {[...pastDays].reverse().map((date) => {
+        {[todayKey, ...[...pastDays].reverse()].map((date) => {
           const day = history[date];
           const known = day && Object.keys(day).length > 0;
           const count = PRAYER_KEYS.filter((key) => day?.[key]?.completed).length;
+          const tone = dayTone(day, date, todayKey);
           const label = new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
             weekday: "short",
             day: "numeric",
@@ -176,24 +187,36 @@ function TodayList({ settings }: { settings: Settings }) {
           return (
             <List.Item
               key={date}
-              icon={
-                !known
-                  ? { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText }
-                  : count === 5
-                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                    : { source: Icon.Circle, tintColor: count ? Color.Orange : Color.Red }
-              }
-              title={label}
-              subtitle={
-                known
-                  ? PRAYER_KEYS.map((key) =>
-                      day?.[key]?.completed ? prayerName(key, false, settings.schedule) : "·",
-                    ).join("  ")
-                  : ""
-              }
-              accessories={[{ text: known ? `${count}/5` : "No data" }]}
+              // The same day colors as Prayer Calendar.
+              icon={{
+                source: count === 5 ? Icon.CheckCircle : tone === "noData" ? Icon.QuestionMarkCircle : Icon.Circle,
+                tintColor: toneColor(tone),
+              }}
+              title={date === todayKey ? `Today, ${label}` : label}
+              subtitle={date === todayKey && !todayDone ? "Counts once all 5 are prayed" : undefined}
+              // One tag per prayer, same text in every row, so the tags line up as columns of a table.
+              accessories={[
+                ...PRAYER_KEYS.map((key) => {
+                  const status = day?.[key]?.status;
+                  return {
+                    tag: {
+                      value: ltrName(prayerName(key, false, settings.schedule)),
+                      color: status ? STATUS_COLORS[status] : NOT_STARTED_GREY,
+                    },
+                    tooltip: status ? STATUS_LABELS[status] : known ? "Not marked" : "No reminder",
+                  };
+                }),
+                { text: known ? `${count}/5` : "No data" },
+              ]}
               actions={
                 <ActionPanel>
+                  <Action.Push
+                    title="Show Day"
+                    icon={Icon.Calendar}
+                    target={
+                      <DayView settings={settings} initialDate={new Date(`${date}T12:00:00`)} onChange={revalidate} />
+                    }
+                  />
                   {getDaySchedule(new Date(`${date}T12:00:00`), settings.schedule).map((slot) => (
                     <ActionPanel.Submenu
                       key={slot.id}

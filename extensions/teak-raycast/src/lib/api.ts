@@ -311,9 +311,20 @@ export const getCardById = (
     parseRaycastCard(await client.cards.get(requireCardId(cardId))),
   );
 
+/**
+ * A card update with the palette edits Teak's API takes. The pinned teak-sdk
+ * predates `addColors` and `removeColors` but sends its input as the request
+ * body, so they reach the API; this widening can go once the pin publishes
+ * them.
+ */
+export type CardUpdate = UpdateCardInput & {
+  addColors?: string[];
+  removeColors?: string[];
+};
+
 export const updateCard = (
   cardId: string,
-  input: UpdateCardInput,
+  input: CardUpdate,
   auth: AuthMode,
 ): Promise<RaycastCard> =>
   withClient(auth, async (client) =>
@@ -387,12 +398,6 @@ export const permanentlyDeleteCard = async (
     client.cards.delete(requireCardId(cardId), { permanent: true }),
   );
 };
-
-export const findSavedCardId = (
-  url: string,
-  auth: AuthMode,
-): Promise<string | null> =>
-  withClient(auth, (client) => client.cards.duplicate(url));
 
 const MIME_BY_EXTENSION: Record<string, string> = {
   avif: "image/avif",

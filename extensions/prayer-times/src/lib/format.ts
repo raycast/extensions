@@ -1,5 +1,5 @@
 /** Hebrew, Arabic (Urdu), Syriac, Thaana, N'Ko and the Arabic presentation forms. */
-const RTL_SCRIPT = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+export const RTL_SCRIPT = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
 /** Left-to-right mark: an invisible, strongly left-to-right character. */
 const LRM = "\u200E";
 
@@ -22,7 +22,8 @@ export function ltrName(name: string): string {
  * @returns Short time string.
  */
 export function formatTime(date: Date): string {
-  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  // Always four digits, 24-hour (06:05), whatever the system locale.
+  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 }
 
 /**

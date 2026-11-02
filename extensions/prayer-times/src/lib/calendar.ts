@@ -1,9 +1,13 @@
 import { PRAYER_KEYS, toDateKey } from "./prayers";
+import { Hex, STATUS_HEX, TONE_HEX } from "./colors";
 import { PrayerStatusValue, STATUS_LABELS } from "./status";
 import { StatRecord } from "./stats";
 
-/** How a calendar day is colored: all five prayed, some, none, no reminder data, or still ahead. */
-export type DayTone = "full" | "partial" | "none" | "noData" | "future";
+/**
+ * A calendar day's color, Today's status colors: the status most of its prayers have (with jamaat counts as on
+ * time; a tie goes to the worse one), grey with no reminder data or before anything is prayed or missed.
+ */
+export type DayTone = "ontime" | "late" | "madeup" | "missed" | "noData" | "future";
 
 /**
  * A month laid out for a seven-column calendar that starts on Monday.
@@ -28,6 +32,9 @@ export function prayedCount(day: Partial<Record<string, StatRecord>> | undefined
   return PRAYER_KEYS.filter((key) => day?.[key]?.completed).length;
 }
 
+/** Statuses from worst to best, for breaking a tie. */
+const WORST_FIRST = ["missed", "madeup", "late", "ontime"] as const;
+
 /**
  * The tone of a calendar day.
  *
@@ -39,24 +46,38 @@ export function prayedCount(day: Partial<Record<string, StatRecord>> | undefined
 export function dayTone(day: Partial<Record<string, StatRecord>> | undefined, date: string, today: string): DayTone {
   if (date > today) return "future";
   if (!day || Object.keys(day).length === 0) return "noData";
-  const count = prayedCount(day);
-  return count === PRAYER_KEYS.length ? "full" : count > 0 ? "partial" : "none";
+  const counts = new Map<string, number>();
+  for (const key of PRAYER_KEYS) {
+    const status = day[key]?.status === "jamaat" ? "ontime" : day[key]?.status;
+    if (status) counts.set(status, (counts.get(status) ?? 0) + 1);
+  }
+  const most = Math.max(0, ...counts.values());
+  return WORST_FIRST.find((status) => most > 0 && counts.get(status) === most) ?? "future";
 }
+
+/** Cell fills are softened (see-through) so a month of color isn't glaring. */
+const FILL_OPACITY = 0.45;
 
 const CELL = { width: 56, height: 24, gap: 3 };
 const WIDTH = 7 * CELL.width + 6 * CELL.gap;
 
-/** Cell fills per tone, status colors (the phone app's tokens), and text colors, per Raycast appearance. */
+const lightOf = <K extends string>(hex: Record<K, Hex>) =>
+  Object.fromEntries(Object.entries<Hex>(hex).map(([k, v]) => [k, v.light])) as Record<K, string>;
+const darkOf = <K extends string>(hex: Record<K, Hex>) =>
+  Object.fromEntries(Object.entries<Hex>(hex).map(([k, v]) => [k, v.dark])) as Record<K, string>;
+
+/** Cell fills per tone and status colors (shared with Today, lib/colors.ts), and text colors, per appearance. */
 const PALETTE = {
   light: {
-    fill: { full: "#34C759", partial: "#FFCC66", none: "#FF3B30", noData: "#E5E5EA", future: "none" },
-    status: { jamaat: "#248A3D", ontime: "#248A3D", late: "#975800", madeup: "#45544F", missed: "#D70015" },
+    // Late uses the phone's light-green disc; made up a true yellow, so it doesn't read as olive once softened.
+    fill: { ...lightOf(TONE_HEX), late: "#7FD98F", madeup: "#F5C518", noData: "#E5E5EA", future: "none" },
+    status: lightOf(STATUS_HEX),
     text: "#1C1C1E",
     muted: "#8E8E93",
   },
   dark: {
-    fill: { full: "#30D158", partial: "#FFC04D", none: "#FF453A", noData: "#3A3A3C", future: "none" },
-    status: { jamaat: "#30D158", ontime: "#30D158", late: "#E9B452", madeup: "#A8B4AF", missed: "#FF6961" },
+    fill: { ...darkOf(TONE_HEX), noData: "#3A3A3C", future: "none" },
+    status: darkOf(STATUS_HEX),
     text: "#F2F2F7",
     muted: "#8E8E93",
   },
@@ -123,9 +144,10 @@ export function panelSvg(
         : tone === "future"
           ? `stroke="${colors.muted}" stroke-opacity="0.4"`
           : "";
-    const ink = filled ? "#1C1C1E" : tone === "future" ? colors.muted : colors.text;
+    // Fills are see-through, so the day number uses the panel's own text color.
+    const ink = tone === "future" ? colors.muted : colors.text;
     parts.push(
-      `<rect x="${x}" y="${y}" width="${CELL.width}" height="${CELL.height}" rx="5" fill="${colors.fill[tone]}" ${stroke}/>`,
+      `<rect x="${x}" y="${y}" width="${CELL.width}" height="${CELL.height}" rx="5" fill="${colors.fill[tone]}" fill-opacity="${filled ? FILL_OPACITY : 1}" ${stroke}/>`,
     );
     parts.push(
       text(x + CELL.width / 2, y + 16, 12, ink, String(date.getDate()), `text-anchor="middle" font-weight="600"`),
@@ -136,14 +158,17 @@ export function panelSvg(
 
   let y = top + Math.ceil((blanks + dates.length) / 7) * (CELL.height + CELL.gap) + 10;
   const legend: [DayTone, string][] = [
-    ["full", "All 5"],
-    ["partial", "Some"],
-    ["none", "None"],
+    ["ontime", "On time"],
+    ["late", "Late"],
+    ["madeup", "Made up"],
+    ["missed", "Missed"],
     ["noData", "No data"],
   ];
   let x = 0;
   for (const [tone, label] of legend) {
-    parts.push(`<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="${colors.fill[tone]}"/>`);
+    parts.push(
+      `<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="${colors.fill[tone]}" fill-opacity="${FILL_OPACITY}"/>`,
+    );
     parts.push(text(x + 14, y + 9, 11, colors.muted, label));
     x += 26 + label.length * 6;
   }

@@ -13,11 +13,12 @@ export type PrayedStatus = Exclude<PrayerStatusValue, "missed">;
 export const PRAYER_STATUSES: readonly PrayerStatusValue[] = ["jamaat", "ontime", "late", "missed", "madeup"];
 
 /** Action wording per prayed status: "Mark …" / "Change to …". */
-export const MARK_TITLES: Record<PrayedStatus, string> = {
+export const MARK_TITLES: Record<PrayerStatusValue, string> = {
   jamaat: "With Jamaat",
   ontime: "On Time",
   late: "Late",
   madeup: "Made Up (Qaza)",
+  missed: "Missed",
 };
 
 /** Short label per status, for lists and the menu bar; the same wording as the phone and watch app. */
@@ -130,19 +131,20 @@ export function prayedAt(slot: PrayerSlot, status: PrayedStatus, now: Date): Dat
 /**
  * The statuses a started prayer can be marked or changed to, besides a plain "mark prayed" (which records
  * {@link clockStatus}) and unmark. With jamaat once its jamaat has happened, or any time when it has no jamaat
- * time set (many never set one for Maghrib); made up only after the
- * prayer's time has ended.
+ * time set (many never set one for Maghrib); made up and missed only after the prayer's time has ended.
+ * An unmarked prayer already counts as missed once its time ends; marking it missed writes that down.
  *
  * @param slot - Prayer slot, already started.
- * @param current - Its prayed status, or undefined when unmarked.
+ * @param current - Its status (missed included), or undefined while unmarked and running.
  * @param now - Current instant.
  * @returns Statuses to offer, in display order.
  */
-export function markOptions(slot: PrayerSlot, current: PrayerStatusValue | undefined, now: Date): PrayedStatus[] {
+export function markOptions(slot: PrayerSlot, current: PrayerStatusValue | undefined, now: Date): PrayerStatusValue[] {
   const prayed = current && current !== "missed";
-  const options: PrayedStatus[] = [];
+  const options: PrayerStatusValue[] = [];
   if (!slot.jamaat || slot.jamaat <= now) options.push("jamaat");
   options.push("ontime", "late");
-  if (now >= slot.end) options.push("madeup");
-  return options.filter((status) => status !== (prayed ? current : clockStatus(slot, now)));
+  if (now >= slot.end) options.push("madeup", "missed");
+  // An unprayed prayer's plain "Mark as Prayed" already records the clock's status.
+  return options.filter((status) => status !== current && (prayed || status !== clockStatus(slot, now)));
 }
