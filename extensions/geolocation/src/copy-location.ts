@@ -11,7 +11,7 @@ const copyLocation = Effect.gen(function* () {
   const text = formatLocation(location, format);
 
   yield* Effect.promise(() => Clipboard.copy(text));
-  yield* Effect.promise(() => showHUD(`Copied ${text} (±${Math.round(location.accuracy)} m)`));
+  yield* Effect.promise(() => showHUD(`Copied ${text}`));
 }).pipe(
   Effect.catchTag("LocationError", (error) =>
     Effect.promise(() =>
