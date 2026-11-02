@@ -32,12 +32,19 @@ function regexWorker() {
       }
       const before = text.slice(0, match.index);
       const start = before.lastIndexOf("\n") + 1;
-      const end = text.indexOf("\n", match.index);
+      const contextStart = Math.max(0, match.index - 100);
+      const contextEnd = Math.min(
+        text.length,
+        Math.max(
+          contextStart + 300,
+          match.index + Math.min(match[0].length, 200),
+        ),
+      );
       matches.push({
         text: match[0],
         line: before.split("\n").length,
         column: Array.from(before.slice(start)).length + 1,
-        excerpt: text.slice(start, end < 0 ? text.length : end).slice(0, 300),
+        excerpt: `${contextStart > 0 ? "…" : ""}${text.slice(contextStart, contextEnd)}${contextEnd < text.length ? "…" : ""}`,
       });
       if (match[0].length === 0) regex.lastIndex += 1;
     }
@@ -55,9 +62,12 @@ export function searchText(
   ignoreCase: boolean,
   timeout = 1000,
   limit = 500,
+  maxBytes = MAX_INPUT_BYTES,
 ): Promise<SearchResult> {
-  if (Buffer.byteLength(text, "utf8") > MAX_INPUT_BYTES)
-    return Promise.reject(new Error("Input exceeds the 1 MiB limit"));
+  if (Buffer.byteLength(text, "utf8") > maxBytes)
+    return Promise.reject(
+      new Error(`Search text exceeds the ${maxBytes} byte limit`),
+    );
   if (!pattern) return Promise.reject(new Error("Enter a regular expression"));
   return new Promise((resolve, reject) => {
     const worker = new Worker(`(${regexWorker.toString()})()`, {

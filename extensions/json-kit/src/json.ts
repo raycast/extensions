@@ -10,6 +10,9 @@ import {
 export const MAX_INPUT_BYTES = 1024 * 1024;
 export const MAX_DEPTH = 128;
 export const MAX_NODES = 50000;
+// Every parsed node can add at most one indentation prefix when formatted.
+export const MAX_GENERATED_BYTES =
+  MAX_INPUT_BYTES + MAX_NODES * (MAX_DEPTH * 2 + 8);
 
 export type JsonDocument = {
   source: string;

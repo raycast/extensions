@@ -15,6 +15,8 @@ import {
 import { useState } from "react";
 import { targetPath, writeJson } from "./export";
 import {
+  MAX_GENERATED_BYTES,
+  MAX_INPUT_BYTES,
   escapeJson,
   parseDocument,
   stats,
@@ -152,7 +154,9 @@ function TextResult({ title, value }: { title: string; value: string }) {
           <Action.Push
             title="Search Text"
             icon={Icon.MagnifyingGlass}
-            target={<RegexForm source={value} />}
+            target={
+              <RegexForm source={value} sourceLimit={MAX_GENERATED_BYTES} />
+            }
           />
         </ActionPanel>
       }
@@ -188,7 +192,11 @@ function Result({ document }: { document: JsonDocument }) {
             title="Search Text"
             icon={Icon.MagnifyingGlass}
             target={
-              <RegexForm source={document.pretty} original={document.source} />
+              <RegexForm
+                source={document.pretty}
+                original={document.source}
+                sourceLimit={MAX_GENERATED_BYTES}
+              />
             }
           />
           <Action.CopyToClipboard
@@ -324,9 +332,11 @@ function TreeView({ document }: { document: JsonDocument }) {
 function RegexForm({
   source,
   original,
+  sourceLimit = MAX_INPUT_BYTES,
 }: {
   source: string;
   original?: string;
+  sourceLimit?: number;
 }) {
   const { push } = useNavigation();
   const [pattern, setPattern] = useState("");
@@ -340,7 +350,14 @@ function RegexForm({
     try {
       const text =
         target === "original" && original !== undefined ? original : source;
-      const result = await searchText(text, pattern, ignoreCase);
+      const result = await searchText(
+        text,
+        pattern,
+        ignoreCase,
+        1000,
+        500,
+        target === "original" ? MAX_INPUT_BYTES : sourceLimit,
+      );
       push(<Matches result={result} />);
     } catch (e) {
       setError(message(e));
