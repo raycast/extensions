@@ -15,7 +15,14 @@ import {
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
 import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
 import { platformShortcut } from "./shortcuts";
-import { SortVaultsByMenu, preferredSortOrder, preferredVaultSortOrder, sortVaults, useVaultFrecency } from "./sort";
+import {
+  SortVaultsByDropdown,
+  SortVaultsByMenu,
+  preferredSortOrder,
+  preferredVaultSortOrder,
+  sortVaults,
+  useVaultFrecency,
+} from "./sort";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
@@ -221,7 +228,11 @@ export function VaultsView() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search vaults...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search vaults..."
+      searchBarAccessory={<SortVaultsByDropdown value={vaultOrder} onChange={setVaultOrder} />}
+    >
       {vaults.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Folder}

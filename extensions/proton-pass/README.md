@@ -76,7 +76,7 @@ Generate Password has its own preferences for the settings it starts with. They 
 
 ### List Vaults
 
-- **Sort vaults by**: Order of the vaults: name (default), item count or most used. Sort by (⌘⇧S) changes it until the window closes. The vault menus of Browse Items and Get TOTP Code list vaults by name
+- **Sort vaults by**: Order of the vaults: name (default), item count or most used. The menu at the top right of List Vaults, or Sort by (⌘⇧S), changes it until the window closes. The vault menus of Browse Items and Get TOTP Code list vaults by name
 
 ### Get TOTP Code
 

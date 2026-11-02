@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 import { platformShortcut } from "./shortcuts";
 import { Item, Vault } from "./types";
@@ -79,6 +79,23 @@ export function SortByMenu({ value, onChange }: { value: SortOrder; onChange: (o
       <Action title="Last Modified" icon={icon("modified")} onAction={() => onChange("modified")} />
       <Action title="Date Created" icon={icon("created")} onAction={() => onChange("created")} />
     </ActionPanel.Submenu>
+  );
+}
+
+/** List Vaults' search bar menu, which the vault list has free since it shows every vault. */
+export function SortVaultsByDropdown({
+  value,
+  onChange,
+}: {
+  value: VaultSortOrder;
+  onChange: (order: VaultSortOrder) => void;
+}) {
+  return (
+    <List.Dropdown tooltip="Sort Vaults" value={value} onChange={(order) => onChange(order as VaultSortOrder)}>
+      <List.Dropdown.Item title="Sort by Name" value="name" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Item Count" value="itemCount" icon={Icon.NumberList} />
+      <List.Dropdown.Item title="Sort by Most Used" value="mostUsed" icon={Icon.NumberList} />
+    </List.Dropdown>
   );
 }
 

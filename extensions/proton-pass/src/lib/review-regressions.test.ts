@@ -2306,7 +2306,7 @@ test("the vault menus list vaults by name, since other commands can't read List 
     "all,p,w,shared-with-me",
   );
 });
-test("List Vaults sorts the vaults by name by default, and Sort by reorders them", async () => {
+test("List Vaults sorts the vaults by name by default, and Sort by or its search bar menu reorders them", async () => {
   const harness = hookHarness();
   const { VaultsView } = loadView("vaults-view.tsx", {
     react: harness.react,
@@ -2371,6 +2371,16 @@ test("List Vaults sorts the vaults by name by default, and Sort by reorders them
       .map((row) => row.title)
       .join(),
     "Beta,Alpha",
+  );
+  // The search bar menu shows the same order and changes it too.
+  const dropdown = harness.render(VaultsView, {}).props.searchBarAccessory as Element;
+  assert.equal(dropdown.props.value, "itemCount");
+  (dropdown.props.onChange as (order: string) => void)("name");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
   );
 });
 
