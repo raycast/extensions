@@ -64,7 +64,7 @@ export function SearchItemsView({
   const [error, setError] = useState<{ type: PassCliErrorType; message?: string } | null>(null);
   const [failedVaults, setFailedVaults] = useState<VaultFailure[]>([]);
   const [loadFailureMessage, setLoadFailureMessage] = useState<string>();
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchItems>();
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const webIntegrationEnabled = preferences.enableWebIntegration ?? true;
   const hasLoadedFromCache = useRef(false);
