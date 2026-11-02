@@ -138,7 +138,7 @@ export default function ManageCustomCheatsheets() {
                         await Service.addToFavorites("custom", sheet.id, sheet.title);
                         await showToast({ style: Toast.Style.Success, title: "Favorited", message: sheet.title });
                       } catch (error) {
-                        await showFailureToast(error, { title: "Could Not Save Favourite" });
+                        await showFailureToast(error, { title: "Could Not Save Favorite" });
                       }
                     }}
                   />

@@ -113,7 +113,7 @@ function ManageReposWithAuth() {
   async function handleDeleteRepo(id: string, name: string, owner: string) {
     const confirmed = await confirmAlert({
       title: "Remove Repository",
-      message: `Are you sure you want to remove "${owner}/${name}" and its cached sheets? Favourites and history will be retained.`,
+      message: `Are you sure you want to remove "${owner}/${name}" and its cached sheets? Favorites and history will be retained.`,
       primaryAction: {
         title: "Remove",
         style: Alert.ActionStyle.Destructive,
