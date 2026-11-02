@@ -2,7 +2,7 @@ import { Icon } from "@raycast/api";
 import { withCache } from "@raycast/utils";
 import { SCHEDULE_EVENT_TYPES, isContactsBirthdaysCalendar } from "../lib/event-types";
 import { rankEventMentions, toEventMentions, toMentionEvents } from "../lib/event-mentions";
-import { getCalendarClient, withGoogleAPIs } from "../lib/google";
+import { getAccountKey, getCalendarClient, withGoogleAPIs } from "../lib/google";
 
 type Input = {
   /** What the user typed in the Events mention search, empty for the default list. */
@@ -14,9 +14,13 @@ const MAX_CALENDARS = 10;
 // Working locations repeat every day and are rarely what someone wants to mention.
 const MENTION_EVENT_TYPES = SCHEDULE_EVENT_TYPES.filter((type) => type !== "workingLocation");
 
-/** Calendars shown in Google Calendar, primary first, so search covers shared and team calendars too. */
+/**
+ * Calendars shown in Google Calendar, primary first, so search covers shared and team calendars too. The account key
+ * only scopes the cache to the signed-in account.
+ */
 const getVisibleCalendars = withCache(
-  async () => {
+  async (accountKey: string) => {
+    void accountKey;
     const response = await getCalendarClient().calendarList.list({ minAccessRole: "reader" });
     return (response.data.items ?? [])
       .filter((entry) => entry.id && entry.selected && !entry.hidden && !entry.deleted)
@@ -29,8 +33,8 @@ const getVisibleCalendars = withCache(
 );
 
 const searchEvents = withCache(
-  async (query: string) => {
-    const calendars = await getVisibleCalendars();
+  async (accountKey: string, query: string) => {
+    const calendars = await getVisibleCalendars(accountKey);
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     // Without a query, show today and the coming week. A query also finds recent past meetings.
@@ -66,7 +70,7 @@ const searchEvents = withCache(
 );
 
 async function searchEventMentions(input: Input) {
-  const events = await searchEvents(input.query.trim());
+  const events = await searchEvents(await getAccountKey(), input.query.trim());
   return toEventMentions(rankEventMentions(events, new Date()), Icon.Calendar);
 }
 

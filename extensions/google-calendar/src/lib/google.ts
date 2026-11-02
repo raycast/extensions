@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { auth, calendar_v3 } from "@googleapis/calendar";
-import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
+import { getAccessToken, OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { getPreferenceValues, Tool } from "@raycast/api";
 import { resolveCalendarIdForEventsList, resolveEventTypesForList } from "./event-types";
@@ -44,6 +45,24 @@ export function getPeopleClient() {
   }
 
   return people;
+}
+
+// Keyed by a hash of the access token, so a new sign-in or a token refresh looks the account up once.
+const getAccountIdForToken = withCache(async (tokenHash: string) => {
+  void tokenHash;
+  const response = await getPeopleClient().people.get({ resourceName: "people/me", personFields: "metadata" });
+  const accountId = response.data.resourceName;
+  if (!accountId) throw new Error("Could not identify the signed-in Google account.");
+  return accountId;
+});
+
+/**
+ * A stable ID for the signed-in Google account. Caches of account data include it in their key, so signing in to
+ * another account never shows the previous account's contacts or events. Must run inside `withGoogleAPIs`.
+ */
+export async function getAccountKey() {
+  const tokenHash = createHash("sha256").update(getAccessToken().token).digest("hex");
+  return getAccountIdForToken(tokenHash);
 }
 
 export function withGoogleAPIs<Input, Output>(

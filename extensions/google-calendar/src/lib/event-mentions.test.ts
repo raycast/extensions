@@ -174,6 +174,13 @@ describe("readEventMention", () => {
     assert.deepEqual(JSON.parse(resource.text), { id: "abc", title: "Design review", start: "2026-11-04T14:00:00Z" });
   });
 
+  it("explains when the event was cancelled after it was mentioned", async () => {
+    await assert.rejects(
+      readEventMention("google-calendar://events/primary/abc", async () => ({ id: "abc", status: "cancelled" })),
+      /no longer available/,
+    );
+  });
+
   it("explains when the event was deleted", async () => {
     await assert.rejects(
       readEventMention("google-calendar://events/primary/abc", async () => {

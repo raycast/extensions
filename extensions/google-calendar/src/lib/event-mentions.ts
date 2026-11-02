@@ -136,7 +136,10 @@ export function parseEventMentionUri(uri: string) {
   }
 }
 
-type GetEvent = (calendarId: string, eventId: string) => Promise<object & { id?: string | null }>;
+type GetEvent = (
+  calendarId: string,
+  eventId: string,
+) => Promise<object & { id?: string | null; status?: string | null }>;
 
 /** Reads the full, current event when the message is sent, so a moved or edited event is not stale. */
 export async function readEventMention(uri: string, getEvent: GetEvent) {
@@ -151,6 +154,9 @@ export async function readEventMention(uri: string, getEvent: GetEvent) {
     }
     throw error;
   }
-  if (event.id !== eventId) throw new Error("This Google Calendar event is no longer available.");
+  // Google still returns an event cancelled after it was mentioned, marked as cancelled.
+  if (event.id !== eventId || event.status === "cancelled") {
+    throw new Error("This Google Calendar event is no longer available.");
+  }
   return { text: JSON.stringify(event, null, 2), mimeType: "application/json" };
 }
