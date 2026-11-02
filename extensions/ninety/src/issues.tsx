@@ -4,6 +4,7 @@ import { useState } from "react";
 import { addIssueComment, deleteIssue, queryIssues, updateIssue } from "./api/ninety";
 import { Issue, IssueInterval } from "./api/types";
 import { CommentForm } from "./components/CommentForm";
+import { ErrorView } from "./components/ErrorView";
 import { IssueForm } from "./components/IssueForm";
 import { TeamDropdown } from "./components/TeamDropdown";
 import { TodoForm } from "./components/TodoForm";
@@ -34,12 +35,12 @@ function issueMarkdown(issue: Issue, userName: (id?: string) => string | undefin
 }
 
 export default function Command() {
-  const { teams } = useTeams();
+  const { teams, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [teamId, setTeamId] = useState("");
   const [showDetail, setShowDetail] = useState(false);
 
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
     (teamId: string) => queryIssues({ teamId }),
     [teamId],
     {
@@ -96,17 +97,25 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading || !teamId}
+      isLoading={isLoading || (!teamId && !teamsError)}
       isShowingDetail={showDetail && issues.length > 0}
       searchBarPlaceholder="Filter Issues"
       searchBarAccessory={<TeamDropdown id="issues-team" teams={teams} onChange={setTeamId} />}
     >
-      <List.EmptyView
-        icon={Icon.Bolt}
-        title="No open Issues"
-        description="Press ⌘N to add one."
-        actions={<ActionPanel>{createAction}</ActionPanel>}
-      />
+      {teamsError || error ? (
+        <ErrorView
+          title={teamsError ? "Couldn't load Teams" : "Couldn't load Issues"}
+          error={(teamsError ?? error)!}
+          onRetry={() => (teamsError ? retryTeams() : revalidate())}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Bolt}
+          title="No open Issues"
+          description="Press ⌘N to add one."
+          actions={<ActionPanel>{createAction}</ActionPanel>}
+        />
+      )}
       {INTERVALS.map((interval) => {
         const items = issues.filter((i) => (i.intervalCode ?? "SHORT_TERM") === interval).sort(byPriority);
         const other: IssueInterval = interval === "SHORT_TERM" ? "LONG_TERM" : "SHORT_TERM";
@@ -211,6 +220,11 @@ export default function Command() {
                             <Action
                               key={p}
                               title={p ? `Priority ${p}` : "No Priority"}
+                              icon={
+                                p
+                                  ? { source: Icon.Exclamationmark, tintColor: priorityAccessory(p)?.tag.color }
+                                  : Icon.Minus
+                              }
                               onAction={() => update(issue, { priority: p }, "Priority updated")}
                             />
                           ))}
@@ -218,7 +232,10 @@ export default function Command() {
                         <Action.Push
                           title="Add Comment"
                           icon={Icon.Bubble}
-                          shortcut={Keyboard.Shortcut.Common.Copy}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "opt"], key: "m" },
+                            Windows: { modifiers: ["ctrl", "alt"], key: "m" },
+                          }}
                           target={
                             <CommentForm
                               itemTitle={title}

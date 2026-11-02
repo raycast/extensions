@@ -4,6 +4,7 @@ import { useState } from "react";
 import { addTodoComment, deleteTodo, getMyTodos, getTeamTodos, updateTodo } from "./api/ninety";
 import { Todo } from "./api/types";
 import { CommentForm } from "./components/CommentForm";
+import { ErrorView } from "./components/ErrorView";
 import { MY_ITEMS, TeamDropdown } from "./components/TeamDropdown";
 import { TodoForm } from "./components/TodoForm";
 import { useTeams } from "./hooks/useTeams";
@@ -43,14 +44,14 @@ function todoMarkdown(todo: Todo, userName: (id?: string) => string | undefined)
 }
 
 export default function Command() {
-  const { teams, teamName } = useTeams();
+  const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [scope, setScope] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const isMine = scope === MY_ITEMS;
 
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
     (scope: string, completed: boolean) =>
       scope === MY_ITEMS ? getMyTodos({ completed }) : getTeamTodos(scope, { completed }),
     [scope, showCompleted],
@@ -112,23 +113,48 @@ export default function Command() {
     />
   );
 
+  const completedToggle = (
+    <Action
+      title={showCompleted ? "Show Open To-Dos" : "Show Completed To-Dos"}
+      icon={showCompleted ? Icon.Circle : Icon.CheckCircle}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "h" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+      }}
+      onAction={() => setShowCompleted((v) => !v)}
+    />
+  );
+
   const sections = showCompleted
     ? [{ title: "Completed", items: todos }]
     : DUE_BUCKETS.map((bucket) => ({ title: bucket, items: todos.filter((t) => dueBucket(t.dueDate) === bucket) }));
 
   return (
     <List
-      isLoading={isLoading || !scope}
+      isLoading={isLoading || (!scope && !teamsError)}
       isShowingDetail={showDetail && todos.length > 0}
       searchBarPlaceholder="Filter To-Dos"
       searchBarAccessory={<TeamDropdown id="todos-scope" teams={teams} onChange={setScope} mineTitle="My To-Dos" />}
     >
-      <List.EmptyView
-        icon={Icon.CheckCircle}
-        title={showCompleted ? "No completed To-Dos" : "No open To-Dos"}
-        description="Press ⌘N to create one."
-        actions={<ActionPanel>{createAction}</ActionPanel>}
-      />
+      {teamsError || error ? (
+        <ErrorView
+          title={teamsError ? "Couldn't load Teams" : "Couldn't load To-Dos"}
+          error={(teamsError ?? error)!}
+          onRetry={() => (teamsError ? retryTeams() : revalidate())}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title={showCompleted ? "No completed To-Dos" : "No open To-Dos"}
+          description="Press ⌘N to create one."
+          actions={
+            <ActionPanel>
+              {createAction}
+              {completedToggle}
+            </ActionPanel>
+          }
+        />
+      )}
       {sections.map((section) => (
         <List.Section key={section.title} title={section.title} subtitle={String(section.items.length)}>
           {section.items.map((todo) => {
@@ -204,7 +230,10 @@ export default function Command() {
                       <Action.Push
                         title="Add Comment"
                         icon={Icon.Bubble}
-                        shortcut={Keyboard.Shortcut.Common.Copy}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "opt"], key: "m" },
+                          Windows: { modifiers: ["ctrl", "alt"], key: "m" },
+                        }}
                         target={
                           <CommentForm
                             itemTitle={todo.title}
@@ -221,15 +250,7 @@ export default function Command() {
                         content={todo.title}
                         shortcut={Keyboard.Shortcut.Common.Copy}
                       />
-                      <Action
-                        title={showCompleted ? "Show Open To-Dos" : "Show Completed To-Dos"}
-                        icon={showCompleted ? Icon.Circle : Icon.CheckCircle}
-                        shortcut={{
-                          macOS: { modifiers: ["cmd", "shift"], key: "h" },
-                          Windows: { modifiers: ["ctrl", "shift"], key: "h" },
-                        }}
-                        onAction={() => setShowCompleted((v) => !v)}
-                      />
+                      {completedToggle}
                       <Action
                         title="Refresh"
                         icon={Icon.ArrowClockwise}

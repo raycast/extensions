@@ -23,9 +23,11 @@ interface Props {
   link?: { id: string; type: Exclude<LinkedItemType, "issue">; title?: string };
   draftValues?: Partial<IssueFormValues>;
   onSaved?: (issue: Issue) => void;
+  /** True when the form is a command's root view, where Raycast shows the command title. */
+  isRoot?: boolean;
 }
 
-export function IssueForm({ issue, defaultTeamId, link, draftValues, onSaved }: Props) {
+export function IssueForm({ issue, defaultTeamId, link, draftValues, onSaved, isRoot }: Props) {
   const { pop } = useNavigation();
   const { teams, isLoading } = useTeams();
   const [lastTeamId, setLastTeamId] = useLastTeam();
@@ -48,10 +50,11 @@ export function IssueForm({ issue, defaultTeamId, link, draftValues, onSaved }: 
       try {
         const payload = {
           title: values.title.trim(),
-          description: values.description.trim() || undefined,
+          description: isEdit ? values.description.trim() : values.description.trim() || undefined,
           teamId: values.teamId,
           interval: values.interval as IssueInterval,
-          priority: Number(values.priority) || undefined,
+          // 0 means no priority; send it so clearing a priority sticks.
+          priority: Number(values.priority),
         };
         const saved = issue
           ? await updateIssue(issue.id, payload)
@@ -82,7 +85,7 @@ export function IssueForm({ issue, defaultTeamId, link, draftValues, onSaved }: 
     <Form
       isLoading={isLoading}
       enableDrafts={!!draftValues || (!issue && !onSaved)}
-      navigationTitle={isEdit ? "Edit Issue" : "Create Issue"}
+      navigationTitle={isRoot ? undefined : isEdit ? "Edit Issue" : "Create Issue"}
       actions={
         <ActionPanel>
           <Action.SubmitForm

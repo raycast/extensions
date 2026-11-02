@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getHeadlines } from "./api/ninety";
 import { Headline } from "./api/types";
+import { ErrorView } from "./components/ErrorView";
 import { HeadlineForm } from "./components/HeadlineForm";
 import { TeamDropdown } from "./components/TeamDropdown";
 import { useTeams } from "./hooks/useTeams";
@@ -16,14 +17,14 @@ function headlineMarkdown(headline: Headline) {
 }
 
 export default function Command() {
-  const { teams, teamName } = useTeams();
+  const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [teamId, setTeamId] = useState("");
   const [cascading, setCascading] = useState(false);
   const [includeDiscussed, setIncludeDiscussed] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
 
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     (teamId: string, isCascadedMessage: boolean, includeDiscussed: boolean) =>
       getHeadlines({ teamId, isCascadedMessage, includeDiscussed }),
     [teamId, cascading, includeDiscussed],
@@ -78,23 +79,30 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading || !teamId}
+      isLoading={isLoading || (!teamId && !teamsError)}
       isShowingDetail={showDetail && headlines.length > 0}
-      navigationTitle={kind}
       searchBarPlaceholder={`Filter ${kind}`}
       searchBarAccessory={<TeamDropdown id="headlines-team" teams={teams} onChange={setTeamId} />}
     >
-      <List.EmptyView
-        icon={Icon.Megaphone}
-        title={`No ${kind}`}
-        description="Press ⌘N to share one."
-        actions={
-          <ActionPanel>
-            {createAction}
-            {toggleActions}
-          </ActionPanel>
-        }
-      />
+      {teamsError || error ? (
+        <ErrorView
+          title={teamsError ? "Couldn't load Teams" : `Couldn't load ${kind}`}
+          error={(teamsError ?? error)!}
+          onRetry={() => (teamsError ? retryTeams() : revalidate())}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Megaphone}
+          title={`No ${kind}`}
+          description="Press ⌘N to share one."
+          actions={
+            <ActionPanel>
+              {createAction}
+              {toggleActions}
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title={kind} subtitle={String(headlines.length)}>
         {headlines.map((headline) => {
           const owner = userName(headline.userId);

@@ -3,6 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { getTeamScorecard } from "./api/ninety";
 import { PeriodInterval, ScorecardKpi, ScorecardScore } from "./api/types";
+import { ErrorView } from "./components/ErrorView";
 import { ScoreForm } from "./components/ScoreForm";
 import { TeamDropdown } from "./components/TeamDropdown";
 import { useTeams } from "./hooks/useTeams";
@@ -41,12 +42,12 @@ function kpiMarkdown(kpi: ScorecardKpi) {
 }
 
 export default function Command() {
-  const { teams } = useTeams();
+  const { teams, error: teamsError, revalidate: retryTeams } = useTeams();
   const [teamId, setTeamId] = useState("");
   const [interval, setPeriodInterval] = useCachedState<PeriodInterval>("scorecard-interval", "weekly");
   const [showDetail, setShowDetail] = useState(true);
 
-  const { data, isLoading, revalidate } = useCachedPromise(getTeamScorecard, [teamId, interval], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(getTeamScorecard, [teamId, interval], {
     execute: !!teamId,
     keepPreviousData: true,
     onError: (error) => {
@@ -67,25 +68,37 @@ export default function Command() {
       }}
     >
       {INTERVALS.map((i) => (
-        <Action key={i.value} title={i.title} onAction={() => setPeriodInterval(i.value)} />
+        <Action
+          key={i.value}
+          title={i.title}
+          icon={i.value === interval ? Icon.CheckCircle : Icon.Circle}
+          onAction={() => setPeriodInterval(i.value)}
+        />
       ))}
     </ActionPanel.Submenu>
   );
 
   return (
     <List
-      isLoading={isLoading || !teamId}
+      isLoading={isLoading || (!teamId && !teamsError)}
       isShowingDetail={showDetail && hasKpis}
-      navigationTitle={`${intervalTitle} Scorecard`}
-      searchBarPlaceholder="Filter Measurables"
+      searchBarPlaceholder={`Filter ${intervalTitle} Measurables`}
       searchBarAccessory={<TeamDropdown id="scorecard-team" teams={teams} onChange={setTeamId} />}
     >
-      <List.EmptyView
-        icon={Icon.BarChart}
-        title={`No ${intervalTitle.toLowerCase()} Measurables`}
-        description="Try another interval with ⌘⇧I."
-        actions={<ActionPanel>{intervalMenu}</ActionPanel>}
-      />
+      {teamsError || error ? (
+        <ErrorView
+          title={teamsError ? "Couldn't load Teams" : "Couldn't load Scorecard"}
+          error={(teamsError ?? error)!}
+          onRetry={() => (teamsError ? retryTeams() : revalidate())}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.BarChart}
+          title={`No ${intervalTitle.toLowerCase()} Measurables`}
+          description="Try another interval with ⌘⇧I."
+          actions={<ActionPanel>{intervalMenu}</ActionPanel>}
+        />
+      )}
       {groups.map((group) => (
         <List.Section key={group.id} title={group.name} subtitle={String(group.kpis.length)}>
           {group.kpis.map((kpi) => {

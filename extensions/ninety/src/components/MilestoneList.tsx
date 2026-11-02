@@ -5,6 +5,7 @@ import { Milestone, Rock } from "../api/types";
 import { showError } from "../lib/errors";
 import { dueDateAccessory, parseDueDate } from "../lib/format";
 import { NinetyUrls } from "../lib/urls";
+import { ErrorView } from "./ErrorView";
 import { MilestoneForm } from "./MilestoneForm";
 import { TodoForm } from "./TodoForm";
 
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export function MilestoneList({ rock, onChange }: Props) {
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(getRockMilestones, [rock._id], {
+  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(getRockMilestones, [rock._id], {
     onError: (error) => {
       showError(error, "Couldn't load Milestones");
     },
@@ -54,12 +55,16 @@ export function MilestoneList({ rock, onChange }: Props) {
 
   return (
     <List isLoading={isLoading} navigationTitle={rock.title} searchBarPlaceholder="Filter Milestones">
-      <List.EmptyView
-        icon={Icon.Flag}
-        title="No Milestones"
-        description="Press ⌘N to add one."
-        actions={<ActionPanel>{addAction}</ActionPanel>}
-      />
+      {error ? (
+        <ErrorView title="Couldn't load Milestones" error={error} onRetry={() => revalidate()} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Flag}
+          title="No Milestones"
+          description="Press ⌘N to add one."
+          actions={<ActionPanel>{addAction}</ActionPanel>}
+        />
+      )}
       <List.Section
         title="Milestones"
         subtitle={milestones.length ? `${done} of ${milestones.length} done` : undefined}

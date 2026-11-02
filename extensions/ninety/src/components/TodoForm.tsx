@@ -21,9 +21,15 @@ interface Props {
   todo?: Todo;
   defaultTeamId?: string;
   /** Link the new To-Do to an Issue, Rock or Milestone. */
-  link?: { id: string; type: Exclude<LinkedItemType, "todo">; title?: string };
+  link?: {
+    id: string;
+    type: Exclude<LinkedItemType, "todo">;
+    title?: string;
+  };
   draftValues?: Partial<TodoFormValues>;
   onSaved?: (todo: Todo) => void;
+  /** True when the form is a command's root view, where Raycast shows the command title. */
+  isRoot?: boolean;
 }
 
 function inSevenDays() {
@@ -32,7 +38,7 @@ function inSevenDays() {
   return date;
 }
 
-export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved }: Props) {
+export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved, isRoot }: Props) {
   const { pop } = useNavigation();
   const { teams, isLoading } = useTeams();
   const [lastTeamId, setLastTeamId] = useLastTeam();
@@ -45,7 +51,11 @@ export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved }: Pr
       teamId: draftValues?.teamId ?? (todo ? todo.teamId || PERSONAL : (defaultTeamId ?? lastTeamId ?? PERSONAL)),
       dueDate: draftValues?.dueDate ?? (todo ? (parseDueDate(todo.dueDate) ?? null) : inSevenDays()),
     },
-    validation: { title: FormValidation.Required },
+    validation: {
+      title: FormValidation.Required,
+      // The API has no way to remove a due date, so don't let an edit look like it did.
+      dueDate: (value) => (todo?.dueDate && !value ? "Ninety can't remove a due date. Pick a new one." : undefined),
+    },
     async onSubmit(values) {
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -55,7 +65,8 @@ export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved }: Pr
         const teamId = values.teamId === PERSONAL ? "" : values.teamId;
         const payload = {
           title: values.title.trim(),
-          description: values.description.trim() || undefined,
+          // An empty string clears the description on edit; undefined would leave it unchanged.
+          description: isEdit ? values.description.trim() : values.description.trim() || undefined,
           dueDate: values.dueDate ? toNinetyDate(values.dueDate) : undefined,
         };
         const saved = todo
@@ -87,7 +98,7 @@ export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved }: Pr
     <Form
       isLoading={isLoading}
       enableDrafts={!!draftValues || (!todo && !onSaved)}
-      navigationTitle={isEdit ? "Edit To-Do" : "Create To-Do"}
+      navigationTitle={isRoot ? undefined : isEdit ? "Edit To-Do" : "Create To-Do"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -102,7 +113,8 @@ export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved }: Pr
       <Form.TextField title="Title" placeholder="What needs to get done?" {...itemProps.title} />
       <Form.TextArea title="Description" placeholder="Optional details" {...itemProps.description} />
       <Form.Dropdown title="Team" info="Personal To-Dos are only visible to you." {...itemProps.teamId}>
-        <Form.Dropdown.Item title="Personal" value={PERSONAL} icon={Icon.Person} />
+        {/* The API can't move a Team To-Do to Personal, so only offer Personal where it can apply. */}
+        {!todo || !todo.teamId ? <Form.Dropdown.Item title="Personal" value={PERSONAL} icon={Icon.Person} /> : null}
         {teams.map((team) => (
           <Form.Dropdown.Item key={team._id} title={team.name} value={team._id} icon={Icon.TwoPeople} />
         ))}

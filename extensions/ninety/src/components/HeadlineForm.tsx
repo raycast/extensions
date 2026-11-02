@@ -20,13 +20,15 @@ interface Props {
   defaultCascaded?: boolean;
   draftValues?: Partial<HeadlineFormValues>;
   onSaved?: (headline: Headline) => void;
+  /** True when the form is a command's root view, where Raycast shows the command title. */
+  isRoot?: boolean;
 }
 
 function escapeHtml(text: string) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function HeadlineForm({ defaultTeamId, defaultCascaded, draftValues, onSaved }: Props) {
+export function HeadlineForm({ defaultTeamId, defaultCascaded, draftValues, onSaved, isRoot }: Props) {
   const { pop } = useNavigation();
   const { teams, isLoading } = useTeams();
   const [lastTeamId, setLastTeamId] = useLastTeam();
@@ -81,7 +83,7 @@ export function HeadlineForm({ defaultTeamId, defaultCascaded, draftValues, onSa
     <Form
       isLoading={isLoading}
       enableDrafts={!!draftValues || !onSaved}
-      navigationTitle="Create Headline"
+      navigationTitle={isRoot ? undefined : "Create Headline"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Headline" icon={Icon.Megaphone} onSubmit={handleSubmit} />

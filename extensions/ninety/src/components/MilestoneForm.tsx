@@ -36,7 +36,7 @@ export function MilestoneForm({ rock, milestone, onSaved }: Props) {
       try {
         const payload = {
           title: values.title.trim(),
-          description: values.description.trim() || undefined,
+          description: milestone ? values.description.trim() : values.description.trim() || undefined,
           dueDate: toNinetyDate(values.dueDate ?? new Date()),
         };
         if (milestone) {

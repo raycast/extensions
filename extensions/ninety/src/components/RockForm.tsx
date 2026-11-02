@@ -30,13 +30,15 @@ interface Props {
   defaultTeamId?: string;
   draftValues?: Partial<RockFormValues>;
   onSaved?: (rock: Rock) => void;
+  /** True when the form is a command's root view, where Raycast shows the command title. */
+  isRoot?: boolean;
 }
 
 function quarterOf(date: Date): RockQuarter {
   return `Q${Math.floor(date.getMonth() / 3) + 1}` as RockQuarter;
 }
 
-export function RockForm({ rock, defaultTeamId, draftValues, onSaved }: Props) {
+export function RockForm({ rock, defaultTeamId, draftValues, onSaved, isRoot }: Props) {
   const { pop } = useNavigation();
   const { teams, isLoading } = useTeams();
   const [lastTeamId, setLastTeamId] = useLastTeam();
@@ -62,7 +64,7 @@ export function RockForm({ rock, defaultTeamId, draftValues, onSaved }: Props) {
         const dueDate = values.dueDate ?? endOfCurrentQuarter();
         const common = {
           title: values.title.trim(),
-          description: values.description.trim() || undefined,
+          description: isEdit ? values.description.trim() : values.description.trim() || undefined,
           dueDate: toNinetyDate(dueDate),
           statusCode: values.statusCode as RockStatus,
           levelCode: values.levelCode as RockLevel,
@@ -97,7 +99,7 @@ export function RockForm({ rock, defaultTeamId, draftValues, onSaved }: Props) {
     <Form
       isLoading={isLoading}
       enableDrafts={!!draftValues || (!rock && !onSaved)}
-      navigationTitle={isEdit ? "Edit Rock" : "Create Rock"}
+      navigationTitle={isRoot ? undefined : isEdit ? "Edit Rock" : "Create Rock"}
       actions={
         <ActionPanel>
           <Action.SubmitForm

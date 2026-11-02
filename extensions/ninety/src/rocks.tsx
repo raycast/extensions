@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { queryRocks, updateRock } from "./api/ninety";
 import { Rock, RockStatus } from "./api/types";
+import { ErrorView } from "./components/ErrorView";
 import { IssueForm } from "./components/IssueForm";
 import { MilestoneForm } from "./components/MilestoneForm";
 import { MilestoneList } from "./components/MilestoneList";
@@ -35,14 +36,14 @@ function rockMarkdown(rock: Rock) {
 }
 
 export default function Command() {
-  const { teams, teamName } = useTeams();
+  const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [scope, setScope] = useState("");
   const [showDetail, setShowDetail] = useState(false);
   const isMine = scope === MY_ITEMS;
-  const { userId, isLoading: isLoadingMe } = useMe();
+  const { userId, isLoading: isLoadingMe, error: meError, revalidate: retryMe } = useMe();
 
-  const { data, isLoading, mutate, revalidate } = useCachedPromise(
+  const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
     (scope: string, userId?: string) =>
       queryRocks(scope === MY_ITEMS ? { userId, futureScope: "Current" } : { teamId: scope, futureScope: "Current" }),
     [scope, userId],
@@ -55,6 +56,8 @@ export default function Command() {
     },
   );
   const rocks = data ?? [];
+  const loadError = teamsError ?? (isMine ? meError : undefined) ?? error;
+  const retry = () => (teamsError ? retryTeams() : isMine && meError ? retryMe() : revalidate());
 
   async function setStatus(rock: Rock, statusCode: RockStatus) {
     try {
@@ -78,17 +81,27 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading || !scope || (isMine && isLoadingMe)}
+      isLoading={!loadError && (isLoading || !scope || (isMine && isLoadingMe))}
       isShowingDetail={showDetail && rocks.length > 0}
       searchBarPlaceholder="Filter Rocks"
       searchBarAccessory={<TeamDropdown id="rocks-scope" teams={teams} onChange={setScope} mineTitle="My Rocks" />}
     >
-      <List.EmptyView
-        icon={Icon.Mountain}
-        title="No Rocks this quarter"
-        description="Press ⌘N to create one."
-        actions={<ActionPanel>{createAction}</ActionPanel>}
-      />
+      {loadError ? (
+        <ErrorView
+          title={
+            teamsError ? "Couldn't load Teams" : meError && isMine ? "Couldn't identify you" : "Couldn't load Rocks"
+          }
+          error={loadError}
+          onRetry={retry}
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Mountain}
+          title="No Rocks this quarter"
+          description="Press ⌘N to create one."
+          actions={<ActionPanel>{createAction}</ActionPanel>}
+        />
+      )}
       {SECTION_ORDER.map((status) => {
         const items = rocks.filter((rock) => rock.statusCode === status);
         if (!items.length) return null;
@@ -151,7 +164,10 @@ export default function Command() {
                         <ActionPanel.Submenu
                           title="Set Status"
                           icon={Icon.Circle}
-                          shortcut={Keyboard.Shortcut.Common.Duplicate}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                            Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+                          }}
                         >
                           {ROCK_STATUSES.filter((s) => s.value !== "DRAFT").map((s) => (
                             <Action
