@@ -71,6 +71,10 @@ Generate Password has its own preferences for the settings it starts with. They 
 - **Passphrase: Separator**: Hyphens, spaces, periods, commas, underscores, numbers, or numbers and symbols (default: hyphens)
 - **Passphrase: Options**: Capitalize words and include numbers, both on by default
 
+### Get TOTP Code
+
+- **Codes**: Hide codes behind dots, until Show Codes (⌘H) shows them while the command stays open. Copying still works (off by default)
+
 ## Filling Logins (macOS)
 
 **Fill Login** closes Raycast and fills the login of the app you were using: it pastes the email (or the username when the item has no email), presses Tab and pastes the password. Put the cursor in the first field of the login form before opening Raycast. If the item has a TOTP code, the code is then left in the clipboard, ready to paste on the next screen.

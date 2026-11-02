@@ -427,6 +427,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
     "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
     "./lib/item-icon": { getListIcon: () => "" },
+    "./lib/shortcuts": shortcuts,
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
       totpProgressIcon: () => "",
@@ -1103,6 +1104,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
       "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
       "./lib/item-icon": { getListIcon: () => "" },
+      "./lib/shortcuts": shortcuts,
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1155,6 +1157,7 @@ function totpCommandFixture(
   globals: Record<string, unknown> = {},
   localTotpCode: (shareId: string, itemId: string) => string | undefined = () => undefined,
   cachedItems: Item[] | null = null,
+  preferences: Record<string, unknown> = {},
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
@@ -1174,7 +1177,7 @@ function totpCommandFixture(
         Color: {},
         Keyboard: { Shortcut: { Common: { Refresh: {} } } },
         Toast: { Style: {} },
-        getPreferenceValues: () => ({}),
+        getPreferenceValues: () => preferences,
         Clipboard: {
           copy: async (value: string) => {
             copied.push(value);
@@ -1189,6 +1192,7 @@ function totpCommandFixture(
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
       "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
       "./lib/item-icon": { getListIcon: () => "" },
+      "./lib/shortcuts": shortcuts,
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1322,6 +1326,33 @@ test("Get TOTP Code generates codes from the listing instead of asking pass-cli 
   const row = actions(fixture.render()).find((entry) => entry.title === item.title);
   assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "654321");
   assert.equal(asked, 0);
+});
+
+test("Hide Codes shows dots instead of the codes until Show Codes, and copying still gives the code", async () => {
+  for (const hideCodes of [false, true]) {
+    const fixture = totpCommandFixture(
+      async () => ({ items: [{ ...item, hasTotp: true }], failedVaults: [] }),
+      undefined,
+      undefined,
+      {},
+      () => "654321",
+      null,
+      { hideCodes },
+    );
+    await new Promise(setImmediate);
+    const row = () => actions(fixture.render()).find((entry) => entry.title === item.title)!;
+    const tag = () => (row().accessories as { tag: { value: string } }[])[0].tag.value;
+    const action = (title: string) => actions(row().actions).find((entry) => entry.title === title);
+    assert.equal(tag(), hideCodes ? "••••••" : "654321");
+    assert.equal(Boolean(action("Show Codes")), hideCodes);
+    await (action("Copy TOTP Code")!.onAction as () => Promise<void>)();
+    assert.deepEqual(fixture.copied, ["654321"]);
+    if (!hideCodes) continue;
+    (action("Show Codes")!.onAction as () => void)();
+    assert.equal(tag(), "654321");
+    (action("Hide Codes")!.onAction as () => void)();
+    assert.equal(tag(), "••••••");
+  }
 });
 
 test("a new TOTP period during the listing waits for it instead of asking pass-cli for each cached item", async () => {

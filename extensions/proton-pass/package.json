@@ -202,7 +202,18 @@
       "title": "Get TOTP Code",
       "subtitle": "Proton Pass",
       "description": "Get TOTP codes for your accounts",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "hideCodes",
+          "type": "checkbox",
+          "title": "Codes",
+          "label": "Hide codes",
+          "description": "Show dots instead of the codes until Show Codes (⌘H). Copying still works.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "login",

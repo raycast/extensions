@@ -16,6 +16,7 @@ import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getTotpRemainingSeconds, formatTotpCode, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./lib/utils";
 import { itemKey, monospace } from "./lib/format";
 import { getListIcon } from "./lib/item-icon";
+import { platformShortcut } from "./lib/shortcuts";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -63,6 +64,9 @@ export default function Command() {
   const loads = useMemo(createRequestTracker, []);
   const cacheWrites = useMemo(createSerialQueue, []);
   const showWebsiteIcons = preferences.showWebsiteIcons ?? false;
+  // With Hide Codes, dots stand for the codes until Show Codes, for as long as the command stays open.
+  const hideCodes = preferences.hideCodes ?? false;
+  const [areCodesShown, setAreCodesShown] = useState(false);
   // As in Browse Items. Made once per list rather than on every second of the countdown.
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -261,7 +265,10 @@ export default function Command() {
               {
                 // Said as in Browse Items' details.
                 tag: code
-                  ? { value: monospace(formatTotpCode(code)), color: getTimerColor() }
+                  ? {
+                      value: monospace(formatTotpCode(hideCodes && !areCodesShown ? "•".repeat(code.length) : code)),
+                      color: getTimerColor(),
+                    }
                   : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
               },
               // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
@@ -274,6 +281,14 @@ export default function Command() {
             actions={
               <ActionPanel>
                 {code && <Action title="Copy TOTP Code" icon={Icon.Clipboard} onAction={() => copyTotp(item)} />}
+                {hideCodes && (
+                  <Action
+                    title={areCodesShown ? "Hide Codes" : "Show Codes"}
+                    icon={areCodesShown ? Icon.EyeDisabled : Icon.Eye}
+                    shortcut={platformShortcut(["cmd"], "h")}
+                    onAction={() => setAreCodesShown((shown) => !shown)}
+                  />
+                )}
                 <Action
                   title="Refresh Codes"
                   icon={Icon.ArrowClockwise}
