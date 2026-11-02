@@ -5,7 +5,7 @@ import { stripVTControlCharacters } from "node:util";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
-import { hcProgramFingerprint, hcTargetKey, type HcTarget, type HcTerminal } from "./herdr.js";
+import { HcError, hcProgramFingerprint, hcTargetKey, type HcTarget, type HcTerminal } from "./herdr.js";
 import { literal } from "./interaction-format.js";
 import type { HcLocalState as LocalState, HcScreen } from "./herdr-session.js";
 
@@ -38,6 +38,7 @@ function logic(names: string[], globals: Record<string, unknown> = {}) {
       exports: {},
       createHash,
       randomUUID,
+      HcError,
       hcProgramFingerprint,
       hcTargetKey,
       stripVTControlCharacters,
@@ -49,7 +50,7 @@ function logic(names: string[], globals: Record<string, unknown> = {}) {
 const helpers = logic([
   "sanitizeTerminalText",
   "hcScreenFingerprint",
-  "hcReportedIdle",
+  "hcReportedReady",
   "hcStatus",
   "hcKeyToken",
   "hcScreenMarkdown",
@@ -128,9 +129,9 @@ test("screen reviews bind full raw capture, status, process and lifecycle, not c
     screen({ stable: false }),
   ])
     assert.notEqual(helpers.hcScreenFingerprint(changed), fingerprint);
-  assert.equal(helpers.hcReportedIdle(terminal({ status: { state: "idle" } })), true);
+  assert.equal(helpers.hcReportedReady(terminal({ status: { state: "idle" } })), true);
   for (const reported of [undefined, false]) {
-    assert.equal(helpers.hcReportedIdle(terminal({ status: { state: "idle" }, reported })), false);
+    assert.equal(helpers.hcReportedReady(terminal({ status: { state: "idle" }, reported })), false);
     assert.match(helpers.hcStatus(terminal({ status: { state: "idle" }, reported })), /Unknown/);
   }
 });
@@ -549,7 +550,7 @@ test("real HC view ordinary sends are idle-conditioned; prompt response requires
   view = h.render();
   view.props.onSearchTextChange("task");
   await settle();
-  await h.action("Send Task");
+  await h.action("Send Message");
   assert.deepEqual(JSON.parse(JSON.stringify(h.requests[0]!.params)), {
     terminal: "remote/t1",
     text: "task",
@@ -585,7 +586,7 @@ test("real HC view blocked task routes into Raycast controls without sending; st
   h.render();
   h.flush();
   await settle();
-  await h.action("Compose Task");
+  await h.action("Compose Message");
   const child = h.child()!;
   child.props.change("future task");
   assert.equal(
@@ -605,7 +606,7 @@ test("real HC view checks child lifetime after preflight and does not send aband
   h.render();
   h.flush();
   await settle();
-  await h.action("Compose Task");
+  await h.action("Compose Message");
   const child = h.child()!;
   child.props.change("don't send");
   const pending = deferred<HcScreen>();
@@ -792,7 +793,7 @@ test("real HC view distinguishes an in-flight journal from delivery uncertainty"
   await settle();
   const pending = deferred<any>();
   h.feed.client.current.request = async () => pending.promise;
-  const sending = h.action("Send Task");
+  const sending = h.action("Send Message");
   await settle();
   let journal = views(h.render()).find((v) => v.props.id === "uncertain")!;
   assert.equal(h.feed.visible, false, "automatic screen reads pause during terminal mutation");
@@ -907,4 +908,103 @@ test("All Sessions navigation pauses HC output polling until the pushed list is 
   resume();
   h.render();
   assert.equal(h.feed.visible, true);
+});
+
+test("ordinary messages continue across idle, working and done turns with supported fresh status conditions", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "idle" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  for (const state of ["idle", "done", "done"] as const) {
+    const next = screen({ terminal: terminal({ status: { state }, turn: h.requests.length }) });
+    h.feed.latest.current = next;
+    h.feed.screen = next;
+    h.render().props.onSearchTextChange(`message ${h.requests.length + 1}`);
+    await settle();
+    await h.action("Send Message");
+    assert.equal(h.requests.at(-1)!.params.if, state === "idle" ? "idle" : undefined);
+    assert.equal(h.requests.at(-1)!.params.force, false);
+    assert.equal(h.render().props.searchText, "", "successful message clears only its submitted draft");
+    assert.equal(
+      [...h.store.data.keys()].some((key) => key.startsWith("hc-attempt-v1:")),
+      false,
+    );
+    const working = screen({ terminal: terminal({ status: { state: "working" } }) });
+    h.feed.latest.current = working;
+    h.feed.screen = working;
+    h.render().props.onSearchTextChange("next draft while working");
+    await settle();
+    assert.ok(
+      !views(h.render()).some((v) => v.props.title === "Send Message"),
+      "working never exposes ordinary terminal send",
+    );
+  }
+  assert.equal(h.requests.length, 3, "every explicit message sent once without a forced dialog path");
+});
+
+test("send checks fresh readiness instead of a stale cached state and does not send an unsupported done condition", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "working" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  await h.action("Compose Message");
+  const child = h.child()!;
+  assert.equal(child.props.title, "Compose Message");
+  const done = screen({ terminal: terminal({ status: { state: "done" } }) });
+  h.feed.refresh = async () => (h.feed.latest.current = done);
+  child.props.change("follow-up");
+  assert.equal(await child.props.send("follow-up", () => true), true);
+  assert.equal(h.requests.length, 1);
+  assert.equal(Object.hasOwn(h.requests[0]!.params, "if"), false);
+  assert.equal(h.requests[0]!.params.force, false);
+});
+
+test("working composer keeps the draft without mistaking work for a blocked dialog", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "working" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  await h.action("Compose Message");
+  const child = h.child()!;
+  child.props.change("keep for later");
+  assert.equal(await child.props.send("keep for later", () => true), false);
+  assert.equal(h.requests.length, 0);
+  assert.equal(h.render().props.selectedItemId, "screen");
+  assert.equal(h.render().props.searchText, "keep for later");
+});
+
+test("known no-write status rejection preserves draft without leaving a false uncertain-input lock", async () => {
+  const store = storage(),
+    state = local("status-rejected", store);
+  await state.load();
+  state.change("task", "keep me");
+  await assert.rejects(
+    state.run(
+      "task",
+      "keep me",
+      async () => true,
+      async () => {
+        throw new HcError("changed", "The terminal changed. Nothing was written.");
+      },
+      () => true,
+    ),
+    /terminal changed/,
+  );
+  assert.equal(state.attempt, undefined);
+  assert.equal(store.data.has(state.attemptKey), false);
+  assert.equal(state.drafts.task, "keep me");
+  let writes = 0;
+  assert.equal(
+    (
+      await state.run(
+        "task",
+        "keep me",
+        async () => true,
+        async () => ++writes,
+        () => true,
+      )
+    ).sent,
+    true,
+  );
+  assert.equal(writes, 1, "only the later explicit action writes input");
 });

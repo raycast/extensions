@@ -17,7 +17,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { createHash, randomUUID } from "node:crypto";
 import { stripVTControlCharacters } from "node:util";
-import { HcClient, hcProgramFingerprint, hcTargetKey } from "./herdr.js";
+import { HcClient, HcError, hcProgramFingerprint, hcTargetKey } from "./herdr.js";
 import type { HcTarget, HcTerminal } from "./herdr.js";
 import { Compose } from "./compose.js";
 import { literal } from "./interaction-format.js";
@@ -68,13 +68,17 @@ export function hcScreenFingerprint(screen: HcScreen): string {
     )
     .digest("hex");
 }
-export function hcReportedIdle(terminal: HcTerminal): boolean {
-  return terminal.reported === true && terminal.status?.state === "idle";
+export function hcReportedReady(terminal: HcTerminal): boolean {
+  return terminal.reported === true && ["idle", "done"].includes(terminal.status?.state || "");
 }
 export function hcStatus(terminal?: HcTerminal): string {
   if (!terminal) return "Connecting";
   if (["lost", "finished", "removed", "restarted"].includes(terminal.state)) return terminal.state;
-  return terminal.reported === true && terminal.status ? terminal.status.state : "Unknown · No Status Report";
+  return terminal.reported === true && terminal.status
+    ? terminal.status.state === "done"
+      ? "Ready"
+      : terminal.status.state
+    : "Unknown · No Status Report";
 }
 export function hcKeyToken(value: string): string {
   if (!value || value !== value.trim() || /\s/.test(value))
@@ -230,7 +234,18 @@ export class HcLocalState {
         this.attempt = undefined;
         return { sent: false };
       }
-      const value = await request();
+      let value: T;
+      try {
+        value = await request();
+      } catch (cause) {
+        // HC rejects blocked/status-mismatch before writing. Keep drafts, not a false delivery lock.
+        if (cause instanceof HcError && ["blocked", "changed"].includes(cause.kind)) {
+          await this.storage.removeItem(this.attemptKey);
+          this.attempt = undefined;
+          marked = false;
+        }
+        throw cause;
+      }
       if (kind === "task" || kind === "answer" || kind === "terminal") {
         cleared = this.drafts[kind] === text;
         await this.clearIf(kind, text!);
@@ -648,7 +663,9 @@ function HcSessionView({
             ? "Key sent. This does not confirm approval or completion."
             : kind === "interrupt"
               ? "Interrupt submitted. See the actual outcome below."
-              : "Input submitted. Agent receipt and completion are not confirmed.",
+              : kind === "task"
+                ? "Message submitted. Waiting for the Agent; you can continue when it is ready."
+                : "Input submitted. Agent receipt and completion are not confirmed.",
         );
         setSelected(mode === "output" ? "screen" : "review-screen");
         setReviewed(undefined);
@@ -673,34 +690,43 @@ function HcSessionView({
       await toastError(new Error("This terminal changed while composing. Your draft is kept; start a new review."));
       return false;
     }
-    const current = feed.latest.current?.terminal;
-    if (!current || !hcReportedIdle(current)) {
-      await openControls();
-      setNotice(
-        "Ordinary tasks require reported Idle. Use terminal controls or Respond to Current Prompt for the current dialog; your task draft is kept.",
-      );
-      return fromComposer && active();
-    }
     let routed = false;
+    let expectedState: string | undefined;
     const result = await operate(
       "task",
       text,
       async () => {
         if (!(await preflight())) return false;
-        if (!hcReportedIdle(feed.latest.current!.terminal)) {
-          routed = true;
-          setMode("controls");
-          setSelected("review-screen");
-          setTextReview(undefined);
-          setReviewed(feed.latest.current);
-          setNotice(
-            "The Agent is no longer reported Idle. Resolve the current prompt here in Raycast; your task draft is kept.",
-          );
+        const current = feed.latest.current!.terminal;
+        if (!hcReportedReady(current)) {
+          if (current.reported === true && current.status?.state === "blocked") {
+            routed = true;
+            setMode("controls");
+            setSelected("review-screen");
+            setTextReview(undefined);
+            setReviewed(feed.latest.current);
+            setNotice("The Agent needs input. Review the current prompt here; your message draft is kept.");
+          } else {
+            setNotice(
+              current.reported === true && current.status?.state === "working"
+                ? "The Agent is still working. Your draft is kept; send when it is ready. Herdr does not provide Argo's message queue."
+                : "This terminal is not reported ready. Your draft is kept; review terminal input before sending.",
+            );
+          }
           return false;
         }
+        // HC only accepts idle/working conditions. Done needs a fresh check and force:false, without an unsupported condition.
+        expectedState = current.status!.state === "idle" ? "idle" : undefined;
         return true;
       },
-      (client) => client.request("terminal.send", { terminal: address, text, force: false, if: "idle", wait: false }),
+      (client) =>
+        client.request("terminal.send", {
+          terminal: address,
+          text,
+          force: false,
+          ...(expectedState ? { if: expectedState } : {}),
+          wait: false,
+        }),
       active,
     );
     return result?.sent || (fromComposer && routed && active());
@@ -717,12 +743,12 @@ function HcSessionView({
             ? "Respond to Current Prompt"
             : kind === "terminal"
               ? "Compose Terminal Input"
-              : "Compose Task"
+              : "Compose Message"
         }
-        submitTitle={kind === "task" ? "Send Task" : "Review Input"}
+        submitTitle={kind === "task" ? "Send Message" : "Review Input"}
         description={
           kind === "task"
-            ? "Saved on this Mac only. Ordinary tasks send only to a reported Idle Agent, never force past a dialog, and never retry automatically."
+            ? "Your draft is saved on this Mac. Send when the Agent is ready, including after a completed answer. Working keeps your draft, not a queued send. Nothing forces past a dialog or retries automatically."
             : kind === "answer"
               ? "Reply to the currently displayed terminal dialog. Next you will review the full screen and answer before explicitly submitting with HC force:true. This is not a queued task."
               : "This program has no status reporter. Next review the full screen and text before submitting terminal input with force:false and no idle condition. It may be a shell command."
@@ -918,6 +944,9 @@ function HcSessionView({
   const terminal = feed.screen?.terminal;
   const blocked = terminal?.reported === true && terminal.status?.state === "blocked";
   const unavailable = storageError || feed.invalid || feed.error;
+  const canSend = Boolean(
+    local.ready && !busy && !unavailable && !local.attempt && terminal && hcReportedReady(terminal),
+  );
   const changed = reviewed && feed.screen && hcScreenFingerprint(reviewed) !== hcScreenFingerprint(feed.screen);
   const preview = mode === "output" ? feed.screen : reviewed || feed.screen;
   const markdown = hcScreenMarkdown(preview, mode === "output" ? "Terminal Output" : "Current Terminal Dialog");
@@ -976,10 +1005,10 @@ function HcSessionView({
             />
             <Action.CopyToClipboard title="Copy Terminal Target" content={address} />
             <Action
-              title="Compose Task"
+              title="Compose Message"
               icon={Icon.Pencil}
               shortcut={Keyboard.Shortcut.Common.New}
-              onAction={() => compose("task")}
+              onAction={() => compose(terminal && terminal.reported !== true ? "terminal" : "task")}
             />
             {mode !== "controls" ? (
               <Action title="Review Terminal Controls" icon={Icon.Terminal} onAction={openControls} />
@@ -1095,7 +1124,9 @@ function HcSessionView({
         mode === "output"
           ? blocked
             ? "Task draft kept · Enter reviews current prompt · ⌘N compose"
-            : "Local task draft · ⌘N multiline · ⌘R refresh"
+            : terminal?.status?.state === "working"
+              ? "Agent working · Draft kept · ⌘N multiline"
+              : "Draft a message · Enter to send · ⌘N for multiline…"
           : "Select one explicit action · No automatic Enter or key sequences"
       }
       actions={<ActionPanel>{sharedActions()}</ActionPanel>}
@@ -1142,7 +1173,11 @@ function HcSessionView({
               ? "Submitting · output remains readable"
               : blocked
                 ? "Needs input · resolve in Raycast"
-                : "Current screen · no terminal scrolling"
+                : terminal && hcReportedReady(terminal)
+                  ? "Ready for your next message"
+                  : terminal?.status?.state === "working"
+                    ? "Agent working · your next draft stays local"
+                    : "Current screen · no terminal scrolling"
           }
           icon={Icon.Terminal}
           detail={details}
@@ -1150,9 +1185,9 @@ function HcSessionView({
             <ActionPanel>
               {mode === "output" && blocked ? (
                 <Action title="Review Current Prompt" icon={Icon.Eye} onAction={openControls} />
-              ) : mode === "output" && local.drafts.task.trim() && Boolean(terminal && hcReportedIdle(terminal)) ? (
+              ) : mode === "output" && local.drafts.task.trim() && canSend ? (
                 <Action
-                  title="Send Task"
+                  title="Send Message"
                   icon={Icon.ArrowUp}
                   onAction={() => sendTask(local.drafts.task, feed.pin.current)}
                 />

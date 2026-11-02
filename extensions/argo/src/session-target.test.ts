@@ -35,6 +35,9 @@ test("HC grouping never calls an unreported or unknown program ready", () => {
   assert.equal(hcStatus(entry), "Unknown");
   entry.terminal.reported = true;
   assert.equal(hcStatus(entry), "Idle");
+  entry.terminal.status.state = "done";
+  assert.equal(hcStatus(entry), "Ready");
+  assert.equal(hcGroup(entry), "Online");
   entry.terminal.status.state = "blocked";
   assert.equal(hcGroup(entry), "Needs Attention");
   entry.terminal.status.state = "future-state";

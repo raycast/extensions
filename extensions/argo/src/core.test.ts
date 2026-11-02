@@ -1828,3 +1828,10 @@ test("HC recent opens only its pinned core and always closes validation client w
     assert.equal(closed, 1);
   }
 });
+
+test("Agent Sessions opens the catalogue even with a saved recent session while Recent keeps resume semantics", () => {
+  const { Sessions } = viewLogic(["Sessions"], { ...viewHarness().globals, SessionCommand: "SessionCommand" });
+  const result = Sessions({ launchContext: { recent: true } });
+  assert.equal(result.type, "SessionCommand");
+  assert.equal(result.props.recent, false);
+});

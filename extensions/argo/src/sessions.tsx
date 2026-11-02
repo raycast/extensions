@@ -1493,5 +1493,5 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
 }
 
 export default function Sessions(props: LaunchProps<{ launchContext: Context }>) {
-  return <SessionCommand {...props.launchContext} />;
+  return <SessionCommand {...props.launchContext} recent={false} />;
 }

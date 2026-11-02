@@ -47,6 +47,7 @@ export function hcStatus(entry: HcEntry): string {
   if (terminal.status.state === "blocked") return "Needs Input";
   if (terminal.status.state === "error") return "Needs Attention";
   if (terminal.status.state === "idle") return "Idle";
+  if (terminal.status.state === "done") return "Ready";
   if (terminal.status.state === "working") return "Working";
   return "Unknown";
 }

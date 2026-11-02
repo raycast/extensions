@@ -2,6 +2,11 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Fix repeated Herdr messages after completed answers, recognize done as Ready, and honor HC's actual conditional-send schema.
+- Align Herdr Send Message and Compose Message with existing Enter and Command-N workflows; keep working drafts without routing them into permission controls.
+- Open the complete source list from Agent Sessions while preserving Recent Agent Session resume behavior.
+- Keep confirmed pre-write status rejections retryable without a false uncertain-input lock; preserve unknown delivery safeguards.
+
 - Add direct Herdr core support alongside existing Argo bridges, with source filtering and exact recent targets.
 - View live terminal output, compose tasks, send explicit dialog keys, review text responses and interrupt inside Raycast.
 - Preserve independent drafts and uncertain input markers without automatic replay or approval-completion claims.
