@@ -106,8 +106,17 @@ export default function ManageWorkspaces({ onChange }: { onChange: () => Promise
 
   if (error && !workspaces) {
     return (
-      <List navigationTitle="Manage Workspaces">
-        <List.EmptyView icon={Icon.Warning} title="Could Not Load Workspaces" description={error.message} />
+      <List isLoading={isLoading} navigationTitle="Manage Workspaces">
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Load Workspaces"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
       </List>
     );
   }

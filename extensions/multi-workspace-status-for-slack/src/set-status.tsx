@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import ManageWorkspaces from "./components/manage-workspaces";
 import { DURATIONS, expirationFor } from "./lib/expiration";
@@ -108,8 +108,12 @@ export default function Command() {
         await saveLastForm({ teamIds: values.teamIds, emoji, text, duration: values.duration });
       }
     } catch (error) {
-      await toast.hide();
-      await showFailureToast(error, { title: "Status set, but your selection could not be saved" });
+      const succeeded = results.filter((result) => !result.error).length;
+      toast.style = Toast.Style.Failure;
+      toast.title = `Status set in ${succeeded} of ${results.length} workspaces, but your selection could not be saved`;
+      toast.message = [summarize(results), error instanceof Error ? error.message : String(error)]
+        .filter(Boolean)
+        .join("\n");
       return;
     }
     await report(results, toast, "Status set");
@@ -129,7 +133,16 @@ export default function Command() {
 
   if (!data) {
     return (
-      <Form isLoading={isLoading}>
+      <Form
+        isLoading={isLoading}
+        actions={
+          error && (
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          )
+        }
+      >
         {error && <Form.Description title="Could Not Load Workspaces" text={error.message} />}
       </Form>
     );
