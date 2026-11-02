@@ -15,6 +15,7 @@ import {
 import { countItemsByVault, formatItemCount, refreshItemCounts, totalItemCount } from "./item-counts";
 import { createListingSaves, createRequestTracker, listingSaves, withTimeout } from "./refresh";
 import { platformShortcut } from "./shortcuts";
+import { preferredSortOrder } from "./sort";
 import { mergeSharing, sharedVaultTooltip, withSharing } from "./vault-sharing";
 import { CliNotFoundView } from "./error-views";
 import { isSharedWithMe, SHARED_WITH_ME } from "./shared-items";
@@ -44,6 +45,8 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
   const backgroundRefreshEnabled = preferences.enableBackgroundRefresh ?? true;
   const hasLoadedFromCache = useRef(false);
   const hasOpenedItems = useRef(false);
+  // Sort By holds for every item list opened from this window, then the preference's order comes back.
+  const sortChoice = useRef(preferredSortOrder());
 
   // Loads can overlap, e.g. Check Again while a browser login reloads: only the latest one updates the view.
   const loads = useMemo(createRequestTracker, []);
@@ -57,7 +60,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
     if (hasOpenedItems.current) return;
     hasOpenedItems.current = true;
     // Vaults load once they're shown: while the items are on top, listing them would list everything a second time.
-    push(<SearchItemsView />, () => void loadVaults());
+    push(<SearchItemsView sortChoice={sortChoice} />, () => void loadVaults());
   }, []);
 
   async function loadVaults() {
@@ -247,7 +250,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={<SearchItemsView allVaults sessionConfirmed={sessionConfirmed} />}
+                    target={<SearchItemsView allVaults sessionConfirmed={sessionConfirmed} sortChoice={sortChoice} />}
                   />
                 </ActionPanel>
               }
@@ -267,7 +270,13 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={<SearchItemsView initialVault={vault} sessionConfirmed={sessionConfirmed} />}
+                    target={
+                      <SearchItemsView
+                        initialVault={vault}
+                        sessionConfirmed={sessionConfirmed}
+                        sortChoice={sortChoice}
+                      />
+                    }
                   />
                   <Action.CopyToClipboard
                     title="Copy Vault Name"
@@ -297,7 +306,7 @@ export function VaultsView({ startOnItems }: { startOnItems: boolean }) {
                   <Action.Push
                     title="View Items"
                     icon={Icon.List}
-                    target={<SearchItemsView initialVault={sharedWithMe} />}
+                    target={<SearchItemsView initialVault={sharedWithMe} sortChoice={sortChoice} />}
                   />
                 </ActionPanel>
               }

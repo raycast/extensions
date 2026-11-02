@@ -1,5 +1,5 @@
 import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
 import { Item, PassCliError, PassCliErrorType, Vault } from "./types";
@@ -9,6 +9,7 @@ import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
 import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
 import { ItemList } from "./item-list";
+import { SortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
 import { isSharedWithMe, listedUnder, SHARED_WITH_ME } from "./shared-items";
 
@@ -87,10 +88,17 @@ interface SearchItemsViewProps {
   allVaults?: boolean;
   /** Opened from the vault list once pass-cli confirmed the session there: saved items show without asking it again. */
   sessionConfirmed?: boolean;
+  /** The order chosen with Sort By in this window. */
+  sortChoice?: MutableRefObject<SortOrder>;
 }
 
 /** The item list of Browse Items, with every vault, or the one opened from the vault list. */
-export function SearchItemsView({ initialVault, allVaults = false, sessionConfirmed = false }: SearchItemsViewProps) {
+export function SearchItemsView({
+  initialVault,
+  allVaults = false,
+  sessionConfirmed = false,
+  sortChoice,
+}: SearchItemsViewProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [vaults, setVaults] = useState<Vault[]>([]);
   // A vault opened from the vault list brings its count, kept if its own listing fails.
@@ -282,6 +290,7 @@ export function SearchItemsView({ initialVault, allVaults = false, sessionConfir
 
   return (
     <ItemList
+      sortChoice={sortChoice}
       // Items wait for the active tab, so that the suggested login is selected from the start.
       items={isLoadingActiveTab ? [] : filteredItems}
       suggestedItems={suggestedItems}

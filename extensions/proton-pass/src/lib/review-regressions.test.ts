@@ -39,6 +39,7 @@ function loadView(
       if (name === "./shared-items") return sharedItems;
       if (name === "./format") return format;
       if (name === "./totp") return totp;
+      if (name === "./sort" || name === "./lib/sort") return sort;
       throw new Error(`Unexpected dependency: ${name}`);
     },
     URL,
@@ -53,6 +54,12 @@ function loadView(
   });
   return module.exports;
 }
+
+// The real sorting, with the Sort By preference at its default.
+const sort = loadView("sort.tsx", {
+  "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
+  "./shortcuts": shortcuts,
+});
 
 function actions(element: unknown): Element["props"][] {
   if (!element || typeof element !== "object" || !("props" in element)) return [];
@@ -260,7 +267,8 @@ function hookHarness() {
     },
     react: {
       useState: (initial: unknown) => {
-        const index = cell(initial);
+        // Like React, a function is called once for the initial value.
+        const index = cursor in slots ? cell(undefined) : cell(typeof initial === "function" ? initial() : initial);
         return [
           slots[index],
           // Like React, an updater function receives the current value.
@@ -428,6 +436,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
     "./lib/item-icon": { getListIcon: () => "" },
     "./lib/shortcuts": shortcuts,
+    "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
       totpProgressIcon: () => "",
@@ -984,8 +993,8 @@ function loadItemList() {
       totpTimerColor: () => "",
     },
   });
-  const render = (items: Item[], suggestedItems: Item[] = []) =>
-    harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {} });
+  const render = (items: Item[], suggestedItems: Item[] = [], props: Record<string, unknown> = {}) =>
+    harness.render(ItemList, { items, suggestedItems, isLoading: false, emptyView: {}, ...props });
   const select = (list: Element, id: string | null) =>
     (list.props.onSelectionChange as (id: string | null) => void)(id);
   return { render, select, state };
@@ -1105,6 +1114,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
       "./lib/item-icon": { getListIcon: () => "" },
       "./lib/shortcuts": shortcuts,
+      "@raycast/utils": { useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: () => undefined }) },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1163,6 +1173,7 @@ function totpCommandFixture(
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
   const writes: Item[][] = [];
   const copied: string[] = [];
+  const visited: Item[] = [];
   let clears = 0;
   let savedItems: Item[] = [];
   const { default: Command } = loadView(
@@ -1193,6 +1204,9 @@ function totpCommandFixture(
       "./lib/format": { itemKey: format.itemKey, monospace: (text: string) => text },
       "./lib/item-icon": { getListIcon: () => "" },
       "./lib/shortcuts": shortcuts,
+      "@raycast/utils": {
+        useFrecencySorting: (items: Item[]) => ({ data: items, visitItem: (entry: Item) => visited.push(entry) }),
+      },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1234,6 +1248,7 @@ function totpCommandFixture(
     toasts,
     writes,
     copied,
+    visited,
     get clears() {
       return clears;
     },
@@ -1326,6 +1341,79 @@ test("Get TOTP Code generates codes from the listing instead of asking pass-cli 
   const row = actions(fixture.render()).find((entry) => entry.title === item.title);
   assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "654321");
   assert.equal(asked, 0);
+});
+
+test("Sort by puts names in alphabetical order, and dates newest first with undated items last", () => {
+  const sortItems = sort.sortItems as unknown as (items: Item[], order: string, mostUsed: Item[]) => Item[];
+  const titles = (items: Item[]) => items.map((entry) => entry.title).join();
+  const items = [
+    { ...item, title: "item 10", modifiedAt: "2026-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+    { ...item, title: "Été", modifiedAt: "2025-06-01T00:00:00.000Z", createdAt: "2026-02-01T00:00:00.000Z" },
+    { ...item, title: "item 9" },
+  ];
+  assert.equal(titles(sortItems(items, "name", [])), "Été,item 9,item 10");
+  assert.equal(titles(sortItems(items, "modified", [])), "item 10,Été,item 9");
+  assert.equal(titles(sortItems(items, "created", [])), "Été,item 10,item 9");
+  assert.equal(sortItems(items, "mostUsed", items.slice(1)).length, 2);
+});
+
+test("Sort by changes Browse Items' order, and holds for the item lists opened next from the same window", () => {
+  const sortChoice = { current: "mostUsed" };
+  const items = [
+    { ...item, itemId: "b", title: "Beta", modifiedAt: "2026-01-01T00:00:00.000Z" },
+    { ...item, itemId: "a", title: "Alpha", modifiedAt: "2025-01-01T00:00:00.000Z" },
+  ];
+  const titles = (list: Element) => (list.props.children as Element[]).map((row) => row.props.title).join();
+  const first = loadItemList();
+  const list = first.render(items, [], { sortChoice });
+  assert.equal(titles(list), "Beta,Alpha");
+  const menu = (list.props.children as Element[])[0].props.actions as Element;
+  assert.equal(menu.props.sortOrder, "mostUsed");
+  (menu.props.onSortOrderChange as (order: string) => void)("name");
+  assert.equal(titles(first.render(items, [], { sortChoice })), "Alpha,Beta");
+  assert.equal(sortChoice.current, "name");
+  // A vault opened next from the vault list starts in the order chosen.
+  assert.equal(titles(loadItemList().render(items, [], { sortChoice })), "Alpha,Beta");
+});
+
+test("Get TOTP Code sorts like Browse Items, and a copied code counts as a use", async () => {
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: [
+        { ...item, itemId: "b", title: "Beta", hasTotp: true },
+        { ...item, itemId: "a", title: "Alpha", hasTotp: true },
+      ],
+      failedVaults: [],
+    }),
+    undefined,
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const rows = () => actions(fixture.render()).filter((entry) => entry.accessories);
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Beta,Alpha",
+  );
+  const sortMenu = actions(rows()[0].actions).find((entry) => "onChange" in entry && "value" in entry)!;
+  assert.equal(sortMenu.value, "mostUsed");
+  (sortMenu.onChange as (order: string) => void)("name");
+  assert.equal(
+    rows()
+      .map((row) => row.title)
+      .join(),
+    "Alpha,Beta",
+  );
+  await (
+    actions(rows()[0].actions).find((entry) => entry.title === "Copy TOTP Code")!.onAction as () => Promise<void>
+  )();
+  assert.deepEqual(
+    fixture.visited.map((entry) => entry.itemId),
+    ["a"],
+  );
 });
 
 test("Hide Codes shows dots instead of the codes until Show Codes, and copying still gives the code", async () => {

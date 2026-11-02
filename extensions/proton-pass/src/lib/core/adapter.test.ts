@@ -159,6 +159,7 @@ test("lists active items and strips full-list secrets", async () => {
     hasTotp: true,
     hasPassword: true,
     modifiedAt: "2025-06-01T12:34:56.000Z",
+    createdAt: "2025-01-15T08:00:00.000Z",
     hasNote: false,
   });
 });

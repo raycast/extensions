@@ -143,6 +143,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
   const hasPassword = loginData ? trimOrUndefined(loginData.password) !== undefined : undefined;
   const modifiedAt = normalizeTimestamp(raw.modify_time ?? raw.modifyTime ?? raw.modified_at);
+  const createdAt = normalizeTimestamp(raw.create_time ?? raw.createTime ?? raw.created_at);
   const hasNote = trimOrUndefined(outerContent.note ?? raw.note) !== undefined;
 
   const vaultName = vaultNameOverride ?? trimOrUndefined(raw.vaultName ?? raw.vault_name) ?? "Unknown Vault";
@@ -163,6 +164,7 @@ export function normalizeItem(raw: unknown, vaultNameOverride?: string, vaultSha
     hasTotp,
     hasPassword,
     modifiedAt,
+    createdAt,
     hasNote,
   };
 }

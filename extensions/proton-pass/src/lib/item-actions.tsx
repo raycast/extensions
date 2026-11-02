@@ -7,6 +7,7 @@ import { ItemDetailStore } from "./item-detail-store";
 import { ItemView } from "./item-view";
 import { NoteView } from "./note-view";
 import { platformShortcut } from "./shortcuts";
+import { SortByMenu, SortOrder } from "./sort";
 import { Item, ItemDetail } from "./types";
 import { getCurrentTotpCode } from "./use-totp-code";
 
@@ -19,6 +20,9 @@ interface ItemActionsProps {
   onToggleDetail?: () => void;
   onRefresh?: () => void;
   onUse: (item: Item) => void;
+  /** Given in the list only, like isShowingDetail. */
+  sortOrder?: SortOrder;
+  onSortOrderChange?: (order: SortOrder) => void;
 }
 
 export const ItemActions = memo(function ItemActions({
@@ -29,6 +33,8 @@ export const ItemActions = memo(function ItemActions({
   onToggleDetail,
   onRefresh,
   onUse,
+  sortOrder,
+  onSortOrderChange,
 }: ItemActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
   // Keeps secrets out of Raycast's clipboard history.
@@ -303,6 +309,7 @@ export const ItemActions = memo(function ItemActions({
             onAction={onToggleDetail}
           />
         )}
+        {sortOrder && onSortOrderChange && <SortByMenu value={sortOrder} onChange={onSortOrderChange} />}
         {onRefresh && (
           <Action
             title="Refresh Items"

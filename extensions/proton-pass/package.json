@@ -307,6 +307,32 @@
       ]
     },
     {
+      "name": "sortBy",
+      "type": "dropdown",
+      "title": "Sort by",
+      "description": "Order of the items in Browse Items and Get TOTP Code. Sort by (⌘⇧S) changes it until the window closes.",
+      "default": "mostUsed",
+      "required": false,
+      "data": [
+        {
+          "title": "Most Used",
+          "value": "mostUsed"
+        },
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Last Modified",
+          "value": "modified"
+        },
+        {
+          "title": "Date Created",
+          "value": "created"
+        }
+      ]
+    },
+    {
       "name": "enableBackgroundRefresh",
       "type": "checkbox",
       "title": "Item List",

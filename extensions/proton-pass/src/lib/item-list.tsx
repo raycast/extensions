@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, Image, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { hostnameOf, itemKey } from "./format";
 import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { getListIcon } from "./item-icon";
+import { SortOrder, compareNames, preferredSortOrder, sortItems } from "./sort";
 import { Item } from "./types";
 import { getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
 
@@ -42,6 +43,8 @@ export interface ItemListProps {
   searchBarAccessory?: List.Props["searchBarAccessory"];
   emptyView: { icon: Image.ImageLike; title: string; description: string; onRetry?: () => void };
   onRefresh?: () => void;
+  /** The order chosen with Sort By, kept for the other lists opened from the same window. */
+  sortChoice?: MutableRefObject<SortOrder>;
 }
 
 export function ItemList({
@@ -52,12 +55,27 @@ export function ItemList({
   searchBarAccessory,
   emptyView,
   onRefresh,
+  sortChoice,
 }: ItemListProps) {
   const showWebsiteIcons = getPreferenceValues<Preferences>().showWebsiteIcons ?? false;
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-item-details", true);
   // A new store whenever the list is refreshed, so loaded details are never older than the items.
   const store = useMemo(() => new ItemDetailStore(), [items]);
-  const { data: sortedItems, visitItem } = useFrecencySorting(items, { key: itemKey, namespace: "items" });
+  const [sortOrder, setSortOrder] = useState(() => sortChoice?.current ?? preferredSortOrder());
+  // Items never used from Raycast come after the others, by name.
+  const { data: mostUsed, visitItem } = useFrecencySorting(items, {
+    key: itemKey,
+    namespace: "items",
+    sortUnvisited: compareNames,
+  });
+  const sortedItems = useMemo(() => sortItems(items, sortOrder, mostUsed), [items, sortOrder, mostUsed]);
+  const onSortOrderChange = useCallback(
+    (order: SortOrder) => {
+      if (sortChoice) sortChoice.current = order;
+      setSortOrder(order);
+    },
+    [sortChoice],
+  );
   const [selectedKey, setSelectedKey] = useState<string | null>();
   const totpSeconds = useTotpSeconds(items.some((item) => item.hasTotp));
 
@@ -136,6 +154,8 @@ export function ItemList({
             onToggleDetail={toggleDetail}
             onRefresh={onRefresh}
             onUse={onUse}
+            sortOrder={sortOrder}
+            onSortOrderChange={onSortOrderChange}
           />
         }
       />

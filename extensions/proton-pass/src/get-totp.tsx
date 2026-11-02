@@ -11,12 +11,14 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useFrecencySorting } from "@raycast/utils";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getTotpRemainingSeconds, formatTotpCode, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./lib/utils";
 import { itemKey, monospace } from "./lib/format";
 import { getListIcon } from "./lib/item-icon";
 import { platformShortcut } from "./lib/shortcuts";
+import { SortByMenu, compareNames, preferredSortOrder, sortItems } from "./lib/sort";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -67,6 +69,14 @@ export default function Command() {
   // With Hide Codes, dots stand for the codes until Show Codes, for as long as the command stays open.
   const hideCodes = preferences.hideCodes ?? false;
   const [areCodesShown, setAreCodesShown] = useState(false);
+  // As in Browse Items, whose use counts here too: copying a code there brings it up here, and the other way round.
+  const [sortOrder, setSortOrder] = useState(preferredSortOrder);
+  const { data: mostUsed, visitItem } = useFrecencySorting(items, {
+    key: itemKey,
+    namespace: "items",
+    sortUnvisited: compareNames,
+  });
+  const sortedItems = useMemo(() => sortItems(items, sortOrder, mostUsed), [items, sortOrder, mostUsed]);
   // As in Browse Items. Made once per list rather than on every second of the countdown.
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -246,6 +256,7 @@ export default function Command() {
       return;
     }
     await Clipboard.copy(totp, { concealed: preferences.copyPasswordTransient ?? true });
+    visitItem(item);
     showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
   }
 
@@ -253,7 +264,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading || isRefreshing} searchBarPlaceholder="Search TOTP items...">
-      {items.map((item) => {
+      {sortedItems.map((item) => {
         const code = currentCode(item);
         return (
           <List.Item
@@ -289,6 +300,7 @@ export default function Command() {
                     onAction={() => setAreCodesShown((shown) => !shown)}
                   />
                 )}
+                <SortByMenu value={sortOrder} onChange={setSortOrder} />
                 <Action
                   title="Refresh Codes"
                   icon={Icon.ArrowClockwise}

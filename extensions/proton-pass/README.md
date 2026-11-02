@@ -55,6 +55,7 @@ Browse Items opens on your items. Esc goes back to the vault list, where All Vau
 - **Fill Login**: Press Return after the password, to submit the login form (off by default)
 - **Transient Clipboard**: Keep copied secrets (passwords, TOTP codes, notes and hidden fields) out of clipboard history
 - **Cache Expiration**: How long cached items stay fresh (5 minutes to 30 days; default 5 minutes). Older items still show instantly while they refresh
+- **Sort by**: Order of the items in Browse Items and Get TOTP Code: most used from Raycast (default), name, last modified or date created. Sort by (⌘⇧S) in the actions changes it until the window closes
 - **Item List**:
   - Refresh items in the background, even when the cache is still fresh
   - Suggest logins for the active browser tab (requires the Raycast browser extension)
