@@ -5,7 +5,8 @@ import { BoltError, showBoltFailure } from "./bolt";
 
 /** Runs one bolt request and shows its text, with paste and copy actions. Leaving the view cancels it. */
 export function ResultView(props: {
-  navigationTitle: string;
+  /** Leave unset on a command's root view so it keeps the command title. */
+  navigationTitle?: string;
   /** `onProgress` receives Multi-step Workflow steps ("Step 2 of 3 · Polish") while it runs. */
   run: (signal: AbortSignal, onProgress: (text: string) => void) => Promise<string>;
   actions?: ReactNode;

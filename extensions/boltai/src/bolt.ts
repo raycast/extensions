@@ -1,4 +1,5 @@
-import { getPreferenceValues, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { spawn } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
@@ -45,20 +46,18 @@ export async function showBoltFailure(error: unknown) {
   if (error instanceof Error && error.name === "AbortError") return;
   const code = error instanceof BoltError ? error.code : undefined;
   if (code === 130) return;
-  await showToast({
-    style: Toast.Style.Failure,
+  // A missing tool is fixed in the preferences when a custom path is set, else by installing BoltAI.
+  const customPath = Boolean(getPreferenceValues<Preferences>().boltPath?.trim());
+  await showFailureToast(error, {
     title: error instanceof BoltError ? error.title : "BoltAI failed",
-    message: error instanceof Error ? error.message : String(error),
     primaryAction:
       code === boltMissing
-        ? { title: "Get BoltAI", onAction: () => open(boltAIDownloadURL) }
+        ? customPath
+          ? { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() }
+          : { title: "Get BoltAI", onAction: () => open(boltAIDownloadURL) }
         : code === 5 || code === 6
           ? { title: "Open BoltAI", onAction: () => openBoltAI() }
           : undefined,
-    secondaryAction:
-      code === boltMissing
-        ? { title: "Open Extension Preferences", onAction: () => openExtensionPreferences() }
-        : undefined,
   });
 }
 
@@ -94,11 +93,7 @@ export async function openBoltAI() {
     if (!app.endsWith(".app")) throw new Error(`bolt isn't inside BoltAI.app (${app}).`);
     await open(app);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't open BoltAI",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Couldn't open BoltAI" });
   }
 }
 

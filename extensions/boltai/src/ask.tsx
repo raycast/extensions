@@ -9,7 +9,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Ask }>
 
   return (
     <ResultView
-      navigationTitle={prompt}
       run={run}
       actions={
         <Action
