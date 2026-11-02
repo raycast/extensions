@@ -5,7 +5,124 @@
 import querystring from "querystring";
 import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
-import { tokenGenerator } from "./tokenGenerator";
+
+const TRANSLATE_URL = "https://translate.google.com/translate_a/single";
+const MAX_GET_URL_LENGTH = 2048;
+const CACHE_LIMIT = 64;
+
+// Recent responses, and requests already on the wire. Translating the same
+// text to several places (or re-rendering a view) should not hit the network again.
+const bodyCache = new Map<string, unknown>();
+const inflight = new Map<string, Promise<unknown>>();
+
+function cacheKey(text: string, from: string, to: string, proxy?: string) {
+    return `${from}\n${to}\n${proxy ?? ""}\n${text}`;
+}
+
+function readCache(key: string): unknown | undefined {
+    if (!bodyCache.has(key)) return undefined;
+    const hit = bodyCache.get(key);
+    bodyCache.delete(key);
+    bodyCache.set(key, hit);
+    return hit;
+}
+
+function writeCache(key: string, body: unknown) {
+    bodyCache.delete(key);
+    bodyCache.set(key, body);
+    if (bodyCache.size <= CACHE_LIMIT) return;
+    const oldest = bodyCache.keys().next().value;
+    if (oldest !== undefined) bodyCache.delete(oldest);
+}
+
+function failedRequest(status: number): Error {
+    if (status === 429) {
+        const error = new Error("please try again later");
+        error.name = "TooManyRequestsError";
+        return error;
+    }
+    const error = new Error(`Translation request failed (${status})`);
+    error.name = "TranslateError";
+    return error;
+}
+
+/**
+ * dict-chrome-ex accepts a translation without a `tk` token. The previous
+ * client fetched the whole translate.google.com document (several megabytes,
+ * and it no longer contains a token) before every request, then asked for
+ * dictionary, examples, and definitions that the extension never reads.
+ * `dt=t` is the translation and `dt=rm` is the pronunciation.
+ */
+async function requestTranslation(text: string, from: string, to: string, proxy?: string): Promise<unknown> {
+    const key = cacheKey(text, from, to, proxy);
+    const cached = readCache(key);
+    if (cached !== undefined) return cached;
+
+    const pending = inflight.get(key);
+    if (pending) return pending;
+
+    const request = fetchTranslation(text, from, to, proxy)
+        .then((body) => {
+            writeCache(key, body);
+            return body;
+        })
+        .finally(() => {
+            inflight.delete(key);
+        });
+
+    inflight.set(key, request);
+    return request;
+}
+
+async function fetchTranslation(text: string, from: string, to: string, proxy?: string): Promise<unknown> {
+    const data: Record<string, string | string[]> = {
+        client: "dict-chrome-ex",
+        sl: from,
+        tl: to,
+        dt: ["t", "rm"],
+        ie: "UTF-8",
+        oe: "UTF-8",
+        q: text,
+    };
+
+    let url = `${TRANSLATE_URL}?${querystring.stringify(data)}`;
+    let method: "GET" | "POST" = "GET";
+    let requestBody: string | undefined;
+    const headers: Record<string, string> = {};
+
+    if (url.length > MAX_GET_URL_LENGTH) {
+        delete data.q;
+        url = `${TRANSLATE_URL}?${querystring.stringify(data)}`;
+        method = "POST";
+        requestBody = new URLSearchParams({ q: text }).toString();
+        headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
+    }
+
+    let status: number;
+    let body: unknown;
+    if (proxy) {
+        const undici = (await import("undici")).default;
+        const { request, ProxyAgent } = undici as typeof undici & Pick<typeof import("undici"), "ProxyAgent">;
+        const response = await request(url, {
+            method,
+            body: requestBody,
+            headers,
+            dispatcher: new ProxyAgent(proxy),
+        });
+        status = response.statusCode;
+        body = status === 200 ? await response.body.json() : undefined;
+    } else {
+        const response = await fetch(url, { method, body: requestBody, headers });
+        status = response.status;
+        body = status === 200 ? await response.json() : undefined;
+    }
+
+    if (status !== 200 || !Array.isArray(body) || !Array.isArray(body[0])) {
+        throw failedRequest(status);
+    }
+
+    return body;
+}
 
 /**
  * @function translate
@@ -35,66 +152,10 @@ export async function translate(text: string, options?: TranslateOption): Promis
     options.raw = Boolean(options.raw);
 
     // Get ISO 639-1 codes for the languages.
-    options.from = getISOCode(options.from);
-    options.to = getISOCode(options.to);
+    options.from = getISOCode(options.from) || "auto";
+    options.to = getISOCode(options.to) || "en";
 
-    // Generate Google Translate token for the text to be translated.
-    let token: any = await tokenGenerator(text);
-
-    // URL & query string required by Google Translate.
-    let baseUrl = "https://translate.google.com/translate_a/single";
-    let data: any = {
-        client: "dict-chrome-ex",
-        sl: options.from,
-        tl: options.to,
-        hl: options.to,
-        dt: [ "at", "bd", "ex", "ld", "md", "qca", "rw", "rm", "ss", "t" ],
-        ie: "UTF-8",
-        oe: "UTF-8",
-        otf: 1,
-        ssel: 0,
-        tsel: 0,
-        kc: 7,
-        q: text,
-        [token.name]: token.value
-    };
-
-    // Append query string to the request URL.
-    let url = `${baseUrl}?${querystring.stringify(data)}`;
-
-    let requestUrl = url;
-    let method: "GET" | "POST" = "GET";
-    let requestBody: string | undefined;
-    const headers: Record<string, string> = {};
-    // If request URL is greater than 2048 characters, use POST method.
-    if (url.length > 2048) {
-        delete data.q;
-        requestUrl = `${baseUrl}?${querystring.stringify(data)}`;
-        method = "POST";
-        requestBody = new URLSearchParams({ q: text }).toString();
-        headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
-    }
-
-    // Use the platform's built-in fetch. undici is loaded lazily and only when a
-    // proxy is configured, so the common path never pulls it in.
-    let body: any;
-    if (options.proxy) {
-        // Global fetch stays the default; only the proxy path pulls in undici, and it
-        // uses undici's own request() (not an imported fetch) so a dispatcher can be set.
-        const undici = (await import("undici")).default;
-        // undici v5 omits ProxyAgent from its default-export type declarations.
-        const { request, ProxyAgent } = undici as typeof undici & Pick<typeof import("undici"), "ProxyAgent">;
-        const response = await request(requestUrl, {
-            method,
-            body: requestBody,
-            headers,
-            dispatcher: new ProxyAgent(options.proxy),
-        });
-        body = await response.body.json();
-    } else {
-        const response = await fetch(requestUrl, { method, body: requestBody, headers });
-        body = await response.json();
-    }
+    const body: any = await requestTranslation(text, options.from, options.to, options.proxy);
 
     let result: TranslateResponse = {
         text: "",
@@ -124,12 +185,14 @@ export async function translate(text: string, options?: TranslateOption): Promis
         }
     });
 
-    if (body[2] === body[8][0][0]) {
-        result.from.language.iso = body[2];
+    const detected = body[2];
+    const suggested = body[8]?.[0]?.[0];
+    if (suggested && detected !== suggested) {
+        result.from.language.didYouMean = true;
+        result.from.language.iso = suggested;
     }
     else {
-        result.from.language.didYouMean = true;
-        result.from.language.iso = body[8][0][0];
+        result.from.language.iso = detected || "";
     }
 
     if (body[7] && body[7][0]) {

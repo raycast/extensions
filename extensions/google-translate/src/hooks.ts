@@ -79,10 +79,48 @@ export const usePreferencesLanguageSet = () => {
   return preferencesLanguageSet;
 };
 
+/** Pause between keystrokes before starting a translation. Pastes and selections skip this. */
+export const TRANSLATE_DEBOUNCE_MS = 250;
+
+const isSingleCharacterEdit = (previous: string, next: string) => {
+  if (Math.abs(previous.length - next.length) !== 1) return false;
+
+  const [shorter, longer] = previous.length < next.length ? [previous, next] : [next, previous];
+  let i = 0;
+  let j = 0;
+  let skipped = 0;
+  while (i < shorter.length && j < longer.length) {
+    if (shorter[i] === longer[j]) {
+      i += 1;
+      j += 1;
+    } else {
+      skipped += 1;
+      if (skipped > 1) return false;
+      j += 1;
+    }
+  }
+
+  return true;
+};
+
 export const useDebouncedValue = <T>(value: T, delay: number) => {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+  const previousValue = React.useRef(value);
 
   React.useEffect(() => {
+    const previous = previousValue.current;
+    previousValue.current = value;
+
+    // Keep the pause for typing. A paste, a cleared field, or a new selection
+    // is not a one-character edit, so translate it immediately.
+    const isTyping =
+      typeof value === "string" && typeof previous === "string" && isSingleCharacterEdit(previous, value);
+
+    if (!isTyping) {
+      setDebouncedValue(value);
+      return;
+    }
+
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
