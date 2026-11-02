@@ -22,7 +22,7 @@ export default function Main({ connectionToEdit, connectionToDuplicate }: Create
     },
     initialValues: connectionToEdit ?? {
       ...connectionToDuplicate,
-      name: connectionToDuplicate ? `${connectionToDuplicate.name} (duplicate)` : undefined,
+      name: connectionToDuplicate ? `${connectionToDuplicate.name}-duplicate` : undefined,
     },
   });
 

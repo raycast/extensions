@@ -6,6 +6,7 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   showHUD,
   useNavigation,
@@ -592,7 +593,7 @@ function GetAction({
           title="Duplicate Connection"
           icon={Icon.Duplicate}
           onAction={() => onItemDuplicate(item)}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Duplicate}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">
