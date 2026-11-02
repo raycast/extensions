@@ -425,7 +425,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
     // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-    "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
+    "./lib/format": { monospace: (text: string) => text },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
       totpProgressIcon: () => "",
@@ -1100,7 +1100,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
+      "./lib/format": { monospace: (text: string) => text },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1185,7 +1185,7 @@ function totpCommandFixture(
       "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
       // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
-      "./lib/format": { monospace: (text: string) => text, TOTP_PLACEHOLDER: "---" },
+      "./lib/format": { monospace: (text: string) => text },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
         totpProgressIcon: () => "",
@@ -1315,6 +1315,8 @@ test("a new TOTP period during the listing waits for it instead of asking pass-c
     [{ ...item, hasTotp: true }],
   );
   await new Promise(setImmediate);
+  const loading = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((loading.accessories as { tag: { value: string } }[])[0].tag.value, "Loading…");
   now = 30_000;
   tick();
   finishListing();
@@ -1476,7 +1478,7 @@ test("expired TOTP codes are hidden and cannot be copied after a failed Retry", 
   now = 30_000;
   await fixture.toasts[0].primaryAction.onAction();
   const expiredRow = actions(fixture.render()).find((entry) => entry.title === item.title)!;
-  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal((expiredRow.accessories as { tag: { value: string } }[])[0].tag.value, "Unavailable");
   assert.equal(
     actions(expiredRow.actions).some((entry) => entry.title === "Copy TOTP Code"),
     false,
@@ -1611,7 +1613,7 @@ test("repeated slow TOTP responses stop with Retry instead of keeping refresh ru
   assert.equal(codes, 3);
   assert.equal(fixture.render().props.isLoading, false);
   const updated = actions(fixture.render()).find((entry) => entry.title === item.title)!;
-  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "---");
+  assert.equal((updated.accessories as { tag: { value: string } }[])[0].tag.value, "Unavailable");
   const retry = fixture.toasts.at(-1)?.primaryAction;
   assert.equal(typeof retry?.onAction, "function");
   await retry!.onAction();

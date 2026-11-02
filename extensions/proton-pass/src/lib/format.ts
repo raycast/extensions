@@ -21,12 +21,6 @@ export function monospace(text: string): string {
   return [...text].map((character) => MONOSPACE[character] ?? character).join("");
 }
 
-/**
- * Six dots for a TOTP code that hasn't arrived yet, as Proton Authenticator shows hidden codes. They are as wide as
- * the code in fixed-width digits to within half a point at the usual text sizes, so that nothing moves when it arrives.
- */
-export const TOTP_PLACEHOLDER = "⦁⦁⦁\u2009⦁⦁⦁";
-
 /** "https://www.example.com/login" or "example.com/login" -> "example.com". Values that aren't URLs are returned unchanged. */
 export function hostnameOf(url: string): string {
   try {

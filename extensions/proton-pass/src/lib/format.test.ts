@@ -7,7 +7,6 @@ import {
   monospace,
   noteToMarkdown,
   toOpenableUrl,
-  TOTP_PLACEHOLDER,
   totpWithCountdown,
   websiteLabels,
 } from "./format";
@@ -86,8 +85,4 @@ test("writes the TOTP countdown first, on two digits, in fixed-width characters,
 test("swaps only digits and s for their fixed-width forms", () => {
   assert.equal(monospace("0123456789s"), "𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝚜");
   assert.equal(monospace("Code: 12 · ok"), "Code: 𝟷𝟸 · ok");
-});
-
-test("holds a dot in place of each digit of a TOTP code that hasn't arrived, in two groups of three", () => {
-  assert.deepEqual(TOTP_PLACEHOLDER.split(/\s+/), ["⦁⦁⦁", "⦁⦁⦁"]);
 });

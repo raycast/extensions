@@ -2,6 +2,7 @@ import {
   List,
   ActionPanel,
   Action,
+  Color,
   Icon,
   showToast,
   Toast,
@@ -20,7 +21,7 @@ import {
   totpProgressIcon,
   totpTimerColor,
 } from "./lib/utils";
-import { monospace, TOTP_PLACEHOLDER } from "./lib/format";
+import { monospace } from "./lib/format";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -259,10 +260,10 @@ export default function Command() {
               subtitle={item.vaultName}
               accessories={[
                 {
-                  tag: {
-                    value: code ? monospace(formatTotpCode(code)) : TOTP_PLACEHOLDER,
-                    color: getTimerColor(),
-                  },
+                  // Said as in Browse Items' details.
+                  tag: code
+                    ? { value: monospace(formatTotpCode(code)), color: getTimerColor() }
+                    : { value: isLoading || isRefreshing ? "Loading…" : "Unavailable", color: Color.SecondaryText },
                 },
                 // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
                 // 30-second period of getTotpRemainingSeconds.
