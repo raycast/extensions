@@ -24,7 +24,7 @@ function notices() {
     assert.match(text, /Permission|Redistribution|permission/, `Missing original notice for ${name}`);
     sections.push(`\n${"=".repeat(70)}\n${name} ${metadata.version} (${metadata.license})\n\n${text}`);
   }
-  return sections.join("\n") + "\n";
+  return sections.join("\n").trimEnd() + "\n";
 }
 const noticePath = path.join(root, "assets/THIRD-PARTY-NOTICES.txt");
 if (process.argv.includes("--write-notices")) {

@@ -292,3 +292,24 @@ test("stale repository editor cannot overwrite newer settings while access times
   assert.equal((await Service.getUserRepository(repo.id)).description, "Newer description");
   assert.equal((await Service.getUserRepository(repo.id)).subdirectory, "");
 });
+
+test("restored bundled editions browse and search without excluded or missing files", async () => {
+  const files = await Service.listFiles();
+  for (const file of ["basic.md", "keywords_test.md", "packs.md", "polyfill.io.md"])
+    assert.ok(!files.some((entry) => entry.path === file));
+  for (const [slug, query] of [
+    ["bash", "Bash conditional construct"],
+    ["jsdoc", "@typedef"],
+    ["markdown", "**bold**"],
+    ["python", 'with open("hello.txt"'],
+    ["tar", "Appending does not work"],
+    ["vim-digraphs", ":digraphs"],
+  ]) {
+    assert.ok(
+      files.some((entry) => entry.path === slug + ".md"),
+      slug,
+    );
+    assert.ok((await Service.getSheet(slug)).length > 100, slug);
+    assert.ok((await Service.searchDefaultContent(query)).includes(slug), slug);
+  }
+});
