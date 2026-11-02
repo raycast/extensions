@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Fix render timeout for large Downloads folders] - {PR_MERGE_DATE}
+
+- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
+
 ## [Fix Quick Look preview process leak] - 2026-11-01
 
 - Fixed Manage Downloads slowing down and becoming unresponsive on large Downloads folders. Quick Look previews that timed out leaked a background process and a temp directory for every previewed item; timed-out previews are now killed, and starting a new preview cancels the previous one.
@@ -7,10 +11,6 @@
 ## [Add Rename action] - 2026-10-24
 
 - Added a Rename action to Manage Downloads (`⌘⇧R` on macOS, `Ctrl+Shift+R` on Windows) that renames the focused download and keeps your place in the list.
-
-## [Fix render timeout for large Downloads folders] - {PR_MERGE_DATE}
-
-- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
 
 ## [Align shortcuts with Search Screenshots] - 2026-09-09
 

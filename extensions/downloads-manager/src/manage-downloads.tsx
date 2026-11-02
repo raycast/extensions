@@ -211,9 +211,11 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", true);
   const cancelRef = useRef<AbortController | null>(null);
+  const isLoadPendingRef = useRef(false);
 
   const loadNextPage = useCallback(async (offset: number) => {
     setIsLoading(true);
+    isLoadPendingRef.current = true;
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
     const signal = cancelRef.current.signal;
@@ -236,6 +238,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
       console.error("Error loading downloads:", error);
     } finally {
       if (!signal.aborted) {
+        isLoadPendingRef.current = false;
         setIsLoading(false);
       }
     }
@@ -252,7 +255,16 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
   }, [isLoading, hasMore, nextOffset, loadNextPage]);
 
+  // A scan that started before a file changed can still hold its old path, so
+  // replace it with a new scan instead of letting it overwrite the list.
+  const restartPendingLoad = useCallback(() => {
+    if (isLoadPendingRef.current) {
+      loadNextPage(0);
+    }
+  }, [loadNextPage]);
+
   function handleTrash(paths: string | string[]) {
+    restartPendingLoad();
     setDownloads((downloads: Download[]) =>
       downloads.filter((download: Download) =>
         Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
@@ -260,12 +272,16 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     );
   }
 
-  const handleRenamed = useCallback((oldPath: string, nextPath: string, nextName: string) => {
-    setDownloads((current: Download[]) =>
-      current.map((item: Download) => (item.path === oldPath ? { ...item, path: nextPath, file: nextName } : item)),
-    );
-    setSelectedItemId((current) => (current === oldPath ? nextPath : current));
-  }, []);
+  const handleRenamed = useCallback(
+    (oldPath: string, nextPath: string, nextName: string) => {
+      restartPendingLoad();
+      setDownloads((current: Download[]) =>
+        current.map((item: Download) => (item.path === oldPath ? { ...item, path: nextPath, file: nextName } : item)),
+      );
+      setSelectedItemId((current) => (current === oldPath ? nextPath : current));
+    },
+    [restartPendingLoad],
+  );
 
   async function handleMoveToTrash(paths: string | string[]) {
     const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
