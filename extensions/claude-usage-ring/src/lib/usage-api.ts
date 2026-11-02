@@ -2,6 +2,7 @@ import type { PlanInfo, Usage, UsageWindow } from "../types";
 import { CredentialsError, readCredentials } from "./credentials";
 
 export const USAGE_URL = "https://api.anthropic.com/api/oauth/usage";
+export const USAGE_PAGE = "https://claude.ai/settings/usage";
 
 export type UsageErrorKind = "unauthorized" | "rate_limited" | "server" | "network" | "schema";
 

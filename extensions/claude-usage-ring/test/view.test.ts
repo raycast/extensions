@@ -49,6 +49,8 @@ describe("deriveView", () => {
     expect(v.extraRows).toEqual([]);
     expect(v.planLabel).toBe("Plan: Team · Max 5x");
     expect(v.updatedLabel).toBe("Updated 1 min ago");
+    expect(v.rows[0]).toMatchObject({ percent: "8%", reset: "resets in 2h 15m", level: "normal" });
+    expect(v.summary).toBe("Session (5h): 8% · resets in 2h 15m\nWeekly: 6% · resets Sat 19:00");
   });
 
   it("percent text per mode", () => {
@@ -65,27 +67,27 @@ describe("deriveView", () => {
   it("stale data dims and shows a banner", () => {
     const v = deriveView(snap({ usage: parseUsage(SAMPLE, NOW - 23 * MIN) }), prefs, NOW);
     expect(v.dim).toBe(true);
-    expect(v.banners).toContain("Data from 23 min ago");
+    expect(v.banners).toContainEqual({ kind: "stale", text: "Data from 23 min ago" });
     expect(decode(v.icon.light)).toContain('opacity="0.5"');
   });
 
   it("error with cached data: last value, dimmed, banner", () => {
     const v = deriveView(snap({ lastError: { kind: "expired", at: NOW } }), prefs, NOW);
     expect(v.dim).toBe(true);
-    expect(v.banners[0]).toBe("⚠ Login expired. Open Claude Code once to refresh it.");
+    expect(v.banners[0]).toEqual({ kind: "error", text: "Login expired. Open Claude Code once to refresh it." });
   });
 
   it("error with no data: hollow ring with !", () => {
     const v = deriveView({ ...EMPTY_SNAPSHOT, lastError: { kind: "not_found", at: NOW } }, prefs, NOW);
     expect(decode(v.icon.light)).toContain("<rect");
-    expect(v.banners[0]).toContain("Not logged in");
+    expect(v.banners[0].text).toContain("Not logged in");
     expect(v.updatedLabel).toBe("Not updated yet");
   });
 
   it("rate limited shows retry time", () => {
     const until = new Date(2026, 10, 2, 14, 32).getTime();
     const v = deriveView(snap({ lastError: { kind: "rate_limited", at: NOW }, backoffUntil: until }), prefs, NOW);
-    expect(v.banners[0]).toBe("⚠ Rate limited, retrying at 14:32");
+    expect(v.banners[0].text).toBe("Rate limited, retrying at 14:32");
   });
 
   it("locked window → full red + banner", () => {
@@ -99,7 +101,10 @@ describe("deriveView", () => {
     const svg = decode(v.icon.light);
     expect(svg).toContain(RED);
     expect(svg).not.toContain("dasharray");
-    expect(v.banners.some((b) => b.includes("Session limit reached: five_hour_limit"))).toBe(true);
+    expect(
+      v.banners.some((b) => b.kind === "locked" && b.text.includes("Session limit reached: five_hour_limit")),
+    ).toBe(true);
+    expect(v.rows[0].level).toBe("critical");
     expect(v.rows[0].subtitle.startsWith("100%")).toBe(true);
   });
 
@@ -115,6 +120,8 @@ describe("deriveView", () => {
       snap({ usage: parseUsage({ ...SAMPLE, five_hour: { ...SAMPLE.five_hour, utilization: p } }, NOW) });
     expect(decode(deriveView(s(70), prefs, NOW).icon.light)).toContain("#F5A524");
     expect(decode(deriveView(s(90), prefs, NOW).icon.light)).toContain("#F31260");
+    expect(deriveView(s(70), prefs, NOW).rows[0].level).toBe("warning");
+    expect(deriveView(s(90), prefs, NOW).rows[0].level).toBe("critical");
   });
 
   it("all-null usage shows 0% without crashing", () => {

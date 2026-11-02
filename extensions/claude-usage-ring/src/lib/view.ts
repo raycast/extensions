@@ -1,20 +1,33 @@
 import type { ErrorKind, Prefs, Snapshot, UsageWindow } from "../types";
 import { formatAgo, formatClock, formatPercent, formatPlan, formatReset } from "./format";
-import { colorFor, ringIcon, type Arc, type IconPair } from "./ring";
+import { AMBER, colorFor, RED, ringIcon, type Arc, type IconPair } from "./ring";
 
 export const STALE_MS = 15 * 60_000;
 
-export type Row = { key: string; title: string; subtitle: string; icon: IconPair };
+export type Level = "normal" | "warning" | "critical";
+
+export type Row = {
+  key: string;
+  title: string;
+  subtitle: string;
+  percent: string;
+  reset: string | null;
+  level: Level;
+  icon: IconPair;
+};
+
+export type Banner = { kind: "error" | "stale" | "locked"; text: string };
 
 export type View = {
   icon: IconPair;
   title?: string;
   tooltip: string;
-  banners: string[];
+  banners: Banner[];
   rows: Row[];
   extraRows: Row[];
   planLabel: string | null;
   updatedLabel: string;
+  summary: string;
   dim: boolean;
 };
 
@@ -67,13 +80,19 @@ function arcFor(w: UsageWindow | null, t: Thresholds): Arc {
   return { pct, color: colorFor(pct, t.warn, t.crit, !!w?.lockedReason) };
 }
 
-function windowText(w: UsageWindow | null, now: number): string {
-  const pct = formatPercent(shownPct(w));
-  return w?.resetsAt ? `${pct} · resets ${formatReset(new Date(w.resetsAt), now)}` : pct;
-}
-
 function row(key: string, title: string, w: UsageWindow | null, t: Thresholds, now: number): Row {
-  return { key, title, subtitle: windowText(w, now), icon: ringIcon({ inner: arcFor(w, t) }) };
+  const arc = arcFor(w, t);
+  const percent = formatPercent(arc.pct);
+  const reset = w?.resetsAt ? `resets ${formatReset(new Date(w.resetsAt), now)}` : null;
+  return {
+    key,
+    title,
+    subtitle: reset ? `${percent} · ${reset}` : percent,
+    percent,
+    reset,
+    level: arc.color === RED ? "critical" : arc.color === AMBER ? "warning" : "normal",
+    icon: ringIcon({ inner: arc }),
+  };
 }
 
 export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
@@ -101,18 +120,18 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
     title = prefs.ringMode === "dual" ? `${p5} · ${p7}` : prefs.ringMode === "weekly" ? p7 : p5;
   }
 
-  const banners: string[] = [];
+  const banners: Banner[] = [];
   if (snap.lastError) {
-    banners.push(`⚠ ${errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource)}`);
+    banners.push({ kind: "error", text: errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource) });
   }
-  if (u && stale) banners.push(`Data from ${formatAgo(u.fetchedAt, now)}`);
+  if (u && stale) banners.push({ kind: "stale", text: `Data from ${formatAgo(u.fetchedAt, now)}` });
   for (const [label, w] of [
     ["Session", five],
     ["Weekly", week],
   ] as const) {
     if (!w?.lockedReason) continue;
     const when = w.resetsAt ? `, resets ${formatReset(new Date(w.resetsAt), now)}` : "";
-    banners.push(`⛔ ${label} limit reached: ${w.lockedReason}${when}`);
+    banners.push({ kind: "locked", text: `${label} limit reached: ${w.lockedReason}${when}` });
   }
 
   const extraRows: Row[] = [];
@@ -120,16 +139,19 @@ export function deriveView(snap: Snapshot, prefs: Prefs, now: number): View {
   if (sonnet) extraRows.push(row("sonnet", "Sonnet Weekly", sonnet, t, now));
 
   const plan = formatPlan(snap.plan?.subscriptionType, snap.plan?.rateLimitTier);
+  const rows = [row("five", "Session (5h)", five, t, now), row("week", "Weekly", week, t, now)];
+  const summary = [...rows, ...extraRows].map((r) => `${r.title}: ${r.subtitle}`).join("\n");
 
   return {
     icon,
     title,
     tooltip: u ? `Claude: 5h ${p5} · week ${p7}` : "Claude usage: no data yet",
     banners,
-    rows: [row("five", "Session (5h)", five, t, now), row("week", "Weekly", week, t, now)],
+    rows,
     extraRows,
     planLabel: plan ? `Plan: ${plan}` : null,
     updatedLabel: u ? `Updated ${formatAgo(u.fetchedAt, now)}` : "Not updated yet",
+    summary,
     dim,
   };
 }

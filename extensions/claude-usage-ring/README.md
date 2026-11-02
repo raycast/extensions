@@ -5,7 +5,12 @@ A Raycast menu bar extension that shows your **Claude subscription usage** as a 
 - **5-hour session limit** (default)
 - **Weekly (7-day) limit**, or both as concentric rings
 
-Click the ring to see exact percentages, reset countdowns, your plan, and when the data was last updated.
+## Commands
+
+| Command | |
+|---|---|
+| **Claude Usage Ring** | The menu bar ring. Click it for exact percentages, reset countdowns, your plan, and when the data was last updated. |
+| **Check Claude Usage** | The same data in a Raycast window. Actions: Open Usage Page (↵), Refresh Usage (⌘R), Copy Usage Summary (⌘⇧C), Configure Extension. Refreshing here also updates the ring. |
 
 The numbers come from the same source as `/usage` in Claude Code. They are not estimated from local logs.
 
@@ -13,7 +18,7 @@ The numbers come from the same source as `/usage` in Claude Code. They are not e
 
 Install **Claude Usage Ring** from the Raycast Store, then:
 
-1. Search **Claude Usage** in Raycast and run it once. This activates the menu bar item and the 2-minute background refresh.
+1. Search **Claude Usage Ring** in Raycast and run it once. This activates the menu bar item and the 2-minute background refresh.
 2. If macOS asks whether Raycast may access the `Claude Code-credentials` Keychain item, click **Always Allow**.
 
 You need to be logged in to Claude Code (`claude` → `/login`) with a Pro, Max or Team subscription.
@@ -52,7 +57,7 @@ The ring is an SVG rendered on the fly as a data URI with light and dark variant
 | Limit locked | full red ring | "Session limit reached: …" |
 | Reset time passed | that window shows 0% until the next fetch | – |
 
-Background runs never show toasts. **Refresh Now** (⌘R) ignores backoff and shows a HUD only if it fails. Clicking the ring refetches if the last attempt was more than 20 seconds ago.
+Background runs never show toasts. **Refresh Now** (⌘R) ignores backoff and shows a HUD only if it fails. Opening the ring or the window refetches if the last attempt was more than 20 seconds ago; background runs skip if it was less than 60 seconds ago.
 
 ## Caveats
 
@@ -64,7 +69,7 @@ Background runs never show toasts. **Refresh Now** (⌘R) ignores backoff and sh
 
 - **Ring shows `!`, "Not logged in"**: run `claude`, then `/login`.
 - **"Keychain access denied"**: run the command again from Raycast and click **Always Allow**. You can also open Keychain Access, find `Claude Code-credentials`, and add Raycast under *Access Control*.
-- **Ring never updates**: open Raycast Settings → Extensions → Claude Usage Ring and check that background refresh is enabled for the command.
+- **Ring never updates**: open Raycast Settings → Extensions → Claude Usage Ring and check that background refresh is enabled for Claude Usage Ring.
 
 ## Development
 
@@ -79,11 +84,13 @@ node scripts/gen-icon.mjs   # regenerate assets/extension-icon.png
 
 ```
 src/
-├── usage-menu-bar.tsx   # the menu-bar command (UI only)
+├── usage-menu-bar.tsx   # Claude Usage Ring (menu bar)
+├── check-usage.tsx      # Check Claude Usage (list view)
 ├── types.ts
 └── lib/
     ├── credentials.ts   # Keychain / file, read-only
     ├── usage-api.ts     # fetch + defensive parsing + UsageSource
+    ├── use-usage.ts     # shared hook: cache-first snapshot + refresh
     ├── refresh.ts       # pure refresh state machine: backoff, throttle, errors
     ├── usage-store.ts   # Raycast Cache wrapper (snapshot only, never the token)
     ├── view.ts          # pure deriveView(): icons, labels, banners

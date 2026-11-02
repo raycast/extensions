@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CredentialsError } from "../src/lib/credentials";
-import { CLICK_THROTTLE_MS, exponentialBackoffMs, refresh } from "../src/lib/refresh";
+import { BACKGROUND_THROTTLE_MS, CLICK_THROTTLE_MS, exponentialBackoffMs, refresh } from "../src/lib/refresh";
 import { oauthSource, parseUsage, UsageError, type UsageSource } from "../src/lib/usage-api";
 import { EMPTY_SNAPSHOT, type Snapshot } from "../src/types";
 import { SAMPLE } from "./fixtures";
@@ -88,10 +88,14 @@ describe("refresh", () => {
     expect((await refresh(backing, ok, { now: NOW, force: true })).usage?.fetchedAt).toBe(NOW);
   });
 
-  it("menu click is throttled, background is not", async () => {
-    const recent: Snapshot = { ...withUsage, lastAttemptAt: NOW - CLICK_THROTTLE_MS / 2 };
-    expect(await refresh(recent, ok, { now: NOW, userInitiated: true })).toBe(recent);
-    expect((await refresh(recent, ok, { now: NOW })).usage?.fetchedAt).toBe(NOW);
+  it("user runs throttle at 20s, background runs at 60s", async () => {
+    const at = (ms: number): Snapshot => ({ ...withUsage, lastAttemptAt: NOW - ms });
+    const clicked = at(CLICK_THROTTLE_MS / 2);
+    expect(await refresh(clicked, ok, { now: NOW, userInitiated: true })).toBe(clicked);
+    expect((await refresh(at(CLICK_THROTTLE_MS), ok, { now: NOW, userInitiated: true })).usage?.fetchedAt).toBe(NOW);
+    const recent = at(BACKGROUND_THROTTLE_MS / 2);
+    expect(await refresh(recent, ok, { now: NOW })).toBe(recent);
+    expect((await refresh(at(BACKGROUND_THROTTLE_MS), ok, { now: NOW })).usage?.fetchedAt).toBe(NOW);
   });
 
   it("unknown thrown values never escape", async () => {

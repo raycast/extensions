@@ -1,25 +1,26 @@
 import {
-  environment,
-  getPreferenceValues,
+  Icon,
   Keyboard,
   launchCommand,
   LaunchType,
   MenuBarExtra,
   open,
-  openCommandPreferences,
+  openExtensionPreferences,
   showHUD,
   type LaunchProps,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { refresh } from "./lib/refresh";
-import { oauthSource } from "./lib/usage-api";
-import { readSnapshot, writeSnapshot } from "./lib/usage-store";
-import { deriveView, errorBanner, type Row } from "./lib/view";
-import type { Prefs, Snapshot } from "./types";
-
-const USAGE_PAGE = "https://claude.ai/settings/usage";
+import { useEffect } from "react";
+import { MENU_BAR_COMMAND, useUsage } from "./lib/use-usage";
+import { USAGE_PAGE } from "./lib/usage-api";
+import { deriveView, errorBanner, type Banner, type Row } from "./lib/view";
 
 type LaunchContext = { force?: boolean };
+
+const BANNER_ICONS: Record<Banner["kind"], Icon> = {
+  error: Icon.Warning,
+  stale: Icon.Clock,
+  locked: Icon.XMarkCircle,
+};
 
 function UsageRow({ row }: { row: Row }) {
   return (
@@ -33,26 +34,14 @@ function UsageRow({ row }: { row: Row }) {
 }
 
 export default function Command({ launchContext }: LaunchProps<{ launchContext: LaunchContext }>) {
-  const prefs = getPreferenceValues<Prefs>();
-  const [snap, setSnap] = useState<Snapshot>(readSnapshot);
-  const [isLoading, setIsLoading] = useState(true);
+  const force = launchContext?.force === true;
+  const { snap, prefs, isLoading } = useUsage({ force });
 
   useEffect(() => {
-    const force = launchContext?.force === true;
-    const userInitiated = environment.launchType === LaunchType.UserInitiated;
-
-    (async () => {
-      const next = await refresh(snap, oauthSource(prefs.credentialsSource), { force, userInitiated });
-      if (next === snap) return;
-      writeSnapshot(next);
-      setSnap(next);
-      if (force && next.lastError) {
-        await showHUD(errorBanner(next.lastError.kind, next.backoffUntil, prefs.credentialsSource));
-      }
-    })()
-      .catch(() => undefined)
-      .finally(() => setIsLoading(false));
-  }, []);
+    if (force && !isLoading && snap.lastError) {
+      showHUD(errorBanner(snap.lastError.kind, snap.backoffUntil, prefs.credentialsSource));
+    }
+  }, [isLoading]);
 
   const view = deriveView(snap, prefs, Date.now());
 
@@ -61,7 +50,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext: 
       {view.banners.length > 0 && (
         <MenuBarExtra.Section>
           {view.banners.map((banner) => (
-            <MenuBarExtra.Item key={banner} title={banner} />
+            <MenuBarExtra.Item key={banner.text} icon={BANNER_ICONS[banner.kind]} title={banner.text} />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -88,17 +77,18 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext: 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Refresh Now"
+          icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() =>
             launchCommand({
-              name: "usage-menu-bar",
+              name: MENU_BAR_COMMAND,
               type: LaunchType.UserInitiated,
               context: { force: true } satisfies LaunchContext,
             })
           }
         />
-        <MenuBarExtra.Item title="Open Usage on claude.ai" onAction={() => open(USAGE_PAGE)} />
-        <MenuBarExtra.Item title="Preferences…" onAction={openCommandPreferences} />
+        <MenuBarExtra.Item title="Open Usage Page" icon={Icon.Globe} onAction={() => open(USAGE_PAGE)} />
+        <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

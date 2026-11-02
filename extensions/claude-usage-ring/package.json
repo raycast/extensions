@@ -15,10 +15,15 @@
   ],
   "commands": [
     {
+      "name": "check-usage",
+      "title": "Check Claude Usage",
+      "description": "See your Claude 5-hour and weekly usage, reset times and plan",
+      "mode": "view"
+    },
+    {
       "name": "usage-menu-bar",
-      "title": "Claude Usage",
-      "subtitle": "Usage Ring",
-      "description": "Show Claude subscription usage in the menu bar",
+      "title": "Claude Usage Ring",
+      "description": "Show Claude subscription usage as a ring in the menu bar",
       "mode": "menu-bar",
       "interval": "2m"
     }

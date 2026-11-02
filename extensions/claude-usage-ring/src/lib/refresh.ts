@@ -7,6 +7,7 @@ export const RATE_LIMIT_DEFAULT_MS = 10 * MIN;
 export const SCHEMA_BACKOFF_MS = 30 * MIN;
 export const MAX_BACKOFF_MS = 30 * MIN;
 export const CLICK_THROTTLE_MS = 20_000;
+export const BACKGROUND_THROTTLE_MS = 60_000;
 
 export type RefreshOptions = {
   force?: boolean;
@@ -22,8 +23,8 @@ export function shouldFetch(snap: Snapshot, opts: RefreshOptions): boolean {
   const now = opts.now ?? Date.now();
   if (opts.force) return true;
   if (snap.backoffUntil && snap.backoffUntil > now) return false;
-  if (opts.userInitiated && snap.lastAttemptAt && now - snap.lastAttemptAt < CLICK_THROTTLE_MS) return false;
-  return true;
+  const throttle = opts.userInitiated ? CLICK_THROTTLE_MS : BACKGROUND_THROTTLE_MS;
+  return !snap.lastAttemptAt || now - snap.lastAttemptAt >= throttle;
 }
 
 export async function refresh(snap: Snapshot, source: UsageSource, opts: RefreshOptions = {}): Promise<Snapshot> {
