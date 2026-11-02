@@ -13,12 +13,15 @@ import {
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useFrecencySorting } from "@raycast/utils";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
-import { Item, PassCliError, PassCliErrorType } from "./lib/types";
+import { Item, PassCliError, PassCliErrorType, Vault } from "./lib/types";
 import { getTotpRemainingSeconds, formatTotpCode, TOTP_ICON, totpProgressIcon, totpTimerColor } from "./lib/utils";
 import { itemKey, monospace } from "./lib/format";
 import { getListIcon } from "./lib/item-icon";
 import { platformShortcut } from "./lib/shortcuts";
 import { SortByMenu, compareNames, preferredSortOrder, sortItems } from "./lib/sort";
+import { ALL_VAULTS_VALUE, VaultDropdown } from "./lib/vault-dropdown";
+import { countItemsByVault } from "./lib/item-counts";
+import { listedUnder, SHARED_WITH_ME } from "./lib/shared-items";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -34,6 +37,17 @@ function getTotpTimeStep(): number {
 
 function currentCode(item: TotpItem): string | undefined {
   return item.currentTotpTimeStep === getTotpTimeStep() ? item.currentTotp : undefined;
+}
+
+/** The vaults that have codes, as listed, for the vault menu. */
+function vaultsWithCodes(items: TotpItem[]): Vault[] {
+  const vaults = new Map<string, Vault>();
+  for (const item of items) {
+    const shareId = listedUnder(item);
+    if (!vaults.has(shareId))
+      vaults.set(shareId, item.sharedWithMe ? SHARED_WITH_ME : { shareId, name: item.vaultName });
+  }
+  return Array.from(vaults.values());
 }
 
 async function loadCode(item: TotpItem): Promise<TotpItem> {
@@ -77,6 +91,14 @@ export default function Command() {
     sortUnvisited: compareNames,
   });
   const sortedItems = useMemo(() => sortItems(items, sortOrder, mostUsed), [items, sortOrder, mostUsed]);
+  // As in Browse Items, with the vaults that have codes, and the last selection restored.
+  const [selectedVaultId, setSelectedVaultId] = useState(ALL_VAULTS_VALUE);
+  const vaults = useMemo(() => vaultsWithCodes(items), [items]);
+  const itemCounts = useMemo(() => countItemsByVault(vaults, items), [vaults, items]);
+  const shownItems =
+    selectedVaultId === ALL_VAULTS_VALUE
+      ? sortedItems
+      : sortedItems.filter((item) => listedUnder(item) === selectedVaultId);
   // As in Browse Items. Made once per list rather than on every second of the countdown.
   const icons = useMemo(
     () => new Map(items.map((item) => [itemKey(item), getListIcon(item, showWebsiteIcons)])),
@@ -263,8 +285,12 @@ export default function Command() {
   const getTimerColor = () => totpTimerColor(remainingSeconds);
 
   return (
-    <List isLoading={isLoading || isRefreshing} searchBarPlaceholder="Search TOTP items...">
-      {sortedItems.map((item) => {
+    <List
+      isLoading={isLoading || isRefreshing}
+      searchBarPlaceholder="Search TOTP items..."
+      searchBarAccessory={<VaultDropdown vaults={vaults} itemCounts={itemCounts} onVaultChange={setSelectedVaultId} />}
+    >
+      {shownItems.map((item) => {
         const code = currentCode(item);
         return (
           <List.Item
@@ -312,8 +338,14 @@ export default function Command() {
           />
         );
       })}
-      {items.length === 0 && !isLoading && !error && (
-        <List.EmptyView icon={TOTP_ICON} title="No TOTP Items" description="None of your items have TOTP configured" />
+      {shownItems.length === 0 && !isLoading && !error && (
+        <List.EmptyView
+          icon={TOTP_ICON}
+          title="No TOTP Items"
+          description={
+            items.length === 0 ? "None of your items have TOTP configured" : "None of this vault's items have TOTP"
+          }
+        />
       )}
     </List>
   );

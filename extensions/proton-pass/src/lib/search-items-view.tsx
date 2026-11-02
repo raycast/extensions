@@ -1,4 +1,4 @@
-import { List, Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
+import { Icon, getPreferenceValues, BrowserExtension, environment, showToast, Toast } from "@raycast/api";
 import { MutableRefObject, useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import { endedSessionError, listItems, listVaultsAndItems, SESSION_CHECK_WAIT_MS, VaultFailure } from "./pass-cli";
@@ -7,11 +7,12 @@ import { getCachedItems, setCachedItems, getCachedVaults, setCachedVaults } from
 import { renderErrorView } from "./error-views";
 import { NotLoggedInView } from "./login-view";
 import { hostnameOf } from "./format";
-import { countItemsByVault, refreshItemCounts, titleWithCount, totalItemCount } from "./item-counts";
+import { countItemsByVault, refreshItemCounts } from "./item-counts";
 import { ItemList } from "./item-list";
+import { ALL_VAULTS_VALUE, VaultDropdown } from "./vault-dropdown";
 import { SortOrder } from "./sort";
 import { createRequestTracker, failedVaultsTitle, getRefreshResult, listingSaves, withTimeout } from "./refresh";
-import { isSharedWithMe, listedUnder, SHARED_WITH_ME } from "./shared-items";
+import { isSharedWithMe, listedUnder } from "./shared-items";
 
 /** How long items wait for the active browser tab, so that its suggestions are in place when the list appears. */
 const ACTIVE_TAB_TIMEOUT_MS = 500;
@@ -29,56 +30,6 @@ function originOf(raw?: string): string | undefined {
 function matchesActiveOrigin(item: Item, activeOrigin?: string): boolean {
   if (!activeOrigin || !item.urls || item.urls.length === 0) return false;
   return item.urls.some((url) => originOf(url) === activeOrigin);
-}
-
-const ALL_VAULTS_VALUE = "all";
-
-interface VaultDropdownProps {
-  vaults: Vault[];
-  /** Number of items in each vault, once known. */
-  itemCounts: Map<string, number>;
-  /** Vault to show, for a vault opened from the vault list. Otherwise the last selection is restored. */
-  value?: string;
-  onVaultChange: (vaultId: string) => void;
-}
-
-function VaultDropdown({ vaults, itemCounts, value, onVaultChange }: VaultDropdownProps) {
-  const listedVaults = vaults.filter((vault) => !isSharedWithMe(vault));
-  // The selected item's title stays in the search bar, so the count of the vault shown is always visible.
-  return (
-    <List.Dropdown
-      tooltip="Select Vault"
-      storeValue={value === undefined}
-      value={value}
-      defaultValue={value === undefined ? ALL_VAULTS_VALUE : undefined}
-      onChange={onVaultChange}
-    >
-      <List.Dropdown.Item
-        title={titleWithCount("All Vaults", totalItemCount(vaults, itemCounts))}
-        value={ALL_VAULTS_VALUE}
-        icon={Icon.Globe}
-      />
-      <List.Dropdown.Section title="Vaults">
-        {listedVaults.map((vault) => (
-          <List.Dropdown.Item
-            key={vault.shareId}
-            title={titleWithCount(vault.name, itemCounts.get(vault.shareId))}
-            value={vault.shareId}
-            icon={Icon.Folder}
-          />
-        ))}
-      </List.Dropdown.Section>
-      {vaults.some(isSharedWithMe) && (
-        <List.Dropdown.Section>
-          <List.Dropdown.Item
-            title={titleWithCount(SHARED_WITH_ME.name, itemCounts.get(SHARED_WITH_ME.shareId))}
-            value={SHARED_WITH_ME.shareId}
-            icon={Icon.TwoPeople}
-          />
-        </List.Dropdown.Section>
-      )}
-    </List.Dropdown>
-  );
 }
 
 interface SearchItemsViewProps {

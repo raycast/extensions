@@ -40,6 +40,9 @@ function loadView(
       if (name === "./format") return format;
       if (name === "./totp") return totp;
       if (name === "./sort" || name === "./lib/sort") return sort;
+      if (name === "./vault-dropdown" || name === "./lib/vault-dropdown") return vaultDropdown;
+      if (name === "./lib/item-counts") return itemCounts;
+      if (name === "./lib/shared-items") return sharedItems;
       throw new Error(`Unexpected dependency: ${name}`);
     },
     URL,
@@ -59,6 +62,12 @@ function loadView(
 const sort = loadView("sort.tsx", {
   "@raycast/api": { Icon: {}, getPreferenceValues: () => ({}) },
   "./shortcuts": shortcuts,
+});
+
+// The vault menu's element isn't rendered here: only its constant and props matter.
+const vaultDropdown = loadView("vault-dropdown.tsx", {
+  "@raycast/api": { List: {}, Icon: {} },
+  "./item-counts": itemCounts,
 });
 
 function actions(element: unknown): Element["props"][] {
@@ -1414,6 +1423,58 @@ test("Get TOTP Code sorts like Browse Items, and a copied code counts as a use",
     fixture.visited.map((entry) => entry.itemId),
     ["a"],
   );
+});
+
+test("Get TOTP Code has Browse Items' vault menu, with the vaults that have codes and their counts", async () => {
+  const fixture = totpCommandFixture(
+    async () => ({
+      items: [
+        { ...item, itemId: "a", title: "Alpha", hasTotp: true },
+        { ...item, shareId: "work", vaultName: "Work", itemId: "b", title: "Beta", hasTotp: true },
+        { ...item, shareId: "work", vaultName: "Work", itemId: "c", title: "Gamma", hasTotp: true },
+        {
+          ...item,
+          shareId: "share-1",
+          vaultName: "Unknown Vault",
+          itemId: "d",
+          title: "Delta",
+          hasTotp: true,
+          sharedWithMe: true,
+        },
+        { ...item, shareId: "empty", vaultName: "No Codes", itemId: "e", title: "Epsilon" },
+      ],
+      failedVaults: [],
+    }),
+    undefined,
+    undefined,
+    {},
+    () => "654321",
+  );
+  await new Promise(setImmediate);
+  const menu = () =>
+    (fixture.render().props.searchBarAccessory as Element).props as {
+      vaults: Vault[];
+      itemCounts: Map<string, number>;
+      onVaultChange: (shareId: string) => void;
+    };
+  const titles = () =>
+    actions(fixture.render())
+      .filter((entry) => entry.accessories)
+      .map((row) => row.title)
+      .join();
+  assert.equal(
+    menu()
+      .vaults.map((vault) => vault.name)
+      .join(),
+    "Personal,Work,Shared with Me",
+  );
+  // Arrays made in the module's context: compared as text.
+  assert.equal(Array.from(menu().itemCounts.values()).join(), "1,2,1");
+  assert.equal(titles(), "Alpha,Beta,Gamma,Delta");
+  menu().onVaultChange("work");
+  assert.equal(titles(), "Beta,Gamma");
+  menu().onVaultChange(menu().vaults[2].shareId);
+  assert.equal(titles(), "Delta");
 });
 
 test("Hide Codes shows dots instead of the codes until Show Codes, and copying still gives the code", async () => {
