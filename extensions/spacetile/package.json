@@ -276,14 +276,14 @@
     },
     {
       "name": "pop-out",
-      "title": "Pop out",
+      "title": "Pop Out",
       "subtitle": "Spacetile",
       "description": "Sends `pop out` to Spacetile.",
       "mode": "no-view"
     },
     {
       "name": "pop-in",
-      "title": "Pop Back in",
+      "title": "Pop Back In",
       "subtitle": "Spacetile",
       "description": "Sends `pop in` to Spacetile.",
       "mode": "no-view"
