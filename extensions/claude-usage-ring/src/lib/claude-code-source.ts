@@ -26,11 +26,30 @@ export function parseRateLimits(json: unknown, capturedAt: number): Usage | null
   return { fiveHour, sevenDay, fetchedAt: capturedAt };
 }
 
+export class UsageReadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UsageReadError";
+  }
+}
+
+const isMissing = (e: unknown) => (e as NodeJS.ErrnoException)?.code === "ENOENT";
+
 export async function readClaudeCodeUsage(file = BRIDGE_DATA_FILE): Promise<Usage | null> {
+  let raw: string;
+  let capturedAt: number;
   try {
-    const [raw, info] = await Promise.all([readFile(file, "utf8"), stat(file)]);
-    return parseRateLimits(JSON.parse(raw), info.mtimeMs);
+    const [text, info] = await Promise.all([readFile(file, "utf8"), stat(file)]);
+    raw = text;
+    capturedAt = info.mtimeMs;
+  } catch (e) {
+    if (isMissing(e)) return null;
+    const reason = (e as NodeJS.ErrnoException)?.code ?? (e instanceof Error ? e.message : String(e));
+    throw new UsageReadError(`Can't read ${file} (${reason}). Check its permissions.`);
+  }
+  try {
+    return parseRateLimits(JSON.parse(raw), capturedAt);
   } catch {
-    return null;
+    throw new UsageReadError(`${file} isn't valid JSON. Send a message in Claude Code to rewrite it.`);
   }
 }

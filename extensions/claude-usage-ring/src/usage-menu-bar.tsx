@@ -4,13 +4,14 @@ import { openCommand, useUsage } from "./lib/use-usage";
 import { deriveView, type Banner } from "./lib/view";
 
 const BANNER_ICONS: Record<Banner["kind"], Icon> = {
+  error: Icon.Warning,
   setup: Icon.Plug,
   limit: Icon.XMarkCircle,
 };
 
 export default function Command() {
-  const { state, prefs, isLoading } = useUsage();
-  const view = deriveView(state, prefs, Date.now());
+  const { state, error, prefs, isLoading } = useUsage();
+  const view = deriveView(state, prefs, Date.now(), error);
 
   return (
     <MenuBarExtra icon={{ source: view.icon }} title={view.title} tooltip={view.tooltip} isLoading={isLoading}>

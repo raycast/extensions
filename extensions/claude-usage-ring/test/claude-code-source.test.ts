@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { parseRateLimits, readClaudeCodeUsage } from "../src/lib/claude-code-source";
+import { parseRateLimits, readClaudeCodeUsage, UsageReadError } from "../src/lib/claude-code-source";
 
 const dir = mkdtempSync(join(tmpdir(), "usage-ring-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -43,10 +43,20 @@ describe("readClaudeCodeUsage", () => {
     expect(u?.fetchedAt).toBe(t.getTime());
     expect(u?.fiveHour?.utilization).toBe(7);
   });
-  it("returns null for a missing or broken file", async () => {
+  it("returns null when the file doesn't exist yet", async () => {
     expect(await readClaudeCodeUsage(join(dir, "missing.json"))).toBeNull();
+  });
+  it("throws a readable error for broken JSON", async () => {
     const bad = join(dir, "bad.json");
     writeFileSync(bad, "{");
-    expect(await readClaudeCodeUsage(bad)).toBeNull();
+    await expect(readClaudeCodeUsage(bad)).rejects.toThrow(UsageReadError);
+    await expect(readClaudeCodeUsage(bad)).rejects.toThrow("isn't valid JSON");
+  });
+  it("throws a readable error when the file can't be read", async () => {
+    const locked = join(dir, "locked.json");
+    writeFileSync(locked, "{}");
+    chmodSync(locked, 0o000);
+    await expect(readClaudeCodeUsage(locked)).rejects.toThrow("EACCES");
+    chmodSync(locked, 0o600);
   });
 });

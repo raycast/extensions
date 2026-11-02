@@ -14,7 +14,7 @@ export type Row = {
   icon: IconPair;
 };
 
-export type Banner = { kind: "setup" | "limit"; text: string };
+export type Banner = { kind: "error" | "setup" | "limit"; text: string };
 
 export type View = {
   icon: IconPair;
@@ -70,7 +70,7 @@ function row(key: string, title: string, w: UsageWindow | null, t: Thresholds, n
   };
 }
 
-export function deriveView(state: UsageState, prefs: ViewPrefs, now: number): View {
+export function deriveView(state: UsageState, prefs: ViewPrefs, now: number, error?: Error): View {
   const t = parseThresholds(prefs);
   const u = state.usage;
   const five = u ? effectiveWindow(u.fiveHour, now) : null;
@@ -90,8 +90,9 @@ export function deriveView(state: UsageState, prefs: ViewPrefs, now: number): Vi
   }
 
   const banners: Banner[] = [];
+  if (error) banners.push({ kind: "error", text: error.message });
   if (!state.connected) banners.push({ kind: "setup", text: NOT_CONNECTED });
-  else if (!u) banners.push({ kind: "setup", text: WAITING });
+  else if (!u && !error) banners.push({ kind: "setup", text: WAITING });
   for (const [label, w] of [
     ["Session", five],
     ["Weekly", week],

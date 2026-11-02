@@ -91,4 +91,16 @@ describe("deriveView", () => {
     const v = deriveView(state(usage(8, 6, { sevenDay: null })), prefs, NOW);
     expect(v.rows[1].subtitle).toBe("0%");
   });
+
+  it("read error shows instead of waiting", () => {
+    const v = deriveView(state(null), prefs, NOW, new Error("bad file"));
+    expect(v.banners).toEqual([{ kind: "error", text: "bad file" }]);
+    expect(decode(v.icon.light)).toContain("<rect");
+  });
+
+  it("read error keeps the last numbers visible", () => {
+    const v = deriveView(state(), prefs, NOW, new Error("bad file"));
+    expect(v.banners[0]).toEqual({ kind: "error", text: "bad file" });
+    expect(v.rows[0].percent).toBe("8%");
+  });
 });

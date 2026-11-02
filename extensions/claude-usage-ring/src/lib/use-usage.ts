@@ -26,6 +26,7 @@ export function useUsage({ sync = false }: { sync?: boolean } = {}) {
   const prefs = getPreferenceValues<Preferences>();
   const { data, error, isLoading, revalidate } = useCachedPromise(loadUsageState, [], {
     onData: sync ? syncMenuBar : undefined,
+    onError: () => undefined,
   });
   return { state: data ?? EMPTY_STATE, error, prefs, isLoading, revalidate };
 }

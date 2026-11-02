@@ -11,13 +11,14 @@ const LEVEL_COLORS: Record<Level, Color> = {
 };
 
 const BANNER_ICONS: Record<Banner["kind"], List.Item.Props["icon"]> = {
+  error: { source: Icon.Warning, tintColor: Color.Red },
   setup: { source: Icon.Plug, tintColor: Color.Orange },
   limit: { source: Icon.XMarkCircle, tintColor: Color.Red },
 };
 
 export default function Command() {
   const { state, error, prefs, isLoading, revalidate } = useUsage({ sync: true });
-  const view = deriveView(state, prefs, Date.now());
+  const view = deriveView(state, prefs, Date.now(), error);
   const actions = <UsageActions view={view} connected={state.connected} onRefresh={revalidate} />;
 
   if (error && !state.usage) {
