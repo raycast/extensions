@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { BRIDGE_DATA_FILE } from "./lib/claude-code-source";
 import {
   BRIDGE_COMMAND,
@@ -86,11 +86,7 @@ export default function Command() {
       revalidate();
       await syncMenuBar();
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't disconnect",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Couldn't disconnect" });
     }
   }
 

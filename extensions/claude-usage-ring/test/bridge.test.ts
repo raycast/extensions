@@ -3,7 +3,14 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { BRIDGE_COMMAND, buildBridgeScript, isBridgeCommand, withBridge, withoutBridge } from "../src/lib/bridge";
+import {
+  BRIDGE_COMMAND,
+  buildBridgeScript,
+  isBridgeCommand,
+  isBridgeConnected,
+  withBridge,
+  withoutBridge,
+} from "../src/lib/bridge";
 
 const home = mkdtempSync(join(tmpdir(), "usage-ring-home-"));
 mkdirSync(join(home, ".claude"));
@@ -76,5 +83,30 @@ describe("settings transforms", () => {
     expect(isBridgeCommand("~/x.sh")).toBe(false);
     expect(isBridgeCommand(undefined)).toBe(false);
     expect(existsSync(home)).toBe(true);
+  });
+});
+
+describe("isBridgeConnected", () => {
+  const dir = mkdtempSync(join(tmpdir(), "usage-ring-connected-"));
+  const settings = join(dir, "settings.json");
+  const script = join(dir, "usage-ring-statusline.sh");
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+
+  it("needs both the script and the status line command", async () => {
+    expect(await isBridgeConnected(settings, script)).toBe(false);
+    writeFileSync(script, "#!/bin/sh\n");
+    expect(await isBridgeConnected(settings, script)).toBe(false);
+    writeFileSync(settings, JSON.stringify({ statusLine: { type: "command", command: BRIDGE_COMMAND } }));
+    expect(await isBridgeConnected(settings, script)).toBe(true);
+  });
+
+  it("is false when the user replaced the status line", async () => {
+    writeFileSync(settings, JSON.stringify({ statusLine: { type: "command", command: "other.sh" } }));
+    expect(await isBridgeConnected(settings, script)).toBe(false);
+  });
+
+  it("is false when settings.json is broken", async () => {
+    writeFileSync(settings, "{");
+    expect(await isBridgeConnected(settings, script)).toBe(false);
   });
 });

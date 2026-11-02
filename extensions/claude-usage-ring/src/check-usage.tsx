@@ -16,9 +16,22 @@ const BANNER_ICONS: Record<Banner["kind"], List.Item.Props["icon"]> = {
 };
 
 export default function Command() {
-  const { state, prefs, isLoading, revalidate } = useUsage({ sync: true });
+  const { state, error, prefs, isLoading, revalidate } = useUsage({ sync: true });
   const view = deriveView(state, prefs, Date.now());
   const actions = <UsageActions view={view} connected={state.connected} onRefresh={revalidate} />;
+
+  if (error && !state.usage) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't Read Claude Usage"
+          description={error.message}
+          actions={actions}
+        />
+      </List>
+    );
+  }
 
   if (!state.usage) {
     return (
@@ -36,7 +49,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Claude Usage" searchBarPlaceholder="Filter limits">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter limits">
       {view.banners.length > 0 && (
         <List.Section title="Status">
           {view.banners.map((banner) => (

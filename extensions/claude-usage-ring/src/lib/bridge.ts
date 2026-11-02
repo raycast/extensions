@@ -91,12 +91,17 @@ async function mtime(file: string): Promise<number | null> {
   }
 }
 
+export async function isBridgeConnected(settingsFile = SETTINGS_FILE, script = BRIDGE_SCRIPT): Promise<boolean> {
+  if ((await mtime(script)) === null) return false;
+  const settings = await readJson<Settings>(settingsFile, {}).catch(() => ({}) as Settings);
+  return isBridgeCommand(settings.statusLine?.command);
+}
+
 export async function getBridgeStatus(): Promise<BridgeStatus> {
-  const settings = await readJson<Settings>(SETTINGS_FILE, {}).catch(() => ({}) as Settings);
   const state = await readJson<BridgeState>(BRIDGE_STATE_FILE, { previousStatusLine: null }).catch(() => null);
   const prev = state?.previousStatusLine?.command;
   return {
-    installed: isBridgeCommand(settings.statusLine?.command),
+    installed: await isBridgeConnected(),
     dataUpdatedAt: await mtime(BRIDGE_DATA_FILE),
     passthroughCommand: typeof prev === "string" ? prev : null,
   };
@@ -105,7 +110,12 @@ export async function getBridgeStatus(): Promise<BridgeStatus> {
 export async function installBridge(): Promise<void> {
   await mkdir(CLAUDE_DIR, { recursive: true });
   const settings = await readJson<Settings>(SETTINGS_FILE, {});
-  if (isBridgeCommand(settings.statusLine?.command)) return;
+  if (isBridgeCommand(settings.statusLine?.command)) {
+    const state = await readJson<BridgeState>(BRIDGE_STATE_FILE, { previousStatusLine: null });
+    await writeFile(BRIDGE_SCRIPT, buildBridgeScript(state.previousStatusLine?.command), "utf8");
+    await chmod(BRIDGE_SCRIPT, 0o755);
+    return;
+  }
 
   const { settings: next, previous } = withBridge(settings);
   if (await mtime(SETTINGS_FILE)) await copyFile(SETTINGS_FILE, `${SETTINGS_FILE}.usage-ring.bak`);

@@ -1,13 +1,13 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { existsSync } from "node:fs";
 import { EMPTY_STATE, type UsageState } from "../types";
-import { BRIDGE_SCRIPT } from "./bridge";
+import { isBridgeConnected } from "./bridge";
 import { readClaudeCodeUsage } from "./claude-code-source";
 import { MENU_BAR_COMMAND } from "./constants";
 
 export async function loadUsageState(): Promise<UsageState> {
-  return { connected: existsSync(BRIDGE_SCRIPT), usage: await readClaudeCodeUsage() };
+  const [connected, usage] = await Promise.all([isBridgeConnected(), readClaudeCodeUsage()]);
+  return { connected, usage };
 }
 
 export async function syncMenuBar(): Promise<void> {
@@ -24,8 +24,8 @@ export async function openCommand(name: string): Promise<void> {
 
 export function useUsage({ sync = false }: { sync?: boolean } = {}) {
   const prefs = getPreferenceValues<Preferences>();
-  const { data, isLoading, revalidate } = useCachedPromise(loadUsageState, [], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(loadUsageState, [], {
     onData: sync ? syncMenuBar : undefined,
   });
-  return { state: data ?? EMPTY_STATE, prefs, isLoading, revalidate };
+  return { state: data ?? EMPTY_STATE, error, prefs, isLoading, revalidate };
 }
