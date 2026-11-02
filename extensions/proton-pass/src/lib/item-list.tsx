@@ -7,11 +7,11 @@ import { ItemActions } from "./item-actions";
 import { ItemDetailPanel } from "./item-detail-panel";
 import { ItemDetailStore, useItemDetail } from "./item-detail-store";
 import { Item } from "./types";
-import { getItemIcon, getTotpRemainingSeconds, totpCircle } from "./utils";
+import { getItemIcon, getTotpRemainingSeconds, totpCircle, totpProgressIcon, totpTimerColor } from "./utils";
 
 /**
  * Seconds left in the current 30-second TOTP period, for the items' progress circles. Updated only when the circle
- * changes step, not every second, so that the list isn't redrawn for nothing.
+ * changes step or color, not every second, so that the list isn't redrawn for nothing.
  */
 function useTotpSeconds(isCounting: boolean): number {
   const [seconds, setSeconds] = useState(getTotpRemainingSeconds);
@@ -19,7 +19,8 @@ function useTotpSeconds(isCounting: boolean): number {
     if (!isCounting) return;
     const timer = setInterval(() => {
       const next = getTotpRemainingSeconds();
-      setSeconds((previous) => (totpCircle(previous, 30) === totpCircle(next, 30) ? previous : next));
+      const look = (seconds: number) => `${totpCircle(seconds, 30)} ${totpTimerColor(seconds)}`;
+      setSeconds((previous) => (look(previous) === look(next) ? previous : next));
     }, 1000);
     return () => clearInterval(timer);
   }, [isCounting]);
@@ -121,7 +122,9 @@ export function ItemList({
         keywords={getKeywords(item)}
         accessories={[
           ...(item.hasNote ? [{ icon: Icon.Document, tooltip: "Has a note" }] : []),
-          ...(item.hasTotp ? [{ icon: totpCircle(totpSeconds, 30), tooltip: "Has a TOTP code" }] : []),
+          ...(item.hasTotp
+            ? [{ icon: totpProgressIcon(totpSeconds, 30, totpTimerColor(totpSeconds)), tooltip: "Has a TOTP code" }]
+            : []),
           ...(isShowingDetail ? [] : [{ text: item.vaultName }]),
         ]}
         detail={
