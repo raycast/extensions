@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { DraftSession } from "./drafts";
 import { withStorageLock } from "./library-store";
 
@@ -13,8 +14,7 @@ export function useDraftPersistence<T extends string | boolean>(key: string, def
   );
   const ready = useRef<Promise<T>>(null);
   const report = (error: unknown) =>
-    showToast({
-      style: Toast.Style.Failure,
+    showFailureToast(error, {
       title: "Draft Not Saved",
       message: error instanceof Error ? error.message : "Storage unavailable. Copy your draft before closing.",
     });
