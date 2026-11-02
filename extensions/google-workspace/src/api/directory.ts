@@ -3,6 +3,10 @@ const ENDPOINT = "https://people.googleapis.com/v1/people:listDirectoryPeople";
 export const USAGE_STORAGE_KEY = "directory-usage";
 export const PINS_STORAGE_KEY = "directory-pins";
 
+/** Pins and recents are stored per Google account so switching accounts never shows another account's data. */
+export const usageStorageKey = (accountId: string) => `${USAGE_STORAGE_KEY}:${accountId}`;
+export const pinsStorageKey = (accountId: string) => `${PINS_STORAGE_KEY}:${accountId}`;
+
 export type DirectoryPhone = { value: string; type?: string };
 
 export type DirectoryPerson = {

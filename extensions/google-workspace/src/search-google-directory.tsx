@@ -10,18 +10,20 @@ import {
 import {
   DirectoryError,
   DirectoryPerson,
-  PINS_STORAGE_KEY,
-  USAGE_STORAGE_KEY,
   fetchDirectory,
+  pinsStorageKey,
   sortPeople,
+  usageStorageKey,
 } from "./api/directory";
-import { signOutOfDirectory, withDirectoryAuth } from "./api/directoryAuth";
+import { getDirectoryAccountId, signOutOfDirectory, withDirectoryAuth } from "./api/directoryAuth";
 
-function SearchGoogleDirectory() {
+function DirectoryList({ accountId }: { accountId: string }) {
   const { token } = getAccessToken();
-  // The token is closed over rather than passed as an argument: useCachedPromise keys its cache on the
-  // arguments, and the token changes on every refresh, which would throw the cached directory away.
-  const { data, error, isLoading, revalidate, mutate } = useCachedPromise(() => fetchDirectory(token), [], {
+  // useCachedPromise keys its cache on the arguments. The account id is passed (unused by the fetcher) so each
+  // Google account gets its own cached directory. The token is closed over instead: it changes on every
+  // refresh, which would throw the cached directory away.
+  const fetchForAccount: (accountId: string) => Promise<DirectoryPerson[]> = () => fetchDirectory(token);
+  const { data, error, isLoading, revalidate, mutate } = useCachedPromise(fetchForAccount, [accountId], {
     onError: (error) => {
       // Expected setup problems are explained by the empty view instead of a toast.
       if (!(error instanceof DirectoryError) || error.kind === "other") {
@@ -33,12 +35,12 @@ function SearchGoogleDirectory() {
     value: usage = {},
     setValue: setUsage,
     isLoading: isLoadingUsage,
-  } = useLocalStorage<Record<string, number>>(USAGE_STORAGE_KEY, {});
+  } = useLocalStorage<Record<string, number>>(usageStorageKey(accountId), {});
   const {
     value: pins = [],
     setValue: setPins,
     isLoading: isLoadingPins,
-  } = useLocalStorage<string[]>(PINS_STORAGE_KEY, []);
+  } = useLocalStorage<string[]>(pinsStorageKey(accountId), []);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("directory-show-detail", false);
 
   const { pinned, others } = sortPeople(data ?? [], usage, pins);
@@ -219,6 +221,29 @@ function SearchGoogleDirectory() {
       <List.Section title="People">{others.map(renderPerson)}</List.Section>
     </List>
   );
+}
+
+function SearchGoogleDirectory() {
+  const accountId = getDirectoryAccountId();
+  // Without an account id (token issued before the `openid` scope) nothing is fetched or read from any cache;
+  // signing out and back in grants the scope.
+  if (!accountId) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Missing Permissions"
+          description="Raycast wasn't allowed to read your directory. Sign out, then reopen the command and grant access."
+          actions={
+            <ActionPanel>
+              <Action title="Sign out of Google Directory" icon={Icon.Logout} onAction={signOutOfDirectory} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+  return <DirectoryList accountId={accountId} />;
 }
 
 export default withDirectoryAuth(SearchGoogleDirectory);

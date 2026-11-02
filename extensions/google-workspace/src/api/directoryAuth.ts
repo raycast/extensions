@@ -1,7 +1,15 @@
 import { LocalStorage, OAuth, Toast, popToRoot, showToast } from "@raycast/api";
 import { OAuthService, WithAccessTokenComponentOrFn, withAccessToken } from "@raycast/utils";
-import { PINS_STORAGE_KEY, USAGE_STORAGE_KEY } from "./directory";
-import { GOOGLE_CLIENT_ID } from "./googleAuth";
+import { pinsStorageKey, usageStorageKey } from "./directory";
+import { GOOGLE_CLIENT_ID, decodeJWT } from "./googleAuth";
+
+// Stable Google account id (ID token `sub`), set on every launch by onAuthorize. Undefined for tokens issued
+// before the `openid` scope was requested.
+let accountId: string | undefined;
+
+export function getDirectoryAccountId(): string | undefined {
+  return accountId;
+}
 
 // Separate login from the Drive one: distinct providerId so tokens are stored independently.
 export const directoryGoogle = new OAuthService({
@@ -16,8 +24,11 @@ export const directoryGoogle = new OAuthService({
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   refreshTokenUrl: "https://oauth2.googleapis.com/token",
-  scope: "https://www.googleapis.com/auth/directory.readonly",
+  scope: "openid https://www.googleapis.com/auth/directory.readonly",
   bodyEncoding: "url-encoded",
+  onAuthorize({ idToken }) {
+    accountId = idToken ? decodeJWT(idToken).sub : undefined;
+  },
 });
 
 export function withDirectoryAuth(componentOrFn: WithAccessTokenComponentOrFn) {
@@ -27,8 +38,10 @@ export function withDirectoryAuth(componentOrFn: WithAccessTokenComponentOrFn) {
 /** Removes tokens, pins and recents. The caller is responsible for wiping the cached directory (see the UI). */
 export async function signOutOfDirectory(): Promise<void> {
   await directoryGoogle.client.removeTokens();
-  await LocalStorage.removeItem(USAGE_STORAGE_KEY);
-  await LocalStorage.removeItem(PINS_STORAGE_KEY);
+  if (accountId) {
+    await LocalStorage.removeItem(usageStorageKey(accountId));
+    await LocalStorage.removeItem(pinsStorageKey(accountId));
+  }
   await showToast({
     style: Toast.Style.Success,
     title: "Signed out of Google Directory",
