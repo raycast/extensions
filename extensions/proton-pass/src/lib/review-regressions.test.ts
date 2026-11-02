@@ -1334,7 +1334,7 @@ test("TOTP codes have their halves set apart like Proton Authenticator's, and lo
   const { formatTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
     formatTotpCode: (code: string) => string;
   };
-  assert.equal(formatTotpCode("123456"), "123\u2007\u2008456");
+  assert.equal(formatTotpCode("123456"), "123\u2002456");
   assert.equal(formatTotpCode("12345678"), "12345678");
 });
 
@@ -1342,8 +1342,8 @@ test("hidden TOTP codes have one dot per digit, since Raycast spaces out each ch
   const { hiddenTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
     hiddenTotpCode: (code: string) => string;
   };
-  assert.equal(hiddenTotpCode("123456"), "⦁⦁⦁\u2007\u200A⦁⦁⦁");
-  assert.equal(hiddenTotpCode("123456").length, "123\u2007\u2008456".length);
+  assert.equal(hiddenTotpCode("123456"), "⦁⦁⦁\u2005⦁⦁⦁");
+  assert.equal(hiddenTotpCode("123456").length, "123\u2002456".length);
   assert.equal(hiddenTotpCode("12345678"), "⦁⦁⦁⦁⦁⦁⦁⦁");
 });
 

@@ -4,9 +4,12 @@ export function itemKey(item: { shareId: string; itemId: string }): string {
   return `${item.shareId}-${item.itemId}`;
 }
 
-/** "09s  ·  418 877": the countdown comes first, on two digits, so that the code stays put while the seconds change. */
+/**
+ * "09s · 418 877": the countdown comes first, on two digits, so that the code stays put while the seconds change. Raycast
+ * collapses repeated spaces, so en spaces set the dot apart, further than the code's halves are from each other.
+ */
 export function totpWithCountdown(formattedCode: string, remainingSeconds: number): string {
-  return `${monospace(`${String(remainingSeconds).padStart(2, "0")}s`)}  ·  ${monospace(formattedCode)}`;
+  return `${monospace(`${String(remainingSeconds).padStart(2, "0")}s`)}\u2002·\u2002${monospace(formattedCode)}`;
 }
 
 /**
