@@ -4,7 +4,6 @@ dist/
 dist-dist/
 /search.js
 /manage-types.js
-raycast-env.d.ts
 .ray-dev.log
 *.log
 .idea/

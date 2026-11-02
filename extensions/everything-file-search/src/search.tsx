@@ -186,6 +186,8 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
     "true",
   );
   const [reloadTick, setReloadTick] = useState(0);
+  // Text previews are read only for the selected row (List.onSelectionChange)
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const debouncedQuery = useDebounced(query, 250);
   const fileType = useMemo(
@@ -322,6 +324,7 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
     <List
       isShowingDetail={showPreview}
       isLoading={isLoading || waitingForTypes}
+      onSelectionChange={setSelectedId}
       searchText={query}
       onSearchTextChange={setQuery}
       enableFiltering={false}
@@ -423,19 +426,24 @@ export default function SearchCommand(props: { arguments?: Arguments.Search }) {
         <List.Section
           title={`${fileType?.label ?? "All"} · ${formatNumber(total)} results${loadInfo} · sorted by ${sortLabel}`}
         >
-          {results.map((f, i) => (
-            <FileListItem
-              key={`${f.type}|${f.path}\\${f.name}|${i}`}
-              file={f}
-              typeDefs={typeDefs}
-              onTogglePreview={() =>
-                setPreviewOn(previewOn === "true" ? "false" : "true")
-              }
-              onCycleType={cycleType}
-              onRefresh={refresh}
-              showPreview={showPreview}
-            />
-          ))}
+          {results.map((f, i) => {
+            const itemKey = `${f.type}|${f.path}\\${f.name}|${i}`;
+            return (
+              <FileListItem
+                key={itemKey}
+                id={itemKey}
+                isSelected={selectedId === itemKey}
+                file={f}
+                typeDefs={typeDefs}
+                onTogglePreview={() =>
+                  setPreviewOn(previewOn === "true" ? "false" : "true")
+                }
+                onCycleType={cycleType}
+                onRefresh={refresh}
+                showPreview={showPreview}
+              />
+            );
+          })}
           {remaining > 0 && (
             <List.Item
               icon={Icon.ChevronDown}
@@ -481,15 +489,19 @@ function FileMetadata({
 }
 
 function FileListItem({
+  id,
   file,
   typeDefs,
+  isSelected,
   onTogglePreview,
   onCycleType,
   onRefresh,
   showPreview,
 }: {
+  id: string;
   file: EverythingResponse["results"][number];
   typeDefs: FileType[];
+  isSelected: boolean;
   onTogglePreview: () => void;
   onCycleType: () => void;
   onRefresh: () => void;
@@ -498,9 +510,11 @@ function FileListItem({
   const full = fullPathOf(file);
   const isFolder = file.type === "folder";
   const dm = filetimeToDate(file.date_modified);
-  // Only read text when the preview pane is on — otherwise a page of results
-  // would open hundreds of files that are never shown
-  const needsText = showPreview && !isFolder && isTextPreviewable(file.name);
+  // Read text only for the selected row while the preview pane is on — the
+  // detail panel only ever shows the selected item, so opening every
+  // previewable file on the page would be wasted reads
+  const needsText =
+    showPreview && isSelected && !isFolder && isTextPreviewable(file.name);
   const [textContent, setTextContent] = useState<string | null | undefined>(
     needsText ? undefined : null,
   );
@@ -550,6 +564,7 @@ function FileListItem({
 
   return (
     <List.Item
+      id={id}
       icon={{
         source: iconForFile(file.name, file.type, typeDefs),
         tooltip: file.type === "folder" ? "Folder" : "File",
