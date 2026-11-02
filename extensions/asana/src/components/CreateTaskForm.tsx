@@ -239,7 +239,11 @@ export default function CreateTaskForm(props: {
           itemProps.assignee.onChange?.(value);
           // Only remember choices made once the list is loaded, so the dropdown's fallback to
           // "Unassigned" while users are still loading is never persisted.
-          if (users && hasAppliedDefaultAssignee.current) setLastAssignee(value);
+          if (!users) return;
+          // A user picked before the default is applied (e.g. "me" is still loading) counts as the
+          // choice, so the default doesn't overwrite it. "" is skipped as it's also the fallback.
+          if (value !== "") hasAppliedDefaultAssignee.current = true;
+          if (hasAppliedDefaultAssignee.current) setLastAssignee(value);
         }}
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
