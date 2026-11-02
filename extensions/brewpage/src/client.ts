@@ -4,6 +4,8 @@ import path from "node:path";
 
 export const MAX_BYTES = 2 * 1024 * 1024;
 const ORIGIN = "https://brewpage.app";
+// Raycast package.json has no version field; bump with each store release.
+export const USER_AGENT = "brewpage-raycast/1.0 (+https://brewpage.app)";
 const RESERVED_HOST_LABELS = new Set([
   "unlock",
   "www",
@@ -130,7 +132,7 @@ export function createPublisher(fetcher: typeof fetch, origin = ORIGIN) {
     const url = new URL("/api/html", endpoint);
     if (choices.visibility === "public") url.searchParams.set("ns", "public");
     url.searchParams.set("ttl", "15");
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = { "Content-Type": "application/json", "User-Agent": USER_AGENT };
     if (choices.protection === "password") headers["X-Password"] = choices.password!;
     let response: Response;
     try {

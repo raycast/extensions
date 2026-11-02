@@ -27,6 +27,7 @@ test("HTTP protocol: explicit visibility/password matrix preserves private crede
       method: request.method,
       url: request.url,
       password: request.headers["x-password"] ?? null,
+      userAgent: request.headers["user-agent"],
       body: JSON.parse(Buffer.concat(chunks).toString()),
     });
     response.writeHead(201, { "Content-Type": "application/json" });
@@ -65,12 +66,48 @@ test("HTTP protocol: explicit visibility/password matrix preserves private crede
     assert.deepEqual(
       received,
       [
-        { method: "POST", url: "/api/html?ns=public&ttl=15", password: null, body: report },
-        { method: "POST", url: "/api/html?ns=public&ttl=15", password: "READER_PASSWORD", body: report },
-        { method: "POST", url: "/api/html?ns=public&ttl=15", password: "caf\u00e9", body: report },
-        { method: "POST", url: "/api/html?ttl=15", password: null, body: report },
-        { method: "POST", url: "/api/html?ttl=15", password: "READER_PASSWORD", body: report },
-        { method: "POST", url: "/api/html?ttl=15", password: "caf\u00e9", body: report },
+        {
+          method: "POST",
+          url: "/api/html?ns=public&ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: null,
+          body: report,
+        },
+        {
+          method: "POST",
+          url: "/api/html?ns=public&ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: "READER_PASSWORD",
+          body: report,
+        },
+        {
+          method: "POST",
+          url: "/api/html?ns=public&ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: "caf\u00e9",
+          body: report,
+        },
+        {
+          method: "POST",
+          url: "/api/html?ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: null,
+          body: report,
+        },
+        {
+          method: "POST",
+          url: "/api/html?ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: "READER_PASSWORD",
+          body: report,
+        },
+        {
+          method: "POST",
+          url: "/api/html?ttl=15",
+          userAgent: "brewpage-raycast/1.0 (+https://brewpage.app)",
+          password: "caf\u00e9",
+          body: report,
+        },
       ],
       "HTTP query, JSON, and password header exactly match OpenAPI 2.6",
     );
