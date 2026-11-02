@@ -11,7 +11,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { listVaultsAndItems, getTotp } from "./lib/pass-cli";
+import { listVaultsAndItems, getListedTotp } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
 import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
@@ -34,7 +34,7 @@ function currentCode(item: TotpItem): string | undefined {
 async function loadCode(item: TotpItem): Promise<TotpItem> {
   const timeStep = getTotpTimeStep();
   try {
-    const code = await getTotp(item.shareId, item.itemId);
+    const code = await getListedTotp(item.shareId, item.itemId);
     return { ...item, currentTotp: timeStep === getTotpTimeStep() ? code : undefined, currentTotpTimeStep: timeStep };
   } catch (error) {
     if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
