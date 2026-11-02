@@ -55,21 +55,6 @@ Repository state now identifies the GitHub owner, repository, branch and file pa
 | Draft changed in another command    | Copy the text you want to keep, close the form and reopen it. Concurrent edits are not silently merged.                                                                              |
 | Content looks different from GitHub | Raycast renders Markdown, not arbitrary HTML/Jekyll pages. Original source remains available for copying. Relative links in some bundled references may require **Open in Browser**. |
 
-## Development
-
-Use npm and the committed lockfile. The current API package requires Node.js 22.22.2 or newer for tooling; use a supported Node version for these checks. Raycast manages its own extension runtime independently.
-
-```sh
-npm ci --ignore-scripts
-npm test
-npm run typecheck
-npm run check-format
-npm run lint
-npm run build
-```
-
-`--ignore-scripts` avoids lifecycle execution during dependency installation. No publishing command is part of the checks. Tests use synthetic data, mocked network/Raycast boundaries, temporary storage and real filesystem locking between test processes. Distribution output is written explicitly to the ignored `dist/` directory; it does not run any extension command. Run `node tests/check-distribution.cjs` after building to verify packaged assets and notices.
-
 This extension supports **macOS**.
 
 ## Credits
