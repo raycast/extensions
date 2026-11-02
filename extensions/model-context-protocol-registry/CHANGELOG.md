@@ -2,7 +2,7 @@
 
 ## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-02
 
-- Update Multi Mail and Multi Calendar in the official registry: Multi Mail names any IMAP mailbox, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
+- Update Multi Mail and Multi Calendar in the official registry: Multi Mail names other IMAP mailboxes, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
 
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
