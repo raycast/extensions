@@ -54,6 +54,12 @@ The extension then only reads that file. It never reads your Claude login, never
 | Orange Threshold | 70 | Ring turns orange from this usage (30% or less left) |
 | Red Threshold | 90 | Ring turns red from this usage (10% or less left) |
 
+To change them, click the ring and choose **Configure Extension**.
+
+![Extension preferences with Show percentage turned on](media/preferences.png)
+
+![The ring with the percentage next to it](media/menu-bar-percentage.png)
+
 ## Troubleshooting
 
 - **"Waiting for Claude Code"**: send a message in Claude Code. Usage arrives with the first reply of a session. If it never arrives, check that Claude Code is signed in with a Pro or Max plan.
