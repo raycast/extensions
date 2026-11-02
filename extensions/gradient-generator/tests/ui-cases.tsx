@@ -18,6 +18,8 @@ import { PNG } from 'pngjs';
 import { generatePng } from '../src/lib/grad';
 import { Gradient } from '../src/types';
 import { usePreviewImage } from '../src/lib/use-preview-image';
+import { library } from '../src/lib/use-library';
+import { entryRef } from '../src/lib/library';
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 let view: ReactTestRenderer;
@@ -132,6 +134,57 @@ test('Preview preserves established primary actions without duplicate shortcuts'
       node.props.shortcut ? [JSON.stringify(node.props.shortcut.macOS)] : [],
     );
     assert.equal(new Set(shortcuts).size, shortcuts.length);
+    await act(async () => view.unmount());
+  }
+});
+
+test('pending saves guard preview changes and release the actions afterwards', async (context) => {
+  for (const random of [false, true]) {
+    let finish!: () => void;
+    const saving = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const save = context.mock.method(
+      library,
+      'save',
+      async (value: Gradient) => {
+        await saving;
+        return entryRef(value, 0);
+      },
+    );
+    await render(
+      <PreviewGradient
+        {...gradient}
+        isRandomGradient={random}
+        onGenerateRandom={() => ({ type: 'conic', stops: ['#F00', '#00F'] })}
+      />,
+    );
+    const before = host('Detail')[0].props.markdown;
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = host('Action')
+        .find((n) => n.props.title === 'Save Gradient')!
+        .props.onAction();
+    });
+    const changePreview = () =>
+      host('Action')
+        .find(
+          (n) => n.props.title === (random ? 'Random (Any)' : 'Add Color Stop'),
+        )!
+        .props.onAction();
+    try {
+      await act(changePreview);
+      assert.equal(host('Detail')[0].props.markdown, before);
+    } finally {
+      await act(async () => {
+        finish();
+        await pending;
+      });
+      save.mock.restore();
+    }
+    assert.equal(host('Detail')[0].props.isLoading, false);
+    await act(changePreview);
+    assert.notEqual(host('Detail')[0].props.markdown, before);
     await act(async () => view.unmount());
   }
 });

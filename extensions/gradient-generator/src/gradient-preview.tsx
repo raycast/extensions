@@ -59,7 +59,7 @@ export default function PreviewGradient({
     preferences.tailwindOutputMode ?? 'utility',
   );
   function regenerate(count?: 2 | 3) {
-    if (!onGenerateRandom) return;
+    if (submitting.current || !onGenerateRandom) return;
     setGradient(onGenerateRandom(count));
     setSource(undefined);
   }
@@ -140,9 +140,13 @@ export default function PreviewGradient({
               title="Add Color Stop"
               icon={Icon.Plus}
               shortcut={shortcut('n', ['shift'])}
-              onAction={() =>
-                setGradient((g) => ({ ...g, stops: [...g.stops, randomHex()] }))
-              }
+              onAction={() => {
+                if (submitting.current) return;
+                setGradient((g) => ({
+                  ...g,
+                  stops: [...g.stops, randomHex()],
+                }));
+              }}
             />
           )}
           <Action

@@ -147,6 +147,7 @@ export default function ExportForm({
       <Form.TextField
         id="width"
         title="Width"
+        placeholder="800"
         value={width}
         onChange={setWidth}
         error={errors.width}
@@ -154,6 +155,7 @@ export default function ExportForm({
       <Form.TextField
         id="height"
         title="Height"
+        placeholder="480"
         value={height}
         onChange={setHeight}
         error={errors.height}
@@ -176,6 +178,7 @@ export default function ExportForm({
       <Form.TextField
         id="filename"
         title="Filename"
+        placeholder={`gradient.${format}`}
         value={filename}
         onChange={setFilename}
         error={errors.filename}
