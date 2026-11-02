@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, Keyboard } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { AuthError, doiUrl, getItems, Item, itemUrl, pdfUrl } from "./api";
 import { formatAuthors, formatCitation } from "./citation";
 
@@ -8,7 +8,7 @@ interface PapersListProps {
   collectionId?: string;
   listId?: string;
   navigationTitle?: string;
-  searchBarAccessory?: ReactNode;
+  searchBarAccessory?: List.Props["searchBarAccessory"];
   isLoadingContext?: boolean;
   contextError?: Error;
 }
