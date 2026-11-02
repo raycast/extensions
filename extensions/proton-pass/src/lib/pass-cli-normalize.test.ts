@@ -204,7 +204,7 @@ test("rejects malformed item and vault records as invalid output", () => {
   }
 });
 
-test("does not invent metadata omitted by pass-cli 2.3.3 vault output", () => {
+test("does not invent metadata omitted by pass-cli vault output", () => {
   assert.deepEqual(normalizeVault({ name: "Work", vault_id: "vault-id-2", share_id: "share-2" }), {
     shareId: "share-2",
     name: "Work",

@@ -33,8 +33,8 @@ if (mode in expectedArgs && JSON.stringify(args) !== JSON.stringify(expectedArgs
   process.exit(3);
 }
 
-// Schema-derived subsets of pass-cli 2.3.3 JSON output (tag 2.3.3, commit 51a4c9b):
-// https://github.com/protonpass/pass-cli/tree/51a4c9b110a0ffe6e81f4f5d3877b9e5a0c24112/pass-cli/src/commands
+// Schema-derived subsets of pass-cli 2.5.1 JSON output (tag 2.5.1, commit 5d0cfbf):
+// https://github.com/protonpass/pass-cli/tree/5d0cfbf8b7875550ce2494dd322032c34a3a6a72/pass-cli/src/commands
 const fixtures = {
   "vaults-array": [{ share_id: "vault-1", name: "Personal", item_count: 3, role: "Owner" }],
   "vaults-wrapper": {

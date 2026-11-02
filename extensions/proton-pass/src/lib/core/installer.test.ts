@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { access, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { installArtifact } from "./installer";
+import { installArtifact, removeOtherVersions } from "./installer";
 import { Artifact } from "./artifact";
 import { makeZip } from "./zip-test-helper";
 
@@ -225,5 +225,28 @@ test("rejects ZIP traversal without writing outside installation directory", asy
     await assert.rejects(access(escapedPath));
     await assert.rejects(access(path.join(destDir, "pass-cli.exe")));
     await assert.rejects(access(tempDir));
+  });
+});
+
+test("removes the versions an upgrade replaced and keeps the installed one", async () => {
+  await withPaths(async (destDir) => {
+    const versionsDir = path.dirname(destDir);
+    const installedDir = path.join(versionsDir, "2.5.1");
+    for (const dir of [installedDir, path.join(versionsDir, "2.3.3")]) {
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, "pass-cli"), "binary");
+    }
+
+    await removeOtherVersions(installedDir);
+
+    await access(path.join(installedDir, "pass-cli"));
+    await assert.rejects(access(path.join(versionsDir, "2.3.3")));
+  });
+});
+
+test("removing other versions does nothing when none are installed", async () => {
+  await withPaths(async (destDir) => {
+    await removeOtherVersions(path.join(destDir, "2.5.1"));
+    await assert.rejects(access(destDir));
   });
 });
