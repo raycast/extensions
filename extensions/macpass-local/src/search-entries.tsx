@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { showFailureToast } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -23,6 +26,7 @@ import {
 } from "./lib/protocol";
 
 type Session = { client: MacPassClient; association: Association };
+const execFileAsync = promisify(execFile);
 
 function storageKey(port: number, hash: string) {
   return `macpass-association:${port}:${hash}`;
@@ -97,11 +101,8 @@ export default function SearchEntries() {
           : "Could not connect to MacPass.";
       setMessage(description);
       setNeedsPairing(true);
-      if (toast) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Connection failed";
-        toast.message = description;
-      }
+      await toast?.hide();
+      await showFailureToast(error, { title: "Connection failed" });
     } finally {
       busy.current = false;
       if (mounted.current) setLoading(false);
@@ -156,9 +157,8 @@ export default function SearchEntries() {
           ? error.message
           : "Could not retrieve the credential.";
       setMessage(description);
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not retrieve credential";
-      toast.message = description;
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not retrieve credential" });
     } finally {
       busy.current = false;
       if (mounted.current) setLoading(false);
@@ -173,7 +173,20 @@ export default function SearchEntries() {
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={() => refresh()}
       />
-      <Action.Open title="Open MacPass" target="/Applications/MacPass.app" />
+      <Action
+        title="Open MacPass"
+        icon={Icon.AppWindow}
+        onAction={async () => {
+          try {
+            await execFileAsync("/usr/bin/open", [
+              "-b",
+              "com.hicknhacksoftware.MacPass",
+            ]);
+          } catch (error) {
+            await showFailureToast(error, { title: "Could not open MacPass" });
+          }
+        }}
+      />
       <Action
         title="Reconnect Database"
         icon={Icon.Link}

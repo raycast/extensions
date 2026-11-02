@@ -41,19 +41,4 @@ Paste targets the application that was frontmost when you invoked Raycast. MacPa
 
 The plugin's `get-all-logins` implementation skips entries stored directly in the database root. Put searchable entries inside a group. It also supplies no group paths or URLs in search results. Password lookup requires a nonempty title; Unicode and punctuation are supported. This extension inherits the plugin's handling of groups and entries, including any recycle-bin entries it returns.
 
-## Development / reinstall
-
-From this directory:
-
-```sh
-npm ci
-npm test
-npm run typecheck
-npm run dev
-```
-
-The development command installs the extension in Raycast. Once it is ready, stop it with Control-C; the commands remain installed. Re-run it to rebuild changes. `npm run build` checks the production build and writes a `dist` directory.
-
-Test fixtures use simulated credentials only. Automated tests cover pairing, encryption/verifier handling, database switches, duplicate titles, Unicode lookup, locked databases, invalid responses, and timeouts. Approving your actual database pairing and checking copy/paste in your chosen target app are manual steps.
-
 The icon comes from the locally installed MacPass application and remains subject to the upstream project's terms. The integration code is MIT licensed.
