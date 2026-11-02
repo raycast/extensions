@@ -1265,7 +1265,7 @@ test("TOTP codes have their halves set apart like Proton Authenticator's, and lo
   const { formatTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
     formatTotpCode: (code: string) => string;
   };
-  assert.equal(formatTotpCode("123456"), "123\u2007\u2008456");
+  assert.equal(formatTotpCode("123456"), "123\u2003\u2009456");
   assert.equal(formatTotpCode("12345678"), "12345678");
 });
 
