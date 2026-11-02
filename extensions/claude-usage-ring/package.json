@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-usage-ring",
+  "title": "Claude Usage Ring",
+  "description": "Claude 5-hour and weekly subscription usage as a menu bar ring",
+  "icon": "extension-icon.png",
+  "author": "bzvstudio",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "usage-menu-bar",
+      "title": "Claude Usage",
+      "subtitle": "Usage Ring",
+      "description": "Show Claude subscription usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "2m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ringMode",
+      "title": "Ring Shows",
+      "description": "What the menu bar ring displays",
+      "type": "dropdown",
+      "required": false,
+      "default": "session",
+      "data": [
+        {
+          "title": "Session (5h)",
+          "value": "session"
+        },
+        {
+          "title": "Weekly",
+          "value": "weekly"
+        },
+        {
+          "title": "Both (outer = weekly, inner = 5h)",
+          "value": "dual"
+        }
+      ]
+    },
+    {
+      "name": "showPercentText",
+      "label": "Show percentage next to the ring",
+      "description": "Show e.g. 8% next to the ring",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "warnThreshold",
+      "title": "Amber Threshold (%)",
+      "description": "Ring turns amber at this utilisation",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "critThreshold",
+      "title": "Red Threshold (%)",
+      "description": "Ring turns red above this utilisation",
+      "type": "textfield",
+      "required": false,
+      "default": "85"
+    },
+    {
+      "name": "credentialsSource",
+      "title": "Credentials Source",
+      "description": "Where to read Claude Code login from (advanced)",
+      "type": "dropdown",
+      "required": false,
+      "default": "keychain",
+      "data": [
+        {
+          "title": "macOS Keychain",
+          "value": "keychain"
+        },
+        {
+          "title": "~/.claude/.credentials.json",
+          "value": "file"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
