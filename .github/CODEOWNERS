@@ -1128,6 +1128,7 @@
 /extensions/gitlab-docs                                             @saschaeggi
 /extensions/gitmoji                                                 @ricoberger @joshmedeski @ridemountainpig
 /extensions/gitpod                                                  @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
+/extensions/glaze                                                   @0xdhrv @0xdhrv
 /extensions/gleam-packages                                          @ryanmiville
 /extensions/glean-search                                            @faizhasim
 /extensions/gles-to-malioc                                          @RomanVPX
@@ -2490,6 +2491,7 @@
 /extensions/readymetrics                                            @chadbutz
 /extensions/real-calc                                               @xilopaint
 /extensions/real-debrid-manager                                     @YamenSharaf
+/extensions/reassign                                                @smuk3c
 /extensions/rebaptize                                               @mcdays94
 /extensions/rebrandly                                               @grikomsn @xmok
 /extensions/recap                                                   @kvzivn
