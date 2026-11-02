@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "argo",
   "title": "Argo",
-  "description": "Continue your existing terminal Agent sessions through a self-hosted Argo bridge.",
+  "description": "Continue existing Agent sessions through Argo bridges or control Herdr terminals directly in Raycast.",
   "icon": "icon.png",
   "author": "fernando_jacob",
   "license": "MIT",
@@ -16,7 +16,7 @@
       "name": "sessions",
       "title": "Agent Sessions",
       "subtitle": "Argo",
-      "description": "Browse bound sessions, send messages, and respond to agent requests.",
+      "description": "Browse Argo and Herdr sessions, view output, send tasks, and respond to prompts inside Raycast.",
       "mode": "view"
     },
     {
@@ -58,6 +58,14 @@
       "type": "textfield",
       "required": false,
       "default": "49139"
+    },
+    {
+      "name": "hcSocketPath",
+      "title": "Herdr Socket Path",
+      "description": "Optional absolute path to an existing herdr-core Unix socket. Leave blank for HC_SOCKET or the official default session path. Discovery never starts a core.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Default Herdr session socket"
     }
   ],
   "scripts": {

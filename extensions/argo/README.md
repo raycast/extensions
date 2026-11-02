@@ -1,10 +1,22 @@
 # Argo
 
-Continue explicitly connected Claude Code sessions from Raycast, on your Mac or a server. Browse sessions, send messages, read replies, and respond to supported agent requests. Codex support is experimental and has additional requirements below.
+Continue existing Agents from Raycast through Argo bridges or a direct Herdr connection. Browse sessions, read output, send tasks, and respond to prompts without leaving Raycast. Native Codex bridge support remains experimental.
 
 Argo is a **self-configured companion bridge**, not a hosted AI service. Installing this extension installs the Raycast UI only: it does not install the Argo runtime, open a tunnel, start a model, or install a launchd/systemd service. You run the bridge and connector on machines you control and keep their processes and transport alive. No Argo cloud account or model API key is required by the extension; your existing agent's authentication and permissions still apply.
 
-## Requirements
+## Herdr: no bridge required
+
+With Herdr already running, open **Agent Sessions** and choose a Herdr terminal. The source filter switches between all sessions, Argo bridges and Herdr. Local and HC-configured remote terminals share the list without changing your existing Agents. If connection fails, open **Herdr Connection Details** and set **Herdr Socket Path** for a custom session. Discovery connects only to an existing private Unix socket and never starts a core. GUI applications may not inherit your shell's environment.
+
+**Terminal Output** is literal terminal text, not chat history. Automatic capture reads only the current screen; **Read More History** is explicit because HC may scroll the original interface. The view shows capture time and completeness. Plain-text capture may lose color-only selection highlights.
+
+Use the task composer for a reported idle Agent. Blocked permission, question and authentication dialogs instead open **Terminal Controls** inside Raycast. Inspect the live prompt, send one navigation key, then review the updated screen before explicitly sending Enter, Escape, a digit, letter or custom chord. Argo never guesses Allow/Deny shortcuts or appends Enter to key input. **Respond to Current Prompt** reviews your text and screen before explicit submission with HC `force:true`; ordinary task sends always use `force:false`. Unreported programs have a separately reviewed terminal-input flow and may execute shell commands. **Interrupt Terminal** uses HC's interrupt operation, not kill.
+
+The exact target uses permanent owning-core and terminal identities. Reconnection or observed program replacement invalidates reviewed controls. Fresh screen checks reduce races, but HC has no atomic screen/approval condition or idempotent input API. Submitted keys do not prove an approval was applied. Input attempts are persisted before network writes. A timeout or disconnect blocks further input across reopen and never retries automatically. Inspect current output before explicitly acknowledging uncertainty; acknowledgment itself sends nothing. **Open Herdr** is an optional escape hatch, not the primary interaction path.
+
+HC needs no bridge runtime or pairing. Its socket grants your account's terminal access and is not a sandbox or separate permission broker. Argo validates ownership/private directory boundaries, does not forward the raw API, and leaves remote credentials with HC. Drafts and input-attempt records are stored locally in Raycast LocalStorage. Current-screen output is not persisted by this integration. Developed against HC 0.1.17 and Herdr App 0.1.12, using negotiated generation-1 methods/features rather than version matching.
+
+## Argo bridge requirements
 
 - Raycast on **macOS**.
 - On the bridge/agent machine: **Node.js 22.13+**, npm, and an already-running supported agent. The public installer also needs tar and HTTPS access to GitHub release assets and the npm registry. Argo does not install system packages.
@@ -34,7 +46,7 @@ A bridge can instead run on your Mac, or use an existing working loopback tunnel
 
 ## Everyday use
 
-- **Agent Sessions** aggregates sessions across paired bridges. Both it and **Recent Agent Session** reopen the last valid conversation; use **All Sessions** to change targets. Reopening checks the configured loopback range and can relocate a paired bridge by its pinned identity when mapped ports change. It is not a system-wide background scanner.
+- **Agent Sessions** aggregates Argo bridges and Herdr terminals. Both it and **Recent Agent Session** reopen the last valid conversation; use **All Sessions** to change targets. Reopening checks the configured loopback range and can relocate a paired bridge by its pinned identity when mapped ports change. It is not a system-wide background scanner.
 - Use **Send Message** for short input or **Compose Message** (**⌘N**) for longer drafts. Only explicitly submitted text is sent; drafts never send automatically after reconnecting. Replies appear as Markdown details, not Raycast AI chat. Bridge history begins at binding, not at the start of your terminal conversation.
 - For a supported pending approval, open **Review Approval**, inspect the parameters, then press **Enter** for **Allow Request** or **⌘⇧D** for **Deny Request**. There is no second confirmation modal; the explicit action submits the decision. Expired requests cannot be answered. Runtime support determines which requests can be relayed—this does not bypass agent permissions.
 - Codex approvals show command, working directory, reason, file changes and permission rules in separate sections. **View Original Parameters** opens the complete unchanged details read-only. Unknown fields remain visible and Agent text cannot become active Markdown links or images. This formatting does not alter the reviewed request or the decision.

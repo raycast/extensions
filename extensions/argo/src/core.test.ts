@@ -21,6 +21,8 @@ import {
   safeMarkdown,
 } from "./core.js";
 
+import { parseSessionTarget } from "./session-target.js";
+import { hcGroup, hcStatus } from "./session-target.js";
 import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
 
 const token = "a".repeat(64);
@@ -124,7 +126,10 @@ test("hub uses bearer auth, rejects redirects, and releases in-flight fetch on c
 function viewLogic(names: string[], globals: Record<string, unknown> = {}) {
   const source = ts.createSourceFile(
     "sessions.tsx",
-    readFileSync(new URL("./sessions.tsx", import.meta.url), "utf8"),
+    readFileSync(
+      new URL(names.length === 1 && names[0] === "Compose" ? "./compose.tsx" : "./sessions.tsx", import.meta.url),
+      "utf8",
+    ),
     ts.ScriptTarget.Latest,
     true,
     ts.ScriptKind.TSX,
@@ -171,6 +176,13 @@ function viewHarness() {
         Shortcut: { Common: { New: { modifiers: ["cmd"], key: "n" }, Refresh: { modifiers: ["cmd"], key: "r" } } },
       },
       Fragment: "Fragment",
+      parseSessionTarget,
+      hcGroup,
+      hcStatus,
+      hcTargetKey: (target: unknown) => JSON.stringify(target),
+      HerdrSession: "HerdrSession",
+      HerdrConnection: "HerdrConnection",
+      useHerdr: () => ({ entries: [], loading: false, reconnect() {} }),
       Color: {},
       Icon: {},
       useState(initial: unknown) {
@@ -191,6 +203,7 @@ function viewHarness() {
       useEffect: (effect: () => void) => effects.push(effect),
       List: Object.assign(member("List"), {
         EmptyView: "EmptyView",
+        Dropdown: Object.assign(member("Dropdown"), { Item: "DropdownItem" }),
         Section: "Section",
         Item: Object.assign(member("Item"), { Detail: Object.assign(member("ItemDetail"), { Metadata }) }),
       }),
@@ -454,7 +467,7 @@ test("session list disambiguates identical ids on different bridges and always e
   }
 });
 
-test("brand-new Mac opens discovery once, but saved/offline bridges never force setup", () => {
+test("first run remains on source-aware list without forcing bridge setup", () => {
   for (const scenario of ["new", "saved", "working", "invalid"] as const) {
     const harness = viewHarness();
     const pushed: View[] = [];
@@ -475,12 +488,10 @@ test("brand-new Mac opens discovery once, but saved/offline bridges never force 
       },
     );
     SessionList({});
-    harness.effects.at(-1)!();
+    harness.effects.forEach((effect) => effect());
     harness.reset();
     SessionList({});
-    harness.effects.at(-1)!();
-    assert.equal(pushed.length, scenario === "new" ? 1 : 0);
-    if (scenario === "new") assert.equal(pushed[0]!.type, "DiscoverBridges");
+    assert.equal(pushed.length, 0);
   }
 });
 
@@ -1679,5 +1690,141 @@ test("approval cannot push original parameters during a decision, including live
       assert.equal(tree.props.isLoading, false);
       assert.equal(originals().length, 1, "unsuccessful completion restores read-only original inspection");
     }
+  }
+});
+
+test("HC-only sessions open in Raycast without native bridge setup and preserve exact recent target", async () => {
+  const harness = viewHarness();
+  const pushed: View[] = [];
+  const writes: [string, string][] = [];
+  const target = {
+    kind: "hc",
+    socketPath: "/private/core.sock",
+    hostCoreId: "host",
+    coreId: "remote",
+    terminalId: "t7",
+  };
+  const entry = {
+    target,
+    machine: "vps",
+    connected: true,
+    terminal: {
+      address: "vps/t7",
+      name: "Review changes",
+      labels: {},
+      argv: ["fixture"],
+      cwd: "/work/app",
+      state: "running",
+      created_ms: 1,
+      reported: true,
+      status: { state: "blocked", kind: "permission" },
+    },
+  };
+  const { SessionList } = viewLogic(
+    ["project", "title", "sessionStatus", "sessionGroup", "orderedSessions", "statusColor", "SessionList"],
+    {
+      ...harness.globals,
+      LAST_CONVERSATION_KEY: "last-conversation-v1",
+      useBridges: () => ({ bridges: [], loading: false, reconnect() {} }),
+      useHerdr: () => ({ entries: [entry], name: "Mac", loading: false, reconnect() {} }),
+      useNavigation: () => ({ push: (view: View) => pushed.push(view) }),
+      LocalStorage: {
+        setItem: async (key: string, value: string) => {
+          writes.push([key, value]);
+        },
+      },
+    },
+  );
+  const list = SessionList({});
+  const item = views(list).find((item) => item.props.title === "Review changes")!;
+  assert.equal(item.props.accessories[1].tag.value, "Needs Input");
+  await views(item)
+    .find((view) => view.props.title === "Respond in Raycast")!
+    .props.onAction();
+  assert.equal(pushed[0]!.type, "HerdrSession");
+  assert.deepEqual(pushed[0]!.props.target, target);
+  assert.deepEqual(JSON.parse(writes[0]![1]), target);
+  assert.equal(
+    views(list).some((view) => view.props.title === "Herdr"),
+    false,
+  );
+});
+
+test("shared Compose locks duplicate activation synchronously and never navigates after unmount", async () => {
+  const harness = viewHarness();
+  let resolve!: (value: boolean) => void;
+  let calls = 0,
+    pops = 0;
+  const { Compose } = viewLogic(["Compose"], {
+    ...harness.globals,
+    useNavigation: () => ({
+      pop() {
+        pops++;
+      },
+    }),
+  });
+  const form = Compose({
+    text: "draft",
+    change() {},
+    send() {
+      calls++;
+      return new Promise<boolean>((done) => {
+        resolve = done;
+      });
+    },
+  });
+  const cleanup = harness.effects[0]!() as unknown as () => void;
+  const action = views(form).find((view) => view.type === "SubmitForm")!;
+  const pending = action.props.onSubmit();
+  await action.props.onSubmit();
+  assert.equal(calls, 1);
+  cleanup();
+  resolve(true);
+  await pending;
+  assert.equal(pops, 0);
+});
+
+test("HC recent opens only its pinned core and always closes validation client without loading native credentials", async () => {
+  for (const scenario of ["valid", "changed", "ended"] as const) {
+    const harness = viewHarness();
+    const target = {
+      kind: "hc",
+      socketPath: "/private/core.sock",
+      hostCoreId: "host",
+      coreId: "remote",
+      terminalId: "t7",
+    };
+    let closed = 0;
+    const { SessionCommand } = viewLogic(["SessionCommand"], {
+      ...harness.globals,
+      LAST_CONVERSATION_KEY: "last-conversation-v1",
+      getPreferenceValues: () => ({}),
+      LocalStorage: { getItem: async () => JSON.stringify(target) },
+      HcClient: {
+        connect: async (path: string) => {
+          assert.equal(path, target.socketPath);
+          return {
+            get: async (received: unknown) => {
+              assert.deepEqual(received, target);
+              if (scenario === "changed") throw new Error("Changed core");
+              return { state: scenario === "ended" ? "finished" : "live" };
+            },
+            close() {
+              closed++;
+            },
+          };
+        },
+      },
+      loadConnection() {
+        assert.fail("HC recent must never read an active bridge credential");
+      },
+    });
+    SessionCommand({});
+    harness.effects[0]!();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    harness.reset();
+    const result = SessionCommand({});
+    assert.equal(result.type, scenario === "valid" ? "HerdrSession" : "SessionList");
+    assert.equal(closed, 1);
   }
 });

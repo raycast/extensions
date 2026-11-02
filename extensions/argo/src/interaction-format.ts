@@ -1,7 +1,7 @@
 import type { Interaction } from "./protocol.js";
 
 // Fence length exceeds every backtick run, keeping Agent content literal and inert.
-function literal(value: unknown): string {
+export function literal(value: unknown): string {
   const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   const fence = "`".repeat(
     Array.from(text.matchAll(/`+/g)).reduce((length, match) => Math.max(length, match[0].length + 1), 3),

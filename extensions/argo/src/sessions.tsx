@@ -25,25 +25,24 @@ import { loadConnection } from "./connections.js";
 import { DiscoverBridges, Setup } from "./onboarding.js";
 import { portRange } from "./discovery.js";
 import { interactionMarkdown, originalParametersMarkdown } from "./interaction-format.js";
+import { Compose } from "./compose.js";
+import { HcClient, hcTargetKey, type HcTarget } from "./herdr.js";
+import { HerdrSession } from "./herdr-session.js";
+import { useHerdr, hcGroup, hcStatus } from "./herdr-feed.js";
+import { HerdrConnection } from "./herdr-connection.js";
+import {
+  LAST_CONVERSATION_KEY,
+  parseSessionTarget,
+  type ConversationTarget,
+  type SessionTarget,
+} from "./session-target.js";
+export { LAST_CONVERSATION_KEY } from "./session-target.js";
 
 export type Context = { bindingId?: string; profileId?: string; connectionKey?: string; recent?: boolean };
-export const LAST_CONVERSATION_KEY = "last-conversation-v1";
-type ConversationTarget = { profileId: string; bindingId: string; connectionKey: string };
 export function parseLastConversation(raw: string): ConversationTarget {
-  const value = JSON.parse(raw);
-  if (
-    !value ||
-    typeof value.profileId !== "string" ||
-    !value.profileId ||
-    value.profileId.length > 100 ||
-    typeof value.bindingId !== "string" ||
-    !value.bindingId ||
-    value.bindingId.length > 200 ||
-    typeof value.connectionKey !== "string" ||
-    !/^[a-f0-9]{24}$/.test(value.connectionKey)
-  )
-    throw new Error("Invalid recent conversation reference");
-  return { profileId: value.profileId, bindingId: value.bindingId, connectionKey: value.connectionKey };
+  const value = parseSessionTarget(raw);
+  if ("kind" in value) throw new Error("Not a bridge conversation");
+  return value;
 }
 const project = (session: Session) => session.cwd.split(/[\\/]/).filter(Boolean).pop() || session.cwd || "No project";
 const title = (session: Session) => session.name || project(session);
@@ -137,13 +136,25 @@ function PreferencesAction() {
 function SessionList({ notice }: { notice?: string }) {
   const feed = useBridges();
   const { push } = useNavigation();
-  const discovered = useRef(false);
-  useEffect(() => {
-    if (!feed.loading && !feed.error && feed.savedCount === 0 && feed.defaultUnavailable && !discovered.current) {
-      discovered.current = true;
-      push(<DiscoverBridges onConnected={feed.reconnect} />);
+  const hc = useHerdr();
+  const [source, setSource] = useState("all");
+  const [selection, setSelection] = useState<string>();
+  const refresh = () => {
+    feed.reconnect();
+    hc.reconnect();
+  };
+  const openHc = async (target: HcTarget) => {
+    try {
+      await LocalStorage.setItem(LAST_CONVERSATION_KEY, JSON.stringify(target));
+      push(<HerdrSession target={target} onAllSessions={(onPop) => push(<SessionList />, onPop)} />);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Recent Session",
+        message: "Check local storage and try again. No input was sent.",
+      });
     }
-  }, [feed.loading, feed.error, feed.savedCount, feed.defaultUnavailable, push, feed.reconnect]);
+  };
   const discoverAction = (
     <Action.Push
       title="Find Forwarded Bridges"
@@ -167,7 +178,7 @@ function SessionList({ notice }: { notice?: string }) {
         title="Refresh Sessions"
         icon={Icon.ArrowClockwise}
         shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={feed.reconnect}
+        onAction={refresh}
       />
       <PreferencesAction />
     </ActionPanel>
@@ -183,7 +194,16 @@ function SessionList({ notice }: { notice?: string }) {
   );
   return (
     <List
-      isLoading={feed.loading}
+      isLoading={feed.loading || hc.loading}
+      selectedItemId={selection}
+      onSelectionChange={(id) => setSelection(id ?? undefined)}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Session source" value={source} onChange={setSource}>
+          <List.Dropdown.Item title="All Sources" value="all" />
+          <List.Dropdown.Item title="Argo Bridges" value="argo" />
+          <List.Dropdown.Item title="Herdr" value="hc" />
+        </List.Dropdown>
+      }
       navigationTitle="Argo · All Sessions"
       searchBarPlaceholder="Find a session, project, machine, bridge, or Agent"
       actions={actions}
@@ -203,23 +223,69 @@ function SessionList({ notice }: { notice?: string }) {
           actions={actions}
         />
       ) : null}
-      {!sessions.length && !feed.loading ? (
+      {!sessions.length && !hc.entries.length && !feed.loading && !hc.loading ? (
         <List.Item
           id="no-sessions"
           title="No Agents Connected Yet"
-          subtitle="Find a forwarded server bridge or connect an existing terminal Agent"
+          subtitle="Open Herdr for local terminals, or connect an existing Agent through an Argo bridge"
           icon={Icon.Terminal}
           actions={actions}
         />
       ) : null}
       {["Needs Attention", "Online", "Offline"].map((group) => {
-        const entries = sessions.filter((session) => sessionGroup(session) === group);
-        return entries.length ? (
+        const entries = source === "hc" ? [] : sessions.filter((session) => sessionGroup(session) === group);
+        const terminals = source === "argo" ? [] : hc.entries.filter((entry) => hcGroup(entry) === group);
+        return entries.length || terminals.length ? (
           <List.Section
             key={group}
             title={group}
-            subtitle={`${entries.length} session${entries.length === 1 ? "" : "s"}`}
+            subtitle={`${entries.length + terminals.length} session${entries.length + terminals.length === 1 ? "" : "s"}`}
           >
+            {terminals.map((entry) => {
+              const state = hcStatus(entry);
+              const color =
+                hcGroup(entry) === "Offline"
+                  ? Color.SecondaryText
+                  : hcGroup(entry) === "Needs Attention"
+                    ? Color.Orange
+                    : state === "Idle"
+                      ? Color.Green
+                      : Color.Blue;
+              const terminal = entry.terminal;
+              const name =
+                terminal.name ||
+                (terminal.title as string) ||
+                terminal.cwd.split("/").filter(Boolean).pop() ||
+                terminal.address;
+              return (
+                <List.Item
+                  key={hcTargetKey(entry.target)}
+                  id={hcTargetKey(entry.target)}
+                  title={name}
+                  subtitle={`${terminal.cwd.split("/").filter(Boolean).pop() || "Terminal"} · ${entry.machine}`}
+                  keywords={["herdr", "hc", terminal.cwd, terminal.address, entry.machine, ...(terminal.argv || [])]}
+                  icon={{ source: Icon.Terminal, tintColor: color }}
+                  accessories={[{ text: "Herdr" }, { tag: { value: state, color } }]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title={state === "Needs Input" ? "Respond in Raycast" : "Open Terminal Output"}
+                        icon={Icon.Terminal}
+                        onAction={() => openHc(entry.target)}
+                      />
+                      <Action
+                        title="Refresh Sessions"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        onAction={refresh}
+                      />
+                      {setupAction}
+                      <PreferencesAction />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
             {entries.map((session) => (
               <List.Item
                 key={`${session.bridge.profile.id}:${session.id}`}
@@ -257,7 +323,7 @@ function SessionList({ notice }: { notice?: string }) {
                       title="Refresh Sessions"
                       icon={Icon.ArrowClockwise}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={feed.reconnect}
+                      onAction={refresh}
                     />
                     <PreferencesAction />
                   </ActionPanel>
@@ -267,7 +333,22 @@ function SessionList({ notice }: { notice?: string }) {
           </List.Section>
         ) : null;
       })}
-      <List.Section title="Connections" subtitle="All saved bridges · Credentials stay in private files">
+      <List.Section title="Connections" subtitle="Independent sources · Existing Agents stay in place">
+        <List.Item
+          id="herdr-connection"
+          title={hc.name === "Herdr" ? "Herdr" : `Herdr · ${hc.name}`}
+          subtitle={hc.error || "Direct local core · Includes its configured remote machines"}
+          icon={{ source: hc.error ? Icon.Warning : Icon.Terminal, tintColor: hc.error ? Color.Orange : Color.Green }}
+          accessories={[{ tag: hc.loading ? "Connecting" : hc.error ? "Unavailable" : "Connected" }]}
+          actions={
+            <ActionPanel>
+              <Action title="Reconnect Herdr" icon={Icon.ArrowClockwise} onAction={hc.reconnect} />
+              <Action.Push title="Herdr Connection Details" target={<HerdrConnection />} />
+              {setupAction}
+              <PreferencesAction />
+            </ActionPanel>
+          }
+        />
         {feed.bridges.map((bridge) => (
           <List.Item
             key={bridge.profile.id}
@@ -314,57 +395,6 @@ function SessionList({ notice }: { notice?: string }) {
         />
       </List.Section>
     </List>
-  );
-}
-
-function Compose({
-  text,
-  change,
-  send,
-}: {
-  text: string;
-  change: (text: string) => void;
-  send: (text: string) => Promise<boolean>;
-}) {
-  const [value, setValue] = useState(text);
-  const [busy, setBusy] = useState(false);
-  const { pop } = useNavigation();
-  return (
-    <Form
-      navigationTitle="Compose Message"
-      isLoading={busy}
-      enableDrafts={false}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Send Message"
-            icon={Icon.ArrowUp}
-            onSubmit={async () => {
-              if (busy) return;
-              setBusy(true);
-              try {
-                if (await send(value)) pop();
-              } finally {
-                setBusy(false);
-              }
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Your draft is saved on this Mac as you type. Nothing sends automatically, including after reconnecting. Send submits to the hub queue only when the Agent is online; a busy Agent receives it after the current turn." />
-      <Form.TextArea
-        id="text"
-        title="Message"
-        value={value}
-        onChange={(next) => {
-          setValue(next);
-          change(next);
-        }}
-        error={value.length > 100_000 ? "Maximum 100,000 characters" : undefined}
-        autoFocus
-      />
-    </Form>
   );
 }
 
@@ -1026,8 +1056,13 @@ function Conversation({
           await LocalStorage.removeItem(recentKey(identity));
         const raw = await LocalStorage.getItem<string>(LAST_CONVERSATION_KEY);
         if (raw) {
-          const saved = parseLastConversation(raw);
-          if (saved.profileId === profileId && saved.bindingId === bindingId && saved.connectionKey === identity)
+          const saved = parseSessionTarget(raw);
+          if (
+            !("kind" in saved) &&
+            saved.profileId === profileId &&
+            saved.bindingId === bindingId &&
+            saved.connectionKey === identity
+          )
             await LocalStorage.removeItem(LAST_CONVERSATION_KEY);
         }
       } catch {
@@ -1370,7 +1405,7 @@ function Conversation({
 }
 
 export function SessionCommand({ bindingId, profileId, connectionKey: expectedKey, recent = true }: Context) {
-  const [target, setTarget] = useState<ConversationTarget>();
+  const [target, setTarget] = useState<SessionTarget>();
   const [loading, setLoading] = useState(Boolean(recent || bindingId));
   const [notice, setNotice] = useState<string>();
   const { configPath, portStart, portEnd } = getPreferenceValues<Preferences>();
@@ -1378,6 +1413,7 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
     if (!recent && !bindingId) return;
     let active = true;
     let hub: Hub | undefined;
+    let hcClient: HcClient | undefined;
     setLoading(true);
     setTarget(undefined);
     void (async () => {
@@ -1388,7 +1424,24 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
         }
         const raw = !bindingId ? await LocalStorage.getItem<string>(LAST_CONVERSATION_KEY) : undefined;
         if (!active) return;
-        const saved = raw ? parseLastConversation(raw) : undefined;
+        const reference = raw ? parseSessionTarget(raw) : undefined;
+        if (reference && "kind" in reference) {
+          const client = await HcClient.connect(reference.socketPath);
+          hcClient = client;
+          try {
+            if (!active) return;
+            const terminal = await client.get(reference);
+            if (["lost", "finished", "removed"].includes(terminal.state)) {
+              if (active) setNotice("Recent Herdr Program Ended — Choose a Terminal Below");
+              return;
+            }
+            if (active) setTarget(reference);
+          } finally {
+            client.close();
+          }
+          return;
+        }
+        const saved = reference;
         const selectedId = saved?.profileId ?? profileId;
         const loaded = await loadConnection(LocalStorage, configPath, selectedId, portRange(portStart, portEnd));
         if (!active) return;
@@ -1415,7 +1468,7 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
         }
         setTarget({ bindingId: id, profileId: profile.id, connectionKey });
       } catch {
-        if (active) setNotice("Could Not Open Recent Session — Reconnect or Choose Below");
+        if (active) setNotice("Choose a Session Below — Reconnect a Source if Needed");
       } finally {
         hub?.close();
         if (active) setLoading(false);
@@ -1424,11 +1477,16 @@ export function SessionCommand({ bindingId, profileId, connectionKey: expectedKe
     return () => {
       active = false;
       hub?.close();
+      hcClient?.close();
     };
   }, [bindingId, profileId, expectedKey, recent, configPath, portStart, portEnd]);
   if (loading) return <List isLoading navigationTitle="Argo · Recent Session" />;
   return target ? (
-    <Conversation key={`${target.profileId}:${target.connectionKey}:${target.bindingId}`} {...target} />
+    "kind" in target ? (
+      <HerdrSession key={hcTargetKey(target)} target={target} onAllSessions={() => setTarget(undefined)} />
+    ) : (
+      <Conversation key={`${target.profileId}:${target.connectionKey}:${target.bindingId}`} {...target} />
+    )
   ) : (
     <SessionList notice={notice} />
   );

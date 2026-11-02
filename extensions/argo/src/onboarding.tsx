@@ -1,3 +1,4 @@
+import { HerdrConnection } from "./herdr-connection.js";
 import { DiscoverBridges } from "./discovery-ui.js";
 import { portRange } from "./discovery.js";
 export { DiscoverBridges } from "./discovery-ui.js";
@@ -401,7 +402,19 @@ export function Setup({ onConnected }: Props) {
       isLoading={feed.loading}
       actions={<ActionPanel>{actions}</ActionPanel>}
     >
-      <List.Section title="Connection">
+      <List.Section title="Herdr · Direct Connection">
+        <List.Item
+          title="Use Herdr Terminals"
+          subtitle="No bridge or pairing · View output and respond inside Raycast"
+          icon={Icon.Terminal}
+          actions={
+            <ActionPanel>
+              <Action.Push title="Connect Herdr" target={<HerdrConnection />} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      <List.Section title="Argo Bridge">
         <List.Item
           title={feed.connection === "live" ? feed.profileName : "Bridge needs attention"}
           subtitle={feed.address || feed.error || "Checking private configuration"}
