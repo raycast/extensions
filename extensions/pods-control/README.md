@@ -79,7 +79,7 @@ Inspect the compatibility matrix. Afterward update the CLI via **Manage CLI** or
 
 ## Report a bug
 
-Open an issue in the [extension repository](https://github.com/raulgg/raycast-extension-pods-control/issues). When the fault clearly sits in the CLI or your device, file it inside the [pods-control CLI repository](https://github.com/raulgg/pods-control/issues) instead. Once a command fails, pick **Copy Error** on its toast then insert that text into your report.
+Open an issue in the [development repository](https://github.com/raulgg/raycast-extension-pods-control/issues). When the fault clearly sits in the CLI or your device, file it inside the [pods-control CLI repository](https://github.com/raulgg/pods-control/issues) instead. Once a command fails, pick **Copy Error** on its toast then insert that text into your report.
 
 ## Privacy and security
 
