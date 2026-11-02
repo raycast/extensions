@@ -34,7 +34,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.CheckW
   const url = normalizeUrl(props.arguments.url);
 
   return (
-    <List navigationTitle={`Check ${url}`} searchBarPlaceholder="Filter checks">
+    <List searchBarPlaceholder="Filter checks">
       {(Object.keys(WEBSITE_CHECKS) as WebsiteCheck[]).map((check) => (
         <List.Item
           key={check}
