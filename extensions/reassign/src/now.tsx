@@ -30,7 +30,7 @@ import {
 import { PLAN_URL, WEB_BASE, webDayUrl } from "./lib/wire";
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   const { data, isLoading, revalidate } = useCachedPromise(loadAroundToday, [todayISO()], {
     keepPreviousData: true,
   });

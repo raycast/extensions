@@ -9,7 +9,7 @@ import { eventRange, isBlockingKind, isTailRow, nowWallClock, ScheduleDay, Sched
 // then a "start" ping. Dedup by id + boundary so each band fires once.
 // RQ-notify: verify reliability and feel with a live account.
 
-// Must equal the `now` command "interval" in package.json. tests/notify.test.ts checks it.
+// Must equal the `now` command "interval" in package.json.
 export const TICK_MINUTES = 10;
 // The heads-up band must be at least one tick wide, or a block jumps over it
 // between ticks and the heads-up never fires. So it spans the whole tick before
