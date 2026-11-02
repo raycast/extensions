@@ -74,6 +74,14 @@ async function requestTranslation(text: string, from: string, to: string, proxy?
     return request;
 }
 
+async function discard(body: Promise<unknown> | undefined) {
+    try {
+        await body;
+    } catch {
+        // The HTTP status is the error callers can act on.
+    }
+}
+
 async function fetchTranslation(text: string, from: string, to: string, proxy?: string): Promise<unknown> {
     const data: Record<string, string | string[]> = {
         client: "dict-chrome-ex",
@@ -110,11 +118,19 @@ async function fetchTranslation(text: string, from: string, to: string, proxy?: 
             dispatcher: new ProxyAgent(proxy),
         });
         status = response.statusCode;
-        body = status === 200 ? await response.body.json() : undefined;
+        if (status !== 200) {
+            await discard(response.body.dump());
+            throw failedRequest(status);
+        }
+        body = await response.body.json();
     } else {
         const response = await fetch(url, { method, body: requestBody, headers });
         status = response.status;
-        body = status === 200 ? await response.json() : undefined;
+        if (status !== 200) {
+            await discard(response.body?.cancel());
+            throw failedRequest(status);
+        }
+        body = await response.json();
     }
 
     if (status !== 200 || !Array.isArray(body) || !Array.isArray(body[0])) {

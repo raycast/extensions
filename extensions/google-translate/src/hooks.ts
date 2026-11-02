@@ -83,9 +83,11 @@ export const usePreferencesLanguageSet = () => {
 export const TRANSLATE_DEBOUNCE_MS = 250;
 
 const isSingleCharacterEdit = (previous: string, next: string) => {
-  if (Math.abs(previous.length - next.length) !== 1) return false;
+  const before = Array.from(previous);
+  const after = Array.from(next);
+  if (Math.abs(before.length - after.length) !== 1) return false;
 
-  const [shorter, longer] = previous.length < next.length ? [previous, next] : [next, previous];
+  const [shorter, longer] = before.length < after.length ? [before, after] : [after, before];
   let i = 0;
   let j = 0;
   let skipped = 0;
