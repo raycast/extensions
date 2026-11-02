@@ -11,7 +11,3 @@ The input view also supports searching the raw text, escaping valid JSON to a co
 Input is not automatically saved. Export requires a user-selected directory and filename; existing files require explicit confirmation before replacement. Copying to the clipboard can expose data to clipboard history or other applications.
 
 To keep the extension responsive, input is limited to 1 MiB, JSON tree depth to 128, and parsed nodes to 50,000. Formatting and compression preserve number tokens and duplicate keys. Character counts are Unicode code points; empty text has one line.
-
-## Development
-
-Use Node.js 22.22.2 or newer, npm, and Raycast. Install dependencies with `npm install`, then run `npm run dev` to load the extension in Raycast. `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build` run the project checks. Installing dependencies and Raycast's own update and development workflows can use the network; JSON processing does not require one.
