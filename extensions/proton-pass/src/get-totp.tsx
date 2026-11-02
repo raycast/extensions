@@ -63,6 +63,7 @@ export default function Command() {
   const itemsRef = useRef<TotpItem[]>([]);
   const currentTimeStepRef = useRef<number>(getTotpTimeStep());
   const isRefreshingRef = useRef(false);
+  const isListingRef = useRef(false);
   const hasLoadedFromCache = useRef(false);
   const loads = useMemo(createRequestTracker, []);
   const cacheWrites = useMemo(createSerialQueue, []);
@@ -110,7 +111,10 @@ export default function Command() {
         }
       }
 
-      const { items: freshItems, failedVaults } = await listVaultsAndItems();
+      isListingRef.current = true;
+      const { items: freshItems, failedVaults } = await listVaultsAndItems().finally(() => {
+        if (isLatest()) isListingRef.current = false;
+      });
       if (!isLatest()) return;
 
       const {
@@ -169,6 +173,7 @@ export default function Command() {
 
   async function resetSession() {
     loads.start(); // Invalidate pending listings and queued cache writes from the ended session.
+    isListingRef.current = false;
     itemsRef.current = [];
     setItems([]);
     setError("not_authenticated");
@@ -177,7 +182,8 @@ export default function Command() {
   }
 
   async function refreshTotpCodes() {
-    if (isRefreshingRef.current) return;
+    // Codes can't be generated here before the listing, which brings them: until then, each would be asked of pass-cli.
+    if (isRefreshingRef.current || isListingRef.current) return;
 
     isRefreshingRef.current = true;
     setIsRefreshing(true);

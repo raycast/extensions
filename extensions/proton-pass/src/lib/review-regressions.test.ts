@@ -1152,6 +1152,7 @@ function totpCommandFixture(
   writeCache: (items: Item[]) => Promise<void> = async () => undefined,
   globals: Record<string, unknown> = {},
   localTotpCode: (shareId: string, itemId: string) => string | undefined = () => undefined,
+  cachedItems: Item[] | null = null,
 ) {
   const harness = hookHarness();
   const toasts: { primaryAction: { onAction: () => Promise<void> } }[] = [];
@@ -1193,7 +1194,7 @@ function totpCommandFixture(
         formatTotpCode: (code: string) => code,
       },
       "./lib/cache": {
-        getCachedItems: async () => null,
+        getCachedItems: async () => (cachedItems ? { data: cachedItems } : null),
         setCachedItems: async (items: Item[]) => {
           await writeCache(items);
           savedItems = items;
@@ -1275,6 +1276,51 @@ test("Get TOTP Code generates codes from the listing instead of asking pass-cli 
   await new Promise(setImmediate);
   const row = actions(fixture.render()).find((entry) => entry.title === item.title);
   assert.equal((row?.accessories as { tag: { value: string } }[] | undefined)?.[0].tag.value, "654321");
+  assert.equal(asked, 0);
+});
+
+test("a new TOTP period during the listing waits for it instead of asking pass-cli for each cached item", async () => {
+  let now = 0;
+  let tick!: () => void;
+  let asked = 0;
+  let listed = false;
+  let finishListing!: () => void;
+  const listing = new Promise<void>((resolve) => {
+    finishListing = resolve;
+  });
+  const fixture = totpCommandFixture(
+    async () => {
+      await listing;
+      listed = true;
+      return { items: [{ ...item, hasTotp: true }], failedVaults: [] };
+    },
+    async () => {
+      asked++;
+      return "123456";
+    },
+    undefined,
+    {
+      Date: class extends Date {
+        static now() {
+          return now;
+        }
+      },
+      setInterval: (callback: () => void) => {
+        tick = callback;
+        return 0;
+      },
+    },
+    // Codes are only generated here for listed items.
+    () => (listed ? "654321" : undefined),
+    [{ ...item, hasTotp: true }],
+  );
+  await new Promise(setImmediate);
+  now = 30_000;
+  tick();
+  finishListing();
+  await new Promise(setImmediate);
+  const row = actions(fixture.render()).find((entry) => entry.title === item.title)!;
+  assert.equal((row.accessories as { tag: { value: string } }[])[0].tag.value, "654321");
   assert.equal(asked, 0);
 });
 
