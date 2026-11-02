@@ -178,13 +178,41 @@ export async function endedSessionError(): Promise<PassCliError | undefined> {
   return new PassCliError("Not authenticated. Run pass-cli login to authenticate.", "not_authenticated");
 }
 
+// Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
+// for accounts with many vaults. Run a bounded number of calls in parallel instead.
+const VAULT_LIST_CONCURRENCY = 8;
+
+/** Runs at most `limit` tasks at once, in the order they come: for listings that start at different times. */
+function createLimiter(limit: number) {
+  let running = 0;
+  const waiting: (() => void)[] = [];
+  return async function run<R>(task: () => Promise<R>): Promise<R> {
+    if (running < limit) running++;
+    // A finishing task hands its place over.
+    else await new Promise<void>((resolve) => waiting.push(resolve));
+    try {
+      return await task();
+    } finally {
+      const next = waiting.shift();
+      if (next) next();
+      else running--;
+    }
+  };
+}
+
+/**
+ * Shared by every listing command, of vaults, shares, items or members: listings can overlap, e.g. the vault list,
+ * the item list it opens and a refresh, and together still run at most 8 pass-cli commands at once.
+ */
+const listingCommands = createLimiter(VAULT_LIST_CONCURRENCY);
+
 export async function listVaults(): Promise<Vault[]> {
   if (USE_MOCK_DATA) {
     await ensureMockCacheCleared();
     return MOCK_VAULTS;
   }
   try {
-    return await (await getAdapter()).listVaults();
+    return await listingCommands(async () => (await getAdapter()).listVaults());
   } catch (error) {
     // Cached items belong to the session that wrote them: once it has ended, they must not show up again.
     if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
@@ -222,45 +250,19 @@ export function localTotpCode(shareId: string, itemId: string): string | undefin
 /** Share IDs of the items shared with the user on their own, outside their vaults. */
 async function listItemShares(): Promise<string[]> {
   try {
-    return await (await getAdapter()).listItemShares();
+    return await listingCommands(async () => (await getAdapter()).listItemShares());
   } catch (error) {
     if (error instanceof PassCliError && error.type === "not_authenticated") await clearCache();
     throw error;
   }
 }
 
-// Each pass-cli call takes ~0.5-1.5s, so listing vaults one after another adds up quickly
-// for accounts with many vaults. Run a bounded number of calls in parallel instead.
-const VAULT_LIST_CONCURRENCY = 8;
-
-/** Runs at most `limit` tasks at once, in the order they come: for listings that start at different times. */
-function createLimiter(limit: number) {
-  let running = 0;
-  const waiting: (() => void)[] = [];
-  return async function run<R>(task: () => Promise<R>): Promise<R> {
-    if (running < limit) running++;
-    // A finishing task hands its place over.
-    else await new Promise<void>((resolve) => waiting.push(resolve));
-    try {
-      return await task();
-    } finally {
-      const next = waiting.shift();
-      if (next) next();
-      else running--;
-    }
-  };
-}
-
-/**
- * Shared by every listing: they can overlap, e.g. the vault list, the item list it opens and a refresh, and together
- * still run at most 8 pass-cli commands at once.
- */
-const listingCommands = createLimiter(VAULT_LIST_CONCURRENCY);
-
 /** A vault whose items couldn't be listed. */
 export interface VaultFailure {
   vault: Vault;
   message: string;
+  /** For Shared with Me, the shares that failed, as each shared item has its own. Missing when the vault failed whole. */
+  shareIds?: string[];
 }
 
 function errorMessage(error: unknown): string {
@@ -291,13 +293,15 @@ async function listItemsOfSources(sources: ItemSource[]): Promise<{ items: Item[
       if (error instanceof PassCliError && error.type === "not_authenticated") throw error;
       const message = errorMessage(error);
       console.error(`Failed to list items from vault ${vault.name}: ${message}`);
-      // Shared items have a share each, but are shown together: they fail together.
-      if (!failures.has(vault.shareId)) failures.set(vault.shareId, { vault, message });
+      // Shared items have a share each, but are shown together: one failure names the shares that failed.
+      const failure = failures.get(vault.shareId) ?? { vault, message };
+      if (isSharedWithMe(vault)) failure.shareIds = [...(failure.shareIds ?? []), shareId];
+      failures.set(vault.shareId, failure);
       return [];
     }
   };
   const itemsPerSource = await Promise.all(sources.map((source) => listingCommands(() => listSource(source))));
-  return { items: itemsPerSource.flat(), failedVaults: [...failures.values()] };
+  return { items: itemsPerSource.flat(), failedVaults: Array.from(failures.values()) };
 }
 
 export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Item[]> {
@@ -313,7 +317,7 @@ export async function listItems(shareId?: string, vaults?: Vault[]): Promise<Ite
   const knownVaults = vaults ?? (await listVaults());
   if (shareId) {
     const vault = knownVaults.find((candidate) => candidate.shareId === shareId);
-    return listItemsFromVault(shareId, vault?.name ?? "Unknown Vault");
+    return listingCommands(() => listItemsFromVault(shareId, vault?.name ?? "Unknown Vault"));
   }
 
   return (await listItemsOfSources(vaultSources(knownVaults))).items;
@@ -368,8 +372,7 @@ export async function listVaultSharing(): Promise<Map<string, VaultSharing>> {
     );
   }
 
-  const adapter = await getAdapter();
-  const roles = Array.from(await adapter.listVaultRoles());
+  const roles = Array.from(await listingCommands(async () => (await getAdapter()).listVaultRoles()));
   return new Map(
     await Promise.all(
       roles.map(([shareId, role]) =>
