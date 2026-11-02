@@ -1,5 +1,21 @@
 # Changelog
 
+## [Queue, YouTube Search and History] - 2026-10-31
+
+### Added
+
+- Now Playing rebuilt around Kaset's queue: queue, recently played and up next in one list, with live progress and full playback controls
+- Album names resolved by searching YouTube Music, since Kaset's player payload does not include them
+- YouTube search in Play Song, merged with YouTube Music and filterable by source
+- Queue actions: play now, remove from queue, play next, add to queue
+- Recently played history recorded in the background without a menu bar item
+- Track Info view (`⌘I`) with large artwork and a metadata column
+
+### Changed
+
+- Upgraded to `@raycast/api` 2.8.2
+- Menu bar player: artwork or progress-ring icon, marquee titles, hide when idle
+
 ## [Update] - 2026-05-05
 
 ### Added

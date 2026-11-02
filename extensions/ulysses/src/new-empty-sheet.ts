@@ -1,5 +1,6 @@
-import { openUlyssesCallback } from "./utils";
+import { saveSheetUrl } from "./ulysses-url";
+import { getPreferences, openUlyssesCallback } from "./utils";
 
 export default async function NewEmptySheet() {
-  await openUlyssesCallback("ulysses://x-callback-url/new-sheet");
+  await openUlyssesCallback(saveSheetUrl({ text: "", group: getPreferences().defaultGroup }));
 }

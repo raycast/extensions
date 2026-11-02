@@ -1,5 +1,10 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { moveWindowToSpace, getCurrentSpacesByDisplay, restoreSpacesByDisplay } from "./utils";
+import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import {
+  moveWindowToSpace,
+  getCurrentSpacesByDisplay,
+  restoreSpacesByDisplay,
+  getAutomaticReturnPreference,
+} from "./utils";
 import { isMoveTarget, useSpaces, Space, RenameSpaceForm } from "./spaces";
 
 export default function Command() {
@@ -9,8 +14,8 @@ export default function Command() {
 
   async function moveWindow(space: Space) {
     try {
-      const preferences = getPreferenceValues<Preferences.MoveWindow>();
-      const originalSpaces = preferences.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
+      const shouldReturn = await getAutomaticReturnPreference();
+      const originalSpaces = shouldReturn ? await getCurrentSpacesByDisplay() : undefined;
       const isCurrentFullscreen = currentSpace?.isFullscreen;
 
       if (isCurrentFullscreen) {

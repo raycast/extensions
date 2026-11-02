@@ -12,6 +12,7 @@ export interface AirlineSummary {
   iata: string | null;
   name: string;
   logoUrl?: string | null;
+  logoDarkUrl?: string | null;
 }
 
 export interface FlightSummary {
@@ -147,7 +148,8 @@ function isAirlineSummary(value: unknown): value is AirlineSummary {
   return (
     isNullableString(value.iata, 8) &&
     isBoundedString(value.name, 256) &&
-    isOptionalNullableString(value.logoUrl, 2_048)
+    isOptionalNullableString(value.logoUrl, 2_048) &&
+    isOptionalNullableString(value.logoDarkUrl, 2_048)
   );
 }
 

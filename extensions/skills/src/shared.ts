@@ -49,7 +49,7 @@ export type SkillLockEntry = {
   sourceType: string;
   sourceUrl?: string;
   ref?: string;
-  skillPath: string;
+  skillPath?: string;
   skillFolderHash: string;
   installedAt: string;
   updatedAt: string;
@@ -67,6 +67,8 @@ export type InstalledSkill = {
   ref?: string;
   installedAt?: string;
   updatedAt?: string;
+  managedBySkillsCli?: boolean;
+  mutableAgents?: string[];
 };
 
 export type SkillFrontmatter = {

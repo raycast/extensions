@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AccountActions } from "./components/AccountActions";
 import { CardDetail } from "./components/CardDetail";
 import { getCardAccessories, getCardSubtitle } from "./components/cardListItem";
@@ -46,6 +46,9 @@ export default function RandomCardsCommand() {
   const [seed, setSeed] = useState(newShuffleSeed);
   // How many cards the last shuffle dealt, so an empty vault isn't "done".
   const [dealt, setDealt] = useState(0);
+  // Cards kept, trashed or gone. A late save for one doesn't deal it again;
+  // only Undo from Move to Trash does.
+  const goneIds = useRef(new Set<string>());
 
   useEffect(() => {
     if (isCheckingAuth) {
@@ -65,6 +68,9 @@ export default function RandomCardsCommand() {
     )
       .then((response) => {
         if (isCurrent) {
+          for (const card of response.items) {
+            goneIds.current.delete(card.id);
+          }
           setCards(response.items);
           setDealt(response.items.length);
         }
@@ -86,23 +92,45 @@ export default function RandomCardsCommand() {
   }, [isCheckingAuth, isAuthenticated, seed]);
 
   const handleRemoved = useCallback((cardId: string) => {
+    goneIds.current.add(cardId);
     setCards((previous) => removeCardById(previous, cardId).cards);
   }, []);
 
   // Archiving or keeping a card moves on to the next one.
-  const handleUpdated = useCallback(
-    (next: RaycastCard) => {
-      if (next.isArchived || next.isDeleted || next.isHidden) {
-        handleRemoved(next.id);
-        return;
-      }
-      setCards((previous) =>
-        previous.some((card) => card.id === next.id)
-          ? previous.map((card) => (card.id === next.id ? next : card))
-          : [next, ...previous],
-      );
+  const handleUpdated = useCallback((next: RaycastCard) => {
+    if (goneIds.current.has(next.id)) {
+      return;
+    }
+    if (next.isArchived || next.isDeleted || next.isHidden) {
+      setCards((previous) => removeCardById(previous, next.id).cards);
+      return;
+    }
+    setCards((previous) =>
+      previous.some((card) => card.id === next.id)
+        ? previous.map((card) => (card.id === next.id ? next : card))
+        : [next, ...previous],
+    );
+  }, []);
+
+  const handleRestored = useCallback(
+    (card: RaycastCard) => {
+      goneIds.current.delete(card.id);
+      handleUpdated(card);
     },
-    [handleRemoved],
+    [handleUpdated],
+  );
+
+  // Archive marks the card gone so a late save can't deal it again; its Undo
+  // answers with the card unarchived, which restores it.
+  const handleArchiveChange = useCallback(
+    (next: RaycastCard) => {
+      if (next.isArchived) {
+        handleRemoved(next.id);
+      } else {
+        handleRestored(next);
+      }
+    },
+    [handleRemoved, handleRestored],
   );
 
   const handleKeep = useCallback(
@@ -191,7 +219,9 @@ export default function RandomCardsCommand() {
                     />
                     <Action
                       icon={Icon.Box}
-                      onAction={() => void archiveCard(card, handleUpdated)}
+                      onAction={() =>
+                        void archiveCard(card, handleArchiveChange)
+                      }
                       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                       title="Archive"
                     />
@@ -204,8 +234,8 @@ export default function RandomCardsCommand() {
                         <CardDetail
                           card={card}
                           onCardDeleted={handleRemoved}
+                          onCardRestored={handleRestored}
                           onCardUpdated={handleUpdated}
-                          onFilterByTag={() => undefined}
                           onNavigateBackAfterDelete={() => undefined}
                           onSignedOut={refreshAuth}
                         />
