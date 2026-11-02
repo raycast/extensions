@@ -65,7 +65,7 @@
           "name": "sortBy",
           "type": "dropdown",
           "title": "Sort items by",
-          "description": "Order of the items. Sort by (⌘⇧S) changes it until the window closes.",
+          "description": "Order of the items. ⌘⇧S changes it until the window closes.",
           "default": "mostUsed",
           "required": false,
           "data": [
@@ -91,7 +91,7 @@
           "name": "sortVaultsBy",
           "type": "dropdown",
           "title": "Sort vaults by",
-          "description": "Order of the vaults in the vault list and the vault menu. The menu at the top right of the vault list, or Sort by (⌘⇧S) there, changes it until the window closes.",
+          "description": "Order of the vaults. ⌘⇧S changes it until the window closes.",
           "default": "name",
           "required": false,
           "data": [
@@ -132,7 +132,7 @@
           "type": "checkbox",
           "title": "",
           "label": "Show website icons",
-          "description": "Needs a Favicon Provider chosen in Raycast's Advanced settings, which receives the domains.",
+          "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
           "default": false,
           "required": false
         }
@@ -325,7 +325,7 @@
           "name": "sortBy",
           "type": "dropdown",
           "title": "Sort items by",
-          "description": "Order of the codes. Sort by (⌘⇧S) changes it until the window closes.",
+          "description": "Order of the codes. ⌘⇧S changes it until the window closes.",
           "default": "mostUsed",
           "required": false,
           "data": [
@@ -352,7 +352,7 @@
           "type": "checkbox",
           "title": "Website Icons",
           "label": "Show website icons",
-          "description": "Needs a Favicon Provider chosen in Raycast's Advanced settings, which receives the domains.",
+          "description": "Needs a Favicon Provider in Raycast's settings. It sees the domains.",
           "default": false,
           "required": false
         }
