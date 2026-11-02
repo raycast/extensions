@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Claude plans without a 5h limit] - {PR_MERGE_DATE}
+
+- Show Claude usage when the response has no 5-hour window, as happens on Max plans, instead of failing with "Missing five_hour usage"
+
 ## [Cursor sign-in on Windows] - 2026-10-16
 
 - Auto-detect active Cursor authentication from the Windows state database, with `%APPDATA%\Cursor\auth.json` as a fallback

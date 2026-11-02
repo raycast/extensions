@@ -316,3 +316,59 @@ test("a named config dir keeps its directory label even when an account identity
     fs.rmSync(parent, { recursive: true, force: true });
   }
 });
+
+async function fetchUsageFrom(body: unknown) {
+  const { fetchClaudeUsage } = await import("./fetcher.ts");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => new Response(JSON.stringify(body), { status: 200 })) as typeof fetch;
+  try {
+    return await fetchClaudeUsage({
+      accessToken: "access-token-1",
+      scopes: ["user:profile"],
+      subscriptionType: "max",
+      source: "file",
+      raw: {},
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+for (const [name, fiveHour] of [
+  ["missing", {}],
+  ["null", { five_hour: null }],
+] as const) {
+  test(`fetchClaudeUsage keeps the weekly window when five_hour is ${name}`, async () => {
+    const { usage, error } = await fetchUsageFrom({ ...fiveHour, seven_day: { utilization: 25 } });
+
+    assert.equal(error, null);
+    assert.equal(usage?.plan, "Claude Max");
+    assert.equal(usage?.fiveHour, null);
+    assert.equal(usage?.sevenDay?.percentageRemaining, 75);
+  });
+}
+
+test("fetchClaudeUsage accepts a response with only a model-scoped limit", async () => {
+  const { usage, error } = await fetchUsageFrom({
+    limits: [{ kind: "weekly_scoped", percent: 40, scope: { model: { display_name: "Fable" } } }],
+  });
+
+  assert.equal(error, null);
+  assert.equal(usage?.fiveHour, null);
+  assert.equal(usage?.sevenDay, null);
+  assert.equal(usage?.modelWindows.fable?.percentageRemaining, 60);
+});
+
+test("fetchClaudeUsage still reads five_hour when it is present", async () => {
+  const { usage } = await fetchUsageFrom({ five_hour: { utilization: 10 }, seven_day: null });
+
+  assert.equal(usage?.fiveHour?.percentageRemaining, 90);
+  assert.equal(usage?.sevenDay, null);
+});
+
+test("fetchClaudeUsage reports a parse error when the response has no usable window", async () => {
+  const { usage, error } = await fetchUsageFrom({ five_hour: null, seven_day: null, extra_usage: {} });
+
+  assert.equal(usage, null);
+  assert.equal(error?.type, "parse_error");
+});
