@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "issue-assistant-for-raycast",
+  "title": "Issue Assistant",
+  "description": "Verified, fully secure and end-to-end encrypted issue search with offline mode.",
+  "version": "1.0.0",
+  "author": "0xdhrv",
+  "owner": "acme",
+  "license": "Apache-2.0",
+  "categories": ["Other"],
+  "platforms": ["macOS", "Windows", "Linux"],
+  "commands": [
+    {
+      "name": "search-issues",
+      "title": "search an issue",
+      "subtitle": "Quickly search all of your Acme issues",
+      "description": "Search Acme issues",
+      "mode": "view",
+      "arguments": [
+        { "name": "team", "type": "text", "placeholder": "team", "required": false },
+        { "name": "query", "type": "text", "placeholder": "search query", "required": true },
+        { "name": "status", "type": "text", "placeholder": "status" },
+        { "name": "owner", "type": "text", "placeholder": "owner" }
+      ]
+    },
+    {
+      "name": "recent-issues",
+      "title": "Recent Issues",
+      "description": "Show recently updated Acme issues",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "workspace",
+          "type": "textfield",
+          "title": "Workspace",
+          "description": "Acme workspace slug",
+          "placeholder": "my-team",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "menu-bar-count",
+      "title": "Open Issues",
+      "description": "Show open issue count in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Issue Assistant",
+      "description": "Set your workspace and defaults",
+      "mode": "view",
+      "interval": "1h"
+    },
+    {
+      "name": "cleanup-files",
+      "title": "Clean Up Attachments",
+      "description": "Delete downloaded attachments",
+      "mode": "no-view"
+    },
+    {
+      "name": "launch-dashboard",
+      "title": "Open Dashboard",
+      "description": "Open the Acme dashboard",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "textfield",
+      "title": "API key",
+      "description": "Your Acme API key",
+      "default": "acm_live_9f2c7b1e4d6a8035c1e7f2b94a6d0e13",
+      "required": true
+    },
+    {
+      "name": "limit",
+      "type": "number",
+      "title": "Result limit",
+      "description": "Maximum number of results",
+      "required": false
+    },
+    {
+      "name": "organisation",
+      "type": "textfield",
+      "title": "Organisation",
+      "description": "Your organisation slug",
+      "required": false
+    },
+    {
+      "name": "cacheDir",
+      "type": "textfield",
+      "title": "Cache Folder",
+      "description": "Where attachments are stored",
+      "default": "~/Library/Application Support/Acme",
+      "required": false
+    },
+    {
+      "name": "editor",
+      "type": "appPicker",
+      "title": "Default Editor",
+      "description": "App used to open attachments",
+      "required": false
+    }
+  ],
+  "tools": [
+    { "name": "delete-issue", "title": "Delete Issue", "description": "Archive an Acme issue so it can be restored" },
+    { "name": "get-issue", "title": "Get Issue", "description": "Return an Acme issue" }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0",
+    "@raycast/utils": "^1.10.0",
+    "@types/node": "22.19.17",
+    "keytar": "^7.9.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "posthog-node": "^4.0.0",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "cheerio": "^1.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "prebuild": "swiftc helper.swift -o assets/acme-helper",
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

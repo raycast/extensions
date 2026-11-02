@@ -1,0 +1,26 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "acme-models",
+  "title": "Acme Models",
+  "description": "Use Acme language models in Raycast AI.",
+  "icon": "extension-icon.png",
+  "author": "0xdhrv",
+  "license": "MIT",
+  "categories": ["Developer Tools"],
+  "commands": [
+    {
+      "name": "show-models",
+      "title": "Show Models",
+      "description": "List Acme models",
+      "mode": "view"
+    }
+  ],
+  "tools": [],
+  "ai": {
+    "modelProvider": "acme"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  }
+}
