@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "b-side",
   "title": "B-Side",
-  "description": "Control B-Side, the Mac player for YouTube Music: play, pause, skip and start a vibe.",
+  "description": "Control B-Side, the Mac player for YouTube Music: play, pause, skip, like the track and choose a vibe.",
   "icon": "icon.png",
   "author": "emilsugaipov",
   "platforms": [
@@ -32,10 +32,16 @@
       "mode": "no-view"
     },
     {
-      "name": "play-vibe",
-      "title": "Play Vibe",
-      "description": "Starts B-Side's first vibe.",
+      "name": "like",
+      "title": "Like Track",
+      "description": "Likes the track B-Side plays.",
       "mode": "no-view"
+    },
+    {
+      "name": "choose-vibe",
+      "title": "Choose Vibe",
+      "description": "Lists your vibes and starts the one you pick.",
+      "mode": "view"
     },
     {
       "name": "show",
@@ -45,7 +51,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.10.1"
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

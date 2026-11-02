@@ -2,4 +2,4 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-Play or Pause, Next Track, Previous Track, Play Vibe and Show Now Playing.
+Play or Pause, Next Track, Previous Track, Like Track, Choose Vibe and Show Now Playing.

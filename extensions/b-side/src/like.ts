@@ -1,5 +1,5 @@
 import { send } from "./bside";
 
 export default async function Command() {
-  await send("vibe", "Playing a Vibe");
+  await send("like", "Liked");
 }
