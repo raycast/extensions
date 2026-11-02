@@ -28,11 +28,11 @@ export function folderPaths(folders: Folder[]): Map<string, FolderRef[]> {
   return paths;
 }
 
-/** The items with the path of their folder. An item whose folder isn't among `folders` gets none. */
-export function withFolderPaths(items: Item[], folders: Folder[]): Item[] {
-  const paths = folderPaths(folders);
+/** The items with the path of their folder, among `folders`. An item whose folder isn't among them gets none. */
+export function withFolderPaths(items: Item[], folders: VaultFolder[]): Item[] {
+  const paths = new Map(folders.map((folder) => [folderEntryValue(folder), folder.path]));
   return items.map((item) => {
-    const folderPath = item.folderId ? paths.get(item.folderId) : undefined;
+    const folderPath = item.folderId ? paths.get(folderValue(item.shareId, item.folderId)) : undefined;
     return folderPath ? { ...item, folderPath } : item;
   });
 }
@@ -42,14 +42,31 @@ export function folderPathLabel(path: FolderRef[]): string {
   return path.map((folder) => folder.name).join(PATH_SEPARATOR);
 }
 
-/** A folder with items in it, for the vault menu and the vault list. */
-export interface FolderEntry {
+/** A folder of one of the user's vaults. */
+export interface VaultFolder {
   /** The vault's share ID. */
   shareId: string;
   /** From the vault's root down to the folder, which comes last. */
   path: FolderRef[];
+}
+
+/** A folder for the vault menu and the vault list. */
+export interface FolderEntry extends VaultFolder {
   /** Items in the folder, its subfolders' included. */
   itemCount: number;
+}
+
+/** The folders of the vaults whose folders a listing could list, empty ones included. */
+export interface ListedFolders {
+  shareIds: string[];
+  folders: VaultFolder[];
+}
+
+const NOTHING_LISTED: ListedFolders = { shareIds: [], folders: [] };
+
+/** A vault's folders, as pass-cli lists them. */
+export function vaultFolders(shareId: string, folders: Folder[]): VaultFolder[] {
+  return [...folderPaths(folders).values()].map((path) => ({ shareId, path }));
 }
 
 /** The vault menu's value for a folder. Vault share IDs never start the same way. */
@@ -57,7 +74,7 @@ export function folderValue(shareId: string, folderId: string): string {
   return `${FOLDER_VALUE_PREFIX}${shareId}:${folderId}`;
 }
 
-export function folderEntryValue(entry: FolderEntry): string {
+export function folderEntryValue(entry: VaultFolder): string {
   return folderValue(entry.shareId, entry.path[entry.path.length - 1].id);
 }
 
@@ -76,17 +93,20 @@ function comparePaths(a: FolderRef[], b: FolderRef[]): number {
 }
 
 /** By vault, then by path. Vaults are ordered by their callers. */
-function compareEntries(a: FolderEntry, b: FolderEntry): number {
+function compareEntries(a: VaultFolder, b: VaultFolder): number {
   if (a.shareId !== b.shareId) return a.shareId < b.shareId ? -1 : 1;
   return comparePaths(a.path, b.path);
 }
 
 /**
- * The folders that have items, in them or in their subfolders, sorted by path within each vault, a folder before its
- * subfolders. Empty folders aren't known: pass-cli only lists the folders of vaults with items in folders.
+ * The vault menu's and the vault list's folders: the ones listed, empty ones included, and those of the items, whose
+ * vault's folders couldn't be listed this time. Each counts its items and its subfolders'. Sorted by path within each
+ * vault, a folder before its subfolders.
  */
-export function folderEntries(items: Item[]): FolderEntry[] {
-  const entries = new Map<string, FolderEntry>();
+export function folderEntries(items: Item[], listed: VaultFolder[] = []): FolderEntry[] {
+  const entries = new Map<string, FolderEntry>(
+    listed.map((folder) => [folderEntryValue(folder), { ...folder, itemCount: 0 }]),
+  );
   for (const item of items) {
     const path = item.folderPath;
     if (!path || item.sharedWithMe) continue;
@@ -100,15 +120,31 @@ export function folderEntries(items: Item[]): FolderEntry[] {
   return [...entries.values()].sort(compareEntries);
 }
 
-/** Folders after a listing: those of vaults whose items couldn't be listed stay as they were. */
+/**
+ * The folders known after a listing: those it listed, and the ones known before for the other vaults that still exist,
+ * whose folders couldn't be listed this time.
+ */
+export function refreshVaultFolders(
+  previous: VaultFolder[],
+  vaults: { shareId: string }[],
+  listed: ListedFolders = NOTHING_LISTED,
+): VaultFolder[] {
+  const listedShareIds = new Set(listed.shareIds);
+  const existing = new Set(vaults.map((vault) => vault.shareId));
+  const kept = previous.filter((folder) => existing.has(folder.shareId) && !listedShareIds.has(folder.shareId));
+  return [...kept, ...listed.folders].sort(compareEntries);
+}
+
+/** Folders after a listing: those of vaults whose items couldn't be listed keep their earlier count. */
 export function refreshFolderEntries(
   previous: FolderEntry[],
   items: Item[],
+  known: VaultFolder[],
   failedShareIds: Set<string>,
 ): FolderEntry[] {
   const kept = previous.filter((entry) => failedShareIds.has(entry.shareId));
-  const listed = folderEntries(items).filter((entry) => !failedShareIds.has(entry.shareId));
-  return [...kept, ...listed].sort(compareEntries);
+  const counted = folderEntries(items, known).filter((entry) => !failedShareIds.has(entry.shareId));
+  return [...kept, ...counted].sort(compareEntries);
 }
 
 /** Whether an item shows for a choice of the vault menu other than All Vaults: a vault, Shared with Me or a folder. */

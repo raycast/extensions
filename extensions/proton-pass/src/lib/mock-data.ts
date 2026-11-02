@@ -1,3 +1,4 @@
+import { VaultFolder } from "./folders";
 import { Item, ItemDetail, Vault } from "./types";
 
 export const MOCK_VAULTS: Vault[] = [
@@ -243,3 +244,18 @@ export const MOCK_TOTP_CODES: Record<string, string> = {
 export function useMockData(): boolean {
   return process.env.NODE_ENV === "development";
 }
+
+/** The vaults' folders, Travel being empty: the items' folders and one without items. */
+export const MOCK_FOLDERS: VaultFolder[] = [
+  { shareId: "vault-1", path: [{ id: "folder-finance", name: "Finance" }] },
+  { shareId: "vault-1", path: [{ id: "folder-streaming", name: "Streaming" }] },
+  { shareId: "vault-1", path: [{ id: "folder-travel", name: "Travel" }] },
+  { shareId: "vault-2", path: [{ id: "folder-engineering", name: "Engineering" }] },
+  {
+    shareId: "vault-2",
+    path: [
+      { id: "folder-engineering", name: "Engineering" },
+      { id: "folder-servers", name: "Servers" },
+    ],
+  },
+];

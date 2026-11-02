@@ -1,10 +1,13 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { VaultFolder } from "./folders";
 import { Item, SavedSharing, Vault } from "./types";
 
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
 const VAULTS_CACHE_KEY = "proton_pass_vaults_cache";
 // Only the vault list lists sharing, so it's saved apart from the vaults, which the item list saves too.
 const SHARING_CACHE_KEY = "proton_pass_sharing_cache";
+// Folders, empty ones included, which the items alone don't give.
+const FOLDERS_CACHE_KEY = "proton_pass_folders_cache";
 // Per-vault item caches were written by earlier versions; keep them available for offline vault views.
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -64,6 +67,9 @@ export const setCachedItems = async (items: Item[], completeListing = false) => 
 export const getCachedVaults = () => getCache<Vault[]>(VAULTS_CACHE_KEY);
 export const setCachedVaults = (vaults: Vault[]) => setCache(VAULTS_CACHE_KEY, vaults);
 
+export const getCachedFolders = () => getCache<VaultFolder[]>(FOLDERS_CACHE_KEY);
+export const setCachedFolders = (folders: VaultFolder[]) => setCache(FOLDERS_CACHE_KEY, folders);
+
 export const getCachedSharing = () => getCache<SavedSharing>(SHARING_CACHE_KEY);
 export const setCachedSharing = (sharing: SavedSharing) => setCache(SHARING_CACHE_KEY, sharing);
 
@@ -74,6 +80,7 @@ export async function clearCache(): Promise<void> {
       key === ITEMS_CACHE_KEY ||
       key === VAULTS_CACHE_KEY ||
       key === SHARING_CACHE_KEY ||
+      key === FOLDERS_CACHE_KEY ||
       key.startsWith(VAULT_ITEMS_CACHE_PREFIX),
   );
 

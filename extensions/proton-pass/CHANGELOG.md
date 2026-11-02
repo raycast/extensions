@@ -2,11 +2,11 @@
 
 ## [Folders and Proton Pass CLI 2.5.1] - {PR_MERGE_DATE}
 
-- Your Proton Pass folders show in Browse Items: in the vault list and in the vault menu at the top right of the items, each vault is followed by its folders, written with their path ("Personal › Banking › Cards") and how many items they hold. A folder shows its items and its subfolders' items. Get TOTP Code's vault menu has them too
+- Your Proton Pass folders show in Browse Items: in the vault list and in the vault menu at the top right of the items, each vault is followed by its folders, written with their path ("Personal › Banking › Cards") and how many items they hold. Empty folders show too. A folder shows its items and its subfolders' items. Get TOTP Code's vault menu lists the folders that hold codes, as it lists the vaults that have codes
 - The item details have a Folder row under Vault
 - New List Folders command: it opens Browse Items on the folders alone, by vault, as List Vaults opens it on the vaults
 - Vaults have a box icon instead of a folder, now that folders have it
-- Empty folders don't show: their names come from one more pass-cli command per vault, run only for vaults with items in folders
+- The folders come from one more pass-cli command per vault, run along with the vault's items, and are saved with them so that they show at once next time
 - The extension installs Proton Pass CLI 2.5.1 instead of 2.3.3, which brings folders, proxy fixes and network updates. The copy of the previous version is deleted once the new one is installed
 - The README no longer suggests `pass-cli login --interactive`: pass-cli 2.5.0 removed logging in with a password in the terminal, leaving the browser login and personal access tokens
 

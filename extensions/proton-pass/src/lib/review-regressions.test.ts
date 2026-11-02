@@ -333,7 +333,11 @@ test("a failed full load keeps early vault items visible and offers a working Re
       },
     },
     "./types": { PassCliError },
-    "./cache": { getCachedItems: async () => null, getCachedVaults: async () => null },
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedFolders: async () => null,
+    },
     "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
     "./login-view": {},
     "./format": {},
@@ -415,6 +419,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: true }),
+      getCachedFolders: async () => null,
       getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: true }),
     },
     "./error-views": errorViews,
@@ -521,6 +526,7 @@ function passCliWithAdapter(adapter: Record<string, unknown>) {
       vaults: Vault[];
       items: Item[];
       failedVaults: { vault: Vault; message: string; shareIds?: string[] }[];
+      folders: { shareIds: string[]; folders: { shareId: string; path: { name: string }[] }[] };
     }>;
   };
 }
@@ -547,7 +553,7 @@ test("items shared one by one are listed under Shared with Me, through their own
   assert.equal(failedVaults.length, 0);
 });
 
-test("folder names are listed only for vaults with items in folders, and their failure keeps the items", async () => {
+test("every vault's folders are listed with its items, empty ones included, and their failure keeps the items", async () => {
   const folderLists: string[] = [];
   const api = passCliWithAdapter({
     listVaults: async () => [
@@ -562,18 +568,27 @@ test("folder names are listed only for vaults with items in folders, and their f
     listFolders: async (shareId: string) => {
       folderLists.push(shareId);
       if (shareId === "family") throw new PassCliError("Network error", "network_error");
-      return [{ folderId: "f", name: "Banking" }];
+      return [
+        { folderId: "f", name: "Banking" },
+        { folderId: "empty", name: "Travel" },
+      ];
     },
   });
-  const { items, failedVaults } = await api.listVaultsAndItems();
-  // Work has no item in a folder, and an item shared on its own can't open its owner's folders.
-  assert.equal(folderLists.sort().join(), "family,personal");
+  const { items, failedVaults, folders } = await api.listVaultsAndItems();
+  // Work has no item in a folder, but may have empty folders. An item shared on its own can't open its owner's folders.
+  assert.equal(folderLists.sort().join(), "family,personal,work");
   assert.equal(
     items
       .map((entry) => `${entry.itemId}:${entry.folderPath?.map((folder) => folder.name).join("/") ?? "-"}`)
       .sort()
       .join(),
     "family-item:-,item-share-item:-,personal-item:Banking,work-item:-",
+  );
+  // Family's folders couldn't be listed: the ones known before stay for it.
+  assert.equal(folders.shareIds.sort().join(), "personal,work");
+  assert.equal(
+    folders.folders.map((folder) => `${folder.shareId}:${folder.path.map(({ name }) => name).join("/")}`).join(),
+    "personal:Banking,personal:Travel,work:Banking,work:Travel",
   );
   assert.equal(failedVaults.length, 0);
 });
@@ -971,10 +986,12 @@ test("failed vault loads remain retryable and never write a fresh empty cache", 
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       setCachedItems: async () => {
         writes++;
       },
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => {
         writes++;
       },
@@ -2055,10 +2072,12 @@ test("an empty failed selected vault offers lasting Retry while other vaults loa
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       setCachedItems: async () => {
         writes++;
       },
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => {
         writes++;
       },
@@ -2124,6 +2143,7 @@ test("an ended session shows the login screen at once, without showing the saved
     },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
       getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
     },
     "./item-counts": {
@@ -2164,6 +2184,7 @@ test("a slow session check doesn't hold the saved items back, and an ended sessi
     },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
       getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
     },
     "./item-counts": {
@@ -2204,6 +2225,7 @@ test("an item list opened from the vault list once the session is confirmed does
     },
     "./cache": {
       getCachedItems: async () => ({ data: [item], isStale: false }),
+      getCachedFolders: async () => null,
       getCachedVaults: async () => ({ data: [{ shareId: "vault", name: "Personal" }], isStale: false }),
     },
   });
@@ -2244,10 +2266,12 @@ test("the vault list passes on a session it confirmed to the item lists it opens
     "./login-view": {},
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
       setCachedSharing: async () => undefined,
       setCachedItems: async () => undefined,
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => undefined,
     },
     "./item-counts": itemCounts,
@@ -2301,6 +2325,7 @@ test("the vault list shows and saves items before optional sharing, from complet
     "./login-view": {},
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
       setCachedSharing: async () => {
@@ -2309,6 +2334,7 @@ test("the vault list shows and saves items before optional sharing, from complet
       setCachedItems: async () => {
         saved.push("items");
       },
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => {
         saved.push("vaults");
       },
@@ -2445,10 +2471,12 @@ test("the vault list is sorted by name by default, and Sort by or its search bar
     "./login-view": {},
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
       setCachedSharing: async () => undefined,
       setCachedItems: async () => undefined,
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => undefined,
     },
     "./item-counts": itemCounts,
@@ -2525,12 +2553,14 @@ test("an older vault list load can't replace newer sharing or displayed counts",
     "./login-view": {},
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
       setCachedSharing: async (sharing: unknown) => {
         savedSharing.push(sharing);
       },
       setCachedItems: async () => undefined,
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => undefined,
     },
     "./item-counts": itemCounts,
@@ -2640,10 +2670,12 @@ test("Browse Items opens all items over the vaults, which load only once they're
     "./login-view": {},
     "./cache": {
       getCachedItems: async () => null,
+      getCachedFolders: async () => null,
       getCachedVaults: async () => null,
       getCachedSharing: async () => null,
       setCachedSharing: async () => undefined,
       setCachedItems: async () => undefined,
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => undefined,
     },
     "./item-counts": itemCounts,
@@ -2670,7 +2702,7 @@ test("Browse Items opens all items over the vaults, which load only once they're
   assert.equal(titles.join(", "), "All Vaults, Personal");
 });
 
-test("folders follow their vault in the vault list, and List Folders shows them alone by vault", async () => {
+test("every folder follows its vault in the vault list, empty ones included, and List Folders shows them alone by vault", async () => {
   const banking = { id: "banking", name: "Banking" };
   const listed = [
     {
@@ -2707,6 +2739,15 @@ test("folders follow their vault in the vault list, and List Folders shows them 
           ],
           items: listed,
           failedVaults: [],
+          // Work's Travel folder is empty.
+          folders: {
+            shareIds: ["vault", "work"],
+            folders: [
+              { shareId: "vault", path: [banking] },
+              { shareId: "vault", path: [banking, { id: "cards", name: "Cards" }] },
+              { shareId: "work", path: [{ id: "travel", name: "Travel" }] },
+            ],
+          },
         }),
       },
       "./types": { PassCliError },
@@ -2715,10 +2756,12 @@ test("folders follow their vault in the vault list, and List Folders shows them 
       "./login-view": {},
       "./cache": {
         getCachedItems: async () => null,
+        getCachedFolders: async () => null,
         getCachedVaults: async () => null,
         getCachedSharing: async () => null,
         setCachedSharing: async () => undefined,
         setCachedItems: async () => undefined,
+        setCachedFolders: async () => undefined,
         setCachedVaults: async () => undefined,
       },
       "./item-counts": itemCounts,
@@ -2737,10 +2780,12 @@ test("folders follow their vault in the vault list, and List Folders shows them 
   const rows = (vaultList.props.children as { props: { children: unknown[] } }).props.children.flat();
   assert.equal(
     rows.flatMap(titleOf).join(", "),
-    "All Vaults, Personal, Personal › Banking, Personal › Banking › Cards, Work",
+    "All Vaults, Personal, Personal › Banking, Personal › Banking › Cards, Work, Work › Travel",
   );
   const cards = rows.find((row) => titleOf(row)[0] === "Personal › Banking › Cards") as Element;
   assert.equal((cards.props.accessories as { text: string }[])[0].text, "1 item");
+  const travel = rows.find((row) => titleOf(row)[0] === "Work › Travel") as Element;
+  assert.equal((travel.props.accessories as { text: string }[])[0].text, "0 items");
   const bankingRow = rows.find((row) => titleOf(row)[0] === "Personal › Banking") as Element;
   // A folder counts its subfolders' items too.
   assert.equal((bankingRow.props.accessories as { text: string }[])[0].text, "2 items");
@@ -2753,7 +2798,10 @@ test("folders follow their vault in the vault list, and List Folders shows them 
     section.props.title,
     [section.props.children].flat().flatMap(titleOf).join(", "),
   ]);
-  assert.deepEqual(JSON.parse(JSON.stringify(sections)), [["Personal", "Banking, Banking › Cards"]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sections)), [
+    ["Personal", "Banking, Banking › Cards"],
+    ["Work", "Travel"],
+  ]);
 });
 
 test("a vault opened from the vault list keeps its count when its items can't be listed", async () => {
@@ -2770,7 +2818,11 @@ test("a vault opened from the vault list keeps its count when its items can't be
         failedVaults: [{ vault: failed, message: "Offline" }],
       }),
     },
-    "./cache": { getCachedItems: async () => null, getCachedVaults: async () => null },
+    "./cache": {
+      getCachedItems: async () => null,
+      getCachedVaults: async () => null,
+      getCachedFolders: async () => null,
+    },
   });
   const render = () => harness.render(SearchItemsView, { initialVault: { ...failed, itemCount: 7 } });
   render();
@@ -2804,8 +2856,10 @@ test("Check Again in Search Items keeps the login screen until the items have lo
     "./types": { PassCliError },
     "./cache": {
       getCachedItems: async () => ({ data: [item], timestamp: 0, isStale: true }),
+      getCachedFolders: async () => null,
       getCachedVaults: async () => ({ data: [vault], timestamp: 0, isStale: true }),
       setCachedItems: async () => undefined,
+      setCachedFolders: async () => undefined,
       setCachedVaults: async () => undefined,
     },
     "./error-views": { renderErrorView: (type: unknown) => (type ? { props: { error: type } } : null) },
