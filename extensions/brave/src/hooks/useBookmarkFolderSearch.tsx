@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
 import { promises, existsSync } from "fs";
 import { BookmarkDirectory, RawBookmarks, SearchResult, BookmarkFolder } from "../interfaces";
 import { getBookmarksFilePath } from "../util";
@@ -52,16 +53,18 @@ export function useBookmarkFolderSearch(): SearchResult<BookmarkFolder> {
   const [errorView, setErrorView] = useState<ReactNode>();
 
   useEffect(() => {
+    setIsLoading(true);
+    setErrorView(undefined);
     getBookmarkFolders(profile)
       .then((bookmarks) => {
         setData(bookmarks);
         setIsLoading(false);
       })
       .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
+        if (getErrorMessage(e).includes(NOT_INSTALLED_MESSAGE)) {
           setErrorView(<NotInstalledError />);
         } else {
-          setErrorView(<UnknownError />);
+          setErrorView(<UnknownError error={e} />);
         }
         setIsLoading(false);
       });

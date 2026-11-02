@@ -10,6 +10,7 @@ export interface GifGridSectionProps {
   results?: IGif[];
   service?: ServiceName;
   isLocalGifSection?: boolean;
+  showSource?: boolean;
   mutate: () => Promise<void>;
 }
 
@@ -35,6 +36,7 @@ export function GifGridSection(props: GifGridSectionProps) {
           index={index}
           visitGifItem={visitGifItem}
           section={props.title}
+          showSource={props.showSource}
           mutate={props.mutate}
         />
       ))}

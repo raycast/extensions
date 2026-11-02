@@ -135,20 +135,22 @@ export default function Command() {
                   icon={Icon.Pencil}
                   target={<RenameSpaceForm space={space} onRename={revalidate} />}
                 />
-                <Action
-                  title="Move Space up"
-                  icon={Icon.ArrowUp}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                  onAction={() => rearrangeSpace(space, "up")}
-                />
-                <Action
-                  title="Move Space Down"
-                  icon={Icon.ArrowDown}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                  onAction={() => rearrangeSpace(space, "down")}
-                />
               </ActionPanel.Section>
             )}
+            <ActionPanel.Section>
+              <Action
+                title="Move Space up"
+                icon={Icon.ArrowUp}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                onAction={() => rearrangeSpace(space, "up")}
+              />
+              <Action
+                title="Move Space Down"
+                icon={Icon.ArrowDown}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                onAction={() => rearrangeSpace(space, "down")}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />

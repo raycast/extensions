@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simready-assets",
+  "title": "SimReady Assets",
+  "description": "Browse, preview, and search NVIDIA's SimReady Assets on Hugging Face. Download only the assets you need.",
+  "icon": "extension_icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "simready-assets",
+      "title": "Search Assets",
+      "subtitle": "SimReady Assets",
+      "description": "Search NVIDIA's SimReady Assets, preview 3D models, and browse individual files to download on demand.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-assets",
+      "title": "Search Assets",
+      "description": "Search or browse NVIDIA's SimReady Assets by name, type, and variant. Returns a page of assets with Hugging Face links without downloading asset content."
+    },
+    {
+      "name": "list-asset-types",
+      "title": "List Asset Types",
+      "description": "List available types in NVIDIA's SimReady Assets with asset counts. Use these type names to filter Search Assets."
+    },
+    {
+      "name": "get-asset-details",
+      "title": "Get Asset Details",
+      "description": "Inspect one SimReady asset's size, license, root models, and preview URL. Returns a command for downloading only that asset folder; never runs commands or downloads asset content."
+    },
+    {
+      "name": "list-asset-files",
+      "title": "List Asset Files",
+      "description": "Browse or search one SimReady asset's files by filename and group. Returns a page of file sizes, Hugging Face pages, and individual download links without downloading the files."
+    }
+  ],
+  "keywords": [
+    "nvidia",
+    "hugging face",
+    "3d",
+    "usd",
+    "simulation",
+    "robotics"
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.9.0",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "evals": "ray evals -I --exit-on-error",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
