@@ -1,6 +1,6 @@
 # Glaze Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-02
 
 - Browse, open, and edit your local Glaze projects.
 - Launch and manage apps installed from Glaze stores.
