@@ -1261,6 +1261,14 @@ test("the TOTP countdown uses Raycast's own circles, in five steps, and turns fr
   assert.equal([30, 11, 10, 6, 5, 1].map(totpTimerColor).join(), "green,green,yellow,yellow,red,red");
 });
 
+test("TOTP codes have their halves set apart like Proton Authenticator's, and longer codes stay whole", () => {
+  const { formatTotpCode } = loadView("utils.ts", { "@raycast/api": { Color: {}, Icon: {} } }) as unknown as {
+    formatTotpCode: (code: string) => string;
+  };
+  assert.equal(formatTotpCode("123456"), "123\u2007\u2008456");
+  assert.equal(formatTotpCode("12345678"), "12345678");
+});
+
 test("Get TOTP Code generates codes from the listing instead of asking pass-cli for each item", async () => {
   let asked = 0;
   const fixture = totpCommandFixture(

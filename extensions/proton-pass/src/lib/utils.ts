@@ -82,9 +82,14 @@ export function getTotpRemainingSeconds(): number {
   return timeStep - secondsElapsed;
 }
 
+/**
+ * "123  456": the halves of a 6-digit code are a digit's width and a little more apart, as in Proton Authenticator.
+ * In fixed-width digits, the code is then as wide as "Loading…", to within a quarter of a point, which Get TOTP Code
+ * shows in its place: its tag keeps its width when the code arrives.
+ */
 export function formatTotpCode(code: string): string {
   if (code.length === 6) {
-    return `${code.slice(0, 3)} ${code.slice(3)}`;
+    return `${code.slice(0, 3)}\u2007\u2008${code.slice(3)}`;
   }
   return code;
 }
