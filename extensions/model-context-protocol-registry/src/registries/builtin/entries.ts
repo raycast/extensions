@@ -472,6 +472,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "cactal",
+    title: "Cactal",
+    description:
+      "Build, publish and run websites from your AI agent. Describe a site and Cactal creates it, writes its pages and publishes it on a free Cactal address; then edit pages, manage CMS content, forms, images and custom domains, and read form submissions. Every edit keeps a version that can be restored, and tools that publish, change the live site or delete are marked destructive. Hosted remote Streamable HTTP server at https://api.cactal.ai/v1/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a Cactal account (free).",
+    icon: "https://cdn.cactal.app/website-assets/TxIyGV6L5vqxpJb7nJU49.png",
+    homepage: "https://cactal.ai/docs/agents/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.cactal.ai/v1/mcp"],
+    },
+    remoteUrl: "https://api.cactal.ai/v1/mcp",
+  },
+  {
     name: "candor-finance",
     title: "Candor Finance",
     description:
