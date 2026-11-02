@@ -6,6 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { openSnapState } from "./lib";
 
 export default function SaveWorkspace() {
@@ -23,9 +24,8 @@ export default function SaveWorkspace() {
       await openSnapState("capture", { name });
       await closeMainWindow({ clearRootSearch: true });
       await showToast({ style: Toast.Style.Success, title: `Saving ${name}` });
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+    } catch (error) {
+      await showFailureToast(error, {
         title: "SnapState is not available",
         message: "Install or launch SnapState, then try again.",
       });

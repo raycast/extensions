@@ -1,4 +1,4 @@
-## [1.0.0] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Restore Workspace command.
 - Add Save Current Workspace command.

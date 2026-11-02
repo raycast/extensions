@@ -6,6 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   openSnapState,
@@ -53,9 +54,8 @@ export default function RestoreWorkspace() {
         title: `Restoring ${workspace.name}`,
         message: "SnapState is bringing the workspace back.",
       });
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
+    } catch (error) {
+      await showFailureToast(error, {
         title: "SnapState is not available",
         message: "Install or launch SnapState, then try again.",
       });
