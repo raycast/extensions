@@ -1,6 +1,6 @@
 # Reassign Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-02
 
 - First release.
 - Save to Inbox sends the text to Reassign AI. The AI splits it into one or more
