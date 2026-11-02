@@ -66,24 +66,43 @@ export function useGoogleAPIs() {
 export async function searchContacts(query?: string) {
   const peopleClient = getPeopleClient();
 
-  const contactsResponse = await peopleClient.people.searchContacts({
-    query: query ?? "",
-    readMask: "names,emailAddresses,photos",
-    sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
-  });
+  const [contactsResponse, otherContactsResponse] = await Promise.all([
+    peopleClient.people.searchContacts({
+      query: query ?? "",
+      readMask: "names,emailAddresses,photos",
+      sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
+    }),
+    peopleClient.otherContacts.search({
+      readMask: "names,emailAddresses,photos",
+      query: query ?? "",
+    }),
+  ]);
   const contacts = contactsResponse.data.results
     ?.map((contact) => contact.person)
     .filter(Boolean) as people_v1.Schema$Person[];
-
-  const otherContactsResponse = await peopleClient.otherContacts.search({
-    readMask: "names,emailAddresses,photos",
-    query: query ?? "",
-  });
   const otherContacts = otherContactsResponse.data.results
     ?.map((contact) => contact.person)
     .filter(Boolean) as people_v1.Schema$Person[];
 
   return [...(contacts ?? []), ...(otherContacts ?? [])];
+}
+
+/**
+ * Lists recently changed saved contacts for an empty search. Google needs an empty "warmup" search before prefix
+ * searches return fresh results, so it is sent alongside.
+ */
+export async function listRecentContacts() {
+  const peopleClient = getPeopleClient();
+  const [response] = await Promise.all([
+    peopleClient.people.connections.list({
+      resourceName: "people/me",
+      personFields: "names,emailAddresses,photos",
+      sortOrder: "LAST_MODIFIED_DESCENDING",
+      pageSize: 100,
+    }),
+    searchContacts("").catch(() => []),
+  ]);
+  return response.data.connections ?? [];
 }
 
 export async function getAutoAddHangouts() {
