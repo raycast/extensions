@@ -395,14 +395,6 @@ export async function getTotp(shareId: string, itemId: string): Promise<string> 
   return first;
 }
 
-/**
- * The TOTP code of one item of a list, such as Get TOTP Code's: their commands share the listings' limit of 8 at once,
- * instead of starting one per item all together.
- */
-export function getListedTotp(shareId: string, itemId: string): Promise<string> {
-  return listingCommands(() => getTotp(shareId, itemId));
-}
-
 export async function generatePassword(options: PasswordOptions): Promise<string> {
   return (await getAdapter()).generatePassword(options);
 }

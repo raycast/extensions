@@ -4,7 +4,7 @@
 
 - Items shared with you one by one show in Browse Items, under Shared with Me in the vault list and the vault menu, as in Proton Pass. They were missing, since they're in none of your vaults. They're also in All Vaults, the search and Get TOTP Code, and one that's also in one of your vaults shows once, with that vault
 - After half an hour unused, pass-cli first catches up with your account's changes, which can take several seconds. Items opened meanwhile, e.g. to fill a login, waited as long again, since each pass-cli command did it too. They now wait for the session check, which does it once
-- The vaults' items no longer wait for the list of items shared with you, which can take seconds. Overlapping loads, e.g. the vault list and the items it opens, run at most 8 pass-cli commands at once together. So do Get TOTP Code's codes, which started one pass-cli command per item all at once
+- The vaults' items no longer wait for the list of items shared with you, which can take seconds. Overlapping loads, e.g. the vault list and the items it opens, run at most 8 pass-cli commands at once together
 - Fill Login and the Paste actions keep Raycast open while the item or its TOTP code loads, with a toast saying so, instead of closing at once with no sign of progress
 - The browser login screens show a spinning toast while waiting for the browser, finishing the login and loading your items
 - Once logged in, the Login command's main action is Logout, which asks for confirmation. Re-Run Browser Login is gone: logging in again is only needed after logging out

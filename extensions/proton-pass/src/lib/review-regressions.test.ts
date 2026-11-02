@@ -418,7 +418,7 @@ test("pass-cli not found shows its screen instead of the cached items, which can
       showToast: async () => undefined,
       getPreferenceValues: () => ({}),
     },
-    "./lib/pass-cli": { getListedTotp: notFound, listVaultsAndItems: notFound },
+    "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound },
     "./lib/types": { PassCliError },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
@@ -574,25 +574,6 @@ test("overlapping listings, e.g. the vault list and the item list it opens, stil
   });
   const [first, second] = await Promise.all([api.listVaultsAndItems(), api.listVaultsAndItems()]);
   assert.equal(first.items.length + second.items.length, 24);
-  assert.equal(most, 8);
-});
-
-test("Get TOTP Code's per-item commands share the listings' limit of 8 at once", async () => {
-  let running = 0;
-  let most = 0;
-  const api = passCliWithAdapter({
-    getTotpCodes: async () => {
-      running++;
-      most = Math.max(most, running);
-      await new Promise(setImmediate);
-      running--;
-      return { totp: "123456" };
-    },
-  }) as unknown as { getListedTotp: (shareId: string, itemId: string) => Promise<string> };
-  const codes = await Promise.all(
-    Array.from({ length: 30 }, (_, index) => api.getListedTotp("vault", `item-${index}`)),
-  );
-  assert.equal(codes.length, 30);
   assert.equal(most, 8);
 });
 
@@ -1058,7 +1039,7 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
       react: harness.react,
       "@raycast/api": api,
       "./lib/pass-cli": {
-        getListedTotp: async () => "123456",
+        getTotp: async () => "123456",
         listVaultsAndItems: async () => {
           calls++;
           return {
@@ -1148,7 +1129,7 @@ function totpCommandFixture(
           toasts.push(toast);
         },
       },
-      "./lib/pass-cli": { listVaultsAndItems, getListedTotp: getTotp },
+      "./lib/pass-cli": { listVaultsAndItems, getTotp },
       "./lib/types": { PassCliError },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
