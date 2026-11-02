@@ -17,6 +17,10 @@ Don't re-raise a thread the author has already resolved unless the new commit br
 - **The old code isn't the spec:** when a PR changes behavior on purpose, review the new behavior. Don't treat the previous docs or code as the source of truth.
 - **Pre-existing problems:** label anything you flag that was already on `main` as pre-existing, and don't block on it.
 
+## Suggestions
+
+When a fix is mechanical, include the exact code or JSON to paste instead of general advice.
+
 ## Review comment phrasing
 
 What: Never use validating phrases like "You're absolutely right", "You're correct", "That's a good point", or similar affirmations in responses.

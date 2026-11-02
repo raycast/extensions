@@ -29,7 +29,7 @@
     {
       "path": "docs/api-reference/keyboard.md",
       "description": "Keyboard shortcuts: per-platform shortcut syntax, ambiguous modifiers, and Keyboard.Shortcut.Common bindings on macOS and Windows",
-      "scope": ["extensions/**/*.tsx"]
+      "scope": ["extensions/**/*.ts", "extensions/**/*.tsx"]
     },
     {
       "path": "docs/api-reference/menu-bar-commands.md",
@@ -39,6 +39,18 @@
     {
       "path": "docs/ai/learn-core-concepts-of-ai-extensions.md",
       "description": "AI extension tools, instructions and confirmations",
+      "scope": [
+        "extensions/*/package.json",
+        "extensions/*/ai.yaml",
+        "extensions/*/ai.yml",
+        "extensions/*/ai.json",
+        "extensions/*/ai.json5",
+        "extensions/*/src/tools/**"
+      ]
+    },
+    {
+      "path": "docs/api-reference/tool.md",
+      "description": "Tool API: confirmations, composer mentions and resource providers",
       "scope": [
         "extensions/*/package.json",
         "extensions/*/ai.yaml",
