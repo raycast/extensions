@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { accountAccessory, AccountIssues } from "./components/accounts";
+import { accountAccessory, AccountIssues, EmptyViewActions } from "./components/accounts";
 import { BoardActions } from "./components/board-view";
 import { CardActions } from "./components/card-actions";
 import { ensureAccount, gather } from "./lib/hackban";
@@ -34,12 +34,15 @@ function Search() {
           icon={Icon.MagnifyingGlass}
           title="No results"
           description={`Nothing on your boards matches "${q}".`}
+          actions={<EmptyViewActions onRefresh={revalidate} />}
         />
       ) : (
+        // Nothing has been searched yet, so there's nothing to refresh.
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Search Hackban"
           description="Board names, card titles and descriptions."
+          actions={<EmptyViewActions />}
         />
       )}
       <AccountIssues data={results} onFixed={revalidate} />
@@ -51,7 +54,7 @@ function Search() {
               title={b.name}
               icon={Icon.AppWindowGrid3x3}
               accessories={accountAccessory(account, accounts)}
-              actions={<BoardActions account={account} board={b} />}
+              actions={<BoardActions account={account} board={b} onRefresh={revalidate} />}
             />
           )),
         )}

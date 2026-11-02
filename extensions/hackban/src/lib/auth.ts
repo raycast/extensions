@@ -78,8 +78,9 @@ export async function signIn(server: string, label?: string): Promise<Account> {
 
   const accounts = await listAccounts();
   const existing = accounts.find((a) => a.server === server);
+  // This may be someone else signing in, so forget who the account was; it's looked up again.
   const account = existing
-    ? { ...existing, clientId, label: label || existing.label }
+    ? { ...existing, clientId, label: label || existing.label, userId: undefined, userName: undefined }
     : newAccount(accounts, server, clientId, label);
   await saveTokens(account.id, tokens);
   await saveAccount(account);

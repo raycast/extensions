@@ -26,7 +26,7 @@ import {
 } from "../lib/accounts";
 import { isSignedIn } from "../lib/auth";
 import { connect, type Gathered } from "../lib/hackban";
-import { withToast } from "./actions";
+import { RefreshAction, withToast } from "./actions";
 
 /** A tag naming the item's account, when more than one account is showing. */
 export function accountAccessory(account: Account, accounts: Account[]): List.Item.Accessory[] {
@@ -55,6 +55,16 @@ export function ManageAccountsAction({ onChange }: { onChange?: () => void }) {
       target={<AccountsView />}
       onPop={onChange}
     />
+  );
+}
+
+/** For an empty list, which has no items to carry these: e.g. no cards yet, or every account hidden. */
+export function EmptyViewActions({ onRefresh }: { onRefresh?: () => void }) {
+  return (
+    <ActionPanel>
+      {onRefresh && <RefreshAction onRefresh={onRefresh} />}
+      <ManageAccountsAction onChange={onRefresh} />
+    </ActionPanel>
   );
 }
 
@@ -110,8 +120,8 @@ function AddAccountForm({ onAdded }: { onAdded: () => void }) {
         if (!v?.trim()) return "Enter the server's address";
         try {
           normalizeServer(v);
-        } catch {
-          return "Enter a web address, like hackban.hackclub.com";
+        } catch (e) {
+          return (e as Error).message;
         }
       },
     },

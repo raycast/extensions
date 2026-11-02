@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 
-import { accountAccessory, AccountIssues, ManageAccountsAction } from "./components/accounts";
+import { accountAccessory, AccountIssues, EmptyViewActions, ManageAccountsAction } from "./components/accounts";
 import { RefreshAction, withToast } from "./components/actions";
 import { CardActions } from "./components/card-actions";
 import { ensureAccount, type From, gather, type Notification } from "./lib/hackban";
@@ -93,6 +93,7 @@ function Notifications() {
         icon={Icon.Bell}
         title="No notifications"
         description="You'll hear about cards you're added to and comments on cards you watch."
+        actions={<EmptyViewActions onRefresh={revalidate} />}
       />
       <AccountIssues data={data} onFixed={revalidate} />
       <List.Section title="Unread" subtitle={unread.length ? String(unread.length) : undefined}>

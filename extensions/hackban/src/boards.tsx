@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 
-import { accountAccessory, AccountIssues } from "./components/accounts";
+import { accountAccessory, AccountIssues, EmptyViewActions } from "./components/accounts";
 import { BoardActions } from "./components/board-view";
 import { ensureAccount, gather } from "./lib/hackban";
 
@@ -17,6 +17,7 @@ function Boards() {
         icon={Icon.AppWindowGrid3x3}
         title="No boards"
         description="Boards you can open on Hackban show up here."
+        actions={<EmptyViewActions onRefresh={revalidate} />}
       />
       <AccountIssues data={data} onFixed={revalidate} />
       {(data?.results ?? []).flatMap(({ account, data: workspaces }) =>

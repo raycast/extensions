@@ -31,7 +31,11 @@ export function CreateCardForm({
   onCreated?: () => void;
 }) {
   const { pop } = useNavigation();
-  const { data: all, isLoading: loadingWorkspaces } = useCachedPromise(fetchWorkspaces, [], { execute: !fixed });
+  const {
+    data: all,
+    isLoading: loadingWorkspaces,
+    revalidate: reloadWorkspaces,
+  } = useCachedPromise(fetchWorkspaces, [], { execute: !fixed });
   const { value: lastBoard, setValue: setLastBoard, isLoading: loadingLast } = useLocalStorage<string>("last-board");
 
   const choices = (all?.results ?? []).flatMap(({ account, data }) =>
@@ -55,31 +59,41 @@ export function CreateCardForm({
       const account = fixed?.account ?? choices.find((c) => c.key === v.board)?.account;
       if (!account) return false;
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating card" });
+      const hackban = api(account);
+      let card: { id: string; url: string };
       try {
         let due = v.due;
         // A day without a time: noon, like Hackban's own date picker.
         if (due && Form.DatePicker.isFullDay(due)) due = new Date(new Date(due).setHours(12, 0, 0, 0));
-        const hackban = api(account);
-        const card = await hackban.createCard({
+        card = await hackban.createCard({
           listId: v.listId,
           title: v.title.trim(),
           description: v.description?.trim() || undefined,
           due: due?.toISOString(),
           position: v.position === "top" ? "top" : "bottom",
         });
-        if (v.assign) await hackban.setMember(card.id, await userId(account), true);
-        toast.style = Toast.Style.Success;
-        toast.title = "Card created";
-        toast.message = v.title.trim();
-        toast.primaryAction = { title: "Open in Browser", onAction: () => open(card.url) };
-        toast.secondaryAction = { title: "Copy Link", onAction: () => Clipboard.copy(card.url) };
-        onCreated?.();
-        if (fixed) return pop();
-        reset({ ...v, title: "", description: "", due: null });
-        focus("title");
       } catch (e) {
         await showFailureToast(e, { title: "Couldn't create card" });
+        return;
       }
+      // The card exists from here on, so the form clears even if adding you fails: trying again would make a second card.
+      let unassigned: string | undefined;
+      if (v.assign) {
+        try {
+          await hackban.setMember(card.id, await userId(account), true);
+        } catch (e) {
+          unassigned = (e instanceof Error && e.message) || "Add yourself on Hackban instead";
+        }
+      }
+      toast.style = unassigned ? Toast.Style.Failure : Toast.Style.Success;
+      toast.title = unassigned ? "Card created, but couldn't add you" : "Card created";
+      toast.message = unassigned ?? v.title.trim();
+      toast.primaryAction = { title: "Open in Browser", onAction: () => open(card.url) };
+      toast.secondaryAction = { title: "Copy Link", onAction: () => Clipboard.copy(card.url) };
+      onCreated?.();
+      if (fixed) return pop();
+      reset({ ...v, title: "", description: "", due: null });
+      focus("title");
     },
   });
 
@@ -91,7 +105,11 @@ export function CreateCardForm({
   const account = fixed?.account ?? picked?.account;
   const boardId = fixed?.boardId ?? picked?.board.id ?? "";
   // Only runs once there's an account (see `execute`).
-  const { data: board, isLoading: loadingBoard } = useCachedPromise(fetchBoard, [account as Account, boardId], {
+  const {
+    data: board,
+    isLoading: loadingBoard,
+    revalidate: reloadBoard,
+  } = useCachedPromise(fetchBoard, [account as Account, boardId], {
     execute: !!account && !!boardId,
   });
   const lists = board?.id === boardId ? board.lists : [];
@@ -108,7 +126,8 @@ export function CreateCardForm({
         <ActionPanel>
           <Action.SubmitForm title="Create Card" icon={Icon.NewDocument} onSubmit={handleSubmit} />
           <ActionPanel.Section>
-            <ManageAccountsAction />
+            {/* revalidate runs even when `execute` is off, so only reload what this form loaded. */}
+            <ManageAccountsAction onChange={fixed ? reloadBoard : reloadWorkspaces} />
           </ActionPanel.Section>
         </ActionPanel>
       }

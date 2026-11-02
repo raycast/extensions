@@ -2,7 +2,7 @@ import { Icon, List } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { accountAccessory, AccountIssues } from "./components/accounts";
+import { accountAccessory, AccountIssues, EmptyViewActions } from "./components/accounts";
 import { ToggleCompleteAction } from "./components/actions";
 import { CardActions } from "./components/card-actions";
 import { cardIcon, type DueState, dueAccessory, dueState, labelAccessories } from "./lib/format";
@@ -51,7 +51,12 @@ function MyCards() {
         </List.Dropdown>
       }
     >
-      <List.EmptyView icon={Icon.CheckCircle} title="No cards" description="Cards you're a member of show up here." />
+      <List.EmptyView
+        icon={Icon.CheckCircle}
+        title="No cards"
+        description="Cards you're a member of show up here."
+        actions={<EmptyViewActions onRefresh={revalidate} />}
+      />
       <AccountIssues data={data} onFixed={revalidate} />
       {SECTIONS.map(({ state, title }) => {
         const inSection = shown.filter((c) => dueState(c.due, c.dueComplete) === state);

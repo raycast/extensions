@@ -109,10 +109,23 @@ export async function clearTokens(id: string) {
   await LocalStorage.removeItem(tokensKey(id));
 }
 
-/** The origin of a server address someone typed, with https:// assumed. */
+// URL normalizes IPv4 hosts to dotted decimal, so a name like 127.0.0.1.example.com can't pass for one.
+const isLoopback = (hostname: string) =>
+  hostname === "localhost" || hostname === "[::1]" || /^127(\.\d{1,3}){3}$/.test(hostname);
+
+/**
+ * The origin of a server address someone typed, with https:// assumed. Plain http only for this
+ * machine: sign-in codes and tokens would otherwise cross the network unencrypted.
+ */
 export function normalizeServer(raw: string) {
   const s = raw.trim();
-  const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(s) ? s : `https://${s}`);
-  if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("Use an http(s) address");
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(s) ? s : `https://${s}`);
+  } catch {
+    throw new Error("Enter a web address, like hackban.hackclub.com");
+  }
+  if (url.protocol !== "https:" && !(url.protocol === "http:" && isLoopback(url.hostname)))
+    throw new Error("Use an https:// address (http:// only works for localhost)");
   return url.origin;
 }
