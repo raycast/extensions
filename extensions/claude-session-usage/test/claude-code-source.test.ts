@@ -2,7 +2,15 @@ import { chmodSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from "node:
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { parseRateLimits, readClaudeCodeUsage, UsageReadError } from "../src/lib/claude-code-source";
+import { homedir } from "node:os";
+import {
+  DEFAULT_CLAUDE_DIR,
+  displayPath,
+  parseRateLimits,
+  readClaudeCodeUsage,
+  resolveClaudeDir,
+  UsageReadError,
+} from "../src/lib/claude-code-source";
 
 const dir = mkdtempSync(join(tmpdir(), "usage-ring-"));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -58,5 +66,22 @@ describe("readClaudeCodeUsage", () => {
     chmodSync(locked, 0o000);
     await expect(readClaudeCodeUsage(locked)).rejects.toThrow("EACCES");
     chmodSync(locked, 0o600);
+  });
+});
+
+describe("resolveClaudeDir", () => {
+  it("defaults to ~/.claude", () => {
+    expect(resolveClaudeDir(undefined, undefined)).toBe(DEFAULT_CLAUDE_DIR);
+    expect(resolveClaudeDir("  ", "")).toBe(DEFAULT_CLAUDE_DIR);
+  });
+
+  it("prefers the preference over CLAUDE_CONFIG_DIR and expands ~", () => {
+    expect(resolveClaudeDir("~/work-claude", "/env/dir")).toBe(join(homedir(), "work-claude"));
+    expect(resolveClaudeDir(undefined, "/env/dir")).toBe("/env/dir");
+  });
+
+  it("shows home paths with ~", () => {
+    expect(displayPath(join(homedir(), ".claude", "x.json"))).toBe("~/.claude/x.json");
+    expect(displayPath("/tmp/x")).toBe("/tmp/x");
   });
 });

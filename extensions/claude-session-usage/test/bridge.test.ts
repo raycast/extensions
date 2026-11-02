@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -8,6 +8,7 @@ import {
   buildBridgeScript,
   isBridgeCommand,
   isBridgeConnected,
+  previousStatusLine,
   withBridge,
   withoutBridge,
 } from "../src/lib/bridge";
@@ -42,6 +43,13 @@ describe("bridge script", () => {
     run(buildBridgeScript(), JSON.stringify({ cwd: "/x" }));
     expect(JSON.parse(readFileSync(dataFile(), "utf8")).five_hour.used_percentage).toBe(12);
     expect(execFileSync("/bin/ls", [join(home, ".claude")]).toString()).not.toContain(".tmp");
+  });
+
+  it("writes to a custom data file when one is given", () => {
+    const custom = join(home, "custom dir's", "usage-ring.json");
+    mkdirSync(join(home, "custom dir's"));
+    run(buildBridgeScript(null, custom), PAYLOAD);
+    expect(JSON.parse(readFileSync(custom, "utf8")).five_hour.used_percentage).toBe(12);
   });
 
   it("passes the full payload to a previous status line command, quotes included", () => {
@@ -108,5 +116,35 @@ describe("isBridgeConnected", () => {
   it("is false when settings.json is broken", async () => {
     writeFileSync(settings, "{");
     expect(await isBridgeConnected(settings, script)).toBe(false);
+  });
+});
+
+describe("previous status line on disconnect", () => {
+  const dir = mkdtempSync(join(tmpdir(), "usage-ring-prev-"));
+  const state = join(dir, "usage-ring-bridge.json");
+  const backup = join(dir, "settings.json.usage-ring.bak");
+  const mine = { type: "command", command: "~/my-line.sh" };
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+
+  it("comes from the saved state", async () => {
+    writeFileSync(state, JSON.stringify({ previousStatusLine: mine }));
+    expect(await previousStatusLine(state, backup)).toEqual(mine);
+  });
+
+  it("falls back to the settings backup when the state file is missing", async () => {
+    rmSync(state);
+    writeFileSync(backup, JSON.stringify({ statusLine: mine }));
+    expect(await previousStatusLine(state, backup)).toEqual(mine);
+    writeFileSync(backup, JSON.stringify({ statusLine: { command: BRIDGE_COMMAND } }));
+    expect(await previousStatusLine(state, backup)).toBeNull();
+  });
+
+  it("throws instead of guessing when the state file can't be read", async () => {
+    writeFileSync(state, JSON.stringify({ previousStatusLine: mine }));
+    chmodSync(state, 0o000);
+    await expect(previousStatusLine(state, backup)).rejects.toThrow(/Can't read/);
+    chmodSync(state, 0o644);
+    writeFileSync(state, "{");
+    await expect(previousStatusLine(state, backup)).rejects.toThrow(/not valid JSON/);
   });
 });

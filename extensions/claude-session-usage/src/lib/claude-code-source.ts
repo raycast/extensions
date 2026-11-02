@@ -1,10 +1,35 @@
+import { getPreferenceValues } from "@raycast/api";
 import { readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import type { Usage, UsageWindow } from "../types";
 
-export const CLAUDE_DIR = join(homedir(), ".claude");
+export const DEFAULT_CLAUDE_DIR = join(homedir(), ".claude");
+
+function configuredClaudeDir(): string | undefined {
+  try {
+    return getPreferenceValues<Preferences>().claudeConfigDir?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Claude Code reads its settings from $CLAUDE_CONFIG_DIR when set. Raycast doesn't see the
+// terminal's environment, so a preference can point at that folder instead.
+export function resolveClaudeDir(custom?: string, env = process.env.CLAUDE_CONFIG_DIR): string {
+  const dir = custom?.trim() || env?.trim();
+  if (!dir) return DEFAULT_CLAUDE_DIR;
+  if (dir === "~" || dir.startsWith("~/")) return join(homedir(), dir.slice(1));
+  return resolve(dir);
+}
+
+export const CLAUDE_DIR = resolveClaudeDir(configuredClaudeDir());
 export const BRIDGE_DATA_FILE = join(CLAUDE_DIR, "usage-ring.json");
+
+export function displayPath(path: string): string {
+  const home = homedir();
+  return path === home || path.startsWith(home + "/") ? "~" + path.slice(home.length) : path;
+}
 
 function parseWindow(w: unknown): UsageWindow | null {
   if (!w || typeof w !== "object") return null;

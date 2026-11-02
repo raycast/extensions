@@ -53,6 +53,7 @@ The extension then only reads that file. It never reads your Claude login, never
 | Show percentage | off | Shows `8%` next to the ring (`8% · 6%` in Both mode) |
 | Orange Threshold | 70 | Ring turns orange from this usage (30% or less left) |
 | Red Threshold | 90 | Ring turns red from this usage (10% or less left) |
+| Claude Config Folder | `~/.claude` | Only needed if you run Claude Code with `CLAUDE_CONFIG_DIR` |
 
 To change them, click the ring and choose **Configure Extension**.
 

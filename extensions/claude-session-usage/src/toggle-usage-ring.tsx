@@ -7,7 +7,7 @@ export default async function Command() {
   try {
     await redrawRing();
   } catch {
-    setRingHidden(false);
+    setRingHidden(!hide);
     await showHUD("Run Menu Bar Ring once to turn it on");
     return;
   }

@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { BRIDGE_DATA_FILE } from "./lib/claude-code-source";
+import { BRIDGE_DATA_FILE, displayPath } from "./lib/claude-code-source";
 import {
-  BRIDGE_COMMAND,
   BRIDGE_SCRIPT,
   getBridgeStatus,
   installBridge,
@@ -19,7 +18,7 @@ function markdown(status: BridgeStatus | undefined): string {
     "# Connect Claude Code",
     "",
     "Claude Code already knows your 5-hour and weekly usage and hands it to its **status line** after every reply.",
-    "Connecting installs a tiny status line script that saves just those numbers to `~/.claude/usage-ring.json`.",
+    `Connecting installs a tiny status line script that saves just those numbers to \`${displayPath(BRIDGE_DATA_FILE)}\`.`,
     "",
     "- The ring then updates **while you use Claude Code**. The extension never reads your login and never calls Anthropic.",
     "- Between sessions you see the last numbers. A window shows 0% once its reset time has passed.",
@@ -45,9 +44,9 @@ function markdown(status: BridgeStatus | undefined): string {
         "",
         "Press **Connect** (↵). This will:",
         "",
-        `1. Back up \`~/.claude/settings.json\` to \`settings.json.usage-ring.bak\``,
-        `2. Create \`${BRIDGE_COMMAND}\``,
-        `3. Set \`statusLine.command\` in \`~/.claude/settings.json\` to that script. An existing status line is kept and keeps working.`,
+        `1. Back up \`${displayPath(SETTINGS_FILE)}\` to \`settings.json.usage-ring.bak\``,
+        `2. Create \`${displayPath(BRIDGE_SCRIPT)}\``,
+        `3. Set \`statusLine.command\` in \`${displayPath(SETTINGS_FILE)}\` to that script. An existing status line is kept and keeps working.`,
         "",
         "Disconnecting restores your previous status line exactly.",
       ];
@@ -108,8 +107,8 @@ export default function Command() {
               text={status.dataUpdatedAt ? formatAgo(status.dataUpdatedAt, Date.now()) : "Never"}
             />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Script" text={BRIDGE_COMMAND} />
-            <Detail.Metadata.Label title="Data File" text="~/.claude/usage-ring.json" />
+            <Detail.Metadata.Label title="Script" text={displayPath(BRIDGE_SCRIPT)} />
+            <Detail.Metadata.Label title="Data File" text={displayPath(BRIDGE_DATA_FILE)} />
           </Detail.Metadata>
         )
       }

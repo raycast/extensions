@@ -121,6 +121,13 @@
       "required": false,
       "default": "90",
       "placeholder": "90"
+    },
+    {
+      "name": "claudeConfigDir",
+      "title": "Claude Config Folder",
+      "description": "Only needed if you run Claude Code with CLAUDE_CONFIG_DIR. Leave empty to use ~/.claude",
+      "type": "directory",
+      "required": false
     }
   ],
   "dependencies": {
