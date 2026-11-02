@@ -10,6 +10,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import {
   filterSnippets,
@@ -23,7 +24,7 @@ import { saveProgress } from "../lib/session-storage";
 import type { MigrationSession, PreviewSnippet } from "../lib/types";
 import { ConflictResolver, EditSnippetForm, GroupNameForm } from "./review-forms";
 import { ExportForm } from "./export-form";
-import { errorMessage, textPreview } from "./shared";
+import { textPreview } from "./shared";
 
 const filters = [
   { value: "all", title: "All Snippets" },
@@ -68,7 +69,7 @@ export function SnippetPreview({ initialSession }: { initialSession: MigrationSe
         message: "Resume this snapshot from the source form. Source files are not re-read when resuming.",
       });
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Save Progress", message: errorMessage(error) });
+      await showFailureToast(error, { title: "Could Not Save Progress" });
     }
   }
 
@@ -101,6 +102,7 @@ export function SnippetPreview({ initialSession }: { initialSession: MigrationSe
               }
             />
           )}
+          <Action title={`Export ${selected.size} Selected Snippets`} icon={Icon.Download} onAction={exportSelected} />
           {item && (
             <Action.Push
               title="Edit Snippet"
@@ -125,15 +127,9 @@ export function SnippetPreview({ initialSession }: { initialSession: MigrationSe
             />
           )}
           <Action
-            title={`Export ${selected.size} Selected Snippets`}
-            icon={Icon.Download}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-            onAction={exportSelected}
-          />
-          <Action
             title="Save Progress"
             icon={Icon.SaveDocument}
-            shortcut={Keyboard.Shortcut.Common.Save}
+            shortcut={item ? Keyboard.Shortcut.Common.Save : undefined}
             onAction={save}
           />
         </ActionPanel.Section>

@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Detail, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { exportMigration, validateFilename, type ExportMode } from "../lib/exporter";
 import type { MigrationSession } from "../lib/types";
-import { errorMessage, textPreview } from "./shared";
+import { textPreview } from "./shared";
 
 export function ExportForm({ session, reportOnly = false }: { session: MigrationSession; reportOnly?: boolean }) {
   const { push } = useNavigation();
@@ -32,7 +33,7 @@ export function ExportForm({ session, reportOnly = false }: { session: Migration
       });
       push(<ExportComplete result={result} />);
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Could Not Save Export", message: errorMessage(error) });
+      await showFailureToast(error, { title: "Could Not Save Export" });
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +79,7 @@ export function ExportForm({ session, reportOnly = false }: { session: Migration
       <Form.TextField
         id="filename"
         title={mode === "groups" ? "Base Filename" : "Filename"}
+        placeholder="my-snippets.json"
         value={filename}
         onChange={(value) => {
           setFilename(value);

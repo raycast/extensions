@@ -9,7 +9,7 @@ npm ci
 npm run check
 ```
 
-`check` runs TypeScript, Raycast manifest and icon validation, ESLint, formatting checks, and a distribution build.
+`check` runs the conversion and migration tests, TypeScript, Raycast manifest and icon validation, ESLint, formatting checks, and a distribution build.
 
 ## Store screenshots
 

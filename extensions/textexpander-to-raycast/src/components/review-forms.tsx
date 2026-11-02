@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { keepConflict, reviewSnippets, updateSnippet } from "../lib/migration";
 import type { MigrationSession, PreviewSnippet, RaycastSnippet } from "../lib/types";
@@ -6,45 +7,35 @@ import { textPreview } from "./shared";
 
 export function EditSnippetForm({ item, onSave }: { item: PreviewSnippet; onSave: (snippet: RaycastSnippet) => void }) {
   const { pop } = useNavigation();
-  const [nameError, setNameError] = useState<string>();
-  const [textError, setTextError] = useState<string>();
-  function save(values: { name: string; keyword: string; text: string }) {
-    setNameError(values.name.trim() ? undefined : "Enter a snippet name.");
-    setTextError(values.text.length ? undefined : "Enter snippet text. Whitespace is allowed.");
-    if (!values.name.trim() || !values.text.length) return;
-    onSave({ name: values.name.trim(), text: values.text, ...(values.keyword ? { keyword: values.keyword } : {}) });
-    pop();
-  }
+  const { handleSubmit, itemProps } = useForm<RaycastSnippet & { keyword: string }>({
+    initialValues: { ...item.snippet, keyword: item.snippet.keyword ?? "" },
+    validation: {
+      name: (value) => (value?.trim() ? undefined : "Enter a snippet name."),
+      text: FormValidation.Required,
+    },
+    onSubmit(values) {
+      onSave({ name: values.name.trim(), text: values.text, ...(values.keyword ? { keyword: values.keyword } : {}) });
+      pop();
+    },
+  });
   return (
     <Form
       navigationTitle="Edit Snippet"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Changes" icon={Icon.CheckCircle} onSubmit={save} />
+          <Action.SubmitForm title="Save Changes" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description text="Changes apply to this migration. Source files stay untouched. Warnings and keyword conflicts are checked again after saving." />
+      <Form.TextField title="Name" placeholder="Email signature" {...itemProps.name} />
       <Form.TextField
-        id="name"
-        title="Name"
-        defaultValue={item.snippet.name}
-        error={nameError}
-        onChange={() => setNameError(undefined)}
-      />
-      <Form.TextField
-        id="keyword"
         title="Keyword"
-        defaultValue={item.snippet.keyword ?? ""}
+        placeholder=";signature"
+        {...itemProps.keyword}
         info="Leave empty to use the snippet through Search Snippets."
       />
-      <Form.TextArea
-        id="text"
-        title="Text"
-        defaultValue={item.snippet.text}
-        error={textError}
-        onChange={() => setTextError(undefined)}
-      />
+      <Form.TextArea title="Text" placeholder="Best regards, Example" {...itemProps.text} />
     </Form>
   );
 }
@@ -59,37 +50,27 @@ export function GroupNameForm({
   onSave: (name: string) => void;
 }) {
   const { pop } = useNavigation();
-  const [error, setError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<{ name: string }>({
+    initialValues: { name: currentName },
+    validation: { name: (value) => (value?.trim() ? undefined : "Enter a group name.") },
+    onSubmit(values) {
+      onSave(values.name.trim());
+      pop();
+    },
+  });
   return (
     <Form
       navigationTitle="Rename Group"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Group Name"
-            icon={Icon.CheckCircle}
-            onSubmit={(values: { name: string }) => {
-              if (!values.name.trim()) {
-                setError("Enter a group name.");
-                return;
-              }
-              onSave(values.name.trim());
-              pop();
-            }}
-          />
+          <Action.SubmitForm title="Save Group Name" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description
         text={`Rename the group “${group}” for this migration. Existing [Group] name prefixes are updated when group prefixes are enabled. Custom names without that prefix are kept.`}
       />
-      <Form.TextField
-        id="name"
-        title="Group Name"
-        defaultValue={currentName}
-        error={error}
-        onChange={() => setError(undefined)}
-      />
+      <Form.TextField title="Group Name" placeholder="Work" {...itemProps.name} />
     </Form>
   );
 }

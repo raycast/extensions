@@ -34,11 +34,10 @@ async function writePrivateJson(filePath: string, value: unknown) {
   const file = await open(filePath, "wx", 0o600);
   try {
     await writeFile(file, data);
-  } catch (error) {
-    await unlink(filePath);
-    throw error;
-  } finally {
     await file.close();
+  } catch (error) {
+    await Promise.allSettled([file.close(), unlink(filePath)]);
+    throw error;
   }
 }
 
@@ -97,8 +96,9 @@ export async function exportMigration(options: {
     }
     return { paths, reportPath, directory: createdDirectory, count: options.mode === "report" ? 0 : items.length };
   } catch (error) {
-    for (const path of paths) await unlink(path);
-    if (createdDirectory) await rm(createdDirectory, { recursive: true });
+    // Attempt every rollback step without replacing the original export error.
+    await Promise.allSettled(paths.map((path) => unlink(path)));
+    if (createdDirectory) await Promise.allSettled([rm(createdDirectory, { recursive: true, force: true })]);
     throw error;
   }
 }

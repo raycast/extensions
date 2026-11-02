@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { convertLibrary } from "./lib/converter";
 import { findLocalSettings, readLibraries, readRaycastExport } from "./lib/reader";
@@ -48,11 +49,7 @@ export default function Command() {
       push(<SnippetPreview initialSession={session} />);
     } catch (error) {
       setSourceError(errorMessage(error));
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Read Migration Data",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Could Not Read Migration Data" });
     } finally {
       setIsLoading(false);
     }
@@ -71,11 +68,7 @@ export default function Command() {
           message: "Use Save Progress in the snippet preview first.",
         });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Resume Migration",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Could Not Resume Migration" });
     } finally {
       setIsLoading(false);
     }
@@ -96,16 +89,21 @@ export default function Command() {
           <Action
             title="Delete Saved Progress"
             icon={Icon.Trash}
+            style={Action.Style.Destructive}
             onAction={async () => {
+              if (
+                !(await confirmAlert({
+                  title: "Delete Saved Progress?",
+                  message: "Your saved edits, group names, and selection will be permanently deleted.",
+                  primaryAction: { title: "Delete Progress", style: Alert.ActionStyle.Destructive },
+                }))
+              )
+                return;
               try {
                 await deleteProgress();
                 await showToast({ style: Toast.Style.Success, title: "Saved Progress Deleted" });
               } catch (error) {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Could Not Delete Progress",
-                  message: errorMessage(error),
-                });
+                await showFailureToast(error, { title: "Could Not Delete Progress" });
               }
             }}
           />

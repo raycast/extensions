@@ -31,11 +31,13 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm run build",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "npm test && npm run typecheck && npm run lint && npm run build",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
     "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
     "csv-parse": "^7.0.3",
     "plist": "^3.1.0",
     "zod": "^4.6.7"
@@ -47,6 +49,7 @@
     "@types/react": "19.3.0",
     "eslint": "^9.39.1",
     "prettier": "^3.8.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },
   "engines": {
