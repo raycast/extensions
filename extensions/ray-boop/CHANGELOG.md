@@ -1,5 +1,8 @@
 # Boop Changelog
 
+## [Fix Collapse Whitespace] - {PR_MERGE_DATE}
+Fixed Collapse Whitespace so it replaces consecutive whitespace, including non-breaking spaces, with a single space and removes whitespace at the beginning and end.
+
 ## [Feature Request] - 2025-07-09
 Added Unicode Normalization NFD, NFC, NFKC, NFKD
 
