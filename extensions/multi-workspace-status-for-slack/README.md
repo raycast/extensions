@@ -8,7 +8,7 @@
 
 [![Release](https://img.shields.io/github/v/release/marcusthiele/Multi-Workspace-Status-for-Slack?color=7C2E8A&sort=semver&style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/releases)
 [![Raycast](https://img.shields.io/badge/Raycast-Extension-7C2E8A?style=for-the-badge&logo=raycast&logoColor=white)](https://www.raycast.com)
-[![macOS](https://img.shields.io/badge/macOS-only-7C2E8A?style=for-the-badge&logo=apple&logoColor=white)](#-installation)
+[![macOS](https://img.shields.io/badge/macOS-only-7C2E8A?style=for-the-badge&logo=apple&logoColor=white)](#-setup)
 [![License](https://img.shields.io/badge/License-MIT-7C2E8A?style=for-the-badge)](LICENSE)
 
 [![Repository](https://img.shields.io/badge/💾_Repository-3A1248?style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack)
@@ -42,28 +42,16 @@ Shortcuts in `Set Status`:
 | -------- | ----------------- |
 | `⌘↩`     | Set Status        |
 | `⌘⇧⌫`    | Clear Status      |
-| `⌘⇧M`    | Manage Workspaces |
+| `⌘⇧↩`    | Manage Workspaces |
 
-## 🔥 Installation
-
-### Build from source
-
-Building needs Node.js 22.22.2 or later.
-
-```bash
-git clone https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack.git
-cd Multi-Workspace-Status-for-Slack
-npm install
-npm run dev
-```
-
-### Connect a workspace
+## 🔥 Setup
 
 The extension connects to each workspace with a Slack user token that you create yourself. You need
 to do this once per workspace.
 
-1. Open `Set Status` and press `⌘⇧M` to open **Manage Workspaces**, then choose **Add Workspace**
-2. Run the **Copy Manifest and Open Slack** action (`⌘⇧O`). This copies the app manifest below and
+1. Open `Set Status` and run **Manage Workspaces** (`⌘↩` before your first workspace, `⌘⇧↩` after
+   that), then choose **Add Workspace**
+2. Run the **Copy Manifest and Open Slack** action (`⌘⇧↩`). This copies the app manifest below and
    opens the Slack app page
 3. In Slack, select **From a manifest**, choose your workspace, and click **Next**
 4. Switch to **JSON**, replace the content with the copied manifest, click **Next**, then **Create**
@@ -101,12 +89,6 @@ to do this once per workspace.
   with that workspace's token
 - A failure in one workspace doesn't stop the others. The toast lists what failed
 
-Run the tests with:
-
-```bash
-npm test
-```
-
 ## 🔒 Privacy
 
 Tokens are stored in Raycast's encrypted local storage and are sent only to `slack.com`. The
@@ -136,22 +118,6 @@ To disconnect a workspace, remove it in **Manage Workspaces** and then delete th
 - `Clear Status` uses the workspaces from your last `Set Status`. Without one, it clears all
   connected workspaces
 - The extension is only available on macOS
-
-## 👥 Contributing
-
-Open an [issue](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/issues) for bugs and ideas. Pull requests are welcome.
-
-### Releases
-
-Add an entry at the top of `CHANGELOG.md` and commit it, then create and push a tag:
-
-```bash
-git tag -a v1.1.0 -m "v1.1.0"
-git push origin v1.1.0
-```
-
-The [release workflow](.github/workflows/release.yml) runs the tests, lint, and build, then creates
-the GitHub release from the latest changelog entry.
 
 ## ℹ️ Disclaimer
 

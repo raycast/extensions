@@ -112,6 +112,10 @@ export function clearStatus(workspaces: Workspace[]): Promise<StatusResult[]> {
   return setStatus(workspaces, { emoji: "", text: "", expiration: 0 });
 }
 
+export function clearTargets(workspaces: Workspace[], lastTeamIds?: string[]): Workspace[] {
+  return lastTeamIds ? workspaces.filter((workspace) => lastTeamIds.includes(workspace.teamId)) : workspaces;
+}
+
 export function summarize(results: StatusResult[]): string {
   return results
     .filter((result) => result.error)

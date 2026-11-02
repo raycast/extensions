@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import ManageWorkspaces from "./components/manage-workspaces";
 import { DURATIONS, expirationFor } from "./lib/expiration";
 import { Workspace, clearStatus, normalizeEmoji, setStatus, StatusResult, summarize } from "./lib/slack";
@@ -41,31 +42,42 @@ async function report(results: StatusResult[], toast: Toast, successTitle: strin
   toast.message = summarize(results);
 }
 
+async function loadFormData() {
+  const [workspaces, lastForm] = await Promise.all([loadWorkspaces(), loadLastForm()]);
+  return { workspaces, lastForm };
+}
+
+function defaultTeamIds(workspaces: Workspace[], lastForm?: LastForm): string[] {
+  const known = workspaces.map((workspace) => workspace.teamId);
+  const selected = known.filter((teamId) => lastForm?.teamIds.includes(teamId));
+  return selected.length > 0 ? selected : known;
+}
+
+function defaultEmojiChoice(lastForm?: LastForm): string {
+  if (!lastForm?.emoji) {
+    return COMMON_EMOJIS[0].value;
+  }
+  return COMMON_EMOJIS.some((item) => item.value === lastForm.emoji) ? lastForm.emoji : CUSTOM_EMOJI;
+}
+
 export default function Command() {
   const { push } = useNavigation();
-  const [workspaces, setWorkspaces] = useState<Workspace[]>();
-  const [lastForm, setLastForm] = useState<LastForm>();
-  const [emojiChoice, setEmojiChoice] = useState<string>();
-  const [teamIds, setTeamIds] = useState<string[]>([]);
+  const { data, isLoading, error, revalidate } = usePromise(loadFormData, [], {
+    failureToastOptions: { title: "Could not load workspaces" },
+  });
+  const [chosenEmoji, setChosenEmoji] = useState<string>();
+  const [chosenTeamIds, setChosenTeamIds] = useState<string[]>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function reload() {
-    const [loaded, last] = await Promise.all([loadWorkspaces(), loadLastForm()]);
-    const known = new Set(loaded.map((workspace) => workspace.teamId));
-    const selected = last?.teamIds.filter((teamId) => known.has(teamId)) ?? [];
-    setWorkspaces(loaded);
-    setLastForm(last);
-    setTeamIds(selected.length > 0 ? selected : [...known]);
-    const isCommon = COMMON_EMOJIS.some((item) => item.value === last?.emoji);
-    setEmojiChoice(!last?.emoji ? COMMON_EMOJIS[0].value : isCommon ? last.emoji : CUSTOM_EMOJI);
-  }
-
-  useEffect(() => {
-    reload();
-  }, []);
+  const workspaces = data?.workspaces ?? [];
+  const lastForm = data?.lastForm;
+  const emojiChoice = chosenEmoji ?? defaultEmojiChoice(lastForm);
+  const teamIds = chosenTeamIds
+    ? chosenTeamIds.filter((teamId) => workspaces.some((workspace) => workspace.teamId === teamId))
+    : defaultTeamIds(workspaces, lastForm);
 
   function selectedWorkspaces(ids: string[]) {
-    return (workspaces ?? []).filter((workspace) => ids.includes(workspace.teamId));
+    return workspaces.filter((workspace) => ids.includes(workspace.teamId));
   }
 
   async function submit(values: FormValues) {
@@ -85,13 +97,21 @@ export default function Command() {
     }
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Setting status…" });
-    await saveLastForm({ teamIds: values.teamIds, emoji, text, duration: values.duration });
     const results = await setStatus(selectedWorkspaces(values.teamIds), {
       emoji,
       text,
       expiration: expirationFor(values.duration),
     });
     setIsSubmitting(false);
+    try {
+      if (results.some((result) => !result.error)) {
+        await saveLastForm({ teamIds: values.teamIds, emoji, text, duration: values.duration });
+      }
+    } catch (error) {
+      await toast.hide();
+      await showFailureToast(error, { title: "Status set, but your selection could not be saved" });
+      return;
+    }
     await report(results, toast, "Status set");
   }
 
@@ -107,17 +127,19 @@ export default function Command() {
     await report(results, toast, "Status cleared");
   }
 
-  const isLoading = workspaces === undefined || emojiChoice === undefined;
-  if (isLoading) {
-    return <Form isLoading />;
+  if (!data) {
+    return (
+      <Form isLoading={isLoading}>
+        {error && <Form.Description title="Could Not Load Workspaces" text={error.message} />}
+      </Form>
+    );
   }
 
   const manageAction = (
     <Action
       title="Manage Workspaces"
       icon={Icon.Gear}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-      onAction={() => push(<ManageWorkspaces onChange={reload} />)}
+      onAction={() => push(<ManageWorkspaces onChange={revalidate} />)}
     />
   );
 
@@ -135,6 +157,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Set Status" icon={Icon.Check} onSubmit={submit} />
+          {manageAction}
           <Action
             title="Clear Status"
             icon={Icon.Trash}
@@ -142,16 +165,15 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
             onAction={clear}
           />
-          {manageAction}
         </ActionPanel>
       }
     >
-      <Form.TagPicker id="teamIds" title="Workspaces" value={teamIds} onChange={setTeamIds}>
+      <Form.TagPicker id="teamIds" title="Workspaces" value={teamIds} onChange={setChosenTeamIds}>
         {workspaces.map((workspace) => (
           <Form.TagPicker.Item key={workspace.teamId} value={workspace.teamId} title={workspace.name} />
         ))}
       </Form.TagPicker>
-      <Form.Dropdown id="emojiChoice" title="Emoji" value={emojiChoice} onChange={setEmojiChoice}>
+      <Form.Dropdown id="emojiChoice" title="Emoji" value={emojiChoice} onChange={setChosenEmoji}>
         {COMMON_EMOJIS.map((item) => (
           <Form.Dropdown.Item key={item.value} value={item.value} title={item.title} />
         ))}

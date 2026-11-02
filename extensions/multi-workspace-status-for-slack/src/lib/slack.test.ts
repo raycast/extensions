@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import { expirationFor } from "./expiration.ts";
-import { clearStatus, normalizeEmoji, setStatus, summarize, verifyToken } from "./slack.ts";
+import { clearStatus, clearTargets, normalizeEmoji, setStatus, summarize, verifyToken } from "./slack.ts";
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -78,8 +78,10 @@ test("verifyToken rejects tokens without the write scope", async () => {
 });
 
 test("verifyToken returns workspace details", async () => {
-  mockSlack(() => ({ ok: true, team: "Buff", team_id: "T1", user: "me" }), { "x-oauth-scopes": "users.profile:write" });
-  assert.deepEqual(await verifyToken(" xoxp-1 "), { teamId: "T1", name: "Buff", user: "me", token: "xoxp-1" });
+  mockSlack(() => ({ ok: true, team: "Acme Labs", team_id: "T1", user: "me" }), {
+    "x-oauth-scopes": "users.profile:write",
+  });
+  assert.deepEqual(await verifyToken(" xoxp-1 "), { teamId: "T1", name: "Acme Labs", user: "me", token: "xoxp-1" });
 });
 
 test("expirationFor computes durations", () => {
@@ -91,4 +93,12 @@ test("expirationFor computes durations", () => {
   assert.equal(expirationFor("week", now), Math.floor(new Date(2026, 10, 8, 23, 59, 59).getTime() / 1000));
   const sunday = new Date(2026, 10, 8, 10, 0, 0);
   assert.equal(expirationFor("week", sunday), Math.floor(new Date(2026, 10, 8, 23, 59, 59).getTime() / 1000));
+});
+
+test("clearTargets uses the last selection and never widens it", () => {
+  const a = ws("a", "xoxp-a");
+  const b = ws("b", "xoxp-b");
+  assert.deepEqual(clearTargets([a, b]), [a, b]);
+  assert.deepEqual(clearTargets([a, b], ["Ta"]), [a]);
+  assert.deepEqual(clearTargets([b], ["Ta"]), []);
 });

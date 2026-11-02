@@ -11,9 +11,9 @@ import {
   open,
   showToast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { SLACK_APPS_URL, SLACK_APP_MANIFEST } from "../lib/manifest";
 import { Workspace, verifyToken } from "../lib/slack";
 import { loadWorkspaces, removeWorkspace, saveWorkspace } from "../lib/storage";
@@ -53,41 +53,36 @@ function AddWorkspaceForm({ onAdded }: { onAdded: () => Promise<void> }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Workspace" icon={Icon.Plus} onSubmit={submit} />
-          <Action
-            title="Copy Manifest and Open Slack"
-            icon={Icon.Globe}
-            shortcut={Keyboard.Shortcut.Common.OpenWith}
-            onAction={openSlack}
-          />
+          <Action title="Copy Manifest and Open Slack" icon={Icon.Globe} onAction={openSlack} />
         </ActionPanel>
       }
     >
+      <Form.Description title="Step 1" text="Press ⌘⇧↩ to copy the app manifest and open Slack." />
       <Form.Description
-        title="Setup"
-        text={
-          "1. Press ⌘⇧O to copy the app manifest and open Slack.\n2. Select “From a manifest”, choose your workspace, and paste the manifest as JSON.\n3. Under “OAuth & Permissions”, click “Install to Workspace”.\n4. Paste the “User OAuth Token” below."
-        }
+        title="Step 2"
+        text="Select “From a manifest”, choose your workspace, and paste the manifest as JSON."
       />
+      <Form.Description title="Step 3" text="Under “OAuth & Permissions”, click “Install to Workspace”." />
+      <Form.Description title="Step 4" text="Paste the “User OAuth Token” below." />
       <Form.PasswordField id="token" title="User OAuth Token" placeholder="xoxp-…" />
     </Form>
   );
 }
 
-export default function ManageWorkspaces({ onChange }: { onChange: () => Promise<void> }) {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>();
-
-  async function reload() {
-    setWorkspaces(await loadWorkspaces());
-  }
+export default function ManageWorkspaces({ onChange }: { onChange: () => Promise<unknown> }) {
+  const {
+    data: workspaces,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(loadWorkspaces, [], {
+    failureToastOptions: { title: "Could not load workspaces" },
+  });
 
   async function changed() {
-    await reload();
+    await revalidate();
     await onChange();
   }
-
-  useEffect(() => {
-    reload();
-  }, []);
 
   async function remove(workspace: Workspace) {
     const confirmed = await confirmAlert({
@@ -96,26 +91,29 @@ export default function ManageWorkspaces({ onChange }: { onChange: () => Promise
       primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
     });
     if (confirmed) {
-      await removeWorkspace(workspace.teamId);
-      await changed();
+      try {
+        await removeWorkspace(workspace.teamId);
+        await changed();
+      } catch (error) {
+        await showFailureToast(error, { title: `Could not remove ${workspace.name}` });
+      }
     }
   }
 
   const addAction = (
-    <Action.Push
-      title="Add Workspace"
-      icon={Icon.Plus}
-      shortcut={Keyboard.Shortcut.Common.New}
-      target={<AddWorkspaceForm onAdded={changed} />}
-    />
+    <Action.Push title="Add Workspace" icon={Icon.Plus} target={<AddWorkspaceForm onAdded={changed} />} />
   );
 
+  if (error && !workspaces) {
+    return (
+      <List navigationTitle="Manage Workspaces">
+        <List.EmptyView icon={Icon.Warning} title="Could Not Load Workspaces" description={error.message} />
+      </List>
+    );
+  }
+
   return (
-    <List
-      isLoading={workspaces === undefined}
-      navigationTitle="Manage Workspaces"
-      searchBarPlaceholder="Search workspaces…"
-    >
+    <List isLoading={isLoading} navigationTitle="Manage Workspaces" searchBarPlaceholder="Search workspaces…">
       <List.EmptyView
         icon={Icon.PlusCircle}
         title="No Workspaces Yet"
@@ -135,7 +133,6 @@ export default function ManageWorkspaces({ onChange }: { onChange: () => Promise
                 title="Remove Workspace"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={() => remove(workspace)}
               />
             </ActionPanel>
