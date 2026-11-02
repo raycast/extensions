@@ -1,146 +1,176 @@
-import { spawn } from "node:child_process";
+import { getPreferenceValues } from "@raycast/api";
+import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { connect } from "node:net";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { getPreferenceValues } from "@raycast/api";
 
-export type NameHit = {
-  kind: "file" | "dir" | "link" | "other";
+/** The daemon's socket. One JSON object per line in, one per line out. */
+const SOCKET = join(homedir(), "Library/Application Support/FSearch/fsearch.sock");
+
+/** Name search answers in milliseconds and content search stops itself at 250 ms; anything slower is stuck. */
+const TIMEOUT_MS = 10_000;
+
+export type Kind = "file" | "dir" | "link" | "other";
+
+export interface Hit {
   path: string;
+  kind: Kind;
   size: number;
-  mtime: Date;
-};
+  /** Seconds since 1970. */
+  mtime: number;
+  score: number;
+}
 
-export type ContentMatch = { line: number; text: string };
+export interface GrepFile {
+  path: string;
+  matches: { line: number; text: string }[];
+}
 
-export type ContentFile = { path: string; matches: ContentMatch[] };
+export interface SearchResult {
+  hits: Hit[];
+  tookMicros: number;
+}
 
-export type SearchResult =
-  | { type: "names"; hits: NameHit[]; tookUs: number }
-  | { type: "content"; files: ContentFile[]; tookUs: number; complete: boolean; indexing: boolean };
+export interface GrepResult {
+  files: GrepFile[];
+  /** False when the time budget ran out before every candidate file was read. */
+  complete: boolean;
+  /** True while the daemon is still building its content index. */
+  indexing: boolean;
+  tookMicros: number;
+}
 
-const REQUEST_TIMEOUT_MS = 30_000;
+/** Filter fields the daemon accepts beside `q` (`ext`, `kind`, `in`, and so on). */
+export type Filters = Record<string, string>;
 
-export class BinaryNotFoundError extends Error {
-  constructor(readonly binaryPath: string) {
-    super(`fsearch is not installed (expected at ${binaryPath}). Run the "Install fsearch" command in Raycast.`);
+export type GrepMode = "literal" | "regex" | "symbol";
+
+export type FSearchErrorReason = "missing" | "indexing" | "unreachable" | "query";
+
+export class FSearchError extends Error {
+  constructor(
+    message: string,
+    readonly reason: FSearchErrorReason,
+  ) {
+    super(message);
+    this.name = "FSearchError";
   }
 }
 
-export function resolveBinaryPath(): string {
-  const { binaryPath } = getPreferenceValues<Preferences>();
-  const configured = binaryPath?.trim();
-  if (!configured) return join(homedir(), ".local", "bin", "fsearch");
-  return configured.startsWith("~/") ? join(homedir(), configured.slice(2)) : configured;
+export function binaryPath() {
+  const { binary } = getPreferenceValues<Preferences>();
+  const path = binary?.trim() || "~/.local/bin/fsearch";
+  return path.startsWith("~") ? join(homedir(), path.slice(1)) : path;
 }
 
-/** Fields the daemon accepts: `q`, `limit`, `op`, `pattern`, `mode`, `per_file`, and any query filter (`ext`, `in`, …). */
-export type FsearchRequest = Record<string, string | number>;
-
-export function search({ query, limit, signal }: { query: string; limit: number; signal?: AbortSignal }) {
-  return request({ q: query, limit }, signal);
+export async function search(q: string, filters: Filters, limit: number, signal?: AbortSignal): Promise<SearchResult> {
+  const r = await request<{ hits: Hit[]; took_us: number } | { files: GrepFile[] }>({ q, ...filters, limit }, signal);
+  if ("files" in r) {
+    throw new FSearchError("Use Search File Contents for content queries", "query");
+  }
+  return { hits: r.hits, tookMicros: r.took_us };
 }
 
-/** Sends one request to the fsearch daemon through `fsearch stdio` and returns the first response line. */
-export function request(payload: FsearchRequest, signal?: AbortSignal) {
-  const binary = resolveBinaryPath();
-  if (!existsSync(binary)) return Promise.reject(new BinaryNotFoundError(binary));
+export async function grep(
+  pattern: string,
+  q: string,
+  mode: GrepMode,
+  signal?: AbortSignal,
+  options: { filters?: Filters; limit?: number; perFile?: number } = {},
+): Promise<GrepResult> {
+  const r = await request<{ files: GrepFile[]; complete: boolean; indexing?: number | boolean; took_us: number }>(
+    { ...options.filters, op: "grep", pattern, q, mode, limit: options.limit ?? 100, per_file: options.perFile ?? 10 },
+    signal,
+  );
+  return {
+    files: r.files,
+    complete: r.complete,
+    indexing: typeof r.indexing === "number" ? r.indexing > 0 : r.indexing === true,
+    tookMicros: r.took_us,
+  };
+}
 
-  return new Promise<SearchResult>((resolve, reject) => {
-    const child = spawn(binary, ["stdio"], { signal });
-    let stdout = "";
-    let stderr = "";
+async function request<T>(body: object, signal?: AbortSignal): Promise<T> {
+  try {
+    return await send<T>(body, signal);
+  } catch (error) {
+    if (!isNotRunning(error)) throw error;
+    await startDaemon();
+    return send<T>(body, signal);
+  }
+}
+
+function send<T>(body: object, signal?: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError());
+    const socket = connect(SOCKET);
+    let buffer = "";
     let settled = false;
-
-    const timer = setTimeout(
-      () => finish(() => reject(new Error(`fsearch did not respond within ${REQUEST_TIMEOUT_MS / 1000}s`))),
-      REQUEST_TIMEOUT_MS,
-    );
-
-    function finish(fn: () => void) {
+    const settle = (result: () => void) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      child.kill();
-      fn();
-    }
+      signal?.removeEventListener("abort", onAbort);
+      socket.destroy();
+      result();
+    };
+    const onAbort = () => settle(() => reject(abortError()));
+    const timer = setTimeout(
+      () => settle(() => reject(new FSearchError("FSearch didn't answer in time", "unreachable"))),
+      TIMEOUT_MS,
+    );
+    signal?.addEventListener("abort", onAbort, { once: true });
 
-    child.stdout.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
-      stdout += chunk;
-      const newline = stdout.indexOf("\n");
-      if (newline === -1) return;
-      const line = stdout.slice(0, newline);
-      finish(() => {
+    socket.setEncoding("utf8");
+    socket.on("connect", () => socket.write(JSON.stringify(body) + "\n"));
+    socket.on("data", (chunk: string) => {
+      buffer += chunk;
+      const end = buffer.indexOf("\n");
+      if (end < 0) return;
+      settle(() => {
         try {
-          resolve(parseResponse(JSON.parse(line)));
-        } catch (error) {
-          reject(error);
+          const response = JSON.parse(buffer.slice(0, end));
+          if (response.ok) return resolve(response as T);
+          const message = String(response.error ?? "FSearch returned an error");
+          reject(new FSearchError(message, message.startsWith("indexing") ? "indexing" : "query"));
+        } catch {
+          reject(new FSearchError("FSearch sent a response that couldn't be read", "unreachable"));
         }
       });
     });
-    child.stderr.setEncoding("utf8");
-    child.stderr.on("data", (chunk: string) => (stderr += chunk));
-    child.on("error", (error) => finish(() => reject(error)));
-    child.on("close", (code) =>
-      finish(() => reject(new Error(stderr.trim() || `fsearch exited with code ${code} without a response`))),
+    socket.on("error", (error) => settle(() => reject(error)));
+    // The daemon hung up before a full line arrived (it quit or restarted mid-search).
+    socket.on("close", () =>
+      settle(() => reject(new FSearchError("FSearch closed the connection before answering", "unreachable"))),
     );
-
-    child.stdin.on("error", (error) => finish(() => reject(error)));
-    child.stdin.end(JSON.stringify(payload) + "\n");
   });
 }
 
-function parseResponse(value: unknown): SearchResult {
-  if (!isRecord(value)) throw new Error("Unexpected response from fsearch");
-  if (value.ok !== true) {
-    throw new Error(typeof value.error === "string" ? value.error : "fsearch returned an error");
+function isNotRunning(error: unknown) {
+  const code = (error as NodeJS.ErrnoException)?.code;
+  return code === "ENOENT" || code === "ECONNREFUSED";
+}
+
+/** Any fsearch client starts the daemon when the socket isn't there; `status` is the cheapest one. */
+function startDaemon(): Promise<void> {
+  const bin = binaryPath();
+  if (!existsSync(bin)) {
+    return Promise.reject(new FSearchError(`FSearch isn't installed at ${bin}`, "missing"));
   }
-  const tookUs = typeof value.took_us === "number" ? value.took_us : 0;
-
-  if (Array.isArray(value.hits)) {
-    return { type: "names", tookUs, hits: value.hits.filter(isRecord).flatMap(parseHit) };
-  }
-  if (Array.isArray(value.files)) {
-    return {
-      type: "content",
-      tookUs,
-      complete: value.complete !== false,
-      indexing: typeof value.indexing === "number" ? value.indexing > 0 : value.indexing === true,
-      files: value.files.filter(isRecord).flatMap(parseFile),
-    };
-  }
-  throw new Error("Unexpected response from fsearch");
+  return new Promise((resolve, reject) => {
+    execFile(bin, ["status"], { timeout: 10_000 }, (error) => {
+      if (error && !existsSync(SOCKET)) {
+        reject(new FSearchError("The FSearch daemon didn't start", "unreachable"));
+      } else {
+        resolve();
+      }
+    });
+  });
 }
 
-function parseHit(hit: Record<string, unknown>): NameHit[] {
-  if (typeof hit.path !== "string") return [];
-  return [
-    {
-      path: hit.path,
-      kind: isKind(hit.kind) ? hit.kind : "other",
-      size: typeof hit.size === "number" ? hit.size : 0,
-      mtime: new Date((typeof hit.mtime === "number" ? hit.mtime : 0) * 1000),
-    },
-  ];
-}
-
-function parseFile(file: Record<string, unknown>): ContentFile[] {
-  if (typeof file.path !== "string") return [];
-  const matches = Array.isArray(file.matches)
-    ? file.matches
-        .filter(isRecord)
-        .flatMap((m) =>
-          typeof m.line === "number" && typeof m.text === "string" ? [{ line: m.line, text: m.text }] : [],
-        )
-    : [];
-  return [{ path: file.path, matches }];
-}
-
-function isKind(value: unknown): value is NameHit["kind"] {
-  return value === "file" || value === "dir" || value === "link" || value === "other";
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function abortError() {
+  const error = new Error("Aborted");
+  error.name = "AbortError";
+  return error;
 }

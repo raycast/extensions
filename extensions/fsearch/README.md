@@ -1,64 +1,52 @@
-<div align="center">
-    <br/>
-    <br/>
-    <img src="./assets/icon.png" alt="FSearch" width="100"/>
-    <h3>FSearch</h3>
-    <p>Instant whole-disk file search with fuzzy names, typo tolerance, and indexed content search</p>
-    <p align="center">
-        <a href="https://buymeacoffee.com/0xdhrv"><img alt="Buy Me a Coffee" src="https://shieldcn.dev/badge/buymecoffee-FFDD04.svg?size=default&amp;theme=neutral&amp;logo=buymeacoffee" /></a>
-        <a href="https://github.com/0xdhrv"><img alt="GitHub" src="https://shieldcn.dev/badge/github-181717.svg?size=default&amp;theme=neutral&amp;logo=github" /></a>
-        <a href="https://x.com/0xdhrv"><img alt="Twitter" src="https://shieldcn.dev/badge/twitter-1DA1F2.svg?size=default&amp;theme=neutral&amp;logo=x" /></a>
-    </p>
-    <br/>
-    <br/>
-</div>
+# FSearch for Raycast
 
-Search your whole disk from Raycast. This extension is a frontend for [fsearch](https://github.com/noahdunnagan/fsearch) by [Noah Dunnagan](https://github.com/noahdunnagan): a macOS indexer that answers name queries in about a tenth of a millisecond and searches inside files from the same index.
+Find any file on your Mac by name or by what's inside it, without leaving Raycast. Built on [FSearch](https://github.com/noahdunnagan/fsearch), which indexes the whole disk and answers in about a millisecond.
 
-Type a name, a folder, or a content query. Results open in the default app, in Finder, or in Quick Look. You can copy the path, the filename, or the file itself.
+## Commands
 
-## Setup
+**Install FSearch** opens Terminal to build and install FSearch, or update an existing installation. It offers to install Rust if needed, installs to `~/.local/bin/fsearch`, and enables startup at login. You can also start the installer from either search command when FSearch is missing, then choose **Try Again** after installation.
 
-Run **Install fsearch** in Raycast, or press ↵ on the "fsearch Is Not Installed" screen. A Terminal window opens and:
+**Search Files** finds files and folders anywhere on your Mac. Words match loosely, and a typo in a longer word still finds the file (`mian.rs` finds `main.rs`). Choose a kind from the menu in the search bar — Folders, Applications, Images, Documents, Code, and more — or narrow the search as you type:
 
-1. Offers to install Rust with [rustup](https://rustup.rs) if `cargo` is missing.
-2. Clones and builds fsearch from source (about 30 seconds).
-3. Installs it to `~/.local/bin/fsearch` as a login item, so the index stays warm.
-4. Offers to open **System Settings → Privacy & Security → Full Disk Access**. Grant access to `~/.local/bin/fsearch` to index everything. Do this again after each update.
+| Type                                | To find                                         |
+| ----------------------------------- | ----------------------------------------------- |
+| `in:~/Developer`                    | Items inside a folder                           |
+| `ext:pdf`                           | Items with a file extension                     |
+| `size:>5mb`                         | Files larger than 5 MB                          |
+| `mtime:<7d`                         | Items modified in the last 7 days               |
+| `'exact`, `^start`, `end$`, `!skip` | Exact words, prefixes, suffixes, and exclusions |
 
-Run the command again later to update fsearch. If you installed the binary somewhere else, set **fsearch Binary** in the extension preferences.
+Press Command-D to show details with a preview, Command-Y for Quick Look, and Command-F to search inside the selected folder.
 
-The first run lists the whole disk (~25s). Search shows "Building Index" until it's ready.
+You can also fill in Name, Kind, and Folder right in Raycast's root search, before the command opens. Press Tab to move between them; each one is optional.
 
-## AI
+**Search File Contents** finds text inside your files. Choose Text, Regular Expression, or Definition from the menu in the search bar; Definition finds where a function or type is declared. Searches ignore case unless you type an uppercase letter. Add `ext:`, `type:`, or `in:` to search fewer files. To open each match at its line, choose an editor in the command's settings. In root search, fill in Text, Match, and Folder to start a search before the command opens.
 
-Mention `@fsearch` in Raycast AI to find files in natural language:
+In either search command, select a result and press Command-Shift-V to **Paste Path to App**. This inserts the full path wherever you were typing. At a zsh or bash prompt, choose **Paste Shell-Quoted Path** from the action menu to insert a path with spaces or punctuation as one argument.
 
-- "@fsearch find PDFs in my Downloads modified this week"
-- "@fsearch where is `parseResponse` defined in ~/Developer/app?"
-- "@fsearch show me videos larger than 1 GB"
+## Raycast AI
 
-## Query Syntax
+Mention `@fsearch` in Raycast AI to find files by name or search inside them:
 
-Queries are passed straight through to fsearch. Words are fuzzy, and words of five or more letters forgive one typo (`mian.rs` finds `main.rs`). Content search is smart-case.
+- “Find PDFs in my Downloads folder modified in the last seven days.”
+- “Find videos larger than 1 GB.”
+- “Which files in ~/Developer/my-app contain TODO?”
+- “Where is parseResponse defined in ~/Developer/my-app?”
 
-| Example                          | Meaning                                            |
-| -------------------------------- | -------------------------------------------------- |
-| `mian.rs`                        | Fuzzy name match (one typo allowed for 5+ letters) |
-| `readme in:~/Developer`          | Limit to a folder                                  |
-| `type:image size:>5mb mtime:<7d` | Filter by type, size, and age                      |
-| `ext:ts grep:TODO`               | Search inside files                                |
-| `ext:rs regex:fn\s+\w+_dir`      | Regex inside files                                 |
-| `sym:apply_dir`                  | Find where a symbol is defined                     |
+The AI tools support the same file kinds and search modes as the commands. They return file paths, metadata, or matching lines without changing files. Content searches return up to five lines per file and report when the search stopped early or the content index is still building. FSearch must be installed as described below; the tools use the extension's FSearch Location setting.
 
-Operators: `'exact`, `^prefix`, `suffix$`, `!exclude`.
+## Install
 
-Filters: `ext:`, `type:`, `kind:`, `in:`, `size:`, `mtime:`, `re:`, `path:`, `grep:`, `regex:`, `sym:`, `limit:`.
+1. Install the extension from the Raycast Store, or build it locally:
 
-Name results show size and modified time. Content results list matching lines and can be expanded with **Toggle Details** (⌘⇧D).
+   ```sh
+   npm install && npm run dev
+   ```
 
-## Credits
+2. Run **Install FSearch** in Raycast and follow the Terminal prompts. Git and the Xcode Command Line Tools are required; the installer offers to install Rust if it isn't available.
 
-Search is powered by [fsearch](https://github.com/noahdunnagan/fsearch) by [Noah Dunnagan](https://github.com/noahdunnagan). fsearch crawls the disk once, follows changes, and keeps names and file contents in one index shared by the CLI and this extension. It is MIT licensed, copyright Noah Dunnagan.
+3. If you previously changed **FSearch Location** in the extension preferences, set it to `~/.local/bin/fsearch` to use this installation.
 
-This Raycast extension is by [0xdhrv](https://github.com/0xdhrv).
+For a manual installation, follow the [FSearch instructions](https://github.com/noahdunnagan/fsearch).
+
+The first search starts the FSearch daemon, which scans the disk once in about 20 seconds. For the daemon to search protected folders like Mail and Messages, give it Full Disk Access in System Settings > Privacy & Security, or start it from a terminal that has access.

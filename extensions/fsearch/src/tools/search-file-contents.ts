@@ -1,38 +1,35 @@
-import { request } from "../lib/fsearch";
-import { formatForAI } from "../lib/tool-output";
+import { grep, type Filters } from "../lib/fsearch";
 
 type Input = {
-  /** Text, regular expression, or symbol name to find inside files. */
+  /** Text, regular expression, or symbol name to find. Literal text is kept exactly, including spaces and colons. */
   pattern: string;
-  /**
-   * How to interpret the pattern. "literal" matches the text as-is (smart-case), "regex" treats it as a regular expression,
-   * and "symbol" finds where a function, type, or variable with that name is defined. Defaults to "literal".
-   */
+  /** literal uses smart-case (uppercase makes it case-sensitive); regex matches a regular expression; symbol finds definitions. Defaults to literal. */
   mode?: "literal" | "regex" | "symbol";
-  /** Only search inside this folder. Absolute path or starting with ~, e.g. "~/Developer/my-app". Strongly recommended. */
+  /** Folder to search within, as an absolute path or ~/ path. Spaces are supported. Prefer the user's project folder. */
   folder?: string;
-  /** Comma-separated file extensions without dots, e.g. "ts,tsx" or "md". */
+  /** Comma-separated file extensions without dots, such as ts,tsx or md. */
   extension?: string;
-  /** Optional words to fuzzy-match against file names to narrow which files are read. */
-  fileName?: string;
-  /** Maximum number of files to return. Defaults to 20. */
+  /** Optional filename query to narrow candidate files. Supports ext:, type:, size:, mtime: and other file filters. Keep the content pattern separate. */
+  fileQuery?: string;
+  /** Maximum matching files, from 1 to 100. Defaults to 20, with up to five matching lines per file. */
   limit?: number;
 };
 
-/**
- * Search inside files on the user's Mac with the fsearch content index, like a fast grep.
- * Returns matching files with line numbers and the matching lines (up to 5 per file).
- */
+/** Search file contents for text, regex matches or symbol definitions. Returns paths and matching lines with line numbers, plus search completeness and indexing status. */
 export default async function tool(input: Input) {
-  const payload: Record<string, string | number> = {
-    op: "grep",
-    pattern: input.pattern,
-    mode: input.mode ?? "literal",
-    q: input.fileName ?? "",
-    limit: input.limit ?? 20,
-    per_file: 5,
-  };
-  if (input.folder) payload.in = input.folder;
-  if (input.extension) payload.ext = input.extension;
-  return formatForAI(await request(payload));
+  if (!input.pattern.trim()) throw new Error("Provide a non-empty content search pattern");
+  const limit = input.limit ?? 20;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error("limit must be an integer from 1 to 100");
+  }
+
+  const filters: Filters = {};
+  if (input.folder) filters.in = input.folder;
+  if (input.extension) filters.ext = input.extension;
+  const result = await grep(input.pattern, input.fileQuery ?? "", input.mode ?? "literal", undefined, {
+    filters,
+    limit,
+    perFile: 5,
+  });
+  return { files: result.files, complete: result.complete, indexing: result.indexing, limit, matchesPerFile: 5 };
 }

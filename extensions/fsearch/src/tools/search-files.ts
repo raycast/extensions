@@ -1,39 +1,45 @@
-import { request } from "../lib/fsearch";
-import { formatForAI } from "../lib/tool-output";
+import { search, type Filters } from "../lib/fsearch";
+import { modifiedDate } from "../lib/format";
+import { filtersFor } from "../lib/kinds";
 
 type Input = {
-  /**
-   * Words to fuzzy-match against file and folder names, e.g. "invoice 2024" or "main.rs".
-   * Supports fsearch operators: 'exact, ^prefix, suffix$, !exclude. Use an empty string to match everything (combine with filters).
-   */
-  query: string;
-  /** Only search inside this folder. Absolute path or starting with ~, e.g. "~/Documents". */
+  /** Name to fuzzy-match. Supports 'exact, ^prefix, suffix$, !exclude and file filters. Omit when filtering only. */
+  query?: string;
+  /** Folder to search within, as an absolute path or ~/ path. Spaces are supported. */
   folder?: string;
-  /** Comma-separated file extensions without dots, e.g. "pdf" or "ts,tsx". */
+  /** Category to search, matching the Search Files command's kind menu. Defaults to all. */
+  kind?: "all" | "file" | "folder" | "app" | "image" | "doc" | "code" | "video" | "audio" | "archive" | "font";
+  /** Comma-separated file extensions without dots, such as pdf or ts,tsx. */
   extension?: string;
-  /** File category. */
-  type?: "image" | "video" | "audio" | "doc" | "code" | "archive" | "font" | "app";
-  /** Restrict to files or folders. */
-  kind?: "file" | "dir";
-  /** Size filter with a comparison and unit, e.g. ">5mb", "<100kb", "1gb..4gb". */
+  /** Size comparison, such as >5mb or <100kb. */
   size?: string;
-  /** Modification-age filter, e.g. "<7d" (changed in the last 7 days), ">1y", "<2h". Units: min, h, d, w, mo, y. */
+  /** Modification age, such as <7d for the last seven days or <2h for the last two hours. */
   modified?: string;
-  /** Maximum number of results. Defaults to 30. */
+  /** Maximum results, from 1 to 100. Defaults to 30. */
   limit?: number;
 };
 
-/**
- * Find files and folders anywhere on the user's Mac by name, using the fsearch index.
- * Results are ranked by relevance and include path, kind, size in bytes, and modification time.
- */
+/** Find files and folders by name or metadata. Returns paths, kinds, byte sizes and modification dates, without reading file contents. */
 export default async function tool(input: Input) {
-  const payload: Record<string, string | number> = { q: input.query, limit: input.limit ?? 30 };
-  if (input.folder) payload.in = input.folder;
-  if (input.extension) payload.ext = input.extension;
-  if (input.type) payload.type = input.type;
-  if (input.kind) payload.kind = input.kind;
-  if (input.size) payload.size = input.size;
-  if (input.modified) payload.mtime = input.modified;
-  return formatForAI(await request(payload));
+  const limit = input.limit ?? 30;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error("limit must be an integer from 1 to 100");
+  }
+
+  const filters: Filters = { ...filtersFor(input.kind ?? "all") };
+  if (input.folder) filters.in = input.folder;
+  if (input.extension) filters.ext = input.extension;
+  if (input.size) filters.size = input.size;
+  if (input.modified) filters.mtime = input.modified;
+
+  const result = await search(input.query?.trim() ?? "", filters, limit);
+  return {
+    results: result.hits.map((hit) => ({
+      path: hit.path,
+      kind: hit.kind,
+      sizeBytes: hit.size,
+      modified: modifiedDate(hit.mtime)?.toISOString() ?? null,
+    })),
+    limit,
+  };
 }
