@@ -85,13 +85,12 @@ export function getTotpRemainingSeconds(): number {
 }
 
 /**
- * "123   456": the halves of a 6-digit code are set apart, as in Proton Authenticator. In fixed-width digits, the gap
- * makes the code as wide as "Loading…" in Raycast's tags, as measured on screen: Get TOTP Code's tag keeps its width
- * when the code arrives.
+ * "123  456": the halves of a 6-digit code are a digit's width and a little more apart, as in Proton Authenticator.
+ * Twice that made the code as wide as "Loading…" in Get TOTP Code's tags, but looked out of place in the details.
  */
 export function formatTotpCode(code: string): string {
   if (code.length === 6) {
-    return `${code.slice(0, 3)}\u2003\u2009${code.slice(3)}`;
+    return `${code.slice(0, 3)}\u2007\u2008${code.slice(3)}`;
   }
   return code;
 }
