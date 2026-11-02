@@ -423,8 +423,12 @@ test("pass-cli not found shows its screen instead of the cached items, which can
     },
     "./lib/pass-cli": { getTotp: notFound, listVaultsAndItems: notFound, localTotpCode: () => undefined },
     "./lib/types": { PassCliError },
+    // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+    "./lib/format": { monospace: (text: string) => text },
     "./lib/utils": {
       getTotpRemainingSeconds: () => 30,
+      totpProgressIcon: () => "",
+      totpTimerColor: () => "",
       getItemIcon: () => "",
       formatTotpCode: (code: string) => code,
     },
@@ -1081,8 +1085,12 @@ test("Get TOTP preserves failed-vault codes with Retry and retires legacy items 
         },
       },
       "./lib/types": { PassCliError },
+      // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+      "./lib/format": { monospace: (text: string) => text },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
+        totpProgressIcon: () => "",
+        totpTimerColor: () => "",
         getItemIcon: () => "",
         formatTotpCode: (code: string) => code,
       },
@@ -1161,8 +1169,12 @@ function totpCommandFixture(
       },
       "./lib/pass-cli": { listVaultsAndItems, getTotp, localTotpCode },
       "./lib/types": { PassCliError },
+      // Fixed-width digits are checked in format.test.ts; plain ones keep these assertions readable.
+      "./lib/format": { monospace: (text: string) => text },
       "./lib/utils": {
         getTotpRemainingSeconds: () => 30,
+        totpProgressIcon: () => "",
+        totpTimerColor: () => "",
         getItemIcon: () => "",
         formatTotpCode: (code: string) => code,
       },
@@ -1208,6 +1220,31 @@ function totpCommandFixture(
     },
   };
 }
+
+test("the TOTP countdown uses Raycast's own circles, in five steps, and turns from green to yellow to red", () => {
+  const icons = {
+    CircleProgress100: "100",
+    CircleProgress75: "75",
+    CircleProgress50: "50",
+    CircleProgress25: "25",
+    Circle: "empty",
+  };
+  const { totpProgressIcon, totpTimerColor } = loadView("utils.ts", {
+    "@raycast/api": { Color: { Green: "green", Yellow: "yellow", Red: "red" }, Icon: icons },
+  }) as unknown as {
+    totpProgressIcon: (remaining: number, period: number, tint?: string) => unknown;
+    totpTimerColor: (remaining: number) => string;
+  };
+  assert.equal(
+    [30, 26, 19, 18, 11, 4, 3, 1].map((seconds) => totpProgressIcon(seconds, 30)).join(),
+    "100,75,75,50,25,25,empty,empty",
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(totpProgressIcon(30, 30, "green"))), {
+    source: "100",
+    tintColor: "green",
+  });
+  assert.equal([30, 11, 10, 6, 5, 1].map(totpTimerColor).join(), "green,green,yellow,yellow,red,red");
+});
 
 test("Get TOTP Code generates codes from the listing instead of asking pass-cli for each item", async () => {
   let asked = 0;

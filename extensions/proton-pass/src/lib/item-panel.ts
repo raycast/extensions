@@ -7,7 +7,7 @@ export type PanelValue =
   | { kind: "empty" }
   | { kind: "loading" }
   | { kind: "unavailable" }
-  | { kind: "code"; code: string; remainingSeconds?: number }
+  | { kind: "code"; code: string; remainingSeconds?: number; period?: number }
   | { kind: "websites"; websites: { label: string; url: string }[] };
 
 export interface PanelRow {
@@ -26,7 +26,7 @@ export interface PanelInput {
   item: Item;
   /** Loaded details of the item, when it's selected. */
   detail?: ItemDetail;
-  totp?: { code: string; remainingSeconds?: number };
+  totp?: { code: string; remainingSeconds?: number; period?: number };
   /** The TOTP code couldn't be fetched. */
   totpFailed?: boolean;
   isLoading: boolean;

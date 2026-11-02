@@ -1,10 +1,10 @@
 import { Color, Detail, Icon, Image, List, open } from "@raycast/api";
 import { memo } from "react";
-import { totpWithCountdown } from "./format";
+import { monospace, totpWithCountdown } from "./format";
 import { getPanelRows, PanelRow, PanelRows, PanelValue } from "./item-panel";
 import { Item, ItemDetail } from "./types";
 import { useTotpCode } from "./use-totp-code";
-import { formatTotpCode, getItemIcon } from "./utils";
+import { formatTotpCode, getItemIcon, totpProgressIcon, totpTimerColor } from "./utils";
 
 const MASKED_SECRET = "••••••••••••";
 
@@ -12,7 +12,7 @@ const ROW_ICONS: Partial<Record<string, Image.ImageLike>> = {
   username: Icon.Person,
   email: Icon.Envelope,
   password: Icon.Key,
-  totp: Icon.Clock,
+  totp: Icon.Shield,
   note: Icon.Document,
   vault: Icon.Folder,
   modified: Icon.Calendar,
@@ -35,10 +35,10 @@ function labelText(value: Exclude<PanelValue, { kind: "websites" }>): string | {
       return { value: "Unavailable", color: Color.SecondaryText };
     case "code":
       return value.remainingSeconds === undefined
-        ? formatTotpCode(value.code)
+        ? monospace(formatTotpCode(value.code))
         : {
             value: totpWithCountdown(formatTotpCode(value.code), value.remainingSeconds),
-            color: value.remainingSeconds <= 5 ? Color.Orange : undefined,
+            color: totpTimerColor(value.remainingSeconds),
           };
   }
 }
@@ -62,7 +62,17 @@ function renderRow(Metadata: Metadata, row: PanelRow, icon?: Image.ImageLike) {
 
 /** The rows of an item, shared by the details panel and the item view. */
 export function renderItemMetadata(Metadata: Metadata, item: Item, rows: PanelRows, error?: string) {
-  const iconOf = (row: PanelRow) => (row.id === "type" ? getItemIcon(item.type) : ROW_ICONS[row.id]);
+  const iconOf = (row: PanelRow) => {
+    if (row.id === "type") return getItemIcon(item.type);
+    // Without a TOTP code, the clock would only add clutter.
+    if (row.id === "totp" && row.value.kind === "empty") return undefined;
+    // A circle that empties with the time the TOTP code has left, instead of the clock.
+    const { value } = row;
+    if (value.kind === "code" && value.remainingSeconds !== undefined && value.period) {
+      return totpProgressIcon(value.remainingSeconds, value.period, totpTimerColor(value.remainingSeconds));
+    }
+    return ROW_ICONS[row.id];
+  };
   return (
     <Metadata>
       {rows.fields.map((row) => renderRow(Metadata, row, iconOf(row)))}

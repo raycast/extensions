@@ -199,7 +199,7 @@ export const ItemActions = memo(function ItemActions({
         {item.hasTotp && (
           <Action
             title="Copy TOTP Code"
-            icon={Icon.Clock}
+            icon={Icon.Shield}
             shortcut={platformShortcut(["cmd"], "t")}
             onAction={() => copy("TOTP Code", getTotpCode, true)}
           />
@@ -220,7 +220,7 @@ export const ItemActions = memo(function ItemActions({
           {item.hasTotp && (
             <Action
               title="Paste TOTP Code"
-              icon={Icon.Clock}
+              icon={Icon.Shield}
               shortcut={platformShortcut(["cmd", "shift"], "t")}
               onAction={pasteTotpCode}
             />

@@ -4,6 +4,7 @@ import {
   escapeMarkdown,
   formatRelativeTime,
   hostnameOf,
+  monospace,
   noteToMarkdown,
   toOpenableUrl,
   totpWithCountdown,
@@ -76,7 +77,12 @@ test("tells websites on the same hostname apart by their path", () => {
   ]);
 });
 
-test("puts the TOTP countdown first, on two digits, so that the code doesn't move", () => {
-  assert.equal(totpWithCountdown("418 877", 9), "09s  ·  418 877");
-  assert.equal(totpWithCountdown("418 877", 30), "30s  ·  418 877");
+test("writes the TOTP countdown first, on two digits, in fixed-width characters, so that nothing moves", () => {
+  assert.equal(totpWithCountdown("418 877", 9), "𝟶𝟿𝚜  ·  𝟺𝟷𝟾 𝟾𝟽𝟽");
+  assert.equal(totpWithCountdown("418 877", 30), "𝟹𝟶𝚜  ·  𝟺𝟷𝟾 𝟾𝟽𝟽");
+});
+
+test("swaps only digits and s for their fixed-width forms", () => {
+  assert.equal(monospace("0123456789s"), "𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝚜");
+  assert.equal(monospace("Code: 12 · ok"), "Code: 𝟷𝟸 · ok");
 });

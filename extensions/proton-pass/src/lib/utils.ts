@@ -1,5 +1,31 @@
-import { Icon } from "@raycast/api";
+import { Color, Icon, Image } from "@raycast/api";
 import { Item, ItemType } from "./types";
+
+/** Green while a TOTP code has more than 10 seconds left, then yellow, and red for its last 5 seconds. */
+export function totpTimerColor(remainingSeconds: number): Color {
+  if (remainingSeconds > 10) return Color.Green;
+  if (remainingSeconds > 5) return Color.Yellow;
+  return Color.Red;
+}
+
+/**
+ * The time a TOTP code has left, as one of Raycast's own progress circles: drawn like its other icons, they don't
+ * flicker when they change, unlike an image redrawn every second. Five steps, from full to empty.
+ */
+export function totpProgressIcon(remainingSeconds: number, period: number, tintColor?: Color): Image.ImageLike {
+  const left = remainingSeconds / period;
+  const source =
+    left > 0.875
+      ? Icon.CircleProgress100
+      : left > 0.625
+        ? Icon.CircleProgress75
+        : left > 0.375
+          ? Icon.CircleProgress50
+          : left > 0.125
+            ? Icon.CircleProgress25
+            : Icon.Circle;
+  return tintColor ? { source, tintColor } : source;
+}
 
 export function getItemIcon(type: ItemType): Icon {
   switch (type) {

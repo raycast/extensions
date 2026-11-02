@@ -7,6 +7,7 @@ import { Item, ItemDetail } from "./types";
 export interface DisplayedCode {
   code: string;
   remainingSeconds?: number;
+  period?: number;
 }
 
 /** The current TOTP code, generated locally from the otpauth URI when possible. */
@@ -63,7 +64,7 @@ export function useTotpCode(item: Item, detail: ItemDetail | undefined): TotpSta
   if (!result) return { failed: false };
   if (!result.code) return { failed: true };
   const code: DisplayedCode = period
-    ? { code: result.code, remainingSeconds: period - (Math.floor(now / 1000) % period) }
+    ? { code: result.code, remainingSeconds: period - (Math.floor(now / 1000) % period), period }
     : { code: result.code };
   return { code, failed: false };
 }

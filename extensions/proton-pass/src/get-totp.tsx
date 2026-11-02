@@ -6,14 +6,14 @@ import {
   showToast,
   Toast,
   Clipboard,
-  Color,
   getPreferenceValues,
   Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { listVaultsAndItems, getTotp, localTotpCode } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
-import { getItemIcon, getTotpRemainingSeconds, formatTotpCode } from "./lib/utils";
+import { getItemIcon, getTotpRemainingSeconds, formatTotpCode, totpProgressIcon, totpTimerColor } from "./lib/utils";
+import { monospace } from "./lib/format";
 import { clearCache, getCachedItems, setCachedItems } from "./lib/cache";
 import { renderErrorView } from "./lib/error-views";
 import { createRequestTracker, createSerialQueue, failedVaultsTitle, getRefreshResult } from "./lib/refresh";
@@ -231,11 +231,7 @@ export default function Command() {
     showToast({ style: Toast.Style.Success, title: "TOTP Copied", message: item.title });
   }
 
-  function getTimerColor(): Color {
-    if (remainingSeconds > 10) return Color.Green;
-    if (remainingSeconds > 5) return Color.Yellow;
-    return Color.Red;
-  }
+  const getTimerColor = () => totpTimerColor(remainingSeconds);
 
   return (
     <List isLoading={isLoading || isRefreshing} searchBarPlaceholder="Search TOTP items...">
@@ -251,11 +247,16 @@ export default function Command() {
               accessories={[
                 {
                   tag: {
-                    value: code ? formatTotpCode(code) : "---",
+                    value: code ? monospace(formatTotpCode(code)) : "---",
                     color: getTimerColor(),
                   },
                 },
-                { text: `${remainingSeconds}s`, icon: Icon.Clock },
+                // Fixed-width digits and a circle that empties: nothing moves as the seconds go by. Codes here follow the
+                // 30-second period of getTotpRemainingSeconds.
+                {
+                  text: monospace(`${String(remainingSeconds).padStart(2, "0")}s`),
+                  icon: totpProgressIcon(remainingSeconds, 30, getTimerColor()),
+                },
               ]}
               actions={
                 <ActionPanel>
