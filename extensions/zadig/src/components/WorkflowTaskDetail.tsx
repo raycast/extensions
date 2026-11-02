@@ -1,9 +1,9 @@
-import { Color, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
 import { getWorkflowTask, type WorkflowTask, type WorkflowTaskBuild } from "../api/workflows";
 import { formatTime } from "../utils/time";
 import { escapeMarkdown } from "../utils/markdown";
-import { getStatusColor } from "../utils/status";
+import { getStatusColor, getStatusIcon } from "../utils/status";
 
 type WorkflowTaskDetailProps = {
   task: WorkflowTask;
@@ -40,7 +40,8 @@ export default function WorkflowTaskDetail({ task }: WorkflowTaskDetailProps) {
                 <List.Item.Detail.Metadata.TagList.Item
                   key={stage.name}
                   text={stage.name}
-                  color={Color.SecondaryText}
+                  icon={getStatusIcon(stage.status)}
+                  color={getStatusColor(stage.status)}
                 />
               ))}
             </List.Item.Detail.Metadata.TagList>
