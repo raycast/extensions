@@ -102,13 +102,17 @@ export const runInLocationApp = Effect.fn("runInLocationApp")(function* (fn: str
   const stdout = join(dir, "stdout");
   const stderr = join(dir, "stderr");
 
-  yield* attempt(() =>
+  // `open -W` exits with an error when the app quits before it starts waiting, for example when Core
+  // Location answers from its cache. The app's output decides the result, so that error only matters
+  // when the app wrote nothing.
+  const launch = yield* attempt(() =>
     execFileAsync(
       "/usr/bin/open",
       ["-W", "-n", "-g", "--stdout", stdout, "--stderr", stderr, "-a", app, "--args", fn],
-      {
-        timeout: RUN_TIMEOUT_MS,
-      },
+      { timeout: RUN_TIMEOUT_MS },
+    ).then(
+      () => undefined,
+      (error: unknown) => error,
     ),
   );
 
@@ -116,5 +120,8 @@ export const runInLocationApp = Effect.fn("runInLocationApp")(function* (fn: str
   if (output) return output;
   // Core Location may log to stderr before the Swift error, so only the last line is the error itself.
   const error = (yield* readOrEmpty(stderr)).trim().split("\n").at(-1) ?? "";
-  return yield* new LocationAppError({ output: error, cause: new Error(error || "No output") });
+  return yield* new LocationAppError({
+    output: error,
+    cause: error ? new Error(error) : (launch ?? new Error("No output")),
+  });
 }, Effect.scoped);
