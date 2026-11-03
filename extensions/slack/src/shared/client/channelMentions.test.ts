@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readChannelMention, searchChannelMentions } from "./channelMentions";
+import { CHANNEL_MISS_RESCAN_AFTER_MS, readChannelMention, searchChannelMentions } from "./channelMentions";
 import type { SlackConversation } from "./slackTypes";
 
 const channel = (name: string, overrides: Partial<SlackConversation> = {}): SlackConversation => ({
@@ -83,6 +83,77 @@ test("search results are capped at 50 while joined channels displace the others"
 
   assert.equal(results.length, 50);
   assert.equal(results[0].title, "#team-joined");
+});
+
+/** A cached directory: pages from a snapshot saved at `savedAt`, then `rescanned` once a newer scan is asked for. */
+const cachedDirectory = (savedAt: number, snapshot: SlackConversation[], rescanned: SlackConversation[] | Error) => {
+  const requests: Array<{ cursor?: string; maxAgeMs?: number }> = [];
+  return {
+    requests,
+    load: async (cursor?: string, options?: { maxAgeMs?: number }) => {
+      requests.push({ cursor, maxAgeMs: options?.maxAgeMs });
+      if (options?.maxAgeMs === undefined) return { items: snapshot, savedAt };
+      if (rescanned instanceof Error) throw rescanned;
+      return { items: rescanned };
+    },
+  };
+};
+
+test("a query is answered from a recent directory snapshot without rescanning, even with no match", async () => {
+  const directory = cachedDirectory(Date.now(), [channel("general")], new Error("must not rescan"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(results, []);
+  assert.deepEqual(directory.requests, [{ cursor: undefined, maxAgeMs: undefined }]);
+});
+
+test("a query with no match in an older snapshot rescans so a new channel is still found", async () => {
+  const directory = cachedDirectory(
+    Date.now() - CHANNEL_MISS_RESCAN_AFTER_MS,
+    [channel("general")],
+    [channel("general"), channel("launch-room")],
+  );
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(
+    results.map((result) => result.title),
+    ["#launch-room"],
+  );
+  assert.deepEqual(directory.requests, [
+    { cursor: undefined, maxAgeMs: undefined },
+    { cursor: undefined, maxAgeMs: CHANNEL_MISS_RESCAN_AFTER_MS },
+  ]);
+});
+
+test("a query that matches an older snapshot does not rescan", async () => {
+  const directory = cachedDirectory(0, [channel("launch")], new Error("must not rescan"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(
+    results.map((result) => result.title),
+    ["#launch"],
+  );
+  assert.equal(directory.requests.length, 1);
+});
+
+test("a failed rescan keeps the snapshot's empty answer instead of failing the search", async () => {
+  const directory = cachedDirectory(0, [channel("general")], new Error("ratelimited"));
+  const results = await searchChannelMentions("launch", {
+    loadMemberChannelsPage: unused,
+    loadChannelsPage: directory.load,
+  });
+
+  assert.deepEqual(results, []);
+  assert.equal(directory.requests.length, 2);
 });
 
 test("long topics are compacted into a short description", async () => {

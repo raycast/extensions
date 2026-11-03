@@ -5,6 +5,9 @@
 - `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, `search-history.tsx`, and `open-new-tab.tsx`.
 - `src/utils/` holds shared browser, AppleScript, search, bookmark, history, URL, suggestion, and action helpers. Put reusable logic here.
 - `src/utils/platform.ts` owns the macOS/Windows split (`isWindows`, Helium executable and profile-root discovery); `src/utils/browser-control.ts` dispatches every app-driving call to `applescript.ts` (macOS) or `windows-browser.ts` (Windows). Import browser behavior from `browser-control.ts`, never from `applescript.ts` directly, and check `isTabControlAvailable` instead of testing the platform inline.
+- `rust/src/browser.rs` owns Windows UI Automation tab switching and guarded new-tab input, exposed through synchronous `#[raycast]` functions in `rust/src/main.rs`. Match the full Helium executable path, skip web document trees, verify selection and focus, and preserve window placement. A configured custom User Data directory must bypass executable-only new-tab input and launch with `--user-data-dir`.
+- Use `@chrismessina/raycast-kit` for copyable failure toasts, safe error messages, and count-aware text where applicable.
+- Vertical tabs may lack horizontal tabs' `view_20` ID: identify their tab-strip ancestry and exclude web documents. Keep offscreen tabs as candidates and use their ScrollItem pattern when available before selection. Reveal hidden Frameless sidebars by guarded edge hover, restoring the cursor unless the user intervenes; never issue profile-dependent Ctrl+S window commands. Restore minimized windows for accessibility inspection and revert unrelated windows on failure.
 - `tests/utils/` holds Vitest coverage for shared helpers. Keep test files out of `src/` so Raycast command source stays focused.
 - `src/types.ts` defines shared extension models. `assets/` stores the extension icon; `metadata/` stores Raycast Store screenshots.
 

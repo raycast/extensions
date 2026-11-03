@@ -76,25 +76,31 @@ export default function SearchTabs() {
           icon={tab.favicon || getFavicon(tab.url, { fallback: Icon.Globe })}
           actions={
             <ActionPanel>
-              <SwitchToTabAction tab={tab} />
-              <OpenNewTabAction />
-              <CloseTabAction
-                tab={tab}
-                mutate={mutate}
-                revalidate={revalidate}
-                pendingCloseIdsRef={pendingCloseIdsRef}
-              />
-              <OpenInNewTabAction tab={tab} />
+              <ActionPanel.Section>
+                <SwitchToTabAction tab={tab} />
+                <OpenNewTabAction />
+                <CloseTabAction
+                  tab={tab}
+                  mutate={mutate}
+                  revalidate={revalidate}
+                  pendingCloseIdsRef={pendingCloseIdsRef}
+                />
+                <OpenInNewTabAction tab={tab} />
+              </ActionPanel.Section>
+              {/* <ActionPanel.Section>
+
+              </ActionPanel.Section> */}
+
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
               <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
-              <ReloadAction subject="Tabs" revalidate={revalidate} />
               <DeduplicateTabsAction
                 tabs={tabsWithoutPendingClose}
                 mutate={mutate}
                 revalidate={revalidate}
                 pendingCloseIdsRef={pendingCloseIdsRef}
               />
+              <ReloadAction subject="Tabs" revalidate={revalidate} />
             </ActionPanel>
           }
         />
