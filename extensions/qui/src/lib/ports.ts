@@ -19,6 +19,12 @@ export async function listListeningPorts(): Promise<ListeningPort[]> {
 
 export type KillResult = "terminated" | "still-running";
 
+/**
+ * Windows has no SIGTERM: Node ends the process outright whatever the signal,
+ * so there's no graceful terminate to offer separately from a force kill.
+ */
+export const supportsGracefulTerminate = process.platform !== "win32";
+
 function isAlive(pid: number): boolean {
   try {
     process.kill(pid, 0);

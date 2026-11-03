@@ -7,3 +7,4 @@
 - Show the chain of processes that started each server
 - Terminate (`⌃X`) or force kill (`⌃⇧X`) a process
 - Refresh automatically every few seconds while open
+- Works on macOS and Windows

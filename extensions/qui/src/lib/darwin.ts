@@ -32,7 +32,7 @@ interface PsRow {
  */
 export async function listListeningPortsDarwin(): Promise<ListeningPort[]> {
   const [lsofOut, psOut] = await Promise.all([
-    run(LSOF, ["-nP", "-iTCP", "-sTCP:LISTEN", "-FpcLn"]),
+    run(LSOF, ["-nP", "-iTCP", "-sTCP:LISTEN", "-FpcLn"], { okExitCodes: [0, 1] }),
     run(PS, ["-axo", "pid=,ppid=,etime=,rss=,comm="]),
   ]);
 
@@ -148,7 +148,9 @@ export function parseEtime(etime: string): number {
 
 async function fetchCommands(pids: number[]): Promise<Map<number, string>> {
   // -ww: never truncate the command line.
-  const out = await run(PS, ["-ww", "-o", "pid=,command=", "-p", pids.join(",")]).catch(() => "");
+  const out = await run(PS, ["-ww", "-o", "pid=,command=", "-p", pids.join(",")], { okExitCodes: [0, 1] }).catch(
+    () => "",
+  );
   const map = new Map<number, string>();
   for (const line of out.split("\n")) {
     const m = line.match(/^\s*(\d+)\s+(.+)$/);
@@ -158,7 +160,9 @@ async function fetchCommands(pids: number[]): Promise<Map<number, string>> {
 }
 
 async function fetchCwds(pids: number[]): Promise<Map<number, string>> {
-  const out = await run(LSOF, ["-a", "-d", "cwd", "-Fn", "-p", pids.join(",")]).catch(() => "");
+  const out = await run(LSOF, ["-a", "-d", "cwd", "-Fn", "-p", pids.join(",")], { okExitCodes: [0, 1] }).catch(
+    () => "",
+  );
   const map = new Map<number, string>();
   let pid = 0;
   for (const line of out.split("\n")) {

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { run } from "~/lib/exec";
+import { runPowerShellScript } from "@raycast/utils";
 import type { ListeningPort, ProcessInfo } from "~/lib/types";
 
 interface WinConn {
@@ -20,17 +20,20 @@ interface WinProc {
 
 // One PowerShell round-trip: listening sockets (IP Helper tables, like witr)
 // plus every process for names, command lines and ancestry.
-const SCRIPT = `
-$ErrorActionPreference = 'SilentlyContinue'
-$now = Get-Date
-$c = @(Get-NetTCPConnection -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess)
-$p = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name, CommandLine, ExecutablePath, WorkingSetSize,
-  @{ n = 'Elapsed'; e = { if ($_.CreationDate) { [int64]($now - $_.CreationDate).TotalSeconds } else { $null } } })
-ConvertTo-Json -InputObject @{ c = $c; p = $p } -Depth 3 -Compress
-`;
+//
+// runPowerShellScript feeds the script through stdin (`-Command -`), where
+// PowerShell runs it line by line, so every statement stays on one line.
+const SCRIPT = [
+  "$ErrorActionPreference = 'SilentlyContinue'",
+  "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8",
+  "$now = Get-Date",
+  "$c = @(Get-NetTCPConnection -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess)",
+  "$p = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name, CommandLine, ExecutablePath, WorkingSetSize, @{ n = 'Elapsed'; e = { if ($_.CreationDate) { [int64]($now - $_.CreationDate).TotalSeconds } else { $null } } })",
+  "ConvertTo-Json -InputObject @{ c = $c; p = $p } -Depth 3 -Compress",
+].join("\n");
 
 export async function listListeningPortsWindows(): Promise<ListeningPort[]> {
-  const out = await run("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", SCRIPT], 20_000);
+  const out = await runPowerShellScript(SCRIPT, { timeout: 20_000 });
   const data = JSON.parse(out) as { c: WinConn[] | null; p: WinProc[] | null };
   const procs = new Map((data.p ?? []).map((p) => [p.ProcessId, p]));
 

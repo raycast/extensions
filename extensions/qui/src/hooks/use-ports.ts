@@ -1,4 +1,4 @@
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ListeningPort, listListeningPorts } from "~/lib/ports";
 
@@ -12,44 +12,40 @@ const POLL_INTERVAL_MS = 2500;
  * the window is closed).
  */
 export function usePorts() {
-  const [ports, setPorts] = useState<ListeningPort[]>();
-  const [isLoading, setIsLoading] = useState(true);
+  // Set while a background refresh (a poll, or the refresh after a kill) runs,
+  // so it neither flashes the loading bar nor toasts every few seconds.
+  const background = useRef(false);
   // PIDs being killed are hidden immediately, and stay hidden even if a poll
   // that started before the kill still sees them.
   const [killing, setKilling] = useState<ReadonlySet<number>>(new Set());
 
-  const latestRequest = useRef(0);
-  const appliedRequest = useRef(0);
-  const pollInFlight = useRef(false);
+  const { data, error, isLoading, revalidate } = usePromise(listListeningPorts, [], {
+    onError: (err) => {
+      if (!background.current) showFailureToast(err, { title: "Couldn't list ports" });
+    },
+  });
 
-  const load = useCallback(async ({ silent }: { silent: boolean }) => {
-    const request = ++latestRequest.current;
-    if (!silent) setIsLoading(true);
+  const loading = useRef(isLoading);
+  loading.current = isLoading;
+
+  const refreshInBackground = useCallback(async () => {
+    background.current = true;
     try {
-      const result = await listListeningPorts();
-      // Responses can arrive out of order; never replace newer data with older.
-      if (request > appliedRequest.current) {
-        appliedRequest.current = request;
-        setPorts(result);
-      }
-    } catch (error) {
-      if (!silent) await showFailureToast(error, { title: "Couldn't list ports" });
+      await revalidate();
+    } catch {
+      // Surfaced through `error`.
     } finally {
-      if (!silent && request === latestRequest.current) setIsLoading(false);
+      background.current = false;
     }
-  }, []);
+  }, [revalidate]);
 
   useEffect(() => {
-    load({ silent: false });
-    const timer = setInterval(async () => {
-      // Skip a tick rather than pile up requests if the system is slow.
-      if (pollInFlight.current) return;
-      pollInFlight.current = true;
-      await load({ silent: true });
-      pollInFlight.current = false;
+    const timer = setInterval(() => {
+      // Skip a tick rather than pile up scans if the system is slow.
+      if (!loading.current) refreshInBackground();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [load]);
+  }, [refreshInBackground]);
 
   /** Hides `pid` while `work` runs, then refreshes so the list reflects reality. */
   const whileKilling = useCallback(
@@ -58,7 +54,7 @@ export function usePorts() {
       try {
         return await work;
       } finally {
-        await load({ silent: true });
+        await refreshInBackground();
         setKilling((current) => {
           const next = new Set(current);
           next.delete(pid);
@@ -66,15 +62,14 @@ export function usePorts() {
         });
       }
     },
-    [load],
+    [refreshInBackground],
   );
 
-  const refresh = useCallback(() => load({ silent: false }), [load]);
-
   return {
-    ports: ports?.filter((p) => !killing.has(p.process.pid)),
-    isLoading,
-    refresh,
+    ports: data?.filter((p: ListeningPort) => !killing.has(p.process.pid)),
+    error,
+    isLoading: isLoading && !background.current,
+    refresh: revalidate,
     whileKilling,
   };
 }

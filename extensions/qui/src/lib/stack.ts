@@ -135,9 +135,12 @@ export async function detectStack(proc: ProcessInfo): Promise<Stack> {
 }
 
 export function frameworkFromCommand(command: string): StackItem | undefined {
-  for (const token of command.split(/\s+/)) {
+  for (const raw of command.split(/\s+/)) {
+    // Windows command lines quote paths and use backslashes; normalise both.
+    const token = raw.replace(/^"|"$/g, "").replaceAll("\\", "/");
     const pkg = token.match(/node_modules\/((?:@[^/]+\/)?[^/.][^/]*)\//)?.[1];
-    const candidates = [path.basename(token).replace(/\.(c|m)?js$/, ""), pkg];
+    // `.cmd`/`.ps1` are the npm shims in node_modules\.bin on Windows.
+    const candidates = [path.posix.basename(token).replace(/\.(c|m)?js$|\.(cmd|ps1|exe)$/i, ""), pkg];
     for (const candidate of candidates) {
       if (candidate && Object.hasOwn(FRAMEWORKS, candidate)) return FRAMEWORKS[candidate];
     }

@@ -16,19 +16,22 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { usePorts } from "~/hooks/use-ports";
-import { killProcess, type ListeningPort } from "~/lib/ports";
+import { killProcess, type ListeningPort, supportsGracefulTerminate } from "~/lib/ports";
 import { stackIcon } from "~/lib/stack";
 
 export default function ManagePorts() {
   const [showDetail, setShowDetail] = useState(true);
-  const { ports: loaded, isLoading, refresh, whileKilling } = usePorts();
+  const { ports: loaded, error, isLoading, refresh, whileKilling } = usePorts();
   const ports = loaded ?? [];
   // Until the first scan returns, show only the loading bar, not an empty state.
   const hasLoaded = loaded !== undefined;
+  // A failed scan with nothing to show gets an error state, not an empty list.
+  // If ports are already listed, a failed background poll keeps them.
+  const failed = error !== undefined && ports.length === 0;
 
   async function terminate(item: ListeningPort, signal: "SIGTERM" | "SIGKILL") {
     const { pid, name } = item.process;
-    const verb = signal === "SIGKILL" ? "Force killing" : "Terminating";
+    const verb = !supportsGracefulTerminate ? "Ending" : signal === "SIGKILL" ? "Force killing" : "Terminating";
     const toast = await showToast({ style: Toast.Style.Animated, title: `${verb} ${name} (PID ${pid})` });
     try {
       const result = await whileKilling(pid, killProcess(pid, signal));
@@ -42,7 +45,7 @@ export default function ManagePorts() {
         toast.message = "It ignored SIGTERM";
         toast.primaryAction = {
           title: "Force Kill",
-          onAction: () => terminate(item, "SIGKILL"),
+          onAction: () => forceKill(item),
         };
       }
     } catch (error) {
@@ -50,11 +53,28 @@ export default function ManagePorts() {
     }
   }
 
+  async function confirmTerminate(item: ListeningPort) {
+    const { name, pid } = item.process;
+    const confirmed = await confirmAlert(
+      supportsGracefulTerminate
+        ? {
+            title: `Terminate ${name}?`,
+            message: `PID ${pid} on port ${item.port} will be asked to quit with SIGTERM. Unsaved work in it may be lost.`,
+            primaryAction: { title: "Terminate", style: Alert.ActionStyle.Destructive },
+          }
+        : {
+            title: `End ${name}?`,
+            message: `PID ${pid} on port ${item.port} will be stopped immediately, without a chance to clean up.`,
+            primaryAction: { title: "End Process", style: Alert.ActionStyle.Destructive },
+          },
+    );
+    if (confirmed) await terminate(item, "SIGTERM");
+  }
+
   async function forceKill(item: ListeningPort) {
     const confirmed = await confirmAlert({
       title: `Force kill ${item.process.name}?`,
       message: `PID ${item.process.pid} on port ${item.port} will be stopped immediately with SIGKILL, without a chance to clean up.`,
-      icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
       primaryAction: { title: "Force Kill", style: Alert.ActionStyle.Destructive },
     });
     if (confirmed) await terminate(item, "SIGKILL");
@@ -66,14 +86,27 @@ export default function ManagePorts() {
       isShowingDetail={showDetail && ports.length > 0}
       searchBarPlaceholder="Filter by port, process, project or PID"
     >
-      {hasLoaded && !isLoading && <List.EmptyView icon={Icon.Network} title="No listening ports" />}
+      {failed ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't list ports"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refresh} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        hasLoaded && !isLoading && <List.EmptyView icon={Icon.Network} title="No listening ports" />
+      )}
       {ports.map((item) => (
         <PortItem
           key={item.id}
           item={item}
           showDetail={showDetail}
           onToggleDetail={() => setShowDetail((v) => !v)}
-          onTerminate={() => terminate(item, "SIGTERM")}
+          onTerminate={() => confirmTerminate(item)}
           onForceKill={() => forceKill(item)}
           onRefresh={refresh}
         />
@@ -125,29 +158,31 @@ function PortItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             {/* Raycast binds ↵ to the first action, so keep it harmless. */}
-            <Action.OpenInBrowser title="Open in Browser" url={`http://localhost:${item.port}`} />
+            <Action.OpenInBrowser title="Open in Browser" url={browserUrl(item)} />
             <Action
               title={showDetail ? "Hide Details" : "Show Details"}
               icon={Icon.Sidebar}
-              shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
               onAction={props.onToggleDetail}
             />
             {proc.cwd && <Action.ShowInFinder title="Show Working Directory" path={proc.cwd} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title="Terminate Process"
-              icon={Icon.Stop}
+              title={supportsGracefulTerminate ? "Terminate Process" : "End Process"}
+              icon={supportsGracefulTerminate ? Icon.Stop : Icon.XMarkCircle}
+              style={Action.Style.Destructive}
               shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={props.onTerminate}
             />
-            <Action
-              title="Force Kill Process"
-              icon={Icon.XMarkCircle}
-              style={Action.Style.Destructive}
-              shortcut={Keyboard.Shortcut.Common.RemoveAll}
-              onAction={props.onForceKill}
-            />
+            {supportsGracefulTerminate && (
+              <Action
+                title="Force Kill Process"
+                icon={Icon.XMarkCircle}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                onAction={props.onForceKill}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -261,12 +296,25 @@ function projectName(item: ListeningPort): string | undefined {
   return undefined;
 }
 
+const isLoopback = (a: string) => a === "localhost" || a.startsWith("127.") || a === "[::1]" || a === "::1";
+const isWildcard = (a: string) => a === "*" || a === "0.0.0.0" || a === "[::]" || a === "::";
+
 function bindScope(addresses: string[]): { label: string; color: Color } {
-  const local = (a: string) => a === "localhost" || a.startsWith("127.") || a === "[::1]" || a === "::1";
-  if (addresses.every(local)) return { label: "localhost", color: Color.Green };
-  if (addresses.some((a) => a === "*" || a === "0.0.0.0" || a === "[::]" || a === "::"))
-    return { label: "network", color: Color.Orange };
+  if (addresses.every(isLoopback)) return { label: "localhost", color: Color.Green };
+  if (addresses.some(isWildcard)) return { label: "network", color: Color.Orange };
   return { label: addresses[0], color: Color.Blue };
+}
+
+/**
+ * Where to open the server: `localhost` when it listens on loopback or every
+ * interface, otherwise the specific address it's bound to (IPv6 bracketed).
+ */
+function browserUrl(item: ListeningPort): string {
+  if (item.addresses.some((a) => isLoopback(a) || isWildcard(a))) return `http://localhost:${item.port}`;
+  // Drop any IPv6 zone (`%en0`), which browsers don't accept in URLs.
+  const address = item.addresses[0].replace(/%[^\]]*/, "");
+  const host = address.includes(":") && !address.startsWith("[") ? `[${address}]` : address;
+  return `http://${host}:${item.port}`;
 }
 
 function processIcon(item: ListeningPort): Image.ImageLike {
