@@ -6,6 +6,7 @@ import { day, money } from "../lib/format";
 import { host } from "../lib/meta";
 import type { Investment, InvestmentsQuery } from "../lib/types";
 import { OrganizationView, PersonView } from "./entities";
+import { ErrorEmptyView } from "./error-view";
 
 const ROLES: Record<string, string> = {
   angel: "Angel",
@@ -202,6 +203,7 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
     <List
       isLoading={isLoading}
       pagination={pagination}
+      searchBarPlaceholder={mode === "investors" ? "Filter investors" : "Filter investments"}
       navigationTitle={`${name} — ${noun}`}
       searchBarAccessory={
         mode === "investors" && unique.length > 0 ? (
@@ -232,15 +234,7 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
       {showUnknown ? <List.Section title="Stage Unknown">{unknown.map(renderRow)}</List.Section> : null}
       {!isLoading && !unique.length ? (
         error ? (
-          <List.EmptyView
-            title={`Couldn't load ${noun.toLowerCase()}`}
-            description="Check your connection, then try again."
-            actions={
-              <ActionPanel>
-                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
-              </ActionPanel>
-            }
-          />
+          <ErrorEmptyView title={`Couldn't load ${noun.toLowerCase()}`} error={error} retry={revalidate} />
         ) : (
           <List.EmptyView
             title={`No recorded ${noun.toLowerCase()}`}

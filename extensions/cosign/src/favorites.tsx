@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { OrganizationView, PersonView } from "./components/entities";
+import { ErrorEmptyView } from "./components/error-view";
 import { FavoriteAction, useFavorites } from "./components/favorite";
 import { EntityRow } from "./components/rows";
 import type { Favorite } from "./lib/favorites";
 
 export default function Command() {
-  const { data, isLoading } = useFavorites();
+  const { data, isLoading, error, revalidate } = useFavorites();
 
   const row = (f: Favorite) => (
     <EntityRow
@@ -23,7 +24,7 @@ export default function Command() {
             icon={f.kind === "people" ? Icon.Person : Icon.Building}
             target={f.kind === "people" ? <PersonView nomineeId={f.id} /> : <OrganizationView organizationId={f.id} />}
           />
-          <FavoriteAction kind={f.kind} id={f.id} name={f.name} />
+          <FavoriteAction kind={f.kind} id={f.id} name={f.name} shortcut={false} />
         </ActionPanel>
       }
     />
@@ -36,7 +37,11 @@ export default function Command() {
       <List.Section title="People">{data?.people.map(row)}</List.Section>
       <List.Section title="Companies">{data?.organizations.map(row)}</List.Section>
       {empty ? (
-        <List.EmptyView title="No favorites yet" description="Press ⌘⇧F on a person or company to add one." />
+        error && !data ? (
+          <ErrorEmptyView title="Couldn't load favorites" error={error} retry={revalidate} />
+        ) : (
+          <List.EmptyView title="No favorites yet" description="Press ⌘⇧F on a person or company to add one." />
+        )
       ) : null}
     </List>
   );

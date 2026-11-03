@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { callTool } from "../lib/cosign-mcp";
-import { showReadFailure } from "../lib/errors";
 import type { FavoriteKind } from "../lib/favorites";
 import { listDetailMetadata } from "../lib/meta";
 import { useRecentSearches } from "../lib/recents";
@@ -97,7 +96,7 @@ export default function SearchList<Result, Detail>(props: {
     isLoading: isLoadingDetail,
     error: detailError,
   } = useCachedPromise(fetchDetail, [debounced ?? ""], {
-    onError: showReadFailure("Couldn't load profile"),
+    failureToastOptions: { title: "Couldn't load profile" },
     execute: !!debounced && items.some((i) => i.id === debounced),
   });
 

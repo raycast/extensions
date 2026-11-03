@@ -16,3 +16,4 @@ compiled_raycast_rust
 # Local-only: held out of the Store copy
 .claude/
 LICENSE
+AGENTS.md

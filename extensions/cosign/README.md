@@ -10,7 +10,7 @@
 
 **Look up people and companies on Cosign, with their funding, investors and open roles, without leaving Raycast.**
 
-[Features](#features) • [Requirements](#requirements) • [Quick Start](#quick-start) • [Usage](#usage) • [Known Issues](#known-issues) • [Development](#development)
+[Features](#features) • [Requirements](#requirements) • [Quick Start](#quick-start) • [Usage](#usage) • [Known Issues](#known-issues)
 
 </div>
 
@@ -55,11 +55,11 @@
 
 ### Actions
 
-| Action                                   | Shortcut | Description                                                               |
-| ---------------------------------------- | -------- | ------------------------------------------------------------------------- |
-| Add to Favorites / Remove from Favorites | `⇧ ⌘ F`  | Star or unstar the selected person or company                             |
-| Toggle Sidebar                           | `⇧ ⌘ D`  | Show or hide the profile sidebar in search results                        |
-| Show / Hide Description                  | `⇧ ⌘ Y`  | Give the markdown description the whole pane by hiding the metadata table |
+| Action                                   | Shortcut                        | Description                                                               |
+| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| Add to Favorites / Remove from Favorites | `⇧ ⌘ F` (`⌘ ⏎` in My Favorites) | Star or unstar the selected person or company                             |
+| Show / Hide Sidebar                      | `⇧ ⌘ D`                         | Show or hide the profile sidebar in search results                        |
+| Show / Hide Description                  | `⇧ ⌘ Y`                         | Give the markdown description the whole pane by hiding the metadata table |
 
 Windows uses `Ctrl` in place of `⌘`.
 
@@ -87,46 +87,6 @@ Windows uses `Ctrl` in place of `⌘`.
   Year" lists) with a `questionId`, but `get_list` rejects that id and `read_cosign_link` doesn't resolve their URLs,
   so their members can't be read.
 - **No Follow or Claim.** Cosign's MCP has no tool to follow or claim a company, so the extension can't offer those actions.
-
----
-
-## Development
-
-### Project Structure
-
-```
-raycast-cosign/
-├── src/
-│   ├── search-people.tsx      # Search People command
-│   ├── search-companies.tsx   # Search Companies command
-│   ├── find-companies.tsx     # Find Companies by Topic command
-│   ├── favorites.tsx          # My Favorites command
-│   ├── components/            # Shared list, row, detail and view-action components
-│   └── lib/                   # Cosign MCP client, API wrappers, favorites, formatting
-├── assets/                    # Extension icon and the on-Cosign glyph (runtime)
-├── media/                     # README images
-├── package.json
-└── tsconfig.json
-```
-
-### Scripts
-
-| Script             | Description                               |
-| ------------------ | ----------------------------------------- |
-| `npm run dev`      | Start in development mode with hot reload |
-| `npm run build`    | Build for production                      |
-| `npm run lint`     | Run Raycast ESLint config                 |
-| `npm run fix-lint` | Auto-fix lint issues                      |
-| `npm run publish`  | Publish to the Raycast Store              |
-
-### Clone & Run
-
-```sh
-git clone https://github.com/chrismessina/raycast-cosign.git
-cd raycast-cosign
-npm install
-npm run dev
-```
 
 ---
 

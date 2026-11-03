@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Action, ActionPanel, Clipboard, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { fetchFunding, fetchJobs, fetchOrganization, fetchPerson } from "../lib/api";
-import { showReadFailure } from "../lib/errors";
 import { day, money } from "../lib/format";
 import { detailMetadata, host, listDetailMetadata, type MetaItem } from "../lib/meta";
 import type { FundingRound, Job, OrganizationDetail, PersonDetail } from "../lib/types";
+import { ErrorEmptyView } from "./error-view";
 import { FavoriteAction } from "./favorite";
 import { InvestmentsView } from "./investments";
 import { useDescriptionOnly, ViewSection } from "./view-actions";
@@ -226,7 +226,7 @@ export function OrganizationActions({ org: o, full = false }: { org: Organizatio
 
 export function PersonView(props: { nomineeId?: string; handle?: string }) {
   const { data, isLoading } = useCachedPromise(fetchPerson, [props], {
-    onError: showReadFailure("Couldn't load profile"),
+    failureToastOptions: { title: "Couldn't load profile" },
   });
   const content = data ? personContent(data) : undefined;
   return (
@@ -248,7 +248,7 @@ export function PersonView(props: { nomineeId?: string; handle?: string }) {
 
 export function OrganizationView({ organizationId }: { organizationId: string }) {
   const { data, isLoading } = useCachedPromise(fetchOrganization, [organizationId], {
-    onError: showReadFailure("Couldn't load profile"),
+    failureToastOptions: { title: "Couldn't load profile" },
   });
   const content = data ? organizationContent(data) : undefined;
   return (
@@ -300,13 +300,18 @@ function roundContent(r: FundingRound): Content {
 }
 
 export function FundingView({ organizationId, name }: { organizationId: string; name: string }) {
-  const { data, isLoading } = useCachedPromise(fetchFunding, [organizationId], {
-    onError: showReadFailure("Couldn't load funding"),
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchFunding, [organizationId], {
+    failureToastOptions: { title: "Couldn't load funding" },
   });
   const [showDetail, setShowDetail] = useCachedState("show-detail-funding", true);
   const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
   return (
-    <List isLoading={isLoading} isShowingDetail={showDetail} navigationTitle={`${name} — Funding`}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail={showDetail}
+      searchBarPlaceholder="Filter funding rounds"
+      navigationTitle={`${name} — Funding`}
+    >
       {data?.rounds.map((r) => {
         const content = roundContent(r);
         return (
@@ -358,6 +363,7 @@ export function FundingView({ organizationId, name }: { organizationId: string; 
           />
         );
       })}
+      {error && !data ? <ErrorEmptyView title="Couldn't load funding" error={error} retry={revalidate} /> : null}
       {data && !data.rounds.length ? <List.EmptyView title="No recorded funding" description={data.coverage} /> : null}
     </List>
   );
@@ -383,8 +389,8 @@ function jobContent(j: Job): Content {
 }
 
 export function JobsView({ companyId, name }: { companyId: string; name: string }) {
-  const { data, isLoading } = useCachedPromise(fetchJobs, [companyId], {
-    onError: showReadFailure("Couldn't load open roles"),
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchJobs, [companyId], {
+    failureToastOptions: { title: "Couldn't load open roles" },
   });
   const [showDetail, setShowDetail] = useCachedState("show-detail-jobs", true);
   const { descriptionOnly, toggleDescriptionOnly } = useDescriptionOnly();
@@ -422,6 +428,7 @@ export function JobsView({ companyId, name }: { companyId: string; name: string 
     <List
       isLoading={isLoading || isLoadingMore}
       isShowingDetail={showDetail}
+      searchBarPlaceholder="Filter open roles"
       navigationTitle={data ? `${name} — Open Roles (${data.totalMatches}) — showing ${jobs.length}` : name}
     >
       {jobs.map((j) => {
@@ -470,6 +477,7 @@ export function JobsView({ companyId, name }: { companyId: string; name: string 
           }
         />
       ) : null}
+      {error && !data ? <ErrorEmptyView title="Couldn't load open roles" error={error} retry={revalidate} /> : null}
       {data && !data.jobs.length ? <List.EmptyView title="No open roles" /> : null}
     </List>
   );
