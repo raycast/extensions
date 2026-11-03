@@ -335,11 +335,13 @@ export default function Configuration() {
       <Form.TextField
         id="maxOverallDownloadLimit"
         title="Max Overall Download"
+        placeholder="0 (unlimited)"
         defaultValue={settings.maxOverallDownloadLimit}
       />
       <Form.TextField
         id="maxOverallUploadLimit"
         title="Max Overall Upload"
+        placeholder="2M"
         defaultValue={settings.maxOverallUploadLimit}
       />
 
@@ -360,14 +362,14 @@ export default function Configuration() {
       <Form.TextField
         id="allProxy"
         title="All Proxy"
-        defaultValue={settings.allProxy}
         placeholder="http://127.0.0.1:7890"
+        defaultValue={settings.allProxy}
       />
       <Form.TextField
         id="noProxy"
         title="No Proxy"
-        defaultValue={settings.noProxy}
         placeholder="localhost,127.0.0.1,::1"
+        defaultValue={settings.noProxy}
       />
       <Form.Checkbox
         id="checkCertificate"
@@ -395,11 +397,13 @@ export default function Configuration() {
       <Form.TextField
         id="retryWait"
         title="Retry Wait (s)"
+        placeholder="5"
         defaultValue={String(settings.retryWait)}
       />
       <Form.TextField
         id="lowestSpeedLimit"
         title="Lowest Speed Limit"
+        placeholder="0"
         defaultValue={settings.lowestSpeedLimit}
       />
 
@@ -408,16 +412,19 @@ export default function Configuration() {
       <Form.TextField
         id="listenPort"
         title="BT Listen Port"
+        placeholder="6881"
         defaultValue={String(settings.listenPort)}
       />
       <Form.TextField
         id="dhtListenPort"
         title="DHT Listen Port"
+        placeholder="6881"
         defaultValue={String(settings.dhtListenPort)}
       />
       <Form.TextField
         id="btMaxPeers"
         title="Max Peers"
+        placeholder="55"
         defaultValue={String(settings.btMaxPeers)}
       />
       <Form.Checkbox
@@ -458,11 +465,13 @@ export default function Configuration() {
       <Form.TextField
         id="seedTime"
         title="Seed Time (minutes, 0 = off)"
+        placeholder="0"
         defaultValue={String(settings.seedTime)}
       />
       <Form.TextField
         id="seedRatio"
         title="Seed Ratio"
+        placeholder="1.0"
         defaultValue={String(settings.seedRatio)}
       />
       <Form.TextArea
@@ -477,6 +486,7 @@ export default function Configuration() {
       <Form.TextField
         id="saveSessionInterval"
         title="Save Session Interval (s)"
+        placeholder="30"
         defaultValue={String(settings.saveSessionInterval)}
       />
       <Form.Checkbox
