@@ -218,6 +218,15 @@
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
     },
     {
+      "name": "runInTerminalByDefault",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Default Action",
+      "label": "Install and uninstall in the terminal application",
+      "description": "↩ on a package that is not installed runs brew install in the terminal application above, and ⌃X runs brew uninstall there. ⌘I still installs inside Raycast."
+    },
+    {
       "name": "greedyUpgrades",
       "type": "checkbox",
       "required": false,
