@@ -1,6 +1,6 @@
 # Simple GIF Cap Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Record a region, window or screen to a GIF from Raycast.
 - Region and window picker with move and resize handles.
