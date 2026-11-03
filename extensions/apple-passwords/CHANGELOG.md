@@ -1,5 +1,9 @@
 # Apple Passwords Changelog
 
+## [Updated] - 2026-11-02
+
+- Documented Dia browser support through APW.
+
 ## [Updated] - 2026-08-21
 
 - Updated extension to meet Raycast extension development criteria
