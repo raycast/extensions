@@ -25,6 +25,7 @@ import {
   MARKET_CURRENCIES,
   MARKET_FILTERS,
   MARKET_LABELS,
+  Market,
   PULSE_FOR_MAC_URL,
   isCryptoPair,
   normalizeTypedSymbol,
@@ -78,8 +79,22 @@ function typedInstrument(query: string, index: SymbolIndex | undefined): Instrum
   }
   // A typed "^FTSE" is an index whatever its exchange, so the Indices filter keeps it.
   if (symbol.startsWith("^")) return { symbol, market: "index", kind: "index", name: symbol, exchange: null };
-  return { symbol, market: "us", kind: "equity", name: symbol, exchange: null };
+  const suffix = /\.([A-Z]+)$/.exec(symbol)?.[1];
+  const market = (suffix && SUFFIX_MARKETS[suffix]) ?? "us";
+  return { symbol, market, kind: "equity", name: symbol, exchange: null };
 }
+
+// The Yahoo suffixes of the markets the filter offers, so a typed `7203.T` stays under Japan.
+const SUFFIX_MARKETS: Record<string, Market> = {
+  HK: "hk",
+  SS: "sh",
+  SZ: "sz",
+  T: "jp",
+  KS: "kr",
+  KQ: "kq",
+  TW: "tw",
+  TWO: "two",
+};
 
 const changeColor = (value: number | null | undefined) =>
   value === null || value === undefined ? Color.SecondaryText : value >= 0 ? Color.Green : Color.Red;
@@ -115,14 +130,7 @@ export default function Command() {
     error: indexError,
     revalidate: reloadIndex,
   } = usePromise(loadIndex, [], {
-    onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load the symbol list",
-        message: error.message,
-        primaryAction: { title: "Retry", onAction: () => reloadIndex() },
-      });
-    },
+    failureToastOptions: { title: "Could not load the symbol list" },
   });
 
   const language: Language = readerLanguage(preferences.nameLanguage ?? "auto", searchText, SYSTEM_LOCALE);
@@ -160,7 +168,11 @@ export default function Command() {
 
   const visible = useMemo(() => sections.flatMap((section) => section.items.map((item) => item.symbol)), [sections]);
   // List rows carry a price only while the detail pane is hidden; the pane prices the selected row itself.
-  const { data: rows, isLoading: rowsLoading } = useCachedPromise(
+  const {
+    data: priced,
+    isLoading: rowsLoading,
+    revalidate: repriceRows,
+  } = useCachedPromise(
     async (symbols: string[]) => {
       const crypto = symbols.filter(isCryptoPair);
       const stocks = symbols.filter((symbol) => !isCryptoPair(symbol));
@@ -172,14 +184,39 @@ export default function Command() {
           return Object.assign({}, ...each.map((result) => (result.status === "fulfilled" ? result.value : {})));
         }),
       ]);
-      return {
+      const failed = [
+        ...(stockRows.status === "rejected" ? ["Yahoo Finance"] : []),
+        ...(cryptoRows.status === "rejected" ? ["Binance"] : []),
+      ];
+      const quotes = {
         ...(stockRows.status === "fulfilled" ? stockRows.value : {}),
         ...(cryptoRows.status === "fulfilled" ? cryptoRows.value : {}),
       } as Record<string, RowQuote>;
+      // Nothing priced: fail outright, and the hook's toast offers Retry.
+      if (failed.length && Object.keys(quotes).length === 0) {
+        throw new Error(`${failed.join(" and ")} did not answer.`);
+      }
+      return { quotes, failed };
     },
     [visible],
-    { execute: !showingDetail && visible.length > 0, keepPreviousData: true },
+    {
+      execute: !showingDetail && visible.length > 0,
+      keepPreviousData: true,
+      failureToastOptions: { title: "Could not load prices" },
+    },
   );
+  const rows = priced?.quotes;
+  // Some rows priced and some not: keep the priced ones, and say which source failed.
+  const failedSources = priced?.failed.join(" and ");
+  useEffect(() => {
+    if (!failedSources) return;
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Some prices could not be loaded",
+      message: `${failedSources} did not answer.`,
+      primaryAction: { title: "Retry", onAction: () => repriceRows() },
+    });
+  }, [priced]);
 
   const remember = (symbol: string) =>
     setRecent((current) => [symbol, ...current.filter((item) => item !== symbol)].slice(0, RECENT_LIMIT));
@@ -304,7 +341,6 @@ function InstrumentActions(props: {
         <Action.CopyToClipboard
           title="Copy Symbol"
           content={instrument.symbol}
-          shortcut={Keyboard.Shortcut.Common.Copy}
           onCopy={() => remember(instrument.symbol)}
         />
         {instrument.name !== instrument.symbol && (

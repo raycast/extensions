@@ -42,9 +42,31 @@ export function validCatalog(value: unknown): value is CatalogDocument {
   return (
     document?.schema === 1 &&
     typeof document.generatedAt === "string" &&
+    Array.isArray(document.markets) &&
     Array.isArray(document.securities) &&
-    Array.isArray(document.markets)
+    document.securities.every(validSecurity) &&
+    (document.crypto === undefined || (Array.isArray(document.crypto) && document.crypto.every(validCoin)))
   );
+}
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const optionalNames = (value: unknown) => value === undefined || isObject(value);
+const optionalAliases = (value: unknown) => value === undefined || Array.isArray(value);
+
+// Every entry the index reads, so a malformed export never replaces the copy in hand.
+function validSecurity(entry: unknown): boolean {
+  return (
+    isObject(entry) &&
+    typeof entry.m === "string" &&
+    typeof entry.c === "string" &&
+    optionalNames(entry.n) &&
+    optionalAliases(entry.a)
+  );
+}
+
+function validCoin(entry: unknown): boolean {
+  return isObject(entry) && typeof entry.b === "string" && optionalNames(entry.n) && optionalAliases(entry.a);
 }
 
 export class CatalogStore {

@@ -70,6 +70,22 @@ test("refuses a truncated or older file and keeps the copy in hand", async () =>
   assert.equal(onDisk.generatedAt, "2026-11-02T00:00:00Z");
 });
 
+test("refuses an export whose entries are malformed", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "pulse-raycast-"));
+  const good = JSON.parse(catalog("2026-11-03T00:00:00Z", 100));
+  const { fetcher } = fakeFetch([
+    new Response(catalog("2026-11-02T00:00:00Z", 100), { headers: { etag: '"a"' } }),
+    new Response(JSON.stringify({ ...good, securities: [...good.securities, null] })),
+    new Response(JSON.stringify({ ...good, crypto: "BTC" })),
+    new Response(JSON.stringify({ ...good, securities: [...good.securities, { m: "us", c: 7 }] })),
+  ]);
+  const store = new CatalogStore(directory, fetcher);
+  const first = await store.refreshCatalog(null);
+  for (let attempt = 0; attempt < 3; attempt += 1) await assert.rejects(store.refreshCatalog(first));
+  const onDisk = JSON.parse(await readFile(join(directory, "symbols-v1.json"), "utf8"));
+  assert.equal(onDisk.generatedAt, "2026-11-02T00:00:00Z");
+});
+
 test("keeps Binance's trading pairs as base and quote", async () => {
   const directory = await mkdtemp(join(tmpdir(), "pulse-raycast-"));
   const symbols = Array.from({ length: 150 }, (_, i) => ({
