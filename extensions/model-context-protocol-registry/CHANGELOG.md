@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add World Monitor MCP Server] - {PR_MERGE_DATE}
+## [Add World Monitor MCP Server] - 2026-11-03
 
 - Add World Monitor to the official registry: real-time global intelligence on conflict, markets, energy, trade, shipping and cyber, with about 100 read-only tools. Hosted Streamable HTTP server at https://worldmonitor.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
