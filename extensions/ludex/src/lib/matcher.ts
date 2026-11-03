@@ -86,6 +86,7 @@ export function matchGames(
         file.template,
         game.installPath,
         game.storeRoot,
+        game.storeGameId,
       );
 
       for (const p of resolved) {
@@ -109,6 +110,7 @@ export function matchGames(
       storeGameId: game.storeGameId,
       launchTarget: game.launchTarget,
       iconPath: game.iconPath,
+      installPath: game.installPath,
       savePaths: deduplicatePaths(savePaths),
       configPaths: deduplicatePaths(configPaths),
     });

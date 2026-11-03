@@ -1,44 +1,41 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import { loadManifest, refreshManifest } from "./lib/manifest";
-import type { IndexedGame, ManifestIndex } from "./lib/types";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useMemo, useRef, useState } from "react";
+import { loadManifest } from "./lib/manifest";
+import { withProgressToast } from "./lib/progress-toast";
+import type { IndexedGame } from "./lib/types";
 
 const MAX_RESULTS = 50;
 
 export default function Command() {
-  const [manifest, setManifest] = useState<ManifestIndex | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState("Loading game database...");
   const [query, setQuery] = useState("");
+  const forceNext = useRef(false);
 
-  async function load(forceRefresh = false) {
-    setIsLoading(true);
-    try {
-      const index = forceRefresh
-        ? await refreshManifest(setStatusMsg)
-        : await loadManifest(setStatusMsg);
-      setManifest(index);
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load manifest",
-        message: String(err),
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const {
+    data: manifest,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const force = forceNext.current;
+      forceNext.current = false;
+      if (!force) return loadManifest(setStatusMsg);
+      return withProgressToast(
+        "Refreshing game database...",
+        "Game database refreshed",
+        (progress) => loadManifest(progress, true),
+      );
+    },
+    [],
+    { failureToastOptions: { title: "Failed to load the game database" } },
+  );
+
+  function refresh() {
+    forceNext.current = true;
+    revalidate();
   }
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const names = useMemo(
     () => (manifest ? Object.keys(manifest) : []),
@@ -67,8 +64,23 @@ export default function Command() {
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search all games..."
     >
-      {isLoading ? (
+      {isLoading && !manifest ? (
         <List.EmptyView title={statusMsg} />
+      ) : error && !manifest ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load the game database"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
       ) : (
         visible.length === 0 && (
           <List.EmptyView
@@ -91,7 +103,7 @@ export default function Command() {
             key={name}
             name={name}
             game={manifest[name]}
-            onRefresh={() => load(true)}
+            onRefresh={refresh}
           />
         ))}
     </List>
@@ -130,7 +142,7 @@ function GameEntry({
             <Action
               title="Refresh Game Database"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={onRefresh}
             />
           </ActionPanel.Section>

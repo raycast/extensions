@@ -3,21 +3,20 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   open,
-  showInFinder,
-  showToast,
-  Toast,
 } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import fs from "fs";
-import os from "os";
 import path from "path";
-import { useEffect, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { detectInstalledGames } from "./lib/game-detector";
 import { gameIcon } from "./lib/game-icon";
 import { launchGame } from "./lib/launcher";
-import { loadManifest, refreshManifest } from "./lib/manifest";
+import { loadManifest } from "./lib/manifest";
 import { matchGames } from "./lib/matcher";
+import { withProgressToast } from "./lib/progress-toast";
 import type { GameWithPaths, ResolvedPath, Store } from "./lib/types";
 
 const STORE_LABEL: Record<Store, string> = {
@@ -29,85 +28,113 @@ const STORE_LABEL: Record<Store, string> = {
 
 const STORE_ORDER: Store[] = ["steam", "gog", "epic", "xbox"];
 
+const REFRESH_DATABASE_SHORTCUT: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd", "shift"], key: "r" },
+  Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+};
+
+type LoadMode = "cached" | "installed" | "database";
+
+async function loadGames(
+  progress: (msg: string) => void,
+  forceDatabase: boolean,
+  forceInstalled: boolean,
+): Promise<GameWithPaths[]> {
+  const manifest = await loadManifest(progress, forceDatabase);
+  progress("Detecting installed games...");
+  const installed = await detectInstalledGames(forceInstalled);
+  progress("Matching against database...");
+  return matchGames(installed, manifest);
+}
+
 export default function Command() {
-  const [games, setGames] = useState<GameWithPaths[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [statusMsg, setStatusMsg] = useState("Starting...");
+  const nextMode = useRef<LoadMode>("cached");
 
-  async function loadGames(forceRefresh = false) {
-    setIsLoading(true);
-    try {
-      const manifest = forceRefresh
-        ? await refreshManifest(setStatusMsg)
-        : await loadManifest(setStatusMsg);
+  const {
+    data: games,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const mode = nextMode.current;
+      nextMode.current = "cached";
+      if (mode === "cached") return loadGames(setStatusMsg, false, false);
+      return withProgressToast(
+        mode === "database"
+          ? "Refreshing game database..."
+          : "Refreshing installed games...",
+        "Games refreshed",
+        (progress) => loadGames(progress, mode === "database", true),
+      );
+    },
+    [],
+    { failureToastOptions: { title: "Error loading games" } },
+  );
 
-      setStatusMsg("Detecting installed games...");
-      const installed = await detectInstalledGames(forceRefresh);
-
-      setStatusMsg("Matching against database...");
-      const matched = matchGames(installed, manifest);
-
-      setGames(matched);
-
-      if (matched.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No games found",
-          message: "Could not detect games with known save/config paths.",
-        });
-      }
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error loading games",
-        message: String(err),
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  function reload(mode: LoadMode) {
+    nextMode.current = mode;
+    revalidate();
   }
 
-  async function refreshInstalled() {
-    setIsLoading(true);
-    try {
-      const manifest = await loadManifest(setStatusMsg);
-      setStatusMsg("Re-detecting installed games...");
-      const installed = await detectInstalledGames(true);
-      setStatusMsg("Matching against database...");
-      setGames(matchGames(installed, manifest));
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error refreshing installed games",
-        message: String(err),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    (async () => {
-      await loadGames();
-    })();
-  }, []);
+  const refreshActions = (
+    <ActionPanel.Section>
+      <Action
+        title="Refresh Installed Games"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={() => reload("installed")}
+      />
+      <Action
+        title="Refresh Game Database"
+        icon={Icon.Download}
+        shortcut={REFRESH_DATABASE_SHORTCUT}
+        onAction={() => reload("database")}
+      />
+    </ActionPanel.Section>
+  );
 
   const byStore = STORE_ORDER.map((store) => ({
     store,
-    games: games.filter((g) => g.store === store),
+    games: (games ?? []).filter((g) => g.store === store),
   })).filter((s) => s.games.length > 0);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search games...">
-      {isLoading && games.length === 0 && <List.EmptyView title={statusMsg} />}
+      {isLoading && !games ? (
+        <List.EmptyView title={statusMsg} />
+      ) : error && !games ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load your games"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={() => reload("cached")}
+              />
+              {refreshActions}
+            </ActionPanel>
+          }
+        />
+      ) : games?.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.GameController}
+          title="No games found"
+          description="No installed game has known save or config paths."
+          actions={<ActionPanel>{refreshActions}</ActionPanel>}
+        />
+      ) : null}
       {byStore.map(({ store, games: storeGames }) => (
         <List.Section key={store} title={STORE_LABEL[store]}>
           {storeGames.map((game) => (
             <GameListItem
               key={`${game.store}-${game.storeGameId ?? game.name}`}
               game={game}
-              onRefresh={() => loadGames(true)}
-              onRefreshInstalled={refreshInstalled}
+              refreshActions={refreshActions}
             />
           ))}
         </List.Section>
@@ -118,12 +145,10 @@ export default function Command() {
 
 function GameListItem({
   game,
-  onRefresh,
-  onRefreshInstalled,
+  refreshActions,
 }: {
   game: GameWithPaths;
-  onRefresh: () => void;
-  onRefreshInstalled: () => void;
+  refreshActions: ReactNode;
 }) {
   const saveCount = game.savePaths.length;
   const configCount = game.configPaths.length;
@@ -166,11 +191,7 @@ function GameListItem({
                 icon={Icon.Play}
                 onAction={() =>
                   launchGame(game.launchTarget!).catch((err) =>
-                    showToast({
-                      style: Toast.Style.Failure,
-                      title: "Could not launch game",
-                      message: String(err),
-                    }),
+                    showFailureToast(err, { title: "Could not launch game" }),
                   )
                 }
               />
@@ -178,20 +199,16 @@ function GameListItem({
           )}
           <SaveActions paths={game.savePaths} />
           <ConfigActions paths={game.configPaths} />
-          <ActionPanel.Section>
-            <Action
-              title="Refresh Installed Games"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={onRefreshInstalled}
-            />
-            <Action
-              title="Refresh Game Database"
-              icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              onAction={onRefresh}
-            />
-          </ActionPanel.Section>
+          {game.installPath && (
+            <ActionPanel.Section title="Install Folder">
+              <Action
+                title="Open Install Folder"
+                icon={Icon.HardDrive}
+                onAction={() => openFolder(game.installPath!)}
+              />
+            </ActionPanel.Section>
+          )}
+          {refreshActions}
         </ActionPanel>
       }
     />
@@ -216,18 +233,20 @@ function folderTitle(p: ResolvedPath, context: "save" | "config"): string {
   return label ? `Open ${base} (${label})` : `Open ${base}`;
 }
 
-function openFolder(p: ResolvedPath) {
-  // If the path is a file (exists: check stat; otherwise: infer from extension), open its parent folder
-  let target = p.path;
-  if (p.exists) {
-    if (fs.statSync(p.path).isFile()) target = path.dirname(p.path);
-  } else if (path.extname(p.path)) {
-    target = path.dirname(p.path);
+// A path that names a file opens its folder; a folder that does not exist yet opens its nearest existing parent.
+function openFolder(target: string) {
+  let folder = target;
+  if (fs.existsSync(folder)) {
+    if (fs.statSync(folder).isFile()) folder = path.dirname(folder);
+  } else if (path.extname(folder)) {
+    folder = path.dirname(folder);
   }
-  while (!fs.existsSync(target) && path.dirname(target) !== target) {
-    target = path.dirname(target);
+  while (!fs.existsSync(folder) && path.dirname(folder) !== folder) {
+    folder = path.dirname(folder);
   }
-  return os.platform() === "darwin" ? showInFinder(target) : open(target);
+  return open(folder).catch((err) =>
+    showFailureToast(err, { title: "Could not open folder" }),
+  );
 }
 
 function SaveActions({ paths }: { paths: ResolvedPath[] }) {
@@ -239,7 +258,7 @@ function SaveActions({ paths }: { paths: ResolvedPath[] }) {
           key={i}
           title={folderTitle(p, "save")}
           icon={p.exists ? Icon.Folder : Icon.QuestionMark}
-          onAction={() => openFolder(p)}
+          onAction={() => openFolder(p.path)}
         />
       ))}
     </ActionPanel.Section>
@@ -255,7 +274,7 @@ function ConfigActions({ paths }: { paths: ResolvedPath[] }) {
           key={i}
           title={folderTitle(p, "config")}
           icon={p.exists ? Icon.Gear : Icon.QuestionMark}
-          onAction={() => openFolder(p)}
+          onAction={() => openFolder(p.path)}
         />
       ))}
     </ActionPanel.Section>

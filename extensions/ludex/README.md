@@ -28,14 +28,14 @@ Save locations come from the [Ludusavi Manifest](https://github.com/mtkennerly/l
 
 ### Browse Games
 
-Lists the games detected on your machine, grouped by store, each with the artwork its store keeps on disk. Each game shows how many save and config paths are known and whether they exist on disk. From there you can open a folder in Explorer or launch the game. If a save folder has not been created yet, the nearest existing parent opens instead.
+Lists the games detected on your machine, grouped by store, each with the artwork its store keeps on disk. Each game shows how many save and config paths are known and whether they exist on disk. From there you can launch the game or open its save, config or install folder in Explorer. If a save folder has not been created yet, the nearest existing parent opens instead.
 
 - Ctrl+R refreshes the installed games.
 - Ctrl+Shift+R refreshes the game database.
 
 ### Search Games
 
-Searches the whole Ludusavi database by name. Use it to check whether a game is supported before you install it, or to find a save location by hand.
+Searches the whole Ludusavi database by name. Use it to check whether a game is supported before you install it.
 
 ### Refresh Installed Games
 
@@ -57,7 +57,7 @@ Downloads the Ludusavi Manifest from GitHub again and rebuilds the index. Use it
 ## How it works
 
 1. On first launch, the Ludusavi Manifest (about 16 MB of YAML, roughly 19,000 entries) is streamed straight to disk, so it never sits in memory.
-2. The manifest is parsed line by line into a compact JSON index, filtered to the current OS to keep it small. The index lives in Raycast's support directory and is reused for 7 days.
+2. The manifest is parsed line by line into a compact JSON index, filtered to the current OS to keep it small. The index lives in Raycast's support directory and is reused for 7 days. If an update fails, for example offline, the last index keeps working.
 3. Installed games are found by reading each store's own files: `.acf` for Steam, the registry for GOG, JSON manifests for Epic and package folders for Xbox.
 4. Detected games are matched against the index by store ID first, then by normalized name.
 5. Save and config paths are resolved by expanding the Ludusavi path variables (`<home>`, `<winAppData>`, `<winLocalAppData>` and so on) and checking whether they exist on disk.
@@ -75,15 +75,6 @@ The Ludusavi Manifest uses named placeholders for common directories. The extens
 | `<winDocuments>`       | `Documents`            |
 | `<winProgramData>`     | `%PROGRAMDATA%`        |
 | `<base>`               | Game install directory |
-
-## Development
-
-```bash
-npm install
-npm run dev     # live-reload in Raycast
-npm run lint
-npm run build
-```
 
 ## Credits
 

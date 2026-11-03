@@ -65,6 +65,7 @@ export function resolveTemplate(
   template: string,
   installPath?: string,
   storeRoot?: string,
+  storeGameId?: string,
   storeUserId = "*",
 ): string {
   const vars = getPathVars();
@@ -83,7 +84,11 @@ export function resolveTemplate(
   result = result.replace(/<home>/g, vars.home);
   result = result.replace(/<osUserName>/g, vars.osUserName);
   result = result.replace(/<storeUserId>/g, storeUserId);
-  result = result.replace(/<storeGameId>/g, "*");
+  // A wildcard here would match every other game's folder (e.g. Steam userdata), so an unknown ID skips the path.
+  if (result.includes("<storeGameId>")) {
+    if (!storeGameId) return "";
+    result = result.replace(/<storeGameId>/g, storeGameId);
+  }
 
   // Windows
   if (vars.winAppData)
@@ -160,8 +165,14 @@ export function resolveAndExpand(
   template: string,
   installPath?: string,
   storeRoot?: string,
+  storeGameId?: string,
 ): string[] {
-  const resolved = resolveTemplate(template, installPath, storeRoot);
+  const resolved = resolveTemplate(
+    template,
+    installPath,
+    storeRoot,
+    storeGameId,
+  );
   if (!resolved) return [];
   const expanded = expandWildcardPath(resolved);
   if (expanded.length > 0 || !resolved.includes("*")) return expanded;

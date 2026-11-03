@@ -64,6 +64,7 @@ export interface GameWithPaths {
   storeGameId?: string;
   launchTarget?: string;
   iconPath?: string;
+  installPath?: string;
   savePaths: ResolvedPath[];
   configPaths: ResolvedPath[];
 }
