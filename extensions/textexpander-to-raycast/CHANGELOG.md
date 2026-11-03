@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improve Migration Review] - {PR_MERGE_DATE}
+## [Improve Migration Review] - 2026-11-03
 
 - Combine multiple sources, search snippet content, and select or exclude matching snippets by group or warning type.
 - Edit snippets, restore source content, rename groups, and resolve keyword conflicts against a supplied Raycast export.
