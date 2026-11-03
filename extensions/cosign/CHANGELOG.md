@@ -1,6 +1,6 @@
 # Cosign Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Search Cosign for people by name or handle, and for companies by name or by topic
 - See full profiles in the sidebar, with funding rounds, investors, portfolios and open roles
