@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [Finished toasts lose Cancel] - {PR_MERGE_DATE}
+## [Install in your terminal by default] - {PR_MERGE_DATE}
+
+- New: an "Install and uninstall in the terminal application" preference, off by default. ↩ on a package that is not installed runs `brew install` in your terminal application, and ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` there too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin
+
+## [Finished toasts lose Cancel] - 2026-11-03
 
 - Fixed: a finished install, upgrade or uninstall could stay on its progress toast, such as "Installing Tinycast / Operation completed successfully", with a Cancel button that did nothing. It now ends on the result, such as "Installed Tinycast", with no Cancel
 
