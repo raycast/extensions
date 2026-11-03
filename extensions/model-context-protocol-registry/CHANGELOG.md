@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Deacon MCP Server] - {PR_MERGE_DATE}
+## [Add Deacon MCP Server] - 2026-11-03
 
 - Add Deacon to the official registry. Your customers tell Deacon's support chat what broke, and your coding agent reads it and fixes the code. Hosted Streamable HTTP server at https://heydeacon.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
