@@ -1457,6 +1457,7 @@
 /extensions/karakeep                                                @foru17 @kdurek @foru17 @chrismessina @mitsimi
 /extensions/kaset-control                                           @Endiruslan @danieltsam
 /extensions/kde-connect                                             @StevenRCE0
+/extensions/keep-md                                                 @perryraskin
 /extensions/keepassxc                                               @pabroux @zkytech @Osmagtor @Ygnas
 /extensions/keeper-security                                         @amuley-ks
 /extensions/keeply                                                  @RolfKoenders
@@ -1988,7 +1989,7 @@
 /extensions/nust-mess-menu                                          @devvMuhammad
 /extensions/nuxt                                                    @HugoRCD
 /extensions/nyc-train-tracker                                       @kcole93
-/extensions/nyxe                                                    
+/extensions/nyxe                                                    @raymond-UI
 /extensions/nzbget                                                  @wyattjoh
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
