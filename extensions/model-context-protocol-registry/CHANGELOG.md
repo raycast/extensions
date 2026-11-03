@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Update Zip-Codes.com MCP Server] - 2026-11-03
+
+- Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
+
 ## [Add Cactal MCP Server] - 2026-11-03
 
 - Add Cactal to the official registry: build, publish and run websites from your AI agent, with pages, CMS content, forms, images and custom domains. Hosted Streamable HTTP server at https://api.cactal.ai/v1/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
