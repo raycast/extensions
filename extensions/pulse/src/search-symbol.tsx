@@ -80,7 +80,7 @@ function typedInstrument(query: string, index: SymbolIndex | undefined): Instrum
   // A typed "^FTSE" is an index whatever its exchange, so the Indices filter keeps it.
   if (symbol.startsWith("^")) return { symbol, market: "index", kind: "index", name: symbol, exchange: null };
   const suffix = /\.([A-Z]+)$/.exec(symbol)?.[1];
-  const market = (suffix && SUFFIX_MARKETS[suffix]) ?? "us";
+  const market = (suffix ? SUFFIX_MARKETS[suffix] : undefined) ?? "us";
   return { symbol, market, kind: "equity", name: symbol, exchange: null };
 }
 
