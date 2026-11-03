@@ -4,7 +4,7 @@
 
 - Press Command-Shift-V in either search command to paste the selected path into the active app. Choose Paste Shell-Quoted Path to use it as a terminal argument.
 - Search Files and its AI tool now direct content queries such as `grep:TODO` to Search File Contents.
-- Search File Contents shows when FSearch is still indexing and refreshes the matches automatically.
+- Search File Contents shows the search folder and indexing status in its results, keeps Raycast's command title, and refreshes matches automatically while indexing.
 - Use `-- ext:pdf` to find the text `ext:pdf`. Put any file filters before `--`.
 
 ## [Remove Trashed Results Immediately] - 2026-10-24

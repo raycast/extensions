@@ -5,7 +5,7 @@ import { StatusView } from "./components/status-view";
 import { splitContentQuery } from "./lib/content-query";
 import { editorName, openAtLine, preferredEditor } from "./lib/editors";
 import { grep, type GrepFile, type GrepMode } from "./lib/fsearch";
-import { expandHome, fileName, folderOf, formatDuration } from "./lib/format";
+import { expandHome, fileName, folderOf, formatDuration, tildify } from "./lib/format";
 import { useFSearch } from "./lib/use-fsearch";
 import { useTrashedPaths } from "./lib/use-trashed-paths";
 
@@ -25,7 +25,7 @@ export default function Command({
   const [mode, setMode] = useState<GrepMode>((args.mode as GrepMode) || "literal");
   const { onTrash, isVisible } = useTrashedPaths();
   const folder = args.folder?.trim() ? expandHome(args.folder) : undefined;
-  const title = folder ? `Search File Contents in ${fileName(folder)}` : "Search File Contents";
+  const scopeLabel = folder ? `In ${tildify(folder)}` : undefined;
   const { pattern, q } = splitContentQuery(text);
   const execute = pattern.length > 0;
 
@@ -38,6 +38,7 @@ export default function Command({
 
   const files = execute && !error ? (data?.files ?? []).filter((file) => isVisible(file.path)) : [];
   const timing = execute && !error && data ? formatDuration(data.tookMicros) : undefined;
+  const heading = [timing, scopeLabel, indexing ? "Indexing…" : undefined].filter(Boolean).join(" · ");
   // The daemon stops reading at its time budget; the best-ranked files come first.
   const incomplete = execute && !error && !isLoading && data?.complete === false;
 
@@ -49,7 +50,6 @@ export default function Command({
       searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder={MODES.find((m) => m.value === mode)?.placeholder}
-      navigationTitle={indexing ? `${title} · Indexing…` : title}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Match"
@@ -66,9 +66,12 @@ export default function Command({
         <List.EmptyView
           icon={Icon.Text}
           title="Search Inside Your Files"
-          description={
-            "Uppercase letters make a search case-sensitive. Narrow it with ext:swift or in:~/Developer.\nType -- ext:pdf to find the text “ext:pdf”."
-          }
+          description={[
+            scopeLabel,
+            "Uppercase letters make a search case-sensitive. Narrow it with ext:swift or in:~/Developer.\nType -- ext:pdf to find the text “ext:pdf”.",
+          ]
+            .filter(Boolean)
+            .join("\n")}
         />
       ) : error ? (
         <StatusView error={error} onRetry={revalidate} />
@@ -76,18 +79,24 @@ export default function Command({
         <List.EmptyView
           icon={Icon.HardDrive}
           title="Indexing File Contents"
-          description="Results refresh automatically as FSearch indexes your files."
+          description={[scopeLabel, "Results refresh automatically as FSearch indexes your files."]
+            .filter(Boolean)
+            .join("\n")}
         />
       ) : files.length === 0 ? (
         <List.EmptyView
           icon={Icon.Text}
           title={isLoading ? "Searching…" : incomplete ? "No Matches Yet" : "No Matches"}
-          description={isLoading ? undefined : incomplete ? (timing ? `${NARROW}\n${timing}` : NARROW) : timing}
+          description={
+            [scopeLabel, !isLoading && incomplete ? NARROW : undefined, isLoading ? undefined : timing]
+              .filter(Boolean)
+              .join("\n") || undefined
+          }
         />
       ) : (
         <>
           {files.map((file, index) => (
-            <FileSection key={file.path} file={file} timing={index === 0 ? timing : undefined} onTrash={onTrash} />
+            <FileSection key={file.path} file={file} heading={index === 0 ? heading : undefined} onTrash={onTrash} />
           ))}
           {incomplete && (
             <List.Section title="Some Files Weren't Searched">
@@ -100,11 +109,19 @@ export default function Command({
   );
 }
 
-function FileSection({ file, timing, onTrash }: { file: GrepFile; timing?: string; onTrash: (path: string) => void }) {
+function FileSection({
+  file,
+  heading,
+  onTrash,
+}: {
+  file: GrepFile;
+  heading?: string;
+  onTrash: (path: string) => void;
+}) {
   const editor = preferredEditor();
   const name = fileName(file.path);
   return (
-    <List.Section title={timing ? `${timing} · ${name}` : name} subtitle={folderOf(file.path)}>
+    <List.Section title={heading ? `${heading} · ${name}` : name} subtitle={folderOf(file.path)}>
       {file.matches.map((match) => (
         <List.Item
           key={`${file.path}:${match.line}`}

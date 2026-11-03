@@ -114,21 +114,57 @@ test("content search shows indexing, retries with matches visible, and stops whe
   const h = await harness(t, "search-contents", { files: [], complete: true, indexing: true });
   assert.match(h.empty()[0].props.title, /Indexing/i);
   assert.equal(h.list().isLoading, true);
+  assert.equal(h.list().navigationTitle, undefined);
   t.mock.timers.tick(1000);
   assert.equal(h.revalidate.mock.callCount(), 1);
 
   const files = [matches("/tmp/report.txt")];
   await h.updateResults({ files, complete: true, indexing: true });
   assert.ok(h.items().some((item) => item.props.id === "/tmp/report.txt:1"));
-  assert.match(h.list().navigationTitle, /Indexing/);
+  assert.match(h.sections()[0].props.title, /Indexing/);
+  assert.equal(h.list().navigationTitle, undefined);
   t.mock.timers.tick(1000);
   assert.equal(h.revalidate.mock.callCount(), 2);
 
   await h.updateResults({ files, complete: true, indexing: false });
   assert.equal(h.list().isLoading, false);
-  assert.doesNotMatch(h.list().navigationTitle, /Indexing/);
+  assert.doesNotMatch(h.sections()[0].props.title, /Indexing/);
+  assert.equal(h.list().navigationTitle, undefined);
   t.mock.timers.tick(3000);
   assert.equal(h.revalidate.mock.callCount(), 2);
+});
+
+test("content search shows the folder in its results and empty states without overriding the root title", async (t) => {
+  const files = [matches("/tmp/My Project/src/report.txt"), matches("/tmp/My Project/keep.txt")];
+  const h = await harness(
+    t,
+    "search-contents",
+    { files, complete: true, indexing: true },
+    { text: "report", folder: "/tmp/My Project" },
+  );
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.sections()[0].props.title, /In \/tmp\/My Project/);
+  assert.match(h.sections()[0].props.title, /Indexing/);
+  assert.match(h.sections()[0].props.title, /500 µs/);
+  assert.equal(h.sections()[0].props.subtitle, "/tmp/My Project/src");
+  assert.equal(h.sections()[1].props.title, "keep.txt");
+
+  await h.updateResults({ files, complete: true, indexing: false });
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.sections()[0].props.title, /In \/tmp\/My Project/);
+  assert.doesNotMatch(h.sections()[0].props.title, /Indexing/);
+
+  await h.updateResults({ files: [], complete: true, indexing: true });
+  assert.equal(h.list().navigationTitle, undefined);
+  assert.match(h.empty()[0].props.title, /Indexing/);
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
+
+  await h.updateResults({ files: [], complete: true, indexing: false });
+  assert.equal(h.empty()[0].props.title, "No Matches");
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
+  await h.changeQuery("");
+  assert.equal(h.empty()[0].props.title, "Search Inside Your Files");
+  assert.match(h.empty()[0].props.description, /In \/tmp\/My Project/);
 });
 
 test("clearing an indexing content search cancels its pending retry", async (t) => {
