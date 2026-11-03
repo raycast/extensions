@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-03
 
 - Discover the installed Yaps CLI without relying on Raycast's `PATH`, including per-user Applications installs.
 - Reuse the signed-in desktop account automatically and require an active trial or Yaps Pro before vault access.
