@@ -1,18 +1,10 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { findEntry, groupByFamily, parseCustomModel, refKey } from "../catalog/build";
 import { routeModel } from "../catalog/routing";
 import { getApiKeys } from "../core/preferences";
-import type {
-  CreativityLevel,
-  DefaultModel,
-  ModelRef,
-  OutputMode,
-  PrivacyOverride,
-  PromptDef,
-  ReasoningLevel,
-} from "../core/types";
+import type { CreativityLevel, ModelRef, OutputMode, PrivacyOverride, PromptDef, ReasoningLevel } from "../core/types";
 import { createPrompt, getDefaultModel, getSnippets, updatePrompt, type PromptDraft } from "../prompts/store";
 import { inspectTemplate, validatePromptDraft } from "../prompts/template/validate";
 import { supportedReasoning, supportsCreativity } from "../providers";
@@ -93,19 +85,16 @@ interface PromptFormProps {
 export function PromptForm({ prompt, knownTags, onSaved }: PromptFormProps) {
   const { pop } = useNavigation();
   const { entries, favorites, isLoading } = useCatalog();
-  const [snippetNames, setSnippetNames] = useState<string[]>([]);
-  const [defaultModel, setDefaultModel] = useState<DefaultModel>();
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        setSnippetNames((await getSnippets()).map((snippet) => snippet.name));
-        setDefaultModel(await getDefaultModel());
-      } catch (error) {
-        await showError("Cannot Load Settings", error);
-      }
-    })();
-  }, []);
+  const { data: settings } = usePromise(
+    async () => ({
+      snippetNames: (await getSnippets()).map((snippet) => snippet.name),
+      defaultModel: await getDefaultModel(),
+    }),
+    [],
+    { onError: (error) => showError("Cannot Load Settings", error) },
+  );
+  const snippetNames = useMemo(() => settings?.snippetNames ?? [], [settings]);
+  const defaultModel = settings?.defaultModel;
 
   // Shown on the route that would run today. It may differ from the stored one after a key change.
   const [storedModel] = useState(() => (prompt?.model ? routeModel(prompt.model, getApiKeys()) : undefined));

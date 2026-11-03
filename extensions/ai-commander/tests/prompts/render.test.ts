@@ -107,6 +107,10 @@ describe("render", () => {
     expect(render(withDefault, { selection: "x", arguments: { tone: "" } })).toBe("x dry");
   });
 
+  it("applies a default given on any occurrence of an argument", () => {
+    expect(render('{selection | raw}{argument name="x" default=""}{argument name="x"}', { selection: "s" })).toBe("s");
+  });
+
   it("fences argument values", () => {
     expect(render('{selection | raw} {argument name="a"}', { selection: "x", arguments: { a: "b" } })).toBe(
       'x """\nb\n"""',

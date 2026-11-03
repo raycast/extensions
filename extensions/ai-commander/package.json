@@ -107,7 +107,7 @@
     "fix-lint": "ray lint --fix",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "check": "npm run build && npm run typecheck && npm run lint && npm test",
     "publish": "npx @raycast/api@latest publish"
   }
 }

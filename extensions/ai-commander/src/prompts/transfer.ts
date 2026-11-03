@@ -9,6 +9,7 @@
  * are Raycast's own IDs such as `anthropic-claude-haiku-5-5` or `openai-gpt-5.6-luna`. An export from the Raycast app
  * itself was not available; it is assumed to follow the same shape.
  */
+import { renameSnippetReferences } from "./template/snippets";
 
 import { createHash, randomUUID } from "node:crypto";
 import { isRecord } from "../core/guards";
@@ -388,8 +389,11 @@ function findExistingPrompt(prompts: readonly PromptDef[], incoming: PromptDef):
   return prompts.find((prompt) => prompt.id === incoming.id);
 }
 
+/** Templates reference snippets by name, so a name match wins over an ID match. That keeps names unique. */
 function findExistingSnippet(snippets: readonly TextSnippet[], incoming: TextSnippet): TextSnippet | undefined {
-  return snippets.find((snippet) => snippet.id === incoming.id || snippet.name === incoming.name);
+  return (
+    snippets.find((snippet) => snippet.name === incoming.name) ?? snippets.find((snippet) => snippet.id === incoming.id)
+  );
 }
 
 function resolveConflict(entry: ImportPlanEntry, resolve: ApplyOptions["resolve"]): ConflictAction {
@@ -407,10 +411,39 @@ export function applyImportPlan(plan: ImportPlan, current: ImportTarget, options
   const prompts = [...current.prompts];
   const snippets = [...current.snippets];
   const summary: ImportSummary = { added: 0, overwritten: 0, copied: 0, skipped: 0 };
+  // Incoming snippet name to the name of its copy. The prompts of the same file must use the copy.
+  const renamed = new Map<string, string>();
+
+  // Snippets first, so that the prompts can be pointed at renamed copies.
+  for (const entry of plan.entries) {
+    if (entry.kind !== "snippet") continue;
+    const { incoming } = entry;
+    const existing = findExistingSnippet(snippets, incoming);
+    const action = existing ? resolveConflict({ ...entry, existing }, options.resolve) : undefined;
+    if (action === "skip") {
+      summary.skipped += 1;
+    } else if (action === "overwrite" && existing) {
+      snippets[snippets.indexOf(existing)] = { ...incoming, id: existing.id, updatedAt: now };
+      summary.overwritten += 1;
+    } else if (action === "copy") {
+      const taken = new Set(snippets.map((snippet) => snippet.name));
+      // A conflict by ID alone leaves the name free, and a kept name needs no rewritten references.
+      const name = taken.has(incoming.name) ? copyName(incoming.name, taken) : incoming.name;
+      if (name !== incoming.name) renamed.set(incoming.name, name);
+      snippets.push({ ...incoming, id: generateId(), name, updatedAt: now });
+      summary.copied += 1;
+    } else {
+      snippets.push(incoming);
+      summary.added += 1;
+    }
+  }
 
   for (const entry of plan.entries) {
     if (entry.kind === "prompt") {
-      const { incoming } = entry;
+      const incoming =
+        renamed.size === 0
+          ? entry.incoming
+          : { ...entry.incoming, template: renameSnippetReferences(entry.incoming.template, renamed) };
       const existing = findExistingPrompt(prompts, incoming);
       const action = existing ? resolveConflict({ ...entry, existing }, options.resolve) : undefined;
       if (action === "skip") {
@@ -432,24 +465,6 @@ export function applyImportPlan(plan: ImportPlan, current: ImportTarget, options
         prompts.push(incoming);
         summary.added += 1;
       }
-      continue;
-    }
-
-    const { incoming } = entry;
-    const existing = findExistingSnippet(snippets, incoming);
-    const action = existing ? resolveConflict({ ...entry, existing }, options.resolve) : undefined;
-    if (action === "skip") {
-      summary.skipped += 1;
-    } else if (action === "overwrite" && existing) {
-      snippets[snippets.indexOf(existing)] = { ...incoming, id: existing.id, updatedAt: now };
-      summary.overwritten += 1;
-    } else if (action === "copy") {
-      const name = copyName(incoming.name, new Set(snippets.map((snippet) => snippet.name)));
-      snippets.push({ ...incoming, id: generateId(), name, updatedAt: now });
-      summary.copied += 1;
-    } else {
-      snippets.push(incoming);
-      summary.added += 1;
     }
   }
 

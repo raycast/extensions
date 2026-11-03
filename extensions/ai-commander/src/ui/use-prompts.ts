@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useMemo } from "react";
 import type { PromptDef } from "../core/types";
 import type { SchemaIssue } from "../prompts/schema";
 import { getLoadIssues, getPrompts } from "../prompts/store";
@@ -12,27 +13,19 @@ export interface PromptsState {
   reload: () => Promise<void>;
 }
 
-export function usePrompts(): PromptsState {
-  const [prompts, setPrompts] = useState<PromptDef[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error>();
-  const [issues, setIssues] = useState<readonly SchemaIssue[]>([]);
+const NO_PROMPTS: PromptDef[] = [];
 
+export function usePrompts(): PromptsState {
+  // A failed load becomes a recovery view, so the hook's generic failure toast stays off.
+  const { data, isLoading, error, revalidate } = usePromise(getPrompts, [], { onError: () => undefined });
+  // The store reports the unreadable entries of its latest read, which is the one that produced `data`.
+  const issues = useMemo(() => (data ? getLoadIssues() : []), [data]);
   const reload = useCallback(async () => {
     try {
-      setPrompts(await getPrompts());
-      setIssues(getLoadIssues());
-      setError(undefined);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause : new Error(String(cause)));
-    } finally {
-      setIsLoading(false);
+      await revalidate();
+    } catch {
+      // `error` brings the failure to the view.
     }
-  }, []);
-
-  useEffect(() => {
-    void reload();
-  }, [reload]);
-
-  return { prompts, isLoading, error, issues, reload };
+  }, [revalidate]);
+  return { prompts: data ?? NO_PROMPTS, isLoading, error, issues, reload };
 }

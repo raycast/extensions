@@ -208,10 +208,11 @@ function lookup(record: Readonly<Record<string, string | undefined>> | undefined
   return typeof value === "string" ? value : undefined;
 }
 
-function resolveArgument(node: ArgumentNode, key: string, values: RenderValues): string {
+function resolveArgument(key: string, values: RenderValues, defaults: ReadonlyMap<string, string>): string {
   const provided = lookup(values.arguments, key);
   if (provided) return provided;
-  if (node.default !== undefined) return node.default;
+  const fallback = defaults.get(key);
+  if (fallback !== undefined) return fallback;
   throw new RenderError("missing-argument", `Argument "${key}" needs a value.`);
 }
 
@@ -257,6 +258,11 @@ export function render(template: string, values: RenderValues = {}): string {
   }
 
   const keys = argumentKeys(placeholdersOf(nodes));
+  // Repeats of a name share one form field, so the first default given anywhere applies to all of them.
+  const defaults = new Map<string, string>();
+  for (const [node, key] of keys) {
+    if (node.default !== undefined && !defaults.has(key)) defaults.set(key, node.default);
+  }
   const now = values.now ?? new Date();
 
   return nodes
@@ -268,7 +274,7 @@ export function render(template: string, values: RenderValues = {}): string {
         case "browser-tab":
           return fenced(resolveInput(node, values) ?? "", node.modifiers);
         case "argument":
-          return fenced(resolveArgument(node, keys.get(node) ?? "argument", values), node.modifiers);
+          return fenced(resolveArgument(keys.get(node) ?? "argument", values, defaults), node.modifiers);
         case "snippet":
           return applyModifiers(snippets.get(node.name ?? "") ?? "", node.modifiers);
         default:

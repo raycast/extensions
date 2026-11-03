@@ -13,8 +13,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
+import { useCallback, useMemo } from "react";
 import { findEntry, groupByFamily, PROVIDER_IDS, refKey } from "./catalog/build";
 import { routeModel } from "./catalog/routing";
 import { getApiKeys } from "./core/preferences";
@@ -90,23 +90,24 @@ function SetDefaultSubmenu({ entry, onSet }: { entry: CatalogEntry; onSet: (mode
 
 export default function Command() {
   const { entries, favorites, isLoading, refresh, toggle } = useCatalog();
-  const [defaultModel, setDefault] = useState<DefaultModel>();
-  const [privacy, setPrivacy] = useState<OpenRouterPrivacy>();
+  const settings = usePromise(
+    async () => ({ defaultModel: await getDefaultModel(), privacy: await getOpenRouterPrivacy() }),
+    [],
+    { onError: (error) => showError("Cannot Load Settings", error) },
+  );
+  const defaultModel = settings.data?.defaultModel;
+  const privacy = settings.data?.privacy;
   const keys = useMemo(() => getApiKeys(), []);
   const groups = useMemo(() => groupByFamily(entries, favorites), [entries, favorites]);
 
+  const { revalidate: revalidateSettings } = settings;
   const reloadSettings = useCallback(async () => {
     try {
-      setDefault(await getDefaultModel());
-      setPrivacy(await getOpenRouterPrivacy());
-    } catch (error) {
-      await showError("Cannot Load Settings", error);
+      await revalidateSettings();
+    } catch {
+      // `onError` has reported it.
     }
-  }, []);
-
-  useEffect(() => {
-    void reloadSettings();
-  }, [reloadSettings]);
+  }, [revalidateSettings]);
 
   async function testProvider(id: ProviderId) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Testing ${PROVIDER_LABELS[id]}` });

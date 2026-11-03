@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useForm, usePromise } from "@raycast/utils";
+import { useCallback } from "react";
 import type { TextSnippet } from "../core/types";
 import { createSnippet, deleteSnippet, getSnippets, updateSnippet } from "../prompts/store";
+import { isQuotableSnippetName, snippetPlaceholder, UNQUOTABLE_SNIPPET_NAME } from "../prompts/template/snippets";
 import { validateSnippetText } from "../prompts/template/validate";
 import { guarded, showError } from "./feedback";
 
@@ -11,7 +12,10 @@ function SnippetForm({ snippet, onSaved }: { snippet?: TextSnippet; onSaved: () 
   const { handleSubmit, itemProps } = useForm<{ name: string; text: string }>({
     initialValues: { name: snippet?.name ?? "", text: snippet?.text ?? "" },
     validation: {
-      name: (value) => (value?.trim() ? undefined : "Required"),
+      name: (value) => {
+        if (!value?.trim()) return "Required";
+        return isQuotableSnippetName(value) ? undefined : UNQUOTABLE_SNIPPET_NAME;
+      },
       text: (value) => {
         if (!value?.trim()) return "Required";
         return validateSnippetText(value).errors[0]?.message;
@@ -46,20 +50,19 @@ function SnippetForm({ snippet, onSaved }: { snippet?: TextSnippet; onSaved: () 
 
 /** Own text blocks, because Raycast's snippets cannot be read through the extension API. */
 export function SnippetList() {
-  const [snippets, setSnippets] = useState<TextSnippet[]>();
+  const {
+    data: snippets,
+    isLoading,
+    revalidate,
+  } = usePromise(getSnippets, [], { onError: (error) => showError("Cannot Load Snippets", error) });
 
   const reload = useCallback(async () => {
     try {
-      setSnippets(await getSnippets());
-    } catch (error) {
-      setSnippets([]);
-      await showError("Cannot Load Snippets", error);
+      await revalidate();
+    } catch {
+      // `onError` has reported it.
     }
-  }, []);
-
-  useEffect(() => {
-    void reload();
-  }, [reload]);
+  }, [revalidate]);
 
   async function remove(snippet: TextSnippet) {
     const confirmed = await confirmAlert({
@@ -82,13 +85,13 @@ export function SnippetList() {
   );
 
   return (
-    <List isLoading={snippets === undefined} navigationTitle="Snippets" searchBarPlaceholder="Search snippets">
+    <List isLoading={isLoading} navigationTitle="Snippets" searchBarPlaceholder="Search snippets">
       {snippets?.map((snippet) => (
         <List.Item
           key={snippet.id}
           icon={Icon.Text}
           title={snippet.name}
-          subtitle={`{snippet name="${snippet.name}"}`}
+          subtitle={snippetPlaceholder(snippet.name)}
           actions={
             <ActionPanel>
               <Action.Push
@@ -97,7 +100,7 @@ export function SnippetList() {
                 target={<SnippetForm snippet={snippet} onSaved={reload} />}
               />
               {create}
-              <Action.CopyToClipboard title="Copy Placeholder" content={`{snippet name="${snippet.name}"}`} />
+              <Action.CopyToClipboard title="Copy Placeholder" content={snippetPlaceholder(snippet.name)} />
               <Action
                 title="Delete Snippet"
                 icon={Icon.Trash}
@@ -109,7 +112,7 @@ export function SnippetList() {
           }
         />
       ))}
-      {snippets !== undefined && (
+      {!isLoading && (
         <List.EmptyView
           title="No Snippets"
           description="Reusable text for your prompts."

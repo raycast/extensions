@@ -34,7 +34,7 @@ import { insertAfterSelection } from "../prompts/postprocess";
 import { setDefaultModel, updatePrompt } from "../prompts/store";
 import { buildRefineRequest } from "../prompts/system-frame";
 import { PROVIDER_LABELS } from "../providers";
-import { showError } from "./feedback";
+import { guarded, showError } from "./feedback";
 import { ModelPicker } from "./model-picker";
 import { useRunOnce } from "./use-run-once";
 import { useRunStream, type RunOutcome, type RunRequest } from "./use-run-stream";
@@ -214,17 +214,20 @@ export function ResultView({ prompt, input, args, navigationTitle }: ResultViewP
     }
   }
 
-  useRunOnce(() => {
-    void (async () => {
-      try {
-        const messages = await buildMessages(prompt, input, args);
-        recordUse(prompt.id);
-        await begin(messages, undefined);
-      } catch (error) {
-        setTurns([{ id: nextId.current++, status: "failed", failure: toRunFailure(error) }]);
-      }
-    })();
-  });
+  /** Builds the first request from the captured input. Also the retry when that failed, on a missing snippet say. */
+  async function prepare(model: ModelRef | undefined) {
+    try {
+      const messages = await buildMessages(prompt, input, args);
+      recordUse(prompt.id);
+      await begin(messages, model);
+    } catch (error) {
+      const id = nextId.current++;
+      setSelectedId(id);
+      setTurns((all) => [...all, { id, status: "failed", failure: toRunFailure(error) }]);
+    }
+  }
+
+  useRunOnce(() => void prepare(undefined));
 
   const busy = turns.some((turn) => turn.status === "streaming");
   const firstMessages = turns[0]?.messages;
@@ -282,10 +285,13 @@ export function ResultView({ prompt, input, args, navigationTitle }: ResultViewP
     void begin(messages, modelOverride, { instruction, parentId: baseTurn.id });
   }
 
-  /** Repeats the version on screen, not the newest one. */
+  /** Repeats the version on screen, not the newest one. Without any request yet, it prepares the first one again. */
   function rerun(model: ModelRef | undefined) {
     const source = selected?.messages ? selected : latest;
-    if (!source?.messages) return;
+    if (!source?.messages) {
+      void prepare(model);
+      return;
+    }
     void begin(source.messages, model, { instruction: source.instruction, parentId: source.parentId });
   }
 
@@ -352,7 +358,7 @@ export function ResultView({ prompt, input, args, navigationTitle }: ResultViewP
       />
     );
     const paste = selectedText !== undefined && pasteAction(selectedText);
-    const retryAction = !busy && (selected.messages ?? latest?.messages) && (
+    const retryAction = !busy && (
       <Action
         title={failure ? "Try Again" : "Regenerate"}
         icon={Icon.ArrowClockwise}
@@ -424,7 +430,9 @@ export function ResultView({ prompt, input, args, navigationTitle }: ResultViewP
           <Action
             title="Open Models & Providers"
             icon={Icon.Gear}
-            onAction={() => launchCommand({ name: "manage-models", type: LaunchType.UserInitiated })}
+            onAction={guarded("Cannot Open Models & Providers", () =>
+              launchCommand({ name: "manage-models", type: LaunchType.UserInitiated }),
+            )}
           />
         )}
         <Action.Push

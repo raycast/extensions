@@ -1,9 +1,10 @@
-import { Action, ActionPanel, getSelectedText, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, getSelectedText, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useRef } from "react";
 import { toRunFailure } from "../commands/failure";
 import { collectInput, frontmostAppId } from "../commands/input";
 import type { PromptDef } from "../core/types";
 import { extractRequirements } from "../prompts/template/render";
+import { showError } from "./feedback";
 import { resolveIcon } from "./icons";
 import { RunSession } from "./run-session";
 import { StoreRecovery } from "./store-recovery";
@@ -37,7 +38,7 @@ export function PromptPicker() {
       push(<RunSession prompt={prompt} input={input} navigationTitle={prompt.name} />);
     } catch (cause) {
       const failure = toRunFailure(cause);
-      await showToast({ style: Toast.Style.Failure, title: failure.title, message: failure.message });
+      await showError(failure.title, failure);
     }
   }
 

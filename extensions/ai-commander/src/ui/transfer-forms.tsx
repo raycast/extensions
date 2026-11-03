@@ -22,6 +22,27 @@ const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 /** The form stays readable with a damaged file, so only the first problems are listed. */
 const MAX_LISTED_ISSUES = 5;
 
+/** Bounds the search for a free file name. Nobody exports a thousand times a day into one folder. */
+const MAX_NAME_ATTEMPTS = 1000;
+
+/**
+ * Never replaces a file, because an earlier export may be the only backup. A second export of the day gets a number,
+ * and the exclusive flag also covers a file that appears between the check and the write.
+ */
+async function writeNewFile(folder: string, base: string, content: string): Promise<string> {
+  for (let attempt = 1; attempt <= MAX_NAME_ATTEMPTS; attempt += 1) {
+    const target = path.join(folder, attempt === 1 ? `${base}.json` : `${base}-${attempt}.json`);
+    try {
+      // Owner-only: prompts can hold work content, even though the export never contains API keys.
+      await writeFile(target, content, { mode: 0o600, flag: "wx" });
+      return target;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    }
+  }
+  throw new Error("Too many exports with the same name in this folder.");
+}
+
 export function ExportForm() {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ folder: string[] }>({
@@ -29,10 +50,9 @@ export function ExportForm() {
     validation: { folder: (value) => (value?.[0] ? undefined : "Choose a folder") },
     onSubmit: async ({ folder }) => {
       const date = new Date().toISOString().slice(0, 10);
-      const target = path.join(folder[0] ?? homedir(), `ai-commander-export-${date}.json`);
       try {
-        // Owner-only: prompts can hold work content, even though the export never contains API keys.
-        await writeFile(target, serializeExport(await exportAll()), { mode: 0o600 });
+        const content = serializeExport(await exportAll());
+        const target = await writeNewFile(folder[0] ?? homedir(), `ai-commander-export-${date}`, content);
         await showToast({ style: Toast.Style.Success, title: "Export Saved", message: path.basename(target) });
         await showInFinder(target);
         pop();

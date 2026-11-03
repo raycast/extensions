@@ -278,6 +278,31 @@ describe("conflict handling", () => {
     expect(outcome.snippets).toEqual([{ ...snippet, text: "New", updatedAt: 50 }]);
   });
 
+  it("matches snippets by name first, so names stay unique", () => {
+    const local = [snippet, { id: "s2", name: "Other", text: "Two", updatedAt: 3 }];
+    const file = { ...parsed, prompts: [], snippets: [{ id: "s1", name: "Other", text: "New", updatedAt: 4 }] };
+    const target = { prompts: [], snippets: local };
+    const outcome = applyImportPlan(planImport(file, target), target, { ...options, resolve: "overwrite" });
+    expect(outcome.snippets.map((entry) => entry.name)).toEqual(["Sign", "Other"]);
+    expect(outcome.snippets[1]).toMatchObject({ id: "s2", text: "New" });
+  });
+
+  it("points imported prompts at snippets kept as copies", () => {
+    const usesSign = { ...incoming, id: "p2", template: '{selection} {snippet name="Sign" | trim}' };
+    const file = { ...parsed, prompts: [usesSign], snippets: [{ ...snippet, id: "s9", text: "Theirs" }] };
+    const target = { prompts: [], snippets: [snippet] };
+    const outcome = applyImportPlan(planImport(file, target), target, { ...options, resolve: "copy" });
+    expect(outcome.snippets[1]?.name).toBe("Sign Copy");
+    expect(outcome.prompts[0]?.template).toBe('{selection} {snippet name="Sign Copy" | trim}');
+  });
+
+  it("keeps the name of a snippet that conflicts by ID only", () => {
+    const file = { ...parsed, prompts: [], snippets: [{ ...snippet, name: "Fresh" }] };
+    const target = { prompts: [], snippets: [snippet] };
+    const outcome = applyImportPlan(planImport(file, target), target, { ...options, resolve: "copy" });
+    expect(outcome.snippets[1]).toMatchObject({ id: "new-id", name: "Fresh" });
+  });
+
   it("does not mutate the current data", () => {
     const prompts = [existing];
     applyImportPlan(planImport(parsed, { prompts, snippets: [] }), { prompts, snippets: [] }, { resolve: "overwrite" });

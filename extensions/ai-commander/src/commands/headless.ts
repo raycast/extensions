@@ -18,14 +18,14 @@ export interface WindowlessOptions {
 type Hud = (title: string) => Promise<void>;
 
 /**
- * A paste lands in whatever app is in front. If the user moved on during a long run, the result goes to the clipboard
- * instead of into the wrong document.
+ * A paste lands in whatever app is in front. If the user moved on during a long run, or the source app is unknown and a
+ * switch could go unnoticed, the result goes to the clipboard instead of into the wrong document.
  */
 async function pasteIntoSource(text: string, sourceApp: string | undefined, done: string, hud: Hud): Promise<void> {
-  const current = await frontmostAppId();
-  if (sourceApp !== undefined && current !== sourceApp) {
+  const current = sourceApp === undefined ? undefined : await frontmostAppId();
+  if (sourceApp === undefined || current !== sourceApp) {
     await Clipboard.copy(text, { concealed: true });
-    await hud("App Changed: Result Copied");
+    await hud(sourceApp === undefined ? "Source App Unknown: Result Copied" : "App Changed: Result Copied");
     return;
   }
   await Clipboard.paste(text);

@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  openExtensionPreferences,
+  useNavigation,
+} from "@raycast/api";
 import { useMemo } from "react";
 import { groupByFamily, refKey } from "../catalog/build";
 import type { CatalogEntry, ModelRef } from "../core/types";
@@ -31,7 +40,7 @@ interface ModelPickerProps {
 }
 
 export function ModelPicker({ title, onPick, onPickAndSave, saveTitle }: ModelPickerProps) {
-  const { entries, favorites, isLoading, refresh } = useCatalog();
+  const { entries, favorites, problems, isLoading, refresh } = useCatalog();
   const { pop } = useNavigation();
   const groups = useMemo(() => groupByFamily(entries, favorites), [entries, favorites]);
 
@@ -72,7 +81,22 @@ export function ModelPicker({ title, onPick, onPickAndSave, saveTitle }: ModelPi
         </List.Section>
       ))}
       {!isLoading && (
-        <List.EmptyView title="No Models" description="Add an API key in the preferences, then refresh." />
+        <List.EmptyView
+          icon={problems.length > 0 ? { source: Icon.Warning, tintColor: Color.Orange } : undefined}
+          title={problems.length > 0 ? "Models Could Not Be Loaded" : "No Models"}
+          description={problems.length > 0 ? problems.join("\n") : "Add an API key in the preferences, then refresh."}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Models"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={refresh}
+              />
+              <Action title="Open Extension Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
       )}
     </List>
   );

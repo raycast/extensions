@@ -15,6 +15,7 @@ import { Icon, LocalStorage } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 import type { DefaultModel, ModelRef, OpenRouterPrivacy, PromptDef, TextSnippet } from "../core/types";
 import { createExamplePrompts } from "./examples";
+import { isQuotableSnippetName, UNQUOTABLE_SNIPPET_NAME } from "./template/snippets";
 import {
   CURRENT_SCHEMA_VERSION,
   createEmptyState,
@@ -230,16 +231,17 @@ export function getSnippets(): Promise<TextSnippet[]> {
   return read((state) => state.snippets);
 }
 
-function assertSnippetNameFree(state: PersistedState, name: string, ownId?: string): void {
+function assertSnippetNameUsable(state: PersistedState, name: string, ownId?: string): void {
+  if (!isQuotableSnippetName(name)) throw new StoreError(UNQUOTABLE_SNIPPET_NAME);
   if (state.snippets.some((snippet) => snippet.name === name && snippet.id !== ownId)) {
     throw new StoreError(`A snippet named "${name}" already exists.`);
   }
 }
 
-/** Names must be unique because templates reference snippets by name. */
+/** Names must be unique and quotable because templates reference snippets by name. */
 export function createSnippet(draft: Pick<TextSnippet, "name" | "text">): Promise<TextSnippet> {
   return mutate((state) => {
-    assertSnippetNameFree(state, draft.name);
+    assertSnippetNameUsable(state, draft.name);
     const snippet: TextSnippet = { ...draft, id: randomUUID(), updatedAt: Date.now() };
     state.snippets.push(snippet);
     return snippet;
@@ -250,7 +252,7 @@ export function updateSnippet(id: string, patch: Partial<Pick<TextSnippet, "name
   return mutate((state) => {
     const snippet = state.snippets.find((entry) => entry.id === id);
     if (!snippet) throw new StoreError("Snippet Not Found");
-    if (patch.name !== undefined) assertSnippetNameFree(state, patch.name, id);
+    if (patch.name !== undefined) assertSnippetNameUsable(state, patch.name, id);
     Object.assign(snippet, patch, { updatedAt: Date.now() });
     return snippet;
   });

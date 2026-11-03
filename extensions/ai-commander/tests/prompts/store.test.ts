@@ -387,3 +387,9 @@ describe("raycastIconKey", () => {
     expect(raycastIconKey("no-such-icon")).toBeUndefined();
   });
 });
+
+describe("snippet names", () => {
+  it("rejects names that no placeholder could quote", async () => {
+    await expect(createSnippet({ name: `It's "it"`, text: "x" })).rejects.toBeInstanceOf(StoreError);
+  });
+});

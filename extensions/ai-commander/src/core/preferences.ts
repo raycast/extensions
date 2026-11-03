@@ -1,19 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { ProviderId } from "./types";
 
-/** Declared here so type checks do not depend on the generated `raycast-env.d.ts`. */
-interface KeyPreferences {
-  anthropicApiKey?: string;
-  openaiApiKey?: string;
-  geminiApiKey?: string;
-  openrouterApiKey?: string;
-}
-
 export type ApiKeys = Partial<Record<ProviderId, string>>;
 
 /** Keys live only in Raycast's password preferences, so they are read on demand and never copied into storage. */
 export function getApiKeys(): ApiKeys {
-  const preferences = getPreferenceValues<KeyPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   return {
     anthropic: preferences.anthropicApiKey?.trim() || undefined,
     openai: preferences.openaiApiKey?.trim() || undefined,
