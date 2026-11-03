@@ -29,6 +29,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers, application
     case "Sogou Explorer":
     case "Vivaldi":
     case "Yandex":
+    case "yab":
       return createChromiumAdapter(application);
     default: {
       const unsupportedBrowser: never = browserName;
