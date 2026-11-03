@@ -78,18 +78,6 @@ Do not paste credentials into issues, chat messages, screenshots, source files, 
 
 Raycast asks for confirmation before the last example can change the device.
 
-## Development
-
-```bash
-npm ci
-npm run typecheck
-npm test
-npm run lint
-npm run build
-```
-
-The API layer is split into a signed HTTP client, quota normalization, declarative device profiles, normalized status extraction, verified command builders, and a testable service layer. Regression tests include EcoFlow's published signature vector and current flat heartbeat examples.
-
 ## API references
 
 - [EcoFlow General Information](https://developer-eu.ecoflow.com/us/document/root?id=2058828162669383681)

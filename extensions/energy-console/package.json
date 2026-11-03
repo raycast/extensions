@@ -285,18 +285,13 @@
     "@types/react": "19.3.0",
     "eslint": "10.10.0",
     "prettier": "3.9.6",
-    "typescript": "6.0.3",
-    "vitest": "5.0.5"
+    "typescript": "6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "check": "npm run build && npm run typecheck && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   }
 }
