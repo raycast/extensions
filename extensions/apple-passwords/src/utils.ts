@@ -221,8 +221,11 @@ const getBrowserCommand = (browserName: string) => {
     case "Chromium":
     case "Brave":
     case "Arc":
-    case "Dia":
       return `tell application "${browserName}" to return URL of active tab of front window`;
+    case "Dia":
+      // Dia's scripting dictionary can reject the flat `active tab of front window` form
+      // with a coercion error, so address the window first (same approach as Arc).
+      return `tell application "${browserName}" to tell front window to return URL of active tab`;
     default:
       throw new BrowserError(browserName);
   }
