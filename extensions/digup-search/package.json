@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "digup-search",
+  "title": "DigUp Search",
+  "description": "Search your files by what's in them with DigUp: pictures, PDFs, documents, recordings, videos and code.",
+  "icon": "icon.png",
+  "author": "roy_jiang",
+  "contributors": ["crazybird"],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "keywords": [
+    "file search",
+    "semantic search",
+    "PDF",
+    "video",
+    "audio",
+    "screenshots",
+    "code search"
+  ],
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "DigUp",
+      "description": "Describe what you're looking for and find the picture, page, moment or code that matches. Requires DigUp 0.6.1 or newer.",
+      "keywords": [
+        "digup",
+        "documents",
+        "images"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "player",
+      "title": "Open Videos and Recordings In",
+      "description": "The app that opens videos and recordings. QuickTime Player, VLC and IINA start at the moment that matched; other apps start at the beginning. A file QuickTime Player can't play (MKV, WebM, FLAC…) opens in its default app instead.",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.apple.QuickTimePlayerX"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "typecheck": "ray build -e dist && tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "smoke": "tsx scripts/smoke.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  }
+}
