@@ -81,24 +81,24 @@ export function hcReplyText(before: string, current: string, sentText: string): 
     const echo = echoEnd(now.slice(0, end), message, prefix);
     // Only strip a leading echo here: a later exact quote can be part of the output itself.
     if (typeof echo === "number" && now.slice(prefix, echo - message.length).every((line) => !line.trim()))
-      return extracted(now.slice(echo, end));
+      return extracted(now.slice(echo));
     return extracted(added);
   }
 
   // A recognizably exact NEW message can delimit a response even after a full redraw.
   const echo = echoEnd(now, message);
   if (typeof echo === "number" && echoEnd(old, message) === undefined) {
-    // A coincidentally repeated last answer must not consume the entire response.
-    return extracted(now.slice(echo, end > echo ? end : now.length));
+    // A shared suffix may be real answer text, not terminal chrome.
+    return extracted(now.slice(echo));
   }
 
-  // Remove a stable footer only AFTER establishing a suffix-prefix scrolling boundary.
+  // A stable suffix can help find a scrolling anchor, but never proves where the answer ends.
   const oldEnd = old.length - suffix;
   // ponytail: quadratic in screen rows; use KMP if HC starts supplying large scrollback captures.
   for (let overlap = Math.min(oldEnd, end - 1); overlap > 0; overlap--) {
     const anchor = old.slice(oldEnd - overlap, oldEnd);
     if (anchor.every((line, i) => line === now[i]) && meaningfulAnchor(anchor)) {
-      const added = now.slice(overlap, end);
+      const added = now.slice(overlap);
       const echoed = echoEnd(added, message);
       return extracted(
         typeof echoed === "number" && added.slice(0, echoed - message.length).every((line) => !line.trim())

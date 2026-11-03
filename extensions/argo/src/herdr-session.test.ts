@@ -1296,3 +1296,30 @@ test("HC view restores completed local rows for the same program without attribu
   assert.doesNotMatch(view.props.markdown, /saved answer/);
   assert.equal(h.requests.length, 0);
 });
+
+test("All Sessions return refreshes saved messages from another view without sending", async () => {
+  let resume: (() => void) | undefined;
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "done" }, turn: 1 }) }), (onPop) => {
+    resume = onPop;
+  });
+  h.render();
+  await settle();
+  h.render();
+  await h.action("All Sessions");
+  const other = new HcConversation(hcTargetKey(target), h.feed.pin.current, h.store);
+  await other.load();
+  await other.begin("other-view", "message in another view", { text: "old\n", state: "idle", turn: 0, complete: true });
+  other.submitted("other-view");
+  other.observe({ text: "old\nanswer in another view", state: "done", turn: 1, complete: true });
+  await settle();
+  assert.ok(resume);
+  resume();
+  await settle();
+  const view = h.render();
+  assert.equal(h.feed.visible, true);
+  assert.match(
+    views(view).find((v) => v.props.id === "reply:other-view")!.props.detail.props.markdown,
+    /answer in another view/,
+  );
+  assert.equal(h.requests.length, 0);
+});

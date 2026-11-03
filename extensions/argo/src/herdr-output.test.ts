@@ -19,11 +19,11 @@ test("trailing row terminators do not block append boundaries", () => {
   assert.deepEqual(hcReplyText("Same row", "Same row\n", "task"), isolated(""));
 });
 
-test("insertion removes unchanged prefix and suffix without filtering status or permission content", () => {
+test("an inserted exact echo keeps trailing screen content and status or permission content", () => {
   const before = "Old user\nOld reply\n❯ \n? for shortcuts";
   const reply = "Working…\nAllow this command?\n  1. Yes\n  2. No\nstatus = 'done'";
   const current = `Old user\nOld reply\n❯ write code\n\n${reply}\n❯ \n? for shortcuts`;
-  assert.deepEqual(hcReplyText(before, current, "write code"), isolated(reply));
+  assert.deepEqual(hcReplyText(before, current, "write code"), isolated(`${reply}\n❯ \n? for shortcuts`));
 });
 
 test("every streaming revision uses the fixed pre-send baseline, never accumulates snapshots", () => {
@@ -32,12 +32,12 @@ test("every streaming revision uses the fixed pre-send baseline, never accumulat
     assert.deepEqual(hcReplyText(before, `Old question\nOld answer\n${reply}\nFooter`, "new task"), isolated(reply));
 });
 
-test("scrolling uses meaningful multiline overlap, including a stable footer", () => {
+test("scrolling uses meaningful multiline overlap but retains a possible footer", () => {
   const anchor = "Previous response line one\nPrevious response line two";
   for (const footer of ["", "\n❯ \n? for shortcuts"])
     assert.deepEqual(
       hcReplyText(`Lost earlier history\n${anchor}${footer}`, `${anchor}\nNew output${footer}`, "next"),
-      isolated("New output"),
+      isolated(`New output${footer}`),
     );
 });
 
@@ -61,7 +61,7 @@ test("Claude and Codex exact prompt echoes delimit responses after a redraw", ()
         `Redrawn history\n${prefix}${sent}\n\nNew reply\n? for shortcuts`,
         sent,
       ),
-      isolated("New reply"),
+      isolated("New reply\n? for shortcuts"),
     );
 });
 
@@ -175,4 +175,28 @@ test("an appended prompt-shaped code line keeps fence context from the baseline"
 
 test("coincidental identical old answers are not swallowed by suffix removal after an echo", () => {
   assert.deepEqual(hcReplyText("Yes", "❯ Are you sure?\nYes", "Are you sure?"), isolated("Yes"));
+});
+
+test("exact echo preserves answer lines that coincide with the old screen suffix", () => {
+  for (const ending of ["Done", "  return value;\n}", "| 合计 | 3 |"])
+    assert.deepEqual(
+      hcReplyText(`Unrelated history\n${ending}`, `❯ task\nNew code\n${ending}`, "task"),
+      isolated(`New code\n${ending}`),
+    );
+});
+
+test("scrolling preserves answer lines that coincide with the old screen suffix", () => {
+  const anchor = "Previous response line one\nPrevious response line two";
+  for (const ending of ["Done", "  return value;\n}", "| 合计 | 3 |"])
+    assert.deepEqual(
+      hcReplyText(`Lost history\n${anchor}\n${ending}`, `${anchor}\nNew code\n${ending}`, "task"),
+      isolated(`New code\n${ending}`),
+    );
+});
+
+test("an inserted exact echo does not truncate a coincidentally unchanged answer ending", () => {
+  assert.deepEqual(
+    hcReplyText("Old history\nDone", "Old history\n❯ task\nNew code\nDone", "task"),
+    isolated("New code\nDone"),
+  );
 });

@@ -1189,6 +1189,7 @@ function HcSessionView({
                   onAllSessions(() => {
                     if (feed.mounted.current) {
                       setPaused(false);
+                      void conversation?.refresh();
                       void feed.refresh(true).catch(() => {});
                     }
                   });
