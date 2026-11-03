@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Multi Mail and Multi Calendar MCP Servers] - {PR_MERGE_DATE}
+## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-03
 
 - Update Multi Mail and Multi Calendar in the official registry: Multi Mail names other IMAP mailboxes, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
 
