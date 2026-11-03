@@ -1,6 +1,6 @@
 # Modelflare Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Ask Modelflare: stream answers from any text model your key can call, with an optional image attachment for vision models.
 - Generate Image: generate images with any image model your key can call and save them to Downloads.
