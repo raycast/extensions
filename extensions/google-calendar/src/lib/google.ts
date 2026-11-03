@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
-import { auth, calendar_v3 } from "@googleapis/calendar";
+import { calendar_v3 } from "@googleapis/calendar";
 import { getAccessToken, OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { getPreferenceValues, Tool } from "@raycast/api";
 import { resolveCalendarIdForEventsList, resolveEventTypesForList } from "./event-types";
 import { getClientId } from "./utils";
+import { createGoogleClients } from "./google-clients";
 
 let calendar: calendar_v3.Calendar | null = null;
 let people: people_v1.People | null = null;
@@ -23,11 +24,7 @@ const google = OAuthService.google({
   clientId: getClientId(),
   scope: GOOGLE_OAUTH_SCOPES.join(" "),
   onAuthorize({ token }) {
-    const oauth = new auth.OAuth2();
-    oauth.setCredentials({ access_token: token });
-
-    calendar = new calendar_v3.Calendar({ auth: oauth });
-    people = new people_v1.People({ auth: oauth });
+    ({ calendar, people } = createGoogleClients(token));
   },
 });
 
