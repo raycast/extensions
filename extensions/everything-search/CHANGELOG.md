@@ -1,6 +1,6 @@
 # Everything Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-03
 - Fixed searches failing with "Error Searching Files" after Raycast has been running for a few hours
 
 ## [Fix] - 2026-10-26
