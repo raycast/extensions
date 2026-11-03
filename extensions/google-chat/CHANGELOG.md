@@ -1,6 +1,6 @@
 # Google Chat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Search Spaces & DMs with frecency sorting, message view, reply in thread, reactions and mark as read
 - My Messages, a conversation list like Google Chat's Home: Unread (counts, mentions) and Read (paginated, by latest activity) sections, a preview of the latest message from others, "You replied" and thread markers, an All / Unread Only switch (⌘U, Default View preference), and Mark as Read / Mark All as Read
