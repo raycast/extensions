@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add HandlePilot MCP Server] - {PR_MERGE_DATE}
+## [Add HandlePilot MCP Server] - 2026-11-03
 
 - Add HandlePilot to the official registry: Instagram competitor research, reel breakdowns, content plans and editable carousels and scripts. Hosted Streamable HTTP server at https://app.handlepilot.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
