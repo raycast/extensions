@@ -200,7 +200,8 @@ test("terminal output removes VT and C0 but preserves Unicode, tabs and literal 
   assert.ok(result.includes("`````\n" + text + "\n`````"));
   assert.match(result, /Incomplete capture/);
   assert.match(result, /Only visible rows/);
-  assert.match(result, /no selected option is inferred/);
+  assert.doesNotMatch(result, /no selected option is inferred/);
+  assert.match(helpers.hcScreenMarkdown(screen(), "Current Terminal Dialog"), /no selected option is inferred/);
 });
 
 test("HC draft kinds and core identities are isolated; delayed success cannot erase newer edit", async () => {
@@ -823,24 +824,27 @@ test("real HC view distinguishes an in-flight journal from delivery uncertainty"
   assert.equal(journal.props.subtitle, "Inspect output before unlocking");
 });
 
-test("terminal prompt detail keeps three compact metadata rows and moves full identity into read-only inspection", async () => {
+test("ordinary output keeps metadata in inspection while dialog controls retain compact context", async () => {
   const h = viewHarness();
   h.render();
   h.flush();
   await settle();
   const view = h.render(),
     row = views(view).find((v) => v.props.id === "screen")!;
-  const metadata = views(row.props.detail.props.metadata).filter((v) => v.type === "Label");
-  assert.deepEqual(
-    metadata.map((v) => v.props.title),
-    ["State", "Connection", "Machine"],
-  );
+  assert.equal(row.props.detail.props.metadata, undefined);
   const identity = views(row.props.actions).find((v) => v.props.title === "Terminal Identity")!;
   assert.equal(identity.type, "Push");
   assert.match(identity.props.target.props.markdown, /remote\/t1/);
   assert.match(identity.props.target.props.markdown, /Host Core: host/);
   assert.match(identity.props.target.props.markdown, /Directory: \/work/);
   await h.action("Review Current Prompt");
+  const review = views(h.render()).find((v) => v.props.id === "review-screen")!;
+  assert.deepEqual(
+    views(review.props.detail.props.metadata)
+      .filter((v) => v.type === "Label")
+      .map((v) => v.props.title),
+    ["State", "Connection", "Machine"],
+  );
   for (const keyRow of views(h.render()).filter((v) => v.props.id?.startsWith("key:")))
     assert.equal(keyRow.props.subtitle, undefined);
 });
@@ -1061,4 +1065,87 @@ test("failed ordinary send keeps its persistent notice and uncertain-input safeg
   assert.ok(views(view).some((v) => v.props.id === "uncertain" && v.props.title === "Input Result Uncertain"));
   assert.equal(view.props.searchText, "keep this draft");
   assert.ok([...h.store.data.keys()].some((key) => key.startsWith("hc-attempt-v1:")));
+});
+
+test("ordinary output omits the duplicate heading while dialog review keeps its context", async () => {
+  assert.doesNotMatch(helpers.hcScreenMarkdown(), /^# /m);
+  assert.match(helpers.hcScreenMarkdown(), /Waiting for a current-screen capture/);
+  assert.doesNotMatch(helpers.hcScreenMarkdown(screen()), /^# /m);
+  const h = viewHarness();
+  h.render();
+  h.flush();
+  await settle();
+  const row = views(h.render()).find((v) => v.props.id === "screen")!;
+  assert.equal(row.props.title, "Terminal Output");
+  assert.doesNotMatch(row.props.detail.props.markdown, /^# Terminal Output/m);
+  assert.match(row.props.detail.props.markdown, /Allow read/);
+  await h.action("Review Current Prompt");
+  const review = views(h.render()).find((v) => v.props.id === "review-screen")!;
+  assert.match(review.props.detail.props.markdown, /^# Current Terminal Dialog/m);
+});
+
+test("healthy output is only literal content; exceptional capture warnings stay visible", () => {
+  const text = "中文长句保持原换行\n  aligned code\n| A | B |\n| 1 | 2 |";
+  assert.equal(helpers.hcScreenMarkdown(screen({ capture: { text, complete: true, how: "screen" } })), literal(text));
+  const warning = helpers.hcScreenMarkdown(
+    screen({ capture: { text, complete: false, how: "screen", why: "Only visible rows" }, stable: false }),
+  );
+  assert.match(warning, /Incomplete capture/);
+  assert.match(warning, /Only visible rows/);
+  assert.match(warning, /State changed during capture/);
+  assert.doesNotMatch(warning, /Captured:|Method:|Terminal text is literal/);
+});
+
+test("full-width reading shares live output and keeps draft, refresh and reviewed controls", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "done" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  h.render().props.onSearchTextChange("saved draft");
+  await settle();
+  await h.action("Read Full Width");
+  let view = h.render();
+  assert.equal(view.type, "Detail");
+  assert.equal(view.props.metadata, undefined);
+  assert.equal(h.feed.visible, true);
+  const next = screen({
+    terminal: terminal({ status: { state: "done" } }),
+    capture: { text: "Latest wide reply", complete: true, how: "screen" },
+  });
+  h.feed.screen = next;
+  h.feed.latest.current = next;
+  assert.equal(h.render().props.markdown, literal("Latest wide reply"));
+  await h.action("Back to Split View");
+  assert.equal(h.render().props.searchText, "saved draft");
+  await h.action("Read Full Width");
+  await h.action("Review Terminal Controls");
+  view = h.render();
+  assert.equal(view.props.selectedItemId, "review-screen");
+  assert.match(
+    views(view).find((v) => v.props.id === "review-screen")!.props.detail.props.markdown,
+    /Current Terminal Dialog/,
+  );
+  assert.equal(h.requests.length, 0, "reading and navigation send no terminal input");
+});
+
+test("full-width reading cannot conceal disconnect or durable uncertain-input state", async () => {
+  const h = viewHarness();
+  h.render();
+  h.flush();
+  await settle();
+  await h.action("Read Full Width");
+  assert.equal(h.render().type, "Detail");
+  h.feed.invalidRef.current = "Terminal replaced";
+  (h.feed as any).invalid = "Terminal replaced";
+  assert.ok(views(h.render()).some((v) => v.props.id === "connection"));
+  const locked = viewHarness();
+  locked.store.data.set(
+    `hc-attempt-v1:${hcTargetKey(target)}`,
+    JSON.stringify({ id: "pending", kind: "key", text: "enter", at: 1 }),
+  );
+  locked.render();
+  locked.flush();
+  await settle();
+  assert.ok(views(locked.render()).some((v) => v.props.id === "uncertain"));
+  assert.ok(!views(locked.render()).some((v) => v.props.title === "Read Full Width"));
 });

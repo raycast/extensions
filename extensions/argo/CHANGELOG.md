@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Simplify Herdr output to content only, move routine diagnostics into inspection, and add live full-width reading with Command-Shift-F while retaining exceptional warnings and reviewed terminal controls.
+
 - Confirm ordinary Herdr messages with a transient toast instead of a persistent banner above terminal output; retain error and uncertain-input warnings.
 
 - Fix repeated Herdr messages after completed answers, recognize done as Ready, and honor HC's actual conditional-send schema.

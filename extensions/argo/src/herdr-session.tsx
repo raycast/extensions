@@ -117,14 +117,15 @@ export function hcKeyToken(value: string): string {
     );
   return [...["ctrl", "alt", "shift", "super"].filter((part) => modifiers.includes(part)), key].join("+");
 }
-export function hcScreenMarkdown(screen?: HcScreen, heading = "Terminal Output"): string {
-  if (!screen) return `# ${heading}\n\nWaiting for a current-screen capture. Nothing is sent automatically.`;
+export function hcScreenMarkdown(screen?: HcScreen, heading?: string): string {
+  const title = heading ? `# ${heading}\n\n` : "";
+  if (!screen) return `${title}Waiting for a current-screen capture. Nothing is sent automatically.`;
   const capture = screen.capture;
   return (
-    `# ${heading}\n\n${literal(sanitizeTerminalText(capture.text) || "(Empty screen)")}\n\n` +
-    `**Current screen · ${capture.complete ? "HC reports complete capture" : "Incomplete capture"}**\n\n` +
-    `${literal(sanitizeTerminalText([`Method: ${capture.how}`, capture.why ? `Note: ${capture.why}` : "", `Captured: ${new Date(screen.capturedAt).toLocaleTimeString()}`].filter(Boolean).join("\n")))}\n\n` +
-    `${screen.stable === false ? "**State changed during capture. Refresh before input.**\n\n" : ""}Terminal text is literal. Color-only selection/highlighting may be missing; no selected option is inferred.`
+    `${title}${literal(sanitizeTerminalText(capture.text) || "(Empty screen)")}` +
+    `${!capture.complete ? `\n\n**Incomplete capture**${capture.why ? `\n\n${literal(sanitizeTerminalText(capture.why))}` : ""}` : ""}` +
+    `${screen.stable === false ? "\n\n**State changed during capture. Refresh before input.**" : ""}` +
+    `${heading ? "\n\nColor-only selection/highlighting may be missing; no selected option is inferred." : ""}`
   );
 }
 
@@ -560,6 +561,7 @@ function HcSessionView({
 }) {
   const { push } = useNavigation();
   const [paused, setPaused] = useState(false);
+  const [fullWidth, setFullWidth] = useState(false);
   const [mode, setMode] = useState<Mode>("output");
   const [selected, setSelected] = useState<string>("screen");
   const [reviewed, setReviewed] = useState<HcScreen>();
@@ -952,12 +954,20 @@ function HcSessionView({
   );
   const changed = reviewed && feed.screen && hcScreenFingerprint(reviewed) !== hcScreenFingerprint(feed.screen);
   const preview = mode === "output" ? feed.screen : reviewed || feed.screen;
-  const markdown = hcScreenMarkdown(preview, mode === "output" ? "Terminal Output" : "Current Terminal Dialog");
+  const markdown = hcScreenMarkdown(preview, mode === "output" ? undefined : "Current Terminal Dialog");
   const inputWarning =
     "Remote terminal input, not a native approval transaction. HC waits for 3 seconds of terminal quiet before input, which can delay delivery. The screen can change after preflight.";
   function sharedActions() {
     return (
       <>
+        {mode === "output" && !unavailable && !local.attempt ? (
+          <Action
+            title={fullWidth ? "Back to Split View" : "Read Full Width"}
+            icon={fullWidth ? Icon.List : Icon.Eye}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={() => setFullWidth((value) => !value)}
+          />
+        ) : null}
         <Action
           title="Refresh Current Screen"
           icon={Icon.ArrowClockwise}
@@ -994,7 +1004,11 @@ function HcSessionView({
                         `Directory: ${terminal?.cwd || "Unknown"}`,
                         `Program: ${terminal?.foreground?.name || terminal?.argv.join(" ") || "Unknown"}`,
                         `State: ${hcStatus(terminal)}`,
+                        `Connection: ${feed.error || feed.invalid ? "Stale / Review Required" : feed.loading ? "Connecting" : "Connected"}`,
+                        `Terminal size: ${terminal?.cols ?? "?"} columns × ${terminal?.rows ?? "?"} rows`,
                         `Capture: ${preview ? `${new Date(preview.capturedAt).toLocaleTimeString()} · ${preview.capture.complete ? "Complete" : "Incomplete"} · ${preview.capture.how}` : "Unavailable"}`,
+                        ...(preview?.capture.why ? [`Capture note: ${preview.capture.why}`] : []),
+                        "Plain terminal capture preserves existing line breaks and spacing. Color-only highlighting may be missing; no selected option is inferred.",
                       ].join("\n"),
                     ),
                   )}`}
@@ -1087,28 +1101,41 @@ function HcSessionView({
       </>
     );
   }
+  const outputMarkdown = `${notice ? `## Recent Operation\n\n${literal(sanitizeTerminalText(notice))}\n\n` : ""}${changed && mode !== "output" ? "**Live screen changed. Refresh or activate an action to review the updated capture before input.**\n\n" : ""}${markdown}${mode !== "output" ? `\n\n${inputWarning}` : ""}`;
   const details = (
     <List.Item.Detail
-      markdown={`${notice ? `## Recent Operation\n\n${literal(sanitizeTerminalText(notice))}\n\n` : ""}${changed && mode !== "output" ? "**Live screen changed. Refresh or activate an action to review the updated capture before input.**\n\n" : ""}${markdown}${mode !== "output" ? `\n\n${inputWarning}` : ""}`}
+      markdown={outputMarkdown}
       metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="State" text={hcStatus(terminal)} />
-          <List.Item.Detail.Metadata.Label
-            title="Connection"
-            text={feed.error || feed.invalid ? "Stale / Review Required" : feed.loading ? "Connecting" : "Connected"}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Machine"
-            text={
-              target.coreId === target.hostCoreId
-                ? feed.client.current?.core.name || "Local Host"
-                : terminal?.address.split("/")[0] || target.coreId
-            }
-          />
-        </List.Item.Detail.Metadata>
+        mode !== "output" ? (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="State" text={hcStatus(terminal)} />
+            <List.Item.Detail.Metadata.Label
+              title="Connection"
+              text={feed.error || feed.invalid ? "Stale / Review Required" : feed.loading ? "Connecting" : "Connected"}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Machine"
+              text={
+                target.coreId === target.hostCoreId
+                  ? feed.client.current?.core.name || "Local Host"
+                  : terminal?.address.split("/")[0] || target.coreId
+              }
+            />
+          </List.Item.Detail.Metadata>
+        ) : undefined
       }
     />
   );
+  if (fullWidth && mode === "output" && !unavailable && !local.attempt) {
+    return (
+      <Detail
+        navigationTitle={`${name} · ${hcStatus(terminal)} · Full Width`}
+        isLoading={feed.loading || busy}
+        markdown={outputMarkdown}
+        actions={<ActionPanel>{sharedActions()}</ActionPanel>}
+      />
+    );
+  }
   return (
     <List
       navigationTitle={`${name} · ${mode === "output" ? "Herdr Terminal" : mode === "text" ? "Review Prompt Response" : "Terminal Controls"}`}
