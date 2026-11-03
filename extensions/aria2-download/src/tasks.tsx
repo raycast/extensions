@@ -11,9 +11,8 @@ import {
   open,
   showToast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import AddDownload from "./add-download";
 import Configuration from "./configuration";
@@ -42,7 +41,10 @@ import {
   isStoppedTask,
   isWaitingTask,
 } from "./lib/task-type";
-import { Aria2Task, ExtensionPreferences } from "./lib/types";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+
+import { Aria2Task } from "./lib/types";
+import { ctrlShortcut } from "./lib/shortcuts";
 
 interface TaskSection {
   title: string;
@@ -61,49 +63,40 @@ function taskActions(
 ): React.ReactNode {
   const uri = getPrimaryUri(task);
   const isActive = isActiveTask(task);
-  const isWaiting = isWaitingTask(task);
   const isStopped = isStoppedTask(task);
   const removeTitle = isStopped ? "Remove from List" : "Remove Download";
 
   return (
     <ActionPanel>
       <Action title="Show Details" icon={Icon.Eye} onAction={onOpenDetail} />
-      {isActive && (
+      {(isActive || task.status === "waiting") && (
         <Action
           title="Pause"
           icon={Icon.Pause}
-          shortcut={{ modifiers: ["ctrl"], key: "p" }}
+          shortcut={ctrlShortcut("p")}
           onAction={async () => {
             try {
               await pauseTask(task.gid);
               await showToast({ style: Toast.Style.Success, title: "Paused" });
               onRefresh();
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Pause failed",
-                message: errorMessage(error),
-              });
+              await showFailureToast(error, { title: "Pause failed" });
             }
           }}
         />
       )}
-      {(isWaiting || task.status === "paused") && (
+      {task.status === "paused" && (
         <Action
           title="Resume"
           icon={Icon.Play}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
+          shortcut={ctrlShortcut("r")}
           onAction={async () => {
             try {
               await resumeTask(task.gid);
               await showToast({ style: Toast.Style.Success, title: "Resumed" });
               onRefresh();
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Resume failed",
-                message: errorMessage(error),
-              });
+              await showFailureToast(error, { title: "Resume failed" });
             }
           }}
         />
@@ -112,7 +105,7 @@ function taskActions(
         title={removeTitle}
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={ctrlShortcut("x")}
         onAction={async () => {
           const confirmed = await confirmAlert({
             title: removeTitle,
@@ -132,11 +125,7 @@ function taskActions(
             await showToast({ style: Toast.Style.Success, title: "Removed" });
             onRefresh();
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Remove failed",
-              message: errorMessage(error),
-            });
+            await showFailureToast(error, { title: "Remove failed" });
           }
         }}
       />
@@ -151,7 +140,7 @@ function taskActions(
         <Action.CopyToClipboard
           title="Copy Source URL"
           content={uri}
-          shortcut={{ modifiers: ["ctrl"], key: "c" }}
+          shortcut={ctrlShortcut("c")}
         />
       )}
       <ActionPanel.Section title="aria2">
@@ -180,38 +169,29 @@ function taskActions(
 
 export default function Tasks() {
   const { push } = useNavigation();
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const [tasks, setTasks] = useState<Aria2Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [daemonError, setDaemonError] = useState<string | null>(null);
+  const preferences = getPreferenceValues<Preferences>();
+  const {
+    data: tasks = [],
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getAllTasks, [], { keepPreviousData: true });
+  const daemonError = error ? errorMessage(error) : null;
   const errorToastShown = useRef(false);
 
-  const lastTasksJson = useRef("");
-
   const refresh = useCallback(async () => {
-    try {
-      const next = await getAllTasks();
-      const serialized = JSON.stringify(next);
-      if (serialized !== lastTasksJson.current) {
-        lastTasksJson.current = serialized;
-        setTasks(next);
-      }
-      setDaemonError(null);
-      errorToastShown.current = false;
-    } catch (error) {
-      setDaemonError(errorMessage(error));
-      if (!errorToastShown.current) {
-        errorToastShown.current = true;
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "aria2 is not available",
-          message: errorMessage(error),
-        });
-      }
-    } finally {
-      setIsLoading(false);
+    await revalidate();
+  }, [revalidate]);
+
+  useEffect(() => {
+    if (daemonError && !errorToastShown.current) {
+      errorToastShown.current = true;
+      void showFailureToast(error, { title: "aria2 is not available" });
     }
-  }, []);
+    if (!daemonError) {
+      errorToastShown.current = false;
+    }
+  }, [daemonError, error]);
 
   const toggle = useCallback(async () => {
     const toast = await showToast({
@@ -230,21 +210,8 @@ export default function Tasks() {
       }
       await refresh();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not toggle aria2";
-      toast.message = errorMessage(error);
+      await showFailureToast(error, { title: "Could not toggle aria2" });
     }
-  }, [refresh]);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      if (!cancelled) await refresh();
-    }
-    boot();
-    return () => {
-      cancelled = true;
-    };
   }, [refresh]);
 
   useEffect(() => {

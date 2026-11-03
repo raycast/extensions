@@ -1,3 +1,6 @@
+import os from "node:os";
+import path from "node:path";
+
 export type DownloadStatus =
   "active" | "waiting" | "paused" | "complete" | "error" | "removed";
 
@@ -98,7 +101,7 @@ export interface Aria2Settings {
 
 export const DEFAULT_SETTINGS: Aria2Settings = {
   rpcPort: 6800,
-  downloadDir: `${process.env.USERPROFILE ?? "C:\\Users\\Jie"}\\Downloads`,
+  downloadDir: path.join(process.env.USERPROFILE ?? os.homedir(), "Downloads"),
   connections: 16,
   split: 16,
   minSplitSize: "1M",
@@ -140,15 +143,6 @@ export interface InstallInfo {
   sha256: string;
   installPath: string;
   installedAt: string;
-}
-
-export interface ExtensionPreferences {
-  rpcEndpoint: string;
-  rpcSecret: string;
-  refreshInterval: string;
-  chunkViz: "heatmap" | "mosaic";
-  chunkColumns: string;
-  showStopped: boolean;
 }
 
 export interface RpcErrorShape {

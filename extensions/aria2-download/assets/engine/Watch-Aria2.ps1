@@ -75,7 +75,6 @@ try {
 
     $interval = [Math]::Max(1, $IntervalSeconds)
     $consecutiveFailures = 0
-    $baseline = $false
     $notifiedThisRun = @{}
     $hadCompletion = $false
     $idlePolls = 0
@@ -116,15 +115,6 @@ try {
                 continue
             }
             $notifiedThisRun[$gid.ToLowerInvariant()] = $true
-
-            if (-not $baseline) {
-                # Existing stopped tasks are history; suppress them on startup.
-                try {
-                    $null = Set-Aria2Notified -Paths $paths -Gid $gid -EventName 'baseline'
-                } catch {
-                }
-                continue
-            }
 
             $followedBy = @($task.followedBy | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
             if ($followedBy.Count -gt 0) {
@@ -171,10 +161,6 @@ try {
             Write-Aria2EngineLog -Paths $paths -Message ('watch: notified gid=' + $gid + ' status=' + $status)
         }
 
-        if (-not $baseline) {
-            $baseline = $true
-            Write-Aria2EngineLog -Paths $paths -Message 'watch: baseline initialized'
-        }
 
         if ($autoStopWhenIdle -and $hadCompletion) {
             $activeCount = 0

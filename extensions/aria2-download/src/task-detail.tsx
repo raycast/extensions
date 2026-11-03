@@ -13,7 +13,6 @@ import {
   open,
   showToast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -41,9 +40,11 @@ import {
   isActiveTask,
   isMetadataTask,
   isStoppedTask,
-  isWaitingTask,
 } from "./lib/task-type";
-import { Aria2Task, ExtensionPreferences } from "./lib/types";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+
+import { Aria2Task } from "./lib/types";
+import { ctrlShortcut } from "./lib/shortcuts";
 import {
   pauseTask,
   removeTask,
@@ -89,47 +90,45 @@ function useTaskStatus(
   isLoading: boolean;
   refresh: () => Promise<void>;
 } {
-  const [task, setTask] = useState<Aria2Task | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const lastTaskJson = useRef("");
+  const [currentGid, setCurrentGid] = useState(gid);
+  const { data, error, isLoading, revalidate } = useCachedPromise(
+    (target: string) => tellStatus(target, STATUS_KEYS),
+    [currentGid],
+    { keepPreviousData: true },
+  );
+  const task = data ?? null;
 
-  const refresh = useCallback(async () => {
-    try {
-      const next = await tellStatus(gid, STATUS_KEYS);
-      const serialized = JSON.stringify(next);
-      if (serialized !== lastTaskJson.current) {
-        lastTaskJson.current = serialized;
-        setTask(next);
-      }
-      setError(null);
-    } catch (caught) {
-      setError(messageOf(caught));
-    } finally {
-      setIsLoading(false);
-    }
+  useEffect(() => {
+    setCurrentGid(gid);
   }, [gid]);
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      if (cancelled) return;
-      await refresh();
+    const followed = task?.followedBy?.[0];
+    if (followed && followed !== currentGid) {
+      setCurrentGid(followed);
     }
-    load();
+  }, [task, currentGid]);
+
+  useEffect(() => {
     const interval = setInterval(
       () => {
-        void refresh();
+        void revalidate();
       },
       Math.max(1, refreshSeconds) * 1000,
     );
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [refresh, refreshSeconds]);
+    return () => clearInterval(interval);
+  }, [revalidate, refreshSeconds]);
 
-  return { task, error, isLoading, refresh };
+  const refresh = useCallback(async () => {
+    await revalidate();
+  }, [revalidate]);
+
+  return {
+    task,
+    error: error ? messageOf(error) : null,
+    isLoading,
+    refresh,
+  };
 }
 
 function taskActions(
@@ -141,7 +140,6 @@ function taskActions(
   onToggleChunkView?: () => void,
 ): React.ReactNode {
   const isActive = isActiveTask(task);
-  const isWaiting = isWaitingTask(task);
   const isStopped = isStoppedTask(task);
   const uri = getPrimaryUri(task);
 
@@ -162,46 +160,38 @@ function taskActions(
               : "Switch to Native Mosaic"
           }
           icon={Icon.AppWindowGrid3x3}
-          shortcut={{ modifiers: ["ctrl"], key: "m" }}
+          shortcut={ctrlShortcut("m")}
           onAction={onToggleChunkView}
         />
       )}
-      {isActive && (
+      {(isActive || task.status === "waiting") && (
         <Action
           title="Pause"
           icon={Icon.Pause}
-          shortcut={{ modifiers: ["ctrl"], key: "p" }}
+          shortcut={ctrlShortcut("p")}
           onAction={async () => {
             try {
               await pauseTask(task.gid);
               await showToast({ style: Toast.Style.Success, title: "Paused" });
               refresh();
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Pause failed",
-                message: messageOf(error),
-              });
+              await showFailureToast(error, { title: "Pause failed" });
             }
           }}
         />
       )}
-      {isWaiting && (
+      {task.status === "paused" && (
         <Action
           title="Resume"
           icon={Icon.Play}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
+          shortcut={ctrlShortcut("r")}
           onAction={async () => {
             try {
               await resumeTask(task.gid);
               await showToast({ style: Toast.Style.Success, title: "Resumed" });
               refresh();
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Resume failed",
-                message: messageOf(error),
-              });
+              await showFailureToast(error, { title: "Resume failed" });
             }
           }}
         />
@@ -230,11 +220,7 @@ function taskActions(
               refresh();
             }
           } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Remove failed",
-              message: messageOf(error),
-            });
+            await showFailureToast(error, { title: "Remove failed" });
           }
         }}
       />
@@ -438,8 +424,13 @@ function MosaicDetail({
                   ? Color.Yellow
                   : Color.SecondaryText,
           }}
-          actions={taskActions(task, refresh, undefined, () =>
-            push(<TaskMetadataDetail task={task} />),
+          actions={taskActions(
+            task,
+            refresh,
+            undefined,
+            () => push(<TaskMetadataDetail task={task} />),
+            chunkViz,
+            onToggleChunkView,
           )}
         />
       ))}
@@ -448,7 +439,7 @@ function MosaicDetail({
 }
 
 export default function TaskDetail({ gid }: TaskDetailProps) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const refreshSeconds = Math.max(
     1,
     Number.parseInt(preferences.refreshInterval || "1", 10),

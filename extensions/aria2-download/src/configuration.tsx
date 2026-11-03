@@ -7,17 +7,17 @@ import {
   Icon,
   Toast,
   confirmAlert,
-  getPreferenceValues,
   open,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 
-import { getVersion } from "./lib/rpc";
-import { restartDaemon, saveSettings } from "./lib/engine";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+
+import { getVersion, isDaemonRunning } from "./lib/rpc";
+import { restartDaemon, saveSettings, stopDaemon } from "./lib/engine";
 import { loadSettingsOrDefaults, readSecret } from "./lib/state";
 import { validateSettings } from "./lib/settings";
-import { Aria2Settings, ExtensionPreferences } from "./lib/types";
+import { Aria2Settings } from "./lib/types";
 
 interface ConfigurationValues {
   rpcPort: string;
@@ -56,10 +56,6 @@ interface ConfigurationValues {
   btLoadSavedMetadata: boolean;
   rpcSaveUploadMetadata: boolean;
   btTracker: string;
-}
-
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 function toNumber(value: string, fallback: number): number {
@@ -122,22 +118,12 @@ function toSettings(
 }
 
 export default function Configuration() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const [settings, setSettings] = useState<Aria2Settings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadSettingsOrDefaults().then((loaded) => {
-      if (!cancelled) {
-        setSettings(loaded);
-        setIsLoading(false);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const {
+    data: loadedSettings,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(loadSettingsOrDefaults, []);
+  const settings = loadedSettings ?? null;
 
   async function submit(values: ConfigurationValues) {
     if (!settings) return;
@@ -152,24 +138,41 @@ export default function Configuration() {
       return;
     }
 
+    let stoppedForPortChange = false;
+    if (next.rpcPort !== settings.rpcPort && (await isDaemonRunning())) {
+      try {
+        await stopDaemon({ onlyIfIdle: true });
+        stoppedForPortChange = true;
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Stop aria2 before changing the RPC port",
+          message:
+            "The daemon has active or queued downloads. Stop it only after they are idle.",
+        });
+        return;
+      }
+    }
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Saving aria2 configuration…",
     });
     try {
       const result = await saveSettings(next);
-      setSettings(next);
+      await revalidate();
       toast.style = Toast.Style.Success;
-      toast.title = result.restartRequired
-        ? "Saved; restart aria2 to apply"
-        : "Saved";
+      toast.title = stoppedForPortChange
+        ? "Saved; aria2 stopped to apply the port"
+        : result.restartRequired
+          ? "Saved; restart aria2 to apply"
+          : "Saved";
       toast.message = result.restartRequired
         ? "Port, split, directory and BT options need a daemon restart."
         : "";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not save configuration";
-      toast.message = messageOf(error);
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not save configuration" });
     }
   }
 
@@ -182,11 +185,7 @@ export default function Configuration() {
         message: `aria2 ${version.version}`,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "aria2 RPC is not available",
-        message: messageOf(error),
-      });
+      await showFailureToast(error, { title: "aria2 RPC is not available" });
     }
   }
 
@@ -207,9 +206,8 @@ export default function Configuration() {
       toast.style = Toast.Style.Success;
       toast.title = "aria2 restarted";
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not restart aria2";
-      toast.message = messageOf(error);
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not restart aria2" });
     }
   }
 
@@ -222,7 +220,7 @@ export default function Configuration() {
       });
       return;
     }
-    await Clipboard.copy(secret);
+    await Clipboard.copy(secret, { concealed: true });
     await showToast({
       style: Toast.Style.Success,
       title: "RPC secret copied",
@@ -237,7 +235,6 @@ export default function Configuration() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="aria2 Configuration"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save" onSubmit={submit} />
@@ -268,6 +265,7 @@ export default function Configuration() {
       <Form.TextField
         id="rpcPort"
         title="RPC Port"
+        placeholder="6800"
         defaultValue={String(settings.rpcPort)}
       />
       <Form.Description text="Changing the RPC port or secret requires updating LinkSwift too." />
@@ -282,11 +280,13 @@ export default function Configuration() {
       <Form.TextField
         id="connections"
         title="Connections per Server"
+        placeholder="16"
         defaultValue={String(settings.connections)}
       />
       <Form.TextField
         id="split"
         title="Split"
+        placeholder="16"
         defaultValue={String(settings.split)}
       />
       <Form.Dropdown
@@ -301,6 +301,7 @@ export default function Configuration() {
       <Form.Dropdown
         id="maxConcurrentDownloads"
         title="Max Concurrent Downloads"
+        placeholder="3"
         defaultValue={String(settings.maxConcurrentDownloads)}
       >
         {[1, 2, 3, 5, 10].map((value) => (
@@ -376,16 +377,19 @@ export default function Configuration() {
       <Form.TextField
         id="connectTimeout"
         title="Connect Timeout (s)"
+        placeholder="30"
         defaultValue={String(settings.connectTimeout)}
       />
       <Form.TextField
         id="timeout"
         title="Timeout (s)"
+        placeholder="60"
         defaultValue={String(settings.timeout)}
       />
       <Form.TextField
         id="maxTries"
         title="Max Tries"
+        placeholder="3"
         defaultValue={String(settings.maxTries)}
       />
       <Form.TextField
@@ -489,9 +493,6 @@ export default function Configuration() {
         id="autoStopWhenIdle"
         label="Stop aria2 after all downloads finish"
         defaultValue={settings.autoStopWhenIdle}
-      />
-      <Form.Description
-        text={`Current RPC override: ${preferences.rpcEndpoint || "(engine settings)"}`}
       />
     </Form>
   );

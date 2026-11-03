@@ -1,67 +1,36 @@
-# Aria2 Download · extension
+# Aria2 Download
 
-Raycast extension for the local aria2 engine in `../engine`.
+Manage a local aria2 queue from Raycast.
 
-## Development
+- **Aria2 Tasks** — active, waiting, and stopped downloads with progress, speed, ETA, peers, pause/resume/remove, and a chunk heatmap or native mosaic view.
+- **Toggle Aria2** — start or stop the local aria2 RPC daemon. When downloads are running, a confirmation is required before force-stopping it.
+- **Add Download** — add direct URLs, magnet links, `.torrent` files, or remote `.torrent` URLs. aria2 can be started automatically and the task list opens after a successful add.
+- **Aria2 Configuration** — tune HTTP, BitTorrent, RPC, notification, and auto-start/auto-stop settings. The generated RPC secret can be copied for LinkSwift.
 
-```powershell
-cd extension
-npm install
-npm run dev       # ray develop, dev extension appears in Raycast
-npm run typecheck
-npm run lint
-npm run build
-```
+## Requirements
 
-`predev` / `prebuild` copy `../engine` into `assets/engine` so the extension is self-contained at runtime. The copied engine is ignored by git.
+aria2 must be installed separately and available as `aria2c.exe` in `PATH` or a common install location.
 
-## Commands
+If aria2 is missing, the extension prompts to open the official aria2 website instead of trying to install it automatically.
 
-- **Aria2 Tasks** — unified list for direct URLs, torrents, magnet/BT and LinkSwift netdisk tasks.
-- **Add Download** — one entry for URLs, magnet links, and local `.torrent` files; source selector, directory, connections, advanced headers, seeding.
-- **Aria2 Configuration** — aria2 settings (HTTP + BT), auto-start on add, auto-stop when all downloads finish, saved to `settings.json`.
-- **Toggle Aria2** — one no-view command; dynamic subtitle shows Running/Stopped/Busy, refreshed in the background every minute.
+## First Use
 
-## Chunk view
+1. Install aria2.
+2. Run **Aria2 Tasks**, **Toggle Aria2**, or **Add Download**.
+3. The extension creates its settings, RPC secret, and runtime configuration automatically.
 
-- **PNG Heatmap** (default): fixed 48×12 rounded-cell heatmap encoded by Node `zlib` and written to `environment.supportPath`; it scales as a whole with the Raycast window. It does not measure the window or reflow columns.
-- **Native Mosaic**: Raycast `Grid` fallback, 8 columns of color blocks; no image dependency.
-- Switch with the **Chunk View** preference.
-
-The map is piece completion from aria2's `bitfield`, not per-connection offsets.
-
-## Runtime state
-
-The engine keeps state under `%LOCALAPPDATA%\lat3ncy-toolbox\aria2`:
-
-```text
-install.json
-settings.json
-rpc-secret.txt
-aria2.runtime.conf
-session.txt
-aria2.log
-rpc.log
-```
-
-The extension reads `settings.json` and `rpc-secret.txt`; connection preferences can override the endpoint/secret for a remote RPC.
-
-## Engine setup
-
-Install aria2 once:
-
-```powershell
-winget install aria2.aria2
-# or scoop install aria2
-# or use the official Windows ZIP from https://aria2.github.io/
-```
-
-The extension automatically discovers `aria2c.exe` in PATH or common install locations. On first start it creates `settings.json`, `rpc-secret.txt` and `aria2.runtime.conf`; no Initialize script or manual configuration is required. If aria2 is missing, Raycast prompts and offers to open the official website.
+No manual engine initialization is required.
 
 ## LinkSwift
 
-LinkSwift pushes netdisk direct links to the same RPC endpoint. Do not paste netdisk direct links into Add Download: the missing Cookie/Referer/User-Agent will usually return 403/412. Add Download detects netdisk domains and redirects you to LinkSwift.
+LinkSwift can push supported netdisk links to the same local RPC endpoint. Copy the RPC secret from **Aria2 Configuration → Actions → Copy RPC Secret** and enter it in LinkSwift's aria2 settings.
 
-## License
+Netdisk direct links should be added through LinkSwift, not pasted directly into Add Download, because those URLs require LinkSwift's Cookie, Referer, and User-Agent.
 
-MIT. See the repository root `LICENSE`.
+## Notes
+
+- The extension is Windows-only.
+- The RPC endpoint listens on loopback only.
+- BitTorrent downloads still upload while downloading; only download and share content you have permission to use.
+- Without a public inbound port or restrictive NAT, BitTorrent peer discovery may be limited.
+- Magnets without `tr=` trackers depend on DHT. If peers stay at zero, add public trackers in **Configuration → Extra Trackers** or use a `.torrent` file.

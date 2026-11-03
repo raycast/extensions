@@ -1,12 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
-
-import {
-  Aria2Settings,
-  Aria2Task,
-  Aria2Version,
-  ExtensionPreferences,
-  GlobalStat,
-} from "./types";
+import { Aria2Settings, Aria2Task, Aria2Version, GlobalStat } from "./types";
 import { loadSettings, readSecret } from "./state";
 
 export class RpcError extends Error {
@@ -32,12 +24,7 @@ export interface Aria2Connection {
   settings: Aria2Settings;
 }
 
-function getPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
-}
-
 export async function getConnection(): Promise<Aria2Connection> {
-  const preferences = getPreferences();
   const settings = await loadSettings();
   if (!settings) {
     throw new RpcError(
@@ -45,10 +32,8 @@ export async function getConnection(): Promise<Aria2Connection> {
       2,
     );
   }
-  const endpoint =
-    preferences.rpcEndpoint?.trim() ||
-    `http://127.0.0.1:${settings.rpcPort}/jsonrpc`;
-  const secret = preferences.rpcSecret?.trim() || (await readSecret());
+  const endpoint = `http://127.0.0.1:${settings.rpcPort}/jsonrpc`;
+  const secret = await readSecret();
   return { endpoint, secret, settings };
 }
 

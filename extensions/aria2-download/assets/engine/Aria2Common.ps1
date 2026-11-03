@@ -2067,6 +2067,30 @@ function Start-Aria2Watcher {
             return $true
         }
 
+        # Mark stopped tasks that already existed before the watcher starts.
+        # Tasks that finish after this snapshot remain unmarked and are notified
+        # by the watcher's first poll, even if they finish very quickly.
+        try {
+            $port = [int]$settings['rpcPort']
+            $secret = ''
+            if (Test-Path -LiteralPath $Paths.SecretFile -PathType Leaf) {
+                $secret = Get-Aria2Secret -Path $Paths.SecretFile
+            }
+            $initialStopped = @(Invoke-Aria2Rpc -Port $port -Secret $secret -Method 'aria2.tellStopped' -Parameters @(0, 200) -TimeoutMs 3000)
+            foreach ($initialTask in $initialStopped) {
+                $initialGid = Get-Aria2StatusString -Status $initialTask -Name 'gid'
+                $initialStatus = Get-Aria2StatusString -Status $initialTask -Name 'status'
+                if (-not [string]::IsNullOrWhiteSpace($initialGid) -and ($initialStatus -eq 'complete' -or $initialStatus -eq 'error')) {
+                    try {
+                        $null = Set-Aria2Notified -Paths $Paths -Gid $initialGid -EventName 'baseline'
+                    } catch {
+                    }
+                }
+            }
+        } catch {
+            # If the snapshot fails, the watcher will notify unmarked tasks.
+        }
+
         $powerShell = 'powershell.exe'
         if (-not [string]::IsNullOrWhiteSpace($env:SystemRoot)) {
             $candidate = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'

@@ -65,8 +65,12 @@ export default async function Toggle() {
         dismissAction: { title: "Cancel" },
       });
       if (force) {
-        await stopDaemon({ onlyIfIdle: false, force: true });
-        await showHUD("aria2 force-stopped");
+        try {
+          await stopDaemon({ onlyIfIdle: false, force: true });
+          await showHUD("aria2 force-stopped");
+        } catch (forceError) {
+          await showHUD(`aria2: ${messageOf(forceError)}`);
+        }
       } else {
         await showHUD("aria2 is busy; stop refused");
       }

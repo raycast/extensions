@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aria2-download",
   "title": "Aria2 Download",
-  "description": "One queue for direct URLs, torrents, magnet/BT, and netdisk links pushed by LinkSwift.",
+  "description": "One queue for direct URLs, torrents, magnet/BT, and LinkSwift netdisk links. Requires aria2 to be installed separately.",
   "icon": "icon.png",
   "author": "1at3ncy",
   "license": "MIT",
@@ -71,22 +71,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "rpcEndpoint",
-      "title": "RPC Endpoint Override",
-      "description": "Leave empty to read the endpoint from the engine settings. Only set this for a remote aria2 RPC.",
-      "type": "textfield",
-      "required": false,
-      "default": ""
-    },
-    {
-      "name": "rpcSecret",
-      "title": "RPC Secret Override",
-      "description": "Leave empty to read the secret from the engine state file. Only set this for a remote aria2 RPC.",
-      "type": "password",
-      "required": false,
-      "default": ""
-    },
     {
       "name": "refreshInterval",
       "title": "Refresh Interval",
@@ -168,9 +152,6 @@
     }
   ],
   "scripts": {
-    "sync-engine": "node scripts/sync-engine.js",
-    "predev": "node scripts/sync-engine.js",
-    "prebuild": "node scripts/sync-engine.js",
     "dev": "ray develop",
     "build": "ray build -e dist -o dist",
     "build:install": "ray build -t release",

@@ -5,13 +5,14 @@ import {
   Form,
   LaunchType,
   Toast,
-  getPreferenceValues,
   launchCommand,
   getSelectedFinderItems,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 import { addTorrent, addUri, isDaemonRunning } from "./lib/rpc";
 import { startDaemon } from "./lib/engine";
@@ -22,7 +23,6 @@ import {
   readTorrentBase64,
   torrentDisplayName,
 } from "./lib/torrent";
-import { Aria2Settings, ExtensionPreferences } from "./lib/types";
 
 type SourceType = "link" | "torrent";
 
@@ -45,10 +45,6 @@ interface FormValues {
   navigate: boolean;
 }
 
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function buildHeaders(values: FormValues): string[] {
   const headers: string[] = [];
   if (values.cookie.trim()) headers.push(`Cookie: ${values.cookie.trim()}`);
@@ -58,10 +54,20 @@ function buildHeaders(values: FormValues): string[] {
   return headers;
 }
 
+function buildFetchHeaders(values: FormValues): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (values.userAgent.trim()) headers["User-Agent"] = values.userAgent.trim();
+  if (values.referer.trim()) headers.Referer = values.referer.trim();
+  if (values.cookie.trim()) headers.Cookie = values.cookie.trim();
+  if (values.authorization.trim()) {
+    headers.Authorization = values.authorization.trim();
+  }
+  return headers;
+}
+
 export default function AddDownload({
   fromTasks = false,
 }: { fromTasks?: boolean } = {}) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
   const { pop } = useNavigation();
 
   async function afterAdd(): Promise<void> {
@@ -71,7 +77,13 @@ export default function AddDownload({
     }
     await launchCommand({ name: "tasks", type: LaunchType.UserInitiated });
   }
-  const [settings, setSettings] = useState<Aria2Settings | null>(null);
+  const { data: loadedSettings, isLoading: settingsLoading } = useCachedPromise(
+    loadSettingsOrDefaults,
+    [],
+    { keepPreviousData: false },
+  );
+  const settings = loadedSettings ?? null;
+  const prefilled = useRef(false);
   const [sourceType, setSourceType] = useState<SourceType>("link");
   const [urls, setUrls] = useState("");
   const [torrent, setTorrent] = useState<string[]>([]);
@@ -88,17 +100,14 @@ export default function AddDownload({
   const [seed, setSeed] = useState(false);
   const [pause, setPause] = useState(false);
   const [navigate, setNavigate] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      const loaded = await loadSettingsOrDefaults();
-      if (cancelled) return;
-      setSettings(loaded);
-      setSplit(String(loaded.split));
-      setDirectory(loaded.downloadDir ? [loaded.downloadDir] : []);
+    if (!settings || prefilled.current) return;
+    prefilled.current = true;
+    setSplit(String(settings.split));
+    setDirectory(settings.downloadDir ? [settings.downloadDir] : []);
 
+    void (async () => {
       let foundTorrent = false;
       try {
         const items = await getSelectedFinderItems();
@@ -128,13 +137,8 @@ export default function AddDownload({
           // Clipboard access is optional.
         }
       }
-      setIsLoading(false);
-    }
-    boot();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    })();
+  }, [settings]);
 
   async function ensureDaemonForAdd(): Promise<boolean> {
     if (await isDaemonRunning()) return true;
@@ -223,9 +227,8 @@ export default function AddDownload({
       toast.message = torrentDisplayName(filePath);
       if (values.navigate) await afterAdd();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not add torrent";
-      toast.message = messageOf(error);
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not add torrent" });
     }
   }
 
@@ -302,7 +305,9 @@ export default function AddDownload({
       if (!(await ensureDaemonForAdd())) return;
       for (const line of lines) {
         if (isTorrentUrl(line)) {
-          const response = await fetch(line);
+          const response = await fetch(line, {
+            headers: buildFetchHeaders(values),
+          });
           if (!response.ok) {
             throw new Error(
               `Could not download torrent: HTTP ${response.status}`,
@@ -329,20 +334,18 @@ export default function AddDownload({
       }
       if (values.navigate) await afterAdd();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not add download";
-      toast.message = messageOf(error);
+      await toast.hide();
+      await showFailureToast(error, { title: "Could not add download" });
     }
   }
 
-  if (isLoading || !settings) {
+  if (settingsLoading || !settings) {
     return <Form isLoading={true} />;
   }
 
   return (
     <Form
-      isLoading={isLoading}
-      navigationTitle="Add Download"
+      isLoading={settingsLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Download" onSubmit={submit} />
@@ -370,7 +373,7 @@ export default function AddDownload({
             onChange={setUrls}
           />
           <Form.Description
-            text={`RPC: ${preferences.rpcEndpoint || `127.0.0.1:${settings.rpcPort}`} · ${settings.downloadDir}`}
+            text={`RPC: 127.0.0.1:${settings.rpcPort} · ${settings.downloadDir}`}
           />
           <Form.TextField
             id="out"
@@ -459,7 +462,7 @@ export default function AddDownload({
             allowMultipleSelection={false}
           />
           <Form.Description
-            text={`RPC: ${preferences.rpcEndpoint || `127.0.0.1:${settings.rpcPort}`} · ${settings.downloadDir}`}
+            text={`RPC: 127.0.0.1:${settings.rpcPort} · ${settings.downloadDir}`}
           />
           <Form.Checkbox
             id="seed"

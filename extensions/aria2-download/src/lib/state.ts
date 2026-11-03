@@ -1,11 +1,13 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import { Aria2Settings, InstallInfo } from "./types";
 import { normalizeSettings } from "./settings";
 
 const LOCAL_APP_DATA =
-  process.env.LOCALAPPDATA ?? "C:\\Users\\Jie\\AppData\\Local";
+  process.env.LOCALAPPDATA ??
+  path.join(process.env.USERPROFILE ?? os.homedir(), "AppData", "Local");
 export const STATE_ROOT = path.join(LOCAL_APP_DATA, "lat3ncy-toolbox", "aria2");
 
 export const SETTINGS_PATH = path.join(STATE_ROOT, "settings.json");
