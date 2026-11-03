@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Contact and Event Mentions in AI Chat] - {PR_MERGE_DATE}
+## [Contact and Event Mentions in AI Chat] - 2026-11-03
 
 - Add a **Contacts** mention search to find people in your Google Contacts and Other contacts by name or email. Without a query it lists your recently changed contacts. Type a full email address to mention someone who is not in your contacts.
 - Read the selected person's current name and email addresses when sending a mention, so AI can invite them or check their availability without searching first.
