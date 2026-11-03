@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Fix Empty and Failed Responses] - {PR_MERGE_DATE}
+## [Fix Empty and Failed Responses] - 2026-11-03
 
 - Fix every command failing with "Unexpected error" when Response Streaming is enabled
 - Fix empty responses from reasoning models when Response Streaming is disabled
