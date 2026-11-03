@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Confirm ordinary Herdr messages with a transient toast instead of a persistent banner above terminal output; retain error and uncertain-input warnings.
+
 - Fix repeated Herdr messages after completed answers, recognize done as Ready, and honor HC's actual conditional-send schema.
 - Align Herdr Send Message and Compose Message with existing Enter and Command-N workflows; keep working drafts without routing them into permission controls.
 - Open the complete source list from Agent Sessions while preserving Recent Agent Session resume behavior.

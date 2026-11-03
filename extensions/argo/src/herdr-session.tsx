@@ -658,15 +658,18 @@ function HcSessionView({
         () => live() && active(),
       );
       if (result.sent && feed.mounted.current) {
-        setNotice(
-          kind === "key"
-            ? "Key sent. This does not confirm approval or completion."
-            : kind === "interrupt"
-              ? "Interrupt submitted. See the actual outcome below."
-              : kind === "task"
-                ? "Message submitted. Waiting for the Agent; you can continue when it is ready."
+        if (kind === "task") {
+          setNotice(undefined);
+          void showToast({ style: Toast.Style.Success, title: "Message Submitted" }).catch(() => {});
+        } else {
+          setNotice(
+            kind === "key"
+              ? "Key sent. This does not confirm approval or completion."
+              : kind === "interrupt"
+                ? "Interrupt submitted. See the actual outcome below."
                 : "Input submitted. Agent receipt and completion are not confirmed.",
-        );
+          );
+        }
         setSelected(mode === "output" ? "screen" : "review-screen");
         setReviewed(undefined);
         await feed.refresh(true).catch(() => {});

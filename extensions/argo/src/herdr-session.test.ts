@@ -473,6 +473,7 @@ function componentHarness(names: string[], globals: Record<string, unknown>) {
 function viewHarness(initial: HcScreen = screen(), onAllSessions?: (onPop?: () => void) => void) {
   const store = storage();
   const requests: Array<{ method: string; params: any }> = [];
+  const toasts: Array<{ title: string }> = [];
   const feed = {
     screen: initial,
     latest: { current: initial },
@@ -499,6 +500,9 @@ function viewHarness(initial: HcScreen = screen(), onAllSessions?: (onPop?: () =
       return feed;
     },
     LocalStorage: store,
+    showToast: async (toast: { title: string }) => {
+      toasts.push(toast);
+    },
     useNavigation: () => ({
       push(view: View) {
         child = view;
@@ -511,7 +515,7 @@ function viewHarness(initial: HcScreen = screen(), onAllSessions?: (onPop?: () =
     assert.ok(action, `Action ${title}`);
     return action.props.onAction();
   };
-  return { ...h, feed, store, requests, render, action, child: () => child };
+  return { ...h, feed, store, requests, toasts, render, action, child: () => child };
 }
 
 test("real HC view defaults to refresh, sends one explicit key, and changed screen requires another activation", async () => {
@@ -1007,4 +1011,54 @@ test("known no-write status rejection preserves draft without leaving a false un
     true,
   );
   assert.equal(writes, 1, "only the later explicit action writes input");
+});
+
+test("ordinary send uses a transient confirmation and clears stale notices without covering output", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "working" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  await h.action("Compose Message");
+  const child = h.child()!;
+  child.props.change("next message");
+  assert.equal(await child.props.send("next message", () => true), false);
+  const markdown = () =>
+    views(h.render())
+      .map((v) => v.props.detail?.props.markdown || v.props.markdown || "")
+      .join("\n");
+  assert.match(markdown(), /Agent is still working/);
+  const ready = screen({
+    terminal: terminal({ status: { state: "done" } }),
+    capture: { text: "Latest Agent answer", complete: true, how: "screen" },
+  });
+  h.feed.latest.current = ready;
+  h.feed.screen = ready;
+  await h.action("Send Message");
+  assert.equal(h.requests.length, 1);
+  assert.match(markdown(), /Latest Agent answer/);
+  assert.doesNotMatch(markdown(), /Recent Operation|Message submitted|Agent is still working/);
+  assert.equal(h.toasts.at(-1)?.title, "Message Submitted");
+});
+
+test("failed ordinary send keeps its persistent notice and uncertain-input safeguard", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "idle" } }) }));
+  h.render();
+  h.flush();
+  await settle();
+  h.render().props.onSearchTextChange("keep this draft");
+  await settle();
+  h.feed.client.current.request = async () => {
+    throw new Error("socket disconnected");
+  };
+  await h.action("Send Message");
+  const view = h.render();
+  assert.match(
+    views(view)
+      .map((v) => v.props.detail?.props.markdown || v.props.markdown || "")
+      .join("\n"),
+    /Recent Operation/,
+  );
+  assert.ok(views(view).some((v) => v.props.id === "uncertain" && v.props.title === "Input Result Uncertain"));
+  assert.equal(view.props.searchText, "keep this draft");
+  assert.ok([...h.store.data.keys()].some((key) => key.startsWith("hc-attempt-v1:")));
 });
