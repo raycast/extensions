@@ -1009,6 +1009,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://mcp.justpublish.ai/",
   },
   {
+    name: "handlepilot",
+    title: "HandlePilot",
+    description:
+      "Instagram content hub for your AI agent. Research any public account or post and rank what performs best for your competitors, get a full breakdown of any reel (transcript, scenes, hook, structure and music), write a content strategy from your niche and your own numbers, and write editable carousels and scripts in your voice. 45 tools. Hosted remote Streamable HTTP server; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Free plan available.",
+    icon: "https://handlepilot.com/images/logo-512.png",
+    homepage: "https://handlepilot.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.handlepilot.com/mcp"],
+    },
+    remoteUrl: "https://app.handlepilot.com/mcp",
+  },
+  {
     name: "handoff",
     title: "handoff",
     description:
