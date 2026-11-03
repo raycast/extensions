@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recall",
   "title": "Recall",
-  "description": "Browse and read the cards saved in your Recall knowledge base — filter by date or source URL, read content, and ask questions about any card.",
+  "description": "Browse and read the cards saved in your Recall knowledge base in a bookmark-style two-column view — previews, descriptions, and tags. Read full content, and ask questions about any card.",
   "icon": "recall-icon.png",
   "author": "dedseq",
   "platforms": [
@@ -24,7 +24,7 @@
     {
       "name": "browse",
       "title": "Browse Recall",
-      "description": "Browse and read the cards saved in your Recall knowledge base",
+      "description": "Browse and read your Recall cards in a bookmark-style two-column view",
       "mode": "view",
       "icon": "recall-icon.png"
     }

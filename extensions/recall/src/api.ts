@@ -2,12 +2,19 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://backend.getrecall.ai/api/v1";
 
+export interface RecallTag {
+  tag_id: string;
+  name: string;
+  path?: string;
+}
+
 export interface Card {
   id: string;
   title: string;
   created_at: string;
   image?: string;
   source_url?: string;
+  tags?: RecallTag[];
 }
 
 export interface Chunk {
@@ -24,6 +31,7 @@ export interface CardDetail {
   created_at: string;
   image?: string;
   source_url?: string;
+  tags?: RecallTag[];
 }
 
 export class RecallError extends Error {
@@ -85,4 +93,10 @@ export async function getCard(cardId: string, focusQuery?: string): Promise<Card
   return request<CardDetail>(`/cards/${encodeURIComponent(cardId)}`, {
     focus_query: focusQuery?.slice(0, 1000),
   });
+}
+
+/** Full saved content (part=content, first page) for the selected card. */
+export async function getCardContent(cardId: string): Promise<string> {
+  const data = await request<{ text: string }>(`/cards/${encodeURIComponent(cardId)}/content`, { part: "content" });
+  return data.text;
 }
