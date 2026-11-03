@@ -1,11 +1,17 @@
 import { execFile } from "node:child_process";
-import { access, readFile, readdir, stat } from "node:fs/promises";
+import { access, readFile, readdir, realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
 import plist from "plist";
 import { parse } from "csv-parse/sync";
-import type { Library, SnippetKind, SourceSnippet } from "./types";
+import {
+  raycastSnippetSchema,
+  type Library,
+  type MigrationSession,
+  type SnippetKind,
+  type SourceSnippet,
+} from "./types";
 
 const execFileAsync = promisify(execFile);
 
@@ -61,7 +67,7 @@ function isSuggested(name: string): boolean {
   return name.trim().toLowerCase() === "suggested snippets";
 }
 
-export function parseCsvLibrary(text: string, group: string): Library {
+function parseCsvLibrary(text: string, group: string): Library {
   let rows: unknown;
   try {
     rows = parse(text, { bom: true, skip_empty_lines: true });
@@ -106,7 +112,7 @@ export function parseCsvLibrary(text: string, group: string): Library {
   };
 }
 
-export function parseLibrary(value: unknown): Library {
+function parseLibrary(value: unknown): Library {
   if (!isRecord(value)) throw new Error("Expected a TextExpander property-list dictionary.");
 
   const snippets: SourceSnippet[] = [];
@@ -152,7 +158,7 @@ export function parseLibrary(value: unknown): Library {
   return { snippets, suggestedCount };
 }
 
-export async function readPlist(filePath: string): Promise<unknown> {
+async function readPlist(filePath: string): Promise<unknown> {
   try {
     // plutil validates XML and binary inputs before the JS parser reads them.
     const result = await execFileAsync("/usr/bin/plutil", ["-convert", "xml1", "-o", "-", "--", filePath], {
@@ -167,7 +173,7 @@ export async function readPlist(filePath: string): Promise<unknown> {
   }
 }
 
-export async function readLibrary(sourcePath: string): Promise<Library> {
+async function readLibrary(sourcePath: string): Promise<Library> {
   const info = await stat(sourcePath);
   if (info.isFile() && extname(sourcePath).toLowerCase() === ".csv") {
     return parseCsvLibrary(await readFile(sourcePath, "utf8"), basename(sourcePath, extname(sourcePath)));
@@ -185,8 +191,8 @@ export async function readLibrary(sourcePath: string): Promise<Library> {
   return result;
 }
 
-export async function findLocalSettings(home = homedir()): Promise<string> {
-  const directory = join(home, "Library", "Application Support", "TextExpander");
+export async function findLocalSettings(): Promise<string> {
+  const directory = join(homedir(), "Library", "Application Support", "TextExpander");
   for (const name of ["Settings.textexpandersettings", "Settings.textexpander"]) {
     const candidate = join(directory, name);
     try {
@@ -200,4 +206,32 @@ export async function findLocalSettings(home = homedir()): Promise<string> {
   throw new Error(
     "No local TextExpander settings found. Choose a CSV or .textexpander export, or locate your .textexpandersettings bundle manually.",
   );
+}
+
+export async function readLibraries(paths: string[]) {
+  if (!paths.length) throw new Error("Choose at least one TextExpander source.");
+  const canonicalPaths = [...new Set(await Promise.all(paths.map((path) => realpath(path))))];
+  const library: Library = { snippets: [], suggestedCount: 0 };
+  const sources: MigrationSession["sources"] = [];
+  for (const path of canonicalPaths) {
+    try {
+      const result = await readLibrary(path);
+      library.snippets.push(
+        ...result.snippets.map((snippet) => ({ ...snippet, id: `${path}:${snippet.id}`, sourcePath: path })),
+      );
+      library.suggestedCount += result.suggestedCount;
+      sources.push({ path, snippetCount: result.snippets.length, suggestedCount: result.suggestedCount });
+    } catch (error) {
+      throw new Error(`${basename(path)}: ${error instanceof Error ? error.message : "Could not read this source."}`);
+    }
+  }
+  return { library, sources };
+}
+
+export async function readRaycastExport(path: string) {
+  const value: unknown = JSON.parse(await readFile(path, "utf8"));
+  const result = raycastSnippetSchema.array().safeParse(value);
+  if (!result.success)
+    throw new Error("Choose a Raycast JSON export containing snippet names and text, with optional keywords.");
+  return result.data;
 }

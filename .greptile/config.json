@@ -1,7 +1,7 @@
 {
-  "strictness": 2,
+  "strictness": 3,
   "commentTypes": ["logic", "syntax", "style"],
-  "autoReview": ["open"],
+  "autoReview": ["push"],
   "ignorePatterns": ".github/CODEOWNERS\n.github/extensionName2Folder.json\n.github/raycast2github.json\n.github/public_raycast_extensions.txt",
   "rules": [
     {

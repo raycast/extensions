@@ -1,4 +1,6 @@
 import { encode } from "gpt-tokenizer";
+import type { ChatCompletion, ChatCompletionChunk } from "openai/resources";
+import type { Stream } from "openai/streaming";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
@@ -24,6 +26,13 @@ export const THINKING_MODELS = [
 
 export function isThinkingModel(model: string): boolean {
   return THINKING_MODELS.includes(model as (typeof THINKING_MODELS)[number]);
+}
+
+// duck-typed because `ray build` bundles `openai/streaming` separately, so `instanceof Stream` is always false
+export function isStream(
+  response: ChatCompletion | Stream<ChatCompletionChunk>,
+): response is Stream<ChatCompletionChunk> {
+  return Symbol.asyncIterator in response;
 }
 
 export function buildSystemPrompt(sysPrompt: string) {
