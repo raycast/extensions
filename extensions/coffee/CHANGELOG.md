@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] Preserve sessions during validation and schedule expiry - {PR_MERGE_DATE}
+## [Fix] Preserve sessions during validation and schedule expiry - 2026-11-03
 
 - Reject invalid durations before replacing an active Coffee session, including requests from AI tools.
 - Stop the observed scheduled session without affecting a newer manual session on macOS or Windows.
@@ -8,12 +8,12 @@
 - Offer a confirmed "Stop Likely Coffee Session…" menu item for a session that appears to predate the update, without adopting terminal `caffeinate` processes; it follows the Decaffeinate schedule rules when no Coffee session is running.
 - Keep the menu bar populated while it refreshes instead of briefly showing an empty menu.
 
-## [Fix] Avoid blank window in Caffeinate For - {PR_MERGE_DATE}
+## [Fix] Avoid blank window in Caffeinate For - 2026-11-03
 
 - Run Caffeinate For without opening a view and close the launcher before process tracking starts.
 - Clear root search for fresh duration arguments on the next run, while preserving startup and background-refresh ordering.
 
-## [Fix] Recognize Coffee-owned caffeination - {PR_MERGE_DATE}
+## [Fix] Recognize Coffee-owned caffeination - 2026-11-03
 
 - Track macOS sessions by persisted process ID and creation time, including across Raycast relaunches.
 - Label external caffeination separately and preserve it when starting, replacing, or stopping Coffee.
