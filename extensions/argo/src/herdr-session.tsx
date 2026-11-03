@@ -22,6 +22,9 @@ import type { HcTarget, HcTerminal } from "./herdr.js";
 import { Compose } from "./compose.js";
 import { literal } from "./interaction-format.js";
 import { openHerdr } from "./herdr-connection.js";
+import { HcConversation } from "./herdr-conversation.js";
+import type { HcTurn } from "./herdr-conversation.js";
+import { safeMarkdown } from "./core.js";
 
 export type HcCapture = { text: string; complete: boolean; how: string; why?: string };
 export type HcScreen = {
@@ -127,6 +130,24 @@ export function hcScreenMarkdown(screen?: HcScreen, heading?: string): string {
     `${screen.stable === false ? "\n\n**State changed during capture. Refresh before input.**" : ""}` +
     `${heading ? "\n\nColor-only selection/highlighting may be missing; no selected option is inferred." : ""}`
   );
+}
+
+function hcMessageMarkdown(turn: HcTurn, user: boolean): string {
+  if (user) return safeMarkdown(sanitizeTerminalText(turn.text));
+  if (turn.state === "rejected") return "This message was not submitted. Your draft is kept.";
+  if (turn.state === "unknown")
+    return "Input delivery is uncertain. Inspect the raw terminal before acknowledging; nothing retries automatically.";
+  if (!turn.isolated)
+    return "This terminal redraw could not be separated reliably into a reply. Use **View Raw Terminal** to inspect it. Earlier screen history is not imported as a message.";
+  if (turn.output)
+    return `${literal(sanitizeTerminalText(turn.output))}${turn.state === "paused" ? "\n\nCapture paused. Later output is not attributed to this message." : ""}`;
+  return turn.state === "paused"
+    ? "Capture paused when the view closed or another turn began. Use **View Raw Terminal** for current output."
+    : turn.state === "done"
+      ? "The terminal reported ready, but no separate reply text was captured. Use **View Raw Terminal**."
+      : turn.state === "blocked"
+        ? "The Agent needs input. Review the original prompt in Terminal Controls."
+        : "Waiting for new terminal output…";
 }
 
 // HC has no idempotency key. A durable marker is a stop sign, never an outbox to replay.
@@ -579,6 +600,33 @@ function HcSessionView({
       if (feed.mounted.current) update((value) => value + 1);
     });
   const local = localRef.current;
+  const [conversation, setConversation] = useState<HcConversation>();
+  useEffect(() => {
+    const program = feed.pin.current;
+    if (!program) return;
+    let canceled = false;
+    const next = new HcConversation(hcTargetKey(target), program, LocalStorage, () => {
+      if (!canceled && feed.mounted.current) update((value) => value + 1);
+    });
+    setConversation(next);
+    void next.load().then(() => {
+      if (!canceled && feed.mounted.current && next.turns.length)
+        setSelected((current) => (current === "screen" ? `reply:${next.turns.at(-1)!.id}` : current));
+    });
+    return () => {
+      canceled = true;
+    };
+  }, [hcTargetKey(target), feed.pin.current]);
+  useEffect(() => {
+    if (!conversation?.ready || !feed.screen || feed.invalid || feed.error || busy) return;
+    conversation.observe({
+      text: sanitizeTerminalText(feed.screen.capture.text),
+      state: feed.screen.terminal.status?.state,
+      turn: feed.screen.terminal.turn,
+      complete: feed.screen.capture.complete,
+      stable: feed.screen.stable,
+    });
+  }, [conversation, feed.screen, feed.invalid, feed.error, busy]);
   const address = `${target.coreId}/${target.terminalId}`;
   const name = feed.screen?.terminal.name || target.terminalId;
   const live = () =>
@@ -647,15 +695,39 @@ function HcSessionView({
   ) {
     if (busy || !feed.mounted.current) return undefined;
     setBusy(true);
+    let conversationId: string | undefined;
     try {
       const result = await local.run(
         kind,
         text,
         check,
-        () => {
+        async () => {
           const client = feed.client.current;
           if (!client) throw new Error("HC disconnected before input submission.");
-          return request(client);
+          if (kind === "task") {
+            const baseline = feed.latest.current;
+            if (!conversation?.ready || !baseline)
+              throw new HcError("changed", "Message history is not ready. Nothing was sent.");
+            conversationId = local.attempt!.id;
+            try {
+              await conversation.begin(conversationId, text!, {
+                text: sanitizeTerminalText(baseline.capture.text),
+                state: baseline.terminal.status?.state,
+                turn: baseline.terminal.turn,
+                complete: baseline.capture.complete,
+                stable: baseline.stable,
+              });
+            } catch (cause) {
+              throw new HcError(
+                "changed",
+                cause instanceof Error ? cause.message : "Cannot save message. Nothing was sent.",
+              );
+            }
+            if (!live() || !active()) throw new HcError("changed", "The terminal review closed. Nothing was sent.");
+          }
+          const value = await request(client);
+          if (conversationId) conversation!.submitted(conversationId);
+          return value;
         },
         () => live() && active(),
       );
@@ -672,12 +744,13 @@ function HcSessionView({
                 : "Input submitted. Agent receipt and completion are not confirmed.",
           );
         }
-        setSelected(mode === "output" ? "screen" : "review-screen");
+        setSelected(mode === "output" ? (conversationId ? `reply:${conversationId}` : "screen") : "review-screen");
         setReviewed(undefined);
         await feed.refresh(true).catch(() => {});
       }
       return result;
     } catch (cause) {
+      if (conversationId) conversation?.failed(conversationId, !local.attempt);
       if (feed.mounted.current)
         setNotice(cause instanceof Error ? cause.message : "Operation failed; inspect the current screen.");
       await toastError(cause);
@@ -950,7 +1023,14 @@ function HcSessionView({
   const blocked = terminal?.reported === true && terminal.status?.state === "blocked";
   const unavailable = storageError || feed.invalid || feed.error;
   const canSend = Boolean(
-    local.ready && !busy && !unavailable && !local.attempt && terminal && hcReportedReady(terminal),
+    local.ready &&
+    conversation?.ready &&
+    !conversation.error &&
+    !busy &&
+    !unavailable &&
+    !local.attempt &&
+    terminal &&
+    hcReportedReady(terminal),
   );
   const changed = reviewed && feed.screen && hcScreenFingerprint(reviewed) !== hcScreenFingerprint(feed.screen);
   const preview = mode === "output" ? feed.screen : reviewed || feed.screen;
@@ -960,6 +1040,25 @@ function HcSessionView({
   function sharedActions() {
     return (
       <>
+        {mode === "output" && blocked ? (
+          <Action title="Review Current Prompt" icon={Icon.Eye} onAction={openControls} />
+        ) : mode === "output" && local.drafts.task.trim() && canSend ? (
+          <Action
+            title="Send Message"
+            icon={Icon.ArrowUp}
+            onAction={() => sendTask(local.drafts.task, feed.pin.current)}
+          />
+        ) : null}
+        {mode === "output" && selected !== "screen" ? (
+          <Action
+            title="View Raw Terminal"
+            icon={Icon.Terminal}
+            onAction={() => {
+              setFullWidth(false);
+              setSelected("screen");
+            }}
+          />
+        ) : null}
         {mode === "output" && !unavailable && !local.attempt ? (
           <Action
             title={fullWidth ? "Back to Split View" : "Read Full Width"}
@@ -1126,12 +1225,19 @@ function HcSessionView({
       }
     />
   );
+  const selectedTurn = conversation?.turns.find(
+    (turn) => selected === `user:${turn.id}` || selected === `reply:${turn.id}`,
+  );
   if (fullWidth && mode === "output" && !unavailable && !local.attempt) {
     return (
       <Detail
         navigationTitle={`${name} · ${hcStatus(terminal)} · Full Width`}
         isLoading={feed.loading || busy}
-        markdown={outputMarkdown}
+        markdown={
+          selectedTurn
+            ? `${notice ? `${literal(sanitizeTerminalText(notice))}\n\n` : ""}${hcMessageMarkdown(selectedTurn, selected.startsWith("user:"))}`
+            : outputMarkdown
+        }
         actions={<ActionPanel>{sharedActions()}</ActionPanel>}
       />
     );
@@ -1194,6 +1300,72 @@ function HcSessionView({
           }
         />
       ) : null}
+      {mode === "output" && conversation?.error ? (
+        <List.Item
+          id="conversation-error"
+          title="Message History Unavailable"
+          icon={Icon.Warning}
+          detail={<List.Item.Detail markdown={safeMarkdown(conversation.error)} />}
+          actions={<ActionPanel>{sharedActions()}</ActionPanel>}
+        />
+      ) : null}
+      {mode === "output" && conversation?.turns.length ? (
+        <List.Section title="Conversation">
+          {[...conversation.turns].reverse().flatMap((turn) =>
+            [false, true].map((user) => (
+              <List.Item
+                key={`${user ? "user" : "reply"}:${turn.id}`}
+                id={`${user ? "user" : "reply"}:${turn.id}`}
+                title={(user
+                  ? turn.text
+                  : turn.output || (turn.state === "done" ? "View terminal output" : "Waiting for output…")
+                )
+                  .replace(/\s+/g, " ")
+                  .slice(0, 100)}
+                accessories={[
+                  {
+                    text: user
+                      ? turn.state === "submitting"
+                        ? "Sending"
+                        : turn.state === "rejected"
+                          ? "Not sent"
+                          : turn.state === "unknown"
+                            ? "Uncertain"
+                            : "You"
+                      : !turn.isolated
+                        ? "Raw screen"
+                        : turn.state === "done"
+                          ? "Output"
+                          : turn.state === "working"
+                            ? "Working"
+                            : turn.state === "blocked"
+                              ? "Needs input"
+                              : turn.state === "paused"
+                                ? "Paused"
+                                : turn.state === "rejected"
+                                  ? "Not sent"
+                                  : turn.state === "unknown"
+                                    ? "Uncertain"
+                                    : "Waiting",
+                  },
+                ]}
+                icon={user ? Icon.Person : Icon.Message}
+                detail={
+                  <List.Item.Detail
+                    markdown={`${notice ? `${literal(sanitizeTerminalText(notice))}\n\n` : ""}${hcMessageMarkdown(turn, user)}`}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    {sharedActions()}
+                    <Action.CopyToClipboard title="Copy Message" content={user ? turn.text : turn.output} />
+                  </ActionPanel>
+                }
+              />
+            )),
+          )}
+        </List.Section>
+      ) : null}
       <List.Section title={mode === "output" ? "Terminal" : "Review Current Dialog"} subtitle={hcStatus(terminal)}>
         <List.Item
           id={mode === "output" ? "screen" : "review-screen"}
@@ -1211,20 +1383,7 @@ function HcSessionView({
           }
           icon={Icon.Terminal}
           detail={details}
-          actions={
-            <ActionPanel>
-              {mode === "output" && blocked ? (
-                <Action title="Review Current Prompt" icon={Icon.Eye} onAction={openControls} />
-              ) : mode === "output" && local.drafts.task.trim() && canSend ? (
-                <Action
-                  title="Send Message"
-                  icon={Icon.ArrowUp}
-                  onAction={() => sendTask(local.drafts.task, feed.pin.current)}
-                />
-              ) : null}
-              {sharedActions()}
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{sharedActions()}</ActionPanel>}
         />
       </List.Section>
       {mode === "controls" ? (

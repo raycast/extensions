@@ -5,6 +5,8 @@ import { stripVTControlCharacters } from "node:util";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { HcConversation } from "./herdr-conversation.js";
+import { safeMarkdown } from "./core.js";
 import { HcError, hcProgramFingerprint, hcTargetKey, type HcTarget, type HcTerminal } from "./herdr.js";
 import { literal } from "./interaction-format.js";
 import type { HcLocalState as LocalState, HcScreen } from "./herdr-session.js";
@@ -401,6 +403,9 @@ function componentHarness(names: string[], globals: Record<string, unknown>) {
   const context = {
     ...helpers,
     ...localLogic,
+    HcConversation,
+    safeMarkdown,
+    ...logic(["hcMessageMarkdown"], { safeMarkdown, sanitizeTerminalText: helpers.sanitizeTerminalText }),
     element: (type: unknown, props: object, ...children: unknown[]) => ({ type, props: { ...props, children } }),
     Fragment: "Fragment",
     Action: Object.assign(member("Action"), {
@@ -510,7 +515,11 @@ function viewHarness(initial: HcScreen = screen(), onAllSessions?: (onPop?: () =
       },
     }),
   });
-  const render = () => h.render("HcSessionView", { target, onAllSessions, reopen() {} });
+  const render = () => {
+    const view = h.render("HcSessionView", { target, onAllSessions, reopen() {} });
+    h.flush();
+    return view;
+  };
   const action = (title: string) => {
     const action = views(render()).find((v) => v.props.title === title && typeof v.props.onAction === "function");
     assert.ok(action, `Action ${title}`);
@@ -1148,4 +1157,142 @@ test("full-width reading cannot conceal disconnect or durable uncertain-input st
   await settle();
   assert.ok(views(locked.render()).some((v) => v.props.id === "uncertain"));
   assert.ok(!views(locked.render()).some((v) => v.props.title === "Read Full Width"));
+});
+
+test("HC conversation renders individual Raycast questions and derived replies without importing old screen history", async () => {
+  const baseline = screen({
+    terminal: terminal({ status: { state: "idle" }, turn: 0 }),
+    capture: { text: "old question\nold reply\n", complete: true, how: "screen" },
+  });
+  const h = viewHarness(baseline);
+  h.render();
+  await settle();
+  h.render().props.onSearchTextChange("first new question");
+  await settle();
+  await h.action("Send Message");
+  const next = screen({
+    terminal: terminal({ status: { state: "done" }, turn: 1 }),
+    capture: { text: baseline.capture.text + "first new reply", complete: true, how: "screen" },
+  });
+  h.feed.latest.current = next;
+  h.feed.screen = next;
+  h.render();
+  await settle();
+  let view = h.render();
+  const replies = views(view).filter((v) => v.props.id?.startsWith("reply:"));
+  const users = views(view).filter((v) => v.props.id?.startsWith("user:"));
+  assert.equal(replies.length, 1);
+  assert.equal(users.length, 1);
+  assert.match(users[0]!.props.detail.props.markdown, /first new question/);
+  assert.match(replies[0]!.props.detail.props.markdown, /first new reply/);
+  assert.doesNotMatch(replies[0]!.props.detail.props.markdown, /old question|old reply/);
+  assert.equal(view.props.selectedItemId, replies[0]!.props.id);
+  h.render().props.onSearchTextChange("second question");
+  await settle();
+  await h.action("Send Message");
+  const last = screen({
+    terminal: terminal({ status: { state: "done" }, turn: 2 }),
+    capture: { text: next.capture.text + "\nsecond reply", complete: true, how: "screen" },
+  });
+  h.feed.latest.current = last;
+  h.feed.screen = last;
+  h.render();
+  await settle();
+  view = h.render();
+  const rows = views(view).filter((v) => v.props.id?.startsWith("reply:"));
+  assert.equal(rows.length, 2);
+  assert.match(rows[0]!.props.detail.props.markdown, /second reply/);
+  assert.doesNotMatch(rows[0]!.props.detail.props.markdown, /first new reply|old reply/);
+  assert.equal(h.requests.length, 2);
+  const send = views(rows[0]!.props.actions).find((v) => typeof v.props.onAction === "function");
+  assert.equal(send!.props.title, "View Raw Terminal");
+  await h.action("View Raw Terminal");
+  assert.equal(h.render().props.selectedItemId, "screen");
+});
+
+test("HC derived reply full-width view stays per-message and ambiguous output requires raw review", async () => {
+  const baseline = screen({
+    terminal: terminal({ status: { state: "idle" }, turn: 0 }),
+    capture: { text: "old history\n", complete: true, how: "screen" },
+  });
+  const h = viewHarness(baseline);
+  h.render();
+  await settle();
+  h.render().props.onSearchTextChange("new question");
+  await settle();
+  await h.action("Send Message");
+  const next = screen({
+    terminal: terminal({ status: { state: "done" }, turn: 1 }),
+    capture: { text: "entirely unrelated redraw", complete: true, how: "screen" },
+  });
+  h.feed.latest.current = next;
+  h.feed.screen = next;
+  h.render();
+  await settle();
+  await h.action("Read Full Width");
+  let view = h.render();
+  assert.equal(view.type, "Detail");
+  assert.match(view.props.markdown, /could not be separated reliably/);
+  assert.doesNotMatch(view.props.markdown, /entirely unrelated redraw/);
+  await h.action("View Raw Terminal");
+  view = h.render();
+  assert.equal(view.props.selectedItemId, "screen");
+  assert.match(
+    views(view).find((v) => v.props.id === "screen")!.props.detail.props.markdown,
+    /entirely unrelated redraw/,
+  );
+  assert.equal(h.requests.length, 1);
+});
+
+test("HC history write failure sends nothing and confirmed rejection differs from unknown delivery", async () => {
+  for (const scenario of ["history", "rejected", "unknown"]) {
+    const h = viewHarness(screen({ terminal: terminal({ status: { state: "idle" }, turn: 0 }) }));
+    h.render();
+    await settle();
+    h.render().props.onSearchTextChange("keep draft");
+    await settle();
+    const save = h.store.setItem;
+    if (scenario === "history")
+      h.store.setItem = async (key, value) => {
+        if (key.startsWith("hc-conversation")) throw new Error("disk full");
+        await save(key, value);
+      };
+    else
+      h.feed.client.current.request = async () => {
+        throw scenario === "rejected" ? new HcError("blocked", "blocked before input") : new Error("connection lost");
+      };
+    await h.action("Send Message");
+    const view = h.render();
+    assert.equal(view.props.searchText, "keep draft");
+    const reply = views(view).find((v) => v.props.id?.startsWith("reply:"))!;
+    assert.match(reply.props.detail.props.markdown, scenario === "unknown" ? /delivery is uncertain/ : /not submitted/);
+    assert.equal(
+      views(view).some((v) => v.props.id === "uncertain"),
+      scenario === "unknown",
+    );
+    if (scenario === "history") assert.equal(h.requests.length, 0);
+  }
+});
+
+test("HC view restores completed local rows for the same program without attributing current history", async () => {
+  const h = viewHarness(screen({ terminal: terminal({ status: { state: "done" }, turn: 4 }) }));
+  const c = new HcConversation(hcTargetKey(target), h.feed.pin.current, h.store);
+  await c.load();
+  await c.begin("saved", "saved question", { text: "old\n", turn: 0, state: "idle", complete: true });
+  c.submitted("saved");
+  c.observe({ text: "old\nsaved answer", turn: 1, state: "done", complete: true });
+  await settle();
+  h.render();
+  await settle();
+  let view = h.render();
+  const reply = views(view).find((v) => v.props.id === "reply:saved")!;
+  assert.match(reply.props.detail.props.markdown, /saved answer/);
+  assert.doesNotMatch(reply.props.detail.props.markdown, /Allow read/);
+  assert.equal(view.props.selectedItemId, "reply:saved");
+  view.props.onSelectionChange("user:saved");
+  await h.action("Read Full Width");
+  view = h.render();
+  assert.match(view.props.markdown, /saved question/);
+  assert.doesNotMatch(view.props.markdown, /saved answer/);
+  assert.equal(h.requests.length, 0);
 });

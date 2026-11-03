@@ -2,6 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Add local Herdr conversation rows for explicit Raycast messages and conservatively isolated per-turn output, with bounded history, streaming replacement and honest raw-screen fallbacks. Keep approvals tied to original-screen review and preserve no-replay delivery safeguards.
+
 - Simplify Herdr output to content only, move routine diagnostics into inspection, and add live full-width reading with Command-Shift-F while retaining exceptional warnings and reviewed terminal controls.
 
 - Confirm ordinary Herdr messages with a transient toast instead of a persistent banner above terminal output; retain error and uncertain-input warnings.
