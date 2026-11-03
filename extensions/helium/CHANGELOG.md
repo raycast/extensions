@@ -1,6 +1,6 @@
 # Helium Changelog
 
-## [Windows Tab Control Improvements] - {PR_MERGE_DATE}
+## [Windows Tab Control Improvements] - 2026-11-03
 
 - Replace PowerShell tab automation with a native Rust helper for faster switching, verified tab selection, and preserved normal/maximized window placement when restoring minimized windows.
 - Support vertical tabs and temporarily reveal hidden sidebars in Frameless mode while restoring their previous state.
