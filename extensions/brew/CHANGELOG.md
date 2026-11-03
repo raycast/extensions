@@ -1,6 +1,10 @@
 # Brew Changelog
 
-## [Install in your terminal by default] - {PR_MERGE_DATE}
+## [Run in Terminal after a finished command] - {PR_MERGE_DATE}
+
+- Fixed: with Terminal as the terminal application, a Run in Terminal action did nothing once an earlier command had finished and its window still showed "[Process completed]". Run in Terminal now opens a new window, so it also no longer ends the shell in your front tab
+
+## [Install in your terminal by default] - 2026-11-03
 
 - New: an "Install and uninstall in the terminal application" preference, off by default. ↩ on a package that is not installed runs `brew install` in your terminal application, and ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` there too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin
 
