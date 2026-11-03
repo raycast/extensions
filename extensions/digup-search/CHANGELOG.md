@@ -1,6 +1,6 @@
 # DigUp Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Search the files DigUp has indexed by what's in them: pictures, screenshots, PDFs, documents, recordings and videos
 - Search code with the Code filter or a `code:` prefix, when code search is on in DigUp
