@@ -34,3 +34,7 @@ Netdisk direct links should be added through LinkSwift, not pasted directly into
 - BitTorrent downloads still upload while downloading; only download and share content you have permission to use.
 - Without a public inbound port or restrictive NAT, BitTorrent peer discovery may be limited.
 - Magnets without `tr=` trackers depend on DHT. If peers stay at zero, add public trackers in **Configuration → Extra Trackers** or use a `.torrent` file.
+
+## Privacy
+
+The extension communicates only with the local aria2 RPC endpoint on `127.0.0.1`.
