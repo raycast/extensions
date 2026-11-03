@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Kilobat CLI MCP Server] - 2026-11-03
+
+- Add Kilobat CLI to the official registry for local macOS network diagnostics. Requires a separately installed CLI and macOS 14+; some tools change settings or need permissions or the companion desktop app.
+
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
