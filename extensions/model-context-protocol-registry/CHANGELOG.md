@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add MakeViral MCP Server] - {PR_MERGE_DATE}
+## [Add MakeViral MCP Server] - 2026-11-03
 
 - Add MakeViral to the official registry: find the newest viral AI video trend templates on TikTok and Instagram Reels and make them from your photos, or make any AI image or video from a prompt. 14 tools. Hosted Streamable HTTP server at https://www.makeviral.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
