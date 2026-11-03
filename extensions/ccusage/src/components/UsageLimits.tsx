@@ -39,8 +39,7 @@ export function UsageLimits() {
     return null;
   }
 
-  const primaryLabel = data?.five_hour ? "5-Hour" : "7-Day";
-  const primaryUtil = (data?.five_hour ?? data?.seven_day)?.utilization ?? 0;
+  const [primaryRow] = getLimitRows(data);
   const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
@@ -57,13 +56,15 @@ export function UsageLimits() {
           ? STANDARD_ACCESSORIES.LOADING
           : isStale && !isLoading
             ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
-            : [
-                {
-                  icon: Icon.Gauge,
-                  text: `${(preferRemaining ? 100 - primaryUtil : primaryUtil).toFixed(0)}%`,
-                  tooltip: `${primaryLabel} Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
-                },
-              ];
+            : !primaryRow
+              ? STANDARD_ACCESSORIES.NO_DATA
+              : [
+                  {
+                    icon: Icon.Gauge,
+                    text: `${(preferRemaining ? 100 - primaryRow.utilization : primaryRow.utilization).toFixed(0)}%`,
+                    tooltip: `${rowTitle(primaryRow.label, primaryRow.period)} · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
+                  },
+                ];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error && !data) {
