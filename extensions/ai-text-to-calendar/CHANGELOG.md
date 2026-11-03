@@ -1,6 +1,6 @@
 # AI Text to Calendar Changelog
 
-## [Fix Crash on Launch] - {PR_MERGE_DATE}
+## [Fix Crash on Launch] - 2026-11-03
 
 - Fix the command failing with `Package subpath './_shims/auto/runtime' is not defined by "exports"` by upgrading the OpenAI SDK from v4 to v7, which no longer self-references `_shims`
 
