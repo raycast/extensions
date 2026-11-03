@@ -1293,6 +1293,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "makeviral",
+    title: "MakeViral",
+    description:
+      "Find the newest viral AI video trend templates on TikTok and Instagram Reels and make them from your photos. Search trend templates with example clips, the photos each version needs and the credit price, run a template with your own photos (solo, with a friend or with a pet), and make any AI image or video from a prompt with models such as Veo, Kling, Seedance, Nano Banana and GPT Image. Check runs, list creations, see the credit balance and get a one-hour photo upload link. 14 tools; browsing templates needs no sign-in, runs use credits from your MakeViral account. Hosted remote Streamable HTTP server at https://www.makeviral.ai/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/makeviral-ai/cursor-plugin/main/assets/logo-400.png",
+    homepage: "https://www.makeviral.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://www.makeviral.ai/mcp"],
+    },
+    remoteUrl: "https://www.makeviral.ai/mcp",
+  },
+  {
     name: "maqami-travel",
     title: "MAQAMI Travel",
     description:

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add MakeViral MCP Server] - 2026-11-03
+
+- Add MakeViral to the official registry: find the newest viral AI video trend templates on TikTok and Instagram Reels and make them from your photos, or make any AI image or video from a prompt. 14 tools. Hosted Streamable HTTP server at https://www.makeviral.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add World Monitor MCP Server] - 2026-11-03
 
 - Add World Monitor to the official registry: real-time global intelligence on conflict, markets, energy, trade, shipping and cyber, with about 100 read-only tools. Hosted Streamable HTTP server at https://worldmonitor.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
