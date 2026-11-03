@@ -1,6 +1,6 @@
 # Nyxe Mail Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Copy Sign-In Code and Open Sign-In Link
 - Search Mail and Inbox, with open, reply, archive, read/unread, snooze and tag actions
