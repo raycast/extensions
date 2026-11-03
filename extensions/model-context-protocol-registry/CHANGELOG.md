@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add WolfSMS MCP Server] - {PR_MERGE_DATE}
+
+- Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
