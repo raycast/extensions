@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { auth, calendar_v3 } from "@googleapis/calendar";
-import { OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
+import { getAccessToken, OAuthService, useCachedPromise, withAccessToken, withCache } from "@raycast/utils";
 import { people_v1 } from "@googleapis/people";
 import { getPreferenceValues, Tool } from "@raycast/api";
 import { resolveCalendarIdForEventsList, resolveEventTypesForList } from "./event-types";
@@ -46,6 +47,24 @@ export function getPeopleClient() {
   return people;
 }
 
+// Keyed by a hash of the access token, so a new sign-in or a token refresh looks the account up once.
+const getAccountIdForToken = withCache(async (tokenHash: string) => {
+  void tokenHash;
+  const response = await getPeopleClient().people.get({ resourceName: "people/me", personFields: "metadata" });
+  const accountId = response.data.resourceName;
+  if (!accountId) throw new Error("Could not identify the signed-in Google account.");
+  return accountId;
+});
+
+/**
+ * A stable ID for the signed-in Google account. Caches of account data include it in their key, so signing in to
+ * another account never shows the previous account's contacts or events. Must run inside `withGoogleAPIs`.
+ */
+export async function getAccountKey() {
+  const tokenHash = createHash("sha256").update(getAccessToken().token).digest("hex");
+  return getAccountIdForToken(tokenHash);
+}
+
 export function withGoogleAPIs<Input, Output>(
   ComponentOrFn: React.ComponentType<Input> | ((params: Input) => Promise<Output> | Output) | Tool.Confirmation<Input>,
 ) {
@@ -66,24 +85,43 @@ export function useGoogleAPIs() {
 export async function searchContacts(query?: string) {
   const peopleClient = getPeopleClient();
 
-  const contactsResponse = await peopleClient.people.searchContacts({
-    query: query ?? "",
-    readMask: "names,emailAddresses,photos",
-    sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
-  });
+  const [contactsResponse, otherContactsResponse] = await Promise.all([
+    peopleClient.people.searchContacts({
+      query: query ?? "",
+      readMask: "names,emailAddresses,photos",
+      sources: ["READ_SOURCE_TYPE_CONTACT", "READ_SOURCE_TYPE_PROFILE"],
+    }),
+    peopleClient.otherContacts.search({
+      readMask: "names,emailAddresses,photos",
+      query: query ?? "",
+    }),
+  ]);
   const contacts = contactsResponse.data.results
     ?.map((contact) => contact.person)
     .filter(Boolean) as people_v1.Schema$Person[];
-
-  const otherContactsResponse = await peopleClient.otherContacts.search({
-    readMask: "names,emailAddresses,photos",
-    query: query ?? "",
-  });
   const otherContacts = otherContactsResponse.data.results
     ?.map((contact) => contact.person)
     .filter(Boolean) as people_v1.Schema$Person[];
 
   return [...(contacts ?? []), ...(otherContacts ?? [])];
+}
+
+/**
+ * Lists recently changed saved contacts for an empty search. Google needs an empty "warmup" search before prefix
+ * searches return fresh results, so it is sent alongside.
+ */
+export async function listRecentContacts() {
+  const peopleClient = getPeopleClient();
+  const [response] = await Promise.all([
+    peopleClient.people.connections.list({
+      resourceName: "people/me",
+      personFields: "names,emailAddresses,photos",
+      sortOrder: "LAST_MODIFIED_DESCENDING",
+      pageSize: 100,
+    }),
+    searchContacts("").catch(() => []),
+  ]);
+  return response.data.connections ?? [];
 }
 
 export async function getAutoAddHangouts() {

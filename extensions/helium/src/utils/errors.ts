@@ -1,3 +1,5 @@
+import { getErrorMessage } from "@chrismessina/raycast-kit/errors";
+
 /**
  * Combine a command's summary with the underlying error text.
  *
@@ -8,6 +10,6 @@
  * is noise.
  */
 export function describeError(summary: string, error: unknown): string {
-  const detail = error instanceof Error ? error.message.trim() : String(error).trim();
+  const detail = getErrorMessage(error).trim();
   return detail ? `${summary}: ${detail}` : summary;
 }
