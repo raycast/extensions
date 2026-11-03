@@ -1,0 +1,121 @@
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { useCallback, useEffect, useState } from "react";
+import type { TextSnippet } from "../core/types";
+import { createSnippet, deleteSnippet, getSnippets, updateSnippet } from "../prompts/store";
+import { validateSnippetText } from "../prompts/template/validate";
+import { guarded, showError } from "./feedback";
+
+function SnippetForm({ snippet, onSaved }: { snippet?: TextSnippet; onSaved: () => Promise<void> }) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<{ name: string; text: string }>({
+    initialValues: { name: snippet?.name ?? "", text: snippet?.text ?? "" },
+    validation: {
+      name: (value) => (value?.trim() ? undefined : "Required"),
+      text: (value) => {
+        if (!value?.trim()) return "Required";
+        return validateSnippetText(value).errors[0]?.message;
+      },
+    },
+    onSubmit: async ({ name, text }) => {
+      try {
+        if (snippet) await updateSnippet(snippet.id, { name: name.trim(), text });
+        else await createSnippet({ name: name.trim(), text });
+        await onSaved();
+        pop();
+      } catch (error) {
+        await showError("Cannot Save Snippet", error);
+      }
+    },
+  });
+
+  return (
+    <Form
+      navigationTitle={snippet ? `Edit ${snippet.name}` : "Create Snippet"}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Snippet" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField {...itemProps.name} title="Name" placeholder="signature" />
+      <Form.TextArea {...itemProps.text} title="Text" placeholder='Text inserted by {snippet name="signature"}' />
+    </Form>
+  );
+}
+
+/** Own text blocks, because Raycast's snippets cannot be read through the extension API. */
+export function SnippetList() {
+  const [snippets, setSnippets] = useState<TextSnippet[]>();
+
+  const reload = useCallback(async () => {
+    try {
+      setSnippets(await getSnippets());
+    } catch (error) {
+      setSnippets([]);
+      await showError("Cannot Load Snippets", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  async function remove(snippet: TextSnippet) {
+    const confirmed = await confirmAlert({
+      title: `Delete "${snippet.name}"?`,
+      message: "Prompts that use this snippet will fail until you replace it.",
+      primaryAction: { title: "Delete Snippet", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    await guarded("Cannot Delete Snippet", () => deleteSnippet(snippet.id))();
+    await reload();
+  }
+
+  const create = (
+    <Action.Push
+      title="Create Snippet"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<SnippetForm onSaved={reload} />}
+    />
+  );
+
+  return (
+    <List isLoading={snippets === undefined} navigationTitle="Snippets" searchBarPlaceholder="Search snippets">
+      {snippets?.map((snippet) => (
+        <List.Item
+          key={snippet.id}
+          icon={Icon.Text}
+          title={snippet.name}
+          subtitle={`{snippet name="${snippet.name}"}`}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Edit Snippet"
+                icon={Icon.Pencil}
+                target={<SnippetForm snippet={snippet} onSaved={reload} />}
+              />
+              {create}
+              <Action.CopyToClipboard title="Copy Placeholder" content={`{snippet name="${snippet.name}"}`} />
+              <Action
+                title="Delete Snippet"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                onAction={() => remove(snippet)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+      {snippets !== undefined && (
+        <List.EmptyView
+          title="No Snippets"
+          description="Reusable text for your prompts."
+          actions={<ActionPanel>{create}</ActionPanel>}
+        />
+      )}
+    </List>
+  );
+}
