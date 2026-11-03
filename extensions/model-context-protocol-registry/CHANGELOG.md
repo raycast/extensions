@@ -1,8 +1,20 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Multi Mail and Multi Calendar MCP Servers] - 2026-11-02
+## [Update Multi Mail and Multi Calendar MCP Servers] - {PR_MERGE_DATE}
 
 - Update Multi Mail and Multi Calendar in the official registry: Multi Mail names other IMAP mailboxes, and Multi Calendar iCloud, Fastmail and other CalDAV calendars.
+
+## [Add MakeViral MCP Server] - 2026-11-03
+
+- Add MakeViral to the official registry: find the newest viral AI video trend templates on TikTok and Instagram Reels and make them from your photos, or make any AI image or video from a prompt. 14 tools. Hosted Streamable HTTP server at https://www.makeviral.ai/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add World Monitor MCP Server] - 2026-11-03
+
+- Add World Monitor to the official registry: real-time global intelligence on conflict, markets, energy, trade, shipping and cyber, with about 100 read-only tools. Hosted Streamable HTTP server at https://worldmonitor.app/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add BatchData MCP Server] - 2026-11-03
+
+- Add BatchData to the official registry: U.S. real estate property, ownership and contact data for AI agents (property lookup, comparables, property search, skip tracing, phone and address checks, investor buy boxes). 21 tools. Hosted Streamable HTTP server at https://mcp.batchdata.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a BatchData API token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A BatchData account is required.
 
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
