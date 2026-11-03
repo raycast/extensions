@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Update Zip-Codes.com MCP Server] - {PR_MERGE_DATE}
+## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
 
