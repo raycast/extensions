@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { CreateMonitorForm } from "./components/create-monitor-form";
 import { ErrorView } from "./components/error-view";
 import { EventList } from "./components/event-list";
 import { showErrorToast } from "./lib/error-toast";
-import { eventLabel } from "./lib/events";
+import { eventLabel, eventTypeSummary } from "./lib/events";
 import {
   deleteMonitor,
   fetchMonitorPage,
@@ -74,8 +74,10 @@ function MonitorRow({ kind, monitor, onChanged }: MonitorRowProps) {
       subtitle={name ? target : undefined}
       icon={isActive ? Icon.Bell : Icon.BellDisabled}
       accessories={[
-        { text: monitor.eventTypes.map(eventLabel).join(", "), tooltip: "Events" },
-        { tag: isActive ? "Active" : "Paused" },
+        { text: eventTypeSummary(monitor.eventTypes), tooltip: monitor.eventTypes.map(eventLabel).join(", ") },
+        isActive
+          ? { tag: { value: "Active", color: Color.Green } }
+          : { tag: { value: "Paused", color: Color.SecondaryText } },
       ]}
       actions={
         <ActionPanel>

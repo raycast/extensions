@@ -1,5 +1,5 @@
 import { Detail, Icon, Image } from "@raycast/api";
-import { formatDate, postMetrics } from "../lib/format";
+import { formatDate, postMetrics, repostedFrom } from "../lib/format";
 import { Post } from "../lib/schemas";
 
 type PostMetadataProps = {
@@ -10,6 +10,7 @@ type PostMetadataProps = {
 
 export function PostMetadata({ post, event, Metadata }: PostMetadataProps) {
   const { author, createdAt } = post;
+  const original = repostedFrom(post.text);
   return (
     <Metadata>
       {event && <Metadata.Label title="Event" text={event} />}
@@ -20,6 +21,7 @@ export function PostMetadata({ post, event, Metadata }: PostMetadataProps) {
           icon={{ source: author.profilePicture ?? Icon.Person, fallback: Icon.Person, mask: Image.Mask.Circle }}
         />
       )}
+      {original && <Metadata.Label title="Reposted From" text={`@${original}`} icon={Icon.Repeat} />}
       {postMetrics(post).map(({ title, count }) => (
         <Metadata.Label key={title} title={title} text={count} />
       ))}

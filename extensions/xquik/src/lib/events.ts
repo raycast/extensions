@@ -85,3 +85,21 @@ export async function fetchEventPage(filter: EventFilter, cursor?: string): Prom
   const page = await request(eventPageSchema, "/events", { query: { ...filter, limit: PAGE_SIZE, after: cursor } });
   return { events: page.events, nextCursor: page.hasMore ? page.nextCursor || undefined : undefined };
 }
+
+export function unseenEvents(events: MonitorEvent[], seenAt: string | undefined): MonitorEvent[] {
+  if (!seenAt) return events;
+  const seen = Date.parse(seenAt);
+  return events.filter((event) => Date.parse(event.occurredAt) > seen);
+}
+
+export function newestEventDate(events: MonitorEvent[]): string | undefined {
+  return events.reduce<string | undefined>(
+    (newest, { occurredAt }) => (!newest || Date.parse(occurredAt) > Date.parse(newest) ? occurredAt : newest),
+    undefined,
+  );
+}
+
+// A monitor can watch 30 event types, so a row names 1 type and counts several.
+export function eventTypeSummary(types: readonly string[]): string {
+  return types.length === 1 ? eventLabel(types[0]) : `${types.length} Events`;
+}

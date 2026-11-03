@@ -5,7 +5,7 @@ import { showErrorToast } from "../lib/error-toast";
 import { feedKey, fetchFeedPage, PostFeed, uniqueById } from "../lib/feeds";
 import { ErrorView } from "./error-view";
 import { PostListItem } from "./post-list-item";
-import { IdleSearchView, SearchAction, SubmittedSearch } from "./submitted-search";
+import { IdleSearchView, SaveSearchAction, SearchAction, SubmittedSearch } from "./submitted-search";
 
 type PostFeedListProps = {
   feed: PostFeed;
@@ -38,10 +38,13 @@ export function PostFeedList({ feed, navigationTitle, search, searchBarAccessory
       showErrorToast(failure, revalidate);
     },
   });
-  const isWaiting = !isIdle && (isLoading || (!data && !error));
+  const isWaiting = isIdle ? search.isLoadingRecents : isLoading || (!data && !error);
   const posts = uniqueById(data ?? []);
   const key = feedKey(feed);
   const searchAction: ReactNode = search && <SearchAction search={search} />;
+  const saveAction: ReactNode = search && search.submitted && (
+    <SaveSearchAction command={search.command} query={search.submitted} />
+  );
   const searchBar = search
     ? {
         filtering: false,
@@ -76,7 +79,7 @@ export function PostFeedList({ feed, navigationTitle, search, searchBarAccessory
     >
       {emptyView()}
       {posts.map((post) => (
-        <PostListItem key={`${key}:${post.id}`} post={post} firstAction={searchAction} />
+        <PostListItem key={`${key}:${post.id}`} post={post} firstAction={searchAction} lastAction={saveAction} />
       ))}
     </List>
   );

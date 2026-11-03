@@ -6,8 +6,11 @@ import { SearchSort } from "./lib/feeds";
 
 const SORTS: SearchSort[] = ["Latest", "Top", "Photos", "Videos"];
 
-export default function Command({ arguments: { query } }: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
-  const search = useSubmittedSearch(query);
+export default function Command({
+  arguments: { query },
+  fallbackText,
+}: LaunchProps<{ arguments: Arguments.SearchPosts }>) {
+  const search = useSubmittedSearch("search-posts", fallbackText ?? query);
   const [sort, setSort] = useState<SearchSort>("Latest");
   const [submittedSort, setSubmittedSort] = useState(sort);
   const sortedSearch: SubmittedSearch = {
@@ -15,6 +18,10 @@ export default function Command({ arguments: { query } }: LaunchProps<{ argument
     isDirty: search.isDirty || (search.submitted !== "" && sort !== submittedSort),
     submit: () => {
       search.submit();
+      setSubmittedSort(sort);
+    },
+    run: (recent) => {
+      search.run(recent);
       setSubmittedSort(sort);
     },
   };

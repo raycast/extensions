@@ -8,10 +8,11 @@ import { PostMetadata } from "./post-metadata";
 type PostListItemProps = {
   post: Post;
   firstAction?: ReactNode;
+  lastAction?: ReactNode;
   event?: string;
 };
 
-export function PostListItem({ post, firstAction, event }: PostListItemProps) {
+export function PostListItem({ post, firstAction, lastAction, event }: PostListItemProps) {
   return (
     <List.Item
       id={post.id}
@@ -24,7 +25,7 @@ export function PostListItem({ post, firstAction, event }: PostListItemProps) {
           metadata={<PostMetadata post={post} event={event} Metadata={List.Item.Detail.Metadata} />}
         />
       }
-      actions={<PostActions post={post} firstAction={firstAction} />}
+      actions={<PostActions post={post} firstAction={firstAction} lastAction={lastAction} />}
     />
   );
 }

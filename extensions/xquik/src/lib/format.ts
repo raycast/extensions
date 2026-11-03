@@ -17,8 +17,15 @@ export function formatDay(date: string): string {
   return DAY_FORMAT.format(new Date(date));
 }
 
+const REPOST_PREFIX = /^RT @(\w+): /;
+
+// A repost's text starts with "RT @handle: ", which fills a narrow list row before the post itself.
+export function repostedFrom(text: string): string | undefined {
+  return text.match(REPOST_PREFIX)?.[1];
+}
+
 export function postTitle(text: string): string {
-  return text.replace(/\s+/g, " ").trim() || "Post";
+  return text.replace(REPOST_PREFIX, "").replace(/\s+/g, " ").trim() || "Post";
 }
 
 export function escapeMarkdown(text: string): string {
@@ -111,4 +118,9 @@ export function compactProfile(profile: Profile) {
     emails: profile.contactInfo?.emails?.map((email) => email.value),
     links: profile.contactInfo?.links?.map((link) => link.url),
   };
+}
+
+export function savedMediaMessage(count: number): string {
+  if (count === 0) return "This Post Has No Media";
+  return `Saved ${count} ${count === 1 ? "File" : "Files"} to Downloads`;
 }

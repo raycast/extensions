@@ -6,10 +6,12 @@ import { saveMedia } from "../lib/media";
 import { Post } from "../lib/schemas";
 import { PostFeedList } from "./post-feed-list";
 import { ProfileScreen } from "./profile-screen";
+import { SHORTCUTS } from "../lib/shortcuts";
 
 type PostActionsProps = {
   post: Post;
   firstAction?: ReactNode;
+  lastAction?: ReactNode;
 };
 
 async function downloadMedia(post: Post) {
@@ -25,45 +27,60 @@ async function downloadMedia(post: Post) {
   }
 }
 
-export function PostActions({ post, firstAction }: PostActionsProps) {
+export function PostActions({ post, firstAction, lastAction }: PostActionsProps) {
   const link = postLink(post);
   const { author } = post;
   return (
     <ActionPanel>
-      {firstAction}
-      <Action.OpenInBrowser url={link} />
-      <Action.Push
-        title="View Replies"
-        icon={Icon.Bubble}
-        target={<PostFeedList feed={{ kind: "replies", post: post.id }} navigationTitle="Replies" />}
-      />
-      <Action.Push
-        title="View Thread"
-        icon={Icon.List}
-        target={<PostFeedList feed={{ kind: "thread", post: post.id }} navigationTitle="Thread" />}
-      />
-      <Action.Push
-        title="View Quotes"
-        icon={Icon.QuoteBlock}
-        target={<PostFeedList feed={{ kind: "quotes", post: post.id }} navigationTitle="Quotes" />}
-      />
-      {author && (
+      <ActionPanel.Section>
+        {firstAction}
+        <Action.OpenInBrowser url={link} shortcut={Keyboard.Shortcut.Common.Open} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
         <Action.Push
-          title="View Author"
-          icon={Icon.Person}
-          target={<ProfileScreen user={author.username} navigationTitle={`@${author.username}`} />}
+          title="View Replies"
+          icon={Icon.Bubble}
+          shortcut={SHORTCUTS.replies}
+          target={<PostFeedList feed={{ kind: "replies", post: post.id }} navigationTitle="Replies" />}
         />
-      )}
-      <Action.CopyToClipboard title="Copy Post Text" content={post.text} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <Action.CopyToClipboard title="Copy Post Link" content={link} shortcut={Keyboard.Shortcut.Common.CopyPath} />
-      {post.media?.length ? (
-        <Action
-          title="Download Media"
-          icon={Icon.Download}
-          shortcut={Keyboard.Shortcut.Common.Save}
-          onAction={() => downloadMedia(post)}
+        <Action.Push
+          title="View Thread"
+          icon={Icon.List}
+          shortcut={SHORTCUTS.thread}
+          target={<PostFeedList feed={{ kind: "thread", post: post.id }} navigationTitle="Thread" />}
         />
-      ) : null}
+        <Action.Push
+          title="View Quotes"
+          icon={Icon.QuoteBlock}
+          shortcut={SHORTCUTS.quotes}
+          target={<PostFeedList feed={{ kind: "quotes", post: post.id }} navigationTitle="Quotes" />}
+        />
+        {author && (
+          <Action.Push
+            title="View Author"
+            icon={Icon.Person}
+            shortcut={SHORTCUTS.author}
+            target={<ProfileScreen user={author.username} navigationTitle={`@${author.username}`} />}
+          />
+        )}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CopyToClipboard title="Copy Post Link" content={link} shortcut={Keyboard.Shortcut.Common.Copy} />
+        <Action.CopyToClipboard
+          title="Copy Post Text"
+          content={post.text}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
+        />
+        {post.media?.length ? (
+          <Action
+            title="Download Media"
+            icon={Icon.Download}
+            shortcut={Keyboard.Shortcut.Common.Save}
+            onAction={() => downloadMedia(post)}
+          />
+        ) : null}
+      </ActionPanel.Section>
+      {lastAction && <ActionPanel.Section>{lastAction}</ActionPanel.Section>}
     </ActionPanel>
   );
 }

@@ -5,6 +5,7 @@ instructions: |
   Creating a monitor costs 30 credits an hour while it is active. Say so before you create one.
   To delete a monitor, call list-monitors first, then pass its kind and id to delete-monitor.
   When a result has a nextCursor and the user wants more, call the same tool again with that cursor.
+  To save the photos or videos of a post, call download-post-media and say where the files went.
 evals:
   - input: "@xquik what did @NASA post last?"
     mocks:
@@ -163,6 +164,19 @@ evals:
           arguments:
             post:
               includes: "2102882545427714266"
+  - input: "@xquik save the video from https://x.com/NASA/status/2102882545427714266"
+    mocks:
+      download-post-media:
+        saved: 1
+        files:
+          - "/Users/me/Downloads/xquik-2102882545427714266-0.mp4"
+    expected:
+      - callsTool:
+          name: "download-post-media"
+          arguments:
+            post:
+              includes: "2102882545427714266"
+      - includes: "Downloads"
   - input: "@xquik show the thread of https://x.com/NASA/status/2102882545427714266"
     mocks:
       get-post-thread:

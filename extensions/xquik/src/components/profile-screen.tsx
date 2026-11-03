@@ -7,6 +7,7 @@ import { fetchProfile } from "../lib/users";
 import { CreateMonitorForm } from "./create-monitor-form";
 import { ErrorScreen } from "./error-view";
 import { PostFeedList } from "./post-feed-list";
+import { SHORTCUTS } from "../lib/shortcuts";
 
 type ProfileScreenProps = {
   user: string;
@@ -73,25 +74,31 @@ function ProfileActions({ profile }: { profile: Profile }) {
   const link = profileLink(username);
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={link} />
-      <Action.Push
-        title="View Posts"
-        icon={Icon.List}
-        target={<PostFeedList feed={{ kind: "userPosts", user: username }} navigationTitle={`@${username}`} />}
-      />
-      <Action.Push
-        title="View Mentions"
-        icon={Icon.Bubble}
-        target={<PostFeedList feed={{ kind: "mentions", user: username }} navigationTitle={`@${username}`} />}
-      />
-      <Action.CopyToClipboard title="Copy Username" content={username} shortcut={Keyboard.Shortcut.Common.Copy} />
-      <Action.CopyToClipboard title="Copy Profile Link" content={link} shortcut={Keyboard.Shortcut.Common.CopyPath} />
-      <Action.Push
-        title="Create Monitor"
-        icon={Icon.Bell}
-        shortcut={Keyboard.Shortcut.Common.New}
-        target={<CreateMonitorForm kind="account" target={username} />}
-      />
+      <ActionPanel.Section>
+        <Action.OpenInBrowser url={link} shortcut={Keyboard.Shortcut.Common.Open} />
+        <Action.Push
+          title="View Posts"
+          icon={Icon.List}
+          shortcut={SHORTCUTS.posts}
+          target={<PostFeedList feed={{ kind: "userPosts", user: username }} navigationTitle={`@${username}`} />}
+        />
+        <Action.Push
+          title="View Mentions"
+          icon={Icon.Bubble}
+          shortcut={SHORTCUTS.mentions}
+          target={<PostFeedList feed={{ kind: "mentions", user: username }} navigationTitle={`@${username}`} />}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CopyToClipboard title="Copy Profile Link" content={link} shortcut={Keyboard.Shortcut.Common.Copy} />
+        <Action.CopyToClipboard title="Copy Username" content={username} shortcut={Keyboard.Shortcut.Common.CopyName} />
+        <Action.Push
+          title="Create Monitor"
+          icon={Icon.Bell}
+          shortcut={Keyboard.Shortcut.Common.New}
+          target={<CreateMonitorForm kind="account" target={username} />}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }
