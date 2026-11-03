@@ -1,5 +1,13 @@
 # Google Calendar Changelog
 
+## [Contact and Event Mentions in AI Chat] - 2026-11-03
+
+- Add a **Contacts** mention search to find people in your Google Contacts and Other contacts by name or email. Without a query it lists your recently changed contacts. Type a full email address to mention someone who is not in your contacts.
+- Read the selected person's current name and email addresses when sending a mention, so AI can invite them or check their availability without searching first.
+- Add an **Events** mention search to find events across your visible calendars by title, description, location, or attendee. Without a query it lists today's and the coming week's events. Searches cover the past 90 days and the coming year, upcoming events first, and a recurring meeting shows only its next and most recent occurrence.
+- Read the selected event's current details when sending a mention, including time, attendees, location, conferencing, and description, so AI can work with it without searching first.
+- Search saved contacts and Other contacts in parallel, so contact search answers faster.
+
 ## [Simplify OAuth Client Selection] - 2026-10-02
 
 - Simplify OAuth client selection to match the redirect schemes used by current Raycast versions.

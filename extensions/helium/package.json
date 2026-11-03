@@ -8,7 +8,8 @@
   "contributors": [
     "mallsjr",
     "IslamTayeb",
-    "ohivan"
+    "ohivan",
+    "muhammadrizo"
   ],
   "platforms": [
     "macOS",
@@ -58,6 +59,13 @@
       "type": "textfield",
       "required": false,
       "placeholder": "Detected automatically"
+    },
+    {
+      "name": "userDataPath",
+      "title": "User Data Directory (Windows)",
+      "description": "Optional existing User Data folder containing Local State and profile folders for a custom or portable installation.",
+      "type": "directory",
+      "required": false
     }
   ],
   "commands": [
@@ -105,17 +113,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0"
+    "@chrismessina/raycast-kit": "^0.2.0",
+    "@raycast/api": "^2.8.2",
+    "@raycast/utils": "^2.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "vitest": "^4.1.9"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   },
   "scripts": {
     "build": "ray build",
@@ -128,7 +138,7 @@
     "test": "vitest run"
   },
   "overrides": {
-    "brace-expansion": "5.0.9",
+    "brace-expansion": "5.0.12",
     "js-yaml@4": "4.3.2"
   }
 }
