@@ -1,6 +1,6 @@
 # Energy Console Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-03
 
 - Monitor every device returned by an EcoFlow Developer Platform account.
 - Show normalized battery, power-flow, solar, grid, load, climate, and appliance readings across all 17 public API families.
