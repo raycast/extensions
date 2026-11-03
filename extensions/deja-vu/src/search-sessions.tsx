@@ -22,6 +22,7 @@ import {
   parseShowJSON,
   quoteConversationMarkdown,
   runDeja,
+  SearchResultEnvelope,
 } from "./lib/deja";
 import { locateDeja } from "./lib/locate";
 
@@ -125,11 +126,11 @@ export default function SearchSessionsCommand() {
   const [query, setQuery] = useState("");
 
   const { data, isLoading, error, revalidate } = usePromise(
-    async (binPath: string, q: string) => {
+    async (binPath: string, q: string): Promise<SearchResultEnvelope> => {
       const trimmed = q.trim();
       if (!trimmed) {
         const out = await runDeja(binPath, ["last", "30", "--json"]);
-        return { strict: parseLastJSON(out), fallback: [] as DejaSessionHit[] };
+        return { tier: "exact", strictHits: parseLastJSON(out), nearestHits: [] };
       }
       const out = await runDeja(binPath, ["search", "--json", "--limit", "25", "--", trimmed]);
       return parseSearchJSON(out);
@@ -159,8 +160,8 @@ export default function SearchSessionsCommand() {
     );
   }
 
-  const strict = data?.strict ?? [];
-  const fallback = data?.fallback ?? [];
+  const strict = data?.strictHits ?? [];
+  const fallback = data?.nearestHits ?? [];
 
   return (
     <List
