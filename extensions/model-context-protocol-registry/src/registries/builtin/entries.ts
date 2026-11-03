@@ -744,6 +744,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     remoteUrl: "https://dchub.cloud/mcp",
   },
   {
+    name: "deacon",
+    title: "Deacon",
+    description:
+      "Your customers tell Deacon's support chat what broke. Claude Code, Cursor or your other coding agent reads it, finds the cause in your code and shows you the fix. Hosted remote Streamable HTTP server with sign-in in the browser, no API key to paste. Free plan with no card.",
+    icon: "https://heydeacon.com/icon-512.png",
+    homepage: "https://heydeacon.com/features/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://heydeacon.com/mcp"],
+    },
+    remoteUrl: "https://heydeacon.com/mcp",
+  },
+  {
     name: "deed-page",
     title: "deed.page",
     description:

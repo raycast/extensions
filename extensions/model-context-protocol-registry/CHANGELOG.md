@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Deacon MCP Server] - 2026-11-03
+
+- Add Deacon to the official registry. Your customers tell Deacon's support chat what broke, and your coding agent reads it and fixes the code. Hosted Streamable HTTP server at https://heydeacon.com/mcp with OAuth sign-in, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add HandlePilot MCP Server] - 2026-11-03
 
 - Add HandlePilot to the official registry: Instagram competitor research, reel breakdowns, content plans and editable carousels and scripts. Hosted Streamable HTTP server at https://app.handlepilot.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
