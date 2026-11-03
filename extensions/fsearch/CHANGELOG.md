@@ -1,6 +1,6 @@
 # FSearch Changelog
 
-## [Paste Paths to Apps] - {PR_MERGE_DATE}
+## [Paste Paths to Apps] - 2026-11-03
 
 - Press Command-Shift-V in either search command to paste the selected path into the active app. Choose Paste Shell-Quoted Path to use it as a terminal argument.
 - Search Files and its AI tool now direct content queries such as `grep:TODO` to Search File Contents.
