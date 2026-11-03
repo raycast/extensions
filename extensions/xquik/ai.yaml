@@ -1,0 +1,98 @@
+instructions: |
+  Link every post as a Markdown link, with a short title from its text and its url value as the target.
+  A post ID or username comes from search-posts, search-users or a link the user gives. Never guess one.
+  search-posts accepts X operators such as from: and since:.
+  Creating a monitor costs 30 credits an hour while it is active. Say so before you create one.
+evals:
+  - input: "@xquik what did @NASA post last?"
+    mocks:
+      get-user-posts:
+        posts:
+          - id: "2102882545427714266"
+            url: "https://x.com/NASA/status/2102882545427714266"
+            text: "Meet Messier 106, a spiral galaxy with an extra set of arms."
+            author: "NASA"
+            createdAt: "Wed Sep 23 22:07:23 +0000 2026"
+            likes: 9043
+            reposts: 772
+            replies: 207
+            views: 1291231
+    expected:
+      - callsTool:
+          name: "get-user-posts"
+          arguments:
+            user:
+              includes: "NASA"
+      - matches: "\\[[^\\]]+\\]\\(https://x\\.com/NASA/status/2102882545427714266\\)"
+  - input: "@xquik find posts from NASA about Artemis since 2026-01-01"
+    mocks:
+      search-posts:
+        posts:
+          - id: "2102761519985332442"
+            url: "https://x.com/NASA/status/2102761519985332442"
+            text: "Artemis crews train for the Moon."
+            author: "NASA"
+            createdAt: "Wed Sep 23 14:06:28 +0000 2026"
+            likes: 9775
+            reposts: 1364
+            replies: 271
+            views: 962488
+    expected:
+      - callsTool:
+          name: "search-posts"
+          arguments:
+            query:
+              and:
+                - includes: "from:NASA"
+                - includes: "since:2026-01-01"
+  - input: "@xquik does @NASA follow @SpaceX?"
+    mocks:
+      check-follow:
+        isFollowing: false
+        isFollowedBy: true
+        sourceUsername: "nasa"
+        targetUsername: "spacex"
+    expected:
+      - callsTool: "check-follow"
+      - meetsCriteria: "Says NASA does not follow SpaceX"
+  - input: "@xquik what is trending in Turkey?"
+    mocks:
+      get-trends:
+        - name: "#AI"
+          rank: 1
+          posts: 250000
+          url: "https://x.com/search?q=%23AI"
+    expected:
+      - callsTool:
+          name: "get-trends"
+          arguments:
+            woeid: 23424969
+      - includes: "#AI"
+  - input: "@xquik show the profile of @NASA"
+    mocks:
+      get-profile:
+        id: "11348282"
+        username: "NASA"
+        name: "NASA"
+        url: "https://x.com/NASA"
+        description: "Making the seemingly impossible, possible."
+        followers: 92376194
+        following: 115
+        posts: 74336
+    expected:
+      - callsTool: "get-profile"
+      - includes: "NASA"
+  - input: "@xquik monitor @NASA for new posts"
+    mocks:
+      create-monitor:
+        id: "42"
+        target: "NASA"
+        isActive: true
+    expected:
+      - callsTool:
+          name: "create-monitor"
+          arguments:
+            kind: "account"
+            target:
+              includes: "NASA"
+      - includes: "30 credits"

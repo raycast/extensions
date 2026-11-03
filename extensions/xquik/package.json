@@ -1,0 +1,211 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xquik",
+  "title": "Xquik - X (Twitter) Data",
+  "description": "Search X (Twitter) data with the world's fastest and cheapest X Twitter data API. Not affiliated with X Corp.",
+  "icon": "icon.png",
+  "author": "burak-bayir",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Data", "Web", "Communication"],
+  "keywords": ["x", "twitter", "tweets", "x api", "twitter api", "x data", "trends", "monitors"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Xquik API Key",
+      "description": "Your key from the API Keys page of your Xquik dashboard.",
+      "type": "password",
+      "required": true,
+      "placeholder": "xq_..."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "Xquik",
+      "description": "Search all public X (Twitter) posts, with no date limit.",
+      "mode": "view",
+      "arguments": [{ "name": "query", "type": "text", "placeholder": "Query", "required": false }]
+    },
+    {
+      "name": "advanced-search",
+      "title": "Advanced Search",
+      "subtitle": "Xquik",
+      "description": "Find X (Twitter) posts by author, date, engagement & media.",
+      "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "subtitle": "Xquik",
+      "description": "Find X (Twitter) accounts by name or username.",
+      "mode": "view",
+      "arguments": [{ "name": "query", "type": "text", "placeholder": "Query", "required": false }]
+    },
+    {
+      "name": "get-user-profile",
+      "title": "Get User Profile",
+      "subtitle": "Xquik",
+      "description": "Show an X (Twitter) profile with counts, links & contact details.",
+      "mode": "view",
+      "arguments": [{ "name": "username", "type": "text", "placeholder": "Username or Link", "required": true }]
+    },
+    {
+      "name": "get-user-posts",
+      "title": "Get User Posts",
+      "subtitle": "Xquik",
+      "description": "List the latest posts from any public X (Twitter) account.",
+      "mode": "view",
+      "arguments": [{ "name": "username", "type": "text", "placeholder": "Username or Link", "required": true }]
+    },
+    {
+      "name": "get-user-mentions",
+      "title": "Get User Mentions",
+      "subtitle": "Xquik",
+      "description": "List public posts that mention any X (Twitter) account.",
+      "mode": "view",
+      "arguments": [{ "name": "username", "type": "text", "placeholder": "Username or Link", "required": true }]
+    },
+    {
+      "name": "get-post",
+      "title": "Get Post",
+      "subtitle": "Xquik",
+      "description": "Open an X (Twitter) post from its link or ID.",
+      "mode": "view",
+      "arguments": [{ "name": "post", "type": "text", "placeholder": "Post Link or ID", "required": true }]
+    },
+    {
+      "name": "get-post-replies",
+      "title": "Get Post Replies",
+      "subtitle": "Xquik",
+      "description": "List the replies to any X (Twitter) post.",
+      "mode": "view",
+      "arguments": [{ "name": "post", "type": "text", "placeholder": "Post Link or ID", "required": true }]
+    },
+    {
+      "name": "check-follow",
+      "title": "Check Follow",
+      "subtitle": "Xquik",
+      "description": "Check whether 1 X (Twitter) account follows another.",
+      "mode": "view",
+      "arguments": [
+        { "name": "source", "type": "text", "placeholder": "Source Account", "required": true },
+        { "name": "target", "type": "text", "placeholder": "Target Account", "required": true }
+      ]
+    },
+    {
+      "name": "view-trends",
+      "title": "View Trends",
+      "subtitle": "Xquik",
+      "description": "See what's trending on X (Twitter) by country.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-monitors",
+      "title": "Manage Monitors",
+      "subtitle": "Xquik",
+      "description": "Create, pause & delete X (Twitter) account and keyword monitors.",
+      "mode": "view"
+    },
+    {
+      "name": "view-monitor-events",
+      "title": "View Monitor Events",
+      "subtitle": "Xquik",
+      "description": "Read the latest events from your monitors.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "description": "Search all public X posts by words or X operators, with no date limit."
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "description": "Find X accounts by name or username."
+    },
+    {
+      "name": "get-profile",
+      "title": "Get Profile",
+      "description": "Read 1 X profile with its counts, bio, links and contact details."
+    },
+    {
+      "name": "get-user-posts",
+      "title": "Get User Posts",
+      "description": "List the latest posts from a public X account."
+    },
+    {
+      "name": "get-user-mentions",
+      "title": "Get User Mentions",
+      "description": "List public posts that mention an X account."
+    },
+    {
+      "name": "get-post",
+      "title": "Get Post",
+      "description": "Read 1 X post from its link or ID."
+    },
+    {
+      "name": "get-post-replies",
+      "title": "Get Post Replies",
+      "description": "List the replies to an X post."
+    },
+    {
+      "name": "get-post-thread",
+      "title": "Get Post Thread",
+      "description": "List the posts in the conversation thread of an X post."
+    },
+    {
+      "name": "check-follow",
+      "title": "Check Follow",
+      "description": "Check whether 1 X account follows another, in both directions."
+    },
+    {
+      "name": "get-trends",
+      "title": "Get Trends",
+      "description": "List what is trending on X for a place."
+    },
+    {
+      "name": "list-monitors",
+      "title": "List Monitors",
+      "description": "List your Xquik account or keyword monitors."
+    },
+    {
+      "name": "create-monitor",
+      "title": "Create Monitor",
+      "description": "Create an Xquik account or keyword monitor, at 30 credits an hour."
+    },
+    {
+      "name": "delete-monitor",
+      "title": "Delete Monitor",
+      "description": "Delete an Xquik monitor and its stored events."
+    },
+    {
+      "name": "list-monitor-events",
+      "title": "List Monitor Events",
+      "description": "List the latest events from your Xquik monitors."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^10.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
