@@ -1,4 +1,5 @@
-import { open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { open, openExtensionPreferences, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { SITE_URL } from "./api";
 import { describeError, ErrorFix } from "./errors";
 
@@ -15,5 +16,5 @@ export function showErrorToast(error: Error, onRetry: () => void): Promise<Toast
       },
     },
   };
-  return showToast({ style: Toast.Style.Failure, title, message: hint, primaryAction: fixes[fix] });
+  return showFailureToast(error, { title, message: hint, primaryAction: fixes[fix] });
 }

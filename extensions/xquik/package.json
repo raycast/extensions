@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xquik",
   "title": "Xquik - X (Twitter) Data",
-  "description": "Search X (Twitter) data with the world's fastest and cheapest X Twitter data API. Not affiliated with X Corp.",
+  "description": "Search X (Twitter) data with the world's fastest and cheapest X Twitter data API. Needs an Xquik API key with credits. Not affiliated with X Corp.",
   "icon": "icon.png",
   "author": "burak-bayir",
   "platforms": ["macOS", "Windows"],

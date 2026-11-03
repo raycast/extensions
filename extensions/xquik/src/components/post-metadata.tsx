@@ -4,13 +4,15 @@ import { Post } from "../lib/schemas";
 
 type PostMetadataProps = {
   post: Post;
+  event?: string;
   Metadata: typeof Detail.Metadata;
 };
 
-export function PostMetadata({ post, Metadata }: PostMetadataProps) {
+export function PostMetadata({ post, event, Metadata }: PostMetadataProps) {
   const { author, createdAt } = post;
   return (
     <Metadata>
+      {event && <Metadata.Label title="Event" text={event} />}
       {author && (
         <Metadata.Label
           title="Author"

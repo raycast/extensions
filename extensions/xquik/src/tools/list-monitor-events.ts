@@ -31,6 +31,7 @@ export default async function tool({ monitorId, keywordMonitorId, cursor }: Inpu
         username: event.username,
         query: event.query,
         post: post && compactPost(post),
+        details: post ? undefined : event.data,
       };
     }),
     nextCursor,

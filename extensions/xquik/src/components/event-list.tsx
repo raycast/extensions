@@ -1,8 +1,8 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { showErrorToast } from "../lib/error-toast";
-import { EventFilter, eventLabel, eventPost, fetchEventPage } from "../lib/events";
-import { escapeMarkdown, formatDate } from "../lib/format";
+import { EventFilter, eventFields, eventLabel, eventPost, eventProfile, fetchEventPage } from "../lib/events";
+import { formatDate, profileMarkdown } from "../lib/format";
 import { MonitorEvent } from "../lib/schemas";
 import { ErrorView } from "./error-view";
 import { PostListItem } from "./post-list-item";
@@ -26,8 +26,10 @@ function eventSource({ username, query }: MonitorEvent): string | undefined {
 function EventRow({ event }: { event: MonitorEvent }) {
   const label = eventLabel(event.type);
   const post = eventPost(event);
-  if (post) return <PostListItem post={post} accessories={[{ tag: label }]} />;
+  if (post) return <PostListItem post={post} event={label} />;
   const source = eventSource(event);
+  const profile = eventProfile(event);
+  const Metadata = List.Item.Detail.Metadata;
   return (
     <List.Item
       title={label}
@@ -36,9 +38,16 @@ function EventRow({ event }: { event: MonitorEvent }) {
       accessories={[{ date: new Date(event.occurredAt) }]}
       detail={
         <List.Item.Detail
-          markdown={[`# ${label}`, source && escapeMarkdown(source), formatDate(event.occurredAt)]
-            .filter(Boolean)
-            .join("\n\n")}
+          markdown={profile ? profileMarkdown(profile) : undefined}
+          metadata={
+            <Metadata>
+              <Metadata.Label title="Event" text={label} />
+              {source && <Metadata.Label title="Monitor" text={source} />}
+              <Metadata.Label title="Date" text={formatDate(event.occurredAt)} />
+              {!profile &&
+                eventFields(event).map(({ title, value }) => <Metadata.Label key={title} title={title} text={value} />)}
+            </Metadata>
+          }
         />
       }
     />

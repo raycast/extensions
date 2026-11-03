@@ -3,6 +3,8 @@ instructions: |
   A post ID or username comes from search-posts, search-users or a link the user gives. Never guess one.
   search-posts accepts X operators such as from: and since:.
   Creating a monitor costs 30 credits an hour while it is active. Say so before you create one.
+  To delete a monitor, call list-monitors first, then pass its kind and id to delete-monitor.
+  When a result has a nextCursor and the user wants more, call the same tool again with that cursor.
 evals:
   - input: "@xquik what did @NASA post last?"
     mocks:
@@ -96,3 +98,138 @@ evals:
             target:
               includes: "NASA"
       - includes: "30 credits"
+  - input: "@xquik find accounts named NASA"
+    mocks:
+      search-users:
+        users:
+          - id: "11348282"
+            username: "NASA"
+            name: "NASA"
+            url: "https://x.com/NASA"
+            followers: 92376194
+        nextCursor: "next"
+    expected:
+      - callsTool:
+          name: "search-users"
+          arguments:
+            query:
+              includes: "NASA"
+      - includes: "@NASA"
+  - input: "@xquik who mentioned @NASA lately?"
+    mocks:
+      get-user-mentions:
+        posts:
+          - id: "2102990000000000001"
+            url: "https://x.com/esa/status/2102990000000000001"
+            text: "Congrats @NASA on the launch."
+            author: "esa"
+            createdAt: "Thu Sep 24 09:00:00 +0000 2026"
+            likes: 1200
+    expected:
+      - callsTool:
+          name: "get-user-mentions"
+          arguments:
+            user:
+              includes: "NASA"
+      - includes: "esa"
+  - input: "@xquik read https://x.com/NASA/status/2102882545427714266"
+    mocks:
+      get-post:
+        id: "2102882545427714266"
+        url: "https://x.com/NASA/status/2102882545427714266"
+        text: "Meet Messier 106, a spiral galaxy with an extra set of arms."
+        author: "NASA"
+        likes: 9043
+    expected:
+      - callsTool:
+          name: "get-post"
+          arguments:
+            post:
+              includes: "2102882545427714266"
+      - includes: "Messier 106"
+  - input: "@xquik show every reply to https://x.com/NASA/status/2102882545427714266"
+    mocks:
+      get-post-replies:
+        posts:
+          - id: "2102890000000000002"
+            url: "https://x.com/astro_fan/status/2102890000000000002"
+            text: "Beautiful image."
+            author: "astro_fan"
+            likes: 12
+        nextCursor: "page-2"
+    expected:
+      - callsTool:
+          name: "get-post-replies"
+          arguments:
+            post:
+              includes: "2102882545427714266"
+  - input: "@xquik show the thread of https://x.com/NASA/status/2102882545427714266"
+    mocks:
+      get-post-thread:
+        posts:
+          - id: "2102882545427714266"
+            url: "https://x.com/NASA/status/2102882545427714266"
+            text: "Meet Messier 106, a spiral galaxy with an extra set of arms."
+            author: "NASA"
+    expected:
+      - callsTool:
+          name: "get-post-thread"
+          arguments:
+            post:
+              includes: "2102882545427714266"
+  - input: "@xquik delete my keyword monitor for artemis launch"
+    mocks:
+      list-monitors:
+        monitors:
+          - kind: "keyword"
+            id: "21"
+            target: "artemis launch"
+            isActive: true
+            eventTypes:
+              - "tweet.new"
+      delete-monitor:
+        deleted: true
+        id: "21"
+        target: "artemis launch"
+    expected:
+      - callsTool:
+          name: "list-monitors"
+          arguments:
+            kind: "keyword"
+      - callsTool:
+          name: "delete-monitor"
+          arguments:
+            kind: "keyword"
+            id: "21"
+  - input: "@xquik what did my monitors catch today?"
+    mocks:
+      list-monitor-events:
+        events:
+          - id: "9"
+            type: "New Post"
+            occurredAt: "2026-11-03T08:00:00Z"
+            username: "NASA"
+            post:
+              id: "2102882545427714266"
+              url: "https://x.com/NASA/status/2102882545427714266"
+              text: "Meet Messier 106, a spiral galaxy with an extra set of arms."
+              author: "NASA"
+    expected:
+      - callsTool: "list-monitor-events"
+      - includes: "NASA"
+  - input: "@xquik list my account monitors"
+    mocks:
+      list-monitors:
+        monitors:
+          - kind: "account"
+            id: "42"
+            target: "@NASA"
+            isActive: true
+            eventTypes:
+              - "tweet.new"
+    expected:
+      - callsTool:
+          name: "list-monitors"
+          arguments:
+            kind: "account"
+      - includes: "@NASA"

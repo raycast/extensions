@@ -18,6 +18,7 @@ export default async function tool({ kind, cursor }: Input) {
   const { monitors, nextCursor } = await fetchMonitorPage(kind, cursor);
   return {
     monitors: monitors.map((monitor) => ({
+      kind,
       id: monitor.id,
       target: monitorTarget(monitor),
       name: monitor.name,

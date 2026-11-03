@@ -1,5 +1,5 @@
 import { request } from "./api";
-import { eventPageSchema, MonitorEvent, Post, postSchema } from "./schemas";
+import { eventPageSchema, MonitorEvent, Post, postSchema, Profile, profileSchema } from "./schemas";
 
 const PAGE_SIZE = 20;
 
@@ -63,6 +63,22 @@ export function eventLabel(type: string): string {
 
 export function eventPost(event: MonitorEvent): Post | undefined {
   return postSchema.safeParse(event.data).data;
+}
+
+export function eventProfile(event: MonitorEvent): Profile | undefined {
+  return profileSchema.safeParse(event.data).data;
+}
+
+export type EventField = { title: string; value: string };
+
+export function eventFields({ data }: MonitorEvent): EventField[] {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) return [];
+  return Object.entries(data)
+    .filter(([, value]) => value !== null && value !== undefined)
+    .map(([key, value]) => ({
+      title: key.charAt(0).toUpperCase() + key.slice(1),
+      value: typeof value === "object" ? JSON.stringify(value) : String(value),
+    }));
 }
 
 export async function fetchEventPage(filter: EventFilter, cursor?: string): Promise<EventPage> {

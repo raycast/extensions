@@ -54,6 +54,10 @@ export async function fetchMonitorPage(kind: MonitorKind, cursor?: string): Prom
   return { monitors: page.monitors, nextCursor: page.hasMore ? page.nextCursor || undefined : undefined };
 }
 
+export function fetchMonitor(kind: MonitorKind, id: string): Promise<Monitor> {
+  return request(monitorSchema, MONITOR_KINDS[kind].itemPath(id));
+}
+
 export function createMonitor(kind: MonitorKind, draft: MonitorDraft): Promise<Monitor> {
   const { listPath, createBody } = MONITOR_KINDS[kind];
   return request(monitorSchema, listPath, { method: "POST", body: createBody(draft) });
