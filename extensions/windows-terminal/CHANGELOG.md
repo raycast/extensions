@@ -1,6 +1,6 @@
 # Windows Terminal Changelog
 
-## [Fix PowerShell Detection] - {PR_MERGE_DATE}
+## [Fix PowerShell Detection] - 2026-11-03
 
 - Fixed Windows Terminal marking the PowerShell 7 profile "Profile no longer detected" (and then opening it in System32) when Terminal was first started from the extension. Raycast doesn't pass `ProgramFiles` to extensions, so the extension now restores it when launching `wt.exe`.
 
