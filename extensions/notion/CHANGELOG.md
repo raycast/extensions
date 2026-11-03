@@ -4,7 +4,7 @@
 
 - Add a **Pages** mention search to find Notion pages by title and mention them in AI Chat. Without a query it lists your recently edited pages.
 - Read the mentioned page when sending the message, including its properties and full content, so AI works with the latest version without searching first.
-- Update to Raycast API 2.10.0.
+- Update to Raycast API 2.10.1.
 
 ## [Added new screenshots] - 2026-10-13
 
