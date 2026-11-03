@@ -20,6 +20,14 @@ describe("fetchClaudeUsageLimits", () => {
     expect(result).toEqual({ status: "ok", data: { five_hour: null, seven_day: window } });
   });
 
+  it("returns data when only a per-model window is readable", async () => {
+    mockResponse({ five_hour: null, seven_day: null, seven_day_opus: window });
+
+    const result = await fetchClaudeUsageLimits("token");
+
+    expect(result).toMatchObject({ status: "ok", data: { seven_day_opus: window } });
+  });
+
   it("reports the response shape when no limit window parses", async () => {
     mockResponse({ five_hour: null, seven_day: null, limits: [{ kind: "weekly_all", percent: 4 }] });
 

@@ -1,4 +1,5 @@
 import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
+import { getLimitRows } from "./limit-rows";
 import { describeShape } from "./parse-diagnostics";
 
 export type UsageLimitsResult =
@@ -48,7 +49,7 @@ export const fetchClaudeUsageLimits = async (accessToken: string): Promise<Usage
     const data: unknown = await response.json();
     const result = UsageLimitDataSchema.safeParse(data);
 
-    if (result.success && (result.data.five_hour || result.data.seven_day)) {
+    if (result.success && getLimitRows(result.data).length > 0) {
       return { status: "ok", data: result.data };
     }
 
