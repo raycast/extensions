@@ -159,26 +159,20 @@ function PaperActions({ item, onToggleDetail }: { item: Item; onToggleDetail: ()
     <ActionPanel>
       <ActionPanel.Section>
         <Action.OpenInBrowser title="Open in ReadCube" url={itemUrl(item)} />
-        {pdf && (
-          <Action.OpenInBrowser
-            title="Open PDF in ReadCube"
-            icon={Icon.Document}
-            url={pdf}
-            shortcut={Keyboard.Shortcut.Common.Open}
-          />
-        )}
+        {/* Raycast binds the first two actions itself, so only later ones get custom shortcuts. */}
+        {pdf && <Action.OpenInBrowser title="Open PDF in ReadCube" icon={Icon.Document} url={pdf} />}
         {doi && (
           <Action.OpenInBrowser
             title="Open DOI Link"
             icon={Icon.Globe}
             url={doi}
-            shortcut={Keyboard.Shortcut.Common.OpenWith}
+            shortcut={pdf ? Keyboard.Shortcut.Common.OpenWith : undefined}
           />
         )}
         <Action
           title="Toggle Details"
           icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={pdf || doi ? { modifiers: ["cmd"], key: "d" } : undefined}
           onAction={onToggleDetail}
         />
       </ActionPanel.Section>

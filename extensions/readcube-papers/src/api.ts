@@ -63,12 +63,6 @@ export interface ItemsPage {
 
 export class AuthError extends Error {}
 
-type Preferences = {
-  email?: string;
-  password?: string;
-  sessionCookie?: string;
-};
-
 async function login(email: string, password: string): Promise<string> {
   const response = await fetch(`${SERVICES_URL}/authentication/login`, {
     method: "POST",
@@ -94,6 +88,14 @@ async function login(email: string, password: string): Promise<string> {
   return cookie;
 }
 
+function parseSession(value: string | undefined): { email?: string; cookie?: string } | undefined {
+  try {
+    return value ? JSON.parse(value) : undefined;
+  } catch {
+    return undefined; // a session saved by an older version
+  }
+}
+
 async function getSessionCookie(forceLogin = false): Promise<string> {
   const { email, password, sessionCookie } = getPreferenceValues<Preferences>();
   if (sessionCookie?.trim()) {
@@ -103,12 +105,14 @@ async function getSessionCookie(forceLogin = false): Promise<string> {
     throw new AuthError("Set your ReadCube email and password (or a session cookie) in the extension preferences.");
   }
 
+  // The cached session belongs to one account; ignore it once the configured email changes.
   if (!forceLogin) {
     const cached = await LocalStorage.getItem<string>(COOKIE_STORAGE_KEY);
-    if (cached) return cached;
+    const session = parseSession(cached);
+    if (session?.email === email && session.cookie) return session.cookie;
   }
   const cookie = await login(email, password);
-  await LocalStorage.setItem(COOKIE_STORAGE_KEY, cookie);
+  await LocalStorage.setItem(COOKIE_STORAGE_KEY, JSON.stringify({ email, cookie }));
   return cookie;
 }
 

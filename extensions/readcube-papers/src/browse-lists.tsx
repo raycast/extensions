@@ -23,7 +23,11 @@ export default function BrowseLists() {
             accessories={collection.shared ? [{ tag: "Shared" }] : []}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Lists" icon={Icon.List} target={<CollectionLists collection={collection} />} />
+                <Action.Push
+                  title="Show Lists"
+                  icon={Icon.List}
+                  target={<CollectionLists collection={collection} navigationTitle={collectionName(collection)} />}
+                />
                 <Action.Push
                   title="Show All Papers"
                   icon={Icon.Document}
@@ -39,7 +43,8 @@ export default function BrowseLists() {
   );
 }
 
-function CollectionLists({ collection }: { collection: Collection }) {
+// navigationTitle is only set when pushed; as the command's root view it keeps the command title.
+function CollectionLists({ collection, navigationTitle }: { collection: Collection; navigationTitle?: string }) {
   const { data: lists, isLoading, error } = useCachedPromise(getLists, [collection.id]);
   const name = collectionName(collection);
 
@@ -61,7 +66,7 @@ function CollectionLists({ collection }: { collection: Collection }) {
     .sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: "base" }));
 
   return (
-    <List isLoading={isLoading} navigationTitle={name} searchBarPlaceholder={`Filter lists in ${name}`}>
+    <List isLoading={isLoading} navigationTitle={navigationTitle} searchBarPlaceholder={`Filter lists in ${name}`}>
       {error ? (
         <ErrorView error={error} title="Couldn't Load Lists" />
       ) : (

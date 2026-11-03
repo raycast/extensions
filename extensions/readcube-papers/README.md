@@ -13,7 +13,7 @@ From any paper you can open it in ReadCube, open its PDF in the ReadCube viewer,
 
 Fill in the extension preferences with **one** of:
 
-1. **Email and Password** — the same credentials you use at app.readcube.com. The password is stored in the Raycast keychain; the extension signs in and keeps the session.
+1. **Email and Password** — the same credentials you use at app.readcube.com. The password is stored securely by Raycast; the extension signs in and keeps the session.
 2. **Session Cookie** — for accounts that sign in with SSO/institutional login. Open app.readcube.com in your browser, open the developer tools' Network tab, select any request to `sync.readcube.com`, and copy the value of its `Cookie` request header.
 
 ## Note
