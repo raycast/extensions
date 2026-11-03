@@ -1,10 +1,10 @@
-# Ougi
+# Fans & Temperatures
 
 Every temperature sensor and fan in your Mac, with manual fan control and overheat protection.
 
 ## Setup
 
-Ougi talks to the Mac's System Management Controller through [ougi](https://github.com/arturious/ougi), a small
+Fans & Temperatures talks to the Mac's System Management Controller through [ougi](https://github.com/arturious/ougi), a small
 open-source command-line tool built from source by Homebrew.
 
 1. Install the tool — temperatures and fan speeds work right away:

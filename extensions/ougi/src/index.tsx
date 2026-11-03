@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BREW_INSTALL,
@@ -33,19 +34,30 @@ const percentOf = (fan: Fan) =>
 function useReading() {
   const [reading, setReading] = useState<Reading>();
   const [error, setError] = useState<Error>();
-  const busy = useRef(false);
+  const inflight = useRef<Promise<void> | undefined>(undefined);
 
-  const refresh = useCallback(async () => {
-    if (busy.current) return;
-    busy.current = true;
-    try {
-      setReading(await read());
-      setError(undefined);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-    } finally {
-      busy.current = false;
+  // A 2s poll can still be running when a fan change finishes. Returning early
+  // would leave the previous mode on screen until the next tick, so a forced
+  // refresh waits for that read and then reads again.
+  const refresh = useCallback(async (opts?: { force?: boolean }) => {
+    while (inflight.current) {
+      if (!opts?.force) return;
+      await inflight.current;
     }
+
+    const run = (async () => {
+      try {
+        setReading(await read());
+        setError(undefined);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      } finally {
+        inflight.current = undefined;
+      }
+    })();
+
+    inflight.current = run;
+    return run;
   }, []);
 
   useEffect(() => {
@@ -81,11 +93,10 @@ export default function Command() {
       await setFans(value);
       toast.style = Toast.Style.Success;
       toast.message = undefined;
-      await refresh();
+      await refresh({ force: true });
     } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not change fan speed";
-      toast.message = e instanceof Error ? e.message : String(e);
+      await toast.hide();
+      await showFailureToast(e, { title: "Could not change fan speed" });
     }
   }
 
@@ -106,7 +117,7 @@ export default function Command() {
         <List.EmptyView
           icon="icon.png"
           title="Install the ougi Command-Line Tool"
-          description={`Ougi reads sensors and controls fans through a small open-source tool. Install it with Homebrew:\n\n${BREW_INSTALL}`}
+          description={`Fans & Temperatures reads sensors and controls fans through a small open-source tool. Install it with Homebrew:\n\n${BREW_INSTALL}`}
           actions={
             <ActionPanel>
               <SetupActions command={BREW_INSTALL} />
@@ -121,7 +132,17 @@ export default function Command() {
   if (error && !reading) {
     return (
       <List>
-        <List.EmptyView icon={Icon.Warning} title="Cannot Read Sensors" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Cannot Read Sensors"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              {refreshAction}
+              <Action.OpenInBrowser title="Open Setup Guide" url={SETUP_URL} />
+            </ActionPanel>
+          }
+        />
       </List>
     );
   }

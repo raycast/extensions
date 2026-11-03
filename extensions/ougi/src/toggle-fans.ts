@@ -5,6 +5,7 @@ import { CliMissingError, DAEMON_INSTALL, fanControl, read, setFans } from "./ou
 export default async function () {
   try {
     const reading = await read();
+    if (reading.fans.length === 0) return showHUD("No fans on this Mac");
     if (fanControl(reading) !== "ready") return showHUD(`Fan control not set up: run ${DAEMON_INSTALL}`);
     const toAuto = reading.fans.some((f) => f.manual);
     await setFans(toAuto ? "auto" : "max");
