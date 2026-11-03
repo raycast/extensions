@@ -1,4 +1,5 @@
 import { getMyTodos, getTeamTodos } from "../api/ninety";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Optional Team Id (from get-teams). Omit to get the user's own To-Dos, personal and team. */
@@ -18,5 +19,6 @@ export default async function tool({ teamId, completed }: Input) {
     isPersonal: todo.isPersonal,
     teamName: todo.teamName,
     ownerUserId: todo.userId,
+    url: NinetyUrls.todo(todo),
   }));
 }

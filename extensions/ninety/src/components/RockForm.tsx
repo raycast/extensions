@@ -75,7 +75,15 @@ export function RockForm({ rock, defaultTeamId, draftValues, onSaved, isRoot }: 
         if (!isEdit) setLastTeamId(values.teamId);
         toast.style = Toast.Style.Success;
         toast.title = isEdit ? "Rock saved" : "Rock created";
-        toast.primaryAction = { title: "Open in Ninety", onAction: () => open(NinetyUrls.rocks) };
+        toast.primaryAction = {
+          title: "Open in Ninety",
+          onAction: () =>
+            open(
+              saved?._id
+                ? NinetyUrls.rock({ _id: saved._id, teamId: saved.teamId ?? values.teamId })
+                : NinetyUrls.rocks,
+            ),
+        };
         if (onSaved) {
           onSaved(saved);
           pop();

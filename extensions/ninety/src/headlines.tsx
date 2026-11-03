@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { getHeadlines } from "./api/ninety";
 import { Headline } from "./api/types";
@@ -9,20 +9,32 @@ import { TeamDropdown } from "./components/TeamDropdown";
 import { useTeams } from "./hooks/useTeams";
 import { useUsers } from "./hooks/useUsers";
 import { showError } from "./lib/errors";
-import { compact, formatDate, htmlToText } from "./lib/format";
+import { compact, formatDate, htmlToMarkdown } from "./lib/format";
 import { NinetyUrls } from "./lib/urls";
+import { useAvatar } from "./hooks/useAvatar";
+
+type SortOrder = "newest" | "oldest";
+
+function byCreatedDate(order: SortOrder) {
+  return (a: Headline, b: Headline) => {
+    const diff = new Date(b.createdDate ?? 0).getTime() - new Date(a.createdDate ?? 0).getTime();
+    return order === "newest" ? diff : -diff;
+  };
+}
 
 function headlineMarkdown(headline: Headline) {
-  return compact([`# ${headline.title}`, htmlToText(headline.description)]).join("\n\n");
+  return compact([`## ${headline.title}`, htmlToMarkdown(headline.description)]).join("\n\n");
 }
 
 export default function Command() {
+  const { avatar, ownerAccessory } = useAvatar();
   const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [teamId, setTeamId] = useState("");
   const [cascading, setCascading] = useState(false);
   const [includeDiscussed, setIncludeDiscussed] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [sortOrder, setSortOrder] = useCachedState<SortOrder>("headlines-sort", "newest");
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (teamId: string, isCascadedMessage: boolean, includeDiscussed: boolean) =>
@@ -36,7 +48,7 @@ export default function Command() {
       },
     },
   );
-  const headlines = data ?? [];
+  const headlines = [...(data ?? [])].sort(byCreatedDate(sortOrder));
   const kind = cascading ? "Cascading Messages" : "Headlines";
 
   const createAction = (
@@ -67,6 +79,15 @@ export default function Command() {
           Windows: { modifiers: ["ctrl", "shift"], key: "h" },
         }}
         onAction={() => setIncludeDiscussed((v) => !v)}
+      />
+      <Action
+        title={sortOrder === "newest" ? "Sort Oldest First" : "Sort Newest First"}
+        icon={sortOrder === "newest" ? Icon.ArrowUp : Icon.ArrowDown}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "opt"], key: "s" },
+          Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+        }}
+        onAction={() => setSortOrder((order) => (order === "newest" ? "oldest" : "newest"))}
       />
       <Action
         title="Refresh"
@@ -103,7 +124,10 @@ export default function Command() {
           }
         />
       )}
-      <List.Section title={kind} subtitle={String(headlines.length)}>
+      <List.Section
+        title={`${kind} · ${sortOrder === "newest" ? "Newest First" : "Oldest First"}`}
+        subtitle={String(headlines.length)}
+      >
         {headlines.map((headline) => {
           const owner = userName(headline.userId);
           const from = headline.cascadedFromTeamId ? teamName(headline.cascadedFromTeamId) : undefined;
@@ -111,7 +135,6 @@ export default function Command() {
             <List.Item
               key={headline.id}
               title={headline.title}
-              subtitle={showDetail ? undefined : owner}
               icon={{
                 source: headline.isCascadedMessage ? Icon.ArrowDown : Icon.Megaphone,
                 tintColor: headline.completed ? Color.SecondaryText : Color.Blue,
@@ -124,6 +147,7 @@ export default function Command() {
                       headline.completed ? { tag: { value: "Discussed", color: Color.SecondaryText } } : undefined,
                       from ? { icon: Icon.TwoPeople, text: from, tooltip: "Cascaded from" } : undefined,
                       headline.createdDate ? { date: new Date(headline.createdDate) } : undefined,
+                      ownerAccessory(owner),
                     ])
               }
               detail={
@@ -131,7 +155,7 @@ export default function Command() {
                   markdown={headlineMarkdown(headline)}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} />
+                      <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
                       {from ? <List.Item.Detail.Metadata.Label title="Cascaded From" text={from} /> : null}
                       <List.Item.Detail.Metadata.Label title="Created" text={formatDate(headline.createdDate)} />
                     </List.Item.Detail.Metadata>
@@ -144,9 +168,13 @@ export default function Command() {
                     <Action
                       title={showDetail ? "Hide Details" : "Show Details"}
                       icon={Icon.Sidebar}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "d" },
+                        Windows: { modifiers: ["ctrl"], key: "d" },
+                      }}
                       onAction={() => setShowDetail((v) => !v)}
                     />
-                    <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.headlines} />
+                    <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.headline(headline)} />
                     <Action.CopyToClipboard title="Copy Headline" content={headline.title} />
                     {createAction}
                   </ActionPanel.Section>

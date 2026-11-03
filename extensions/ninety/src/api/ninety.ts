@@ -13,6 +13,8 @@ import {
   IssuesQuery,
   Milestone,
   NextMeeting,
+  PastMeeting,
+  PastMeetingDetail,
   Paginated,
   PeriodInterval,
   Rock,
@@ -26,6 +28,20 @@ import {
   UpdateTodoInput,
   User,
 } from "./types";
+
+/** Runs `fn` over `items` a few at a time, to stay well under Ninety's 25 requests/second limit. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await fn(items[index]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
 
 /** Safety cap so a huge company can't trigger hundreds of requests. */
 const MAX_PAGES = 10;
@@ -177,6 +193,22 @@ export async function getRockMilestones(rockId: string): Promise<Milestone[]> {
   return milestones.filter((milestone) => !milestone.isDeleted);
 }
 
+/**
+ * Milestones for many Rocks at once, keyed by Rock Id. Rock list results leave Milestones out, so
+ * this fetches them a few at a time to stay well under Ninety's 25 requests/second limit.
+ * A Rock whose Milestones fail to load is left out rather than failing the whole list.
+ */
+export async function getMilestonesForRocks(rockIds: string[]): Promise<Record<string, Milestone[]>> {
+  const ids = [...new Set(rockIds)];
+  const lists = await mapLimit(ids, 5, (rockId) => getRockMilestones(rockId).catch(() => undefined));
+  const result: Record<string, Milestone[]> = {};
+  ids.forEach((rockId, i) => {
+    const milestones = lists[i];
+    if (milestones) result[rockId] = milestones;
+  });
+  return result;
+}
+
 export const createMilestone = async (input: CreateMilestoneInput) =>
   withIds(await api.post<Milestone>("/milestones", input));
 
@@ -215,12 +247,105 @@ export const putKpiScore = (kpiId: string, value: number, periodStartDate: strin
 
 // Meetings
 
+/** How long after a Meeting's planned end it still counts as the current one. */
+export const MEETING_GRACE_MS = 30 * 60 * 1000;
+
+export function meetingEndTime(meeting: NextMeeting) {
+  const agendaMs = meeting.agenda.reduce((sum, item) => sum + item.durationSeconds, 0) * 1000;
+  return new Date(meeting.scheduledDate).getTime() + agendaMs + MEETING_GRACE_MS;
+}
+
+/**
+ * `/meetings/next` can still return an occurrence that has already ended (for example yesterday's
+ * Weekly Meeting). Move a repeating Meeting forward by its cadence to the next real occurrence;
+ * a one-time Meeting that has ended is dropped.
+ */
+function nextOccurrence(meeting: NextMeeting, now = Date.now()): NextMeeting | null {
+  if (meetingEndTime(meeting) >= now) return meeting;
+  if (meeting.cadence === "none") return null;
+  const date = new Date(meeting.scheduledDate);
+  const duration = meetingEndTime(meeting) - date.getTime();
+  for (let i = 0; i < 60 && date.getTime() + duration < now; i++) {
+    if (meeting.cadence === "monthly") date.setMonth(date.getMonth() + 1);
+    else date.setDate(date.getDate() + (meeting.cadence === "biWeekly" ? 14 : 7));
+  }
+  return { ...meeting, scheduledDate: date.toISOString() };
+}
+
 /** Returns null when nothing is scheduled in the near term (Ninety answers 404). */
 export async function getNextMeeting(teamId: string): Promise<NextMeeting | null> {
   try {
-    return await api.get<NextMeeting>("/meetings/next", { teamId });
+    const meeting = await api.get<NextMeeting>("/meetings/next", { teamId });
+    return meeting ? nextOccurrence(meeting) : null;
   } catch (error) {
     if (error instanceof NinetyError && error.status === 404) return null;
     throw error;
   }
+}
+
+/** Meeting kinds the past-Meetings endpoint can return; one call per kind. `other` covers the rest. */
+const PAST_MEETING_TYPES = ["level10", "quarterly", "annualDayTwo", "other"] as const;
+
+export async function getPastMeetings(teamId: string, pageSize = 10): Promise<PastMeeting[]> {
+  const pages = await mapLimit([...PAST_MEETING_TYPES], 4, (meetingType) =>
+    api.get<Paginated<PastMeeting>>("/meetings", { teamId, meetingType, pageIndex: 0, pageSize }),
+  );
+  return pages.flatMap((page) => page?.items ?? []);
+}
+
+export const getPastMeeting = (meetingId: string) => api.get<PastMeetingDetail>(`/meetings/${meetingId}`);
+
+export interface MeetingsOverview {
+  upcoming: NextMeeting[];
+  past: PastMeeting[];
+}
+
+/** Each Team's next Meeting plus its recent past Meetings, newest first. */
+export async function getMeetingsOverview(teamIds: string[]): Promise<MeetingsOverview> {
+  const perTeam = await mapLimit(teamIds, 2, async (teamId) => {
+    const [next, past] = await Promise.all([getNextMeeting(teamId), getPastMeetings(teamId)]);
+    return { next, past };
+  });
+  return {
+    upcoming: perTeam
+      .flatMap(({ next }) => (next ? [next] : []))
+      .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()),
+    past: perTeam.flatMap(({ past }) => past).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+  };
+}
+
+interface CompanyKpi {
+  id: string;
+  description?: string;
+}
+
+interface CompanyKpiPage {
+  data?: CompanyKpi[];
+  pagination?: { nextToken?: string };
+}
+
+/**
+ * Measurable descriptions, keyed by Measurable Id. Only `/scorecard/kpis/company` returns them, and
+ * it's limited to company Owners and Admins (others get a 403, so callers should treat this as
+ * optional). Scores are requested for a single day to keep the response small.
+ */
+export async function getKpiDescriptions(): Promise<Record<string, string>> {
+  const today = new Date().toISOString().slice(0, 10);
+  const descriptions: Record<string, string> = {};
+  let nextToken: string | undefined;
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const result = await api.get<CompanyKpiPage>("/scorecard/kpis/company", {
+      limit: 100,
+      nextToken,
+      scoresFrom: today,
+      scoresTo: today,
+    });
+    for (const kpi of result?.data ?? []) {
+      const id = kpi.id ?? (kpi as { _id?: string })._id;
+      if (id && kpi.description?.trim()) descriptions[id] = kpi.description;
+    }
+    nextToken = result?.pagination?.nextToken;
+    if (!nextToken) break;
+  }
+  return descriptions;
 }

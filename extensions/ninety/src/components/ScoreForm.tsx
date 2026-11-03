@@ -12,13 +12,15 @@ interface Values {
 
 interface Props {
   kpi: ScorecardKpi;
+  /** Period to preselect (its start date); defaults to the latest one. */
+  periodStartDate?: string;
   onSaved?: () => void;
 }
 
-export function ScoreForm({ kpi, onSaved }: Props) {
+export function ScoreForm({ kpi, periodStartDate, onSaved }: Props) {
   const { pop } = useNavigation();
   const periods = kpi.scores.filter((score) => !score.isFuture);
-  const latest = periods[periods.length - 1];
+  const latest = periods.find((score) => score.periodStartDate === periodStartDate) ?? periods[periods.length - 1];
   const isYesNo = kpi.unit === "yesno";
 
   const { handleSubmit, itemProps } = useForm<Values>({
@@ -48,7 +50,7 @@ export function ScoreForm({ kpi, onSaved }: Props) {
 
   return (
     <Form
-      navigationTitle="Enter Score"
+      navigationTitle="Input Score"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Score" icon={Icon.Checkmark} onSubmit={handleSubmit} />

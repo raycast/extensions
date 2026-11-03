@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { createIssue } from "../api/ninety";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Team Id from get-teams. Issues always belong to a Team. */
@@ -22,7 +23,12 @@ export default async function tool(input: Input) {
     interval: input.interval ?? "SHORT_TERM",
     priority: input.priority,
   });
-  return { id: issue.id, title: issue.title, list: issue.intervalCode };
+  return {
+    id: issue.id,
+    title: issue.title,
+    list: issue.intervalCode,
+    url: NinetyUrls.issue({ ...issue, teamId: issue.teamId ?? input.teamId }),
+  };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => ({

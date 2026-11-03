@@ -1,5 +1,6 @@
 import { getTeamScorecard } from "../api/ninety";
 import { formatGoal, formatKpiValue } from "../lib/format";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Team Id from get-teams. */
@@ -19,6 +20,7 @@ export default async function tool({ teamId, interval = "weekly" }: Input) {
         id: kpi.id,
         title: kpi.title,
         owner: kpi.ownerName,
+        url: NinetyUrls.kpi(interval, group.id, kpi.id, teamId),
         goal: formatGoal(kpi.defaultGoal, kpi.unit),
         scores: kpi.scores
           .filter((score) => !score.isFuture)

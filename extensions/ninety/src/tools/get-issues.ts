@@ -1,4 +1,5 @@
 import { queryIssues } from "../api/ninety";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Team Id from get-teams. */
@@ -19,5 +20,6 @@ export default async function tool({ teamId, interval, searchText }: Input) {
     priority: issue.priority || undefined,
     createdDate: issue.createdDate,
     ownerUserId: issue.userId,
+    url: NinetyUrls.issue(issue),
   }));
 }

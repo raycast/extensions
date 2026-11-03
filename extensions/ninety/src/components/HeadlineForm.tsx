@@ -61,7 +61,15 @@ export function HeadlineForm({ defaultTeamId, defaultCascaded, draftValues, onSa
         setLastTeamId(values.teamId);
         toast.style = Toast.Style.Success;
         toast.title = `${kind} created`;
-        toast.primaryAction = { title: "Open in Ninety", onAction: () => open(NinetyUrls.headlines) };
+        toast.primaryAction = {
+          title: "Open in Ninety",
+          onAction: () =>
+            open(
+              saved?.id
+                ? NinetyUrls.headline({ id: saved.id, teamId: saved.teamId ?? values.teamId })
+                : NinetyUrls.headlines,
+            ),
+        };
         if (onSaved) {
           onSaved(saved);
           pop();

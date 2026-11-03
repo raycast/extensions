@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { addIssueComment, deleteIssue, queryIssues, updateIssue } from "./api/ninety";
 import { Issue, IssueInterval } from "./api/types";
@@ -11,18 +11,26 @@ import { TodoForm } from "./components/TodoForm";
 import { useTeams } from "./hooks/useTeams";
 import { useUsers } from "./hooks/useUsers";
 import { showError } from "./lib/errors";
-import { compact, formatDate, htmlToText, intervalTitle, priorityAccessory } from "./lib/format";
+import { compact, formatDate, htmlToMarkdown, intervalTitle, priorityAccessory } from "./lib/format";
 import { NinetyUrls } from "./lib/urls";
+import { useAvatar } from "./hooks/useAvatar";
+import { UPDATE_SHORTCUT } from "./lib/shortcuts";
 
 const INTERVALS: IssueInterval[] = ["SHORT_TERM", "LONG_TERM"];
 
+type SortOrder = "newest" | "priority";
+
+function byNewest(a: Issue, b: Issue) {
+  return new Date(b.createdDate ?? 0).getTime() - new Date(a.createdDate ?? 0).getTime();
+}
+
 function byPriority(a: Issue, b: Issue) {
-  return (b.priority ?? 0) - (a.priority ?? 0) || (a.title ?? "").localeCompare(b.title ?? "");
+  return (b.priority ?? 0) - (a.priority ?? 0) || byNewest(a, b);
 }
 
 function issueMarkdown(issue: Issue, userName: (id?: string) => string | undefined) {
-  const lines = [`# ${issue.title ?? "Untitled Issue"}`];
-  const description = htmlToText(issue.description);
+  const lines = [`## ${issue.title ?? "Untitled Issue"}`];
+  const description = htmlToMarkdown(issue.description);
   if (description) lines.push(description);
   if (issue.comments?.length) {
     lines.push("---", "### Comments");
@@ -35,10 +43,12 @@ function issueMarkdown(issue: Issue, userName: (id?: string) => string | undefin
 }
 
 export default function Command() {
+  const { avatar, ownerAccessory } = useAvatar();
   const { teams, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [teamId, setTeamId] = useState("");
   const [showDetail, setShowDetail] = useState(false);
+  const [sortOrder, setSortOrder] = useCachedState<SortOrder>("issues-sort", "newest");
 
   const { data, isLoading, error, mutate, revalidate } = useCachedPromise(
     (teamId: string) => queryIssues({ teamId }),
@@ -95,6 +105,18 @@ export default function Command() {
     />
   );
 
+  const sortAction = (
+    <Action
+      title={sortOrder === "newest" ? "Sort by Priority" : "Sort Newest First"}
+      icon={sortOrder === "newest" ? Icon.Exclamationmark : Icon.Clock}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "opt"], key: "s" },
+        Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+      }}
+      onAction={() => setSortOrder((order) => (order === "newest" ? "priority" : "newest"))}
+    />
+  );
+
   return (
     <List
       isLoading={isLoading || (!teamId && !teamsError)}
@@ -113,14 +135,25 @@ export default function Command() {
           icon={Icon.Bolt}
           title="No open Issues"
           description="Press ⌘N to add one."
-          actions={<ActionPanel>{createAction}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              {createAction}
+              {sortAction}
+            </ActionPanel>
+          }
         />
       )}
       {INTERVALS.map((interval) => {
-        const items = issues.filter((i) => (i.intervalCode ?? "SHORT_TERM") === interval).sort(byPriority);
+        const items = issues
+          .filter((i) => (i.intervalCode ?? "SHORT_TERM") === interval)
+          .sort(sortOrder === "newest" ? byNewest : byPriority);
         const other: IssueInterval = interval === "SHORT_TERM" ? "LONG_TERM" : "SHORT_TERM";
         return (
-          <List.Section key={interval} title={intervalTitle(interval)} subtitle={String(items.length)}>
+          <List.Section
+            key={interval}
+            title={`${intervalTitle(interval)} · ${sortOrder === "newest" ? "Newest First" : "By Priority"}`}
+            subtitle={String(items.length)}
+          >
             {items.map((issue) => {
               const title = issue.title ?? "Untitled Issue";
               const owner = userName(issue.userId);
@@ -128,7 +161,6 @@ export default function Command() {
                 <List.Item
                   key={issue.id}
                   title={title}
-                  subtitle={showDetail ? undefined : owner}
                   icon={{ source: Icon.Bolt, tintColor: interval === "SHORT_TERM" ? Color.Orange : Color.Purple }}
                   keywords={owner ? [owner] : undefined}
                   accessories={
@@ -140,6 +172,7 @@ export default function Command() {
                             : undefined,
                           priorityAccessory(issue.priority),
                           issue.createdDate ? { date: new Date(issue.createdDate), tooltip: "Created" } : undefined,
+                          ownerAccessory(owner),
                         ])
                   }
                   detail={
@@ -148,7 +181,7 @@ export default function Command() {
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="List" text={intervalTitle(interval)} />
-                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} />
+                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
                           <List.Item.Detail.Metadata.Label
                             title="Priority"
                             text={issue.priority ? `${issue.priority} of 5` : "None"}
@@ -162,11 +195,6 @@ export default function Command() {
                     <ActionPanel>
                       <ActionPanel.Section>
                         <Action
-                          title="Solve Issue"
-                          icon={Icon.CheckCircle}
-                          onAction={() => update(issue, { completed: true }, "Issue solved", true)}
-                        />
-                        <Action
                           title={showDetail ? "Hide Details" : "Show Details"}
                           icon={Icon.Sidebar}
                           shortcut={{
@@ -175,7 +203,13 @@ export default function Command() {
                           }}
                           onAction={() => setShowDetail((v) => !v)}
                         />
-                        <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.issues} />
+                        <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.issue(issue)} />
+                        <Action
+                          title="Solve Issue"
+                          icon={Icon.CheckCircle}
+                          shortcut={UPDATE_SHORTCUT}
+                          onAction={() => update(issue, { completed: true }, "Issue solved", true)}
+                        />
                       </ActionPanel.Section>
                       <ActionPanel.Section>
                         <Action.Push
@@ -252,6 +286,7 @@ export default function Command() {
                           content={title}
                           shortcut={Keyboard.Shortcut.Common.Copy}
                         />
+                        {sortAction}
                         <Action
                           title="Refresh"
                           icon={Icon.ArrowClockwise}

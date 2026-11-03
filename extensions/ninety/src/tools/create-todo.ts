@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
 import { createTodo } from "../api/ninety";
 import { dateStringToNinetyDate } from "../lib/format";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** The To-Do title. */
@@ -26,6 +27,11 @@ export default async function tool(input: Input) {
     dueDate: todo.dueDate,
     teamName: todo.teamName,
     isPersonal: todo.isPersonal,
+    url: NinetyUrls.todo({
+      id: todo.id,
+      isPersonal: todo.isPersonal ?? !input.teamId,
+      teamId: todo.teamId ?? input.teamId,
+    }),
   };
 }
 

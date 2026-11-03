@@ -218,15 +218,38 @@ export function formatGoal(goal: unknown, unit: KpiUnit): string {
   if (goal === null || goal === undefined) return "—";
   if (typeof goal !== "object") return formatKpiValue(goal, unit);
   const record = goal as Record<string, unknown>;
-  const min = numericValue(record.min ?? record.minValue);
-  const max = numericValue(record.max ?? record.maxValue);
-  if (min !== undefined && max !== undefined) return `${formatKpiValue(min, unit)} – ${formatKpiValue(max, unit)}`;
-  const operator =
-    typeof record.operator === "string" ? record.operator : typeof record.type === "string" ? record.type : "";
+  const range = goalRange(record);
+  if (range) {
+    const text = `${formatKpiValue(range.min, unit)} – ${formatKpiValue(range.max, unit)}`;
+    return range.outside ? `Outside ${text}` : text;
+  }
+  const operator = goalOperator(record);
   const value = numericValue(goal);
   if (value === undefined) return "—";
   const symbol = operatorSymbol(operator);
   return `${symbol ? symbol + " " : ""}${formatKpiValue(value, unit)}`;
+}
+
+/** Ninety sends goals like `{ orientation: "gte", value: 13 }`; older shapes used `operator` or `type`. */
+function goalOperator(record: Record<string, unknown>) {
+  const value = record.orientation ?? record.operator ?? record.type;
+  return typeof value === "string" ? value : "";
+}
+
+/**
+ * A goal's min/max only count when its orientation is "inside" or "outside". Ninety keeps leftover
+ * min/max values (often 0 and 0) on ordinary goals like `{ orientation: "gte", value: 4 }`.
+ */
+function goalRange(record: Record<string, unknown>) {
+  const orientation = goalOperator(record).toLowerCase();
+  const min = numericValue(record.min ?? record.minValue);
+  const max = numericValue(record.max ?? record.maxValue);
+  if (min === undefined || max === undefined) return undefined;
+  if (orientation === "inside" || orientation === "between") return { min, max, outside: false };
+  if (orientation === "outside") return { min, max, outside: true };
+  // No orientation at all: an older range-only goal.
+  if (!orientation && record.value === undefined) return { min, max, outside: false };
+  return undefined;
 }
 
 function operatorSymbol(operator: string) {
@@ -248,12 +271,14 @@ export function scoreMeetsGoal(score: KpiScoreLike, unit: KpiUnit): boolean | un
     return goal === undefined ? undefined : unit === "yesno" ? value === goal : value >= goal;
   }
   const record = score.goal as Record<string, unknown>;
-  const min = numericValue(record.min ?? record.minValue);
-  const max = numericValue(record.max ?? record.maxValue);
-  if (min !== undefined && max !== undefined) return value >= min && value <= max;
+  const range = goalRange(record);
+  if (range) {
+    const inside = value >= range.min && value <= range.max;
+    return range.outside ? !inside : inside;
+  }
   const goal = numericValue(score.goal);
   if (goal === undefined) return undefined;
-  const symbol = operatorSymbol(String(record.operator ?? record.type ?? ""));
+  const symbol = operatorSymbol(goalOperator(record));
   switch (symbol) {
     case "≥":
       return value >= goal;
@@ -273,22 +298,72 @@ export function scoreMeetsGoal(score: KpiScoreLike, unit: KpiUnit): boolean | un
 // Text
 
 /** Ninety descriptions can be HTML. Turn them into plain text for Raycast markdown. */
-export function htmlToText(html?: string): string {
-  if (!html) return "";
-  return html
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|h[1-6])>/gi, "\n\n")
-    .replace(/<li[^>]*>/gi, "- ")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
+function decodeEntities(text: string) {
+  return text
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+/** Plain text from Ninety's rich-text HTML, for form fields and AI tool output. */
+export function htmlToText(html?: string): string {
+  if (!html) return "";
+  return decodeEntities(
+    html
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|h[1-6])>/gi, "\n\n")
+      .replace(/<li[^>]*>/gi, "- ")
+      .replace(/<\/li>/gi, "\n")
+      .replace(/<[^>]+>/g, ""),
+  )
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+/**
+ * Markdown from Ninety's rich-text HTML, for detail panes: keeps links, bold, italics, headings
+ * and lists. Text that isn't Markdown on purpose (like "# of days…") is escaped so it doesn't
+ * turn into a heading or list.
+ */
+export function htmlToMarkdown(html?: string): string {
+  if (!html) return "";
+  if (!/<[a-z][\s\S]*>/i.test(html)) return escapeMarkdownLines(decodeEntities(html)).trim();
+  const markdown = html
+    .replace(/\r?\n/g, " ")
+    .replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, href: string, label: string) => {
+      const text = label.replace(/<[^>]+>/g, "").trim() || href;
+      return `[${text.replace(/[[\]]/g, "\\$&")}](${href.replace(/\)/g, "%29").replace(/ /g, "%20")})`;
+    })
+    .replace(/<(strong|b)(\s[^>]*)?>([\s\S]*?)<\/\1>/gi, (_, _tag, _attrs, inner: string) =>
+      inner.trim() ? `**${inner.trim()}**` : "",
+    )
+    .replace(/<(em|i)(\s[^>]*)?>([\s\S]*?)<\/\1>/gi, (_, _tag, _attrs, inner: string) =>
+      inner.trim() ? `_${inner.trim()}_` : "",
+    )
+    .replace(/<(s|strike|del)(\s[^>]*)?>([\s\S]*?)<\/\1>/gi, (_, _tag, _attrs, inner: string) => `~~${inner}~~`)
+    .replace(
+      /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi,
+      (_, level: string, inner: string) => `\n\n${"#".repeat(Math.min(Number(level) + 2, 6))} ${inner}\n\n`,
+    )
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<\/(ul|ol)>/gi, "\n\n")
+    .replace(/<\/(p|div|blockquote)>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "");
+  return decodeEntities(escapeMarkdownLines(markdown))
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** Escapes a line-leading "#" (e.g. "# of days…") unless it's a heading we produced. */
+function escapeMarkdownLines(text: string) {
+  return text.replace(/^(\s*)#(?!#* \S)/gm, "$1\\#").replace(/^(\s*)# (?=\S)/gm, "$1\\# ");
 }
 
 export function compact<T>(items: (T | undefined | null | false)[]): T[] {

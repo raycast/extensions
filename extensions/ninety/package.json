@@ -55,13 +55,33 @@
       "title": "Scorecard",
       "subtitle": "Ninety",
       "description": "View a Team's Scorecard and enter Measurable scores.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showAverage",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Details",
+          "label": "Show Average",
+          "description": "Show each Measurable's average, compared with its goal, at the top of its score table."
+        },
+        {
+          "name": "showTotal",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "",
+          "label": "Show Total",
+          "description": "Show each Measurable's total at the top of its score table."
+        }
+      ]
     },
     {
-      "name": "next-meeting",
-      "title": "Next Meeting",
+      "name": "meetings",
+      "title": "Meetings",
       "subtitle": "Ninety",
-      "description": "See a Team's next Meeting with its agenda and attendees.",
+      "description": "See each Team's Meeting happening now, the next one coming up, and past Meetings with their notes.",
       "mode": "view"
     },
     {
@@ -156,7 +176,7 @@
     }
   ],
   "ai": {
-    "instructions": "Ninety is an EOS (Entrepreneurial Operating System) platform. Terms: Rocks are 90-day priorities (quarterly goals) with Milestones; Issues are items on a Team's Issues List to be solved with IDS (Identify, Discuss, Solve), split into Short-Term and Long-Term; To-Dos are 7-day action items; Headlines are short good/bad news updates for a Team's meeting; Cascading Messages are Headlines sent down from leadership; the Scorecard tracks weekly Measurables (also called KPIs). Most tools need a Team Id: when the user names a Team, call get-teams first and match the name. If the Team is ambiguous, ask the user. Items created through the API are always owned by the user. When listing items, keep answers short and include due dates and status.",
+    "instructions": "Ninety is an EOS (Entrepreneurial Operating System) platform. Terms: Rocks are 90-day priorities (quarterly goals) with Milestones; Issues are items on a Team's Issues List to be solved with IDS (Identify, Discuss, Solve), split into Short-Term and Long-Term; To-Dos are 7-day action items; Headlines are short good/bad news updates for a Team's meeting; Cascading Messages are Headlines sent down from leadership; the Scorecard tracks weekly Measurables (also called KPIs). Most tools need a Team Id: when the user names a Team, call get-teams first and match the name. If the Team is ambiguous, ask the user. Items created through the API are always owned by the user. When listing items, keep answers short and include due dates and status. Items include a `url` to open them in Ninety; when you mention a specific item, link its title with that url.",
     "evals": [
       {
         "input": "@ninety what are my open to-dos?",
@@ -504,8 +524,8 @@
       "type": "password",
       "title": "Personal Access Token",
       "required": true,
-      "placeholder": "Paste your Ninety token",
-      "description": "Generate one in Ninety under User Settings → Developer Settings → Generate New Token. Requires a Thrive or Legacy plan."
+      "placeholder": "From app.ninety.io/settings/user/developer-settings",
+      "description": "Generate one at https://app.ninety.io/settings/user/developer-settings (User Settings → Developer Settings → Generate New Token). Requires a Thrive or Legacy plan."
     },
     {
       "name": "email",
@@ -513,7 +533,15 @@
       "title": "Your Ninety Email",
       "required": false,
       "placeholder": "you@company.com",
-      "description": "Optional. Only used to look up your user if it can't be read from the token."
+      "description": "Optional, but needed for My Rocks and your avatar. Ninety's API has no way to look up the signed-in user, so the extension finds you by this email."
+    },
+    {
+      "name": "avatarUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Your Avatar URL",
+      "description": "Optional. Ninety's API doesn't share profile photos, so people show as initials. Paste the link to your Ninety photo (right-click your avatar in Ninety, then Copy Image Address) to show it on items you own.",
+      "placeholder": "https://s3.amazonaws.com/ninety-avatars-prod/people/…"
     }
   ],
   "dependencies": {

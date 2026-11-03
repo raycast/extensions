@@ -1,5 +1,6 @@
 import { queryRocks } from "../api/ninety";
 import { getCurrentUserId } from "../lib/me";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Team Id from get-teams. Omit to get the user's own Rocks. */
@@ -21,6 +22,7 @@ export default async function tool({ teamId, futureScope = "Current" }: Input) {
     quarter: rock.quarter,
     ownerUserId: rock.userId,
     teamId: rock.teamId,
+    url: NinetyUrls.rock(rock),
     milestones: rock.milestones
       ?.filter((m) => !m.isDeleted)
       .map((m) => ({ id: m._id, title: m.title, dueDate: m.dueDate, done: m.isDone })),

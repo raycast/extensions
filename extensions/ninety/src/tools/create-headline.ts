@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { createHeadline } from "../api/ninety";
+import { NinetyUrls } from "../lib/urls";
 
 type Input = {
   /** Team Id from get-teams. */
@@ -23,7 +24,12 @@ export default async function tool(input: Input) {
     description: input.description ? `<p>${escapeHtml(input.description)}</p>` : undefined,
     isCascadedMessage: input.cascadingMessage ?? false,
   });
-  return { id: headline.id, title: headline.title, isCascadedMessage: headline.isCascadedMessage };
+  return {
+    id: headline.id,
+    title: headline.title,
+    isCascadedMessage: headline.isCascadedMessage,
+    url: NinetyUrls.headline({ id: headline.id, teamId: headline.teamId ?? input.teamId }),
+  };
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => ({

@@ -62,7 +62,11 @@ export function IssueForm({ issue, defaultTeamId, link, draftValues, onSaved, is
         if (!isEdit) setLastTeamId(values.teamId);
         toast.style = Toast.Style.Success;
         toast.title = isEdit ? "Issue saved" : "Issue created";
-        toast.primaryAction = { title: "Open in Ninety", onAction: () => open(NinetyUrls.issues) };
+        toast.primaryAction = {
+          title: "Open in Ninety",
+          onAction: () =>
+            open(saved?.id ? NinetyUrls.issue({ ...saved, teamId: saved.teamId ?? values.teamId }) : NinetyUrls.issues),
+        };
         if (onSaved) {
           onSaved(saved);
           pop();

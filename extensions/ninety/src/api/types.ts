@@ -354,3 +354,50 @@ export interface NextMeeting {
   agenda: MeetingAgendaItem[];
   attendees: MeetingPerson[];
 }
+
+export interface MeetingRating {
+  userId: string;
+  rating: number;
+}
+
+/** A concluded Meeting, as listed by `GET /meetings`. */
+export interface PastMeeting {
+  id: string;
+  teamId: string;
+  date: string;
+  endDate?: string;
+  meetingType: MeetingType;
+  /** Custom agenda name; most Meetings have none. */
+  name?: string;
+  /** 0 means the duration was never recorded. */
+  durationSeconds: number;
+  averageRating?: number;
+  ratings?: MeetingRating[];
+  /** People on the roster, not confirmed attendance. */
+  attendeeCount?: number;
+  issuesTracked?: number;
+  issuesSolved?: number;
+  issueSolveRatePercent?: number;
+  issueSolveRateTargetPercent?: number;
+  presenterId?: string;
+  agendaId?: string;
+}
+
+export interface MeetingItemRef {
+  id: string;
+  title?: string;
+  ownerId?: string;
+}
+
+/** One concluded Meeting in full, from `GET /meetings/{id}`. */
+export interface PastMeetingDetail extends PastMeeting {
+  /** HTML. The only free-text record of what was decided. */
+  notes?: string;
+  presenter?: MeetingPerson;
+  attendees?: MeetingPerson[];
+  doneHeadlines?: MeetingItemRef[];
+  cascadingMessages?: MeetingItemRef[];
+  workedIssues?: MeetingItemRef[];
+  newTodos?: MeetingItemRef[];
+  newRocks?: MeetingItemRef[];
+}

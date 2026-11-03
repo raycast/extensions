@@ -16,11 +16,13 @@ import {
   dueBucket,
   dueDateAccessory,
   formatDate,
-  htmlToText,
+  htmlToMarkdown,
   parseDueDate,
   toNinetyDate,
 } from "./lib/format";
 import { NinetyUrls } from "./lib/urls";
+import { useAvatar } from "./hooks/useAvatar";
+import { UPDATE_SHORTCUT } from "./lib/shortcuts";
 
 function sortByDueDate(a: Todo, b: Todo) {
   const da = parseDueDate(a.dueDate)?.getTime() ?? Infinity;
@@ -29,8 +31,8 @@ function sortByDueDate(a: Todo, b: Todo) {
 }
 
 function todoMarkdown(todo: Todo, userName: (id?: string) => string | undefined) {
-  const lines = [`# ${todo.title}`];
-  const description = htmlToText(todo.description);
+  const lines = [`## ${todo.title}`];
+  const description = htmlToMarkdown(todo.description);
   if (description) lines.push(description);
   if (todo.comments?.length) {
     lines.push("---", "### Comments");
@@ -44,6 +46,7 @@ function todoMarkdown(todo: Todo, userName: (id?: string) => string | undefined)
 }
 
 export default function Command() {
+  const { avatar, ownerAccessory } = useAvatar();
   const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [scope, setScope] = useState("");
@@ -164,7 +167,7 @@ export default function Command() {
               <List.Item
                 key={todo.id}
                 title={todo.title}
-                subtitle={showDetail ? undefined : isMine ? team : owner}
+                subtitle={showDetail || !isMine ? undefined : team}
                 icon={
                   todo.completed
                     ? { source: Icon.CheckCircle, tintColor: Color.Green }
@@ -177,6 +180,7 @@ export default function Command() {
                     : compact<List.Item.Accessory>([
                         todo.comments?.length ? { icon: Icon.Bubble, text: String(todo.comments.length) } : undefined,
                         dueDateAccessory(todo.dueDate, todo.completed),
+                        ownerAccessory(owner),
                       ])
                 }
                 detail={
@@ -185,7 +189,11 @@ export default function Command() {
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Team" text={team ?? "—"} />
-                        <List.Item.Detail.Metadata.Label title="Owner" text={userName(todo.userId) ?? "—"} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Owner"
+                          text={userName(todo.userId) ?? "—"}
+                          icon={avatar(userName(todo.userId))}
+                        />
                         <List.Item.Detail.Metadata.Label title="Due" text={formatDate(todo.dueDate) || "—"} />
                         <List.Item.Detail.Metadata.Label title="Created" text={formatDate(todo.createdDate)} />
                       </List.Item.Detail.Metadata>
@@ -196,11 +204,6 @@ export default function Command() {
                   <ActionPanel>
                     <ActionPanel.Section>
                       <Action
-                        title={todo.completed ? "Reopen To-Do" : "Complete To-Do"}
-                        icon={todo.completed ? Icon.Circle : Icon.CheckCircle}
-                        onAction={() => toggleComplete(todo)}
-                      />
-                      <Action
                         title={showDetail ? "Hide Details" : "Show Details"}
                         icon={Icon.Sidebar}
                         shortcut={{
@@ -209,7 +212,13 @@ export default function Command() {
                         }}
                         onAction={() => setShowDetail((v) => !v)}
                       />
-                      <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.todos} />
+                      <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.todo(todo)} />
+                      <Action
+                        title={todo.completed ? "Reopen To-Do" : "Complete To-Do"}
+                        icon={todo.completed ? Icon.Circle : Icon.CheckCircle}
+                        shortcut={UPDATE_SHORTCUT}
+                        onAction={() => toggleComplete(todo)}
+                      />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action.Push

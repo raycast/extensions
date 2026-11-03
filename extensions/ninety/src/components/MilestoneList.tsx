@@ -8,6 +8,7 @@ import { NinetyUrls } from "../lib/urls";
 import { ErrorView } from "./ErrorView";
 import { MilestoneForm } from "./MilestoneForm";
 import { TodoForm } from "./TodoForm";
+import { UPDATE_SHORTCUT } from "../lib/shortcuts";
 
 interface Props {
   rock: Rock;
@@ -84,8 +85,10 @@ export function MilestoneList({ rock, onChange }: Props) {
                 <Action
                   title={milestone.isDone ? "Mark as Not Done" : "Mark as Done"}
                   icon={milestone.isDone ? Icon.Circle : Icon.CheckCircle}
+                  shortcut={UPDATE_SHORTCUT}
                   onAction={() => toggle(milestone)}
                 />
+                <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.rock(rock)} />
                 <Action.Push
                   title="Edit Milestone"
                   icon={Icon.Pencil}
@@ -107,7 +110,6 @@ export function MilestoneList({ rock, onChange }: Props) {
                   }
                 />
                 {addAction}
-                <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.rocks} />
               </ActionPanel>
             }
           />

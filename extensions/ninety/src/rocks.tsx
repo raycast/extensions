@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { getProgressIcon, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { queryRocks, updateRock } from "./api/ninety";
-import { Rock, RockStatus } from "./api/types";
+import { getMilestonesForRocks, queryRocks, updateRock } from "./api/ninety";
+import { Milestone, Rock, RockStatus } from "./api/types";
 import { ErrorView } from "./components/ErrorView";
 import { IssueForm } from "./components/IssueForm";
 import { MilestoneForm } from "./components/MilestoneForm";
@@ -14,16 +14,53 @@ import { useMe } from "./hooks/useMe";
 import { useTeams } from "./hooks/useTeams";
 import { useUsers } from "./hooks/useUsers";
 import { showError } from "./lib/errors";
-import { compact, dueDateAccessory, formatDate, htmlToText, ROCK_STATUSES, rockStatus } from "./lib/format";
+import { compact, dueDateAccessory, formatDate, htmlToMarkdown, ROCK_STATUSES, rockStatus } from "./lib/format";
 import { NinetyUrls } from "./lib/urls";
+import { useAvatar } from "./hooks/useAvatar";
+import { UPDATE_SHORTCUT } from "./lib/shortcuts";
 
-const SECTION_ORDER: RockStatus[] = ["OFF_TRACK", "ON_TRACK", "DRAFT", "DONE", "CANCELED"];
+/** Within a section, Rocks that need attention come first. */
+const STATUS_ORDER: RockStatus[] = ["OFF_TRACK", "ON_TRACK", "DRAFT", "DONE", "CANCELED"];
 
-function rockMarkdown(rock: Rock) {
-  const lines = [`# ${rock.title}`];
-  const description = htmlToText(rock.description);
+function byStatusThenDue(a: Rock, b: Rock) {
+  const status = STATUS_ORDER.indexOf(a.statusCode) - STATUS_ORDER.indexOf(b.statusCode);
+  return status || new Date(a.dueDate ?? 0).getTime() - new Date(b.dueDate ?? 0).getTime();
+}
+
+interface RockSection {
+  key: string;
+  title: string;
+  rocks: Rock[];
+}
+
+/**
+ * Groups Rocks the way Ninety's Rocks page does: Company, then Department, then one section per
+ * person for individual Rocks (you first). "Company & Department" Rocks sit under Company.
+ */
+function groupRocks(rocks: Rock[], userName: (id?: string) => string | undefined, meId?: string): RockSection[] {
+  const company = rocks.filter((r) => r.levelCode === "COMPANY" || r.levelCode === "COMPANY_AND_DEPARTMENT");
+  const department = rocks.filter((r) => r.levelCode === "DEPARTMENT");
+  const individual = rocks.filter((r) => !company.includes(r) && !department.includes(r));
+
+  const byOwner = new Map<string, Rock[]>();
+  for (const rock of individual) byOwner.set(rock.userId ?? "", [...(byOwner.get(rock.userId ?? "") ?? []), rock]);
+  const people = [...byOwner.entries()]
+    .map(([ownerId, items]) => ({ ownerId, name: userName(ownerId) ?? "Unassigned", items }))
+    .sort((a, b) => Number(b.ownerId === meId) - Number(a.ownerId === meId) || a.name.localeCompare(b.name));
+
+  return [
+    { key: "company", title: "Company Rocks", rocks: company },
+    { key: "department", title: "Department Rocks", rocks: department },
+    ...people.map((p) => ({ key: `person-${p.ownerId}`, title: p.name, rocks: p.items })),
+  ]
+    .filter((section) => section.rocks.length)
+    .map((section) => ({ ...section, rocks: [...section.rocks].sort(byStatusThenDue) }));
+}
+
+function rockMarkdown(rock: Rock, milestones: Milestone[]) {
+  const lines = [`## ${rock.title}`];
+  const description = htmlToMarkdown(rock.description);
   if (description) lines.push(description);
-  const milestones = rock.milestones?.filter((m) => !m.isDeleted) ?? [];
   if (milestones.length) {
     lines.push("### Milestones");
     lines.push(
@@ -35,7 +72,19 @@ function rockMarkdown(rock: Rock) {
   return lines.join("\n\n");
 }
 
+function byDueDate(a: Milestone, b: Milestone) {
+  return new Date(a.dueDate ?? 0).getTime() - new Date(b.dueDate ?? 0).getTime();
+}
+
+function milestoneProgress(milestones: Milestone[]) {
+  const done = milestones.filter((m) => m.isDone).length;
+  const total = milestones.length;
+  const percent = total ? Math.round((done / total) * 100) : 0;
+  return { done, total, percent, summary: `${done} of ${total} done (${percent}%)` };
+}
+
 export default function Command() {
+  const { avatar, ownerAccessory } = useAvatar();
   const { teams, teamName, error: teamsError, revalidate: retryTeams } = useTeams();
   const { userName } = useUsers();
   const [scope, setScope] = useState("");
@@ -56,6 +105,24 @@ export default function Command() {
     },
   );
   const rocks = data ?? [];
+
+  // Rock list results leave Milestones out, so load them for every Rock shown.
+  const rockIds = rocks.map((rock) => rock._id);
+  const {
+    data: milestonesByRock,
+    isLoading: isLoadingMilestones,
+    revalidate: refreshMilestones,
+  } = useCachedPromise(getMilestonesForRocks, [rockIds], {
+    execute: rockIds.length > 0,
+    keepPreviousData: true,
+    onError: () => undefined,
+  });
+  const milestonesFor = (rock: Rock) =>
+    [...(milestonesByRock?.[rock._id] ?? rock.milestones ?? [])].filter((m) => !m.isDeleted).sort(byDueDate);
+  const milestonesChanged = () => {
+    refreshMilestones();
+    revalidate();
+  };
   const loadError = teamsError ?? (isMine ? meError : undefined) ?? error;
   const retry = () => (teamsError ? retryTeams() : isMine && meError ? retryMe() : revalidate());
 
@@ -102,36 +169,47 @@ export default function Command() {
           actions={<ActionPanel>{createAction}</ActionPanel>}
         />
       )}
-      {SECTION_ORDER.map((status) => {
-        const items = rocks.filter((rock) => rock.statusCode === status);
-        if (!items.length) return null;
+      {groupRocks(rocks, userName, userId).map((section) => {
         return (
-          <List.Section key={status} title={rockStatus(status).title} subtitle={String(items.length)}>
-            {items.map((rock) => {
-              const milestones = rock.milestones?.filter((m) => !m.isDeleted) ?? [];
-              const done = milestones.filter((m) => m.isDone).length;
+          <List.Section key={section.key} title={section.title} subtitle={String(section.rocks.length)}>
+            {section.rocks.map((rock) => {
+              const milestones = milestonesFor(rock);
+              const progress = milestoneProgress(milestones);
+              const milestonesLoaded = !!milestonesByRock?.[rock._id] || !isLoadingMilestones;
               const owner = userName(rock.userId);
               const team = teamName(rock.teamId);
               return (
                 <List.Item
                   key={rock._id}
                   title={rock.title}
-                  subtitle={showDetail ? undefined : isMine ? team : owner}
+                  subtitle={showDetail || !isMine ? undefined : team}
                   icon={rockStatus(rock.statusCode).icon}
                   keywords={compact([owner, team])}
                   accessories={
                     showDetail
                       ? undefined
                       : compact<List.Item.Accessory>([
-                          milestones.length
-                            ? { icon: Icon.Flag, text: `${done}/${milestones.length}`, tooltip: "Milestones done" }
+                          progress.total
+                            ? {
+                                icon: getProgressIcon(
+                                  progress.done / progress.total,
+                                  progress.done === progress.total ? Color.Green : Color.Blue,
+                                ),
+                                text: `${progress.done}/${progress.total}`,
+                                tooltip: `Milestones: ${progress.summary}`,
+                              }
+                            : undefined,
+                          rock.levelCode === "COMPANY_AND_DEPARTMENT"
+                            ? { tag: "Company & Dept", tooltip: "Company and Department Rock" }
                             : undefined,
                           dueDateAccessory(rock.dueDate, rock.completed),
+                          ownerAccessory(owner),
                         ])
                   }
                   detail={
                     <List.Item.Detail
-                      markdown={rockMarkdown(rock)}
+                      isLoading={!milestonesLoaded}
+                      markdown={rockMarkdown(rock, milestones)}
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.TagList title="Status">
@@ -140,15 +218,21 @@ export default function Command() {
                               color={rockStatus(rock.statusCode).color}
                             />
                           </List.Item.Detail.Metadata.TagList>
-                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} />
+                          <List.Item.Detail.Metadata.Label title="Owner" text={owner ?? "—"} icon={avatar(owner)} />
                           <List.Item.Detail.Metadata.Label title="Team" text={team ?? "—"} />
                           <List.Item.Detail.Metadata.Label title="Due" text={formatDate(rock.dueDate)} />
-                          {milestones.length ? (
-                            <List.Item.Detail.Metadata.Label
-                              title="Milestones"
-                              text={`${done} of ${milestones.length} done`}
-                            />
-                          ) : null}
+                          <List.Item.Detail.Metadata.Label
+                            title="Milestones"
+                            text={!milestonesLoaded ? "Loading…" : progress.total ? progress.summary : "None"}
+                            icon={
+                              progress.total
+                                ? getProgressIcon(
+                                    progress.done / progress.total,
+                                    progress.done === progress.total ? Color.Green : Color.Blue,
+                                  )
+                                : undefined
+                            }
+                          />
                         </List.Item.Detail.Metadata>
                       }
                     />
@@ -156,28 +240,6 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section>
-                        <Action.Push
-                          title="View Milestones"
-                          icon={Icon.Flag}
-                          target={<MilestoneList rock={rock} onChange={() => revalidate()} />}
-                        />
-                        <ActionPanel.Submenu
-                          title="Set Status"
-                          icon={Icon.Circle}
-                          shortcut={{
-                            macOS: { modifiers: ["cmd", "shift"], key: "u" },
-                            Windows: { modifiers: ["ctrl", "shift"], key: "u" },
-                          }}
-                        >
-                          {ROCK_STATUSES.filter((s) => s.value !== "DRAFT").map((s) => (
-                            <Action
-                              key={s.value}
-                              title={s.title}
-                              icon={s.icon}
-                              onAction={() => setStatus(rock, s.value)}
-                            />
-                          ))}
-                        </ActionPanel.Submenu>
                         <Action
                           title={showDetail ? "Hide Details" : "Show Details"}
                           icon={Icon.Sidebar}
@@ -187,7 +249,26 @@ export default function Command() {
                           }}
                           onAction={() => setShowDetail((v) => !v)}
                         />
-                        <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.rocks} />
+                        <Action.OpenInBrowser title="Open in Ninety" url={NinetyUrls.rock(rock)} />
+                        <Action.Push
+                          title="View Milestones"
+                          icon={Icon.Flag}
+                          shortcut={{
+                            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+                            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+                          }}
+                          target={<MilestoneList rock={rock} onChange={milestonesChanged} />}
+                        />
+                        <ActionPanel.Submenu title="Set Status" icon={Icon.Circle} shortcut={UPDATE_SHORTCUT}>
+                          {ROCK_STATUSES.filter((s) => s.value !== "DRAFT").map((s) => (
+                            <Action
+                              key={s.value}
+                              title={s.title}
+                              icon={s.icon}
+                              onAction={() => setStatus(rock, s.value)}
+                            />
+                          ))}
+                        </ActionPanel.Submenu>
                       </ActionPanel.Section>
                       <ActionPanel.Section>
                         <Action.Push
@@ -197,7 +278,7 @@ export default function Command() {
                             macOS: { modifiers: ["cmd", "shift"], key: "n" },
                             Windows: { modifiers: ["ctrl", "shift"], key: "n" },
                           }}
-                          target={<MilestoneForm rock={rock} onSaved={() => revalidate()} />}
+                          target={<MilestoneForm rock={rock} onSaved={milestonesChanged} />}
                         />
                         <Action.Push
                           title="Create Linked To-Do"

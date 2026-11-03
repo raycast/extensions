@@ -80,7 +80,19 @@ export function TodoForm({ todo, defaultTeamId, link, draftValues, onSaved, isRo
         if (!isEdit) setLastTeamId(values.teamId);
         toast.style = Toast.Style.Success;
         toast.title = isEdit ? "To-Do saved" : "To-Do created";
-        toast.primaryAction = { title: "Open in Ninety", onAction: () => open(NinetyUrls.todos) };
+        toast.primaryAction = {
+          title: "Open in Ninety",
+          onAction: () =>
+            open(
+              saved?.id
+                ? NinetyUrls.todo({
+                    id: saved.id,
+                    isPersonal: saved.isPersonal ?? values.teamId === PERSONAL,
+                    teamId: saved.teamId ?? (values.teamId === PERSONAL ? undefined : values.teamId),
+                  })
+                : NinetyUrls.todos,
+            ),
+        };
         if (onSaved) {
           onSaved(saved);
           pop();
