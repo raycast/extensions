@@ -15,7 +15,7 @@ Each resort shows:
 - **Conditions**: temperature, wind and gusts (flagged red in high wind), and the freezing level.
 - **A 7-day outlook** with daily snowfall and temperatures.
 
-From the actions (⌘K) you can favorite a resort (⌘⇧P), open its website, search for webcams, refresh the forecast (⌘R) and correct its elevations (⌘E).
+From the actions (⌘K) you can favorite a resort (⌘.), open its website, search for webcams, refresh the forecast (⌘R) and correct its elevations (⌘E).
 
 ### Favorites in Menu Bar
 

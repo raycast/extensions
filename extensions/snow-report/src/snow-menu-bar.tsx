@@ -10,6 +10,7 @@ import {
   openCommandPreferences,
   showHUD,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { useForecasts } from "./hooks/useForecasts";
 import { useResorts } from "./hooks/useResorts";
@@ -45,8 +46,13 @@ export default function SnowMenuBar() {
     await showHUD("Hidden from the menu bar. Run Favorites in Menu Bar to show it again.");
   };
   const first = favorites[0];
-  const openReport = (resortId?: string) =>
-    launchCommand({ name: "snow-report", type: LaunchType.UserInitiated, context: { resortId } });
+  const openReport = async (resortId?: string) => {
+    try {
+      await launchCommand({ name: "snow-report", type: LaunchType.UserInitiated, context: { resortId } });
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't open Search Resorts" });
+    }
+  };
 
   const title = first ? `${compact(headline(forecasts[first.id])?.next24h)} ${shortName(first.name)}` : undefined;
 

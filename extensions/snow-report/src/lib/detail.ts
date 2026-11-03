@@ -34,13 +34,14 @@ export function resortMarkdown(
   resort: Resort,
   forecast: ResortForecast | undefined,
   status: { isLoading: boolean; error?: Error },
+  favorite = false,
 ): string {
-  if (!forecast) return buildMarkdown(resort, undefined, status);
+  if (!forecast) return buildMarkdown(resort, undefined, status, favorite);
   const units = getPreferenceValues<Preferences>().units;
-  const key = JSON.stringify([resort, environment.appearance, units]);
+  const key = JSON.stringify([resort, environment.appearance, units, favorite]);
   const hit = built.get(forecast);
   if (hit?.key === key) return hit.markdown;
-  const markdown = buildMarkdown(resort, forecast, status);
+  const markdown = buildMarkdown(resort, forecast, status, favorite);
   built.set(forecast, { key, markdown });
   return markdown;
 }
@@ -49,10 +50,11 @@ function buildMarkdown(
   resort: Resort,
   forecast: ResortForecast | undefined,
   status: { isLoading: boolean; error?: Error },
+  favorite: boolean,
 ): string {
   const place = [flag(resort.country), [resort.region, resort.country].filter(Boolean).join(", ")].join(" ");
   const parts = [
-    `## ${resort.name}`,
+    favorite ? `## ${resort.name} ★` : `## ${resort.name}`,
     resort.website ? `${place}\u2003[${host(resort.website)}](${resort.website})` : place,
   ];
 

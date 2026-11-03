@@ -69,9 +69,13 @@ export function ResortForm(props: Props) {
     },
   });
 
+  // Editing always happens in a pushed view, so it gets a title. Adding is the Add Resort command's root
+  // view, which Raycast names itself.
+  const title = mode === "override" ? `Edit Elevations: ${resort.name}` : resort ? "Edit Resort" : undefined;
+
   return (
     <Form
-      navigationTitle={mode === "override" ? `Edit Elevations: ${resort.name}` : resort ? "Edit Resort" : "Add Resort"}
+      navigationTitle={title}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save" onSubmit={handleSubmit} />

@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, mock, test } from "node:test";
 import { fetchForecasts, isPowder, precipitationNow, skyNow, windNow, type PointForecast } from "../src/lib/forecast";
 import type { Resort } from "../src/types";
 
-// Fourteen days of hourly data in UTC, starting a week before "now" (past_days=7 plus 7 forecast days).
+// Fifteen days of hourly data in UTC, starting a week before "now" (past_days=7 plus 8 forecast days).
 const START = Date.UTC(2026, 0, 1);
 const NOW = Date.UTC(2026, 0, 8, 12, 30);
 const NOW_INDEX = 7 * 24 + 12; // the 12:00 slot
-const HOURS = 14 * 24;
+const HOURS = 15 * 24;
 const time = Array.from({ length: HOURS }, (_, i) => new Date(START + i * 3600_000).toISOString().slice(0, 16));
 const filled = (value: number | null) => Array<number | null>(HOURS).fill(value);
 
@@ -68,6 +68,7 @@ describe("fetchForecasts", () => {
   test("asks for a week of history", async () => {
     await fetchForecasts([resort("hill")]);
     assert.equal(requests[0].searchParams.get("past_days"), "7");
+    assert.equal(requests[0].searchParams.get("forecast_days"), "8");
   });
 
   test("queries base and summit, and sums the hourly snowfall around now", async () => {
@@ -99,7 +100,20 @@ describe("fetchForecasts", () => {
     assert.equal(days[0].snowfall, 14.5);
     assert.equal(days[1].snowfall, 12);
     assert.deepEqual([days[1].tempMin, days[1].tempMax], [-10, 13]);
-    assert.equal(next7d, 14.5 + 6 * 12);
+    assert.equal(days.length, 7);
+    assert.equal(next7d, 167 * 0.5 + 3); // the 168 hours after now
+  });
+
+  test("next 7 days doesn't count snow that already fell today", async () => {
+    mock.method(globalThis, "fetch", async () => {
+      const loc = location(2000);
+      loc.hourly.snowfall[NOW_INDEX - 2] = 20; // a morning storm, before now
+      return Response.json(loc);
+    });
+    const { hill } = await fetchForecasts([resort("hill")]);
+    if (hill.kind !== "single") return assert.fail("expected a single forecast");
+    assert.equal(hill.point.next7d, 167 * 0.5 + 3);
+    assert.equal(hill.point.days[0].snowfall, 14.5 - 0.5 + 20); // the outlook's "Today" still includes it
   });
 
   test("resorts without elevations get one point at the model's terrain height", async () => {

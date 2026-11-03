@@ -92,7 +92,8 @@ function buildUrl(points: Point[]): string {
     hourly: HOURLY.join(","),
     timezone: "auto",
     past_days: "7",
-    forecast_days: "7",
+    // One day more than the outlook, so "next 7 days" can sum 168 hours from now.
+    forecast_days: "8",
   });
   return `${API_URL}?${params}`;
 }
@@ -154,7 +155,7 @@ function summarize(loc: ApiLocation): PointForecast {
   const now = hourly.time.findIndex((t) => t.startsWith(localNow.slice(0, 13)));
   const at = (series: Series) => (now === -1 ? null : (series[now] ?? null));
 
-  const days = dailyFromHourly(hourly, localNow.slice(0, 10));
+  const days = dailyFromHourly(hourly, localNow.slice(0, 10)).slice(0, 7);
   const depth = at(hourly.snow_depth);
   const isDay = at(hourly.is_day);
 
@@ -165,7 +166,8 @@ function summarize(loc: ApiLocation): PointForecast {
     last7d: now === -1 ? null : sum(hourly.snowfall, now - 167, now + 1),
     next24h: now === -1 ? null : sum(hourly.snowfall, now + 1, now + 25),
     next72h: now === -1 ? null : sum(hourly.snowfall, now + 1, now + 73),
-    next7d: days.some((d) => d.snowfall === null) ? null : days.reduce((total, d) => total + (d.snowfall ?? 0), 0),
+    // From now, not from midnight, so snow that already fell today doesn't count as forecast.
+    next7d: now === -1 ? null : sum(hourly.snowfall, now + 1, now + 169),
     snowDepth: depth === null ? null : depth * 100,
     temperature: at(hourly.temperature_2m),
     freezingLevel: at(hourly.freezing_level_height),
