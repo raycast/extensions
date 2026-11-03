@@ -576,6 +576,7 @@
 /extensions/copyq-clipboard-manager                                 @andrewcincotta @pernielsentikaer
 /extensions/corcel                                                  @AkinAguda
 /extensions/cortisol-meter                                          @Smexey
+/extensions/cosign                                                  @chrismessina
 /extensions/cosmic-bookmarks                                        @kemiljk
 /extensions/count-numbers                                           @XInTheDark
 /extensions/counter                                                 @EvanZhouDev @pernielsentikaer
@@ -656,6 +657,7 @@
 /extensions/datahub                                                 @nickrotondo
 /extensions/datawrapper                                             @benkates
 /extensions/date-converter                                          @asportnoy @vineus @danyalprout @aleksey925
+/extensions/date-inserter                                           @namikaze-40p
 /extensions/dated-folder                                            @fanhefeng
 /extensions/datetime-format-converter                               @yangxyo @yisshengyouni @pernielsentikaer @hemangkinra @jose-elias-alvarez @bestemic @ridemountainpig @shanto462
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
@@ -1235,7 +1237,7 @@
 /extensions/heed                                                    @rbstp
 /extensions/heidisql-sessions                                       @THEN00P
 /extensions/height                                                  @teziovsky
-/extensions/helium                                                  @IslamTayeb @mallsjr @mallsjr @ohivan
+/extensions/helium                                                  @IslamTayeb @mallsjr @mallsjr @ohivan @muhammadrizo-y
 /extensions/helldivers2                                             @AlexStrNik @LitoMore
 /extensions/hellonext-changelogs                                    @heertheeswaran
 /extensions/hellonext-wallpapers                                    @imkarthikk
@@ -1455,6 +1457,7 @@
 /extensions/karakeep                                                @foru17 @kdurek @foru17 @chrismessina @mitsimi
 /extensions/kaset-control                                           @Endiruslan @danieltsam
 /extensions/kde-connect                                             @StevenRCE0
+/extensions/keep-md                                                 @perryraskin
 /extensions/keepassxc                                               @pabroux @zkytech @Osmagtor @Ygnas
 /extensions/keeper-security                                         @amuley-ks
 /extensions/keeply                                                  @RolfKoenders
@@ -1986,6 +1989,7 @@
 /extensions/nust-mess-menu                                          @devvMuhammad
 /extensions/nuxt                                                    @HugoRCD
 /extensions/nyc-train-tracker                                       @kcole93
+/extensions/nyxe                                                    @raymond-UI
 /extensions/nzbget                                                  @wyattjoh
 /extensions/oblique-strategies                                      @dnnsmnstrr
 /extensions/obs-clippings                                           @trevware
@@ -3105,6 +3109,7 @@
 /extensions/ton-address                                             @drankou
 /extensions/toncoin-price                                           @uqe
 /extensions/toneclone                                               @jfox85
+/extensions/tonecue-audio-scenes                                    @4IngoJ
 /extensions/toolbox                                                 @kkange @Saafo @pernielsentikaer @Yakitrak @podlesny-j
 /extensions/toothpick                                               @VladCuciureanu @briankosw @VladCuciureanu @sxn @pernielsentikaer @rspeicher @VladCuciureanu @AntonNiklasson @xmok @merchako @alexibuild @AviralSaxena
 /extensions/torbox                                                  @baradusov @ohivan
@@ -3433,6 +3438,7 @@
 /extensions/yandex-smart-home                                       @beautyfree
 /extensions/yandex-telemost                                         @egorchuzhin
 /extensions/yap                                                     @bytechase
+/extensions/yaps                                                    @richawo
 /extensions/yasb                                                    @deviljin112
 /extensions/yatt                                                    @alexbartok
 /extensions/yazio-tracker                                           @Giton22 @pernielsentikaer
