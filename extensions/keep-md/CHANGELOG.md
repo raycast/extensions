@@ -1,6 +1,6 @@
 # Keep.md Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-03
 
 - Search, open, edit, and archive Keep.md bookmarks.
 - Save URLs with optional titles and tags.
