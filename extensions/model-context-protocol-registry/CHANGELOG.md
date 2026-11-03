@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Fix the Mnemoverse README row] - {PR_MERGE_DATE}
+
+- Bring the Mnemoverse row in the README back in line with its registry entry: the hosted remote server with OAuth 2.1 sign-in and no API key, instead of the earlier local-server text.
+
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
