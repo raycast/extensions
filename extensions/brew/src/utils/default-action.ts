@@ -6,8 +6,8 @@
 export type ActionSlot = "first" | "terminal";
 
 /**
- * Whether `slot` holds the Run … in Terminal action. The Default Action
- * preference moves it to the first slot.
+ * Whether `slot` holds the Run … in Terminal action. The preference to install
+ * and uninstall in the terminal moves it to the first slot.
  *
  * A pinned package ignores the preference. brew refuses to uninstall it without
  * `--force`, which the command builder does not add, so the panel shows no

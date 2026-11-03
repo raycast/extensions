@@ -526,7 +526,7 @@ async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: bo
 }
 
 /**
- * Run Uninstall in Terminal on ⌃X, where the Default Action preference puts it.
+ * Run Uninstall in Terminal on ⌃X, where the terminal preference puts it.
  * The panel shows it only when its pin state says unpinned, but a pin set from
  * the CLI since the list loaded still makes brew refuse. So this reads brew's
  * pins first, even when the caller passes `false`, and sends a pinned package

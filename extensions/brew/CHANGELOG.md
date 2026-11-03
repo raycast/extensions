@@ -2,7 +2,7 @@
 
 ## [Install in your terminal by default] - {PR_MERGE_DATE}
 
-- New: a Default Action preference makes ↩ on a package that is not installed run `brew install` in your terminal application. ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` in the terminal too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin. The preference is off by default
+- New: an "Install and uninstall in the terminal application" preference, off by default. ↩ on a package that is not installed runs `brew install` in your terminal application, and ⌘I still installs inside Raycast. ⌃X runs `brew uninstall` there too, except on a pinned package, where Uninstall stays in Raycast and asks to unpin
 
 ## [Finished toasts lose Cancel] - 2026-11-03
 

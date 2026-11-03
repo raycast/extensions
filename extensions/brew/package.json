@@ -222,9 +222,8 @@
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Default Action",
       "label": "Install and uninstall in the terminal application",
-      "description": "↩ on a package that is not installed runs brew install in the terminal application above, and ⌃X runs brew uninstall there. ⌘I still installs inside Raycast."
+      "description": "When enabled, brew install and uninstall run in the terminal application. ⌘I still installs inside Raycast."
     },
     {
       "name": "greedyUpgrades",
