@@ -1,6 +1,6 @@
 # Boop Changelog
 
-## [Fix Collapse Whitespace] - {PR_MERGE_DATE}
+## [Fix Collapse Whitespace] - 2026-11-03
 Fixed Collapse Whitespace so it replaces consecutive whitespace, including non-breaking spaces, with a single space and removes whitespace at the beginning and end.
 
 ## [Feature Request] - 2025-07-09
