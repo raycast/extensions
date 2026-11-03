@@ -4,6 +4,10 @@
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add BatchData MCP Server] - 2026-11-03
+
+- Add BatchData to the official registry: U.S. real estate property, ownership and contact data for AI agents (property lookup, comparables, property search, skip tracing, phone and address checks, investor buy boxes). 21 tools. Hosted Streamable HTTP server at https://mcp.batchdata.com with OAuth 2.1 sign-in (dynamic client registration and PKCE) or a BatchData API token, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients. A BatchData account is required.
+
 ## [Add SlickTrip MCP Server] - 2026-11-01
 
 - Add SlickTrip to the official registry: live flight, hotel and seat prices, cheapest-day calendars, and price-drop and seat alerts. Hosted Streamable HTTP server at https://mcp.slicktrip.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
