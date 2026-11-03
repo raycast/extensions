@@ -527,10 +527,11 @@ async function pinnedForUninstall(formula: Cask | Nameable, effectivePinned?: bo
 
 /**
  * Run Uninstall in Terminal on ⌃X, where the Default Action preference puts it.
- * The panel shows it only when the cached payload is unpinned, but a pin set
- * from the CLI since the fetch still makes brew refuse. So this reads the pins
- * first and sends a pinned package to the in-Raycast Uninstall, which asks to
- * unpin.
+ * The panel shows it only when its pin state says unpinned, but a pin set from
+ * the CLI since the list loaded still makes brew refuse. So this reads brew's
+ * pins first, even when the caller passes `false`, and sends a pinned package
+ * to the in-Raycast Uninstall, which asks to unpin. A caller's `true` is a live
+ * pin and needs no read.
  */
 export async function uninstallInTerminal(
   formula: Cask | Nameable,
@@ -538,13 +539,13 @@ export async function uninstallInTerminal(
   runCommandInTerminal: (command: string) => Promise<void>,
   onAction: (result: boolean) => void,
 ): Promise<void> {
-  const pinned = await pinnedForUninstall(formula, effectivePinned);
+  const pinned = effectivePinned === true || (await pinnedForUninstall(formula));
   if (pinned === undefined) {
     return;
   }
   if (pinned) {
     // Pass the pin just read, so uninstall does not ask brew again.
-    onAction(await uninstall(formula, false, pinned, onAction));
+    onAction(await uninstall(formula, false, true, onAction));
     return;
   }
   await runCommandInTerminal(brewUninstallCommand(formula));
