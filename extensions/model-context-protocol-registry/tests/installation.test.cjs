@@ -22,6 +22,7 @@ const { getAccessories } = loadSource("src/registries/builtin/utils.ts");
 const { OFFICIAL_ENTRIES } = loadSource("src/registries/builtin/entries.ts");
 const { writeMCPConfig } = loadSource("src/shared/mcp.ts");
 const linear = OFFICIAL_ENTRIES.find((entry) => entry.name === "linear");
+const elevenlabs = OFFICIAL_ENTRIES.find((entry) => entry.name === "elevenlabs");
 
 test("Linear installs directly in Raycast without npx or npm dependencies", () => {
   const server = getRaycastServer(linear);
@@ -74,5 +75,21 @@ test("Linear keeps a proxy fallback with the current endpoint for other clients"
     });
   } finally {
     rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("ElevenLabs uses the maintained hosted server", () => {
+  assert.equal(elevenlabs.remoteUrl, "https://api.elevenlabs.io/v1/mcp");
+  assert.equal(getRaycastServer(elevenlabs).url, "https://api.elevenlabs.io/v1/mcp");
+  assert.deepEqual(elevenlabs.configuration, {
+    command: "npx",
+    args: ["-y", "mcp-remote", "https://api.elevenlabs.io/v1/mcp"],
+  });
+});
+
+test("archived or missing built-in servers are not offered", () => {
+  const names = new Set(OFFICIAL_ENTRIES.map((entry) => entry.name));
+  for (const name of ["e2b", "google-drive", "shopify-dev"]) {
+    assert.equal(names.has(name), false, `${name} should not remain in the built-in registry`);
   }
 });

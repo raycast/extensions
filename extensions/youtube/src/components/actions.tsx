@@ -1,4 +1,5 @@
 import { Action, Color, Icon } from "@raycast/api";
+import { channelUrl } from "../lib/urls";
 import { PlaylistList } from "./playlist";
 import { addRecentChannel } from "./recent_channels";
 import { SearchVideoList } from "./video_search";
@@ -12,7 +13,7 @@ export function OpenChannelInBrowser({ channelId, refresh }: ChannelActionProps)
   return (
     <Action.OpenInBrowser
       title="Open Channel in Browser"
-      url={`https://youtube.com/channel/${channelId}`}
+      url={channelUrl(channelId)}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
       onOpen={() => {
         addRecentChannel(channelId);

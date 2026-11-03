@@ -1,0 +1,19 @@
+# Raycast / Node
+node_modules/
+dist/
+.raycast/
+raycast-env.d.ts
+
+# Secrets — this repo becomes PUBLIC on store publish. Nothing sensitive here.
+.env
+.env.*
+*.local
+
+# Planning notes — local only, never published
+plan/
+
+# OS / editor
+.DS_Store
+*.log
+.vscode/
+.idea/

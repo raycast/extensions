@@ -3,7 +3,7 @@ import { AlertWindows } from "./state";
 import { ARABIC_NAMES, MethodName, PRAYER_KEYS, PrayerKey, ScheduleConfig } from "./prayers";
 import { PlanOptions } from "./plan";
 import { readLocation, StoredLocation } from "./location";
-import { parseJamaatRule } from "./jamaat";
+import { formulaProblem, parseJamaatRule } from "./jamaat";
 import { resolveRules, toSchool } from "./rules";
 
 /** Parsed, typed view of the extension preferences. */
@@ -31,26 +31,29 @@ export interface Settings {
   warnings: string[];
 }
 
-const JAMAAT_PREFS: [keyof Preferences, string][] = [
-  ["jamaatFajr", "Fajr Jamaat"],
-  ["jamaatDhuhr", "Dhuhr Jamaat"],
-  ["jamaatJumuah", "Jumu'ah Jamaat"],
-  ["jamaatAsr", "Asr Jamaat"],
-  ["jamaatMaghrib", "Maghrib Jamaat"],
-  ["jamaatIsha", "Isha Jamaat"],
+const JAMAAT_PREFS: [keyof Preferences, string, PrayerKey][] = [
+  ["jamaatFajr", "Fajr Jamaat", "fajr"],
+  ["jamaatDhuhr", "Dhuhr Jamaat", "dhuhr"],
+  ["jamaatJumuah", "Jumu'ah Jamaat", "dhuhr"],
+  ["jamaatAsr", "Asr Jamaat", "asr"],
+  ["jamaatMaghrib", "Maghrib Jamaat", "maghrib"],
+  ["jamaatIsha", "Isha Jamaat", "isha"],
 ];
 
 /**
- * Jamaat rules that don't parse. Such a prayer silently gets no jamaat, so say so instead.
+ * Jamaat rules that don't parse, and formulas that can't work. Such a prayer silently gets no jamaat, so say
+ * so instead.
  *
  * @param prefs - Raw preferences.
  * @returns One message per unreadable rule.
  */
 export function jamaatWarnings(prefs: Partial<Record<string, unknown>>): string[] {
-  return JAMAAT_PREFS.flatMap(([name, label]) => {
+  return JAMAAT_PREFS.flatMap(([name, label, key]) => {
     const text = String(prefs[name] ?? "");
     const rule = parseJamaatRule(text);
     if (rule.kind === "invalid") return [`${label} "${text.trim()}" isn't a valid rule`];
+    const problem = rule.kind === "formula" && formulaProblem(rule.source, key);
+    if (problem) return [`${label} "${text.trim()}": ${problem}`];
     const combines =
       (name === "jamaatAsr" && rule.kind === "after" && rule.prayer === "dhuhr") ||
       (name === "jamaatIsha" && rule.kind === "after" && rule.prayer === "maghrib");
@@ -115,6 +118,7 @@ export function buildSettings(location: StoredLocation): Settings {
   const headsUpMinutes = Math.max(0, toNumber(prefs.headsUpMinutes, 15));
   const windows: AlertWindows = {
     startWindowMinutes: toNumber(prefs.startWindowMinutes, 5),
+    preferredReminderMinutes: toNumber(prefs.preferredReminderMinutes, 15),
     endingReminderMinutes: toNumber(prefs.endingReminderMinutes, 30),
     jamaatReminderMinutes: toNumber(prefs.jamaatReminderMinutes, 10),
     headsUpMinutes,

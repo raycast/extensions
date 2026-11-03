@@ -146,6 +146,27 @@ export interface Video {
   channelTitle: string;
 }
 
+function videoFromSnippet(
+  id: string,
+  snippet?:
+    | youtube_v3.Schema$VideoSnippet
+    | youtube_v3.Schema$SearchResultSnippet
+    | youtube_v3.Schema$PlaylistItemSnippet,
+): Video {
+  return {
+    id,
+    title: snippet?.title || "?",
+    description: snippet?.description || undefined,
+    publishedAt: snippet?.publishedAt || "?",
+    channelId: snippet?.channelId || "",
+    channelTitle: snippet?.channelTitle || "?",
+    thumbnails: {
+      default: { url: snippet?.thumbnails?.default?.url || undefined },
+      high: { url: snippet?.thumbnails?.high?.url || undefined },
+    },
+  };
+}
+
 function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undefined): VideoStatistics | undefined {
   const si = statistics;
   if (!si) {
@@ -277,23 +298,7 @@ export async function searchVideos(
     for (const r of items) {
       const vid = r.id?.videoId;
       if (vid) {
-        const v: Video = {
-          id: vid,
-          title: r.snippet?.title || "?",
-          description: r.snippet?.description || undefined,
-          publishedAt: r.snippet?.publishedAt || "?",
-          channelId: r.snippet?.channelId || "",
-          channelTitle: r.snippet?.channelTitle || "?",
-          thumbnails: {
-            default: {
-              url: r.snippet?.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: r.snippet?.thumbnails?.high?.url || undefined,
-            },
-          },
-        };
-        result.push(v);
+        result.push(videoFromSnippet(vid, r.snippet));
       }
     }
   }
@@ -310,28 +315,7 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
         part: ["id", "snippet"],
         maxResults: videoIdChunk.length,
       });
-      result.push(
-        ...(data?.data.items?.map(
-          (r) =>
-            ({
-              id: r.id,
-              title: r.snippet?.title || "?",
-              description: r.snippet?.description || undefined,
-              publishedAt: r.snippet?.publishedAt || "?",
-              channelId: r.snippet?.channelId || "",
-              channelTitle: r.snippet?.channelTitle || "?",
-
-              thumbnails: {
-                default: {
-                  url: r.snippet?.thumbnails?.default?.url || undefined,
-                },
-                high: {
-                  url: r.snippet?.thumbnails?.high?.url || undefined,
-                },
-              },
-            }) as Video,
-        ) || []),
-      );
+      result.push(...(data?.data.items?.map((r) => videoFromSnippet(r.id || "", r.snippet)) || []));
     }
     await fetchAndInjectVideoStats(result);
     return result;
@@ -478,23 +462,7 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
           throw Error(`Could not get snippet of playlist ${playlistId}`);
         }
         const vid = item.contentDetails?.videoId;
-        const v: Video = {
-          id: vid || "",
-          title: sn.title || "?",
-          description: sn.description || undefined,
-          publishedAt: sn.publishedAt || "?",
-          channelId: sn.channelId || "",
-          channelTitle: sn.channelTitle || "?",
-          thumbnails: {
-            default: {
-              url: sn.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: sn.thumbnails?.high?.url || undefined,
-            },
-          },
-        };
-        result.push(v);
+        result.push(videoFromSnippet(vid || "", sn));
       }
       await fetchAndInjectVideoStats(result);
     }
@@ -515,25 +483,11 @@ export async function getPopularVideos(): Promise<Video[] | undefined> {
     for (const item of items) {
       const sn = item.snippet;
       if (sn) {
-        const v: Video = {
-          id: item.id || "",
-          title: sn.title || "?",
-          description: sn.description || undefined,
+        result.push({
+          ...videoFromSnippet(item.id || "", sn),
           duration: convertYouTubeDuration(item.contentDetails?.duration),
-          publishedAt: sn.publishedAt || "?",
-          thumbnails: {
-            default: {
-              url: sn.thumbnails?.default?.url || undefined,
-            },
-            high: {
-              url: sn.thumbnails?.high?.url || undefined,
-            },
-          },
-          channelId: sn.channelId || "",
-          channelTitle: sn.channelTitle || "?",
           statistics: dataToStatistics(item.statistics),
-        };
-        result.push(v);
+        });
       }
     }
   }

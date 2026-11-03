@@ -1,12 +1,12 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
-import { Stream } from "openai/streaming";
 import {
   allModels,
   countToken,
   estimatePrice,
   formatUserMessage,
+  isStream,
   isThinkingModel,
   buildSystemPrompt,
   buildUserPrompt,
@@ -109,7 +109,7 @@ export default function ResultView(props: ResultViewProps) {
           setResponse((prev) => prev + part);
         };
 
-        if (response instanceof Stream) {
+        if (isStream(response)) {
           for await (const part of response) {
             processChunk(part.choices[0]?.delta?.content ?? "");
           }
@@ -120,7 +120,7 @@ export default function ResultView(props: ResultViewProps) {
 
           if (isThinkingModel(model)) {
             const idx = whole.indexOf(closingTag);
-            const visible = idx === -1 ? "" : whole.slice(idx + closingLen);
+            const visible = idx === -1 ? whole : whole.slice(idx + closingLen);
             setResponse(visible);
           } else {
             setResponse(whole);

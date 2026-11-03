@@ -13,6 +13,9 @@
 const MARKDOWN_TYPES = /^text\/(?:x-)?markdown\b/i;
 const MARKDOWN_PATH = /\.(?:md|markdown)$/i;
 
+/** YAML (`---`) or TOML (`+++`) front matter at the very start; group 2 is its body. */
+const FRONT_MATTER = /^(---|\+\+\+)[ \t]*\r?\n([\s\S]*?)\r?\n\1[ \t]*(?:\r?\n|$)/;
+
 /**
  * True for a Markdown response: its content type says so, or it's plain text at a `.md` path.
  * A full HTML document is never Markdown, whatever its headers claim: a catch-all route can
@@ -22,6 +25,10 @@ export function isMarkdownResponse(contentType: string | null, url: string, body
   if (/^\s*(?:<!--[\s\S]*?-->\s*)*<(?:!doctype\s+html|html)[\s>]/i.test(body.slice(0, 1024))) return false;
   if (contentType && MARKDOWN_TYPES.test(contentType)) return true;
   if (contentType && !/^text\/plain\b/i.test(contentType)) return false;
+  return isMarkdownPath(url);
+}
+
+export function isMarkdownPath(url: string): boolean {
   try {
     return MARKDOWN_PATH.test(new URL(url).pathname);
   } catch {
@@ -174,6 +181,24 @@ export function findMarkdownAlternate(html: string, pageUrl: string): string | n
 }
 
 /**
+ * A fence's opening line: three or more backticks or tildes, and a backtick fence's info has
+ * none. A line may end in "\r", as in a file written on Windows.
+ */
+const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})([^\r\n]*)\r?$/;
+const FENCE_CLOSE = /^ {0,3}(`+|~+)[ \t]*\r?$/;
+
+function opensFence(line: string): { char: string; length: number } | null {
+  const open = line.match(FENCE_OPEN);
+  if (!open || (open[1][0] === "`" && open[2].includes("`"))) return null;
+  return { char: open[1][0], length: open[1].length };
+}
+
+function closesFence(line: string, fence: { char: string; length: number }): boolean {
+  const close = line.match(FENCE_CLOSE);
+  return !!close && close[1][0] === fence.char && close[1].length >= fence.length;
+}
+
+/**
  * Splits Markdown into alternating prose and code (odd indexes are code), so rewrites never
  * touch code. Fences close only on a run of the same character at least as long as the opener,
  * as CommonMark requires; an unclosed fence runs to the end. Indented code blocks aren't
@@ -186,19 +211,18 @@ function splitFences(markdown: string): string[] {
   for (const line of markdown.split("\n")) {
     if (fence) {
       current.push(line);
-      const close = line.match(/^ {0,3}(`+|~+)[ \t]*\r?$/);
-      if (close && close[1][0] === fence.char && close[1].length >= fence.length) {
+      if (closesFence(line, fence)) {
         parts.push(current.join("\n"));
         current = [];
         fence = null;
       }
       continue;
     }
-    const open = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
-    if (open && !(open[1][0] === "`" && open[2].includes("`"))) {
+    const open = opensFence(line);
+    if (open) {
       parts.push(current.join("\n"));
       current = [line];
-      fence = { char: open[1][0], length: open[1].length };
+      fence = open;
       continue;
     }
     current.push(line);
@@ -234,6 +258,137 @@ function mapProse(
     .join("");
 }
 
+/** For each line inside a fenced code block, the block's first and last lines. */
+function codeBlocks(lines: string[]): ({ start: number; end: number } | undefined)[] {
+  const blocks: ({ start: number; end: number } | undefined)[] = new Array(lines.length);
+  let fence: { char: string; length: number } | null = null;
+  let opened = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (fence) {
+      if (closesFence(lines[i], fence)) {
+        for (let j = opened; j <= i; j++) blocks[j] = { start: opened, end: i };
+        fence = null;
+      }
+    } else if ((fence = opensFence(lines[i]))) {
+      opened = i;
+    }
+  }
+  if (fence) for (let j = opened; j < lines.length; j++) blocks[j] = { start: opened, end: lines.length - 1 };
+  return blocks;
+}
+
+/** A one-line JSON body naming schema.org: the page's JSON-LD, which a converter keeps as code. */
+const JSON_LD = /^[ \t]*\{.*"@context"\s*:\s*"https?:\/\/schema\.org/;
+const SKIP_LINK = /^\[skip to [^\]\n]{1,60}\]\(#[^)\s]*\)$/i;
+const THEME_TOGGLE = /^(?:light|dark|system|auto)(?:\s*(?:light|dark|system|auto)){1,3}$/i;
+/** A docs page's feedback widget, its question and its buttons: "Was this helpful?" over "YesNo". */
+const FEEDBACK_WIDGET = /^(?:(?:was this (?:page |article )?helpful|did this (?:page )?help)\??|yes\s*no)$/i;
+/** A line that is one link, its label text or an image plus text: the link's URL is captured. */
+const LINK_LINE = /^\[(?:!\[[^\]\n]{0,300}\]\([^)\s]{0,2000}\))?[^[\]\n]{0,100}\]\(([^)\s]{1,2000})\)$/;
+
+/**
+ * Removes what a converter carries over from the page around the article when it turns a whole
+ * HTML page into Markdown, as Cloudflare does for `Accept: text/markdown`. Only the start and the
+ * end of the document are touched, where the page's header and footer land; a line that looks
+ * like chrome inside the article stays. At the start: a skip link, links to the site's home page
+ * (its logo and name), and a quoted note pointing agents at `llms.txt`. At the end: those, a
+ * light/dark theme toggle, a feedback widget ("Was this helpful?" over "YesNo"), the page's
+ * JSON-LD, and headings left with nothing under them ("On this page" over a table of contents the
+ * converter dropped). Front matter is kept. `url` is the page's
+ * URL, which says what its home page is. `pageHtml` is the page's HTML: a closing JSON-LD block is
+ * the page's own only when that HTML carries the same JSON, and is otherwise an example the
+ * article ends with.
+ */
+export function stripPageChrome(markdown: string, url: string, pageHtml = ""): string {
+  let home: string | null = null;
+  try {
+    home = new URL("/", url).href;
+  } catch {
+    // No home page to recognize
+  }
+  const isChromeLine = (line: string) => {
+    const text = line.trim();
+    if (SKIP_LINK.test(text) || THEME_TOGGLE.test(text)) return true;
+    const link = text.match(LINK_LINE);
+    if (!link || !home) return false;
+    try {
+      return new URL(link[1], url).href === home;
+    } catch {
+      return false;
+    }
+  };
+
+  const frontMatter = markdown.match(FRONT_MATTER)?.[0] ?? "";
+  const lines = markdown.slice(frontMatter.length).split("\n");
+  const blocks = codeBlocks(lines);
+  const isQuote = (i: number) => !blocks[i] && /^ {0,3}>/.test(lines[i]);
+  const quoteNamesLlms = (from: number, to: number) => lines.slice(from, to).some((l) => /\bllms\.txt\b/i.test(l));
+
+  let first = 0;
+  while (first < lines.length) {
+    if (blocks[first]) break;
+    if (!lines[first].trim() || isChromeLine(lines[first])) {
+      first++;
+    } else if (isQuote(first)) {
+      let end = first;
+      while (end < lines.length && isQuote(end)) end++;
+      if (!quoteNamesLlms(first, end)) break;
+      first = end;
+    } else break;
+  }
+
+  let last = lines.length;
+  while (last > first) {
+    const i = last - 1;
+    const block = blocks[i];
+    if (block) {
+      const json = lines[block.start + 1]?.trim() ?? "";
+      const isJsonLd =
+        block.end === i && i - block.start === 2 && JSON_LD.test(json) && !!pageHtml && pageHtml.includes(json);
+      if (!isJsonLd || block.start < first) break;
+      last = block.start;
+    } else if (
+      !lines[i].trim() ||
+      isChromeLine(lines[i]) ||
+      FEEDBACK_WIDGET.test(lines[i].trim()) ||
+      /^ {0,3}#{1,6}(?:\s|$)/.test(lines[i])
+    ) {
+      last = i;
+    } else if (isQuote(i)) {
+      let start = i;
+      while (start > first && isQuote(start - 1)) start--;
+      if (!quoteNamesLlms(start, last)) break;
+      last = start;
+    } else break;
+  }
+
+  if (first === 0 && last === lines.length) return markdown;
+  return frontMatter + lines.slice(first, last).join("\n") + (last < lines.length ? "\n" : "");
+}
+
+/**
+ * A JSX component's tag in prose: a closing tag (`</Note>`), an opening tag with attributes, even
+ * spread over lines (`<Card title="…">`), a self-closing one (`<Badge />`), or a bare opening tag
+ * alone on its line (`<Steps>`). A capitalized type in prose, as in `List<String>`, is none of these.
+ */
+const COMPONENT_TAG =
+  /<\/[A-Z][\w.]{0,60}\s*>|<[A-Z][\w.]{0,60}(?:\s+[\w:-]{1,60}(?:=|\s|\/?>)|\s*\/>)|^[ \t]*<[A-Z][\w.]{0,60}>[ \t]*\r?$/gm;
+
+/**
+ * How many JSX component tags the prose holds (`<Steps>`, `<Card title="…">`, `</Note>`): the MDX
+ * that documentation sites publish as Markdown. Raycast renders none of them, and the text
+ * indented inside them reads as code. Inline code and code blocks don't count.
+ */
+export function componentTags(markdown: string): number {
+  let count = 0;
+  mapProse(markdown, (prose) => {
+    // A closing tag counts for its opening one too, which can be a bare `<Note>` mid-line.
+    for (const [tag] of prose.matchAll(COMPONENT_TAG)) count += tag.startsWith("</") ? 2 : 1;
+    return prose;
+  });
+  return count;
+}
+
 function absolutize(href: string, baseUrl: string): string {
   // A backslash is a Markdown escape here, which URL would read as a path separator.
   if (href.includes("\\")) return href;
@@ -267,7 +422,7 @@ function frontMatterTitle(block: string, toml: boolean): string | null {
 /** Front matter title, or a leading `# Heading`, which is removed since Reader shows the title itself. */
 function takeTitle(markdown: string): { title: string | null; body: string } {
   let title: string | null = null;
-  const frontMatter = markdown.match(/^(---|\+\+\+)[ \t]*\r?\n([\s\S]*?)\r?\n\1[ \t]*(?:\r?\n|$)/);
+  const frontMatter = markdown.match(FRONT_MATTER);
   if (frontMatter) {
     title = frontMatterTitle(frontMatter[2], frontMatter[1] === "+++");
     markdown = markdown.slice(frontMatter[0].length);
@@ -296,8 +451,11 @@ function dropElements(text: string, name: string): string {
   return out + text.slice(i);
 }
 
-/** Plain text for the summarizer: no Markdown syntax, links, or HTML tags. Code keeps its text. */
-function toPlainText(markdown: string): string {
+/**
+ * Plain text for the summarizer: no Markdown syntax, links, or HTML tags. Code keeps its text,
+ * unless `withCode` is false.
+ */
+function toPlainText(markdown: string, withCode = true): string {
   const prose = (text: string) =>
     decodeEntities(
       dropElements(dropElements(text, "script"), "style")
@@ -310,11 +468,20 @@ function toPlainText(markdown: string): string {
         .replace(/\*+|__+|`+/g, ""),
     );
   // Code keeps its text, minus fence lines and backticks; HTML-looking code ("`<script>`") is text, not markup.
-  return mapProse(markdown, prose, (code, fenced) =>
-    fenced ? code.replace(/^ {0,3}(?:`{3,}|~{3,}).*$/gm, "") : code.replace(/^`+|`+$/g, ""),
-  )
+  return mapProse(markdown, prose, (code, fenced) => {
+    if (!withCode) return fenced ? "\n" : "";
+    return fenced ? code.replace(/^ {0,3}(?:`{3,}|~{3,}).*$/gm, "") : code.replace(/^`+|`+$/g, "");
+  })
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+/**
+ * The Markdown's prose as plain text, without its code: what it says, as opposed to what it
+ * shows. A code example quoting "Unlimited access" is not the page withholding its story.
+ */
+export function proseText(markdown: string): string {
+  return toPlainText(markdown, false);
 }
 
 export interface MarkdownArticle {
@@ -344,6 +511,10 @@ export function parseMarkdownArticle(markdown: string, url: string): MarkdownArt
       .replace(/(\]\(<?)([^)\s>]+)/g, (_m, open, href) => open + absolutize(href, url))
       .replace(/^( {0,3}\[[^\]\n]{1,300}\]:[ \t]*<?)([^\s>]+)/gm, (_m, open, href) => open + absolutize(href, url))
       .replace(
+        /^( {0,3}\[[^\]\n]{1,300}\]:[ \t]*\r?\n[ \t]+<?)([^\s>]+)/gm,
+        (_m, open, href) => open + absolutize(href, url),
+      )
+      .replace(
         /(\s(?:src|href)\s*=\s*)(["'])([^"'\s]{1,2000})\2/gi,
         (_m, attr, quote, href) => attr + quote + absolutize(href, url) + quote,
       )
@@ -366,4 +537,163 @@ export function parseMarkdownArticle(markdown: string, url: string): MarkdownArt
   });
 
   return { title, body, textContent: toPlainText(body) };
+}
+
+/**
+ * Text reduced to lowercase letters and digits, without Markdown links' URLs or reference labels
+ * or HTML tags, so the same sentence compares equal in a page's Markdown and in the article
+ * Readability took from its HTML, which format it differently.
+ */
+function comparable(text: string): string {
+  return text
+    .replace(/!?\[([^\]\n]{0,1000})\](?:\([^)\n]{0,2000}\)|\[[^\]\n]{0,300}\])/g, "$1")
+    .replace(/<[^<>\n]{0,1000}>/g, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+/**
+ * When Readability's article holds at least this share of the Markdown's text, it found the whole
+ * article, and what the Markdown has beyond it is the page around it. On seven real pages
+ * (2026-10-26), pages whose Markdown added only chrome scored 0.85 to 0.96; pages where it added
+ * sections Readability missed scored 0.11 to 0.51.
+ */
+const ARTICLE_SHARE = 0.75;
+
+/** A line counts as the article's when this much of its start is found there. Shorter lines match by chance. */
+const MIN_ANCHOR = 30;
+const ANCHOR = 60;
+
+/**
+ * A cut-off region holding a line with at least this many letters of prose (outside links and
+ * code) is article the HTML parse left out, not page chrome, so that end isn't cut. On real pages
+ * (2026-10-26) no line of cut chrome held more than 48 letters; the callout paragraphs Readability
+ * dropped from a Cloudflare docs page held 133 and 135. Counted per line: summing a paragraph's
+ * lines also sums a footer's rows of short links, and a hand-wrapped paragraph is rare in the
+ * Markdown converters produce.
+ */
+const MIN_PROSE = 100;
+
+/** Lines tried from each end for the article's first and last. Past this, nothing is cut. */
+const MAX_PROBES = 300;
+
+/** A reference definition, `[label]: url`, which links earlier in the article depend on. */
+const REFERENCE_DEFINITION = /^ {0,3}\[[^\]\n]{1,300}\]:/;
+
+/**
+ * Cuts a converted page's Markdown down to the article Readability found in the same page's HTML.
+ * A converter keeps the page's header, subscribe form, and menus; Readability drops them, and so
+ * marks where the article starts and ends.
+ *
+ * The cut runs from the first line that is clearly in `articleText` (one whose first `ANCHOR`
+ * characters are found there) to the last, then outward through neighboring lines found there in
+ * full, however short, such as a closing list of requirements; lines with no text of their own
+ * (a rule) come along when such a line lies beyond them. Code blocks are kept whole, an image
+ * comes along when `articleHtml` (the article Readability found, as HTML) shows the same file,
+ * and reference definitions cut off with the page around the article are kept too.
+ *
+ * Returns the Markdown unchanged when Readability found only part of the page, or no line of the
+ * article can be found.
+ */
+export function trimToArticle(markdown: string, articleText: string, articleHtml = ""): string {
+  const article = comparable(articleText);
+  if (article.length < comparable(markdown).length * ARTICLE_SHARE) return markdown;
+
+  // Front matter carries the title, and is kept.
+  const frontMatter = markdown.match(FRONT_MATTER)?.[0] ?? "";
+  const lines = markdown.slice(frontMatter.length).split("\n");
+  const blocks = codeBlocks(lines);
+  const anchors = (i: number) => {
+    const text = comparable(lines[i]);
+    return text.length >= MIN_ANCHOR && article.includes(text.slice(0, ANCHOR));
+  };
+
+  // Images by file name, so a reference image (`![Flow][flow]`, `![flow]`) finds its definition's URL.
+  const definitions = new Map<string, string>();
+  for (const [, name, href] of markdown.matchAll(/^ {0,3}\[([^\]\n]{1,300})\]:[ \t]*\r?\n?[ \t]*<?([^\s>]+)/gm)) {
+    definitions.set(label(name), href);
+  }
+  const fileOf = (href: string | undefined) => href?.split(/[?#]/)[0].split("/").pop() || null;
+  /** For a line that is only images: whether the article shows them all. Null for any other line. */
+  const imagesShown = (line: string): boolean | null => {
+    const images = [
+      ...line.matchAll(/!\[([^\]\n]{0,1000})\](?:\(<?([^)\s>]{1,2000})[^)\n]*\)|\[([^\]\n]{0,300})\])?/g),
+    ];
+    if (!images.length || line.replace(/!\[[^\]\n]{0,1000}\](?:\([^)\n]*\)|\[[^\]\n]{0,300}\])?/g, "").trim())
+      return null;
+    return images.every(([, alt, inline, ref]) => {
+      const file = fileOf(inline ?? definitions.get(label(ref || alt)));
+      return !!file && articleHtml.includes(file);
+    });
+  };
+
+  let first = -1;
+  for (let i = 0; i < Math.min(lines.length, MAX_PROBES); i++) {
+    if (anchors(i)) {
+      first = blocks[i]?.start ?? i;
+      break;
+    }
+  }
+  let last = -1;
+  for (let i = lines.length - 1; i >= Math.max(0, lines.length - MAX_PROBES); i--) {
+    if (anchors(i)) {
+      last = blocks[i]?.end ?? i;
+      break;
+    }
+  }
+  if (first === -1 || last < first) return markdown;
+
+  // Outward through lines found in the article, skipping over lines with no text of their own.
+  const extend = (from: number, step: 1 | -1) => {
+    let edge = from;
+    for (let i = from + step; i >= 0 && i < lines.length; i += step) {
+      const block = blocks[i];
+      if (block) {
+        // The code between the fences; a fence's info string ("sh") isn't in the article.
+        const closed = block.end > block.start && FENCE_CLOSE.test(lines[block.end]);
+        const code = lines.slice(block.start + 1, closed ? block.end : block.end + 1).join("\n");
+        if (!article.includes(comparable(code))) break;
+        edge = step > 0 ? block.end : block.start;
+        i = edge;
+        continue;
+      }
+      const shown = imagesShown(lines[i]);
+      if (shown !== null) {
+        if (shown) edge = i;
+        continue;
+      }
+      const text = comparable(lines[i]);
+      if (!text) continue;
+      if (!article.includes(text)) break;
+      edge = i;
+    }
+    return edge;
+  };
+  first = extend(first, -1);
+  last = extend(last, 1);
+
+  // An end whose cut-off region holds prose is article the HTML parse missed: keep it whole.
+  const prose = (line: string) =>
+    line
+      .replace(/!?\[[^\]\n]{0,1000}\](?:\([^)\n]*\)|\[[^\]\n]{0,300}\])/g, "")
+      .replace(/<[^<>\n]{0,1000}>/g, "")
+      .replace(/[^\p{L}]+/gu, "").length;
+  const holdsProse = (from: number, to: number) => {
+    for (let i = from; i < to; i++) if (!blocks[i] && prose(lines[i]) >= MIN_PROSE) return true;
+    return false;
+  };
+  if (holdsProse(0, first)) first = 0;
+  if (holdsProse(last + 1, lines.length)) last = lines.length - 1;
+  if (first === 0 && last === lines.length - 1) return markdown;
+
+  // A definition's destination or title may continue on the indented lines after it.
+  const references: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if ((i >= first && i <= last) || blocks[i] || !REFERENCE_DEFINITION.test(lines[i])) continue;
+    references.push(lines[i]);
+    while (i + 1 < lines.length && /^[ \t]+\S/.test(lines[i + 1]) && !REFERENCE_DEFINITION.test(lines[i + 1])) {
+      references.push(lines[++i]);
+    }
+  }
+  return frontMatter + [...lines.slice(first, last + 1), ...(references.length ? ["", ...references] : [])].join("\n");
 }

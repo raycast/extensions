@@ -20,7 +20,7 @@ import {
   listImages,
   type CloudflareImage,
   type OutputFormat,
-} from "@mcdays/cloudflare-images-core";
+} from "./lib/cloudflare-core.js";
 import { buildCloudflareConfig, getPreferences } from "./lib/config.js";
 import { getEffectiveDefaultVariant } from "./lib/variant.js";
 import { clearCachedSigningKey, getSigningKey } from "./lib/signing-key.js";

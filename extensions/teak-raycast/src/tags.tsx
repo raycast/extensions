@@ -3,14 +3,14 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   useNavigation,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AccountActions } from "./components/AccountActions";
 import { CardsListCommand } from "./components/CardsListCommand";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
-import { SetApiKeyAction } from "./components/SetApiKeyAction";
-import { SignOutAction } from "./components/SignOutAction";
 import {
   confirmAndDeleteTag,
   MergeTagList,
@@ -30,14 +30,14 @@ function TagCardsView({ tag }: { tag: string }) {
       emptyDescription={`No cards are tagged with "${tag}" right now.`}
       emptyIcon={Icon.Tag}
       emptyTitle={`No cards tagged "${tag}"`}
-      latestSectionTitle={`Cards tagged "${tag}"`}
       loadCards={(input) =>
         searchCards({ ...input, limit: 50, tag }, "interactive")
       }
       navigationTitle={`Tag: ${tag}`}
       removeTagFilterFromList
       scopeTag={tag}
-      searchBarPlaceholder={`Search within "${tag}" or use type:, sort:oldest`}
+      searchBarPlaceholder={`Search within "${tag}", or filter with fav, sort:oldest`}
+      sectionTitle={`Tagged "${tag}"`}
     />
   );
 }
@@ -93,25 +93,40 @@ export default function TagsCommand() {
     return tags.filter((tag) => tag.name.toLowerCase().includes(normalized));
   }, [searchText, tags]);
 
+  const searchBar = {
+    onSearchTextChange: setSearchText,
+    searchBarPlaceholder: "Filter tags…",
+    searchText,
+  };
+
   if (isCheckingAuth) {
-    return <List isLoading navigationTitle="Teak Tags" />;
+    return <List isLoading {...searchBar} />;
   }
+
+  const listActions = (
+    <>
+      <ActionPanel.Section>
+        <Action
+          icon={Icon.ArrowClockwise}
+          onAction={() => void load()}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Reload Tags"
+        />
+      </ActionPanel.Section>
+      <AccountActions onSignedOut={refreshAuth} />
+    </>
+  );
 
   if (!isAuthenticated) {
     return <MissingApiKeyDetail error={authError} onSignedIn={refreshAuth} />;
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Teak Tags"
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Filter tags..."
-      searchText={searchText}
-    >
+    <List isLoading={isLoading} {...searchBar}>
       {error ? (
         <List.EmptyView
-          description="Check your API key and network connection, then retry."
+          actions={<ActionPanel>{listActions}</ActionPanel>}
+          description="Check your connection, then reload."
           icon={Icon.ExclamationMark}
           title={error}
         />
@@ -119,6 +134,7 @@ export default function TagsCommand() {
 
       {!(error || isLoading) && filteredTags.length === 0 ? (
         <List.EmptyView
+          actions={<ActionPanel>{listActions}</ActionPanel>}
           description={
             searchText.trim()
               ? "Try a different keyword to find tags."
@@ -129,69 +145,76 @@ export default function TagsCommand() {
         />
       ) : null}
 
-      {filteredTags.map((tag) => (
-        <List.Item
-          accessories={[
-            {
-              tag: { color: Color.Blue, value: `${tag.count}` },
-              tooltip: `${tag.count} card${tag.count === 1 ? "" : "s"}`,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Eye}
-                onAction={() => {
-                  push(<TagCardsView tag={tag.name} />);
-                }}
-                title="View Cards with Tag"
-              />
-              <Action.CopyToClipboard
-                content={tag.name}
-                shortcut={{ key: "c", modifiers: ["cmd"] }}
-                title="Copy Tag Name"
-              />
-              <ActionPanel.Section title="Change Tag">
-                <Action.Push
-                  icon={Icon.Pencil}
-                  shortcut={{ key: "e", modifiers: ["cmd"] }}
-                  target={
-                    <RenameTagForm onFinished={() => void load()} tag={tag} />
-                  }
-                  title="Rename Tag"
-                />
-                <Action.Push
-                  icon={Icon.Tag}
-                  shortcut={{ key: "m", modifiers: ["cmd", "shift"] }}
-                  target={
-                    <MergeTagList
-                      onFinished={() => void load()}
-                      tag={tag}
-                      tags={tags}
-                    />
-                  }
-                  title="Merge into…"
-                />
+      <List.Section
+        subtitle={
+          filteredTags.length > 0
+            ? `${filteredTags.length} tag${filteredTags.length === 1 ? "" : "s"}`
+            : undefined
+        }
+        title={searchText.trim() ? "Results" : "All Tags"}
+      >
+        {filteredTags.map((tag) => (
+          <List.Item
+            accessories={[
+              {
+                text: `${tag.count} card${tag.count === 1 ? "" : "s"}`,
+                tooltip: `${tag.count} card${tag.count === 1 ? "" : "s"} tagged "${tag.name}"`,
+              },
+            ]}
+            actions={
+              <ActionPanel title={tag.name}>
                 <Action
-                  icon={Icon.Trash}
-                  onAction={() =>
-                    void confirmAndDeleteTag(tag, () => void load())
-                  }
-                  shortcut={{ key: "x", modifiers: ["ctrl"] }}
-                  style={Action.Style.Destructive}
-                  title="Delete Tag"
+                  icon={Icon.Eye}
+                  onAction={() => {
+                    push(<TagCardsView tag={tag.name} />);
+                  }}
+                  title="View Cards"
                 />
-              </ActionPanel.Section>
-              <SetApiKeyAction />
-              <SignOutAction onSignedOut={refreshAuth} />
-            </ActionPanel>
-          }
-          icon={Icon.Tag}
-          key={tag.name}
-          subtitle={`${tag.count} card${tag.count === 1 ? "" : "s"}`}
-          title={tag.name}
-        />
-      ))}
+                <Action.CopyToClipboard
+                  content={tag.name}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                  title="Copy Tag Name"
+                />
+                <ActionPanel.Section title="Change Tag">
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    target={
+                      <RenameTagForm onFinished={() => void load()} tag={tag} />
+                    }
+                    title="Rename Tag"
+                  />
+                  <Action.Push
+                    icon={Icon.Tag}
+                    shortcut={{ key: "m", modifiers: ["cmd", "shift"] }}
+                    target={
+                      <MergeTagList
+                        onFinished={() => void load()}
+                        tag={tag}
+                        tags={tags}
+                      />
+                    }
+                    title="Merge into…"
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    onAction={() =>
+                      void confirmAndDeleteTag(tag, () => void load())
+                    }
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                    title="Delete Tag"
+                  />
+                </ActionPanel.Section>
+                {listActions}
+              </ActionPanel>
+            }
+            icon={{ source: Icon.Tag, tintColor: Color.Blue }}
+            key={tag.name}
+            title={tag.name}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

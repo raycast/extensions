@@ -1,0 +1,413 @@
+{
+  "ownerName": "Slack",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://slack.com/help/articles/201374536-Slack-keyboard-shortcuts",
+  "shortcuts": [
+    {
+      "id": "quick-switcher",
+      "commandName": "Open Conversation",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "open-conversation-alt",
+      "commandName": "Open Conversation",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "compose-new-message",
+      "commandName": "Compose New Message",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "unsend-message",
+      "commandName": "Unsend Message",
+      "modifiers": ["command"],
+      "key": "Z",
+      "scope": "app"
+    },
+    {
+      "id": "set-status",
+      "commandName": "Set Status",
+      "modifiers": ["command", "shift"],
+      "key": "Y",
+      "scope": "app"
+    },
+    {
+      "id": "open-preferences",
+      "commandName": "Open Preferences",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "hide-right-sidebar",
+      "commandName": "Hide Right Sidebar",
+      "modifiers": ["command"],
+      "key": ".",
+      "scope": "app"
+    },
+    {
+      "id": "create-canvas",
+      "commandName": "Create New Canvas",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "show-shortcuts",
+      "commandName": "Show Keyboard Shortcuts",
+      "modifiers": ["command"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "start-search",
+      "commandName": "Start Search",
+      "modifiers": ["command"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "search-current-conversation",
+      "commandName": "Search Current Conversation",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "start-huddle",
+      "commandName": "Start, Join, Leave, or End Huddle",
+      "modifiers": ["command", "shift"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-huddle-mute",
+      "commandName": "Toggle Huddle Mute",
+      "modifiers": ["command", "shift"],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-full-screen",
+      "commandName": "Toggle Full Screen",
+      "modifiers": ["command", "control"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Window",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "reopen-closed-window",
+      "commandName": "Reopen Last Closed Window",
+      "modifiers": ["command", "shift"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "open-people-view",
+      "commandName": "Open People View",
+      "modifiers": ["command", "shift"],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "quit-slack",
+      "commandName": "Quit Slack",
+      "modifiers": ["command"],
+      "key": "Q",
+      "scope": "app"
+    },
+    {
+      "id": "upload-file",
+      "commandName": "Upload File",
+      "modifiers": ["command"],
+      "key": "O",
+      "scope": "app"
+    },
+    {
+      "id": "downloaded-files",
+      "commandName": "View Downloaded Files",
+      "modifiers": ["command", "shift"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "new-snippet",
+      "commandName": "Create New Snippet",
+      "modifiers": ["command", "shift"],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "jump-most-recent-unread",
+      "commandName": "Jump to Most Recent Unread Message",
+      "modifiers": ["command"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "previous-unread",
+      "commandName": "Previous Unread Conversation",
+      "modifiers": ["option", "shift"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "next-unread",
+      "commandName": "Next Unread Conversation",
+      "modifiers": ["option", "shift"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "previous-conversation",
+      "commandName": "Previous Conversation in Sidebar",
+      "modifiers": ["option"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "next-conversation",
+      "commandName": "Next Conversation in Sidebar",
+      "modifiers": ["option"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "go-back",
+      "commandName": "Go Back",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "go-forward",
+      "commandName": "Go Forward",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "browse-dms",
+      "commandName": "Browse Direct Messages",
+      "modifiers": ["command", "shift"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "open-activity",
+      "commandName": "Open Activity View",
+      "modifiers": ["command", "shift"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "open-threads",
+      "commandName": "Open Threads View",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "browse-channels",
+      "commandName": "Browse Channels",
+      "modifiers": ["command", "shift"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "conversation-details",
+      "commandName": "Open Conversation Details",
+      "modifiers": ["command", "shift"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "workspace-switcher",
+      "commandName": "Expand Workspace Switcher",
+      "modifiers": ["command", "shift"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "previous-workspace",
+      "commandName": "Previous Workspace",
+      "modifiers": ["control", "shift"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "next-workspace",
+      "commandName": "Next Workspace",
+      "modifiers": ["control"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "previous-tab",
+      "commandName": "Previous Tab",
+      "modifiers": ["control"],
+      "key": "Page Up",
+      "scope": "app"
+    },
+    {
+      "id": "next-tab",
+      "commandName": "Next Tab",
+      "modifiers": ["control"],
+      "key": "Page Down",
+      "scope": "app"
+    },
+    {
+      "id": "edit-message",
+      "commandName": "Edit Message",
+      "modifiers": [],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "delete-message",
+      "commandName": "Delete Message",
+      "modifiers": [],
+      "key": "Delete",
+      "scope": "app"
+    },
+    {
+      "id": "reply-thread",
+      "commandName": "Open or Reply to Thread",
+      "modifiers": [],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "forward-message",
+      "commandName": "Forward Message",
+      "modifiers": [],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "pin-message",
+      "commandName": "Pin or Unpin Message",
+      "modifiers": [],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "save-message",
+      "commandName": "Save Message",
+      "modifiers": [],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "mark-above-unread",
+      "commandName": "Mark Messages Above as Unread",
+      "modifiers": [],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "message-reminder",
+      "commandName": "Create Reminder About Message",
+      "modifiers": [],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "add-reaction",
+      "commandName": "Add Emoji Reaction",
+      "modifiers": [],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "bold",
+      "commandName": "Bold Selected Text",
+      "modifiers": ["command"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "italic",
+      "commandName": "Italicize Selected Text",
+      "modifiers": ["command"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "underline",
+      "commandName": "Underline Selected Text",
+      "modifiers": ["command"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "strikethrough",
+      "commandName": "Strikethrough Selected Text",
+      "modifiers": ["command", "shift"],
+      "key": "X",
+      "scope": "app"
+    },
+    {
+      "id": "hyperlink",
+      "commandName": "Hyperlink Selected Text",
+      "modifiers": ["command", "shift"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "quote",
+      "commandName": "Quote Selected Text",
+      "modifiers": ["command", "shift"],
+      "key": "9",
+      "scope": "app"
+    },
+    {
+      "id": "code",
+      "commandName": "Code Selected Text",
+      "modifiers": ["command", "shift"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "code-block",
+      "commandName": "Code Block Selected Text",
+      "modifiers": ["command", "option", "shift"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "bulleted-list",
+      "commandName": "Bulleted List",
+      "modifiers": ["command", "shift"],
+      "key": "8",
+      "scope": "app"
+    },
+    {
+      "id": "numbered-list",
+      "commandName": "Numbered List",
+      "modifiers": ["command", "shift"],
+      "key": "7",
+      "scope": "app"
+    },
+    {
+      "id": "apply-markdown",
+      "commandName": "Apply Markdown Formatting",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    }
+  ]
+}

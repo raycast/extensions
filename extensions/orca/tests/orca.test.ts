@@ -13,6 +13,7 @@ import {
   isUnseen,
   mergeAgents,
   projectNamer,
+  orcaError,
   summarize,
   unwrap,
 } from "../src/orca.ts";
@@ -113,7 +114,55 @@ test("unwrap surfaces the message Orca reported on failure", () => {
   });
 
   assert.throws(() => unwrap(failure), /Orca runtime is not reachable/);
+  assert.throws(
+    () => unwrap(JSON.stringify({ ok: false, error: { message: "Unknown command: agent launch" } })),
+    /Update Orca/,
+  );
   assert.deepEqual(unwrap(JSON.stringify({ ok: true, result: { a: 1 } })), { a: 1 });
+});
+
+/** What promisified execFile rejects with when the CLI exits non-zero. */
+function cliFailure(stdout: string, stderr = "") {
+  return Object.assign(
+    new Error("Command failed: /Applications/Orca.app/orca agent launch --prompt secret prompt text"),
+    { code: 1, stdout, stderr },
+  );
+}
+
+test("a failing command reports what Orca said, not the command line with the prompt in it", () => {
+  const error = orcaError(
+    cliFailure(JSON.stringify({ ok: false, error: { code: "no_runtime", message: "Orca runtime is not reachable" } })),
+  );
+
+  assert.equal(error.message, "Orca runtime is not reachable");
+});
+
+test("a command or flag Orca does not know means Orca is too old", () => {
+  const unknown = (message: string) =>
+    orcaError(cliFailure(JSON.stringify({ ok: false, error: { code: "invalid_argument", message } }))).message;
+
+  assert.match(unknown("Unknown command: agent launch"), /Update Orca to 1\.4\.229 or later/);
+  assert.match(unknown("Unknown flag --wait-submit for command: terminal send"), /Update Orca/);
+  // Same code, but a real mistake in the input: Orca's own words are the useful ones.
+  assert.equal(unknown("Worktree not found: path:/gone"), "Worktree not found: path:/gone");
+});
+
+test("a missing CLI points at the preference", () => {
+  const missing = Object.assign(new Error("spawn /nope/orca ENOENT"), { code: "ENOENT", path: "/nope/orca" });
+
+  assert.match(orcaError(missing).message, /No Orca CLI at \/nope\/orca.*Orca CLI Path/);
+});
+
+test("output that is not Orca's envelope still hides the prompt", () => {
+  assert.equal(orcaError(cliFailure("", "zsh: killed\n")).message, "zsh: killed");
+  assert.equal(orcaError(cliFailure("not json")).message, "Orca CLI exited with code 1");
+});
+
+test("a CLI killed by a signal does not fall back to the command line", () => {
+  const killed = Object.assign(cliFailure(""), { code: null, signal: "SIGTERM", killed: true });
+
+  assert.equal(orcaError(killed).message, "Orca CLI was stopped by SIGTERM");
+  assert.doesNotMatch(orcaError(killed).message, /secret prompt/);
 });
 
 test("a title Orca could not generate is replaced by the prompt", () => {

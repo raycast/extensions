@@ -36,6 +36,31 @@ export class SearchUnavailableError extends Error {
   }
 }
 
+export class SearchBlockedError extends SearchUnavailableError {
+  constructor(public readonly retryAfterSeconds: number) {
+    super(
+      `DuckDuckGo rejected this search request. Try again in ${retryAfterSeconds}s or open the search in your browser.`,
+    );
+    this.name = "SearchBlockedError";
+  }
+}
+
+// A challenge does not establish that the VQD has expired. Pause this client's
+// queries and pagination briefly instead of repeatedly requesting fresh sessions.
+const BLOCK_COOLDOWN_MS = 60_000;
+let blockedUntil = 0;
+
+function checkSearchBlock() {
+  if (blockedUntil > Date.now()) {
+    throw new SearchBlockedError(Math.ceil((blockedUntil - Date.now()) / 1000));
+  }
+}
+
+function blockSearch() {
+  blockedUntil = Date.now() + BLOCK_COOLDOWN_MS;
+  return new SearchBlockedError(BLOCK_COOLDOWN_MS / 1000);
+}
+
 class OldVQDError extends Error {}
 
 // Reuse one Axios client so VQD acquisition and image requests keep the same
@@ -79,6 +104,7 @@ async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
       headers: { ...HEADERS, "cache-control": "no-cache", pragma: "no-cache" },
       signal,
     });
+    if (response.data?.response_type === "botnet_challenge") throw blockSearch();
     const html = typeof response.data === "string" ? response.data : "";
     const match = VQD_PATTERNS.map((pattern) => pattern.exec(html)).find(Boolean);
     if (!match) {
@@ -87,9 +113,13 @@ async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
     }
     return match[1];
   } catch (error) {
+    if (error instanceof SearchUnavailableError) throw error;
     if (error instanceof AxiosError && error.code === "ERR_CANCELED") {
       console.log("VQD request canceled");
       return;
+    }
+    if (error instanceof AxiosError && error.response?.data?.response_type === "botnet_challenge") {
+      throw blockSearch();
     }
     logRequestError("get-vqd", error);
     throw new SearchUnavailableError("DuckDuckGo is temporarily unavailable. Please wait a moment and try again.");
@@ -98,6 +128,26 @@ async function getVQD(query: string, ia = "web", signal?: AbortSignal) {
 
 function queryString(query: Record<string, string>) {
   return new URLSearchParams(query).toString();
+}
+
+function imageFilters(options: ImageSearchOptions) {
+  return [
+    "",
+    options.filters?.size ? `size:${options.filters.size}` : "",
+    options.filters?.color ? `color:${options.filters.color}` : "",
+    options.filters?.type ? `type:${options.filters.type}` : "",
+    options.filters?.layout ? `layout:${options.filters.layout}` : "",
+    options.filters?.license ? `license:${options.filters.license}` : "",
+  ];
+}
+
+export function imageSearchBrowserURL(query: string, options: ImageSearchOptions = {}) {
+  const url = new URL(DDG_URL);
+  url.search = queryString({ q: query, ia: "images", iax: "images", kl: options.locale || "en-us" });
+  const filters = imageFilters(options);
+  if (filters.some(Boolean)) url.searchParams.set("iaf", filters.join(","));
+  url.searchParams.set("kp", options.moderate ? "-1" : "-2");
+  return url.toString();
 }
 
 async function makeNextFromQuery(
@@ -111,14 +161,7 @@ async function makeNextFromQuery(
 
   // DuckDuckGo expects six fixed filter slots:
   // time, size, color, type, layout, license.
-  const filters = [
-    "",
-    options.filters?.size ? `size:${options.filters.size}` : "",
-    options.filters?.color ? `color:${options.filters.color}` : "",
-    options.filters?.type ? `type:${options.filters.type}` : "",
-    options.filters?.layout ? `layout:${options.filters.layout}` : "",
-    options.filters?.license ? `license:${options.filters.license}` : "",
-  ];
+  const filters = imageFilters(options);
 
   const queryObject: Record<string, string> = {
     ct: "AT",
@@ -140,6 +183,7 @@ export async function imageSearch(
   options: ImageSearchOptions = {},
   signal?: AbortSignal,
 ): Promise<ImageSearchResult> {
+  checkSearchBlock();
   console.log(`Searching for "${query}"...`);
   // VQD is tied to a search session. Never reuse one global token for unrelated queries.
   let rejectedVqd: string | undefined;
@@ -186,6 +230,7 @@ function isRetryable(error: AxiosError) {
 
 export async function imageNextSearch(next: string, vqd: string, signal?: AbortSignal): Promise<ImageSearchResult> {
   if (!vqd) return { vqd: "", results: [] };
+  checkSearchBlock();
   console.log("Loading DuckDuckGo image results...");
   const separator = next.includes("?") ? "&" : "?";
   const reqUrl = `${next}${separator}vqd=${encodeURIComponent(vqd)}`;
@@ -197,9 +242,12 @@ export async function imageNextSearch(next: string, vqd: string, signal?: AbortS
     try {
       const response = await ddgClient.get(reqUrl, { signal });
 
+      if (response.data?.response_type === "botnet_challenge") {
+        throw blockSearch();
+      }
       data = response.data as DuckDuckGoSearchResponse;
       if (!data || !Array.isArray(data.results)) {
-        throw new SearchUnavailableError("DuckDuckGo returned an anti-bot response. Please wait and try again.");
+        throw new SearchUnavailableError("DuckDuckGo returned an unexpected response. Please try again later.");
       }
       console.log(`DuckDuckGo returned ${data.results.length} images${attempt ? ` (attempt ${attempt + 1})` : ""}.`);
       break;
@@ -208,6 +256,9 @@ export async function imageNextSearch(next: string, vqd: string, signal?: AbortS
         if (error.code === "ERR_CANCELED") {
           console.log("VQD request canceled");
           return { results: [], vqd };
+        }
+        if (error.response?.data?.response_type === "botnet_challenge") {
+          throw blockSearch();
         }
         if (error.response?.status === 403) {
           throw new OldVQDError();

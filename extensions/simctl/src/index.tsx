@@ -1,37 +1,43 @@
 import { ActionPanel, List, Action, Color, Icon, useNavigation, closeMainWindow } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
+import { openSimulator } from "./simulator";
 
 export default function Command() {
   const [state, setState] = useCachedState<State[]>("state", []);
   const [isLoading, setIsLoading] = useState(true);
+  const navigation = useNavigation();
 
   const fetchSimulators = () => {
     setIsLoading(true);
     exec(`xcrun simctl list --json devices`, (err, stdout) => {
       if (err != null) {
-        console.log(err);
+        showFailureToast(err, { title: "Failed to Load Simulators" });
         setIsLoading(false);
         return;
       }
-      const list: SimctlList = JSON.parse(stdout);
-      const devices = Object.entries(list.devices).flatMap(([key, devices]) =>
-        devices
-          .filter((device) => device.isAvailable)
-          .map((device) => {
-            // e.g. com.apple.CoreSimulator.SimRuntime.watchOS-8-5
-            const os = key
-              .replaceAll("com.apple.CoreSimulator.SimRuntime.", "") // watchOS-8-5
-              .split("-"); // [watchOS, 8, 5]
-            const osName = os[0]; // watchOS
-            const osVer = os.slice(1).join("."); // 8.5
-            const runtime = `${osName} ${osVer}`; // watchOS 8.5
+      try {
+        const list: SimctlList = JSON.parse(stdout);
+        const devices = Object.entries(list.devices).flatMap(([key, devices]) =>
+          devices
+            .filter((device) => device.isAvailable)
+            .map((device) => {
+              // e.g. com.apple.CoreSimulator.SimRuntime.watchOS-8-5
+              const os = key
+                .replaceAll("com.apple.CoreSimulator.SimRuntime.", "") // watchOS-8-5
+                .split("-"); // [watchOS, 8, 5]
+              const osName = os[0]; // watchOS
+              const osVer = os.slice(1).join("."); // 8.5
+              const runtime = `${osName} ${osVer}`; // watchOS 8.5
 
-            return { ...device, runtime };
-          }),
-      );
-      setState(devices);
+              return { ...device, runtime };
+            }),
+        );
+        setState(devices);
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to Load Simulators" });
+      }
       setIsLoading(false);
     });
   };
@@ -41,41 +47,20 @@ export default function Command() {
   }, []);
 
   const bootAction = (device: Device) => {
-    const navigation = useNavigation();
-
     return (
       <Action
         title={device.state === "Booted" ? "Open" : "Boot"}
         icon={Icon.Power}
-        onAction={() => {
-          exec(`xcrun simctl boot ${device.udid}`, () => {
+        onAction={async () => {
+          try {
+            await openSimulator(device);
+            navigation.pop();
+            await closeMainWindow({ clearRootSearch: true });
+          } catch (error) {
+            await showFailureToast(error, { title: "Failed to Open Simulator" });
+          } finally {
             fetchSimulators();
-          });
-          exec(`open -g -a Simulator`);
-          const appleScript = `
-            tell application "System Events"
-              repeat
-                set windowFound to false
-                set theWindows to windows of process "Simulator"
-                repeat with theWindow in theWindows
-                  set theWindowName to name of theWindow
-                  if theWindowName contains "${device.name}" then
-                    tell application "Simulator" to activate
-                    perform action "AXRaise" of theWindow
-                    set windowFound to true
-                    exit repeat 
-                  end if
-                  delay 0.1
-                end repeat
-                if windowFound then
-                  exit repeat
-                end if
-              end repeat
-            end tell
-        `;
-          exec(`osascript -e '${appleScript}'`);
-          navigation.pop();
-          closeMainWindow({ clearRootSearch: true });
+          }
         }}
       />
     );

@@ -18,14 +18,13 @@ import { loadHistory, prayedSet, PrayerRecord, setPrayed, setStatus } from "./li
 import { clockStatus, MARK_TITLES, markOptions, STATUS_LABELS } from "./lib/status";
 import { statusIcon } from "./lib/status-icons";
 import { formatTime, ltrName } from "./lib/format";
-import { menuBarTitle, TitleTone } from "./lib/menubar-title";
+import { menuBarTitle, Period, periodBounds, periodSubtitle } from "./lib/menubar-title";
+import { AlertWindows, MenuBarState } from "./lib/state";
 
-/** The masjid on a colored disc, like the app logo, colored by what the countdown is to (lib/menubar-title.ts). */
-const toneIcon = (tone: TitleTone) =>
-  // The logo's dark green would vanish on a dark menu bar, so it is lifted there.
-  tone === "darkGreen"
-    ? { source: { light: "masjid-bar-darkGreen.png", dark: "masjid-bar-darkGreen-dark.png" } }
-    : `masjid-bar-${tone}.png`;
+/** The masjid on a disc colored by the prayer's period (lib/menubar-title.ts), like the app logo. */
+const periodIcon = (period: Period) => ({
+  source: { light: `masjid-bar-${period}.png`, dark: `masjid-bar-${period}-dark.png` },
+});
 
 /** One row of the dropdown: a prayer, or a reference time like sunrise. */
 type Row = { type: "prayer"; slot: PrayerSlot; at: Date } | { type: "reference"; time: ReferenceTime; at: Date };
@@ -76,11 +75,19 @@ function prayerStatus(slot: PrayerSlot, record: PrayerRecord | undefined, active
   return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, subtitle: "" };
 }
 
-/** Header for the current prayer's actions: when it ends, and its preferred end while that is still ahead. */
-function sectionTitle(slot: PrayerSlot, now: Date): string {
-  const preferred =
-    slot.preferredEnd && now < slot.preferredEnd ? ` · preferred until ${formatTime(slot.preferredEnd)}` : "";
-  return `${ltrName(slot.name)}${preferred} · ends ${formatTime(slot.end)}`;
+/** Header for the current prayer's actions: its preferred end (the school's) and end. Ending soon is a setting, not a time. */
+function sectionTitle(slot: PrayerSlot, windows: AlertWindows): string {
+  const bounds = periodBounds(slot, windows);
+  const preferred = bounds.hasPreferred ? `preferred until ${formatTime(bounds.preferred)}, ` : "";
+  return `${ltrName(slot.name)} · ${preferred}ends ${formatTime(slot.end)}`;
+}
+
+/** The dropdown row of the menu bar's prayer: its period disc and the countdown in words. */
+function periodStatus(state: MenuBarState, now: Date, windows: AlertWindows) {
+  return {
+    icon: periodIcon(menuBarTitle(state, now, windows).tone),
+    subtitle: periodSubtitle(state, now, windows),
+  };
 }
 
 export default function Command() {
@@ -88,7 +95,7 @@ export default function Command() {
   // before the fresh read lands. The read is a small LocalStorage lookup.
   const { data: settings, isLoading, error } = usePromise(loadSettings);
   if (!settings) {
-    if (isLoading) return <MenuBarExtra isLoading icon={toneIcon("white")} />;
+    if (isLoading) return <MenuBarExtra isLoading icon={periodIcon("notStarted")} />;
     return (
       <MenuBarExtra icon={{ source: Icon.Warning, tintColor: Color.Orange }} tooltip={error?.message}>
         <MenuBarExtra.Item
@@ -120,7 +127,13 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
   if (!isLoading && !state && !error) return null;
 
   const current = activeSlot(slots, now);
-  const title = state ? menuBarTitle(state, now) : undefined;
+  const formulaErrors = slots.filter(
+    (slot) =>
+      slot.date === toDateKey(now) &&
+      slot.jamaatError &&
+      !settings.warnings.some((warning) => warning.endsWith(slot.jamaatError!)),
+  );
+  const title = state ? menuBarTitle(state, now, settings.windows) : undefined;
   const rows = dropdownRows(slots, getReferenceTimes(now, settings.schedule), current, now);
   const shown = state && state.kind !== "upcoming" ? state.slot : undefined;
   const snoozeKind: AlertKind | undefined =
@@ -139,7 +152,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={!title ? { source: Icon.Warning, tintColor: Color.Orange } : toneIcon(title.tone)}
+      icon={!title ? { source: Icon.Warning, tintColor: Color.Orange } : periodIcon(title.tone)}
       title={title?.text}
       tooltip={error ? `Reminders: ${error.message}` : "Prayer Times"}
     >
@@ -147,8 +160,17 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
       {settings.warnings.map((warning) => (
         <MenuBarExtra.Item key={warning} title={warning} icon={Icon.Warning} onAction={openExtensionPreferences} />
       ))}
+      {/* A formula that fails only on some days (e.g. no Dhuhr jamaat to follow) isn't in the settings warnings. */}
+      {formulaErrors.map((slot) => (
+        <MenuBarExtra.Item
+          key={`${slot.id}:formula`}
+          title={`${ltrName(slot.name)} Jamaat: ${slot.jamaatError}`}
+          icon={Icon.Warning}
+          onAction={() => launchCommand({ name: "jamaat-formulas", type: LaunchType.UserInitiated })}
+        />
+      ))}
       {shown && (
-        <MenuBarExtra.Section title={sectionTitle(shown, now)}>
+        <MenuBarExtra.Section title={sectionTitle(shown, settings.windows)}>
           <MenuBarExtra.Item
             title={`Mark ${ltrName(shown.name)} as Prayed`}
             icon={statusIcon(clockStatus(shown, now))}
@@ -192,7 +214,10 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
           const { slot } = row;
           const record = history?.[slot.date]?.[slot.key];
           const done = Boolean(record?.completed);
-          const status = prayerStatus(slot, record, slot.id === current?.id, now);
+          const status =
+            state && slot.id === state.slot.id && !done
+              ? periodStatus(state, now, settings.windows)
+              : prayerStatus(slot, record, slot.id === current?.id, now);
           const jamaat = slot.jamaat ? ` · jamaat ${formatTime(slot.jamaat)}` : "";
           const started = slot.start <= now;
           // ⌥ marks on time: an unmarked prayer that is already late, or one recorded late.

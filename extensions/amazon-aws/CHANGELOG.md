@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Fix AWS command startup] - {PR_MERGE_DATE}
+
+- Rebuild with the updated Raycast CLI to fix AWS commands failing to start because of shared AWS SDK dependencies.
+
 ## [Fix AWS client initialization] - 2026-10-16
 
 - Update the AWS SDK to fix a circular dependency that caused commands to fail with `Cannot read properties of undefined (reading 'for')` in Store builds.

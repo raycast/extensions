@@ -170,14 +170,14 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
     "@aws-sdk/s3-request-presigner": "^3.864.0",
-    "@raycast/api": "^1.102.4",
+    "@raycast/api": "^2.10.1",
     "@raycast/utils": "^1.17.0",
     "dayjs": "^1.11.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/react": "19.3.0",
     "eslint": "^9.34.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

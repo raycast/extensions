@@ -1,4 +1,11 @@
-# Better Uptime Changelog
+# Better Stack Changelog
+
+## [Rebrand to Better Stack] - 2026-10-27
+
+- Rename the extension from Better Uptime to Better Stack and use Better Stack's icon
+- Keep the commands showing up when searching for "Better Uptime"
+- Switch to Better Stack's API domain
+- Update the API token instructions to point to Better Stack's team-based Incidents API tokens
 
 ## [Windows support and fixes] - 2026-10-25
 

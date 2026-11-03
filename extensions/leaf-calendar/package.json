@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leaf-calendar",
+  "title": "Leaf Calendar",
+  "description": "A raycast extension to access Leaf Calendar with your raycast workflow. You can see your agenda, setup scheduling links, and schedule events. You can also see all your calendars in one place",
+  "icon": "extension-icon.png",
+  "author": "artistro08",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "agenda",
+      "title": "My Agenda",
+      "subtitle": "Leaf Calendar",
+      "description": "See your upcoming events, join meetings, and move events.",
+      "mode": "view"
+    },
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "Leaf Calendar",
+      "description": "Add an event to one of your calendars.",
+      "mode": "view"
+    },
+    {
+      "name": "join-next-meeting",
+      "title": "Join Next Meeting",
+      "subtitle": "Leaf Calendar",
+      "description": "Join the meeting Leaf Calendar's join shortcut would pick.",
+      "mode": "no-view"
+    },
+    {
+      "name": "find-time-to-meet",
+      "title": "Find a Time to Meet",
+      "subtitle": "Leaf Calendar",
+      "description": "Pick free times to offer someone, copy them as a message, and keep them on your calendar.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "slotMinutes",
+          "title": "Time Slots",
+          "description": "How long each offered time is. A booking link uses its own length.",
+          "type": "dropdown",
+          "required": false,
+          "default": "30",
+          "data": [
+            {
+              "title": "15 Minutes",
+              "value": "15"
+            },
+            {
+              "title": "30 Minutes",
+              "value": "30"
+            },
+            {
+              "title": "45 Minutes",
+              "value": "45"
+            },
+            {
+              "title": "1 Hour",
+              "value": "60"
+            },
+            {
+              "title": "1.5 Hours",
+              "value": "90"
+            },
+            {
+              "title": "2 Hours",
+              "value": "120"
+            },
+            {
+              "title": "Whole Free Stretch",
+              "value": "0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scheduled-windows",
+      "title": "Scheduled Windows",
+      "subtitle": "Leaf Calendar",
+      "description": "Book or delete the time windows you offered.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "daysAhead",
+      "title": "Agenda Length",
+      "description": "How many days My Agenda shows, starting today.",
+      "type": "dropdown",
+      "required": false,
+      "default": "7",
+      "data": [
+        {
+          "title": "Today",
+          "value": "1"
+        },
+        {
+          "title": "3 Days",
+          "value": "3"
+        },
+        {
+          "title": "7 Days",
+          "value": "7"
+        },
+        {
+          "title": "14 Days",
+          "value": "14"
+        },
+        {
+          "title": "30 Days",
+          "value": "30"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

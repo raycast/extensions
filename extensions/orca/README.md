@@ -122,12 +122,13 @@ What a saved prompt points at. With a worktree it is one call —
 `worktree create --repo id:… --name … --agent … --prompt …` — and Orca does the
 rest.
 
-Without one, **Run In** decides where the prompt lands. *A new agent* opens a
-fresh pane in the project folder (`terminal create`, then `terminal send`),
-leaving working agents alone. *The agent already running* sends it to the pane
-of the project's most recently active agent instead — skipping panes that cannot
-take input (detached, orphaned or read-only) and falling back to a fresh pane
-when that project has none, so the prompt is never dropped.
+Without one, **Run In** decides where the prompt lands. *A new agent* starts a
+fresh one in the project folder (`agent launch --agent … --prompt …`), leaving
+working agents alone; Orca submits the prompt once the agent is up, so a slow
+shell profile cannot swallow it. *The agent already running* sends it to the
+pane of the project's most recently active agent instead — skipping panes that
+cannot take input (detached, orphaned or read-only) and falling back to a fresh
+agent when that project has none, so the prompt is never dropped.
 
 **Orca is never brought to the front.** The agent starts in the background and
 its pane is waiting whenever you get to it; Raycast just flashes a HUD.
@@ -183,9 +184,14 @@ Read** (`orca worktree set --worktree id:… --read`) clears it for all of them.
 
 ## Requirements
 
-Orca.app installed and running. The extension shells out to the CLI bundled with
-the app at `/Applications/Orca.app/Contents/Resources/bin/orca`; override the
-path in extension preferences if yours lives elsewhere.
+Orca.app 1.4.229 or later, installed and running. The extension shells out to
+the CLI bundled with the app at `/Applications/Orca.app/Contents/Resources/bin/orca`;
+override the path in extension preferences if yours lives elsewhere.
+
+An older Orca answers a command it does not know with an error of its own, and
+the extension turns that into "update Orca" rather than a failed command line.
+Any other error shows what Orca said — never the command, which would carry the
+whole prompt.
 
 ## Development
 

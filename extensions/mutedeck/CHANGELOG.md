@@ -1,6 +1,18 @@
 # Changelog
 
-## [Ownership Transfer] - {PR_MERGE_DATE}
+## [Secure Pairing with MuteDeck] - 2026-10-26
+
+### New
+
+- **Approve Raycast in MuteDeck**: on newer MuteDeck versions, the first command asks MuteDeck to allow Raycast. A toast shows while MuteDeck displays the prompt; once approved, Raycast keeps its token and sends it with every request. If the token is revoked in MuteDeck, the next command asks again.
+- The Meeting Deck shows a "Raycast isn't approved in MuteDeck" state with an **Ask MuteDeck Again** action. After a denial, Raycast waits at least 30 seconds before asking again on its own.
+
+### Changed
+
+- Now built on the official MuteDeck plugin SDK (`@mutedeck/plugin-client`). Older MuteDeck versions without pairing keep working as before, without a prompt.
+- **Bring to Front** now uses MuteDeck's HTTP API, so the WebSocket Endpoint preference has been removed.
+
+## [Ownership Transfer] - 2026-09-10
 
 - Extension ownership transferred from chad_walters to the MuteDeck organisation — now the official MuteDeck extension.
 

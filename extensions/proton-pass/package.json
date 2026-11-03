@@ -21,9 +21,13 @@
   "commands": [
     {
       "name": "search-items",
-      "title": "Search Items",
+      "title": "Browse Items",
       "subtitle": "Proton Pass",
-      "description": "Search all items across vaults",
+      "description": "Browse your vaults and search their items",
+      "keywords": [
+        "search",
+        "vaults"
+      ],
       "mode": "view"
     },
     {
@@ -244,7 +248,7 @@
       "type": "checkbox",
       "title": "Transient Clipboard",
       "label": "Keep copied secrets out of clipboard history",
-      "description": "Passwords, 2FA codes, notes and hidden fields.",
+      "description": "Passwords, TOTP codes, notes and hidden fields.",
       "default": true,
       "required": false
     },

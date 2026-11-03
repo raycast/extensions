@@ -42,7 +42,7 @@ export interface MenuBarFlight {
     | "flightPhase"
     | "onTimeStatus"
   >;
-  airline: Pick<UpcomingFlight["airline"], "iata" | "logoUrl">;
+  airline: Pick<UpcomingFlight["airline"], "iata" | "logoUrl" | "logoDarkUrl">;
   departureAirport: MenuBarAirport;
   arrivalAirport: MenuBarArrivalAirport | null;
 }
@@ -91,7 +91,11 @@ export function projectMenuBarFlight(source: UpcomingFlight): MenuBarFlight {
       flightPhase: source.flight.flightPhase,
       onTimeStatus: source.flight.onTimeStatus,
     },
-    airline: { iata: source.airline.iata, logoUrl: source.airline.logoUrl },
+    airline: {
+      iata: source.airline.iata,
+      logoUrl: source.airline.logoUrl,
+      logoDarkUrl: source.airline.logoDarkUrl,
+    },
     departureAirport: menuBarAirport(source.departureAirport),
     arrivalAirport: source.arrivalAirport
       ? menuBarArrivalAirport(source.arrivalAirport)

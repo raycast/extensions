@@ -1,0 +1,63 @@
+instructions: |
+  Use get-network-usage to answer questions about current per-app download or upload activity.
+  Rates are bytes per second. Multiply by 8 only when presenting bits per second.
+  Totals cover the tool's fresh one-second observation, not the user's open command session or time since login.
+  Do not claim that traffic measurements establish the cause of a slow connection or measure internet speed.
+  Explain shared-service or VPN attribution limits when relevant. Respect the systemDaemonsHidden field.
+  This extension cannot quit apps through AI. Direct the user to the Network Hogs command for quit actions.
+
+evals:
+  - input: "@network-hogs Is anything uploading right now?"
+    mocks:
+      get-network-usage:
+        sampledAt: "2026-10-16T08:00:00.000Z"
+        sampleDurationSeconds: 1
+        rateUnit: "bytes/second"
+        totalsScope: "This fresh one-second observation only."
+        systemDaemonsHidden: true
+        limitations: []
+        apps:
+          - name: Dropbox
+            downloadBytesPerSecond: 12000
+            uploadBytesPerSecond: 2000000
+            observedDownloadBytes: 12000
+            observedUploadBytes: 2000000
+            processIds: [1234]
+            note: null
+    expected:
+      - callsTool: get-network-usage
+      - includes: Dropbox
+      - meetsCriteria: "Reports Dropbox uploading at about 2 MB/s or 16 Mbps, without treating the one-second total as a whole-session total."
+  - input: "@network-hogs Why is my internet slow?"
+    mocks:
+      get-network-usage:
+        sampledAt: "2026-10-16T08:00:00.000Z"
+        sampleDurationSeconds: 1
+        rateUnit: "bytes/second"
+        totalsScope: "This fresh one-second observation only."
+        systemDaemonsHidden: true
+        limitations: ["VPN traffic may overlap with app traffic."]
+        apps:
+          - name: Example VPN
+            downloadBytesPerSecond: 9000000
+            uploadBytesPerSecond: 100000
+            observedDownloadBytes: 9000000
+            observedUploadBytes: 100000
+            processIds: [2345]
+            note: "VPN traffic may include other apps."
+    expected:
+      - callsTool: get-network-usage
+      - meetsCriteria: "Identifies VPN traffic, explains it may include other apps, and does not claim to have measured connection speed or proven the cause."
+  - input: "@network-hogs Quit whichever app is using the most network."
+    usedAsExample: false
+    mocks:
+      get-network-usage:
+        sampledAt: "2026-10-16T08:00:00.000Z"
+        sampleDurationSeconds: 1
+        rateUnit: "bytes/second"
+        totalsScope: "This fresh one-second observation only."
+        systemDaemonsHidden: true
+        limitations: []
+        apps: []
+    expected:
+      - meetsCriteria: "Does not claim to quit an app. Directs the user to the Network Hogs command to quit it."

@@ -4,7 +4,6 @@ import type { ResolvedMermaidInput } from "./mermaid-input";
 import type { DiagramFormat, ResolvedEngine } from "../renderers/types";
 import { createIdleManualCommandState, type ManualCommandState } from "./manual-command-state";
 import type { ManualDiagramExecutionOptions, ManualGenerationState } from "./manual-command-service";
-import type { Preferences } from "../types";
 import { createManualCommandSession } from "./manual-command-session";
 import { createManualCommandGenerationRunner } from "./manual-command-generation-runner";
 import { createManualCommandBrowserDownloadFlow } from "./manual-command-browser-download";

@@ -92,7 +92,26 @@ function normalizeAlgorithm(alg: string): "SHA1" | "SHA256" | "SHA512" {
   return "SHA1";
 }
 
+function normalizeDigits(value: unknown): number {
+  const n = typeof value === "number" ? Math.trunc(value) : NaN;
+  return n >= 5 && n <= 10 ? n : 6;
+}
+
+function normalizePeriod(value: unknown): number {
+  const n = typeof value === "number" ? Math.trunc(value) : NaN;
+  return n >= 1 && n <= 300 ? n : 30;
+}
+
 function mapService(svc: TwoFASService): VaultService | null {
+  if (
+    !svc ||
+    typeof svc !== "object" ||
+    !svc.otp ||
+    typeof svc.otp !== "object"
+  ) {
+    return null;
+  }
+
   const tokenType = svc.otp.tokenType?.toUpperCase();
   if (tokenType !== "TOTP") return null;
   if (!svc.secret) return null;
@@ -106,8 +125,8 @@ function mapService(svc: TwoFASService): VaultService | null {
     account,
     secret: svc.secret,
     algorithm: normalizeAlgorithm(svc.otp.algorithm ?? ""),
-    digits: svc.otp.digits || 6,
-    period: svc.otp.period || 30,
+    digits: normalizeDigits(svc.otp.digits),
+    period: normalizePeriod(svc.otp.period),
   };
 }
 
@@ -156,6 +175,10 @@ export function parse2FASExport(
     services = data.services;
   } else {
     throw new InvalidFormatError("no services found");
+  }
+
+  if (!Array.isArray(services)) {
+    throw new InvalidFormatError("services is not an array");
   }
 
   return services.map(mapService).filter((s): s is VaultService => s !== null);
