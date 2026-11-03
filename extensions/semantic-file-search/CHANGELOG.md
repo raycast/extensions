@@ -1,6 +1,6 @@
 # Semantic File Search Changelog
 
-## [Simpler Engine Setup] - {PR_MERGE_DATE}
+## [Simpler Engine Setup] - 2026-11-03
 
 - Download the local engine installer directly from setup and follow separate engine and model installation steps.
 - Use Semantic Search Engine 0.7.2 to coordinate Core ML preparation after macOS updates while preserving existing models and indexes.
