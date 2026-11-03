@@ -46,4 +46,5 @@ export const session = createSession({
   },
 });
 
-export const { authorize, connectionEpoch, forceRefresh, reconnect, signOut, signedInEmail, storedToken } = session;
+export const { authorize, connectionEpoch, forceRefresh, reauthorize, reconnect, signOut, signedInEmail, storedToken } =
+  session;

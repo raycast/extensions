@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
-import { apiKey, authorize, reconnect } from "./lib/auth";
+import { apiKey, authorize, reauthorize } from "./lib/auth";
 import { appUrl, askUrl } from "./lib/config";
 import { money, validZone } from "./vendor/twelfth-shared/index";
 import { type WorkspaceContext, workspaceContext } from "./lib/context";
@@ -36,7 +36,9 @@ function SearchProducts() {
   );
   // Prices are in the workspace's currency, not dollars by default. Without the
   // context the products still list, with bare amounts: no toast for it.
-  const { data: context } = useCachedPromise(() => workspaceContext(), [], { onError: () => undefined });
+  const { data: context, revalidate: revalidateContext } = useCachedPromise(() => workspaceContext(), [], {
+    onError: () => undefined,
+  });
 
   return (
     <List
@@ -65,6 +67,12 @@ function SearchProducts() {
           reach={reach}
           workspace={context?.workspace?.name}
           onRetry={revalidate}
+          onSwitched={() => {
+            // A new connection may be to a workspace with another name,
+            // currency and timezone: read its context again, not just products.
+            revalidateContext();
+            revalidate();
+          }}
         />
       )}
       {data?.map((product) => (
@@ -130,12 +138,14 @@ function EmptyProducts({
   reach,
   workspace,
   onRetry,
+  onSwitched,
 }: {
   error: Error | undefined;
   query: string;
   reach: Pick<ProductPage, "totalProducts" | "scope"> | undefined;
   workspace: string | undefined;
   onRetry: () => void;
+  onSwitched: () => void;
 }) {
   const where = workspace ? ` in ${workspace}` : "";
   const actions = (
@@ -147,8 +157,15 @@ function EmptyProducts({
           title="Switch Workspace"
           icon={Icon.Switch}
           onAction={async () => {
-            await reconnect();
-            onRetry();
+            // reauthorize keeps the current connection until the new grant
+            // lands, so a cancelled or failed sign-in leaves you where you were.
+            try {
+              await reauthorize();
+            } catch (error) {
+              await showFailureToast(error, { title: "Workspace not switched" });
+              return;
+            }
+            onSwitched();
           }}
         />
       )}
