@@ -72,30 +72,30 @@ const getScopedRows = (data: UsageLimitData): LimitRow[] => {
  *
  * Per-model windows come from `limits[]`, plus the flat `seven_day_sonnet` / `seven_day_opus`
  * fields for any weekly window `limits[]` does not already carry. An account served both shapes
- * at once keeps every window it reports and renders none of them twice.
+ * at once keeps every window it reports and renders none of them twice. A total the plan does
+ * not have, such as the 5-hour window on plans without one, yields no row.
  */
 export const getLimitRows = (data: UsageLimitData | null | undefined): LimitRow[] => {
   if (!data) return [];
 
-  return [
-    {
-      key: "five_hour",
-      label: "5-Hour",
-      period: null,
-      utilization: data.five_hour.utilization,
-      decimals: 1,
-      resets_at: data.five_hour.resets_at,
-      windowHours: 5,
-    },
-    {
-      key: "seven_day",
-      label: "7-Day",
-      period: null,
-      utilization: data.seven_day.utilization,
-      decimals: 1,
-      resets_at: data.seven_day.resets_at,
-      windowHours: 7 * 24,
-    },
-    ...getScopedRows(data),
-  ];
+  const totals = [
+    { key: "five_hour", label: "5-Hour", window: data.five_hour, windowHours: 5 },
+    { key: "seven_day", label: "7-Day", window: data.seven_day, windowHours: 7 * 24 },
+  ].flatMap(({ key, label, window, windowHours }): LimitRow[] =>
+    window
+      ? [
+          {
+            key,
+            label,
+            period: null,
+            utilization: window.utilization,
+            decimals: 1,
+            resets_at: window.resets_at,
+            windowHours,
+          },
+        ]
+      : [],
+  );
+
+  return [...totals, ...getScopedRows(data)];
 };

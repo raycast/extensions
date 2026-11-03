@@ -39,7 +39,8 @@ export function UsageLimits() {
     return null;
   }
 
-  const fiveHourUtil = data?.five_hour?.utilization ?? 0;
+  const primaryLabel = data?.five_hour ? "5-Hour" : "7-Day";
+  const primaryUtil = (data?.five_hour ?? data?.seven_day)?.utilization ?? 0;
   const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
@@ -59,19 +60,14 @@ export function UsageLimits() {
             : [
                 {
                   icon: Icon.Gauge,
-                  text: `${(preferRemaining ? 100 - fiveHourUtil : fiveHourUtil).toFixed(0)}%`,
-                  tooltip: `5-Hour Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
+                  text: `${(preferRemaining ? 100 - primaryUtil : primaryUtil).toFixed(0)}%`,
+                  tooltip: `${primaryLabel} Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
                 },
               ];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error && !data) {
-      return (
-        <ErrorMetadata
-          noDataMessage="Unable to fetch usage limits"
-          noDataSubMessage="Re-authenticate by running: claude login"
-        />
-      );
+      return <ErrorMetadata noDataMessage="Unable to fetch usage limits" noDataSubMessage={error.message} />;
     }
 
     if (isRateLimited && !data) {
