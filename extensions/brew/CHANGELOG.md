@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Finished toasts lose Cancel] - {PR_MERGE_DATE}
+
+- Fixed: a finished install, upgrade or uninstall could stay on its progress toast, such as "Installing Tinycast / Operation completed successfully", with a Cancel button that did nothing. It now ends on the result, such as "Installed Tinycast", with no Cancel
+
 ## [Better search ranking] - 2026-10-31
 
 - Improved: Search now lists exact name matches first, then names that start with what you typed, then names containing it, and description-only matches last. Searching `dia` finds Dia before AirMedia
