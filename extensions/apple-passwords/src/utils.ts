@@ -221,6 +221,7 @@ const getBrowserCommand = (browserName: string) => {
     case "Chromium":
     case "Brave":
     case "Arc":
+    case "Dia":
       return `tell application "${browserName}" to return URL of active tab of front window`;
     default:
       throw new BrowserError(browserName);
