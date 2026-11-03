@@ -1,6 +1,18 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { useForm, usePromise } from "@raycast/utils";
 import { useCallback } from "react";
+import { errorMessage } from "../core/errors";
 import type { TextSnippet } from "../core/types";
 import { createSnippet, deleteSnippet, getSnippets, updateSnippet } from "../prompts/store";
 import { isQuotableSnippetName, snippetPlaceholder, UNQUOTABLE_SNIPPET_NAME } from "../prompts/template/snippets";
@@ -52,6 +64,7 @@ function SnippetForm({ snippet, onSaved }: { snippet?: TextSnippet; onSaved: () 
 export function SnippetList() {
   const {
     data: snippets,
+    error,
     isLoading,
     revalidate,
   } = usePromise(getSnippets, [], { onError: (error) => showError("Cannot Load Snippets", error) });
@@ -112,13 +125,30 @@ export function SnippetList() {
           }
         />
       ))}
-      {!isLoading && (
-        <List.EmptyView
-          title="No Snippets"
-          description="Reusable text for your prompts."
-          actions={<ActionPanel>{create}</ActionPanel>}
-        />
-      )}
+      {!isLoading &&
+        (error ? (
+          <List.EmptyView
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+            title="Snippets Could Not Be Loaded"
+            description={errorMessage(error)}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Try Again"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={reload}
+                />
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.EmptyView
+            title="No Snippets"
+            description="Reusable text for your prompts."
+            actions={<ActionPanel>{create}</ActionPanel>}
+          />
+        ))}
     </List>
   );
 }

@@ -230,7 +230,8 @@ export function ResultView({ prompt, input, args, navigationTitle }: ResultViewP
   useRunOnce(() => void prepare(undefined));
 
   const busy = turns.some((turn) => turn.status === "streaming");
-  const firstMessages = turns[0]?.messages;
+  // The original request. A failed preparation leaves turns without one, so it is not always the first turn's.
+  const firstMessages = turns.find((turn) => turn.messages)?.messages;
   const latest = turns[turns.length - 1];
   const selected = turns.find((turn) => turn.id === selectedId) ?? latest;
   const position = selected ? turns.indexOf(selected) + 1 : 0;
