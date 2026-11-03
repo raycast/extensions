@@ -12,7 +12,7 @@ uv tool install ccswap   # or: pipx install ccswap
 
 Then add your accounts with `ccswap add` (see the ccswap README).
 
-The extension looks for `ccswap` in `~/.local/bin`, `/opt/homebrew/bin` and `/usr/local/bin`. If yours is somewhere else, set **ccswap Path** in the extension preferences (`which ccswap` prints it).
+The extension looks for `ccswap` in `~/.local/bin`, `/opt/homebrew/bin` and `/usr/local/bin`. If yours is somewhere else, pick it in **ccswap Path** in the extension preferences (`which ccswap` prints where it is).
 
 ## Commands
 

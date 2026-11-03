@@ -12,9 +12,11 @@ export default async function Command() {
   }
   try {
     await run(bin, switchArgs("claude"));
-    const active = (await listAccounts(bin)).claude.find((a) => a.active);
-    await showHUD(`Claude Code: ${active ? label(active) : "switched"}`);
   } catch (error) {
     await showFailureToast(error, { title: "Switch failed" });
+    return;
   }
+  // The switch already happened, so a failed lookup only loses the account name.
+  const active = (await listAccounts(bin).catch(() => undefined))?.claude.find((a) => a.active);
+  await showHUD(`Claude Code: ${active ? label(active) : "switched"}`);
 }

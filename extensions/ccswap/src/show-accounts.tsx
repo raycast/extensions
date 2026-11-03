@@ -40,20 +40,22 @@ function accessories(account: Account): List.Item.Accessory[] {
 
 export default function Command() {
   const bin = resolveBinary(getPreferenceValues<Preferences>().ccswapPath || undefined);
-  const { data, isLoading, revalidate } = useCachedPromise(listAccounts, [bin ?? ""], { execute: !!bin });
+  const { data, error, isLoading, revalidate } = useCachedPromise(listAccounts, [bin ?? ""], { execute: !!bin });
 
   async function switchTo(provider: Provider, number?: number) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Switching…" });
     try {
       await run(bin!, switchArgs(provider, number));
-      const active = (await listAccounts(bin!))[provider].find((a) => a.active);
-      revalidate();
-      toast.style = Toast.Style.Success;
-      toast.title = `${TITLES[provider]}: ${active ? label(active) : "switched"}`;
-      toast.message = AFTER_SWITCH[provider];
     } catch (error) {
       await showFailureToast(error, { title: "Switch failed" });
+      return;
     }
+    // The switch already happened, so a failed lookup only loses the account name.
+    const active = (await listAccounts(bin!).catch(() => undefined))?.[provider].find((a) => a.active);
+    revalidate();
+    toast.style = Toast.Style.Success;
+    toast.title = `${TITLES[provider]}: ${active ? label(active) : "switched"}`;
+    toast.message = AFTER_SWITCH[provider];
   }
 
   if (!bin) {
@@ -73,8 +75,29 @@ export default function Command() {
     );
   }
 
+  if (error && !data) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't Load Accounts"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  const bestAction = (provider: Provider, shortcut?: Keyboard.Shortcut) => (
+    <Action title="Switch to Best Account" icon={Icon.Stars} shortcut={shortcut} onAction={() => switchTo(provider)} />
+  );
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search accounts…">
       {(["claude", "codex"] as const).map((provider) => (
         <List.Section key={provider} title={TITLES[provider]}>
           {(data?.[provider] ?? []).map((account) => (
@@ -87,20 +110,18 @@ export default function Command() {
               accessories={accessories(account)}
               actions={
                 <ActionPanel>
-                  {!account.active && (
+                  {/* Raycast hides shortcuts on the first two actions, so ⌘B sits third. */}
+                  {account.active ? (
+                    bestAction(provider)
+                  ) : (
                     <Action
                       title="Switch to Account"
                       icon={Icon.Switch}
                       onAction={() => switchTo(provider, account.number)}
                     />
                   )}
-                  <Action
-                    title="Switch to Best Account"
-                    icon={Icon.Stars}
-                    shortcut={{ modifiers: ["cmd"], key: "b" }}
-                    onAction={() => switchTo(provider)}
-                  />
                   <Action.CopyToClipboard title="Copy Email" content={account.email} />
+                  {!account.active && bestAction(provider, { modifiers: ["cmd"], key: "b" })}
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}

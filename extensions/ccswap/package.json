@@ -16,8 +16,8 @@
     {
       "name": "ccswapPath",
       "title": "ccswap Path",
-      "description": "Full path to the ccswap binary. Leave empty to look in ~/.local/bin, /opt/homebrew/bin and /usr/local/bin.",
-      "type": "textfield",
+      "description": "The ccswap binary. Leave empty to look in ~/.local/bin, /opt/homebrew/bin and /usr/local/bin.",
+      "type": "file",
       "required": false
     }
   ],
