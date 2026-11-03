@@ -1,6 +1,6 @@
 # Date Inserter Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-03
 
 - Insert Date command: pick a date from a monthly calendar and paste it into the frontmost app, or copy it.
 - Keyboard navigation: arrow keys move by day and week and turn pages across months; jump by month or year, or go back to today.
