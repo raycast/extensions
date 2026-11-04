@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Fix Active Workspaces Across Spaces] - {PR_MERGE_DATE}
+## [Fix Active Workspaces Across Spaces] - 2026-11-04
 
 - List Cursor windows across all macOS Spaces and switch to their Space when focusing a window
 - Batch Window menu reads to keep active workspace discovery fast
