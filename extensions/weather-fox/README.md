@@ -45,20 +45,3 @@ Works on macOS and Windows. Shortcuts below are written for macOS; on Windows re
 ## Setup
 
 No account, API key, or preferences panel needed — everything is configured inside the command itself, starting with the first-launch wizard.
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-To preview the artwork without launching Raycast:
-
-```bash
-npx tsx scripts/preview.ts          # hero cards for every theme/condition → /tmp/weather-previews
-npx tsx scripts/cast-preview.ts     # every Cast scene → /tmp/cast-previews
-npx tsx scripts/cast-validate.ts    # checks the generated SVG animations for structural errors
-```
-
-`scripts/make-icon.ts` and `scripts/mask-icon.ts` regenerate the two icons in `assets/` (instructions in the file headers).
