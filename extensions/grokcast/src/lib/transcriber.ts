@@ -14,13 +14,10 @@ import { callXai, describeXaiError, XaiClient, XaiFailureReason, type XaiSdkErro
 const REQUEST_TIMEOUT = Duration.seconds(60)
 
 /** Transcription failed. `reason` picks what the UI offers, `message` is for the user. */
-export class TranscriptionError extends Schema.TaggedError<TranscriptionError>()(
-  "TranscriptionError",
-  {
-    reason: XaiFailureReason,
-    message: Schema.String,
-  },
-) {}
+export class TranscriptionError extends Schema.TaggedError<TranscriptionError>()("TranscriptionError", {
+  reason: XaiFailureReason,
+  message: Schema.String,
+}) {}
 
 export class Transcript extends Schema.Class<Transcript>("Transcript")({
   text: Schema.String,
@@ -53,14 +50,14 @@ const makeTranscriber = Effect.fn("Transcriber.make")(function* () {
     options: TranscribeOptions,
   ) {
     const xai = yield* client.pipe(
-      Effect.mapError(
-        (error) => new TranscriptionError({ reason: "failed", message: error.message }),
-      ),
+      Effect.mapError((error) => new TranscriptionError({ reason: "failed", message: error.message })),
     )
+
     const language = Option.match(options.language, {
       onNone: () => ({}),
       onSome: (code) => ({ language: code, format: options.formatNumbers }),
     })
+
     const result = yield* callXai((signal) =>
       xai.voice.transcribe(
         {
@@ -73,6 +70,7 @@ const makeTranscriber = Effect.fn("Transcriber.make")(function* () {
         { signal, maxRetries: 0, timeout: Duration.toMillis(REQUEST_TIMEOUT) },
       ),
     ).pipe(Effect.mapError(toTranscriptionError))
+
     return new Transcript({
       text: result.text.trim(),
       seconds: result.duration,
@@ -80,18 +78,12 @@ const makeTranscriber = Effect.fn("Transcriber.make")(function* () {
     })
   })
 
-  return Transcriber.of({ transcribe })
+  return { transcribe }
 })
 
-export class Transcriber extends Context.Service<
-  Transcriber,
-  {
-    /** Transcribe mono 16 kHz signed 16-bit little-endian PCM. */
-    readonly transcribe: (
-      audio: Uint8Array<ArrayBuffer>,
-      options: TranscribeOptions,
-    ) => Effect.Effect<Transcript, TranscriptionError>
-  }
->()("grokcast/Transcriber") {
-  static readonly layer = Layer.effect(Transcriber, makeTranscriber())
+/** Transcribes mono 16 kHz signed 16-bit little-endian PCM. */
+export class Transcriber extends Context.Service<Transcriber>()("grokcast/Transcriber", {
+  make: makeTranscriber(),
+}) {
+  static readonly layer = Layer.effect(Transcriber, Transcriber.make)
 }

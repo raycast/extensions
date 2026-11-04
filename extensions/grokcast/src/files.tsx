@@ -9,8 +9,6 @@ import {
   confirmAlert,
   Form,
   Icon,
-  launchCommand,
-  LaunchType,
   List,
   showInFinder,
   showToast,
@@ -35,12 +33,14 @@ import {
 } from "./lib/files.ts"
 import { GrokRuntime } from "./lib/grok.ts"
 import type { XaiFailure } from "./lib/xai.ts"
+import { SignInAction } from "./components/launch.tsx"
 
 type State = Data.TaggedEnum<{
   Loading: {}
   Loaded: { readonly list: FileList }
   Failed: { readonly failure: XaiFailure }
 }>
+
 const State = Data.taggedEnum<State>()
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" })
@@ -59,6 +59,7 @@ export default function Files() {
         Effect.flatMap((next) => Effect.sync(() => setState(next))),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -75,9 +76,8 @@ export default function Files() {
     setBusy(true)
     GrokRuntime.runFork(
       Effect.gen(function* () {
-        const toast = yield* Effect.tryPromise(() =>
-          showToast({ style: Toast.Style.Animated, title }),
-        )
+        const toast = yield* Effect.tryPromise(() => showToast({ style: Toast.Style.Animated, title }))
+
         yield* program.pipe(
           Effect.flatMap((result) => done(result, toast)),
           Effect.catch((error) =>
@@ -147,6 +147,7 @@ export default function Files() {
       message: "The link stops working for everyone. The file stays.",
       primaryAction: { title: "Revoke", style: Alert.ActionStyle.Destructive },
     })
+
     if (confirmed) {
       change(
         "Revoking the public link",
@@ -166,6 +167,7 @@ export default function Files() {
       message: "This deletes the file at xAI, and its public link stops working.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     })
+
     if (confirmed) {
       change(
         `Deleting ${file.filename}`,
@@ -189,12 +191,7 @@ export default function Files() {
   )
 
   const reloadAction = (
-    <Action
-      title="Reload"
-      icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={reload}
-    />
+    <Action title="Reload" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={reload} />
   )
 
   return State.$match(state, {
@@ -222,11 +219,7 @@ export default function Files() {
       </List>
     ),
     Loaded: ({ list }) => (
-      <List
-        isLoading={busy}
-        isShowingDetail={list.files.length > 0}
-        searchBarPlaceholder="Search files"
-      >
+      <List isLoading={busy} isShowingDetail={list.files.length > 0} searchBarPlaceholder="Search files">
         <List.EmptyView
           icon={Icon.Document}
           title="No files yet"
@@ -264,11 +257,7 @@ export default function Files() {
                   })}
                   <Action.CopyToClipboard title="Copy File ID" content={file.id} />
                   <ActionPanel.Submenu
-                    title={
-                      Option.isSome(file.publicLink)
-                        ? "Make a New Public Link"
-                        : "Create Public Link"
-                    }
+                    title={Option.isSome(file.publicLink) ? "Make a New Public Link" : "Create Public Link"}
                     icon={Icon.Link}
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                   >
@@ -318,10 +307,7 @@ function FileDetail({ file }: { readonly file: GrokFile }) {
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Name" text={file.filename} />
           <List.Item.Detail.Metadata.Label title="Size" text={sizeOf(file.bytes)} />
-          <List.Item.Detail.Metadata.Label
-            title="Uploaded"
-            text={dateFormat.format(file.createdAt)}
-          />
+          <List.Item.Detail.Metadata.Label title="Uploaded" text={dateFormat.format(file.createdAt)} />
           <List.Item.Detail.Metadata.Label
             title="Expires"
             text={Option.match(file.expiresAt, {
@@ -356,22 +342,6 @@ function FileDetail({ file }: { readonly file: GrokFile }) {
   )
 }
 
-function SignInAction() {
-  return (
-    <Action
-      title="Sign in to Grok"
-      icon={Icon.Person}
-      onAction={() =>
-        void launchCommand({
-          name: "account",
-          type: LaunchType.UserInitiated,
-          context: { signIn: true },
-        })
-      }
-    />
-  )
-}
-
 /** The value of the "No Expiry" choice in the form's dropdown. */
 const NO_EXPIRY = "none"
 
@@ -387,23 +357,24 @@ function UploadFile({ onUploaded }: { readonly onUploaded: () => void }) {
   const upload = (path: string) => {
     setUploading(true)
     const filename = basename(path)
+
     const expiresAfter = Option.flatMap(
       Arr.findFirst(EXPIRY_CHOICES, (choice) => expiryValue(choice.seconds) === expiry),
       (choice) => choice.seconds,
     )
+
     GrokRuntime.runFork(
       Effect.gen(function* () {
         const toast = yield* Effect.tryPromise(() =>
           showToast({ style: Toast.Style.Animated, title: `Uploading ${filename}` }),
         )
+
         yield* Effect.tryPromise({
           try: () => readFile(path),
           catch: () => new MacError({ message: `Could not read ${filename}.` }),
         }).pipe(
           Effect.flatMap((bytes) =>
-            GrokFiles.use((files) =>
-              files.upload({ filename, bytes: new Uint8Array(bytes), expiresAfter }),
-            ),
+            GrokFiles.use((files) => files.upload({ filename, bytes: new Uint8Array(bytes), expiresAfter })),
           ),
           Effect.flatMap(() =>
             Effect.sync(() => {
@@ -467,6 +438,7 @@ function UploadFile({ onUploaded }: { readonly onUploaded: () => void }) {
 const sizeOf = (bytes: number): string => {
   const units = ["bytes", "KB", "MB", "GB"]
   const exponent = Math.min(Math.floor(Math.log10(Math.max(bytes, 1)) / 3), units.length - 1)
+
   return `${sizeFormat.format(bytes / 1000 ** exponent)} ${units[exponent]}`
 }
 
@@ -474,9 +446,7 @@ const ErrorCode = Schema.Struct({ code: Schema.String })
 
 /** True when a failed write found a file already there. */
 const alreadyExists = (cause: unknown) =>
-  Schema.decodeUnknownOption(ErrorCode)(cause).pipe(
-    Option.exists((error) => error.code === "EEXIST"),
-  )
+  Schema.decodeUnknownOption(ErrorCode)(cause).pipe(Option.exists((error) => error.code === "EEXIST"))
 
 /** Tries before giving up on a free name. */
 const MAX_SAVE_ATTEMPTS = 100
@@ -487,11 +457,14 @@ const MAX_SAVE_ATTEMPTS = 100
  */
 const saveToDownloads = (filename: string, bytes: Uint8Array) => {
   const folder = join(homedir(), "Downloads")
+
   const failed = new MacError({
     message: `Could not save ${savedName(filename, 0)} in Downloads.`,
   })
+
   const attempt = (index: number): Effect.Effect<string, MacError> => {
     const path = join(folder, savedName(filename, index))
+
     return Effect.tryPromise({
       try: () => writeFile(path, bytes, { flag: "wx" }),
       catch: (cause) => ({ exists: alreadyExists(cause) }),
@@ -502,5 +475,6 @@ const saveToDownloads = (filename: string, bytes: Uint8Array) => {
       ),
     )
   }
+
   return attempt(0)
 }

@@ -46,9 +46,7 @@ const decodeUrl = Schema.decodeUnknownOption(Schema.URLFromString)
 export const isXaiUrl = (url: string): boolean =>
   Option.exists(
     decodeUrl(url),
-    (parsed) =>
-      parsed.protocol === "https:" &&
-      (parsed.hostname === "x.ai" || parsed.hostname.endsWith(".x.ai")),
+    (parsed) => parsed.protocol === "https:" && (parsed.hostname === "x.ai" || parsed.hostname.endsWith(".x.ai")),
   )
 
 /** An HTTPS URL on `x.ai`. */
@@ -103,6 +101,7 @@ export const TokenResponse = Schema.Struct({
   id_token: Schema.OptionFromOptionalKey(Schema.RedactedFromValue(Schema.NonEmptyString)),
   expires_in: Schema.OptionFromOptionalKey(Schema.Finite),
 })
+
 export type TokenResponse = typeof TokenResponse.Type
 
 const OAuthErrorBody = Schema.Struct({
@@ -112,71 +111,70 @@ const OAuthErrorBody = Schema.Struct({
 
 const isOk = (status: number): boolean => status >= 200 && status < 300
 
+/** The `OAuthError` for an error response, with the OAuth `error` value when the body has one. */
+const errorResponse = (response: HttpClientResponse.HttpClientResponse, failure: string) =>
+  HttpClientResponse.schemaBodyJson(OAuthErrorBody)(response).pipe(
+    Effect.option,
+    Effect.flatMap((body) =>
+      Effect.fail(
+        new OAuthError({
+          code: Option.getOrElse(
+            Option.map(body, (parsed) => parsed.error),
+            () => "http_error",
+          ),
+          message: body.pipe(
+            Option.flatMap((parsed) => parsed.error_description),
+            Option.getOrElse(() => `${failure} (HTTP ${response.status}).`),
+          ),
+          status: Option.some(response.status),
+        }),
+      ),
+    ),
+  )
+
 /** Send a request. A network failure or an error status becomes an `OAuthError`. */
-const send = Effect.fn("oauth.send")(function* (
-  request: HttpClientRequest.HttpClientRequest,
-  failure: string,
-) {
+const send = Effect.fn("oauth.send")(function* (request: HttpClientRequest.HttpClientRequest, failure: string) {
   const client = yield* HttpClient.HttpClient
+
   const response = yield* client
     .execute(request)
-    .pipe(
-      Effect.mapError(
-        () => new OAuthError({ code: "network_error", message: failure, status: Option.none() }),
-      ),
-    )
-  if (isOk(response.status)) return response
-  const body = yield* HttpClientResponse.schemaBodyJson(OAuthErrorBody)(response).pipe(
-    Effect.option,
+    .pipe(Effect.mapError(() => new OAuthError({ code: "network_error", message: failure, status: Option.none() })))
+
+  return yield* Option.match(
+    Option.liftPredicate(response, (answer) => isOk(answer.status)),
+    { onNone: () => errorResponse(response, failure), onSome: Effect.succeed },
   )
-  return yield* new OAuthError({
-    code: Option.match(body, { onNone: () => "http_error", onSome: (parsed) => parsed.error }),
-    message: body.pipe(
-      Option.flatMap((parsed) => parsed.error_description),
-      Option.getOrElse(() => `${failure} (HTTP ${response.status}).`),
-    ),
-    status: Option.some(response.status),
-  })
 })
 
 /** Decode a JSON response body. A body that does not match fails with `code`. */
 const decodeBody = <S extends Schema.Decoder<unknown>>(schema: S, code: string, message: string) =>
   Effect.fn("oauth.decodeBody")(function* (response: HttpClientResponse.HttpClientResponse) {
     return yield* HttpClientResponse.schemaBodyJson(schema)(response).pipe(
-      Effect.mapError(
-        () => new OAuthError({ code, message, status: Option.some(response.status) }),
-      ),
+      Effect.mapError(() => new OAuthError({ code, message, status: Option.some(response.status) })),
     )
   })
 
 const postForm = (url: string, form: Readonly<Record<string, string>>) =>
-  HttpClientRequest.post(url).pipe(
-    HttpClientRequest.acceptJson,
-    HttpClientRequest.bodyUrlParams(form),
-  )
+  HttpClientRequest.post(url).pipe(HttpClientRequest.acceptJson, HttpClientRequest.bodyUrlParams(form))
 
 export const discoverEndpoints = Effect.fn("oauth.discoverEndpoints")(function* (issuer: string) {
   const response = yield* send(
-    HttpClientRequest.get(`${issuer}/.well-known/openid-configuration`).pipe(
-      HttpClientRequest.acceptJson,
-    ),
+    HttpClientRequest.get(`${issuer}/.well-known/openid-configuration`).pipe(HttpClientRequest.acceptJson),
     "Could not reach xAI sign-in",
   ).pipe(
     Effect.mapError(
-      (error) =>
-        new OAuthError({ code: "discovery_failed", message: error.message, status: error.status }),
+      (error) => new OAuthError({ code: "discovery_failed", message: error.message, status: error.status }),
     ),
   )
+
   const config = yield* decodeBody(
     OpenIdConfiguration,
     "invalid_discovery",
     "xAI sign-in returned an unexpected configuration.",
   )(response)
+
   return new OAuthEndpoints({
-    deviceAuthorization: Option.getOrElse(
-      config.device_authorization_endpoint,
-      () => `${issuer}/oauth2/device/code`,
-    ),
+    deviceAuthorization: Option.getOrElse(config.device_authorization_endpoint, () => `${issuer}/oauth2/device/code`),
     token: config.token_endpoint,
     revocation: config.revocation_endpoint,
   })
@@ -194,11 +192,13 @@ export const requestDeviceCode = Effect.fn("oauth.requestDeviceCode")(function* 
     }),
     "Could not start xAI sign-in",
   )
+
   const body = yield* decodeBody(
     DeviceCodeResponse,
     "invalid_device_code",
     "xAI sign-in returned an incomplete device code.",
   )(response)
+
   return new DeviceCode({
     deviceCode: Redacted.make(body.device_code),
     userCode: body.user_code,
@@ -209,11 +209,7 @@ export const requestDeviceCode = Effect.fn("oauth.requestDeviceCode")(function* 
   })
 })
 
-const readTokenResponse = decodeBody(
-  TokenResponse,
-  "invalid_token_response",
-  "xAI sign-in returned no access token.",
-)
+const readTokenResponse = decodeBody(TokenResponse, "invalid_token_response", "xAI sign-in returned no access token.")
 
 const exchangeDeviceCode = Effect.fn("oauth.exchangeDeviceCode")(function* (
   endpoints: OAuthEndpoints,
@@ -228,6 +224,7 @@ const exchangeDeviceCode = Effect.fn("oauth.exchangeDeviceCode")(function* (
     }),
     "xAI sign-in failed",
   )
+
   return yield* readTokenResponse(response)
 })
 
@@ -241,9 +238,8 @@ export const pollDeviceToken = Effect.fn("oauth.pollDeviceToken")(function* (
   clientId: string,
   device: DeviceCode,
 ) {
-  const poll = (
-    interval: Duration.Duration,
-  ): Effect.Effect<TokenResponse, OAuthError, HttpClient.HttpClient> =>
+  // A poll ends the way one exchange does.
+  const poll = (interval: Duration.Duration): ReturnType<typeof exchangeDeviceCode> =>
     Effect.sleep(interval).pipe(
       Effect.andThen(exchangeDeviceCode(endpoints, clientId, device)),
       Effect.catchTag("OAuthError", (error) =>
@@ -254,6 +250,7 @@ export const pollDeviceToken = Effect.fn("oauth.pollDeviceToken")(function* (
         ),
       ),
     )
+
   return yield* poll(Duration.seconds(device.interval)).pipe(
     Effect.timeoutOrElse({
       duration: Duration.seconds(device.expiresIn),
@@ -282,6 +279,7 @@ export const refreshTokens = Effect.fn("oauth.refreshTokens")(function* (
     }),
     "Could not refresh the Grok sign-in",
   )
+
   return yield* readTokenResponse(response)
 })
 
@@ -291,14 +289,14 @@ export const revokeToken = Effect.fn("oauth.revokeToken")(function* (
   clientId: string,
   token: Redacted.Redacted<string>,
 ) {
-  if (Option.isNone(endpoints.revocation)) return
-  yield* send(
-    postForm(endpoints.revocation.value, {
-      token: Redacted.value(token),
-      client_id: clientId,
-    }),
-    "Could not revoke the Grok sign-in",
-  )
+  yield* Option.match(endpoints.revocation, {
+    onNone: () => Effect.void,
+    onSome: (revocation) =>
+      send(
+        postForm(revocation, { token: Redacted.value(token), client_id: clientId }),
+        "Could not revoke the Grok sign-in",
+      ),
+  })
 })
 
 /** Who is signed in, from the ID token's claims. For display only. */
@@ -326,21 +324,21 @@ export class ClientId extends Context.Service<ClientId, string>()("grok/ClientId
 const makeXaiEndpoints = Effect.fn("XaiEndpoints.make")(function* () {
   const client = yield* HttpClient.HttpClient
   const cache = yield* Ref.make(Option.none<OAuthEndpoints>())
+
   const discover = discoverEndpoints(XAI_ISSUER).pipe(
     Effect.provideService(HttpClient.HttpClient, client),
     Effect.tap((endpoints) => Ref.set(cache, Option.some(endpoints))),
   )
+
   // Only a successful discovery is kept, so a failed one is retried on the next use.
-  const get = Ref.get(cache).pipe(
-    Effect.flatMap(Option.match({ onNone: () => discover, onSome: Effect.succeed })),
-  )
-  return XaiEndpoints.of({ get })
+  const get = Ref.get(cache).pipe(Effect.flatMap(Option.match({ onNone: () => discover, onSome: Effect.succeed })))
+
+  return { get }
 })
 
 /** The xAI sign-in endpoints, discovered on first use and then reused. */
-export class XaiEndpoints extends Context.Service<
-  XaiEndpoints,
-  { readonly get: Effect.Effect<OAuthEndpoints, OAuthError> }
->()("grok/XaiEndpoints") {
-  static readonly layer = Layer.effect(XaiEndpoints, makeXaiEndpoints())
+export class XaiEndpoints extends Context.Service<XaiEndpoints>()("grok/XaiEndpoints", {
+  make: makeXaiEndpoints(),
+}) {
+  static readonly layer = Layer.effect(XaiEndpoints, XaiEndpoints.make)
 }

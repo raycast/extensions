@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  launchCommand,
-  LaunchType,
-  List,
-  useNavigation,
-} from "@raycast/api"
+import { Action, ActionPanel, Detail, Form, Icon, List, useNavigation } from "@raycast/api"
 import * as Arr from "effect/Array"
 import * as Data from "effect/Data"
 import * as Effect from "effect/Effect"
@@ -19,12 +9,14 @@ import { useEffect, useState } from "react"
 import { GrokRuntime } from "./lib/grok.ts"
 import { ModelCatalog, type GrokModel, type ModelKind, type Token } from "./lib/models.ts"
 import type { XaiFailure } from "./lib/xai.ts"
+import { SignInAction } from "./components/launch.tsx"
 
 type State = Data.TaggedEnum<{
   Loading: {}
   Loaded: { readonly models: ReadonlyArray<GrokModel> }
   Failed: { readonly failure: XaiFailure }
 }>
+
 const State = Data.taggedEnum<State>()
 
 const SECTIONS: ReadonlyArray<{ readonly kind: ModelKind; readonly title: string }> = [
@@ -48,6 +40,7 @@ export default function Models() {
         Effect.flatMap((next) => Effect.sync(() => setState(next))),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -144,10 +137,7 @@ function ModelDetail({ model }: { readonly model: GrokModel }) {
           {Option.match(model.contextLength, {
             onNone: () => null,
             onSome: (length) => (
-              <List.Item.Detail.Metadata.Label
-                title="Context"
-                text={`${numberFormat.format(length)} tokens`}
-              />
+              <List.Item.Detail.Metadata.Label title="Context" text={`${numberFormat.format(length)} tokens`} />
             ),
           })}
           {Option.match(model.maxPromptLength, {
@@ -170,13 +160,7 @@ function ModelDetail({ model }: { readonly model: GrokModel }) {
   )
 }
 
-function TagRow({
-  title,
-  values,
-}: {
-  readonly title: string
-  readonly values: ReadonlyArray<string>
-}) {
+function TagRow({ title, values }: { readonly title: string; readonly values: ReadonlyArray<string> }) {
   return Arr.match(values, {
     onEmpty: () => null,
     onNonEmpty: (all) => (
@@ -189,26 +173,11 @@ function TagRow({
   })
 }
 
-function SignInAction() {
-  return (
-    <Action
-      title="Sign in to Grok"
-      icon={Icon.Person}
-      onAction={() =>
-        void launchCommand({
-          name: "account",
-          type: LaunchType.UserInitiated,
-          context: { signIn: true },
-        })
-      }
-    />
-  )
-}
-
 /** A form for the text, then the count from xAI's tokenizer for `model`. */
 function CountTokens({ model }: { readonly model: string }) {
   const { push } = useNavigation()
   const [text, setText] = useState("")
+
   return (
     <Form
       navigationTitle={`Count Tokens for ${model}`}
@@ -240,6 +209,7 @@ type CountState = Data.TaggedEnum<{
   Counted: { readonly tokens: ReadonlyArray<Token> }
   Failed: { readonly failure: XaiFailure }
 }>
+
 const CountState = Data.taggedEnum<CountState>()
 
 function TokenCount({ model, text }: { readonly model: string; readonly text: string }) {
@@ -253,6 +223,7 @@ function TokenCount({ model, text }: { readonly model: string; readonly text: st
         Effect.flatMap((next) => Effect.sync(() => setState(next))),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -288,10 +259,7 @@ function TokenCount({ model, text }: { readonly model: string; readonly text: st
         actions={
           <ActionPanel>
             <Action.CopyToClipboard title="Copy Token Count" content={String(tokens.length)} />
-            <Action.CopyToClipboard
-              title="Copy Token IDs"
-              content={tokens.map((token) => token.id).join(" ")}
-            />
+            <Action.CopyToClipboard title="Copy Token IDs" content={tokens.map((token) => token.id).join(" ")} />
           </ActionPanel>
         }
       />
@@ -299,8 +267,7 @@ function TokenCount({ model, text }: { readonly model: string; readonly text: st
   })
 }
 
-const visible = (text: string) =>
-  text.replaceAll("`", "ˋ").replaceAll(" ", "·").replaceAll("\n", "⏎")
+const visible = (text: string) => text.replaceAll("`", "ˋ").replaceAll(" ", "·").replaceAll("\n", "⏎")
 
 /** At most this many tokens are listed, so a long text stays quick to show. */
 const SHOWN_TOKENS = 500
@@ -309,6 +276,7 @@ const SHOWN_TOKENS = 500
 const tokenMarkdown = (tokens: ReadonlyArray<Token>): string => {
   const shown = Arr.take(tokens, SHOWN_TOKENS)
   const rest = tokens.length - shown.length
+
   return [
     `# ${numberFormat.format(tokens.length)} ${tokens.length === 1 ? "token" : "tokens"}`,
     "",

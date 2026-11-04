@@ -31,15 +31,17 @@ export class Conversation extends Schema.Class<Conversation>("Conversation")({
 /** A new conversation, before its first question. */
 export const newConversation = Effect.map(
   Clock.currentTimeMillis,
-  (now) =>
-    new Conversation({ id: String(now), title: "", createdAt: now, updatedAt: now, turns: [] }),
+  (now) => new Conversation({ id: String(now), title: "", createdAt: now, updatedAt: now, turns: [] }),
 )
 
 /** `conversation` with `turn` added. The first question names it. */
 export const withTurn = (conversation: Conversation, turn: ChatTurn): Conversation =>
   new Conversation({
     ...conversation,
-    title: conversation.title === "" ? titleOf(turn.prompt) : conversation.title,
+    title: Option.getOrElse(
+      Option.liftPredicate(conversation.title, (title) => title !== ""),
+      () => titleOf(turn.prompt),
+    ),
     updatedAt: turn.createdAt + Math.round(turn.seconds * 1000),
     turns: Arr.append(conversation.turns, turn),
   })
@@ -62,16 +64,19 @@ const makeConversations = Effect.fn("ChatConversations.make")(function* () {
 
   /** Save `conversation` and move it to the top. A conversation with no turns is not saved. */
   const save = Effect.fn("ChatConversations.save")(function* (conversation: Conversation) {
-    if (Arr.isReadonlyArrayEmpty(conversation.turns)) return
-    yield* update((all) =>
-      Arr.take(
-        Arr.prepend(
-          Arr.filter(all, (old) => old.id !== conversation.id),
-          conversation,
+    yield* Arr.match(conversation.turns, {
+      onEmpty: () => Effect.void,
+      onNonEmpty: () =>
+        update((all) =>
+          Arr.take(
+            Arr.prepend(
+              Arr.filter(all, (old) => old.id !== conversation.id),
+              conversation,
+            ),
+            MAX_CONVERSATIONS,
+          ),
         ),
-        MAX_CONVERSATIONS,
-      ),
-    )
+    })
   })
 
   const remove = Effect.fn("ChatConversations.remove")(function* (id: string) {
@@ -80,21 +85,11 @@ const makeConversations = Effect.fn("ChatConversations.make")(function* () {
 
   const clear = store.remove(KEY).pipe(Effect.withSpan("ChatConversations.clear"))
 
-  return ChatConversations.of({ list, save, remove, clear })
+  return { list, save, remove, clear }
 })
 
-export class ChatConversations extends Context.Service<
-  ChatConversations,
-  {
-    readonly list: Effect.Effect<ReadonlyArray<Conversation>>
-    readonly save: (
-      conversation: Conversation,
-    ) => Effect.Effect<void, KeyValueStore.KeyValueStoreError | Schema.SchemaError>
-    readonly remove: (
-      id: string,
-    ) => Effect.Effect<void, KeyValueStore.KeyValueStoreError | Schema.SchemaError>
-    readonly clear: Effect.Effect<void, KeyValueStore.KeyValueStoreError>
-  }
->()("grokcast/ChatConversations") {
-  static readonly layer = Layer.effect(ChatConversations, makeConversations())
+export class ChatConversations extends Context.Service<ChatConversations>()("grokcast/ChatConversations", {
+  make: makeConversations(),
+}) {
+  static readonly layer = Layer.effect(ChatConversations, ChatConversations.make)
 }

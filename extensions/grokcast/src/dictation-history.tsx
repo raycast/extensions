@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api"
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api"
 import * as Effect from "effect/Effect"
 import * as Option from "effect/Option"
 import { useEffect, useState } from "react"
@@ -35,18 +26,25 @@ export default function DictationHistoryCommand() {
     GrokRuntime.runFork(
       program.pipe(
         Effect.andThen(Effect.sync(reload)),
-        Effect.catch(() =>
-          Effect.tryPromise(() => showToast({ style: Toast.Style.Failure, title: failure })),
-        ),
+        Effect.catch(() => Effect.tryPromise(() => showToast({ style: Toast.Style.Failure, title: failure }))),
         Effect.ignore,
       ),
     )
 
-  const remove = (entry: HistoryEntry) =>
-    change(
-      DictationHistory.use((history) => history.remove(entry.id)),
-      "Could not delete the dictation",
-    )
+  const remove = async (entry: HistoryEntry) => {
+    const confirmed = await confirmAlert({
+      title: "Delete this dictation?",
+      message: "This removes it from this Mac.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    })
+
+    if (confirmed) {
+      change(
+        DictationHistory.use((history) => history.remove(entry.id)),
+        "Could not delete the dictation",
+      )
+    }
+  }
 
   const clearAll = async () => {
     const confirmed = await confirmAlert({
@@ -54,6 +52,7 @@ export default function DictationHistoryCommand() {
       message: "This removes the dictation history from this Mac.",
       primaryAction: { title: "Delete All", style: Alert.ActionStyle.Destructive },
     })
+
     if (confirmed) {
       change(
         DictationHistory.use((history) => history.clear),
@@ -65,11 +64,7 @@ export default function DictationHistoryCommand() {
   const list = Option.getOrElse(entries, (): ReadonlyArray<HistoryEntry> => [])
 
   return (
-    <List
-      isLoading={Option.isNone(entries)}
-      isShowingDetail={list.length > 0}
-      searchBarPlaceholder="Search dictations"
-    >
+    <List isLoading={Option.isNone(entries)} isShowingDetail={list.length > 0} searchBarPlaceholder="Search dictations">
       <List.EmptyView
         icon={Icon.Microphone}
         title="No dictations yet"
@@ -84,16 +79,9 @@ export default function DictationHistoryCommand() {
               markdown={entry.text}
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label
-                    title="Dictated"
-                    text={dateFormat.format(entry.createdAt)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Dictated" text={dateFormat.format(entry.createdAt)} />
                   {detailRows(entry).map((row) => (
-                    <List.Item.Detail.Metadata.Label
-                      key={row.title}
-                      title={row.title}
-                      text={row.text}
-                    />
+                    <List.Item.Detail.Metadata.Label key={row.title} title={row.title} text={row.text} />
                   ))}
                 </List.Item.Detail.Metadata>
               }
@@ -108,7 +96,7 @@ export default function DictationHistoryCommand() {
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => remove(entry)}
+                onAction={() => void remove(entry)}
               />
               <Action
                 title="Delete All Dictations"

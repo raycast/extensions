@@ -26,14 +26,18 @@ export class ImageFileError extends Schema.TaggedError<ImageFileError>()("ImageF
   cause: Schema.Defect(),
 }) {}
 
+/** Run a file operation on the image folder. A failure becomes an `ImageFileError` with `message`. */
+export const imageFileCall = <A>(message: string, call: () => Promise<A>) =>
+  Effect.tryPromise({ try: call, catch: (cause) => new ImageFileError({ message, cause }) })
+
 /** The folder that holds the image files. The extension uses its support folder. */
 export class ImageFiles extends Context.Service<
   ImageFiles,
   {
     /** Write `bytes` to the file `name` and return its full path. */
-    readonly write: (name: string, bytes: Uint8Array) => Effect.Effect<string, ImageFileError>
+    readonly write: (name: string, bytes: Uint8Array) => ReturnType<typeof imageFileCall<string>>
     /** Delete the file at `path`. A missing file is not an error. */
-    readonly remove: (path: string) => Effect.Effect<void, ImageFileError>
+    readonly remove: (path: string) => ReturnType<typeof imageFileCall<void>>
   }
 >()("grokcast/ImageFiles") {}
 
@@ -80,43 +84,45 @@ const makeLibrary = Effect.fn("ImageLibrary.make")(function* () {
   const removeFiles = (entries: ReadonlyArray<ImageEntry>) =>
     Effect.forEach(entries, (entry) => Effect.ignore(files.remove(entry.path)), { discard: true })
 
-  const add = Effect.fn("ImageLibrary.add")(function* (
-    request: ImageRequest,
-    images: ReadonlyArray<GeneratedImage>,
-  ) {
+  /** Save the images Grok made for `request`, and return their entries. */
+  const add = Effect.fn("ImageLibrary.add")(function* (request: ImageRequest, images: ReadonlyArray<GeneratedImage>) {
     const createdAt = yield* Clock.currentTimeMillis
-    const added = yield* Effect.forEach(images, (image, index) => {
+
+    const save = Effect.fn("ImageLibrary.save")(function* (image: GeneratedImage, index: number) {
       const id = `${createdAt}-${index}`
       const size = imageSize(image.bytes)
-      return files.write(`${id}.${extensionFor(image.mimeType)}`, image.bytes).pipe(
-        Effect.map(
-          (path) =>
-            new ImageEntry({
-              id,
-              prompt: request.prompt,
-              path,
-              mimeType: image.mimeType,
-              createdAt,
-              edited: request.sources.length > 0,
-              aspectRatio: request.aspectRatio,
-              resolution: request.resolution,
-              width: Option.map(size, (value) => value.width),
-              height: Option.map(size, (value) => value.height),
-            }),
-        ),
-      )
+      const path = yield* files.write(`${id}.${extensionFor(image.mimeType)}`, image.bytes)
+
+      return new ImageEntry({
+        id,
+        prompt: request.prompt,
+        path,
+        mimeType: image.mimeType,
+        createdAt,
+        edited: request.sources.length > 0,
+        aspectRatio: request.aspectRatio,
+        resolution: request.resolution,
+        width: Option.map(size, (value) => value.width),
+        height: Option.map(size, (value) => value.height),
+      })
     })
+
+    const added = yield* Effect.forEach(images, save)
+
     yield* lock.withPermits(1)(
       Effect.gen(function* () {
         const ids = new Set(Arr.map(added, (entry) => entry.id))
+
         const all = Arr.appendAll(
           added,
           Arr.filter(yield* list, (old) => !ids.has(old.id)),
         )
+
         yield* store.set(KEY, Arr.take(all, MAX_IMAGES))
         yield* removeFiles(Arr.drop(all, MAX_IMAGES))
       }),
     )
+
     return added
   })
 
@@ -142,26 +148,11 @@ const makeLibrary = Effect.fn("ImageLibrary.make")(function* () {
     )
   })
 
-  return ImageLibrary.of({ list, add, remove, clear: clear() })
+  return { list, add, remove, clear: clear() }
 })
 
-export class ImageLibrary extends Context.Service<
-  ImageLibrary,
-  {
-    readonly list: Effect.Effect<ReadonlyArray<ImageEntry>>
-    /** Save the images Grok made for `request`, and return their entries. */
-    readonly add: (
-      request: ImageRequest,
-      images: ReadonlyArray<GeneratedImage>,
-    ) => Effect.Effect<
-      ReadonlyArray<ImageEntry>,
-      ImageFileError | KeyValueStore.KeyValueStoreError | Schema.SchemaError
-    >
-    readonly remove: (
-      id: string,
-    ) => Effect.Effect<void, KeyValueStore.KeyValueStoreError | Schema.SchemaError>
-    readonly clear: Effect.Effect<void, KeyValueStore.KeyValueStoreError>
-  }
->()("grokcast/ImageLibrary") {
-  static readonly layer = Layer.effect(ImageLibrary, makeLibrary())
+export class ImageLibrary extends Context.Service<ImageLibrary>()("grokcast/ImageLibrary", {
+  make: makeLibrary(),
+}) {
+  static readonly layer = Layer.effect(ImageLibrary, ImageLibrary.make)
 }

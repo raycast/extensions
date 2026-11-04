@@ -3,6 +3,7 @@
 // No Raycast imports, so tests run it under plain Node with a fake `fetch`.
 
 import type { VideoEditParams, VideoExtendParams, VideoGenerateParams } from "@xai-official/sdk"
+import * as Arr from "effect/Array"
 import * as Context from "effect/Context"
 import * as Data from "effect/Data"
 import * as Duration from "effect/Duration"
@@ -34,20 +35,12 @@ export class VideoError extends Schema.TaggedError<VideoError>()("VideoError", {
   requestId: Schema.Option(Schema.String),
 }) {}
 
-export const ASPECT_RATIOS = [
-  "16:9",
-  "9:16",
-  "1:1",
-  "4:3",
-  "3:4",
-  "3:2",
-  "2:3",
-  "21:9",
-  "5:2",
-] as const
+export const ASPECT_RATIOS = ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9", "5:2"] as const
+
 export type AspectRatio = (typeof ASPECT_RATIOS)[number]
 
 export const RESOLUTIONS = ["480p", "720p", "1080p"] as const
+
 export type Resolution = (typeof RESOLUTIONS)[number]
 
 /** A picture or video from disk. `type` is its media type, such as `image/png`. */
@@ -80,6 +73,7 @@ export type VideoRequest = Data.TaggedEnum<{
     readonly duration: Option.Option<number>
   }
 }>
+
 export const VideoRequest = Data.taggedEnum<VideoRequest>()
 
 export class Video extends Schema.Class<Video>("Video")({
@@ -95,6 +89,7 @@ export type VideoStatus = Data.TaggedEnum<{
   Pending: { readonly progress: Option.Option<number> }
   Done: { readonly video: Video }
 }>
+
 export const VideoStatus = Data.taggedEnum<VideoStatus>()
 
 /** The parts of the SDK's `VideoResponse` that Grokcast reads. */
@@ -102,9 +97,7 @@ const VideoResponse = Schema.Struct({
   status: Schema.String,
   progress: Schema.OptionFromOptionalNullOr(Schema.Finite),
   model: Schema.OptionFromOptionalNullOr(Schema.String),
-  error: Schema.OptionFromOptionalNullOr(
-    Schema.Struct({ code: Schema.String, message: Schema.String }),
-  ),
+  error: Schema.OptionFromOptionalNullOr(Schema.Struct({ code: Schema.String, message: Schema.String })),
   video: Schema.OptionFromOptionalNullOr(
     Schema.Struct({
       url: Schema.OptionFromOptionalNullOr(Schema.String),
@@ -113,6 +106,7 @@ const VideoResponse = Schema.Struct({
     }),
   ),
 })
+
 type VideoResponse = typeof VideoResponse.Type
 
 const wording = { feature: "video generation", failed: "xAI could not make the video" }
@@ -120,15 +114,12 @@ const wording = { feature: "video generation", failed: "xAI could not make the v
 const fromSdk = (error: XaiSdkError) =>
   new VideoError({ ...describeXaiError(error, wording), requestId: Option.none() })
 
-const failed = (message: string) =>
-  new VideoError({ reason: "failed", message, requestId: Option.none() })
+const failed = (message: string) => new VideoError({ reason: "failed", message, requestId: Option.none() })
 
 /** What a finished job's response means: the video, or why there is none. */
-const toStatus = (response: VideoResponse): Effect.Effect<VideoStatus, VideoError> =>
+const toStatus = (response: VideoResponse) =>
   Match.value(response.status).pipe(
-    Match.when("pending", () =>
-      Effect.succeed(VideoStatus.Pending({ progress: response.progress })),
-    ),
+    Match.when("pending", () => Effect.succeed(VideoStatus.Pending({ progress: response.progress }))),
     Match.when("done", () =>
       Option.match(response.video, {
         onNone: () => Effect.fail(failed("xAI finished the job but sent no video.")),
@@ -137,9 +128,7 @@ const toStatus = (response: VideoResponse): Effect.Effect<VideoStatus, VideoErro
             Option.filter(video.url, (url) => video.respect_moderation && url !== ""),
             {
               onNone: () =>
-                Effect.fail(
-                  failed("Grok's moderation blocked this video. Try a different prompt or image."),
-                ),
+                Effect.fail(failed("Grok's moderation blocked this video. Try a different prompt or image.")),
               onSome: (url) =>
                 Effect.succeed(
                   VideoStatus.Done({
@@ -169,9 +158,7 @@ const toStatus = (response: VideoResponse): Effect.Effect<VideoStatus, VideoErro
  * The SDK's types require `model`, but the API treats it as optional and then uses
  * xAI's current model. Grokcast leaves it out so xAI's default and upgrades apply.
  */
-const withXaiDefaultModel = <Params extends { readonly model: string }>(
-  params: Omit<Params, "model">,
-): Params =>
+const withXaiDefaultModel = <Params extends { readonly model: string }>(params: Omit<Params, "model">): Params =>
   // SAFETY: only `model` is missing, the API accepts a request without it, and the
   // SDK sends the body as given (it only inlines Blobs as data URLs).
   params as Params
@@ -187,30 +174,31 @@ const MEDIA_TYPES = {
   mp4: "video/mp4",
 } as const satisfies Record<string, string>
 
+/** The part of `path` after its last dot, in lower case. */
+const extensionOf = (path: string) => path.slice(path.lastIndexOf(".") + 1).toLowerCase()
+
 /** The media type of `path`, when xAI accepts that kind of file. */
-export const mediaTypeOf = (path: string): Option.Option<string> => {
-  const extension = path.slice(path.lastIndexOf(".") + 1).toLowerCase()
-  return Option.fromNullishOr(Object.entries(MEDIA_TYPES).find(([key]) => key === extension)?.[1])
-}
+export const mediaTypeOf = (path: string): Option.Option<string> =>
+  Option.map(
+    Arr.findFirst(Object.entries(MEDIA_TYPES), ([key]) => key === extensionOf(path)),
+    ([, type]) => type,
+  )
+
+/** `filled` full cells, then empty cells up to `steps`. */
+const bar = (filled: number, steps: number) => "█".repeat(filled) + "░".repeat(steps - filled)
 
 /** A text bar for `progress` (0 to 100), such as `████░░░░`. */
-export const progressBar = (progress: number, steps = 20): string => {
-  const filled = Math.round((Math.min(100, Math.max(0, progress)) / 100) * steps)
-  return "█".repeat(filled) + "░".repeat(steps - filled)
-}
+export const progressBar = (progress: number, steps = 20): string =>
+  bar(Math.round((Math.min(100, Math.max(0, progress)) / 100) * steps), steps)
 
 const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
   const xai = yield* XaiClient
   const http = yield* HttpClient.HttpClient
 
-  const sdk = <A>(
-    call: (client: Effect.Success<typeof xai.client>, signal: AbortSignal) => Promise<A>,
-  ) =>
+  const sdk = <A>(call: (client: Effect.Success<typeof xai.client>, signal: AbortSignal) => Promise<A>) =>
     xai.client.pipe(
       Effect.mapError((error) => failed(error.message)),
-      Effect.flatMap((client) =>
-        callXai((signal) => call(client, signal)).pipe(Effect.mapError(fromSdk)),
-      ),
+      Effect.flatMap((client) => callXai((signal) => call(client, signal)).pipe(Effect.mapError(fromSdk))),
     )
 
   // A 429 is usually the plan's usage limit, so say so at once instead of retrying.
@@ -220,6 +208,7 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
     timeout: Duration.toMillis(REQUEST_TIMEOUT),
   })
 
+  /** Start a job and return its request ID. */
   const start = Effect.fn("VideoGenerator.start")(function* (request: VideoRequest) {
     const started = yield* VideoRequest.$match(request, {
       Generate: ({ prompt, image, duration, aspectRatio, resolution }) =>
@@ -237,10 +226,7 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
         ),
       Edit: ({ prompt, video }) =>
         sdk((client, signal) =>
-          client.videos.edit(
-            withXaiDefaultModel<VideoEditParams>({ prompt, video: blobOf(video) }),
-            options(signal),
-          ),
+          client.videos.edit(withXaiDefaultModel<VideoEditParams>({ prompt, video: blobOf(video) }), options(signal)),
         ),
       Extend: ({ prompt, video, duration }) =>
         sdk((client, signal) =>
@@ -254,33 +240,47 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
           ),
         ),
     })
+
     return started.request_id
   })
 
+  /** Ask once how the job is going. */
   const status = Effect.fn("VideoGenerator.status")(function* (requestId: string) {
-    const response = yield* sdk((client, signal) => client.videos.get(requestId, options(signal)))
+    // The job may still finish at xAI, so a failed check keeps its ID for Check Again.
+    const response = yield* sdk((client, signal) => client.videos.get(requestId, options(signal))).pipe(
+      Effect.mapError(
+        (error) =>
+          new VideoError({
+            reason: error.reason,
+            message: error.message,
+            requestId: Option.some(requestId),
+          }),
+      ),
+    )
+
     const decoded = yield* Schema.decodeUnknownEffect(VideoResponse)(response).pipe(
       Effect.mapError(() => failed("xAI sent a video status Grokcast could not read.")),
     )
+
     return yield* toStatus(decoded)
   })
 
   const stillRunning = (requestId: string) =>
     new VideoError({
       reason: "network",
-      message:
-        "The video is taking longer than usual. It may still finish at xAI, so check again later.",
+      message: "The video is taking longer than usual. It may still finish at xAI, so check again later.",
       requestId: Option.some(requestId),
     })
 
+  /**
+   * Poll every `POLL_INTERVAL` until the video is ready, calling `onPending` with each
+   * progress report. After `MAX_WAIT`, fails with the request ID so the user can check again.
+   */
   const follow = Effect.fn("VideoGenerator.follow")(function* (
     requestId: string,
-    onPending: (progress: Option.Option<number>) => Effect.Effect<void>,
+    onPending: (progress: Option.Option<number>) => typeof Effect.void,
   ) {
-    const last = yield* Stream.fromEffectSchedule(
-      status(requestId),
-      Schedule.spaced(POLL_INTERVAL),
-    ).pipe(
+    const last = yield* Stream.fromEffectSchedule(status(requestId), Schedule.spaced(POLL_INTERVAL)).pipe(
       Stream.tap((current) =>
         VideoStatus.$match(current, {
           Pending: ({ progress }) => onPending(progress),
@@ -294,6 +294,7 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
         orElse: () => Effect.fail(stillRunning(requestId)),
       }),
     )
+
     return yield* last.pipe(
       Option.flatMap(Option.liftPredicate(VideoStatus.$is("Done"))),
       Option.match({
@@ -303,12 +304,14 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
     )
   })
 
+  /** `start`, then `follow`. */
   const generate = Effect.fn("VideoGenerator.generate")(function* (
     request: VideoRequest,
-    onPending: (progress: Option.Option<number>) => Effect.Effect<void>,
+    onPending: (progress: Option.Option<number>) => typeof Effect.void,
   ) {
     const requestId = yield* start(request)
     yield* onPending(Option.none())
+
     return yield* follow(requestId, onPending)
   })
 
@@ -329,31 +332,11 @@ const makeVideoGenerator = Effect.fn("VideoGenerator.make")(function* () {
     )
   })
 
-  return VideoGenerator.of({ start, status, follow, generate, download })
+  return { start, status, follow, generate, download }
 })
 
-export class VideoGenerator extends Context.Service<
-  VideoGenerator,
-  {
-    /** Start a job and return its request ID. */
-    readonly start: (request: VideoRequest) => Effect.Effect<string, VideoError>
-    /** Ask once how the job is going. */
-    readonly status: (requestId: string) => Effect.Effect<VideoStatus, VideoError>
-    /**
-     * Poll every `POLL_INTERVAL` until the video is ready, calling `onPending` with each
-     * progress report. After `MAX_WAIT`, fails with the request ID so the user can check again.
-     */
-    readonly follow: (
-      requestId: string,
-      onPending: (progress: Option.Option<number>) => Effect.Effect<void>,
-    ) => Effect.Effect<Video, VideoError>
-    /** `start`, then `follow`. */
-    readonly generate: (
-      request: VideoRequest,
-      onPending: (progress: Option.Option<number>) => Effect.Effect<void>,
-    ) => Effect.Effect<Video, VideoError>
-    readonly download: (video: Video) => Effect.Effect<Uint8Array<ArrayBuffer>, VideoError>
-  }
->()("grokcast/VideoGenerator") {
-  static readonly layer = Layer.effect(VideoGenerator, makeVideoGenerator())
+export class VideoGenerator extends Context.Service<VideoGenerator>()("grokcast/VideoGenerator", {
+  make: makeVideoGenerator(),
+}) {
+  static readonly layer = Layer.effect(VideoGenerator, VideoGenerator.make)
 }

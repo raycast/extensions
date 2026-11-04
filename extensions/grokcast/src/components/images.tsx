@@ -10,8 +10,6 @@ import {
   Form,
   Grid,
   Icon,
-  launchCommand,
-  LaunchType,
   showHUD,
   showToast,
   Toast,
@@ -40,6 +38,7 @@ import {
   SourceImage,
   type ImageRequest,
 } from "../lib/images.ts"
+import { openCommand, SignInAction } from "./launch.tsx"
 
 /** Dropdown value for "let xAI choose". */
 const XAI_DEFAULT = "default"
@@ -86,29 +85,23 @@ const resultAspect = (
 
 /** The aspect ratio of a saved image, from the pixel size it was saved with. */
 const entryAspect = (entry: ImageEntry): Option.Option<AspectRatio> =>
-  Option.zipWith(entry.width, entry.height, (width, height) =>
-    nearestAspectRatio({ width, height }),
-  )
+  Option.zipWith(entry.width, entry.height, (width, height) => nearestAspectRatio({ width, height }))
 
 /**
  * The cell shape for a grid of saved images: the shape most of them have. Images saved
  * before Grokcast kept pixel sizes do not count. With none known, the cells are square.
  */
 export const libraryAspect = (entries: ReadonlyArray<ImageEntry>): Grid.AspectRatio => {
-  const counts = Arr.reduce(
-    Arr.getSomes(Arr.map(entries, entryAspect)),
-    new Map<AspectRatio, number>(),
-    (map, ratio) => map.set(ratio, (map.get(ratio) ?? 0) + 1),
+  const counts = Arr.reduce(Arr.getSomes(Arr.map(entries, entryAspect)), new Map<AspectRatio, number>(), (map, ratio) =>
+    map.set(ratio, (map.get(ratio) ?? 0) + 1),
   )
+
   return gridAspect(
     Option.map(
       Arr.head(
         Arr.sort(
           Array.from(counts),
-          Order.mapInput(
-            Order.flip(Order.Number),
-            ([, count]: readonly [AspectRatio, number]) => count,
-          ),
+          Order.mapInput(Order.flip(Order.Number), ([, count]: readonly [AspectRatio, number]) => count),
         ),
       ),
       ([ratio]) => ratio,
@@ -139,8 +132,7 @@ const readSource = (path: string) =>
     onSome: (mimeType) =>
       Effect.tryPromise({
         try: () => readFile(path),
-        catch: () =>
-          new ImageError({ reason: "failed", message: `Could not read ${basename(path)}.` }),
+        catch: () => new ImageError({ reason: "failed", message: `Could not read ${basename(path)}.` }),
       }).pipe(Effect.map((bytes) => new SourceImage({ bytes: new Uint8Array(bytes), mimeType }))),
   })
 
@@ -167,10 +159,7 @@ const draftOf = (values: Form.Values): Option.Option<ImageDraft> =>
       prompt: decoded.prompt.trim(),
       aspectRatio: Schema.decodeUnknownOption(AspectRatio)(decoded.aspectRatio),
       resolution: Schema.decodeUnknownOption(Resolution)(decoded.resolution),
-      count: Option.getOrElse(
-        Option.liftPredicate(Number.parseInt(decoded.count, 10), Number.isFinite),
-        () => 1,
-      ),
+      count: Option.getOrElse(Option.liftPredicate(Number.parseInt(decoded.count, 10), Number.isFinite), () => 1),
       sources: decoded.sources ?? [],
     })),
   )
@@ -179,39 +168,44 @@ const draftOf = (values: Form.Values): Option.Option<ImageDraft> =>
  * The prompt form. With `edit`, it also asks for the images to edit. Submitting it
  * shows the new images.
  */
-export function ImageForm({
-  edit,
-  initial,
-}: {
-  readonly edit: boolean
-  readonly initial?: Partial<ImageDraft>
-}) {
+export function ImageForm({ edit, initial }: { readonly edit: boolean; readonly initial?: Partial<ImageDraft> }) {
   const { push } = useNavigation()
   const [promptError, setPromptError] = useState<Option.Option<string>>(Option.none())
   const [sourcesError, setSourcesError] = useState<Option.Option<string>>(Option.none())
 
   const submit = (values: Form.Values) => {
     const draft = draftOf(values)
+
     if (Option.isNone(draft)) {
       return
     }
+
     const { prompt, sources } = draft.value
+
     if (prompt === "") {
       setPromptError(Option.some("Describe the image"))
+
       return
     }
+
     if (edit && sources.length === 0) {
       setSourcesError(Option.some("Choose an image to edit"))
+
       return
     }
+
     if (sources.length > MAX_SOURCE_IMAGES) {
       setSourcesError(Option.some(`Choose up to ${MAX_SOURCE_IMAGES} images`))
+
       return
     }
+
     if (!Arr.every(sources, isEditableImage)) {
       setSourcesError(Option.some("Choose JPEG, PNG, or WebP images"))
+
       return
     }
+
     push(<ImageResults draft={draft.value} />)
   }
 
@@ -242,9 +236,7 @@ export function ImageForm({
       <Form.TextArea
         id="prompt"
         title="Prompt"
-        placeholder={
-          edit ? "Make it a watercolor painting at sunset" : "A red fox reading a map in the snow"
-        }
+        placeholder={edit ? "Make it a watercolor painting at sunset" : "A red fox reading a map in the snow"}
         defaultValue={initial?.prompt}
         error={Option.getOrUndefined(promptError)}
         onChange={() => setPromptError(Option.none())}
@@ -284,6 +276,7 @@ type State = Data.TaggedEnum<{
   Done: { readonly entries: ReadonlyArray<ImageEntry> }
   Failed: { readonly message: string; readonly signIn: boolean }
 }>
+
 const State = Data.taggedEnum<State>()
 
 const create = (draft: ImageDraft) =>
@@ -291,11 +284,9 @@ const create = (draft: ImageDraft) =>
     const sources = yield* Effect.forEach(draft.sources, readSource)
     const request: ImageRequest = { ...draft, sources }
     const images = yield* ImageGenerator.use((generator) => generator.create(request))
+
     return yield* ImageLibrary.use((library) => library.add(request, images)).pipe(
-      Effect.mapError(
-        () =>
-          new ImageError({ reason: "failed", message: "Could not save the image on this Mac." }),
-      ),
+      Effect.mapError(() => new ImageError({ reason: "failed", message: "Could not save the image on this Mac." })),
     )
   })
 
@@ -310,12 +301,11 @@ export function ImageResults({ draft }: { readonly draft: ImageDraft }) {
       create(draft).pipe(
         Effect.tap((entries) => Effect.sync(() => setState(State.Done({ entries })))),
         Effect.catchTag("ImageError", (error) =>
-          Effect.sync(() =>
-            setState(State.Failed({ message: error.message, signIn: error.reason === "signIn" })),
-          ),
+          Effect.sync(() => setState(State.Failed({ message: error.message, signIn: error.reason === "signIn" }))),
         ),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -344,7 +334,7 @@ export function ImageResults({ draft }: { readonly draft: ImageDraft }) {
       </Grid>
     ),
     Failed: ({ message, signIn }) => (
-      <Grid columns={2}>
+      <Grid columns={2} searchBarPlaceholder={draft.prompt}>
         <Grid.EmptyView
           icon={Icon.ExclamationMark}
           title={editing ? "The image was not edited" : "The image was not made"}
@@ -375,10 +365,9 @@ export function ImageResults({ draft }: { readonly draft: ImageDraft }) {
                 <Action
                   title="Open Image History"
                   icon={Icon.Clock}
-                  shortcut={{ modifiers: ["cmd"], key: "y" }}
-                  onAction={() =>
-                    void launchCommand({ name: "image-history", type: LaunchType.UserInitiated })
-                  }
+                  // ⌘Y is Quick Look on the same image.
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "y" }}
+                  onAction={() => void openCommand("image-history")}
                 />
               </>
             }
@@ -387,22 +376,6 @@ export function ImageResults({ draft }: { readonly draft: ImageDraft }) {
       </Grid>
     ),
   })
-}
-
-function SignInAction() {
-  return (
-    <Action
-      title="Sign in to Grok"
-      icon={Icon.Person}
-      onAction={() =>
-        void launchCommand({
-          name: "account",
-          type: LaunchType.UserInitiated,
-          context: { signIn: true },
-        })
-      }
-    />
-  )
 }
 
 const AGAIN_SHORTCUT: Keyboard.Shortcut = { modifiers: ["cmd"], key: "r" }
@@ -414,9 +387,7 @@ const saveToDownloads = (entry: ImageEntry) => {
     Effect.tryPromise(() => copyFile(entry.path, target)).pipe(
       Effect.andThen(Effect.tryPromise(() => showHUD(`Saved to Downloads as ${basename(target)}`))),
       Effect.catch(() =>
-        Effect.tryPromise(() =>
-          showToast({ style: Toast.Style.Failure, title: "Could not save to Downloads" }),
-        ),
+        Effect.tryPromise(() => showToast({ style: Toast.Style.Failure, title: "Could not save to Downloads" })),
       ),
       Effect.ignore,
     ),
@@ -424,13 +395,7 @@ const saveToDownloads = (entry: ImageEntry) => {
 }
 
 /** One image in a grid, with the actions every grid offers and `extra` after them. */
-export function ImageItem({
-  entry,
-  extra,
-}: {
-  readonly entry: ImageEntry
-  readonly extra?: ReactNode
-}) {
+export function ImageItem({ entry, extra }: { readonly entry: ImageEntry; readonly extra?: ReactNode }) {
   return (
     <Grid.Item
       content={{ source: entry.path }}
@@ -450,11 +415,7 @@ export function ImageItem({
               onAction={() => saveToDownloads(entry)}
             />
             <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-            <Action.Open
-              title="Open Image"
-              target={entry.path}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-            />
+            <Action.Open title="Open Image" target={entry.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push

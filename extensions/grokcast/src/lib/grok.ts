@@ -18,14 +18,9 @@ import * as Redacted from "effect/Redacted"
 import * as Schema from "effect/Schema"
 import * as FetchHttpClient from "effect/http/FetchHttpClient"
 import * as KeyValueStore from "effect/persistence/KeyValueStore"
-import {
-  AfterDictation,
-  DictationPreferences,
-  DictationSettings,
-  languageFromPreference,
-} from "./dictation.ts"
+import { AfterDictation, DictationPreferences, DictationSettings, languageFromPreference } from "./dictation.ts"
 import { DictationHistory } from "./history.ts"
-import { ImageFileError, ImageFiles, ImageLibrary } from "./image-library.ts"
+import { imageFileCall, ImageFiles, ImageLibrary } from "./image-library.ts"
 import { ImageGenerator } from "./images.ts"
 import { ClientId, DEFAULT_CLIENT_ID, XaiEndpoints } from "./oauth.ts"
 import {
@@ -36,19 +31,15 @@ import {
   RecorderError,
   RecorderExit,
   RecorderLauncher,
+  type RecorderEvents,
+  type RecorderProcess,
 } from "./recorder.ts"
-import { GrokSession, StoredTokens, TokenStore, TokenStoreError } from "./session.ts"
+import { GrokSession, StoredTokens, TokenStore, tokenStoreCall, TokenStoreError } from "./session.ts"
 import { GrokFiles } from "./files.ts"
 import { LiveTranscriber, WsWebSocketConstructor } from "./live-transcriber.ts"
 import { ModelCatalog } from "./models.ts"
 import { AudioLauncher, PlaybackError, SpeechPlayer } from "./speech-player.ts"
-import {
-  optionalPreference,
-  Speaker,
-  SpeechPreferences,
-  SpeechSettings,
-  speedFromPreference,
-} from "./speech.ts"
+import { optionalPreference, Speaker, SpeechPreferences, SpeechSettings, speedFromPreference } from "./speech.ts"
 import { Transcriber } from "./transcriber.ts"
 import { ReadAloudVoice, VoiceLibrary } from "./voices.ts"
 import { VideoGenerator } from "./video.ts"
@@ -71,7 +62,7 @@ const client = new OAuth.PKCEClient({
 const STORE_TIMEOUT = Duration.seconds(10)
 
 const storeCall = <A>(message: string, call: () => Promise<A>) =>
-  Effect.tryPromise({ try: call, catch: (cause) => new TokenStoreError({ message, cause }) }).pipe(
+  tokenStoreCall(message, call).pipe(
     // A second copy of Raycast can leave the call unanswered. Fail instead of hanging.
     Effect.timeoutOrElse({
       duration: STORE_TIMEOUT,
@@ -143,39 +134,39 @@ export const RaycastClientId = Layer.sync(ClientId, () =>
   ),
 )
 
-/** Defaults match the preferences in `package.json`. */
-export const RaycastDictationPreferences = Layer.sync(DictationPreferences, () => {
-  const values = preferences()
-  const value = <A>(pick: (decoded: typeof Preferences.Type) => Option.Option<A>, fallback: A) =>
+/** One preference from `values`, or `fallback` when it is not set. */
+const preferenceIn =
+  (values: Option.Option<typeof Preferences.Type>) =>
+  <A>(pick: (decoded: typeof Preferences.Type) => Option.Option<A>, fallback: A) =>
     values.pipe(
       Option.flatMap(pick),
       Option.getOrElse(() => fallback),
     )
-  return new DictationSettings({
+
+type PreferenceValue = ReturnType<typeof preferenceIn>
+
+const dictationSettings = (value: PreferenceValue) =>
+  new DictationSettings({
     language: languageFromPreference(value((decoded) => decoded.language, "en")),
     formatNumbers: value((decoded) => decoded.formatNumbers, true),
     afterDictation: value((decoded) => decoded.afterDictation, "paste"),
     keepHistory: value((decoded) => decoded.keepHistory, true),
   })
-})
+
+/** Defaults match the preferences in `package.json`. */
+export const RaycastDictationPreferences = Layer.sync(DictationPreferences, () =>
+  dictationSettings(preferenceIn(preferences())),
+)
+
+const speechSettings = (value: PreferenceValue) =>
+  new SpeechSettings({
+    voice: optionalPreference(value((decoded) => decoded.voice, "")),
+    speed: speedFromPreference(value((decoded) => decoded.speed, "")),
+    language: Option.getOrElse(optionalPreference(value((decoded) => decoded.speechLanguage, "")), () => "auto"),
+  })
 
 /** Read Aloud's preferences. An empty value means xAI's default. */
-export const RaycastSpeechPreferences = Layer.sync(SpeechPreferences, () => {
-  const values = preferences()
-  const text = (pick: (decoded: typeof Preferences.Type) => Option.Option<string>) =>
-    values.pipe(
-      Option.flatMap(pick),
-      Option.getOrElse(() => ""),
-    )
-  return new SpeechSettings({
-    voice: optionalPreference(text((decoded) => decoded.voice)),
-    speed: speedFromPreference(text((decoded) => decoded.speed)),
-    language: Option.getOrElse(
-      optionalPreference(text((decoded) => decoded.speechLanguage)),
-      () => "auto",
-    ),
-  })
-})
+export const RaycastSpeechPreferences = Layer.sync(SpeechPreferences, () => speechSettings(preferenceIn(preferences())))
 
 const storageCall = <A>(method: string, call: () => Promise<A>) =>
   Effect.tryPromise({
@@ -195,17 +186,14 @@ export const RaycastKeyValueStore = Layer.sync(KeyValueStore.KeyValueStore, () =
     set: (key, value) => storageCall("set", () => LocalStorage.setItem(key, value)),
     remove: (key) => storageCall("remove", () => LocalStorage.removeItem(key)),
     clear: storageCall("clear", () => LocalStorage.clear()),
-    size: storageCall("size", () => LocalStorage.allItems()).pipe(
-      Effect.map((items) => Object.keys(items).length),
-    ),
+    size: storageCall("size", () => LocalStorage.allItems()).pipe(Effect.map((items) => Object.keys(items).length)),
   }),
 )
 
 const helperCall = <A>(call: () => Promise<A>) =>
   Effect.tryPromise({
     try: call,
-    catch: () =>
-      new RecorderError({ reason: "failed", message: "Could not check microphone access." }),
+    catch: () => new RecorderError({ reason: "failed", message: "Could not check microphone access." }),
   })
 
 export const RaycastMicrophonePermission = Layer.succeed(
@@ -213,10 +201,7 @@ export const RaycastMicrophonePermission = Layer.succeed(
   MicrophonePermission.of({
     status: helperCall(microphoneAccess).pipe(
       Effect.flatMap(Schema.decodeUnknownEffect(MicrophoneAccess)),
-      Effect.mapError(
-        () =>
-          new RecorderError({ reason: "failed", message: "Could not check microphone access." }),
-      ),
+      Effect.mapError(() => new RecorderError({ reason: "failed", message: "Could not check microphone access." })),
     ),
     request: helperCall(requestMicrophoneAccess),
   }),
@@ -237,14 +222,17 @@ const filled = (text: Option.Option<string>) =>
     Option.filter((value) => value !== ""),
   )
 
-/** Grok Chat's command preferences. Defaults match `package.json`. */
-export const RaycastChatPreferences = Layer.sync(ChatPreferences, () => {
-  const values = Schema.decodeUnknownOption(ChatPreferenceValues)(getPreferenceValues())
-  const pick = <A>(f: (decoded: typeof ChatPreferenceValues.Type) => Option.Option<A>) =>
+/** `[tool]` when its preference is on, or when it is not set and `fallback` is true. */
+const on = (tool: ChatTool, enabled: Option.Option<boolean>, fallback: boolean) =>
+  Option.toArray(Option.liftPredicate(tool, () => Option.getOrElse(enabled, () => fallback)))
+
+const chatPreferenceIn =
+  (values: Option.Option<typeof ChatPreferenceValues.Type>) =>
+  <A>(f: (decoded: typeof ChatPreferenceValues.Type) => Option.Option<A>) =>
     Option.flatMap(values, f)
-  const on = (tool: ChatTool, enabled: Option.Option<boolean>, fallback: boolean) =>
-    Option.getOrElse(enabled, () => fallback) ? [tool] : []
-  return new ChatSettings({
+
+const chatSettings = (pick: ReturnType<typeof chatPreferenceIn>) =>
+  new ChatSettings({
     model: filled(pick((decoded) => decoded.chatModel)),
     reasoningEffort: pick((decoded) => decoded.reasoningEffort).pipe(
       Option.flatMap(Schema.decodeUnknownOption(ReasoningEffort)),
@@ -268,40 +256,38 @@ export const RaycastChatPreferences = Layer.sync(ChatPreferences, () => {
       ),
     ],
   })
-})
+
+/** Grok Chat's command preferences. Defaults match `package.json`. */
+export const RaycastChatPreferences = Layer.sync(ChatPreferences, () =>
+  chatSettings(chatPreferenceIn(Schema.decodeUnknownOption(ChatPreferenceValues)(getPreferenceValues()))),
+)
 
 /** `ray build` compiles `recorder/` to this path in the extension's assets. */
 const recorderBinary = () => join(environment.assetsPath, "compiled_raycast_swift", "recorder")
 
-export const RaycastRecorderLauncher = Layer.succeed(
-  RecorderLauncher,
-  RecorderLauncher.of({
-    start: (args, events) => {
-      const binary = recorderBinary()
-      // An installed extension's assets can lose the executable bit.
-      chmodSync(binary, 0o755)
-      const child = spawn(binary, [...args], { stdio: ["pipe", "pipe", "pipe"] })
-      const stderr: Array<string> = []
-      child.stdout.on("data", (chunk: Buffer) => events.audio(chunk))
-      child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk.toString("utf8")))
-      child.on("error", () =>
-        events.exit(RecorderExit.Failed({ message: "Could not start the microphone recorder." })),
-      )
-      child.on("exit", (code) =>
-        events.exit(exitFromCode(Option.fromNullishOr(code), stderr.join(""))),
-      )
-      return {
-        // Not stdin: Tinycast closes it at once.
-        finish: () => {
-          child.kill("SIGTERM")
-        },
-        kill: () => {
-          child.kill("SIGKILL")
-        },
-      }
+function startRecorder(args: ReadonlyArray<string>, events: RecorderEvents): RecorderProcess {
+  const binary = recorderBinary()
+  // An installed extension's assets can lose the executable bit.
+  chmodSync(binary, 0o755)
+  const child = spawn(binary, [...args], { stdio: ["pipe", "pipe", "pipe"] })
+  const stderr: Array<string> = []
+  child.stdout.on("data", (chunk: Buffer) => events.audio(chunk))
+  child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk.toString("utf8")))
+  child.on("error", () => events.exit(RecorderExit.Failed({ message: "Could not start the microphone recorder." })))
+  child.on("exit", (code) => events.exit(exitFromCode(Option.fromNullishOr(code), stderr.join(""))))
+
+  return {
+    // Not stdin: Tinycast closes it at once.
+    finish: () => {
+      child.kill("SIGTERM")
     },
-  }),
-)
+    kill: () => {
+      child.kill("SIGKILL")
+    },
+  }
+}
+
+export const RaycastRecorderLauncher = Layer.succeed(RecorderLauncher, RecorderLauncher.of({ start: startRecorder }))
 
 const AFPLAY = "/usr/bin/afplay"
 
@@ -328,9 +314,9 @@ export const RaycastAudioLauncher = Layer.succeed(
       // A failed start also leaves `pid` empty, which fails below.
       child.on("error", () => {})
       child.unref()
+
       return yield* Option.match(Option.fromNullishOr(child.pid), {
-        onNone: () =>
-          Effect.fail(new PlaybackError({ message: "Could not start playing the speech." })),
+        onNone: () => Effect.fail(new PlaybackError({ message: "Could not start playing the speech." })),
         onSome: Effect.succeed,
       })
     }),
@@ -347,21 +333,21 @@ export const RaycastAudioLauncher = Layer.succeed(
 /** Images Grok made, in the extension's support folder. Raycast deletes it with the extension. */
 const imageFolder = () => join(environment.supportPath, "images")
 
-const fileCall = <A>(message: string, call: () => Promise<A>) =>
-  Effect.tryPromise({ try: call, catch: (cause) => new ImageFileError({ message, cause }) })
+/** Write the image file `name` and give its full path. */
+async function writeImage(name: string, bytes: Uint8Array): Promise<string> {
+  const folder = imageFolder()
+  await mkdir(folder, { recursive: true })
+  const path = join(folder, name)
+  await writeFile(path, bytes)
+
+  return path
+}
 
 export const RaycastImageFiles = Layer.succeed(
   ImageFiles,
   ImageFiles.of({
-    write: (name, bytes) =>
-      fileCall("Could not save the image.", async () => {
-        const folder = imageFolder()
-        await mkdir(folder, { recursive: true })
-        const path = join(folder, name)
-        await writeFile(path, bytes)
-        return path
-      }),
-    remove: (path) => fileCall("Could not delete the image.", () => rm(path, { force: true })),
+    write: (name, bytes) => imageFileCall("Could not save the image.", () => writeImage(name, bytes)),
+    remove: (path) => imageFileCall("Could not delete the image.", () => rm(path, { force: true })),
   }),
 )
 
@@ -391,18 +377,9 @@ export const GrokLive = Layer.mergeAll(
     Layer.provideMerge(Layer.mergeAll(RaycastTokenStore, RaycastClientId)),
     Layer.provideMerge(FetchHttpClient.layer),
   ),
-  Recorder.layer.pipe(
-    Layer.provideMerge(Layer.mergeAll(RaycastMicrophonePermission, RaycastRecorderLauncher)),
-  ),
-  Layer.mergeAll(
-    DictationHistory.layer,
-    SpeechPlayer.layer,
-    ReadAloudVoice.layer,
-    ImageLibrary.layer,
-  ).pipe(
-    Layer.provideMerge(
-      Layer.mergeAll(RaycastKeyValueStore, RaycastAudioLauncher, RaycastImageFiles),
-    ),
+  Recorder.layer.pipe(Layer.provideMerge(Layer.mergeAll(RaycastMicrophonePermission, RaycastRecorderLauncher))),
+  Layer.mergeAll(DictationHistory.layer, SpeechPlayer.layer, ReadAloudVoice.layer, ImageLibrary.layer).pipe(
+    Layer.provideMerge(Layer.mergeAll(RaycastKeyValueStore, RaycastAudioLauncher, RaycastImageFiles)),
   ),
   RaycastDictationPreferences,
   RaycastSpeechPreferences,

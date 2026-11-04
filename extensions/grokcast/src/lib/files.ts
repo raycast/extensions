@@ -8,8 +8,10 @@ import * as Context from "effect/Context"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import * as Layer from "effect/Layer"
+import * as Match from "effect/Match"
 import * as Option from "effect/Option"
 import * as Schema from "effect/Schema"
+import * as Stream from "effect/Stream"
 import { callXai, describeXaiError, XaiClient, XaiFailureReason, type XaiSdkError } from "./xai.ts"
 
 /** How long a list, share, or delete request may take. */
@@ -88,18 +90,27 @@ export class MacError extends Schema.TaggedError<MacError>()("MacError", {
  * then "name (1).ext", "name (2).ext", and so on, so an existing file is never
  * replaced. A name with folders in it keeps only its last part.
  */
-export const savedName = (filename: string, attempt: number): string => {
-  const name = Option.getOrElse(
-    Arr.last(
-      filename.split(/[/\\]/).filter((part) => part !== "" && part !== "." && part !== ".."),
-    ),
+export const savedName = (filename: string, attempt: number): string =>
+  Match.value(attempt).pipe(
+    Match.when(0, () => lastPart(filename)),
+    Match.orElse(() => numbered(lastPart(filename), attempt)),
+  )
+
+const lastPart = (filename: string) =>
+  Option.getOrElse(
+    Arr.last(filename.split(/[/\\]/).filter((part) => part !== "" && part !== "." && part !== "..")),
     () => "file",
   )
-  if (attempt === 0) return name
-  const dot = name.lastIndexOf(".")
-  const [stem, extension] = dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, ""]
-  return `${stem} (${attempt})${extension}`
-}
+
+/** "name (n).ext": the number goes before the extension, when there is one. */
+const numbered = (name: string, attempt: number) =>
+  Match.value(name.lastIndexOf(".")).pipe(
+    Match.when(
+      (dot) => dot > 0,
+      (dot) => `${name.slice(0, dot)} (${attempt})${name.slice(dot)}`,
+    ),
+    Match.orElse(() => `${name} (${attempt})`),
+  )
 
 /** A file to upload. */
 export interface UploadRequest {
@@ -136,9 +147,8 @@ const toFilesError = (failed: string) => (error: XaiSdkError) =>
 const makeFiles = Effect.fn("GrokFiles.make")(function* () {
   const { client } = yield* XaiClient
 
-  const sdk = client.pipe(
-    Effect.mapError((error) => new FilesError({ reason: "failed", message: error.message })),
-  )
+  const sdk = client.pipe(Effect.mapError((error) => new FilesError({ reason: "failed", message: error.message })))
+
   const options = (signal: AbortSignal, timeout = REQUEST_TIMEOUT) => ({
     signal,
     maxRetries: 0,
@@ -163,29 +173,30 @@ const makeFiles = Effect.fn("GrokFiles.make")(function* () {
       ).pipe(Effect.mapError(toFilesError("xAI could not list your files"))),
     )
 
-  /** Pages from `token` on, until xAI has no more or `pagesLeft` runs out. */
-  const pagesFrom = (
-    token: Option.Option<string>,
-    pagesLeft: number,
-  ): Effect.Effect<FileList, FilesError> =>
-    Effect.flatMap(page(token), (result) => {
-      const files = Arr.map(result.data, fromFileObject)
-      const next = Option.filter(
-        Option.fromNullishOr(result.pagination_token),
-        (value) => value !== "",
-      )
-      return Option.isSome(next) && pagesLeft > 1
-        ? Effect.map(
-            pagesFrom(next, pagesLeft - 1),
-            (rest) => new FileList({ files: [...files, ...rest.files], more: rest.more }),
-          )
-        : Effect.succeed(new FileList({ files, more: Option.isSome(next) }))
-    })
+  /** The next page's token, when xAI has more. */
+  const nextToken = (result: Effect.Success<ReturnType<typeof page>>) =>
+    Option.filter(Option.fromNullishOr(result.pagination_token), (value) => value !== "")
 
-  const list = pagesFrom(Option.none(), MAX_PAGES).pipe(Effect.withSpan("GrokFiles.list"))
+  /** The newest files, up to `MAX_PAGES` pages of them. */
+  const list = Stream.paginate(Option.none<string>(), (token) =>
+    // One page per step. The list ends when xAI gives no next token.
+    page(token).pipe(Effect.map((result) => [[result], Option.map(nextToken(result), Option.some)] as const)),
+  ).pipe(
+    Stream.take(MAX_PAGES),
+    Stream.runCollect,
+    Effect.map(
+      (pages) =>
+        new FileList({
+          files: Arr.flatMap(pages, (result) => Arr.map(result.data, fromFileObject)),
+          more: Option.isSome(Option.flatMap(Arr.last(pages), nextToken)),
+        }),
+    ),
+    Effect.withSpan("GrokFiles.list"),
+  )
 
   const upload = Effect.fn("GrokFiles.upload")(function* (request: UploadRequest) {
     const xai = yield* sdk
+
     const result = yield* callXai((signal) =>
       xai.files.upload(
         {
@@ -199,23 +210,24 @@ const makeFiles = Effect.fn("GrokFiles.make")(function* () {
         options(signal, TRANSFER_TIMEOUT),
       ),
     ).pipe(Effect.mapError(toFilesError("xAI could not upload the file")))
+
     return fromFileObject(result)
   })
 
   const download = Effect.fn("GrokFiles.download")(function* (file: GrokFile) {
     const xai = yield* sdk
-    const bytes = yield* callXai(async (signal) => {
-      const response = await xai.files.content(file.id, {}, options(signal, TRANSFER_TIMEOUT))
-      return response.bytes()
-    }).pipe(Effect.mapError(toFilesError("xAI could not download the file")))
+
+    const bytes = yield* callXai((signal) =>
+      xai.files.content(file.id, {}, options(signal, TRANSFER_TIMEOUT)).then((response) => response.bytes()),
+    ).pipe(Effect.mapError(toFilesError("xAI could not download the file")))
+
     return new DownloadedFile({ filename: file.filename, bytes })
   })
 
-  const share = Effect.fn("GrokFiles.share")(function* (
-    id: string,
-    expiresAfter: Option.Option<number>,
-  ) {
+  /** Make a public link to file `id`. None for `expiresAfter` keeps the file's own expiry, if any. */
+  const share = Effect.fn("GrokFiles.share")(function* (id: string, expiresAfter: Option.Option<number>) {
     const xai = yield* sdk
+
     const result = yield* callXai((signal) =>
       xai.files.createPublicUrl(
         id,
@@ -226,12 +238,14 @@ const makeFiles = Effect.fn("GrokFiles.make")(function* () {
         options(signal),
       ),
     ).pipe(Effect.mapError(toFilesError("xAI could not make a public link")))
+
     return new PublicLink({
       url: result.public_url,
       expiresAt: millis(Option.fromNullishOr(result.expires_at)),
     })
   })
 
+  /** Stop file `id`'s public link from working. */
   const unshare = Effect.fn("GrokFiles.unshare")(function* (id: string) {
     const xai = yield* sdk
     yield* callXai((signal) => xai.files.revokePublicUrl(id, options(signal))).pipe(
@@ -246,25 +260,11 @@ const makeFiles = Effect.fn("GrokFiles.make")(function* () {
     )
   })
 
-  return GrokFiles.of({ list, upload, download, share, unshare, remove })
+  return { list, upload, download, share, unshare, remove }
 })
 
-export class GrokFiles extends Context.Service<
-  GrokFiles,
-  {
-    /** The newest files, up to `MAX_PAGES` pages of them. */
-    readonly list: Effect.Effect<FileList, FilesError>
-    readonly upload: (request: UploadRequest) => Effect.Effect<GrokFile, FilesError>
-    readonly download: (file: GrokFile) => Effect.Effect<DownloadedFile, FilesError>
-    /** Make a public link to file `id`. None for `expiresAfter` keeps the file's own expiry, if any. */
-    readonly share: (
-      id: string,
-      expiresAfter: Option.Option<number>,
-    ) => Effect.Effect<PublicLink, FilesError>
-    /** Stop file `id`'s public link from working. */
-    readonly unshare: (id: string) => Effect.Effect<void, FilesError>
-    readonly remove: (id: string) => Effect.Effect<void, FilesError>
-  }
->()("grokcast/GrokFiles") {
-  static readonly layer = Layer.effect(GrokFiles, makeFiles())
+export class GrokFiles extends Context.Service<GrokFiles>()("grokcast/GrokFiles", {
+  make: makeFiles(),
+}) {
+  static readonly layer = Layer.effect(GrokFiles, GrokFiles.make)
 }

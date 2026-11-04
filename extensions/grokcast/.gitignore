@@ -15,3 +15,6 @@ raycast-env.d.ts
 .swiftpm
 Package.resolved
 assets/compiled_raycast_swift
+
+# Staging folder for `nub run publish` and `nub run store:check`.
+.store/

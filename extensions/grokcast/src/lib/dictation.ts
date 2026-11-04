@@ -9,12 +9,13 @@ import * as Context from "effect/Context"
 import * as Duration from "effect/Duration"
 import * as Effect from "effect/Effect"
 import * as Fiber from "effect/Fiber"
+import * as Match from "effect/Match"
 import * as Option from "effect/Option"
 import * as Queue from "effect/Queue"
 import * as Schema from "effect/Schema"
 import * as Stream from "effect/Stream"
 import { DictationHistory } from "./history.ts"
-import { LiveTranscriber } from "./live-transcriber.ts"
+import { LiveTranscriber, type LiveTranscript } from "./live-transcriber.ts"
 import { durationOfBytes, joinChunks, levelDbfs, Recorder } from "./recorder.ts"
 import { Transcriber } from "./transcriber.ts"
 
@@ -28,6 +29,7 @@ export const MIN_DICTATION_SECONDS = 0.3
 export const LIVE_FINISH_TIMEOUT = Duration.seconds(10)
 
 export const AfterDictation = Schema.Literals(["paste", "copy"])
+
 export type AfterDictation = typeof AfterDictation.Type
 
 export class DictationSettings extends Schema.Class<DictationSettings>("DictationSettings")({
@@ -41,10 +43,9 @@ export class DictationSettings extends Schema.Class<DictationSettings>("Dictatio
 }) {}
 
 /** The user's dictation preferences. */
-export class DictationPreferences extends Context.Service<
-  DictationPreferences,
-  DictationSettings
->()("grokcast/DictationPreferences") {}
+export class DictationPreferences extends Context.Service<DictationPreferences, DictationSettings>()(
+  "grokcast/DictationPreferences",
+) {}
 
 export interface Recording {
   /** Mono 16 kHz signed 16-bit little-endian PCM. */
@@ -57,33 +58,42 @@ export interface Recording {
  * seconds recorded so far, the level of each chunk for a meter, and the chunk.
  */
 export const recordSpeech = Effect.fn("recordSpeech")(function* (
-  stop: Effect.Effect<void>,
+  stop: typeof Effect.void,
   onAudio: (seconds: number, level: number, chunk: Uint8Array) => void,
 ) {
   const recorder = yield* Recorder
-  const recorded = yield* recorder.record.pipe(
-    Stream.interruptWhen(Effect.raceFirst(stop, Effect.sleep(MAX_DICTATION))),
-    Stream.runFold(
-      () => ({ chunks: Arr.empty<Uint8Array>(), bytes: 0 }),
-      (total, chunk) => {
-        const bytes = total.bytes + chunk.byteLength
+  const limit = Effect.sleep(MAX_DICTATION)
+  const stopped = Effect.raceFirst(stop, limit)
+
+  const chunks = yield* recorder.record.pipe(
+    Stream.interruptWhen(stopped),
+    withRecordedBytes,
+    Stream.tap(({ chunk, bytes }) =>
+      Effect.sync(() => {
         onAudio(durationOfBytes(bytes), levelDbfs(chunk), chunk)
-        return { chunks: Arr.append(total.chunks, chunk), bytes }
-      },
+      }),
     ),
+    Stream.map(({ chunk }) => chunk),
+    Stream.runCollect,
   )
-  return {
-    audio: joinChunks(recorded.chunks),
-    seconds: durationOfBytes(recorded.bytes),
-  } satisfies Recording
+
+  const audio = joinChunks(chunks)
+
+  return { audio, seconds: durationOfBytes(audio.byteLength) } satisfies Recording
 })
 
+/** Each chunk with the bytes recorded up to and including it. */
+const withRecordedBytes = Stream.mapAccum(
+  () => 0,
+  (total: number, chunk: Uint8Array) =>
+    [total + chunk.byteLength, [{ chunk, bytes: total + chunk.byteLength }]] as const,
+)
+
 /** Transcribe a whole recording with the user's preferences, in one request. */
-export const transcribeRecording = Effect.fn("transcribeRecording")(function* (
-  recording: Recording,
-) {
+export const transcribeRecording = Effect.fn("transcribeRecording")(function* (recording: Recording) {
   const settings = yield* DictationPreferences
   const transcriber = yield* Transcriber
+
   return yield* transcriber.transcribe(recording.audio, {
     language: settings.language,
     formatNumbers: settings.formatNumbers,
@@ -122,50 +132,95 @@ export class Dictation extends Schema.Class<Dictation>("Dictation")({
  * cannot be saved does not fail this. None means no speech was heard.
  */
 export const dictateSpeech = Effect.fn("dictateSpeech")(function* (
-  stop: Effect.Effect<void>,
+  stop: typeof Effect.void,
   progress: DictationProgress,
 ) {
   const settings = yield* DictationPreferences
   const live = yield* LiveTranscriber
   const audio = yield* Queue.unbounded<Uint8Array, Cause.Done>()
+
   const liveText = yield* Effect.forkChild(
     live.transcribe(Stream.fromQueue(audio), settings.language, progress.text).pipe(
       Effect.tapError(() => Effect.sync(progress.liveStopped)),
       Effect.option,
     ),
   )
+
   const recording = yield* recordSpeech(stop, (seconds, level, chunk) => {
     Queue.offerUnsafe(audio, chunk)
     progress.audio(seconds, level)
   }).pipe(Effect.ensuring(Queue.end(audio)))
-  if (recording.seconds < MIN_DICTATION_SECONDS) return Option.none<Dictation>()
-  progress.finishing(recording.seconds)
-  const stoppedAt = yield* Clock.currentTimeMillis
 
-  const heard = yield* Fiber.join(liveText).pipe(
-    Effect.timeoutOption(LIVE_FINISH_TIMEOUT),
-    Effect.map((transcript) =>
-      Option.filter(Option.flatten(transcript), (found) => found.text !== ""),
+  const dictation = yield* Effect.transposeOption(
+    Option.map(
+      Option.liftPredicate(recording, (recorded) => recorded.seconds >= MIN_DICTATION_SECONDS),
+      (recorded) => finishDictation(recorded, liveText, progress, settings),
     ),
   )
-  const transcript = yield* Option.match(heard, {
-    onSome: (found) => Effect.succeed({ text: found.text, language: found.language, live: true }),
-    onNone: () =>
-      transcribeRecording(recording).pipe(
-        Effect.map((found) => ({ text: found.text, language: found.language, live: false })),
-      ),
-  })
-  if (transcript.text === "") return Option.none<Dictation>()
-  const dictation = new Dictation({
-    ...transcript,
-    seconds: recording.seconds,
-    readySeconds: ((yield* Clock.currentTimeMillis) - stoppedAt) / 1000,
-  })
-  if (settings.keepHistory) {
-    yield* DictationHistory.use((history) => history.add(dictation)).pipe(Effect.ignore)
-  }
-  return Option.some(dictation)
+
+  return Option.flatten(dictation)
 })
+
+const liveResult = (found: LiveTranscript) => ({
+  text: found.text,
+  language: found.language,
+  live: true,
+})
+
+/** Send the whole recording in one request. */
+const recordingResult = (recording: Recording) =>
+  transcribeRecording(recording).pipe(
+    Effect.map((found) => ({ text: found.text, language: found.language, live: false })),
+  )
+
+/** Keep `dictation` in the history. A history that cannot be saved does not fail this. */
+const remember = (dictation: Dictation) => DictationHistory.use((history) => history.add(dictation)).pipe(Effect.ignore)
+
+/**
+ * After recording stops: wait for the live text, or send the whole recording when there
+ * is none. None when no speech was heard.
+ */
+const finishDictation = (
+  recording: Recording,
+  liveText: Fiber.Fiber<Option.Option<LiveTranscript>>,
+  progress: DictationProgress,
+  settings: DictationSettings,
+) =>
+  Effect.gen(function* () {
+    progress.finishing(recording.seconds)
+    const stoppedAt = yield* Clock.currentTimeMillis
+
+    const heard = yield* Fiber.join(liveText).pipe(
+      Effect.timeoutOption(LIVE_FINISH_TIMEOUT),
+      Effect.map((transcript) => Option.filter(Option.flatten(transcript), (found) => found.text !== "")),
+    )
+
+    const transcript = yield* Option.match(heard, {
+      onSome: (found) => Effect.succeed(liveResult(found)),
+      onNone: () => recordingResult(recording),
+    })
+
+    const readyAt = yield* Clock.currentTimeMillis
+
+    const dictation = Option.map(
+      Option.liftPredicate(transcript, (found) => found.text !== ""),
+      (found) =>
+        new Dictation({
+          ...found,
+          seconds: recording.seconds,
+          readySeconds: (readyAt - stoppedAt) / 1000,
+        }),
+    )
+
+    yield* Effect.transposeOption(
+      Option.map(
+        Option.filter(dictation, () => settings.keepHistory),
+        remember,
+      ),
+    )
+
+    return dictation
+  })
 
 /** The number of words in `text`. Works for languages that do not put spaces between words. */
 export const countWords = (text: string): number =>
@@ -175,10 +230,7 @@ export const countWords = (text: string): number =>
 
 /** The name of a language code in the user's language, such as `English` for `en`. */
 export const languageName = (code: string): string =>
-  Option.getOrElse(
-    Option.fromNullishOr(new Intl.DisplayNames(undefined, { type: "language" }).of(code)),
-    () => code,
-  )
+  Option.getOrElse(Option.fromNullishOr(new Intl.DisplayNames(undefined, { type: "language" }).of(code)), () => code)
 
 /** What a dictation's details can show. Older history entries lack some of them. */
 export interface DictationFacts {
@@ -190,11 +242,17 @@ export interface DictationFacts {
 }
 
 /** Rows for a details panel: words, length, speed, language, wait, and method. */
-export const detailRows = (
-  facts: DictationFacts,
-): ReadonlyArray<{ readonly title: string; readonly text: string }> => {
-  const words = countWords(facts.text)
-  const rows = [
+export const detailRows = (facts: DictationFacts): ReadonlyArray<{ readonly title: string; readonly text: string }> =>
+  rowsOf(facts, countWords(facts.text))
+
+const methodName = (live: boolean): string =>
+  Match.value(live).pipe(
+    Match.when(true, () => "Live"),
+    Match.orElse(() => "From the whole recording"),
+  )
+
+const rowsOf = (facts: DictationFacts, words: number) =>
+  Arr.getSomes([
     Option.some({ title: "Words", text: String(words) }),
     Option.some({ title: "Length", text: clockOf(facts.seconds) }),
     Option.map(
@@ -206,13 +264,8 @@ export const detailRows = (
       title: "Ready In",
       text: `${seconds.toFixed(1)} s`,
     })),
-    Option.map(facts.live, (live) => ({
-      title: "Transcribed",
-      text: live ? "Live" : "From the whole recording",
-    })),
-  ]
-  return Arr.getSomes(rows)
-}
+    Option.map(facts.live, (live) => ({ title: "Transcribed", text: methodName(live) })),
+  ])
 
 /** While the user speaks, show at most this many characters of the text. */
 export const LIVE_TEXT_CHARS = 280
@@ -221,18 +274,23 @@ export const LIVE_TEXT_CHARS = 280
  * The end of `text`, at most `LIVE_TEXT_CHARS` long and starting at a word, with an
  * ellipsis when the start was cut. A short view keeps each redraw small.
  */
-export const recentText = (text: string): string => {
-  if (text.length <= LIVE_TEXT_CHARS) return text
-  const tail = text.slice(-LIVE_TEXT_CHARS)
-  const word = tail.indexOf(" ")
-  return `…${word >= 0 ? tail.slice(word + 1) : tail}`
-}
+export const recentText = (text: string): string =>
+  Option.liftPredicate(text, (long) => long.length > LIVE_TEXT_CHARS).pipe(
+    Option.map((long) => `…${fromFirstWord(long.slice(-LIVE_TEXT_CHARS))}`),
+    Option.getOrElse(() => text),
+  )
+
+/** `tail` from its first whole word: after the first space, when it has one. */
+const fromFirstWord = (tail: string): string =>
+  Option.liftPredicate(tail.indexOf(" "), (space) => space >= 0).pipe(
+    Option.map((space) => tail.slice(space + 1)),
+    Option.getOrElse(() => tail),
+  )
 
 /** A length as minutes and seconds, such as `0:07` or `2:15`. */
-export const clockOf = (seconds: number): string => {
-  const whole = Math.floor(seconds)
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`
-}
+export const clockOf = (seconds: number): string => minutesAndSeconds(Math.floor(seconds))
+
+const minutesAndSeconds = (whole: number) => `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`
 
 /** The language to send, from a preference value where `auto` means detect it. */
 export const languageFromPreference = (value: string): Option.Option<string> =>

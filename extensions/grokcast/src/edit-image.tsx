@@ -25,9 +25,7 @@ export default function EditImage() {
   const [sources, setSources] = useState<Option.Option<ReadonlyArray<string>>>(Option.none())
 
   useEffect(() => {
-    GrokRuntime.runFork(
-      selectedImages.pipe(Effect.tap((paths) => Effect.sync(() => setSources(Option.some(paths))))),
-    )
+    GrokRuntime.runFork(selectedImages.pipe(Effect.tap((paths) => Effect.sync(() => setSources(Option.some(paths))))))
   }, [])
 
   // The form reads its default images once, so wait for the Finder selection.

@@ -6,8 +6,6 @@ import {
   Color,
   Detail,
   Icon,
-  launchCommand,
-  LaunchType,
   showHUD,
   type Image,
   type Keyboard,
@@ -29,6 +27,7 @@ import {
 } from "./lib/dictation.ts"
 import { GrokRuntime } from "./lib/grok.ts"
 import { levelBar } from "./lib/recorder.ts"
+import { openCommand, SignInAction } from "./components/launch.tsx"
 
 type State = Data.TaggedEnum<{
   Starting: {}
@@ -41,11 +40,18 @@ type State = Data.TaggedEnum<{
     readonly liveStopped: boolean
   }
   Finishing: { readonly seconds: number; readonly text: string }
-  Done: { readonly dictation: Dictation; readonly delivered: "pasted" | "copied" }
+  Done: { readonly dictation: Dictation; readonly delivered: "pasted" | "copied" | "notDelivered" }
   NoSpeech: {}
   Failed: { readonly message: string; readonly signIn: boolean }
 }>
+
 const State = Data.taggedEnum<State>()
+
+const DELIVERED_LABELS = {
+  pasted: "Pasted",
+  copied: "Copied to the clipboard",
+  notDelivered: "Could not paste or copy the text",
+} as const
 
 export default function Dictate() {
   const [state, setState] = useState<State>(State.Starting())
@@ -61,12 +67,11 @@ export default function Dictate() {
           RecorderError: (error) =>
             Effect.sync(() => setState(State.Failed({ message: error.message, signIn: false }))),
           TranscriptionError: (error) =>
-            Effect.sync(() =>
-              setState(State.Failed({ message: error.message, signIn: error.reason === "signIn" })),
-            ),
+            Effect.sync(() => setState(State.Failed({ message: error.message, signIn: error.reason === "signIn" }))),
         }),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -78,12 +83,7 @@ export default function Dictate() {
   }
 
   const againAction = (
-    <Action
-      title="Dictate Again"
-      icon={Icon.Microphone}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-      onAction={again}
-    />
+    <Action title="Dictate Again" icon={Icon.Microphone} shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={again} />
   )
 
   const historyAction = (
@@ -91,16 +91,12 @@ export default function Dictate() {
       title="Open Dictation History"
       icon={Icon.Clock}
       shortcut={HISTORY_SHORTCUT}
-      onAction={() =>
-        void launchCommand({ name: "dictation-history", type: LaunchType.UserInitiated })
-      }
+      onAction={() => void openCommand("dictation-history")}
     />
   )
 
   return State.$match(state, {
-    Starting: () => (
-      <Detail isLoading markdown="" metadata={<Status label="Starting the microphone" />} />
-    ),
+    Starting: () => <Detail isLoading markdown="" metadata={<Status label="Starting the microphone" />} />,
     Recording: ({ seconds, level, text, liveStopped }) => (
       <Detail
         isLoading
@@ -121,11 +117,7 @@ export default function Dictate() {
         }
         actions={
           <ActionPanel>
-            <Action
-              title="Stop and Transcribe"
-              icon={Icon.Stop}
-              onAction={() => stopRef.current()}
-            />
+            <Action title="Stop and Transcribe" icon={Icon.Stop} onAction={() => stopRef.current()} />
           </ActionPanel>
         }
       />
@@ -146,8 +138,12 @@ export default function Dictate() {
         markdown={dictation.text}
         metadata={
           <Status
-            label={delivered === "pasted" ? "Pasted" : "Copied to the clipboard"}
-            icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+            label={DELIVERED_LABELS[delivered]}
+            icon={
+              delivered === "notDelivered"
+                ? { source: Icon.ExclamationMark, tintColor: Color.Red }
+                : { source: Icon.CheckCircle, tintColor: Color.Green }
+            }
             history
           >
             {detailRows({
@@ -185,26 +181,11 @@ export default function Dictate() {
       <Detail
         markdown={message}
         metadata={
-          <Status
-            label="Dictation did not finish"
-            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          />
+          <Status label="Dictation did not finish" icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} />
         }
         actions={
           <ActionPanel>
-            {signIn ? (
-              <Action
-                title="Sign in to Grok"
-                icon={Icon.Person}
-                onAction={() =>
-                  void launchCommand({
-                    name: "account",
-                    type: LaunchType.UserInitiated,
-                    context: { signIn: true },
-                  })
-                }
-              />
-            ) : null}
+            {signIn ? <SignInAction /> : null}
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={again} />
           </ActionPanel>
         }
@@ -243,14 +224,13 @@ function Status({
   )
 }
 
-const dictate = Effect.fn("dictate")(function* (
-  setState: (state: State) => void,
-  onStop: (stop: () => void) => void,
-) {
+const dictate = Effect.fn("dictate")(function* (setState: (state: State) => void, onStop: (stop: () => void) => void) {
   const settings = yield* DictationPreferences
+
   const stopped = Effect.callback<void>((resume) => {
     onStop(() => resume(Effect.void))
   })
+
   // Audio and text arrive separately; each update shows both. The last words can
   // arrive after recording stops.
   const view = {
@@ -260,25 +240,25 @@ const dictate = Effect.fn("dictate")(function* (
     liveStopped: false,
     finishing: false,
   }
+
   // Render only when something visible changed. Audio chunks arrive many times a
   // second, and Tinycast redraws more slowly than Raycast.
   const shown = { key: "" }
+
   const show = () => {
     const key = [
-      view.finishing
-        ? "finishing"
-        : `${levelBar(view.level, METER_STEPS)} ${clockOf(view.seconds)}`,
+      view.finishing ? "finishing" : `${levelBar(view.level, METER_STEPS)} ${clockOf(view.seconds)}`,
       view.text,
       view.liveStopped,
     ].join("|")
+
     if (key === shown.key) return
     shown.key = key
     setState(
-      view.finishing
-        ? State.Finishing({ seconds: view.seconds, text: view.text })
-        : State.Recording({ ...view }),
+      view.finishing ? State.Finishing({ seconds: view.seconds, text: view.text }) : State.Recording({ ...view }),
     )
   }
+
   const transcript = yield* dictateSpeech(stopped, {
     audio: (seconds, level) => {
       view.seconds = seconds
@@ -299,10 +279,13 @@ const dictate = Effect.fn("dictate")(function* (
       show()
     },
   })
+
   if (Option.isNone(transcript)) {
     setState(State.NoSpeech())
+
     return
   }
+
   const dictation = transcript.value
   const delivered = yield* deliver(dictation, settings.afterDictation)
   setState(State.Done({ dictation, delivered }))
@@ -328,13 +311,17 @@ const deliver = (dictation: Dictation, afterDictation: "paste" | "copy") =>
   )
 
 const copy = (dictation: Dictation) =>
-  Effect.tryPromise(async () => {
-    await Clipboard.copy(dictation.text)
-    await showHUD(`Copied ${summaryOf(dictation)}`)
-  }).pipe(Effect.ignore, Effect.as("copied" as const))
+  Effect.tryPromise(() => Clipboard.copy(dictation.text)).pipe(
+    // The text is on the clipboard even when the HUD cannot show.
+    Effect.andThen(Effect.tryPromise(() => showHUD(`Copied ${summaryOf(dictation)}`)).pipe(Effect.ignore)),
+    Effect.as("copied" as const),
+    // The text stays on screen, with Paste and Copy actions to try again.
+    Effect.catch(() => Effect.succeed("notDelivered" as const)),
+  )
 
 /** Such as `42 words from 0:12 of speech`. */
 const summaryOf = (dictation: Dictation): string => {
   const words = countWords(dictation.text)
+
   return `${words} ${words === 1 ? "word" : "words"} from ${clockOf(dictation.seconds)} of speech`
 }

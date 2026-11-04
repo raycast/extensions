@@ -13,14 +13,7 @@ import * as Schema from "effect/Schema"
 import * as Semaphore from "effect/Semaphore"
 import * as FetchHttpClient from "effect/http/FetchHttpClient"
 import * as HttpClient from "effect/http/HttpClient"
-import {
-  ClientId,
-  OAuthError,
-  refreshTokens,
-  revokeToken,
-  XaiEndpoints,
-  type TokenResponse,
-} from "./oauth.ts"
+import { ClientId, refreshTokens, revokeToken, XaiEndpoints, type TokenResponse } from "./oauth.ts"
 
 /** Refresh this long before the access token expires. */
 export const REFRESH_MARGIN_MS = 5 * 60_000
@@ -49,13 +42,20 @@ export class XaiFetchError extends Schema.TaggedError<XaiFetchError>()("XaiFetch
   cause: Schema.Defect(),
 }) {}
 
+/** Run one call to the token store. A failure becomes a `TokenStoreError` with `message`. */
+export const tokenStoreCall = <A>(message: string, call: () => Promise<A>) =>
+  Effect.tryPromise({ try: call, catch: (cause) => new TokenStoreError({ message, cause }) })
+
+/** A token store operation: it gives `A`, or fails with `TokenStoreError`. */
+type TokenStoreOperation<A> = ReturnType<typeof tokenStoreCall<A>>
+
 /** Where the tokens live. The extension uses Raycast's encrypted OAuth token store. */
 export class TokenStore extends Context.Service<
   TokenStore,
   {
-    readonly load: Effect.Effect<Option.Option<StoredTokens>, TokenStoreError>
-    readonly save: (tokens: StoredTokens) => Effect.Effect<void, TokenStoreError>
-    readonly clear: Effect.Effect<void, TokenStoreError>
+    readonly load: TokenStoreOperation<Option.Option<StoredTokens>>
+    readonly save: (tokens: StoredTokens) => TokenStoreOperation<void>
+    readonly clear: TokenStoreOperation<void>
   }
 >()("grok/TokenStore") {}
 
@@ -74,22 +74,20 @@ export const toStoredTokens = (
     refreshToken: Option.orElse(response.refresh_token, () =>
       Option.flatMap(previous, (tokens) => tokens.refreshToken),
     ),
-    idToken: Option.orElse(response.id_token, () =>
-      Option.flatMap(previous, (tokens) => tokens.idToken),
-    ),
+    idToken: Option.orElse(response.id_token, () => Option.flatMap(previous, (tokens) => tokens.idToken)),
     expiresAt: now + Option.getOrElse(response.expires_in, () => 0) * 1000,
   })
 
-export const needsRefresh = (tokens: StoredTokens, now: number): boolean =>
-  tokens.expiresAt - REFRESH_MARGIN_MS <= now
+export const needsRefresh = (tokens: StoredTokens, now: number): boolean => tokens.expiresAt - REFRESH_MARGIN_MS <= now
 
 const sameToken = (a: Redacted.Redacted<string>, b: Redacted.Redacted<string>): boolean =>
   Redacted.value(a) === Redacted.value(b)
 
 // Tinycast's Request drops the signal of a Request it copies unless it is passed again.
-const withBearer = (request: Request, token: Redacted.Redacted<string>): Request => {
+function withBearer(request: Request, token: Redacted.Redacted<string>): Request {
   const headers = new Headers(request.headers)
   headers.set("authorization", `Bearer ${Redacted.value(token)}`)
+
   return new Request(request, { headers, signal: request.signal })
 }
 
@@ -98,13 +96,20 @@ const withBearer = (request: Request, token: Redacted.Redacted<string>): Request
  * but Tinycast can send the same body twice, so a plain copy is enough there.
  */
 const copyRequest = (request: Request): Request =>
-  P.isFunction(request.clone) ? request.clone() : new Request(request, { signal: request.signal })
+  Match.value(request).pipe(
+    Match.when(
+      (original: Request) => P.isFunction(original.clone),
+      (original) => original.clone(),
+    ),
+    Match.orElse((original) => new Request(original, { signal: original.signal })),
+  )
 
 export type FetchFn = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 
 const notSignedIn = new NotSignedInError({
   message: "Not signed in to Grok. Sign in from Grok Account first.",
 })
+
 const signInExpired = new NotSignedInError({
   message: "The Grok sign-in expired. Sign in again from Grok Account.",
 })
@@ -120,70 +125,81 @@ const make = Effect.fn("GrokSession.make")(function* () {
   const refreshLock = yield* Semaphore.make(1)
 
   const load = store.load.pipe(
-    Effect.flatMap(
-      Option.match({ onNone: () => Effect.fail(notSignedIn), onSome: Effect.succeed }),
-    ),
+    Effect.flatMap(Option.match({ onNone: () => Effect.fail(notSignedIn), onSome: Effect.succeed })),
   )
 
-  const expire = store.clear.pipe(Effect.andThen(Effect.fail(signInExpired)))
+  const expire = store.clear.pipe(Effect.andThen(() => Effect.fail(signInExpired)))
+
+  const saveRefreshed = (response: TokenResponse, current: StoredTokens) =>
+    Clock.currentTimeMillis.pipe(
+      Effect.map((now) => toStoredTokens(response, now, Option.some(current))),
+      Effect.tap(store.save),
+    )
+
+  const refreshStored = (current: StoredTokens) =>
+    Effect.gen(function* () {
+      const refreshToken = yield* Option.match(current.refreshToken, {
+        onNone: () => expire,
+        onSome: Effect.succeed,
+      })
+
+      const resolved = yield* endpoints.get
+
+      return yield* refreshTokens(resolved, clientId, refreshToken).pipe(
+        Effect.flatMap((response) => saveRefreshed(response, current)),
+        Effect.catchTag("OAuthError", (error) =>
+          Match.value(error.code).pipe(
+            Match.when("invalid_grant", () => recoverSpentRefreshToken(current)),
+            Match.orElse(() => Effect.fail(error)),
+          ),
+        ),
+      )
+    })
 
   const runRefresh = Effect.fn("GrokSession.refresh")(function* (stale: Redacted.Redacted<string>) {
     const current = yield* load
+    const now = yield* Clock.currentTimeMillis
+
     // Another caller or command already refreshed: use its tokens.
-    if (
-      !sameToken(current.accessToken, stale) &&
-      !needsRefresh(current, yield* Clock.currentTimeMillis)
-    ) {
-      return current
-    }
-    const refreshToken = yield* Option.match(current.refreshToken, {
-      onNone: () => expire,
+    const refreshedElsewhere = Option.liftPredicate(
+      current,
+      (tokens) => !sameToken(tokens.accessToken, stale) && !needsRefresh(tokens, now),
+    )
+
+    return yield* Option.match(refreshedElsewhere, {
+      onNone: () => refreshStored(current),
       onSome: Effect.succeed,
     })
-    return yield* refreshTokens(yield* endpoints.get, clientId, refreshToken).pipe(
-      Effect.flatMap((response) =>
-        Effect.gen(function* () {
-          const next = toStoredTokens(
-            response,
-            yield* Clock.currentTimeMillis,
-            Option.some(current),
-          )
-          yield* store.save(next)
-          return next
-        }),
-      ),
-      Effect.catchTag("OAuthError", (error) =>
-        Match.value(error.code).pipe(
-          Match.when("invalid_grant", () => recoverSpentRefreshToken(current)),
-          Match.orElse(() => Effect.fail(error)),
-        ),
-      ),
-    )
   })
 
   /** Another process may have spent this refresh token and saved a new one. */
-  const recoverSpentRefreshToken = Effect.fn("GrokSession.recoverSpentRefreshToken")(function* (
-    current: StoredTokens,
-  ) {
+  const recoverSpentRefreshToken = Effect.fn("GrokSession.recoverSpentRefreshToken")(function* (current: StoredTokens) {
     const latest = yield* store.load
     const now = yield* Clock.currentTimeMillis
+
     const newer = Option.filter(
       latest,
       (tokens) =>
-        !Option.makeEquivalence(sameToken)(tokens.refreshToken, current.refreshToken) &&
-        !needsRefresh(tokens, now),
+        !Option.makeEquivalence(sameToken)(tokens.refreshToken, current.refreshToken) && !needsRefresh(tokens, now),
     )
+
     return yield* Option.match(newer, { onNone: () => expire, onSome: Effect.succeed })
   })
 
-  const refresh = (stale: Redacted.Redacted<string>) =>
-    refreshLock.withPermits(1)(runRefresh(stale))
+  const refresh = (stale: Redacted.Redacted<string>) => refreshLock.withPermits(1)(runRefresh(stale))
+
+  const refreshedAccessToken = (tokens: StoredTokens) =>
+    refresh(tokens.accessToken).pipe(Effect.map((fresh) => fresh.accessToken))
 
   /** A current access token, refreshed first when it is within five minutes of expiry. */
   const accessToken = Effect.gen(function* () {
     const tokens = yield* load
-    if (!needsRefresh(tokens, yield* Clock.currentTimeMillis)) return tokens.accessToken
-    return (yield* refresh(tokens.accessToken)).accessToken
+    const now = yield* Clock.currentTimeMillis
+
+    return yield* Option.match(
+      Option.liftPredicate(tokens, (current) => needsRefresh(current, now)),
+      { onNone: () => Effect.succeed(tokens.accessToken), onSome: refreshedAccessToken },
+    )
   }).pipe(Effect.withSpan("GrokSession.accessToken"))
 
   const sendRaw = (request: Request) =>
@@ -192,14 +208,26 @@ const make = Effect.fn("GrokSession.make")(function* () {
       catch: (cause) => new XaiFetchError({ cause }),
     })
 
+  /** After a 401: drop the body, refresh once, and send the copy with the new token. */
+  const retryWithFreshToken = (retry: Request, stale: Redacted.Redacted<string>, unauthorized: Response) =>
+    Effect.tryPromise(() => unauthorized.body?.cancel() ?? Promise.resolve()).pipe(
+      Effect.ignore,
+      Effect.andThen(() => refresh(stale)),
+      Effect.flatMap((fresh) => sendRaw(withBearer(retry, fresh.accessToken))),
+    )
+
   const authorizedFetch = Effect.fn("GrokSession.fetch")(function* (request: Request) {
     const retry = copyRequest(request)
     const token = yield* accessToken
     const response = yield* sendRaw(withBearer(request, token))
-    if (response.status !== 401) return response
-    yield* Effect.tryPromise(() => response.body?.cancel() ?? Promise.resolve()).pipe(Effect.ignore)
-    const fresh = yield* refresh(token)
-    return yield* sendRaw(withBearer(retry, fresh.accessToken))
+
+    return yield* Option.match(
+      Option.liftPredicate(response, (answer) => answer.status === 401),
+      {
+        onNone: () => Effect.succeed(response),
+        onSome: (unauthorized) => retryWithFreshToken(retry, token, unauthorized),
+      },
+    )
   })
 
   const runPromise = Effect.runPromiseWith(context)
@@ -216,46 +244,36 @@ const make = Effect.fn("GrokSession.make")(function* () {
       ),
     )
 
-  /** Revoke the refresh token at xAI, then clear local tokens. Local tokens are cleared even if the revoke fails. */
-  const signOut = Effect.gen(function* () {
-    const stored = yield* store.load
-    if (Option.isNone(stored)) return false
-    const tokens = stored.value
-    const revoked = yield* Effect.exit(
-      Effect.flatMap(endpoints.get, (resolved) =>
-        revokeToken(
-          resolved,
-          clientId,
-          Option.getOrElse(tokens.refreshToken, () => tokens.accessToken),
+  const revokeAndClear = (tokens: StoredTokens) =>
+    Effect.gen(function* () {
+      const revoked = yield* endpoints.get.pipe(
+        Effect.flatMap((resolved) =>
+          revokeToken(
+            resolved,
+            clientId,
+            Option.getOrElse(tokens.refreshToken, () => tokens.accessToken),
+          ),
         ),
-      ),
-    )
-    yield* store.clear
-    yield* revoked
-    return true
-  }).pipe(Effect.withSpan("GrokSession.signOut"))
+        Effect.exit,
+      )
 
-  return GrokSession.of({ accessToken, refresh, fetch, signOut })
+      yield* store.clear
+      yield* revoked
+
+      return true
+    })
+
+  /** Revoke the refresh token at xAI, then clear local tokens. Local tokens are cleared even if the revoke fails. */
+  const signOut = store.load.pipe(
+    Effect.flatMap(Option.match({ onNone: () => Effect.succeed(false), onSome: revokeAndClear })),
+    Effect.withSpan("GrokSession.signOut"),
+  )
+
+  return { accessToken, refresh, fetch, signOut }
 })
 
-export class GrokSession extends Context.Service<
-  GrokSession,
-  {
-    readonly accessToken: Effect.Effect<
-      Redacted.Redacted<string>,
-      NotSignedInError | OAuthError | TokenStoreError,
-      HttpClient.HttpClient
-    >
-    readonly refresh: (
-      staleAccessToken: Redacted.Redacted<string>,
-    ) => Effect.Effect<
-      StoredTokens,
-      NotSignedInError | OAuthError | TokenStoreError,
-      HttpClient.HttpClient
-    >
-    readonly fetch: FetchFn
-    readonly signOut: Effect.Effect<boolean, OAuthError | TokenStoreError, HttpClient.HttpClient>
-  }
->()("grok/GrokSession") {
-  static readonly layer = Layer.effect(GrokSession, make())
+export class GrokSession extends Context.Service<GrokSession>()("grok/GrokSession", {
+  make: make(),
+}) {
+  static readonly layer = Layer.effect(GrokSession, GrokSession.make)
 }

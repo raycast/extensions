@@ -8,8 +8,6 @@ import {
   getSelectedFinderItems,
   Icon,
   Keyboard,
-  launchCommand,
-  LaunchType,
   List,
   showToast,
   Toast,
@@ -21,14 +19,10 @@ import * as Fiber from "effect/Fiber"
 import * as Option from "effect/Option"
 import { useEffect, useRef, useState } from "react"
 import { Chat, ChatPreferences, turnMarkdown, type ChatTurn } from "./lib/chat.ts"
-import {
-  ChatConversations,
-  newConversation,
-  withTurn,
-  type Conversation,
-} from "./lib/conversations.ts"
+import { ChatConversations, newConversation, withTurn, type Conversation } from "./lib/conversations.ts"
 import { GrokRuntime } from "./lib/grok.ts"
 import { imageMarkdown, isSupportedImage } from "./lib/chat-images.ts"
+import { signIn } from "./components/launch.tsx"
 
 export default function GrokChat() {
   return <ChatView initial={Option.none()} nested={false} />
@@ -58,11 +52,19 @@ const STREAM_REDRAW_MS = 150
 
 const SHOW_CONVERSATIONS: Keyboard.Shortcut = { modifiers: ["cmd"], key: "y" }
 
-const signIn = () =>
-  void launchCommand({ name: "account", type: LaunchType.UserInitiated, context: { signIn: true } })
-
 const failureToast = (title: string) =>
   Effect.tryPromise(() => showToast({ style: Toast.Style.Failure, title })).pipe(Effect.ignore)
+
+/** The saved copy of `current`, or `current` when it is not saved (yet, or any more). */
+const latestOf = (saved: ChatConversations["Service"], current: Conversation) =>
+  saved.list.pipe(
+    Effect.map((all) =>
+      Option.getOrElse(
+        Arr.findFirst(all, (old) => old.id === current.id),
+        () => current,
+      ),
+    ),
+  )
 
 /** The question, with its images, as the detail pane shows it. */
 const questionMarkdown = (prompt: string, images: ReadonlyArray<string>) =>
@@ -102,15 +104,19 @@ function ChatView({
   /** Attach the images among `paths`. Other files are skipped with a toast. */
   const attach = (paths: ReadonlyArray<string>, source: string) => {
     const images = paths.filter(isSupportedImage)
+
     if (images.length === 0) {
       void showToast({
         style: Toast.Style.Failure,
         title: `No JPEG, PNG, or WebP image ${source}`,
       })
+
       return
     }
+
     setAttachments((current) => Arr.dedupe([...current, ...images]))
     setSelected(Option.some("attachments"))
+
     if (images.length < paths.length) {
       void showToast({
         style: Toast.Style.Failure,
@@ -134,17 +140,20 @@ function ChatView({
 
   const ask = (text: string, images: ReadonlyArray<string> = attachments) => {
     const prompt = text.trim()
+
     if (prompt === "" || Option.isSome(pending)) return
     setSearchText("")
     setAttachments([])
     setFailure(Option.none())
     setSelected(Option.some("pending"))
     const view = { prompt, status: "Waiting for Grok", answer: "", timer: false, done: false }
+
     const show = () => {
       if (!view.done) {
         setPending(Option.some({ prompt, images, status: view.status, answer: view.answer }))
       }
     }
+
     // Draw the newest text a moment later, once, however many pieces arrive meanwhile.
     const showSoon = () => {
       if (view.timer) return
@@ -154,42 +163,41 @@ function ChatView({
         show()
       }, STREAM_REDRAW_MS)
     }
+
     show()
+
     const program = Effect.gen(function* () {
       const settings = yield* ChatPreferences
       const chat = yield* Chat
       const saved = yield* ChatConversations
+
+      // Show Conversations can continue the same conversation, so start from the saved copy.
       const base = yield* Option.match(conversation, {
         onNone: () => newConversation,
-        onSome: Effect.succeed,
+        onSome: (current) => latestOf(saved, current),
       })
-      const turn = yield* chat.ask(
-        prompt,
-        { conversationId: base.id, history: base.turns, images },
-        settings,
-        {
-          thinking: () => {
-            if (view.answer !== "" || view.status === "Thinking") return
-            view.status = "Thinking"
-            showSoon()
-          },
-          tool: (label) => {
-            view.status = label
-            showSoon()
-          },
-          text: (answer) => {
-            view.status = "Answering"
-            view.answer = answer
-            showSoon()
-          },
+
+      const turn = yield* chat.ask(prompt, { conversationId: base.id, history: base.turns, images }, settings, {
+        thinking: () => {
+          if (view.answer !== "" || view.status === "Thinking") return
+          view.status = "Thinking"
+          showSoon()
         },
-      )
+        tool: (label) => {
+          view.status = label
+          showSoon()
+        },
+        text: (answer) => {
+          view.status = "Answering"
+          view.answer = answer
+          showSoon()
+        },
+      })
+
       const next = withTurn(base, turn)
       setConversation(Option.some(next))
       setSelected(Option.some(turn.id))
-      yield* saved
-        .save(next)
-        .pipe(Effect.catch(() => failureToast("Could not save the conversation")))
+      yield* saved.save(next).pipe(Effect.catch(() => failureToast("Could not save the conversation")))
     }).pipe(
       Effect.catchTag("ChatError", (error) =>
         Effect.sync(() => {
@@ -219,12 +227,23 @@ function ChatView({
         }),
       ),
     )
+
     fiber.current = Option.some(GrokRuntime.runFork(program))
   }
 
   const stop = () => {
     Option.map(fiber.current, (running) => GrokRuntime.runFork(Fiber.interrupt(running)))
   }
+
+  /** Show the saved copy of this conversation, which Show Conversations may have changed. */
+  const refresh = () =>
+    Option.map(conversation, (current) =>
+      GrokRuntime.runFork(
+        ChatConversations.use((saved) => latestOf(saved, current)).pipe(
+          Effect.flatMap((latest) => Effect.sync(() => setConversation(Option.some(latest)))),
+        ),
+      ),
+    )
 
   const startNew = () => {
     stop()
@@ -237,11 +256,13 @@ function ChatView({
   const deleteConversation = async () => {
     if (Option.isNone(conversation)) return
     const current = conversation.value
+
     const confirmed = await confirmAlert({
       title: "Delete this conversation?",
       message: "This removes it from this Mac.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     })
+
     if (!confirmed) return
     GrokRuntime.runFork(
       ChatConversations.use((saved) => saved.remove(current.id)).pipe(
@@ -252,6 +273,7 @@ function ChatView({
   }
 
   const asking = Option.isSome(pending)
+
   const askAction =
     searchText.trim() !== "" && !asking ? (
       <Action title="Ask Grok" icon={Icon.SpeechBubble} onAction={() => ask(searchText)} />
@@ -300,6 +322,7 @@ function ChatView({
             icon={Icon.List}
             shortcut={SHOW_CONVERSATIONS}
             target={<ConversationsView />}
+            onPop={refresh}
           />
         )}
       </ActionPanel.Section>
@@ -320,9 +343,7 @@ function ChatView({
   return (
     <List
       isLoading={asking}
-      isShowingDetail={
-        turns.length > 0 || asking || Option.isSome(failure) || attachments.length > 0
-      }
+      isShowingDetail={turns.length > 0 || asking || Option.isSome(failure) || attachments.length > 0}
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -333,10 +354,15 @@ function ChatView({
             ? "Ask a follow-up…"
             : "Ask Grok…"
       }
-      navigationTitle={Option.match(conversation, {
-        onNone: () => "Grok Chat",
-        onSome: (current) => current.title,
-      })}
+      // The root view keeps the command title; only an opened conversation shows its own.
+      navigationTitle={
+        nested
+          ? Option.match(conversation, {
+              onNone: () => "Grok Chat",
+              onSome: (current) => current.title,
+            })
+          : undefined
+      }
       selectedItemId={Option.getOrUndefined(selected)}
       onSelectionChange={(id) => setSelected(Option.fromNullishOr(id))}
     >
@@ -414,9 +440,7 @@ function ChatView({
             actions={
               <ActionPanel>
                 {askAction}
-                {current.signIn ? (
-                  <Action title="Sign in to Grok" icon={Icon.Person} onAction={signIn} />
-                ) : null}
+                {current.signIn ? <Action title="Sign in to Grok" icon={Icon.Person} onAction={signIn} /> : null}
                 <Action
                   title="Try Again"
                   icon={Icon.ArrowClockwise}
@@ -449,11 +473,7 @@ function ChatView({
               {Arr.match(turn.citations, {
                 onEmpty: () => null,
                 onNonEmpty: (citations) => (
-                  <ActionPanel.Submenu
-                    title="Open Source"
-                    icon={Icon.Globe}
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                  >
+                  <ActionPanel.Submenu title="Open Source" icon={Icon.Globe} shortcut={Keyboard.Shortcut.Common.Open}>
                     {citations.map((citation) => (
                       <Action.OpenInBrowser
                         key={citation.url}
@@ -476,6 +496,7 @@ function ChatView({
 /** A file picker for images, from Finder. It hands the chosen paths back and closes. */
 function ChooseImages({ onChoose }: { readonly onChoose: (paths: ReadonlyArray<string>) => void }) {
   const { pop } = useNavigation()
+
   return (
     <Form
       navigationTitle="Attach Images"
@@ -506,9 +527,7 @@ function ChooseImages({ onChoose }: { readonly onChoose: (paths: ReadonlyArray<s
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" })
 
 function ConversationsView() {
-  const [conversations, setConversations] = useState<Option.Option<ReadonlyArray<Conversation>>>(
-    Option.none(),
-  )
+  const [conversations, setConversations] = useState<Option.Option<ReadonlyArray<Conversation>>>(Option.none())
 
   const reload = () =>
     GrokRuntime.runFork(
@@ -529,12 +548,28 @@ function ConversationsView() {
       ),
     )
 
+  const removeOne = async (conversation: Conversation) => {
+    const confirmed = await confirmAlert({
+      title: "Delete this conversation?",
+      message: "This removes it from this Mac.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    })
+
+    if (confirmed) {
+      change(
+        ChatConversations.use((saved) => saved.remove(conversation.id)),
+        "Could not delete the conversation",
+      )
+    }
+  }
+
   const clearAll = async () => {
     const confirmed = await confirmAlert({
       title: "Delete all conversations?",
       message: "This removes every Grok conversation from this Mac.",
       primaryAction: { title: "Delete All", style: Alert.ActionStyle.Destructive },
     })
+
     if (confirmed) {
       change(
         ChatConversations.use((saved) => saved.clear),
@@ -560,9 +595,7 @@ function ConversationsView() {
           icon={Icon.SpeechBubble}
           accessories={[
             {
-              text: `${conversation.turns.length} ${
-                conversation.turns.length === 1 ? "question" : "questions"
-              }`,
+              text: `${conversation.turns.length} ${conversation.turns.length === 1 ? "question" : "questions"}`,
             },
             { text: dateFormat.format(conversation.updatedAt) },
           ]}
@@ -579,12 +612,7 @@ function ConversationsView() {
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={Keyboard.Shortcut.Common.Remove}
-                onAction={() =>
-                  change(
-                    ChatConversations.use((saved) => saved.remove(conversation.id)),
-                    "Could not delete the conversation",
-                  )
-                }
+                onAction={() => void removeOne(conversation)}
               />
               <Action
                 title="Delete All Conversations"

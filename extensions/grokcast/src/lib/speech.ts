@@ -68,65 +68,66 @@ const toSpeechError = (error: XaiSdkError) =>
     }),
   )
 
+const noText = () => new SpeechError({ reason: "noText", message: "There is no text to read." })
+
+const tooLong = () =>
+  new SpeechError({
+    reason: "tooLong",
+    message: `The text is too long to read aloud. Grok reads up to ${MAX_SPEECH_CHARACTERS.toLocaleString("en-US")} characters at a time.`,
+  })
+
 /** Check that there is something to read and that xAI accepts its length. */
-export const checkText = (text: string): Effect.Effect<string, SpeechError> => {
-  const trimmed = text.trim()
-  if (trimmed === "") {
-    return Effect.fail(new SpeechError({ reason: "noText", message: "There is no text to read." }))
-  }
-  if (trimmed.length > MAX_SPEECH_CHARACTERS) {
-    return Effect.fail(
-      new SpeechError({
-        reason: "tooLong",
-        message: `The text is too long to read aloud. Grok reads up to ${MAX_SPEECH_CHARACTERS.toLocaleString("en-US")} characters at a time.`,
-      }),
-    )
-  }
-  return Effect.succeed(trimmed)
-}
+export const checkText = (text: string) =>
+  Effect.succeed(text.trim()).pipe(
+    Effect.filterOrFail((trimmed) => trimmed !== "", noText),
+    Effect.filterOrFail((trimmed) => trimmed.length <= MAX_SPEECH_CHARACTERS, tooLong),
+  )
 
 const makeSpeaker = Effect.fn("Speaker.make")(function* () {
   const { client } = yield* XaiClient
 
   const speak = Effect.fn("Speaker.speak")(function* (text: string, settings: SpeechSettings) {
     const checked = yield* checkText(text)
+
     const xai = yield* client.pipe(
       Effect.mapError((error) => new SpeechError({ reason: "failed", message: error.message })),
     )
+
     const voice = Option.match(settings.voice, {
       onNone: () => ({}),
       onSome: (voiceId) => ({ voice_id: voiceId }),
     })
+
     const speed = Option.match(settings.speed, {
       onNone: () => ({}),
       onSome: (value) => ({ speed: value }),
     })
-    const audio = yield* callXai(async (signal) => {
-      const response = await xai.voice.speak(
-        {
-          text: checked,
-          language: settings.language,
-          output_format: { codec: "mp3" },
-          ...voice,
-          ...speed,
-        },
-        // A 429 here is usually the plan's usage limit, so say so at once instead of waiting.
-        { signal, maxRetries: 0, timeout: Duration.toMillis(REQUEST_TIMEOUT) },
-      )
-      return response.bytes()
-    }).pipe(Effect.mapError(toSpeechError))
+
+    const audio = yield* callXai((signal) =>
+      xai.voice
+        .speak(
+          {
+            text: checked,
+            language: settings.language,
+            output_format: { codec: "mp3" },
+            ...voice,
+            ...speed,
+          },
+          // A 429 here is usually the plan's usage limit, so say so at once instead of waiting.
+          { signal, maxRetries: 0, timeout: Duration.toMillis(REQUEST_TIMEOUT) },
+        )
+        .then((response) => response.bytes()),
+    ).pipe(Effect.mapError(toSpeechError))
+
     return new Speech({ audio, characters: checked.length })
   })
 
-  return Speaker.of({ speak })
+  return { speak }
 })
 
-export class Speaker extends Context.Service<
-  Speaker,
-  {
-    /** Turn text into MP3 speech. */
-    readonly speak: (text: string, settings: SpeechSettings) => Effect.Effect<Speech, SpeechError>
-  }
->()("grokcast/Speaker") {
-  static readonly layer = Layer.effect(Speaker, makeSpeaker())
+/** Turns text into MP3 speech. */
+export class Speaker extends Context.Service<Speaker>()("grokcast/Speaker", {
+  make: makeSpeaker(),
+}) {
+  static readonly layer = Layer.effect(Speaker, Speaker.make)
 }

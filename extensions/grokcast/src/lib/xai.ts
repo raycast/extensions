@@ -32,13 +32,8 @@ export class XaiSdkError extends Schema.TaggedError<XaiSdkError>()("XaiSdkError"
 }) {}
 
 /** What the UI offers after a failed xAI request. */
-export const XaiFailureReason = Schema.Literals([
-  "signIn",
-  "plan",
-  "usageLimit",
-  "network",
-  "failed",
-])
+export const XaiFailureReason = Schema.Literals(["signIn", "plan", "usageLimit", "network", "failed"])
+
 export type XaiFailureReason = typeof XaiFailureReason.Type
 
 /** A failed xAI request, described for the user. */
@@ -59,8 +54,8 @@ const SessionFailure = Schema.Struct({ _tag: Schema.String, message: Schema.Stri
 
 /** The error `GrokSession.fetch` rejected with (such as `NotSignedInError`), inside the SDK's error. */
 const sessionFailure = (error: XaiSdkError) =>
-  Schema.decodeUnknownOption(SessionFailure)(
-    APIError.is(error.cause) ? error.cause.cause : undefined,
+  Option.liftPredicate(error.cause, APIError.is).pipe(
+    Option.flatMap((sdkError) => Schema.decodeUnknownOption(SessionFailure)(sdkError.cause)),
   )
 
 const failure = (reason: XaiFailureReason, message: string): XaiFailure => ({ reason, message })
@@ -87,9 +82,7 @@ export const describeXaiError = (error: XaiSdkError, wording: XaiFeatureWording)
         Match.when(Match.instanceOf(RateLimitError), () =>
           failure("usageLimit", "You reached your Grok usage limit. Try again later."),
         ),
-        Match.when(Match.instanceOf(TimeoutError), () =>
-          failure("network", "xAI took too long to answer. Try again."),
-        ),
+        Match.when(Match.instanceOf(TimeoutError), () => failure("network", "xAI took too long to answer. Try again.")),
         Match.when(Match.instanceOf(APIConnectionError), () =>
           failure("network", "Could not reach xAI. Check your internet connection."),
         ),
@@ -133,6 +126,22 @@ const newClient = (fetch: GrokSession["Service"]["fetch"]) =>
     catch: (cause) => new XaiSdkError({ cause }),
   })
 
+const setNodeVersion = (versions: NodeJS.ProcessVersions, version: string) =>
+  Effect.sync(() => {
+    versions.node = version
+  })
+
+/** Report the SDK's lowest Node version. Gives the version it replaced. */
+const raiseNodeVersion = (versions: NodeJS.ProcessVersions) =>
+  Effect.sync(() => versions.node).pipe(Effect.tap(() => setNodeVersion(versions, SDK_MIN_NODE)))
+
+const newTinycastClient = (versions: NodeJS.ProcessVersions, fetch: GrokSession["Service"]["fetch"]) =>
+  Effect.acquireUseRelease(
+    raiseNodeVersion(versions),
+    () => newClient(fetch),
+    (reported) => setNodeVersion(versions, reported),
+  )
+
 /**
  * Start the SDK client. Tinycast runs extensions in its own engine and reports Node
  * 22.0.0, which fails the SDK's Node 22.13 check in its constructor, though Tinycast
@@ -142,38 +151,20 @@ const newClient = (fetch: GrokSession["Service"]["fetch"]) =>
 const startClient = (fetch: GrokSession["Service"]["fetch"]) =>
   Option.match(tinycastVersions(), {
     onNone: () => newClient(fetch),
-    onSome: (versions) =>
-      Effect.acquireUseRelease(
-        Effect.sync(() => {
-          const reported = versions.node
-          versions.node = SDK_MIN_NODE
-          return reported
-        }),
-        () => newClient(fetch),
-        (reported) =>
-          Effect.sync(() => {
-            versions.node = reported
-          }),
-      ),
-  }).pipe(
-    Effect.mapError(
-      () => new XaiStartError({ message: "The xAI SDK could not start in this app." }),
-    ),
-  )
+    onSome: (versions) => newTinycastClient(versions, fetch),
+  }).pipe(Effect.mapError(() => new XaiStartError({ message: "The xAI SDK could not start in this app." })))
 
 const make = Effect.fn("XaiClient.make")(function* () {
   const session = yield* GrokSession
   // Made on first use, so a host the SDK refuses to start in fails only there.
   const client = yield* Effect.cached(startClient(session.fetch))
-  return XaiClient.of({ client })
+
+  return { client }
 })
 
 /** The `SpaceXAI` client for the signed-in user. Every feature shares one. */
-export class XaiClient extends Context.Service<
-  XaiClient,
-  {
-    readonly client: Effect.Effect<SpaceXAI, XaiStartError>
-  }
->()("grokcast/XaiClient") {
-  static readonly layer = Layer.effect(XaiClient, make())
+export class XaiClient extends Context.Service<XaiClient>()("grokcast/XaiClient", {
+  make: make(),
+}) {
+  static readonly layer = Layer.effect(XaiClient, XaiClient.make)
 }

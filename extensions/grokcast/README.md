@@ -54,7 +54,7 @@ Set these in the command preferences:
 
 **Generate Image** asks for a prompt and makes up to four images with Grok Imagine on your subscription. Pick an aspect ratio and resolution, or leave them at xAI Default. **Edit Image** changes up to three JPEG, PNG, or WebP images with a prompt. It starts with the images selected in Finder, if there are any. With more than one image, call them `<IMAGE_0>`, `<IMAGE_1>`, and so on in the prompt.
 
-Each new image shows in a grid. Copy or paste it, look at it with Quick Look (⌘Y), save it to Downloads (⌘S), edit it again (⌘E), or reuse the prompt (⇧⌘R). **Image History** keeps your last 200 images in the extension's support folder on this Mac, with the same actions. Grokcast does not choose the image model, so xAI's current default and its upgrades apply.
+Each new image shows in a grid. Copy or paste it, look at it with Quick Look (⌘Y), save it to Downloads (⌘S), edit it again (⌘E), or reuse the prompt (⇧⌘R). Press ⇧⌘Y to open **Image History**, which keeps your last 200 images in the extension's support folder on this Mac, with the same actions. Grokcast does not choose the image model, so xAI's current default and its upgrades apply.
 
 ## Video
 
@@ -79,7 +79,7 @@ Set these in the command preferences:
 
 ## Models
 
-**Grok Models** lists the Grok language, image, and video models that xAI offers your account, newest first. The side panel shows each model's version, aliases, inputs and outputs, context length, and reasoning efforts. Grokcast does not show prices, because your subscription does not pay per token. Other commands do not pin a model, so xAI's default and its upgrades apply on their own.
+**Grok Models** lists the Grok language, image, and video models that xAI offers your account, newest first. The side panel shows each model's version, aliases, inputs and outputs, context length, and reasoning efforts. Grokcast does not show prices, because your subscription does not pay per token. Grok Chat uses grok-4.7 unless you pick another model in its preferences. The other commands do not pin a model, so xAI's default and its upgrades apply on their own.
 
 On a language model, **Count Tokens** (⌘T) shows how that model splits a text into tokens and how many there are.
 
@@ -110,7 +110,3 @@ The list shows up to the newest 500 files.
 The tokens stay in Raycast's encrypted token store on your Mac. Grokcast has no server. Requests go straight to `api.x.ai` and count against your subscription's weekly usage.
 
 xAI does not yet offer client registration for third-party apps. Grokcast reuses Grok Build's public OAuth client, the same way Hermes Agent, OpenCode, and others do. If xAI gives this extension its own client ID, set it in the extension preferences.
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).

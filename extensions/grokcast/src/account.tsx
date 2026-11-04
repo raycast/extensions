@@ -40,6 +40,7 @@ type Task = Data.TaggedEnum<{
   SignIn: {}
   SignOut: {}
 }>
+
 const Task = Data.taggedEnum<Task>()
 
 type State = Data.TaggedEnum<{
@@ -50,12 +51,14 @@ type State = Data.TaggedEnum<{
   SigningOut: {}
   Failed: { readonly message: string; readonly retry: Task }
 }>
+
 const State = Data.taggedEnum<State>()
 
 export default function Account(props: LaunchProps) {
   const signInAtLaunch = Schema.decodeUnknownOption(LaunchContext)(props.launchContext).pipe(
     Option.exists((context) => context.signIn),
   )
+
   const [task, setTask] = useState<Task>(() => (signInAtLaunch ? Task.SignIn() : Task.Check()))
   const [state, setState] = useState<State>(State.Checking())
 
@@ -65,11 +68,10 @@ export default function Account(props: LaunchProps) {
       SignIn: () => signIn(setState),
       SignOut: () => signOut(setState),
     })
+
     const fiber = GrokRuntime.runFork(
       program.pipe(
-        Effect.catch((error) =>
-          Effect.sync(() => setState(State.Failed({ message: describe(error), retry: task }))),
-        ),
+        Effect.catch((error) => Effect.sync(() => setState(State.Failed({ message: describe(error), retry: task })))),
         // A defect would otherwise leave the screen on "Checking…" with no way out.
         Effect.catchDefect((defect) =>
           Effect.sync(() => {
@@ -84,14 +86,13 @@ export default function Account(props: LaunchProps) {
         ),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
   }, [task])
 
-  const signInAction = (
-    <Action title="Sign In" icon={Icon.Person} onAction={() => setTask(Task.SignIn())} />
-  )
+  const signInAction = <Action title="Sign In" icon={Icon.Person} onAction={() => setTask(Task.SignIn())} />
 
   return State.$match(state, {
     Checking: () => <Detail isLoading markdown="" metadata={<Status label="Checking…" />} />,
@@ -124,7 +125,7 @@ export default function Account(props: LaunchProps) {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Browser" url={device.browserUrl} />
-            <Action.CopyToClipboard title="Copy Code" content={device.userCode} />
+            <Action.CopyToClipboard title="Copy Code" content={device.userCode} concealed />
           </ActionPanel>
         }
       />
@@ -151,10 +152,7 @@ export default function Account(props: LaunchProps) {
               onNone: () => null,
               onSome: (email) => <Detail.Metadata.Label title="Email" text={email} />,
             })}
-            <Detail.Metadata.Label
-              title="Sign-in Client"
-              text={customClient ? "Custom" : "Grok Build"}
-            />
+            <Detail.Metadata.Label title="Sign-in Client" text={customClient ? "Custom" : "Grok Build"} />
           </Status>
         }
         actions={
@@ -177,12 +175,7 @@ export default function Account(props: LaunchProps) {
     Failed: ({ message, retry }) => (
       <Detail
         markdown={message}
-        metadata={
-          <Status
-            label="Something went wrong"
-            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          />
-        }
+        metadata={<Status label="Something went wrong" icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} />}
         actions={
           <ActionPanel>
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => setTask(retry)} />
@@ -213,15 +206,18 @@ function Status({
 
 const signedIn = Effect.fn("signedIn")(function* (profile: Profile) {
   const clientId = yield* ClientId
+
   return State.SignedIn({ profile, customClient: clientId !== DEFAULT_CLIENT_ID })
 })
 
 const check = Effect.fn("check")(function* (setState: (state: State) => void) {
   const stored = yield* TokenStore.use((store) => store.load)
+
   const next = yield* Option.match(stored, {
     onNone: () => Effect.succeed(State.SignedOut()),
     onSome: (tokens) => signedIn(profileFromIdToken(tokens.idToken)),
   })
+
   setState(next)
 })
 
@@ -230,20 +226,19 @@ const signIn = Effect.fn("signIn")(function* (setState: (state: State) => void) 
   const endpoints = yield* XaiEndpoints.use((xai) => xai.get)
   const clientId = yield* ClientId
   const device = yield* requestDeviceCode(endpoints, clientId)
-  yield* Effect.tryPromise(() => Clipboard.copy(device.userCode))
+  yield* Effect.tryPromise(() => Clipboard.copy(device.userCode, { concealed: true }))
   setState(State.Waiting({ device }))
   yield* Effect.tryPromise(() => open(device.browserUrl))
   const response = yield* pollDeviceToken(endpoints, clientId, device)
   const tokens = toStoredTokens(response, yield* Clock.currentTimeMillis, Option.none())
   yield* TokenStore.use((store) => store.save(tokens))
   setState(yield* signedIn(profileFromIdToken(tokens.idToken)))
-  yield* Effect.tryPromise(() =>
-    showToast({ style: Toast.Style.Success, title: "Signed in to Grok" }),
-  )
+  yield* Effect.tryPromise(() => showToast({ style: Toast.Style.Success, title: "Signed in to Grok" }))
 })
 
 const signOut = Effect.fn("signOut")(function* (setState: (state: State) => void) {
   setState(State.SigningOut())
+
   const toast = yield* GrokSession.use((session) => session.signOut).pipe(
     Effect.as({ style: Toast.Style.Success, title: "Signed out of Grok" }),
     // signOut clears local tokens even when xAI does not confirm the revoke.
@@ -255,6 +250,7 @@ const signOut = Effect.fn("signOut")(function* (setState: (state: State) => void
       }),
     ),
   )
+
   setState(State.SignedOut())
   yield* Effect.tryPromise(() => showToast(toast))
 })

@@ -9,8 +9,6 @@ import {
   Detail,
   Form,
   Icon,
-  launchCommand,
-  LaunchType,
   List,
   showToast,
   Toast,
@@ -45,6 +43,7 @@ import {
   type GrokVoice,
 } from "./lib/voices.ts"
 import type { XaiFailure } from "./lib/xai.ts"
+import { SignInAction } from "./components/launch.tsx"
 
 type State = Data.TaggedEnum<{
   Loading: {}
@@ -54,20 +53,23 @@ type State = Data.TaggedEnum<{
   }
   Failed: { readonly failure: XaiFailure }
 }>
+
 const State = Data.taggedEnum<State>()
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" })
 
 /** What a preview says. */
-const sampleText = (voice: GrokVoice) =>
-  `Hi, I'm ${voice.name}. This is how I sound when Grokcast reads to you.`
+const sampleText = (voice: GrokVoice) => `Hi, I'm ${voice.name}. This is how I sound when Grokcast reads to you.`
 
 /** A message that could not be shown is not worth failing over. */
-const toast = (options: Toast.Options) =>
-  Effect.tryPromise(() => showToast(options)).pipe(Effect.ignore)
+const toast = (options: Toast.Options) => Effect.tryPromise(() => showToast(options)).pipe(Effect.ignore)
 
 const failureToast = (title: string) => (failure: { readonly message: string }) =>
   toast({ style: Toast.Style.Failure, title, message: failure.message })
+
+/** Raycast could not save or read the choice in LocalStorage. */
+const storageFailureToast = (title: string) => () =>
+  toast({ style: Toast.Style.Failure, title, message: "Raycast could not save the change." })
 
 export default function Voices() {
   const [state, setState] = useState<State>(State.Loading())
@@ -75,15 +77,13 @@ export default function Voices() {
 
   useEffect(() => {
     const fiber = GrokRuntime.runFork(
-      Effect.all([
-        VoiceLibrary.use((library) => library.list),
-        ReadAloudVoice.use((voice) => voice.get),
-      ]).pipe(
+      Effect.all([VoiceLibrary.use((library) => library.list), ReadAloudVoice.use((voice) => voice.get)]).pipe(
         Effect.map(([voices, readAloud]) => State.Loaded({ voices, readAloud })),
         Effect.catchTag("VoicesError", (failure) => Effect.succeed(State.Failed({ failure }))),
         Effect.flatMap((next) => Effect.sync(() => setState(next))),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -91,21 +91,19 @@ export default function Voices() {
 
   const reload = () => setAttempt((count) => count + 1)
 
-  const run = (
-    program: Effect.Effect<void, never, ManagedRuntime.ManagedRuntime.Services<typeof GrokRuntime>>,
-  ) => GrokRuntime.runFork(program)
+  const run = (program: Effect.Effect<void, never, ManagedRuntime.ManagedRuntime.Services<typeof GrokRuntime>>) =>
+    GrokRuntime.runFork(program)
 
   const preview = (voice: GrokVoice) =>
     run(
       Effect.gen(function* () {
         yield* toast({ style: Toast.Style.Animated, title: `Getting ${voice.name}'s voice…` })
         const preferences = yield* SpeechPreferences
+
         const speech = yield* Speaker.use((speaker) =>
-          speaker.speak(
-            sampleText(voice),
-            new SpeechSettings({ ...preferences, voice: Option.some(voice.id) }),
-          ),
+          speaker.speak(sampleText(voice), new SpeechSettings({ ...preferences, voice: Option.some(voice.id) })),
         )
+
         yield* SpeechPlayer.use((player) => player.play(speech.audio))
         yield* toast({ style: Toast.Style.Success, title: `Playing ${voice.name}` })
       }).pipe(
@@ -121,10 +119,9 @@ export default function Voices() {
   const useForReadAloud = (voice: GrokVoice) =>
     run(
       ReadAloudVoice.use((chosen) => chosen.set(voice)).pipe(
-        Effect.andThen(
-          toast({ style: Toast.Style.Success, title: `Read Aloud Now Uses ${voice.name}` }),
-        ),
+        Effect.andThen(toast({ style: Toast.Style.Success, title: `Read Aloud Now Uses ${voice.name}` })),
         Effect.andThen(Effect.sync(reload)),
+        Effect.catch(storageFailureToast("Could Not Change the Read Aloud Voice")),
       ),
     )
 
@@ -138,6 +135,7 @@ export default function Voices() {
           }),
         ),
         Effect.andThen(Effect.sync(reload)),
+        Effect.catch(storageFailureToast("Could Not Change the Read Aloud Voice")),
       ),
     )
 
@@ -147,9 +145,23 @@ export default function Voices() {
       message: "This deletes the custom voice at xAI. It cannot be undone.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     })
+
     if (!confirmed) return
     run(
       VoiceLibrary.use((library) => library.remove(voice.id)).pipe(
+        // A deleted voice cannot read aloud, so Read Aloud goes back to its preference.
+        Effect.andThen(
+          ReadAloudVoice.use((chosen) =>
+            chosen.get.pipe(
+              Effect.flatMap((current) =>
+                Effect.when(
+                  chosen.clear.pipe(Effect.catch(storageFailureToast("Could Not Reset Read Aloud"))),
+                  Effect.succeed(Option.exists(current, (picked) => picked.id === voice.id)),
+                ),
+              ),
+            ),
+          ),
+        ),
         Effect.andThen(toast({ style: Toast.Style.Success, title: `Deleted ${voice.name}` })),
         Effect.andThen(Effect.sync(reload)),
         Effect.catchTag("VoicesError", failureToast("Could Not Delete the Voice")),
@@ -169,7 +181,7 @@ export default function Voices() {
         title="New Voice from Audio File"
         icon={Icon.Upload}
         shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-        target={<VoiceForm mode={{ _tag: "FromFile" }} onDone={reload} />}
+        target={<VoiceForm mode={FormMode.FromFile()} onDone={reload} />}
       />
     </>
   )
@@ -194,24 +206,15 @@ export default function Voices() {
     Loaded: ({ voices, readAloud }) => {
       const custom = Arr.filter(voices, (voice) => voice.custom)
       const builtIn = Arr.filter(voices, (voice) => !voice.custom)
-      const isReadAloud = (voice: GrokVoice) =>
-        Option.exists(readAloud, (chosen) => chosen.id === voice.id)
+
+      const isReadAloud = (voice: GrokVoice) => Option.exists(readAloud, (chosen) => chosen.id === voice.id)
+
       const item = (voice: GrokVoice) => (
         <List.Item
           key={voice.id}
           title={voice.name}
           keywords={[voice.id]}
           icon={voice.custom ? Icon.Person : Icon.SpeakerOn}
-          accessories={
-            isReadAloud(voice)
-              ? [
-                  {
-                    tag: { value: "Read Aloud", color: Color.Green },
-                    tooltip: "Read Aloud uses this voice",
-                  },
-                ]
-              : []
-          }
           detail={<VoiceDetail voice={voice} readAloud={isReadAloud(voice)} />}
           actions={
             <ActionPanel>
@@ -246,7 +249,7 @@ export default function Voices() {
                     title="Edit Voice"
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<VoiceForm mode={{ _tag: "Edit", voice }} onDone={reload} />}
+                    target={<VoiceForm mode={FormMode.Edit({ voice })} onDone={reload} />}
                   />
                   <Action
                     title="Delete Voice"
@@ -270,6 +273,7 @@ export default function Voices() {
           }
         />
       )
+
       return (
         <List isShowingDetail={voices.length > 0} searchBarPlaceholder="Search voices">
           <List.EmptyView
@@ -286,18 +290,13 @@ export default function Voices() {
   })
 }
 
-function VoiceDetail({
-  voice,
-  readAloud,
-}: {
-  readonly voice: GrokVoice
-  readonly readAloud: boolean
-}) {
+function VoiceDetail({ voice, readAloud }: { readonly voice: GrokVoice; readonly readAloud: boolean }) {
   const row = (title: string, value: Option.Option<string>) =>
     Option.match(value, {
       onNone: () => null,
       onSome: (text) => <List.Item.Detail.Metadata.Label title={title} text={text} />,
     })
+
   return (
     <List.Item.Detail
       markdown={Option.match(voice.description, {
@@ -307,10 +306,7 @@ function VoiceDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
-          <List.Item.Detail.Metadata.Label
-            title="Kind"
-            text={voice.custom ? "Custom" : "Built-in"}
-          />
+          <List.Item.Detail.Metadata.Label title="Kind" text={voice.custom ? "Custom" : "Built-in"} />
           {row("Language", voice.language)}
           {row("Gender", Option.map(voice.gender, titleCase))}
           {row("Age", Option.map(voice.age, titleCase))}
@@ -340,27 +336,12 @@ const titleCase = (value: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
-function SignInAction() {
-  return (
-    <Action
-      title="Sign in to Grok"
-      icon={Icon.Person}
-      onAction={() =>
-        void launchCommand({
-          name: "account",
-          type: LaunchType.UserInitiated,
-          context: { signIn: true },
-        })
-      }
-    />
-  )
-}
-
 type RecordState = Data.TaggedEnum<{
   Starting: {}
   Recording: { readonly seconds: number; readonly level: number }
   Failed: { readonly message: string }
 }>
+
 const RecordState = Data.taggedEnum<RecordState>()
 
 /** Steps in the level meter. Fewer steps mean fewer redraws. */
@@ -380,11 +361,14 @@ function RecordVoice({ onCreated }: { readonly onCreated: () => void }) {
     const stopped = Effect.callback<void>((resume) => {
       stopRef.current = () => resume(Effect.void)
     })
+
     const shown = { key: "" }
+
     const fiber = GrokRuntime.runFork(
       recordSpeech(stopped, (seconds, level) => {
         if (seconds >= MAX_REFERENCE_SECONDS) stopRef.current()
         const key = `${levelBar(level, METER_STEPS)} ${clockOf(seconds)}`
+
         if (key === shown.key) return
         shown.key = key
         setState(RecordState.Recording({ seconds, level }))
@@ -393,14 +377,13 @@ function RecordVoice({ onCreated }: { readonly onCreated: () => void }) {
           Effect.sync(() =>
             push(
               <VoiceForm
-                mode={{
-                  _tag: "Recorded",
+                mode={FormMode.Recorded({
                   audio: new ReferenceAudio({
                     bytes: wavOf(recording.audio),
                     filename: "recording.wav",
                   }),
                   seconds: recording.seconds,
-                }}
+                })}
                 onDone={onCreated}
               />,
             ),
@@ -411,6 +394,7 @@ function RecordVoice({ onCreated }: { readonly onCreated: () => void }) {
         ),
       ),
     )
+
     return () => {
       GrokRuntime.runFork(Fiber.interrupt(fiber))
     }
@@ -438,10 +422,7 @@ function RecordVoice({ onCreated }: { readonly onCreated: () => void }) {
               icon={{ source: Icon.Microphone, tintColor: Color.Red }}
             />
             <Detail.Metadata.Label title="Level" text={levelBar(level, METER_STEPS)} />
-            <Detail.Metadata.Label
-              title="Length"
-              text={`${clockOf(seconds)} of ${clockOf(MAX_REFERENCE_SECONDS)}`}
-            />
+            <Detail.Metadata.Label title="Length" text={`${clockOf(seconds)} of ${clockOf(MAX_REFERENCE_SECONDS)}`} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Cancel" text="Esc" />
           </Detail.Metadata>
@@ -473,10 +454,16 @@ function RecordVoice({ onCreated }: { readonly onCreated: () => void }) {
   })
 }
 
-type FormMode =
-  | { readonly _tag: "FromFile" }
-  | { readonly _tag: "Recorded"; readonly audio: ReferenceAudio; readonly seconds: number }
-  | { readonly _tag: "Edit"; readonly voice: GrokVoice }
+type FormMode = Data.TaggedEnum<{
+  FromFile: {}
+  Recorded: { readonly audio: ReferenceAudio; readonly seconds: number }
+  Edit: { readonly voice: GrokVoice }
+}>
+
+const FormMode = Data.taggedEnum<FormMode>()
+const isEdit = FormMode.$is("Edit")
+const isRecorded = FormMode.$is("Recorded")
+const isFromFile = FormMode.$is("FromFile")
 
 /** Form values for one choice. An empty string is "Not Set". */
 const NOT_SET = ""
@@ -490,16 +477,14 @@ const textValue = (value: string): Option.Option<string> =>
 /** Make a custom voice from a recording or a file, or change one's labels. */
 function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone: () => void }) {
   const { pop } = useNavigation()
-  const initial = mode._tag === "Edit" ? labelsOf(mode.voice) : VoiceLabels.empty
+  const initial = isEdit(mode) ? labelsOf(mode.voice) : VoiceLabels.empty
   const [saving, setSaving] = useState(false)
   const [nameError, setNameError] = useState<Option.Option<string>>(Option.none())
   const [fileError, setFileError] = useState<Option.Option<string>>(Option.none())
 
   const optionChoices = (values: ReadonlyArray<string>) => [
     <Form.Dropdown.Item key="not-set" value={NOT_SET} title="Not Set" />,
-    ...values.map((value) => (
-      <Form.Dropdown.Item key={value} value={value} title={titleCase(value)} />
-    )),
+    ...values.map((value) => <Form.Dropdown.Item key={value} value={value} title={titleCase(value)} />),
   ]
 
   const submit = (values: {
@@ -514,15 +499,21 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
     readonly files?: ReadonlyArray<string>
   }) => {
     const name = textValue(values.name)
+
     if (Option.isNone(name)) {
       setNameError(Option.some("Enter a name"))
+
       return
     }
+
     const file = Arr.head(values.files ?? [])
-    if (mode._tag === "FromFile" && Option.isNone(file)) {
+
+    if (isFromFile(mode) && Option.isNone(file)) {
       setFileError(Option.some("Choose an audio file"))
+
       return
     }
+
     const labels = new VoiceLabels({
       name,
       description: textValue(values.description),
@@ -533,59 +524,65 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
       useCase: choice(VoiceUseCase, values.useCase),
       tone: choice(VoiceTone, values.tone),
     })
-    const audio: Effect.Effect<ReferenceAudio, { readonly message: string }> =
-      mode._tag === "Recorded"
-        ? Effect.succeed(mode.audio)
-        : Effect.tryPromise({
-            try: async () => {
-              const path = Option.getOrElse(file, () => "")
-              return new ReferenceAudio({
-                bytes: new Uint8Array(await readFile(path)),
-                filename: basename(path),
-              })
-            },
-            catch: () => ({ message: "Could not read the audio file." }),
-          })
-    const program =
-      mode._tag === "Edit"
-        ? VoiceLibrary.use((library) => library.update(mode.voice.id, labels)).pipe(
-            Effect.andThen(
-              toast({
-                style: Toast.Style.Success,
-                title: `Saved ${Option.getOrElse(name, () => "")}`,
-              }),
-            ),
-            Effect.catchTag("VoicesError", failureToast("Could Not Save the Voice")),
-          )
-        : audio.pipe(
-            Effect.tap(() => toast({ style: Toast.Style.Animated, title: "Making the voice…" })),
-            Effect.flatMap((clip) => VoiceLibrary.use((library) => library.create(clip, labels))),
-            Effect.flatMap((voice) =>
-              toast({
-                style: Toast.Style.Success,
-                title: `Made ${voice.name}`,
-                message: "Preview it, or press ⌘U to use it for Read Aloud.",
-              }),
-            ),
-            Effect.catch(failureToast("Could Not Make the Voice")),
-          )
+
+    const audio: Effect.Effect<ReferenceAudio, { readonly message: string }> = isRecorded(mode)
+      ? Effect.succeed(mode.audio)
+      : Effect.tryPromise({
+          try: async () => {
+            const path = Option.getOrElse(file, () => "")
+
+            return new ReferenceAudio({
+              bytes: new Uint8Array(await readFile(path)),
+              filename: basename(path),
+            })
+          },
+          catch: () => ({ message: "Could not read the audio file." }),
+        })
+
+    const program = isEdit(mode)
+      ? VoiceLibrary.use((library) => library.update(mode.voice.id, labels)).pipe(
+          Effect.andThen(
+            toast({
+              style: Toast.Style.Success,
+              title: `Saved ${Option.getOrElse(name, () => "")}`,
+            }),
+          ),
+          Effect.tapError(failureToast("Could Not Save the Voice")),
+        )
+      : audio.pipe(
+          Effect.tap(() => toast({ style: Toast.Style.Animated, title: "Making the voice…" })),
+          Effect.flatMap((clip) => VoiceLibrary.use((library) => library.create(clip, labels))),
+          Effect.flatMap((voice) =>
+            toast({
+              style: Toast.Style.Success,
+              title: `Made ${voice.name}`,
+              message: "Preview it, or press ⌘U to use it for Read Aloud.",
+            }),
+          ),
+          Effect.tapError(failureToast("Could Not Make the Voice")),
+        )
+
     setSaving(true)
+    // The form, and a recording, stay open after a failure so the user can try again.
     GrokRuntime.runFork(
       program.pipe(
-        Effect.andThen(
-          Effect.sync(() => {
-            setSaving(false)
-            onDone()
-            // A recording opened this form from the recorder, so go back past it too.
-            pop()
-            if (mode._tag === "Recorded") pop()
-          }),
-        ),
+        Effect.matchEffect({
+          onFailure: () => Effect.sync(() => setSaving(false)),
+          onSuccess: () =>
+            Effect.sync(() => {
+              setSaving(false)
+              onDone()
+              // A recording opened this form from the recorder, so go back past it too.
+              pop()
+
+              if (isRecorded(mode)) pop()
+            }),
+        }),
       ),
     )
   }
 
-  const title = mode._tag === "Edit" ? "Edit Voice" : "New Voice"
+  const title = isEdit(mode) ? "Edit Voice" : "New Voice"
 
   return (
     <Form
@@ -593,15 +590,11 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
       navigationTitle={title}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={mode._tag === "Edit" ? "Save Voice" : "Make Voice"}
-            icon={Icon.Check}
-            onSubmit={submit}
-          />
+          <Action.SubmitForm title={isEdit(mode) ? "Save Voice" : "Make Voice"} icon={Icon.Check} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      {mode._tag === "FromFile" ? (
+      {isFromFile(mode) ? (
         <Form.FilePicker
           id="files"
           title="Audio"
@@ -612,9 +605,7 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
           info={`A clip of one person speaking, up to ${MAX_REFERENCE_SECONDS} seconds, such as WAV or MP3.`}
         />
       ) : null}
-      {mode._tag === "Recorded" ? (
-        <Form.Description title="Audio" text={`Your recording (${clockOf(mode.seconds)})`} />
-      ) : null}
+      {isRecorded(mode) ? <Form.Description title="Audio" text={`Your recording (${clockOf(mode.seconds)})`} /> : null}
       <Form.TextField
         id="name"
         title="Name"
@@ -630,18 +621,10 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
         defaultValue={Option.getOrElse(initial.description, () => "")}
       />
       <Form.Separator />
-      <Form.Dropdown
-        id="gender"
-        title="Gender"
-        defaultValue={Option.getOrElse(initial.gender, () => NOT_SET)}
-      >
+      <Form.Dropdown id="gender" title="Gender" defaultValue={Option.getOrElse(initial.gender, () => NOT_SET)}>
         {optionChoices(VoiceGender.literals)}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="age"
-        title="Age"
-        defaultValue={Option.getOrElse(initial.age, () => NOT_SET)}
-      >
+      <Form.Dropdown id="age" title="Age" defaultValue={Option.getOrElse(initial.age, () => NOT_SET)}>
         {optionChoices(VoiceAge.literals)}
       </Form.Dropdown>
       <Form.TextField
@@ -656,18 +639,10 @@ function VoiceForm({ mode, onDone }: { readonly mode: FormMode; readonly onDone:
         placeholder="Optional, such as en"
         defaultValue={Option.getOrElse(initial.language, () => "")}
       />
-      <Form.Dropdown
-        id="useCase"
-        title="Use"
-        defaultValue={Option.getOrElse(initial.useCase, () => NOT_SET)}
-      >
+      <Form.Dropdown id="useCase" title="Use" defaultValue={Option.getOrElse(initial.useCase, () => NOT_SET)}>
         {optionChoices(VoiceUseCase.literals)}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="tone"
-        title="Tone"
-        defaultValue={Option.getOrElse(initial.tone, () => NOT_SET)}
-      >
+      <Form.Dropdown id="tone" title="Tone" defaultValue={Option.getOrElse(initial.tone, () => NOT_SET)}>
         {optionChoices(VoiceTone.literals)}
       </Form.Dropdown>
     </Form>

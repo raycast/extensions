@@ -21,6 +21,9 @@ export class PlayingSpeech extends Schema.Class<PlayingSpeech>("PlayingSpeech")(
   pid: Schema.Int,
 }) {}
 
+/** A call to the player: its value, or an error of type `E`. */
+type PlayerCall<A, E = never> = ReturnType<typeof Effect.fromResult<A, E>>
+
 /**
  * Starts and stops the audio player process. The extension writes the audio to a
  * file and plays it with macOS `afplay`.
@@ -29,10 +32,10 @@ export class AudioLauncher extends Context.Service<
   AudioLauncher,
   {
     /** Start playing MP3 audio in a process that outlives the command. Gives its process ID. */
-    readonly play: (audio: Uint8Array) => Effect.Effect<number, PlaybackError>
+    readonly play: (audio: Uint8Array) => PlayerCall<number, PlaybackError>
     /** True when `pid` is still a player this extension started. */
-    readonly isPlaying: (pid: number) => Effect.Effect<boolean>
-    readonly stop: (pid: number) => Effect.Effect<void>
+    readonly isPlaying: (pid: number) => PlayerCall<boolean>
+    readonly stop: (pid: number) => PlayerCall<void>
   }
 >()("grokcast/AudioLauncher") {}
 
@@ -40,31 +43,28 @@ const makePlayer = Effect.fn("SpeechPlayer.make")(function* () {
   const launcher = yield* AudioLauncher
   const store = KeyValueStore.toSchemaStore(yield* KeyValueStore.KeyValueStore, PlayingSpeech)
 
+  /** The speech in `record`, while its player still runs. */
+  const stillPlaying = (record: PlayingSpeech) =>
+    launcher.isPlaying(record.pid).pipe(Effect.map((alive) => Option.liftPredicate(record, () => alive)))
+
   /** A missing or unreadable record counts as nothing playing. */
   const playing = store.get(KEY).pipe(
     Effect.catch(() => Effect.succeedNone),
-    Effect.flatMap((record) =>
-      Option.match(record, {
-        onNone: () => Effect.succeedNone,
-        onSome: (current) =>
-          launcher
-            .isPlaying(current.pid)
-            .pipe(Effect.map((alive) => Option.filter(record, () => alive))),
-      }),
-    ),
+    Effect.map(Option.map(stillPlaying)),
+    Effect.flatMap(Effect.transposeOption),
+    Effect.map(Option.flatten),
   )
 
   const forget = store.remove(KEY).pipe(Effect.ignore)
 
   /** Stop the speech that is playing. False when nothing was playing. */
-  const stop = Effect.gen(function* () {
-    const current = yield* playing
-    yield* forget
-    return yield* Option.match(current, {
-      onNone: () => Effect.succeed(false),
-      onSome: (speech) => launcher.stop(speech.pid).pipe(Effect.as(true)),
-    })
-  }).pipe(Effect.withSpan("SpeechPlayer.stop"))
+  const stop = playing.pipe(
+    Effect.tap(() => forget),
+    Effect.map(Option.map((speech) => launcher.stop(speech.pid))),
+    Effect.flatMap(Effect.transposeOption),
+    Effect.map(Option.isSome),
+    Effect.withSpan("SpeechPlayer.stop"),
+  )
 
   /** Play MP3 audio in the background, after stopping any speech that is playing. */
   const play = Effect.fn("SpeechPlayer.play")(function* (audio: Uint8Array) {
@@ -74,16 +74,11 @@ const makePlayer = Effect.fn("SpeechPlayer.make")(function* () {
     yield* store.set(KEY, new PlayingSpeech({ pid })).pipe(Effect.ignore)
   })
 
-  return SpeechPlayer.of({ isPlaying: Effect.map(playing, Option.isSome), play, stop })
+  return { isPlaying: Effect.map(playing, Option.isSome), play, stop }
 })
 
-export class SpeechPlayer extends Context.Service<
-  SpeechPlayer,
-  {
-    readonly isPlaying: Effect.Effect<boolean>
-    readonly play: (audio: Uint8Array) => Effect.Effect<void, PlaybackError>
-    readonly stop: Effect.Effect<boolean>
-  }
->()("grokcast/SpeechPlayer") {
-  static readonly layer = Layer.effect(SpeechPlayer, makePlayer())
+export class SpeechPlayer extends Context.Service<SpeechPlayer>()("grokcast/SpeechPlayer", {
+  make: makePlayer(),
+}) {
+  static readonly layer = Layer.effect(SpeechPlayer, SpeechPlayer.make)
 }
