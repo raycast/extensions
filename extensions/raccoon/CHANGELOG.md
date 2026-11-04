@@ -1,6 +1,6 @@
 # Raccoon Changelog
 
-## [Docs] - {PR_MERGE_DATE}
+## [Docs] - 2026-11-04
 
 - Add a link to the issue tracker in the README.
 
