@@ -30,8 +30,8 @@ export class XcodeProjectService {
     const excludedXcodeProjectPaths = XcodeProjectService.excludedXcodeProjectPaths();
     // Initialize regular expression
     const regularExpression = /^(.*?)\s+kMDItemLastUsedDate\s+=\s+(.*)$/;
-    // Initialize Xcode project array
-    const xcodeProjects: XcodeProject[] = [];
+    // Initialize Xcode projects by file path
+    const xcodeProjectsByFilePath = new Map<string, XcodeProject>();
     // For each raw line of spotlight query output
     for (const rawLine of spotlightQueryOutput.stdout.trim().split("\n")) {
       // Trim the raw line
@@ -68,6 +68,18 @@ export class XcodeProjectService {
         // Continue with next line
         continue;
       }
+      // Use the project or playground containing the path if it is an embedded workspace
+      path = XcodeProjectService.embeddedWorkspaceContainerPath(path) ?? path;
+      // Check if Xcode project has already been found
+      const existingXcodeProject = xcodeProjectsByFilePath.get(path);
+      if (existingXcodeProject) {
+        // Keep the most recent last used date
+        if (lastUsed && (!existingXcodeProject.lastUsed || lastUsed > existingXcodeProject.lastUsed)) {
+          existingXcodeProject.lastUsed = lastUsed;
+        }
+        // Continue with next line
+        continue;
+      }
       // Decode Xcode project
       const xcodeProject = XcodeProjectService.decodeXcodeProject(path, lastUsed);
       // Check if Xcode project could not be decoded from path
@@ -75,9 +87,11 @@ export class XcodeProjectService {
         // Continue with next line
         continue;
       }
-      // Append Xcode project
-      xcodeProjects.push(xcodeProject);
+      // Store Xcode project
+      xcodeProjectsByFilePath.set(path, xcodeProject);
     }
+    // Initialize Xcode project array
+    const xcodeProjects = [...xcodeProjectsByFilePath.values()];
     // Append Xcode projects located in git worktrees, which are typically
     // stored in hidden directories that are not indexed by Spotlight
     xcodeProjects.push(...XcodeProjectService.gitWorktreeXcodeProjects(xcodeProjects, excludedXcodeProjectPaths));
@@ -99,6 +113,23 @@ export class XcodeProjectService {
       path.includes("/Library/Autosave Information") ||
       excludedXcodeProjectPaths.some((excludedPath) => path.startsWith(excludedPath))
     );
+  }
+
+  /**
+   * Returns the path of the Xcode Project or Swift Playground containing the given path
+   * if it is an embedded workspace, e.g. "MyPlayground.playground/playground.xcworkspace".
+   * @param path The Xcode Project path
+   */
+  private static embeddedWorkspaceContainerPath(path: string): string | undefined {
+    if (Path.extname(path) !== `.${XcodeProjectType.workspace}`) {
+      return undefined;
+    }
+    const containerPath = Path.dirname(path);
+    return [`.${XcodeProjectType.project}`, `.${XcodeProjectType.swiftPlayground}`].includes(
+      Path.extname(containerPath)
+    )
+      ? containerPath
+      : undefined;
   }
 
   /**
@@ -324,12 +355,15 @@ export class XcodeProjectService {
     keywords.push(name);
     // Filter out duplicates and empty keywords
     keywords = [...new Set(keywords.filter(Boolean))];
+    // Initialize the directory path
+    const directoryPath = Path.dirname(xcodeProjectPath);
     // Return XcodeProject
     return {
       name: name,
       type: fileExtension,
-      directoryPath: Path.dirname(xcodeProjectPath),
+      directoryPath: directoryPath,
       filePath: xcodeProjectPath,
+      gitRootDirectoryPath: XcodeProjectService.gitRepository(directoryPath)?.rootDirectory,
       lastUsed: lastUsed,
       keywords: keywords.reverse(),
     };
