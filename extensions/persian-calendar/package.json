@@ -13,32 +13,34 @@
     "Productivity"
   ],
   "license": "MIT",
-
-"commands": [
-  {
-    "name": "persian-calendar",
-    "title": "Persian Calendar",
-    "subtitle": "Jalali Monthly Calendar",
-    "description": "Browse Persian calendar months.",
-    "mode": "view"
-  },
-  {
-    "name": "convert-date",
-    "title": "Convert Date",
-    "subtitle": "Jalali ↔ Gregorian",
-    "description": "Convert Persian and Gregorian dates.",
-    "mode": "view"
-  },
-  {
-    "name": "today-date",
-    "title": "چندمه",
-    "subtitle": "نمایش تاریخ امروز",
-    "description": "Show today's Persian date.",
-    "mode": "no-view",
-    "interval": "10m",
-    "keywords": ["امروز", "تاریخ امروز"]
-  }
-],
+  "commands": [
+    {
+      "name": "persian-calendar",
+      "title": "Persian Calendar",
+      "subtitle": "Jalali Monthly Calendar",
+      "description": "Browse Persian calendar months.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-date",
+      "title": "Convert Date",
+      "subtitle": "Jalali ↔ Gregorian",
+      "description": "Convert Persian and Gregorian dates.",
+      "mode": "view"
+    },
+    {
+      "name": "today-date",
+      "title": "چندمه",
+      "subtitle": "نمایش تاریخ امروز",
+      "description": "Show today's Persian date.",
+      "mode": "no-view",
+      "interval": "10m",
+      "keywords": [
+        "امروز",
+        "تاریخ امروز"
+      ]
+    }
+  ],
   "tools": [],
   "dependencies": {
     "@raycast/api": "^2.8.2",
@@ -47,8 +49,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
     "eslint": "^10.5.0",
     "prettier": "^3.8.5",
     "typescript": "^6.0.3"
