@@ -171,7 +171,10 @@ function UnreadNotifications() {
           <MenuBarExtra.Item
             title="Mark All as Read"
             icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "i" },
+              Windows: { modifiers: ["ctrl"], key: "i" },
+            }}
             onAction={markAllNotificationsAsRead}
           />
         ) : null}
@@ -185,7 +188,10 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "," },
+            Windows: { modifiers: ["ctrl"], key: "," },
+          }}
           onAction={openCommandPreferences}
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />

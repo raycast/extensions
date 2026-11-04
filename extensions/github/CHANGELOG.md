@@ -2,7 +2,7 @@
 
 ## [Windows Action Shortcuts] - {PR_MERGE_DATE}
 
-- Support Windows shortcuts for actions, submenus, and toast actions.
+- Support Windows shortcuts for actions, submenus, and toast actions, and align macOS bindings with Raycast's standard action shortcuts where they match.
 
 ## [Create Release and Dispatch Workflow Commands] - 2026-10-31
 
