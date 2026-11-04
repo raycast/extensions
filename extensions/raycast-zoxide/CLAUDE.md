@@ -2,45 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Build & Development Commands
-
-- `npm run build` — Build the extension (`ray build`)
-- `npm run dev` — Run in development mode (`ray develop`)
-- `npm run lint` — Lint the codebase (`ray lint`)
-- `npm run fix-lint` — Auto-fix lint issues (`ray lint --fix`)
-- `npm run publish` — Publish to Raycast Store
-
-No test framework is configured.
-
 ## Architecture
 
 This is a **Raycast extension** that integrates with [zoxide](https://github.com/ajeetdsouza/zoxide) (a smarter `cd` command) and [fzf](https://github.com/junegunn/fzf) for fuzzy filtering. macOS only.
 
-### Commands (entry points in `src/`)
+No test framework is configured.
 
-- **`search-directories.tsx`** — Main search view. Queries zoxide for all scored directories, pipes results through fzf for fuzzy filtering, and displays matches. Falls back to Spotlight search when no results are found.
-- **`add-from-finder.tsx`** — No-view command. Gets the selected/open folder from Finder via AppleScript and adds it to zoxide's database.
+## Gotchas
 
-### Key patterns
-
-- **Hooks** (`src/hooks/`) wrap CLI tools using `useExec` from `@raycast/utils`:
-  - `useZoxide` — runs `zoxide <command>` with correct PATH
-  - `useFzf` — runs `fzf --filter` against piped input (zoxide output)
-  - `useSpotlight` — runs `mdfind` for directory search fallback
-
-- **Path handling** (`src/utils/path-helpers.ts`):
-  - `pathFor(command)` builds the `PATH` env var, prepending user-configured additional paths (from preferences) to defaults like `/opt/homebrew/bin`
-  - `makeFriendly` / `makeUnfriendly` swap system paths for display names (e.g., iCloud Drive path ↔ "iCloud Drive", `$HOME` ↔ `~`)
-
-- **Shell injection prevention** (`src/utils/misc.ts`): `base64ShellSanitize` encodes user input as base64 and decodes it inline in the shell command, avoiding direct string interpolation.
-
-### Import aliases (configured in `tsconfig.json`)
-
-- `@components/*` → `src/components/*`
-- `@hooks/*` → `src/hooks/*`
-- `@utils/*` → `src/utils/*`
-
-### Preferences (defined in `package.json`)
-
-- `open-in` — Application picker for opening directories (default: Finder)
-- `addl-paths` — Additional `PATH` directories for finding zoxide/fzf binaries
+- **No shell for zoxide/fzf**: all zoxide commands live in `src/utils/zoxide.ts` and run the binary via `execFile` (fzf via `useExec(file, args)`), so user input is passed as arguments and needs no escaping. PATH comes from `pathFor()` (honors the additional path directories preference), not the shell.
+- **Shell injection prevention** (`src/utils/misc.ts`): `base64ShellSanitize` encodes user input as base64 and decodes it inline in the shell command. Still required where a shell is used (currently only Spotlight); prefer the no-shell pattern above for new commands.
+- **Score bump on open**: open actions are `Action.Open`/`Action.OpenWith` with `onOpen` calling the synchronous `addToZoxide`. It must stay synchronous — opening the target tears the command down before async work finishes. `onOpen` with `application` set requires Raycast 2.11+.
