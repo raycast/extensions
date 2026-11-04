@@ -1,6 +1,6 @@
 # Mercury Changelog
 
-## [Add Account and Transaction Action Shortcuts] - {PR_MERGE_DATE}
+## [Add Account and Transaction Action Shortcuts] - 2026-11-04
 
 - Added the standard Raycast Open shortcut to Open in Browser for bank accounts
 - Added ⌘⇧U to Update Token for the selected Mercury account
