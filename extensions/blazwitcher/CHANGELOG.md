@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-04
 
 - Search Chrome tabs, bookmarks, and history with Chinese, Pinyin, initials, and English.
 - Combine domains and space-separated words, with optional full-URL and strict search modes.
