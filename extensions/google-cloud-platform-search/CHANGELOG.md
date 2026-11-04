@@ -1,6 +1,6 @@
 # Google Cloud Platform Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-11-04
 
 - Render at most 100 projects to prevent the command from running out of memory.
 
