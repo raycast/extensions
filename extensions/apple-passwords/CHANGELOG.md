@@ -1,6 +1,6 @@
 # Apple Passwords Changelog
 
-## [Fixed] - {PR_MERGE_DATE}
+## [Fixed] - 2026-11-04
 
 - Detect the active tab in Dia so matching passwords are found automatically.
 
