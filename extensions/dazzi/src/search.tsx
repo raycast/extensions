@@ -13,6 +13,7 @@ import { homedir } from "node:os";
 import { useRef, useState } from "react";
 import { askArgs, openArgs, retrieveArgs, retrieveCliPath, validateQuestion } from "./lib/dazzi";
 import { runLauncher } from "./lib/launch";
+import { detailMarkdown } from "./lib/markdown";
 import { type Hit, type HitKind, parseRetrieveOutput, type RetrieveResult } from "./lib/retrieve";
 import { DazziNotFoundError, resolveDazziApp, run } from "./lib/runtime";
 
@@ -41,6 +42,8 @@ async function search(query: string, topK: number, signal: AbortSignal | undefin
     timeoutMs: RETRIEVE_TIMEOUT_MS,
     signal,
   });
+  // The program never ran to its own exit (missing, not executable, out of time): say why, not "no results".
+  if (result.failure !== undefined) return { ok: false, error: `${result.failure.message} (${result.failure.code})` };
   // The CLI prints its JSON (including `ok: false` errors) on stdout; stderr carries progress and warnings. A crash
   // leaves stdout empty and ends stderr with Node's version footer, so the first error line is the useful one.
   const parsed = parseRetrieveOutput(result.stdout, homedir());
@@ -52,12 +55,6 @@ async function search(query: string, topK: number, signal: AbortSignal | undefin
     return { ok: false, error: lines.find((line) => /error/iu.test(line)) ?? lines[0] ?? parsed.error };
   }
   return parsed;
-}
-
-function detailMarkdown(hit: Hit): string {
-  const heading = hit.location === undefined ? `### ${hit.title}` : `### ${hit.title}\n\n_${hit.location}_`;
-  const body = hit.content.trim().length === 0 ? "_No preview_" : hit.content.trim();
-  return `${heading}\n\n${body}`;
 }
 
 function HitActions({ hit, query }: { hit: Hit; query: string }) {

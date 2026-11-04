@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { type ExecFileException, execFile } from "node:child_process";
 import { access, constants } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dazziAppCandidates, launcherPath, toolEnv } from "./dazzi";
@@ -12,10 +12,28 @@ export class DazziNotFoundError extends Error {
   }
 }
 
+/** Why a program did not run to its own exit: the OS refused to start it, it was killed, or it ran out of time. */
+export interface RunFailure {
+  /** `ENOENT`, `EACCES`, `ETIMEDOUT`, a signal name such as `SIGSEGV`, or whatever other code Node reported. */
+  readonly code: string;
+  readonly message: string;
+}
+
 export interface RunResult {
+  /** The program's exit status; `null` when it never exited on its own, and then `failure` says why. */
   readonly status: number | null;
   readonly stdout: string;
   readonly stderr: string;
+  readonly failure?: RunFailure;
+}
+
+function describeFailure(error: ExecFileException, timeoutMs: number) {
+  if (error.killed === true && error.signal === "SIGTERM") {
+    return { code: "ETIMEDOUT", message: `Timed out after ${timeoutMs / 1000} seconds` };
+  }
+  const reason = error.message.split("\n")[0] ?? "";
+  const code = typeof error.code === "string" ? error.code : (error.signal ?? "UNKNOWN");
+  return { code, message: reason.length > 0 ? reason : `The program stopped (${code})` };
 }
 
 /** The installed Dazzi.app: the first candidate that ships an executable `dazzi` launcher. */
@@ -55,8 +73,13 @@ export function run(
         reject(error);
         return;
       }
-      const code = error === null ? 0 : typeof error.code === "number" ? error.code : null;
-      resolve({ status: code, stdout, stderr });
+      if (error === null) {
+        resolve({ status: 0, stdout, stderr });
+      } else if (typeof error.code === "number") {
+        resolve({ status: error.code, stdout, stderr });
+      } else {
+        resolve({ status: null, stdout, stderr, failure: describeFailure(error, options.timeoutMs) });
+      }
     },
   );
   return promise;

@@ -21,6 +21,14 @@ export async function runLauncher(args: readonly string[], success: string): Pro
     return;
   }
   const result = await run(app, launcherPath(app), args, { timeoutMs: 30_000 });
+  if (result.failure !== undefined) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Dazzi did not take the request",
+      message: `${result.failure.message} (${result.failure.code})`,
+    });
+    return;
+  }
   const outcome = launcherOutcome(result.status, result.stderr);
   if (outcome.kind === "ok") {
     await closeMainWindow();
