@@ -1,5 +1,10 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Folklore MCP] - {PR_MERGE_DATE}
+
+- Add Folklore MCP 1.7.0 with direct HTTP in Raycast and a local proxy fallback for other clients.
+- Describe the eleven tools, public-data scope and qualified professional review requirement.
+
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
