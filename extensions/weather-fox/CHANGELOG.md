@@ -1,6 +1,6 @@
 # Weather Fox Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-04
 
 - Current conditions, 24-hour temperature curve, and 7 or 16-day forecast with hand-drawn SVG hero scenes
 - Today view with rain nowcast (15-minute precipitation) and the next 10 hours
