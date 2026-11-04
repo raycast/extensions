@@ -76,9 +76,7 @@ export function SimilarPerfumes({ perfume }: { perfume: PerfumeMatch }) {
         <List.Item
           key={`${n.name}-${n.house}`}
           title={n.name}
-          subtitle={n.house}
           keywords={[n.house, ...(n.family ? [n.family] : [])]}
-          accessories={n.family ? [{ tag: n.family }] : []}
           detail={
             <List.Item.Detail
               markdown={`# ${n.name}\n\n_${n.house}_\n\n${n.difference ?? ""}`}
@@ -126,7 +124,11 @@ export function MaterialDetail({ name, fallbackUrl }: { name: string; fallbackUr
             {m.naturalOrSynthetic && <Detail.Metadata.Label title="Origin Type" text={cap(m.naturalOrSynthetic)} />}
             {m.origin && <Detail.Metadata.Label title="Origin" text={m.origin} />}
             {m.aliases.length > 0 && (
-              <Detail.Metadata.Label title="Also Called" text={m.aliases.slice(0, 4).join(", ")} />
+              <Detail.Metadata.TagList title="Also Called">
+                {m.aliases.slice(0, 4).map((a) => (
+                  <Detail.Metadata.TagList.Item key={a} text={a} />
+                ))}
+              </Detail.Metadata.TagList>
             )}
           </Detail.Metadata>
         )
