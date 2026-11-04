@@ -1,8 +1,10 @@
 # Zen Changelog
 
-## [Fix Windows New Tab Search] - {PR_MERGE_DATE}
+## [Fix New Tab Search and Windows History] - {PR_MERGE_DATE}
 
 - Fixed **New Tab** searches on Windows: a query with several words no longer opens a separate tab for each word, and searching with the **Browser Default** search engine no longer fails with a PowerShell error.
+- Fixed searches with a chosen search engine cutting the query off at `&` or `#`, or turning `+` into a space: the query is now URL-encoded.
+- Fixed opening a history entry on Windows when its URL contains `$`: the URL is now passed to PowerShell as a literal, so it can no longer be expanded or run as PowerShell code.
 
 ## [Fix] - 2026-09-19
 

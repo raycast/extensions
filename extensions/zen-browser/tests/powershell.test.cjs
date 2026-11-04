@@ -16,7 +16,7 @@ function loadModule() {
   return exports;
 }
 
-const { psLiteral, windowsArg, newTabPowerShellScript, searchPowerShellScript } = loadModule();
+const { psLiteral, windowsArg, newTabPowerShellScript, openUrlPowerShellScript } = loadModule();
 
 test("psLiteral wraps values in single quotes and doubles embedded single quotes", () => {
   assert.equal(psLiteral("plain"), "'plain'");
@@ -74,24 +74,24 @@ test("new-tab query starting with - or / gets a leading space so Zen does not re
   assert.equal(newTabPowerShellScript("/r/rust"), 'Start-Process "zen" -ArgumentList \'-search " /r/rust"\'');
 });
 
-test("explicit-engine script passes prefix and query as one quoted argument", () => {
+test("open-url script passes the URL as one quoted argument", () => {
   assert.equal(
-    searchPowerShellScript("https://google.com/search?q=", "two words"),
-    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q=two words"\'',
+    openUrlPowerShellScript("https://google.com/search?q="),
+    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q="\'',
   );
   assert.equal(
-    searchPowerShellScript("https://google.com/search?q=", undefined),
-    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q="\'',
+    openUrlPowerShellScript(`https://google.com/search?q=${encodeURIComponent("tom & jerry #1 c++")}`),
+    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q=tom%20%26%20jerry%20%231%20c%2B%2B"\'',
   );
 });
 
-test("explicit-engine query containing a subexpression or quotes is not evaluated", () => {
+test("open-url script does not evaluate $ expressions or quotes in a URL", () => {
   assert.equal(
-    searchPowerShellScript("https://google.com/search?q=", "$(calc)"),
-    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q=$(calc)"\'',
+    openUrlPowerShellScript("https://example.com/?a=$(calc)&b=$env:USERNAME"),
+    'Start-Process "zen" -ArgumentList \'"https://example.com/?a=$(calc)&b=$env:USERNAME"\'',
   );
   assert.equal(
-    searchPowerShellScript("https://google.com/search?q=", "a\"b'c"),
-    'Start-Process "zen" -ArgumentList \'"https://google.com/search?q=a\\"b\'\'c"\'',
+    openUrlPowerShellScript("https://example.com/a\"b'c"),
+    'Start-Process "zen" -ArgumentList \'"https://example.com/a\\"b\'\'c"\'',
   );
 });

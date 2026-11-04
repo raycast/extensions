@@ -19,6 +19,6 @@ export function newTabPowerShellScript(query?: string): string {
   return `Start-Process "zen" -ArgumentList ${psLiteral(`-search ${windowsArg(term)}`)}`;
 }
 
-export function searchPowerShellScript(prefix: string, query?: string): string {
-  return `Start-Process "zen" -ArgumentList ${psLiteral(windowsArg(`${prefix}${query ?? ""}`))}`;
+export function openUrlPowerShellScript(url: string): string {
+  return `Start-Process "zen" -ArgumentList ${psLiteral(windowsArg(url))}`;
 }
