@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add deAPI MCP Server] - {PR_MERGE_DATE}
+
+- Add deAPI to the official registry: image, video, audio and transcription tools on open-source models, each with a matching price tool, plus balance, model list and job status. 39 tools. Hosted Streamable HTTP server at https://mcp.deapi.ai/mcp through `mcp-remote`, with the deAPI API key sent as an `Authorization: Bearer` header.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
