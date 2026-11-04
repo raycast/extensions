@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { syncPreferences } from "../core/config";
+import { ExtensionPreferences, syncPreferences } from "../core/config";
 import { installCli } from "../core/install";
 import { CLI_PATH } from "../core/paths";
 import { Config } from "../core/types";
@@ -9,7 +9,7 @@ import { Config } from "../core/types";
 /** Mirror native preferences for the hook CLI and background collector. */
 export function syncConfig(): Config {
   return syncPreferences(
-    getPreferenceValues<Preferences>(),
+    getPreferenceValues<ExtensionPreferences>(),
     `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}`,
   );
 }
