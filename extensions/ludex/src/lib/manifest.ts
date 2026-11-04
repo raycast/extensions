@@ -299,17 +299,19 @@ async function runUpdate(onProgress?: (msg: string) => void): Promise<void> {
 
 /**
  * Loads the index, updating it first when it is older than 7 days or `force` is set.
- * @remarks If the update fails and an older index exists, that index is returned and a toast says it may be outdated.
+ * @remarks If the update fails and an older index exists, that index is returned with `outdated` set and a toast says so.
  */
-export async function loadManifest(
+export async function loadManifestResult(
   onProgress?: (msg: string) => void,
   force = false,
-): Promise<ManifestIndex> {
+): Promise<{ manifest: ManifestIndex; outdated: boolean }> {
+  let outdated = false;
   if (force || !isCacheValid() || !fs.existsSync(INDEX_FILE)) {
     try {
       await updateManifest(onProgress);
     } catch (err) {
       if (!fs.existsSync(INDEX_FILE)) throw err;
+      outdated = true;
       const reason = err instanceof Error ? err.message : String(err);
       await showFailureToast(err, {
         title: "Could not update the game database",
@@ -320,7 +322,14 @@ export async function loadManifest(
 
   onProgress?.("Loading game database...");
   const json = await fs.promises.readFile(INDEX_FILE, "utf8");
-  return JSON.parse(json) as ManifestIndex;
+  return { manifest: JSON.parse(json) as ManifestIndex, outdated };
+}
+
+export async function loadManifest(
+  onProgress?: (msg: string) => void,
+  force = false,
+): Promise<ManifestIndex> {
+  return (await loadManifestResult(onProgress, force)).manifest;
 }
 
 export function refreshManifest(

@@ -14,7 +14,7 @@ import { type ReactNode, useRef, useState } from "react";
 import { detectInstalledGames } from "./lib/game-detector";
 import { gameIcon } from "./lib/game-icon";
 import { launchGame } from "./lib/launcher";
-import { loadManifest } from "./lib/manifest";
+import { loadManifestResult } from "./lib/manifest";
 import { matchGames } from "./lib/matcher";
 import { withProgressToast } from "./lib/progress-toast";
 import type { GameWithPaths, ResolvedPath, Store } from "./lib/types";
@@ -39,12 +39,15 @@ async function loadGames(
   progress: (msg: string) => void,
   forceDatabase: boolean,
   forceInstalled: boolean,
-): Promise<GameWithPaths[]> {
-  const manifest = await loadManifest(progress, forceDatabase);
+): Promise<{ games: GameWithPaths[]; outdated: boolean }> {
+  const { manifest, outdated } = await loadManifestResult(
+    progress,
+    forceDatabase,
+  );
   progress("Detecting installed games...");
   const installed = await detectInstalledGames(forceInstalled);
   progress("Matching against database...");
-  return matchGames(installed, manifest);
+  return { games: matchGames(installed, manifest), outdated };
 }
 
 export default function Command() {
@@ -60,14 +63,18 @@ export default function Command() {
     async () => {
       const mode = nextMode.current;
       nextMode.current = "cached";
-      if (mode === "cached") return loadGames(setStatusMsg, false, false);
-      return withProgressToast(
+      if (mode === "cached") {
+        return (await loadGames(setStatusMsg, false, false)).games;
+      }
+      const result = await withProgressToast(
         mode === "database"
           ? "Refreshing game database..."
           : "Refreshing installed games...",
         "Games refreshed",
         (progress) => loadGames(progress, mode === "database", true),
+        (r) => !r.outdated,
       );
+      return result.games;
     },
     [],
     { failureToastOptions: { title: "Error loading games" } },
