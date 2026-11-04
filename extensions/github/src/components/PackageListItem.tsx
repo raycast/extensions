@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import { pluralize } from "../helpers";
@@ -67,7 +67,10 @@ export default function PackageListItem({ pkg }: PackageListItemProps) {
               title="Open Repository"
               icon={Icon.Folder}
               url={pkg.repository.html_url}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "r" },
+                Windows: { modifiers: ["ctrl"], key: "r" },
+              }}
             />
           ) : null}
 
