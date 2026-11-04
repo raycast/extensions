@@ -1,4 +1,6 @@
 import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
+import { getLimitRows } from "./limit-rows";
+import { describeShape } from "./parse-diagnostics";
 
 export type UsageLimitsResult =
   | { status: "ok"; data: UsageLimitData }
@@ -36,16 +38,25 @@ export const fetchClaudeUsageLimits = async (accessToken: string): Promise<Usage
       return { status: "rate_limited", retryAfterMs: parseRetryAfter(response.headers.get("retry-after")) };
     }
 
+    if (response.status === 401 || response.status === 403) {
+      return { status: "error", message: `API returned ${response.status}. Re-authenticate by running: claude login` };
+    }
+
     if (!response.ok) {
       return { status: "error", message: `API returned ${response.status}` };
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
     const result = UsageLimitDataSchema.safeParse(data);
 
-    return result.success
-      ? { status: "ok", data: result.data }
-      : { status: "error", message: "Unexpected API response format" };
+    if (result.success && getLimitRows(result.data).length > 0) {
+      return { status: "ok", data: result.data };
+    }
+
+    return {
+      status: "error",
+      message: `Unexpected API response format. Response shape: ${JSON.stringify(describeShape(data, 2))}`,
+    };
   } catch (err) {
     return { status: "error", message: err instanceof Error ? err.message : "Network error" };
   }

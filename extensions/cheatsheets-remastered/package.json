@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "cheatsheets-remastered",
   "title": "Cheatsheets Remastered",
-  "description": "A remastered Cheatsheets extension with enhanced functionality, custom sheet creation, and an improved browsing experience.",
+  "description": "Browse bundled developer references, personal Markdown and synced GitHub cheatsheets offline. Search, favorite and organize your sheets.",
   "icon": "logo.png",
   "author": "smcnab1",
   "contributors": [],
@@ -42,7 +42,7 @@
       "name": "manage-repos",
       "title": "Repo Manager",
       "subtitle": "Cheatsheets Remastered",
-      "description": "Manage user-specified repositories (list, add, remove) with GitHub OAuth",
+      "description": "Add GitHub repositories and sync Markdown for offline access",
       "mode": "view"
     }
   ],
@@ -52,7 +52,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token (optional)",
-      "description": "Optional: Improves rate limits for online content search (local search doesn't require it)"
+      "description": "Retained for compatibility. Repository sync uses GitHub OAuth; this preference does not override it."
     },
     {
       "name": "defaultSort",
@@ -82,25 +82,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.5",
-    "@raycast/utils": "^2.2.1",
-    "axios": "^1.6.0"
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3",
+    "axios": "^1.6.0",
+    "proper-lockfile": "^4.1.2",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "gray-matter": "^4.0.3",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.6",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.13.0",
     "prettier": "^3.5.3",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc -p tsconfig.test.json && node --test tests/*.test.cjs",
+    "typecheck": "tsc --noEmit",
+    "check-format": "prettier --check src tests package.json eslint.config.js tsconfig*.json docs README.md CHANGELOG.md ATTRIBUTION.md"
   }
 }

@@ -4,6 +4,14 @@
 
 - Add Embers to the official registry: work the warm leads Embers finds in LinkedIn engagement, with today's queue, lead details, opener drafts, status and follow-ups, ICP changes and sending leads to a CRM or outreach tool. Hosted Streamable HTTP server at https://mcp.useembers.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
 
+## [Add WolfSMS MCP Server] - 2026-11-04
+
+- Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
+## [Add Sofya MCP Server] - 2026-11-04
+
+- Add Sofya to the official registry: web search with full page content, page fetch as clean Markdown (PDFs and Office documents included), extraction with a prompt, and deep research with a cited report. 6 tools. Hosted Streamable HTTP server at https://mcp.sofya.co/mcp with OAuth sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Update Zip-Codes.com MCP Server] - 2026-11-03
 
 - Update the Zip-Codes.com description: the server now has 12 tools, adding `buy_credits`, which lets an agent with an MPP wallet buy a prepaid API key (the wallet's owner approves each payment).
