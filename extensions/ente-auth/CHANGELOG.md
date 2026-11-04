@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Respect TOTP account settings] - {PR_MERGE_DATE}
+## [Respect TOTP account settings] - 2026-11-04
 
 - Generate codes using each imported account's algorithm, digit count, and period
 - Use the configured period for next-code generation and countdown progress
