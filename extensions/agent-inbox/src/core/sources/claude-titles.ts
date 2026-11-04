@@ -36,7 +36,9 @@ export class ClaudeTitleSource {
   private legacy = new Map<string, LegacyTitle>();
   private sidecars = new Set<string>();
   private next = 0;
-  constructor(private readonly io = { desktop: readClaudeDesktopSessions, windows: readClaudeTitleWindows, now: Date.now }) {}
+  constructor(
+    private readonly io = { desktop: readClaudeDesktopSessions, windows: readClaudeTitleWindows, now: Date.now },
+  ) {}
 
   async read(sessions: Session[]): Promise<SessionTitle[]> {
     const observedAt = this.io.now();
@@ -56,7 +58,8 @@ export class ClaudeTitleSource {
           this.sidecars.add(session.transcriptPath);
           if (custom.title) add(session, custom.title, "claude-title-file");
         } else if (this.sidecars.has(session.transcriptPath) || session.titleSource === "claude-title-file") continue;
-        else if (session.transcriptPath && basename(session.transcriptPath) === `${session.sessionId}.jsonl`) legacy.push(session);
+        else if (session.transcriptPath && basename(session.transcriptPath) === `${session.sessionId}.jsonl`)
+          legacy.push(session);
         else if (
           session.host === "app" &&
           CLAUDE_BRIDGE_ID.test(session.sessionId) &&
@@ -84,7 +87,8 @@ export class ClaudeTitleSource {
           cached = { cursor: batch.cursor, ...(batch.reset ? {} : { title: cached?.title, custom: cached?.custom }) };
           for (const { entry } of batch.records) {
             if (entry.sessionId && entry.sessionId !== session.sessionId) continue;
-            const title = entry.type === "custom-title" ? entry.customTitle : entry.type === "ai-title" ? entry.title : undefined;
+            const title =
+              entry.type === "custom-title" ? entry.customTitle : entry.type === "ai-title" ? entry.title : undefined;
             if (typeof title !== "string" || !title.trim()) continue;
             if (entry.type === "custom-title" || !cached.custom) {
               cached.title = title;
@@ -109,7 +113,9 @@ export class ClaudeTitleSource {
       }
       const identities = windows.map(claudeWindowIdentity).filter((v) => v?.title);
       for (const session of cloud) {
-        const names = new Set(identities.filter((v) => v && sameClaudeBridgeId(v.sessionId, session.sessionId)).map((v) => v!.title));
+        const names = new Set(
+          identities.filter((v) => v && sameClaudeBridgeId(v.sessionId, session.sessionId)).map((v) => v!.title),
+        );
         if (names.size === 1) add(session, [...names][0], "claude-cloud-window");
       }
     }

@@ -9,7 +9,13 @@ export async function readCodexTitles(sessions: Session[], root = CODEX_DIR, now
   const known = new Set(sessions.map((session) => session.sessionId));
   return (await readCodexDesktopSessions(root))
     .filter((entry) => known.has(entry.sessionId))
-    .map((entry) => ({ agent: "codex", sessionId: entry.sessionId, title: entry.title, observedAt, source: "codex-catalog" }));
+    .map((entry) => ({
+      agent: "codex",
+      sessionId: entry.sessionId,
+      title: entry.title,
+      observedAt,
+      source: "codex-catalog",
+    }));
 }
 
 /** A renamed conversation retains its original prompt in transcripts; show its current catalog name. */

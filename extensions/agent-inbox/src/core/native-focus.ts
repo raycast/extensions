@@ -1,8 +1,9 @@
 import { selectWindowDocument } from "./focus-selection";
 
 /** Native AX attributes retain CFURL values that System Events cannot serialize. */
-export function nativeFocusScript(bundleId: string, mode: "focused" | "windows" = "focused"): string {
+export function nativeFocusScript(mode: "focused" | "windows" = "focused"): string {
   return `
+function run(argv) {
 ObjC.import("AppKit");
 ObjC.import("ApplicationServices");
 ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
@@ -10,7 +11,7 @@ ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]])
 ObjC.bindFunction("CFGetTypeID", ["unsigned long", ["id"]]);
 ObjC.bindFunction("CFURLGetTypeID", ["unsigned long", []]);
 ObjC.bindFunction("CFURLGetString", ["id", ["id"]]);
-const bundle = ${JSON.stringify(bundleId)};
+const bundle = argv[0];
 const selectDocument = ${selectWindowDocument.toString()};
 function attribute(node, name) {
   const value = Ref();
@@ -62,6 +63,7 @@ function readApplication() {
   `
   }
 }
-JSON.stringify(readApplication());
+return JSON.stringify(readApplication());
+}
 `;
 }

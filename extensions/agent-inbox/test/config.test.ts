@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
 import { readConfig, syncPreferences, writeConfig } from "../src/core/config";
-import { translator } from "../src/core/messages";
 import { tempDir } from "./helpers";
 
 test("native preference changes reach the collector without overwriting channel configuration", (t) => {
@@ -22,10 +21,4 @@ test("native preference changes reach the collector without overwriting channel 
   assert.equal(readConfig(path).contentSearchEnabled, true);
   assert.equal(readConfig(path).resumeTerminal, "terminal");
   assert.deepEqual(readConfig(path).notificationChannels, ["custom"]);
-});
-
-test("interface and notification messages use English with substituted values", () => {
-  const t = translator();
-  assert.equal(t("notify.waiting"), "Waiting for you");
-  assert.equal(t("hud.subscribed", { title: "会话 {name}" }), "Subscribed · 会话 {name}");
 });

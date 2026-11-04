@@ -52,7 +52,11 @@ test("scan Claude and Codex transcripts without importing them", (t) => {
       }),
       j({
         type: "response_item",
-        payload: { type: "message", role: "user", content: [{ type: "input_text", text: "<environment_context>…</environment_context>" }] },
+        payload: {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "<environment_context>…</environment_context>" }],
+        },
       }),
       j({ type: "event_msg", payload: { type: "user_message", message: "web-remakes README 参数出处" } }),
       j({ type: "event_msg", payload: { type: "agent_message", message: "找到了三处出处。" } }),

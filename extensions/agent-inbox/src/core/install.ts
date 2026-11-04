@@ -1,4 +1,13 @@
-import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, rmSync } from "node:fs";
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  renameSync,
+  rmSync,
+} from "node:fs";
 import { dirname } from "node:path";
 import { CLI_PATH } from "./paths";
 import { run } from "./exec";
@@ -48,6 +57,7 @@ export function applyPlan(plan: InstallPlan): string[] {
 }
 
 export function terminalNotifierPath(): string | undefined {
-  for (const p of ["/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"]) if (existsSync(p)) return p;
+  for (const p of ["/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"])
+    if (existsSync(p)) return p;
   return undefined;
 }

@@ -39,7 +39,10 @@ export async function deliverNotifications(
     try {
       if (!channel) throw new Error(`Unknown notification channel: ${job.channel}`);
       await Promise.race([
-        channel.send(notificationMessage(job.id, { ...session, title: current.title }), { config, signal: controller.signal }),
+        channel.send(notificationMessage(job.id, { ...session, title: current.title }), {
+          config,
+          signal: controller.signal,
+        }),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => {
             controller.abort();

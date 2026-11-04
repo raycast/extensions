@@ -1,6 +1,14 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { applyEvent, endsWithQuestion, filterSessions, groupInbox, inboxSection, toTitle, waitingCount } from "../src/core/status";
+import {
+  applyEvent,
+  endsWithQuestion,
+  filterSessions,
+  groupInbox,
+  inboxSection,
+  toTitle,
+  waitingCount,
+} from "../src/core/status";
 import { AgentEvent, Session } from "../src/core/types";
 
 const ev = (type: AgentEvent["type"], extra: Partial<AgentEvent> = {}): AgentEvent => ({
@@ -122,16 +130,28 @@ test("failure and quota transitions notify once, survive session end and clear w
 
 test("events with sparse metadata preserve the session title, location and transcript", () => {
   const initial = run([
-    ev("progress", { title: "Original", cwd: "/repo", transcriptPath: "/transcript", locator: { tty: "/dev/ttys001", tmuxPane: "%2" } }),
+    ev("progress", {
+      title: "Original",
+      cwd: "/repo",
+      transcriptPath: "/transcript",
+      locator: { tty: "/dev/ttys001", tmuxPane: "%2" },
+    }),
   ]);
   const next = run(
-    [ev("needs_input", { title: "Another title", cwd: "", transcriptPath: "", locator: { tty: "", tmuxPane: undefined, hostId: "host" } })],
+    [
+      ev("needs_input", {
+        title: "Another title",
+        cwd: "",
+        transcriptPath: "",
+        locator: { tty: "", tmuxPane: undefined, hostId: "host" },
+      }),
+    ],
     initial,
   );
   assert.equal(next.title, "Original");
   assert.equal(next.cwd, "/repo");
   assert.equal(next.transcriptPath, "/transcript");
-  assert.deepEqual(next.locator, { tty: "/dev/ttys001", tmuxPane: "%2", hostId: "host" });
+  assert.deepEqual(next.locator, { tty: "/dev/ttys001", tmuxPane: "%2", hostId: "host", observedAt: 1000 });
 });
 
 test("all-session filters preserve running discovery and allow subscription/status overlap", () => {
@@ -142,7 +162,8 @@ test("all-session filters preserve running discovery and allow subscription/stat
     { ...run([ev("started", { sessionId: "history" })]), subscribed: true },
     { ...run([ev("needs_input", { sessionId: "unsubscribed-waiting" })]), subscribed: false },
   ];
-  const ids = (filter: Parameters<typeof filterSessions>[1]) => filterSessions(sessions, filter).map((s) => s.sessionId);
+  const ids = (filter: Parameters<typeof filterSessions>[1]) =>
+    filterSessions(sessions, filter).map((s) => s.sessionId);
   assert.deepEqual(ids("all"), ["running", "waiting", "done", "history", "unsubscribed-waiting"]);
   assert.deepEqual(ids("subscribed"), ["waiting", "done", "history"]);
   assert.deepEqual(ids("needs_input"), ["waiting", "unsubscribed-waiting"]);

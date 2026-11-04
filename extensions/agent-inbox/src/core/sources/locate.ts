@@ -10,7 +10,10 @@ export function findTranscript(root: string, sessionId: string, codex = false): 
       for (const entry of readdirSync(directory, { withFileTypes: true })) {
         const path = join(directory, entry.name);
         if (entry.isDirectory() && depth < 4) visit(path, depth + 1);
-        else if (entry.isFile() && (codex ? entry.name.endsWith(`-${sessionId}.jsonl`) : entry.name === `${sessionId}.jsonl`))
+        else if (
+          entry.isFile() &&
+          (codex ? entry.name.endsWith(`-${sessionId}.jsonl`) : entry.name === `${sessionId}.jsonl`)
+        )
           matches.push(path);
       }
     } catch {

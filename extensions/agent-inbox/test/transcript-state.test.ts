@@ -45,7 +45,10 @@ test("Claude end_turn survives post-stop bookkeeping and does not use completed-
   assert.deepEqual(claudeTurnState(lines), { status: "ready", attention: null });
   assert.equal(claudeTurnState([json({ completedTurns: 13, lastTurnEdgeAt: 123 })]), undefined);
   assert.equal(claudeTurnState([json({ type: "assistant", message: { content: "All done!" } })]), undefined);
-  assert.deepEqual(claudeTurnState([json(completed("要继续处理下一项吗？"))]), { status: "needs_input", attention: "question" });
+  assert.deepEqual(claudeTurnState([json(completed("要继续处理下一项吗？"))]), {
+    status: "needs_input",
+    attention: "question",
+  });
 });
 
 test("later activity or incomplete records invalidate an earlier Claude completion", () => {

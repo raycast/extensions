@@ -64,7 +64,11 @@ test("search reads full dialogue beyond head/tail and matches Chinese, Unicode a
   }
   assert.equal(searchSessions(sessions, "不存在", await index.search("不存在")).length, 0);
   assert.equal(searchSessions(sessions, "Launch").length, 1, "titles work before content indexing completes");
-  assert.equal(searchSessions(sessions, "latest summary").length, 0, "metadata-only search does not silently search conversation bodies");
+  assert.equal(
+    searchSessions(sessions, "latest summary").length,
+    0,
+    "metadata-only search does not silently search conversation bodies",
+  );
   const warm = await new SessionSearchIndex(options).update(sessions, () => undefined);
   assert.equal(warm.updated, 0, "unchanged transcripts are not reread across command launches");
 });
@@ -120,21 +124,38 @@ test("Codex messages are searchable, but reasoning, tool payloads and injected i
   const entries = [
     { type: "session_meta", payload: { id: "codex-session" } },
     { type: "event_msg", payload: { type: "user_message", message: "请验证检索" } },
-    { type: "response_item", payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "查询已完成" }] } },
+    {
+      type: "response_item",
+      payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "查询已完成" }] },
+    },
     { type: "event_msg", payload: { type: "agent_message", message: "查询已完成" } },
     {
       type: "response_item",
-      payload: { type: "message", role: "user", content: [{ type: "input_text", text: "# AGENTS.md\nInjectedNeedle" }] },
+      payload: {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "# AGENTS.md\nInjectedNeedle" }],
+      },
     },
     { type: "response_item", payload: { type: "function_call_output", output: "ToolNeedle" } },
-    { type: "response_item", payload: { type: "reasoning", summary: [{ type: "summary_text", text: "ReasoningNeedle" }] } },
+    {
+      type: "response_item",
+      payload: { type: "reasoning", summary: [{ type: "summary_text", text: "ReasoningNeedle" }] },
+    },
   ];
   writeFileSync(path, entries.map((entry) => JSON.stringify(entry)).join("\n") + "\n{partial");
   await index.update([], () => undefined);
   for (const query of ["验证检索", "查询已完成"]) assert.ok((await index.search(query))["codex:codex-session"]);
-  for (const query of ["InjectedNeedle", "ToolNeedle", "ReasoningNeedle"]) assert.deepEqual(await index.search(query), {});
+  for (const query of ["InjectedNeedle", "ToolNeedle", "ReasoningNeedle"])
+    assert.deepEqual(await index.search(query), {});
   assert.equal(conversationText("claude", { type: "user", isMeta: true, message: { content: "MetadataNeedle" } }), "");
-  assert.equal(conversationText("claude", { type: "user", message: { content: [{ type: "tool_result", content: "ToolNeedle" }] } }), "");
+  assert.equal(
+    conversationText("claude", {
+      type: "user",
+      message: { content: [{ type: "tool_result", content: "ToolNeedle" }] },
+    }),
+    "",
+  );
 });
 
 test("literal SQL/FTS punctuation is safe and terms can match separate transcript parts of one session", async (t) => {
@@ -187,7 +208,13 @@ test("full-content hits stay discoverable when all dialogue lies outside history
       JSON.stringify({ type: "tool", content: "y".repeat(150_000) }),
     ].join("\n"),
   );
-  const opts = { claudeRoot, codexRoot, claudeDesktopRoot: join(root, "none"), codexIndex: join(root, "none"), useCache: false };
+  const opts = {
+    claudeRoot,
+    codexRoot,
+    claudeDesktopRoot: join(root, "none"),
+    codexIndex: join(root, "none"),
+    useCache: false,
+  };
   assert.equal(scanHistory(opts).length, 0, "ordinary history retains its empty-session behavior");
   const sessions = scanHistory({ ...opts, includeUntitled: true }).map(fromHistory);
   assert.equal(sessions.length, 1);

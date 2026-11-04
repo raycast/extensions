@@ -39,7 +39,8 @@ function listCodex(root: string): TranscriptFile[] {
       const st = safeStat(p);
       if (!st) continue;
       if (st.isDirectory() && depth < 4) walk(p, depth + 1);
-      else if (st.isFile() && f.endsWith(".jsonl")) out.push({ agent: "codex", path: p, mtime: st.mtimeMs, size: st.size });
+      else if (st.isFile() && f.endsWith(".jsonl"))
+        out.push({ agent: "codex", path: p, mtime: st.mtimeMs, size: st.size });
     }
   };
   if (existsSync(root)) walk(root, 0);
@@ -88,7 +89,8 @@ function hostFor(agent: "claude" | "codex", info: TranscriptInfo): Host {
 function toEntry(ref: TranscriptFile, info: TranscriptInfo, names: Map<string, string>): HistoryEntry | null {
   let sessionId = info.sessionId;
   if (!sessionId) {
-    sessionId = ref.agent === "claude" ? basename(ref.path, ".jsonl") : (basename(ref.path).match(UUID_IN_NAME)?.[1] ?? "");
+    sessionId =
+      ref.agent === "claude" ? basename(ref.path, ".jsonl") : (basename(ref.path).match(UUID_IN_NAME)?.[1] ?? "");
   }
   if (!sessionId) return null;
   const title = names.get(sessionId) || toTitle(info.title) || toTitle(info.firstPrompt);
@@ -171,13 +173,16 @@ export function scanHistory(opts: ScanOptions = {}): HistoryEntry[] {
       try {
         const { head, tail } = readHeadTail(ref.path);
         const info =
-          ref.agent === "claude" ? parseClaude(parseLines(head), parseLines(tail)) : parseCodex(parseLines(head), parseLines(tail));
+          ref.agent === "claude"
+            ? parseClaude(parseLines(head), parseLines(tail))
+            : parseCodex(parseLines(head), parseLines(tail));
         entry = toEntry(ref, info, names);
       } catch {
         entry = null;
       }
     }
-    if (entry && ref.agent === "codex" && names.has(entry.sessionId)) entry = { ...entry, title: names.get(entry.sessionId)! };
+    if (entry && ref.agent === "codex" && names.has(entry.sessionId))
+      entry = { ...entry, title: names.get(entry.sessionId)! };
     nextCache.files[ref.path] = { mtime: ref.mtime, size: ref.size, entry };
     if (entry?.agent === "claude") {
       const record = findClaudeDesktopSession(entry.sessionId, desktop);

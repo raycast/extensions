@@ -43,7 +43,8 @@ export class TranscriptStateRecovery {
               observed = undefined;
               continue;
             }
-            for (const event of source.parse(entry, session, context)) observed = applyEvent(observed, event)?.next ?? observed;
+            for (const event of source.parse(entry, session, context))
+              observed = applyEvent(observed, event)?.next ?? observed;
           } catch {
             observed = undefined;
           }

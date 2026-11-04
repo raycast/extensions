@@ -83,7 +83,9 @@ export function readClaudeDesktopSessions(root = CLAUDE_DESKTOP_SESSIONS): Claud
 }
 
 function bridgeAliases(value: unknown): { bridgeSessionIds?: string[] } {
-  const ids = (Array.isArray(value) ? value : [value]).filter((id): id is string => typeof id === "string" && CLAUDE_BRIDGE_ID.test(id));
+  const ids = (Array.isArray(value) ? value : [value]).filter(
+    (id): id is string => typeof id === "string" && CLAUDE_BRIDGE_ID.test(id),
+  );
   return ids.length ? { bridgeSessionIds: [...new Set(ids)] } : {};
 }
 
@@ -94,7 +96,10 @@ export function sameClaudeBridgeId(a: string, b: string): boolean {
 }
 
 /** Do not guess when multiple desktop records claim the same CLI transcript. */
-export function findClaudeDesktopSession(id: string, records: ClaudeDesktopSession[]): ClaudeDesktopSession | undefined {
+export function findClaudeDesktopSession(
+  id: string,
+  records: ClaudeDesktopSession[],
+): ClaudeDesktopSession | undefined {
   const matches = records.filter(
     (r) => r.cliSessionId === id || r.sessionId === id || r.bridgeSessionIds?.some((b) => sameClaudeBridgeId(b, id)),
   );

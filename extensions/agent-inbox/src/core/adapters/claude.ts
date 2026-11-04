@@ -63,7 +63,8 @@ function hostFromEnv(env: NodeJS.ProcessEnv, transcriptPath: string): { host?: H
     try {
       const { head, tail } = readHeadTail(transcriptPath);
       const info = parseClaude(parseLines(head), parseLines(tail));
-      if (info.entrypoint) return { host: /desktop/i.test(info.entrypoint) ? "app" : "cli", entrypoint: info.entrypoint };
+      if (info.entrypoint)
+        return { host: /desktop/i.test(info.entrypoint) ? "app" : "cli", entrypoint: info.entrypoint };
     } catch {
       // No transcript yet at SessionStart; preserve the prior host if no other signal exists.
     }
@@ -82,7 +83,11 @@ function attentionFor(type: string, message: string): Attention | null {
   return "input";
 }
 
-export function parseClaudeHook(payload: Record<string, unknown>, env: NodeJS.ProcessEnv, now = Date.now()): AgentEvent | null {
+export function parseClaudeHook(
+  payload: Record<string, unknown>,
+  env: NodeJS.ProcessEnv,
+  now = Date.now(),
+): AgentEvent | null {
   const sessionId = s(payload.session_id);
   const name = s(payload.hook_event_name);
   if (!sessionId || !name) return null;
@@ -138,7 +143,8 @@ export function parseClaudeHook(payload: Record<string, unknown>, env: NodeJS.Pr
     case "Stop":
     case "SubagentStop": {
       if (name === "SubagentStop") return null;
-      const last = s(payload.last_assistant_message) || (base.transcriptPath ? lastClaudeAssistant(base.transcriptPath) : "");
+      const last =
+        s(payload.last_assistant_message) || (base.transcriptPath ? lastClaudeAssistant(base.transcriptPath) : "");
       return { ...base, type: "stopped", attention: asksForInput(last) ? "question" : undefined, summary: last };
     }
     case "StopFailure":
@@ -156,7 +162,8 @@ const claudeNavigation = { openUrl, activateBundle, copyToClipboard, jumpToCli, 
 export async function jumpClaude(session: Session, config: Config, navigation = claudeNavigation): Promise<JumpResult> {
   const records = navigation.readClaudeDesktopSessions();
   const resolved = enrichClaudeSessions([session], records)[0];
-  if (resolved.host !== "app") return navigation.jumpToCli(resolved, `claude --resume ${shQuote(resolved.sessionId)}`, config);
+  if (resolved.host !== "app")
+    return navigation.jumpToCli(resolved, `claude --resume ${shQuote(resolved.sessionId)}`, config);
   const record = findClaudeDesktopSession(resolved.sessionId, records);
   const desktopId = record?.sessionId || resolved.locator.claudeDesktopId || resolved.sessionId;
   let url: string | undefined;
@@ -211,7 +218,11 @@ export const claudeAdapter: Adapter = {
           before,
           after,
           summary: CLAUDE_EVENTS.join(" · "),
-          preview: JSON.stringify({ hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) }, null, 2),
+          preview: JSON.stringify(
+            { hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) },
+            null,
+            2,
+          ),
           previewLang: "json",
         },
       ],
@@ -224,7 +235,9 @@ export const claudeAdapter: Adapter = {
     if (!before) return { changes: [], notes: [] };
     const after = stringify(withoutOurHooks(parseJsonFile(before, CLAUDE_SETTINGS)));
     return {
-      changes: [{ path: CLAUDE_SETTINGS, before, after, summary: CLAUDE_EVENTS.join(" · "), preview: "", previewLang: "json" }],
+      changes: [
+        { path: CLAUDE_SETTINGS, before, after, summary: CLAUDE_EVENTS.join(" · "), preview: "", previewLang: "json" },
+      ],
       notes: [],
     };
   },

@@ -55,6 +55,10 @@ export interface SessionState {
 }
 
 export interface Locator {
+  /** Agent process identity captured by hooks; start time protects against PID reuse. */
+  pid?: number;
+  processStartedAt?: string;
+  observedAt?: number;
   /** Controlling terminal of the agent process, e.g. /dev/ttys003 */
   tty?: string;
   /** $TMUX_PANE, e.g. %12 */

@@ -11,7 +11,7 @@ export interface FocusedWindow {
 
 /** Passive title sampling of already-open Claude windows. Never activates or navigates. */
 export async function readClaudeTitleWindows(execute = osascript): Promise<FocusedWindow[]> {
-  const result = await execute(nativeFocusScript("com.anthropic.claudefordesktop", "windows"), "JavaScript");
+  const result = await execute(nativeFocusScript("windows"), "JavaScript", ["com.anthropic.claudefordesktop"]);
   if (!result.ok) return [];
   try {
     const value = JSON.parse(result.stdout);
@@ -23,7 +23,7 @@ export async function readClaudeTitleWindows(execute = osascript): Promise<Focus
 
 /** Read the front window's outer document, never sidebar links or conversation contents. */
 export async function readFocusedWindow(bundleId: string, execute = osascript): Promise<FocusedWindow | undefined> {
-  const native = await execute(nativeFocusScript(bundleId), "JavaScript");
+  const native = await execute(nativeFocusScript(), "JavaScript", [bundleId]);
   if (native.ok) {
     try {
       const value = JSON.parse(native.stdout);
@@ -35,9 +35,11 @@ export async function readFocusedWindow(bundleId: string, execute = osascript): 
   }
   const result = await execute(
     `
-const processes = Application("System Events").applicationProcesses.whose({ bundleIdentifier: ${JSON.stringify(bundleId)} })();
+function run(argv) {
+const bundle = argv[0];
+const processes = Application("System Events").applicationProcesses.whose({ bundleIdentifier: bundle })();
 const selectDocument = ${selectWindowDocument.toString()};
-if (!processes.length) JSON.stringify(null);
+if (!processes.length) return JSON.stringify(null);
 else {
   const app = processes[0];
   function attribute(node, name) {
@@ -55,7 +57,7 @@ else {
         const url = String(attribute(item.node, "AXURL") || "");
         const title = String(attribute(item.node, "AXTitle") || "");
         // Claude exposes its Electron shell and conversation as sibling documents.
-        if (${JSON.stringify(bundleId)} === "com.anthropic.claudefordesktop" && (url.startsWith("file:") || (!url && !title))) continue;
+        if (bundle === "com.anthropic.claudefordesktop" && (url.startsWith("file:") || (!url && !title))) continue;
         if (!url && !title) continue;
         result = selectDocument(result, { title, url });
         break;
@@ -65,12 +67,18 @@ else {
       }
     }
   }
-  JSON.stringify(result);
+  return JSON.stringify(result);
+}
 }`,
     "JavaScript",
+    [bundleId],
   );
   if (!result.ok) {
-    if (/AX_ACCESS_DENIED|assistive|not authorized|not permitted|(-1743|-1719|10004)/i.test(`${native.stderr}\n${result.stderr}`))
+    if (
+      /AX_ACCESS_DENIED|assistive|not authorized|not permitted|(-1743|-1719|10004)/i.test(
+        `${native.stderr}\n${result.stderr}`,
+      )
+    )
       throw new FocusAccessError();
     return undefined;
   }

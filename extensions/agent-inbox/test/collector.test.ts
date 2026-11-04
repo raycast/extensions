@@ -11,7 +11,8 @@ import { claudeAdapter } from "../src/core/adapters/claude";
 import { TranscriptStateRecovery } from "../src/core/transcript-state";
 import { tempDir } from "./helpers";
 
-const row = (at: number, type: string, payload: object) => JSON.stringify({ timestamp: new Date(at).toISOString(), type, payload }) + "\n";
+const row = (at: number, type: string, payload: object) =>
+  JSON.stringify({ timestamp: new Date(at).toISOString(), type, payload }) + "\n";
 const question = (at: number, id: string, count = 1) =>
   row(at, "response_item", {
     type: "function_call",
@@ -36,7 +37,8 @@ test("Codex desktop async acknowledgement and Stop retain all pending questions 
     path = join(directory, "rollout.jsonl");
   writeFileSync(
     path,
-    row(1000, "session_meta", { id: "s", originator: "codex_app" }) + row(2000, "event_msg", { type: "task_started", turn_id: "t" }),
+    row(1000, "session_meta", { id: "s", originator: "codex_app" }) +
+      row(2000, "event_msg", { type: "task_started", turn_id: "t" }),
   );
   const store = new Store(join(directory, "db.sqlite"));
   await store.record({ agent: "codex", sessionId: "s", type: "started", transcriptPath: path, at: 500 });
@@ -185,7 +187,11 @@ test("bootstrap finds an unanswered async question before a multi-megabyte tool 
     row(1000, "session_meta", { id: "s", originator: "codex_app" }) +
       row(2000, "event_msg", { type: "task_started", turn_id: "t" }) +
       question(3000, "early") +
-      row(4000, "response_item", { type: "custom_tool_call_output", call_id: "unrelated", output: "x".repeat(3 * 1024 * 1024) }) +
+      row(4000, "response_item", {
+        type: "custom_tool_call_output",
+        call_id: "unrelated",
+        output: "x".repeat(3 * 1024 * 1024),
+      }) +
       row(5000, "event_msg", { type: "task_complete", turn_id: "t" }),
   );
   const store = new Store(join(directory, "db.sqlite"));
@@ -212,7 +218,13 @@ test("Claude recoverable API retry errors do not become permanent user attention
     path,
     [
       { timestamp: new Date(1000).toISOString(), type: "user", message: { content: "Continue" } },
-      { timestamp: new Date(2000).toISOString(), type: "system", subtype: "api_error", retryInMs: 1000, error: "temporary" },
+      {
+        timestamp: new Date(2000).toISOString(),
+        type: "system",
+        subtype: "api_error",
+        retryInMs: 1000,
+        error: "temporary",
+      },
       {
         timestamp: new Date(3000).toISOString(),
         type: "assistant",

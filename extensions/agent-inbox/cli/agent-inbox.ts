@@ -65,7 +65,7 @@ Attention: input, question, permission, failed, quota, interrupted
 
 Data directory: AGENT_INBOX_HOME (default: ~/.sessions)
 Install modifies agent configuration; watch and deliver may send notifications.
-Setup, isolated examples and option defaults: docs/cli.md in the repository.
+Setup, isolated examples and option defaults: https://github.com/0xFANGO/agent-inbox/blob/main/docs/cli.md
 `;
 
 function log(msg: string) {
@@ -187,7 +187,9 @@ async function list(args: string[]) {
     return;
   }
   for (const s of rows) {
-    process.stdout.write(`${s.status.padEnd(11)} ${s.subscribed ? "●" : " "} ${s.agent}/${s.host} ${s.sessionId}  ${s.title}\n`);
+    process.stdout.write(
+      `${s.status.padEnd(11)} ${s.subscribed ? "●" : " "} ${s.agent}/${s.host} ${s.sessionId}  ${s.title}\n`,
+    );
   }
 }
 
@@ -260,7 +262,9 @@ async function main() {
       process.stdout.write("agent-inbox 1\n");
       return;
     default:
-      process.stderr.write("usage: agent-inbox <command> [options]\nRun agent-inbox --help for commands and options.\n");
+      process.stderr.write(
+        "usage: agent-inbox <command> [options]\nRun agent-inbox --help for commands and options.\n",
+      );
       process.exitCode = 2;
   }
 }

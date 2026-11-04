@@ -29,7 +29,14 @@ export class TitleSynchronizer {
           .replace(/\p{Cc}/gu, " ")
           .replace(/\s+/g, " ")
           .trim();
-        if (o.agent !== adapters[index].id || !known.has(key(o)) || !title || !Number.isFinite(o.observedAt) || o.observedAt < 0) continue;
+        if (
+          o.agent !== adapters[index].id ||
+          !known.has(key(o)) ||
+          !title ||
+          !Number.isFinite(o.observedAt) ||
+          o.observedAt < 0
+        )
+          continue;
         const existing = observations.get(key(o));
         if (!existing || o.observedAt > existing.observedAt) observations.set(key(o), { ...o, title });
       }
@@ -40,7 +47,12 @@ export class TitleSynchronizer {
     return sessions.map((session) => {
       const observation = observations.get(key(session));
       return observation && observation.observedAt >= (session.titleObservedAt ?? 0)
-        ? { ...session, title: observation.title, titleObservedAt: observation.observedAt, titleSource: observation.source }
+        ? {
+            ...session,
+            title: observation.title,
+            titleObservedAt: observation.observedAt,
+            titleSource: observation.source,
+          }
         : session;
     });
   }

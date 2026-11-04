@@ -101,7 +101,9 @@ function readClaudeDesktopSessions(root = CLAUDE_DESKTOP_SESSIONS) {
   return records;
 }
 function bridgeAliases(value) {
-  const ids = (Array.isArray(value) ? value : [value]).filter((id) => typeof id === "string" && CLAUDE_BRIDGE_ID.test(id));
+  const ids = (Array.isArray(value) ? value : [value]).filter(
+    (id) => typeof id === "string" && CLAUDE_BRIDGE_ID.test(id)
+  );
   return ids.length ? { bridgeSessionIds: [...new Set(ids)] } : {};
 }
 function sameClaudeBridgeId(a, b) {
@@ -157,9 +159,14 @@ function claudeWindowIdentity(window) {
 import { execFile, spawn } from "node:child_process";
 function run(file, args, input, timeoutMs = 5e3) {
   return new Promise((resolve) => {
-    const child = execFile(file, args, { encoding: "utf8", timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) => {
-      resolve({ ok: !err, stdout: String(stdout ?? ""), stderr: String(stderr ?? (err ? String(err) : "")) });
-    });
+    const child = execFile(
+      file,
+      args,
+      { encoding: "utf8", timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 },
+      (err, stdout, stderr) => {
+        resolve({ ok: !err, stdout: String(stdout ?? ""), stderr: String(stderr ?? (err ? String(err) : "")) });
+      }
+    );
     if (input !== void 0) {
       child.stdin?.on("error", () => void 0);
       child.stdin?.end(input);
@@ -174,11 +181,8 @@ function detach(file, args) {
   } catch {
   }
 }
-function osascript(script, lang = "AppleScript") {
-  return run("/usr/bin/osascript", ["-l", lang, "-e", script]);
-}
-function asString(s3) {
-  return '"' + s3.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+function osascript(script, lang = "AppleScript", args = []) {
+  return run("/usr/bin/osascript", ["-l", lang, "-e", script, "--", ...args]);
 }
 function shQuote(s3) {
   if (/^[A-Za-z0-9_\-./:=@%+]+$/.test(s3)) return s3;
@@ -200,8 +204,9 @@ function selectWindowDocument(native, document) {
 }
 
 // src/core/native-focus.ts
-function nativeFocusScript(bundleId, mode = "focused") {
+function nativeFocusScript(mode = "focused") {
   return `
+function run(argv) {
 ObjC.import("AppKit");
 ObjC.import("ApplicationServices");
 ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
@@ -209,7 +214,7 @@ ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]])
 ObjC.bindFunction("CFGetTypeID", ["unsigned long", ["id"]]);
 ObjC.bindFunction("CFURLGetTypeID", ["unsigned long", []]);
 ObjC.bindFunction("CFURLGetString", ["id", ["id"]]);
-const bundle = ${JSON.stringify(bundleId)};
+const bundle = argv[0];
 const selectDocument = ${selectWindowDocument.toString()};
 function attribute(node, name) {
   const value = Ref();
@@ -257,13 +262,14 @@ function readApplication() {
   return window ? readWindow(window) : null;
   `}
 }
-JSON.stringify(readApplication());
+return JSON.stringify(readApplication());
+}
 `;
 }
 
 // src/core/focused-window.ts
 async function readClaudeTitleWindows(execute = osascript) {
-  const result = await execute(nativeFocusScript("com.anthropic.claudefordesktop", "windows"), "JavaScript");
+  const result = await execute(nativeFocusScript("windows"), "JavaScript", ["com.anthropic.claudefordesktop"]);
   if (!result.ok) return [];
   try {
     const value = JSON.parse(result.stdout);
@@ -281,6 +287,76 @@ function validWindow(value) {
 // src/core/sources/collector.ts
 import { closeSync, openSync, readSync, statSync as statSync2 } from "node:fs";
 import { createHash } from "node:crypto";
+
+// src/core/locate.ts
+async function ttyOf(pid, execute = run) {
+  const r = await execute("/bin/ps", ["-o", "tty=", "-p", String(pid)], void 0, 2e3);
+  const tty = r.stdout.trim();
+  if (!r.ok || !tty || tty.startsWith("?")) return void 0;
+  return tty.startsWith("/dev/") ? tty : `/dev/${tty}`;
+}
+async function captureLocator(env, pid = process.ppid, execute = run) {
+  const loc = {};
+  if (env.TMUX_PANE) loc.tmuxPane = env.TMUX_PANE;
+  if (env.TMUX) loc.tmuxSocket = env.TMUX.split(",")[0];
+  if (env.__CFBundleIdentifier) loc.bundleId = env.__CFBundleIdentifier;
+  if (env.TERM_PROGRAM) loc.termProgram = env.TERM_PROGRAM;
+  const tty = await ttyOf(pid, execute);
+  if (tty) loc.tty = tty;
+  const seen = /* @__PURE__ */ new Set();
+  for (let depth = 0; pid > 1 && depth < 12 && !seen.has(pid); depth++) {
+    seen.add(pid);
+    const process2 = await readProcess(pid, execute);
+    if (!process2) break;
+    if (isAgentProcess(process2.command) && process2.tty === loc.tty) {
+      loc.pid = pid;
+      loc.processStartedAt = process2.startedAt;
+      break;
+    }
+    pid = process2.parent;
+  }
+  return loc;
+}
+function isAgentProcess(command) {
+  const [executable, script = ""] = command.trim().split(/\s+/);
+  if (/(?:^|\/)(?:claude|codex)$/.test(executable)) return true;
+  return /(?:^|\/)node$/.test(executable) && /\/@(?:anthropic-ai\/claude-code|openai\/codex)\//.test(script);
+}
+async function readProcess(pid, execute = run) {
+  const result = await execute(
+    "/bin/ps",
+    ["-ww", "-p", String(pid), "-o", "ppid=,tty=,lstart=,args="],
+    void 0,
+    2e3
+  );
+  if (!result.ok) return void 0;
+  const match = result.stdout.trim().match(/^(\d+)\s+(\S+)\s+(\w{3}\s+\w{3}\s+\d+\s+\d+:\d+:\d+\s+\d{4})\s+(.+)$/);
+  if (!match) return void 0;
+  return {
+    parent: Number(match[1]),
+    tty: match[2].startsWith("/") ? match[2] : `/dev/${match[2]}`,
+    startedAt: match[3].replace(/\s+/g, " "),
+    command: match[4]
+  };
+}
+async function terminalOwnerAlive(locator, execute = run) {
+  if (!locator.tty || !locator.pid || !locator.processStartedAt) return false;
+  const process2 = await readProcess(locator.pid, execute);
+  return !!process2 && process2.tty === locator.tty && process2.startedAt === locator.processStartedAt && isAgentProcess(process2.command);
+}
+var TERMINAL_LOCATOR_KEYS = [
+  "tty",
+  "tmuxPane",
+  "tmuxSocket",
+  "pid",
+  "processStartedAt",
+  "observedAt"
+];
+function releaseTerminal(locator) {
+  const next = { ...locator };
+  for (const key2 of TERMINAL_LOCATOR_KEYS) delete next[key2];
+  return next;
+}
 
 // src/core/status.ts
 var TITLE_MAX = 80;
@@ -338,7 +414,8 @@ function applyEvent(prev, ev) {
         (request) => (!request.inferred || request.at >= (previous.turnStartedAt ?? 0)) && !state.resolved.includes(request.id)
       );
       if (ev.at < previous.at || otherTurn) {
-        for (const request of relevant) if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
+        for (const request of relevant)
+          if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
       } else {
         state.phase = observed.phase;
         state.turnId = observed.turnId ?? state.turnId;
@@ -346,7 +423,8 @@ function applyEvent(prev, ev) {
         state.pending = state.pending.filter(
           (r) => !state.resolved.includes(r.id) && (!r.inferred || r.at >= (observed.turnStartedAt ?? 0))
         );
-        for (const request of relevant) if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
+        for (const request of relevant)
+          if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
       }
       break;
     }
@@ -375,7 +453,8 @@ function applyEvent(prev, ev) {
       const attention2 = ev.type === "needs_input" ? ev.attention ?? "input" : ev.type;
       const samePrompt = (other) => other === attention2 || ["input", "question", "permission"].includes(attention2) && ["input", "question", "permission"].includes(other);
       if (!ids.length && state.pending.some((request) => !request.inferred && samePrompt(request.attention))) break;
-      if (ids.length) state.pending = state.pending.filter((request) => !request.inferred || !samePrompt(request.attention));
+      if (ids.length)
+        state.pending = state.pending.filter((request) => !request.inferred || !samePrompt(request.attention));
       const requestIds2 = ids.length ? ids : [`hint:${attention2}`];
       for (const id of requestIds2) {
         if (state.resolved.includes(id) || state.pending.some((request) => request.id === id)) continue;
@@ -387,7 +466,13 @@ function applyEvent(prev, ev) {
     case "stopped":
       state.phase = "ready";
       if (ev.attention === "question" && state.pending.length === 0) {
-        state.pending.push({ id: "hint:question", attention: "question", at: ev.at, turnId: ev.turnId, inferred: true });
+        state.pending.push({
+          id: "hint:question",
+          attention: "question",
+          at: ev.at,
+          turnId: ev.turnId,
+          inferred: true
+        });
       }
       break;
     case "completed":
@@ -419,7 +504,9 @@ function applyEvent(prev, ev) {
     updatedAt: ev.at,
     transcriptPath: ""
   };
-  const newRequest = state.pending.some((r) => !previous.pending.some((p) => p.id === r.id || p.inferred && p.attention === r.attention));
+  const newRequest = state.pending.some(
+    (r) => !previous.pending.some((p) => p.id === r.id || p.inferred && p.attention === r.attention)
+  );
   const statusChanged = base.status !== status || base.attention !== attention || newRequest;
   const next = {
     ...base,
@@ -430,7 +517,7 @@ function applyEvent(prev, ev) {
     status,
     attention,
     state,
-    locator: { ...base.locator, ...stripEmpty(ev.locator) },
+    locator: ev.type === "ended" ? releaseTerminal(base.locator) : ev.at >= previous.at && ev.locator ? { ...base.locator, ...stripEmpty(ev.locator), ...ev.locator.tty ? { observedAt: ev.at } : {} } : base.locator,
     transcriptPath: ev.transcriptPath || base.transcriptPath,
     handledAt: statusChanged ? null : base.handledAt,
     updatedAt: Math.max(base.updatedAt, ev.at)
@@ -452,11 +539,11 @@ function stripEmpty(o) {
 // src/core/sources/collector.ts
 var WINDOW = 512 * 1024;
 var MAX_BATCH = 1024 * 1024;
-function readTranscriptBatch(path, previous, fromStart = false) {
+function readTranscriptBatch(path, previous, fromStart = false, recovery = false) {
   const stat = statSync2(path);
   if (!stat.isFile()) throw new Error("Transcript is not a regular file");
   const identity = `${stat.dev}:${stat.ino}:${stat.birthtimeMs}`;
-  const reset = !previous || previous.identity !== identity || stat.size < previous.offset || stat.size === previous.offset && stat.mtimeMs !== previous.mtime;
+  const reset = !previous || previous.identity !== identity || stat.size < previous.offset || recovery && previous.bootstrapping && previous.bootstrapEnd !== void 0 && stat.size < previous.bootstrapEnd || stat.size === previous.offset && stat.mtimeMs !== previous.mtime;
   const start = reset ? fromStart ? 0 : Math.max(0, stat.size - WINDOW) : previous.offset;
   const cursor = {
     identity,
@@ -465,12 +552,14 @@ function readTranscriptBatch(path, previous, fromStart = false) {
     skipping: reset ? start > 0 : previous.skipping,
     mtime: stat.mtimeMs,
     bootstrapping: reset || previous?.bootstrapping,
-    snapshot: reset ? void 0 : previous?.snapshot
+    snapshot: reset ? void 0 : previous?.snapshot,
+    bootstrapEnd: reset ? recovery ? stat.size : void 0 : previous?.bootstrapEnd ?? (previous?.bootstrapping && recovery ? stat.size : void 0)
   };
+  const end = recovery && cursor.bootstrapping && cursor.bootstrapEnd !== void 0 ? cursor.bootstrapEnd : stat.size;
   const fd = openSync(path, "r");
   const records = [];
   try {
-    const buffer = Buffer.alloc(Math.min(MAX_BATCH, stat.size - start));
+    const buffer = Buffer.alloc(Math.min(MAX_BATCH, end - start));
     const length = readSync(fd, buffer, 0, buffer.length, start);
     let from = 0;
     for (let index = 0; index < length; index++) {
@@ -478,7 +567,8 @@ function readTranscriptBatch(path, previous, fromStart = false) {
       if (!cursor.skipping) {
         try {
           const entry = JSON.parse(buffer.subarray(from, index).toString("utf8"));
-          if (entry && typeof entry === "object" && !Array.isArray(entry)) records.push({ entry, offset: start + from });
+          if (entry && typeof entry === "object" && !Array.isArray(entry))
+            records.push({ entry, offset: start + from });
         } catch {
         }
       }
@@ -486,12 +576,12 @@ function readTranscriptBatch(path, previous, fromStart = false) {
       from = index + 1;
       cursor.offset = start + from;
     }
-    if (!cursor.skipping && from < length && start + length === stat.size) {
+    if (!cursor.skipping && from < length && start + length === end) {
       try {
         const entry = JSON.parse(buffer.subarray(from, length).toString("utf8"));
         if (entry && typeof entry === "object" && !Array.isArray(entry)) {
           records.push({ entry, offset: start + from });
-          cursor.offset = stat.size;
+          cursor.offset = end;
           from = length;
         }
       } catch {
@@ -501,11 +591,12 @@ function readTranscriptBatch(path, previous, fromStart = false) {
       cursor.offset = start + length;
       cursor.skipping = true;
     }
-    if (cursor.skipping && from === 0 && start + length === stat.size) cursor.offset = stat.size;
+    if (cursor.skipping && from === 0 && start + length === end) cursor.offset = end;
   } finally {
     closeSync(fd);
   }
-  return { records, cursor, reset, atEnd: cursor.offset === stat.size };
+  const atBootstrapEnd = end - start <= MAX_BATCH;
+  return { records, cursor, reset, atEnd: cursor.offset === stat.size, atBootstrapEnd };
 }
 var TranscriptCollector = class {
   constructor(engine, adapters, onError = () => {
@@ -533,11 +624,12 @@ var TranscriptCollector = class {
           path = await adapter?.source?.locateTranscript?.(session) ?? "";
         }
         if (!path) continue;
-        if (path !== session.transcriptPath) await this.engine.store.attachTranscript(session.agent, session.sessionId, path);
+        if (path !== session.transcriptPath)
+          await this.engine.store.attachTranscript(session.agent, session.sessionId, path);
         const cursorKey = `transcript:v2:${key2}:${path}`;
         let previous = await this.engine.store.readCursor(cursorKey);
         for (let chunk = 0; chunk < 32; chunk++) {
-          const batch = readTranscriptBatch(path, previous, true);
+          const batch = readTranscriptBatch(path, previous, true, true);
           let snapshot = batch.cursor.snapshot;
           for (const { entry, offset } of batch.records) {
             for (const [index, event2] of source2.parse(entry, session, batch.cursor.context).entries()) {
@@ -550,7 +642,7 @@ var TranscriptCollector = class {
               else await this.engine.ingest(normalized);
             }
           }
-          if (batch.cursor.bootstrapping && batch.atEnd) {
+          if (batch.cursor.bootstrapping && batch.atBootstrapEnd) {
             if (snapshot?.state)
               await this.engine.ingest(
                 {
@@ -571,6 +663,7 @@ var TranscriptCollector = class {
               );
             batch.cursor.bootstrapping = false;
             batch.cursor.snapshot = void 0;
+            batch.cursor.bootstrapEnd = void 0;
           } else if (batch.cursor.bootstrapping) batch.cursor.snapshot = snapshot;
           await this.engine.store.writeCursor(cursorKey, batch.cursor);
           const advanced = batch.cursor.offset !== previous?.offset;
@@ -628,7 +721,8 @@ var ClaudeTitleSource = class {
           this.sidecars.add(session.transcriptPath);
           if (custom.title) add(session, custom.title, "claude-title-file");
         } else if (this.sidecars.has(session.transcriptPath) || session.titleSource === "claude-title-file") continue;
-        else if (session.transcriptPath && basename(session.transcriptPath) === `${session.sessionId}.jsonl`) legacy.push(session);
+        else if (session.transcriptPath && basename(session.transcriptPath) === `${session.sessionId}.jsonl`)
+          legacy.push(session);
         else if (session.host === "app" && CLAUDE_BRIDGE_ID.test(session.sessionId) && !local && !desktop.some((r) => r.bridgeSessionIds?.some((id) => sameClaudeBridgeId(id, session.sessionId))))
           cloud.push(session);
       }
@@ -670,7 +764,9 @@ var ClaudeTitleSource = class {
       }
       const identities = windows.map(claudeWindowIdentity).filter((v) => v?.title);
       for (const session of cloud) {
-        const names = new Set(identities.filter((v) => v && sameClaudeBridgeId(v.sessionId, session.sessionId)).map((v) => v.title));
+        const names = new Set(
+          identities.filter((v) => v && sameClaudeBridgeId(v.sessionId, session.sessionId)).map((v) => v.title)
+        );
         if (names.size === 1) add(session, [...names][0], "claude-cloud-window");
       }
     }
@@ -734,7 +830,9 @@ function questionIds(callId, name, input) {
 }
 function asyncReplyIds(text2) {
   const ids = [];
-  for (const match of text2.matchAll(/<send_user_message_question_reply>([\s\S]*?)<\/send_user_message_question_reply>/g)) {
+  for (const match of text2.matchAll(
+    /<send_user_message_question_reply>([\s\S]*?)<\/send_user_message_question_reply>/g
+  )) {
     try {
       const answers = JSON.parse(match[1]);
       if (!Array.isArray(answers)) continue;
@@ -756,11 +854,17 @@ var codexTranscript = {
     const metadata = object(payload.internal_chat_message_metadata_passthrough);
     const turnId = string(payload.turn_id) || string(metadata.turn_id) || context.turnId;
     const base = { agent: session.agent, sessionId: session.sessionId, at, source: "transcript", turnId };
-    const event2 = (type, extra = {}) => [{ ...base, type, ...extra }];
+    const event2 = (type, extra = {}) => [
+      { ...base, type, ...extra }
+    ];
     if (entry.type === "session_meta") {
-      if (string(payload.id) && payload.id !== session.sessionId) throw new Error("Transcript session identity mismatch");
+      if (string(payload.id) && payload.id !== session.sessionId)
+        throw new Error("Transcript session identity mismatch");
       const origin = string(payload.originator) || string(payload.source);
-      return event2("started", { cwd: string(payload.cwd), host: /desktop|codex_app|chatgpt/i.test(origin) ? "app" : "cli" });
+      return event2("started", {
+        cwd: string(payload.cwd),
+        host: /desktop|codex_app|chatgpt/i.test(origin) ? "app" : "cli"
+      });
     }
     if (entry.type === "turn_context") {
       context.turnId = string(payload.turn_id) || context.turnId;
@@ -818,7 +922,13 @@ var claudeTranscript = {
   parse(entry, session, context) {
     const at = eventTime(entry.timestamp, 0);
     if (!at || entry.isSidechain === true) return [];
-    const base = { agent: session.agent, sessionId: session.sessionId, at, source: "transcript", turnId: context.turnId };
+    const base = {
+      agent: session.agent,
+      sessionId: session.sessionId,
+      at,
+      source: "transcript",
+      turnId: context.turnId
+    };
     const message = object(entry.message);
     const content = Array.isArray(message.content) ? message.content.map(object) : [];
     const events = [];
@@ -826,7 +936,8 @@ var claudeTranscript = {
       for (const item of content)
         if (item.type === "tool_result" && string(item.tool_use_id))
           events.push({ ...base, type: "tool", requestIds: [string(item.tool_use_id)] });
-      if (!events.length && !entry.isMeta) events.push({ ...base, type: "progress", title: messageText(message.content) });
+      if (!events.length && !entry.isMeta)
+        events.push({ ...base, type: "progress", title: messageText(message.content) });
     }
     if (entry.type === "assistant") {
       for (const item of content)
@@ -848,7 +959,7 @@ var claudeTranscript = {
 };
 
 // src/core/adapters/claude.ts
-import { existsSync as existsSync2, readFileSync as readFileSync3 } from "node:fs";
+import { existsSync as existsSync3, readFileSync as readFileSync3 } from "node:fs";
 
 // src/core/terminal.ts
 import { existsSync } from "node:fs";
@@ -891,24 +1002,19 @@ async function focusTmuxPane(loc, actions = { run, activateBundle }) {
   const activated = bundle && bundle !== "tmux" ? await actions.activateBundle(bundle) : false;
   return window.ok && selected.ok && (switched.ok || activated);
 }
-async function ttyAlive(tty) {
-  if (!tty) return false;
-  const name = tty.replace(/^\/dev\//, "");
-  const r = await run("/bin/ps", ["-t", name, "-o", "comm="]);
-  if (!r.ok) return false;
-  return r.stdout.split("\n").some((l) => /claude|codex|node/i.test(l));
-}
 async function activateBundle(bundleId) {
   const r = await run("/usr/bin/open", ["-b", bundleId]);
   return r.ok;
 }
 async function focusTty(tty, bundleId, actions = { osascript }) {
   if (bundleId === TERMINAL_BUNDLE) {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "Terminal"
   repeat with w in windows
     repeat with t in tabs of w
-      if tty of t is ${asString(tty)} then
+      if tty of t is (item 1 of argv) then
         set selected of t to true
         set index of w to 1
         activate
@@ -917,16 +1023,22 @@ tell application "Terminal"
     end repeat
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty]
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   if (bundleId === ITERM_BUNDLE) {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "iTerm2"
   repeat with w in windows
     repeat with t in tabs of w
       repeat with s in sessions of t
-        if tty of s is ${asString(tty)} then
+        if tty of s is (item 1 of argv) then
           select w
           select t
           select s
@@ -937,20 +1049,30 @@ tell application "iTerm2"
     end repeat
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty]
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   if (bundleId === GHOSTTY_BUNDLE) {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "Ghostty"
   repeat with term in terminals
-    if tty of term is ${asString(tty)} then
+    if tty of term is (item 1 of argv) then
       focus term
       return "ok"
     end if
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty]
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   return false;
@@ -958,12 +1080,18 @@ return "miss"`);
 async function openInTerminal(command, cwd, terminal, actions = { run, osascript }) {
   const line = cwd && existsSync(cwd) ? `cd ${shQuote(cwd)} && ${command}` : command;
   if (terminal === "iterm") {
-    const r2 = await actions.osascript(`
+    const r2 = await actions.osascript(
+      `
+on run argv
 tell application "iTerm2"
   activate
   set w to (create window with default profile)
-  tell current session of w to write text ${asString(line)}
-end tell`);
+  tell current session of w to write text (item 1 of argv)
+end tell
+end run`,
+      "AppleScript",
+      [line]
+    );
     if (r2.ok) return true;
   }
   if (terminal === "ghostty") {
@@ -973,13 +1101,337 @@ end tell`);
     const r2 = await actions.run("/usr/bin/open", args);
     if (r2.ok) return true;
   }
-  const r = await actions.osascript(`
+  const r = await actions.osascript(
+    `
+on run argv
 tell application "Terminal"
   activate
-  do script ${asString(line)}
-end tell`);
+  do script (item 1 of argv)
+end tell
+end run`,
+    "AppleScript",
+    [line]
+  );
   return r.ok;
 }
+
+// src/core/sqlite.ts
+import { existsSync as existsSync2, mkdirSync } from "node:fs";
+import { dirname as dirname2 } from "node:path";
+function sqliteBinary() {
+  if (process.env.AGENT_INBOX_SQLITE) return process.env.AGENT_INBOX_SQLITE;
+  for (const p of ["/usr/bin/sqlite3", "/opt/homebrew/bin/sqlite3", "/usr/local/bin/sqlite3"]) {
+    if (existsSync2(p)) return p;
+  }
+  return "sqlite3";
+}
+function q(v) {
+  if (v === null || v === void 0) return "NULL";
+  if (typeof v === "boolean") return v ? "1" : "0";
+  if (typeof v === "number") return Number.isFinite(v) ? String(Math.trunc(v)) : "NULL";
+  return "'" + String(v).split("\0").join("").replace(/'/g, "''") + "'";
+}
+var SqliteError = class extends Error {
+};
+async function exec(dbPath, statements) {
+  if (!existsSync2(dirname2(dbPath))) mkdirSync(dirname2(dbPath), { recursive: true });
+  const res = await run(sqliteBinary(), ["-json", "-bail", "-cmd", ".timeout 4000", dbPath], statements, 1e4);
+  if (!res.ok) throw new SqliteError(res.stderr.trim() || "sqlite3 failed");
+  const out = res.stdout.trim();
+  if (!out) return [];
+  try {
+    return JSON.parse(out);
+  } catch {
+    throw new SqliteError("Unexpected sqlite3 output: " + out.slice(0, 200));
+  }
+}
+
+// src/core/db.ts
+var SCHEMA = `
+CREATE TABLE IF NOT EXISTS sessions (
+  agent TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  host TEXT NOT NULL DEFAULT 'cli',
+  title TEXT NOT NULL DEFAULT '',
+  cwd TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'idle',
+  attention TEXT,
+  summary TEXT NOT NULL DEFAULT '',
+  locator TEXT NOT NULL DEFAULT '{}',
+  subscribed INTEGER NOT NULL DEFAULT 0,
+  handled_at INTEGER,
+  started_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  transcript_path TEXT NOT NULL DEFAULT '',
+  state TEXT NOT NULL DEFAULT '{}',
+  revision INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (agent, session_id)
+);
+CREATE INDEX IF NOT EXISTS sessions_updated ON sessions(updated_at DESC);
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  agent TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  summary TEXT NOT NULL DEFAULT '',
+  at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS events_session ON events(agent, session_id, at DESC);
+CREATE TABLE IF NOT EXISTS event_receipts (agent TEXT, session_id TEXT, event_key TEXT, PRIMARY KEY(agent, session_id, event_key));
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  id TEXT NOT NULL, channel TEXT NOT NULL, payload TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at INTEGER NOT NULL DEFAULT 0, lease_until INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY(id, channel)
+);
+CREATE TABLE IF NOT EXISTS source_cursors (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS session_titles (
+  agent TEXT NOT NULL, session_id TEXT NOT NULL, title TEXT NOT NULL,
+  observed_at INTEGER NOT NULL, source TEXT NOT NULL, PRIMARY KEY(agent,session_id)
+);
+`;
+var COLUMNS = "agent, session_id, host, title, cwd, status, attention, summary, locator, subscribed, handled_at, started_at, updated_at, transcript_path, state, revision";
+var READ_SESSIONS = `SELECT ${COLUMNS.split(", ").map((column) => column === "title" ? "COALESCE(t.title,s.title) AS title" : `s.${column}`).join(", ")},
+  t.observed_at AS title_observed_at, t.source AS title_source FROM sessions s LEFT JOIN session_titles t ON s.agent=t.agent AND s.session_id=t.session_id`;
+function fromRow(r) {
+  let locator = {};
+  try {
+    locator = JSON.parse(r.locator || "{}");
+  } catch {
+    locator = {};
+  }
+  return {
+    agent: r.agent,
+    sessionId: r.session_id,
+    host: r.host === "app" ? "app" : "cli",
+    title: r.title ?? "",
+    ...r.title_observed_at != null ? { titleObservedAt: r.title_observed_at } : {},
+    ...r.title_source ? { titleSource: r.title_source } : {},
+    cwd: r.cwd ?? "",
+    status: r.status,
+    attention: r.attention ?? null,
+    summary: r.summary ?? "",
+    locator,
+    subscribed: r.subscribed === 1,
+    handledAt: r.handled_at ?? null,
+    startedAt: r.started_at,
+    updatedAt: r.updated_at,
+    transcriptPath: r.transcript_path ?? "",
+    state: parseState(r.state),
+    revision: r.revision ?? 0
+  };
+}
+function parseState(value) {
+  try {
+    const state = JSON.parse(value);
+    return state && typeof state.at === "number" && Array.isArray(state.pending) && Array.isArray(state.resolved) ? state : void 0;
+  } catch {
+    return void 0;
+  }
+}
+function values(s3) {
+  return [
+    q(s3.agent),
+    q(s3.sessionId),
+    q(s3.host),
+    q(s3.title),
+    q(s3.cwd),
+    q(s3.status),
+    q(s3.attention),
+    q(s3.summary),
+    q(JSON.stringify(s3.locator ?? {})),
+    q(s3.subscribed),
+    q(s3.handledAt),
+    q(s3.startedAt),
+    q(s3.updatedAt),
+    q(s3.transcriptPath),
+    q(JSON.stringify(s3.state ?? {})),
+    q(s3.revision ?? 0)
+  ].join(", ");
+}
+var Store = class {
+  constructor(path = DB_PATH) {
+    this.path = path;
+  }
+  path;
+  ready = null;
+  init() {
+    if (!this.ready) {
+      this.ready = this.initialize();
+      this.ready.catch(() => this.ready = null);
+    }
+    return this.ready;
+  }
+  async initialize() {
+    await exec(this.path, "PRAGMA journal_mode=WAL;");
+    await exec(this.path, SCHEMA);
+    for (const [name, declaration] of [
+      ["state", "TEXT NOT NULL DEFAULT '{}'"],
+      ["revision", "INTEGER NOT NULL DEFAULT 0"]
+    ]) {
+      const columns = await exec(this.path, "PRAGMA table_info(sessions);");
+      if (columns.some((column) => column.name === name)) continue;
+      try {
+        await exec(this.path, `ALTER TABLE sessions ADD COLUMN ${name} ${declaration};`);
+      } catch (error) {
+        const current = await exec(this.path, "PRAGMA table_info(sessions);");
+        if (!current.some((column) => column.name === name)) throw error;
+      }
+    }
+    await exec(
+      this.path,
+      "UPDATE sessions SET status='ready', revision=revision+1 WHERE agent IN ('claude','codex') AND status='done' AND state='{}';"
+    );
+  }
+  async run(sql) {
+    await this.init();
+    return exec(this.path, sql);
+  }
+  async get(agent, sessionId) {
+    const rows = await this.run(`${READ_SESSIONS} WHERE s.agent=${q(agent)} AND s.session_id=${q(sessionId)};`);
+    return rows[0] ? fromRow(rows[0]) : void 0;
+  }
+  async all(limit = 500) {
+    const rows = await this.run(`${READ_SESSIONS} ORDER BY s.updated_at DESC LIMIT ${q(limit)};`);
+    return rows.map(fromRow);
+  }
+  /** Rows that can appear in the inbox or the menu bar. */
+  async active() {
+    const rows = await this.run(
+      `${READ_SESSIONS} WHERE s.subscribed=1 AND s.handled_at IS NULL ORDER BY s.updated_at DESC;`
+    );
+    return rows.map(fromRow);
+  }
+  async put(s3) {
+    await this.run(
+      `INSERT INTO sessions (${COLUMNS}) VALUES (${values(s3)}) ON CONFLICT(agent,session_id) DO UPDATE SET (${COLUMNS})=(${values(s3)}), revision=sessions.revision+1;`
+    );
+  }
+  /** Apply an adapter event through the state machine and persist it. */
+  async record(ev, options = {}) {
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const prev = await this.get(ev.agent, ev.sessionId);
+      const receipt = `agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)} AND event_key=${q(ev.eventId)}`;
+      if (ev.eventId && (await this.run(`SELECT 1 FROM event_receipts WHERE ${receipt};`)).length) return null;
+      const t = applyEvent(prev, ev);
+      if (!t) return null;
+      t.next.revision = (prev?.revision ?? -1) + 1;
+      const allowed = ev.eventId ? ` AND NOT EXISTS (SELECT 1 FROM event_receipts WHERE ${receipt})` : "";
+      const write = prev ? `UPDATE sessions SET (${COLUMNS})=(${values(t.next)}) WHERE agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)} AND revision=${q(prev.revision ?? 0)}${allowed};` : `INSERT OR IGNORE INTO sessions (${COLUMNS}) SELECT ${values(t.next)} WHERE 1${allowed};`;
+      const loc = t.next.locator;
+      const sameLocation = loc.tmuxPane && loc.tmuxSocket ? `json_extract(locator,'$.tmuxPane')=${q(loc.tmuxPane)} AND json_extract(locator,'$.tmuxSocket')=${q(loc.tmuxSocket)}` : `json_extract(locator,'$.tty')=${q(loc.tty)}`;
+      const stripped = `json_remove(locator,${TERMINAL_LOCATOR_KEYS.map((key2) => q(`$.${key2}`)).join(",")})`;
+      const ownership = ev.locator?.tty && loc.tty && loc.observedAt === ev.at ? `UPDATE sessions SET locator=${stripped}, revision=revision+1
+           WHERE (SELECT n FROM applied)=1 AND (${sameLocation})
+           AND COALESCE(json_extract(locator,'$.observedAt'),0)<${q(ev.at)};
+           UPDATE sessions SET locator=${stripped}, revision=revision+1
+           WHERE (SELECT n FROM applied)=1 AND agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)}
+           AND EXISTS (SELECT 1 FROM sessions WHERE (${sameLocation}) AND COALESCE(json_extract(locator,'$.observedAt'),0)>${q(ev.at)});` : "";
+      const notificationId = `${ev.agent}:${ev.sessionId}:${t.next.revision}`;
+      const enqueue = t.notify && !options.silent ? [...new Set(options.channels ?? [])].map(
+        (channel) => `INSERT OR IGNORE INTO notification_outbox (id,channel,payload) SELECT ${q(notificationId)},${q(channel)},${q(JSON.stringify(t.next))} WHERE (SELECT n FROM applied)=1;`
+      ).join("") : "";
+      const result = await this.run(
+        `BEGIN IMMEDIATE; ${write} CREATE TEMP TABLE applied AS SELECT changes() AS n;INSERT INTO events (agent,session_id,type,summary,at) SELECT ${q(ev.agent)},${q(ev.sessionId)},${q(ev.type)},${q(t.next.summary)},${q(ev.at)} WHERE (SELECT n FROM applied)=1;` + (ev.eventId ? `INSERT OR IGNORE INTO event_receipts SELECT ${q(ev.agent)},${q(ev.sessionId)},${q(ev.eventId)} WHERE (SELECT n FROM applied)=1;` : "") + enqueue + ownership + `DELETE FROM events WHERE at < ${q(ev.at - 30 * 24 * 3600 * 1e3)}; SELECT n FROM applied; COMMIT;`
+      );
+      if (result[0]?.n === 1) return t;
+    }
+    throw new Error("Concurrent session updates did not settle; event was not recorded");
+  }
+  async subscribed() {
+    return (await this.run(`${READ_SESSIONS} WHERE s.subscribed=1;`)).map(fromRow);
+  }
+  /** Metadata never changes state, activity, subscription or notification receipts. */
+  async syncTitles(observations) {
+    const valid = observations.filter((o) => o.title.trim() && Number.isFinite(o.observedAt) && o.observedAt >= 0);
+    if (!valid.length) return [];
+    if (valid.length > 200) {
+      const saved = [];
+      for (let index = 0; index < valid.length; index += 200)
+        saved.push(...await this.syncTitles(valid.slice(index, index + 200)));
+      return saved;
+    }
+    const writes = valid.map(
+      (o) => `INSERT INTO session_titles (agent,session_id,title,observed_at,source)
+       SELECT ${q(o.agent)},${q(o.sessionId)},${q(o.title)},${q(o.observedAt)},${q(o.source)}
+       WHERE EXISTS (SELECT 1 FROM sessions WHERE agent=${q(o.agent)} AND session_id=${q(o.sessionId)})
+       ON CONFLICT(agent,session_id) DO UPDATE SET title=excluded.title,observed_at=excluded.observed_at,source=excluded.source
+       WHERE excluded.observed_at>session_titles.observed_at;`
+    ).join("\n");
+    const where = valid.map((o) => `(agent=${q(o.agent)} AND session_id=${q(o.sessionId)})`).join(" OR ");
+    return this.run(`BEGIN IMMEDIATE; ${writes}
+      SELECT agent,session_id AS sessionId,title,observed_at AS observedAt,source FROM session_titles WHERE ${where}; COMMIT;`);
+  }
+  async attachTranscript(agent, sessionId, path) {
+    await this.run(
+      `UPDATE sessions SET transcript_path=${q(path)}, revision=revision+1 WHERE agent=${q(agent)} AND session_id=${q(sessionId)} AND transcript_path<>${q(path)};`
+    );
+  }
+  async readCursor(key2) {
+    const rows = await this.run(`SELECT value FROM source_cursors WHERE key=${q(key2)};`);
+    return rows[0] ? JSON.parse(rows[0].value) : void 0;
+  }
+  async writeCursor(key2, value) {
+    await this.run(`INSERT OR REPLACE INTO source_cursors VALUES (${q(key2)},${q(JSON.stringify(value))});`);
+  }
+  async claimNotifications(now = Date.now()) {
+    return this.run(
+      `UPDATE notification_outbox SET lease_until=${q(now + 6e4)} WHERE rowid IN (SELECT rowid FROM notification_outbox WHERE next_attempt_at<=${q(now)} AND lease_until<=${q(now)} LIMIT 1) RETURNING id,channel,payload,attempts;`
+    );
+  }
+  async finishNotification(job, delivered, now = Date.now()) {
+    const where = `id=${q(job.id)} AND channel=${q(job.channel)}`;
+    await this.run(
+      delivered ? `DELETE FROM notification_outbox WHERE ${where};` : `UPDATE notification_outbox SET attempts=attempts+1,lease_until=0,next_attempt_at=${q(now + Math.min(36e5, 1e3 * 2 ** Math.min(job.attempts, 12)))} WHERE ${where};`
+    );
+  }
+  async setSubscribed(agent, sessionId, subscribed) {
+    await this.run(
+      `UPDATE sessions SET revision=revision+1, subscribed=${q(subscribed)}${subscribed ? ", handled_at=NULL" : ""} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`
+    );
+  }
+  /** Subscribe to a session that may only exist as a transcript on disk (history). */
+  async subscribeEntry(s3, options = {}) {
+    const identity = options.focused && s3.host === "app" ? `, host='app', title=CASE WHEN excluded.title<>'' THEN excluded.title ELSE sessions.title END, locator=json_patch(CASE WHEN json_valid(sessions.locator) THEN sessions.locator ELSE '{}' END, ${q(
+      JSON.stringify({
+        ...s3.locator.hostId ? { hostId: s3.locator.hostId } : {},
+        ...s3.locator.claudeDesktopId ? { claudeDesktopId: s3.locator.claudeDesktopId } : {}
+      })
+    )})` : "";
+    await this.run(
+      `INSERT INTO sessions (${COLUMNS}) VALUES (${values({ ...s3, subscribed: true, handledAt: null })}) ON CONFLICT(agent, session_id) DO UPDATE SET revision=sessions.revision+1, subscribed=1, handled_at=NULL${identity};`
+    );
+    if (options.focused && s3.title)
+      await this.syncTitles([
+        {
+          agent: s3.agent,
+          sessionId: s3.sessionId,
+          title: s3.title,
+          observedAt: s3.titleObservedAt ?? Date.now(),
+          source: "focused-window"
+        }
+      ]);
+  }
+  async markHandled(agent, sessionId, at = Date.now()) {
+    await this.run(
+      `UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`
+    );
+  }
+  async unmarkHandled(agent, sessionId) {
+    await this.run(
+      `UPDATE sessions SET revision=revision+1, handled_at=NULL WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`
+    );
+  }
+  /** "Archive Completed": every finished session leaves the inbox. */
+  async archiveDone(at = Date.now(), observed) {
+    const snapshots = observed?.filter((s3) => s3.subscribed && s3.handledAt === null && s3.status === "done");
+    if (snapshots?.length === 0) return 0;
+    const state = snapshots ? `status IN ('idle','done') AND (${snapshots.map((s3) => `(agent=${q(s3.agent)} AND session_id=${q(s3.sessionId)} AND updated_at=${q(s3.updatedAt)})`).join(" OR ")})` : "status='done'";
+    const rows = await this.run(
+      `UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE subscribed=1 AND ${state} AND handled_at IS NULL; SELECT changes() AS n;`
+    );
+    return rows[0]?.n ?? 0;
+  }
+};
 
 // src/core/jump.ts
 async function openUrl(url) {
@@ -990,11 +1442,21 @@ async function copyToClipboard(text2) {
   const r = await run("/usr/bin/pbcopy", [], text2);
   return r.ok;
 }
-var cliNavigation = { activateBundle, bundleFor, focusTmuxPane, focusTty, openInTerminal, tmuxPaneAlive, ttyAlive };
+var cliNavigation = {
+  activateBundle,
+  bundleFor,
+  focusTmuxPane,
+  focusTty,
+  openInTerminal,
+  tmuxPaneAlive,
+  terminalOwnerAlive,
+  currentSession: (s3) => new Store().get(s3.agent, s3.sessionId)
+};
 async function jumpToCli(session, resumeCommand, config, navigation = cliNavigation) {
-  const loc = session.locator ?? {};
-  const alive = await navigation.ttyAlive(loc.tty);
-  if (loc.tmuxPane && await navigation.tmuxPaneAlive(loc) && (alive || !loc.tty)) {
+  const current = await navigation.currentSession(session);
+  const loc = current?.locator ?? {};
+  const alive = await navigation.terminalOwnerAlive(loc);
+  if (loc.tmuxPane && await navigation.tmuxPaneAlive(loc) && alive) {
     if (await navigation.focusTmuxPane(loc)) return { ok: true, method: "tmux" };
   }
   if (alive && loc.tty) {
@@ -1194,7 +1656,8 @@ function hostFromEnv(env, transcriptPath) {
     try {
       const { head, tail } = readHeadTail(transcriptPath);
       const info = parseClaude(parseLines(head), parseLines(tail));
-      if (info.entrypoint) return { host: /desktop/i.test(info.entrypoint) ? "app" : "cli", entrypoint: info.entrypoint };
+      if (info.entrypoint)
+        return { host: /desktop/i.test(info.entrypoint) ? "app" : "cli", entrypoint: info.entrypoint };
     } catch {
     }
   }
@@ -1275,7 +1738,8 @@ var claudeNavigation = { openUrl, activateBundle, copyToClipboard, jumpToCli, re
 async function jumpClaude(session, config, navigation = claudeNavigation) {
   const records = navigation.readClaudeDesktopSessions();
   const resolved = enrichClaudeSessions([session], records)[0];
-  if (resolved.host !== "app") return navigation.jumpToCli(resolved, `claude --resume ${shQuote(resolved.sessionId)}`, config);
+  if (resolved.host !== "app")
+    return navigation.jumpToCli(resolved, `claude --resume ${shQuote(resolved.sessionId)}`, config);
   const record2 = findClaudeDesktopSession(resolved.sessionId, records);
   const desktopId = record2?.sessionId || resolved.locator.claudeDesktopId || resolved.sessionId;
   let url;
@@ -1303,8 +1767,8 @@ var claudeAdapter = {
   name: "Claude Code",
   icon: "claude.svg",
   detect() {
-    const cli = existsSync2(CLAUDE_DIR);
-    const app = CLAUDE_APP_PATHS.some(existsSync2);
+    const cli = existsSync3(CLAUDE_DIR);
+    const app = CLAUDE_APP_PATHS.some(existsSync3);
     let hooked = false;
     try {
       hooked = hasOurHooks(parseJsonFile(read(CLAUDE_SETTINGS), CLAUDE_SETTINGS), CLAUDE_EVENTS);
@@ -1327,7 +1791,11 @@ var claudeAdapter = {
           before,
           after,
           summary: CLAUDE_EVENTS.join(" \xB7 "),
-          preview: JSON.stringify({ hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) }, null, 2),
+          preview: JSON.stringify(
+            { hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) },
+            null,
+            2
+          ),
           previewLang: "json"
         }
       ],
@@ -1339,7 +1807,9 @@ var claudeAdapter = {
     if (!before) return { changes: [], notes: [] };
     const after = stringify(withoutOurHooks(parseJsonFile(before, CLAUDE_SETTINGS)));
     return {
-      changes: [{ path: CLAUDE_SETTINGS, before, after, summary: CLAUDE_EVENTS.join(" \xB7 "), preview: "", previewLang: "json" }],
+      changes: [
+        { path: CLAUDE_SETTINGS, before, after, summary: CLAUDE_EVENTS.join(" \xB7 "), preview: "", previewLang: "json" }
+      ],
       notes: []
     };
   },
@@ -1350,12 +1820,18 @@ var claudeAdapter = {
 };
 
 // src/core/codex-desktop.ts
-import { existsSync as existsSync3, readdirSync as readdirSync3, readFileSync as readFileSync4 } from "node:fs";
+import { existsSync as existsSync4, readdirSync as readdirSync3, readFileSync as readFileSync4 } from "node:fs";
 import { join as join5 } from "node:path";
 async function readCodexTitles(sessions, root = CODEX_DIR, now = Date.now) {
   const observedAt = now();
   const known = new Set(sessions.map((session) => session.sessionId));
-  return (await readCodexDesktopSessions(root)).filter((entry) => known.has(entry.sessionId)).map((entry) => ({ agent: "codex", sessionId: entry.sessionId, title: entry.title, observedAt, source: "codex-catalog" }));
+  return (await readCodexDesktopSessions(root)).filter((entry) => known.has(entry.sessionId)).map((entry) => ({
+    agent: "codex",
+    sessionId: entry.sessionId,
+    title: entry.title,
+    observedAt,
+    source: "codex-catalog"
+  }));
 }
 async function readCodexDesktopSessions(root = CODEX_DIR) {
   let files;
@@ -1389,7 +1865,7 @@ async function readCodexDesktopSessions(root = CODEX_DIR) {
     }));
   }
   const path = join5(root, "session_index.jsonl");
-  if (!existsSync3(path)) return [];
+  if (!existsSync4(path)) return [];
   const names = /* @__PURE__ */ new Map();
   try {
     for (const line of readFileSync4(path, "utf8").split("\n")) {
@@ -1426,7 +1902,7 @@ async function query(path, sql) {
 }
 
 // src/core/adapters/codex.ts
-import { existsSync as existsSync4, readFileSync as readFileSync5 } from "node:fs";
+import { existsSync as existsSync5, readFileSync as readFileSync5 } from "node:fs";
 var CODEX_APP_BUNDLE = "com.openai.codex";
 var CODEX_APP_PATHS = ["/Applications/Codex.app", "/Applications/ChatGPT.app"];
 var CODEX_HOOK_EVENTS = [
@@ -1440,7 +1916,8 @@ var CODEX_HOOK_EVENTS = [
 ];
 var THREAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function jumpCodex(session, config, navigation = { openUrl, copyToClipboard, jumpToCli }) {
-  if (session.host !== "app") return navigation.jumpToCli(session, `codex resume ${shQuote(session.sessionId)}`, config);
+  if (session.host !== "app")
+    return navigation.jumpToCli(session, `codex resume ${shQuote(session.sessionId)}`, config);
   if (THREAD_ID.test(session.sessionId)) {
     const host = session.locator?.hostId ? `?hostId=${encodeURIComponent(session.locator.hostId)}` : "";
     if (await navigation.openUrl(`codex://threads/${session.sessionId}${host}`)) return { ok: true, method: "url" };
@@ -1538,7 +2015,8 @@ function parseCodexNotify(payload, env, now = Date.now()) {
   if (type === "agent-turn-complete") {
     return { ...base, type: "stopped", attention: asksForInput(last) ? "question" : void 0, summary: last };
   }
-  if (/approval|permission/i.test(type)) return { ...base, type: "needs_input", attention: "permission", summary: last };
+  if (/approval|permission/i.test(type))
+    return { ...base, type: "needs_input", attention: "permission", summary: last };
   return null;
 }
 function parseCodexHook(payload, env, now = Date.now()) {
@@ -1602,8 +2080,8 @@ var codexAdapter = {
   name: "Codex",
   icon: "openai.svg",
   detect() {
-    const cli = existsSync4(CODEX_DIR);
-    const app = CODEX_APP_PATHS.some(existsSync4);
+    const cli = existsSync5(CODEX_DIR);
+    const app = CODEX_APP_PATHS.some(existsSync5);
     const toml = read2(CODEX_CONFIG);
     let hooked = false;
     try {
@@ -1635,7 +2113,11 @@ var codexAdapter = {
       before: hooksText,
       after: stringify(withOurHooks(parseJsonFile(hooksText, CODEX_HOOKS), entries)),
       summary: CODEX_HOOK_EVENTS.join(" \xB7 "),
-      preview: JSON.stringify({ hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) }, null, 2),
+      preview: JSON.stringify(
+        { hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) },
+        null,
+        2
+      ),
       previewLang: "json"
     });
     return { changes, notes: ["setup.codexHooksNote"] };
@@ -1677,7 +2159,7 @@ var codexAdapter = {
 };
 
 // src/core/adapters/custom.ts
-import { existsSync as existsSync5, mkdirSync, readdirSync as readdirSync4, readFileSync as readFileSync6, writeFileSync } from "node:fs";
+import { existsSync as existsSync6, mkdirSync as mkdirSync2, readdirSync as readdirSync4, readFileSync as readFileSync6, writeFileSync } from "node:fs";
 import { join as join6 } from "node:path";
 var fill = (tpl, s3) => tpl.split("{sessionId}").join(s3.sessionId).split("{cwd}").join(s3.cwd);
 function manifestAdapter(m) {
@@ -1708,7 +2190,8 @@ function loadManifests(dir = ADAPTERS_DIR) {
   for (const f of files) {
     try {
       const m = JSON.parse(readFileSync6(join6(dir, f), "utf8"));
-      if (m && typeof m.id === "string" && /^[a-z0-9][a-z0-9_-]*$/i.test(m.id) && m.id !== "claude" && m.id !== "codex") out.push(m);
+      if (m && typeof m.id === "string" && /^[a-z0-9][a-z0-9_-]*$/i.test(m.id) && m.id !== "claude" && m.id !== "codex")
+        out.push(m);
     } catch {
     }
   }
@@ -1725,7 +2208,7 @@ function getAdapter(id) {
 }
 
 // src/core/config.ts
-import { existsSync as existsSync6, mkdirSync as mkdirSync2, readFileSync as readFileSync7, writeFileSync as writeFileSync2 } from "node:fs";
+import { existsSync as existsSync7, mkdirSync as mkdirSync3, readFileSync as readFileSync7, writeFileSync as writeFileSync2 } from "node:fs";
 var DEFAULT_DEEPLINK_BASE = "raycast://extensions/silencerichard/agent-inbox";
 var DEFAULT_CONFIG = {
   notifications: true,
@@ -1742,437 +2225,35 @@ function readConfig(path = CONFIG_PATH) {
   }
 }
 
-// src/core/sqlite.ts
-import { existsSync as existsSync7, mkdirSync as mkdirSync3 } from "node:fs";
-import { dirname as dirname2 } from "node:path";
-function sqliteBinary() {
-  if (process.env.AGENT_INBOX_SQLITE) return process.env.AGENT_INBOX_SQLITE;
-  for (const p of ["/usr/bin/sqlite3", "/opt/homebrew/bin/sqlite3", "/usr/local/bin/sqlite3"]) {
-    if (existsSync7(p)) return p;
+// src/core/format.ts
+function attentionLabel(attention) {
+  switch (attention) {
+    case "question":
+      return "Asked you a question";
+    case "permission":
+      return "Needs permission";
+    case "failed":
+      return "Failed";
+    case "quota":
+      return "Out of quota";
+    case "interrupted":
+      return "Interrupted";
+    default:
+      return "Waiting for input";
   }
-  return "sqlite3";
-}
-function q(v) {
-  if (v === null || v === void 0) return "NULL";
-  if (typeof v === "boolean") return v ? "1" : "0";
-  if (typeof v === "number") return Number.isFinite(v) ? String(Math.trunc(v)) : "NULL";
-  return "'" + String(v).split("\0").join("").replace(/'/g, "''") + "'";
-}
-var SqliteError = class extends Error {
-};
-async function exec(dbPath, statements) {
-  if (!existsSync7(dirname2(dbPath))) mkdirSync3(dirname2(dbPath), { recursive: true });
-  const res = await run(sqliteBinary(), ["-json", "-bail", "-cmd", ".timeout 4000", dbPath], statements, 1e4);
-  if (!res.ok) throw new SqliteError(res.stderr.trim() || "sqlite3 failed");
-  const out = res.stdout.trim();
-  if (!out) return [];
-  try {
-    return JSON.parse(out);
-  } catch {
-    throw new SqliteError("Unexpected sqlite3 output: " + out.slice(0, 200));
-  }
-}
-
-// src/core/db.ts
-var SCHEMA = `
-CREATE TABLE IF NOT EXISTS sessions (
-  agent TEXT NOT NULL,
-  session_id TEXT NOT NULL,
-  host TEXT NOT NULL DEFAULT 'cli',
-  title TEXT NOT NULL DEFAULT '',
-  cwd TEXT NOT NULL DEFAULT '',
-  status TEXT NOT NULL DEFAULT 'idle',
-  attention TEXT,
-  summary TEXT NOT NULL DEFAULT '',
-  locator TEXT NOT NULL DEFAULT '{}',
-  subscribed INTEGER NOT NULL DEFAULT 0,
-  handled_at INTEGER,
-  started_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-  transcript_path TEXT NOT NULL DEFAULT '',
-  state TEXT NOT NULL DEFAULT '{}',
-  revision INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (agent, session_id)
-);
-CREATE INDEX IF NOT EXISTS sessions_updated ON sessions(updated_at DESC);
-CREATE TABLE IF NOT EXISTS events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  agent TEXT NOT NULL,
-  session_id TEXT NOT NULL,
-  type TEXT NOT NULL,
-  summary TEXT NOT NULL DEFAULT '',
-  at INTEGER NOT NULL
-);
-CREATE INDEX IF NOT EXISTS events_session ON events(agent, session_id, at DESC);
-CREATE TABLE IF NOT EXISTS event_receipts (agent TEXT, session_id TEXT, event_key TEXT, PRIMARY KEY(agent, session_id, event_key));
-CREATE TABLE IF NOT EXISTS notification_outbox (
-  id TEXT NOT NULL, channel TEXT NOT NULL, payload TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
-  next_attempt_at INTEGER NOT NULL DEFAULT 0, lease_until INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY(id, channel)
-);
-CREATE TABLE IF NOT EXISTS source_cursors (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS session_titles (
-  agent TEXT NOT NULL, session_id TEXT NOT NULL, title TEXT NOT NULL,
-  observed_at INTEGER NOT NULL, source TEXT NOT NULL, PRIMARY KEY(agent,session_id)
-);
-`;
-var COLUMNS = "agent, session_id, host, title, cwd, status, attention, summary, locator, subscribed, handled_at, started_at, updated_at, transcript_path, state, revision";
-var READ_SESSIONS = `SELECT ${COLUMNS.split(", ").map((column) => column === "title" ? "COALESCE(t.title,s.title) AS title" : `s.${column}`).join(", ")},
-  t.observed_at AS title_observed_at, t.source AS title_source FROM sessions s LEFT JOIN session_titles t ON s.agent=t.agent AND s.session_id=t.session_id`;
-function fromRow(r) {
-  let locator = {};
-  try {
-    locator = JSON.parse(r.locator || "{}");
-  } catch {
-    locator = {};
-  }
-  return {
-    agent: r.agent,
-    sessionId: r.session_id,
-    host: r.host === "app" ? "app" : "cli",
-    title: r.title ?? "",
-    ...r.title_observed_at != null ? { titleObservedAt: r.title_observed_at } : {},
-    ...r.title_source ? { titleSource: r.title_source } : {},
-    cwd: r.cwd ?? "",
-    status: r.status,
-    attention: r.attention ?? null,
-    summary: r.summary ?? "",
-    locator,
-    subscribed: r.subscribed === 1,
-    handledAt: r.handled_at ?? null,
-    startedAt: r.started_at,
-    updatedAt: r.updated_at,
-    transcriptPath: r.transcript_path ?? "",
-    state: parseState(r.state),
-    revision: r.revision ?? 0
-  };
-}
-function parseState(value) {
-  try {
-    const state = JSON.parse(value);
-    return state && typeof state.at === "number" && Array.isArray(state.pending) && Array.isArray(state.resolved) ? state : void 0;
-  } catch {
-    return void 0;
-  }
-}
-function values(s3) {
-  return [
-    q(s3.agent),
-    q(s3.sessionId),
-    q(s3.host),
-    q(s3.title),
-    q(s3.cwd),
-    q(s3.status),
-    q(s3.attention),
-    q(s3.summary),
-    q(JSON.stringify(s3.locator ?? {})),
-    q(s3.subscribed),
-    q(s3.handledAt),
-    q(s3.startedAt),
-    q(s3.updatedAt),
-    q(s3.transcriptPath),
-    q(JSON.stringify(s3.state ?? {})),
-    q(s3.revision ?? 0)
-  ].join(", ");
-}
-var Store = class {
-  constructor(path = DB_PATH) {
-    this.path = path;
-  }
-  path;
-  ready = null;
-  init() {
-    if (!this.ready) {
-      this.ready = this.initialize();
-      this.ready.catch(() => this.ready = null);
-    }
-    return this.ready;
-  }
-  async initialize() {
-    await exec(this.path, "PRAGMA journal_mode=WAL;");
-    await exec(this.path, SCHEMA);
-    for (const [name, declaration] of [
-      ["state", "TEXT NOT NULL DEFAULT '{}'"],
-      ["revision", "INTEGER NOT NULL DEFAULT 0"]
-    ]) {
-      const columns = await exec(this.path, "PRAGMA table_info(sessions);");
-      if (columns.some((column) => column.name === name)) continue;
-      try {
-        await exec(this.path, `ALTER TABLE sessions ADD COLUMN ${name} ${declaration};`);
-      } catch (error) {
-        const current = await exec(this.path, "PRAGMA table_info(sessions);");
-        if (!current.some((column) => column.name === name)) throw error;
-      }
-    }
-    await exec(
-      this.path,
-      "UPDATE sessions SET status='ready', revision=revision+1 WHERE agent IN ('claude','codex') AND status='done' AND state='{}';"
-    );
-  }
-  async run(sql) {
-    await this.init();
-    return exec(this.path, sql);
-  }
-  async get(agent, sessionId) {
-    const rows = await this.run(`${READ_SESSIONS} WHERE s.agent=${q(agent)} AND s.session_id=${q(sessionId)};`);
-    return rows[0] ? fromRow(rows[0]) : void 0;
-  }
-  async all(limit = 500) {
-    const rows = await this.run(`${READ_SESSIONS} ORDER BY s.updated_at DESC LIMIT ${q(limit)};`);
-    return rows.map(fromRow);
-  }
-  /** Rows that can appear in the inbox or the menu bar. */
-  async active() {
-    const rows = await this.run(`${READ_SESSIONS} WHERE s.subscribed=1 AND s.handled_at IS NULL ORDER BY s.updated_at DESC;`);
-    return rows.map(fromRow);
-  }
-  async put(s3) {
-    await this.run(
-      `INSERT INTO sessions (${COLUMNS}) VALUES (${values(s3)}) ON CONFLICT(agent,session_id) DO UPDATE SET (${COLUMNS})=(${values(s3)}), revision=sessions.revision+1;`
-    );
-  }
-  /** Apply an adapter event through the state machine and persist it. */
-  async record(ev, options = {}) {
-    for (let attempt = 0; attempt < 16; attempt++) {
-      const prev = await this.get(ev.agent, ev.sessionId);
-      const receipt = `agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)} AND event_key=${q(ev.eventId)}`;
-      if (ev.eventId && (await this.run(`SELECT 1 FROM event_receipts WHERE ${receipt};`)).length) return null;
-      const t = applyEvent(prev, ev);
-      if (!t) return null;
-      t.next.revision = (prev?.revision ?? -1) + 1;
-      const allowed = ev.eventId ? ` AND NOT EXISTS (SELECT 1 FROM event_receipts WHERE ${receipt})` : "";
-      const write = prev ? `UPDATE sessions SET (${COLUMNS})=(${values(t.next)}) WHERE agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)} AND revision=${q(prev.revision ?? 0)}${allowed};` : `INSERT OR IGNORE INTO sessions (${COLUMNS}) SELECT ${values(t.next)} WHERE 1${allowed};`;
-      const notificationId = `${ev.agent}:${ev.sessionId}:${t.next.revision}`;
-      const enqueue = t.notify && !options.silent ? [...new Set(options.channels ?? [])].map(
-        (channel) => `INSERT OR IGNORE INTO notification_outbox (id,channel,payload) SELECT ${q(notificationId)},${q(channel)},${q(JSON.stringify(t.next))} WHERE (SELECT n FROM applied)=1;`
-      ).join("") : "";
-      const result = await this.run(
-        `BEGIN IMMEDIATE; ${write} CREATE TEMP TABLE applied AS SELECT changes() AS n;INSERT INTO events (agent,session_id,type,summary,at) SELECT ${q(ev.agent)},${q(ev.sessionId)},${q(ev.type)},${q(t.next.summary)},${q(ev.at)} WHERE (SELECT n FROM applied)=1;` + (ev.eventId ? `INSERT OR IGNORE INTO event_receipts SELECT ${q(ev.agent)},${q(ev.sessionId)},${q(ev.eventId)} WHERE (SELECT n FROM applied)=1;` : "") + enqueue + `DELETE FROM events WHERE at < ${q(ev.at - 30 * 24 * 3600 * 1e3)}; SELECT n FROM applied; COMMIT;`
-      );
-      if (result[0]?.n === 1) return t;
-    }
-    throw new Error("Concurrent session updates did not settle; event was not recorded");
-  }
-  async subscribed() {
-    return (await this.run(`${READ_SESSIONS} WHERE s.subscribed=1;`)).map(fromRow);
-  }
-  /** Metadata never changes state, activity, subscription or notification receipts. */
-  async syncTitles(observations) {
-    const valid = observations.filter((o) => o.title.trim() && Number.isFinite(o.observedAt) && o.observedAt >= 0);
-    if (!valid.length) return [];
-    if (valid.length > 200) {
-      const saved = [];
-      for (let index = 0; index < valid.length; index += 200) saved.push(...await this.syncTitles(valid.slice(index, index + 200)));
-      return saved;
-    }
-    const writes = valid.map(
-      (o) => `INSERT INTO session_titles (agent,session_id,title,observed_at,source)
-       SELECT ${q(o.agent)},${q(o.sessionId)},${q(o.title)},${q(o.observedAt)},${q(o.source)}
-       WHERE EXISTS (SELECT 1 FROM sessions WHERE agent=${q(o.agent)} AND session_id=${q(o.sessionId)})
-       ON CONFLICT(agent,session_id) DO UPDATE SET title=excluded.title,observed_at=excluded.observed_at,source=excluded.source
-       WHERE excluded.observed_at>session_titles.observed_at;`
-    ).join("\n");
-    const where = valid.map((o) => `(agent=${q(o.agent)} AND session_id=${q(o.sessionId)})`).join(" OR ");
-    return this.run(`BEGIN IMMEDIATE; ${writes}
-      SELECT agent,session_id AS sessionId,title,observed_at AS observedAt,source FROM session_titles WHERE ${where}; COMMIT;`);
-  }
-  async attachTranscript(agent, sessionId, path) {
-    await this.run(
-      `UPDATE sessions SET transcript_path=${q(path)}, revision=revision+1 WHERE agent=${q(agent)} AND session_id=${q(sessionId)} AND transcript_path<>${q(path)};`
-    );
-  }
-  async readCursor(key2) {
-    const rows = await this.run(`SELECT value FROM source_cursors WHERE key=${q(key2)};`);
-    return rows[0] ? JSON.parse(rows[0].value) : void 0;
-  }
-  async writeCursor(key2, value) {
-    await this.run(`INSERT OR REPLACE INTO source_cursors VALUES (${q(key2)},${q(JSON.stringify(value))});`);
-  }
-  async claimNotifications(now = Date.now()) {
-    return this.run(
-      `UPDATE notification_outbox SET lease_until=${q(now + 6e4)} WHERE rowid IN (SELECT rowid FROM notification_outbox WHERE next_attempt_at<=${q(now)} AND lease_until<=${q(now)} LIMIT 1) RETURNING id,channel,payload,attempts;`
-    );
-  }
-  async finishNotification(job, delivered, now = Date.now()) {
-    const where = `id=${q(job.id)} AND channel=${q(job.channel)}`;
-    await this.run(
-      delivered ? `DELETE FROM notification_outbox WHERE ${where};` : `UPDATE notification_outbox SET attempts=attempts+1,lease_until=0,next_attempt_at=${q(now + Math.min(36e5, 1e3 * 2 ** Math.min(job.attempts, 12)))} WHERE ${where};`
-    );
-  }
-  async setSubscribed(agent, sessionId, subscribed) {
-    await this.run(
-      `UPDATE sessions SET revision=revision+1, subscribed=${q(subscribed)}${subscribed ? ", handled_at=NULL" : ""} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`
-    );
-  }
-  /** Subscribe to a session that may only exist as a transcript on disk (history). */
-  async subscribeEntry(s3, options = {}) {
-    const identity = options.focused && s3.host === "app" ? `, host='app', title=CASE WHEN excluded.title<>'' THEN excluded.title ELSE sessions.title END, locator=json_patch(CASE WHEN json_valid(sessions.locator) THEN sessions.locator ELSE '{}' END, ${q(
-      JSON.stringify({
-        ...s3.locator.hostId ? { hostId: s3.locator.hostId } : {},
-        ...s3.locator.claudeDesktopId ? { claudeDesktopId: s3.locator.claudeDesktopId } : {}
-      })
-    )})` : "";
-    await this.run(
-      `INSERT INTO sessions (${COLUMNS}) VALUES (${values({ ...s3, subscribed: true, handledAt: null })}) ON CONFLICT(agent, session_id) DO UPDATE SET revision=sessions.revision+1, subscribed=1, handled_at=NULL${identity};`
-    );
-    if (options.focused && s3.title)
-      await this.syncTitles([
-        { agent: s3.agent, sessionId: s3.sessionId, title: s3.title, observedAt: s3.titleObservedAt ?? Date.now(), source: "focused-window" }
-      ]);
-  }
-  async markHandled(agent, sessionId, at = Date.now()) {
-    await this.run(`UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`);
-  }
-  async unmarkHandled(agent, sessionId) {
-    await this.run(`UPDATE sessions SET revision=revision+1, handled_at=NULL WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`);
-  }
-  /** "Archive Completed": every finished session leaves the inbox. */
-  async archiveDone(at = Date.now(), observed) {
-    const snapshots = observed?.filter((s3) => s3.subscribed && s3.handledAt === null && s3.status === "done");
-    if (snapshots?.length === 0) return 0;
-    const state = snapshots ? `status IN ('idle','done') AND (${snapshots.map((s3) => `(agent=${q(s3.agent)} AND session_id=${q(s3.sessionId)} AND updated_at=${q(s3.updatedAt)})`).join(" OR ")})` : "status='done'";
-    const rows = await this.run(
-      `UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE subscribed=1 AND ${state} AND handled_at IS NULL; SELECT changes() AS n;`
-    );
-    return rows[0]?.n ?? 0;
-  }
-};
-
-// src/core/locate.ts
-async function ttyOf(pid) {
-  const r = await run("/bin/ps", ["-o", "tty=", "-p", String(pid)], void 0, 2e3);
-  const tty = r.stdout.trim();
-  if (!r.ok || !tty || tty.startsWith("?")) return void 0;
-  return tty.startsWith("/dev/") ? tty : `/dev/${tty}`;
-}
-async function captureLocator(env, pid = process.ppid) {
-  const loc = {};
-  if (env.TMUX_PANE) loc.tmuxPane = env.TMUX_PANE;
-  if (env.TMUX) loc.tmuxSocket = env.TMUX.split(",")[0];
-  if (env.__CFBundleIdentifier) loc.bundleId = env.__CFBundleIdentifier;
-  if (env.TERM_PROGRAM) loc.termProgram = env.TERM_PROGRAM;
-  const tty = await ttyOf(pid);
-  if (tty) loc.tty = tty;
-  return loc;
-}
-
-// src/core/messages.ts
-var messages = {
-  "section.needsInput": "Waiting for You",
-  "section.running": "Running",
-  "section.done": "Completed",
-  "status.ready": "Turn ended",
-  "status.unknown": "Status unknown",
-  "status.cloudUnavailable": "Cloud status unavailable",
-  "host.cloud": "Claude cloud conversation",
-  "hud.cloudSubscribed": "Subscribed: {title} (cloud status unavailable)",
-  "meta.cloudUnavailable": "This cloud session is saved and can be reopened from Subscriptions. Cloud execution status is not connected, so waiting-for-input alerts are unavailable.",
-  "status.idle": "Not started",
-  "attention.interrupted": "Interrupted",
-  "meta.status": "Status",
-  "section.subscribed": "Subscribed",
-  "nav.inbox": "Subscriptions",
-  "nav.all": "All Sessions",
-  "nav.setup": "Connect an Agent",
-  "nav.menuBar": "Agent Inbox \xB7 Subscribed Sessions",
-  "filter.title": "Filter Sessions",
-  "search.placeholder": "Search",
-  "search.allPlaceholder": "Search titles and conversation content",
-  "search.titlesPlaceholder": "Search conversation titles and projects",
-  "search.enable": "Set Up Full-Text Search",
-  "search.disabledDescription": "Enable Full-Text Search in extension preferences to search conversation content",
-  "search.indexing": "Indexing conversation content {n}/{total}",
-  "search.indexingDesc": "Titles are searchable now; content results fill in as indexing completes",
-  "search.indexFailed": "Some conversations could not be indexed",
-  "search.indexFailedDesc": "{n} transcripts could not be read; title search is available. Press \u2318R to retry",
-  "search.contentMatch": "Conversation content match",
-  "action.jump": "Jump to Session",
-  "action.handled": "Mark as Handled",
-  "action.unhandled": "Move Back to Subscriptions",
-  "action.subscribe": "Subscribe",
-  "action.subscribeCurrent": "Subscribe to Current Conversation",
-  "action.openAll": "Browse All Sessions",
-  "action.unsubscribe": "Unsubscribe",
-  "action.detail": "Show Details",
-  "action.hideDetail": "Hide Details",
-  "action.archiveDone": "Archive Completed",
-  "action.openInbox": "Open Subscriptions",
-  "action.openSetup": "Connect an Agent",
-  "action.install": "Connect",
-  "action.reinstall": "Reconnect",
-  "action.uninstall": "Remove Hooks",
-  "action.openFolder": "Open Folder",
-  "action.refresh": "Refresh",
-  "action.preferences": "Open Extension Preferences",
-  "host.app": "Desktop",
-  "host.cli": "CLI",
-  "agent.claude": "Claude",
-  "agent.codex": "Codex",
-  "meta.agent": "Agent",
-  "meta.project": "Project",
-  "meta.started": "Started",
-  "meta.activity": "Last Activity",
-  "meta.noSummary": "No messages yet",
-  "attention.input": "Waiting for input",
-  "attention.question": "Asked you a question",
-  "attention.permission": "Needs permission",
-  "attention.failed": "Failed",
-  "attention.quota": "Out of quota",
-  "time.justNow": "just now",
-  "time.minutes": "{n} min ago",
-  "time.hours": "{n} h ago",
-  "time.yesterday": "yesterday",
-  "time.days": "{n} d ago",
-  "time.since": "since {t}",
-  "time.today": "today {t}",
-  "empty.inbox.title": "No subscribed sessions",
-  "empty.inbox.desc": "Subscribe in All Sessions to follow progress and jump back",
-  "empty.onboard.title": "No agent connected yet",
-  "empty.onboard.desc": "Choose Connect an Agent from the action menu, then subscribe to a session",
-  "empty.all.title": "No sessions found",
-  "empty.all.desc": "Nothing in ~/.claude/projects or ~/.codex/sessions",
-  "empty.menu": "No subscribed sessions",
-  "empty.filter.desc": "Try another filter or search term",
-  "hud.subscribed": "Subscribed \xB7 {title}",
-  "hud.unsubscribed": "Unsubscribed \xB7 {title}",
-  "hud.handled": "Handled \xB7 {title}",
-  "hud.archived": "Archived {n} completed sessions",
-  "hud.notFound": "Couldn't identify the current session; select it in All Sessions",
-  "hud.focusPermission": "Can't read the window; check Raycast's Accessibility and Automation permissions",
-  "hud.alreadySubscribed": "Already subscribed \xB7 {title}",
-  "toast.jumpFailed": "Couldn't jump back",
-  "toast.copiedId": "Session ID copied \u2014 paste it in the app",
-  "toast.resumed": "Resumed in a new terminal",
-  "toast.installing": "Connecting {name}",
-  "toast.installed": "{name} connected",
-  "toast.uninstalled": "Hooks removed for {name}",
-  "toast.installFailed": "Connection failed",
-  "toast.uninstallFailed": "Removal failed",
-  "toast.error": "Something went wrong",
-  "confirm.jumpTitle": "Jump back to {target}?",
-  "confirm.cancel": "Cancel",
-  "setup.ready": "Installed",
-  "setup.install": "Not Connected",
-  "setup.installing": "Connecting",
-  "setup.installNotDetected": "Connection could not be verified. Try again.",
-  "setup.notFound": "Not found",
-  "setup.claudeHosts": "CLI \xB7 Desktop",
-  "setup.codexHosts": "CLI \xB7 Desktop",
-  "setup.uninstallIntro": "Only the entries written by this extension are removed.",
-  "setup.nodeMissing": "Node.js was not found. Hooks need it to run.",
-  "setup.codexHooksNote": "Codex asks you to approve new hooks once: run /hooks inside Codex.",
-  "notify.waiting": "Waiting for you"
-};
-function translator() {
-  return (key2, vars) => {
-    let value = messages[key2];
-    if (vars) for (const [name, replacement] of Object.entries(vars)) value = value.split(`{${name}}`).join(String(replacement));
-    return value;
-  };
 }
 
 // src/core/install.ts
-import { chmodSync, copyFileSync, existsSync as existsSync8, mkdirSync as mkdirSync4, readFileSync as readFileSync8, writeFileSync as writeFileSync3, renameSync, rmSync } from "node:fs";
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync as existsSync8,
+  mkdirSync as mkdirSync4,
+  readFileSync as readFileSync8,
+  writeFileSync as writeFileSync3,
+  renameSync,
+  rmSync
+} from "node:fs";
 import { dirname as dirname3 } from "node:path";
 async function resolveNode(fallback = process.execPath) {
   const shell = process.env.SHELL && existsSync8(process.env.SHELL) ? process.env.SHELL : "/bin/zsh";
@@ -2194,7 +2275,8 @@ function applyPlan(plan) {
   return written;
 }
 function terminalNotifierPath() {
-  for (const p of ["/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"]) if (existsSync8(p)) return p;
+  for (const p of ["/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"])
+    if (existsSync8(p)) return p;
   return void 0;
 }
 
@@ -2203,14 +2285,13 @@ function raycastNotificationLink(config, message) {
   const context = encodeURIComponent(JSON.stringify({ jump: { agent: message.agent, sessionId: message.sessionId } }));
   return `${config.deeplinkBase}/inbox?context=${context}`;
 }
-function macosChannel(link = raycastNotificationLink) {
+function macosChannel(link = raycastNotificationLink, actions = { run, terminalNotifierPath }) {
   return {
     id: "macos",
     async send(message, { config }) {
-      const t = translator();
-      const title = t(message.attention && message.attention !== "input" ? `attention.${message.attention}` : "notify.waiting");
-      const notifier = terminalNotifierPath();
-      const result = notifier ? await run(
+      const title = message.attention && message.attention !== "input" ? attentionLabel(message.attention) : "Waiting for you";
+      const notifier = actions.terminalNotifierPath();
+      const result = notifier ? await actions.run(
         notifier,
         [
           "-title",
@@ -2228,11 +2309,17 @@ function macosChannel(link = raycastNotificationLink) {
         ],
         void 0,
         8e3
-      ) : await run(
+      ) : await actions.run(
         "/usr/bin/osascript",
         [
           "-e",
-          `display notification ${asString(message.summary || " ")} with title ${asString(title)} subtitle ${asString(message.title)} sound name "Glass"`
+          `on run argv
+  display notification (item 1 of argv) with title (item 2 of argv) subtitle (item 3 of argv) sound name "Glass"
+end run`,
+          "--",
+          message.summary || " ",
+          title,
+          message.title
         ],
         void 0,
         8e3
@@ -2277,7 +2364,10 @@ async function deliverNotifications(store, config, channels = [macosChannel()], 
     try {
       if (!channel) throw new Error(`Unknown notification channel: ${job.channel}`);
       await Promise.race([
-        channel.send(notificationMessage(job.id, { ...session, title: current.title }), { config, signal: controller.signal }),
+        channel.send(notificationMessage(job.id, { ...session, title: current.title }), {
+          config,
+          signal: controller.signal
+        }),
         new Promise((_, reject) => {
           timer = setTimeout(() => {
             controller.abort();
@@ -2335,7 +2425,8 @@ var TitleSynchronizer = class {
       if (result.status !== "fulfilled") continue;
       for (const o of result.value) {
         const title = o.title.replace(new RegExp("\\p{Cc}", "gu"), " ").replace(/\s+/g, " ").trim();
-        if (o.agent !== adapters[index].id || !known.has(key(o)) || !title || !Number.isFinite(o.observedAt) || o.observedAt < 0) continue;
+        if (o.agent !== adapters[index].id || !known.has(key(o)) || !title || !Number.isFinite(o.observedAt) || o.observedAt < 0)
+          continue;
         const existing = observations.get(key(o));
         if (!existing || o.observedAt > existing.observedAt) observations.set(key(o), { ...o, title });
       }
@@ -2344,7 +2435,12 @@ var TitleSynchronizer = class {
     for (const title of persisted) observations.set(key(title), title);
     return sessions.map((session) => {
       const observation = observations.get(key(session));
-      return observation && observation.observedAt >= (session.titleObservedAt ?? 0) ? { ...session, title: observation.title, titleObservedAt: observation.observedAt, titleSource: observation.source } : session;
+      return observation && observation.observedAt >= (session.titleObservedAt ?? 0) ? {
+        ...session,
+        title: observation.title,
+        titleObservedAt: observation.observedAt,
+        titleSource: observation.source
+      } : session;
     });
   }
 };
@@ -2431,7 +2527,7 @@ Attention: input, question, permission, failed, quota, interrupted
 
 Data directory: AGENT_INBOX_HOME (default: ~/.sessions)
 Install modifies agent configuration; watch and deliver may send notifications.
-Setup, isolated examples and option defaults: docs/cli.md in the repository.
+Setup, isolated examples and option defaults: https://github.com/0xFANGO/agent-inbox/blob/main/docs/cli.md
 `;
 function log(msg) {
   try {
@@ -2545,8 +2641,10 @@ async function list(args) {
     return;
   }
   for (const s3 of rows) {
-    process.stdout.write(`${s3.status.padEnd(11)} ${s3.subscribed ? "\u25CF" : " "} ${s3.agent}/${s3.host} ${s3.sessionId}  ${s3.title}
-`);
+    process.stdout.write(
+      `${s3.status.padEnd(11)} ${s3.subscribed ? "\u25CF" : " "} ${s3.agent}/${s3.host} ${s3.sessionId}  ${s3.title}
+`
+    );
   }
 }
 async function watch(once = false) {
@@ -2617,7 +2715,9 @@ async function main() {
       process.stdout.write("agent-inbox 1\n");
       return;
     default:
-      process.stderr.write("usage: agent-inbox <command> [options]\nRun agent-inbox --help for commands and options.\n");
+      process.stderr.write(
+        "usage: agent-inbox <command> [options]\nRun agent-inbox --help for commands and options.\n"
+      );
       process.exitCode = 2;
   }
 }

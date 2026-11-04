@@ -1,5 +1,7 @@
 import { AgentEvent, Attention, PendingRequest, Session, SessionState } from "./types";
 
+import { releaseTerminal } from "./locate";
+
 export const TITLE_MAX = 80;
 
 /** Turn a prompt or message into a one-line title. */
@@ -71,12 +73,15 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
     at: prev && !["idle", "ready"].includes(prev.status) && !ev.snapshotComplete ? prev.updatedAt : 0,
     source: "legacy",
     pending:
-      prev?.status === "needs_input" ? [{ id: "legacy", attention: prev.attention ?? "input", at: prev.updatedAt, inferred: true }] : [],
+      prev?.status === "needs_input"
+        ? [{ id: "legacy", attention: prev.attention ?? "input", at: prev.updatedAt, inferred: true }]
+        : [],
     resolved: [],
   };
   const requestLifecycle = !!ev.requestIds?.length && ["needs_input", "resolved", "tool"].includes(ev.type);
   if (ev.at < previous.at && ev.type !== "snapshot" && !requestLifecycle) return null;
-  const startsTurn = ev.type === "progress" || (ev.type === "snapshot" && (ev.snapshot?.turnStartedAt ?? 0) > previous.at);
+  const startsTurn =
+    ev.type === "progress" || (ev.type === "snapshot" && (ev.snapshot?.turnStartedAt ?? 0) > previous.at);
   const otherTurn = !!ev.turnId && !!previous.turnId && ev.turnId !== previous.turnId && !startsTurn;
   if (otherTurn && !requestLifecycle && ev.type !== "snapshot") return null;
   // Legacy notify cannot end an identified, newer turn. The rollout/Stop hook supplies its end.
@@ -92,12 +97,14 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
       state.resolved = [...new Set([...state.resolved, ...observed.resolved])].slice(-256);
       state.pending = state.pending.filter((request) => !state.resolved.includes(request.id));
       const relevant = observed.pending.filter(
-        (request) => (!request.inferred || request.at >= (previous.turnStartedAt ?? 0)) && !state.resolved.includes(request.id),
+        (request) =>
+          (!request.inferred || request.at >= (previous.turnStartedAt ?? 0)) && !state.resolved.includes(request.id),
       );
       if (ev.at < previous.at || otherTurn) {
         // A stop hook can arrive before the collector sees its unanswered question.
         // Older snapshots may add that evidence, but cannot roll back the current phase.
-        for (const request of relevant) if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
+        for (const request of relevant)
+          if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
       } else {
         state.phase = observed.phase;
         state.turnId = observed.turnId ?? state.turnId;
@@ -105,7 +112,8 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
         state.pending = state.pending.filter(
           (r) => !state.resolved.includes(r.id) && (!r.inferred || r.at >= (observed.turnStartedAt ?? 0)),
         );
-        for (const request of relevant) if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
+        for (const request of relevant)
+          if (!state.pending.some((r) => r.id === request.id)) state.pending.push(request);
       }
       break;
     }
@@ -123,7 +131,11 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
       const matched = state.pending.filter((request) => ids.includes(request.id));
       state.pending = state.pending.filter((request) => !ids.includes(request.id));
       state.resolved = [...new Set([...state.resolved, ...ids])].slice(-256);
-      if (ev.type === "tool" && ev.at >= previous.at && (!ev.turnId || !previous.turnId || ev.turnId === previous.turnId))
+      if (
+        ev.type === "tool" &&
+        ev.at >= previous.at &&
+        (!ev.turnId || !previous.turnId || ev.turnId === previous.turnId)
+      )
         state.phase = "running";
       else if (!matched.length && !ids.length) return null;
       break;
@@ -138,9 +150,11 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
       // remain pending after its tool result resolves the real request.
       const samePrompt = (other: Attention) =>
         other === attention ||
-        (["input", "question", "permission"].includes(attention) && ["input", "question", "permission"].includes(other));
+        (["input", "question", "permission"].includes(attention) &&
+          ["input", "question", "permission"].includes(other));
       if (!ids.length && state.pending.some((request) => !request.inferred && samePrompt(request.attention))) break;
-      if (ids.length) state.pending = state.pending.filter((request) => !request.inferred || !samePrompt(request.attention));
+      if (ids.length)
+        state.pending = state.pending.filter((request) => !request.inferred || !samePrompt(request.attention));
       const requestIds = ids.length ? ids : [`hint:${attention}`];
       for (const id of requestIds) {
         if (state.resolved.includes(id) || state.pending.some((request) => request.id === id)) continue;
@@ -152,7 +166,13 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
     case "stopped":
       state.phase = "ready";
       if (ev.attention === "question" && state.pending.length === 0) {
-        state.pending.push({ id: "hint:question", attention: "question", at: ev.at, turnId: ev.turnId, inferred: true });
+        state.pending.push({
+          id: "hint:question",
+          attention: "question",
+          at: ev.at,
+          turnId: ev.turnId,
+          inferred: true,
+        });
       }
       break;
     case "completed":
@@ -184,7 +204,9 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
     updatedAt: ev.at,
     transcriptPath: "",
   };
-  const newRequest = state.pending.some((r) => !previous.pending.some((p) => p.id === r.id || (p.inferred && p.attention === r.attention)));
+  const newRequest = state.pending.some(
+    (r) => !previous.pending.some((p) => p.id === r.id || (p.inferred && p.attention === r.attention)),
+  );
   const statusChanged = base.status !== status || base.attention !== attention || newRequest;
   const next: Session = {
     ...base,
@@ -195,7 +217,12 @@ export function applyEvent(prev: Session | undefined, ev: AgentEvent): Transitio
     status,
     attention,
     state,
-    locator: { ...base.locator, ...stripEmpty(ev.locator) },
+    locator:
+      ev.type === "ended"
+        ? releaseTerminal(base.locator)
+        : ev.at >= previous.at && ev.locator
+          ? { ...base.locator, ...stripEmpty(ev.locator), ...(ev.locator.tty ? { observedAt: ev.at } : {}) }
+          : base.locator,
     transcriptPath: ev.transcriptPath || base.transcriptPath,
     handledAt: statusChanged ? null : base.handledAt,
     updatedAt: Math.max(base.updatedAt, ev.at),

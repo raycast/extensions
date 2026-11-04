@@ -3,7 +3,6 @@ import { allAdapters, getAdapter } from "../core/adapters";
 import { Store } from "../core/db";
 import { enrichClaudeSessions } from "../core/claude-desktop";
 import { TitleSynchronizer } from "../core/titles";
-import { Translator } from "../core/messages";
 import { Config, Session } from "../core/types";
 import { recoverIdleSessionStates } from "../core/transcript-state";
 
@@ -20,27 +19,27 @@ export async function allSessions(limit = 500): Promise<Session[]> {
 }
 
 /** Jump back to the session and close Raycast. Shows a HUD when a fallback was used. */
-export async function jumpBack(session: Session, config: Config, t: Translator): Promise<void> {
+export async function jumpBack(session: Session, config: Config): Promise<void> {
   const adapter = getAdapter(session.agent);
   if (!adapter) {
-    await showToast({ style: Toast.Style.Failure, title: t("toast.jumpFailed"), message: session.agent });
+    await showToast({ style: Toast.Style.Failure, title: "Couldn't jump back", message: session.agent });
     return;
   }
-  const toast = await showToast({ style: Toast.Style.Animated, title: t("action.jump") });
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Jump to Session" });
   try {
     const r = await adapter.jump(session, config);
     if (!r.ok) {
       toast.style = Toast.Style.Failure;
-      toast.title = t("toast.jumpFailed");
+      toast.title = "Couldn't jump back";
       return;
     }
     toast.hide();
-    if (r.method === "copied") await showHUD(t("toast.copiedId"));
-    else if (r.method === "resume") await showHUD(t("toast.resumed"));
+    if (r.method === "copied") await showHUD("Session ID copied — paste it in the app");
+    else if (r.method === "resume") await showHUD("Resumed in a new terminal");
     else await closeMainWindow({ clearRootSearch: true });
   } catch (e) {
     toast.style = Toast.Style.Failure;
-    toast.title = t("toast.jumpFailed");
+    toast.title = "Couldn't jump back";
     toast.message = String((e as Error).message ?? e);
   }
 }

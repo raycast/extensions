@@ -1,4 +1,5 @@
 import { exec, q } from "./sqlite";
+import { TERMINAL_LOCATOR_KEYS } from "./locate";
 import { DB_PATH } from "./paths";
 import { applyEvent, Transition } from "./status";
 import { AgentEvent, Attention, Host, Locator, Session, SessionState, SessionTitle, Status } from "./types";
@@ -107,7 +108,9 @@ function fromRow(r: Row): Session {
 function parseState(value: string): SessionState | undefined {
   try {
     const state = JSON.parse(value);
-    return state && typeof state.at === "number" && Array.isArray(state.pending) && Array.isArray(state.resolved) ? state : undefined;
+    return state && typeof state.at === "number" && Array.isArray(state.pending) && Array.isArray(state.resolved)
+      ? state
+      : undefined;
   } catch {
     return undefined;
   }
@@ -193,7 +196,9 @@ export class Store {
 
   /** Rows that can appear in the inbox or the menu bar. */
   async active(): Promise<Session[]> {
-    const rows = await this.run(`${READ_SESSIONS} WHERE s.subscribed=1 AND s.handled_at IS NULL ORDER BY s.updated_at DESC;`);
+    const rows = await this.run(
+      `${READ_SESSIONS} WHERE s.subscribed=1 AND s.handled_at IS NULL ORDER BY s.updated_at DESC;`,
+    );
     return rows.map(fromRow);
   }
 
@@ -216,6 +221,22 @@ export class Store {
       const write = prev
         ? `UPDATE sessions SET (${COLUMNS})=(${values(t.next)}) WHERE agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)} AND revision=${q(prev.revision ?? 0)}${allowed};`
         : `INSERT OR IGNORE INTO sessions (${COLUMNS}) SELECT ${values(t.next)} WHERE 1${allowed};`;
+      const loc = t.next.locator;
+      const sameLocation =
+        loc.tmuxPane && loc.tmuxSocket
+          ? `json_extract(locator,'$.tmuxPane')=${q(loc.tmuxPane)} AND json_extract(locator,'$.tmuxSocket')=${q(loc.tmuxSocket)}`
+          : `json_extract(locator,'$.tty')=${q(loc.tty)}`;
+      const stripped = `json_remove(locator,${TERMINAL_LOCATOR_KEYS.map((key) => q(`$.${key}`)).join(",")})`;
+      // Transfer ownership atomically, including /clear or resume within the same process.
+      const ownership =
+        ev.locator?.tty && loc.tty && loc.observedAt === ev.at
+          ? `UPDATE sessions SET locator=${stripped}, revision=revision+1
+           WHERE (SELECT n FROM applied)=1 AND (${sameLocation})
+           AND COALESCE(json_extract(locator,'$.observedAt'),0)<${q(ev.at)};
+           UPDATE sessions SET locator=${stripped}, revision=revision+1
+           WHERE (SELECT n FROM applied)=1 AND agent=${q(ev.agent)} AND session_id=${q(ev.sessionId)}
+           AND EXISTS (SELECT 1 FROM sessions WHERE (${sameLocation}) AND COALESCE(json_extract(locator,'$.observedAt'),0)>${q(ev.at)});`
+          : "";
       const notificationId = `${ev.agent}:${ev.sessionId}:${t.next.revision}`;
       const enqueue =
         t.notify && !options.silent
@@ -233,6 +254,7 @@ export class Store {
             ? `INSERT OR IGNORE INTO event_receipts SELECT ${q(ev.agent)},${q(ev.sessionId)},${q(ev.eventId)} WHERE (SELECT n FROM applied)=1;`
             : "") +
           enqueue +
+          ownership +
           `DELETE FROM events WHERE at < ${q(ev.at - 30 * 24 * 3600 * 1000)}; SELECT n FROM applied; COMMIT;`,
       );
       if (result[0]?.n === 1) return t;
@@ -250,7 +272,8 @@ export class Store {
     if (!valid.length) return [];
     if (valid.length > 200) {
       const saved: SessionTitle[] = [];
-      for (let index = 0; index < valid.length; index += 200) saved.push(...(await this.syncTitles(valid.slice(index, index + 200))));
+      for (let index = 0; index < valid.length; index += 200)
+        saved.push(...(await this.syncTitles(valid.slice(index, index + 200))));
       return saved;
     }
     const writes = valid
@@ -325,16 +348,26 @@ export class Store {
     );
     if (options.focused && s.title)
       await this.syncTitles([
-        { agent: s.agent, sessionId: s.sessionId, title: s.title, observedAt: s.titleObservedAt ?? Date.now(), source: "focused-window" },
+        {
+          agent: s.agent,
+          sessionId: s.sessionId,
+          title: s.title,
+          observedAt: s.titleObservedAt ?? Date.now(),
+          source: "focused-window",
+        },
       ]);
   }
 
   async markHandled(agent: string, sessionId: string, at = Date.now()): Promise<void> {
-    await this.run(`UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`);
+    await this.run(
+      `UPDATE sessions SET revision=revision+1, handled_at=${q(at)} WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`,
+    );
   }
 
   async unmarkHandled(agent: string, sessionId: string): Promise<void> {
-    await this.run(`UPDATE sessions SET revision=revision+1, handled_at=NULL WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`);
+    await this.run(
+      `UPDATE sessions SET revision=revision+1, handled_at=NULL WHERE agent=${q(agent)} AND session_id=${q(sessionId)};`,
+    );
   }
 
   /** "Archive Completed": every finished session leaves the inbox. */

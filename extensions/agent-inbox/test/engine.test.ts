@@ -18,7 +18,14 @@ test("concurrent writers preserve every pending request and deduplicate event id
   await store.setSubscribed(base.agent, base.sessionId, true);
   await Promise.all(
     Array.from({ length: 10 }, (_, i) =>
-      new Store(path).record({ ...base, type: "needs_input", attention: "question", requestIds: [`q${i}`], at: 2, eventId: `e${i}` }),
+      new Store(path).record({
+        ...base,
+        type: "needs_input",
+        attention: "question",
+        requestIds: [`q${i}`],
+        at: 2,
+        eventId: `e${i}`,
+      }),
     ),
   );
   let session = (await store.get(base.agent, base.sessionId))!;
@@ -38,7 +45,14 @@ test("source events enqueue independent channels; failures retry with the same m
   const engine = new EventEngine(store, () => config);
   await engine.ingest({ ...base, type: "progress", at: 1 });
   await store.setSubscribed(base.agent, base.sessionId, true);
-  await engine.ingest({ ...base, type: "needs_input", attention: "question", requestIds: ["q"], at: 2, eventId: "ask" });
+  await engine.ingest({
+    ...base,
+    type: "needs_input",
+    attention: "question",
+    requestIds: ["q"],
+    at: 2,
+    eventId: "ask",
+  });
   const sent: string[] = [],
     attempts: string[] = [];
   const channels: NotificationChannel[] = [
@@ -105,7 +119,9 @@ test("legacy inferred done migrates to ready without changing subscriptions or a
 });
 
 test("collector launch definition keeps paths as arguments and escapes plist values", () => {
-  const plist = collectorPlist("/path with spaces/node", "/cli&name.mjs", "/sessions", { CODEX_HOME: "/codex<custom>" });
+  const plist = collectorPlist("/path with spaces/node", "/cli&name.mjs", "/sessions", {
+    CODEX_HOME: "/codex<custom>",
+  });
   assert.ok(plist.includes("<string>/path with spaces/node</string>"));
   assert.ok(plist.includes("/cli&amp;name.mjs"));
   assert.ok(plist.includes("/codex&lt;custom&gt;"));

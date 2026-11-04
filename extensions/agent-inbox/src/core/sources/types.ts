@@ -6,7 +6,11 @@ export interface SourceContext {
   asyncRequests?: Record<string, string[]>;
 }
 export interface TranscriptSource {
-  parse(entry: Record<string, unknown>, session: Pick<Session, "agent" | "sessionId">, context: SourceContext): AgentEvent[];
+  parse(
+    entry: Record<string, unknown>,
+    session: Pick<Session, "agent" | "sessionId">,
+    context: SourceContext,
+  ): AgentEvent[];
 }
 
 /** Optional capabilities: a future DSH provider can push events without a transcript. */

@@ -1,9 +1,16 @@
-import { CLAUDE_BUNDLE, CLAUDE_BRIDGE_ID, findClaudeDesktopSession, readClaudeDesktopSessions, sameClaudeBridgeId } from "./claude-desktop";
+import {
+  CLAUDE_BUNDLE,
+  CLAUDE_BRIDGE_ID,
+  findClaudeDesktopSession,
+  readClaudeDesktopSessions,
+  sameClaudeBridgeId,
+} from "./claude-desktop";
 import { CODEX_APP_BUNDLE } from "./adapters/codex";
 import { readCodexDesktopSessions } from "./codex-desktop";
 import { FocusedWindow, readFocusedWindow } from "./focused-window";
 import { fromHistory } from "./merge";
 import { bundleFor, frontTty, tmuxClients, TERMINAL_BUNDLES } from "./terminal";
+import { terminalOwnerAlive } from "./locate";
 import { Session } from "./types";
 import { claudeWindowIdentity } from "./claude-window";
 
@@ -76,7 +83,9 @@ function normalizedTitle(title: string): string {
 }
 
 async function codexSession(window: FocusedWindow, sessions: Session[], readCatalog: typeof readCodexDesktopSessions) {
-  const documents = [...new Set([window.url, window.documentUrl].filter((url): url is string => url !== undefined))].map(codexDocument);
+  const documents = [
+    ...new Set([window.url, window.documentUrl].filter((url): url is string => url !== undefined)),
+  ].map(codexDocument);
   const identities = documents.filter((document) => document.id);
   const ids = new Set(identities.map((document) => document.id));
   if (ids.size > 1 || (!ids.size && documents.some((document) => !document.shell))) return undefined;
@@ -102,18 +111,23 @@ async function codexSession(window: FocusedWindow, sessions: Session[], readCata
   if (!selected) return undefined;
   const hostIds = [...new Set(identities.map((document) => document.hostId).filter(Boolean))];
   if (hostIds.length > 1) return undefined;
-  return { ...selected, host: "app" as const, locator: { ...selected.locator, ...(hostIds[0] ? { hostId: hostIds[0] } : {}) } };
+  return {
+    ...selected,
+    host: "app" as const,
+    locator: { ...selected.locator, ...(hostIds[0] ? { hostId: hostIds[0] } : {}) },
+  };
 }
 
 /** Match actual window identity. Background activity and lastFocusedAt are not current focus. */
 export async function sessionForForeground(
   context: ForegroundContext,
   sessions: Session[],
-  actions = { readClaudeDesktopSessions, readCodexDesktopSessions, tmuxClients },
+  actions = { readClaudeDesktopSessions, readCodexDesktopSessions, tmuxClients, terminalOwnerAlive },
 ): Promise<Session | undefined> {
   const { bundleId, window, tty } = context;
   if (!bundleId) return undefined;
-  if (bundleId === CODEX_APP_BUNDLE) return window ? codexSession(window, sessions, actions.readCodexDesktopSessions) : undefined;
+  if (bundleId === CODEX_APP_BUNDLE)
+    return window ? codexSession(window, sessions, actions.readCodexDesktopSessions) : undefined;
   if (bundleId === CLAUDE_BUNDLE) {
     if (!window) return undefined;
     const desktop = actions.readClaudeDesktopSessions();
@@ -154,10 +168,13 @@ export async function sessionForForeground(
       );
       if (matches.length) {
         const match = unique(matches);
-        return match && identity.title ? { ...match, title: identity.title, titleObservedAt: context.capturedAt ?? Date.now() } : match;
+        return match && identity.title
+          ? { ...match, title: identity.title, titleObservedAt: context.capturedAt ?? Date.now() }
+          : match;
       }
       // Preserve ambiguous/archived local mappings; don't manufacture a cloud duplicate.
-      if (desktop.some((r) => r.sessionId === id || r.bridgeSessionIds?.some((alias) => sameClaudeBridgeId(alias, id)))) return undefined;
+      if (desktop.some((r) => r.sessionId === id || r.bridgeSessionIds?.some((alias) => sameClaudeBridgeId(alias, id))))
+        return undefined;
       if (!CLAUDE_BRIDGE_ID.test(id)) return undefined;
       // Cloud-only Code sessions have no local_* metadata or CLI transcript. Save the
       // actual focused identity without guessing state, project or activity timestamps.
@@ -187,12 +204,20 @@ export async function sessionForForeground(
     return unique(candidates.filter((s) => s.title === title));
   }
 
-  const cli = sessions.filter((s) => s.host === "cli");
+  const cli = sessions.filter((s) => s.host === "cli" && s.locator.tty);
+  const liveMatch = async (candidates: Session[]) => {
+    const live = await Promise.all(candidates.map((s) => actions.terminalOwnerAlive(s.locator)));
+    return unique(candidates.filter((_, index) => live[index]));
+  };
   if (!tty || !(TERMINAL_BUNDLES.has(bundleId) || cli.some((s) => bundleFor(s.locator) === bundleId))) return undefined;
   const sockets = [...new Set(cli.filter((s) => s.locator.tmuxPane).map((s) => s.locator.tmuxSocket))];
-  const clients = (await Promise.all(sockets.map((socket) => actions.tmuxClients(socket)))).flat().filter((c) => c.tty === tty);
+  const clients = (await Promise.all(sockets.map((socket) => actions.tmuxClients(socket))))
+    .flat()
+    .filter((c) => c.tty === tty);
   if (clients.length)
-    return unique(cli.filter((s) => clients.some((c) => s.locator.tmuxPane === c.pane && s.locator.tmuxSocket === c.socket)));
+    return liveMatch(
+      cli.filter((s) => clients.some((c) => s.locator.tmuxPane === c.pane && s.locator.tmuxSocket === c.socket)),
+    );
   // No app-wide "most recent" fallback: it can select a different tab or background agent.
-  return unique(cli.filter((s) => s.locator.tty === tty && !s.locator.tmuxPane));
+  return liveMatch(cli.filter((s) => s.locator.tty === tty && !s.locator.tmuxPane));
 }

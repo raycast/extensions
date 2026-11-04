@@ -90,7 +90,10 @@ export class SessionSearchIndex {
           `CREATE VIRTUAL TABLE IF NOT EXISTS documents USING fts5(path UNINDEXED, agent UNINDEXED, session_id UNINDEXED, body, tokenize='trigram');`,
         );
       } catch {
-        await exec(this.path, `CREATE TABLE IF NOT EXISTS documents (path TEXT PRIMARY KEY, agent TEXT, session_id TEXT, body TEXT);`);
+        await exec(
+          this.path,
+          `CREATE TABLE IF NOT EXISTS documents (path TEXT PRIMARY KEY, agent TEXT, session_id TEXT, body TEXT);`,
+        );
       }
       const rows = await exec<{ sql: string }>(this.path, `SELECT sql FROM sqlite_master WHERE name='documents';`);
       this.trigram = /USING fts5/i.test(rows[0]?.sql ?? "");
@@ -108,7 +111,11 @@ export class SessionSearchIndex {
     return next;
   }
 
-  private async updateFiles(sessions: Session[], progress: (state: IndexProgress) => void, signal?: AbortSignal): Promise<IndexProgress> {
+  private async updateFiles(
+    sessions: Session[],
+    progress: (state: IndexProgress) => void,
+    signal?: AbortSignal,
+  ): Promise<IndexProgress> {
     await this.init();
     signal?.throwIfAborted();
     const files = new Map(listTranscriptFiles(this.options).map((file) => [file.path, file]));
@@ -117,12 +124,15 @@ export class SessionSearchIndex {
       if (files.has(s.transcriptPath) || (s.agent !== "claude" && s.agent !== "codex")) continue;
       try {
         const st = await stat(s.transcriptPath);
-        if (st.isFile()) files.set(s.transcriptPath, { path: s.transcriptPath, agent: s.agent, size: st.size, mtime: st.mtimeMs });
+        if (st.isFile())
+          files.set(s.transcriptPath, { path: s.transcriptPath, agent: s.agent, size: st.size, mtime: st.mtimeMs });
       } catch {
         // Missing files are excluded from the index and are still searchable by title.
       }
     }
-    const old = new Map((await exec<SourceRow>(this.path, "SELECT path,agent,mtime,size FROM sources;")).map((row) => [row.path, row]));
+    const old = new Map(
+      (await exec<SourceRow>(this.path, "SELECT path,agent,mtime,size FROM sources;")).map((row) => [row.path, row]),
+    );
     const state: IndexProgress = { completed: 0, total: files.size, updated: 0, failed: 0 };
     progress({ ...state });
     for (const file of files.values()) {
@@ -155,7 +165,10 @@ export class SessionSearchIndex {
     const removed = [...old.keys()].filter((path) => !files.has(path));
     if (removed.length > 0) {
       const paths = removed.map(q).join(",");
-      await exec(this.path, `BEGIN; DELETE FROM documents WHERE path IN (${paths}); DELETE FROM sources WHERE path IN (${paths}); COMMIT;`);
+      await exec(
+        this.path,
+        `BEGIN; DELETE FROM documents WHERE path IN (${paths}); DELETE FROM sources WHERE path IN (${paths}); COMMIT;`,
+      );
     }
     return state;
   }
@@ -169,7 +182,8 @@ export class SessionSearchIndex {
     for (let start = 0; start < terms.length; start += 16) {
       const statements = terms.slice(start, start + 16).map((term, i) => {
         const literal = q(term);
-        const fts = this.trigram && [...term].length >= 3 ? `body MATCH ${q('"' + term.replace(/"/g, '""') + '"')} AND ` : "";
+        const fts =
+          this.trigram && [...term].length >= 3 ? `body MATCH ${q('"' + term.replace(/"/g, '""') + '"')} AND ` : "";
         return `SELECT agent,session_id,${start + i} AS term,substr(body,max(1,instr(body,${literal})-50),180) AS snippet FROM documents WHERE ${fts}instr(body,${literal})>0`;
       });
       const rows = await exec<{ agent: string; session_id: string; term: number; snippet: string }>(

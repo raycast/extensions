@@ -55,8 +55,14 @@ test("desktop metadata supplies CLI-to-local IDs and ignores malformed records",
   const records = readClaudeDesktopSessions(root);
   assert.deepEqual(records, [record]);
   assert.equal(findClaudeDesktopSession(record.cliSessionId, records)?.sessionId, record.sessionId);
-  assert.equal(findClaudeDesktopSession(record.cliSessionId, [record, { ...record, sessionId: "local_duplicate" }]), undefined);
-  writeFileSync(join(dir, record.sessionId + ".json"), JSON.stringify({ ...record, title: "Renamed desktop conversation" }));
+  assert.equal(
+    findClaudeDesktopSession(record.cliSessionId, [record, { ...record, sessionId: "local_duplicate" }]),
+    undefined,
+  );
+  writeFileSync(
+    join(dir, record.sessionId + ".json"),
+    JSON.stringify({ ...record, title: "Renamed desktop conversation" }),
+  );
   assert.equal(readClaudeDesktopSessions(root)[0].title, "Renamed desktop conversation");
 });
 
@@ -76,7 +82,10 @@ test("desktop bridge aliases accept legacy string or arrays and reject unrelated
   assert.deepEqual(records[0].bridgeSessionIds, ["session_cloud1", "cse_cloud2"]);
   assert.equal(findClaudeDesktopSession("cse_cloud1", records)?.sessionId, record.sessionId);
   assert.equal(findClaudeDesktopSession("session_cloud2", records)?.sessionId, record.sessionId);
-  assert.equal(findClaudeDesktopSession("session_cloud1", [records[0], { ...records[0], sessionId: "local_ambiguous" }]), undefined);
+  assert.equal(
+    findClaudeDesktopSession("session_cloud1", [records[0], { ...records[0], sessionId: "local_ambiguous" }]),
+    undefined,
+  );
   assert.equal(sameClaudeBridgeId("cloud1", "session_cloud1"), false);
   assert.equal(sameClaudeBridgeId("local_cloud1", "session_cloud1"), false);
 });
@@ -101,7 +110,12 @@ test("an explicit terminal resume takes priority over historical desktop ownersh
 });
 
 test("a legacy idle terminal locator from a failed desktop jump does not override desktop identity", () => {
-  const stale = { ...session, status: "idle" as const, cwd: "/Users/me", locator: { tty: "/dev/ttys008", bundleId: "com.apple.Terminal" } };
+  const stale = {
+    ...session,
+    status: "idle" as const,
+    cwd: "/Users/me",
+    locator: { tty: "/dev/ttys008", bundleId: "com.apple.Terminal" },
+  };
   const [repaired] = enrichClaudeSessions([stale], [record]);
   assert.equal(repaired.host, "app");
   assert.equal(repaired.cwd, record.cwd);

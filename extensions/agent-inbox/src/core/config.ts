@@ -45,7 +45,9 @@ export function syncPreferences(preferences: ExtensionPreferences, deeplinkBase:
       notifications: preferences.notifications,
       contentSearchEnabled: preferences.contentSearchEnabled,
       resumeTerminal:
-        preferences.resumeTerminal === "iterm" || preferences.resumeTerminal === "ghostty" ? preferences.resumeTerminal : "terminal",
+        preferences.resumeTerminal === "iterm" || preferences.resumeTerminal === "ghostty"
+          ? preferences.resumeTerminal
+          : "terminal",
       deeplinkBase,
     },
     path,

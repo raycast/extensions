@@ -1,8 +1,84 @@
-# 使用指南
+# Agent Inbox 使用帮助
 
-[English](usage.md) | **简体中文**
+[English](help.md) | **简体中文**
 
-[返回 README](../README.zh-CN.md) · [安装与卸载](setup.zh-CN.md)
+[README](README.zh-CN.md)
+
+## 环境要求
+
+- macOS、Raycast，以及已经使用的 Claude Code 或 Codex。Agent Inbox 不安装或登录这些客户端。
+- 系统自带的 `sqlite3`，用于本地状态与搜索索引。
+- 可选的 `terminal-notifier`，用于可点击通知。
+
+Hook 和后台采集器优先使用已有 Node.js，没有时使用 Raycast 自带运行时。
+
+### 接入第一个 Agent
+
+1. 打开 **All Sessions**，在 **Actions（⌘K）** 中选择 **Connect an Agent**。
+2. 选择 Claude Code 或 Codex，按回车执行接入；面板会显示结果。
+3. Codex 首次接入后，按提示在 Codex 内执行 `/hooks` 确认信任。已运行会话是否加载新 Hook 取决于客户端，可在新会话中验证。
+4. 在 **All Sessions** 选中会话后按 ⌘↵ 订阅；也可从目标 Agent 窗口唤出 Raycast，直接运行 **Subscribe to Current Conversation**。列表中的 Actions → Subscribe to Current Conversation（⌘⇧↵）仍可使用。
+5. 打开 **Subscriptions（订阅列表）** 查看它。支持监测的会话在需要回答或授权时进入「待输入」，系统通知开启时会提醒；按回车跳回原对话。
+
+首次可以订阅一个已经存在的会话验证列表展示。通知应使用新产生的问题或授权请求验证：首次恢复历史状态不会补发历史通知。
+
+### 权限与可点击通知
+
+窗口识别和终端定位需要 macOS 的「辅助功能」或「自动化」权限。根据系统提示，在「系统设置 → 隐私与安全性」中给执行操作的 Raycast / 终端授权。没有可靠的窗口信息时，在「全部会话」中手动选择会话。
+
+如需点击系统通知后跳回，可使用 Homebrew 安装：
+
+```sh
+brew install terminal-notifier
+```
+
+没有它时仍可显示系统通知，但不能从通知直接跳回。点击通知后，Raycast 会先确认，再跳转；订阅列表内按回车直接跳转。macOS 通知权限和专注模式也会影响通知显示。
+
+## 安装会修改什么
+
+| 位置                                                           | 用途                                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------------- |
+| `~/.claude/settings.json`                                      | Claude Code Hook 配置；使用 `CLAUDE_CONFIG_DIR` 时跟随该目录  |
+| `~/.codex/config.toml`、`~/.codex/hooks.json`                  | Codex notify 转发与 Hook 配置；使用 `CODEX_HOME` 时跟随该目录 |
+| `~/.sessions/bin/agent-inbox.mjs`                              | Hook 与采集器使用的稳定 CLI 路径                              |
+| `~/Library/LaunchAgents/com.fango.agent-inbox.collector.plist` | 用户级后台采集服务                                            |
+| `~/.sessions/`                                                 | 状态、订阅、配置、通知队列与缓存                              |
+
+接入会保留其他 Hook 和原有 Codex notify 转发；修改已有配置前写入同路径的 `*.agent-inbox.bak`。备份为最近一次修改前的内容，多次接入可能覆盖旧备份。接入面板也会安装或重启后台采集器。更新扩展后，下次打开命令会同步已经安装的 CLI。
+
+Agent 自身的对话文件只读。默认搜索标题、项目和 ID；全文搜索需要在 Raycast 原生偏好中主动开启，索引留在本机，关闭后不会自动删除已有索引。详细行为见 [使用指南](#搜索)。
+
+## 停用或卸载
+
+临时停止某个会话的后台采集与提醒：在列表中取消订阅。只停止系统提醒：在原生偏好中关闭 **System Notifications**，再打开扩展命令同步后台配置。
+
+完整卸载按以下顺序操作：
+
+1. 在 **All Sessions → Actions → Connect an Agent**选择已接入的 Agent，在 Actions 中执行**Remove Hooks**。对每个接入的 Agent 分别操作；只移除本扩展条目，不要直接用旧备份覆盖整份客户端配置。
+2. 停止后台采集器，并删除它的启动项：
+
+   ```sh
+   launchctl bootout "gui/$(id -u)/com.fango.agent-inbox.collector"
+   rm -f "$HOME/Library/LaunchAgents/com.fango.agent-inbox.collector.plist"
+   ```
+
+   若服务已停止，第一条命令可能报告找不到服务；仍需删除启动项，避免下次登录再次启动。仅移除 Hook 不会自动卸载采集器。
+
+3. 在 Raycast 的扩展设置中移除 Agent Inbox。
+4. 在 **All Sessions** 选中会话后按 ⌘↵ 订阅；也可从目标 Agent 窗口唤出 Raycast，直接运行 **Subscribe to Current Conversation**。列表中的 Actions → Subscribe to Current Conversation（⌘⇧↵）仍可使用。
+
+## 排查
+
+| 现象               | 检查                                                                          |
+| ------------------ | ----------------------------------------------------------------------------- |
+| 无法订阅当前窗口   | 目标是否是受支持的 Code 页面；窗口权限与 tty 是否可读；先在全部会话里手动订阅 |
+| 纯云端会话没有提醒 | 没有本地记录或 Hook 时不具备状态监测，详情会显示「云端状态未接入」            |
+| 会话未进入已完成   | 普通回合停止只代表「本轮结束」；仅明确的完成事件进入已完成                    |
+| 没有系统通知       | 检查订阅、已处理标记、通知开关与 macOS 权限；历史状态恢复不会补发提醒         |
+| 通知不能点击       | 检查 `terminal-notifier` 是否可用；仍可在订阅列表跳回                         |
+| 跳转只打开了应用   | 未能精确定位时会复制 ID 或恢复 CLI，会话详情与提示会说明兜底结果              |
+
+诊断日志位于 `~/.sessions/log.txt` 和 `~/.sessions/collector.log`。提交问题前删去路径、会话内容和凭据，见 [贡献说明](https://github.com/0xFANGO/agent-inbox/issues)。
 
 ## 命令
 
@@ -27,9 +103,7 @@
 
 默认只搜索会话标题、项目与会话 ID，**不自动加载或索引完整对话**。选择搜索结果底部的 **Set Up Full-Text Search** 或操作菜单中的 **Open Extension Preferences**，在原生偏好中主动开启 **Full-Text Search**，然后重新打开 All Sessions。偏好说明会告知读取范围和本地索引行为。关闭后停止索引和正文检索，已有索引留在本机且不再更新。
 
-启用后可检索完整的用户与 Agent 消息，支持中文短词、大小写归一和多个关键词；工具输出、思考过程和系统注入内容不纳入正文索引。首次流式读取本机记录，随后仅重新索引修改时间或大小变化的文件。查询使用本地 SQLite 索引，不逐次扫描原文件，也不会上传对话。索引过程中标题搜索仍可用；退出列表、刷新或关闭内容搜索可正常中止读取。
-
-2026-11-04 的本机样本为 237 个文件、约 1.39 GB 原始记录：首次索引约 4.38 秒、索引约 17.9 MB；热刷新约 44 ms，查询约 3–9 ms，另有 180 ms 输入防抖。冷索引峰值进程内存约 308 MB；不同机器和记录量会有差异。索引位于 `~/.sessions/cache/conversation-search.sqlite`，只有云端而没有本地记录的对话内容不能检索。
+启用后可检索完整的用户与 Agent 消息，支持中文短词、大小写归一和多个关键词；工具输出、思考过程和系统注入内容不纳入正文索引。首次流式读取本机记录，随后仅重新索引修改时间或大小变化的文件。查询使用本地 SQLite 索引，不逐次扫描原文件，也不会上传对话。索引过程中标题搜索仍可用；刷新列表会排队处理最新数据，不会中断正在运行的索引；离开列表或关闭全文搜索时才取消读取。
 
 ### 偏好设置与接入
 
@@ -42,10 +116,6 @@
 菜单栏通过 Raycast 原生的 **Session Menu Bar** 命令启用开关控制，刷新周期为一分钟，插件内不再提供第二个显示开关。
 
 **Connect an Agent（接入 Agent）** 保留在会话列表的操作菜单中。选择 Claude Code / Codex 后执行接入，显示进度与成功／失败；原配置备份为 `*.agent-inbox.bak`。Codex 首次仍需在应用内执行 `/hooks` 确认。
-
-### 从旧开发版升级
-
-更新后请检查一次原生偏好：通知默认开启，全文搜索默认关闭。旧 `config.json` 的 language 和 menuBarEnabled 字段不再使用。升级后通过 **Connect an Agent → Reconnect** 重新接入，让后台采集器加载新版 CLI。如果 Raycast 中仍有旧作者名注册的开发副本，请停用旧副本，避免两个版本同时管理共享配置。
 
 ## 状态与订阅
 
@@ -87,8 +157,6 @@ Claude 的本地 metadata 还用于把 `bridgeSessionIds` 关联到 `local_*` �
 
 CLI 的「订阅当前窗口对话」需要先接入 Hook，并由 Hook 采集原会话的 tty / tmux 定位信息。仅扫描到的历史文件通常不含这些信息，可在「全部会话」中手动选择并订阅。
 
-用户已实测确认 Codex 桌面当前窗口订阅与返回正确对话正常；其他验证范围见 [测试记录](../TESTING.zh-CN.md)。窗口信息和终端 tty 查询依赖 macOS 自动化/辅助功能权限；不支持相关接口或权限不足时，可以在「全部会话」中手动选择并订阅。
-
 ## 跳回
 
 | 来源          | 跳回方式                                                                                                           | 兜底                                        |
@@ -101,3 +169,5 @@ CLI 的「订阅当前窗口对话」需要先接入 Hook，并由 Hook 采集�
 Claude 桌面端的 `local_*` ID 和 CLI transcript UUID 不同，不能直接把 CLI UUID 放进桌面端的 continue 链接。本机已验证映射后能跳回对应的 Claude Code 对话。仅激活应用或复制 ID 是兜底行为，不代表已精确到达目标会话。
 
 点通知会打开 `raycast://…/inbox?context=…`，Raycast 先弹窗确认（↵ 跳回，esc 取消）。在订阅列表里按 ↵ 直接跳，不弹确认。点通知跳回需要先装 `terminal-notifier`（`brew install terminal-notifier`），没装的话通知只能看、不能点。
+
+终端定位会校验 Agent 进程身份。重新连接 hooks 后，请触发新事件或启动新会话，以更新旧的终端定位信息。

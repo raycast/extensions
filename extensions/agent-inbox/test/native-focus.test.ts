@@ -16,11 +16,22 @@ const web = (url: string, title: string, children: Element[] = []): Element => (
   AXTitle: title,
   AXChildren: array(children),
 });
-const window = (children: Element[]): Element => ({ AXRole: "AXWindow", AXTitle: "Claude", AXChildren: array(children) });
+const window = (children: Element[]): Element => ({
+  AXRole: "AXWindow",
+  AXTitle: "Claude",
+  AXChildren: array(children),
+});
 
-function runProbe(app: Element, running = true, bundle = CLAUDE_BUNDLE, mode: "focused" | "windows" = "focused"): unknown {
+function runProbe(
+  app: Element,
+  running = true,
+  bundle = CLAUDE_BUNDLE,
+  mode: "focused" | "windows" = "focused",
+): unknown {
   const bridge = Object.assign((value: unknown) => value, {
-    NSRunningApplication: { runningApplicationsWithBundleIdentifier: () => array(running ? [{ processIdentifier: 123 }] : []) },
+    NSRunningApplication: {
+      runningApplicationsWithBundleIdentifier: () => array(running ? [{ processIdentifier: 123 }] : []),
+    },
     AXUIElementCreateApplication: () => app,
     AXUIElementCopyAttributeValue: (node: Element, name: string, out: unknown[]) => {
       if (node.denied) return -25211;
@@ -33,7 +44,8 @@ function runProbe(app: Element, running = true, bundle = CLAUDE_BUNDLE, mode: "f
     CFURLGetString: (value: { value: string }) => value.value,
   });
   return JSON.parse(
-    runInNewContext(nativeFocusScript(bundle, mode), {
+    runInNewContext(nativeFocusScript(mode) + "\nrun(args)", {
+      args: [bundle],
       $: bridge,
       Ref: () => [],
       ObjC: {
@@ -73,7 +85,9 @@ test("native AX never substitutes a background window or starts an absent applic
 test("title sampling reads only outer documents of open windows without changing focus", () => {
   const first = window([
     web("file:///Claude.app/index.html", ""),
-    web("https://claude.ai/epitaxy/session_one", "One - Claude Code", [web("https://claude.ai/epitaxy/session_wrong", "Nested artifact")]),
+    web("https://claude.ai/epitaxy/session_one", "One - Claude Code", [
+      web("https://claude.ai/epitaxy/session_wrong", "Nested artifact"),
+    ]),
   ]);
   const second = window([web("https://claude.ai/epitaxy/session_two", "Two - Claude Code")]);
   const app = { AXWindows: array([first, second]) };
@@ -84,7 +98,14 @@ test("title sampling reads only outer documents of open windows without changing
   assert.equal(runProbe(app), null, "the same app still has no focused window");
   assert.deepEqual(runProbe(app, false, CLAUDE_BUNDLE, "windows"), []);
   assert.equal(
-    (runProbe({ AXWindows: array(Array.from({ length: 30 }, () => first)) }, true, CLAUDE_BUNDLE, "windows") as unknown[]).length,
+    (
+      runProbe(
+        { AXWindows: array(Array.from({ length: 30 }, () => first)) },
+        true,
+        CLAUDE_BUNDLE,
+        "windows",
+      ) as unknown[]
+    ).length,
     12,
   );
 });
@@ -95,7 +116,11 @@ test("native AX reports the accessibility denial instead of guessing a window", 
 
 test("Codex's generic Electron document preserves the native conversation title and URL", () => {
   const route = "codex://threads/019a1234-1234-7123-a123-123456789abc";
-  const focused = { ...window([web("app://-/index.html", "Codex")]), AXTitle: "Renamed conversation", AXDocument: cfurl(route) };
+  const focused = {
+    ...window([web("app://-/index.html", "Codex")]),
+    AXTitle: "Renamed conversation",
+    AXDocument: cfurl(route),
+  };
   assert.deepEqual(runProbe({ AXFocusedWindow: focused }, true, CODEX_APP_BUNDLE), {
     title: "Renamed conversation",
     url: route,

@@ -1,8 +1,84 @@
-# Usage
+# Agent Inbox Help
 
-**English** | [简体中文](usage.zh-CN.md)
+**English** | [简体中文](help.zh-CN.md)
 
-[README](../README.md) · [Setup and removal](setup.md)
+[README](README.md)
+
+## Requirements
+
+- macOS and Raycast, plus an existing Claude Code or Codex setup. Agent Inbox does not install or sign in to those clients.
+- The system `sqlite3` for local state and search indexes.
+- Optional `terminal-notifier` for clickable notifications.
+
+Hooks and the background collector use an existing Node.js installation when available, with Raycast's runtime as a fallback.
+
+### Connect your first agent
+
+1. Open **All Sessions**, then its action menu (⌘K), and choose **Connect an Agent**.
+2. Select Claude Code or Codex and press Return. The panel reports progress and the result.
+3. For Codex, approve new hooks with `/hooks` inside Codex. Whether an existing session loads new hooks depends on the client; verify with a new session if needed.
+4. In **All Sessions**, select a conversation and press ⌘Return to subscribe. To follow the focused conversation, invoke Raycast from the agent window and run **Subscribe to Current Conversation** directly. All Sessions also keeps **Actions → Subscribe to Current Conversation** (⌘⇧Return).
+5. Open **Subscriptions**. Monitored sessions enter **Waiting for You** when an answer or permission is needed. With notifications enabled, new requests trigger an alert. Press Return to jump back.
+
+Start by subscribing to an existing session to check the list. Test alerts with a new question or permission request: recovering historical state does not send old notifications.
+
+### Permissions and clickable notifications
+
+Window recognition and terminal targeting need macOS Accessibility or Automation permissions. Follow the system prompt in **System Settings → Privacy & Security** for the Raycast or terminal process performing the action. If window information is unavailable, select the session manually in **All Sessions**.
+
+For clickable notifications, install with Homebrew:
+
+```sh
+brew install terminal-notifier
+```
+
+Without it, system notifications still display but cannot navigate back. Clicking a notification opens a confirmation in Raycast before jumping; Return within **Subscriptions** jumps directly. macOS notification permissions and Focus settings also affect delivery.
+
+## What setup changes
+
+| Location                                                       | Purpose                                                             |
+| -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `~/.claude/settings.json`                                      | Claude hooks; follows `CLAUDE_CONFIG_DIR` when set                  |
+| `~/.codex/config.toml`, `~/.codex/hooks.json`                  | Codex notify forwarding and hooks; follows `CODEX_HOME`             |
+| `~/.sessions/bin/agent-inbox.mjs`                              | Stable CLI path used by hooks and the collector                     |
+| `~/Library/LaunchAgents/com.fango.agent-inbox.collector.plist` | User background collector                                           |
+| `~/.sessions/`                                                 | State, subscriptions, configuration, notification queue, and caches |
+
+Setup preserves unrelated hooks and existing Codex notify forwarding. Before changing an existing configuration file, it writes a sibling `*.agent-inbox.bak`. This backup stores the previous contents and may be replaced by later setup changes. Connecting also installs or restarts the collector. After an extension update, opening a command refreshes an already-installed CLI.
+
+Agent conversation files remain read-only. Search uses titles, projects, and IDs by default. Enable **Full-Text Search** in native extension preferences to index conversation content locally. Disabling it leaves the existing index on disk. See [search](#search).
+
+## Disable or remove
+
+Unsubscribe to stop monitoring and alerts for a session. To stop all alerts, turn off **System Notifications** in Raycast's extension preferences, then reopen a command to sync the collector configuration.
+
+To remove the extension:
+
+1. Open **All Sessions → Actions → Connect an Agent**. For each connected agent, choose **Remove Hooks** from its actions. This removes only this extension's entries; do not restore an old backup over the entire client configuration.
+2. Stop the collector and remove its login item:
+
+   ```sh
+   launchctl bootout "gui/$(id -u)/com.fango.agent-inbox.collector"
+   rm -f "$HOME/Library/LaunchAgents/com.fango.agent-inbox.collector.plist"
+   ```
+
+   If already stopped, the first command may report that the service is missing. Still remove the plist to prevent a later login from starting it. Removing hooks alone does not uninstall the collector.
+
+3. Remove Agent Inbox in Raycast's extension preferences.
+4. Optionally delete `~/.sessions/`, losing subscriptions, configuration, and the local index. Check the corresponding directory if you use `AGENT_INBOX_HOME`. This is separate from the original Claude and Codex conversation storage.
+
+## Troubleshooting
+
+| Symptom                            | Check                                                                                                                        |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Current-window subscription fails  | Use a supported Code page and check window/tty permissions; select the session manually if needed                            |
+| A cloud-only session has no alerts | Without local records or hooks, monitoring is unavailable; its status says “Cloud status unavailable”                        |
+| A session is not marked completed  | An ordinary stop means “Turn ended”; only an explicit completion event produces “Completed”                                  |
+| No system notification             | Check subscription, handled status, notification preferences, and macOS permissions; history recovery does not replay alerts |
+| Notification cannot be clicked     | Install `terminal-notifier`, or jump from Subscriptions                                                                      |
+| Navigation only opens the app      | Exact targeting was unavailable; the UI reports ID-copy or CLI-resume recovery                                               |
+
+Diagnostic logs are `~/.sessions/log.txt` and `~/.sessions/collector.log`. Redact paths, conversation content, and credentials before [reporting an issue](https://github.com/0xFANGO/agent-inbox/issues).
 
 ## Commands
 
@@ -25,9 +101,9 @@ Press **⌫ Delete** with an empty search field to return to the previous view; 
 
 Default search covers titles, projects, and session IDs. It does **not** automatically load or index full conversations. Choose **Set Up Full-Text Search** below the search results, or **Open Extension Preferences**, then enable **Full-Text Search**. The native preference explains what will be read and stored. Reopen **All Sessions** after changing it. Turning it off stops indexing and content queries; the existing index remains on disk and is no longer updated.
 
-The index includes user and agent messages, with short Chinese terms, case normalization, and multiple keywords supported. Tool output, reasoning, and system-injected content are excluded. The initial build streams local files; subsequent refreshes reindex only changed file sizes or modification times. Queries use local SQLite and never upload conversations. Title search remains available while indexing. Leaving or refreshing the list cancels pending reads safely.
+The index includes user and agent messages, with short Chinese terms, case normalization, and multiple keywords supported. Tool output, reasoning, and system-injected content are excluded. The initial build streams local files; subsequent refreshes reindex only changed file sizes or modification times. Queries use local SQLite and never upload conversations. Title search remains available while indexing. Refreshing the list queues the latest data without interrupting indexing. Leaving the list or disabling full-text search cancels pending reads.
 
-A local sample on 2026-11-04 contained 237 files and about 1.39 GB of records: the first index took about 4.38 seconds, occupied 17.9 MB, and peaked at roughly 308 MB process memory. A warm refresh took about 44 ms and queries about 3–9 ms, plus 180 ms input debounce. These are measurements on one machine, not guarantees. The index lives at `~/.sessions/cache/conversation-search.sqlite`. Cloud-only content without local records cannot be searched.
+The index lives at `~/.sessions/cache/conversation-search.sqlite`. Cloud-only content without local records cannot be searched.
 
 ### Preferences and connections
 
@@ -39,11 +115,7 @@ The interface and notification labels use English. Open **Actions → Open Exten
 
 Enable or disable **Session Menu Bar** in Raycast's command preferences. Its refresh interval is one minute. There is no second visibility switch inside the extension.
 
-**Connect an Agent** remains in the session action menus. It connects Claude Code or Codex and shows progress and success/failure. Existing configuration is backed up to `*.agent-inbox.bak`. Codex still requires its own `/hooks` approval. Custom adapters are implemented through the [integration interfaces](integrations.md).
-
-### Upgrading from the earlier development version
-
-Native preferences now control terminal recovery, notifications, and content search. Review them once after updating: notifications default to on and full-text search defaults to off. The old language and menu-bar fields in `config.json` are no longer used. Use **Connect an Agent → Reconnect** after upgrading to restart the collector with the updated CLI. If Raycast still lists an older development copy under the former author name, disable that copy so only the current extension manages shared preferences.
+**Connect an Agent** remains in the session action menus. It connects Claude Code or Codex and shows progress and success/failure. Existing configuration is backed up to `*.agent-inbox.bak`. Codex still requires its own `/hooks` approval.
 
 ## State and subscriptions
 
@@ -83,9 +155,7 @@ Codex preserves native window titles when Electron exposes a generic page title,
 
 Claude metadata maps `bridgeSessionIds` to `local_*` and CLI IDs, accepting older strings and newer arrays. Same-suffix `session_*` and `cse_*` IDs share the mapping; ambiguous mappings are rejected. Without local records, an explicit cloud Code session ID can still be subscribed to and reopened. A cloud icon identifies it in the lists and menu bar. The detail view explains that input reminders are unavailable. Unknown activity times are omitted from rows; subscription time is never used as activity.
 
-CLI current-window matching requires installed hooks to collect tty/tmux locators. Historical transcripts usually lack these, so select those sessions manually.
-
-Current-window subscription and return to the correct Codex desktop conversation were verified by the user; see the [test record](../TESTING.md) for the remaining coverage. When permissions or terminal interfaces are unavailable, use manual selection.
+CLI current-window matching requires installed hooks to collect tty/tmux locators and the agent process identity. After reconnecting hooks, trigger a new agent event or start a new session to refresh older locators. Historical transcripts usually lack these, so select those sessions manually.
 
 ## Jump back
 

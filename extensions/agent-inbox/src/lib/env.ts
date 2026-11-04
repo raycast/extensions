@@ -1,16 +1,15 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { ExtensionPreferences, syncPreferences } from "../core/config";
+import { syncPreferences } from "../core/config";
 import { installCli } from "../core/install";
 import { CLI_PATH } from "../core/paths";
-import { translator, Translator } from "../core/messages";
 import { Config } from "../core/types";
 
 /** Mirror native preferences for the hook CLI and background collector. */
 export function syncConfig(): Config {
   return syncPreferences(
-    getPreferenceValues<ExtensionPreferences>(),
+    getPreferenceValues<Preferences>(),
     `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}`,
   );
 }
@@ -27,11 +26,11 @@ function refreshCli() {
 
 let refreshed = false;
 
-export function locale(): { t: Translator; config: Config } {
+export function extensionConfig(): Config {
   const config = syncConfig();
   if (!refreshed) {
     refreshed = true;
     refreshCli();
   }
-  return { t: translator(), config };
+  return config;
 }

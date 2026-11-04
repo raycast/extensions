@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { asString, osascript, run, shQuote } from "./exec";
+import { osascript, run, shQuote } from "./exec";
 import { Locator, ResumeTerminal } from "./types";
 
 export const TERMINAL_BUNDLE = "com.apple.Terminal";
@@ -62,15 +62,6 @@ export async function focusTmuxPane(loc: Locator, actions = { run, activateBundl
   return window.ok && selected.ok && (switched.ok || activated);
 }
 
-/** Is an agent process still attached to this tty? */
-export async function ttyAlive(tty: string | undefined): Promise<boolean> {
-  if (!tty) return false;
-  const name = tty.replace(/^\/dev\//, "");
-  const r = await run("/bin/ps", ["-t", name, "-o", "comm="]);
-  if (!r.ok) return false;
-  return r.stdout.split("\n").some((l) => /claude|codex|node/i.test(l));
-}
-
 export async function activateBundle(bundleId: string): Promise<boolean> {
   const r = await run("/usr/bin/open", ["-b", bundleId]);
   return r.ok;
@@ -79,11 +70,13 @@ export async function activateBundle(bundleId: string): Promise<boolean> {
 /** Select the Terminal.app / iTerm2 tab or Ghostty surface that owns a tty. */
 export async function focusTty(tty: string, bundleId: string | undefined, actions = { osascript }): Promise<boolean> {
   if (bundleId === TERMINAL_BUNDLE) {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "Terminal"
   repeat with w in windows
     repeat with t in tabs of w
-      if tty of t is ${asString(tty)} then
+      if tty of t is (item 1 of argv) then
         set selected of t to true
         set index of w to 1
         activate
@@ -92,16 +85,22 @@ tell application "Terminal"
     end repeat
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty],
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   if (bundleId === ITERM_BUNDLE) {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "iTerm2"
   repeat with w in windows
     repeat with t in tabs of w
       repeat with s in sessions of t
-        if tty of s is ${asString(tty)} then
+        if tty of s is (item 1 of argv) then
           select w
           select t
           select s
@@ -112,21 +111,31 @@ tell application "iTerm2"
     end repeat
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty],
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   if (bundleId === GHOSTTY_BUNDLE) {
     // Ghostty 1.4 exposes terminal.tty; focus also selects its split, tab and window.
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "Ghostty"
   repeat with term in terminals
-    if tty of term is ${asString(tty)} then
+    if tty of term is (item 1 of argv) then
       focus term
       return "ok"
     end if
   end repeat
 end tell
-return "miss"`);
+return "miss"
+end run`,
+      "AppleScript",
+      [tty],
+    );
     return r.ok && r.stdout.trim() === "ok";
   }
   return false;
@@ -169,14 +178,23 @@ export interface TmuxClient {
 export async function tmuxClients(socket?: string, actions = { run }): Promise<TmuxClient[]> {
   const r = await actions.run(
     tmuxBinary(),
-    tmuxArgs({ tmuxSocket: socket }, ["list-clients", "-F", "#{client_tty}\t#{pane_id}\t#{client_activity}\t#{socket_path}"]),
+    tmuxArgs({ tmuxSocket: socket }, [
+      "list-clients",
+      "-F",
+      "#{client_tty}\t#{pane_id}\t#{client_activity}\t#{socket_path}",
+    ]),
   );
   if (!r.ok) return [];
   return r.stdout
     .split("\n")
     .map((l) => l.split("\t"))
     .filter((p) => p.length === 4 && TTY_PATH.test(p[0]) && /^%\d+$/.test(p[1]) && p[3].startsWith("/"))
-    .map(([tty, pane, activity, reportedSocket]) => ({ tty, pane, activity: Number(activity) || 0, socket: socket || reportedSocket }));
+    .map(([tty, pane, activity, reportedSocket]) => ({
+      tty,
+      pane,
+      activity: Number(activity) || 0,
+      socket: socket || reportedSocket,
+    }));
 }
 
 /** Open a new terminal window running `command` in `cwd`. */
@@ -188,12 +206,18 @@ export async function openInTerminal(
 ): Promise<boolean> {
   const line = cwd && existsSync(cwd) ? `cd ${shQuote(cwd)} && ${command}` : command;
   if (terminal === "iterm") {
-    const r = await actions.osascript(`
+    const r = await actions.osascript(
+      `
+on run argv
 tell application "iTerm2"
   activate
   set w to (create window with default profile)
-  tell current session of w to write text ${asString(line)}
-end tell`);
+  tell current session of w to write text (item 1 of argv)
+end tell
+end run`,
+      "AppleScript",
+      [line],
+    );
     if (r.ok) return true;
   }
   if (terminal === "ghostty") {
@@ -203,10 +227,16 @@ end tell`);
     const r = await actions.run("/usr/bin/open", args);
     if (r.ok) return true;
   }
-  const r = await actions.osascript(`
+  const r = await actions.osascript(
+    `
+on run argv
 tell application "Terminal"
   activate
-  do script ${asString(line)}
-end tell`);
+  do script (item 1 of argv)
+end tell
+end run`,
+    "AppleScript",
+    [line],
+  );
   return r.ok;
 }

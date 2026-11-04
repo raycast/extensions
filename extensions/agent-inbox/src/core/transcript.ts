@@ -2,7 +2,11 @@ import { closeSync, openSync, readSync, statSync } from "node:fs";
 import { asksForInput } from "./status";
 
 /** Read the first and last chunk of a (potentially huge) JSONL transcript. */
-export function readHeadTail(path: string, headBytes = 64 * 1024, tailBytes = 48 * 1024): { head: string[]; tail: string[]; size: number } {
+export function readHeadTail(
+  path: string,
+  headBytes = 64 * 1024,
+  tailBytes = 48 * 1024,
+): { head: string[]; tail: string[]; size: number } {
   const size = statSync(path).size;
   const fd = openSync(path, "r");
   try {
@@ -142,7 +146,11 @@ export function conversationText(agent: string, entry: J): string {
       const text = str(payload.message);
       return payload.type === "user_message" && isScaffolding(text) ? "" : text;
     }
-    if (entry.type === "response_item" && payload.type === "message" && (payload.role === "user" || payload.role === "assistant")) {
+    if (
+      entry.type === "response_item" &&
+      payload.type === "message" &&
+      (payload.role === "user" || payload.role === "assistant")
+    ) {
       const text = textOf(payload.content);
       return payload.role === "user" && isScaffolding(text) ? "" : text;
     }
@@ -227,7 +235,8 @@ export function parseCodex(head: J[], tail: J[]): TranscriptInfo {
       info.startedAt = ts(p.timestamp) || ts(e.timestamp);
     }
     if (!info.firstPrompt) {
-      if (e.type === "event_msg" && p.type === "user_message" && !isScaffolding(str(p.message))) info.firstPrompt = str(p.message);
+      if (e.type === "event_msg" && p.type === "user_message" && !isScaffolding(str(p.message)))
+        info.firstPrompt = str(p.message);
       else if (e.type === "response_item" && p.type === "message" && p.role === "user") {
         const text = textOf(p.content);
         if (!isScaffolding(text)) info.firstPrompt = text;
@@ -238,7 +247,8 @@ export function parseCodex(head: J[], tail: J[]): TranscriptInfo {
     for (let i = list.length - 1; i >= 0 && !info.lastAssistant; i--) {
       const p = obj(list[i].payload);
       if (list[i].type === "event_msg" && p.type === "agent_message") info.lastAssistant = str(p.message);
-      else if (list[i].type === "response_item" && p.type === "message" && p.role === "assistant") info.lastAssistant = textOf(p.content);
+      else if (list[i].type === "response_item" && p.type === "message" && p.role === "assistant")
+        info.lastAssistant = textOf(p.content);
     }
   };
   scan(tail);

@@ -38,7 +38,10 @@ test("large transcripts discard partial records and retain the latest complete a
 
 test("Claude Stop falls back to the transcript when no last message is supplied", (t) => {
   const path = join(tempDir(t), "transcript.jsonl");
-  writeFileSync(path, JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "要继续吗？" }] } }));
+  writeFileSync(
+    path,
+    JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "要继续吗？" }] } }),
+  );
   const event = parseClaudeHook({ session_id: "s", hook_event_name: "Stop", transcript_path: path }, {})!;
   assert.equal(event.type, "stopped");
   assert.equal(event.attention, "question");
@@ -72,9 +75,17 @@ test("transcript titles ignore injected instructions and retain explicit renames
           content: [{ type: "input_text", text: "<environment_context>metadata</environment_context>" }],
         },
       },
-      { type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Fix the bug" }] } },
+      {
+        type: "response_item",
+        payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Fix the bug" }] },
+      },
     ],
-    [{ type: "response_item", payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "Fixed." }] } }],
+    [
+      {
+        type: "response_item",
+        payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "Fixed." }] },
+      },
+    ],
   );
   assert.equal(codex.firstPrompt, "Fix the bug");
   assert.equal(codex.lastAssistant, "Fixed.");

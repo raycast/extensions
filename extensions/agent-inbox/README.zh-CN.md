@@ -33,8 +33,6 @@ flowchart LR
 
 需要 **macOS、Raycast**，以及已经使用的 Claude Code 或 Codex。可点击通知另需 `terminal-notifier`。
 
-Agent Inbox 尚未在 Raycast Store 上架。审核通过后，可在 Raycast 的 **Store** 命令中搜索并安装 **Agent Inbox**。当前请参考 [源码安装](docs/setup.zh-CN.md#源码安装)。
-
 安装扩展后：
 
 1. 在 Raycast 搜索 **Agent Inbox**，打开 **All Sessions → Actions（⌘K）→ Connect an Agent**，接入 Claude Code 或 Codex。Codex 首次需在客户端执行 `/hooks` 确认。
@@ -43,7 +41,7 @@ Agent Inbox 尚未在 Raycast Store 上架。审核通过后，可在 Raycast �
 
 插件界面和通知统一使用英文。通过 **Actions → Open Extension Preferences** 打开原生偏好，设置恢复终端、通知和全文搜索。
 
-接入会安装本地 Hook 和用户级后台采集器，修改前备份已有配置。权限、可点击通知、数据位置和卸载步骤见 [安装指南](docs/setup.zh-CN.md)。
+接入会安装本地 Hook 和用户级后台采集器，修改前备份已有配置。权限、可点击通知、数据位置和卸载步骤见 [安装指南](help.zh-CN.md)。
 
 ## 日常使用
 
@@ -56,7 +54,7 @@ Agent Inbox 尚未在 Raycast Store 上架。审核通过后，可在 Raycast �
 
 **待输入**包括问题、授权，以及需要处理的失败、额度或中断。**本轮结束**表示 Agent 停止了这一轮；只有明确的完成事件才标记为**已完成**。标记已处理会暂时隐藏会话，状态变化或新请求会让它重新出现。
 
-完整快捷键、状态语义、标题同步和跳转兜底见 [使用指南](docs/usage.zh-CN.md)。
+完整快捷键、状态语义、标题同步和跳转兜底见 [使用指南](help.zh-CN.md)。
 
 ## 支持范围
 
@@ -65,7 +63,7 @@ Agent Inbox 尚未在 Raycast Store 上架。审核通过后，可在 Raycast �
 | 来源                       | 当前能力                                       | 边界                                                           |
 | -------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
 | Claude Code CLI / 本地桌面 | 历史发现、订阅、Hook 与本地记录状态采集、跳回  | 原窗口定位依赖权限与可用的会话映射                             |
-| Codex CLI / 桌面           | 历史发现、订阅、Hook 与本地 rollout 采集、跳回 | 客户端数据格式可能变化；已验证流程见测试记录                   |
+| Codex CLI / 桌面           | 历史发现、订阅、Hook 与本地 rollout 采集、跳回 | 客户端数据格式可能变化；精确跳转需要客户端支持                 |
 | Claude Code 纯云端         | 按明确窗口 ID 订阅和跳回，同步已打开窗口的标题 | 以云朵图标标识；无本地记录或 Hook 时，没有待输入提醒或正文搜索 |
 | 终端                       | Terminal、iTerm2、Ghostty；支持 tmux 定位      | 精确 Ghostty 定位使用 1.4 的 tty 接口；缺少接口时降级处理      |
 
@@ -84,23 +82,8 @@ Agent Inbox 管理你已经打开的会话，不托管或派发任务、不代�
 
 修改原生偏好后，重新打开扩展命令以同步后台采集器配置。
 
-全文索引位于 `~/.sessions/cache/conversation-search.sqlite`。关闭搜索会停止索引与正文检索，已有索引不会自动删除。更多说明见 [搜索与隐私](docs/usage.zh-CN.md#搜索)。
+全文索引位于 `~/.sessions/cache/conversation-search.sqlite`。关闭搜索会停止索引与正文检索，已有索引不会自动删除。更多说明见 [搜索与隐私](help.zh-CN.md#搜索)。
 
-## 开发与贡献
+问题和建议请提交到 [Issues](https://github.com/0xFANGO/agent-inbox/issues)。
 
-```sh
-npm ci
-npm run check  # 测试、类型、ESLint / Prettier、CLI 与 Raycast 构建
-npm run dev    # 在 Raycast 中加载开发版
-```
-
-- [贡献说明](CONTRIBUTING.zh-CN.md)：开发、复现问题与提交 PR。
-- [CLI](docs/cli.zh-CN.md) · [架构](docs/architecture.zh-CN.md) · [扩展接口](docs/integrations.zh-CN.md)。
-- [测试记录](TESTING.zh-CN.md) · [更新记录](CHANGELOG.zh-CN.md)。
-- [产品与 Logo 设计说明](docs/brand-brief.zh-CN.md)。
-
-使用问题与建议请提交 [Issue](https://github.com/raycast/extensions/issues)；安全问题请先阅读 [安全说明](SECURITY.zh-CN.md)。
-
-## 许可证
-
-源码采用 [MIT](LICENSE)。第三方图标与随仓库附带的工具保留各自权利，平台图标来源见 [素材说明](media/README.md)。
+平台图标来自 [Simple Icons](https://github.com/simple-icons/simple-icons)，使用 [CC0 1.0](https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md) 许可。商标归各自所有者所有。

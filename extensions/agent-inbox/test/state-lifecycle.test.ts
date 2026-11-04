@@ -8,7 +8,8 @@ import { Session, AgentEvent } from "../src/core/types";
 function reduce(events: Partial<AgentEvent>[], initial?: Session): Session {
   let session = initial;
   for (const event of events)
-    session = applyEvent(session, { agent: "codex", sessionId: "s", type: "progress", at: 100, ...event })?.next ?? session;
+    session =
+      applyEvent(session, { agent: "codex", sessionId: "s", type: "progress", at: 100, ...event })?.next ?? session;
   return session!;
 }
 
@@ -19,7 +20,12 @@ test("turn end and process exit never assert that the user's task was completed"
 });
 
 test("both adapters recognize non-question-mark requests and questions followed by prose", () => {
-  for (const text of ["请确认后我再继续。", "请选择 A 或 B", "是否继续？\n选择后我将开始执行。", "Please confirm before I continue."]) {
+  for (const text of [
+    "请确认后我再继续。",
+    "请选择 A 或 B",
+    "是否继续？\n选择后我将开始执行。",
+    "Please confirm before I continue.",
+  ]) {
     const events = [
       parseCodexNotify({ type: "agent-turn-complete", "thread-id": "s", "last-assistant-message": text }, {}, 100),
       parseClaudeHook({ hook_event_name: "Stop", session_id: "s", last_assistant_message: text }, {}, 100),
@@ -72,7 +78,13 @@ test("old and wrong-turn completion cannot overwrite new questions; answered req
 test("legacy notifications do not duplicate or outlive structured approval requests", () => {
   const start = { ...reduce([{ type: "progress" }]), subscribed: true };
   const structured = reduce([{ type: "needs_input", attention: "permission", requestIds: ["p"] }], start);
-  const reminder = applyEvent(structured, { agent: "codex", sessionId: "s", type: "needs_input", attention: "permission", at: 101 })!;
+  const reminder = applyEvent(structured, {
+    agent: "codex",
+    sessionId: "s",
+    type: "needs_input",
+    attention: "permission",
+    at: 101,
+  })!;
   assert.equal(reminder.notify, false);
   assert.equal(reminder.next.state!.pending.length, 1);
   assert.equal(reduce([{ type: "tool", requestIds: ["p"], at: 102 }], reminder.next).status, "running");
@@ -96,7 +108,12 @@ test("Claude permission reminders cannot duplicate or outlive AskUserQuestion", 
     101,
   )!;
   const reminder = parseClaudeHook(
-    { session_id: "s", hook_event_name: "Notification", notification_type: "permission_prompt", message: "Claude needs your input" },
+    {
+      session_id: "s",
+      hook_event_name: "Notification",
+      notification_type: "permission_prompt",
+      message: "Claude needs your input",
+    },
     {},
     102,
   )!;
@@ -148,7 +165,10 @@ test("late transcript requests and matching replies reconcile after a newer stop
     { type: "progress", turnId: "t", at: 100 },
     { type: "stopped", turnId: "t", at: 300 },
   ]);
-  const delayed = reduce([{ type: "needs_input", source: "transcript", requestIds: ["q"], turnId: "t", at: 200 }], ready);
+  const delayed = reduce(
+    [{ type: "needs_input", source: "transcript", requestIds: ["q"], turnId: "t", at: 200 }],
+    ready,
+  );
   assert.equal(delayed.status, "needs_input");
   assert.equal(delayed.state!.at, 300);
   const answered = reduce([{ type: "resolved", requestIds: ["q"], turnId: "t", at: 250 }], delayed);
@@ -158,7 +178,11 @@ test("late transcript requests and matching replies reconcile after a newer stop
 
 test("quoted examples in a finished report do not become inferred questions", () => {
   const text = "已完成检查。\n\n| 示例 | 结果 |\n| 请确认后我再继续。 | 待输入 |\n\n测试全部通过。";
-  const event = parseCodexNotify({ type: "agent-turn-complete", "thread-id": "s", "last-assistant-message": text }, {}, 100)!;
+  const event = parseCodexNotify(
+    { type: "agent-turn-complete", "thread-id": "s", "last-assistant-message": text },
+    {},
+    100,
+  )!;
   assert.equal(applyEvent(undefined, event)!.next.status, "ready");
 });
 

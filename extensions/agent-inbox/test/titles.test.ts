@@ -62,7 +62,11 @@ test("title synchronization is independent of state, subscription, activity, han
   const after = (await store.get("claude", "one"))!;
   assert.deepEqual(after, { ...before, title: "Renamed", titleObservedAt: 100, titleSource: "test" });
   assert.deepEqual(await store.claimNotifications(), []);
-  assert.equal((await new Store(store.path).get("claude", "one"))!.title, "Renamed", "rename survives a process restart");
+  assert.equal(
+    (await new Store(store.path).get("claude", "one"))!.title,
+    "Renamed",
+    "rename survives a process restart",
+  );
   await store.syncTitles([observation("   ", 200)]);
   assert.equal((await store.get("claude", "one"))!.title, "Renamed");
 });
@@ -122,7 +126,11 @@ test("Claude sidecar renames override a saved prompt and survive partial or miss
   assert.equal((await sync.refresh(await store.all()))[0].title, "Renamed <project>");
   rmSync(sidecar);
   const restarted = sourceFor();
-  assert.deepEqual(await restarted.read(await store.all()), [], "missing sidecar must not restore an old transcript name after restart");
+  assert.deepEqual(
+    await restarted.read(await store.all()),
+    [],
+    "missing sidecar must not restore an old transcript name after restart",
+  );
 });
 
 test("legacy Claude rename records are found before huge output, and only complete matching records apply", async (t) => {
@@ -176,7 +184,10 @@ test("desktop metadata updates names, while a CLI resume retains its CLI rename 
   assert.equal((await source.read([app]))[0].title, "Desktop name");
   title = "Desktop renamed";
   assert.equal((await source.read([app]))[0].title, "Desktop renamed");
-  assert.equal((await source.read([{ ...app, host: "cli", locator: { claudeEntrypoint: "cli" } }]))[0].title, "CLI name");
+  assert.equal(
+    (await source.read([{ ...app, host: "cli", locator: { claudeEntrypoint: "cli" } }]))[0].title,
+    "CLI name",
+  );
 });
 
 test("Claude cloud names follow exact open-window IDs, including aliases, never titles or activity guesses", async (t) => {
@@ -198,7 +209,11 @@ test("Claude cloud names follow exact open-window IDs, including aliases, never 
     { title: "A - Claude Code", url: "https://claude.ai/epitaxy/session_cloud1" },
     { title: "B - Claude Code", url: "https://claude.ai/epitaxy/cse_cloud1" },
   ];
-  assert.equal((await sync.refresh(await store.all()))[0].title, "Renamed", "conflicting windows are not evidence of a unique name");
+  assert.equal(
+    (await sync.refresh(await store.all()))[0].title,
+    "Renamed",
+    "conflicting windows are not evidence of a unique name",
+  );
   windows = [];
   const saved = (await sync.refresh(await store.all()))[0];
   assert.equal(saved.title, "Renamed");
@@ -215,7 +230,9 @@ test("Codex catalog renames are persisted even when no execution events arrive",
   const store = new Store(join(root, "db.sqlite"));
   await store.put({ ...session, agent: "codex" });
   let now = 100;
-  const sync = new TitleSynchronizer(store, () => [adapter("codex", (rows) => readCodexTitles(rows, root, () => ++now))]);
+  const sync = new TitleSynchronizer(store, () => [
+    adapter("codex", (rows) => readCodexTitles(rows, root, () => ++now)),
+  ]);
   await sync.refresh(await store.all());
   await exec(catalog, "UPDATE threads SET name='Renamed' WHERE id='one';");
   await sync.refresh(await store.all());
@@ -225,7 +242,10 @@ test("Codex catalog renames are persisted even when no execution events arrive",
 test("a queued notification uses the current title without generating another notification", async (t) => {
   const store = new Store(join(tempDir(t), "db.sqlite"));
   await store.put({ ...session, handledAt: null });
-  await store.record({ agent: "claude", sessionId: "one", type: "needs_input", requestIds: ["q"], at: 1000 }, { channels: ["test"] });
+  await store.record(
+    { agent: "claude", sessionId: "one", type: "needs_input", requestIds: ["q"], at: 1000 },
+    { channels: ["test"] },
+  );
   await store.syncTitles([observation("Renamed after question", 2000)]);
   const sent: string[] = [];
   await deliverNotifications(store, { ...DEFAULT_CONFIG, notificationChannels: ["test"] }, [

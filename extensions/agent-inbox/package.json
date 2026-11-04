@@ -143,7 +143,7 @@
   "scripts": {
     "build:cli": "esbuild cli/agent-inbox.ts --bundle --platform=node --format=esm --target=node18 --outfile=assets/agent-inbox.mjs --banner:js='#!/usr/bin/env node'",
     "build": "npm run build:cli && ray build -e dist",
-    "bundle": "npm run build:cli && ray bundle --output dist/agent-inbox.rayext && zip -q -d dist/agent-inbox.rayext '*.map' && zip -q -j dist/agent-inbox.rayext LICENSE",
+    "bundle": "npm run build:cli && ray bundle --output dist/agent-inbox.rayext && zip -q -d dist/agent-inbox.rayext '*.map'",
     "dev": "npm run build:cli && ray develop",
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build:cli",

@@ -31,10 +31,21 @@ test("hook CLI writes events into the database (built bundle)", (t) => {
     TMUX: "/tmp/tmux-501/default,1,0",
     __CFBundleIdentifier: "com.mitchellh.ghostty",
   };
-  const hook = (payload: object) => execFileSync(process.execPath, [CLI, "hook", "claude"], { env, input: JSON.stringify(payload) });
+  const hook = (payload: object) =>
+    execFileSync(process.execPath, [CLI, "hook", "claude"], { env, input: JSON.stringify(payload) });
   hook({ hook_event_name: "SessionStart", session_id: "s-1", cwd: "/work/chatcut" });
-  hook({ hook_event_name: "UserPromptSubmit", session_id: "s-1", cwd: "/work/chatcut", prompt: "chatcut 转场 shader 修复" });
-  hook({ hook_event_name: "Stop", session_id: "s-1", cwd: "/work/chatcut", last_assistant_message: "修好了，要我提交吗？" });
+  hook({
+    hook_event_name: "UserPromptSubmit",
+    session_id: "s-1",
+    cwd: "/work/chatcut",
+    prompt: "chatcut 转场 shader 修复",
+  });
+  hook({
+    hook_event_name: "Stop",
+    session_id: "s-1",
+    cwd: "/work/chatcut",
+    last_assistant_message: "修好了，要我提交吗？",
+  });
   // malformed input must not crash the agent
   execFileSync(process.execPath, [CLI, "hook", "claude"], { env, input: "not json" });
 
@@ -50,7 +61,20 @@ test("hook CLI writes events into the database (built bundle)", (t) => {
   );
   execFileSync(
     process.execPath,
-    [CLI, "event", "--agent", "t3code", "--session", "x1", "--type", "needs_input", "--summary", "pick one", "--title", "Plan"],
+    [
+      CLI,
+      "event",
+      "--agent",
+      "t3code",
+      "--session",
+      "x1",
+      "--type",
+      "needs_input",
+      "--summary",
+      "pick one",
+      "--title",
+      "Plan",
+    ],
     { env },
   );
 
@@ -76,12 +100,21 @@ test("hook CLI writes events into the database (built bundle)", (t) => {
 
 test("CLI reports usage errors and unknown sessions with nonzero exit codes", (t) => {
   const env = { ...process.env, AGENT_INBOX_HOME: tempDir(t) };
-  for (const args of [[], ["unknown"], ["event"], ["event", "--agent", "test", "--session", "s", "--type", "invalid"]]) {
+  for (const args of [
+    [],
+    ["unknown"],
+    ["event"],
+    ["event", "--agent", "test", "--session", "s", "--type", "invalid"],
+  ]) {
     const result = spawnSync(process.execPath, [CLI, ...args], { env, encoding: "utf8", timeout: 5000 });
     assert.equal(result.status, 2);
     assert.match(result.stderr, /usage:/);
   }
-  const missing = spawnSync(process.execPath, [CLI, "jump", "claude", "missing"], { env, encoding: "utf8", timeout: 5000 });
+  const missing = spawnSync(process.execPath, [CLI, "jump", "claude", "missing"], {
+    env,
+    encoding: "utf8",
+    timeout: 5000,
+  });
   assert.equal(missing.status, 1);
   assert.match(missing.stderr, /session not found/);
 });

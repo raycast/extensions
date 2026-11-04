@@ -15,7 +15,8 @@ export const CLAUDE_DIR = process.env.CLAUDE_CONFIG_DIR || join(HOME, ".claude")
 export const CLAUDE_PROJECTS = join(CLAUDE_DIR, "projects");
 export const CLAUDE_SETTINGS = join(CLAUDE_DIR, "settings.json");
 export const CLAUDE_DESKTOP_SESSIONS =
-  process.env.AGENT_INBOX_CLAUDE_DESKTOP_ROOT || join(HOME, "Library", "Application Support", "Claude", "claude-code-sessions");
+  process.env.AGENT_INBOX_CLAUDE_DESKTOP_ROOT ||
+  join(HOME, "Library", "Application Support", "Claude", "claude-code-sessions");
 
 export const CODEX_DIR = process.env.CODEX_HOME || join(HOME, ".codex");
 export const CODEX_SESSIONS = join(CODEX_DIR, "sessions");

@@ -24,7 +24,7 @@ test("record, subscribe, handle, archive", async (context) => {
   await store.setSubscribed("claude", "a", true);
   let a = (await store.get("claude", "a"))!;
   assert.equal(a.title, '它\'s "quoted"');
-  assert.deepEqual(a.locator, { tty: "/dev/ttys001" });
+  assert.deepEqual(a.locator, { tty: "/dev/ttys001", observedAt: 1 });
   assert.equal(a.subscribed, true);
 
   const t = await store.record({ agent: "claude", sessionId: "a", type: "needs_input", at: 3 });
@@ -96,13 +96,20 @@ test("subscribing stale history preserves a live session's state and locator", a
   const store = tmp(t);
   await store.record({ agent: "claude", sessionId: "s", type: "started", at: 1 });
   const stale = (await store.get("claude", "s"))!;
-  await store.record({ agent: "claude", sessionId: "s", type: "progress", title: "Live title", locator: { tty: "/dev/ttys007" }, at: 2 });
+  await store.record({
+    agent: "claude",
+    sessionId: "s",
+    type: "progress",
+    title: "Live title",
+    locator: { tty: "/dev/ttys007" },
+    at: 2,
+  });
   await store.subscribeEntry(stale);
   const current = (await store.get("claude", "s"))!;
   assert.equal(current.subscribed, true);
   assert.equal(current.status, "running");
   assert.equal(current.title, "Live title");
-  assert.deepEqual(current.locator, { tty: "/dev/ttys007" });
+  assert.deepEqual(current.locator, { tty: "/dev/ttys007", observedAt: 2 });
   assert.equal(current.updatedAt, 2);
 });
 
@@ -110,7 +117,14 @@ test("subscribing history cannot overwrite a hook row after a stale absence chec
   const store = tmp(t);
   await store.record({ agent: "claude", sessionId: "s", type: "started", at: 1 });
   const stale = (await store.get("claude", "s"))!;
-  await store.record({ agent: "claude", sessionId: "s", type: "progress", title: "New live prompt", cwd: "/live", at: 20 });
+  await store.record({
+    agent: "claude",
+    sessionId: "s",
+    type: "progress",
+    title: "New live prompt",
+    cwd: "/live",
+    at: 20,
+  });
   // Reproduce the stale result a separate existence check can return while a hook creates the row.
   store.get = async () => undefined;
   await store.subscribeEntry(stale);
@@ -125,7 +139,12 @@ test("subscribing history cannot overwrite a hook row after a stale absence chec
 test("a matched desktop window persists corrected identity without overwriting concurrent hook state", async (t) => {
   const store = tmp(t);
   await store.record({ agent: "codex", sessionId: "s", host: "cli", type: "started", at: 1 });
-  const focused = { ...(await store.get("codex", "s"))!, host: "app" as const, title: "Renamed", locator: { hostId: "host-one" } };
+  const focused = {
+    ...(await store.get("codex", "s"))!,
+    host: "app" as const,
+    title: "Renamed",
+    locator: { hostId: "host-one" },
+  };
   await store.record({ agent: "codex", sessionId: "s", type: "progress", locator: { tty: "/dev/ttys007" }, at: 2 });
   await store.subscribeEntry(focused, { focused: true });
   const current = (await store.get("codex", "s"))!;
@@ -134,7 +153,7 @@ test("a matched desktop window persists corrected identity without overwriting c
   assert.equal(current.subscribed, true);
   assert.equal(current.status, "running");
   assert.equal(current.updatedAt, 2);
-  assert.deepEqual(current.locator, { tty: "/dev/ttys007", hostId: "host-one" });
+  assert.deepEqual(current.locator, { tty: "/dev/ttys007", hostId: "host-one", observedAt: 2 });
 });
 
 test("resubscribing restores handled sessions and archive only affects subscriptions", async (t) => {

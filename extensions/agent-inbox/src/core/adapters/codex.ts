@@ -32,7 +32,8 @@ export async function jumpCodex(
   config: Config,
   navigation = { openUrl, copyToClipboard, jumpToCli },
 ): Promise<JumpResult> {
-  if (session.host !== "app") return navigation.jumpToCli(session, `codex resume ${shQuote(session.sessionId)}`, config);
+  if (session.host !== "app")
+    return navigation.jumpToCli(session, `codex resume ${shQuote(session.sessionId)}`, config);
   if (THREAD_ID.test(session.sessionId)) {
     const host = session.locator?.hostId ? `?hostId=${encodeURIComponent(session.locator.hostId)}` : "";
     if (await navigation.openUrl(`codex://threads/${session.sessionId}${host}`)) return { ok: true, method: "url" };
@@ -125,14 +126,21 @@ export function ourNotify(ctx: HookContext, existing: string[]): string[] {
 // ---------- hook payload parsing ----------
 
 function hostFromEnv(env: NodeJS.ProcessEnv): Host | undefined {
-  if (env.__CFBundleIdentifier === CODEX_APP_BUNDLE || /codex_app|desktop/i.test(env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE ?? ""))
+  if (
+    env.__CFBundleIdentifier === CODEX_APP_BUNDLE ||
+    /codex_app|desktop/i.test(env.CODEX_INTERNAL_ORIGINATOR_OVERRIDE ?? "")
+  )
     return "app";
   if (env.TERM_PROGRAM || env.TMUX || env.TTY) return "cli";
   return undefined;
 }
 
 /** `notify` payload: {"type":"agent-turn-complete","thread-id","cwd","input-messages","last-assistant-message"} */
-export function parseCodexNotify(payload: Record<string, unknown>, env: NodeJS.ProcessEnv, now = Date.now()): AgentEvent | null {
+export function parseCodexNotify(
+  payload: Record<string, unknown>,
+  env: NodeJS.ProcessEnv,
+  now = Date.now(),
+): AgentEvent | null {
   const type = s(payload.type);
   const sessionId = s(payload["thread-id"]) || s(payload.thread_id) || s(payload["session-id"]);
   if (!sessionId) return null;
@@ -151,12 +159,17 @@ export function parseCodexNotify(payload: Record<string, unknown>, env: NodeJS.P
   if (type === "agent-turn-complete") {
     return { ...base, type: "stopped", attention: asksForInput(last) ? "question" : undefined, summary: last };
   }
-  if (/approval|permission/i.test(type)) return { ...base, type: "needs_input", attention: "permission", summary: last };
+  if (/approval|permission/i.test(type))
+    return { ...base, type: "needs_input", attention: "permission", summary: last };
   return null;
 }
 
 /** hooks.json payload (Claude-compatible shape). */
-export function parseCodexHook(payload: Record<string, unknown>, env: NodeJS.ProcessEnv, now = Date.now()): AgentEvent | null {
+export function parseCodexHook(
+  payload: Record<string, unknown>,
+  env: NodeJS.ProcessEnv,
+  now = Date.now(),
+): AgentEvent | null {
   const sessionId = s(payload.session_id) || s(payload.thread_id) || s(payload.conversation_id);
   const name = s(payload.hook_event_name);
   if (!sessionId) return null;
@@ -261,7 +274,11 @@ export const codexAdapter: Adapter = {
       before: hooksText,
       after: stringify(withOurHooks(parseJsonFile(hooksText, CODEX_HOOKS), entries)),
       summary: CODEX_HOOK_EVENTS.join(" · "),
-      preview: JSON.stringify({ hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) }, null, 2),
+      preview: JSON.stringify(
+        { hooks: Object.fromEntries(Object.entries(entries).map(([k, v]) => [k, [v]])) },
+        null,
+        2,
+      ),
       previewLang: "json",
     });
     return { changes, notes: ["setup.codexHooksNote"] };

@@ -33,8 +33,6 @@ flowchart LR
 
 Requires **macOS, Raycast**, and an existing Claude Code or Codex setup. Clickable notifications also require `terminal-notifier`.
 
-Agent Inbox is not yet published in the Raycast Store. Once approved, install **Agent Inbox** from Raycast's **Store** command. For now, follow [source installation](docs/setup.md#install-from-source).
-
 After installing the extension:
 
 1. Search for **Agent Inbox** in Raycast. Open **All Sessions → Actions (⌘K) → Connect an Agent** and connect Claude Code or Codex. For Codex, approve the new hooks with `/hooks` in the client.
@@ -43,7 +41,7 @@ After installing the extension:
 
 The interface and notifications use English. Open **Actions → Open Extension Preferences** for terminal, notification, and full-text search options.
 
-Connecting an agent installs local hooks and a user background collector, backing up existing configuration before editing it. See the [setup guide](docs/setup.md) for permissions, clickable notifications, data locations, and removal instructions.
+Connecting an agent installs local hooks and a user background collector, backing up existing configuration before editing it. See the [setup guide](help.md) for permissions, clickable notifications, data locations, and removal instructions.
 
 ## Everyday use
 
@@ -56,7 +54,7 @@ Connecting an agent installs local hooks and a user background collector, backin
 
 **Waiting for input** includes questions, permission requests, and failures, quota limits, or interruptions that need attention. **Turn ended** means the agent stopped this turn; **Completed** requires an explicit completion event. Marking a session handled hides it until its state changes or a new request arrives.
 
-See the [usage guide](docs/usage.md) for all shortcuts, status rules, title synchronization, and navigation fallbacks.
+See the [usage guide](help.md) for all shortcuts, status rules, title synchronization, and navigation fallbacks.
 
 ## Compatibility
 
@@ -65,7 +63,7 @@ The current platform is **Raycast** and the operating system is **macOS**. Sessi
 | Source                          | Available features                                                                       | Limits                                                                                                    |
 | ------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | Claude Code CLI / local desktop | History, subscriptions, state collection through hooks and local transcripts, navigation | Exact window matching depends on permissions and available session mappings                               |
-| Codex CLI / desktop             | History, subscriptions, state collection through hooks and local rollouts, navigation    | Client formats may change; see the test record for verified workflows                                     |
+| Codex CLI / desktop             | History, subscriptions, state collection through hooks and local rollouts, navigation    | Client formats may change; exact targeting requires a supported client                                    |
 | Cloud-only Claude Code          | Subscribe and navigate using an explicit window session ID; sync titles of open windows  | Without local transcripts or hooks, monitoring is unavailable: no input notifications or full-text search |
 | Terminals                       | Terminal, iTerm2, Ghostty, and tmux targeting                                            | Exact Ghostty targeting uses the tty interface in 1.4; missing interfaces fall back to recovery options   |
 
@@ -84,25 +82,8 @@ State, subscriptions, configuration, and the notification queue live in `~/.sess
 
 Changes to native preferences sync to the background collector when you next open an extension command.
 
-The full-text index is stored at `~/.sessions/cache/conversation-search.sqlite`. Turning search off stops indexing and content queries; it does not delete the existing index. See [search and privacy](docs/usage.md#search).
+The full-text index is stored at `~/.sessions/cache/conversation-search.sqlite`. Turning search off stops indexing and content queries; it does not delete the existing index. See [search and privacy](help.md#search).
 
-## Development and contributing
+For questions and suggestions, use [Issues](https://github.com/0xFANGO/agent-inbox/issues).
 
-```sh
-npm ci
-npm run check  # Tests, types, ESLint / Prettier, CLI and Raycast builds
-npm run dev    # Load the development extension in Raycast
-```
-
-Documentation defaults to English, with a Simplified Chinese edition linked at the top of each guide:
-
-- [Contributing](CONTRIBUTING.md): development, reproducing problems, and pull requests.
-- [CLI](docs/cli.md) · [Architecture](docs/architecture.md) · [Integration interfaces](docs/integrations.md).
-- [Test record](TESTING.md) · [Changelog](CHANGELOG.md).
-- [Product and logo design brief](docs/brand-brief.md).
-
-Use [Issues](https://github.com/raycast/extensions/issues) for questions and suggestions. For security reports, read the [security policy](SECURITY.md) first.
-
-## License
-
-Source code is licensed under [MIT](LICENSE). Third-party icons and bundled tools retain their respective rights. See the [platform icon sources](media/README.md).
+Platform icons: [Simple Icons](https://github.com/simple-icons/simple-icons), licensed under [CC0 1.0](https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md). Trademarks belong to their respective owners.

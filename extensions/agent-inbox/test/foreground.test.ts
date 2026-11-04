@@ -38,6 +38,7 @@ const record: ClaudeDesktopSession = {
   isArchived: false,
 };
 const noIO = {
+  terminalOwnerAlive: async () => true,
   readClaudeDesktopSessions: (): ClaudeDesktopSession[] => [],
   readCodexDesktopSessions: async () => [],
   tmuxClients: async (): Promise<TmuxClient[]> => [],
@@ -45,7 +46,10 @@ const noIO = {
 
 test("current Claude document ID wins over a newer background session and duplicate titles", async () => {
   const background = { ...base, sessionId: "other", locator: { claudeDesktopId: "local_other" }, updatedAt: 999 };
-  const focused = { bundleId: CLAUDE_BUNDLE, window: { title: base.title, url: "https://claude.ai/epitaxy/local_one?artifact=123" } };
+  const focused = {
+    bundleId: CLAUDE_BUNDLE,
+    window: { title: base.title, url: "https://claude.ai/epitaxy/local_one?artifact=123" },
+  };
   assert.equal((await sessionForForeground(focused, [background, base], noIO))?.sessionId, base.sessionId);
   assert.equal(
     await sessionForForeground(
@@ -83,10 +87,14 @@ test("switching documents changes the selected session without any hook activity
 });
 
 test("a focused desktop session outside the database/history limit can be subscribed", async (t) => {
-  const session = await sessionForForeground({ bundleId: CLAUDE_BUNDLE, window: { title: `${record.title} - Claude Code`, url: "" } }, [], {
-    ...noIO,
-    readClaudeDesktopSessions: () => [record],
-  });
+  const session = await sessionForForeground(
+    { bundleId: CLAUDE_BUNDLE, window: { title: `${record.title} - Claude Code`, url: "" } },
+    [],
+    {
+      ...noIO,
+      readClaudeDesktopSessions: () => [record],
+    },
+  );
   assert.equal(session?.sessionId, record.cliSessionId);
   const store = new Store(join(tempDir(t), "sessions.sqlite"));
   await store.subscribeEntry(session!);
@@ -106,7 +114,13 @@ test("desktop enrichment does not create duplicate candidates from an existing h
 test("Codex uses the focused title, and never guesses from last updated when no window is available", async () => {
   const current = { ...base, agent: "codex", locator: {} };
   assert.equal(
-    (await sessionForForeground({ bundleId: CODEX_APP_BUNDLE, window: { title: base.title, url: "" } }, [current], noIO))?.sessionId,
+    (
+      await sessionForForeground(
+        { bundleId: CODEX_APP_BUNDLE, window: { title: base.title, url: "" } },
+        [current],
+        noIO,
+      )
+    )?.sessionId,
     base.sessionId,
   );
   assert.equal(await sessionForForeground({ bundleId: CODEX_APP_BUNDLE }, [current], noIO), undefined);
@@ -140,8 +154,17 @@ test("Codex resolves protocol, local, detached-window and hash routes by ID even
 test("Codex catalog names resolve renamed and old sessions, preserving existing subscription state", async () => {
   const catalog = { ...codexSession, title: "Renamed conversation", transcriptPath: "/old/rollout.jsonl" };
   const actions = { ...noIO, readCodexDesktopSessions: async () => [catalog] };
-  const context = { bundleId: CODEX_APP_BUNDLE, window: { title: "Renamed conversation - ChatGPT", url: "app://-/index.html" } };
-  const known = { ...codexSession, host: "cli" as const, subscribed: true, status: "running" as const, transcriptPath: "" };
+  const context = {
+    bundleId: CODEX_APP_BUNDLE,
+    window: { title: "Renamed conversation - ChatGPT", url: "app://-/index.html" },
+  };
+  const known = {
+    ...codexSession,
+    host: "cli" as const,
+    subscribed: true,
+    status: "running" as const,
+    transcriptPath: "",
+  };
   const matched = await sessionForForeground(context, [known], actions);
   assert.equal(matched?.subscribed, true);
   assert.equal(matched?.status, "running");
@@ -156,7 +179,10 @@ test("Codex rejects ambiguous titles, unknown IDs, conflicting windows, and non-
   const context = { bundleId: CODEX_APP_BUNDLE, window: { title: base.title, url: "" } };
   assert.equal(await sessionForForeground(context, [codexSession, other], noIO), undefined);
   for (const url of ["app://-/settings", "https://example.com/", `codex://threads/${other.sessionId}`]) {
-    assert.equal(await sessionForForeground({ ...context, window: { ...context.window, url } }, [codexSession], noIO), undefined);
+    assert.equal(
+      await sessionForForeground({ ...context, window: { ...context.window, url } }, [codexSession], noIO),
+      undefined,
+    );
   }
   assert.equal(
     await sessionForForeground(
@@ -222,15 +248,27 @@ test("foreground capture waits for Raycast to close and for the focused window t
 
 test("current terminal tty selects the exact tab, without falling back to another tab", async () => {
   const current = { ...base, host: "cli" as const, locator: { bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys001" } };
-  const other = { ...current, sessionId: "other", updatedAt: 999, locator: { ...current.locator, tty: "/dev/ttys002" } };
+  const other = {
+    ...current,
+    sessionId: "other",
+    updatedAt: 999,
+    locator: { ...current.locator, tty: "/dev/ttys002" },
+  };
   assert.equal(
     (await sessionForForeground({ bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys001" }, [other, current], noIO))?.sessionId,
     current.sessionId,
   );
-  assert.equal(await sessionForForeground({ bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys003" }, [other, current], noIO), undefined);
+  assert.equal(
+    await sessionForForeground({ bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys003" }, [other, current], noIO),
+    undefined,
+  );
   assert.equal(await sessionForForeground({ bundleId: GHOSTTY_BUNDLE }, [other, current], noIO), undefined);
   assert.equal(
-    await sessionForForeground({ bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys001" }, [current, { ...current, sessionId: "duplicate" }], noIO),
+    await sessionForForeground(
+      { bundleId: GHOSTTY_BUNDLE, tty: "/dev/ttys001" },
+      [current, { ...current, sessionId: "duplicate" }],
+      noIO,
+    ),
     undefined,
   );
 });
@@ -248,7 +286,9 @@ test("tmux matches the current outer tty, server socket and pane together", asyn
     ...noIO,
     tmuxClients: async (socket?: string) => {
       queried.push(socket);
-      return [{ tty: socket === "/tmp/one" ? "/dev/ttys001" : "/dev/ttys002", pane: "%1", activity: 999, socket: socket! }];
+      return [
+        { tty: socket === "/tmp/one" ? "/dev/ttys001" : "/dev/ttys002", pane: "%1", activity: 999, socket: socket! },
+      ];
     },
   });
   assert.equal(result?.sessionId, "current");
@@ -274,13 +314,16 @@ test("window probe skips the empty Electron shell and ignores nested artifact do
   const shell = element({ AXRole: "AXWebArea", AXTitle: "", AXURL: "" });
   const window = element({ AXRole: "AXWindow", AXTitle: "Claude" }, [shell, document]);
   const app = element({ AXFocusedWindow: window });
-  const result = await readFocusedWindow(CLAUDE_BUNDLE, async (script) =>
+  const result = await readFocusedWindow(CLAUDE_BUNDLE, async (script, _lang, args) =>
     script.includes('ObjC.import("AppKit")')
       ? { ok: false, stdout: "", stderr: "native bridge unavailable" }
       : {
           ok: true,
           stderr: "",
-          stdout: runInNewContext(script, { Application: () => ({ applicationProcesses: { whose: () => () => [app] } }) }),
+          stdout: runInNewContext(script + "\nrun(args)", {
+            args,
+            Application: () => ({ applicationProcesses: { whose: () => () => [app] } }),
+          }),
         },
   );
   assert.deepEqual(result, { title: `${base.title} - Claude Code`, url: "" });
@@ -319,9 +362,19 @@ test("a successful native focus read is authoritative, including no focused wind
 
 test("window probe reports denied permissions and rejects malformed or failed output", async () => {
   await assert.rejects(
-    readFocusedWindow(CLAUDE_BUNDLE, async () => ({ ok: false, stdout: "", stderr: "not allowed assistive access (-1719)" })),
+    readFocusedWindow(CLAUDE_BUNDLE, async () => ({
+      ok: false,
+      stdout: "",
+      stderr: "not allowed assistive access (-1719)",
+    })),
     FocusAccessError,
   );
-  assert.equal(await readFocusedWindow(CLAUDE_BUNDLE, async () => ({ ok: true, stdout: "not-json", stderr: "" })), undefined);
-  assert.equal(await readFocusedWindow(CLAUDE_BUNDLE, async () => ({ ok: false, stdout: "", stderr: "timed out" })), undefined);
+  assert.equal(
+    await readFocusedWindow(CLAUDE_BUNDLE, async () => ({ ok: true, stdout: "not-json", stderr: "" })),
+    undefined,
+  );
+  assert.equal(
+    await readFocusedWindow(CLAUDE_BUNDLE, async () => ({ ok: false, stdout: "", stderr: "timed out" })),
+    undefined,
+  );
 });

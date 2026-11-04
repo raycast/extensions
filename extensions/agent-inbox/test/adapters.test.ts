@@ -1,7 +1,14 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { parseClaudeHook } from "../src/core/adapters/claude";
-import { findNotify, originalNotify, ourNotify, parseCodexHook, parseCodexNotify, setNotify } from "../src/core/adapters/codex";
+import {
+  findNotify,
+  originalNotify,
+  ourNotify,
+  parseCodexHook,
+  parseCodexNotify,
+  setNotify,
+} from "../src/core/adapters/codex";
 import { hasOurHooks, parseJsonFile, withOurHooks, withoutOurHooks } from "../src/core/adapters/json";
 
 const ctx = { node: "/opt/homebrew/bin/node", cli: "/Users/me/.sessions/bin/agent-inbox.mjs" };
@@ -59,16 +66,33 @@ test("claude hook payloads", () => {
   assert.equal(parseClaudeHook({ ...base, hook_event_name: "UserPromptSubmit", prompt: "hi" }, {})!.type, "progress");
   assert.equal(
     parseClaudeHook(
-      { ...base, hook_event_name: "Notification", notification_type: "idle_prompt", message: "Claude is waiting for your input" },
+      {
+        ...base,
+        hook_event_name: "Notification",
+        notification_type: "idle_prompt",
+        message: "Claude is waiting for your input",
+      },
       {},
     ),
     null,
   );
-  const perm = parseClaudeHook({ ...base, hook_event_name: "Notification", message: "Claude needs your permission to use Bash" }, {})!;
+  const perm = parseClaudeHook(
+    { ...base, hook_event_name: "Notification", message: "Claude needs your permission to use Bash" },
+    {},
+  )!;
   assert.equal(perm.attention, "permission");
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "Stop", last_assistant_message: "要不要继续？" }, {})!.attention, "question");
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "Stop", last_assistant_message: "完成了。" }, {})!.type, "stopped");
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "SessionStart" }, { CLAUDE_CODE_ENTRYPOINT: "claude-desktop" })!.host, "app");
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "Stop", last_assistant_message: "要不要继续？" }, {})!.attention,
+    "question",
+  );
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "Stop", last_assistant_message: "完成了。" }, {})!.type,
+    "stopped",
+  );
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "SessionStart" }, { CLAUDE_CODE_ENTRYPOINT: "claude-desktop" })!.host,
+    "app",
+  );
   assert.equal(parseClaudeHook({ hook_event_name: "Stop" }, {}), null);
 });
 
@@ -121,7 +145,10 @@ test("Codex hook start and prompt payloads retain session identity and desktop h
   assert.equal(started.transcriptPath, "/rollout.jsonl");
   assert.equal(started.at, 10);
   assert.equal(started.type, "started");
-  assert.equal(parseCodexHook({ ...base, hook_event_name: "UserPromptSubmit", prompt: "fix ci" }, env)!.title, "fix ci");
+  assert.equal(
+    parseCodexHook({ ...base, hook_event_name: "UserPromptSubmit", prompt: "fix ci" }, env)!.title,
+    "fix ci",
+  );
   assert.equal(parseCodexHook({ ...base, hook_event_name: "Unknown" }, env), null);
   assert.equal(parseCodexNotify({ type: "unknown", "thread-id": "thread" }, env), null);
   assert.equal(parseCodexNotify({ type: "agent-turn-complete" }, env), null);
@@ -130,11 +157,21 @@ test("Codex hook start and prompt payloads retain session identity and desktop h
 test("Claude handles permission, quota and failure events and ignores subagent completion", () => {
   const base = { session_id: "s" };
   assert.equal(
-    parseClaudeHook({ ...base, hook_event_name: "Notification", notification_type: "permission_prompt" }, {})!.attention,
+    parseClaudeHook({ ...base, hook_event_name: "Notification", notification_type: "permission_prompt" }, {})!
+      .attention,
     "permission",
   );
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "Notification", message: "Usage limit reached" }, {})!.type, "quota");
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "StopFailure", error: "request failed" }, {})!.type, "failed");
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "Notification", message: "Usage limit reached" }, {})!.type,
+    "quota",
+  );
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "StopFailure", error: "request failed" }, {})!.type,
+    "failed",
+  );
   assert.equal(parseClaudeHook({ ...base, hook_event_name: "SubagentStop", last_assistant_message: "done" }, {}), null);
-  assert.equal(parseClaudeHook({ ...base, hook_event_name: "Notification", notification_type: "auth_success" }, {}), null);
+  assert.equal(
+    parseClaudeHook({ ...base, hook_event_name: "Notification", notification_type: "auth_success" }, {}),
+    null,
+  );
 });

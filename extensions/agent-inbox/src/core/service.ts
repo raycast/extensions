@@ -5,7 +5,8 @@ import { run } from "./exec";
 import { CLI_PATH, ROOT } from "./paths";
 
 const LABEL = "com.fango.agent-inbox.collector";
-const xml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const xml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** A small local collector watches subscribed transcripts and drains the notification outbox. */
 export function collectorPlist(node: string, cli: string, root: string, env: Record<string, string> = {}): string {

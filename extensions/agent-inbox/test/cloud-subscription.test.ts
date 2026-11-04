@@ -7,10 +7,10 @@ import { Store } from "../src/core/db";
 import { jumpClaude } from "../src/core/adapters/claude";
 import { DEFAULT_CONFIG } from "../src/core/config";
 import { absoluteTime, relativeTime, rowTime, statusLabel } from "../src/core/format";
-import { translator } from "../src/core/messages";
 import { tempDir } from "./helpers";
 
 const noIO = {
+  terminalOwnerAlive: async () => true,
   readClaudeDesktopSessions: () => [],
   readCodexDesktopSessions: async () => [],
   tmuxClients: async () => [],
@@ -61,7 +61,11 @@ test("cloud fallback requires a supported conversation URL and rejects conflicti
     "https://user@claude.ai/epitaxy/session_cloud123",
     "",
   ]) {
-    assert.equal(await sessionForForeground({ ...context, window: { ...context.window, url } }, [], noIO), undefined, url);
+    assert.equal(
+      await sessionForForeground({ ...context, window: { ...context.window, url } }, [], noIO),
+      undefined,
+      url,
+    );
   }
   assert.equal(await sessionForForeground({ ...context, window: undefined }, [], noIO), undefined);
   assert.equal(
@@ -76,18 +80,23 @@ test("cloud fallback requires a supported conversation URL and rejects conflicti
 
 test("cloud-only rows explain missing monitoring and unknown dates, while real events retain their status", async (t) => {
   const focused = (await sessionForForeground(context, [], noIO))!;
-  const en = translator();
-  assert.equal(statusLabel(focused, en), "Cloud status unavailable");
-  assert.equal(absoluteTime(focused.startedAt, en), "—");
-  assert.equal(relativeTime(focused.updatedAt, en), "—");
-  assert.equal(rowTime({ ...focused, status: "running", updatedAt: 1000 }, en, 1000), en("time.justNow"));
+  assert.equal(statusLabel(focused), "Cloud status unavailable");
+  assert.equal(absoluteTime(focused.startedAt), "—");
+  assert.equal(relativeTime(focused.updatedAt), "—");
+  assert.equal(rowTime({ ...focused, status: "running", updatedAt: 1000 }, 1000), "just now");
   const store = new Store(join(tempDir(t), "db.sqlite"));
   await store.subscribeEntry(focused);
-  await store.record({ agent: "claude", sessionId: focused.sessionId, type: "needs_input", requestIds: ["q"], at: 1000 });
+  await store.record({
+    agent: "claude",
+    sessionId: focused.sessionId,
+    type: "needs_input",
+    requestIds: ["q"],
+    at: 1000,
+  });
   const live = (await sessionForForeground(context, await store.all(), noIO))!;
   assert.equal(live.status, "needs_input");
   assert.equal(isClaudeCloudOnly(live), false);
-  assert.equal(statusLabel(live, en), "Waiting for You");
+  assert.equal(statusLabel(live), "Waiting for You");
   assert.equal(live.updatedAt, 1000);
 });
 

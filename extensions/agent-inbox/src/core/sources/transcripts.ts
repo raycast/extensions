@@ -33,7 +33,9 @@ export function questionIds(callId: string, name: string, input: unknown): strin
 /** The desktop async tool returns {accepted:true}; answers arrive later in a user message. */
 function asyncReplyIds(text: string): string[] {
   const ids: string[] = [];
-  for (const match of text.matchAll(/<send_user_message_question_reply>([\s\S]*?)<\/send_user_message_question_reply>/g)) {
+  for (const match of text.matchAll(
+    /<send_user_message_question_reply>([\s\S]*?)<\/send_user_message_question_reply>/g,
+  )) {
     try {
       const answers: unknown = JSON.parse(match[1]);
       if (!Array.isArray(answers)) continue;
@@ -62,11 +64,17 @@ export const codexTranscript: TranscriptSource = {
     const metadata = object(payload.internal_chat_message_metadata_passthrough);
     const turnId = string(payload.turn_id) || string(metadata.turn_id) || context.turnId;
     const base = { agent: session.agent, sessionId: session.sessionId, at, source: "transcript", turnId };
-    const event = (type: AgentEvent["type"], extra: Partial<AgentEvent> = {}): AgentEvent[] => [{ ...base, type, ...extra }];
+    const event = (type: AgentEvent["type"], extra: Partial<AgentEvent> = {}): AgentEvent[] => [
+      { ...base, type, ...extra },
+    ];
     if (entry.type === "session_meta") {
-      if (string(payload.id) && payload.id !== session.sessionId) throw new Error("Transcript session identity mismatch");
+      if (string(payload.id) && payload.id !== session.sessionId)
+        throw new Error("Transcript session identity mismatch");
       const origin = string(payload.originator) || string(payload.source);
-      return event("started", { cwd: string(payload.cwd), host: /desktop|codex_app|chatgpt/i.test(origin) ? "app" : "cli" });
+      return event("started", {
+        cwd: string(payload.cwd),
+        host: /desktop|codex_app|chatgpt/i.test(origin) ? "app" : "cli",
+      });
     }
     if (entry.type === "turn_context") {
       context.turnId = string(payload.turn_id) || context.turnId;
@@ -93,7 +101,10 @@ export const codexTranscript: TranscriptSource = {
       }
     }
     if (entry.type !== "response_item") return [];
-    if ((payload.type === "function_call" || payload.type === "custom_tool_call") && questionTool(string(payload.name))) {
+    if (
+      (payload.type === "function_call" || payload.type === "custom_tool_call") &&
+      questionTool(string(payload.name))
+    ) {
       const ids = questionIds(string(payload.call_id), string(payload.name), payload.arguments ?? payload.input);
       if (/request_user_input_async$/.test(string(payload.name))) {
         context.asyncRequests ??= {};
@@ -125,7 +136,13 @@ export const claudeTranscript: TranscriptSource = {
   parse(entry, session, context: SourceContext) {
     const at = eventTime(entry.timestamp, 0);
     if (!at || entry.isSidechain === true) return [];
-    const base = { agent: session.agent, sessionId: session.sessionId, at, source: "transcript", turnId: context.turnId };
+    const base = {
+      agent: session.agent,
+      sessionId: session.sessionId,
+      at,
+      source: "transcript",
+      turnId: context.turnId,
+    };
     const message = object(entry.message);
     const content = Array.isArray(message.content) ? message.content.map(object) : [];
     const events: AgentEvent[] = [];
@@ -133,7 +150,8 @@ export const claudeTranscript: TranscriptSource = {
       for (const item of content)
         if (item.type === "tool_result" && string(item.tool_use_id))
           events.push({ ...base, type: "tool", requestIds: [string(item.tool_use_id)] });
-      if (!events.length && !entry.isMeta) events.push({ ...base, type: "progress", title: messageText(message.content) });
+      if (!events.length && !entry.isMeta)
+        events.push({ ...base, type: "progress", title: messageText(message.content) });
     }
     if (entry.type === "assistant") {
       for (const item of content)

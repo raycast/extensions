@@ -52,7 +52,8 @@ export function loadManifests(dir = ADAPTERS_DIR): AdapterManifest[] {
   for (const f of files) {
     try {
       const m = JSON.parse(readFileSync(join(dir, f), "utf8")) as AdapterManifest;
-      if (m && typeof m.id === "string" && /^[a-z0-9][a-z0-9_-]*$/i.test(m.id) && m.id !== "claude" && m.id !== "codex") out.push(m);
+      if (m && typeof m.id === "string" && /^[a-z0-9][a-z0-9_-]*$/i.test(m.id) && m.id !== "claude" && m.id !== "codex")
+        out.push(m);
     } catch {
       // skip invalid manifests
     }

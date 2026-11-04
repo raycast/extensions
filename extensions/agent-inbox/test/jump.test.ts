@@ -24,7 +24,8 @@ const session: Session = {
 };
 
 const noWindow = {
-  ttyAlive: async () => false,
+  terminalOwnerAlive: async () => false,
+  currentSession: async (s: Session) => s,
   tmuxPaneAlive: async () => false,
   focusTmuxPane: async () => false,
   bundleFor,
@@ -59,7 +60,7 @@ test("the original terminal tab takes priority over the resume-terminal preferen
     { ...DEFAULT_CONFIG, resumeTerminal: "iterm" },
     {
       ...noWindow,
-      ttyAlive: async () => true,
+      terminalOwnerAlive: async () => true,
       focusTty: async (...args) => {
         calls.push(args);
         return true;
@@ -81,7 +82,7 @@ test("failed tmux focus and application activation reach the configured resume f
     DEFAULT_CONFIG,
     {
       ...noWindow,
-      ttyAlive: async () => true,
+      terminalOwnerAlive: async () => true,
       tmuxPaneAlive: async () => true,
       openInTerminal: async () => {
         resumed = true;
@@ -94,7 +95,10 @@ test("failed tmux focus and application activation reach the configured resume f
 });
 
 test("a failed resume launch is reported to the caller", async () => {
-  assert.deepEqual(await jumpToCli(session, "claude --resume test-session", DEFAULT_CONFIG, noWindow), { ok: false, method: "resume" });
+  assert.deepEqual(await jumpToCli(session, "claude --resume test-session", DEFAULT_CONFIG, noWindow), {
+    ok: false,
+    method: "resume",
+  });
 });
 
 test("Codex desktop uses the external thread link and encodes host identity independently of app versions", async () => {
@@ -127,16 +131,20 @@ test("Codex reports failed launch or clipboard recovery and never opens an inval
     [true, true],
   ]) {
     const urls: string[] = [];
-    const result = await jumpCodex({ ...session, agent: "codex", host: "app", sessionId: "unrecognized/id" }, DEFAULT_CONFIG, {
-      openUrl: async (url) => {
-        urls.push(url);
-        return launched;
+    const result = await jumpCodex(
+      { ...session, agent: "codex", host: "app", sessionId: "unrecognized/id" },
+      DEFAULT_CONFIG,
+      {
+        openUrl: async (url) => {
+          urls.push(url);
+          return launched;
+        },
+        copyToClipboard: async () => copied,
+        jumpToCli: async () => {
+          assert.fail("invalid desktop IDs are not CLI IDs");
+        },
       },
-      copyToClipboard: async () => copied,
-      jumpToCli: async () => {
-        assert.fail("invalid desktop IDs are not CLI IDs");
-      },
-    });
+    );
     assert.deepEqual(urls, ["codex://launch"]);
     assert.deepEqual(result, { ok: launched && copied, method: "copied" });
   }
