@@ -168,7 +168,9 @@ func render(source url: URL, layers: [TextLayer], to folder: URL) throws -> URL 
     CGImageDestinationSetProperties(destination, properties)
   }
   for index in 0..<frames {
-    guard let image = CGImageSourceCreateImageAtIndex(source, index, nil) else { throw TextError.unreadable }
+    guard let image = isGIF ? CGImageSourceCreateImageAtIndex(source, index, nil) : uprightImage(from: source) else {
+      throw TextError.unreadable
+    }
     var properties: [CFString: Any] = [:]
     if isGIF,
       let frame = CGImageSourceCopyPropertiesAtIndex(source, index, nil) as? [CFString: Any],
@@ -182,6 +184,20 @@ func render(source url: URL, layers: [TextLayer], to folder: URL) throws -> URL 
   }
   guard CGImageDestinationFinalize(destination) else { throw TextError.unreadable }
   return target
+}
+
+// Photos (for example JPEGs from a phone) can store their rotation instead of rotated pixels. The editor
+// shows them upright, so apply that rotation at full size before the text goes on.
+private func uprightImage(from source: CGImageSource) -> CGImage? {
+  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any]
+  let width = properties?[kCGImagePropertyPixelWidth] as? Int ?? 0
+  let height = properties?[kCGImagePropertyPixelHeight] as? Int ?? 0
+  let options: [CFString: Any] = [
+    kCGImageSourceCreateThumbnailFromImageAlways: true,
+    kCGImageSourceCreateThumbnailWithTransform: true,
+    kCGImageSourceThumbnailMaxPixelSize: max(width, height),
+  ]
+  return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
 }
 
 private func draw(_ layers: [TextLayer], on image: CGImage) throws -> CGImage {
@@ -221,6 +237,8 @@ final class Canvas: NSView {
   var onAdd: (CGPoint) -> Void = { _ in }
   var onDelete: () -> Void = {}
   private var dragOffset = CGPoint.zero
+  /// The text that the current mouse drag moves. Nil when the drag started on empty space.
+  private var dragged: TextLayer?
 
   override var isFlipped: Bool { true }
   override var acceptsFirstResponder: Bool { true }
@@ -260,7 +278,8 @@ final class Canvas: NSView {
   override func mouseDown(with event: NSEvent) {
     let point = convert(event.locationInWindow, from: nil)
     window?.makeFirstResponder(self)
-    guard let hit = layer(at: point) else {
+    dragged = layer(at: point)
+    guard let hit = dragged else {
       if event.clickCount == 2 { onAdd(CGPoint(x: point.x / bounds.width, y: point.y / bounds.height)) }
       return
     }
@@ -271,7 +290,7 @@ final class Canvas: NSView {
   }
 
   override func mouseDragged(with event: NSEvent) {
-    guard let selected else { return }
+    guard let selected = dragged else { return }
     let point = convert(event.locationInWindow, from: nil)
     selected.center = CGPoint(
       x: min(max((point.x - dragOffset.x) / bounds.width, 0), 1),
@@ -283,6 +302,7 @@ final class Canvas: NSView {
   }
 
   override func mouseUp(with event: NSEvent) {
+    dragged = nil
     window?.invalidateCursorRects(for: self)
   }
 
