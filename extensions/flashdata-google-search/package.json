@@ -33,7 +33,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --test tests/*.test.ts",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "node -e \"throw new Error('Use npm run publish for the Raycast Store; do not publish this extension to npm.')\""
   },

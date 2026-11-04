@@ -30,7 +30,3 @@ Your key is entered through Raycast's password preference. The extension sends y
 - [FlashData](https://flashdata.dev/)
 - [API reference](https://flashdata.dev/docs/sources/google_search)
 - [Terms of service](https://flashdata.dev/legal/terms)
-
-## Development
-
-Use `npm install`, `npm run build`, and `npm run lint`. `npm test` uses mocked HTTP responses and documented fixtures; it never performs a paid search. Run the distribution build in Raycast before submitting a Store PR. Publish with `npm run publish`, not `npm publish`.
