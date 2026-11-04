@@ -92,7 +92,8 @@ const isGitRepository = async (dirPath: string): Promise<boolean> => {
     try {
         const gitPath = path.join(dirPath, '.git')
         const stat = await fs.stat(gitPath)
-        return stat.isDirectory()
+        // worktrees and submodules have a .git file pointing at the real git dir
+        return stat.isDirectory() || stat.isFile()
     } catch {
         return false
     }

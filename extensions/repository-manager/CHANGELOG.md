@@ -1,5 +1,8 @@
 # Repository Manager Changelog
 
+## [Detect Git worktrees] - {PR_MERGE_DATE}
+- **Git Worktrees**: Detect linked worktrees and submodules, whose `.git` is a file instead of a directory
+
 ## [Repository Workflow, Tags, and AI Briefs] - 2026-05-12
 - **Repository Tags**: Add custom tags to repositories, show them in the list, and filter by tag from the main repository filter dropdown
 - **Unified Filters**: Combine directory, health, recent, favorite, and tag filters in the upper-right list filter with clearly labeled sections
