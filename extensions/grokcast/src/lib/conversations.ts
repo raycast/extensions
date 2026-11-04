@@ -46,6 +46,20 @@ export const withTurn = (conversation: Conversation, turn: ChatTurn): Conversati
     turns: Arr.append(conversation.turns, turn),
   })
 
+/**
+ * The copy of one conversation to continue from. The saved copy wins only when it is ahead:
+ * Show Conversations may have added turns to it. When saving an answer failed, the open copy
+ * has the newer turns, so it wins.
+ */
+export const newerOf = (saved: Conversation, open: Conversation): Conversation =>
+  Option.getOrElse(
+    Option.liftPredicate(
+      saved,
+      (candidate) => candidate.turns.length > open.turns.length || candidate.updatedAt > open.updatedAt,
+    ),
+    () => open,
+  )
+
 const Conversations = Schema.Array(Conversation)
 
 const makeConversations = Effect.fn("ChatConversations.make")(function* () {
@@ -85,7 +99,20 @@ const makeConversations = Effect.fn("ChatConversations.make")(function* () {
 
   const clear = store.remove(KEY).pipe(Effect.withSpan("ChatConversations.clear"))
 
-  return { list, save, remove, clear }
+  /** The copy of `open` to continue from: the saved copy when it is ahead, else `open`. */
+  const latest = Effect.fn("ChatConversations.latest")(function* (open: Conversation) {
+    const all = yield* list
+
+    return Option.getOrElse(
+      Option.map(
+        Arr.findFirst(all, (saved) => saved.id === open.id),
+        (saved) => newerOf(saved, open),
+      ),
+      () => open,
+    )
+  })
+
+  return { list, save, remove, clear, latest }
 })
 
 export class ChatConversations extends Context.Service<ChatConversations>()("grokcast/ChatConversations", {

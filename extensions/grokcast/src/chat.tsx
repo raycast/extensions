@@ -55,17 +55,6 @@ const SHOW_CONVERSATIONS: Keyboard.Shortcut = { modifiers: ["cmd"], key: "y" }
 const failureToast = (title: string) =>
   Effect.tryPromise(() => showToast({ style: Toast.Style.Failure, title })).pipe(Effect.ignore)
 
-/** The saved copy of `current`, or `current` when it is not saved (yet, or any more). */
-const latestOf = (saved: ChatConversations["Service"], current: Conversation) =>
-  saved.list.pipe(
-    Effect.map((all) =>
-      Option.getOrElse(
-        Arr.findFirst(all, (old) => old.id === current.id),
-        () => current,
-      ),
-    ),
-  )
-
 /** The question, with its images, as the detail pane shows it. */
 const questionMarkdown = (prompt: string, images: ReadonlyArray<string>) =>
   [`**${prompt}**`, ...images.map(imageMarkdown)].join("\n\n")
@@ -171,10 +160,10 @@ function ChatView({
       const chat = yield* Chat
       const saved = yield* ChatConversations
 
-      // Show Conversations can continue the same conversation, so start from the saved copy.
+      // Show Conversations can continue the same conversation, so start from the copy that is ahead.
       const base = yield* Option.match(conversation, {
         onNone: () => newConversation,
-        onSome: (current) => latestOf(saved, current),
+        onSome: saved.latest,
       })
 
       const turn = yield* chat.ask(prompt, { conversationId: base.id, history: base.turns, images }, settings, {
@@ -239,7 +228,7 @@ function ChatView({
   const refresh = () =>
     Option.map(conversation, (current) =>
       GrokRuntime.runFork(
-        ChatConversations.use((saved) => latestOf(saved, current)).pipe(
+        ChatConversations.use((saved) => saved.latest(current)).pipe(
           Effect.flatMap((latest) => Effect.sync(() => setConversation(Option.some(latest)))),
         ),
       ),
