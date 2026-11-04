@@ -40,6 +40,7 @@ export default function ResultView(props: ResultViewProps) {
       setMetrics((m) => ({ ...m, model, temp, promptTokens: 0, responseTokens: 0 }));
       const startTime = Date.now();
       let toast: Toast | undefined;
+      let rawResponse = "";
 
       try {
         toast = await showToast(Toast.Style.Animated, toast_title);
@@ -70,15 +71,16 @@ export default function ResultView(props: ResultViewProps) {
           { signal },
         );
         if (signal.aborted) return;
-        const promptTokens = countToken(fullSysPrompt + userPrompt);
-        setMetrics((m) => ({ ...m, promptTokens }));
+        if (show_metadata) {
+          const promptTokens = countToken(fullSysPrompt + userPrompt);
+          setMetrics((m) => ({ ...m, promptTokens }));
+        }
         await consumeCompletion(completion, {
           thinking: isThinkingModel(model),
           signal,
           onUpdate: (text, rawText) => {
-            const responseTokens = countToken(rawText);
+            rawResponse = rawText;
             setResponse(text);
-            setMetrics((m) => ({ ...m, responseTokens }));
           },
         });
         if (signal.aborted) return;
@@ -99,7 +101,13 @@ export default function ResultView(props: ResultViewProps) {
       } finally {
         if (activeRequest.current === controller) {
           activeRequest.current = undefined;
-          if (!signal.aborted) setLoading(false);
+          if (!signal.aborted) {
+            if (show_metadata && rawResponse) {
+              const responseTokens = countToken(rawResponse);
+              setMetrics((m) => ({ ...m, responseTokens }));
+            }
+            setLoading(false);
+          }
         }
         if (signal.aborted) await toast?.hide();
       }

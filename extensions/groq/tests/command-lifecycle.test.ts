@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { encode } from "gpt-tokenizer";
 import type { ChatData } from "../src/hook/AIChat.types";
 import type { Metrics } from "../src/hook/ResultView.types";
 
@@ -14,6 +15,7 @@ const harness = vi.hoisted(() => ({
   showToast: vi.fn(),
   getItem: vi.fn(),
   setItem: vi.fn(),
+  showMetadata: true,
 }));
 
 vi.mock("react", () => ({
@@ -71,12 +73,15 @@ vi.mock("../src/hook/configAPI", () => ({
   openai: { chat: { completions: { create: harness.create } } },
   global_model: "qwen/qwen3.8-27b",
   enable_streaming: true,
-  show_metadata: true,
+  get show_metadata() {
+    return harness.showMetadata;
+  },
 }));
 
 import Chat from "../src/aiChat";
 import ResultView from "../src/hook/accessAPI";
 import { buildSystemPrompt, buildUserPrompt, countToken } from "../src/hook/utils";
+import * as utils from "../src/hook/utils";
 
 function render<T>(component: () => T): T {
   harness.stateIndex = 0;
@@ -93,12 +98,31 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
+function mountResultView() {
+  render(() =>
+    ResultView({
+      sys_prompt: "Be helpful",
+      selected_text: "Context",
+      user_extra_msg: "Explain this",
+      model_override: "global",
+      toast_title: "Thinking",
+    }),
+  );
+  return harness.effects[0]();
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
   harness.states = [];
   harness.refs = [];
   harness.effects = [];
+  harness.showMetadata = true;
   harness.setItem.mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("result view prompt metrics", () => {
@@ -116,16 +140,7 @@ describe("result view prompt metrics", () => {
               },
             },
       );
-      render(() =>
-        ResultView({
-          sys_prompt: "Be helpful",
-          selected_text: "Context",
-          user_extra_msg: "Explain this",
-          model_override: "global",
-          toast_title: "Thinking",
-        }),
-      );
-      const cleanup = harness.effects[0]();
+      const cleanup = mountResultView();
       await vi.waitFor(() => expect(toast.style).toBe("success"));
       const metrics = harness.states[2] as Metrics;
       expect(metrics.promptTokens).toBe(
@@ -137,6 +152,88 @@ describe("result view prompt metrics", () => {
       cleanup?.();
     },
   );
+});
+
+describe("result view response metrics", () => {
+  it.each([true, false])("keeps tokenization out of streaming updates with metadata %s", async (showMetadata) => {
+    vi.useFakeTimers();
+    harness.showMetadata = showMetadata;
+    const tokenizer = vi.spyOn(utils, "countToken");
+    const toast = { style: "animated", title: "", hide: vi.fn() };
+    harness.showToast.mockResolvedValue(toast);
+    const parts = ["<think>reasoning</think>", ...Array.from({ length: 25 }, () => "long answer ".repeat(100))];
+    const rawText = parts.join("");
+    harness.create.mockResolvedValue({
+      async *[Symbol.asyncIterator]() {
+        for (const content of parts) {
+          yield { choices: [{ delta: { content } }] };
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+      },
+    });
+    const cleanup = mountResultView();
+
+    await vi.advanceTimersByTimeAsync(200);
+    expect(harness.states[0]).not.toBe("");
+    expect(harness.states[1]).toBe(true);
+    expect((harness.states[2] as Metrics).responseTokens).toBe(0);
+    expect(tokenizer).toHaveBeenCalledTimes(showMetadata ? 1 : 0);
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(toast.style).toBe("success");
+    expect(harness.states[0]).toBe(parts.slice(1).join(""));
+    expect(harness.states[1]).toBe(false);
+    expect(tokenizer).toHaveBeenCalledTimes(showMetadata ? 2 : 0);
+    expect((harness.states[2] as Metrics).responseTokens).toBe(showMetadata ? encode(rawText).length : 0);
+    if (showMetadata) expect(tokenizer).toHaveBeenLastCalledWith(rawText);
+    cleanup?.();
+  });
+
+  it.each(["non-streaming", "interrupted"])("counts the %s response once when the request ends", async (kind) => {
+    const tokenizer = vi.spyOn(utils, "countToken");
+    const toast = { style: "animated", title: "", hide: vi.fn() };
+    const rawText = "<think>reasoning</think>Partial answer";
+    harness.showToast.mockResolvedValue(toast);
+    harness.create.mockResolvedValue(
+      kind === "non-streaming"
+        ? { choices: [{ message: { content: rawText } }] }
+        : {
+            async *[Symbol.asyncIterator]() {
+              yield { choices: [{ delta: { content: rawText } }] };
+              throw new Error("Connection lost");
+            },
+          },
+    );
+    const cleanup = mountResultView();
+    await vi.waitFor(() => expect(harness.states[1]).toBe(false));
+    expect(toast.style).toBe(kind === "non-streaming" ? "success" : "failure");
+    expect(tokenizer).toHaveBeenCalledTimes(2);
+    expect(tokenizer).toHaveBeenLastCalledWith(rawText);
+    expect((harness.states[2] as Metrics).responseTokens).toBe(encode(rawText).length);
+    expect(harness.states[0]).toContain("Partial answer");
+    cleanup?.();
+  });
+
+  it("does not tokenize the answer after the view is closed", async () => {
+    const tokenizer = vi.spyOn(utils, "countToken");
+    const toast = { style: "animated", title: "", hide: vi.fn().mockResolvedValue(undefined) };
+    const pending = deferred<void>();
+    harness.showToast.mockResolvedValue(toast);
+    harness.create.mockResolvedValue({
+      async *[Symbol.asyncIterator]() {
+        yield { choices: [{ delta: { content: "Partial answer" } }] };
+        await pending.promise;
+        yield { choices: [{ delta: { content: "Late answer" } }] };
+      },
+    });
+    const cleanup = mountResultView();
+    await vi.waitFor(() => expect(tokenizer).toHaveBeenCalledOnce());
+    cleanup?.();
+    pending.resolve();
+    await vi.waitFor(() => expect(toast.hide).toHaveBeenCalledOnce());
+    expect(tokenizer).toHaveBeenCalledOnce();
+    expect((harness.states[2] as Metrics).responseTokens).toBe(0);
+  });
 });
 
 describe("AI Chat cancellation", () => {
