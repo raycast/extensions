@@ -1,4 +1,9 @@
+import { includeRepositoryFile } from "./repository-sync";
+import { SearchSections } from "./search-sections";
+import { shortcut } from "./shortcuts";
+import { Keyboard } from "@raycast/api";
 import React from "react";
+import { CreateCustomCheatsheet } from "./create-custom-cheatsheet";
 import {
   Action,
   ActionPanel,
@@ -11,7 +16,6 @@ import {
   Toast,
   confirmAlert,
   Alert,
-  LocalStorage,
   Clipboard,
   getPreferenceValues,
 } from "@raycast/api";
@@ -20,38 +24,12 @@ import { showFailureToast, useFrecencySorting } from "@raycast/utils";
 
 import Service, { CustomCheatsheet, FavoriteCheatsheet, RepositoryCheatsheet } from "./service";
 import type { File as ServiceFile } from "./service";
-import { stripFrontmatter, stripTemplateTags, formatTables, formatHtmlElements } from "./utils";
+import { displayMarkdown } from "./markdown";
+import { partitionTitleMatches } from "./search";
 // GitHub icon for repository cheatsheets - using built-in icon
 const githubIcon = Icon.Globe;
 
-// (removed unused getCheatsheetIcon)
-
-// Custom hook for draft persistence
-function useDraftPersistence(key: string, defaultValue: string) {
-  const [value, setValue] = useState(defaultValue);
-
-  useEffect(() => {
-    // Load draft from storage
-    LocalStorage.getItem<string>(key).then((stored) => {
-      if (stored && stored !== defaultValue) {
-        setValue(stored);
-      }
-    });
-  }, [key, defaultValue]);
-
-  const updateValue = (newValue: string) => {
-    setValue(newValue);
-    // Save to storage
-    LocalStorage.setItem(key, newValue);
-  };
-
-  const clearDraft = () => {
-    LocalStorage.removeItem(key);
-    setValue(defaultValue);
-  };
-
-  return { value, updateValue, clearDraft };
-}
+import { useDraftPersistence } from "./use-draft";
 
 type FilterType = "all" | "custom" | "default" | "repository" | "favorites" | "hidden";
 
@@ -87,11 +65,19 @@ function Command() {
 
   // Update unified list when data changes
   useEffect(() => {
+    let active = true;
     const updateUnifiedList = async () => {
-      const unified = await createUnifiedList();
-      setUnifiedList(unified);
+      try {
+        const unified = await createUnifiedList();
+        if (active) setUnifiedList(unified);
+      } catch (err) {
+        if (active) setError(err instanceof Error ? err.message : "Storage unavailable");
+      }
     };
-    updateUnifiedList();
+    void updateUnifiedList();
+    return () => {
+      active = false;
+    };
   }, [sheets, customSheets, repositorySheets, favorites]);
 
   // Add content search effect
@@ -106,7 +92,9 @@ function Command() {
       const res = await Service.searchDefaultContent(q);
       if (mounted) setContentResults(res);
     }
-    run();
+    void run().catch((error) => {
+      if (mounted) setError(error instanceof Error ? error.message : "Bundled search unavailable");
+    });
     return () => {
       mounted = false;
     };
@@ -117,7 +105,7 @@ function Command() {
       setIsLoading(true);
       setError(null);
 
-      // Always try to fetch fresh data from online sources by default
+      // Browsing reads bundled assets and the saved library without network access.
       const [files, custom, repository, favs] = await Promise.all([
         Service.listFiles(),
         Service.getCustomCheatsheets(),
@@ -134,6 +122,13 @@ function Command() {
       setRepositorySheets(repository);
       setFavorites(favs);
       setViewStats(await Service.getViewStatsMap());
+      const unresolved = await Service.getMigrationWarnings();
+      if (unresolved.length)
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some Legacy State Needs Review",
+          message: `${unresolved.length} ambiguous or missing repository paths were preserved. Reapply favorites/hidden state to the correct sheets; see README migration notes.`,
+        });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load cheatsheets");
       showFailureToast(err, { title: "Failed to load cheatsheets" });
@@ -185,16 +180,16 @@ function Command() {
     const repoMap = new Map(userRepos.map((repo) => [repo.id, repo]));
 
     repositorySheets.forEach((sheet) => {
-      const key = `repository:${sheet.slug}`;
+      const key = `repository:${sheet.id}`;
       const isHidden = hiddenKeys.has(key);
       const repo = repoMap.get(sheet.repositoryId);
       const repositoryName = repo ? `${repo.owner}/${repo.name}` : sheet.filePath.split("/")[0];
-      const isFavorited = favorites.some((fav) => fav.slug === sheet.slug && fav.type === "repository");
+      const isFavorited = favorites.some((fav) => fav.slug === sheet.id && fav.type === "repository");
 
       unified.push({
         id: sheet.id,
         type: "repository",
-        slug: sheet.slug,
+        slug: sheet.id,
         title: sheet.title,
         isFavorited,
         repositoryId: sheet.repositoryId,
@@ -207,9 +202,9 @@ function Command() {
   };
 
   // Apply frequency sorting
-  const { data: frecencyData } = useFrecencySorting(unifiedList, {
+  const { data: frecencyData, visitItem } = useFrecencySorting(unifiedList, {
     namespace: "cheatsheets",
-    key: (item) => `${item.type}-${item.slug}`,
+    key: (item) => `${item.type}:${item.slug}`,
     sortUnvisited: (a, b) => {
       // Sort unvisited items: favorites first, then alphabetically
       if (a.isFavorited && !b.isFavorited) return -1;
@@ -221,8 +216,8 @@ function Command() {
   // User sorting options using view stats
   const sortedData = [...frecencyData].sort((a, b) => {
     if (sort === "alpha") return a.title.localeCompare(b.title);
-    const aKey = `${a.type}-${a.slug}`;
-    const bKey = `${b.type}-${b.slug}`;
+    const aKey = `${a.type}:${a.slug}`;
+    const bKey = `${b.type}:${b.slug}`;
     const aStats = viewStats[aKey];
     const bStats = viewStats[bKey];
     if (sort === "lastViewed") return (bStats?.lastViewedAt || 0) - (aStats?.lastViewedAt || 0);
@@ -258,7 +253,7 @@ function Command() {
 
     // Then apply search filter
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.trim().toLowerCase();
 
       // For custom sheets, search in title, content, tags, and description
       if (item.type === "custom") {
@@ -295,32 +290,7 @@ function Command() {
     return true;
   });
 
-  // Separate title matches from content matches for better search results
-  const titleMatches: UnifiedCheatsheet[] = [];
-  const contentMatches: UnifiedCheatsheet[] = [];
-
-  if (searchQuery.trim()) {
-    const query = searchQuery.toLowerCase();
-
-    filteredData.forEach((item) => {
-      let isTitleMatch = false;
-
-      if (item.type === "custom") {
-        const customSheet = customSheets.find((s) => s.id === item.id);
-        if (customSheet) {
-          isTitleMatch = customSheet.title.toLowerCase().includes(query);
-        }
-      } else if (item.type === "default") {
-        isTitleMatch = Service.defaultMatchesQuery(item.slug, searchQuery);
-      }
-
-      if (isTitleMatch) {
-        titleMatches.push(item);
-      } else {
-        contentMatches.push(item);
-      }
-    });
-  }
+  const { titles: titleMatches, content: contentMatches } = partitionTitleMatches(filteredData, searchQuery);
 
   // Combine results: title matches first, then content matches
   const searchResults = searchQuery.trim() ? [...titleMatches, ...contentMatches] : filteredData;
@@ -328,20 +298,20 @@ function Command() {
   // Build recent list (top 3: prefer lastViewed, fallback to mostViewed if none)
   let recentItems = [...searchResults]
     .sort((a, b) => {
-      const aKey = `${a.type}-${a.slug}`;
-      const bKey = `${b.type}-${b.slug}`;
+      const aKey = `${a.type}:${a.slug}`;
+      const bKey = `${b.type}:${b.slug}`;
       return (viewStats[bKey]?.lastViewedAt || 0) - (viewStats[aKey]?.lastViewedAt || 0);
     })
-    .filter((item) => !!viewStats[`${item.type}-${item.slug}`]?.lastViewedAt)
+    .filter((item) => !!viewStats[`${item.type}:${item.slug}`]?.lastViewedAt)
     .slice(0, 3);
   if (recentItems.length === 0) {
     recentItems = [...searchResults]
       .sort((a, b) => {
-        const aKey = `${a.type}-${a.slug}`;
-        const bKey = `${b.type}-${b.slug}`;
+        const aKey = `${a.type}:${a.slug}`;
+        const bKey = `${b.type}:${b.slug}`;
         return (viewStats[bKey]?.count || 0) - (viewStats[aKey]?.count || 0);
       })
-      .filter((item) => (viewStats[`${item.type}-${item.slug}`]?.count || 0) > 0)
+      .filter((item) => (viewStats[`${item.type}:${item.slug}`]?.count || 0) > 0)
       .slice(0, 3);
   }
 
@@ -374,11 +344,6 @@ function Command() {
 
   async function handleRefresh() {
     await loadData();
-    showToast({
-      style: Toast.Style.Success,
-      title: "Refreshed",
-      message: "Cheatsheets updated",
-    });
   }
 
   async function handleToggleFavorite(item: UnifiedCheatsheet) {
@@ -389,9 +354,6 @@ function Command() {
       // Update local state
       const updatedFavorites = await Service.getFavorites();
       setFavorites(updatedFavorites);
-
-      // Update the item's favorite status
-      item.isFavorited = newFavorited;
 
       showToast({
         style: Toast.Style.Success,
@@ -425,7 +387,7 @@ function Command() {
   if (error) {
     return (
       <Detail
-        markdown={`# Error Loading Cheatsheets\n\n${error}\n\nPlease try refreshing or check your internet connection.`}
+        markdown={`# Error Loading Cheatsheets\n\n${error}\n\nRetry after checking the error above. Preserve your personal data before reinstalling.`}
         actions={
           <ActionPanel>
             <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadData} />
@@ -438,6 +400,7 @@ function Command() {
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder="Search cheatsheets..."
       searchText={searchQuery}
@@ -458,15 +421,8 @@ function Command() {
           <Action.Push
             title="Create Custom Cheatsheet"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={
-              <CreateCustomSheetForm
-                onCreated={async () => {
-                  const updated = await Service.getCustomCheatsheets();
-                  setCustomSheets(updated);
-                }}
-              />
-            }
+            shortcut={Keyboard.Shortcut.Common.New}
+            target={<CreateCustomSheetForm onCreated={loadData} />}
           />
         </ActionPanel>
       }
@@ -480,7 +436,7 @@ function Command() {
           description={
             searchQuery
               ? `No cheatsheets match "${searchQuery}"`
-              : "No cheatsheets available yet. Try refreshing or check your connection."
+              : "No cheatsheets available yet. Refresh or create a custom cheatsheet."
           }
           actions={
             <ActionPanel>
@@ -488,14 +444,7 @@ function Command() {
               <Action.Push
                 title="Create Custom Cheatsheet"
                 icon={Icon.Plus}
-                target={
-                  <CreateCustomSheetForm
-                    onCreated={async () => {
-                      const updated = await Service.getCustomCheatsheets();
-                      setCustomSheets(updated);
-                    }}
-                  />
-                }
+                target={<CreateCustomSheetForm onCreated={loadData} />}
               />
             </ActionPanel>
           }
@@ -527,7 +476,7 @@ function Command() {
         </>
       )}
 
-      {recentItems.length > 0 && (
+      {!searchQuery.trim() && recentItems.length > 0 && (
         <List.Section title="Recently Viewed" subtitle={`${recentItems.length} items`}>
           {recentItems.map((item) => (
             <List.Item
@@ -560,10 +509,13 @@ function Command() {
                 <ActionPanel>
                   <Action.Push
                     title="Open Cheatsheet"
+                    onPop={loadData}
                     icon={Icon.Window}
                     target={
                       item.type === "custom" ? (
                         <CustomSheetView sheet={customSheets.find((s) => s.id === item.id)!} />
+                      ) : item.type === "repository" ? (
+                        <RepositorySheetView sheet={repositorySheets.find((s) => s.id === item.id)!} />
                       ) : (
                         <SheetView slug={item.slug} />
                       )
@@ -573,7 +525,7 @@ function Command() {
                     title={item.isHidden ? "Show Cheatsheet" : "Hide Cheatsheet"}
                     icon={item.isHidden ? Icon.Eye : Icon.EyeDisabled}
                     onAction={() => handleToggleHidden(item)}
-                    shortcut={{ modifiers: ["cmd"], key: "h" }}
+                    shortcut={shortcut("h")}
                   />
                 </ActionPanel>
               }
@@ -627,6 +579,7 @@ function Command() {
               <ActionPanel.Section title="View">
                 <Action.Push
                   title="Open Cheatsheet"
+                  onPop={loadData}
                   icon={Icon.Window}
                   target={
                     item.type === "custom" ? (
@@ -637,13 +590,8 @@ function Command() {
                       <SheetView slug={item.slug} />
                     )
                   }
-                  onPush={async () => {
-                    await Service.recordView(item.type, item.slug, item.title);
-                    if (item.type === "repository") {
-                      await Service.recordRepositoryCheatsheetAccess(item.id);
-                    }
-                    const stats = await Service.getViewStatsMap();
-                    setViewStats(stats);
+                  onPush={() => {
+                    void visitItem(item);
                   }}
                 />
                 {item.type === "default" && (
@@ -655,20 +603,20 @@ function Command() {
                   title={item.isFavorited ? "Remove from Favorites" : "Add to Favorites"}
                   icon={item.isFavorited ? Icon.StarDisabled : Icon.Star}
                   onAction={() => handleToggleFavorite(item)}
-                  shortcut={{ modifiers: ["cmd"], key: "f" }}
+                  shortcut={shortcut("f")}
                 />
                 <Action
                   title={item.isHidden ? "Show Cheatsheet" : "Hide Cheatsheet"}
                   icon={item.isHidden ? Icon.Eye : Icon.EyeDisabled}
                   onAction={() => handleToggleHidden(item)}
-                  shortcut={{ modifiers: ["cmd"], key: "h" }}
+                  shortcut={shortcut("h")}
                 />
                 <Action.CopyToClipboard title="Copy Title" content={item.title} icon={Icon.CopyClipboard} />
                 {item.type === "default" && (
                   <Action
                     title="Copy Full Content"
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                     onAction={async () => {
                       const content = await Service.getSheet(item.slug);
                       await Clipboard.copy(content);
@@ -684,7 +632,7 @@ function Command() {
                   <Action
                     title="Copy Full Content"
                     icon={Icon.CopyClipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                     onAction={async () => {
                       const sheet = customSheets.find((s) => s.id === item.id);
                       if (sheet) {
@@ -702,15 +650,9 @@ function Command() {
                   <Action.Push
                     title="Edit Custom Cheatsheet"
                     icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                     target={
-                      <EditCustomSheetForm
-                        sheet={customSheets.find((s) => s.id === item.id)!}
-                        onUpdated={async () => {
-                          const updated = await Service.getCustomCheatsheets();
-                          setCustomSheets(updated);
-                        }}
-                      />
+                      <EditCustomSheetForm sheet={customSheets.find((s) => s.id === item.id)!} onUpdated={loadData} />
                     }
                   />
                 )}
@@ -741,14 +683,7 @@ function Command() {
               <Action.Push
                 title="Create New"
                 icon={Icon.Plus}
-                target={
-                  <CreateCustomSheetForm
-                    onCreated={async () => {
-                      const updated = await Service.getCustomCheatsheets();
-                      setCustomSheets(updated);
-                    }}
-                  />
-                }
+                target={<CreateCustomSheetForm onCreated={loadData} />}
               />
             </ActionPanel>
           }
@@ -758,72 +693,10 @@ function Command() {
   );
 }
 
-// Helper function to get sheets from files
 function getSheets(files: ServiceFile[]): string[] {
   return files
-    .filter((file) => {
-      const isDir = file.type === "tree";
-      const isMarkdown = file.path.endsWith(".md");
-
-      // Skip if directory or not markdown
-      if (isDir || !isMarkdown) {
-        return false;
-      }
-
-      // Admin and documentation file exclusions - be more precise
-      const isNotAdminFile = !file.path.match(/^(README|CONTRIBUTING|index|index@2016)\.md$/i);
-      const isNotInGitHubDir = !file.path.startsWith(".github/");
-      const isNotCodeOfConduct = !file.path.match(/code[_-]of[_-]conduct\.md$/i);
-      const isNotLicense = !file.path.match(/^(LICENSE|LICENCE)\.md$/i);
-      const isNotChangelog = !file.path.match(/^(CHANGELOG|HISTORY)\.md$/i);
-      const isNotSecurity = !file.path.match(/^(SECURITY|SECURITY\.md)$/i);
-      const isNotContributing = !file.path.match(/^(CONTRIBUTING|CONTRIBUTING\.md)$/i);
-      const isNotPullRequestTemplate = !file.path.match(/pull_request_template\.md$/i);
-      const isNotIssueTemplate = !file.path.startsWith(".github/ISSUE_TEMPLATE/");
-      const isNotWorkflow = !file.path.startsWith(".github/workflows/");
-      const isNotReleaseNotes = !file.path.match(/^(RELEASES?|RELEASE[_-]NOTES?)\.md$/i);
-      const isNotAuthors = !file.path.match(/^(AUTHORS?|CONTRIBUTORS?)\.md$/i);
-      const isNotRoadmap = !file.path.match(/^(ROADMAP|ROAD[_-]MAP)\.md$/i);
-      const isNotTodo = !file.path.match(/^(TODO|TASKS?)\.md$/i);
-      const isNotInstallation = !file.path.match(/^(INSTALL|INSTALLATION)\.md$/i);
-      const isNotGettingStarted = !file.path.match(/^(GETTING[_-]STARTED|QUICK[_-]START)\.md$/i);
-
-      // Directory and file pattern exclusions
-      const isNotInUnderscoreDir = !file.path.match(/(^|\/)_[^/]+/); // Exclude dirs starting with _
-      const isNotAtSymbolFile = !file.path.includes("@"); // Exclude files with @ in name
-      const isNotInUnderscoreFile = !file.path.match(/_[^/]*\.md$/); // Exclude files starting with _
-
-      // Additional exclusions for common non-cheatsheet files
-      const isNotIndexFile = !file.path.match(/^(Index|IndexASVS|IndexMASVS|IndexProactiveControls|IndexTopTen)\.md$/i);
-      const isNotPrefaceFile = !file.path.match(/^(Preface|HelpGuide)\.md$/i);
-      const isNotProjectFile = !file.path.match(/^Project\.[^/]*\.md$/i);
-
-      return (
-        isNotAdminFile &&
-        isNotInGitHubDir &&
-        isNotCodeOfConduct &&
-        isNotLicense &&
-        isNotChangelog &&
-        isNotSecurity &&
-        isNotContributing &&
-        isNotPullRequestTemplate &&
-        isNotIssueTemplate &&
-        isNotWorkflow &&
-        isNotReleaseNotes &&
-        isNotAuthors &&
-        isNotRoadmap &&
-        isNotTodo &&
-        isNotInstallation &&
-        isNotGettingStarted &&
-        isNotInUnderscoreDir &&
-        isNotAtSymbolFile &&
-        isNotInUnderscoreFile &&
-        isNotIndexFile &&
-        isNotPrefaceFile &&
-        isNotProjectFile
-      );
-    })
-    .map((file) => file.path.replace(".md", ""));
+    .filter((file) => file.type === "blob" && includeRepositoryFile(file.path))
+    .map((file) => file.path.replace(/\.md$/i, ""));
 }
 
 interface SheetProps {
@@ -846,7 +719,9 @@ function SheetView({ slug }: SheetProps) {
       const sheetContent = await Service.getSheet(slug);
       setContent(sheetContent);
       // Record view for default sheet
-      await Service.recordView("default", slug, slug);
+      await Service.recordView("default", slug, slug).catch((error) =>
+        showFailureToast(error, { title: "Could Not Save View History" }),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load cheatsheet");
     } finally {
@@ -861,7 +736,7 @@ function SheetView({ slug }: SheetProps) {
   if (error) {
     return (
       <Detail
-        markdown={`# Error Loading Cheatsheet\n\n${error}\n\nPlease try refreshing or check your internet connection.`}
+        markdown={`# Error Loading Cheatsheet\n\n${error}\n\nRetry after checking the error above. Preserve your personal data before reinstalling.`}
         actions={
           <ActionPanel>
             <Action title="Retry" icon={Icon.ArrowClockwise} onAction={loadSheet} />
@@ -871,7 +746,7 @@ function SheetView({ slug }: SheetProps) {
     );
   }
 
-  const processedContent = formatHtmlElements(formatTables(stripTemplateTags(stripFrontmatter(content))));
+  const processedContent = displayMarkdown(content, true);
   const isLocal = Service.isLocalCheatsheet(slug);
 
   return (
@@ -880,8 +755,14 @@ function SheetView({ slug }: SheetProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            <Action.CopyToClipboard title="Copy Content" content={processedContent} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Original Markdown" content={content} icon={Icon.CopyClipboard} />
             <Action.CopyToClipboard title="Copy Title" content={slug} icon={Icon.CopyClipboard} />
+            <Action.Push
+              title="Search Within Sheet"
+              icon={Icon.MagnifyingGlass}
+              shortcut={shortcut("f")}
+              target={<SearchSections title={slug} source={content} bundled />}
+            />
             <Action.OpenInBrowser url={Service.urlFor(slug)} title="Open in Browser" icon={Icon.Link} />
           </ActionPanel.Section>
           {isLocal && (
@@ -906,16 +787,25 @@ interface CustomSheetProps {
 
 function CustomSheetView({ sheet }: CustomSheetProps) {
   useEffect(() => {
-    Service.recordView("custom", sheet.id, sheet.title);
+    Service.recordView("custom", sheet.id, sheet.title).catch((error) =>
+      showFailureToast(error, { title: "Could Not Save View History" }),
+    );
   }, [sheet.id]);
   return (
     <Detail
-      markdown={`# ${sheet.title}\n\n${sheet.content}`}
+      navigationTitle={sheet.title}
+      markdown={displayMarkdown(sheet.content)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Actions">
-            <Action.CopyToClipboard title="Copy Content" content={sheet.content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
             <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
+            <Action.Push
+              title="Search Within Sheet"
+              icon={Icon.MagnifyingGlass}
+              shortcut={shortcut("f")}
+              target={<SearchSections title={sheet.title} source={sheet.content} />}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -935,30 +825,36 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
 
   const {
     value: title,
+    isReady: titleReady,
     updateValue: updateTitle,
     clearDraft: clearTitleDraft,
-  } = useDraftPersistence(`edit-custom-sheet-title-${sheet.id}`, sheet.title);
+  } = useDraftPersistence<string>(`edit-custom-sheet-title-${sheet.id}`, sheet.title);
 
   const {
     value: content,
+    isReady: contentReady,
     updateValue: updateContent,
     clearDraft: clearContentDraft,
-  } = useDraftPersistence(`edit-custom-sheet-content-${sheet.id}`, sheet.content);
+  } = useDraftPersistence<string>(`edit-custom-sheet-content-${sheet.id}`, sheet.content);
 
   const {
     value: tags,
+    isReady: tagsReady,
     updateValue: updateTags,
     clearDraft: clearTagsDraft,
-  } = useDraftPersistence(`edit-custom-sheet-tags-${sheet.id}`, (sheet.tags || []).join(", "));
+  } = useDraftPersistence<string>(`edit-custom-sheet-tags-${sheet.id}`, (sheet.tags || []).join(", "));
 
   const {
     value: description,
+    isReady: descriptionReady,
     updateValue: updateDescription,
     clearDraft: clearDescriptionDraft,
-  } = useDraftPersistence(`edit-custom-sheet-description-${sheet.id}`, sheet.description || "");
+  } = useDraftPersistence<string>(`edit-custom-sheet-description-${sheet.id}`, sheet.description || "");
 
   const handleSubmit = async (values: { title: string; content: string; tags?: string; description?: string }) => {
     try {
+      if (!(titleReady && contentReady && tagsReady && descriptionReady))
+        throw new Error("Wait for saved drafts to load. If loading failed, preserve your text and reopen the form.");
       setIsSubmitting(true);
       setShowErrors(true);
       if (!values.title?.trim() || !values.content?.trim()) {
@@ -973,13 +869,19 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
             .filter(Boolean)
         : [];
 
-      await Service.updateCustomCheatsheet(sheet.id, values.title, values.content, tagsArray, values.description);
+      await Service.updateCustomCheatsheet(
+        sheet.id,
+        values.title,
+        values.content,
+        tagsArray,
+        values.description,
+        sheet.updatedAt,
+      );
 
       // Clear drafts after successful submission
-      clearTitleDraft();
-      clearContentDraft();
-      clearTagsDraft();
-      clearDescriptionDraft();
+      const draftsCleared = (
+        await Promise.all([clearTitleDraft(), clearContentDraft(), clearTagsDraft(), clearDescriptionDraft()])
+      ).every(Boolean);
 
       onUpdated();
       pop();
@@ -987,7 +889,9 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
       showToast({
         style: Toast.Style.Success,
         title: "Updated",
-        message: `"${values.title}" has been modified`,
+        message: draftsCleared
+          ? `"${values.title}" has been modified`
+          : "Sheet saved. Some drafts could not be cleared; copy any newer draft before resetting it.",
       });
     } catch (error) {
       showFailureToast(error, { title: "Failed to update cheatsheet" });
@@ -998,7 +902,7 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
 
   return (
     <Form
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || !(titleReady && contentReady && tagsReady && descriptionReady)}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Custom Cheatsheet" onSubmit={handleSubmit} icon={Icon.Document} />
@@ -1006,12 +910,19 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
             title="Reset Draft"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            onAction={() => {
-              clearTitleDraft();
-              clearContentDraft();
-              clearTagsDraft();
-              clearDescriptionDraft();
-              showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
+            onAction={async () => {
+              if (
+                !(await confirmAlert({
+                  title: "Discard Saved Draft?",
+                  message: "This removes the saved draft for this form.",
+                  primaryAction: { title: "Discard", style: Alert.ActionStyle.Destructive },
+                }))
+              )
+                return;
+              const draftsCleared = (
+                await Promise.all([clearTitleDraft(), clearContentDraft(), clearTagsDraft(), clearDescriptionDraft()])
+              ).every(Boolean);
+              if (draftsCleared) showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
             }}
           />
         </ActionPanel>
@@ -1054,131 +965,7 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
   );
 }
 
-interface CreateCustomSheetProps {
-  onCreated: () => void;
-}
-
-function CreateCustomSheetForm({ onCreated }: CreateCustomSheetProps) {
-  const { pop } = useNavigation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
-
-  const {
-    value: title,
-    updateValue: updateTitle,
-    clearDraft: clearTitleDraft,
-  } = useDraftPersistence("create-custom-sheet-title", "");
-
-  const {
-    value: content,
-    updateValue: updateContent,
-    clearDraft: clearContentDraft,
-  } = useDraftPersistence("create-custom-sheet-content", "");
-
-  const {
-    value: tags,
-    updateValue: updateTags,
-    clearDraft: clearTagsDraft,
-  } = useDraftPersistence("create-custom-sheet-tags", "");
-
-  const {
-    value: description,
-    updateValue: updateDescription,
-    clearDraft: clearDescriptionDraft,
-  } = useDraftPersistence("create-custom-sheet-description", "");
-
-  const handleSubmit = async (values: { title: string; content: string; tags?: string; description?: string }) => {
-    try {
-      setIsSubmitting(true);
-      setShowErrors(true);
-
-      const tagsArray = values.tags
-        ? values.tags
-            .split(",")
-            .map((tag: string) => tag.trim())
-            .filter(Boolean)
-        : [];
-
-      await Service.createCustomCheatsheet(values.title, values.content, tagsArray, values.description);
-
-      // Clear drafts after successful submission
-      clearTitleDraft();
-      clearContentDraft();
-      clearTagsDraft();
-      clearDescriptionDraft();
-
-      onCreated();
-      pop();
-
-      showToast({
-        style: Toast.Style.Success,
-        title: "Created",
-        message: `"${values.title}" has been added`,
-      });
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to create cheatsheet" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Form
-      isLoading={isSubmitting}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Create Custom Cheatsheet" onSubmit={handleSubmit} icon={Icon.Document} />
-          <Action
-            title="Reset Draft"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={() => {
-              clearTitleDraft();
-              clearContentDraft();
-              clearTagsDraft();
-              clearDescriptionDraft();
-              showToast({ style: Toast.Style.Success, title: "Draft Cleared" });
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Enter cheatsheet title"
-        value={title}
-        onChange={updateTitle}
-        error={showErrors && !title.trim() ? "Title is required" : undefined}
-      />
-
-      <Form.TextArea
-        id="content"
-        title="Content"
-        placeholder="Enter cheatsheet content (Markdown supported)"
-        value={content}
-        onChange={updateContent}
-        error={showErrors && !content.trim() ? "Content is required" : undefined}
-      />
-
-      <Form.TextField
-        id="tags"
-        title="Tags"
-        placeholder="Enter tags separated by commas"
-        value={tags}
-        onChange={updateTags}
-      />
-
-      <Form.TextField
-        id="description"
-        title="Description"
-        placeholder="Enter optional description"
-        value={description}
-        onChange={updateDescription}
-      />
-    </Form>
-  );
-}
+const CreateCustomSheetForm = CreateCustomCheatsheet;
 
 // Repository cheatsheet view component
 function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
@@ -1187,7 +974,9 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
 
   useEffect(() => {
     // Record view for repository sheet
-    Service.recordRepositoryCheatsheetAccess(sheet.repositoryId);
+    Service.recordView("repository", sheet.id, sheet.title).catch((error) =>
+      showFailureToast(error, { title: "Could Not Save View History" }),
+    );
 
     // Fetch repository information
     const fetchRepository = async () => {
@@ -1202,18 +991,18 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
           });
         }
       } catch (err) {
-        console.error("Failed to fetch repository info:", err);
+        showFailureToast(err, { title: "Could Not Load Repository Details" });
       }
     };
 
     fetchRepository();
   }, [sheet.repositoryId]);
 
-  const processedContent = formatHtmlElements(formatTables(stripTemplateTags(stripFrontmatter(sheet.content))));
+  const processedContent = displayMarkdown(sheet.content);
 
   // Construct GitHub URLs
   const githubUrl = repository
-    ? `https://github.com/${repository.owner}/${repository.name}/blob/${repository.defaultBranch}/${sheet.filePath}`
+    ? `https://github.com/${repository.owner}/${repository.name}/blob/${encodeURIComponent(sheet.revision || repository.defaultBranch)}/${sheet.filePath.split("/").map(encodeURIComponent).join("/")}`
     : null;
   const repositoryUrl = repository ? `https://github.com/${repository.owner}/${repository.name}` : null;
 
@@ -1264,8 +1053,14 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
             </ActionPanel.Section>
           )}
           <ActionPanel.Section title="Actions">
-            <Action.CopyToClipboard title="Copy Content" content={sheet.content} icon={Icon.CopyClipboard} />
+            <Action.CopyToClipboard title="Copy Original Markdown" content={sheet.content} icon={Icon.CopyClipboard} />
             <Action.CopyToClipboard title="Copy Title" content={sheet.title} icon={Icon.CopyClipboard} />
+            <Action.Push
+              title="Search Within Sheet"
+              icon={Icon.MagnifyingGlass}
+              shortcut={shortcut("f")}
+              target={<SearchSections title={sheet.title} source={sheet.content} />}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

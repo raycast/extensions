@@ -4,7 +4,7 @@
  * Provides functions for displaying toast notifications.
  */
 
-import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
+import { Clipboard, Toast, showHUD } from "@raycast/api";
 import { ExecError } from "./types";
 import { uiLogger } from "./logger";
 import { isRecoverableError, getErrorMessage, isBrewLockError } from "./errors";
@@ -37,14 +37,12 @@ export interface ActionToastHandle {
 }
 
 /**
- * Finish an in-progress action toast.
+ * Finish an in-progress action toast in place.
  *
- * Raycast's toast update/hide messages carry no toast id: they act on whichever
- * toast is currently on screen. Mutating the animated toast in place therefore
- * risks leaving its "Cancel" action attached to a finished operation. Showing a
- * fresh toast makes that structurally impossible: `showToast` replaces the
- * visible toast outright, so it needs no `hide()` first — and adding one would
- * open an `await` gap in which another writer could claim the slot.
+ * Replacing it with a fresh `showToast` let a progress update sent in the same
+ * tick land on top of the replacement, leaving a finished operation animated
+ * with a live Cancel. Updating the same toast keeps the requests on one toast,
+ * and clearing its actions removes Cancel along with the progress message.
  */
 async function settle(toast: Toast, style: Toast.Style, title: string, hudMessage: string): Promise<void> {
   if (preferences.closeAfterAction) {
@@ -52,7 +50,11 @@ async function settle(toast: Toast, style: Toast.Style, title: string, hudMessag
     toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
     await showHUD(hudMessage);
   } else {
-    await showToast({ style, title });
+    toast.style = style;
+    toast.title = title;
+    toast.message = undefined;
+    toast.primaryAction = undefined;
+    toast.secondaryAction = undefined;
   }
 }
 

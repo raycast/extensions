@@ -1,9 +1,9 @@
 ---
 title: Bash scripting
 category: CLI
-tags:
-  - Featured
-updated: 2020-07-05T00:00:00.000Z
+layout: 2017/sheet
+tags: [Featured]
+updated: 2020-07-05
 keywords:
   - Variables
   - Functions
@@ -12,9 +12,6 @@ keywords:
   - Loops
   - Conditional execution
   - Command substitution
-tech: bash
-status: active
-lastReviewed: '2025-09-05'
 ---
 
 ## Getting started
@@ -24,6 +21,8 @@ lastReviewed: '2025-09-05'
 {: .-intro}
 
 This is a quick reference to getting started with Bash scripting.
+
+Some examples require a newer Bash than the system version on macOS, including associative arrays and case conversion. Check `bash --version`; these examples are not portable POSIX `sh` syntax.
 
 - [Learn bash in y minutes](https://learnxinyminutes.com/docs/bash/) _(learnxinyminutes.com)_
 - [Bash Guide](http://mywiki.wooledge.org/BashGuide) _(mywiki.wooledge.org)_
@@ -389,7 +388,7 @@ See [Special parameters](https://web.archive.org/web/20230318164746/https://wiki
 
 ### Conditions
 
-Note that `[[` is actually a command/program that returns either `0` (true) or `1` (false). Any program that obeys the same logic (like all base utils, such as `grep(1)` or `ping(1)`) can be used as condition, see examples.
+`[[ ... ]]` is a Bash conditional construct, not an external program. Shell conditions can also use a command's exit status: zero is true and nonzero is false.
 
 | Condition                | Description           |
 | ------------------------ | --------------------- |
@@ -510,11 +509,11 @@ echo "${!Fruits[@]}"          # Keys of all elements, space-separated
 ```bash
 Fruits=("${Fruits[@]}" "Watermelon")    # Push
 Fruits+=('Watermelon')                  # Also Push
-Fruits=( "${Fruits[@]/Ap*/}" )          # Remove by regex match
+Fruits=( "${Fruits[@]/Ap*/}" )          # Remove by glob pattern
 unset Fruits[2]                         # Remove one item
 Fruits=("${Fruits[@]}")                 # Duplicate
 Fruits=("${Fruits[@]}" "${Veggies[@]}") # Concatenate
-words=($(< datafile))                   # From file (split by IFS)
+mapfile -t lines < "logfile"            # Read lines into an array (Bash 4+)
 ```
 
 ### Iteration
@@ -794,30 +793,6 @@ cat <<END
 hello world
 END
 ```
-
-Heredoc allows a section of your source code to be treated as a file. See [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Redirections.html#Here-Documents).
-
-### Herestring
-
-```sh
-tr '[:lower:]' '[:upper:]' <<< "Will be uppercased, even $variable"
-```
-
-Herestring allows a string to be treated as a standard input (stdin). See [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Redirections.html#Here-Strings).
-
-### Process substitution
-
-```sh 
-# loop on myfunc output lines
-while read -r line; do
-  echo "$line"
-done < <(myfunc)
-
-# compare content of two folders
-diff <(ls "$dir1") <(ls "$dir2")
-```
-
-Process substitution allows the input (or output) of a command to be treated as a file. See [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Process-Substitution.html).
 
 ### Reading input
 

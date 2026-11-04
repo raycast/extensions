@@ -22,6 +22,10 @@ You can also fill in Name, Kind, and Folder right in Raycast's root search, befo
 
 **Search File Contents** finds text inside your files. Choose Text, Regular Expression, or Definition from the menu in the search bar; Definition finds where a function or type is declared. Searches ignore case unless you type an uppercase letter. Add `ext:`, `type:`, or `in:` to search fewer files. To open each match at its line, choose an editor in the command's settings. In root search, fill in Text, Match, and Folder to start a search before the command opens.
 
+To search for text that looks like a filter, put `--` before the pattern. For example, `ext:md -- ext:pdf` finds the text `ext:pdf` in Markdown files. While FSearch builds its content index, matches stay visible and refresh automatically.
+
+In either search command, select a result and press Command-Shift-V to **Paste Path to App**. This inserts the full path wherever you were typing. At a zsh or bash prompt, choose **Paste Shell-Quoted Path** from the action menu to insert a path with spaces or punctuation as one argument.
+
 ## Raycast AI
 
 Mention `@fsearch` in Raycast AI to find files by name or search inside them:

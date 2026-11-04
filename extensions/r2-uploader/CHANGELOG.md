@@ -1,5 +1,10 @@
 # R2 Uploader Changelog
 
+## [Fix Crash on Launch] - 2026-11-03
+
+- Upgrade `@raycast/api` to 2.10.1 so the build no longer generates broken `@smithy/core` subpath exports, fixing the `Package subpath './transport' is not defined by "exports"` error when running the extension
+- Align `@types/react` with the version bundled by `@raycast/api` so the build keeps type-checking
+
 ## [WebP Conversion and Metadata Updates] - 2026-10-10
 
 - Add optional WebP conversion using the `cwebp` command
