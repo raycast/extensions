@@ -1,6 +1,6 @@
 # Gradient Generator Changelog
 
-## [Reliability Fixes] - {PR_MERGE_DATE}
+## [Reliability Fixes] - 2026-11-04
 
 - Fix Random Gradient render timeouts by referencing temporary local preview PNGs and retain full preview resolution.
 - Preserve labels from Create through Preview and saved-library actions.
