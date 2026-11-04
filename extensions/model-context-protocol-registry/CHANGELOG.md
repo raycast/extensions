@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Ecommerce Leads MCP Server] - {PR_MERGE_DATE}
+
+- Add Ecommerce Leads to the official registry as a hosted Streamable HTTP server with a direct HTTP connection in Raycast, an `mcp-remote` fallback for other clients, and OAuth 2.1 sign-in for the account tools.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
