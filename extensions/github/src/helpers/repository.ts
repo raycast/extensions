@@ -56,7 +56,10 @@ export const WEB_IDES: {
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
     icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
-    shortcut: Keyboard.Shortcut.Common.Save,
+    shortcut: {
+      macOS: { modifiers: ["cmd"], key: "s" },
+      Windows: { modifiers: ["ctrl"], key: "s" },
+    },
   },
   {
     title: "DeepWiki",
