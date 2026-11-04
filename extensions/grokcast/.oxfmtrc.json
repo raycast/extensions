@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "arrowParens": "always",
+  "semi": false,
+  "ignorePatterns": ["dist/**", "package-lock.json", "CHANGELOG.md", ".tegami/**"]
+}

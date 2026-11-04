@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>SolZeroAI/renovate-config"],
+  "description": "The Raycast Store runs npm ci, so the lockfile is package-lock.json. nub updates it in place; npm would reformat it.",
+  "skipArtifactsUpdate": true,
+  "postUpgradeTasks": {
+    "commands": ["nub install --prefer-frozen-lockfile --lockfile-only --ignore-scripts"],
+    "fileFilters": ["package-lock.json"],
+    "executionMode": "branch"
+  },
+  "packageRules": [
+    {
+      "description": "Raycast runs the extension on Node 22, so the Node types stay on 22.",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<23"
+    },
+    {
+      "description": "@types/react must match the version @raycast/api pins. Bump it together with @raycast/api.",
+      "matchPackageNames": ["@types/react"],
+      "enabled": false
+    }
+  ]
+}
