@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Fix Streaming Responses] - {PR_MERGE_DATE}
+## [Fix Streaming Responses] - 2026-11-04
 
 - Buffer streaming updates to prevent long responses from freezing text commands and AI Chat.
 - Cancel requests when leaving a view and preserve partial answers when a request fails.
