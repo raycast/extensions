@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, ActionPanel, Action, Icon, showToast, Toast, LocalStorage, useNavigation } from "@raycast/api";
+import { Form, confirmAlert, Alert, ActionPanel, Action, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 import Service from "./service";
@@ -14,74 +14,74 @@ type AddRepositoryFormValues = {
   subdirectory?: string;
 };
 
-// Custom hook for draft persistence
-function useDraftPersistence(key: string, defaultValue: string | boolean) {
-  const [value, setValue] = useState(defaultValue);
-
-  React.useEffect(() => {
-    // Load draft from storage
-    LocalStorage.getItem<string | boolean>(key).then((stored) => {
-      if (stored !== undefined && stored !== defaultValue) {
-        setValue(stored);
-      }
-    });
-  }, [key, defaultValue]);
-
-  const updateValue = (newValue: string | boolean) => {
-    setValue(newValue);
-    // Save to storage
-    LocalStorage.setItem(key, newValue);
-  };
-
-  const clearDraft = () => {
-    LocalStorage.removeItem(key);
-    setValue(defaultValue);
-  };
-
-  return { value, updateValue, clearDraft };
-}
+import { useDraftPersistence } from "./use-draft";
 
 export function AddRepositoryForm({ onAdded }: { onAdded?: () => void }) {
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
-  const { value: name, updateValue: updateName, clearDraft: clearNameDraft } = useDraftPersistence("add-repo-name", "");
+  const {
+    value: name,
+    isReady: nameReady,
+    updateValue: updateName,
+    clearDraft: clearNameDraft,
+  } = useDraftPersistence<string>("add-repo-name", "");
 
   const {
     value: owner,
+    isReady: ownerReady,
     updateValue: updateOwner,
     clearDraft: clearOwnerDraft,
-  } = useDraftPersistence("add-repo-owner", "");
+  } = useDraftPersistence<string>("add-repo-owner", "");
 
   const {
     value: description,
+    isReady: descriptionReady,
     updateValue: updateDescription,
     clearDraft: clearDescriptionDraft,
-  } = useDraftPersistence("add-repo-description", "");
+  } = useDraftPersistence<string>("add-repo-description", "");
 
-  const { value: url, updateValue: updateUrl, clearDraft: clearUrlDraft } = useDraftPersistence("add-repo-url", "");
+  const {
+    value: url,
+    isReady: urlReady,
+    updateValue: updateUrl,
+    clearDraft: clearUrlDraft,
+  } = useDraftPersistence<string>("add-repo-url", "");
 
   const {
     value: isPrivate,
+    isReady: isPrivateReady,
     updateValue: updateIsPrivate,
     clearDraft: clearIsPrivateDraft,
-  } = useDraftPersistence("add-repo-private", false);
+  } = useDraftPersistence<boolean>("add-repo-private", false);
 
   const {
     value: defaultBranch,
+    isReady: defaultBranchReady,
     updateValue: updateDefaultBranch,
     clearDraft: clearDefaultBranchDraft,
-  } = useDraftPersistence("add-repo-branch", "main");
+  } = useDraftPersistence<string>("add-repo-branch", "main");
 
   const {
     value: subdirectory,
+    isReady: subdirectoryReady,
     updateValue: updateSubdirectory,
     clearDraft: clearSubdirectoryDraft,
-  } = useDraftPersistence("add-repo-subdir", "");
+  } = useDraftPersistence<string>("add-repo-subdir", "");
 
   const handleSubmit = async (values: AddRepositoryFormValues) => {
     try {
+      if (!(
+        nameReady &&
+        ownerReady &&
+        descriptionReady &&
+        urlReady &&
+        isPrivateReady &&
+        defaultBranchReady &&
+        subdirectoryReady
+      ))
+        throw new Error("Wait for saved drafts to load. If loading failed, preserve your text and reopen the form.");
       setIsSubmitting(true);
       setShowErrors(true);
 
@@ -114,14 +114,24 @@ export function AddRepositoryForm({ onAdded }: { onAdded?: () => void }) {
       );
 
       // Clear drafts after successful submission
-      clearNameDraft();
-      clearOwnerDraft();
-      clearDescriptionDraft();
-      clearUrlDraft();
-      clearIsPrivateDraft();
-      clearDefaultBranchDraft();
-      clearSubdirectoryDraft();
+      const draftsCleared = (
+        await Promise.all([
+          clearNameDraft(),
+          clearOwnerDraft(),
+          clearDescriptionDraft(),
+          clearUrlDraft(),
+          clearIsPrivateDraft(),
+          clearDefaultBranchDraft(),
+          clearSubdirectoryDraft(),
+        ])
+      ).every(Boolean);
 
+      if (!draftsCleared)
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Repository Added; Draft Retained",
+          message: "Some draft fields could not be cleared. Check them before adding another repository.",
+        });
       if (onAdded) {
         onAdded();
       }
@@ -135,7 +145,18 @@ export function AddRepositoryForm({ onAdded }: { onAdded?: () => void }) {
 
   return (
     <Form
-      isLoading={isSubmitting}
+      isLoading={
+        isSubmitting ||
+        !(
+          nameReady &&
+          ownerReady &&
+          descriptionReady &&
+          urlReady &&
+          isPrivateReady &&
+          defaultBranchReady &&
+          subdirectoryReady
+        )
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Repository" onSubmit={handleSubmit} icon={Icon.Plus} />
@@ -143,15 +164,27 @@ export function AddRepositoryForm({ onAdded }: { onAdded?: () => void }) {
             title="Reset Form"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            onAction={() => {
-              clearNameDraft();
-              clearOwnerDraft();
-              clearDescriptionDraft();
-              clearUrlDraft();
-              clearIsPrivateDraft();
-              clearDefaultBranchDraft();
-              clearSubdirectoryDraft();
-              showToast({ style: Toast.Style.Success, title: "Form Reset" });
+            onAction={async () => {
+              if (
+                !(await confirmAlert({
+                  title: "Discard Saved Draft?",
+                  message: "This removes the saved draft for this form.",
+                  primaryAction: { title: "Discard", style: Alert.ActionStyle.Destructive },
+                }))
+              )
+                return;
+              const draftsCleared = (
+                await Promise.all([
+                  clearNameDraft(),
+                  clearOwnerDraft(),
+                  clearDescriptionDraft(),
+                  clearUrlDraft(),
+                  clearIsPrivateDraft(),
+                  clearDefaultBranchDraft(),
+                  clearSubdirectoryDraft(),
+                ])
+              ).every(Boolean);
+              if (draftsCleared) showToast({ style: Toast.Style.Success, title: "Form Reset" });
             }}
           />
         </ActionPanel>
@@ -166,57 +199,52 @@ export function AddRepositoryForm({ onAdded }: { onAdded?: () => void }) {
         id="name"
         title="Repository Name"
         placeholder="Enter repository name (e.g., 'my-awesome-project')"
-        value={name as string}
-        onChange={updateName as (value: string) => void}
-        error={showErrors && !(name as string)?.trim() ? "Repository name is required" : undefined}
+        value={name}
+        onChange={updateName}
+        error={showErrors && !name.trim() ? "Repository name is required" : undefined}
       />
 
       <Form.TextField
         id="owner"
         title="Owner"
         placeholder="Enter owner/username (e.g., 'octocat')"
-        value={owner as string}
-        onChange={updateOwner as (value: string) => void}
-        error={showErrors && !(owner as string)?.trim() ? "Owner is required" : undefined}
+        value={owner}
+        onChange={updateOwner}
+        error={showErrors && !owner.trim() ? "Owner is required" : undefined}
       />
 
       <Form.TextArea
         id="description"
         title="Description"
         placeholder="Enter optional repository description"
-        value={description as string}
-        onChange={updateDescription as (value: string) => void}
+        value={description}
+        onChange={updateDescription}
       />
 
       <Form.TextField
         id="url"
         title="Repository URL"
         placeholder="Enter repository URL (optional, will auto-generate if empty)"
-        value={url as string}
-        onChange={updateUrl as (value: string) => void}
+        value={url}
+        onChange={updateUrl}
       />
 
-      <Form.Checkbox
-        id="isPrivate"
-        label="Private Repository"
-        value={isPrivate as boolean}
-        onChange={updateIsPrivate as (value: boolean) => void}
-      />
+      <Form.Checkbox id="isPrivate" label="Private Repository" value={isPrivate} onChange={updateIsPrivate} />
 
       <Form.TextField
         id="defaultBranch"
         title="Default Branch"
         placeholder="Enter default branch name (e.g., 'main', 'master')"
-        value={defaultBranch as string}
-        onChange={updateDefaultBranch as (value: string) => void}
+        value={defaultBranch}
+        onChange={updateDefaultBranch}
       />
 
       <Form.TextField
         id="subdirectory"
         title="Subdirectory (Optional)"
         placeholder="Enter subdirectory path (e.g., 'docs', 'cheatsheets')"
-        value={subdirectory as string}
-        onChange={updateSubdirectory as (value: string) => void}
+        value={subdirectory}
+        onChange={updateSubdirectory}
       />
     </Form>
   );

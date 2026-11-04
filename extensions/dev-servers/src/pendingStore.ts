@@ -6,7 +6,14 @@ const PENDING_KEY = "pending-starts";
 // broke" while the real cause, and the fix, sit outside the extension
 // entirely, so the generic "check the startup log" wastes the user's time on a
 // question we can already answer.
-export type SpawnFailure = "port-conflict" | "portless-proxy-down";
+//
+// "command-not-found" names the missing command (see PendingStart.detail);
+// "install-failed" is an install the start ran first that did not finish.
+export type SpawnFailure =
+  | "port-conflict"
+  | "portless-proxy-down"
+  | "command-not-found"
+  | "install-failed";
 
 // A start the dashboard has fired but not yet seen bind a port, keyed by cwd
 // in `pendingStarts`. It renders as a synthetic list row (see PendingItem)
@@ -36,9 +43,13 @@ export type PendingStart = {
   status: "starting" | "failed";
   // Set when failed and diagnosable, else null.
   reason: SpawnFailure | null;
+  // What the reason is about, when it is about something nameable: the
+  // command a "command-not-found" failure could not find.
+  detail?: string;
   // What the row says while it waits, and how long a failure claims it gave
-  // the server (the spawn watchdog allows 15s, restart's own poll ~10s).
-  kind: "start" | "restart";
+  // the server (the spawn watchdog allows 15s, restart's own poll ~10s, an
+  // install-then-start several minutes).
+  kind: "start" | "restart" | "install";
   // Every pid listed for this cwd when the row was made, plus the pid a
   // restart is replacing. The row resolves only when some *other* server
   // appears for the cwd.
@@ -66,7 +77,9 @@ function isPendingStart(value: unknown): value is PendingStart {
     typeof entry.logStart === "number" &&
     typeof entry.deadline === "number" &&
     (entry.status === "starting" || entry.status === "failed") &&
-    (entry.kind === "start" || entry.kind === "restart") &&
+    (entry.kind === "start" ||
+      entry.kind === "restart" ||
+      entry.kind === "install") &&
     Array.isArray(entry.ignorePids)
   );
 }

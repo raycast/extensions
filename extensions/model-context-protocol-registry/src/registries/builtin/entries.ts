@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "sofya",
+    title: "Sofya",
+    description:
+      "Web search, page fetch, extraction and deep research for AI agents. Search results come with full page content instead of snippets, fetch returns clean Markdown (PDFs and Office documents included), extract pulls specific information from a page with a prompt, and research returns a cited multi-source report. Hosted remote Streamable HTTP server; OAuth sign-in with dynamic client registration, or a Sofya API key as a Bearer token.",
+    icon: "https://sofya.co/static/icon-512.png",
+    homepage: "https://sofya.co/docs",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sofya.co/mcp"],
+    },
+    remoteUrl: "https://mcp.sofya.co/mcp",
+  },
+  {
     name: "batchdata",
     title: "BatchData",
     description:

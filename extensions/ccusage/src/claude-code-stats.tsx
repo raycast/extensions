@@ -89,7 +89,8 @@ const fetchUsageLimit = async () => {
   const result = await fetchClaudeUsageLimits(token);
   if (result.status !== "ok") return null;
 
-  return Math.round(result.data.five_hour.utilization * 10) / 10;
+  const window = result.data.five_hour ?? result.data.seven_day;
+  return window ? Math.round(window.utilization * 10) / 10 : null;
 };
 
 export default async function Command() {

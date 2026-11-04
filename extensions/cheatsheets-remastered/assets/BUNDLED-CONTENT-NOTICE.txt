@@ -1,0 +1,23 @@
+Bundled developer references
+
+Source: DevHints / https://github.com/rstacruz/cheatsheets
+Copyright (c) 2021 Rico Sta. Cruz and contributors
+The original MIT notice is retained verbatim in DEVHINTS-LICENSE.txt.
+
+The extension's original import and metadata/index update are recorded at
+raycast/extensions commits 0abf19dbd937a73b3db0777458bd87885c2038fa and
+1c7042cadf638b78345215bc0502a8fec0504714. Source links and individual
+notices remain intact. Metadata and formatting changes do not grant a new
+license to third-party content.
+
+bash.md, jsdoc.md, markdown.md, python.md, tar.md and vim-digraphs.md derive
+from licensed revision bf059536c6403deadd404b25320df2dc4608537d, with limited
+local accuracy and Markdown-layout corrections documented in ATTRIBUTION.md.
+The root LICENSE at that revision is identical to DEVHINTS-LICENSE.txt.
+MIT-bearing contribution snapshots also support lua.md, pm2.md, tmux.md and
+the later rspec.md patch; exact revisions are recorded in ATTRIBUTION.md.
+
+basic.md, keywords_test.md, packs.md and polyfill.io.md are excluded pending
+applicable permission evidence. The retired polyfill CDN loader is also omitted
+from cheatsheet-styles.md. No permission for the excluded later material is
+implied by prior publication or by this notice.

@@ -4,14 +4,19 @@ Search local files by meaning using EmbeddingGemma 2. Documents, photos, video s
 
 ## Requirements and setup
 
-Apple silicon, macOS 26+, and the separately installed **Semantic Search Engine 0.7.1** are required. Allow about 2.5 GB for engine installation, plus model weights and your library index.
+Apple silicon, macOS 26+, and the separately installed **Semantic Search Engine 0.7.2** are required. Allow about 2.5 GB for engine installation, plus model weights and your library index. Setup has two steps: install the local engine, then download a search model.
 
-1. Open **Search Files** in Semantic File Search and choose **Download Search Engine** if the engine is missing.
-2. Open the companion installer from the release page and click **Install**. Python and decoding libraries are included. No Homebrew or terminal setup.
-3. Return to Search and choose **Check Installation**.
-4. Choose **Manage Library** in Actions, download a model, select folders and apply. Model weights download from Hugging Face.
+### 1. Install the local engine
 
-The 0.7.1 companion is unsigned; macOS may require explicit opening approval. See the [installation guide](https://github.com/nikusti/semantic-search/blob/main/docs/INSTALL.md).
+Open **Search Files** in Semantic File Search and choose **Download Search Engine** to download the [Semantic Search Engine 0.7.2 installer ZIP](https://github.com/nikusti/semantic-search/releases/download/v0.7.2/semantic-search-engine-v0.7.2-unsigned.zip). Extract the ZIP, open **Semantic Search Engine Installer.app**, and click **Install**. Return to Search Files and choose **Check Installation**.
+
+The installer includes Python and decoding libraries; it does **not** include model weights. No Homebrew or terminal setup is required. The 0.7.2 installer is unsigned, so macOS may require explicit opening approval. See the [installation guide](https://github.com/nikusti/semantic-search/blob/main/docs/INSTALL.md).
+
+### 2. Download a model and choose folders
+
+Choose **Manage Library** in Actions, select a model, add the folders to search and enable the file types you need. Choose **Download & Apply** to download model weights separately from Hugging Face and apply your selection. An already installed model can be reused without downloading it again: choose **Apply** to save changed settings, or **Update Search Index** when the settings are already saved.
+
+Updating the engine preserves existing models, indexes and settings in shared storage. This extension requires the 0.7.2 engine; an older installation must be updated before use.
 
 MLX 8-bit and Core ML are supported; each model keeps a separate index. Text queries load only the text encoder even when searching indexed media. The default index uses 512-dimensional float32 vectors. By default, model workers unload one minute after leaving search when no indexing or request is active.
 
