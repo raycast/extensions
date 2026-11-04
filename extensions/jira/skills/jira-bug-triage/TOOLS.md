@@ -2,19 +2,19 @@
 
 Input inventory reviewed against `package.json` and all 11 files in `src/tools/` on September 24, 2026. All 11 tools are registered. `?` means optional; confirmation objects and their nested fields are required. Source links show the exact implementation.
 
-| Tool | Inputs |
-| --- | --- |
-| [create-issue](../../src/tools/create-issue.ts) | `projectId: string`; `issueTypeId: string`; `summary: string`; `description?: string`; `assigneeId?: string`; `issueLabels?: string`; `dueDate?: string`; `confirmation: { projectName: string; issueTypeName: string; assigneeName: string; }` |
-| [get-users](../../src/tools/get-users.ts) | None |
-| [get-projects](../../src/tools/get-projects.ts) | None |
-| [get-labels](../../src/tools/get-labels.ts) | None |
-| [get-issue-types](../../src/tools/get-issue-types.ts) | `projectId: string` |
-| [get-teams](../../src/tools/get-teams.ts) | None |
-| [search-issues](../../src/tools/search-issues.ts) | `jql: string` |
-| [get-myself](../../src/tools/get-myself.ts) | None |
-| [assign-issue](../../src/tools/assign-issue.ts) | `issueIdOrKey: string`; `assigneeId?: string`; `confirmation: { issueSummary: string; assigneeName: string; }` |
-| [update-issue](../../src/tools/update-issue.ts) | `issueIdOrKey: string`; `summary?: string`; `description?: string`; `dueDate?: string`; `addLabels?: string`; `removeLabels?: string`; `confirmation: { issueSummary: string; }` |
-| [get-issue](../../src/tools/get-issue.ts) | `issueIdOrKey: string` |
+| Tool                                                  | Inputs                                                                                                                                                                                                                                          |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [create-issue](../../src/tools/create-issue.ts)       | `projectId: string`; `issueTypeId: string`; `summary: string`; `description?: string`; `assigneeId?: string`; `issueLabels?: string`; `dueDate?: string`; `confirmation: { projectName: string; issueTypeName: string; assigneeName: string; }` |
+| [get-users](../../src/tools/get-users.ts)             | None                                                                                                                                                                                                                                            |
+| [get-projects](../../src/tools/get-projects.ts)       | None                                                                                                                                                                                                                                            |
+| [get-labels](../../src/tools/get-labels.ts)           | None                                                                                                                                                                                                                                            |
+| [get-issue-types](../../src/tools/get-issue-types.ts) | `projectId: string`                                                                                                                                                                                                                             |
+| [get-teams](../../src/tools/get-teams.ts)             | None                                                                                                                                                                                                                                            |
+| [search-issues](../../src/tools/search-issues.ts)     | `jql: string`                                                                                                                                                                                                                                   |
+| [get-myself](../../src/tools/get-myself.ts)           | None                                                                                                                                                                                                                                            |
+| [assign-issue](../../src/tools/assign-issue.ts)       | `issueIdOrKey: string`; `assigneeId?: string`; `confirmation: { issueSummary: string; assigneeName: string; }`                                                                                                                                  |
+| [update-issue](../../src/tools/update-issue.ts)       | `issueIdOrKey: string`; `summary?: string`; `description?: string`; `dueDate?: string`; `addLabels?: string`; `removeLabels?: string`; `confirmation: { issueSummary: string; }`                                                                |
+| [get-issue](../../src/tools/get-issue.ts)             | `issueIdOrKey: string`                                                                                                                                                                                                                          |
 
 ## Input and result details
 

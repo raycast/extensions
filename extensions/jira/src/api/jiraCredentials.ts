@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
+
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
-import fetch from "node-fetch";
 
+import fetch from "./fetch";
 import { User } from "./users";
 import { parseJiraResponse } from "./response";
 
@@ -15,6 +17,7 @@ type JiraCredentials = {
 type CachedJiraSite = Pick<JiraCredentials, "cloudId" | "siteUrl" | "myself">;
 
 const siteCache = new Cache({ namespace: "jira-credentials" });
+let authenticationVersion = 0;
 
 function readCachedSite(accountKey: string): CachedJiraSite | null {
   const raw = siteCache.get(accountKey);
@@ -42,12 +45,16 @@ async function resolveCredentials(
   authorizationHeader: string,
   load: () => Promise<CachedJiraSite>,
 ) {
+  const version = ++authenticationVersion;
   const apply = (site: CachedJiraSite) => {
     jiraCredentials = { ...site, authorizationHeader };
   };
 
   const loadAndCache = async () => {
     const site = await load();
+    if (version !== authenticationVersion) {
+      return;
+    }
     apply(site);
     writeCachedSite(accountKey, site);
   };
@@ -60,7 +67,9 @@ async function resolveCredentials(
 
   apply(cachedSite);
   loadAndCache().catch(() => {
-    siteCache.remove(accountKey);
+    if (version === authenticationVersion) {
+      siteCache.remove(accountKey);
+    }
   });
 }
 
@@ -109,7 +118,20 @@ export const jiraWithApiToken = {
   },
 };
 
-const oauthSiteCacheKey = "oauth";
+function getPreferredSiteUrl() {
+  const { siteUrl } = getPreferenceValues<Preferences>();
+  const configuredUrl = siteUrl?.trim();
+  if (!configuredUrl) {
+    return undefined;
+  }
+
+  return new URL(configuredUrl.includes("://") ? configuredUrl : `https://${configuredUrl}`).origin;
+}
+
+function getOAuthSiteCacheKey(token: string) {
+  const tokenFingerprint = createHash("sha256").update(token).digest("hex");
+  return `oauth:${getPreferredSiteUrl() ?? "default"}:${tokenFingerprint}`;
+}
 
 export const jira = OAuthService.jira({
   clientId: "NAeIO0L9UVdGqKj5YF32HhcysfBCP31P",
@@ -119,8 +141,9 @@ export const jira = OAuthService.jira({
   scope: "read:jira-user read:jira-work write:jira-work offline_access read:sprint:jira-software",
   async onAuthorize({ token }) {
     const authorizationHeader = `Bearer ${token}`;
+    const preferredSiteUrl = getPreferredSiteUrl();
 
-    await resolveCredentials(oauthSiteCacheKey, authorizationHeader, async () => {
+    await resolveCredentials(getOAuthSiteCacheKey(token), authorizationHeader, async () => {
       const sitesResponse = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
         headers: {
           Authorization: authorizationHeader,
@@ -134,7 +157,12 @@ export const jira = OAuthService.jira({
         throw new Error("No Jira site is accessible with this account.");
       }
 
-      const site = sites[0];
+      const site = preferredSiteUrl ? sites.find((site) => new URL(site.url).origin === preferredSiteUrl) : sites[0];
+      if (!site) {
+        throw new Error(
+          `The configured Jira site ${preferredSiteUrl} is not accessible with this account. Grant access to this site or update the Jira Site URL preference.`,
+        );
+      }
       const { myself } = await fetchMyself(
         `https://api.atlassian.com/ex/jira/${site.id}/rest/api/3/myself`,
         authorizationHeader,
@@ -148,13 +176,13 @@ export const jira = OAuthService.jira({
   },
 });
 
-// The cached site belongs to the account that signed in last. Signing in through the browser is
-// the only point where another account can be connected (first connection, or a re-connection after
-// the refresh token was rejected), so the cached site is dropped before the sign-in starts. Stored
-// tokens are reused or refreshed without a sign-in, and those keep the account.
+// Every cached site belongs to the last signed-in account. A browser sign-in can change that
+// account, so invalidate all site identities in this credential-only namespace.
 const signIn = jira.client.authorize.bind(jira.client);
 jira.client.authorize = (options) => {
-  siteCache.remove(oauthSiteCacheKey);
+  authenticationVersion += 1;
+  siteCache.clear();
+  jiraCredentials = null;
   return signIn(options);
 };
 
@@ -166,4 +194,9 @@ export function getJiraCredentials() {
   }
 
   return jiraCredentials;
+}
+
+export function getJiraCacheKey() {
+  const { cloudId, siteUrl, myself } = getJiraCredentials();
+  return `${cloudId ?? siteUrl}:${myself.accountId}`;
 }

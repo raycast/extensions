@@ -1,23 +1,27 @@
 import { List } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useState } from "react";
 
 import { Filter, getFilters } from "./api/filters";
 import StatusIssueList from "./components/StatusIssueList";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import { useJiraCachedPromise, useJiraCachedState } from "./hooks/useJiraCache";
 import useIssues from "./hooks/useIssues";
 
 export function MyFilters() {
-  const [cachedFilter, setCachedFilter] = useCachedState<Filter>("filter");
+  const [cachedFilter, setCachedFilter] = useJiraCachedState<Filter>("filter");
   const [filterQuery, setFilterQuery] = useState("");
-  const { data: filters, isLoading: isLoadingFilters } = useCachedPromise((query) => getFilters(query), [filterQuery], {
-    keepPreviousData: true,
-  });
+  const { data: filters, isLoading: isLoadingFilters } = useJiraCachedPromise(
+    (query) => getFilters(query),
+    [filterQuery],
+    {
+      keepPreviousData: true,
+    },
+  );
 
   const isSearching = filterQuery !== "";
 
   const { issues, isLoading, mutate } = useIssues(cachedFilter?.jql ?? "", {
-    execute: cachedFilter && cachedFilter.jql !== "" && !isSearching,
+    execute: Boolean(cachedFilter?.jql.trim()) && !isSearching,
   });
 
   const searchBarAccessory = filters ? (

@@ -8,6 +8,7 @@ import { IssueFormValues } from "../components/CreateIssueForm";
 import { CustomFieldSchema, getCustomFieldValue } from "../helpers/customFields";
 
 import { Project } from "./projects";
+import { getJiraCredentials } from "./jiraCredentials";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
 import { User } from "./users";
 
@@ -262,7 +263,37 @@ export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
   return issuetype;
 };
 
-const issueTypeIconUris = new Map<string, Promise<string>>();
+const issueTypeIconUris = new Map<string, string>();
+const pendingIssueTypeIcons = new Map<string, Promise<string>>();
+const waitingIconDownloads: (() => void)[] = [];
+let activeIconDownloads = 0;
+
+function getIssueTypeIconCacheKey(iconUrl: string) {
+  const { siteUrl, myself } = getJiraCredentials();
+  return JSON.stringify([siteUrl, myself.accountId, iconUrl]);
+}
+
+async function downloadIssueTypeIcon(iconUrl: string, cacheKey: string) {
+  if (activeIconDownloads >= 4) {
+    await new Promise<void>((resolve) => waitingIconDownloads.push(resolve));
+  } else {
+    activeIconDownloads += 1;
+  }
+
+  try {
+    if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+      throw new Error("The Jira account changed while waiting to load an icon.");
+    }
+    return await getAuthenticatedUri(iconUrl, "image/jpeg");
+  } finally {
+    const next = waitingIconDownloads.shift();
+    if (next) {
+      next();
+    } else {
+      activeIconDownloads -= 1;
+    }
+  }
+}
 
 async function resolveIssueTypeIconUri(issuetype?: IssueType) {
   const iconUrl = issuetype?.iconUrl;
@@ -270,17 +301,38 @@ async function resolveIssueTypeIconUri(issuetype?: IssueType) {
     return;
   }
 
-  let dataUri = issueTypeIconUris.get(iconUrl);
-  if (!dataUri) {
-    dataUri = getAuthenticatedUri(iconUrl, "image/jpeg");
-    dataUri.catch(() => issueTypeIconUris.delete(iconUrl));
-    issueTypeIconUris.set(iconUrl, dataUri);
-  }
-
   try {
-    issuetype.iconUrl = await dataUri;
+    const cacheKey = getIssueTypeIconCacheKey(iconUrl);
+    const cachedDataUri = issueTypeIconUris.get(cacheKey);
+    if (cachedDataUri) {
+      issuetype.iconUrl = cachedDataUri;
+      return;
+    }
+
+    let dataUri = pendingIssueTypeIcons.get(cacheKey);
+    if (!dataUri) {
+      dataUri = downloadIssueTypeIcon(iconUrl, cacheKey)
+        .then((uri) => {
+          if (getIssueTypeIconCacheKey(iconUrl) !== cacheKey) {
+            throw new Error("The Jira account changed while loading an icon.");
+          }
+          issueTypeIconUris.set(cacheKey, uri);
+          if (issueTypeIconUris.size > 128) {
+            const oldestKey = issueTypeIconUris.keys().next().value;
+            if (oldestKey !== undefined) issueTypeIconUris.delete(oldestKey);
+          }
+          return uri;
+        })
+        .finally(() => pendingIssueTypeIcons.delete(cacheKey));
+      pendingIssueTypeIcons.set(cacheKey, dataUri);
+    }
+
+    const resolvedUri = await dataUri;
+    if (getIssueTypeIconCacheKey(iconUrl) === cacheKey) {
+      issuetype.iconUrl = resolvedUri;
+    }
   } catch {
-    // Keep the original Jira icon URL when Jira returns an HTML error page instead of image content.
+    // An optional icon must not prevent loading issues or form metadata.
   }
 }
 
