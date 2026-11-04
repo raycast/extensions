@@ -98,7 +98,6 @@ export function RadarView(props: {
   return (
     <Detail
       isLoading={radar.isLoading || props.isLoading}
-      navigationTitle={`${formatPlace(place)} — Radar`}
       markdown={
         radar.markdown ??
         (radar.isLoading
@@ -107,6 +106,7 @@ export function RadarView(props: {
       }
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Location" icon={Icon.Pin} text={formatPlace(place)} />
           {radar.loopRange && <Detail.Metadata.Label title="Animation Loop" icon={Icon.Video} text={radar.loopRange} />}
           {radar.frameTime && (
             <Detail.Metadata.Label

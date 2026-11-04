@@ -52,7 +52,6 @@ export default function Command() {
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={scene ? `Cast — ${scene.conditionLabel}` : "Cast"}
       markdown={markdown}
       actions={<CastActions scene={scene} settings={settings} refresh={revalidate} />}
     />

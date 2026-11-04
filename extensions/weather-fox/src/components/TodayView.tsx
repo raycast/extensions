@@ -85,7 +85,6 @@ export function TodayView(props: {
   return (
     <Detail
       isLoading={isLoading}
-      navigationTitle={formatPlace(place)}
       markdown={markdown}
       metadata={
         cur && forecast ? (
