@@ -13,6 +13,14 @@ const ASSET_TYPES: AssetType[] = ["logo", "icon", "tail"];
 
 const assetUrl = (airline: Airline, file: string) => `${CDN}/assets/${airline.slug}/${file}.svg`;
 
+// Whether fetched JSON is a usable airline list: a non-empty array of
+// airlines that each have a slug and assets. Anything else, including an
+// empty list, falls back to the bundled one.
+export const isAirlineList = (data: unknown): data is Airline[] =>
+  Array.isArray(data) &&
+  data.length > 0 &&
+  data.every((a) => typeof a?.slug === "string" && typeof a?.assets === "object" && a.assets !== null);
+
 interface AssetTile {
   /** Tile id and download name, e.g. "logo" or "logo-mono". */
   variant: string;
