@@ -21,17 +21,12 @@ export interface StoredCredentials {
   port: string;
 }
 
-interface Preferences {
-  token?: string;
-  port?: string;
-  cacheResults?: boolean;
-}
-
 /**
  * Credentials come from the Connect button in TableStudio (LocalStorage) or, for anyone who
  * prefers setting it by hand, the extension's preferences. Both are returned, LocalStorage first
  * because it's the one that can be re-pushed with a fresh token from the app — but the caller
- * falls through to the next on a 401, so a stale stored token can't shadow a good manual one.
+ * falls through to the next on a 401 or a port that doesn't answer, so stale stored credentials
+ * can't shadow good manual ones.
  */
 async function resolveCredentials(preferences: Preferences): Promise<StoredCredentials[]> {
   const candidates: StoredCredentials[] = [];
@@ -52,14 +47,18 @@ async function resolveCredentials(preferences: Preferences): Promise<StoredCrede
   return candidates;
 }
 
-/** Tries each candidate in turn, moving on only when the token is rejected. */
+/**
+ * Tries each candidate in turn, moving on when the token is rejected or nothing answers on its
+ * port — the app may have moved to a port only the manual settings know about.
+ */
 async function fetchWithAny(candidates: StoredCredentials[]): Promise<CatalogPayload> {
   for (const [index, credentials] of candidates.entries()) {
     try {
       return await fetchCatalog(credentials);
     } catch (error) {
       const isLast = index === candidates.length - 1;
-      if (isLast || !(error instanceof HttpError && error.kind === "unauthorized")) throw error;
+      const kind = classify(error).kind;
+      if (isLast || (kind !== "unauthorized" && kind !== "unreachable")) throw error;
     }
   }
   throw new HttpError("unauthorized");
@@ -202,7 +201,12 @@ async function fetchCatalog(credentials: StoredCredentials): Promise<CatalogPayl
   if (response.status === 503) throw new HttpError("notPublished");
   if (!response.ok) throw new HttpError("unreadable", `TableStudio returned ${response.status}.`);
 
-  return (await response.json()) as CatalogPayload;
+  // Something answered, so a body that won't parse is a real error, not TableStudio being closed.
+  try {
+    return (await response.json()) as CatalogPayload;
+  } catch {
+    throw new HttpError("unreadable", "TableStudio sent a response this extension couldn't read.");
+  }
 }
 
 class HttpError extends Error {

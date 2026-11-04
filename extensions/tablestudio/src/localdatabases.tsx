@@ -1,5 +1,5 @@
 import { Action, Icon, List } from "@raycast/api";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CatalogItem } from "./catalog";
 import { CatalogErrorView, CatalogRow, isSettled, openLink, statusColor, useCatalog } from "./shared";
 
@@ -22,6 +22,17 @@ export default function Command() {
   const { items, error, isStale, isLoading, reload } = useCatalog();
   const [isBusy, setIsBusy] = useState(false);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const isClosed = useRef(false);
+
+  // Closing the command must end the watch: a timer left behind would keep fetching and writing
+  // the offline copy after the user has gone, and a poll mid-fetch would schedule the next one.
+  useEffect(() => {
+    isClosed.current = false;
+    return () => {
+      isClosed.current = true;
+      clearTimeout(pollTimer.current);
+    };
+  }, []);
 
   if (!isLoading && error) {
     return <CatalogErrorView error={error} onRetry={reload} />;
@@ -39,10 +50,13 @@ export default function Command() {
     clearTimeout(pollTimer.current);
     setIsBusy(true);
     await openLink(link, `${verb} ${item.title}…`);
+    if (isClosed.current) return;
 
     let attempts = 0;
     const poll = async () => {
+      if (isClosed.current) return;
       const result = await reload();
+      if (isClosed.current) return;
       const current = result.items.find((candidate) => candidate.id === item.id);
       // Stop once it settles, once the row disappears, or once we've waited long enough — a
       // server that fails to come up must not leave the list spinning forever.

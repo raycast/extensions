@@ -10,7 +10,7 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CatalogError,
   CatalogItem,
@@ -75,7 +75,7 @@ export async function openLink(link: string, successMessage?: string) {
   }
 }
 
-interface CatalogState {
+export interface CatalogState {
   items: CatalogItem[];
   error?: CatalogError;
   isStale: boolean;
@@ -88,33 +88,44 @@ interface CatalogState {
  *
  * `reload` resolves with the result so a caller can poll until something settles — see the
  * start/stop flow in `localdatabases.tsx`.
+ *
+ * `initial` is for a pushed screen: it starts from what the screen below already loaded instead
+ * of fetching again, but still gets a `reload` that updates itself — a refresh that only changed
+ * the screen underneath would leave this one showing the old rows.
  */
-export function useCatalog(incoming?: Partial<StoredCredentials>) {
-  const [state, setState] = useState<CatalogState>({
-    items: [],
-    isStale: false,
-    isLoading: true,
-  });
+export function useCatalog({
+  incoming,
+  initial,
+}: { incoming?: Partial<StoredCredentials>; initial?: Omit<CatalogState, "isLoading"> } = {}) {
+  const [state, setState] = useState<CatalogState>(
+    initial ? { ...initial, isLoading: false } : { items: [], isStale: false, isLoading: true },
+  );
 
   // Depend on the token itself rather than the object: Raycast hands `launchContext` in as a
   // fresh object shape, and an identity-based dependency would refetch on every render.
   const incomingToken = incoming?.token;
   const incomingPort = incoming?.port;
+  // `launchContext` stays the same for the whole launch, so without this every Refresh and every
+  // start/stop poll would save the token again and repeat the "Connected" toast.
+  const storedToken = useRef<string | undefined>(undefined);
 
   const load = useCallback(async (): Promise<CatalogResult> => {
     setState((previous) => ({ ...previous, isLoading: true }));
 
     // A deeplink from TableStudio carries the token; persist it before the first fetch so the
     // very launch that connects also shows results.
-    const stored = await storeCredentials({
-      token: incomingToken,
-      port: incomingPort,
-    });
-    if (stored)
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Connected to TableStudio",
+    if (incomingToken && storedToken.current !== incomingToken) {
+      storedToken.current = incomingToken;
+      const stored = await storeCredentials({
+        token: incomingToken,
+        port: incomingPort,
       });
+      if (stored)
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Connected to TableStudio",
+        });
+    }
 
     const result = await loadCatalog();
     setState({
@@ -126,9 +137,10 @@ export function useCatalog(incoming?: Partial<StoredCredentials>) {
     return result;
   }, [incomingToken, incomingPort]);
 
+  const hasInitial = initial !== undefined;
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!hasInitial) load();
+  }, [load, hasInitial]);
 
   return { ...state, reload: load };
 }

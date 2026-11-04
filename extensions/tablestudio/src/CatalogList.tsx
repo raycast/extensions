@@ -27,7 +27,7 @@ interface Ranking {
  * searchable with no filtering code here.
  */
 export function CatalogList({ incomingCredentials }: { incomingCredentials?: Partial<StoredCredentials> }) {
-  const { items: allItems, error, isStale, isLoading, reload } = useCatalog(incomingCredentials);
+  const { items: allItems, error, isStale, isLoading, reload } = useCatalog({ incoming: incomingCredentials });
   const [scope, setScope] = useState<string>(ALL);
   const [searchText, setSearchText] = useState("");
 
@@ -90,8 +90,8 @@ export function CatalogList({ incomingCredentials }: { incomingCredentials?: Par
         ));
 
         // With a scope picked there's only ever one section, and a header repeating the
-        // dropdown's own value is noise.
-        if (scope !== ALL) return rows;
+        // dropdown's own value is noise — unless it's the only place left to say "offline copy".
+        if (scope !== ALL && !isStale) return rows;
 
         // Raycast filters the rows itself and never says how many matched, so while searching
         // the count would be the section's total ("24") above five results. Leave it out then.
@@ -159,13 +159,7 @@ function ConnectionAwareRow({
           // Drilling into a connection is using it, so it ranks the same as opening it.
           onPush={onOpen}
           target={
-            <ConnectionTables
-              connection={item}
-              items={items}
-              ranking={ranking}
-              isStale={isStale}
-              onRefresh={onRefresh}
-            />
+            <ConnectionTables connection={item} initialItems={items} initialIsStale={isStale} onRefresh={onRefresh} />
           }
         />
       }
@@ -173,25 +167,58 @@ function ConnectionAwareRow({
   );
 }
 
-/** The tables and views belonging to one connection. Never fetches — it filters what's loaded. */
+/**
+ * The tables and views belonging to one connection. Starts from what the main list loaded, but
+ * keeps its own copy: props captured by `Action.Push` never change, so Refresh here has to update
+ * this screen itself, not only the list underneath.
+ */
 function ConnectionTables({
   connection,
-  items,
-  ranking,
-  isStale,
+  initialItems,
+  initialIsStale,
   onRefresh,
 }: {
   connection: CatalogItem;
-  /** Already in frecency order — filtering keeps it. */
-  items: CatalogItem[];
-  ranking: Ranking;
-  isStale: boolean;
+  initialItems: CatalogItem[];
+  initialIsStale: boolean;
+  /** Refreshes the main list too, so going back doesn't land on the old copy. */
   onRefresh: () => void;
 }) {
-  const tables = items.filter((item) => item.category === "table" && item.connectionID === connection.connectionID);
+  const { items, error, isStale, isLoading, reload } = useCatalog({
+    initial: { items: initialItems, isStale: initialIsStale },
+  });
+  // Same default namespace as the main list, so rankings are shared, and it re-sorts after a
+  // refresh replaces the rows.
+  const { data: rankedItems, visitItem, resetRanking } = useFrecencySorting(items);
+  const refresh = () => {
+    reload();
+    onRefresh();
+  };
+
+  if (!isLoading && error) {
+    return <CatalogErrorView error={error} onRetry={refresh} />;
+  }
+
+  const tables = rankedItems.filter(
+    (item) => item.category === "table" && item.connectionID === connection.connectionID,
+  );
+  const rows = tables.map((table) => (
+    <CatalogRow
+      key={table.id}
+      item={table}
+      isStale={isStale}
+      onRefresh={refresh}
+      onOpen={() => visitItem(table)}
+      onResetRanking={() => resetRanking(table)}
+    />
+  ));
 
   return (
-    <List navigationTitle={connection.title} searchBarPlaceholder={`Search tables in ${connection.title}`}>
+    <List
+      isLoading={isLoading}
+      navigationTitle={connection.title}
+      searchBarPlaceholder={`Search tables in ${connection.title}`}
+    >
       {/* A connection whose schema TableStudio hasn't cached publishes no tables at all, which
           would otherwise read as a bug rather than a step the user hasn't taken yet. */}
       <List.EmptyView
@@ -199,16 +226,13 @@ function ConnectionTables({
         title="No tables published yet"
         description="Open this connection in TableStudio once and its tables appear here."
       />
-      {tables.map((table) => (
-        <CatalogRow
-          key={table.id}
-          item={table}
-          isStale={isStale}
-          onRefresh={onRefresh}
-          onOpen={() => ranking.visitItem(table)}
-          onResetRanking={() => ranking.resetRanking(table)}
-        />
-      ))}
+      {isStale ? (
+        <List.Section title={CATEGORY_TITLES.table} subtitle="offline copy">
+          {rows}
+        </List.Section>
+      ) : (
+        rows
+      )}
     </List>
   );
 }
