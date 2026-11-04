@@ -1,6 +1,6 @@
 # Claude Usage (ccusage) Changelog
 
-## [Support plans without a 5-hour limit] - {PR_MERGE_DATE}
+## [Support plans without a 5-hour limit] - 2026-11-04
 
 ### Fixed
 
