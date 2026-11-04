@@ -14,7 +14,6 @@ A powerful Raycast extension that enables Zemtu carsharing and mobility solution
 - **My Reservations**: View and manage all your upcoming reservations
 - **Quick Booking**: Instantly book available vehicles with just a few clicks
 - **Reservation Details**: Access complete booking information and status
-- **Menu Bar Integration**: Keep track of current and upcoming reservations in your menu bar
 
 ### 🤖 Raycast AI
 - **Natural Language Booking**: Ask `@zemtu` to find and book vehicles, with a confirmation before every booking
@@ -40,7 +39,6 @@ A powerful Raycast extension that enables Zemtu carsharing and mobility solution
 | `List Vehicles` | Display all available vehicles in your area |
 | `Find Vehicles in Time Range` | Search for vehicles available during specific time periods |
 | `My Reservations` | View and manage your current and upcoming reservations |
-| `Menu Bar Reservations` | Enable menu bar integration for quick reservation overview |
 | `Check Settings` | Test the Zemtu URL, login, location and vehicle access, with a hint for anything that needs fixing |
 
 ## Keyboard Shortcuts
@@ -108,12 +106,10 @@ Raycast AI requires a Raycast Pro subscription. The extension's regular commands
 
 ### Optional Settings
 - **Your Location**: Enter an address (e.g. `Marktplatz 1, Dornbirn`) or coordinates (e.g. `47.4486, 9.7621`). To get coordinates, right-click a place in Google Maps and click the numbers to copy them. With a location set, the vehicle list and `@zemtu` sort vehicles by distance.
-- **Menu Bar**: Toggle menu bar reservation display
 
 ## System Requirements
 
 - Raycast (latest version recommended) on macOS or Windows
-- The Menu Bar Reservations command is only available on macOS
 - Active Zemtu account with valid credentials
 
 ## Privacy & Security

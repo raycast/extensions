@@ -41,15 +41,6 @@
       "icon": "extension-icon.png"
     },
     {
-      "name": "menu-bar-reservations",
-      "title": "Menu Bar Reservations",
-      "subtitle": "Zemtu",
-      "description": "Show current and upcoming vehicle reservations in menu bar",
-      "mode": "menu-bar",
-      "icon": "extension-icon.png",
-      "interval": "5m"
-    },
-    {
       "name": "check-settings",
       "title": "Check Settings",
       "subtitle": "Zemtu",
@@ -114,15 +105,6 @@
       "title": "Password",
       "description": "Your Zemtu password (stored encrypted by Raycast)",
       "placeholder": "Your Zemtu password"
-    },
-    {
-      "name": "enableMenuBar",
-      "type": "checkbox",
-      "required": false,
-      "title": "Enable Menu Bar",
-      "description": "Show reservations in the menu bar",
-      "default": true,
-      "label": "Display current and upcoming reservations in menu bar"
     },
     {
       "name": "location",
