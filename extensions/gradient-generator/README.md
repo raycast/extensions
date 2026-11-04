@@ -1,76 +1,67 @@
 # Gradient Generator
 
-A minimalist, local-first Raycast extension for crafting gradients. Create a gradient, preview it in a large panel, copy ready-to-use snippets (CSS, SwiftUI, Tailwind arbitrary value), generate random gradients, save your favorites locally, and export as SVG or PNG files.
-
-## Key Features
-
-* Create linear, radial, or conic gradients (with angle for linear)
-* Large preview and gradient metadata
-* Copy snippets: CSS, SwiftUI, Tailwind arbitrary value
-* Random gradient generator (2–3 stops)
-* Saved gradients list with quick preview and delete
-* Export gradients as SVG or PNG files with customizable settings
-* Enhanced validation with error checking and warnings
-* Configurable export directories and Tailwind output preferences
-* Local storage only (no network calls)
+Create, preview and save gradients locally in Raycast. Copy CSS, Tailwind arbitrary-value classes or a complete SwiftUI view, and export PNG or SVG files.
 
 ## Commands
 
-* **Create Gradient**: Form to define type, colors, and angle; pushes to Preview
-* **Random Gradient**: Generates a random 2–3 stop gradient and shows Preview
-* **Saved Gradients**: List of saved gradients with color tags; open Preview; rename labels (Quick Rename or Edit Label); delete
+| Command             | What you can do                                                                                     |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **Create Gradient** | Choose linear, radial or conic; enter 2–10 hex colors; set a linear angle; add an optional label.   |
+| **Random Gradient** | Generate a gradient with two or three random colors, then preview, copy or save it.                 |
+| **Saved Gradients** | Search your library, open previews, edit labels, copy snippets or delete entries with confirmation. |
+
+**Example:** choose Linear, enter `#FF5733` and `#33C1FF`, set the angle to `90`, and label it “Hero background”. Choose **Preview Gradient**, then **Copy CSS** or **Save Gradient** from Actions.
+
+Colors accept `#RGB` and `#RRGGBB`. Stops are evenly spaced; custom positions and per-stop transparency are not available. A linear angle of 0° points up, 90° right, 180° down and 270° left; 360° equals 0°.
+
+![Random Gradient preview with local rendering, color metadata and the Random (Any) primary action](media/preview.jpg)
+
+## Save and rename
+
+A label entered in Create follows the gradient into Preview. **Save with Label** and **Edit Label** share the same rules:
+
+- Blank labels are allowed; clearing a label keeps the gradient.
+- Reusing a non-empty label asks before replacing other saved entries with that exact, case-sensitive label.
+- Canceling replacement leaves your form and library intact.
+- Saving a preview opened from the library updates that selected entry. Further saves from the same preview update it again.
+- If the underlying entry changes, reopen it before editing again.
+
+Existing gradients with more than ten stops remain readable, exportable and renameable; new gradients and added stops use the ten-stop limit.
+
+The extension keeps the existing `saved-gradients` storage format and does not automatically migrate or delete records. If stored data is invalid, library writes stop and **Copy Original Library JSON** lets you retain the original data for recovery. There is no JSON restore command yet.
+
+## Copy and export
+
+| Output   | Supported behavior                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| CSS      | Linear, radial and conic; explicitly requests sRGB interpolation. Requires a browser supporting CSS gradient color-space syntax.     |
+| Tailwind | Arbitrary-value `bg-[…]` class, or raw CSS according to your preference, in both Preview and Saved Gradients.                        |
+| SwiftUI  | Complete `GeneratedGradient` view, including imports and numeric sRGB colors. macOS 12+ / iOS 15+; no `Color(hex:)` helper required. |
+| PNG      | Opaque image, custom dimensions or presets, at 1× or 2× DPR.                                                                         |
+| SVG      | Portable linear and radial vectors, with dimensions and a matching viewBox.                                                          |
+
+**Conic SVG is deliberately unavailable:** standard SVG gradients cannot represent it. Use PNG or CSS; the extension never substitutes a radial gradient. PNG clipboard copying is not implemented; save a PNG file instead.
+
+### Export limits
+
+Choose an existing destination folder in extension preferences. `~/Downloads` is expanded to your home directory; a custom folder is useful for redirected or localized Downloads folders.
+
+Enter a filename such as `hero-gradient.png`, without a path. Existing regular files require confirmation. Reserved Windows filenames, path separators and traversal are rejected on every platform. Symlink destinations are rejected.
+
+Width and height must be positive whole numbers. The final output, **including DPR**, is limited to **8,192 pixels per side and 16,777,216 total pixels**. For example, 1920 × 1080 at 2× produces 3840 × 2160 pixels; 4K at 2× exceeds the budget. The RGBA pixel buffer alone can reach 64 MiB; encoding also needs working memory.
+
+If rendering or writing fails, the form keeps your entries and shows the error. New exports use exclusive publication; replacements are staged before the existing file is replaced. Use a local filesystem supporting hard links and atomic renames (such as APFS or NTFS); unsupported destinations fail rather than silently overwrite files.
 
 ## Preferences
 
-* **SVG Export Directory**: Choose where SVG files are saved (default: ~/Downloads)
-* **PNG Export Directory**: Choose where PNG files are saved (default: ~/Downloads)
-* **Tailwind Output Mode**: Choose between utility classes (bg-[...]) or raw CSS output
+| Preference           | Default         |
+| -------------------- | --------------- |
+| SVG Export Directory | `~/Downloads`   |
+| PNG Export Directory | `~/Downloads`   |
+| Tailwind Output Mode | Utility classes |
 
-## Export Features
+## Privacy and platform status
 
-* **SVG Export**: Save gradients as scalable vector graphics with customizable dimensions
-* **PNG Export**: Export as high-quality PNG images with multiple size presets (HD, Full HD, 2K, 4K)
+Gradient creation, random generation, storage and rendering run locally, without extension network requests or AI access. Clipboard contents are read only when you choose a paste-color action. The extension does not implement cloud sync; Raycast controls its own storage and backup behavior.
 
-## Frequently Asked Questions
-
-**Do I need an internet connection?**
-
-No. The extension works completely offline with no network calls required.
-
-**Can I export my gradients?**
-
-Yes. You can copy CSS, SwiftUI, and Tailwind snippets directly from the preview panel, or export as SVG/PNG files to your chosen directory.
-
-**Are my saved gradients synced?**
-
-All gradients are stored locally in Raycast's storage. They're not synced across devices right now.
-
-**How does the random generator work?**
-
-It creates gradients with 2–3 color stops using random colors and positions, perfect for inspiration and quick mockups.
-
-**What export formats are supported?**
-
-SVG (scalable vector) and PNG (raster) formats are supported. PNG exports include multiple size presets and optional transparency.
-
-## Troubleshooting
-
-**I can't see my saved gradients.**
-
-Make sure you've actually saved gradients using the save button in the preview panel. Check that the filter isn't set incorrectly.
-
-**The preview isn't showing.**
-
-Try refreshing the extension or restarting Raycast. The preview requires the gradient data to be properly formatted.
-
-**Copy actions aren't working.**
-
-Ensure you're using the latest version of Raycast. The copy functionality depends on Raycast's clipboard API.
-
-**Export isn't working.**
-
-Make sure you've set the export directory preferences in Raycast settings. The extension needs to know where to save your exported files.
-
-**Validation errors appear.**
-
-The extension now includes enhanced validation. Check that your hex colors are valid (e.g., #ff0000) and that you have at least 2 color stops.
+Available on **macOS**.
