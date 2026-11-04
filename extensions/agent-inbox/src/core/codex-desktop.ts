@@ -4,10 +4,20 @@ import { run } from "./exec";
 import { CODEX_DIR } from "./paths";
 import { HistoryEntry, Session, SessionTitle } from "./types";
 
-export async function readCodexTitles(sessions: Session[], root = CODEX_DIR, now = Date.now): Promise<SessionTitle[]> {
+export interface CodexCatalogOptions {
+  root?: string;
+  /** Raycast supplies executeSQL; the standalone CLI uses the system sqlite3. */
+  query?: (path: string, sql: string) => Promise<Record<string, unknown>[] | undefined>;
+}
+
+export async function readCodexTitles(
+  sessions: Session[],
+  options: CodexCatalogOptions = {},
+  now = Date.now,
+): Promise<SessionTitle[]> {
   const observedAt = now();
   const known = new Set(sessions.map((session) => session.sessionId));
-  return (await readCodexDesktopSessions(root))
+  return (await readCodexDesktopSessions(options))
     .filter((entry) => known.has(entry.sessionId))
     .map((entry) => ({
       agent: "codex",
@@ -28,7 +38,18 @@ export function enrichCodexTitles<T extends HistoryEntry>(sessions: T[], catalog
 }
 
 /** Read names/IDs, not credentials or transcript bodies, from Codex's optional local catalog. */
-export async function readCodexDesktopSessions(root = CODEX_DIR): Promise<HistoryEntry[]> {
+export async function readCodexDesktopSessions({
+  root = CODEX_DIR,
+  query: execute = query,
+}: CodexCatalogOptions = {}): Promise<HistoryEntry[]> {
+  // An absent, locked or unsupported catalog is optional in both runtimes.
+  const read = async (path: string, sql: string) => {
+    try {
+      return await execute(path, sql);
+    } catch {
+      return undefined;
+    }
+  };
   let files: string[];
   try {
     files = readdirSync(root)
@@ -39,13 +60,13 @@ export async function readCodexDesktopSessions(root = CODEX_DIR): Promise<Histor
   }
   for (const file of files) {
     const path = join(root, file);
-    const schema = await query(path, "PRAGMA table_info(threads);");
+    const schema = await read(path, "PRAGMA table_info(threads);");
     const columns = new Set(schema?.map((row) => row.name));
     if (!columns.has("id") || (!columns.has("name") && !columns.has("title"))) continue;
     // Detect columns instead of pinning a database version. Older releases have only `title`.
     const col = (name: string, fallback: string) => (columns.has(name) ? `"${name}"` : fallback);
     const name = `COALESCE(NULLIF(${col("name", "NULL")}, ''), ${col("title", "''")}, '')`;
-    const rows = await query(
+    const rows = await read(
       path,
       `SELECT id, ${name} AS name, ${col("cwd", "''")} AS cwd, ${col("rollout_path", "''")} AS path, ` +
         `${col("created_at_ms", `${col("created_at", "0")} * 1000`)} AS started, ` +

@@ -5,9 +5,14 @@ import { enrichClaudeSessions } from "../core/claude-desktop";
 import { TitleSynchronizer } from "../core/titles";
 import { Config, Session } from "../core/types";
 import { recoverIdleSessionStates } from "../core/transcript-state";
+import { readCodexTitles } from "./codex-desktop";
 
 export const store = new Store();
-const titleSync = new TitleSynchronizer(store, allAdapters);
+const titleSync = new TitleSynchronizer(store, () =>
+  allAdapters().map((adapter) =>
+    adapter.id === "codex" ? { ...adapter, source: { ...adapter.source, titles: readCodexTitles } } : adapter,
+  ),
+);
 export const refreshSessionTitles = (sessions: Session[]) => titleSync.refresh(sessions);
 
 export async function activeSessions(): Promise<Session[]> {

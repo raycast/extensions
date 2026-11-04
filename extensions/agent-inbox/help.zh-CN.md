@@ -146,6 +146,8 @@ Agent 自身的对话文件只读。默认搜索标题、项目和 ID；全文�
 
 ### 订阅当前窗口对话
 
+独立命令与 All Sessions 操作均会显示配置和订阅失败的具体原因。配置无法保存时，Raycast 保持打开，不创建订阅。
+
 从目标 Agent 窗口唤出 Raycast，直接运行 **Subscribe to Current Conversation**，也可在 **Raycast Preferences → Extensions** 中为它单独设置全局快捷键。All Sessions 的 Actions 和 **⌘⇧↵** 继续复用同一逻辑。插件关闭 Raycast 后识别前台窗口，再读取会话，按以下信息匹配：
 
 - **Claude / Codex 桌面端**：优先通过原生 Accessibility 读取前台窗口文档 URL 中的会话 ID。URL 不能标识会话时使用当前文档的唯一标题；原生读取失败时才降级到 System Events。只有唯一匹配才订阅；Claude 的标题匹配仅接受以 `- Claude Code` 结尾的页面。普通 Claude 聊天、主页、标题有歧义或缺少窗口信息时，不会按最近活动时间猜一个会话。

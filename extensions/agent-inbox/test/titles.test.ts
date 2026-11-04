@@ -231,7 +231,7 @@ test("Codex catalog renames are persisted even when no execution events arrive",
   await store.put({ ...session, agent: "codex" });
   let now = 100;
   const sync = new TitleSynchronizer(store, () => [
-    adapter("codex", (rows) => readCodexTitles(rows, root, () => ++now)),
+    adapter("codex", (rows) => readCodexTitles(rows, { root }, () => ++now)),
   ]);
   await sync.refresh(await store.all());
   await exec(catalog, "UPDATE threads SET name='Renamed' WHERE id='one';");

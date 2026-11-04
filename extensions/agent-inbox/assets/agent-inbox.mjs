@@ -1822,10 +1822,10 @@ var claudeAdapter = {
 // src/core/codex-desktop.ts
 import { existsSync as existsSync4, readdirSync as readdirSync3, readFileSync as readFileSync4 } from "node:fs";
 import { join as join5 } from "node:path";
-async function readCodexTitles(sessions, root = CODEX_DIR, now = Date.now) {
+async function readCodexTitles(sessions, options = {}, now = Date.now) {
   const observedAt = now();
   const known = new Set(sessions.map((session) => session.sessionId));
-  return (await readCodexDesktopSessions(root)).filter((entry) => known.has(entry.sessionId)).map((entry) => ({
+  return (await readCodexDesktopSessions(options)).filter((entry) => known.has(entry.sessionId)).map((entry) => ({
     agent: "codex",
     sessionId: entry.sessionId,
     title: entry.title,
@@ -1833,7 +1833,17 @@ async function readCodexTitles(sessions, root = CODEX_DIR, now = Date.now) {
     source: "codex-catalog"
   }));
 }
-async function readCodexDesktopSessions(root = CODEX_DIR) {
+async function readCodexDesktopSessions({
+  root = CODEX_DIR,
+  query: execute = query
+} = {}) {
+  const read3 = async (path2, sql) => {
+    try {
+      return await execute(path2, sql);
+    } catch {
+      return void 0;
+    }
+  };
   let files;
   try {
     files = readdirSync3(root).filter((name) => /^state(?:_\d+)?\.sqlite$/.test(name)).sort((a, b) => b.localeCompare(a, void 0, { numeric: true }));
@@ -1842,12 +1852,12 @@ async function readCodexDesktopSessions(root = CODEX_DIR) {
   }
   for (const file of files) {
     const path2 = join5(root, file);
-    const schema = await query(path2, "PRAGMA table_info(threads);");
+    const schema = await read3(path2, "PRAGMA table_info(threads);");
     const columns = new Set(schema?.map((row) => row.name));
     if (!columns.has("id") || !columns.has("name") && !columns.has("title")) continue;
     const col = (name2, fallback) => columns.has(name2) ? `"${name2}"` : fallback;
     const name = `COALESCE(NULLIF(${col("name", "NULL")}, ''), ${col("title", "''")}, '')`;
-    const rows = await query(
+    const rows = await read3(
       path2,
       `SELECT id, ${name} AS name, ${col("cwd", "''")} AS cwd, ${col("rollout_path", "''")} AS path, ${col("created_at_ms", `${col("created_at", "0")} * 1000`)} AS started, ${col("updated_at_ms", `${col("updated_at", "0")} * 1000`)} AS updated FROM threads${columns.has("archived") ? " WHERE archived=0" : ""};`
     );

@@ -118,12 +118,15 @@ async function codexSession(window: FocusedWindow, sessions: Session[], readCata
   };
 }
 
+const foregroundActions = { readClaudeDesktopSessions, readCodexDesktopSessions, tmuxClients, terminalOwnerAlive };
+
 /** Match actual window identity. Background activity and lastFocusedAt are not current focus. */
 export async function sessionForForeground(
   context: ForegroundContext,
   sessions: Session[],
-  actions = { readClaudeDesktopSessions, readCodexDesktopSessions, tmuxClients, terminalOwnerAlive },
+  overrides: Partial<typeof foregroundActions> = {},
 ): Promise<Session | undefined> {
+  const actions = { ...foregroundActions, ...overrides };
   const { bundleId, window, tty } = context;
   if (!bundleId) return undefined;
   if (bundleId === CODEX_APP_BUNDLE)

@@ -146,6 +146,8 @@ New names persist separately. Older observations cannot overwrite newer ones. Re
 
 ### Subscribe to the current conversation
 
+Both the root command and the All Sessions action report configuration and subscription failures with the underlying error. If configuration cannot be saved, Raycast stays open and no subscription is created.
+
 Invoke Raycast from the target agent window and run **Subscribe to Current Conversation**. You can assign it a global hotkey in **Raycast Preferences → Extensions**. The All Sessions action and **⌘⇧Return** shortcut invoke the same behavior. Raycast closes before foreground identification:
 
 - **Claude/Codex desktop:** Prefer native Accessibility document URLs containing session IDs. Otherwise use a unique current-document title; fall back to System Events only if native reads fail. Claude title matching requires a Code page ending in `- Claude Code`. Ordinary chats, home pages, ambiguous titles, or missing window data never trigger a guess based on recent activity.

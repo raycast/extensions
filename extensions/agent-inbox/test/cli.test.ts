@@ -1,11 +1,24 @@
 import { strict as assert } from "node:assert";
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { tempDir } from "./helpers";
 
 const CLI = join(process.cwd(), "assets", "agent-inbox.mjs");
+
+test("the distributed CLI runs outside the extension without Raycast or node_modules", (t) => {
+  const root = tempDir(t);
+  const cli = join(root, "agent-inbox.mjs");
+  copyFileSync(CLI, cli);
+  const env = { ...process.env, AGENT_INBOX_HOME: join(root, "state"), NODE_PATH: "" };
+  const run = (args: string[]) => execFileSync(process.execPath, [cli, ...args], { cwd: root, env, encoding: "utf8" });
+  assert.match(run(["--help"]), /usage:/);
+  run(["event", "--agent", "test", "--session", "one", "--type", "started"]);
+  const [session] = JSON.parse(run(["list", "--json"]));
+  assert.equal(session.sessionId, "one");
+  assert.equal(session.status, "idle");
+});
 
 test("CLI help succeeds without initializing state or requiring sqlite", (t) => {
   const root = tempDir(t);

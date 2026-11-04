@@ -13,7 +13,7 @@ test("Codex catalog detects columns and prefers display names over the original 
     `CREATE TABLE threads (id TEXT, name TEXT, title TEXT, cwd TEXT, rollout_path TEXT, created_at_ms INTEGER, updated_at_ms INTEGER, archived INTEGER);
     INSERT INTO threads VALUES ('one','Renamed','Original prompt','/project','/transcript',1001,2002,0), ('two','','Fallback title','/project','',1,2,0), ('archived','Old','', '', '',1,2,1);`,
   );
-  const rows = await readCodexDesktopSessions(root);
+  const rows = await readCodexDesktopSessions({ root });
   assert.deepEqual(
     rows.map((r) => [r.sessionId, r.title]),
     [
@@ -37,11 +37,11 @@ test("older Codex catalogs need no fixed filename version or new columns; valid 
     `CREATE TABLE threads (id TEXT, title TEXT, created_at INTEGER, updated_at INTEGER);
     INSERT INTO threads VALUES ('one','Old schema',10,20);`,
   );
-  const [row] = await readCodexDesktopSessions(root);
+  const [row] = await readCodexDesktopSessions({ root });
   assert.equal(row.title, "Old schema");
   assert.equal(row.startedAt, 10000);
   await exec(join(root, "state_10.sqlite"), "CREATE TABLE threads (id TEXT, title TEXT);");
-  assert.deepEqual(await readCodexDesktopSessions(root), []);
+  assert.deepEqual(await readCodexDesktopSessions({ root }), []);
 });
 
 test("unsupported Codex catalogs fall back to the last index name and tolerate incomplete writes", async (t) => {
@@ -55,8 +55,8 @@ test("unsupported Codex catalogs fall back to the last index name and tolerate i
       '{"id":',
     ].join("\n"),
   );
-  const rows = await readCodexDesktopSessions(root);
+  const rows = await readCodexDesktopSessions({ root });
   assert.equal(rows.length, 1);
   assert.equal(rows[0].title, "New");
-  assert.deepEqual(await readCodexDesktopSessions(join(root, "missing")), []);
+  assert.deepEqual(await readCodexDesktopSessions({ root: join(root, "missing") }), []);
 });
