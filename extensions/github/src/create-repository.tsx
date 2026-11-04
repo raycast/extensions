@@ -6,11 +6,12 @@ import {
   Form,
   Icon,
   Image,
+  Keyboard,
   open,
   showToast,
   Toast,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
@@ -35,11 +36,7 @@ function RepositoryForm() {
         octokit.users.getAuthenticated(),
         // Personal repositories don't need the organization list, so a failure here shouldn't block the form
         octokit.paginate(octokit.orgs.listForAuthenticatedUser, { per_page: 100 }).catch((error) => {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed loading organizations",
-            message: getErrorMessage(error),
-          });
+          showFailureToast(error, { title: "Failed loading organizations" });
           return [];
         }),
       ]);
@@ -50,11 +47,7 @@ function RepositoryForm() {
       };
     },
     [],
-    {
-      onError(error) {
-        showToast({ style: Toast.Style.Failure, title: "Failed loading owners", message: getErrorMessage(error) });
-      },
-    },
+    { failureToastOptions: { title: "Failed loading owners" } },
   );
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<RepositoryFormValues>({
@@ -74,12 +67,12 @@ function RepositoryForm() {
         toast.title = `Created ${repository.full_name}`;
         toast.primaryAction = {
           title: "Open in Browser",
-          shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+          shortcut: Keyboard.Shortcut.Common.Open,
           onAction: () => open(repository.html_url),
         };
         toast.secondaryAction = {
           title: "Copy Clone URL",
-          shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+          shortcut: Keyboard.Shortcut.Common.Copy,
           onAction: () => Clipboard.copy(getCloneUrl(repository)),
         };
 

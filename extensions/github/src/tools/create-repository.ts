@@ -55,7 +55,7 @@ export const confirmation = withGitHubClient(async (input: Input) => {
   const owner = input.owner || (await getViewerLogin());
 
   return {
-    message: `Are you sure you want to create this repository?`,
+    message: `Are you sure you want to create ${owner}/${input.name}?`,
     info: [
       { name: "Name", value: input.name },
       { name: "Owner", value: owner },
