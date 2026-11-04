@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add pdf-table-pull-lite, doc2md-lite and link-check-lite MCP Servers] - {PR_MERGE_DATE}
+
+- Add three free community servers by Tidy Byte Tools, all local stdio servers from PyPI through `uvx` with no API key: pdf-table-pull-lite (tables from text PDFs as CSV), doc2md-lite (text PDFs and HTML to Markdown) and link-check-lite (status codes, broken links and redirect chains).
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
