@@ -931,6 +931,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6.1_Sol | OpenAI's GPT-6.1 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6.1_Terra | OpenAI's balanced GPT-6.1 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
@@ -960,6 +961,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Vercel_GLM-5.3_Flash | Z.AI's native multimodal coding model with hybrid attention, visual coding, and agentic tool use. |
 | Vercel_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
 | Vercel_Kimi_K3 | Moonshot AI's trillion-parameter multimodal model with strong reasoning and agentic tool-calling. |
+| Vercel_Kimi_K3.1_Pro | Moonshot AI's frontier multimodal model for complex reasoning, coding, and long-horizon agentic work. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
@@ -6643,7 +6645,7 @@ Pagination requires version 1.69.0 or higher of the `@raycast/api` package.
 - `hasMore` - indicates to Raycast whether it _should_ call `onLoadMore` when the user reaches the end of the grid.
 - `pageSize` - indicates how many placeholder items Raycast should add to the end of the grid when it calls `onLoadMore`. Once `onLoadMore` finishes executing, the placeholder items will be replaced by the newly-added grid items.
 
-Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered when the user scrolls to the bottom, regardless of the `hasMore` value. Additionally, during development, a warning will be printed in the terminal.
+Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. The heuristic uses initial result growth until a page completes, then estimates the memory needed for another page using recent page loads in the current view. It reserves additional headroom when that estimate is small or unavailable. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered even when `hasMore` is `true`. Raycast periodically rechecks blocked pagination and expires old page estimates, allowing pagination to resume when sufficient memory is available. The initial estimate remains until a page completes or the dataset changes. These checks reduce the risk of running out of memory but cannot guarantee that a page will fit. During development, a warning is printed in the terminal.
 
 For convenience, most of the hooks, and one "from scratch".
 
@@ -7777,7 +7779,7 @@ Pagination requires version 1.69.0 or higher of the `@raycast/api` package.
 - `hasMore` - indicates to Raycast whether it _should_ call `onLoadMore` when the user reaches the end of the list.
 - `pageSize` - indicates how many placeholder items Raycast should add to the end of the list when it calls `onLoadMore`. Once `onLoadMore` finishes executing, the placeholder items will be replaced by the newly-added list items.
 
-Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered when the user scrolls to the bottom, regardless of the `hasMore` value. Additionally, during development, a warning will be printed in the terminal.
+Note that extensions have access to a limited amount of memory. As your extension paginates, its memory usage will increase. Paginating extensively could lead to the extension eventually running out of memory and crashing. To protect against the extension crashing due to memory exhaustion, Raycast monitors the extension's memory usage and employs heuristics to determine whether it's safe to paginate further. The heuristic uses initial result growth until a page completes, then estimates the memory needed for another page using recent page loads in the current view. It reserves additional headroom when that estimate is small or unavailable. If it's deemed unsafe to continue paginating, `onLoadMore` will not be triggered even when `hasMore` is `true`. Raycast periodically rechecks blocked pagination and expires old page estimates, allowing pagination to resume when sufficient memory is available. The initial estimate remains until a page completes or the dataset changes. These checks reduce the risk of running out of memory but cannot guarantee that a page will fit. During development, a warning is printed in the terminal.
 
 For convenience, most of the hooks, and one "from scratch".
 
