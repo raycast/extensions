@@ -11,7 +11,7 @@ A Raycast extension for your own meme library. Save the GIFs and images that you
 ## Requirements
 
 - macOS with Raycast 2.
-- Node.js 22 or later (only to install from source).
+- Node.js 22 or later and Xcode 16.3 or later (only to install from source; Raycast compiles the Add Text editor with Xcode).
 - [ffmpeg](https://ffmpeg.org) to save GIFs from X and other MP4 videos: `brew install ffmpeg`. Other memes do not need it.
 
 ## Install
@@ -68,12 +68,13 @@ You can also put image files directly into the library folder.
 
 ![The Meme Library grid in Raycast](media/grid-en.jpg)
 
-In Meme Library, the most recently used memes come first. GIFs have a play badge.
+In Meme Library, the most recently used memes come first. GIFs have a play badge, and the selected GIF plays.
 
 | Key | Action |
 | --- | --- |
 | Enter | Paste the meme into the frontmost app. GIFs stay animated. |
 | ⌥⇧⌘C | Copy the meme to the clipboard. |
+| ⌘T | Add text to the meme (see below). |
 | ⌘E | Edit the title and tags. Search finds memes by title and tag. |
 | ⇧⌘F | Show the file in Finder. |
 | ⌃X | Move the meme to the Trash. |
@@ -84,6 +85,18 @@ In Meme Library, the most recently used memes come first. GIFs have a play badge
 In the preferences, you can change Enter to copy instead of paste.
 
 ![Search finds a meme by its tag](media/search-en.jpg)
+
+### Add text
+
+Select a meme and press ⌘T (or ⌘K → **Add Text**). An editor window opens.
+
+1. Type your text. English and Chinese both work, also with input methods such as Zhuyin and Pinyin. ⌥↩ adds a new line.
+2. Drag the text to move it. The arrow keys move the selected text (⇧ moves it farther).
+3. Change the font, size, color, and outline in the toolbar.
+4. Click **Add Text** or double-click the image to add more text. The new text uses the same style.
+5. Press ⌘↩. The meme with the text is copied to the clipboard. Press Esc to cancel.
+
+GIFs keep all their frames, so they stay animated. The original meme in your library does not change. The copies are kept for one week in the extension's support folder.
 
 ## Library folder
 

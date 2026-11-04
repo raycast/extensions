@@ -3,12 +3,16 @@ import {
   ActionPanel,
   Alert,
   Clipboard,
+  closeMainWindow,
   confirmAlert,
+  environment,
   Form,
   getPreferenceValues,
   Grid,
   Icon,
   List,
+  PopToRootType,
+  popToRoot,
   showHUD,
   showInFinder,
   showToast,
@@ -18,7 +22,9 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { join } from "node:path";
 import { useEffect, useRef, useState } from "react";
+import { addText } from "swift:../swift";
 import { Library, Meme, Source } from "./lib/library";
 import { getLibrary, readClipboardSource, saveSource } from "./lib/save";
 
@@ -30,6 +36,7 @@ export default function Command() {
   const library = getLibrary();
   const { primaryAction } = getPreferenceValues<Preferences>();
   const [columns, setColumns] = useState("5");
+  const [selected, setSelected] = useState<string | null>(null);
   const { data: memes = [], isLoading, revalidate } = usePromise(() => library.list());
 
   // Show the grid at once, then make missing thumbnails (for example, for files dropped into the folder).
@@ -57,6 +64,7 @@ export default function Command() {
       fit={Grid.Fit.Fill}
       aspectRatio="1"
       isLoading={isLoading}
+      onSelectionChange={setSelected}
       searchBarPlaceholder="Search memes by title or tag"
       searchBarAccessory={
         <Grid.Dropdown tooltip="Size" storeValue onChange={setColumns}>
@@ -70,7 +78,12 @@ export default function Command() {
       {memes.map((meme) => (
         <Grid.Item
           key={meme.file}
-          content={{ source: meme.thumbnail ?? meme.path }}
+          id={meme.file}
+          // Only the selected GIF uses the original file, so it plays. The others keep their small
+          // static thumbnails, so the grid stays fast.
+          content={{
+            source: meme.file === selected && meme.file.endsWith(".gif") ? meme.path : (meme.thumbnail ?? meme.path),
+          }}
           title={meme.title}
           subtitle={meme.tags.join(", ")}
           keywords={meme.tags}
@@ -89,6 +102,7 @@ export default function Command() {
                     <CopyMeme library={library} meme={meme} />
                   </>
                 )}
+                <AddText library={library} meme={meme} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.Push
@@ -151,6 +165,33 @@ function CopyMeme({ library, meme }: { library: Library; meme: Meme }) {
         await Clipboard.copy({ file: meme.path });
         await library.markUsed(meme);
         await showHUD("Copied meme");
+      }}
+    />
+  );
+}
+
+// Opens a native editor window: type text, drag it into place, pick a font and colors, then press ⌘↩.
+// The editor saves a copy (the original meme does not change) and puts it on the clipboard.
+function AddText({ library, meme }: { library: Library; meme: Meme }) {
+  return (
+    <Action
+      title="Add Text"
+      icon={Icon.Text}
+      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      onAction={async () => {
+        // Suspended keeps this command loaded while the editor is open, so the HUD below still shows.
+        await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+        try {
+          const copied = await addText(meme.path, join(environment.supportPath, "with-text"));
+          if (copied) {
+            await library.markUsed(meme);
+            await showHUD("Copied meme with text");
+          }
+        } catch (error) {
+          await showHUD(`Could not add text: ${errorMessage(error)}`);
+        }
+        // Raycast stays on this command after a suspended close, so go back to root search.
+        await popToRoot();
       }}
     />
   );
