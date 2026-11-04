@@ -152,7 +152,11 @@ function LoginSection({
           icon={Icon.LineChart}
           title="Treasury"
           subtitle="Fetching balance…"
-          actions={<ActionPanel>{loginActions}</ActionPanel>}
+          actions={
+            <ActionPanel>
+              <LoginActions login={login} onLoginsChanged={onLoginsChanged} showUpdateTokenShortcut={false} />
+            </ActionPanel>
+          }
         />
       )}
       {treasury.map((account) => (
@@ -171,7 +175,15 @@ function LoginSection({
   );
 }
 
-function LoginActions({ login, onLoginsChanged }: { login: MercuryLogin; onLoginsChanged: () => void }) {
+function LoginActions({
+  login,
+  onLoginsChanged,
+  showUpdateTokenShortcut = true,
+}: {
+  login: MercuryLogin;
+  onLoginsChanged: () => void;
+  showUpdateTokenShortcut?: boolean;
+}) {
   async function remove() {
     const confirmed = await confirmAlert({
       title: `Remove ${login.name}?`,
@@ -196,7 +208,7 @@ function LoginActions({ login, onLoginsChanged }: { login: MercuryLogin; onLogin
       <Action.Push
         title={`Update Token for ${login.name}`}
         icon={Icon.Key}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+        shortcut={showUpdateTokenShortcut ? { modifiers: ["cmd", "shift"], key: "u" } : undefined}
         target={<AddAccountForm replacing={login} onSaved={onLoginsChanged} />}
       />
       <Action
