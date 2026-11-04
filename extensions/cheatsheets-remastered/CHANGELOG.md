@@ -1,6 +1,6 @@
 # Cheatsheets Remastered Changelog
 
-## [Markdown and Sync Reliability] - {PR_MERGE_DATE}
+## [Markdown and Sync Reliability] - 2026-11-04
 
 - Preserve original Markdown for copying and improve display of frontmatter, Unicode, tables and code examples.
 - Keep the previous repository snapshot when a download fails or is canceled; validate and bound downloads before saving a complete revision.
