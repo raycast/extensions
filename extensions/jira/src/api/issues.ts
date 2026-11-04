@@ -257,6 +257,30 @@ export type Issue = {
   };
 };
 
+export type IssueForAI = {
+  id: Issue["id"];
+  key: Issue["key"];
+  fields: {
+    summary: Issue["fields"]["summary"];
+    updated: Issue["fields"]["updated"];
+    issuetype: Issue["fields"]["issuetype"];
+    status: Issue["fields"]["status"];
+    priority: Issue["fields"]["priority"];
+    assignee: Issue["fields"]["assignee"];
+    project: Issue["fields"]["project"];
+    parent?: {
+      id: Issue["id"];
+      key: Issue["key"];
+      fields: {
+        summary: Issue["fields"]["summary"];
+        issuetype: Issue["fields"]["issuetype"];
+        status: Issue["fields"]["status"];
+        priority: Issue["fields"]["priority"];
+      };
+    };
+  };
+};
+
 export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
   await resolveIssueTypeIconUri(issuetype);
 
@@ -336,10 +360,10 @@ async function resolveIssueTypeIconUri(issuetype?: IssueType) {
   }
 }
 
-type GetIssuesResponse = {
-  issues?: Issue[];
-  searchResults?: Issue[];
-  values?: Issue[];
+type GetIssuesResponse<TIssue = Issue> = {
+  issues?: TIssue[];
+  searchResults?: TIssue[];
+  values?: TIssue[];
 };
 
 export async function getIssues({ jql } = { jql: "" }) {
@@ -399,25 +423,19 @@ export async function getIssues({ jql } = { jql: "" }) {
   return resolvedIssues;
 }
 
-export async function getIssuesForAI({ jql } = { jql: "" }) {
+export async function getIssuesForAI({ jql } = { jql: "" }): Promise<IssueForAI[]> {
   const body = {
     jql,
     maxResults: 50,
     fields: ["summary", "updated", "issuetype", "status", "priority", "assignee", "project", "parent"],
   };
 
-  const result = await request<GetIssuesResponse>("/search/jql", {
+  const result = await request<GetIssuesResponse<IssueForAI>>("/search/jql", {
     method: "POST",
     body: JSON.stringify(body),
   });
 
-  const issues =
-    result?.issues ??
-    (result as unknown as { searchResults?: Issue[] }).searchResults ??
-    (result as unknown as { values?: Issue[] }).values ??
-    [];
-
-  return issues;
+  return result?.issues ?? result?.searchResults ?? result?.values ?? [];
 }
 
 export type Schema = {
