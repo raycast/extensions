@@ -34,7 +34,7 @@ Sync uses GitHub OAuth with `repo read:org read:user` scopes. The `repo` grant i
 
 Saved content stays in Raycast's local extension storage, without cross-device sync. Downloading updates and opening remote links or images can require a connection. A failed download retains the previous repository snapshot.
 
-See [repository behavior and recovery](https://github.com/smcnab1/cheatsheets-remastered/blob/main/docs/migration.md) for metadata, import limits, sync exclusions and troubleshooting. Back up local data before downgrading; older versions cannot read newer changes. Never include tokens or private sheet content in [issue reports](https://github.com/smcnab1/cheatsheets-remastered/issues).
+See [repository behavior and recovery](docs/migration.md) for metadata, import limits, sync exclusions and troubleshooting. Back up local data before downgrading; older versions cannot read newer changes. Never include tokens or private sheet content in [issue reports](https://github.com/smcnab1/cheatsheets-remastered/issues).
 
 ## Maintenance and credits
 
