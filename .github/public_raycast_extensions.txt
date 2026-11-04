@@ -81,3 +81,4 @@ openqr
 done-bear
 happy-squid
 glaze
+zemtu
