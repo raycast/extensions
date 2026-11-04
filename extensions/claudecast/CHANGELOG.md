@@ -1,5 +1,12 @@
 # ClaudeCast Changelog
 
+## [1.8.1] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Deep Search Crash**: Typing a common search term no longer crashes the command with React error #185 ("Something Went Wrong"). Results now reach the list in batches every 100 ms instead of one render per match, and index status updates no longer trigger renders per session file.
+- **Quieter Index Updates**: Deep Search only shows an indexing message when it builds the index for the first time. Routine incremental updates happen silently behind the search spinner.
+
 ## [1.8.0] - 2026-08-24
 
 ### Added

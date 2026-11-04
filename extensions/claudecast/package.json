@@ -415,7 +415,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/agent-control.test.ts tests/ask-user-question.test.ts tests/claude-oauth-credential.test.ts tests/claude-spawn.test.ts tests/date.test.ts tests/no-machine-paths.test.ts tests/permission-inbox.test.ts tests/platform.test.ts tests/pricing.test.ts tests/session-inbox.test.ts tests/session-parser-core.test.ts tests/session-search-index.test.ts tests/session-search-index-performance.test.ts tests/subscription-usage.test.ts tests/terminal-core.test.ts tests/windows-runtime.test.ts tests/worktree-concurrency.test.ts tests/worktree-core.test.ts tests/worktree-integration.test.ts tests/wsl-core.test.ts",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/agent-control.test.ts tests/ask-user-question.test.ts tests/claude-oauth-credential.test.ts tests/claude-spawn.test.ts tests/date.test.ts tests/no-machine-paths.test.ts tests/permission-inbox.test.ts tests/platform.test.ts tests/pricing.test.ts tests/search-result-batcher.test.ts tests/session-inbox.test.ts tests/session-parser-core.test.ts tests/session-search-index.test.ts tests/session-search-index-performance.test.ts tests/subscription-usage.test.ts tests/terminal-core.test.ts tests/windows-runtime.test.ts tests/worktree-concurrency.test.ts tests/worktree-core.test.ts tests/worktree-integration.test.ts tests/wsl-core.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {
