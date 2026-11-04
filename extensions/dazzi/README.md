@@ -11,7 +11,7 @@ Search what Dazzi has indexed and ask Dazzi's AI Search without switching to the
 
 ## Requirements
 
-- [Dazzi](https://github.com/NomaDamas/AutoRAG-app/releases/latest) 0.3.1 or later for macOS (Apple Silicon), installed in `/Applications` or `~/Applications`. A copy elsewhere can be set under **Dazzi Application** in the extension preferences. An older Dazzi still runs Search Dazzi and Open in Dazzi; the two Ask commands show "Update Dazzi".
+- The [Dazzi](https://github.com/NomaDamas/AutoRAG-app/releases/latest) macOS app, version 0.3.1 or later (Apple Silicon), installed in `/Applications` or `~/Applications`. The extension does nothing without it. A copy elsewhere can be chosen under **Dazzi Application** in the extension preferences. An older Dazzi still runs Search Dazzi and Open in Dazzi; the two Ask commands show "Update Dazzi".
 - At least one folder or source indexed in Dazzi. Search Dazzi reads that index; it does not build one.
 - The commands that read the Finder selection ask once for permission to control Finder.
 
@@ -21,13 +21,3 @@ The extension only uses what the Dazzi app bundle ships:
 
 - `Dazzi.app/Contents/Resources/bin/dazzi` is the `dazzi` command. `--ask QUESTION [--] [path...]` asks AI Search and `[--] path...` opens or reveals paths. A running Dazzi receives the request over its local socket; if Dazzi isn't running, the command starts it.
 - `Dazzi.app/Contents/Resources/tools/bin/autorag lite retrieve --json` is Dazzi's bundled librarian. It searches the same index the app keeps, with the app's tools first on `PATH`, the same way the app runs them.
-
-## Development
-
-```sh
-npm install
-npm run dev        # ray develop: loads the extension into Raycast
-npm test           # vitest: argument building, launcher outcomes, result parsing
-npm run lint       # ray lint: manifest, icon, ESLint, Prettier
-npm run build
-```

@@ -1,4 +1,13 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useRef, useState } from "react";
@@ -53,12 +62,16 @@ function detailMarkdown(hit: Hit): string {
 
 function HitActions({ hit, query }: { hit: Hit; query: string }) {
   const question = validateQuestion(query);
-  // ⌘↵ belongs to the panel's second action (Show in Dazzi / Open in Browser); Ask Dazzi gets ⌘⇧↵ of its own.
+  // The first two actions of every panel get Raycast's own ↵ and ⌘↵, which hide a custom shortcut. Ask Dazzi is
+  // therefore the third action of every panel, so its ⌘⇧↵ is shown and the same on every kind of result.
   const ask = question.ok ? (
     <Action
       title="Ask Dazzi"
       icon={Icon.SpeechBubble}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "return" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+      }}
       onAction={() => runLauncher(askArgs(question.question, hit.path === undefined ? [] : [hit.path]), "Asked Dazzi")}
     />
   ) : null;
@@ -73,11 +86,11 @@ function HitActions({ hit, query }: { hit: Hit; query: string }) {
             icon={Icon.Finder}
             onAction={() => runLauncher(openArgs([path]), "Shown in Dazzi")}
           />
+          {ask}
           <Action.ShowInFinder path={path} shortcut={{ modifiers: ["cmd", "shift"], key: "f" }} />
           <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          {ask}
           <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.CopyToClipboard title="Copy Excerpt" content={hit.content} />
         </ActionPanel.Section>
@@ -88,14 +101,15 @@ function HitActions({ hit, query }: { hit: Hit; query: string }) {
     <ActionPanel>
       <ActionPanel.Section>
         {hit.url === undefined ? null : <Action.OpenInBrowser url={hit.url} />}
+        <Action.CopyToClipboard title="Copy Excerpt" content={hit.content} />
+        {hit.url === undefined ? <Action.CopyToClipboard title="Copy Title" content={hit.title} /> : null}
         {ask}
       </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.CopyToClipboard title="Copy Excerpt" content={hit.content} />
-        {hit.url === undefined ? null : (
+      {hit.url === undefined ? null : (
+        <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy URL" content={hit.url} shortcut={Keyboard.Shortcut.Common.Copy} />
-        )}
-      </ActionPanel.Section>
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 }
@@ -106,7 +120,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const [query, setQuery] = useState(props.arguments.query ?? "");
   const abortable = useRef<AbortController>(null);
   const trimmed = query.trim();
-  const { data, isLoading, error } = usePromise(
+  const { data, isLoading, error, revalidate } = usePromise(
     (text: string, k: number) => search(text, k, abortable.current?.signal),
     [trimmed, Number(topK) || 10],
     {
@@ -116,20 +130,22 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   );
 
   const searching = trimmed.length > 0 && isLoading;
-  let empty: { title: string; description?: string; icon: Icon } = {
+  let empty: { title: string; description?: string; icon: Icon; failure?: "not-installed" | "failed" } = {
     title: "Search what Dazzi has indexed",
     description: "Files, mail, chats, and web history",
     icon: Icon.MagnifyingGlass,
   };
-  if (error !== undefined) empty = { title: "Search failed", description: error.message, icon: Icon.ExclamationMark };
+  if (error !== undefined)
+    empty = { title: "Search failed", description: error.message, icon: Icon.ExclamationMark, failure: "failed" };
   else if (data !== undefined && !data.ok && data.error === "not-installed") {
     empty = {
       title: "Dazzi is not installed",
       description: "Install Dazzi, or set its location in the extension preferences.",
       icon: Icon.ExclamationMark,
+      failure: "not-installed",
     };
   } else if (data !== undefined && !data.ok)
-    empty = { title: "Search failed", description: data.error, icon: Icon.ExclamationMark };
+    empty = { title: "Search failed", description: data.error, icon: Icon.ExclamationMark, failure: "failed" };
   else if (searching) empty = { title: "Searching…", icon: Icon.MagnifyingGlass };
   else if (trimmed.length > 0 && data?.ok === true && data.hits.length === 0) {
     // Nothing came back because a source failed, not because nothing matched: say which and why.
@@ -137,7 +153,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     empty =
       skipped === undefined
         ? { title: "No results", icon: Icon.MagnifyingGlass }
-        : { title: `Could not search ${skipped.surface}`, description: skipped.reason, icon: Icon.ExclamationMark };
+        : {
+            title: `Could not search ${skipped.surface}`,
+            description: skipped.reason,
+            icon: Icon.ExclamationMark,
+            failure: "failed",
+          };
   }
 
   const hits = trimmed.length > 0 && data?.ok === true ? data.hits : [];
@@ -163,13 +184,29 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           description={empty.description}
           icon={empty.icon}
           actions={
-            trimmed.length > 0 && validateQuestion(trimmed).ok ? (
+            empty.failure !== undefined || (trimmed.length > 0 && validateQuestion(trimmed).ok) ? (
               <ActionPanel>
-                <Action
-                  title="Ask Dazzi"
-                  icon={Icon.SpeechBubble}
-                  onAction={() => runLauncher(askArgs(trimmed, []), "Asked Dazzi")}
-                />
+                {empty.failure === "not-installed" ? (
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                ) : null}
+                {empty.failure === undefined ? null : (
+                  <Action
+                    title="Retry"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={revalidate}
+                  />
+                )}
+                {empty.failure === "failed" ? (
+                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                ) : null}
+                {trimmed.length > 0 && validateQuestion(trimmed).ok ? (
+                  <Action
+                    title="Ask Dazzi"
+                    icon={Icon.SpeechBubble}
+                    onAction={() => runLauncher(askArgs(trimmed, []), "Asked Dazzi")}
+                  />
+                ) : null}
               </ActionPanel>
             ) : undefined
           }
