@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "app-icons",
   "title": "App Icons Finder",
   "description": "Search the App Store and download official app icons as PNG.",
@@ -128,7 +129,6 @@
     "dev": "ray develop",
     "fix": "ray lint",
     "fix-fix": "ray lint --fix",
-    "icons": "node scripts/render-icon.mjs",
     "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint"
   }

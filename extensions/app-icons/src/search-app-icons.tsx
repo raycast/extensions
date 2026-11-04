@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -12,37 +12,28 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { normalizeCountry, STORE_COUNTRIES } from "./lib/countries";
-import { forgetRecent, loadRecent, rememberRecent } from "./lib/recent";
+import { pushRecent, removeRecent, RECENT_STORAGE_KEY } from "./lib/recent";
 import { prepareIconPng, saveIconPng } from "./lib/download";
 import { searchAppIcons, type AppIcon } from "./lib/search";
 
 const SUGGESTIONS = ["Notion", "Figma", "Spotify", "Linear", "Slack", "Things"] as const;
 const ACCENTS = [Color.Blue, Color.Green, Color.Orange, Color.Purple, Color.Red, Color.Yellow] as const;
 
-interface Preferences {
-  country: string;
-}
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [searchText, setSearchText] = useState("");
   const [country, setCountry] = useState(normalizeCountry(preferences.country));
-  const [recent, setRecent] = useState<string[]>([]);
+  const { value: recent = [], setValue: setRecent } = useLocalStorage<string[]>(RECENT_STORAGE_KEY, []);
   const abortable = useRef<AbortController | null>(null);
   const query = searchText.trim();
 
-  useEffect(() => {
-    void loadRecent().then(setRecent);
-  }, []);
-
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async (term: string, store: string) => {
       const apps = await searchAppIcons(term, store, abortable.current?.signal);
       if (apps.length > 0) {
-        const next = await rememberRecent(term);
-        setRecent(next);
+        setRecent((current) => pushRecent(current ?? [], term));
       }
       return apps;
     },
@@ -56,6 +47,7 @@ export default function Command() {
 
   const apps = query ? (data ?? []) : [];
   const showIdle = query.length === 0;
+  const showSearchFailure = query.length > 0 && !isLoading && apps.length === 0 && Boolean(error);
 
   return (
     <Grid
@@ -94,7 +86,7 @@ export default function Command() {
                         title="Remove"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        onAction={async () => setRecent(await forgetRecent(term))}
+                        onAction={() => setRecent((current) => removeRecent(current ?? [], term))}
                       />
                     </ActionPanel>
                   }
@@ -119,6 +111,17 @@ export default function Command() {
             );
           })}
         </>
+      ) : showSearchFailure ? (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Search failed"
+          description={error instanceof Error ? error.message : "Could not reach the App Store."}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : apps.length === 0 && !isLoading ? (
         <Grid.EmptyView icon={Icon.AppWindowGrid3x3} title="No apps found" />
       ) : (
