@@ -9,7 +9,7 @@
 [![Release](https://img.shields.io/github/v/release/marcusthiele/Multi-Workspace-Status-for-Slack?color=7C2E8A&sort=semver&style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/releases)
 [![Raycast](https://img.shields.io/badge/Raycast-Extension-7C2E8A?style=for-the-badge&logo=raycast&logoColor=white)](https://www.raycast.com)
 [![macOS](https://img.shields.io/badge/macOS-only-7C2E8A?style=for-the-badge&logo=apple&logoColor=white)](#-setup)
-[![License](https://img.shields.io/badge/License-MIT-7C2E8A?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-7C2E8A?style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/blob/main/.github/LICENSE)
 
 [![Repository](https://img.shields.io/badge/💾_Repository-3A1248?style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack)
 [![Issues](https://img.shields.io/badge/🐛_Issues-3A1248?style=for-the-badge)](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/issues)
@@ -125,4 +125,4 @@ This extension is not created by, affiliated with, or supported by Slack Technol
 
 ## ⭐ License
 
-This project is licensed under the terms of the [MIT license](LICENSE)
+This project is licensed under the terms of the [MIT license](https://github.com/marcusthiele/Multi-Workspace-Status-for-Slack/blob/main/.github/LICENSE)
