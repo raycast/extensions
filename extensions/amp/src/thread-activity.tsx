@@ -1,5 +1,5 @@
 import { Color, environment, Icon, LaunchType, LocalStorage, MenuBarExtra, showHUD, Keyboard } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { liveThreads, type LiveThread } from "./lib/amp";
 import { openInAmp, relativeTime } from "./lib/ui";
 
@@ -47,8 +47,13 @@ export default function ThreadActivity() {
   const { finished, working } = cached;
 
   const open = async (t: LiveThread) => {
+    try {
+      await openInAmp(t.url);
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't open thread" });
+      return;
+    }
     await markSeen([t]);
-    await openInAmp(t.url);
     revalidate();
   };
 

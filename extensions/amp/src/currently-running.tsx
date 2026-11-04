@@ -1,7 +1,15 @@
 import { Clipboard, Color, Icon, launchCommand, LaunchType, MenuBarExtra, open, Keyboard } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { AMP_URL, liveThreads } from "./lib/amp";
 import { openInAmp, relativeTime } from "./lib/ui";
+
+async function launch(name: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Couldn't open command" });
+  }
+}
 
 export default function CurrentlyRunning() {
   const { data, isLoading, error } = useCachedPromise(() => liveThreads());
@@ -41,13 +49,13 @@ export default function CurrentlyRunning() {
           title="New Thread…"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
-          onAction={() => launchCommand({ name: "new-thread", type: LaunchType.UserInitiated })}
+          onAction={() => launch("new-thread")}
         />
         <MenuBarExtra.Item
           title="Ask Puck…"
           icon={Icon.SpeechBubble}
           shortcut={{ modifiers: ["cmd"], key: "j" }}
-          onAction={() => launchCommand({ name: "ask-puck", type: LaunchType.UserInitiated })}
+          onAction={() => launch("ask-puck")}
         />
         <MenuBarExtra.Item title="Open Ampcode.com" icon={Icon.Globe} onAction={() => open(AMP_URL)} />
       </MenuBarExtra.Section>

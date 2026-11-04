@@ -1,4 +1,5 @@
 import { Clipboard, getPreferenceValues, LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { startThread } from "./lib/amp";
 import { openInAmp, withToast } from "./lib/ui";
 
@@ -11,7 +12,11 @@ export default async function StartThread(props: LaunchProps<{ arguments: Argume
     "Thread started",
   );
   if (!url) return;
-  await Clipboard.copy(url);
-  await openInAmp(url);
-  await showHUD("Amp thread started — URL copied");
+  try {
+    await Clipboard.copy(url);
+    await openInAmp(url);
+    await showHUD("Amp thread started — URL copied");
+  } catch (error) {
+    await showFailureToast(error, { title: "Thread started, but it couldn't be opened" });
+  }
 }

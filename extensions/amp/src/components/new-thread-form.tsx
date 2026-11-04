@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCachedPromise, useForm } from "@raycast/utils";
 import { listProjects, projectSlug, startThread } from "../lib/amp";
 import { openInAmp, withToast } from "../lib/ui";
 
@@ -24,16 +23,25 @@ type Values = {
   open: boolean;
 };
 
-export function NewThreadForm({ project, prompt }: { project?: string; prompt?: string }) {
+/** `navigationTitle` is for pushed forms only; as a command's root view Raycast shows the command title. */
+export function NewThreadForm({
+  project,
+  prompt,
+  navigationTitle,
+}: {
+  project?: string;
+  prompt?: string;
+  navigationTitle?: string;
+}) {
   const prefs = getPreferenceValues<Preferences>();
   const { data: projects, isLoading } = useCachedPromise(listProjects);
-  const [promptError, setPromptError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit: submit,
+    initialValues: { prompt },
+    validation: { prompt: (value) => (value?.trim() ? undefined : "Write a prompt") },
+  });
 
   async function submit(v: Values) {
-    if (!v.prompt.trim()) {
-      setPromptError("Write a prompt");
-      return;
-    }
     const url = await withToast(
       "Starting orb…",
       () =>
@@ -56,20 +64,17 @@ export function NewThreadForm({ project, prompt }: { project?: string; prompt?: 
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="New Amp Thread"
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Start Thread" icon={Icon.Rocket} onSubmit={submit} />
+          <Action.SubmitForm title="Start Thread" icon={Icon.Rocket} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea
-        id="prompt"
+        {...itemProps.prompt}
         title="Prompt"
         placeholder="What should the agent do?"
-        defaultValue={prompt}
-        error={promptError}
-        onChange={() => setPromptError(undefined)}
         enableMarkdown
         autoFocus
       />

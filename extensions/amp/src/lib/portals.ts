@@ -3,7 +3,7 @@ import { liveThreads, threadMarkdown, type LiveThread } from "./amp";
 export type Portal = { title: string; url: string };
 export type OrbPortals = { thread: LiveThread; portals: Portal[] };
 
-/** Portal hosts embed the thread's UUID in base36: t-<25 chars>-p<port>.<portal domain>. */
+/** Portal hosts embed the thread's UUID in base36: t-<25 chars>-p<port>.onamp.dev. */
 export function portalHostPrefix(threadID: string): string {
   const hex = threadID.replace(/^T-/, "").replace(/-/g, "");
   return `t-${BigInt(`0x${hex}`).toString(36).padStart(25, "0")}-p`;
@@ -13,7 +13,7 @@ export function portalHostPrefix(threadID: string): string {
 export function portalsInTranscript(threadID: string, markdown: string): Portal[] {
   const prefix = portalHostPrefix(threadID);
   const pattern = new RegExp(
-    `(?:\\[([^\\]\\n]{1,80})\\]\\()?(https://${prefix}(\\d+)\\.[a-z0-9.-]+)(/[^\\s)"'<>\\]\`]*)?`,
+    `(?:\\[([^\\]\\n]{1,80})\\]\\()?(https://${prefix}(\\d+)\\.onamp\\.dev)(/[^\\s)"'<>\\]\`]*)?`,
     "g",
   );
   const byOrigin = new Map<string, Portal>();

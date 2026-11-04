@@ -1,10 +1,6 @@
-<p align="center"><img src="assets/amp-icon.png" alt="Amp" width="96"></p>
+<p align="center"><img src="media/amp-icon.png" alt="Amp" width="96"></p>
 
 <h1 align="center">Amp for Raycast</h1>
-
-[![CI](https://github.com/pc-style/raycast-amp/actions/workflows/ci.yml/badge.svg)](https://github.com/pc-style/raycast-amp/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/pc-style/raycast-amp)](https://github.com/pc-style/raycast-amp/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Start, find, steer, and watch [Amp](https://ampcode.com) threads without leaving Raycast. Chat with Puck, see which agents are working from the menu bar, and jump into your orbs' portals.
 
@@ -41,18 +37,9 @@ Start, find, steer, and watch [Amp](https://ampcode.com) threads without leaving
   <img src="media/search-projects.jpg" alt="Search Projects" width="49%">
 </p>
 
-## Install
+## Setup
 
-You need macOS with [Raycast](https://raycast.com), Node.js 22.22 or later, and the [Amp CLI](https://ampcode.com/install) signed in with `amp login`.
-
-```sh
-git clone https://github.com/pc-style/raycast-amp.git
-cd raycast-amp
-npm ci
-npm run dev
-```
-
-`npm run dev` imports the extension into Raycast. You can stop it once the commands show up; Raycast keeps the extension.
+Install the [Amp CLI](https://ampcode.com/install) and sign in with `amp login`. The extension finds the CLI on its own; if yours lives somewhere else, set **Amp CLI Path** in the extension preferences.
 
 ## Preferences
 
@@ -71,23 +58,3 @@ Everything goes through public Amp CLI commands: `threads list/search/export/mar
 - **Puck** conversations are ordinary threads in `puck` mode. Ask Puck sends with `threads continue` and waits for the reply, using `amp top` to tell when Puck stops working.
 - **Portals** have no CLI listing. Portal hosts embed the thread UUID in base36 (`t-<uuid36>-p<port>.onamp.dev`), so Open Portal reads the transcripts of threads whose orbs are connected and picks out URLs on their own hosts. Portals an agent never printed, and custom portal hostnames, don't appear.
 
-## Development
-
-```sh
-npm ci
-npm run dev     # ray develop, with hot reload
-npm run lint    # ESLint, Prettier, and Raycast manifest checks
-npm run build
-```
-
-CI runs lint, a production build, and `tsc` on every push to `main` and every pull request. Pushing a `v*` tag publishes a GitHub release with the built extension attached:
-
-```sh
-git tag v1.1.0 && git push origin v1.1.0
-```
-
-Issues and pull requests are welcome.
-
-## License
-
-[MIT](LICENSE)

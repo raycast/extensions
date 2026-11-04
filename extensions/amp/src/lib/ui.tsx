@@ -1,4 +1,14 @@
-import { Action, getApplications, getPreferenceValues, Icon, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  open,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { threadURL } from "./amp";
 
 const AMP_BUNDLE_ID = "com.ampcode.amp";
@@ -15,6 +25,16 @@ export async function openInAmp(url: string) {
 
 export function OpenThreadAction({ id, title = "Open Thread" }: { id: string; title?: string }) {
   return <Action title={title} icon={Icon.Globe} onAction={() => openInAmp(threadURL(id))} />;
+}
+
+/** Actions for an error view: try again, or fix the CLI path or token in preferences. */
+export function RecoveryActions({ onRetry }: { onRetry: () => void }) {
+  return (
+    <ActionPanel>
+      <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
+      <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+    </ActionPanel>
+  );
 }
 
 export function relativeTime(iso: string): string {

@@ -4,14 +4,25 @@ import { AMP_URL, listProjects, projectSlug } from "./lib/amp";
 import { NewThreadForm } from "./components/new-thread-form";
 import { ThreadListItem } from "./components/thread-list-item";
 import { searchThreads } from "./lib/amp";
+import { RecoveryActions } from "./lib/ui";
 
 function ProjectThreads({ repo, slug }: { repo: string; slug: string }) {
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, isLoading, revalidate, error } = useCachedPromise(
     (r: string) => searchThreads(`repo:${r.replace(/^https?:\/\//, "")}`),
     [repo],
   );
   return (
     <List isLoading={isLoading} navigationTitle={slug} searchBarPlaceholder={`Threads in ${slug}`}>
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't reach Amp"
+          description={error.message}
+          actions={<RecoveryActions onRetry={revalidate} />}
+        />
+      ) : (
+        <List.EmptyView icon={Icon.Bubble} title={`No threads in ${slug}`} />
+      )}
       {(data ?? []).map((t) => (
         <ThreadListItem key={t.id} thread={t} onChange={revalidate} />
       ))}
@@ -20,10 +31,17 @@ function ProjectThreads({ repo, slug }: { repo: string; slug: string }) {
 }
 
 export default function SearchProjects() {
-  const { data, isLoading, error } = useCachedPromise(listProjects);
+  const { data, isLoading, error, revalidate } = useCachedPromise(listProjects);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search projects">
-      {error && <List.EmptyView icon={Icon.Warning} title="Couldn't reach Amp" description={error.message} />}
+      {error && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't reach Amp"
+          description={error.message}
+          actions={<RecoveryActions onRetry={revalidate} />}
+        />
+      )}
       {(data ?? []).map((p) => {
         const slug = projectSlug(p);
         const host = p.repositoryURL.includes("github.com") ? "GitHub" : "Amp";
@@ -37,11 +55,14 @@ export default function SearchProjects() {
             accessories={[{ tag: host }]}
             actions={
               <ActionPanel>
-                <Action.Push title="New Thread" icon={Icon.Plus} target={<NewThreadForm project={slug} />} />
+                <Action.Push
+                  title="New Thread"
+                  icon={Icon.Plus}
+                  target={<NewThreadForm project={slug} navigationTitle={`New Thread in ${slug}`} />}
+                />
                 <Action.Push
                   title="Show Threads"
                   icon={Icon.List}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
                   target={<ProjectThreads repo={p.repositoryURL} slug={slug} />}
                 />
                 <Action.OpenInBrowser title="Open Project" url={`${AMP_URL}/@${slug}`} />

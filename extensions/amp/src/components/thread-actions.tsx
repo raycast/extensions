@@ -15,8 +15,15 @@ export function SendMessageForm({ id, title }: { id: string; title: string }) {
             icon={Icon.Message}
             onSubmit={async ({ message }: { message: string }) => {
               if (!message.trim()) return;
-              const sent = await withToast("Sending…", () => sendMessage(id, message), "Message sent");
-              if (sent !== undefined) pop();
+              const sent = await withToast(
+                "Sending…",
+                async () => {
+                  await sendMessage(id, message);
+                  return true;
+                },
+                "Message sent",
+              );
+              if (sent) pop();
             }}
           />
           <OpenThreadAction id={id} />
@@ -48,7 +55,7 @@ function RenameForm({ id, title, onDone }: { id: string; title: string; onDone?:
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Title" defaultValue={title} />
+      <Form.TextField id="name" title="Title" placeholder="Thread title" defaultValue={title} />
     </Form>
   );
 }
@@ -63,12 +70,7 @@ export function ThreadTranscript({ id, title }: { id: string; title: string }) {
       actions={
         <ActionPanel>
           <OpenThreadAction id={id} />
-          <Action.Push
-            title="Send Message"
-            icon={Icon.Message}
-            shortcut={Keyboard.Shortcut.Common.Edit}
-            target={<SendMessageForm id={id} title={title} />}
-          />
+          <Action.Push title="Send Message" icon={Icon.Message} target={<SendMessageForm id={id} title={title} />} />
           <Action.CopyToClipboard title="Copy as Markdown" content={data ?? ""} />
         </ActionPanel>
       }
@@ -82,12 +84,7 @@ export function ThreadActions({ id, title, onChange }: { id: string; title: stri
     <ActionPanel>
       <ActionPanel.Section>
         <OpenThreadAction id={id} />
-        <Action.Push
-          title="Send Message"
-          icon={Icon.Message}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
-          target={<SendMessageForm id={id} title={title} />}
-        />
+        <Action.Push title="Send Message" icon={Icon.Message} target={<SendMessageForm id={id} title={title} />} />
         <Action.Push
           title="Read Transcript"
           icon={Icon.Document}

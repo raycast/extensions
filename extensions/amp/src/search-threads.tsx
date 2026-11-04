@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { listProjects, listThreads, projectSlug, searchThreads, watchLiveThreads, type LiveThread } from "./lib/amp";
 import { ThreadListItem } from "./components/thread-list-item";
+import { RecoveryActions } from "./lib/ui";
 
 const FILTERS = [
   { title: "Recent", value: "" },
@@ -28,14 +29,25 @@ export default function SearchThreads() {
 
   // Mark threads that are working right now, updated live.
   const [live, setLive] = useState<Map<string, LiveThread>>(new Map());
-  useEffect(
-    () =>
-      watchLiveThreads(
+  useEffect(() => {
+    let stop = () => undefined as void;
+    let retry: NodeJS.Timeout | undefined;
+    const connect = () => {
+      stop = watchLiveThreads(
         (threads) => setLive(new Map(threads.map((t) => [t.id, t]))),
-        () => undefined,
-      ),
-    [],
-  );
+        // The stream ended, so its working states are stale: drop them and reconnect.
+        () => {
+          setLive(new Map());
+          retry = setTimeout(connect, 5_000);
+        },
+      );
+    };
+    connect();
+    return () => {
+      clearTimeout(retry);
+      stop();
+    };
+  }, []);
 
   const threads = data ?? [];
   const working = threads.filter((t) => live.get(t.id)?.working);
@@ -69,7 +81,12 @@ export default function SearchThreads() {
       }
     >
       {error && !threads.length ? (
-        <List.EmptyView icon={Icon.Warning} title="Couldn't reach Amp" description={error.message} />
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Couldn't reach Amp"
+          description={error.message}
+          actions={<RecoveryActions onRetry={revalidate} />}
+        />
       ) : (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
