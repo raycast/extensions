@@ -14,7 +14,7 @@ Create, preview and save gradients locally in Raycast. Copy CSS, Tailwind arbitr
 
 Colors accept `#RGB` and `#RRGGBB`. Stops are evenly spaced; custom positions and per-stop transparency are not available. A linear angle of 0° points up, 90° right, 180° down and 270° left; 360° equals 0°.
 
-![Random Gradient preview with local rendering, color metadata and the Random (Any) primary action](media/preview.png)
+![Random Gradient preview with local rendering, color metadata and the Random (Any) primary action](media/preview.jpg)
 
 ## Save and rename
 
