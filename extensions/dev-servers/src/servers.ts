@@ -1955,7 +1955,20 @@ export async function restartServer(server: DevServer): Promise<void> {
 export function restartReplay(server: DevServer): string | undefined {
   const js = server.runtime === "node" || server.runtime === "bun";
   if (js && planSpawn(server.cwd) !== null) return undefined;
-  if (server.command) return server.command;
+  if (server.command) {
+    // Checked here, before the kill, rather than discovered after it: an
+    // executable given by path that still does not exist once replayArgv has
+    // rejoined split arguments means the line cannot be run again, and the
+    // working server must be left alone. A bare name (`rails`, `php`) is
+    // resolved by the login shell's PATH and passes.
+    const exe = replayArgv(server.command, server.cwd)[0];
+    if (exe.includes("/") && !fs.existsSync(path.resolve(server.cwd, exe))) {
+      throw new Error(
+        `Can't restart ${server.tool}: its command line can't be run again as recorded (${exe} was not found). Kill it and start it from your terminal.`,
+      );
+    }
+    return server.command;
+  }
   // No command is recorded only when the process rewrote its title into a
   // status line (see restartCommandFor), so that is the reason to give.
   throw new Error(
