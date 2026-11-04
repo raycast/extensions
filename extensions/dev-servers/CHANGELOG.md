@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Raycast 2 crash fix, recents that keep up, dev servers outside the JS world] - {PR_MERGE_DATE}
+## [Raycast 2 crash fix, recents that keep up, dev servers outside the JS world] - 2026-11-04
 
 - **Fixed: starting a project crashed the dashboard on Raycast 2.** A few seconds into any start or restart, the dashboard was replaced by "Minified React error #185". The "Starting…" row animated its spinner by swapping the icon about 20 times a second, and Raycast 2's new renderer cannot keep up with that. The row now shows a still icon, and the list's own loading bar moves while anything is starting.
 - **Projects with no dependencies installed now start anyway.** If a project's `node_modules` folder is missing (cleaned up to free space, a fresh clone, a new worktree), starting it used to fail after 15 seconds with "Didn't start". It now asks once, "Install dependencies first?", installs with the project's own package manager (npm, pnpm, yarn or bun, read from its lockfile, at the workspace root for monorepos), then starts the server. The row reads "Installing dependencies, then starting…" meanwhile. Tick "Do not show this again" and future installs simply happen. The Start picker tags such projects "Not installed" so it's no surprise.
