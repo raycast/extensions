@@ -213,17 +213,16 @@ export function watchLiveThreads(
 export function liveThreads(timeoutMs = 15_000): Promise<LiveThread[]> {
   return new Promise((resolve, reject) => {
     let latest: LiveThread[] | undefined;
-    let placeholder = false;
+    let placeholder = false; // seen the empty event the CLI prints before the server answers
     let quiet: NodeJS.Timeout | undefined;
     const finish = (error?: Error) => {
       clearTimeout(timer);
       clearTimeout(quiet);
       stop();
+      // Without the server's snapshot, report Amp as unavailable rather than guess "no threads",
+      // so callers keep what they last saw.
       if (latest) resolve(latest);
-      // The stream only prints changes, so an account with no threads never sends more than
-      // the placeholder. Trust it only once the whole timeout has passed without an error.
-      else if (placeholder && !error) resolve([]);
-      else reject(error ?? new Error("Amp did not report active threads in time."));
+      else reject(error ?? new Error("Amp didn't send the list of active threads in time."));
     };
     const timer = setTimeout(() => finish(), timeoutMs);
     const stop = watchLiveThreads((threads) => {

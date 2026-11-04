@@ -28,11 +28,12 @@ export function OpenThreadAction({ id, title = "Open Thread" }: { id: string; ti
 }
 
 /** Actions for an error view: try again, or fix the CLI path or token in preferences. */
-export function RecoveryActions({ onRetry }: { onRetry: () => void }) {
+export function RecoveryActions({ onRetry, children }: { onRetry: () => void; children?: React.ReactNode }) {
   return (
     <ActionPanel>
       <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={onRetry} />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+      {children}
     </ActionPanel>
   );
 }

@@ -96,7 +96,11 @@ export default function AskPuck(props: LaunchProps<{ arguments: Arguments.AskPuc
           icon={Icon.Warning}
           title="Couldn't reach Puck"
           description={error.message}
-          actions={<RecoveryActions onRetry={() => (initial.error ? initial.revalidate() : history.revalidate())} />}
+          actions={
+            <RecoveryActions onRetry={() => (initial.error ? initial.revalidate() : history.revalidate())}>
+              {conversationActions}
+            </RecoveryActions>
+          }
         />
       ) : (
         <List.EmptyView
