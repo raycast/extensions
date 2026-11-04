@@ -19,3 +19,6 @@ dist/
 *.log
 .env
 .raycast/
+
+# Temporary bundled UI tests
+.ui-tests-*/

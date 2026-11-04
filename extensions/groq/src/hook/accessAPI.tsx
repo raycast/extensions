@@ -1,18 +1,18 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { global_model, enable_streaming, openai, show_metadata } from "./configAPI";
 import {
   allModels,
   countToken,
   estimatePrice,
   formatUserMessage,
-  isStream,
   isThinkingModel,
   buildSystemPrompt,
   buildUserPrompt,
 } from "./utils";
 import { ResultViewProps, Metrics } from "./ResultView.types";
 import { OpenAIError } from "openai";
+import { consumeCompletion } from "./stream-completion";
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
@@ -25,133 +25,103 @@ export default function ResultView(props: ResultViewProps) {
     temp: temperature ?? 0.7,
   });
 
-  // Memoized chat response function
-  const getChatResponse = useCallback(async (sysPrompt: string, selectedText: string, model: string, temp: number) => {
-    const fullSysPrompt = buildSystemPrompt(sysPrompt);
-    const userPrompt = buildUserPrompt(user_extra_msg, selectedText);
-    try {
-      const res = await openai.chat.completions.create({
-        model: model,
-        messages: [
-          { role: "system", content: fullSysPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: temp,
-        stream: enable_streaming,
-      });
-      setMetrics((m) => ({ ...m, promptTokens: countToken(fullSysPrompt + userPrompt) }));
-      return res;
-    } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: "Error" });
-      setLoading(false);
-      setResponse(`## ⚠️ API Error\n\`\`\`${(error as Error).message}\`\`\``);
-    }
-  }, []);
+  const activeRequest = useRef<AbortController | undefined>(undefined);
 
   const getResult = useCallback(
     async (newModel?: string, newTemp?: number) => {
+      activeRequest.current?.abort();
+      const controller = new AbortController();
+      activeRequest.current = controller;
+      const { signal } = controller;
+      const model = newModel || metrics.model;
+      const temp = newTemp ?? metrics.temp;
       setLoading(true);
-      const toast = await showToast(Toast.Style.Animated, toast_title);
+      setResponse("");
+      setMetrics((m) => ({ ...m, model, temp, promptTokens: 0, responseTokens: 0 }));
       const startTime = Date.now();
+      let toast: Toast | undefined;
+      let rawResponse = "";
 
       try {
+        toast = await showToast(Toast.Style.Animated, toast_title);
         let selectedText = selected_text;
         if (selectedText === undefined) {
           try {
             selectedText = await getSelectedText();
-          } catch (error) {
-            console.log(error);
-            await showToast({ style: Toast.Style.Failure, title: "Error" });
-            setLoading(false);
-            setResponse(
-              "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again.",
+          } catch {
+            throw new Error(
+              "Raycast was unable to get the selected text. Try copying the text to a text editor and try again.",
             );
-            return;
           }
         }
+        if (signal.aborted) return;
 
-        const model = newModel || metrics.model;
-        const temp = newTemp ?? metrics.temp;
-        setMetrics((m) => ({ ...m, model: model, temp: temp }));
-        const response = await getChatResponse(sys_prompt, selectedText, model, temp);
-        if (!response) return;
-
-        const closingTag = "</think>";
-        const closingLen = closingTag.length;
-
-        let startedOutput = !isThinkingModel(model);
-        let searchBuffer = ""; // rolling buffer to detect closingTag across chunk boundaries
-
-        const processChunk = (part: string) => {
-          if (!part) return;
-
-          // count tokens
-          setMetrics((m) => ({ ...m, responseTokens: m.responseTokens + countToken(part) }));
-
-          if (!startedOutput) {
-            const combined = searchBuffer + part;
-            const idx = combined.indexOf(closingTag);
-            if (idx !== -1) {
-              startedOutput = true;
-              const after = combined.slice(idx + closingLen);
-              setResponse(after);
-              searchBuffer = "";
-            } else {
-              setResponse((prev) => prev + part);
-              // detect closingTag across chunk boundaries
-              const keep = Math.min(combined.length, closingLen - 1);
-              searchBuffer = combined.slice(combined.length - keep);
-            }
-            return;
-          }
-
-          // past closingTag or non-thinking model -> append directly
-          setResponse((prev) => prev + part);
-        };
-
-        if (isStream(response)) {
-          for await (const part of response) {
-            processChunk(part.choices[0]?.delta?.content ?? "");
-          }
-        } else {
-          const whole = response.choices[0]?.message?.content ?? "";
-          // count tokens
-          setMetrics((m) => ({ ...m, responseTokens: m.responseTokens + countToken(whole) }));
-
-          if (isThinkingModel(model)) {
-            const idx = whole.indexOf(closingTag);
-            const visible = idx === -1 ? whole : whole.slice(idx + closingLen);
-            setResponse(visible);
-          } else {
-            setResponse(whole);
-          }
+        const fullSysPrompt = buildSystemPrompt(sys_prompt);
+        const userPrompt = buildUserPrompt(user_extra_msg, selectedText);
+        const completion = await openai.chat.completions.create(
+          {
+            model,
+            messages: [
+              { role: "system", content: fullSysPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            temperature: temp,
+            stream: enable_streaming,
+          },
+          { signal },
+        );
+        if (signal.aborted) return;
+        if (show_metadata) {
+          const promptTokens = countToken(fullSysPrompt + userPrompt);
+          setMetrics((m) => ({ ...m, promptTokens }));
         }
+        await consumeCompletion(completion, {
+          thinking: isThinkingModel(model),
+          signal,
+          onUpdate: (text, rawText) => {
+            rawResponse = rawText;
+            setResponse(text);
+          },
+        });
+        if (signal.aborted) return;
 
         const duration = (Date.now() - startTime) / 1000;
         toast.style = Toast.Style.Success;
         toast.title = `Finished in ${duration.toFixed(1)}s`;
       } catch (error) {
-        if (error instanceof OpenAIError) {
-          setResponse(`## ⚠️ API Error\n\`\`\`${error.message}\`\`\``);
-        } else {
-          setResponse("⚠️ Unexpected error. Please check your input and connection.");
+        if (signal.aborted) return;
+        const title = error instanceof OpenAIError ? "API Error" : "Error";
+        const message = error instanceof Error ? error.message : "Unexpected error. Please check your connection.";
+        setResponse((partial) => `${partial}${partial ? "\n\n" : ""}⚠️ ${title}: ${message}`);
+        if (toast) {
+          toast.style = Toast.Style.Failure;
+          toast.title = title;
+          toast.message = message;
         }
       } finally {
-        setLoading(false);
+        if (activeRequest.current === controller) {
+          activeRequest.current = undefined;
+          if (!signal.aborted) {
+            if (show_metadata && rawResponse) {
+              const responseTokens = countToken(rawResponse);
+              setMetrics((m) => ({ ...m, responseTokens }));
+            }
+            setLoading(false);
+          }
+        }
+        if (signal.aborted) await toast?.hide();
       }
     },
-    [metrics.model, metrics.temp],
+    [metrics.model, metrics.temp, sys_prompt, selected_text, user_extra_msg, toast_title],
   );
 
   function handleRetry(options: { newModel?: string; newTemp?: number }) {
-    setResponse("");
-    setLoading(true);
-    setMetrics((m) => ({ ...m, responseTokens: 0 }));
-    getResult(options.newModel, options.newTemp);
+    void getResult(options.newModel, options.newTemp);
   }
 
   useEffect(() => {
-    getResult();
+    void getResult();
+    return () => activeRequest.current?.abort();
   }, []);
 
   let markdown = "";

@@ -1,5 +1,9 @@
 # Apple Passwords Changelog
 
+## [Fixed] - 2026-11-04
+
+- Detect the active tab in Dia so matching passwords are found automatically.
+
 ## [Updated] - 2026-11-02
 
 - Documented Dia browser support through APW.

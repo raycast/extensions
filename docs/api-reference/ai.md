@@ -240,6 +240,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6.1_Sol | OpenAI's GPT-6.1 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6.1_Terra | OpenAI's balanced GPT-6.1 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
@@ -269,6 +270,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Vercel_GLM-5.3_Flash | Z.AI's native multimodal coding model with hybrid attention, visual coding, and agentic tool use. |
 | Vercel_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
 | Vercel_Kimi_K3 | Moonshot AI's trillion-parameter multimodal model with strong reasoning and agentic tool-calling. |
+| Vercel_Kimi_K3.1_Pro | Moonshot AI's frontier multimodal model for complex reasoning, coding, and long-horizon agentic work. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
