@@ -1,6 +1,6 @@
 # ClaudeCast Changelog
 
-## [1.8.1] - {PR_MERGE_DATE}
+## [1.8.1] - 2026-11-04
 
 ### Fixed
 
