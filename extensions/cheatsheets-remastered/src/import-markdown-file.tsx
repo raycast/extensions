@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { readLocalMarkdown, LocalMarkdown } from "./local-markdown";
 import Service from "./service";
 
@@ -13,13 +13,15 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
   const saving = useRef(false);
   const [files, setFiles] = useState<string[]>([]);
   const [loaded, setLoaded] = useState<LocalMarkdown | null>(null);
-  const [title, setTitle] = useState("");
-  const [tags, setTags] = useState("");
-  const [description, setDescription] = useState("");
   const [fileError, setFileError] = useState<string>();
-  const [showErrors, setShowErrors] = useState(false);
   const [isReading, setIsReading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { handleSubmit, itemProps, reset } = useForm<ImportValues>({
+    initialValues: { title: "", tags: "", description: "" },
+    validation: { title: (value) => (value?.trim() ? undefined : "Title is required") },
+    onSubmit: importFile,
+  });
 
   useEffect(() => {
     mounted.current = true;
@@ -36,9 +38,7 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
     selection.current = controller;
     setFiles(paths);
     setLoaded(null);
-    setTitle("");
-    setTags("");
-    setDescription("");
+    reset({ title: "", tags: "", description: "" });
     setFileError(undefined);
     setIsReading(false);
     if (!paths.length) return;
@@ -51,9 +51,7 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
       const sheet = await readLocalMarkdown(paths[0], controller.signal);
       if (controller.signal.aborted || !mounted.current) return;
       setLoaded(sheet);
-      setTitle(sheet.title);
-      setTags(sheet.tags?.join(", ") || "");
-      setDescription(sheet.description || "");
+      reset({ title: sheet.title, tags: sheet.tags?.join(", ") || "", description: sheet.description || "" });
     } catch (error) {
       if (!controller.signal.aborted && mounted.current)
         setFileError(error instanceof Error ? error.message : "Cannot read this file. Select it again.");
@@ -62,10 +60,12 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
     }
   }
 
-  async function handleSubmit(values: ImportValues) {
-    if (saving.current || isReading || !mounted.current) return;
-    setShowErrors(true);
-    if (!loaded || !values.title.trim()) return;
+  async function importFile(values: ImportValues) {
+    if (saving.current || isReading || !mounted.current) return false;
+    if (!loaded) {
+      setFileError((error) => error || "Choose a readable Markdown file.");
+      return false;
+    }
     saving.current = true;
     setIsSubmitting(true);
     try {
@@ -124,7 +124,7 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
         allowMultipleSelection={false}
         canChooseDirectories={false}
         canChooseFiles
-        error={fileError || (showErrors && !loaded && !isReading ? "Choose a readable Markdown file." : undefined)}
+        error={fileError}
       />
       {loaded && (
         <Form.Description
@@ -132,15 +132,9 @@ export function ImportMarkdownFile({ onImported }: { onImported?: () => void }) 
           text="The selected file's text is ready to import. Select the file again to load later edits. You can edit these details before saving."
         />
       )}
-      <Form.TextField
-        id="title"
-        title="Title"
-        value={title}
-        onChange={setTitle}
-        error={showErrors && !title.trim() ? "Title is required" : undefined}
-      />
-      <Form.TextField id="tags" title="Tags" value={tags} onChange={setTags} placeholder="Tags separated by commas" />
-      <Form.TextArea id="description" title="Description" value={description} onChange={setDescription} />
+      <Form.TextField title="Title" placeholder="My Git Reference" {...itemProps.title} />
+      <Form.TextField title="Tags" placeholder="Tags separated by commas" {...itemProps.tags} />
+      <Form.TextArea title="Description" placeholder="Optional summary of this cheatsheet" {...itemProps.description} />
     </Form>
   );
 }
