@@ -1,54 +1,32 @@
-import { LocalStorage } from "@raycast/api";
 import * as OTPAuth from "otpauth";
-import { STORAGE_KEY } from "../constants/secrets";
-import { dataTransformer } from "../constants/transformer";
 import { JsonFormat, Secret } from "./types";
 
-export const getJsonFormatFromStore = async (): Promise<JsonFormat[]> => {
-	const storageStringRaw = await LocalStorage.getItem<string>(STORAGE_KEY);
-	const data: Secret[] = JSON.parse(storageStringRaw || "[]");
-
-	return mapSecretsToJsonFormat(data);
-};
-
-export const mapSecretsToJsonFormat = (items: Secret[]): JsonFormat[] => {
-	const result: JsonFormat[] = [];
-
-	if (!items) {
-		return [];
-	}
-
-	try {
-		items.forEach((item) => {
-			const totp = new OTPAuth.TOTP({ secret: item.secret });
-			const currentTotp = totp.generate();
-			const currentTotpTimeRemaining = totp.period - (Math.floor(Date.now() / 1000) % totp.period);
-			const nextTotp = totp.generate({ timestamp: Date.now() + 30 * 1000 });
-
-			const formattedData = dataTransformer(
-				item.username,
-				item.issuer,
-				item.algorithm,
-				item.digits,
-				item.period,
-				item.tags,
-				item.notes,
-				currentTotp,
-				currentTotpTimeRemaining,
-				nextTotp
-			);
-
-			if (formattedData) {
-				result.push(formattedData);
-			}
-		});
-	} catch (err: unknown) {
-		if (err instanceof Error && err.message.includes("No such file or directory")) {
-			console.error("Database not found. Please import secrets first.");
+export const mapSecretsToJsonFormat = (items: Secret[], timestamp = Date.now()): JsonFormat[] =>
+	items.flatMap((item) => {
+		try {
+			const totp = new OTPAuth.TOTP({
+				secret: item.secret,
+				algorithm: item.algorithm || "SHA1",
+				digits: item.digits || 6,
+				period: Number(item.period) || 30,
+			});
+			return [
+				{
+					id: item.id,
+					username: item.username,
+					service_name: item.issuer.replace(/\+/g, " "),
+					algorithm: totp.algorithm,
+					digits: totp.digits,
+					period: String(totp.period),
+					tags: item.tags,
+					notes: item.notes,
+					current_totp: totp.generate({ timestamp }),
+					current_totp_time_remaining: totp.period - (Math.floor(timestamp / 1000) % totp.period),
+					next_totp: totp.generate({ timestamp: timestamp + totp.period * 1000 }),
+				},
+			];
+		} catch {
+			console.error("A TOTP entry could not be read. Check its settings in Ente Auth and the device clock.");
 			return [];
 		}
-		console.error("Error reading secrets: ", err);
-	}
-
-	return result;
-};
+	});

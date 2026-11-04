@@ -1,4 +1,6 @@
 interface Secret {
+	// Only cloud-sync entries have id
+	id?: string;
 	username: string;
 	issuer: string;
 	algorithm: string;
@@ -9,11 +11,9 @@ interface Secret {
 	secret: string;
 }
 
-interface SecretData {
-	[serviceName: string]: Secret[];
-}
-
 interface JsonFormat {
+	// Only cloud-sync entries have id
+	id?: string;
 	service_name: string;
 	current_totp: string;
 	current_totp_time_remaining: number;
@@ -26,4 +26,4 @@ interface JsonFormat {
 	notes: string;
 }
 
-export type { JsonFormat, Secret, SecretData };
+export type { JsonFormat, Secret };

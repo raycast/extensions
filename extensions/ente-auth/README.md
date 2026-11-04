@@ -2,16 +2,19 @@
    <img src="./assets/icon.png" width="150" height="150" />
 </p>
 
-# Ente Auth - Raycast extension for Ente Exports
+# Ente Auth - Raycast extension
 
 Easily integrate your **Ente Auth** with Raycast using this simple extension to query your Ente Auth TOTP accounts.
 
-The workflow uses Ente CLI to export your secrets from Ente Auth and then stashes them securely into Raycast's encrypted database.
+Sign in to Ente for automatic cloud sync, or keep using CLI exports. In import mode, the workflow uses Ente CLI to export your secrets from Ente Auth and then stashes them securely into Raycast's encrypted database.
 
 ## Features
 
+- Cloud Sync: Sign in once. **Get TOTP** syncs encrypted entries each time it opens, with no CLI or export file needed.
+- Offline Codes: Use the last valid encrypted cache when Ente cannot be reached.
 - Imports: Ability to dynamically import secrets
-- TOTP Code Display: Fetches and displays TOTP secrets exported from Ente Auth.
+- TOTP Code Display: Fetches and displays TOTP codes from cloud sync or Ente Auth exports.
+- TOTP Settings: Uses each entry's algorithm, digit count, and period for current codes, next codes, and countdowns.
 - Sorted Data: Most used TOTP codes will be displayed at the top. Use ⌘ + [Number] to select.
 - Service Icons: Automatically fetches a brand icon for each account from the Ente custom-icon registry, with a Simple Icons fallback. If neither has a match, it falls back to a favicon (when a URL is set in the notes) and then a default icon. Use the **Refresh Icons** action (⌘R) to re-download.
 - Metadata Display: Shows detailed metadata for each TOTP.
@@ -21,7 +24,19 @@ The workflow uses Ente CLI to export your secrets from Ente Auth and then stashe
 
 ## 🚀 Setup
 
-> The Ente Auth [CLI](https://github.com/ente-io/ente/tree/main/cli) is required.
+### Cloud Sign-In
+
+1. Run **Sign in to Ente** in Raycast.
+2. Enter your Ente email address and password. The password is used on this device to sign in and unlock your keys. It is not sent to Ente directly or saved anywhere.
+3. Leave **Server URL** blank for `https://api.ente.com`. For a custom server, enter its Museum API origin, for example `https://api.ente.example.com`.
+4. Complete email verification and account TOTP verification if required. Each step shows the selected server.
+5. **Get TOTP** opens and starts sync. Its title shows the saved server, including when you use cached codes offline.
+
+Sign-out removes the local cloud session and cache, even when the server is offline.
+
+Passkey sign-in is not supported. Workaround: Enable account TOTP in Ente to sign in without removing passkeys. When Ente offers both a passkey and account TOTP, the extension uses TOTP.
+
+If you cannot use TOTP, remove all passkeys in Ente, sign in to the extension, then add a passkey again. If you sign out or Ente ends the session, you must sign in again with this workaround.
 
 ### Homebrew (Recommended)
 
@@ -39,7 +54,7 @@ ente version
 
 ### Github Release (Optional)
 
-To use the **Ente Auth** extension, you'll need the **Ente CLI**. Follow the steps below to install it:
+To use import mode in the **Ente Auth** extension, you'll need the **Ente CLI**. Follow the steps below to install it:
 
 1. Visit the [Ente CLI releases page](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0).
 2. Download the latest version for **macOS**.
@@ -73,7 +88,7 @@ ente version
 
 1. **Launch Raycast**
 
-2. **Import Your Data**
+2. **Import Your Data (Import Mode Only)**
    - To import your Ente Auth TOTP accounts, simply trigger the workflow by running **`Import Secrets`** in Raycast.
 
 3. **Search for an Ente Auth TOTP account**

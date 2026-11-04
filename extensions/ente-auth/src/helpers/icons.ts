@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
-import fse from "fs-extra";
-import path from "path";
+import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import {
 	ENTE_CUSTOM_ICONS_URL,
 	ENTE_ICONS_DATABASE_URL,
@@ -57,7 +58,7 @@ const iconFilePath = (service: string): string => path.join(ICONS_DIR, `${slugif
 export const getIconPath = (service: string): string | undefined => {
 	if (!service) return undefined;
 	const file = iconFilePath(service);
-	return fse.existsSync(file) ? file : undefined;
+	return existsSync(file) ? file : undefined;
 };
 
 // `transient` marks a retryable failure (network/rate-limit/5xx) so it is not cached as a miss.
@@ -155,20 +156,20 @@ export const ensureIcons = async (services: string[], force = false): Promise<vo
 	const uniqueServices = [...new Set(services.filter(Boolean))];
 	if (uniqueServices.length === 0) return;
 
-	await fse.ensureDir(ICONS_DIR);
+	await mkdir(ICONS_DIR, { recursive: true });
 	const misses = await getMisses();
 	let missesChanged = false;
 
 	for (const service of uniqueServices) {
 		const file = iconFilePath(service);
-		if (!force && (fse.existsSync(file) || missedRecently(misses, service))) continue;
+		if (!force && (existsSync(file) || missedRecently(misses, service))) continue;
 
 		const ente = await fetchEnteIcon(service);
 		const simple = ente.svg ? null : await fetchSimpleIcon(service);
 		const svg = ente.svg ?? simple?.svg ?? null;
 
 		if (svg) {
-			await fse.writeFile(file, svg);
+			await writeFile(file, svg);
 			if (service in misses) {
 				delete misses[service];
 				missesChanged = true;
