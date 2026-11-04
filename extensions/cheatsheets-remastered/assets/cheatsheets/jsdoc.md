@@ -1,11 +1,9 @@
 ---
 title: Jsdoc
 category: JavaScript
-updated: 2024-07-26T00:00:00.000Z
+layout: 2017/sheet
+updated: 2020-06-23
 weight: -1
-tech: jsdoc
-status: active
-lastReviewed: '2025-09-05'
 ---
 
 ### Functions
@@ -116,10 +114,6 @@ See: <https://jsdoc.app/tags-typedef.html>
  * @typedef {import('./Foo').default} Bar
  */
 
-// or
-
-/** @import { Bar } from "./Foo.js" */
-
 /**
  * @param {Bar} x
  */
@@ -138,8 +132,6 @@ This syntax is [TypeScript-specific](https://github.com/Microsoft/TypeScript/wik
  * @private
  * @deprecated
  * @see
- * @example
- * @todo
  *
  * @function
  * @class
