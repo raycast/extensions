@@ -26,6 +26,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [country, setCountry] = useState(normalizeCountry(preferences.country));
   const { value: recent = [], setValue: setRecent } = useLocalStorage<string[]>(RECENT_STORAGE_KEY, []);
+  const recentRef = useRef(recent);
+  recentRef.current = recent;
   const abortable = useRef<AbortController | null>(null);
   const query = searchText.trim();
 
@@ -33,7 +35,7 @@ export default function Command() {
     async (term: string, store: string) => {
       const apps = await searchAppIcons(term, store, abortable.current?.signal);
       if (apps.length > 0) {
-        setRecent((current) => pushRecent(current ?? [], term));
+        setRecent(pushRecent(recentRef.current, term));
       }
       return apps;
     },
@@ -86,7 +88,7 @@ export default function Command() {
                         title="Remove"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
-                        onAction={() => setRecent((current) => removeRecent(current ?? [], term))}
+                        onAction={() => setRecent(removeRecent(recent, term))}
                       />
                     </ActionPanel>
                   }
