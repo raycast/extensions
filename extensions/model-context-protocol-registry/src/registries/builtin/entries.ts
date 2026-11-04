@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "rainbrand",
+    title: "Rainbrand",
+    description:
+      "Rainbrand is the brand layer for agents. It turns a brand’s identity, guidance, and assets into shared context that agents and products can use. That context evolves with the brand, alongside the tools where it is created and managed.",
+    icon: "https://www.rainbrand.com/logos/rainbrand-app-icon-light-512.png",
+    homepage: "https://www.rainbrand.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.rainbrand.com/mcp"],
+    },
+    remoteUrl: "https://mcp.rainbrand.com/mcp",
+  },
+  {
     name: "sofya",
     title: "Sofya",
     description:
