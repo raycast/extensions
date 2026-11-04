@@ -18,17 +18,13 @@ export default function RandomGradient() {
     return { type, angle, stops };
   };
 
-  const [gradient, setGradient] = useState(() => generateRandomGradient());
-
-  const handleGenerateRandom = (stopCount?: 2 | 3) => {
-    setGradient(generateRandomGradient(stopCount));
-  };
+  const [gradient] = useState(() => generateRandomGradient());
 
   return (
     <PreviewGradient
       {...gradient}
       isRandomGradient={true}
-      onGenerateRandom={handleGenerateRandom}
+      onGenerateRandom={generateRandomGradient}
     />
   );
 }
