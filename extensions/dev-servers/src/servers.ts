@@ -406,9 +406,15 @@ function isCandidate(proc: RawProcess): boolean {
   return isProjectScript(proc.command);
 }
 
-// Lowercased basename of a command line's executable.
+// Lowercased basename of a command line's executable. A trailing colon is
+// dropped: Puma and gunicorn rewrite their process title to `puma: cluster
+// worker ...` / `gunicorn: master [app]`, and with the colon kept the name
+// missed CANDIDATE_EXECS, so those servers were rejected before
+// detectForeignTool (which strips it too) ever saw them.
 function execBase(command: string): string {
-  return commandBase(command.split(/\s+/, 1)[0]).toLowerCase();
+  return commandBase(command.split(/\s+/, 1)[0])
+    .toLowerCase()
+    .replace(/:$/, "");
 }
 
 // The runtime an executable name is, or null when it is not an interpreter:
@@ -1590,7 +1596,7 @@ export async function startDevServer(
   // disturbs nothing.
   await reapProjectHelpers(cwd);
   const plan = replay
-    ? { cmd: "", args: replay.trim().split(/\s+/) }
+    ? { cmd: "", args: replayArgv(replay, cwd) }
     : planSpawn(cwd);
   if (!plan) {
     throw new Error(
@@ -1608,17 +1614,26 @@ export async function startDevServer(
   // marker lines land in the spawn log, where they tell a failed install
   // apart from a server that failed after a good one.
   const install = options.install;
+  // Two packages of one workspace started together share an install folder,
+  // and two installs writing one node_modules at once corrupt it. lockf (in
+  // macOS base) queues the second behind the first on a lock file keyed by
+  // the folder; by the time it runs, the tree is in place and the install is
+  // a quick no-op.
   const shellArgs = install
     ? [
         "-ilc",
         'print -r -- "[Dev Servers] Installing dependencies: $2 install in $1"' +
-          ' && { (cd -- "$1" && "$2" install) ||' +
+          ' && { (cd -- "$1" && /usr/bin/lockf -k "$3" "$2" install) ||' +
           ` { print -r -- ${JSON.stringify(INSTALL_FAILED_MARKER)}; exit 1; } }` +
           ` && print -r -- ${JSON.stringify(INSTALL_DONE_MARKER)}` +
-          ' && shift 2 && exec "$@"',
+          ' && shift 3 && exec "$@"',
         "dev-servers",
         install.dir,
         install.pm,
+        path.join(
+          os.tmpdir(),
+          `dev-servers-install-${cwdSlug(install.dir)}.lock`,
+        ),
         ...argv,
       ]
     : ["-ilc", 'exec "$0" "$@"', ...argv];
@@ -1653,6 +1668,50 @@ export async function startDevServer(
   child.once("spawn", closeLog);
   child.once("error", closeLog);
   child.unref();
+}
+
+// Split a recorded command line back into arguments. `ps` joins argv with
+// single spaces, so an argument that held a space (a project in `~/Client
+// Work`, a venv inside it) comes out as two tokens, and running those would
+// fail after the restart had already killed the working server. Paths are the
+// arguments that realistically contain spaces, and a path can be checked: a
+// token that looks like one but does not exist is joined with the tokens after
+// it for as long as that produces a path that does. Anything else stays split
+// on whitespace, which is what every other argument of a dev server's command
+// line is.
+const REPLAY_JOIN_LIMIT = 8;
+
+function replayArgv(command: string, cwd: string): string[] {
+  const tokens = command.trim().split(/\s+/);
+  const exists = (p: string) => {
+    if (!/[/~]/.test(p)) return false;
+    // A path may sit inside a flag (`--root=/Users/me/Client Work`).
+    const bare = p.replace(/^--?[\w-]+=/, "");
+    const abs = bare.startsWith("~")
+      ? path.join(os.homedir(), bare.slice(1))
+      : path.resolve(cwd, bare);
+    return fs.existsSync(abs);
+  };
+  const out: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    let token = tokens[i];
+    if (/[/~]/.test(token) && !exists(token)) {
+      for (
+        let j = i + 1;
+        j < tokens.length && j - i <= REPLAY_JOIN_LIMIT;
+        j++
+      ) {
+        const joined = tokens.slice(i, j + 1).join(" ");
+        if (exists(joined)) {
+          token = joined;
+          i = j;
+          break;
+        }
+      }
+    }
+    out.push(token);
+  }
+  return out;
 }
 
 // Path of the spawn log for a given cwd. Useful for error toasts that point
@@ -1888,12 +1947,15 @@ export async function restartServer(server: DevServer): Promise<void> {
 // package.json script is the project's stated intent and wins over however
 // the last server was started; the recorded line is only the fallback for a
 // bare `node server.js` in a folder with no dev script.
+//
+// A non-JS server with no recorded line is refused even when the folder has
+// a dev script. That script belongs to something else (the asset build next
+// to a Puma app), and running it would kill the app and bring back only the
+// asset server.
 export function restartReplay(server: DevServer): string | undefined {
   const js = server.runtime === "node" || server.runtime === "bun";
-  const plannable = planSpawn(server.cwd) !== null;
-  if (js && plannable) return undefined;
+  if (js && planSpawn(server.cwd) !== null) return undefined;
   if (server.command) return server.command;
-  if (plannable) return undefined;
   // No command is recorded only when the process rewrote its title into a
   // status line (see restartCommandFor), so that is the reason to give.
   throw new Error(

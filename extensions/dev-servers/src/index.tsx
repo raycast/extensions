@@ -104,7 +104,11 @@ function sameServers(a: DevServer[], b: DevServer[]): boolean {
     if (
       a[i].pid !== b[i].pid ||
       a[i].port !== b[i].port ||
-      a[i].branch !== b[i].branch
+      a[i].branch !== b[i].branch ||
+      // A supervisor that replaced a worker keeps its own pid and port, so
+      // without this the list kept the dead worker's pid and a kill or
+      // restart missed the live one, which went on holding the port.
+      (a[i].workerPids ?? []).join(",") !== (b[i].workerPids ?? []).join(",")
     )
       return false;
   }
@@ -465,7 +469,9 @@ function ServerItem({
               <Action.CopyToClipboard
                 title="Copy Network URL"
                 content={`http://${lanIp}:${server.port}`}
-                shortcut={Keyboard.Shortcut.Common.CopyName}
+                // Not Common.CopyName: this copies a URL, not a name.
+                // eslint-disable-next-line @raycast/prefer-common-shortcut
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
             )}
             <Action.CopyToClipboard
@@ -2087,13 +2093,14 @@ export default function Command(
     const ignorePids = serversRef.current
       .filter((s) => s.cwd === cwd)
       .map((s) => s.pid);
+    const deadline = Date.now() + INSTALL_TIMEOUT_MS;
     setPendingStarts((prev) => {
       const entry = prev.get(cwd);
       return new Map(prev).set(cwd, {
         name,
         projectKey: entry?.projectKey ?? cwd,
         logStart,
-        deadline: Date.now() + INSTALL_TIMEOUT_MS,
+        deadline,
         status: "starting",
         reason: null,
         detail: undefined,
@@ -2108,7 +2115,22 @@ export default function Command(
     } catch (err) {
       dismissPending(cwd);
       await showFailureToast(err, { title: `Failed to start ${name}` });
+      return;
     }
+    // Hand the rest to the same watcher every other start uses, so this one
+    // gets what they get: the toast, the cursor following the row to its
+    // server, and auto-open when the port binds. A batch already in flight
+    // owns that machinery; the row still resolves on its own then, only
+    // without the toast and the tab.
+    if (spawnState.phase !== "idle" && spawnState.phase !== "done") return;
+    toastRef.current = await showToast({
+      style: Toast.Style.Animated,
+      title: `Installing and starting ${name}…`,
+    });
+    setSpawnState({
+      phase: "spawning",
+      expecting: new Map([[cwd, { name, logStart, ignorePids, deadline }]]),
+    });
   }
 
   async function restart(server: DevServer) {
