@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dazzi",
+  "title": "Dazzi",
+  "description": "Search your files, mail, and chats with Dazzi's local index, and ask Dazzi's AI Search from anywhere.",
+  "icon": "extension-icon.png",
+  "author": "vkehfdl1",
+  "categories": ["Productivity", "Documentation"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Dazzi",
+      "subtitle": "Dazzi",
+      "description": "Search the documents, mail, chats, and web history Dazzi has indexed, without a chat model.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask Dazzi",
+      "subtitle": "Dazzi",
+      "description": "Ask Dazzi's AI Search a question; the answer opens in a new AI Search tab.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ask-about-selection",
+      "title": "Ask Dazzi About Selected Files",
+      "subtitle": "Dazzi",
+      "description": "Ask Dazzi's AI Search a question with the files selected in Finder attached.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-in-dazzi",
+      "title": "Open in Dazzi",
+      "subtitle": "Dazzi",
+      "description": "Open the folders selected in Finder in Dazzi, or show the selected files in their folder.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dazziApp",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Dazzi Application",
+      "description": "Path to Dazzi.app. Leave empty to use the installed Dazzi."
+    },
+    {
+      "name": "topK",
+      "type": "dropdown",
+      "required": false,
+      "default": "10",
+      "title": "Results",
+      "description": "How many results Search Dazzi shows.",
+      "data": [
+        { "title": "10", "value": "10" },
+        { "title": "20", "value": "20" },
+        { "title": "30", "value": "30" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.10.1",
+    "@raycast/utils": "^2.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
