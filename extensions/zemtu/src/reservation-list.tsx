@@ -5,65 +5,59 @@ import {
   Icon,
   showToast,
   Toast,
-  getPreferenceValues,
   openExtensionPreferences,
-  Keyboard,
   Alert,
   confirmAlert,
-  Color,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { graphqlClient, Reservation } from "./graphql";
-import { useAuth } from "./useAuth";
+import { describeLoadError, useAuth } from "./useAuth";
 import { ReservationDetail } from "./reservation-detail";
-import { getTranslations } from "./translations";
 import FindVehiclesCommand from "./vehicle-list";
 import { ReservationUpdateWrapper } from "./reservation-update-wrapper";
-import CheckSettings from "./check-settings";
+import { ErrorEmptyView } from "./error-view";
+
+// Not cached on disk on purpose: reservations contain the access PIN
+const fetchReservations = () => graphqlClient.getReservations();
+
+const formatTime = (date: Date) => date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+
+const formatDay = (date: Date) =>
+  date.toDateString() === new Date().toDateString() ? "Today" : date.toLocaleDateString();
+
+const formatRange = (reservation: Reservation) => {
+  const start = new Date(reservation.start);
+  const end = new Date(reservation.end);
+  return start.toDateString() === end.toDateString()
+    ? `${formatDay(start)}, ${formatTime(start)} – ${formatTime(end)}`
+    : `${formatDay(start)}, ${formatTime(start)} – ${formatDay(end)}, ${formatTime(end)}`;
+};
 
 export default function Command() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [isLoadingReservations, setIsLoadingReservations] = useState(false);
-
-  const { isLoading: isAuthLoading, isAuthenticated, error, hasCredentials, preferences, t } = useAuth();
-  const userPreferences = getPreferenceValues<{ language: string }>();
-  const translations = getTranslations(userPreferences.language || "en");
-
-  useEffect(() => {
-    async function loadReservations() {
-      if (!isAuthenticated) return;
-
-      try {
-        setIsLoadingReservations(true);
-        // console.log("Loading reservations...");
-        const reservationsData = await graphqlClient.getReservations();
-        // console.log("Reservations loaded:", reservationsData);
-
-        setReservations(reservationsData);
-      } catch (err) {
-        console.error("Error loading reservations:", err);
-        // Error handling is managed by useAuth hook
-      } finally {
-        setIsLoadingReservations(false);
-      }
-    }
-
-    loadReservations();
-  }, [isAuthenticated]);
+  const { isLoading: isAuthLoading, error: authError, hasCredentials, retryLogin } = useAuth();
+  const {
+    data: reservations = [],
+    isLoading: isLoadingReservations,
+    error: loadError,
+    revalidate,
+  } = usePromise(fetchReservations, [], {
+    execute: hasCredentials,
+    // Shown in the error view below
+    onError: () => undefined,
+  });
 
   const isLoading = isAuthLoading || isLoadingReservations;
 
-  // Show authentication required message
   if (!hasCredentials) {
     return (
       <List>
         <List.Item
           icon={Icon.Lock}
-          title={t.authRequired}
-          subtitle={t.pleaseEnterCredentials}
+          title="Authentication Required"
+          subtitle="Please enter your username and password in preferences"
           actions={
             <ActionPanel>
-              <Action title={t.openPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -71,77 +65,65 @@ export default function Command() {
     );
   }
 
-  // Show error state
-  if (error) {
+  const errorMessage = authError ?? (loadError ? describeLoadError(loadError) : null);
+  if (errorMessage) {
     return (
-      <List>
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title={t.error}
-          description={error}
-          actions={
-            <ActionPanel>
-              <Action title={t.checkCredentials} icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.Push title={t.checkSettings} icon={Icon.Checkmark} target={<CheckSettings />} />
-            </ActionPanel>
-          }
+      <List isLoading={isLoading}>
+        <ErrorEmptyView
+          description={errorMessage}
+          onRetry={() => {
+            retryLogin();
+            revalidate();
+          }}
         />
       </List>
     );
   }
 
-  // Show reservations
+  const deleteReservation = async (reservation: Reservation, vehicleTitle: string) => {
+    // Deleting can't be undone, so ask first
+    const confirmed = await confirmAlert({
+      title: "Delete this reservation?",
+      message: `${vehicleTitle}\n${formatRange(reservation)}`,
+      icon: Icon.Trash,
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      dismissAction: { title: "Cancel" },
+    });
+    if (!confirmed) return;
+
+    try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting Reservation" });
+      await graphqlClient.deleteReservation(reservation.id);
+      toast.style = Toast.Style.Success;
+      toast.title = "Reservation Deleted";
+      revalidate();
+    } catch (error) {
+      await showFailureToast(error, { title: "Error Deleting" });
+    }
+  };
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search reservations">
       {reservations.length === 0 && !isLoading ? (
         <List.Item
           icon={Icon.Calendar}
-          title={translations.noReservations}
-          subtitle={translations.noReservationsSubtitle}
+          title="You have no reservations."
+          subtitle="Search for a vehicle."
           actions={
             <ActionPanel>
               <Action.Push
-                title={translations.findVehicles}
+                title="Find Vehicles"
                 icon={Icon.Car}
-                target={<FindVehiclesCommand />}
-                shortcut={{
-                  macOS: { modifiers: ["cmd"], key: "return" },
-                  Windows: { modifiers: ["ctrl"], key: "return" },
-                }}
+                target={<FindVehiclesCommand onBooked={revalidate} />}
               />
             </ActionPanel>
           }
         />
       ) : (
         reservations.map((reservation) => {
-          const startDate = new Date(reservation.start);
-          const endDate = new Date(reservation.end);
-          const vehicleTitle = reservation.vehicle.captions?.[0] || `${translations.vehicle} ${reservation.vehicle.id}`;
-
-          // Use proper locale for date formatting
-          const locale = userPreferences.language === "de" ? "de-DE" : "en-US";
-
-          // Format dates naturally
-          const startDateStr = startDate.toLocaleDateString(locale);
-          const endDateStr = endDate.toLocaleDateString(locale);
-          const startTimeStr = startDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-          const endTimeStr = endDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-
-          // Check if start and end are on the same day
-          const isSameDay = startDateStr === endDateStr;
-
-          // Check if the date is today
-          const today = new Date();
-          const todayStr = today.toLocaleDateString(locale);
-          const isToday = startDateStr === todayStr;
-
-          // Use "Heute" for today's date, otherwise use the actual date
-          const displayStartDate = isToday ? translations.today : startDateStr;
-          const displayEndDate = endDateStr === todayStr ? translations.today : endDateStr;
-
-          const dateTimeText = isSameDay
-            ? `${displayStartDate} ${translations.from} ${startTimeStr} ${translations.to} ${endTimeStr} ${translations.oclock}`
-            : `${translations.on} ${displayStartDate} ${translations.from} ${startTimeStr} ${translations.to} ${displayEndDate} ${endTimeStr} ${translations.oclock}`;
+          const { vehicle } = reservation;
+          const vehicleTitle = vehicle.label || vehicle.captions?.[0] || `Vehicle ${vehicle.id}`;
+          const dateTimeText = formatRange(reservation);
 
           return (
             <List.Item
@@ -152,61 +134,31 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title={translations.showDetails}
+                    title="Show Details"
                     icon={Icon.Eye}
-                    target={<ReservationDetail reservation={reservation} />}
+                    target={<ReservationDetail reservation={reservation} onChange={revalidate} />}
                   />
                   <Action.Push
-                    title={translations.editReservation}
+                    title="Edit Reservation"
                     icon={Icon.Pencil}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
-                    target={<ReservationUpdateWrapper reservation={reservation} />}
+                    target={<ReservationUpdateWrapper reservation={reservation} onSaved={revalidate} />}
                   />
                   <Action.CopyToClipboard
-                    title={translations.copyReservationDetails}
-                    content={`${translations.reservation}: ${vehicleTitle}\n${translations.start}: ${startDate.toLocaleDateString(locale)} ${startDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}\n${translations.end}: ${endDate.toLocaleDateString(locale)} ${endDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}\n${translations.status}: ${reservation.state}`}
+                    title="Copy Reservation Details"
+                    icon={Icon.Clipboard}
+                    content={`Reservation: ${vehicleTitle}\n${dateTimeText}\nStatus: ${reservation.state}`}
                   />
                   <Action.OpenInBrowser
-                    title={translations.openInBrowser}
-                    url={`${preferences.baseUrl}/reservations/${reservation.id}`}
+                    title="Open in Browser"
+                    icon={Icon.Globe}
+                    url={`${graphqlClient.getBaseUrl()}/reservations/${reservation.id}`}
                   />
                   <Action
-                    title={translations.deleteReservation}
+                    title="Delete Reservation"
                     icon={Icon.Trash}
                     shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                     style={Action.Style.Destructive}
-                    onAction={async () => {
-                      // Deleting can't be undone, so ask first
-                      const confirmed = await confirmAlert({
-                        title: translations.deleteConfirmTitle,
-                        message: `${vehicleTitle}\n${dateTimeText}`,
-                        icon: Icon.Trash,
-                        primaryAction: { title: translations.deleteAction, style: Alert.ActionStyle.Destructive },
-                        dismissAction: { title: translations.cancel },
-                      });
-                      if (!confirmed) return;
-
-                      try {
-                        const toast = await showToast({
-                          style: Toast.Style.Animated,
-                          title: translations.deletingReservation,
-                        });
-
-                        await graphqlClient.deleteReservation(reservation.id);
-
-                        toast.style = Toast.Style.Success;
-                        toast.title = translations.reservationDeleted;
-
-                        // Aktualisiere die Reservierungsliste
-                        setReservations(reservations.filter((r) => r.id !== reservation.id));
-                      } catch (error) {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: translations.errorDeleting,
-                          message: error instanceof Error ? error.message : String(error),
-                        });
-                      }
-                    }}
+                    onAction={() => deleteReservation(reservation, vehicleTitle)}
                   />
                 </ActionPanel>
               }

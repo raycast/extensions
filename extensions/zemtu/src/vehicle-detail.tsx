@@ -1,20 +1,17 @@
-import { ActionPanel, Detail, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
-import { useAuth } from "./useAuth";
-import { Vehicle } from "./graphql";
+import { ActionPanel, Detail, Action, Icon, Color } from "@raycast/api";
+import { graphqlClient, Vehicle } from "./graphql";
 import { BookingForm } from "./reservation-create";
-import { getTranslations } from "./translations";
 import { formatCapability, mapsUrl, withImageHeight } from "./utils";
 
 interface VehicleDetailProps {
   vehicle: Vehicle;
+  // Time range the user searched for, handed on to the booking form
+  initialStart?: Date;
+  initialEnd?: Date;
+  onBooked?: () => void;
 }
 
-export function VehicleDetail({ vehicle }: VehicleDetailProps) {
-  const { preferences } = useAuth();
-  const userPreferences = getPreferenceValues<{ language: string }>();
-  const translations = getTranslations(userPreferences.language || "en");
-  const locale = userPreferences.language === "de" ? "de-DE" : "en-US";
-
+export function VehicleDetail({ vehicle, initialStart, initialEnd, onBooked }: VehicleDetailProps) {
   const vehicleTitle = vehicle.label || vehicle.captions?.[0] || `${vehicle.brand} ${vehicle.model}`;
   const brandModel = [vehicle.brand, vehicle.model].filter(Boolean).join(" ");
   const fullAddress = [vehicle.address, [vehicle.zip, vehicle.city].filter(Boolean).join(" ")]
@@ -42,7 +39,7 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())[0];
 
   const formatDateTime = (value: string) =>
-    new Date(value).toLocaleString(locale, {
+    new Date(value).toLocaleString(undefined, {
       weekday: "short",
       day: "2-digit",
       month: "2-digit",
@@ -69,31 +66,23 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
       navigationTitle={vehicleTitle}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title={translations.status}>
+          <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item
-              text={
-                isAvailable
-                  ? translations.available
-                  : isReservedNow
-                    ? translations.reservedNow
-                    : translations.notAvailable
-              }
+              text={isAvailable ? "Available" : isReservedNow ? "Currently reserved" : "Not Available"}
               color={isAvailable ? Color.Green : Color.Red}
             />
-            {electricData?.charging ? (
-              <Detail.Metadata.TagList.Item text={translations.charging} color={Color.Blue} />
-            ) : null}
+            {electricData?.charging ? <Detail.Metadata.TagList.Item text="Charging" color={Color.Blue} /> : null}
           </Detail.Metadata.TagList>
           {nextReservation ? (
             <Detail.Metadata.Label
-              title={translations.nextReservation}
+              title="Next Reservation"
               text={formatDateTime(nextReservation.start)}
               icon={Icon.Calendar}
             />
           ) : null}
           {stateOfCharge != null ? (
             <Detail.Metadata.Label
-              title={translations.stateOfCharge}
+              title="State of Charge"
               text={{ value: `${stateOfCharge} %`, color: levelColor(stateOfCharge) }}
               icon={{
                 source: electricData?.charging ? Icon.BatteryCharging : Icon.Battery,
@@ -103,38 +92,30 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
           ) : null}
           {fuelLevel != null ? (
             <Detail.Metadata.Label
-              title={translations.fuelLevel}
+              title="Fuel Level"
               text={{ value: `${fuelLevel} %`, color: levelColor(fuelLevel) }}
               icon={{ source: Icon.Gauge, tintColor: levelColor(fuelLevel) }}
             />
           ) : null}
 
           <Detail.Metadata.Separator />
-          {brandModel ? <Detail.Metadata.Label title={translations.vehicle} text={brandModel} icon={Icon.Car} /> : null}
-          {vehicle.licensePlate ? (
-            <Detail.Metadata.Label title={translations.licensePlate} text={vehicle.licensePlate} />
-          ) : null}
-          {vehicle.condition ? <Detail.Metadata.Label title={translations.condition} text={vehicle.condition} /> : null}
+          {brandModel ? <Detail.Metadata.Label title="Vehicle" text={brandModel} icon={Icon.Car} /> : null}
+          {vehicle.licensePlate ? <Detail.Metadata.Label title="License Plate" text={vehicle.licensePlate} /> : null}
+          {vehicle.condition ? <Detail.Metadata.Label title="Condition" text={vehicle.condition} /> : null}
           {vehicle.carsharinggroup?.name ? (
-            <Detail.Metadata.Label title={translations.carSharingGroup} text={vehicle.carsharinggroup.name} />
+            <Detail.Metadata.Label title="Car Sharing Group" text={vehicle.carsharinggroup.name} />
           ) : null}
 
           <Detail.Metadata.Separator />
-          {fullAddress ? (
-            <Detail.Metadata.Label title={translations.address} text={fullAddress} icon={Icon.Pin} />
-          ) : null}
-          {positionData?.address ? (
-            <Detail.Metadata.Label title={translations.currentAddress} text={positionData.address} />
-          ) : null}
-          {vehicle.zoneObject?.label ? (
-            <Detail.Metadata.Label title={translations.zone} text={vehicle.zoneObject.label} />
-          ) : null}
-          {mapsLink ? <Detail.Metadata.Link title="" text={translations.openInMaps} target={mapsLink} /> : null}
+          {fullAddress ? <Detail.Metadata.Label title="Address" text={fullAddress} icon={Icon.Pin} /> : null}
+          {positionData?.address ? <Detail.Metadata.Label title="Current Address" text={positionData.address} /> : null}
+          {vehicle.zoneObject?.label ? <Detail.Metadata.Label title="Zone" text={vehicle.zoneObject.label} /> : null}
+          {mapsLink ? <Detail.Metadata.Link title="" text="Open in Maps" target={mapsLink} /> : null}
 
           {capabilities.length > 0 ? (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.TagList title={translations.equipment}>
+              <Detail.Metadata.TagList title="Equipment">
                 {capabilities.map((capability) => (
                   <Detail.Metadata.TagList.Item key={capability} text={formatCapability(capability)} />
                 ))}
@@ -148,7 +129,7 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
               {supporters.map((supporter, index) => {
                 const phone = supporter?.phoneNumberMobile || supporter?.phoneNumber;
                 const name = supporter?.fullName || supporter?.email || "";
-                const title = index === 0 ? translations.contact : "";
+                const title = index === 0 ? "Contact" : "";
                 return phone ? (
                   <Detail.Metadata.Link
                     key={supporter?.pk ?? index}
@@ -174,43 +155,48 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
       actions={
         <ActionPanel>
           <Action.Push
-            title={translations.bookVehicle}
+            title="Book Vehicle"
             icon={Icon.Calendar}
-            target={<BookingForm vehicle={vehicle} />}
+            target={
+              <BookingForm vehicle={vehicle} initialStart={initialStart} initialEnd={initialEnd} onBooked={onBooked} />
+            }
           />
           <Action.OpenInBrowser
-            title={translations.openInBrowser}
-            url={`${preferences.baseUrl}/instant_booking/${vehicle.pk}`}
+            title="Open in Browser"
+            url={`${graphqlClient.getBaseUrl()}/instant_booking/${vehicle.pk}`}
             icon={Icon.Globe}
           />
           {mapsLink ? (
             <Action.OpenInBrowser
-              title={translations.openInMaps}
+              title="Open in Maps"
               url={mapsLink}
               icon={Icon.Map}
               shortcut={{ macOS: { modifiers: ["cmd"], key: "m" }, Windows: { modifiers: ["ctrl"], key: "m" } }}
             />
           ) : null}
           <Action.CopyToClipboard
-            title={translations.copyAllDetails}
+            title="Copy All Details"
+            icon={Icon.Clipboard}
             content={[
               vehicleTitle,
-              brandModel && `${translations.vehicle}: ${brandModel}`,
-              vehicle.licensePlate && `${translations.licensePlate}: ${vehicle.licensePlate}`,
-              fullAddress && `${translations.address}: ${fullAddress}`,
-              `${translations.availableNow}: ${isAvailable ? translations.yes : translations.no}`,
-              stateOfCharge != null && `${translations.stateOfCharge}: ${stateOfCharge}%`,
-              fuelLevel != null && `${translations.fuelLevel}: ${fuelLevel}%`,
-              vehicle.carsharinggroup?.name && `${translations.carSharingGroup}: ${vehicle.carsharinggroup.name}`,
+              brandModel && `Vehicle: ${brandModel}`,
+              vehicle.licensePlate && `License Plate: ${vehicle.licensePlate}`,
+              fullAddress && `Address: ${fullAddress}`,
+              `Available Now: ${isAvailable ? "Yes" : "No"}`,
+              stateOfCharge != null && `State of Charge: ${stateOfCharge}%`,
+              fuelLevel != null && `Fuel Level: ${fuelLevel}%`,
+              vehicle.carsharinggroup?.name && `Car Sharing Group: ${vehicle.carsharinggroup.name}`,
             ]
               .filter(Boolean)
               .join("\n")}
           />
           {vehicle.licensePlate ? (
-            <Action.CopyToClipboard title={translations.copyLicensePlate} content={vehicle.licensePlate} />
+            <Action.CopyToClipboard title="Copy License Plate" icon={Icon.Clipboard} content={vehicle.licensePlate} />
           ) : null}
-          {fullAddress ? <Action.CopyToClipboard title={translations.copyAddress} content={fullAddress} /> : null}
-          <Action.CopyToClipboard title={translations.copyVehicleId} content={vehicle.id} />
+          {fullAddress ? (
+            <Action.CopyToClipboard title="Copy Address" icon={Icon.Clipboard} content={fullAddress} />
+          ) : null}
+          <Action.CopyToClipboard title="Copy Vehicle ID" icon={Icon.Clipboard} content={vehicle.id} />
         </ActionPanel>
       }
     />

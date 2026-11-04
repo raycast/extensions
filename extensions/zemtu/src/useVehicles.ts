@@ -17,7 +17,7 @@ const fetchVehicles = (baseUrl: string, username: string) => {
  * Raycast's on-disk cache (shared by all commands), then refreshed in the background.
  */
 export function useVehicles(options: { execute?: boolean } = {}) {
-  const { baseUrl, username } = getPreferenceValues<{ baseUrl: string; username: string }>();
+  const { baseUrl, username } = getPreferenceValues<Preferences>();
 
   return useCachedPromise(fetchVehicles, [baseUrl, username], {
     execute: options.execute ?? Boolean(username),

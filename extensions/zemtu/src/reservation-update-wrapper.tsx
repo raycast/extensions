@@ -1,37 +1,32 @@
-import { List, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Reservation } from "./graphql";
+import { ErrorEmptyView } from "./error-view";
 import { ReservationUpdateForm } from "./reservation-update";
+import { describeLoadError } from "./useAuth";
 import { useVehicles } from "./useVehicles";
 
 interface ReservationUpdateWrapperProps {
   reservation: Reservation;
+  onSaved?: () => void;
 }
 
-export function ReservationUpdateWrapper({ reservation }: ReservationUpdateWrapperProps) {
+export function ReservationUpdateWrapper({ reservation, onSaved }: ReservationUpdateWrapperProps) {
   // Usually served from the cache, so the form opens without waiting for the API
-  const { data: vehicles, isLoading, error } = useVehicles();
+  const { data: vehicles, isLoading, error, revalidate } = useVehicles();
   const vehicle = vehicles.find((v) => v.id === reservation.vehicle.id);
-  const errorMessage = error?.message;
 
   if (vehicle) {
-    return <ReservationUpdateForm reservation={reservation} vehicle={vehicle} />;
-  }
-
-  if (isLoading) {
-    return (
-      <List isLoading={true}>
-        <List.Item title="Loading vehicle data..." icon={Icon.Car} />
-      </List>
-    );
+    return <ReservationUpdateForm reservation={reservation} vehicle={vehicle} onSaved={onSaved} />;
   }
 
   return (
-    <List>
-      <List.Item
-        title="Error loading vehicle data"
-        subtitle={errorMessage || "Vehicle not found"}
-        icon={Icon.ExclamationMark}
-      />
+    <List isLoading={isLoading}>
+      {isLoading ? null : (
+        <ErrorEmptyView
+          description={error ? describeLoadError(error) : "This vehicle is no longer available to your account."}
+          onRetry={revalidate}
+        />
+      )}
     </List>
   );
 }

@@ -1,165 +1,83 @@
-import { ActionPanel, Action, Form, showToast, Toast, popToRoot } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useState } from "react";
 import { graphqlClient, Reservation, Vehicle } from "./graphql";
-import { getTranslations } from "./translations";
-import { getPreferenceValues } from "@raycast/api";
 
 interface UpdateFormProps {
   reservation: Reservation;
   vehicle: Vehicle;
+  onSaved?: () => void;
 }
 
-interface AvailabilityStatus {
-  isAvailable: boolean;
-  isChecking: boolean;
-  message: string;
-}
-
-export function ReservationUpdateForm({ reservation, vehicle }: UpdateFormProps) {
-  const preferences = getPreferenceValues<{ language: string }>();
-  const translations = getTranslations(preferences.language || "en");
+export function ReservationUpdateForm({ reservation, vehicle, onSaved }: UpdateFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [availability, setAvailability] = useState<AvailabilityStatus>({
-    isAvailable: true,
-    isChecking: false,
-    message: "",
-  });
+  const wasBusinessTrip = reservation.purpose === "BUSINESS";
 
-  const vehicleTitle = vehicle.label || vehicle.captions?.[0] || `${vehicle.brand} ${vehicle.model}`;
-
-  // Initialize form with existing reservation data
+  // Start with the saved values, so changing only the time keeps the note and purpose
   const [formData, setFormData] = useState({
     startDateTime: new Date(reservation.start),
     endDateTime: new Date(reservation.end),
-    note: "", // Note will be fetched from reservation details if available
-    isBusinessTrip: false, // Default, could be inferred from reservation data
+    note: reservation.note ?? "",
+    isBusinessTrip: wasBusinessTrip,
   });
 
-  // Check vehicle availability for the selected time period (excluding current reservation)
-  const checkAvailability = async (startTime: Date, endTime: Date) => {
-    if (!startTime || !endTime || endTime <= startTime) {
-      setAvailability({
-        isAvailable: false,
-        isChecking: false,
-        message: translations.invalidTimeRange || "Invalid time range",
-      });
-      return;
-    }
+  const vehicleTitle = vehicle.label || vehicle.captions?.[0] || `${vehicle.brand} ${vehicle.model}`;
+  const isValidRange = formData.endDateTime > formData.startDateTime;
 
-    setAvailability((prev) => ({ ...prev, isChecking: true }));
+  // Other reservations of this vehicle, including the buffer time after them.
+  // The server has the final say when saving.
+  const hasConflict = (vehicle.reservations?.edges ?? []).some(({ node }) => {
+    if (node.id === reservation.id) return false;
+    return (
+      formData.startDateTime < new Date(node.bufferedEnd || node.end) && formData.endDateTime > new Date(node.start)
+    );
+  });
 
-    try {
-      // Check against existing reservations (excluding the current one being updated)
-      const existingReservations = vehicle.reservations?.edges || [];
-
-      const hasConflict = existingReservations.some((edge) => {
-        const res = edge.node;
-        // Skip the current reservation being updated
-        if (res.id === reservation.id) {
-          return false;
-        }
-
-        const reservationStart = new Date(res.start);
-        const reservationEnd = new Date(res.end);
-
-        // Check for time overlap
-        return startTime < reservationEnd && endTime > reservationStart;
-      });
-
-      if (hasConflict) {
-        setAvailability({
-          isAvailable: false,
-          isChecking: false,
-          message: translations.vehicleNotAvailable || "Vehicle not available for selected time",
-        });
-      } else {
-        setAvailability({
-          isAvailable: true,
-          isChecking: false,
-          message: translations.vehicleAvailable || "Vehicle available for selected time",
-        });
-      }
-    } catch (error) {
-      console.error("Error checking availability:", error);
-      setAvailability({
-        isAvailable: false,
-        isChecking: false,
-        message: translations.availabilityCheckFailed || "Could not check availability",
-      });
-    }
-  };
-
-  // Check availability when dates change
-  useEffect(() => {
-    if (formData.startDateTime && formData.endDateTime) {
-      const timeoutId = setTimeout(() => {
-        checkAvailability(formData.startDateTime, formData.endDateTime);
-      }, 500); // Debounce for 500ms
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [formData.startDateTime, formData.endDateTime]);
+  const availabilityText = !isValidRange
+    ? "Invalid Time Range"
+    : hasConflict
+      ? "Vehicle Not Available"
+      : "Vehicle Available";
 
   async function handleSubmit() {
-    // Validation
-    if (formData.endDateTime <= formData.startDateTime) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: translations.validationError,
-        message: translations.endAfterStart,
-      });
-      return;
-    }
+    if (isSubmitting) return;
 
-    // Check if vehicle is available
-    if (!availability.isAvailable) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: translations.validationError,
-        message: translations.vehicleNotAvailable,
-      });
+    const problem = !isValidRange
+      ? "End date and time must be after start date and time"
+      : hasConflict
+        ? "Vehicle Not Available"
+        : null;
+
+    if (problem) {
+      await showToast({ style: Toast.Style.Failure, title: "Validation Error", message: problem });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: translations.updatingReservation,
-        message: `${translations.updateReservation} ${vehicleTitle}`,
-      });
+      await showToast({ style: Toast.Style.Animated, title: "Updating Reservation", message: vehicleTitle });
 
-      // Format dates as ISO strings for the API
-      const startTimeISO = formData.startDateTime.toISOString();
-      const endTimeISO = formData.endDateTime.toISOString();
-
-      const updatedReservation = await graphqlClient.updateReservation(reservation.id, {
-        vehicleId: vehicle.id,
-        startTime: startTimeISO,
-        endTime: endTimeISO,
-        purpose: formData.isBusinessTrip ? "BUSINESS" : "PERSONAL",
+      // The vehicle stays the same, and this mutation doesn't accept the vehicle's global id anyway
+      await graphqlClient.updateReservation(reservation.id, {
+        startTime: formData.startDateTime.toISOString(),
+        endTime: formData.endDateTime.toISOString(),
+        // Keep whatever the server has unless the user actually changed the checkbox
+        purpose:
+          formData.isBusinessTrip === wasBusinessTrip
+            ? reservation.purpose
+            : formData.isBusinessTrip
+              ? "BUSINESS"
+              : "PERSONAL",
         note: formData.note,
       });
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: translations.reservationUpdated,
-        message: `${vehicleTitle} ${translations.reservationUpdated}`,
-      });
+      await showToast({ style: Toast.Style.Success, title: "Reservation Updated", message: vehicleTitle });
 
-      console.log("Reservation updated:", updatedReservation);
-
-      // Navigate back to root after successful update
+      onSaved?.();
       await popToRoot();
     } catch (error) {
-      console.error("Update error:", error);
-
-      await showToast({
-        style: Toast.Style.Failure,
-        title: translations.updateFailed,
-        message: error instanceof Error ? error.message : translations.unknownError,
-      });
+      await showFailureToast(error, { title: "Update Failed" });
     } finally {
       setIsSubmitting(false);
     }
@@ -167,69 +85,55 @@ export function ReservationUpdateForm({ reservation, vehicle }: UpdateFormProps)
 
   return (
     <Form
-      navigationTitle={`${translations.editReservation}: ${vehicleTitle}`}
+      navigationTitle={`Edit Reservation: ${vehicleTitle}`}
       isLoading={isSubmitting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={translations.saveChanges} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description title={translations.vehicle} text={`${vehicleTitle} • ${vehicle.licensePlate}`} />
+      <Form.Description title="Vehicle" text={`${vehicleTitle} • ${vehicle.licensePlate}`} />
 
-      <Form.Description title={translations.location} text={`${vehicle.address}, ${vehicle.city} ${vehicle.zip}`} />
+      <Form.Description title="Location" text={`${vehicle.address}, ${vehicle.city} ${vehicle.zip}`} />
 
       <Form.Separator />
 
       <Form.DatePicker
         id="startDateTime"
-        title={translations.startDateTime}
+        title="Start Date and Time"
         value={formData.startDateTime}
         onChange={(date) => {
-          if (date) {
-            setFormData((prev) => ({
-              ...prev,
-              startDateTime: date,
-            }));
-          }
+          if (date) setFormData((prev) => ({ ...prev, startDateTime: date }));
         }}
         type={Form.DatePicker.Type.DateTime}
       />
 
       <Form.DatePicker
         id="endDateTime"
-        title={translations.endDateTime}
+        title="End Date and Time"
         value={formData.endDateTime}
         onChange={(date) => {
-          if (date) {
-            setFormData((prev) => ({
-              ...prev,
-              endDateTime: date,
-            }));
-          }
+          if (date) setFormData((prev) => ({ ...prev, endDateTime: date }));
         }}
         type={Form.DatePicker.Type.DateTime}
       />
 
-      {availability.isChecking ? (
-        <Form.Description title={translations.availability} text={translations.checkingAvailability} />
-      ) : (
-        <Form.Description title={translations.availability} text={availability.message} />
-      )}
+      <Form.Description title="Availability" text={availabilityText} />
 
       <Form.Separator />
 
       <Form.TextArea
         id="note"
-        title={translations.note}
-        placeholder={translations.optionalNoteBooking}
+        title="Note"
+        placeholder="Optional note for booking"
         value={formData.note}
         onChange={(value) => setFormData((prev) => ({ ...prev, note: value }))}
       />
 
       <Form.Checkbox
         id="isBusinessTrip"
-        label={translations.businessTrip}
+        label="Business Trip"
         value={formData.isBusinessTrip}
         onChange={(value) => setFormData((prev) => ({ ...prev, isBusinessTrip: value }))}
       />

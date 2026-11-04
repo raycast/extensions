@@ -45,7 +45,7 @@ const geocode = async (address: string, fresh = false): Promise<GeocodeResult | 
   return coordinates;
 };
 
-export const getLocationPreference = () => getPreferenceValues<{ location?: string }>().location?.trim() ?? "";
+export const getLocationPreference = () => getPreferenceValues<Preferences>().location?.trim() ?? "";
 
 /**
  * The user's location from the preferences (address or coordinates), or null if none is set

@@ -1,159 +1,87 @@
-import { MenuBarExtra, openExtensionPreferences, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {
+  MenuBarExtra,
+  openExtensionPreferences,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  showHUD,
+} from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { graphqlClient, Reservation } from "./graphql";
-import { useAuth } from "./useAuth";
+import { describeLoadError, useAuth } from "./useAuth";
 
-interface Preferences {
-  enableMenuBar: boolean;
-}
+// Raycast re-runs this command every 5 minutes (see "interval" in package.json)
+const fetchReservations = () => graphqlClient.getReservations();
+
+const formatDateTime = (dateString: string) =>
+  new Date(dateString).toLocaleString(undefined, {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const getTimeUntilStart = (startTime: string) => {
+  const diffMs = new Date(startTime).getTime() - Date.now();
+  if (diffMs < 0) return "Ongoing";
+
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return hours > 0 ? `in ${hours}h ${minutes}m` : `in ${minutes}m`;
+};
+
+const vehicleName = ({ vehicle }: Reservation) => vehicle.label || vehicle.captions?.[0] || `Vehicle ${vehicle.id}`;
+
+const openCommand = async (name: string, title: string) => {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch {
+    await showHUD(`Could not open ${title}. Is the command enabled in Raycast?`);
+  }
+};
+const openReservations = () => openCommand("reservation-list", "My Reservations");
+const openVehicles = () => openCommand("vehicle-list", "List Vehicles");
 
 export default function MenuBarReservations() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { isLoading, isAuthenticated, error, hasCredentials, t } = useAuth();
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [isLoadingReservations, setIsLoadingReservations] = useState(false);
+  const { enableMenuBar } = getPreferenceValues<Preferences>();
+  const { isLoading: isAuthLoading, error: authError, hasCredentials } = useAuth();
+  const {
+    data: reservations = [],
+    isLoading: isLoadingReservations,
+    error: loadError,
+    revalidate,
+  } = usePromise(fetchReservations, [], {
+    execute: hasCredentials && enableMenuBar,
+    // Shown as a menu item below
+    onError: () => undefined,
+  });
 
-  // Format date for display
-  const formatDateTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // Get time until reservation starts
-  const getTimeUntilStart = (startTime: string): string => {
-    const now = new Date();
-    const start = new Date(startTime);
-    const diffMs = start.getTime() - now.getTime();
-
-    if (diffMs < 0) {
-      return t.ongoing || "Ongoing";
-    }
-
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (diffHours > 0) {
-      return `${t.inHours || "in"} ${diffHours}h ${diffMinutes}m`;
-    } else {
-      return `${t.inMinutes || "in"} ${diffMinutes}m`;
-    }
-  };
-
-  // Check if reservation is active now
-  const isActive = (reservation: Reservation): boolean => {
-    const now = new Date();
-    const start = new Date(reservation.start);
-    const end = new Date(reservation.end);
-    return now >= start && now <= end;
-  };
-
-  // Get next upcoming reservation
-  const getNextReservation = (): Reservation | null => {
-    const now = new Date();
-    const upcoming = reservations
-      .filter((r) => new Date(r.start) > now)
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-
-    return upcoming.length > 0 ? upcoming[0] : null;
-  };
-
-  // Get current active reservation
-  const getCurrentReservation = (): Reservation | null => {
-    return reservations.find((r) => isActive(r)) || null;
-  };
-
-  // Fetch reservations
-  const fetchReservations = async () => {
-    if (!isAuthenticated) return;
-
-    setIsLoadingReservations(true);
-    try {
-      const fetchedReservations = await graphqlClient.getReservations();
-      setReservations(fetchedReservations);
-    } catch (err) {
-      console.error("Error fetching reservations:", err);
-    } finally {
-      setIsLoadingReservations(false);
-    }
-  };
-
-  useEffect(() => {
-    // Raycast re-runs this command every 5 minutes (see "interval" in package.json)
-    if (isAuthenticated && preferences.enableMenuBar) {
-      fetchReservations();
-    }
-  }, [isAuthenticated]);
-
-  // Get menu bar title and icon
-  const getMenuBarDisplay = () => {
-    if (isLoading || isLoadingReservations) {
-      return {
-        title: "🚗",
-        tooltip: t.loadingReservations || "Loading reservations...",
-      };
-    }
-
-    if (!hasCredentials || error) {
-      return {
-        title: "❌",
-        tooltip: t.authenticationRequired || "Authentication required",
-      };
-    }
-
-    const currentReservation = getCurrentReservation();
-    const nextReservation = getNextReservation();
-
-    if (currentReservation) {
-      const vehicleName = currentReservation.vehicle.captions?.[0] || `Vehicle ${currentReservation.vehicle.id}`;
-      const endTime = formatDateTime(currentReservation.end);
-      return {
-        title: "🚗",
-        tooltip: `${t.currentReservation || "Current"}: ${vehicleName} ${t.until || "until"} ${endTime}`,
-      };
-    }
-
-    if (nextReservation) {
-      const vehicleName = nextReservation.vehicle.captions?.[0] || `Vehicle ${nextReservation.vehicle.id}`;
-      const timeUntil = getTimeUntilStart(nextReservation.start);
-      return {
-        title: `🚗`,
-        tooltip: `${t.nextReservation || "Next"}: ${vehicleName} ${timeUntil}`,
-      };
-    }
-
-    return {
-      title: "🚙",
-      tooltip: t.noReservations || "No reservations",
-    };
-  };
-
-  const { tooltip } = getMenuBarDisplay();
-
-  const openReservations = async () => {
-    try {
-      await launchCommand({ name: "reservation-list", type: LaunchType.UserInitiated });
-    } catch (err) {
-      console.error("Error opening reservations:", err);
-    }
-  };
-
-  const openVehicles = async () => {
-    try {
-      await launchCommand({ name: "vehicle-list", type: LaunchType.UserInitiated });
-    } catch (err) {
-      console.error("Error opening vehicles:", err);
-    }
-  };
-
-  // If menu bar is disabled in preferences, don't render anything
-  if (!preferences.enableMenuBar) {
+  // If the menu bar is disabled in the preferences, don't render anything
+  if (!enableMenuBar) {
     return null;
   }
+
+  const isLoading = isAuthLoading || isLoadingReservations;
+  const errorMessage = authError ?? (loadError ? describeLoadError(loadError) : null);
+
+  const now = new Date();
+  const current = reservations.find((r) => now >= new Date(r.start) && now <= new Date(r.end));
+  const upcoming = reservations
+    .filter((r) => new Date(r.start) > now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, 5); // Show max 5 upcoming
+
+  const tooltip = isLoading
+    ? "Loading reservations..."
+    : !hasCredentials
+      ? "Authentication Required"
+      : errorMessage
+        ? errorMessage
+        : current
+          ? `Current Reservation: ${vehicleName(current)} until ${formatDateTime(current.end)}`
+          : upcoming[0]
+            ? `Next Reservation: ${vehicleName(upcoming[0])} ${getTimeUntilStart(upcoming[0].start)}`
+            : "You have no reservations.";
 
   return (
     <MenuBarExtra
@@ -164,82 +92,54 @@ export default function MenuBarReservations() {
         },
       }}
       tooltip={tooltip}
-      isLoading={isLoading || isLoadingReservations}
+      isLoading={isLoading}
     >
       {!hasCredentials ? (
-        <MenuBarExtra.Item
-          title={t.authenticationRequired || "Authentication Required"}
-          onAction={openExtensionPreferences}
-        />
-      ) : error ? (
-        <MenuBarExtra.Item title={t.error || "Error"} subtitle={error} onAction={openExtensionPreferences} />
-      ) : isLoading || isLoadingReservations ? (
-        <MenuBarExtra.Item title={t.loadingReservations || "Loading reservations..."} />
+        <MenuBarExtra.Item title="Authentication Required" onAction={openExtensionPreferences} />
+      ) : authError ? (
+        <MenuBarExtra.Item title="Error" subtitle={authError} onAction={openExtensionPreferences} />
+      ) : loadError ? (
+        <>
+          <MenuBarExtra.Item title="Could not load reservations" subtitle={errorMessage ?? undefined} />
+          <MenuBarExtra.Item title="Try Again" onAction={revalidate} icon="🔄" />
+        </>
+      ) : isLoading ? (
+        <MenuBarExtra.Item title="Loading reservations..." />
       ) : reservations.length === 0 ? (
         <>
-          <MenuBarExtra.Item title={t.noReservations || "No reservations"} />
-          <MenuBarExtra.Item title={t.openZemtu || "Open Zemtu Extension"} onAction={openVehicles} />
+          <MenuBarExtra.Item title="You have no reservations." />
+          <MenuBarExtra.Item title="Open Zemtu Extension" onAction={openVehicles} />
         </>
       ) : (
         <>
-          {/* Current reservation section */}
-          {(() => {
-            const current = getCurrentReservation();
-            if (current) {
-              const vehicleName = current.vehicle.captions?.[0] || `Vehicle ${current.vehicle.id}`;
-              const endTime = formatDateTime(current.end);
-              return (
-                <>
-                  <MenuBarExtra.Section title={t.currentReservation || "Current Reservation"}>
-                    <MenuBarExtra.Item
-                      title={vehicleName}
-                      subtitle={`${t.until || "until"} ${endTime}`}
-                      icon="🚗"
-                      onAction={openReservations}
-                    />
-                  </MenuBarExtra.Section>
-                </>
-              );
-            }
-            return null;
-          })()}
+          {current ? (
+            <MenuBarExtra.Section title="Current Reservation">
+              <MenuBarExtra.Item
+                title={vehicleName(current)}
+                subtitle={`until ${formatDateTime(current.end)}`}
+                icon="🚗"
+                onAction={openReservations}
+              />
+            </MenuBarExtra.Section>
+          ) : null}
 
-          {/* Upcoming reservations */}
-          {(() => {
-            const upcomingReservations = reservations
-              .filter((r) => new Date(r.start) > new Date())
-              .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-              .slice(0, 5); // Show max 5 upcoming
+          {upcoming.length > 0 ? (
+            <MenuBarExtra.Section title="Upcoming Reservations">
+              {upcoming.map((reservation) => (
+                <MenuBarExtra.Item
+                  key={reservation.id}
+                  title={vehicleName(reservation)}
+                  subtitle={`${formatDateTime(reservation.start)} (${getTimeUntilStart(reservation.start)})`}
+                  icon="🕐"
+                  onAction={openReservations}
+                />
+              ))}
+            </MenuBarExtra.Section>
+          ) : null}
 
-            if (upcomingReservations.length === 0) {
-              return null;
-            }
-
-            return (
-              <MenuBarExtra.Section title={t.upcomingReservations || "Upcoming Reservations"}>
-                {upcomingReservations.map((reservation) => {
-                  const vehicleName = reservation.vehicle.captions?.[0] || `Vehicle ${reservation.vehicle.id}`;
-                  const startTime = formatDateTime(reservation.start);
-                  const timeUntil = getTimeUntilStart(reservation.start);
-
-                  return (
-                    <MenuBarExtra.Item
-                      key={reservation.id}
-                      title={vehicleName}
-                      subtitle={`${startTime} (${timeUntil})`}
-                      icon="🕐"
-                      onAction={openReservations}
-                    />
-                  );
-                })}
-              </MenuBarExtra.Section>
-            );
-          })()}
-
-          {/* Actions */}
-          <MenuBarExtra.Section title={t.actions || "Actions"}>
-            <MenuBarExtra.Item title={t.refreshReservations || "Refresh"} onAction={fetchReservations} icon="🔄" />
-            <MenuBarExtra.Item title={t.openZemtu || "Open Zemtu Extension"} onAction={openVehicles} icon="🚗" />
+          <MenuBarExtra.Section title="Actions">
+            <MenuBarExtra.Item title="Refresh" onAction={revalidate} icon="🔄" />
+            <MenuBarExtra.Item title="Open Zemtu Extension" onAction={openVehicles} icon="🚗" />
           </MenuBarExtra.Section>
         </>
       )}

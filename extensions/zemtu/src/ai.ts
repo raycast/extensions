@@ -1,22 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
 import { Vehicle } from "./graphql";
-import { getTranslations } from "./translations";
 import { haversineKm } from "./utils";
 import { Coordinates } from "./location";
-
-interface Preferences {
-  language: string;
-}
-
-export const getAiContext = () => {
-  const preferences = getPreferenceValues<Preferences>();
-  const language = preferences.language || "en";
-  return {
-    preferences,
-    translations: getTranslations(language),
-    locale: language === "de" ? "de-DE" : "en-US",
-  };
-};
 
 export const vehicleName = (vehicle: Pick<Vehicle, "label" | "captions" | "brand" | "model">) =>
   vehicle.label || vehicle.captions?.[0] || `${vehicle.brand} ${vehicle.model}`;
@@ -46,9 +30,9 @@ export const validateTimeRange = (start: Date, end: Date) => {
   if (start.getTime() < Date.now() - 5 * 60 * 1000) throw new Error("The start is in the past.");
 };
 
-// Unambiguous date for confirmations, e.g. "Samstag, 24. Oktober 2026, 09:00"
-export const formatLongDateTime = (date: Date, locale: string) =>
-  date.toLocaleString(locale, {
+// Unambiguous date for confirmations, e.g. "Saturday, October 24, 2026, 09:00"
+export const formatLongDateTime = (date: Date) =>
+  date.toLocaleString(undefined, {
     weekday: "long",
     day: "numeric",
     month: "long",

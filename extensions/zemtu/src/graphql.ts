@@ -1,11 +1,4 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  baseUrl: string;
-  username: string;
-  password: string;
-  language: string;
-}
+import { Cache, LocalStorage, getPreferenceValues } from "@raycast/api";
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -142,6 +135,8 @@ export interface Reservation {
   };
   state: string;
   fishingPin?: string;
+  note?: string | null;
+  purpose: string;
 }
 
 interface ReservationsResponse {
@@ -161,7 +156,7 @@ interface BookingInput {
   vehicleId: string;
   startTime: string; // ISO datetime string
   endTime: string; // ISO datetime string
-  purpose: "BUSINESS" | "PERSONAL";
+  purpose: string;
   note?: string;
 }
 
@@ -185,7 +180,8 @@ interface UserError {
 
 interface BookingResponse {
   createReservation: {
-    reservation: ReservationResult;
+    reservation: ReservationResult | null;
+    userErrors: UserError[] | null;
   };
 }
 
@@ -203,19 +199,34 @@ interface DeleteReservationResponse {
   };
 }
 
-// JWT token: kept in memory and persisted in the Raycast cache until it expires,
+// JWT token: kept in memory and in Raycast's encrypted LocalStorage until it expires,
 // so a new command launch doesn't have to log in again
 let jwtToken: string | null = null;
 let pendingAuth: Promise<void> | null = null;
 
-const tokenCache = new Cache();
-const TOKEN_CACHE_KEY = "zemtu_jwt";
+const TOKEN_STORAGE_KEY = "zemtu_jwt";
+
+// Earlier versions kept the token in the unencrypted cache
+new Cache().remove(TOKEN_STORAGE_KEY);
+
+// Above this many free vehicles a single page can't tell whether a specific one is among them
+const AVAILABILITY_PAGE_SIZE = 100;
 
 interface CachedToken {
   token: string;
   expiresAt: number; // ms since epoch
   account: string;
 }
+
+// Mutations report problems in userErrors next to the data, not in the top-level errors
+const responseMessages = (response: GraphQLResponse<unknown>) => [
+  ...(response.errors ?? []).map((error) => error.message),
+  ...Object.values((response.data ?? {}) as Record<string, { userErrors?: UserError[] | null } | null>).flatMap(
+    (payload) => payload?.userErrors?.flatMap((error) => error.messages) ?? [],
+  ),
+];
+
+const formatUserErrors = (userErrors: UserError[]) => userErrors.map((error) => error.messages.join(", ")).join("; ");
 
 // Server errors that mean the token is missing, invalid or expired
 const isAuthError = (message: string) =>
@@ -227,7 +238,7 @@ class ZemtuGraphQLClient {
   constructor() {
     const preferences = getPreferenceValues<Preferences>();
     // Use baseUrl from preferences, fallback to demo URL
-    this.baseUrl = preferences.baseUrl || "https://demo.zemtu.com";
+    this.baseUrl = (preferences.baseUrl?.trim() || "https://demo.zemtu.com").replace(/\/+$/, "");
   }
 
   private static DELETE_RESERVATION_MUTATION = `
@@ -299,20 +310,16 @@ class ZemtuGraphQLClient {
     }
   }
 
-  private persistToken(token: string) {
+  private async persistToken(token: string) {
     const exp = ZemtuGraphQLClient.tokenExpiry(token);
-    if (!exp) {
-      console.log("Token has no readable expiry, not caching it");
-      return;
-    }
-    const cached: CachedToken = { token, expiresAt: exp * 1000, account: this.account() };
-    tokenCache.set(TOKEN_CACHE_KEY, JSON.stringify(cached));
-    console.log(`Token cached, valid until ${new Date(cached.expiresAt).toLocaleTimeString()}`);
+    if (!exp) return;
+    const stored: CachedToken = { token, expiresAt: exp * 1000, account: this.account() };
+    await LocalStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
   }
 
-  private loadPersistedToken(): string | null {
+  private async loadPersistedToken(): Promise<string | null> {
     try {
-      const raw = tokenCache.get(TOKEN_CACHE_KEY);
+      const raw = await LocalStorage.getItem<string>(TOKEN_STORAGE_KEY);
       if (!raw) return null;
       const cached: CachedToken = JSON.parse(raw);
       // Keep a minute of headroom so the token doesn't expire mid-request
@@ -328,14 +335,13 @@ class ZemtuGraphQLClient {
     await this.ensureAuthenticated();
     try {
       const response = await this.makeGraphQLRequest<T>(query, variables);
-      const message = response.errors?.map((e) => e.message).join(" ") ?? "";
-      if (!message || !isAuthError(message)) return response;
+      if (!isAuthError(responseMessages(response).join(" "))) return response;
     } catch (error) {
-      if (!(error instanceof Error) || !isAuthError(error.message)) throw error;
+      // Only a real auth status: error pages can contain words like "token", and resending could book twice
+      if (!(error instanceof Error) || !/request failed: 40[13]/i.test(error.message)) throw error;
     }
 
-    console.log("Token rejected, re-authenticating...");
-    this.clearToken();
+    await this.clearToken();
     await this.ensureAuthenticated();
     return this.makeGraphQLRequest<T>(query, variables);
   }
@@ -358,8 +364,6 @@ class ZemtuGraphQLClient {
       }
     `;
 
-    console.log("Attempting tokenAuth authentication...");
-
     try {
       const response = await this.makeGraphQLRequest<TokenAuthResponse>(
         query,
@@ -379,8 +383,7 @@ class ZemtuGraphQLClient {
 
       if (response.data?.tokenAuth?.token) {
         jwtToken = response.data.tokenAuth.token;
-        this.persistToken(jwtToken);
-        console.log("Authentication successful with tokenAuth");
+        await this.persistToken(jwtToken);
         return true;
       }
 
@@ -513,6 +516,30 @@ class ZemtuGraphQLClient {
     }
   }
 
+  // Asks the server, which knows every reservation and buffer time
+  async isVehicleFree(vehicleId: string, start: string, end: string): Promise<boolean> {
+    const query = `
+      query VehicleAvailability($first: Int, $availability: AvailabilityInput) {
+        allVehicles(first: $first, availability: $availability) {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
+    `;
+    const response = await this.authorizedRequest<{ allVehicles: { edges: Array<{ node: { id: string } }> } | null }>(
+      query,
+      { first: AVAILABILITY_PAGE_SIZE, availability: { start, end, availableDuringRequestedTimespan: true } },
+    );
+    if (response.errors) throw new Error(response.errors[0]?.message || "Failed to check availability");
+
+    const free = (response.data?.allVehicles?.edges ?? []).map((edge) => edge.node);
+    // On a full page the vehicle may be further back; the server still rejects a conflicting booking
+    return free.length >= AVAILABILITY_PAGE_SIZE || free.some((vehicle) => vehicle.id === vehicleId);
+  }
+
   async getReservations(): Promise<Reservation[]> {
     const query = `
       query getReservations($first: Int!) {
@@ -549,6 +576,8 @@ class ZemtuGraphQLClient {
               }
               state
               fishingPin
+              note
+              purpose
             }
           }
         }
@@ -566,14 +595,7 @@ class ZemtuGraphQLClient {
       }
 
       if (response.data?.allReservations?.edges) {
-        return response.data.allReservations.edges.map((edge) => ({
-          id: edge.node.id,
-          start: edge.node.start,
-          end: edge.node.end,
-          vehicle: edge.node.vehicle,
-          state: edge.node.state,
-          fishingPin: edge.node.fishingPin,
-        }));
+        return response.data.allReservations.edges.map((edge) => edge.node);
       }
 
       return [];
@@ -599,6 +621,10 @@ class ZemtuGraphQLClient {
               licensePlate
             }
           }
+          userErrors {
+            field
+            messages
+          }
         }
       }
     `;
@@ -616,14 +642,17 @@ class ZemtuGraphQLClient {
       },
     };
 
-    console.log("Creating booking with variables:", variables);
-
     try {
       const response = await this.authorizedRequest<BookingResponse>(mutation, variables);
 
       if (response.errors) {
         console.error("Booking creation errors:", response.errors);
         throw new Error(response.errors[0]?.message || "Failed to create booking");
+      }
+
+      const userErrors = response.data?.createReservation?.userErrors;
+      if (userErrors && userErrors.length > 0) {
+        throw new Error(formatUserErrors(userErrors));
       }
 
       if (!response.data?.createReservation?.reservation) {
@@ -648,34 +677,34 @@ class ZemtuGraphQLClient {
     };
 
     try {
-      console.log("Delete reservation variables:", JSON.stringify(variables));
-
       const response = await this.authorizedRequest<DeleteReservationResponse>(
         ZemtuGraphQLClient.DELETE_RESERVATION_MUTATION,
         variables,
       );
-
-      console.log("Delete reservation response:", JSON.stringify(response));
 
       if (!response || !response.data || !response.data.deleteReservation) {
         throw new Error("Failed to delete reservation");
       }
 
       if (response.data.deleteReservation.userErrors && response.data.deleteReservation.userErrors.length > 0) {
-        const errorMessages = response.data.deleteReservation.userErrors
-          .map((err) => `${err.field}: ${err.messages.join(", ")}`)
-          .join("; ");
-        throw new Error(`Deletion failed: ${errorMessages}`);
+        throw new Error(formatUserErrors(response.data.deleteReservation.userErrors));
       }
 
-      return !!response.data.deleteReservation.reservation;
+      if (!response.data.deleteReservation.reservation) {
+        throw new Error("Failed to delete reservation");
+      }
+
+      return true;
     } catch (error) {
       console.error("Error deleting reservation:", error);
       throw error;
     }
   }
 
-  async updateReservation(reservationId: string, bookingData: BookingInput): Promise<ReservationResult> {
+  async updateReservation(
+    reservationId: string,
+    bookingData: Omit<BookingInput, "vehicleId">,
+  ): Promise<ReservationResult> {
     const mutation = `
       mutation UpdateReservation($input: UpdateReservationInput!) {
         updateReservation(input: $input) {
@@ -703,17 +732,13 @@ class ZemtuGraphQLClient {
       input: {
         reservation: {
           id: reservationId,
-          vehicleId: bookingData.vehicleId,
           start: bookingData.startTime,
           end: bookingData.endTime,
           note: bookingData.note || "",
           purpose: bookingData.purpose,
-          liftOffer: false,
         },
       },
     };
-
-    console.log("Updating reservation with variables:", variables);
 
     try {
       const response = await this.authorizedRequest<UpdateReservationResponse>(mutation, variables);
@@ -724,10 +749,7 @@ class ZemtuGraphQLClient {
       }
 
       if (response.data?.updateReservation?.userErrors && response.data.updateReservation.userErrors.length > 0) {
-        const errorMessages = response.data.updateReservation.userErrors
-          .map((err) => `${err.field}: ${err.messages.join(", ")}`)
-          .join("; ");
-        throw new Error(`Update failed: ${errorMessages}`);
+        throw new Error(formatUserErrors(response.data.updateReservation.userErrors));
       }
 
       if (!response.data?.updateReservation?.reservation) {
@@ -760,22 +782,21 @@ class ZemtuGraphQLClient {
   // Concurrent callers share a single login request
   async ensureAuthenticated(): Promise<void> {
     if (jwtToken) return;
-    jwtToken = this.loadPersistedToken();
-    if (jwtToken) return;
 
     if (!pendingAuth) {
-      pendingAuth = this.authenticate()
-        .then(() => undefined)
-        .finally(() => {
-          pendingAuth = null;
-        });
+      pendingAuth = (async () => {
+        jwtToken = await this.loadPersistedToken();
+        if (!jwtToken) await this.authenticate();
+      })().finally(() => {
+        pendingAuth = null;
+      });
     }
     await pendingAuth;
   }
 
-  clearToken(): void {
+  async clearToken(): Promise<void> {
     jwtToken = null;
-    tokenCache.remove(TOKEN_CACHE_KEY);
+    await LocalStorage.removeItem(TOKEN_STORAGE_KEY);
   }
 }
 

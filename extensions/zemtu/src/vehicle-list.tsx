@@ -1,24 +1,14 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  Keyboard,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-  Color,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Keyboard, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { Vehicle } from "./graphql";
-import { useAuth } from "./useAuth";
+import { graphqlClient, Vehicle } from "./graphql";
+import { describeLoadError, useAuth } from "./useAuth";
 import { useVehicles } from "./useVehicles";
 import { haversineKm } from "./utils";
 import { getLocationPreference, resolveLocation } from "./location";
 import { VehicleDetail } from "./vehicle-detail";
 import { BookingForm } from "./reservation-create";
-import CheckSettings from "./check-settings";
+import { ErrorEmptyView } from "./error-view";
 
 interface TransformedVehicle {
   id: string;
@@ -33,10 +23,11 @@ interface TransformedVehicle {
 
 type SortOption = "alphabetical" | "distance";
 
-export default function Command() {
-  const { error: authError, hasCredentials, preferences, t } = useAuth();
+// `onBooked` is only set when another command pushes this view
+export default function Command({ onBooked }: { onBooked?: () => void }) {
+  const { error: authError, hasCredentials, retryLogin } = useAuth();
   // Cached vehicles show up instantly, fresh data replaces them once loaded
-  const { data: vehicles, isLoading, revalidate } = useVehicles({ execute: hasCredentials });
+  const { data: vehicles, isLoading, error: loadError, revalidate } = useVehicles({ execute: hasCredentials });
 
   // Default to sorting by distance when the user entered a location
   const locationPreference = getLocationPreference();
@@ -50,9 +41,9 @@ export default function Command() {
       if (coordinates) return;
       showToast({
         style: Toast.Style.Failure,
-        title: t.locationNotFound,
+        title: "Location not found – check the address in the preferences",
         message: locationPreference,
-        primaryAction: { title: t.openPreferences, onAction: () => openExtensionPreferences() },
+        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
       });
     },
   });
@@ -69,7 +60,7 @@ export default function Command() {
     return vehicles.map((vehicle) => {
       const title = vehicle.label || vehicle.captions?.[0] || `${vehicle.brand} ${vehicle.model}`;
       const subtitle = `${vehicle.address}, ${vehicle.city} ${vehicle.zip}`;
-      const accessory = vehicle.instantAvailability.usableNow ? t.available : t.notAvailable;
+      const accessory = vehicle.instantAvailability.usableNow ? "Available" : "Not Available";
 
       return {
         id: vehicle.id,
@@ -83,11 +74,16 @@ export default function Command() {
         title,
         subtitle,
         accessory,
-        booking_url: `${preferences.baseUrl}/instant_booking/${vehicle.pk}`,
+        booking_url: `${graphqlClient.getBaseUrl()}/instant_booking/${vehicle.pk}`,
         calculatedDistance: getDistance(vehicle),
         originalData: vehicle,
       };
     });
+  };
+
+  const handleBooked = () => {
+    revalidate();
+    onBooked?.();
   };
 
   const items = transformVehicles(vehicles);
@@ -98,11 +94,11 @@ export default function Command() {
       <List>
         <List.Item
           icon={Icon.Lock}
-          title={t.authRequired}
-          subtitle={t.pleaseEnterCredentials}
+          title="Authentication Required"
+          subtitle="Please enter your username and password in preferences"
           actions={
             <ActionPanel>
-              <Action title={t.openPreferences} icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -111,19 +107,16 @@ export default function Command() {
   }
 
   // Show error state (only if there is nothing cached to show instead)
-  if (authError && items.length === 0) {
+  const errorMessage = authError ?? (loadError ? describeLoadError(loadError) : null);
+  if (errorMessage && items.length === 0) {
     return (
-      <List>
-        <List.EmptyView
-          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-          title={t.error}
-          description={authError}
-          actions={
-            <ActionPanel>
-              <Action title={t.checkCredentials} icon={Icon.Gear} onAction={openExtensionPreferences} />
-              <Action.Push title={t.checkSettings} icon={Icon.Checkmark} target={<CheckSettings />} />
-            </ActionPanel>
-          }
+      <List isLoading={isLoading}>
+        <ErrorEmptyView
+          description={errorMessage}
+          onRetry={() => {
+            retryLogin();
+            revalidate();
+          }}
         />
       </List>
     );
@@ -149,11 +142,12 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder="Search vehicles"
       searchBarAccessory={
         hasCoordinates ? (
-          <List.Dropdown tooltip={t.filterBy} value={sortBy} onChange={(newValue) => setSortBy(newValue as SortOption)}>
-            <List.Dropdown.Item title={t.sortByDistance} value="distance" />
-            <List.Dropdown.Item title={t.sortAlphabetically} value="alphabetical" />
+          <List.Dropdown tooltip="Filter by" value={sortBy} onChange={(newValue) => setSortBy(newValue as SortOption)}>
+            <List.Dropdown.Item title="Sort by Distance" value="distance" />
+            <List.Dropdown.Item title="Sort Alphabetically" value="alphabetical" />
           </List.Dropdown>
         ) : undefined
       }
@@ -186,20 +180,32 @@ export default function Command() {
               accessories={accessories}
               actions={
                 <ActionPanel>
-                  <Action.Push title={t.showDetails} icon={Icon.Eye} target={<VehicleDetail vehicle={vehicle} />} />
-                  <Action.Push title={t.bookVehicle} icon={Icon.Calendar} target={<BookingForm vehicle={vehicle} />} />
+                  <Action.Push
+                    title="Show Details"
+                    icon={Icon.Eye}
+                    target={<VehicleDetail vehicle={vehicle} onBooked={handleBooked} />}
+                  />
+                  <Action.Push
+                    title="Book Vehicle"
+                    icon={Icon.Calendar}
+                    target={<BookingForm vehicle={vehicle} onBooked={handleBooked} />}
+                  />
                   {item.booking_url && (
-                    <Action.OpenInBrowser title={t.bookInBrowser} url={item.booking_url} icon={Icon.Globe} />
+                    <Action.OpenInBrowser title="Book in Browser" url={item.booking_url} icon={Icon.Globe} />
                   )}
                   <Action
-                    title={t.refreshReservations}
+                    title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={revalidate}
                   />
-                  <Action.CopyToClipboard title={t.copyTitle} content={item.title} />
-                  <Action.CopyToClipboard title={t.copyVehicleId} content={item.id} />
-                  <Action.CopyToClipboard title={t.copyLicensePlate} content={vehicle.licensePlate} />
+                  <Action.CopyToClipboard title="Copy Title" icon={Icon.Clipboard} content={item.title} />
+                  <Action.CopyToClipboard title="Copy Vehicle ID" icon={Icon.Clipboard} content={item.id} />
+                  <Action.CopyToClipboard
+                    title="Copy License Plate"
+                    icon={Icon.Clipboard}
+                    content={vehicle.licensePlate}
+                  />
                 </ActionPanel>
               }
             />

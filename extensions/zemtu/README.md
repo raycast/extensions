@@ -1,6 +1,6 @@
 # Zemtu Raycast Extension
 
-A powerful Raycast extension that enables Zemtu carsharing and mobility solution users to manage their vehicles and reservations directly from Raycast.
+A powerful Raycast extension that enables Zemtu carsharing and mobility solution users to manage their vehicles and reservations directly from Raycast. You need a Zemtu account from your carsharing provider to use it.
 
 ## Features
 
@@ -30,7 +30,6 @@ A powerful Raycast extension that enables Zemtu carsharing and mobility solution
    - **Zemtu URL**: Your provider's Zemtu address, e.g. `https://yourcompany.zemtu.com` (default: `https://demo.zemtu.com`)
    - **Username**: Your Zemtu account username
    - **Password**: Your Zemtu account password
-   - **Language**: Choose between English and German
    - **Your Location** (optional): An address or coordinates, used to sort vehicles by distance
 3. Run **Check Settings** to make sure everything works
 
@@ -43,6 +42,24 @@ A powerful Raycast extension that enables Zemtu carsharing and mobility solution
 | `My Reservations` | View and manage your current and upcoming reservations |
 | `Menu Bar Reservations` | Enable menu bar integration for quick reservation overview |
 | `Check Settings` | Test the Zemtu URL, login, location and vehicle access, with a hint for anything that needs fixing |
+
+## Keyboard Shortcuts
+
+Windows uses `Ctrl` where macOS uses `⌘`.
+
+| Where | Action | macOS | Windows |
+|-------|--------|-------|---------|
+| Everywhere | Open the actions menu | `⌘K` | `Ctrl+K` |
+| Lists and details | Run the first action | `↵` | `Enter` |
+| Lists and details | Run the second action, e.g. Book Vehicle or Edit Reservation | `⌘↵` | `Ctrl+Enter` |
+| Forms | Search, book or save | `⌘↵` | `Ctrl+Enter` |
+| List Vehicles | Refresh | `⌘R` | `Ctrl+R` |
+| Search results | New search | `⌘N` | `Ctrl+N` |
+| Vehicle and reservation details | Open in Maps | `⌘M` | `Ctrl+M` |
+| My Reservations and reservation details | Delete a reservation (always asks first) | `⌘D` | `Ctrl+D` |
+| Check Settings | Check again | `⌘R` | `Ctrl+R` |
+
+In forms, `↵` stays with the focused field, e.g. it opens the date picker.
 
 ## Raycast AI
 
@@ -90,7 +107,6 @@ Raycast AI requires a Raycast Pro subscription. The extension's regular commands
 - **Zemtu URL**: Your provider's Zemtu address, e.g. `https://yourcompany.zemtu.com`
 
 ### Optional Settings
-- **Language**: Interface language preference
 - **Your Location**: Enter an address (e.g. `Marktplatz 1, Dornbirn`) or coordinates (e.g. `47.4486, 9.7621`). To get coordinates, right-click a place in Google Maps and click the numbers to copy them. With a location set, the vehicle list and `@zemtu` sort vehicles by distance.
 - **Menu Bar**: Toggle menu bar reservation display
 
@@ -102,7 +118,7 @@ Raycast AI requires a Raycast Pro subscription. The extension's regular commands
 
 ## Privacy & Security
 
-Your password is stored in Raycast's encrypted preferences. The extension talks directly to your Zemtu server; the login token and the last vehicle list are cached locally by Raycast on your computer so the extension starts quickly.
+Your password is stored in Raycast's encrypted preferences. The extension talks directly to your Zemtu server; the login token is kept in Raycast's encrypted local storage and the last vehicle list in its local cache, so the extension starts quickly. Reservations are not cached on disk because they contain the access PIN, and copying a PIN keeps it out of Raycast's clipboard history.
 
 If you enter an address as your location, it is looked up once via OpenStreetMap (Nominatim) to get its coordinates; the result is cached locally. Coordinates are used as they are and never sent anywhere.
 
