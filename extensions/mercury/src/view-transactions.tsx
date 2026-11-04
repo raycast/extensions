@@ -196,6 +196,7 @@ function LoginActions({ login, onLoginsChanged }: { login: MercuryLogin; onLogin
       <Action.Push
         title={`Update Token for ${login.name}`}
         icon={Icon.Key}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
         target={<AddAccountForm replacing={login} onSaved={onLoginsChanged} />}
       />
       <Action
@@ -259,7 +260,11 @@ function AccountItem({
               target={<CardList logins={[login]} accountId={account.id} />}
             />
             {refreshAction}
-            <Action.OpenInBrowser title="Open in Browser" url={account.dashboardLink} />
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={account.dashboardLink}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
