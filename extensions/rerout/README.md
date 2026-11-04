@@ -15,12 +15,3 @@ Create branded short links, browse them and manage tags without leaving Raycast.
 3. Run any Rerout command and paste the key into **API Key**.
 
 Leave **API Base URL** at its default unless you use a staging or self-hosted Rerout deployment.
-
-## Development
-
-```bash
-npm install
-npm run dev
-npm run lint
-npm run build
-```
