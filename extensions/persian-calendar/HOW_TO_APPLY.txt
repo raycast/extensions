@@ -1,0 +1,44 @@
+PERSIAN CALENDAR - GREPTILE REVIEW FIXES
+======================================
+
+This zip has exactly FIVE replacement project files:
+  src/persian-calendar.tsx
+  src/convert-date.tsx
+  src/today-date.ts
+  package.json
+  README.md
+
+IMPORTANT: Back up your Raycast project before copying files.
+Copy these into your existing project folder:
+ C:\Users\mimsa\Documents\extensions\persian-calendar
+Do NOT copy the downloaded folder as a new Raycast extension.
+Do NOT delete jalali.ts, assets, metadata, CHANGELOG.md or .git.
+
+Then in VS Code terminal (inside the project):
+  npm.cmd install
+  npm.cmd run fix-lint
+  npx.cmd tsc -p tsconfig.json --noEmit
+  npm.cmd run lint
+  npm.cmd run build
+  npm.cmd run dev
+
+Test the three commands. The quick-date command is now named
+"Today's Date" (US English for Raycast Store), but it retains the
+Persian searchable keyword "چندمه" and Persian date result.
+Make sure typing "چندمه" in Raycast still finds "Today's Date".
+
+If everything works, stop dev with Ctrl+C, then:
+  git add src package.json package-lock.json README.md
+  git commit -m "Address Raycast Store review feedback"
+  npm.cmd run publish
+
+Never use git push --force; the publish command updates your existing PR.
+Revisit the Greptile review and respond to the comments that were fixed.
+
+NOTES:
+ - This package is based on PR #33112 source snapshot from Nov 4, 2026.
+ - Existing calendar calculations in src/jalali.ts are NOT replaced.
+ - Existing screenshots under metadata are NOT replaced. If UI changed,
+   consider capturing fresh screenshots before merging.
+ - Do not assume the Store accepts English-only labels + Persian keywords
+   until the Raycast reviewer confirms. This preserves the requested search.

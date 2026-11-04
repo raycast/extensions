@@ -16,6 +16,7 @@ import {
 export default function Command() {
   const today = getIranToday();
   const [monthOffset, setMonthOffset] = useState(0);
+  const [selectedItemId, setSelectedItemId] = useState(`${today.jy}-${today.jm}-${today.jd}`);
 
   const absoluteMonth = today.jy * 12 + today.jm - 1 + monthOffset;
   const jy = Math.floor(absoluteMonth / 12);
@@ -24,27 +25,61 @@ export default function Command() {
   const leadingSpaces = weekdayIndex(firstGregorian.gy, firstGregorian.gm, firstGregorian.gd);
   const numberOfDays = jalaaliMonthLength(jy, jm);
 
-  const previousMonth = () => setMonthOffset((current) => current - 1);
-  const nextMonth = () => setMonthOffset((current) => current + 1);
-  const jumpToToday = () => setMonthOffset(0);
+  function openMonth(offset: number) {
+    const absolute = today.jy * 12 + today.jm - 1 + offset;
+    const year = Math.floor(absolute / 12);
+    const month = (((absolute % 12) + 12) % 12) + 1;
+    setMonthOffset(offset);
+    setSelectedItemId(`${year}-${month}-${offset === 0 ? today.jd : 1}`);
+  }
+
+  const previousMonth = () => openMonth(monthOffset - 1);
+  const nextMonth = () => openMonth(monthOffset + 1);
+  const jumpToToday = () => openMonth(0);
+
+  function navigationActions() {
+    return (
+      <ActionPanel>
+        <Action title="Go to Today" onAction={jumpToToday} />
+        <Action title="Previous Month" onAction={previousMonth} />
+        <Action title="Next Month" onAction={nextMonth} />
+      </ActionPanel>
+    );
+  }
 
   return (
     <Grid
       columns={7}
       filtering={false}
-      navigationTitle={`${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`}
-      searchBarPlaceholder="تقویم شمسی • ساعت ایران"
+      selectedItemId={selectedItemId}
+      onSelectionChange={(id) => {
+        if (id) setSelectedItemId(id);
+      }}
+      searchBarPlaceholder="Browse Persian dates (Iran time)"
     >
       <Grid.Section
         title={`${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`}
-        subtitle="تقویم بر اساس ساعت ایران • جمعه با رنگ نارنجی مشخص شده است"
+        subtitle="Based on Iran time • Fridays are highlighted in orange"
       >
         {SHORT_WEEKDAYS.map((label, index) => (
-          <Grid.Item key={`weekday-${index}`} content="🗓️" title={label} subtitle={WEEKDAYS[index]} />
+          <Grid.Item
+            key={`weekday-${index}`}
+            id={`weekday-${index}`}
+            content="🗓️"
+            title={label}
+            subtitle={WEEKDAYS[index]}
+            actions={navigationActions()}
+          />
         ))}
 
         {Array.from({ length: leadingSpaces }, (_, index) => (
-          <Grid.Item key={`empty-${index}`} content="▫️" title=" " />
+          <Grid.Item
+            key={`empty-${index}`}
+            id={`empty-${index}`}
+            content="▫️"
+            title=" "
+            actions={navigationActions()}
+          />
         ))}
 
         {Array.from({ length: numberOfDays }, (_, index) => {
@@ -58,11 +93,11 @@ export default function Command() {
           const markdown = [
             `# ${weekday}، ${faDigits(jd)} ${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`,
             "",
-            `**تاریخ شمسی:** ${persianDate}`,
+            `**Jalali Date:** ${persianDate}`,
             "",
-            `**تاریخ میلادی:** ${gregorianDate}`,
+            `**Gregorian Date:** ${gregorianDate}`,
             "",
-            isToday ? "📍 امروز (به وقت ایران)" : "",
+            isToday ? "📍 Today (Iran time)" : "",
           ].join("\n");
 
           return (
@@ -76,21 +111,23 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="نمایش جزئیات روز"
+                    title="View Date Details"
                     target={
                       <Detail
+                        navigationTitle="Date Details"
                         markdown={markdown}
                         actions={
                           <ActionPanel>
-                            <Action.CopyToClipboard title="کپی تاریخ شمسی" content={persianDate} />
-                            <Action.CopyToClipboard title="کپی تاریخ میلادی" content={gregorianDate} />
+                            <Action.CopyToClipboard title="Copy Jalali Date" content={persianDate} />
+                            <Action.CopyToClipboard title="Copy Gregorian Date" content={gregorianDate} />
                           </ActionPanel>
                         }
                       />
                     }
                   />
+                  <Action.CopyToClipboard title="Copy Jalali Date" content={persianDate} />
                   <Action
-                    title="ماه بعد"
+                    title="Next Month"
                     onAction={nextMonth}
                     shortcut={{
                       Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
@@ -98,15 +135,15 @@ export default function Command() {
                     }}
                   />
                   <Action
-                    title="ماه قبل"
+                    title="Previous Month"
                     onAction={previousMonth}
                     shortcut={{
                       Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
                     }}
                   />
-                  <Action title="بازگشت به امروز" onAction={jumpToToday} />
-                  <Action.CopyToClipboard title="کپی تاریخ شمسی" content={persianDate} />
+                  <Action title="Go to Today" onAction={jumpToToday} />
+                  <Action.CopyToClipboard title="Copy Gregorian Date" content={gregorianDate} />
                 </ActionPanel>
               }
             />

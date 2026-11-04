@@ -1,21 +1,22 @@
 import { environment, LaunchType, showHUD, updateCommandMetadata } from "@raycast/api";
-
+import { showFailureToast } from "@raycast/utils";
 import { faDigits, getIranToday, MONTH_NAMES } from "./jalali";
 
 export default async function Command() {
-  // Get today's date in Iran's timezone.
-  const today = getIranToday();
+  try {
+    const today = getIranToday();
+    const dateText = `امروز ${faDigits(today.jd)} ${MONTH_NAMES[today.jm - 1]} ${faDigits(today.jy)}`;
 
-  // Format the date using Persian month names and numerals.
-  const dateText = `امروز ${faDigits(today.jd)} ${MONTH_NAMES[today.jm - 1]} ${faDigits(today.jy)}`;
+    await updateCommandMetadata({ subtitle: dateText });
 
-  // Display the date beside the command in Raycast search.
-  await updateCommandMetadata({
-    subtitle: dateText,
-  });
-
-  // Show a notification only when the user launches the command.
-  if (environment.launchType === LaunchType.UserInitiated) {
-    await showHUD(dateText);
+    if (environment.launchType === LaunchType.UserInitiated) {
+      await showHUD(dateText);
+    }
+  } catch (error) {
+    if (environment.launchType === LaunchType.UserInitiated) {
+      await showFailureToast(error, { title: "Could Not Show Today's Date" });
+    } else {
+      console.error("Could not refresh the Persian date in the background", error);
+    }
   }
 }

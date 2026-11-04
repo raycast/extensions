@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Detail, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { isValidJalaaliDate } from "jalaali-js";
 import {
@@ -44,30 +45,25 @@ export default function Command() {
   }
 
   function convert() {
-    const y = parseNumber(year);
-    const m = parseNumber(month);
-    const d = parseNumber(day);
-    if (y === null || m === null || d === null) {
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "ورودی نامعتبر",
-        message: "سال، ماه و روز را با عدد وارد کنید.",
-      });
-      return;
-    }
-
     try {
+      const y = parseNumber(year);
+      const m = parseNumber(month);
+      const d = parseNumber(day);
+      if (y === null || m === null || d === null) {
+        throw new Error("Enter numbers for the year, month, and day.");
+      }
+
       let jy: number, jm: number, jd: number;
       let gy: number, gm: number, gd: number;
 
       if (direction === "jalali-to-gregorian") {
-        if (!isValidJalaaliDate(y, m, d)) throw new Error("تاریخ شمسی نامعتبر است.");
+        if (!isValidJalaaliDate(y, m, d)) throw new Error("Invalid Jalali date.");
         jy = y;
         jm = m;
         jd = d;
         ({ gy, gm, gd } = toGregorian(jy, jm, jd));
       } else {
-        if (!validGregorian(y, m, d)) throw new Error("تاریخ میلادی نامعتبر است (سال ۱۰۰۰ تا ۳۰۰۰).");
+        if (!validGregorian(y, m, d)) throw new Error("Invalid Gregorian date (year 1000–3000).");
         gy = y;
         gm = m;
         gd = d;
@@ -79,42 +75,37 @@ export default function Command() {
       const weekday = WEEKDAYS[weekdayIndex(gy, gm, gd)];
       push(
         <Detail
-          navigationTitle="نتیجه تبدیل تاریخ"
-          markdown={`# نتیجه تبدیل تاریخ\n\n**شمسی:** ${persian}\n\n**میلادی:** ${gregorian}\n\n**روز هفته:** ${weekday}\n\n**تاریخ کامل شمسی:** ${faDigits(jd)} ${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`}
+          navigationTitle="Date Conversion Result"
+          markdown={`# Date Conversion Result\n\n**Jalali:** ${persian}\n\n**Gregorian:** ${gregorian}\n\n**Weekday:** ${weekday}\n\n**Full Persian Date:** ${faDigits(jd)} ${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="کپی تاریخ شمسی" content={persian} />
-              <Action.CopyToClipboard title="کپی تاریخ میلادی" content={gregorian} />
+              <Action.CopyToClipboard title="Copy Jalali Date" content={persian} />
+              <Action.CopyToClipboard title="Copy Gregorian Date" content={gregorian} />
             </ActionPanel>
           }
         />,
       );
     } catch (error) {
-      void showToast({
-        style: Toast.Style.Failure,
-        title: "امکان تبدیل این تاریخ نیست",
-        message: error instanceof Error ? error.message : "تاریخ ورودی را بررسی کنید.",
-      });
+      void showFailureToast(error, { title: "Could Not Convert Date" });
     }
   }
 
   return (
     <Form
-      navigationTitle="تبدیل تاریخ شمسی و میلادی"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="تبدیل تاریخ" onSubmit={convert} />
+          <Action.SubmitForm title="Convert Date" onSubmit={convert} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="direction" title="نوع تبدیل" value={direction} onChange={changeDirection}>
-        <Form.Dropdown.Item value="jalali-to-gregorian" title="شمسی به میلادی" />
-        <Form.Dropdown.Item value="gregorian-to-jalali" title="میلادی به شمسی" />
+      <Form.Dropdown id="direction" title="Conversion Direction" value={direction} onChange={changeDirection}>
+        <Form.Dropdown.Item value="jalali-to-gregorian" title="Jalali to Gregorian" />
+        <Form.Dropdown.Item value="gregorian-to-jalali" title="Gregorian to Jalali" />
       </Form.Dropdown>
-      <Form.TextField id="year" title="سال" placeholder="مثلاً ۱۴۰۵" value={year} onChange={setYear} />
-      <Form.TextField id="month" title="ماه" placeholder="۱ تا ۱۲" value={month} onChange={setMonth} />
-      <Form.TextField id="day" title="روز" placeholder="۱ تا ۳۱" value={day} onChange={setDay} />
-      <Form.Description text="می‌توانید اعداد فارسی یا انگلیسی وارد کنید. محاسبات بدون اینترنت انجام می‌شود." />
+      <Form.TextField id="year" title="Year" placeholder="e.g. 1405" value={year} onChange={setYear} />
+      <Form.TextField id="month" title="Month" placeholder="1–12" value={month} onChange={setMonth} />
+      <Form.TextField id="day" title="Day" placeholder="1–31" value={day} onChange={setDay} />
+      <Form.Description text="Enter Persian or English numerals. Conversion works offline." />
     </Form>
   );
 }
