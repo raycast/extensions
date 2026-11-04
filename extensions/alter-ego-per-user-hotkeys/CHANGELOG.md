@@ -1,3 +1,3 @@
 # Alter Ego Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-04
