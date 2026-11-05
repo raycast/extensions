@@ -3,18 +3,32 @@ import { Action, ActionPanel, Grid, Icon, AI, environment } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
 import { SlackClient } from "./shared/client";
+import { useEmojiRanking, type EmojiEntry } from "./shared/useEmojiRanking";
 
 const DISPLAY_LIMIT = 1000;
 
-function EmojiItem({ name, url }: { name: string; url: string }) {
+function EmojiItem({
+  name,
+  url,
+  onUse,
+  onResetRanking,
+}: {
+  name: string;
+  url: string;
+  onUse: () => void;
+  onResetRanking: () => void;
+}) {
   return (
     <Grid.Item
       content={url}
       title={name}
       actions={
         <ActionPanel>
-          <Action.Paste content={name} />
-          <Action.CopyToClipboard content={name} />
+          <Action.Paste content={name} onPaste={onUse} />
+          <Action.CopyToClipboard content={name} onCopy={onUse} />
+          <ActionPanel.Section>
+            <Action icon={Icon.ArrowCounterClockwise} title="Reset Ranking" onAction={onResetRanking} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -27,7 +41,7 @@ function Command() {
 
   const { data, isLoading } = useCachedPromise(SlackClient.getWorkspaceEmojis);
 
-  const emojis = useMemo(() => Object.entries(data ?? {}), [data]);
+  const emojis = useMemo(() => Object.entries(data ?? {}) as EmojiEntry[], [data]);
 
   const filteredEmojis = useMemo(() => {
     if (!searchText) return emojis;
@@ -47,7 +61,7 @@ function Command() {
       .split(",")
       .map((name) => name.trim())
       .filter((name) => !!data?.[name])
-      .map((name) => [name, data?.[name]]) as Array<[string, string]>;
+      .map((name) => [name, data?.[name]]) as EmojiEntry[];
   }, [modelResponse, data]);
 
   const emojiEntries = useMemo(() => {
@@ -56,8 +70,11 @@ function Command() {
     return filteredEmojis;
   }, [searchText, emojis, filteredEmojis, aiEmojiEntries, executeAISearch]);
 
-  const visibleEmojis = useMemo(() => emojiEntries.slice(0, displayLimit), [emojiEntries, displayLimit]);
-  const hiddenCount = emojiEntries.length - visibleEmojis.length;
+  const { entries: rankedEmojis, visitItem, resetRanking } = useEmojiRanking(emojiEntries);
+
+  // Not memoized on purpose: the ranked array may keep its reference when the ranking changes.
+  const visibleEmojis = rankedEmojis.slice(0, displayLimit);
+  const hiddenCount = rankedEmojis.length - visibleEmojis.length;
 
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
@@ -72,8 +89,14 @@ function Command() {
       onSearchTextChange={handleSearchTextChange}
       throttle
     >
-      {visibleEmojis.map(([name, url]) => (
-        <EmojiItem key={name} name={name} url={url} />
+      {visibleEmojis.map((entry) => (
+        <EmojiItem
+          key={entry[0]}
+          name={entry[0]}
+          url={entry[1]}
+          onUse={() => visitItem(entry)}
+          onResetRanking={() => resetRanking(entry)}
+        />
       ))}
 
       {hiddenCount > 0 && (

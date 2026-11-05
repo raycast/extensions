@@ -1,5 +1,10 @@
 # Slack Changelog
 
+## [Rank frequently used emojis in Search Emojis] - {PR_MERGE_DATE}
+
+- Search Emojis now shows the emojis you paste or copy most often first, both when the command opens and while you search, like the frequently used section in Slack's own emoji picker. The ranking is kept per workspace on your machine.
+- Added a **Reset Ranking** action that moves a single emoji back to its original position.
+
 ## [Faster Channel Mentions] - 2026-11-02
 
 - The **Channels** mention search in AI Chat now reads the cached channel directory that Open Channel uses, instead of scanning every channel in the workspace on each keystroke. Your own channels are cached too, so the default list opens instantly.
