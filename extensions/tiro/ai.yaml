@@ -1,0 +1,53 @@
+instructions: |
+  - If a tool says the sign-in or API key was rejected, ask the user to sign in again from the Search Notes command, or to check the optional API key in the Tiro extension preferences. Never ask for a key or password in chat.
+  - Always call `search-notes` before `get-note` to get note IDs. Never invent IDs.
+  - For "latest", "last", or "today's" meetings, call `search-notes` without a keyword.
+  - Search with the words people would have said in the meeting. Many notes are in Korean or Japanese, so try the keyword in the meeting's language when an English keyword finds nothing.
+  - Answer from `get-note` output, not from titles alone. Set `includeTranscript` only for quotes, who-said-what, or details the summary leaves out.
+  - Cite the notes you used with their title and `url` as a markdown link.
+
+evals:
+  - input: "@tiro Summarize my last meeting"
+    mocks:
+      search-notes:
+        - id: "note-weekly-sync"
+          title: "Weekly product sync"
+          createdAt: "2026-10-30T06:37:00Z"
+          durationMinutes: 42
+          participants: ["Alex Kim", "Jordan Lee"]
+          url: "https://tiro.ooo/n/note-weekly-sync"
+      get-note:
+        id: "note-weekly-sync"
+        title: "Weekly product sync"
+        createdAt: "2026-10-30T06:37:00Z"
+        durationMinutes: 42
+        participants: ["Alex Kim", "Jordan Lee"]
+        url: "https://tiro.ooo/n/note-weekly-sync"
+        summary: "- Launch the beta next Tuesday\n- Alex owns the release notes"
+    expected:
+      - callsTool: "search-notes"
+      - callsTool: "get-note"
+  - input: "@tiro What did we decide about pricing?"
+    mocks:
+      search-notes:
+        - id: "note-pricing"
+          title: "Pricing review"
+          createdAt: "2026-10-28T02:00:00Z"
+          durationMinutes: 55
+          participants: ["Alex Kim", "Jordan Lee"]
+          url: "https://tiro.ooo/n/note-pricing"
+      get-note:
+        id: "note-pricing"
+        title: "Pricing review"
+        createdAt: "2026-10-28T02:00:00Z"
+        durationMinutes: 55
+        participants: ["Alex Kim", "Jordan Lee"]
+        url: "https://tiro.ooo/n/note-pricing"
+        summary: "- Keep the current plans this quarter\n- Test a yearly plan in one market first"
+    expected:
+      - callsTool:
+          name: "search-notes"
+          arguments:
+            keyword:
+              includes: "pricing"
+      - callsTool: "get-note"
