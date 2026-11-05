@@ -1,6 +1,6 @@
 # Ghosthand Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-05
 
 - View connected iPhones, setup requirements, and active lease holders.
 - Run confirmed Ghosthand-hosted tasks with progress, results, and cancellation.
