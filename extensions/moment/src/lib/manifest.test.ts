@@ -1,7 +1,7 @@
 // The manifest, the AI file and the Store's files, as the ticket fixes them.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { basename, join, relative } from "node:path";
 import { test } from "node:test";
 import { COMMAND_FILE_NAMES, COMMAND_TITLES as SIRI_TITLES, COMMANDS, type Command } from "./timer.ts";
 
@@ -134,11 +134,20 @@ test("store_noProFeatureOrUpsellInTheExtension", () => {
   }
 });
 
-test("store_readmeChangelogAndLicenseArePresent", () => {
+test("store_readmeAndChangelogArePresent", () => {
   assert.ok(existsSync(join(ROOT, "README.md")));
   const changelog = readFileSync(join(ROOT, "CHANGELOG.md"), "utf8");
   assert.match(changelog, /^# Moment Changelog\n\n## \[Initial Version\] - \{PR_MERGE_DATE\}\n/);
-  assert.match(readFileSync(join(ROOT, "LICENSE"), "utf8"), /^MIT License\n/);
+});
+
+// FF-1318 (the Store's review): raycast/extensions' own MIT licence covers
+// every extension, so the manifest's "license": "MIT" stands alone.
+test("store_noLicenseFile_theRepositorysLicenceCoversTheExtension", () => {
+  const licences = storeFiles().filter((path) => /^licen[cs]e(\.|$)/i.test(basename(path)));
+  assert.deepEqual(
+    licences.map((path) => relative(ROOT, path)),
+    [],
+  );
 });
 
 for (const name of ["icon.png", "icon@dark.png"]) {

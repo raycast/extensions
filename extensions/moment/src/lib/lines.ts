@@ -6,7 +6,15 @@
 // own (FF-1281, US English only).
 
 import { NOT_WHOLE_MINUTES, OVER_THE_MAXIMUM, toolMinutes } from "./minutes.ts";
-import { MOMENT_ERROR, SYSTEM_ERROR, type Command, type Reply, type TimerInfo } from "./timer.ts";
+import {
+  isSetapp,
+  MOMENT_ERROR,
+  SYSTEM_ERROR,
+  type Command,
+  type MomentBundleId,
+  type Reply,
+  type TimerInfo,
+} from "./timer.ts";
 
 // Siri's lines.
 const NOT_READY = "Moment is not ready yet. Please open the app first.";
@@ -17,7 +25,6 @@ const ALREADY_PAUSED = "The timer is already paused.";
 const ALREADY_RUNNING = "The timer is already running.";
 // FF-1280's lines.
 const START_DID_NOT_RUN = "The focus session didn't start.";
-const COULD_NOT_COMPLETE = "Moment couldn't complete the command.";
 // This extension's own.
 const SESSION_IN_PROGRESS = "A focus session or break is already in progress.";
 const NO_ANSWER_IN_TIME = "Moment didn't answer in time.";
@@ -106,11 +113,14 @@ export const NOT_INSTALLED: Failure = {
   action: "openAppStore",
 };
 
-const TOO_OLD: Failure = {
-  title: "This version of Moment doesn't support Raycast.",
-  message: "Update Moment from the App Store.",
-  action: "openAppStore",
-};
+const TOO_OLD = "This version of Moment doesn't support Raycast.";
+
+/** A Moment from before the dictionary: updated from the App Store, or by Setapp itself, with nothing to open. */
+function tooOld(bundleId: MomentBundleId): Failure {
+  return isSetapp(bundleId)
+    ? { title: TOO_OLD, message: "Update Moment in Setapp." }
+    : { title: TOO_OLD, message: "Update Moment from the App Store.", action: "openAppStore" };
+}
 
 const NOT_PERMITTED: Failure = {
   title: "Raycast isn't allowed to control Moment.",
@@ -118,21 +128,31 @@ const NOT_PERMITTED: Failure = {
   action: "openAutomationSettings",
 };
 
-/** Why a command did nothing, read from the error's number and the command, never from its text. */
-export function failureFor(command: Command, reply: Exclude<Reply, { type: "timer" }>): Failure {
+/** FF-1280's line for a reply that can't be read, or a run that never got one. */
+export const COULD_NOT_COMPLETE: Failure = { title: "Moment couldn't complete the command." };
+
+/**
+ * Why a command did nothing, read from the error's number and the command,
+ * never from its text, and from the Moment asked, which says where to update it.
+ */
+export function failureFor(
+  command: Command,
+  reply: Exclude<Reply, { type: "timer" }>,
+  bundleId: MomentBundleId,
+): Failure {
   switch (reply.type) {
     case "refusedInFlight":
       return { title: inFlightLine(reply.inFlight) };
     case "timedOut":
       return { title: NO_ANSWER_IN_TIME };
     case "unreadable":
-      return { title: COULD_NOT_COMPLETE };
+      return COULD_NOT_COMPLETE;
     case "error":
-      return failureForNumber(command, reply.number);
+      return failureForNumber(command, reply.number, bundleId);
   }
 }
 
-function failureForNumber(command: Command, number: number): Failure {
+function failureForNumber(command: Command, number: number, bundleId: MomentBundleId): Failure {
   switch (number) {
     case MOMENT_ERROR.notReady:
       return { title: NOT_READY };
@@ -153,7 +173,7 @@ function failureForNumber(command: Command, number: number): Failure {
       // The minutes are checked first, so this can't happen.
       return { title: NOT_WHOLE_MINUTES };
     case SYSTEM_ERROR.eventNotHandled:
-      return TOO_OLD;
+      return tooOld(bundleId);
     case SYSTEM_ERROR.notPermitted:
       return NOT_PERMITTED;
     case SYSTEM_ERROR.timedOut:
@@ -161,7 +181,7 @@ function failureForNumber(command: Command, number: number): Failure {
     case SYSTEM_ERROR.applicationNotFound:
       return NOT_INSTALLED;
     default:
-      return { title: COULD_NOT_COMPLETE };
+      return COULD_NOT_COMPLETE;
   }
 }
 

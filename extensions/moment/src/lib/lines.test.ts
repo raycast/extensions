@@ -113,6 +113,10 @@ test("successLine_checkTimerFinished_isSirisAlreadyFinished", () => {
 
 const error = (number: number, message = "") => ({ type: "error", number, message }) as const;
 
+// The Moment asked (FF-1311): the App Store's or Setapp's (FF-1309).
+const APP_STORE = "studio.lumi.moment";
+const SETAPP = "studio.lumi.moment-setapp";
+
 for (const [inFlight, title] of [
   [runningFocus, "A focus session is already running, with 12 minutes left."],
   [pausedFocus, "A focus session is paused, with 12 minutes left."],
@@ -120,19 +124,19 @@ for (const [inFlight, title] of [
   [pausedBreak, "A break is paused, with 40 seconds left."],
 ] as const) {
   test(`failureFor_startRefused${inFlight.state}${inFlight.kind}_namesTheSessionInFlight`, () => {
-    assert.deepEqual(failureFor("startFocus", { type: "refusedInFlight", inFlight }), { title });
+    assert.deepEqual(failureFor("startFocus", { type: "refusedInFlight", inFlight }, APP_STORE), { title });
   });
 }
 
 test("failureFor_startRefusedWithoutTheTimerRead_saysSomethingIsInProgress", () => {
-  assert.deepEqual(failureFor("startFocus", error(1006)), {
+  assert.deepEqual(failureFor("startFocus", error(1006), APP_STORE), {
     title: "A focus session or break is already in progress.",
   });
 });
 
 for (const command of COMMANDS) {
   test(`failureFor_${command}NotReady_isSirisLine`, () => {
-    assert.deepEqual(failureFor(command, error(1001)), {
+    assert.deepEqual(failureFor(command, error(1001), APP_STORE), {
       title: "Moment is not ready yet. Please open the app first.",
     });
   });
@@ -140,12 +144,12 @@ for (const command of COMMANDS) {
 
 for (const command of ["pauseTimer", "addTime", "stopTimer"] as const) {
   test(`failureFor_${command}WithNothingInFlight_isSirisNothingRunning`, () => {
-    assert.deepEqual(failureFor(command, error(1002)), { title: "No timer is currently running" });
+    assert.deepEqual(failureFor(command, error(1002), APP_STORE), { title: "No timer is currently running" });
   });
 }
 
 test("failureFor_resumeWithNothingInFlight_isSirisNothingPaused", () => {
-  assert.deepEqual(failureFor("resumeTimer", error(1002)), { title: "No timer is paused" });
+  assert.deepEqual(failureFor("resumeTimer", error(1002), APP_STORE), { title: "No timer is paused" });
 });
 
 for (const [number, title] of [
@@ -156,20 +160,39 @@ for (const [number, title] of [
   [-1700, "Moment takes whole minutes from 1 to 90."],
 ] as const) {
   test(`failureFor_${number}_is${title.replace(/\W/g, "")}`, () => {
-    assert.deepEqual(failureFor("pauseTimer", error(number)), { title });
+    assert.deepEqual(failureFor("pauseTimer", error(number), APP_STORE), { title });
   });
 }
 
-test("failureFor_eventNotHandled_saysToUpdateMomentWithTheAppStore", () => {
-  assert.deepEqual(failureFor("pauseTimer", error(-1708)), {
+test("failureFor_eventNotHandledByTheAppStoresMoment_saysToUpdateItFromTheAppStore", () => {
+  assert.deepEqual(failureFor("pauseTimer", error(-1708), APP_STORE), {
     title: "This version of Moment doesn't support Raycast.",
     message: "Update Moment from the App Store.",
     action: "openAppStore",
   });
 });
 
+// FF-1318: Setapp updates its own Moment, so there's no store to open.
+test("failureFor_eventNotHandledBySetappsMoment_saysToUpdateItInSetappWithNoAction", () => {
+  assert.deepEqual(failureFor("pauseTimer", error(-1708), SETAPP), {
+    title: "This version of Moment doesn't support Raycast.",
+    message: "Update Moment in Setapp.",
+  });
+});
+
+for (const reply of [
+  ...[1001, 1002, 1003, 1004, 1005, 1006, 1007, -1700, -1712, -1743, -10814, -10000].map((number) => error(number)),
+  { type: "refusedInFlight", inFlight: runningFocus } as const,
+  { type: "timedOut" } as const,
+  { type: "unreadable" } as const,
+]) {
+  test(`failureFor_${JSON.stringify(reply.type === "error" ? reply.number : reply.type)}_isTheSameForEitherMoment`, () => {
+    assert.deepEqual(failureFor("resumeTimer", reply, SETAPP), failureFor("resumeTimer", reply, APP_STORE));
+  });
+}
+
 test("failureFor_automationRefused_saysWhereToAllowIt", () => {
-  assert.deepEqual(failureFor("checkTimer", error(-1743)), {
+  assert.deepEqual(failureFor("checkTimer", error(-1743), APP_STORE), {
     title: "Raycast isn't allowed to control Moment.",
     message: "Allow it in System Settings › Privacy & Security › Automation › Raycast › Moment.",
     action: "openAutomationSettings",
@@ -177,12 +200,14 @@ test("failureFor_automationRefused_saysWhereToAllowIt", () => {
 });
 
 test("failureFor_appleEventTimeoutAndProcessTimeout_areTheSameLine", () => {
-  assert.deepEqual(failureFor("startFocus", error(-1712)), { title: "Moment didn't answer in time." });
-  assert.deepEqual(failureFor("startFocus", { type: "timedOut" }), { title: "Moment didn't answer in time." });
+  assert.deepEqual(failureFor("startFocus", error(-1712), APP_STORE), { title: "Moment didn't answer in time." });
+  assert.deepEqual(failureFor("startFocus", { type: "timedOut" }, APP_STORE), {
+    title: "Moment didn't answer in time.",
+  });
 });
 
 test("failureFor_applicationNotFound_isNotInstalled", () => {
-  assert.deepEqual(failureFor("stopTimer", error(-10814)), NOT_INSTALLED);
+  assert.deepEqual(failureFor("stopTimer", error(-10814), APP_STORE), NOT_INSTALLED);
 });
 
 test("notInstalled_linksToTheAppStore", () => {
@@ -195,14 +220,14 @@ test("notInstalled_linksToTheAppStore", () => {
 
 for (const reply of [error(-10000), error(-600), error(-2741), error(42), { type: "unreadable" } as const]) {
   test(`failureFor_${JSON.stringify(reply)}_isCouldNotComplete`, () => {
-    assert.deepEqual(failureFor("addTime", reply), { title: "Moment couldn't complete the command." });
+    assert.deepEqual(failureFor("addTime", reply, APP_STORE), { title: "Moment couldn't complete the command." });
   });
 }
 
 test("failureFor_aNumberWithAnyMessage_isTheSameFailure", () => {
   assert.deepEqual(
-    failureFor("pauseTimer", error(1004, "The timer is already paused.")),
-    failureFor("pauseTimer", error(1004, "Le minuteur est déjà en pause.")),
+    failureFor("pauseTimer", error(1004, "The timer is already paused."), APP_STORE),
+    failureFor("pauseTimer", error(1004, "Le minuteur est déjà en pause."), APP_STORE),
   );
 });
 

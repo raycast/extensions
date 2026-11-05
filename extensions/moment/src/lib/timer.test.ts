@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { MOMENT_BUNDLE_IDS, parseReply, parseRunning, type ScriptOutput } from "./timer.ts";
+import { isSetapp, MOMENT_BUNDLE_IDS, parseReply, parseRunning, type ScriptOutput } from "./timer.ts";
 
 const printed = (stdout: string): ScriptOutput => ({ stdout, stderr: "", exitCode: 0, timedOut: false });
 
@@ -105,6 +105,15 @@ const SETAPP = "studio.lumi.moment-setapp";
 
 test("MOMENT_BUNDLE_IDS_bothMacApps_areTheAppStoresThenSetapps", () => {
   assert.deepEqual(MOMENT_BUNDLE_IDS, [APP_STORE, SETAPP]);
+});
+
+// FF-1318: where a Moment too old for Raycast is updated.
+test("isSetapp_theAppStoresMoment_isFalse", () => {
+  assert.equal(isSetapp(APP_STORE), false);
+});
+
+test("isSetapp_setappsMoment_isTrue", () => {
+  assert.equal(isSetapp(SETAPP), true);
 });
 
 test("parseRunning_twoPrinted_isBothInTheirOrder", () => {

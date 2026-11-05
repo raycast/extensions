@@ -1,10 +1,17 @@
 // Pure: no @raycast import, so `node --test` loads it. What a command and a
 // tool do, with Raycast's and AppleScript's effects handed in by src/moment.ts.
 
-import { failureFor, NOT_INSTALLED, successLine, WAITING_FOR_MOMENT, type Failure } from "./lines.ts";
+import {
+  COULD_NOT_COMPLETE,
+  failureFor,
+  NOT_INSTALLED,
+  successLine,
+  WAITING_FOR_MOMENT,
+  type Failure,
+} from "./lines.ts";
 import { parseMinutes, toolMinutes } from "./minutes.ts";
 import { argumentsFor, scriptFor } from "./scripts.ts";
-import { MOMENT_BUNDLE_IDS, type Command, type Reply, type TimerInfo } from "./timer.ts";
+import { MOMENT_BUNDLE_IDS, type Command, type MomentBundleId, type Reply, type TimerInfo } from "./timer.ts";
 import { toolErrorText, toolOutput, type ToolTimer } from "./tool-output.ts";
 
 export type Outcome = { ok: true; timer: TimerInfo } | { ok: false; failure: Failure };
@@ -40,7 +47,7 @@ export type CommandFeedback = {
  * launched. Undefined when neither is installed. The running check runs only
  * with both, and one that fails counts as none running.
  */
-export async function chooseBundleId(effects: ChoiceEffects): Promise<string | undefined> {
+export async function chooseBundleId(effects: ChoiceEffects): Promise<MomentBundleId | undefined> {
   const installed = new Set(await effects.installedBundleIds());
   const moments = MOMENT_BUNDLE_IDS.filter((bundleId) => installed.has(bundleId));
   if (moments.length < 2) return moments[0];
@@ -58,7 +65,7 @@ async function runningAmong(effects: ChoiceEffects, moments: string[]): Promise<
   }
 }
 
-/** Chooses the Moment installed, then runs the command's one script on it. Never throws. */
+/** Chooses the Moment installed, then runs the command's one script on it; a failure names that Moment's store. Never throws. */
 export async function askWith(effects: AskEffects, command: Command, minutes: number | undefined): Promise<Outcome> {
   try {
     const bundleId = await chooseBundleId(effects);
@@ -66,10 +73,10 @@ export async function askWith(effects: AskEffects, command: Command, minutes: nu
     const reply = await effects.runScript(scriptFor(command), argumentsFor(bundleId, minutes));
     if (reply.type === "timer") return { ok: true, timer: reply.timer };
     if (reply.type === "error") effects.log(`Moment answered ${command} with error ${reply.number}: ${reply.message}`);
-    return { ok: false, failure: failureFor(command, reply) };
+    return { ok: false, failure: failureFor(command, reply, bundleId) };
   } catch (error) {
     effects.log(`Moment's ${command} didn't run: ${String(error)}`);
-    return { ok: false, failure: failureFor(command, { type: "unreadable" }) };
+    return { ok: false, failure: COULD_NOT_COMPLETE };
   }
 }
 

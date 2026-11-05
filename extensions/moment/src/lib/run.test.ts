@@ -265,3 +265,55 @@ test("askWith_anInstalledCheckThatThrows_isCouldNotComplete", async () => {
   assert.deepEqual(outcome, { ok: false, failure: { title: "Moment couldn't complete the command." } });
   assert.deepEqual(runs, []);
 });
+
+// The update line (FF-1318): a Moment from before the dictionary answers
+// -1708, and the line names whatever updates the Moment that was asked.
+
+const TOO_OLD = "This version of Moment doesn't support Raycast.";
+
+/** This fake Mac's chosen Moment, answering every script with -1708. */
+function tooOldAsk(installed: string[], running: string[] = []): Ask {
+  const { runScript } = fakeScript({ type: "error", number: -1708, message: "" });
+  return (command, minutes) => askWith({ ...fakeMac(installed, running).effects, runScript }, command, minutes);
+}
+
+/** A Raycast window that keeps each failure whole: its title, message and action. */
+function failuresShown() {
+  const failures: Failure[] = [];
+  const feedback: CommandFeedback = {
+    waiting: async () => (failure: Failure) => failures.push(failure),
+    hud: async () => {},
+    failure: async (failure) => {
+      failures.push(failure);
+    },
+  };
+  return { feedback, failures };
+}
+
+const APP_STORE_UPDATE: Failure = {
+  title: TOO_OLD,
+  message: "Update Moment from the App Store.",
+  action: "openAppStore",
+};
+const SETAPP_UPDATE: Failure = { title: TOO_OLD, message: "Update Moment in Setapp." };
+
+for (const [situation, installed, running, failure, toolError] of [
+  ["appStoreAlone", [APP_STORE], [], APP_STORE_UPDATE, `${TOO_OLD} Update Moment from the App Store.`],
+  ["setappAlone", [SETAPP], [], SETAPP_UPDATE, `${TOO_OLD} Update Moment in Setapp.`],
+  ["bothSetappRunning", [APP_STORE, SETAPP], [SETAPP], SETAPP_UPDATE, `${TOO_OLD} Update Moment in Setapp.`],
+] as const) {
+  test(`askWith_${situation}TooOld_saysToUpdateTheMomentAsked`, async () => {
+    const outcome = await tooOldAsk([...installed], [...running])("pauseTimer", undefined);
+    assert.deepEqual(outcome, { ok: false, failure });
+  });
+
+  test(`runCommandWith_${situation}TooOld_turnsTheWaitingToastIntoItsUpdateLine`, async () => {
+    const { feedback, failures } = failuresShown();
+    await runCommandWith(tooOldAsk([...installed], [...running]), feedback, "startFocus", "25");
+    assert.deepEqual(failures, [failure]);
+  });
+
+  test(`runToolWith_${situation}TooOld_throwsItsUpdateLine`, async () => {
+    await assert.rejects(runToolWith(tooOldAsk([...installed], [...running]), "checkTimer"), { message: toolError });
+  });
+}

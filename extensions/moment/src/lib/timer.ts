@@ -1,7 +1,15 @@
 // Pure: no @raycast import, so `node --test` loads it.
 
 /** Moment for Mac's bundle ids, the App Store's first, then Setapp's (FF-1309): the one place they live. */
-export const MOMENT_BUNDLE_IDS: readonly string[] = ["studio.lumi.moment", "studio.lumi.moment-setapp"];
+export const MOMENT_BUNDLE_IDS = ["studio.lumi.moment", "studio.lumi.moment-setapp"] as const;
+
+/** The Moment asked: one of MOMENT_BUNDLE_IDS. */
+export type MomentBundleId = (typeof MOMENT_BUNDLE_IDS)[number];
+
+/** Setapp's Moment, which Setapp updates rather than the App Store. */
+export function isSetapp(bundleId: MomentBundleId): boolean {
+  return bundleId === "studio.lumi.moment-setapp";
+}
 
 /** FF-1280's commands (MomentMac/Moment.sdef), by the names MomentCore gives them. */
 export type Command = "startFocus" | "pauseTimer" | "resumeTimer" | "addTime" | "stopTimer" | "checkTimer";
