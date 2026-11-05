@@ -122,16 +122,15 @@ function usesDefaultChromeDataDir(command: string): boolean {
   if (index === -1) {
     return true;
   }
-  // `ps` prints arguments unquoted and the path itself contains spaces, so the value runs until
-  // the next flag. Compare the whole directory, not a prefix: "…/Google/Chrome-testing" is a
-  // separate browser session and must be left alone.
-  const value = command
-    .slice(index + flag.length)
-    .split(" --")[0]
-    .trim()
-    .replace(/^["']|["']$/g, "")
-    .replace(/\/+$/, "");
-  return value === CHROME_DEFAULT_DATA_DIR;
+  // `ps` prints arguments unquoted and space-separated, and the path itself contains spaces, so
+  // the value cannot be split reliably. Instead require the exact default dir followed by the end
+  // of the line or a space (the next flag or a URL): "…/Google/Chrome-testing" is a separate
+  // browser session and must be left alone.
+  const value = command.slice(index + flag.length).replace(/^["']/, "");
+  if (!value.startsWith(CHROME_DEFAULT_DATA_DIR)) {
+    return false;
+  }
+  return /^\/?["']?(\s|$)/.test(value.slice(CHROME_DEFAULT_DATA_DIR.length));
 }
 
 function getDefaultProfileChromePids(): number[] {
