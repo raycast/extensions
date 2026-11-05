@@ -68,6 +68,14 @@ export function parseNetwork(stdout: string): NetworkReport {
  * The address someone means when they ask what theirs is: routable, not
  * loopback and not link-local.
  */
+/** A VPN that is only configured changes nothing about the traffic right now. */
+export function splitVpns(vpns: Vpn[]): { connected: Vpn[]; idle: Vpn[] } {
+	return {
+		connected: vpns.filter((v) => v.state === "connected"),
+		idle: vpns.filter((v) => v.state !== "connected"),
+	};
+}
+
 export function primaryAddress(n: NetworkReport): Interface | null {
 	return n.interfaces.find((i) => i.family === "inet" && i.kind !== "Loopback" && i.kind !== "LinkLocal") ?? null;
 }

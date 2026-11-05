@@ -20,24 +20,36 @@ export type EnvReport = {
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
+/** macOS adds these through /etc/paths.d/10-cryptex, and they are often absent. */
+const isCryptexEntry = (path: string) => path.startsWith("/var/run/com.apple.security.cryptexd/");
+
+/** On the sealed system volume: nobody can remove these, root included. */
+const isSealedLink = (link: string) =>
+	["/System/", "/bin/", "/sbin/", "/usr/"].some((root) => link.startsWith(root)) && !link.startsWith("/usr/local/");
+
 export function parseEnv(stdout: string): EnvReport {
 	const r = expectObject(stdout, "env");
 	return {
 		path: Array.isArray(r.path)
-			? r.path.map((v) => {
-					const p = (v ?? {}) as Record<string, unknown>;
-					return { path: str(p.path), exists: p.exists === true };
-				})
+			? r.path
+					.map((v) => {
+						const p = (v ?? {}) as Record<string, unknown>;
+						return { path: str(p.path), exists: p.exists === true };
+					})
+					// Dropped here so that no count or action can offer them as problems.
+					.filter((p) => p.exists || !isCryptexEntry(p.path))
 			: [],
 		broken_symlinks: Array.isArray(r.broken_symlinks)
-			? r.broken_symlinks.map((v) => {
-					const b = (v ?? {}) as Record<string, unknown>;
-					return {
-						name: str(b.name),
-						link: str(b.link),
-						target: str(b.target),
-					};
-				})
+			? r.broken_symlinks
+					.map((v) => {
+						const b = (v ?? {}) as Record<string, unknown>;
+						return {
+							name: str(b.name),
+							link: str(b.link),
+							target: str(b.target),
+						};
+					})
+					.filter((b) => !isSealedLink(b.link))
 			: [],
 		duplicates: Array.isArray(r.duplicates) ? r.duplicates.filter((d): d is string => typeof d === "string") : [],
 		tools: Array.isArray(r.tools)

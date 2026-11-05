@@ -62,3 +62,19 @@ test("paths are shown relative to home", () => {
 	// /Users/meredith must not be rewritten as ~redith.
 	assert.equal(shortPath("/Users/meredith/x", "/Users/me"), "/Users/meredith/x");
 });
+
+test("a detached HEAD in a tool's hidden checkout is how the tool works", () => {
+	const nvm = {
+		name: ".nvm",
+		path: "/Users/x/.nvm",
+		uncommitted: 0,
+		unpushed: 0,
+		stashed: 0,
+		detached_head: true,
+		no_upstream: 1,
+	};
+	assert.equal(repoLevel(nvm), "loose");
+	assert.equal(summarise(nvm), "1 branch with no upstream");
+	assert.equal(repoLevel({ ...nvm, name: "app" }), "detached");
+	assert.equal(repoLevel({ ...nvm, unpushed: 2 }), "unpushed");
+});

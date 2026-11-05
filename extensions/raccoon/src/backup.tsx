@@ -7,6 +7,7 @@ import { health, humanAge, parseBackup, type BackupHealth, type BackupReport } f
 
 const TINT: Record<BackupHealth, Color> = {
 	never: Color.Red,
+	disconnected: Color.Orange,
 	fresh: Color.Green,
 	late: Color.Orange,
 	overdue: Color.Red,
@@ -17,6 +18,7 @@ const HEADLINE: Record<BackupHealth, string> = {
 	// on a Mac holding two dozen hourly local snapshots — which are backups,
 	// and are why a disk does not empty. The row below tells the other half.
 	never: "No backup to an external disk",
+	disconnected: "Backup disk not connected",
 	fresh: "Backed up",
 	late: "Backup is a few days old",
 	overdue: "Backup is more than a week old",
@@ -56,7 +58,10 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 					accessories={[
 						{
 							tag: {
-								value: humanAge(b.last_backup.hours_ago),
+								value:
+									state === "disconnected"
+										? "last backup unknown"
+										: humanAge(b.last_backup.hours_ago),
 								color: TINT[state],
 							},
 						},

@@ -73,3 +73,20 @@ test("an rcc too old to report snapshots reads as not checked, not as none", () 
 	assert.equal(r.local_snapshots.available, false);
 	assert.equal(r.local_snapshots.count, 0);
 });
+
+test("a destination with local snapshots and no answer is a disk not connected", () => {
+	const base = {
+		destination: { configured: true, name: "Disk", kind: "Local" },
+		last_backup: { date: "", hours_ago: -1 },
+		local_snapshots: { available: true, count: 11 },
+	};
+	assert.equal(health(parseBackup(JSON.stringify(base))), "disconnected");
+	assert.equal(
+		health(parseBackup(JSON.stringify({ ...base, local_snapshots: { available: true, count: 0 } }))),
+		"never",
+	);
+	assert.equal(
+		health(parseBackup(JSON.stringify({ ...base, destination: { configured: false, name: "", kind: "" } }))),
+		"never",
+	);
+});

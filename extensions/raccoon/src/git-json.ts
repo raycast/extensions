@@ -28,9 +28,12 @@ export type GitReport = {
  */
 export type RepoLevel = "unpushed" | "detached" | "uncommitted" | "loose";
 
+/** Tools such as nvm keep a hidden checkout on a tag: detached is how they work. */
+const detachedMatters = (repo: GitRepo) => repo.detached_head && !repo.name.startsWith(".");
+
 export function repoLevel(repo: GitRepo): RepoLevel {
 	if (repo.unpushed > 0) return "unpushed";
-	if (repo.detached_head) return "detached";
+	if (detachedMatters(repo)) return "detached";
 	if (repo.uncommitted > 0) return "uncommitted";
 	return "loose";
 }
@@ -59,7 +62,7 @@ export function sortRepos(repos: GitRepo[]): GitRepo[] {
 export function summarise(repo: GitRepo): string {
 	const parts: string[] = [];
 	if (repo.unpushed > 0) parts.push(`${repo.unpushed} unpushed`);
-	if (repo.detached_head) parts.push("detached HEAD");
+	if (detachedMatters(repo)) parts.push("detached HEAD");
 	if (repo.uncommitted > 0) parts.push(`${repo.uncommitted} uncommitted`);
 	if (repo.stashed > 0) parts.push(`${repo.stashed} stashed`);
 	if (repo.no_upstream > 0)

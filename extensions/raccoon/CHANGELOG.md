@@ -1,5 +1,12 @@
 # Raccoon Changelog
 
+## [Fewer False Alarms] - {PR_MERGE_DATE}
+
+- Environment no longer lists what belongs to macOS as a problem: its cryptex PATH entries, and broken symlinks on the sealed system volume, which nothing can remove.
+- Backup says the disk is not connected when it is configured and in use, instead of saying there is no backup.
+- Git no longer flags the detached HEAD of a tool's hidden checkout, such as `.nvm`.
+- Network lists a VPN under "In the way" only while it is connected.
+
 ## [Docs] - 2026-11-04
 
 - Add a link to the issue tracker in the README.

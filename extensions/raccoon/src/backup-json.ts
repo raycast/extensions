@@ -50,7 +50,7 @@ export function parseBackup(stdout: string): BackupReport {
 	};
 }
 
-export type BackupHealth = "never" | "fresh" | "late" | "overdue";
+export type BackupHealth = "never" | "disconnected" | "fresh" | "late" | "overdue";
 
 /**
  * A day is fine, a week is late, beyond that the backup is not protecting
@@ -58,7 +58,10 @@ export type BackupHealth = "never" | "fresh" | "late" | "overdue";
  */
 export function health(b: BackupReport): BackupHealth {
 	const hours = b.last_backup.hours_ago;
-	if (hours < 0) return "never";
+	if (hours < 0) {
+		// tmutil cannot answer for an unmounted disk, and snapshots show it has been used.
+		return b.destination.configured && b.local_snapshots.count > 0 ? "disconnected" : "never";
+	}
 	if (hours < 24) return "fresh";
 	if (hours < 168) return "late";
 	return "overdue";

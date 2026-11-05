@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isNoise, parseNetwork, primaryAddress } from "./network-json.ts";
+import { isNoise, parseNetwork, primaryAddress, splitVpns } from "./network-json.ts";
 
 const full = JSON.stringify({
 	interfaces: [
@@ -52,4 +52,19 @@ test("an unknown vpn state is read as configured, not as connected", () => {
 
 test("output that is not JSON says so", () => {
 	assert.throws(() => parseNetwork("-- Network Status"), /did not print JSON/);
+});
+
+test("only a connected VPN is in the way", () => {
+	const { connected, idle } = splitVpns([
+		{ name: "Work", state: "connected" },
+		{ name: "Tailscale", state: "configured" },
+	]);
+	assert.deepEqual(
+		connected.map((v) => v.name),
+		["Work"],
+	);
+	assert.deepEqual(
+		idle.map((v) => v.name),
+		["Tailscale"],
+	);
 });

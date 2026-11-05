@@ -38,3 +38,32 @@ test("a version is trimmed to the part that identifies it", () => {
 test("output that is not JSON says so", () => {
 	assert.throws(() => parseEnv("-- PATH Entries"), /did not print JSON/);
 });
+
+test("what belongs to macOS is not the reader's problem", () => {
+	const report = parseEnv(
+		JSON.stringify({
+			path: [
+				{ path: "/usr/bin", exists: true },
+				{ path: "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin", exists: false },
+				{ path: "/gone", exists: false },
+			],
+			broken_symlinks: [
+				{
+					name: "weakpass_edit",
+					link: "/usr/sbin/weakpass_edit",
+					target: "/usr/sbin/authserver/tools/weakpass",
+				},
+				{ name: "cagent", link: "/usr/local/bin/cagent", target: "/nowhere" },
+			],
+		}),
+	);
+	assert.deepEqual(
+		report.path.map((p) => p.path),
+		["/usr/bin", "/gone"],
+	);
+	assert.deepEqual(
+		report.broken_symlinks.map((b) => b.name),
+		["cagent"],
+	);
+	assert.equal(problems(report), 2);
+});
