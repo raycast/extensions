@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cmarks",
-  "title": "cmarks",
+  "title": "Cmarks",
   "description": "Search and open Markdown files from your cmarks workspaces, reopen recent files, and send Finder selections to cmarks.",
   "icon": "icon.png",
   "author": "changhyun_yoo",
@@ -12,7 +12,7 @@
     {
       "name": "search",
       "title": "Search Markdown Files",
-      "subtitle": "cmarks",
+      "subtitle": "Cmarks",
       "description": "Search Markdown files in every cmarks workspace and open one in cmarks.",
       "mode": "view",
       "keywords": ["markdown", "md", "readme", "docs", "workspace"]
@@ -20,14 +20,14 @@
     {
       "name": "recent",
       "title": "Open Recent File",
-      "subtitle": "cmarks",
+      "subtitle": "Cmarks",
       "description": "Reopen a Markdown file you read recently in cmarks.",
       "mode": "view"
     },
     {
       "name": "open-finder-selection",
-      "title": "Open Finder Selection in cmarks",
-      "subtitle": "cmarks",
+      "title": "Open Finder Selection in Cmarks",
+      "subtitle": "Cmarks",
       "description": "Open the files and folders selected in the Finder with cmarks. Folders become workspaces.",
       "mode": "no-view"
     }

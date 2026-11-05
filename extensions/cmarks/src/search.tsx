@@ -1,17 +1,20 @@
-import { Action, ActionPanel, Icon, Keyboard, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { abbreviateHome, BUNDLE_ID, listMarkdownFiles, loadFilter, loadWorkspaces, MarkdownFile } from "./cmarks";
+import { APP_STORE_URL, GITHUB_URL, isCmarksInstalled, launchCmarks, openInCmarks } from "./app";
+import { abbreviateHome, listMarkdownFiles, loadFilter, loadWorkspaces, MarkdownFile } from "./cmarks";
 
 export default function Command() {
-  const { data, isLoading, error } = usePromise(async () => {
-    const [workspaces, filter] = await Promise.all([loadWorkspaces(), loadFilter()]);
-    const files = await listMarkdownFiles(workspaces, filter);
-    return { workspaces, files };
-  });
-
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Couldn't read cmarks workspaces", message: String(error) });
-  }
+  const { data, isLoading } = usePromise(
+    async () => {
+      const installed = await isCmarksInstalled();
+      if (!installed) return { installed, workspaces: [], files: [] };
+      const [workspaces, filter] = await Promise.all([loadWorkspaces(), loadFilter()]);
+      const files = await listMarkdownFiles(workspaces, filter);
+      return { installed, workspaces, files };
+    },
+    [],
+    { failureToastOptions: { title: "Couldn't read cmarks workspaces" } },
+  );
 
   const byWorkspace = new Map<string, MarkdownFile[]>();
   for (const file of data?.files ?? []) {
@@ -20,18 +23,21 @@ export default function Command() {
     byWorkspace.set(file.workspace.root, list);
   }
 
-  const noWorkspaces = !isLoading && (data?.workspaces.length ?? 0) === 0;
+  const notInstalled = data !== undefined && !data.installed;
+  const noWorkspaces = !isLoading && !notInstalled && (data?.workspaces.length ?? 0) === 0;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Markdown files in cmarks workspaces…">
-      {noWorkspaces ? (
+      {notInstalled ? (
+        <NotInstalledView />
+      ) : noWorkspaces ? (
         <List.EmptyView
           icon={Icon.Folder}
           title="No cmarks workspaces yet"
           description="Open a folder in cmarks (File ▸ New Workspace) and it will show up here."
           actions={
             <ActionPanel>
-              <Action title="Open Cmarks" icon={Icon.AppWindow} onAction={() => open("cmarks://open", BUNDLE_ID)} />
+              <Action title="Open Cmarks" icon={Icon.AppWindow} onAction={launchCmarks} />
             </ActionPanel>
           }
         />
@@ -64,11 +70,28 @@ function FileItem({ file }: { file: MarkdownFile }) {
 export function FileActions({ path }: { path: string }) {
   return (
     <ActionPanel>
-      <Action title="Open in Cmarks" icon={Icon.AppWindow} onAction={() => open(path, BUNDLE_ID)} />
+      <Action title="Open in Cmarks" icon={Icon.AppWindow} onAction={() => openInCmarks(path)} />
       <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
       <Action.ShowInFinder path={path} shortcut={{ modifiers: ["cmd"], key: "f" }} />
       <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.Copy} />
       <Action.OpenWith path={path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
     </ActionPanel>
+  );
+}
+
+/** cmarks가 설치돼 있지 않을 때의 빈 화면. 받을 수 있는 곳으로 안내한다. */
+export function NotInstalledView() {
+  return (
+    <List.EmptyView
+      icon={Icon.Download}
+      title="cmarks is not installed"
+      description="Install cmarks from the Mac App Store or GitHub, then run this command again."
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Get It on the Mac App Store" url={APP_STORE_URL} icon={Icon.AppWindow} />
+          <Action.OpenInBrowser title="Get It on GitHub" url={GITHUB_URL} icon={Icon.Code} />
+        </ActionPanel>
+      }
+    />
   );
 }
