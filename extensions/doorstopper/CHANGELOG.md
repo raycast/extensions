@@ -1,6 +1,6 @@
 # Doorstopper Changelog
 
-## [Timers, Auto-Off and Passwordless Mode] - {PR_MERGE_DATE}
+## [Timers, Auto-Off and Passwordless Mode] - 2026-11-05
 
 - Added Enable Doorstopper for Duration, with 30 minute to 4 hour presets, typed durations like `45m`, `1h30` or `2.5h`, and recent durations in the menu bar.
 - Added Set up Passwordless Doorstopper, which installs an optional sudoers rule that allows only `pmset -a disablesleep 0` and `pmset -a disablesleep 1`, so toggling no longer asks for a password or Touch ID.
