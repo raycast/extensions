@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { execFileSync } from "child_process";
 import net from "net";
 import { existsSync, readFileSync } from "fs";
@@ -121,7 +122,16 @@ function usesDefaultChromeDataDir(command: string): boolean {
   if (index === -1) {
     return true;
   }
-  return command.slice(index + flag.length).startsWith(CHROME_DEFAULT_DATA_DIR);
+  // `ps` prints arguments unquoted and the path itself contains spaces, so the value runs until
+  // the next flag. Compare the whole directory, not a prefix: "…/Google/Chrome-testing" is a
+  // separate browser session and must be left alone.
+  const value = command
+    .slice(index + flag.length)
+    .split(" --")[0]
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\/+$/, "");
+  return value === CHROME_DEFAULT_DATA_DIR;
 }
 
 function getDefaultProfileChromePids(): number[] {
@@ -131,18 +141,12 @@ function getDefaultProfileChromePids(): number[] {
 // Send a regular Quit (same as ⌘Q) to one specific process. AppleScript's
 // `tell application "Google Chrome" to quit` cannot be used: with several Chrome instances
 // running it only reaches one of them, often not the one holding the user's profile.
-function requestQuit(pid: number): void {
+async function requestQuit(pid: number): Promise<void> {
   try {
-    execFileSync(
-      "osascript",
-      [
-        "-l",
-        "JavaScript",
-        "-e",
-        'function run(argv) { ObjC.import("AppKit"); const app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(argv[0])); if (!app.isNil()) { app.terminate; } }',
-        String(pid),
-      ],
-      { encoding: "utf-8", timeout: 5000 },
+    await runAppleScript(
+      'function run(argv) { ObjC.import("AppKit"); const app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(argv[0])); if (!app.isNil()) { app.terminate; } }',
+      [String(pid)],
+      { language: "JavaScript", timeout: 5000 },
     );
   } catch {
     // Process may already be gone; the caller polls for the actual exit
@@ -158,7 +162,7 @@ async function quitDefaultProfileChrome(): Promise<boolean> {
   if (pids.length === 0) {
     return true;
   }
-  pids.forEach(requestQuit);
+  await Promise.all(pids.map(requestQuit));
 
   const deadline = Date.now() + CHROME_QUIT_TIMEOUT_MS;
   while (Date.now() < deadline) {
@@ -179,7 +183,7 @@ async function waitForProxiedDefaultProfileChrome(proxyServer: string): Promise<
     await waitMs(PROXY_POLL_INTERVAL_MS);
     const proxied = getChromeMainPids().some((pid) => {
       const command = getProcessCommand(pid);
-      return usesDefaultChromeDataDir(command) && command.includes(`--proxy-server=${proxyServer}`);
+      return usesDefaultChromeDataDir(command) && command.split(/\s+/).includes(`--proxy-server=${proxyServer}`);
     });
     if (proxied) {
       return true;
