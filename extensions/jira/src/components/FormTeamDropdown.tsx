@@ -1,10 +1,10 @@
 import { Form, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 
 import { getTeams } from "../api/teams";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 
 export function FormTeamDropdown({ name, ...props }: Form.Dropdown.Props & { name: string }) {
-  const { data: teams } = useCachedPromise(() => getTeams());
+  const { data: teams } = useJiraCachedPromise(() => getTeams(), []);
 
   return (
     <Form.Dropdown {...props} title={name} storeValue>
