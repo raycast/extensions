@@ -267,3 +267,20 @@ test("Jira errors retain errorMessages/errors and handle non-JSON status failure
   next = response(204, "");
   assert.equal(await request("/rest/api/3/issue/TEST-1/worklog/42", undefined, "DELETE"), undefined);
 });
+
+test("exact issue lookup uses the single-issue endpoint on Cloud and Server without JQL", async () => {
+  for (const [isJiraCloud, version] of [
+    ["cloud", 3],
+    ["server", 2],
+  ]) {
+    const calls = [];
+    const load = fixtureModules({ isJiraCloud, customJQL: "updated >= -7d" }, async (...args) => {
+      calls.push(args);
+      return issue("TEST-99");
+    });
+    assert.equal((await load("controllers").getIssue("TEST-99")).key, "TEST-99");
+    assert.deepEqual(calls, [[`/rest/api/${version}/issue/TEST-99?fields=summary,project`]]);
+  }
+  const load = fixtureModules({}, async () => ({ key: "TEST-99" }));
+  await assert.rejects(load("controllers").getIssue("TEST-99"), /invalid issue response/);
+});

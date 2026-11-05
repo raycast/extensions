@@ -75,6 +75,8 @@ To use this extension, you need to configure the following preferences:
 - Editing only the duration or date preserves the original Jira comment. Changing the description replaces it with plain text (formatted as an Atlassian document on Jira Cloud).
 - Durations must use whole hours, minutes, and seconds in that order, for example `2h 30m`, `45m`, or `30s`. Invalid or partial inputs are rejected.
 
+To log time on an older ticket outside your filter, type its full key (for example `APM-12345`) in the Issue dropdown. Exact-key lookup searches Jira directly, including other projects you can access. Ordinary text searches still filter the loaded issues.
+
 ## Development
 
 Run `npm ci`, `npm test`, `npm run lint`, and `npm run build` from this extension's folder. Run `npm run dev` to load it into Raycast with automatic rebuilding. The regression tests use fixture responses and never access a real Jira account.

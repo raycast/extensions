@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
-import { getIssues, getProjects, postTimeLog, loadAllPages } from "./controllers";
+import { getIssue, getIssues, getProjects, postTimeLog, loadAllPages } from "./controllers";
 import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
@@ -8,6 +8,8 @@ type LogTimeProps = {
   initialDate?: Date;
   onSuccess?: () => void;
 };
+
+const normalizeSearch = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 export default function Command({ initialDate, onSuccess }: LogTimeProps) {
   const { pop } = useNavigation();
@@ -25,8 +27,30 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
   const [submitting, setSubmitting] = useState(false);
   const [projectError, setProjectError] = useState<string>();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [issueSearch, setIssueSearch] = useState("");
+  const [exactIssues, setExactIssues] = useState<Issue[]>([]);
+  const exactIssueCache = useRef(new Map<string, Issue>());
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string>();
+  const availableIssues = Array.from(new Map([...issues, ...exactIssues].map((issue) => [issue.key, issue])).values());
+  const searchKey = issueSearch.trim().toUpperCase();
+  const exactMatchKey = exactIssueCache.current.get(searchKey)?.key ?? searchKey;
+  const exactMatch =
+    availableIssues.find((issue) => issue.key === exactMatchKey) ??
+    (!searchKey ? exactIssues.find((issue) => issue.key === selectedIssueKey) : undefined);
+  const searchTerms = normalizeSearch(issueSearch).trim().split(/\s+/).filter(Boolean);
+  const matchingIssues = availableIssues.filter((issue) => {
+    const text = normalizeSearch(`${issue.key} ${issue.fields.summary}`);
+    return searchTerms.every((term) => text.includes(term));
+  });
+  const visibleIssues = exactMatch
+    ? [exactMatch, ...matchingIssues.filter((issue) => issue.key !== exactMatch.key)]
+    : matchingIssues;
+  const visibleSelection = visibleIssues.some((issue) => issue.key === selectedIssueKey)
+    ? selectedIssueKey
+    : (visibleIssues[0]?.key ?? "");
   const issueCache = useRef(new Map<string, Issue[]>());
-  const loading = projectsLoading || issuesLoading || submitting;
+  const loading = projectsLoading || issuesLoading || lookupLoading || submitting;
 
   const validateTime = () => {
     const valid = parseTimeToSeconds(timeInput) > 0;
@@ -35,13 +59,13 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
   };
 
   async function handleSubmit(values: { issueId: string; timeInput: string; description: string; startedAt: Date }) {
-    if (submitting || projectsLoading || issuesLoading) return;
+    if (submitting || projectsLoading || issuesLoading || lookupLoading || lookupError) return;
     const seconds = parseTimeToSeconds(values.timeInput);
     if (seconds <= 0) {
       validateTime();
       return;
     }
-    const issue = issues.find((item) => item.key === values.issueId);
+    const issue = visibleIssues.find((item) => item.key === values.issueId);
     if (!issue) {
       await showToast(Toast.Style.Failure, "Choose an issue before logging time.");
       return;
@@ -147,10 +171,50 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
     };
   }, [selectedProject, userPrefs.customJQL, refreshTrigger]);
 
+  useEffect(() => {
+    let active = true;
+    setLookupError(undefined);
+    const key = issueSearch.trim().toUpperCase();
+    if (!/^[A-Z][A-Z0-9_]*-[0-9]+$/.test(key)) {
+      setLookupLoading(false);
+      return;
+    }
+    const cached = issues.find((issue) => issue.key === key) ?? exactIssueCache.current.get(key);
+    if (cached) {
+      setSelectedIssueKey(cached.key);
+      setLookupLoading(false);
+      return;
+    }
+    setLookupLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const issue = await getIssue(key);
+        if (active) {
+          exactIssueCache.current.set(key, issue);
+          setExactIssues((current) => [...current.filter((item) => item.key !== issue.key), issue]);
+          setSelectedIssueKey(issue.key);
+        }
+      } catch (error) {
+        if (active) setLookupError(error instanceof Error ? error.message : String(error));
+      } finally {
+        if (active) setLookupLoading(false);
+      }
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [issueSearch, issues, selectedProject]);
+
   const handleSelectProject = (project: string) => {
     if (project === selectedProject) return;
     setIssues([]);
     setSelectedIssueKey(undefined);
+    setIssueSearch("");
+    setExactIssues([]);
+    exactIssueCache.current.clear();
+    setLookupError(undefined);
+    setLookupLoading(false);
     setSelectedProject(project);
   };
 
@@ -196,8 +260,18 @@ Please check your permissions, jira account, or credentials and try again.
       <Form.Dropdown id="projectId" title="Project" value={selectedProject} onChange={handleSelectProject}>
         {projects?.map((item) => <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />)}
       </Form.Dropdown>
-      <Form.Dropdown id="issueId" title="Issue" value={selectedIssueKey} onChange={setSelectedIssueKey}>
-        {issues.map((item) => (
+      <Form.Dropdown
+        id="issueId"
+        title="Issue"
+        value={visibleSelection}
+        onChange={setSelectedIssueKey}
+        filtering={false}
+        isLoading={lookupLoading}
+        onSearchTextChange={setIssueSearch}
+        error={lookupError}
+        info="Search by full issue key (for example APM-12345) to find tickets outside your filter."
+      >
+        {visibleIssues.map((item) => (
           <Form.Dropdown.Item key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
         ))}
       </Form.Dropdown>
