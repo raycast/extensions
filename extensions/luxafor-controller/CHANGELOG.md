@@ -1,6 +1,6 @@
 # Luxafor Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-11-05
 
 - Add Set Busy, Set Available, Turn off and Set Custom Color commands, plus five recent accepted colors.
 - Fix red-test cancellation and validate custom hex colors before sending.
