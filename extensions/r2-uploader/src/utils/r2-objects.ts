@@ -9,55 +9,36 @@ export type FileEntry = {
   key: string;
   name: string;
   size: number;
-  lastModified?: Date;
 };
 export type R2Entry = FolderEntry | FileEntry;
 
-export async function listR2Entries(prefix: string): Promise<{ entries: R2Entry[]; bucketName: string }> {
-  const { client, bucketName } = createR2Client();
-
-  const commonPrefixes: string[] = [];
-  const contents: { Key?: string; Size?: number; LastModified?: Date }[] = [];
-  let continuationToken: string | undefined;
-
-  do {
+export function listR2Entries(prefix: string, { bucketName }: { bucketName: string; endpoint: string }) {
+  return async ({ cursor }: { cursor?: string }): Promise<{ data: R2Entry[]; hasMore: boolean; cursor?: string }> => {
+    const { client } = createR2Client();
     const response = await client.send(
       new ListObjectsV2Command({
         Bucket: bucketName,
         Prefix: prefix,
         Delimiter: "/",
-        ContinuationToken: continuationToken,
+        ContinuationToken: cursor,
+        MaxKeys: 100,
       }),
     );
 
-    for (const commonPrefix of response.CommonPrefixes ?? []) {
-      if (commonPrefix.Prefix) {
-        commonPrefixes.push(commonPrefix.Prefix);
+    const data: R2Entry[] = [];
+    for (const { Prefix: folderPrefix } of response.CommonPrefixes ?? []) {
+      if (folderPrefix) {
+        data.push({ type: "folder", prefix: folderPrefix, name: folderPrefix.slice(prefix.length, -1) });
       }
     }
-    contents.push(...(response.Contents ?? []));
-
-    continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
-  } while (continuationToken);
-
-  const folders: FolderEntry[] = commonPrefixes.map((folderPrefix) => ({
-    type: "folder" as const,
-    prefix: folderPrefix,
-    name: folderPrefix.slice(prefix.length).replace(/\/$/, ""),
-  }));
-
-  const files: FileEntry[] = contents
-    .filter((object) => object.Key && object.Key !== prefix)
-    .map((object) => ({
-      type: "file" as const,
-      key: object.Key as string,
-      name: (object.Key as string).slice(prefix.length),
-      size: object.Size ?? 0,
-      lastModified: object.LastModified,
-    }))
-    .sort((a, b) => (b.lastModified?.getTime() ?? 0) - (a.lastModified?.getTime() ?? 0));
-
-  return { entries: [...folders, ...files], bucketName };
+    for (const { Key: key, Size: size } of response.Contents ?? []) {
+      if (key && key !== prefix) {
+        data.push({ type: "file", key, name: key.slice(prefix.length), size: size ?? 0 });
+      }
+    }
+    const nextCursor = response.IsTruncated ? response.NextContinuationToken : undefined;
+    return { data, hasMore: Boolean(nextCursor), cursor: nextCursor };
+  };
 }
 
 export async function deleteR2Object(key: string): Promise<void> {
