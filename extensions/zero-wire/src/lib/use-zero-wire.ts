@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { type Briefing, type Database } from "./model";
 import { repository, service } from "./runtime";
 
@@ -32,7 +33,7 @@ async function perform(operation: () => Promise<Database>, manual = false) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Local data could not be loaded";
     publish({ ...state, loading: false, error: message });
-    await showToast({ style: Toast.Style.Failure, title: "Zero Wire could not update", message });
+    await showFailureToast(error, { title: "Zero Wire could not update" });
   } finally {
     activeOperations--;
     publish({ ...state, loading: activeOperations > 0 });

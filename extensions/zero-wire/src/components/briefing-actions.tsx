@@ -18,6 +18,11 @@ export function BriefingActions({
     <ActionPanel>
       {children}
       <Action.OpenInBrowser title="Open Original Briefing" url={b.url} />
+      <Action.CopyToClipboard
+        title="Copy Briefing URL"
+        content={b.url}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+      />
       <ActionPanel.Section title="Local review state">
         <Action
           title={store.db?.bookmarks[b.id] ? "Remove Bookmark" : "Bookmark Briefing"}
@@ -33,11 +38,6 @@ export function BriefingActions({
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy source content">
-        <Action.CopyToClipboard
-          title="Copy Briefing URL"
-          content={b.url}
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
-        />
         {b.cves.length > 0 && <Action.CopyToClipboard title="Copy All CVEs" content={b.cves.join("\n")} />}
         <Action.CopyToClipboard title="Copy Attributed Markdown Brief" content={briefingMarkdown(b)} />
         {b.assessmentPrompt ? (

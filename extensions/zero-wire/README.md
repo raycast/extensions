@@ -1,7 +1,7 @@
 <div align="center">
     <br/>
     <br/>
-    <img src="./assets/extension_icon.png" alt="Zero Wire" width="100"/>
+    <img src="./media/extension_icon.png" alt="Zero Wire" width="100"/>
     <h3>Zero Wire</h3>
     <p>Read and follow Cloudflare security briefings</p>
     <br/>
@@ -31,37 +31,6 @@ Try `@zero-wire Find briefings for CVE-2026-115560` or `@zero-wire Show my unrea
 
 Results include canonical links, source dates, local retrieval time, content coverage, feed freshness, and fetch errors. Archived entries explicitly report unknown current source availability. The tools do not execute assessment prompts or inspect infrastructure. The native commands remain usable without an AI subscription.
 
-AI instructions and mocked evaluation cases live in `ai.yaml`. Run them with `npx ray evals -I --exit-on-error`.
-
-## Develop
-
-```sh
-npm install
-npm run dev
-```
-
-Requires Raycast with extension support on macOS or Windows. No credentials or AI subscription are required. The native views and platform-specific shortcuts use Raycast's APIs.
-
-```sh
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run check-source
-```
-
-## Current validation status
-
-This implements the PRD's P0 commands and read-only Raycast AI tools. Menu bar polling remains a later milestone. There are no background requests or notifications in this version.
-
-Live direct retrieval from [the official RSS feed](https://radar.cloudflare.com/security/zero-wire/rss) succeeded on 5 November 2026 in Asia/Kolkata. The adapter recovered six complete entries and the two source assessment prompts, with 3,441 and 3,691 characters. Several entries legitimately have no assessment prompt. The HTML index challenged direct requests, so RSS is the primary source and complete entries require no page scraping.
-
-Native macOS checks confirmed live lists and details, CVE search, source tag loading, bookmarking, and explicit review actions. The copied php2shell assessment prompt matched all 3,691 source characters. Test bookmark and review changes were restored.
-
-Tests cover the captured production feed plus synthetic edge cases, complete prompt copying, source qualifiers, category and CVE parsing, local search, revision identity, conditional requests, rate limiting, failure retention, and concurrent state writes. `npm run check-source` repeats live retrieval and parsing without modifying user state.
-
-Before Store submission, check Windows behavior and verify keyboard navigation and light/dark appearance. Review the source policy findings below, including the scope of RSS licensing and AI use.
-
 ## Data access and privacy
 
 Native commands and AI tools share a persistent RSS cache. The adapter allows at most one feed request per hour per extension support directory, including manual refresh, failed attempts, partial-detail requests, and adapter upgrades. This interval is a project choice. Concurrent commands share a file lock, and the attempt time is saved before the request. Requests have a 15-second timeout and a 5 MiB response limit. Search and filter changes make no requests. Detail views use RSS content; partial entries link to the original briefing instead of scraping its page. Refresh returns cached content until another request is eligible.
@@ -82,7 +51,5 @@ Checked on 5 November 2026, Asia/Kolkata:
 - Cloudflare's [Website and Online Services Terms of Use](https://www.cloudflare.com/website-terms/), effective 1 August 2025, prohibit overburdening services and circumventing limits in section 7. Section 8 separately restricts automated access and use for AI systems, subject to its stated robots.txt and user-agent conditions. Publishing RSS or an agent-assessment prompt does not establish blanket permission for AI ingestion or training. These tools do not train models, but that alone does not establish an exemption. Confirm the intended AI use with Cloudflare before distributing that capability; RSS-specific AI authorization was not established by this review.
 
 No numeric refresh limit was found in these official publications or the feed metadata. The live RSS response returned `Cache-Control: public, max-age=300` and no RSS `ttl`, license, or copyright element. The five-minute HTTP freshness lifetime is an observation, not a contractual polling allowance. The extension keeps a conservative one-hour interval and honors longer server `Retry-After` delays. Requests stop at challenges and redirects; the adapter does not bypass them. Radar's robots.txt returned a challenge during this check, so it could not establish any AI user-agent permission.
-
-The development-only `npm run check-source` command makes one direct diagnostic request outside the Raycast cache. Run it sparingly; it is not a background polling job.
 
 Cloudflare does not endorse this extension. The findings above document the published rules and their limits; they do not claim that Cloudflare approved this integration.

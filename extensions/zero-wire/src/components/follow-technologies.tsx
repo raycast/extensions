@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { INDEX_URL } from "../lib/model";
 import { useZeroWire } from "../lib/use-zero-wire";
 
-export function FollowTechnologies() {
+export function FollowTechnologies({ navigationTitle }: { navigationTitle?: string }) {
   const store = useZeroWire();
   const tags = new Map<string, string>(Object.entries(store.db?.followed ?? {}));
   for (const briefing of store.db?.snapshot?.briefings ?? [])
@@ -10,7 +10,7 @@ export function FollowTechnologies() {
   return (
     <List
       isLoading={store.loading}
-      navigationTitle="Follow Technologies"
+      navigationTitle={navigationTitle}
       searchBarPlaceholder="Find source technology tags…"
     >
       <List.EmptyView

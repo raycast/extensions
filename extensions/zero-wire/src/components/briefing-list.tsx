@@ -28,7 +28,11 @@ export function BriefingList({ saved = false }: { saved?: boolean }) {
         shortcut={Keyboard.Shortcut.Common.Refresh}
       />
       <Action.OpenInBrowser title="Open Zero Wire Website" url={INDEX_URL} />
-      <Action.Push title="Follow Technologies" icon={Icon.Tag} target={<FollowTechnologies />} />
+      <Action.Push
+        title="Follow Technologies"
+        icon={Icon.Tag}
+        target={<FollowTechnologies navigationTitle="Follow Technologies" />}
+      />
     </ActionPanel>
   );
   const hasSnapshot = Boolean(store.db?.snapshot);
@@ -38,7 +42,6 @@ export function BriefingList({ saved = false }: { saved?: boolean }) {
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}
-      navigationTitle={saved ? "Saved Briefings" : "Search Security Briefings"}
       searchBarPlaceholder="Search titles, CVEs, or technology tags…"
       searchBarAccessory={
         <List.Dropdown
@@ -120,7 +123,7 @@ export function BriefingList({ saved = false }: { saved?: boolean }) {
                     <Action.Push
                       title="Manage Followed Technologies"
                       icon={Icon.Tag}
-                      target={<FollowTechnologies />}
+                      target={<FollowTechnologies navigationTitle="Follow Technologies" />}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "f" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "f" },

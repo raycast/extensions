@@ -36,7 +36,15 @@ export function briefingMarkdown(b: Briefing): string {
         )
         .join("\n\n"),
     ) +
-    section("Cloudflare coverage", paragraphs(b.coverage)) +
+    section(
+      "Cloudflare coverage",
+      [
+        paragraphs(b.coverage),
+        b.coverageLinks.map((link) => `- [${escapeMarkdown(link.title)}](<${link.url}>)`).join("\n"),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+    ) +
     section(
       "Evidence and sources",
       [
@@ -48,6 +56,6 @@ export function briefingMarkdown(b: Briefing): string {
       ].join("\n\n"),
     ) +
     `---\n\n${SOURCE_LICENSE_NOTICE} [License](<${SOURCE_LICENSE_URL}>).\n\n` +
-    "A technology match indicates relevance; review status records your acknowledgement of this revision.\n"
+    "A technology match indicates relevance; review status records your acknowledgment of this revision.\n"
   );
 }

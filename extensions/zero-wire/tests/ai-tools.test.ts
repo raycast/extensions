@@ -56,6 +56,14 @@ test("AI detail retains all qualifiers and complete prompts without modifying bo
       result.briefing.overview.some((text) => text.includes("Exploitation of CVE-2026-115560 is not established")),
     );
     assert.ok(result.briefing.evidence.some((e) => e.description.includes("does not extend to CVE-2026-115560")));
+    assert.deepEqual(
+      result.briefing.cloudflareCoverageLinks,
+      before.archive[`${INDEX_URL}/php2shell`].coverageLinks.map(({ title, url }) => ({ title, url })),
+    );
+    assert.deepEqual(
+      result.briefing.cloudflareCoverageLinks.map((link) => link.title),
+      ["Paid plans", "Free plans"],
+    );
     const noPrompt = await tools.get({ briefingId: "emudhra-certificate-compromise" });
     assert.equal(noPrompt.briefing?.assessmentPrompt, null);
     assert.ok(noPrompt.briefing?.evidenceNotes.some((note) => note.includes("No CVE was cited")));

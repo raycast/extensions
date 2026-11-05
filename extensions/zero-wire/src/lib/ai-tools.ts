@@ -58,7 +58,7 @@ function summary(b: Briefing, db: Database) {
   };
 }
 const scope =
-  "Cloudflare Zero Wire curates selected threats. A technology match indicates relevance, not confirmed exposure. Local review state is an acknowledgement, not patch or compromise status.";
+  "Cloudflare Zero Wire curates selected threats. A technology match indicates relevance, not confirmed exposure. Local review state is an acknowledgment, not patch or compromise status.";
 
 export class BriefingTools {
   constructor(private readonly service: BriefingService) {}
@@ -108,6 +108,7 @@ export class BriefingTools {
         evidence: b.evidence.map((e) => ({ title: e.title, url: e.url, description: e.description })),
         evidenceNotes: [...b.evidenceNotes],
         cloudflareCoverage: [...b.coverage],
+        cloudflareCoverageLinks: b.coverageLinks.map((link) => ({ title: link.title, url: link.url })),
         assessmentPrompt: b.assessmentPrompt,
         contentHash: b.hash,
       },

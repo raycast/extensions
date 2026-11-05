@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { load } from "cheerio";
 import { parseFeed, parseDetail } from "../src/lib/source";
-import { INDEX_URL, canonicalUrl, safeUrl } from "../src/lib/model";
+import { INDEX_URL, briefingSchema, canonicalUrl, contentHash, safeUrl } from "../src/lib/model";
 import { briefingMarkdown, escapeMarkdown } from "../src/lib/markdown";
 import { feedXml, records } from "./helpers";
 
@@ -45,6 +45,42 @@ test("captured live RSS recovers six complete entries, all CVEs, tags, actions a
   assert.ok(exported.includes(escapeMarkdown(fetchedAt)));
   assert.match(exported, /Exploitation of CVE/);
   assert.ok(php.evidence.some((e) => e.description.includes("does not extend to CVE-2026-115560")));
+});
+test("coverage retains safe rules links in parsed content, Markdown, and revision identity", async () => {
+  const xml = await readFile(new URL("./fixtures/zero-wire-rss.xml", import.meta.url), "utf8");
+  const php = parseFeed(xml, fetchedAt).find((b) => b.title === "php2shell")!;
+  assert.deepEqual(
+    php.coverageLinks.map((link) => link.title),
+    ["Paid plans", "Free plans"],
+  );
+  for (const link of php.coverageLinks) {
+    const url = new URL(link.url);
+    assert.equal(url.origin, "https://dash.cloudflare.com");
+    assert.equal(url.searchParams.get("search"), "CVE-2026-109618");
+    assert.ok(briefingMarkdown(php).includes(`[${link.title}](<${link.url}>)`));
+  }
+  assert.notEqual(
+    php.hash,
+    contentHash({
+      ...php,
+      coverageLinks: php.coverageLinks.map((link) => ({ ...link, url: `${link.url}&changed=1` })),
+    }),
+  );
+  const { coverageLinks, ...legacy } = php;
+  assert.deepEqual(briefingSchema.parse(legacy).coverageLinks, []);
+  const detail = await parseDetail(
+    `<h1>${php.title}</h1><h2>What happened</h2><p>Overview.</p><h2>Product coverage</h2><p>Use <a href="/rules?utm_source=test">Rules</a> and <a href="javascript:alert(1)">unsafe</a>.</p><h3>Service status</h3><p><a href="https://example.com/status">Status</a></p>`,
+    php,
+    fetchedAt,
+  );
+  assert.deepEqual(
+    detail.coverageLinks.map(({ title, url }) => ({ title, url })),
+    [
+      { title: "Rules", url: "https://radar.cloudflare.com/rules" },
+      { title: "Status", url: "https://example.com/status" },
+    ],
+  );
+  assert.ok(detail.coverage.some((text) => text.includes("unsafe")));
 });
 test("synthetic Unicode prompts, missing dates, unknown categories and unsafe evidence", async () => {
   const entries = await records();

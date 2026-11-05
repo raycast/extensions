@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const INDEX_URL = "https://radar.cloudflare.com/security/zero-wire";
 export const RSS_URL = `${INDEX_URL}/rss`;
-export const ADAPTER_VERSION = 3;
+export const ADAPTER_VERSION = 4;
 export const TTL = 60 * 60 * 1000;
 export const SOURCE_LICENSE_URL = "https://creativecommons.org/licenses/by-nc/4.0/";
 export const SOURCE_LICENSE_NOTICE =
@@ -32,6 +32,7 @@ export const briefingSchema = z.object({
   evidence: z.array(linkSchema),
   evidenceNotes: z.array(z.string()).default([]),
   coverage: z.array(z.string()),
+  coverageLinks: z.array(linkSchema).default([]),
   assessmentPrompt: z.string().nullable(),
   completeness: z.enum(["full", "partial"]),
   provenance: z.enum(["rss", "html"]),
@@ -142,6 +143,7 @@ export function contentHash(b: Omit<Briefing, "hash">): string {
     evidence,
     evidenceNotes,
     coverage,
+    coverageLinks,
     assessmentPrompt,
   } = b;
   return createHash("sha256")
@@ -163,6 +165,7 @@ export function contentHash(b: Omit<Briefing, "hash">): string {
           evidence,
           evidenceNotes,
           coverage,
+          coverageLinks,
           assessmentPrompt,
         }),
       ),

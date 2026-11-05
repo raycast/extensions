@@ -101,6 +101,14 @@ function parseContent(html: string) {
     evidence,
     evidenceNotes,
     coverage: [...section("Product coverage"), ...section("Service status")],
+    coverageLinks: sectionNodes("Product coverage")
+      .add(sectionNodes("Service status"))
+      .filter("a[href]")
+      .toArray()
+      .flatMap((node) => {
+        const url = safeUrl($(node).attr("href") ?? "");
+        return url ? [{ title: $(node).text().trim() || url, url, description: "" }] : [];
+      }),
     assessmentPrompt: prompt.trim() ? prompt : null,
   };
 }
