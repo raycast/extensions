@@ -33,8 +33,165 @@ function loadSource(entry, runAppleScript = async () => "", moduleMocks = {}) {
   return load(path.resolve(__dirname, "..", entry));
 }
 
+const catalogSong = {
+  id: "1679612971",
+  title: "Through the Fire and Flames",
+  artist: "DragonForce",
+  album: "Inhuman Rampage",
+  playable: true,
+  url: "https://music.apple.com/fr/album/inhuman-rampage/1679612960?i=1679612971",
+};
+
+test("catalog playback validates exact Apple host, protocol, album path and song ID", () => {
+  const { catalogPlaybackUrl } = loadSource("src/util/scripts/catalog.ts");
+  assert.equal(catalogPlaybackUrl(catalogSong), catalogSong.url.replace("https:", "music:"));
+  for (const url of [
+    "https://music.apple.com.evil.test/fr/album/x/1?i=1679612971",
+    "https://music.apple.com@evil.test/fr/album/x/1?i=1679612971",
+    "https://user@music.apple.com/fr/album/x/1?i=1679612971",
+    "https://music.apple.com:444/fr/album/x/1?i=1679612971",
+    "file:///tmp/music",
+    "javascript:alert(1)",
+    "https://music.apple.com/fr/album/x/1?i=2",
+    catalogSong.url + "&i=2",
+    "https://music.apple.com/fr/song/x/1679612971",
+  ])
+    assert.throws(() => catalogPlaybackUrl({ ...catalogSong, url }));
+  assert.throws(() => catalogPlaybackUrl({ ...catalogSong, playable: false }));
+  assert.throws(() => catalogPlaybackUrl({ ...catalogSong, artist: "" }));
+});
+
+test("catalog script fails closed and verifies exact metadata instead of generic playing", () => {
+  const { catalogPlaybackScript } = loadSource("src/util/scripts/catalog.ts");
+  const script = catalogPlaybackScript(catalogSong);
+  assert.match(script, /count of foundRows\) is 1/);
+  assert.match(script, /if not frontmost then error/);
+  assert.match(script, /name of current track is "Through the Fire and Flames"/);
+  assert.match(script, /artist of current track is "DragonForce"/);
+  assert.match(script, /album of current track is "Inhuman Rampage"/);
+  assert.match(script, /player state is playing/);
+  assert.match(script, /repeat 40 times/);
+  assert.doesNotMatch(script, /duplicate|addToLibrary|key code 49/);
+});
+
+test("catalog metadata is escaped before inserting into AppleScript", () => {
+  const { catalogPlaybackScript } = loadSource("src/util/scripts/catalog.ts");
+  const script = catalogPlaybackScript({ ...catalogSong, title: 'A "quoted" song' });
+  assert.ok(script.includes('A \\"quoted\\" song'));
+});
+
+test("catalog playback requires explicit verification and propagates errors", async () => {
+  let result = "verified";
+  let failure;
+  let calls = 0;
+  const { playCatalogSong } = loadSource("src/util/scripts/catalog.ts", async (_script, _args, options) => {
+    calls++;
+    assert.equal(options.timeout, 30000);
+    if (failure) throw failure;
+    return result;
+  });
+  assert.equal((await playCatalogSong(catalogSong)())._tag, "Right");
+  result = "playing";
+  assert.equal((await playCatalogSong(catalogSong)())._tag, "Left");
+  failure = new Error("Accessibility denied");
+  assert.match((await playCatalogSong(catalogSong)()).left.message, /Accessibility denied/);
+  const previousCalls = calls;
+  assert.equal((await playCatalogSong({ ...catalogSong, playable: false })())._tag, "Left");
+  assert.equal(calls, previousCalls);
+});
+
 const row = (id, name, artist = "Artist", album = "Album") =>
   `id=${id}$BREAKname=${name}$BREAKartist=${artist}$BREAKalbum=${album}$BREAKduration=120`;
+
+test("Just Play keeps library playback independent of catalog sign-in and only falls back on a miss", async () => {
+  const E = require("fp-ts/Either");
+  const TE = require("fp-ts/TaskEither");
+  let raw = row("1", "Local Song");
+  let searchFailure;
+  let authCalls = 0,
+    catalogCalls = 0,
+    localPlays = 0,
+    catalogPlays = 0;
+  const messages = [];
+  const justPlay = loadSource("src/just-play.tsx", undefined, {
+    "@raycast/api": { closeMainWindow: async () => {} },
+    "./util/feedback": {
+      hud: async (message) => {
+        messages.push(message);
+      },
+    },
+    "./util/scripts": {
+      track: {
+        search: () => async () => (searchFailure ? E.left(searchFailure) : E.right(raw)),
+        playById: () => async () => {
+          localPlays++;
+          return E.right("");
+        },
+      },
+    },
+    "./util/apple-music-auth": {
+      withAppleMusicAuth:
+        (fn) =>
+        async (...args) => {
+          authCalls++;
+          return fn(...args);
+        },
+    },
+    "./util/catalog-api": {
+      searchCatalog: () => {
+        catalogCalls++;
+        return TE.right({ songs: [catalogSong], albums: [] });
+      },
+    },
+    "./util/scripts/catalog": {
+      playCatalogSong: () => async () => {
+        catalogPlays++;
+        return E.right();
+      },
+    },
+  }).default;
+  await justPlay({ arguments: { query: "Local Song" } });
+  assert.equal(localPlays, 1);
+  assert.equal(authCalls, 0);
+  raw = "";
+  await justPlay({ arguments: { query: "DragonForce" } });
+  assert.equal(authCalls, 1);
+  assert.equal(catalogPlays, 1);
+  assert.match(messages.at(-1), /Through the Fire and Flames/);
+  searchFailure = new Error("Music is unavailable");
+  await justPlay({ arguments: { query: "Other" } });
+  assert.equal(catalogCalls, 1);
+  assert.match(messages.at(-1), /Music is unavailable/);
+  await justPlay({ arguments: { query: "  " } });
+  assert.equal(catalogCalls, 1);
+});
+
+test("catalog AI playback resolves metadata and never claims success after script failure", async () => {
+  const TE = require("fp-ts/TaskEither");
+  let failed = false;
+  let seen;
+  const play = loadSource("src/tools/play-catalog-song.ts", undefined, {
+    "@raycast/api": { closeMainWindow: async () => {} },
+    "../util/apple-music-auth": { withAppleMusicAuth: (fn) => fn },
+    "../util/catalog-api": {
+      getCatalogSong: (id) => {
+        assert.equal(id, catalogSong.id);
+        return TE.right(catalogSong);
+      },
+    },
+    "../util/scripts/catalog": {
+      playCatalogSong: (song) => {
+        seen = song;
+        return failed ? TE.left(new Error("Wrong track still playing")) : TE.right();
+      },
+    },
+  }).default;
+  const result = await play({ songId: catalogSong.id });
+  assert.equal(result.playing, true);
+  assert.equal(seen, catalogSong);
+  failed = true;
+  await assert.rejects(play({ songId: catalogSong.id }), /Wrong track/);
+});
 
 test("metadata keeps equals signs and empty output produces no phantom tracks", () => {
   const { parseResult } = loadSource("src/util/parser.ts");

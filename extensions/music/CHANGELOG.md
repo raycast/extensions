@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Catalog Song Playback] - {PR_MERGE_DATE}
+
+- Added Play in Music to catalog song search results and album tracklists without adding songs to the library.
+- Just Play now falls back to the Apple Music catalog when no local library result exists.
+- Added AI tools for catalog search and verified song playback.
+- Validate catalog links, require an unambiguous matching row, and verify the playing title, artist and album before reporting success.
+- Documented foreground UI automation, required permissions and unsupported-layout failures.
+
 ## [Album Art in Menu Bar] - 2026-10-17
 
 - Added a "Menu Bar Icon" preference to the Menu Bar Player: choose the Apple Music icon (default), the current track's cover art, or no icon. Covers are extracted from Music, resized, and cached per track, and fall back to the Apple Music icon when unavailable.

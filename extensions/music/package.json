@@ -397,7 +397,7 @@
       "name": "search-apple-music",
       "title": "Search Apple Music",
       "subtitle": "Apple Music",
-      "description": "Search the Apple Music catalog for songs and albums, and add them to your library.",
+      "description": "Search the Apple Music catalog, play songs in Music, or add songs and albums to your library.",
       "disabledByDefault": true,
       "mode": "view",
       "keywords": [
@@ -446,6 +446,16 @@
     }
   ],
   "tools": [
+    {
+      "name": "search-catalog",
+      "title": "Search Apple Music Catalog",
+      "description": "Search songs and albums in the Apple Music catalog, including music outside the library. Requires Apple Music sign-in."
+    },
+    {
+      "name": "play-catalog-song",
+      "title": "Play Catalog Song",
+      "description": "Play a song returned by search-catalog in Music without adding it to the library. Brings Music to the foreground and requires Accessibility permission. Reports success only after verifying playback."
+    },
     {
       "name": "get-volume",
       "title": "Get Volume",

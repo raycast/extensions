@@ -4,6 +4,15 @@ instructions: |
 
   ---
 
+  # Catalog songs
+  - For a song outside the library, use search-catalog with its title and artist.
+  - An empty library search does not mean a song is unavailable on Apple Music.
+  - Use play-catalog-song with an exact song ID returned by search-catalog.
+  - Choose the requested artist/version; ask if results are ambiguous. Do not substitute a live recording or cover silently.
+  - Never add a song to the library just to play it.
+  - Only acknowledge playback if play-catalog-song succeeds. Opening a page is not playback.
+  - Catalog playback brings Music to the foreground and requires Accessibility permission. Do not fall back to the global play tool on failure: it may resume an unrelated song.
+
   # 1. Playback Control
 
   1. Identifying Content to Play

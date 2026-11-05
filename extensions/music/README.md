@@ -9,6 +9,27 @@
 ![sc1](./assets/screnshot-1.png)
 ![sc2](./assets/screnshot-2.png)
 
+## Catalog playback
+
+**Search Apple Music** offers **Play in Music** for catalog songs, including songs
+not in your library. **Just Play** still searches the library first; when there
+are no results it signs in to Apple Music and plays the first playable catalog
+result. Use Search Apple Music to choose a specific edition or recording.
+
+AI can use **Search Apple Music Catalog**, then **Play Catalog Song** with a
+returned song ID. Playback never adds the song to your library.
+
+Catalog playback requires an Apple Music subscription, Music signed in, and
+Raycast's **Accessibility** and **Automation** permissions in System Settings.
+It brings Music to the foreground, selects the matching row in the album table,
+and presses Return. Avoid switching apps while it starts. It verifies the
+playing title, artist and album before reporting success.
+
+This uses Music's accessible album-table layout, not a public catalog playback
+API. Unsupported layouts, ambiguous rows, missing metadata, /song/ links, or
+permissions fail with an error; **Open in Music** remains available.
+Albums and playlists retain their existing behavior.
+
 ## Troubleshooting
 
 - Enable **Start Playlist** in Raycast Settings → Extensions → Music. It is disabled by default.
