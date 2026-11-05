@@ -68,7 +68,7 @@ function NoteListItemMetadata({ content, note, vault }: NoteListItemMetadataProp
       <List.Item.Detail.Metadata.Label title="File Size" text={fileSizeFor(note).toFixed(2) + " KB"} />
       <List.Item.Detail.Metadata.Label
         title="Note Path"
-        text={trimPathToMaxLength(note.path.split(vault.path)[1], 55)}
+        text={trimPathToMaxLength(normalizeRelativePath(note.path, vault.path), 55)}
       />
     </List.Item.Detail.Metadata>
   );
