@@ -1,6 +1,6 @@
 # Cheatsheets Remastered Changelog
 
-## [Metadata and Markdown Import] - {PR_MERGE_DATE}
+## [Metadata and Markdown Import] - 2026-11-05
 
 - Read titles, descriptions and tags from repository Markdown frontmatter, including saved sheets offline.
 - Search repository metadata, see tags in lists and read full descriptions in sheet details.
