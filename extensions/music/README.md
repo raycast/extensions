@@ -17,18 +17,32 @@ are no results it signs in to Apple Music and plays the first playable catalog
 result. Use Search Apple Music to choose a specific edition or recording.
 
 AI can use **Search Apple Music Catalog**, then **Play Catalog Song** with a
-returned song ID. Playback never adds the song to your library.
+returned song ID. AI playback leaves the conversation open rather than closing
+Raycast and potentially reactivating Music. Playback never adds the song to your library.
 
 Catalog playback requires an Apple Music subscription, Music signed in, and
-Raycast's **Accessibility** and **Automation** permissions in System Settings.
-It brings Music to the foreground, selects the matching row in the album table,
-and presses Return. Avoid switching apps while it starts. It verifies the
-playing title, artist and album before reporting success.
+Raycast's **Automation** permission to control Music. It does not require
+Accessibility, select UI elements, simulate keys, or activate Music.
 
-This uses Music's accessible album-table layout, not a public catalog playback
-API. Unsupported layouts, ambiguous rows, missing metadata, /song/ links, or
-permissions fail with an error; **Open in Music** remains available.
-Albums and playlists retain their existing behavior.
+The extension obtains the ordered album tracklist from Apple's API, stops the
+current queue, opens the album with macOS `open -g`, then uses native playback
+and Next Track commands. This is not a direct play-by-catalog-ID API: preparation
+can take several seconds, replaces the queue, and changes Music's background page.
+Intermediate tracks are silenced, each step is verified by title, artist and album,
+and the original volume and shuffle settings are restored. On failure, playback
+is paused before restoring settings. A separate cleanup subprocess also runs after
+a playback timeout; if Music is unresponsive, a restoration error is reported.
+
+Concurrent catalog requests are rejected with a native macOS lock. Avoid changing
+playback, volume or shuffle during preparation; switching applications is fine.
+A native macOS notification is requested only after playback and restored settings
+are verified. Its visibility depends on notification permissions and Focus settings.
+
+Incomplete album tracklists, unavailable preceding tracks, indistinguishable
+metadata, unsupported links or a preparation deadline fail safely with an error;
+**Open in Music** remains available. Albums and playlists retain their existing
+behavior. This route depends on Music's album-link behavior, not its UI layout,
+and still needs real-device checks after macOS/Music updates.
 
 ## Troubleshooting
 

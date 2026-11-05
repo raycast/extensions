@@ -454,7 +454,7 @@
     {
       "name": "play-catalog-song",
       "title": "Play Catalog Song",
-      "description": "Play a song returned by search-catalog in Music without adding it to the library. Brings Music to the foreground and requires Accessibility permission. Reports success only after verifying playback."
+      "description": "Play a song returned by search-catalog in Music in the background, without UI clicks or library additions. Temporarily silences album preparation and restores volume and shuffle. Reports success only after verifying playback."
     },
     {
       "name": "get-volume",

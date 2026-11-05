@@ -11,7 +11,8 @@ instructions: |
   - Choose the requested artist/version; ask if results are ambiguous. Do not substitute a live recording or cover silently.
   - Never add a song to the library just to play it.
   - Only acknowledge playback if play-catalog-song succeeds. Opening a page is not playback.
-  - Catalog playback brings Music to the foreground and requires Accessibility permission. Do not fall back to the global play tool on failure: it may resume an unrelated song.
+  - Catalog playback loads the album in the background and silently advances with native Music commands, without UI clicks or focus changes. It restores volume and shuffle, replaces the current queue, and may take several seconds. Do not run other playback/volume/shuffle tools concurrently.
+  - Do not fall back to the global play tool on failure: it may resume an unrelated song.
 
   # 1. Playback Control
 

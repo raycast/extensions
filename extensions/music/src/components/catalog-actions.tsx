@@ -9,7 +9,7 @@ import { isNotInLibraryError } from "../util/apple-script";
 import { CatalogAlbum, CatalogPlaylist, CatalogSong } from "../util/models";
 import * as music from "../util/scripts";
 
-import { playCatalogSong } from "../util/scripts/catalog";
+import { playCatalogSong } from "../util/catalog-playback";
 
 export function PlayCatalogSongAction({ song }: { song: CatalogSong }) {
   return (
@@ -24,7 +24,7 @@ export function PlayCatalogSongAction({ song }: { song: CatalogSong }) {
             async (error) => {
               await showToast({ style: Toast.Style.Failure, title: "Could Not Play Song", message: error.message });
             },
-            () => hud(`Playing "${song.title}" by ${song.artist}`),
+            async () => undefined,
           ),
         )();
       }}

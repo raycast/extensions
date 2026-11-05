@@ -6,7 +6,7 @@ import * as music from "./util/scripts";
 import { hud } from "./util/feedback";
 import { withAppleMusicAuth } from "./util/apple-music-auth";
 import { searchCatalog } from "./util/catalog-api";
-import { playCatalogSong } from "./util/scripts/catalog";
+import { playCatalogSong } from "./util/catalog-playback";
 
 const playFromCatalog = withAppleMusicAuth(async (props: LaunchProps<{ arguments: Arguments.JustPlay }>) => {
   const results = await searchCatalog(props.arguments.query.trim())();
@@ -16,7 +16,6 @@ const playFromCatalog = withAppleMusicAuth(async (props: LaunchProps<{ arguments
   await closeMainWindow();
   const played = await playCatalogSong(song)();
   if (E.isLeft(played)) throw played.left;
-  await hud(`Playing ${song.title} by ${song.artist}`);
 });
 
 export default async (props: LaunchProps<{ arguments: Arguments.JustPlay }>) => {
