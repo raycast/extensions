@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Comunicate.eu MCP Server] - 2026-11-05
+
+- Add Comunicate.eu to the official registry: plan and publish press releases, advertorials and SEO articles on 3,800+ news sites in Romania and other European markets (catalogue search, prices per campaign type, publication rules, budget plans, drafts and publication tracking). 27 tools. Hosted Streamable HTTP server at https://app.comunicate.eu/mcp; catalogue tools need no sign-in, account tools use OAuth 2.1 (dynamic client registration and PKCE), with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
