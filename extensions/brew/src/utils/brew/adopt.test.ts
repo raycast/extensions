@@ -129,6 +129,9 @@ describe("caskAppdir", () => {
 
   it("expands ~ like Pathname#expand_path", () => {
     expect(caskAppdir({ HOMEBREW_CASK_OPTS: "--appdir=~/Applications" })).toBe(path.join(os.homedir(), "Applications"));
+    expect(caskAppdir({ HOMEBREW_CASK_OPTS: "--appdir=~//Applications/" })).toBe(
+      path.join(os.homedir(), "Applications"),
+    );
   });
 
   it("ignores the spaced form, because Homebrew does", () => {

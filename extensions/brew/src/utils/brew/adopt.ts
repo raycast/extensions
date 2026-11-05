@@ -364,7 +364,8 @@ export function conflictingInstalledCasks(
  * `brew` is spawned with Raycast's own environment (`execBrewEnv` copies
  * `process.env`), not the user's shell, so its `--appdir` is whatever
  * `HOMEBREW_CASK_OPTS` says there — and `/Applications`, Homebrew's default,
- * when that is unset, as it usually is.
+ * when that is unset, as it usually is. This ignores `brew.env` files, so the
+ * scan uses it only when `brewFetchCaskAppdir` can't ask brew.
  *
  * It has to be exactly that one directory. `brew install --adopt` targets
  * `<appdir>/<Name>.app` and nothing else, so an app matched anywhere else is
@@ -390,10 +391,14 @@ export function caskAppdir(env: NodeJS.ProcessEnv = process.env): string {
   // ignores `--appdir /x`, so honoring it would scan a directory brew never
   // adopts into. A regex taking the first match got duplicates, quoting and
   // escaping wrong, each a way to scan one directory while brew uses another.
-  let appdir = "/Applications";
   const words = shellSplit(env.HOMEBREW_CASK_OPTS ?? "");
   // An unmatched quote makes Homebrew itself raise, so no install would run.
-  if (words === undefined) return appdir;
+  return caskOptsAppdir(words ?? []);
+}
+
+/** The `--appdir` in `HOMEBREW_CASK_OPTS` once it is split into words. */
+export function caskOptsAppdir(words: readonly string[]): string {
+  let appdir = "/Applications";
   for (const word of words) {
     const eq = word.indexOf("=");
     if (eq === -1) continue;
@@ -443,7 +448,8 @@ export function shellSplit(line: string): string[] | undefined {
 /** `Pathname#expand_path` for the cases a path setting takes: `~`, `~/…`, relative. */
 function expandPath(value: string): string {
   if (value === "~") return os.homedir();
-  if (value.startsWith("~/")) return path.join(os.homedir(), value.slice(2));
+  // `resolve` drops a trailing slash, like `expand_path`.
+  if (value.startsWith("~/")) return path.resolve(path.join(os.homedir(), value.slice(2)));
   return path.resolve(value);
 }
 

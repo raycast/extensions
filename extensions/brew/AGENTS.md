@@ -381,11 +381,15 @@ target: "Thorium Browser.app"` publishes both names; Homebrew installs — and
   whose token is installed. Otherwise a managed app returns as a candidate for
   its own `@beta` sibling.
 - **Only the app directly inside brew's effective `appdir` is adoptable.**
-  `brew install --adopt` targets `<appdir>/<Name>.app` and nothing else, and the
-  extension runs brew with Raycast's environment, so that is `--appdir` from
-  Raycast's `HOMEBREW_CASK_OPTS`, or `/Applications` when unset
-  (`caskAppdir`). Accepting `~/Applications` as well would let a row show one
-  file while brew installs beside it or adopts a different one. `caskAppdir`
+  `brew install --adopt` targets `<appdir>/<Name>.app` and nothing else. The
+  scan reads that folder from `brew config` (`brewFetchCaskAppdir`), which
+  prints `HOMEBREW_CASK_OPTS` after brew loads its `brew.env` files. Raycast's
+  environment doesn't have those. Don't use `brew ruby` or any other `dev-cmd`
+  for this, because the first one a user runs turns on developer mode for
+  good. If `brew config` fails, the scan falls back to `caskAppdir`, which
+  reads Raycast's `HOMEBREW_CASK_OPTS`, or `/Applications` when it's unset.
+  Accepting `~/Applications` as well would let a row show one file while brew
+  installs beside it or adopts a different one. `caskAppdir`
   reproduces Homebrew's parse exactly — Ruby `Shellwords.shellsplit`, only
   `=`-form words, the LAST `appdir` wins — because every divergence is a way
   to scan one directory while brew uses another. `shellSplit` is checked
@@ -396,9 +400,8 @@ target: "Thorium Browser.app"` publishes both names; Homebrew installs — and
   ships `Recents.app` inside `Finder.app`, it name-matches a cask, and `recents`
   is not `auto_updates` — so without it the list offered an SIP-protected Apple
   binary labeled verified.
-  Raycast's environment is not the whole story, though: brew also loads
-  `HOMEBREW_CASK_OPTS` from its own `brew.env` files, which the extension never
-  sees. So the adopt command passes the scanned folder as an explicit
+  The scanned folder can still differ from brew's, for example after that
+  fallback. So the adopt command passes it as an explicit
   `--appdir` (`brewAdoptCaskArgs`), which beats every env source
   (`cask/config.rb`: explicit, then env, then default). It is an argument
   ARRAY because the streaming runner otherwise splits on whitespace.
