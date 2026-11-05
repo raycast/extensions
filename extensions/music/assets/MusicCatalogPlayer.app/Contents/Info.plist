@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>fr.semzen.raycast.music.catalog-player</string>
+<key>CFBundleName</key><string>Raycast Music Player</string>
+<key>CFBundleDisplayName</key><string>Raycast Music Player</string>
+<key>CFBundleExecutable</key><string>MusicCatalogPlayer</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>LSUIElement</key><true/>
+<key>NSAppleMusicUsageDescription</key><string>Play a requested Apple Music catalog song in Music without adding it to your library or opening its window.</string>
+</dict></plist>

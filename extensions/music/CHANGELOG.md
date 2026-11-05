@@ -5,8 +5,9 @@
 - Added Play in Music to catalog song search results and album tracklists without adding songs to the library.
 - Just Play now falls back to the Apple Music catalog when no local library result exists.
 - Added AI tools for catalog search and verified song playback.
-- Validate catalog links and complete, unambiguous album tracklists; verify each native playback transition before reporting success.
-- Play catalog songs in the background without UI automation, restore volume/shuffle after preparation or failure, prevent concurrent playback, and request a native success notification.
+- Validate the exact catalog identity and use a bundled native player instead of opening album links or skipping through tracks.
+- Preserve minimized Music windows, volume and shuffle; independently verify track metadata and advancing playback before requesting a native success notification.
+- Include helper sources, a universal build script, macOS authorization, timeouts and concurrency protection. Document the non-public macOS API and local-distribution limitations.
 
 ## [Album Art in Menu Bar] - 2026-10-17
 

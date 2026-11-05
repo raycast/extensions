@@ -20,29 +20,41 @@ AI can use **Search Apple Music Catalog**, then **Play Catalog Song** with a
 returned song ID. AI playback leaves the conversation open rather than closing
 Raycast and potentially reactivating Music. Playback never adds the song to your library.
 
-Catalog playback requires an Apple Music subscription, Music signed in, and
-Raycast's **Automation** permission to control Music. It does not require
-Accessibility, select UI elements, simulate keys, or activate Music.
+Catalog playback requires an Apple Music subscription, Music signed in, Raycast's
+**Automation** permission to verify playback, and **Media & Apple Music** permission
+for the bundled **Raycast Music Player** helper. The first use can display a normal
+macOS consent dialog. Denied access is reported without falling back to another song.
 
-The extension obtains the ordered album tracklist from Apple's API, stops the
-current queue, opens the album with macOS `open -g`, then uses native playback
-and Next Track commands. This is not a direct play-by-catalog-ID API: preparation
-can take several seconds, replaces the queue, and changes Music's background page.
-Intermediate tracks are silenced, each step is verified by title, artist and album,
-and the original volume and shuffle settings are restored. On failure, playback
-is paused before restoring settings. A separate cleanup subprocess also runs after
-a playback timeout; if Music is unresponsive, a restoration error is reported.
+The helper sends the exact catalog song ID to Music's system player. It does not
+open a Music URL, select UI elements, simulate keys, add a library item, or manipulate
+Music's windows. The current queue is replaced with the selected song; volume and
+shuffle are not modified. A minimized Music window stays minimized in the tested
+configuration.
 
-Concurrent catalog requests are rejected with a native macOS lock. Avoid changing
-playback, volume or shuffle during preparation; switching applications is fine.
-A native macOS notification is requested only after playback and restored settings
-are verified. Its visibility depends on notification permissions and Focus settings.
+The extension independently verifies the title, artist, album and advancing
+playback position via AppleScript. Unverified playback is paused and reported as
+an error; success is never inferred from the launcher exit status. Concurrent
+catalog requests are rejected with a native macOS lock. The helper has a deadline
+and stops if its calling process or request directory disappears.
 
-Incomplete album tracklists, unavailable preceding tracks, indistinguishable
-metadata, unsupported links or a preparation deadline fail safely with an error;
-**Open in Music** remains available. Albums and playlists retain their existing
-behavior. This route depends on Music's album-link behavior, not its UI layout,
-and still needs real-device checks after macOS/Music updates.
+A native macOS notification is requested only after playback verification.
+Its visibility depends on notification permissions and Focus settings.
+**Open in Music** remains a separate, explicit action. Albums, playlists and
+library playback retain their existing behavior.
+
+### Compatibility limitation
+
+This is a local experimental integration: the MediaPlayer system-player methods
+are present at runtime but are **not public macOS SDK APIs**. Real playback with a
+minimized Music window was tested on macOS 27 / Apple silicon. Intel is compiled,
+not hardware-tested. Other macOS versions and future updates are not guaranteed.
+Unsupported APIs fail explicitly; there is no hidden URL/UI fallback.
+
+The small bundled helper includes its full source and build script in `native/`.
+It is ad-hoc signed for local use, not Developer ID signed or notarized. Changing
+its executable can require granting Music access again. Raycast Store acceptance
+and a public distribution/signing strategy must be reviewed before an upstream PR;
+see [Raycast's binary dependency guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store#binary-dependencies-and-additional-configuration).
 
 ## Troubleshooting
 
@@ -53,6 +65,8 @@ and still needs real-device checks after macOS/Music updates.
 - If Music stops responding after sleep, reopen Music and retry. Script timeouts prevent indefinite waits but cannot repair Music's internal state.
 
 ## Development
+
+After changing native sources, run `npm run build:native` on macOS with Xcode Command Line Tools. The reproducible command builds arm64 and x86_64 and verifies the bundle signature. Normal TypeScript builds reuse that asset.
 
 Run `npm test`, `npx tsc --noEmit`, `npm run build`, and `npm run lint`.
 The regression suite covers subprocess handling, search ranking, metadata parsing, and generated scripts. Playback, cloud sync, and station behavior also need testing in Raycast with Music on macOS.

@@ -30,6 +30,7 @@
   ],
   "scripts": {
     "test": "node --test tests/*.test.cjs",
+    "build:native": "node native/build.cjs",
     "publish": "npx @raycast/api@latest publish",
     "build": "ray build -e dist",
     "dev": "ray develop",
@@ -454,7 +455,7 @@
     {
       "name": "play-catalog-song",
       "title": "Play Catalog Song",
-      "description": "Play a song returned by search-catalog in Music in the background, without UI clicks or library additions. Temporarily silences album preparation and restores volume and shuffle. Reports success only after verifying playback."
+      "description": "Play an exact catalog song through the native Music player without opening its window or adding it to the library. Requires macOS Music permission. Preserves volume and shuffle; reports success only after verifying the track and playback progress."
     },
     {
       "name": "get-volume",

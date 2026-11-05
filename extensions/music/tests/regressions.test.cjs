@@ -61,97 +61,116 @@ test("catalog playback validates exact Apple host, protocol, album path and song
   assert.throws(() => catalogPlaybackUrl({ ...catalogSong, artist: "" }));
 });
 
-const albumDetail = (tracks) => ({ album: { id: "1679612960", trackCount: tracks.length }, tracks });
+test("catalog verification never opens a link or changes windows, volume or shuffle", () => {
+  const { catalogVerifyScript } = loadSource("src/util/scripts/catalog.ts");
+  const script = catalogVerifyScript(catalogSong);
+  assert.doesNotMatch(
+    script,
+    /System Events|activate|frontmost|key code|click|duplicate|next track|open|set sound volume|set shuffle/,
+  );
+  assert.match(script, /repeat 120 times/);
+  assert.match(script, /name of current track is "Through the Fire and Flames"/);
+  assert.match(script, /artist of current track is "DragonForce"/);
+  assert.match(script, /album of current track is "Inhuman Rampage"/);
+  assert.match(script, /player state is playing/);
+  assert.match(script, /currentPosition > firstPosition \+ 0.05/);
+});
 
-test("catalog plan validates the entire album and rejects unavailable or ambiguous steps", () => {
-  const { catalogPlaybackPlan } = loadSource("src/util/scripts/catalog.ts");
-  assert.deepEqual(catalogPlaybackPlan(catalogSong, albumDetail([catalogSong])).tracks, [catalogSong]);
-  assert.throws(() => catalogPlaybackPlan(catalogSong, null), /complete album/);
-  assert.throws(() =>
-    catalogPlaybackPlan(catalogSong, { ...albumDetail([catalogSong]), album: { id: "2", trackCount: 1 } }),
-  );
-  assert.throws(() =>
-    catalogPlaybackPlan(catalogSong, { ...albumDetail([catalogSong]), album: { id: "1679612960", trackCount: 2 } }),
-  );
-  assert.throws(() => catalogPlaybackPlan(catalogSong, albumDetail([])), /identified/);
-  assert.throws(() => catalogPlaybackPlan(catalogSong, albumDetail([catalogSong, catalogSong])), /identified/);
-  assert.throws(
-    () => catalogPlaybackPlan(catalogSong, albumDetail([{ ...catalogSong, title: "Different" }])),
-    /metadata/,
-  );
-  assert.throws(
-    () => catalogPlaybackPlan(catalogSong, albumDetail([{ ...catalogSong, id: "2" }, catalogSong])),
-    /indistinguishable/,
-  );
+test("catalog verification and notification escape metadata", () => {
+  const { catalogVerifyScript, catalogNotificationScript } = loadSource("src/util/scripts/catalog.ts");
+  const song = { ...catalogSong, title: 'A "quoted" song' };
+  assert.ok(catalogVerifyScript(song).includes('A \\"quoted\\" song'));
+  assert.ok(catalogNotificationScript(song).includes('A \\"quoted\\" song'));
+});
+
+test("native helper results must identify this song and an actual playback attempt", () => {
+  const { parseNativeResult, NativeCatalogError } = loadSource("src/util/catalog-native.ts");
+  const raw = (value) => JSON.stringify({ songId: catalogSong.id, playbackAttempted: true, ...value });
+  assert.doesNotThrow(() => parseNativeResult(raw({ status: "started" }), catalogSong.id));
+  for (const value of [
+    "",
+    "{}",
+    "null",
+    "[]",
+    raw({ status: "started", songId: "2" }),
+    raw({ status: "started", playbackAttempted: false }),
+  ])
+    assert.throws(() => parseNativeResult(value, catalogSong.id), NativeCatalogError);
   assert.throws(
     () =>
-      catalogPlaybackPlan(
-        catalogSong,
-        albumDetail([{ ...catalogSong, id: "2", title: "Other", playable: false }, catalogSong]),
+      parseNativeResult(
+        raw({ status: "error", playbackAttempted: false, message: "Permission denied" }),
+        catalogSong.id,
       ),
-    /unavailable/,
+    (error) => error.message === "Permission denied" && !error.playbackAttempted,
+  );
+  assert.throws(
+    () => parseNativeResult(raw({ status: "error", message: "Preparation failed" }), catalogSong.id),
+    (error) => error.playbackAttempted,
   );
 });
 
-test("catalog script uses only background opening and verified native track transitions", () => {
-  const { catalogPlaybackPlan, catalogPlaybackScript, catalogRestoreScript } =
-    loadSource("src/util/scripts/catalog.ts");
-  const earlier = { ...catalogSong, id: "2", title: "Earlier" };
-  const script = catalogPlaybackScript(catalogPlaybackPlan(catalogSong, albumDetail([earlier, catalogSong])));
-  assert.doesNotMatch(script, /System Events|activate|frontmost|key code|click|duplicate|addToLibrary/);
-  assert.match(script, /\/usr\/bin\/open -g /);
-  assert.match(script, /set sound volume to 0/);
-  assert.match(script, /set shuffle enabled to false/);
-  assert.match(script, /repeat 40 times/);
-  assert.ok(script.indexOf("my waitForSettings(0, false)") < script.indexOf('tell application "Music" to stop'));
-  assert.match(script, /set deadline to \(current date\) \+ 45/);
-  assert.match(script, /name of current track is expectedTitle/);
-  assert.match(script, /artist of current track is expectedArtist/);
-  assert.match(script, /album of current track is expectedAlbum/);
-  assert.match(script, /player state is playing/);
-  assert.equal((script.match(/to next track/g) || []).length, 1);
-  assert.ok(script.indexOf('my waitForTrack("Earlier"') < script.indexOf("to next track"));
-  assert.ok(script.indexOf("to next track") < script.indexOf('my waitForTrack("Through the Fire and Flames"'));
-  const cleanup = catalogRestoreScript({ volume: 43, shuffle: true }, catalogSong, false);
-  assert.ok(cleanup.indexOf("if not verified then pause") < cleanup.indexOf("set sound volume to 43"));
-  assert.match(cleanup, /set shuffle enabled to true/);
-  assert.match(cleanup, /my waitForSettings\(43, true\)/);
-  assert.ok(cleanup.indexOf("my waitForSettings(43, true)") < cleanup.lastIndexOf("if verified then"));
-});
-
-test("catalog metadata is escaped and invalid settings cannot be inserted into cleanup", () => {
-  const { catalogPlaybackPlan, catalogPlaybackScript, catalogNotificationScript, parseCatalogState } =
-    loadSource("src/util/scripts/catalog.ts");
-  const song = { ...catalogSong, title: 'A "quoted" song' };
-  assert.ok(catalogPlaybackScript(catalogPlaybackPlan(song, albumDetail([song]))).includes('A \\"quoted\\" song'));
-  assert.ok(catalogNotificationScript(song).includes('A \\"quoted\\" song'));
-  assert.deepEqual(parseCatalogState("43|true\n"), { volume: 43, shuffle: true });
-  for (const raw of ["", "101|false", "-1|false", "3|unknown", "3|false\nactivate"])
-    assert.throws(() => parseCatalogState(raw));
+test("native transport launches the bundled app, checks its result and removes the private request directory", async () => {
+  const events = [];
+  let payload = JSON.stringify({ status: "started", songId: catalogSong.id, playbackAttempted: true });
+  let failure;
+  const native = loadSource("src/util/catalog-native.ts", undefined, {
+    "@raycast/api": { environment: { assetsPath: "/assets" } },
+    "node:fs/promises": {
+      chmod: async () => events.push("mode"),
+      mkdtemp: async () => "/tmp/music-test",
+      readFile: async () => payload,
+      rm: async (directory) => {
+        assert.equal(directory, "/tmp/music-test");
+        events.push("cleanup");
+      },
+    },
+    "node:child_process": {
+      execFile: (file, args, options, callback) => {
+        events.push("launch");
+        assert.equal(file, "/usr/bin/open");
+        assert.deepEqual(args.slice(0, 4), ["-g", "-n", "-W", "/assets/MusicCatalogPlayer.app"]);
+        assert.deepEqual(args.slice(4), ["--args", catalogSong.id, "/tmp/music-test/result.json", String(process.pid)]);
+        assert.equal(options.timeout, 95000);
+        callback(failure, "");
+      },
+    },
+  });
+  await native.startNativeCatalogSong(catalogSong.id);
+  assert.deepEqual(events, ["mode", "launch", "cleanup"]);
+  events.length = 0;
+  payload = "{}";
+  await assert.rejects(native.startNativeCatalogSong(catalogSong.id), native.NativeCatalogError);
+  assert.equal(events.at(-1), "cleanup");
+  failure = Object.assign(new Error("Timed out"), { killed: true });
+  await assert.rejects(native.startNativeCatalogSong(catalogSong.id), (error) => error.playbackAttempted);
+  assert.equal(events.at(-1), "cleanup");
+  events.length = 0;
+  await assert.rejects(native.startNativeCatalogSong("1; evil"));
+  assert.deepEqual(events, []);
 });
 
 function playbackHarness(options = {}) {
-  const TE = require("fp-ts/TaskEither");
   const events = [];
   const scripts = [];
+  class NativeCatalogError extends Error {
+    constructor(message, playbackAttempted = false) {
+      super(message);
+      this.playbackAttempted = playbackAttempted;
+    }
+  }
   const run = async (script, _args, settings) => {
     scripts.push(script);
-    if (script.includes("return (sound volume as text)")) {
-      events.push("save");
-      return options.state ?? "43|true";
+    if (script.includes("set firstPosition")) {
+      events.push("verify");
+      assert.equal(settings.timeout, 20000);
+      if (options.verifyError) throw options.verifyError;
+      return options.verifyResult ?? "verified";
     }
-    if (script.includes("on waitForTrack")) {
-      events.push("play");
-      assert.equal(settings.timeout, 60000);
-      if (options.playError) throw options.playError;
-      return options.playResult ?? "verified";
-    }
-    if (script.includes("set verified to false")) {
-      events.push("restore");
-      assert.match(script, /set sound volume to 43/);
-      assert.match(script, /set shuffle enabled to true/);
-      if (options.restoreError) throw options.restoreError;
-      return options.restoreResult ?? "verified";
+    if (script === 'tell application "Music" to pause') {
+      events.push("pause");
+      if (options.pauseError) throw options.pauseError;
+      return "";
     }
     assert.match(script, /^display notification/);
     events.push("notify");
@@ -159,8 +178,13 @@ function playbackHarness(options = {}) {
     return "";
   };
   const { playCatalogSong } = loadSource("src/util/catalog-playback.ts", run, {
-    "./catalog-api": {
-      getCatalogAlbum: () => (options.albumError ? TE.left(options.albumError) : TE.right(albumDetail([catalogSong]))),
+    "./catalog-native": {
+      NativeCatalogError,
+      startNativeCatalogSong: async (id) => {
+        assert.equal(id, catalogSong.id);
+        events.push("native");
+        if (options.nativeError) throw new NativeCatalogError(options.nativeError, options.attempted);
+      },
     },
     "./catalog-lock": {
       withCatalogPlaybackLock: async (fn) => {
@@ -177,45 +201,40 @@ function playbackHarness(options = {}) {
   return { play: () => playCatalogSong(catalogSong)(), events, scripts, playCatalogSong };
 }
 
-test("catalog playback restores settings and notifies only after both verifications succeed", async () => {
+test("catalog playback verifies native playback before notifying, without changing settings", async () => {
   const h = playbackHarness();
   assert.equal((await h.play())._tag, "Right");
-  assert.deepEqual(h.events, ["lock", "save", "play", "restore", "notify", "unlock"]);
-  assert.match(h.scripts[2], /set verified to \(player state is playing/);
-  const mutedNotifications = playbackHarness({ notifyError: new Error("Notifications disabled") });
-  assert.equal((await mutedNotifications.play())._tag, "Right");
+  assert.deepEqual(h.events, ["lock", "native", "verify", "notify", "unlock"]);
+  assert.ok(h.scripts.every((script) => !/set sound volume|set shuffle|open -g/.test(script)));
+  const notifications = playbackHarness({ notifyError: new Error("Notifications disabled") });
+  assert.equal((await notifications.play())._tag, "Right");
 });
 
-test("catalog playback restores settings after timeout or unexpected output and never announces success", async () => {
+test("unverified native playback is paused and never announced as successful", async () => {
   for (const options of [
-    { playError: new Error("Timed out") },
-    { playResult: "playing" },
-    { restoreResult: "not-verified" },
-    { restoreError: new Error("Music unresponsive") },
+    { verifyError: new Error("Timed out") },
+    { verifyResult: "playing" },
+    { verifyError: new Error("Wrong song"), pauseError: new Error("Music unresponsive") },
   ]) {
     const h = playbackHarness(options);
     assert.equal((await h.play())._tag, "Left");
-    assert.deepEqual(h.events, ["lock", "save", "play", "restore", "unlock"]);
-    if (options.playError || options.playResult) {
-      assert.match(h.scripts[2], /set verified to false\s+tell application "Music"\s+if not verified then pause/);
-    }
+    assert.deepEqual(h.events, ["lock", "native", "verify", "pause", "unlock"]);
   }
+  const failed = playbackHarness({ nativeError: "Preparation failed", attempted: true });
+  assert.equal((await failed.play())._tag, "Left");
+  assert.deepEqual(failed.events, ["lock", "native", "pause", "unlock"]);
 });
 
-test("invalid input, unavailable API, invalid settings and concurrent requests do not start playback", async () => {
-  for (const options of [
-    { albumError: new Error("Offline") },
-    { state: "invalid" },
-    { lockError: new Error("Another catalog playback request is running") },
-  ]) {
-    const h = playbackHarness(options);
-    assert.equal((await h.play())._tag, "Left");
-    assert.ok(!h.events.includes("play"));
-    assert.ok(!h.events.includes("notify"));
-  }
-  const h = playbackHarness();
-  assert.equal((await h.playCatalogSong({ ...catalogSong, playable: false })())._tag, "Left");
-  assert.deepEqual(h.events, []);
+test("permission denial, invalid input and concurrent requests preserve existing playback", async () => {
+  const denied = playbackHarness({ nativeError: "Permission denied" });
+  assert.equal((await denied.play())._tag, "Left");
+  assert.deepEqual(denied.events, ["lock", "native", "unlock"]);
+  const busy = playbackHarness({ lockError: new Error("Another catalog playback request is running") });
+  assert.equal((await busy.play())._tag, "Left");
+  assert.deepEqual(busy.events, ["lock"]);
+  const invalid = playbackHarness();
+  assert.equal((await invalid.playCatalogSong({ ...catalogSong, playable: false })())._tag, "Left");
+  assert.deepEqual(invalid.events, []);
 });
 
 test(
