@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Menu bar rate-limit submenus] - {PR_MERGE_DATE}
+## [Menu bar rate-limit submenus] - 2026-11-05
 
 - Hover over Claude and Codex accounts to view 5-hour and 7-day quota bars, percentages, and reset countdowns
 - Reuse Percentage Display for Remaining or Consumed (Used), keeping Remaining as the default
