@@ -22,10 +22,10 @@ import {
 import { useEffect, useState } from "react";
 import { showFailureToast, useFrecencySorting } from "@raycast/utils";
 
-import Service, { CustomCheatsheet, FavoriteCheatsheet, RepositoryCheatsheet } from "./service";
+import Service, { CustomCheatsheet, FavoriteCheatsheet, RepositorySheet } from "./service";
 import type { File as ServiceFile } from "./service";
-import { displayMarkdown } from "./markdown";
-import { partitionTitleMatches } from "./search";
+import { displayMarkdown, repositoryDisplayMarkdown } from "./markdown";
+import { partitionTitleMatches, repositoryMatchesQuery } from "./search";
 // GitHub icon for repository cheatsheets - using built-in icon
 const githubIcon = Icon.Globe;
 
@@ -47,7 +47,7 @@ interface UnifiedCheatsheet {
 function Command() {
   const [sheets, setSheets] = useState<string[]>([]);
   const [customSheets, setCustomSheets] = useState<CustomCheatsheet[]>([]);
-  const [repositorySheets, setRepositorySheets] = useState<RepositoryCheatsheet[]>([]);
+  const [repositorySheets, setRepositorySheets] = useState<RepositorySheet[]>([]);
   const [favorites, setFavorites] = useState<FavoriteCheatsheet[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const preferences = getPreferenceValues<{ defaultSort: "frecency" | "lastViewed" | "mostViewed" | "alpha" }>();
@@ -273,16 +273,11 @@ function Command() {
         return Service.defaultMatchesQuery(item.slug, searchQuery) || contentResults.includes(item.slug);
       }
 
-      // For repository sheets, search in title and content
+      // For repository sheets, search metadata, original content and source details
       if (item.type === "repository") {
         const repoSheet = repositorySheets.find((s) => s.id === item.id);
         if (repoSheet) {
-          return (
-            repoSheet.title.toLowerCase().includes(query) ||
-            repoSheet.content.toLowerCase().includes(query) ||
-            repoSheet.filePath.toLowerCase().includes(query) ||
-            (item.repositoryName && item.repositoryName.toLowerCase().includes(query))
-          );
+          return repositoryMatchesQuery(repoSheet, query, item.repositoryName);
         }
       }
     }
@@ -503,7 +498,9 @@ function Command() {
                     ? (Service.getDefaultMetadata(item.slug)?.tags || [])
                         .slice(0, 3)
                         .map((tag) => ({ text: tag, icon: Icon.Tag }))
-                    : []),
+                    : (repositorySheets.find((s) => s.id === item.id)?.tags || [])
+                        .slice(0, 3)
+                        .map((tag) => ({ text: tag, icon: Icon.Tag }))),
               ]}
               actions={
                 <ActionPanel>
@@ -558,7 +555,12 @@ function Command() {
             item.type === "custom"
               ? customSheets.find((s) => s.id === item.id)?.tags || []
               : item.type === "repository"
-                ? ["repository", "github", item.repositoryName || ""].filter(Boolean)
+                ? [
+                    "repository",
+                    "github",
+                    item.repositoryName || "",
+                    ...(repositorySheets.find((s) => s.id === item.id)?.tags || []),
+                  ].filter(Boolean)
                 : Service.getDefaultMetadata(item.slug)?.tags || []
           }
           accessories={[
@@ -572,7 +574,9 @@ function Command() {
                 ? (Service.getDefaultMetadata(item.slug)?.tags || [])
                     .slice(0, 3)
                     .map((tag) => ({ text: tag, icon: Icon.Tag }))
-                : []),
+                : (repositorySheets.find((s) => s.id === item.id)?.tags || [])
+                    .slice(0, 3)
+                    .map((tag) => ({ text: tag, icon: Icon.Tag }))),
           ]}
           actions={
             <ActionPanel>
@@ -968,7 +972,7 @@ function EditCustomSheetForm({ sheet, onUpdated }: EditCustomSheetProps) {
 const CreateCustomSheetForm = CreateCustomCheatsheet;
 
 // Repository cheatsheet view component
-function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
+function RepositorySheetView({ sheet }: { sheet: RepositorySheet }) {
   const [isLoading] = useState(false);
   const [repository, setRepository] = useState<{ owner: string; name: string; defaultBranch: string } | null>(null);
 
@@ -998,7 +1002,7 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
     fetchRepository();
   }, [sheet.repositoryId]);
 
-  const processedContent = displayMarkdown(sheet.content);
+  const processedContent = repositoryDisplayMarkdown(sheet.content, sheet.description);
 
   // Construct GitHub URLs
   const githubUrl = repository
@@ -1014,6 +1018,14 @@ function RepositorySheetView({ sheet }: { sheet: RepositoryCheatsheet }) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Title" text={sheet.title} />
+          {sheet.description && <Detail.Metadata.Label title="Description" text={sheet.description} />}
+          {!!sheet.tags?.length && (
+            <Detail.Metadata.TagList title="Tags">
+              {sheet.tags.map((tag) => (
+                <Detail.Metadata.TagList.Item key={tag} text={tag} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
           {repositoryUrl ? (
             <Detail.Metadata.Link
               title="Repository"

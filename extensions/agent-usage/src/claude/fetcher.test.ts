@@ -316,3 +316,55 @@ test("a named config dir keeps its directory label even when an account identity
     fs.rmSync(parent, { recursive: true, force: true });
   }
 });
+
+test("fetchClaudeUsage accepts missing or null five-hour windows and preserves weekly data", async (t) => {
+  const { fetchClaudeUsage } = await import("./fetcher.ts");
+  for (const five_hour of [undefined, null]) {
+    t.mock.method(globalThis, "fetch", async () =>
+      Response.json({
+        five_hour,
+        seven_day: { utilization: 21 },
+        seven_day_sonnet: { utilization: 30 },
+        extra_usage: { is_enabled: true, monthly_limit: 1000, used_credits: 200 },
+      }),
+    );
+    const { usage, error } = await fetchClaudeUsage({ accessToken: "test-token" });
+    assert.equal(error, null);
+    assert.ok(usage);
+    assert.equal(usage.fiveHour, null);
+    assert.equal(usage.sevenDay?.percentageRemaining, 79);
+    assert.equal(usage.modelWindows.sonnet.percentageRemaining, 70);
+    assert.equal(usage.extraUsage?.used, 2);
+  }
+});
+
+test("fetchClaudeUsage tolerates both windows absent without implying unlimited usage", async (t) => {
+  const { fetchClaudeUsage } = await import("./fetcher.ts");
+  t.mock.method(globalThis, "fetch", async () => Response.json({ five_hour: null, seven_day: null }));
+  const { usage, error } = await fetchClaudeUsage({ accessToken: "test-token" });
+  assert.equal(error, null);
+  assert.ok(usage);
+  assert.equal(usage.fiveHour, null);
+  assert.equal(usage.sevenDay, null);
+});
+
+test("fetchClaudeUsage preserves valid five-hour windows including exhausted quota", async (t) => {
+  const { fetchClaudeUsage } = await import("./fetcher.ts");
+  for (const utilization of [0, 100]) {
+    t.mock.method(globalThis, "fetch", async () => Response.json({ five_hour: { utilization } }));
+    const { usage, error } = await fetchClaudeUsage({ accessToken: "test-token" });
+    assert.equal(error, null);
+    assert.equal(usage?.fiveHour?.percentageRemaining, 100 - utilization);
+    assert.equal(usage?.sevenDay, null);
+  }
+});
+
+test("fetchClaudeUsage rejects malformed response bodies and present invalid windows", async (t) => {
+  const { fetchClaudeUsage } = await import("./fetcher.ts");
+  for (const body of [null, [], "invalid", { five_hour: {} }, { seven_day: { utilization: "bad" } }]) {
+    t.mock.method(globalThis, "fetch", async () => Response.json(body));
+    const { usage, error } = await fetchClaudeUsage({ accessToken: "test-token" });
+    assert.equal(usage, null);
+    assert.equal(error?.type, "parse_error");
+  }
+});

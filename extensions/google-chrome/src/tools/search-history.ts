@@ -27,19 +27,33 @@ export async function getChromeHistory(query?: string, profile?: string) {
   try {
     const db = await loadDatabase(profile);
 
-    const searchTerms = query ? query.trim().split(" ") : [""];
-    const whereConditions = query
-      ? searchTerms.map((term) => `(title LIKE '%${term}%' OR url LIKE '%${term}%')`).join(" AND ")
-      : null;
+    // Escape single quotes so a query like "don't" doesn't break the SQL.
+    const searchTerms = (query ?? "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((term) => term.replace(/'/g, "''"));
+    const whereConditions =
+      searchTerms.length > 0
+        ? searchTerms.map((term) => `(title LIKE '%${term}%' OR url LIKE '%${term}%')`).join(" AND ")
+        : null;
 
+    // Chrome stores last_visit_time as microseconds since 1601-01-01. Return it as an
+    // ISO 8601 date so the AI gets a readable time instead of the raw counter.
     const results: QueryExecResult[] = db.exec(`
-        SELECT id, url, title, last_visit_time as lastVisited
+        SELECT id, url, title,
+               strftime('%Y-%m-%dT%H:%M:%SZ', last_visit_time / 1000000 + strftime('%s', '1601-01-01'), 'unixepoch') as lastVisited
         FROM urls
         WHERE ${whereConditions ?? 1}
         AND last_visit_time > 0
         ORDER BY last_visit_time DESC
         LIMIT 30
       `);
+
+    // db.exec returns no result set when nothing matches.
+    if (results.length === 0) {
+      return [];
+    }
 
     const mappedData = results[0].values.map((valueArray) => {
       return results[0].columns.reduce<Partial<HistoryEntry>>(

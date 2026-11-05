@@ -1,11 +1,7 @@
 import { showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { makeFriendly, pathFor } from "@utils/path-helpers";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { base64ShellSanitize } from "@utils/misc";
-
-const asyncExec = promisify(exec);
+import { makeFriendly } from "@utils/path-helpers";
+import { addToZoxide } from "@utils/zoxide";
 
 // Returns the selected/open Finder folder, or "" when nothing is available.
 const getFinderPath = async (): Promise<string> => {
@@ -50,13 +46,6 @@ const chooseFolder = async (): Promise<string> => {
   }
 };
 
-const addToZoxide = async (folder: string) => {
-  const { stderr } = await asyncExec(`zoxide add "${base64ShellSanitize(folder)}"`, {
-    env: { PATH: pathFor("zoxide") },
-  });
-  if (stderr.length) throw new Error(stderr);
-};
-
 export default async function Command() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Checking Finder…" });
   try {
@@ -73,7 +62,7 @@ export default async function Command() {
     }
 
     toast.title = "Adding directory to zoxide...";
-    await addToZoxide(folder);
+    addToZoxide(folder);
 
     try {
       await launchCommand({ name: "search-directories", type: LaunchType.UserInitiated });

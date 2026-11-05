@@ -39,7 +39,8 @@
 /extensions/agent-browser                                           @0xdhrv
 /extensions/agent-client-protocol                                   @Yukaii
 /extensions/agent-ecosystem-map                                     @spyrae
-/extensions/agent-usage                                             @natsustan @alexibuild @AdrianBonpin @GarrickZ2 @EDM115 @chingweih @natsustan @jakoss @Laughing0900 @ridemountainpig
+/extensions/agent-inbox                                             @0xFANGO
+/extensions/agent-usage                                             @natsustan @alexibuild @AdrianBonpin @GarrickZ2 @EDM115 @chingweih @natsustan @jakoss @Laughing0900 @ridemountainpig @BallerJay
 /extensions/agentcfg                                                @jorgenosberg
 /extensions/ai-agency                                               @Marcin-91
 /extensions/ai-by-vercel                                            @ridemountainpig
@@ -787,7 +788,7 @@
 /extensions/dondori                                                 @ruslan-korneev
 /extensions/done-bear                                               @mblode
 /extensions/donut                                                   @Visual-Studio-Coder
-/extensions/doorstopper                                             @VladCuciureanu
+/extensions/doorstopper                                             @VladCuciureanu @o101k
 /extensions/doppler-share-secrets                                   @thomaspaulmann @ridemountainpig @xmok @Lp-Francois
 /extensions/dot-new                                                 @natterstefan @xmok @ViGeng
 /extensions/dot-underscore-files-cleaner                            @danulqua
