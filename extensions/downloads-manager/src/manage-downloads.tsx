@@ -212,8 +212,9 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", true);
   const cancelRef = useRef<AbortController | null>(null);
   const isLoadPendingRef = useRef(false);
+  const loadedCountRef = useRef(0);
 
-  const loadNextPage = useCallback(async (offset: number) => {
+  const loadNextPage = useCallback(async (offset: number, batchSize = PAGE_SIZE) => {
     setIsLoading(true);
     isLoadPendingRef.current = true;
     cancelRef.current?.abort();
@@ -221,8 +222,8 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     const signal = cancelRef.current.signal;
 
     try {
-      const newDownloads = await getDownloadsAsync(PAGE_SIZE, offset, currentFolderPath);
-      const hasMoreItems = newDownloads.length === PAGE_SIZE;
+      const newDownloads = await getDownloadsAsync(batchSize, offset, currentFolderPath);
+      const hasMoreItems = newDownloads.length === batchSize;
 
       if (!signal.aborted) {
         if (offset === 0) {
@@ -232,7 +233,9 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
           setDownloads((prev: Download[]) => [...prev, ...newDownloads]);
         }
         setHasMore(hasMoreItems);
-        setNextOffset(offset + PAGE_SIZE);
+        const newOffset = offset + batchSize;
+        setNextOffset(newOffset);
+        loadedCountRef.current = newOffset;
       }
     } catch (error) {
       console.error("Error loading downloads:", error);
@@ -257,9 +260,10 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
 
   // A scan that started before a file changed can still hold its old path, so
   // replace it with a new scan instead of letting it overwrite the list.
+  // Reload the full already-displayed range so later pages are not lost.
   const restartPendingLoad = useCallback(() => {
     if (isLoadPendingRef.current) {
-      loadNextPage(0);
+      loadNextPage(0, Math.max(loadedCountRef.current, PAGE_SIZE));
     }
   }, [loadNextPage]);
 
