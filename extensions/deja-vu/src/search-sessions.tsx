@@ -100,7 +100,7 @@ export function SessionActions({ bin, hit }: { bin: string; hit: DejaSessionHit 
           }
         }}
       />
-      <Action.CopyToClipboard title="Copy Session ID" content={hit.id} shortcut={Keyboard.Shortcut.Common.Pin} />
+      <Action.CopyToClipboard title="Copy Session ID" content={hit.id} shortcut={Keyboard.Shortcut.Common.CopyName} />
       {hit.project ? (
         <Action
           title="Open Project Folder"
