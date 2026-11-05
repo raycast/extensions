@@ -1,28 +1,33 @@
 import { showToast, Toast } from "@raycast/api";
-import { AirlineMeta } from "soaring-symbols";
-import { normalizeFill } from ".";
+import { type Airline, listAirlines } from "soaring-symbols";
+import { AIRLINES_URL, isAirlineList } from "./airlines";
 
-export const fetchAirlines = async (): Promise<AirlineMeta[]> => {
+// The latest airlines of the extension's release line, or the list bundled
+// with the extension when that can't be loaded (offline, CDN error) or isn't
+// a usable list (see isAirlineList), so the
+// commands always have something to show
+export const fetchAirlines = async (): Promise<Airline[]> => {
   try {
-    const res = await fetch("https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/airlines.json");
+    const res = await fetch(AIRLINES_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!isAirlineList(data)) throw new Error("Unexpected airlines.json shape");
 
-    return (await res.json()) as AirlineMeta[];
+    return data;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to load airlines",
-      message: String(error),
+      title: "Showing the bundled airline list",
+      message: `Couldn't load the latest one: ${String(error)}`,
     });
 
-    return [];
+    return listAirlines();
   }
 };
 
-export const getSVGContent = async (url: string, monochrome: boolean = false) => {
+export const getSVGContent = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch SVG");
-  const svg = await res.text();
 
-  return monochrome ? normalizeFill(svg) : svg;
+  return res.text();
 };
