@@ -42,15 +42,15 @@ Contributor-provided Raycast screenshots with sensitive Jira identifiers, projec
 
 ### Log Time
 
-![Log Time form with the date prefilled](screenshots/log-time.png)
+![Log Time form with the date prefilled](media/log-time.png)
 
 ### View Logged Time
 
-![Logged time entries with daily totals and reminders](screenshots/logged-time.png)
+![Logged time entries with daily totals and reminders](media/logged-time.png)
 
 ### Refresh and Month Navigation
 
-![Refresh and month navigation actions](screenshots/refresh-actions.png)
+![Refresh and month navigation actions](media/refresh-actions.png)
 
 ## Setup
 
