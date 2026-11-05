@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [Fix Google API Requests] - {PR_MERGE_DATE}
+
+- Fixed Google Calendar requests failing with "r is not a function" by using native fetch for Google API calls
+
 ## [Update] - 2025-11-26
 
 - Fix issue with AI response not being parsed correctly

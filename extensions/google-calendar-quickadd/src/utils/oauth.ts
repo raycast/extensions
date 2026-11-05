@@ -1,6 +1,7 @@
-import { auth, calendar_v3 } from "@googleapis/calendar";
+import { calendar_v3 } from "@googleapis/calendar";
 import { OAuthService, withAccessToken } from "@raycast/utils";
 import type { Tool } from "@raycast/api";
+import { createCalendarClient } from "./google-clients";
 
 // Only request the minimal scopes needed
 const GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar";
@@ -14,9 +15,7 @@ export const googleOAuth = OAuthService.google({
   tokenUrl: "https://oauth2.googleapis.com/token",
   scope: GOOGLE_SCOPES,
   onAuthorize({ token }) {
-    const oauth = new auth.OAuth2();
-    oauth.setCredentials({ access_token: token });
-    calendar = new calendar_v3.Calendar({ auth: oauth });
+    calendar = createCalendarClient(token);
   },
 });
 
