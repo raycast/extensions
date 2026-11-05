@@ -48,7 +48,10 @@ function ProfileAction({ profileUrl }: { profileUrl: string }) {
   ) : null;
 }
 
-/** A pushed thread. Opening it is the explicit "read" gesture; the list never loads an unread thread by itself. */
+/**
+ * A pushed thread. Reading it here does not mark it read on Cosign (`read_conversations` says so), so the inbox keeps
+ * showing Cosign's own unread state after Back. Clearing it locally would show a state Cosign doesn't hold.
+ */
 function ThreadView({ conversation }: { conversation: Conversation }) {
   const { data, isLoading, error, revalidate } = useCachedPromise(fetchThread, [conversation.threadId], {
     onError: onErrorToast({ title: "Couldn't load conversation" }),

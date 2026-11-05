@@ -125,9 +125,20 @@ export function connectionSentence(c: Conversation): string | null {
   return sentences.join(" ") || c.connectionReason;
 }
 
-/** Rows that share a name get the person's handle, so two people called "Alex" read as "Alex (@alex)" and "Alex (@alex_smith)". Only the repeats are touched, and a row with no handle keeps its plain name. */
+/**
+ * Rows that share a name get the person's handle, so two people called "Alex" read as "Alex (@alex)" and
+ * "Alex (@alex_smith)". A repeat that still matches (no handle, as on every request row) gets a number: "Alex (2)".
+ * Titles come back unique, because Raycast doesn't run the actions of identical sibling menu bar items.
+ */
 export function withHandles(rows: { name: string; handle?: string | null }[]): string[] {
   const seen = new Map<string, number>();
   for (const { name } of rows) seen.set(name, (seen.get(name) ?? 0) + 1);
-  return rows.map(({ name, handle }) => ((seen.get(name) ?? 0) > 1 && handle ? `${name} (@${handle})` : name));
+  const taken = new Set<string>();
+  return rows.map(({ name, handle }) => {
+    const base = (seen.get(name) ?? 0) > 1 && handle ? `${name} (@${handle})` : name;
+    let title = base;
+    for (let n = 2; taken.has(title); n++) title = `${base} (${n})`;
+    taken.add(title);
+    return title;
+  });
 }

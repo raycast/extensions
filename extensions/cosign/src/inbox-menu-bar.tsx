@@ -19,7 +19,7 @@ async function openInbox() {
 }
 
 async function load() {
-  // One conversation read plus up to five request-page reads per refresh, and no thread bodies: the menu bar must not mark anything read.
+  // One conversation read plus up to five request-page reads per refresh. No thread bodies: the menu bar only needs counts and previews.
   const [conversations, requests] = await Promise.all([fetchConversations(), fetchNetworkRequests()]);
   return { conversations, requests: requests.page, complete: requests.isDone };
 }

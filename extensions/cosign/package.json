@@ -24,7 +24,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Name or handle",
+          "placeholder": "Name or Handle",
           "type": "text",
           "required": false
         }
@@ -39,7 +39,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Company name",
+          "placeholder": "Company Name",
           "type": "text",
           "required": false
         }
