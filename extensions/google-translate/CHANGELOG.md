@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Faster translations] - {PR_MERGE_DATE}
+## [Faster translations] - 2026-11-05
 
 - Each translation saves 3.02 MiB and 1,739 ms
 - Pasted and selected text translates immediately
