@@ -762,15 +762,7 @@ type Build = {
   entrypoint: string;
   /** The state of the deployment depending on the process of deploying, or if it is ready or in an error state */
   readyState:
-    | "INITIALIZING"
-    | "BUILDING"
-    | "UPLOADING"
-    | "DEPLOYING"
-    | "READY"
-    | "ARCHIVED"
-    | "ERROR"
-    | "QUEUED"
-    | "CANCELED";
+    "INITIALIZING" | "BUILDING" | "UPLOADING" | "DEPLOYING" | "READY" | "ARCHIVED" | "ERROR" | "QUEUED" | "CANCELED";
   /** The time at which the Build state was last modified */
   readyStateAt?: number;
   /** The time at which the Build was scheduled to be built */

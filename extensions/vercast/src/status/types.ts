@@ -2,11 +2,7 @@
 // Reference: https://www.vercel-status.com/api/v2
 
 export type ComponentStatus =
-  | "operational"
-  | "degraded_performance"
-  | "partial_outage"
-  | "major_outage"
-  | "under_maintenance";
+  "operational" | "degraded_performance" | "partial_outage" | "major_outage" | "under_maintenance";
 
 export type IncidentImpact = "none" | "minor" | "major" | "critical" | "maintenance";
 
