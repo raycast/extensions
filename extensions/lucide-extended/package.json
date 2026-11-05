@@ -12,7 +12,6 @@
     {
       "name": "search-icons",
       "title": "Search Icons",
-      "subtitle": "Lucide Extended: Filled & Duotone Icons",
       "description": "Search filled and duotone icons and copy their name, SVG or component.",
       "mode": "view",
       "preferences": [

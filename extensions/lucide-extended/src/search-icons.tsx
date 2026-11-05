@@ -12,7 +12,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { showFailureToast, useFetch, useLocalStorage } from "@raycast/utils";
-import { memo, useEffect, useMemo, useState } from "react";
+import { cloneElement, memo, useEffect, useMemo, useState } from "react";
 import { CATALOGUE_URL, parseCatalogue, toItems, type IconItem } from "./catalogue";
 import { search, type Style } from "./search";
 
@@ -141,7 +141,10 @@ const IconGridItems = memo(function IconGridItems({
             <ActionPanel>
               {iconActions(item)
                 .sort((a, b) => Number(b.id === primaryAction) - Number(a.id === primaryAction))
-                .map((action) => action.element)}
+                // Raycast assigns the first two actions Enter and Cmd+Enter, so they can't have their own shortcuts.
+                .map((action, index) =>
+                  index < 2 ? cloneElement(action.element, { shortcut: undefined }) : action.element,
+                )}
               <ActionPanel.Section>
                 <ActionPanel.Submenu
                   title="Change Color…"
@@ -199,7 +202,6 @@ export default function Command() {
       columns={8}
       inset={Grid.Inset.Large}
       isLoading={isLoading}
-      navigationTitle={selected ? `Search Icons – ${selected}` : "Search Icons"}
       searchBarPlaceholder="Search by name, tag or use case"
       onSearchTextChange={setSearchText}
       onSelectionChange={setSelected}
@@ -231,7 +233,11 @@ export default function Command() {
       ) : catalogue && results.length === 0 ? (
         <Grid.EmptyView icon={Icon.MagnifyingGlass} title="No Icons Found" description="Try another name or tag." />
       ) : (
-        <Grid.Section title="Results" subtitle={catalogue ? String(results.length) : undefined}>
+        <Grid.Section
+          title="Results"
+          // Grid titles truncate, so the selected icon's full slug goes here.
+          subtitle={catalogue ? [results.length, selected].filter(Boolean).join(" · ") : undefined}
+        >
           <IconGridItems
             items={page}
             color={color}
