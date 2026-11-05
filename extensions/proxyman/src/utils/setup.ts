@@ -117,15 +117,31 @@ function getProcessCommand(pid: number): string {
 // pointing to "<hostname>-<pid>". Reading it identifies the instance holding the user's real
 // profiles without parsing `ps` output, which joins arguments with spaces and cannot tell where
 // a path containing spaces ends. Instances on other dirs (e.g. the /tmp/chrome-insecure one that
-// "New Profile" launches) are never matched. A stale lock left by a crash is ignored because its
-// PID is no longer a running Chrome process.
+// "New Profile" launches) are never matched.
 function getDefaultProfileChromePid(): number | undefined {
   try {
     const target = readlinkSync(path.join(CHROME_DEFAULT_DATA_DIR, "SingletonLock"));
     const pid = Number.parseInt(target.slice(target.lastIndexOf("-") + 1), 10);
-    return getChromeMainPids().includes(pid) ? pid : undefined;
+    if (!getChromeMainPids().includes(pid)) {
+      return undefined;
+    }
+    return ownsDefaultChromeSocket(pid) ? pid : undefined;
   } catch {
     return undefined;
+  }
+}
+
+// A lock left behind by a crash can point to a PID that was later reused by another process,
+// even another Chrome on a different data dir. The owner also listens on the Unix socket that
+// `SingletonSocket` links to (a per-instance temporary path), so require the process to have
+// exactly that socket open.
+function ownsDefaultChromeSocket(pid: number): boolean {
+  try {
+    const socketPath = readlinkSync(path.join(CHROME_DEFAULT_DATA_DIR, "SingletonSocket"));
+    const output = execFileSync("/usr/sbin/lsof", ["-a", "-p", String(pid), "-U", "-Fn"], { encoding: "utf-8" });
+    return output.split("\n").includes(`n${socketPath}`);
+  } catch {
+    return false;
   }
 }
 
