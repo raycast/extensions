@@ -17,8 +17,9 @@ are no results it signs in to Apple Music and plays the first playable catalog
 result. Use Search Apple Music to choose a specific edition or recording.
 
 AI can use **Search Apple Music Catalog**, then **Play Catalog Song** with a
-returned song ID. AI playback leaves the conversation open rather than closing
-Raycast and potentially reactivating Music. Playback never adds the song to your library.
+returned song ID. Its confirmation identifies the song and explains that playback
+replaces the current queue. AI playback leaves the conversation open rather than
+closing Raycast and potentially reactivating Music. Playback never adds the song to your library.
 
 Catalog playback requires an Apple Music subscription, Music signed in, Raycast's
 **Automation** permission to verify playback, and **Media & Apple Music** permission
@@ -31,11 +32,11 @@ Music's windows. The current queue is replaced with the selected song; volume an
 shuffle are not modified. A minimized Music window stays minimized in the tested
 configuration.
 
-The extension independently verifies the title, artist, album and advancing
-playback position via AppleScript. Unverified playback is paused and reported as
-an error; success is never inferred from the launcher exit status. Concurrent
-catalog requests are rejected with a native macOS lock. The helper has a deadline
-and stops if its calling process or request directory disappears.
+Playback is reported as successful only after Music confirms the requested song
+and playback progress. If verification fails, check Music before retrying. The
+extension reports the error without pausing or stopping Music, so it does not
+interrupt a newer song you may have selected. Simultaneous catalog playback
+requests are rejected; wait for the first request to finish before retrying.
 
 The extension does not send an additional catalog playback notification.
 Music's own track-change alerts and their settings are left untouched.
@@ -50,11 +51,8 @@ minimized Music window was tested on macOS 27 / Apple silicon. Intel is compiled
 not hardware-tested. Other macOS versions and future updates are not guaranteed.
 Unsupported APIs fail explicitly; there is no hidden URL/UI fallback.
 
-The small bundled helper includes its full source and build script in `native/`.
-It is ad-hoc signed for local use, not Developer ID signed or notarized. Changing
-its executable can require granting Music access again. Raycast Store acceptance
-and a public distribution/signing strategy must be reviewed before an upstream PR;
-see [Raycast's binary dependency guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store#binary-dependencies-and-additional-configuration).
+The bundled helper is ad-hoc signed for local use, not Developer ID signed or
+notarized. Updating it can require granting Music access again.
 
 ## Troubleshooting
 
@@ -63,10 +61,3 @@ see [Raycast's binary dependency guidelines](https://developers.raycast.com/basi
 - Music may not expose a station's current track to AppleScript. If Add to Playlist cannot access it, add the song in Music first.
 - If **Add to Library** creates an entry with an incorrect date or does not sync it to your cloud library, use **Search Apple Music** and its **Add to Library** action. That command uses the Apple Music API and requires sign-in. The current-track shortcut still uses Music's AppleScript duplication command.
 - If Music stops responding after sleep, reopen Music and retry. Script timeouts prevent indefinite waits but cannot repair Music's internal state.
-
-## Development
-
-After changing native sources, run `npm run build:native` on macOS with Xcode Command Line Tools. The reproducible command builds arm64 and x86_64 and verifies the bundle signature. Normal TypeScript builds reuse that asset.
-
-Run `npm test`, `npx tsc --noEmit`, `npm run build`, and `npm run lint`.
-The regression suite covers subprocess handling, search ranking, metadata parsing, and generated scripts. Playback, cloud sync, and station behavior also need testing in Raycast with Music on macOS.

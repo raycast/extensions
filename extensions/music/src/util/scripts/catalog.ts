@@ -1,4 +1,3 @@
-import { escapeAppleScriptString } from "../apple-script";
 import { CatalogSong } from "../models";
 
 /** Validate the exact catalog identity; the URL is never opened for playback. */
@@ -23,18 +22,18 @@ export function catalogPlaybackUrl(song: CatalogSong): string {
   return `music://music.apple.com${url.pathname}?i=${song.id}`;
 }
 
-const literal = (value: string) => `"${escapeAppleScriptString(value)}"`;
-const matches = (song: CatalogSong) =>
-  `player state is playing and name of current track is ${literal(song.title)} and artist of current track is ${literal(song.artist)} and album of current track is ${literal(song.album)}`;
-
-/** Read-only: require the requested metadata and an advancing playback position. */
-export function catalogVerifyScript(song: CatalogSong): string {
-  return `
+/** Fixed, read-only script: catalog metadata is passed separately through argv. */
+export const catalogVerifyScript = `
+  on run argv
+    if (count of argv) is not 3 then error "Expected title, artist and album."
+    set expectedTitle to item 1 of argv
+    set expectedArtist to item 2 of argv
+    set expectedAlbum to item 3 of argv
     set firstPosition to missing value
     repeat 120 times
       tell application "Music"
         try
-          if ${matches(song)} then
+          if player state is playing and name of current track is expectedTitle and artist of current track is expectedArtist and album of current track is expectedAlbum then
             set currentPosition to player position
             if firstPosition is not missing value then
               if currentPosition > firstPosition + 0.05 then return "verified"
@@ -50,8 +49,6 @@ export function catalogVerifyScript(song: CatalogSong): string {
       end tell
       delay 0.1
     end repeat
-    error "Music did not confirm the requested song with advancing playback."
-  `;
-}
-
-export const catalogPauseScript = 'tell application "Music" to pause';
+    error "Music did not confirm the requested song with advancing playback. Check Music before retrying."
+  end run
+`;
