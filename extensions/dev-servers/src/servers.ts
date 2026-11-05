@@ -1720,6 +1720,24 @@ export function spawnLogPath(cwd: string): string {
   return path.join(os.tmpdir(), `dev-servers-spawn-${cwdSlug(cwd)}.log`);
 }
 
+// A path with the home folder shortened to ~, for display.
+export function tildePath(p: string): string {
+  const home = os.homedir();
+  return p.startsWith(home) ? `~${p.slice(home.length)}` : p;
+}
+
+// Size of the (append-mode) spawn log before an attempt writes to it. Taken
+// right before every spawn so the watchdog and the log view can scope
+// themselves to that attempt's bytes alone.
+export function spawnLogOffset(cwd: string): number {
+  try {
+    return fs.statSync(spawnLogPath(cwd)).size;
+  } catch {
+    // No log yet; the spawn writes from byte 0.
+    return 0;
+  }
+}
+
 // Restart pre-spawn kill: SIGKILL + wait-for-exit. Unlike `killProcess`
 // above, this is *not* graceful: the spawn flow needs the listener to
 // release its port immediately so the new server can bind it without
