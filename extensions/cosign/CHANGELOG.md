@@ -1,6 +1,6 @@
 # Cosign Changelog
 
-## [Inbox] - {PR_MERGE_DATE}
+## [Inbox] - 2026-11-05
 
 - Read your Cosign conversations, and accept or archive connection requests
 - See unread messages and pending requests in the menu bar
