@@ -10,6 +10,10 @@ const PROXY_HOST = "127.0.0.1";
 const DEFAULT_PROXY_PORT = 9090;
 const PROXYMAN_BUNDLE_IDS = ["com.proxyman.NSProxy", "com.proxyman.NSProxy-setapp"];
 const PROXY_READY_TIMEOUT_MS = 15000;
+const CHROME_PROCESS_NAME = "Google Chrome";
+const CHROME_DEFAULT_DATA_DIR = path.join(homedir(), "Library/Application Support/Google/Chrome");
+const CHROME_QUIT_TIMEOUT_MS = 15000;
+const CHROME_LAUNCH_TIMEOUT_MS = 10000;
 const PROXY_POLL_INTERVAL_MS = 500;
 
 interface ProxymanPaths {
@@ -85,25 +89,103 @@ function getProxyServer(port: number): string {
   return `http://${PROXY_HOST}:${port}`;
 }
 
-function quitApp(appName: string): void {
-  try {
-    execFileSync("osascript", ["-e", `tell application "${appName}" to quit`], { encoding: "utf-8" });
-  } catch {
-    // App may not be running or may not respond to quit
-  }
-}
-
-function isAppRunning(processName: string): boolean {
-  try {
-    const result = execFileSync("pgrep", ["-x", processName], { encoding: "utf-8" });
-    return result.trim().length > 0;
-  } catch {
-    return false;
-  }
-}
-
 function waitMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getChromeMainPids(): number[] {
+  try {
+    return execFileSync("pgrep", ["-x", CHROME_PROCESS_NAME], { encoding: "utf-8" })
+      .split("\n")
+      .map((line) => Number.parseInt(line, 10))
+      .filter((pid) => Number.isInteger(pid) && pid > 0);
+  } catch {
+    return [];
+  }
+}
+
+function getProcessCommand(pid: number): string {
+  try {
+    return execFileSync("ps", ["-p", String(pid), "-o", "command="], { encoding: "utf-8" }).trim();
+  } catch {
+    return "";
+  }
+}
+
+// A Chrome instance owns the default user data dir (the user's real profiles) unless it was
+// started with --user-data-dir pointing elsewhere, e.g. the /tmp/chrome-insecure instance that
+// the "New Profile" setup launches.
+function usesDefaultChromeDataDir(command: string): boolean {
+  const flag = "--user-data-dir=";
+  const index = command.indexOf(flag);
+  if (index === -1) {
+    return true;
+  }
+  return command.slice(index + flag.length).startsWith(CHROME_DEFAULT_DATA_DIR);
+}
+
+function getDefaultProfileChromePids(): number[] {
+  return getChromeMainPids().filter((pid) => usesDefaultChromeDataDir(getProcessCommand(pid)));
+}
+
+// Send a regular Quit (same as ⌘Q) to one specific process. AppleScript's
+// `tell application "Google Chrome" to quit` cannot be used: with several Chrome instances
+// running it only reaches one of them, often not the one holding the user's profile.
+function requestQuit(pid: number): void {
+  try {
+    execFileSync(
+      "osascript",
+      [
+        "-l",
+        "JavaScript",
+        "-e",
+        'function run(argv) { ObjC.import("AppKit"); const app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number(argv[0])); if (!app.isNil()) { app.terminate; } }',
+        String(pid),
+      ],
+      { encoding: "utf-8", timeout: 5000 },
+    );
+  } catch {
+    // Process may already be gone; the caller polls for the actual exit
+  }
+}
+
+// Chrome applies command-line flags only when it starts a fresh process for a user data dir:
+// launching while an instance already owns that dir just forwards the request to it and the
+// proxy flags are silently dropped. So every instance using the default dir must be fully
+// gone before relaunching.
+async function quitDefaultProfileChrome(): Promise<boolean> {
+  const pids = getDefaultProfileChromePids();
+  if (pids.length === 0) {
+    return true;
+  }
+  pids.forEach(requestQuit);
+
+  const deadline = Date.now() + CHROME_QUIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await waitMs(PROXY_POLL_INTERVAL_MS);
+    const alive = new Set(getChromeMainPids());
+    if (pids.every((pid) => !alive.has(pid))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Confirm that a Chrome instance on the default user data dir is actually running with our
+// proxy flag, instead of assuming the launch worked.
+async function waitForProxiedDefaultProfileChrome(proxyServer: string): Promise<boolean> {
+  const deadline = Date.now() + CHROME_LAUNCH_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await waitMs(PROXY_POLL_INTERVAL_MS);
+    const proxied = getChromeMainPids().some((pid) => {
+      const command = getProcessCommand(pid);
+      return usesDefaultChromeDataDir(command) && command.includes(`--proxy-server=${proxyServer}`);
+    });
+    if (proxied) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Check whether the proxy port is accepting connections (i.e. Proxyman's proxy is live).
@@ -210,14 +292,21 @@ async function setupChrome(newProfile: boolean): Promise<void> {
     const port = await getReadyPort(paths);
     if (port === null) return;
 
-    if (!newProfile && isAppRunning("Google Chrome")) {
+    if (!newProfile && getDefaultProfileChromePids().length > 0) {
       await showToast({
         style: Toast.Style.Animated,
         title: "Closing Google Chrome...",
         message: "Chrome must restart to apply proxy settings",
       });
-      quitApp("Google Chrome");
-      await waitMs(1500);
+      const closed = await quitDefaultProfileChrome();
+      if (!closed) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Google Chrome Did Not Quit",
+          message: "Close any open dialogs in Chrome, quit it, and run the command again.",
+        });
+        return;
+      }
     }
 
     const launchTitle = newProfile
@@ -225,9 +314,19 @@ async function setupChrome(newProfile: boolean): Promise<void> {
       : "Launching Google Chrome with Proxyman...";
     await showToast({ style: Toast.Style.Animated, title: launchTitle });
 
-    const bashArgs = [scriptPath, "-c", paths.cert, "-p", getProxyServer(port)];
+    const proxyServer = getProxyServer(port);
+    const bashArgs = [scriptPath, "-c", paths.cert, "-p", proxyServer];
     if (newProfile) bashArgs.push("-n");
     execFileSync("bash", bashArgs, { encoding: "utf-8", timeout: 10000 });
+
+    if (!newProfile && !(await waitForProxiedDefaultProfileChrome(proxyServer))) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Chrome Started Without Proxyman Proxy",
+        message: "Quit Google Chrome completely and run the command again.",
+      });
+      return;
+    }
 
     await showToast({
       style: Toast.Style.Success,
