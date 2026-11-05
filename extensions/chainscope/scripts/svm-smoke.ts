@@ -1,6 +1,6 @@
 import { detect } from "../src/lib/detect";
 import { solanaRpcFor } from "../src/lib/settings-model";
-import { analyzeSolanaAddress, analyzeSolanaTransaction } from "../src/lib/svm";
+import { analyzeSolanaAddress, analyzeSolanaTransaction, collectTransfers, tokenInfoByAccount } from "../src/lib/svm";
 
 const RPC = process.env.SOLANA_RPC || "https://solana-rpc.publicnode.com";
 
@@ -91,6 +91,12 @@ async function main() {
       console.log("  (skipped: no recent top-level Jupiter call)");
     } else {
       const jup = r.instructions.find((i) => i.programId === JUPITER);
+      if (r.transfers.some((t) => t.kind === "SPL"))
+        check(
+          "programs include the token program called inside Jupiter",
+          r.programs.some((p) => p.name.startsWith("SPL Token")),
+          r.programs.map((p) => p.name).join(),
+        );
       check("Jupiter instruction present", !!jup, JSON.stringify(jup?.summary));
       check("decoded via Anchor IDL", jup?.source === "anchor IDL", `source=${jup?.source}`);
       // Some Jupiter instructions take no args.
@@ -142,6 +148,29 @@ async function main() {
     }
   } catch (e) {
     console.log(`  (skipped: ${(e as Error).message})`);
+  }
+
+  console.log("\n[SPL transfer amounts (pure)]");
+  {
+    const MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    const tokens = tokenInfoByAccount(
+      [{ pubkey: "payer" }, { pubkey: "from" }, { pubkey: "to" }],
+      [{ accountIndex: 1, mint: MINT, uiTokenAmount: { decimals: 6 } }],
+    );
+    const transfer = (amount: string, source = "from") => ({
+      program: "spl-token",
+      programId: TOKEN_PROGRAM,
+      parsed: { type: "transfer", info: { source, destination: "other", amount } },
+    });
+    const [known, small, whole, unknown] = collectTransfers(
+      [transfer("1500000"), transfer("5"), transfer("1000000"), transfer("7", "nobody")],
+      tokens,
+    );
+    check("plain transfer uses the token's decimals", known.amount === "1.5", known.amount);
+    check("plain transfer finds the mint", known.mint === MINT, known.mint);
+    check("small amounts keep leading zeros", small.amount === "0.000005", small.amount);
+    check("whole amounts have no decimal point", whole.amount === "1", whole.amount);
+    check("unknown tokens stay raw, with no decimals", unknown.amount === "7" && unknown.decimals === undefined);
   }
 
   console.log("\n[Solana cluster picks the RPC]");

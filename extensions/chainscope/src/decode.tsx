@@ -7,24 +7,23 @@ import {
   Form,
   Icon,
   Image,
-  LaunchType,
   List,
   Toast,
-  launchCommand,
   openExtensionPreferences,
   showInFinder,
   showToast,
   useNavigation,
   type LaunchProps,
 } from "@raycast/api";
-import { writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { usePromise } from "@raycast/utils";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { createContext, useContext, useMemo, useState } from "react";
 import { formatEther, formatGwei, slice, type Address, type Hex } from "viem";
 import { withSettings } from "./with-settings";
-import { convertUnits } from "./lib/convert";
+import { convertUnits, csvCell, uniqueFileName } from "./lib/convert";
+import { openCommand } from "./lib/launch";
 import { detect, type DetectedKind } from "./lib/detect";
 import {
   analyzeAddress,
@@ -130,11 +129,13 @@ type ExportData = { json: string; csv: string; base: string };
 
 const RowCtx = createContext<{
   toggleDetail: () => void;
+  showingDetail: boolean;
   exp: ExportData | null;
   customAbiData: Hex | null;
   repick: () => void;
 }>({
   toggleDetail: () => {},
+  showingDetail: false,
   exp: null,
   customAbiData: null,
   repick: () => {},
@@ -178,10 +179,6 @@ function inlineCall(c: DecodedCall | null, data?: Hex): string {
   if (!c) return data ? data.slice(0, 10) : "raw";
   const args = c.args.map((a) => (a.value.length > 24 ? `${a.value.slice(0, 22)}…` : a.value)).join(", ");
   return `${c.functionName}(${args})`;
-}
-
-function csvCell(s: string): string {
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 function callRows(c: DecodedCall, section: string): string[][] {
@@ -264,7 +261,7 @@ function analysisToCsv(a: Analysis): string {
     r.transfers.forEach((t, i) => {
       rows.push(
         [`transfer#${i}`, "kind", "", t.kind],
-        [`transfer#${i}`, "amount", t.mint ?? "", t.amount],
+        [`transfer#${i}`, "amount", t.mint ?? (t.kind === "SPL" ? "raw units" : ""), t.amount],
         [`transfer#${i}`, "from", "address", t.from],
         [`transfer#${i}`, "to", "address", t.to],
       );
@@ -297,12 +294,14 @@ function exportBase(a: Analysis): string {
 
 async function downloadFile(content: string, name: string, label: string) {
   try {
-    const path = join(homedir(), "Downloads", name);
-    writeFileSync(path, content, "utf8");
-    await showToast({ style: Toast.Style.Success, title: `Saved ${label}`, message: name });
+    const dir = join(homedir(), "Downloads");
+    const unique = uniqueFileName(name, (n) => existsSync(join(dir, n)));
+    const path = join(dir, unique);
+    writeFileSync(path, content, { encoding: "utf8", flag: "wx" });
+    await showToast({ style: Toast.Style.Success, title: `Saved ${label}`, message: unique });
     await showInFinder(path);
   } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: `Could not save ${label}`, message: (e as Error).message });
+    await showFailureToast(e, { title: `Could not save ${label}` });
   }
 }
 
@@ -312,7 +311,7 @@ function SettingsActions() {
       <Action
         title="Manage Networks"
         icon={Icon.Network}
-        onAction={() => launchCommand({ name: "manage-networks", type: LaunchType.UserInitiated })}
+        onAction={() => openCommand("manage-networks", "Manage Networks")}
       />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel>
@@ -322,19 +321,14 @@ function SettingsActions() {
 function Command(props: LaunchProps) {
   const handoff = (props.launchContext as { text?: string } | undefined)?.text?.trim();
   const [text, setText] = useState(handoff ?? "");
-  const [seeded, setSeeded] = useState(!!handoff);
   const [showDetail, setShowDetail] = useState(false);
-  const [history, setHistory] = useState<ClipItem[]>([]);
-
-  useEffect(() => {
-    if (handoff) return;
-    readClipboardHistory()
-      .then((items) => {
-        setHistory(items);
-        if (items[0] && isDecodable(items[0].kind)) setText(items[0].value);
-      })
-      .finally(() => setSeeded(true));
-  }, [handoff]);
+  const { data: history = [], isLoading: readingClipboard } = usePromise(readClipboardHistory, [], {
+    execute: !handoff,
+    onData: (items) => {
+      if (items[0] && isDecodable(items[0].kind)) setText(items[0].value);
+    },
+  });
+  const seeded = !!handoff || !readingClipboard;
 
   const cfg = useMemo(() => getConfig(), []);
   const solCfg = useMemo(() => getSolanaConfig(), []);
@@ -355,9 +349,16 @@ function Command(props: LaunchProps) {
     if (data?.type === "tx" && data.report.input && data.report.input !== "0x") return data.report.input;
     return null;
   }, [data]);
+  const showingDetail = showDetail && !!data;
   const ctx = useMemo(
-    () => ({ toggleDetail: () => setShowDetail((v) => !v), exp, customAbiData, repick: () => setText("") }),
-    [exp, customAbiData],
+    () => ({
+      toggleDetail: () => setShowDetail((v) => !v),
+      showingDetail,
+      exp,
+      customAbiData,
+      repick: () => setText(""),
+    }),
+    [showingDetail, exp, customAbiData],
   );
 
   return (
@@ -367,7 +368,7 @@ function Command(props: LaunchProps) {
         onSearchTextChange={setText}
         searchBarPlaceholder="Paste a transaction, address, ENS name, or call data"
         filtering={false}
-        isShowingDetail={showDetail && !!data}
+        isShowingDetail={showingDetail}
         isLoading={(isNetwork && isLoading) || !seeded}
       >
         {text ? (
@@ -535,7 +536,7 @@ function CopyRow({
   copy?: string;
   detail?: string;
 }) {
-  const { toggleDetail, exp, customAbiData, repick } = useContext(RowCtx);
+  const { toggleDetail, showingDetail, exp, customAbiData, repick } = useContext(RowCtx);
   const md = detail ?? `**${subtitle ?? "value"}**\n\n\`\`\`\n${title}\n\`\`\``;
   return (
     <List.Item
@@ -543,7 +544,7 @@ function CopyRow({
       icon={icon}
       title={title}
       subtitle={subtitle}
-      accessories={tag ? [{ tag: { value: tag.text, color: tag.color } }] : undefined}
+      accessories={tag && !showingDetail ? [{ tag: { value: tag.text, color: tag.color } }] : undefined}
       detail={<List.Item.Detail markdown={md} />}
       actions={
         <ActionPanel>
@@ -1140,7 +1141,8 @@ function ValueView({ input }: { input: string }) {
 }
 
 function solTransferTitle(t: SolTransfer): string {
-  return t.kind === "SOL" ? `${t.amount} SOL` : `${t.amount} ${t.mint ? `· ${shortAddr(t.mint)}` : "tokens"}`;
+  if (t.kind === "SOL") return `${t.amount} SOL`;
+  return t.mint ? `${t.amount} · ${shortAddr(t.mint)}` : `${t.amount} raw units`;
 }
 
 function solTransferMarkdown(t: SolTransfer): string {

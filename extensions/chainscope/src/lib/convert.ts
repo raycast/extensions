@@ -32,6 +32,21 @@ function push(rows: Row[], label: string, fn: () => string, hint?: string) {
   if (v !== null) rows.push({ label, value: v, hint });
 }
 
+// Spreadsheets run cells starting with these; plain negative numbers stay numeric.
+export function csvCell(s: string): string {
+  const safe = /^\s*[=+\-@]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s) ? `'${s}` : s;
+  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+}
+
+export function uniqueFileName(name: string, taken: (candidate: string) => boolean): string {
+  if (!taken(name)) return name;
+  const dot = name.lastIndexOf(".");
+  for (let i = 2; ; i++) {
+    const candidate = `${name.slice(0, dot)} (${i})${name.slice(dot)}`;
+    if (!taken(candidate)) return candidate;
+  }
+}
+
 export function convertUnits(raw: string): Row[] {
   const input = raw.trim();
   const rows: Row[] = [];

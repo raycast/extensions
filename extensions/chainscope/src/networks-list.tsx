@@ -6,7 +6,6 @@ import {
   confirmAlert,
   Form,
   Icon,
-  Keyboard,
   List,
   showToast,
   Toast,
@@ -155,7 +154,6 @@ function NetworkForm({ existing, onSave }: { existing?: CustomChainInput; onSave
             <Action.SubmitForm
               title="Save and Add Another"
               icon={Icon.PlusCircle}
-              shortcut={Keyboard.Shortcut.Common.Save}
               onSubmit={async () => {
                 if (!(await save())) return;
                 setV(EMPTY);
@@ -167,7 +165,7 @@ function NetworkForm({ existing, onSave }: { existing?: CustomChainInput; onSave
           <Action
             title="Test Connection"
             icon={Icon.Plug}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={existing ? undefined : { modifiers: ["cmd"], key: "t" }}
             onAction={() =>
               runRpcTest(v.rpc.trim() || (validId ? getChain(chainId).defaultRpc : ""), validId ? chainId : undefined)
             }
@@ -246,14 +244,7 @@ export function NetworksList() {
     });
   }
 
-  const addAction = (
-    <Action.Push
-      title="Add Network"
-      icon={Icon.Plus}
-      shortcut={Keyboard.Shortcut.Common.New}
-      target={<NetworkForm onSave={save} />}
-    />
-  );
+  const addAction = <Action.Push title="Add Network" icon={Icon.Plus} target={<NetworkForm onSave={save} />} />;
 
   function row(id: number, saved?: CustomChainInput) {
     const chain = getChain(id);
@@ -309,7 +300,7 @@ export function NetworksList() {
   const savedIds = new Set(s.chains.map((c) => c.id));
 
   return (
-    <List navigationTitle="Manage Networks" searchBarPlaceholder="Search networks by name, ID, or token">
+    <List searchBarPlaceholder="Search networks by name, ID, or token">
       <List.EmptyView
         icon={Icon.Network}
         title="Network not found"

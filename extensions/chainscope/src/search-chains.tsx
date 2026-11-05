@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 import { listChains } from "./lib/chains";
+import { openCommand } from "./lib/launch";
 import { withSettings } from "./with-settings";
 
 function Command() {
@@ -17,7 +18,7 @@ function Command() {
             <Action
               title="Add Network"
               icon={Icon.Plus}
-              onAction={() => launchCommand({ name: "manage-networks", type: LaunchType.UserInitiated })}
+              onAction={() => openCommand("manage-networks", "Manage Networks")}
             />
           </ActionPanel>
         }
@@ -37,11 +38,7 @@ function Command() {
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Chain ID" content={String(c.id)} />
                   {c.defaultRpc ? (
-                    <Action.CopyToClipboard
-                      title="Copy RPC URL"
-                      content={c.defaultRpc}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                    />
+                    <Action.CopyToClipboard title="Copy RPC URL" content={c.defaultRpc} concealed={c.custom} />
                   ) : null}
                   {c.explorer ? <Action.OpenInBrowser title="Open Explorer" url={c.explorer} /> : null}
                   {c.explorer ? <Action.CopyToClipboard title="Copy Explorer URL" content={c.explorer} /> : null}

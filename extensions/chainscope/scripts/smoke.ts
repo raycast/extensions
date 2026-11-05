@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { getChain, registerCustomChains } from "../src/lib/chains";
 import { detect } from "../src/lib/detect";
 import { chainError, changedFrom, fromPreferences, merge } from "../src/lib/settings-model";
-import { checksum, convertUnits, hashAndSelector } from "../src/lib/convert";
+import { checksum, convertUnits, csvCell, hashAndSelector, uniqueFileName } from "../src/lib/convert";
 import {
   analyzeAddress,
   analyzeCalldata,
@@ -11,6 +11,7 @@ import {
   decodeRevertData,
   decodeWithCustomAbi,
   fetchTransaction,
+  matchEvent,
   parseAbiText,
   parseDelegation,
   resolveEnsName,
@@ -23,6 +24,8 @@ import {
   encodeAbiParameters,
   encodeFunctionData,
   encodePacked,
+  parseAbi,
+  toEventSelector,
   http,
   parseAbiItem,
   toFunctionSelector,
@@ -234,7 +237,7 @@ async function main() {
           const answers: Record<string, unknown> = {
             eth_chainId: "0x1",
             eth_getCode: url === "/rpc-code" ? "0x6000" : "0x",
-            eth_getStorageAt: `0x${"0".repeat(64)}`,
+            ...(url === "/rpc-no-storage" ? {} : { eth_getStorageAt: `0x${"0".repeat(64)}` }),
             getVersion: { "solana-core": "9.9.9" },
           };
           res.end(
@@ -313,6 +316,13 @@ async function main() {
       someone,
     );
     check("per-chain Blockscout URL is used", bs.decoded?.source === "Blockscout", String(bs.decoded?.source));
+    registerCustomChains([{ id: 7777005, name: "No Storage", rpc: `${local}/rpc-no-storage` }]);
+    const noStorage = await analyzeCalldata({ chainId: 7777005 }, TEST_CALL, someone).then(
+      (r) => r.decoded?.functionName ?? "no decode",
+      (e) => `threw: ${(e as Error).message.split("\n")[0]}`,
+    );
+    check("a failed proxy lookup doesn't stop the decode", !noStorage.startsWith("threw"), noStorage);
+    registerCustomChains([{ id: 1, rpc: `${local}/rpc` }]);
     const hung = await Promise.race([
       analyzeCalldata({ chainId: 1, signatureDbUrl: `${local}/hang` }, TEST_CALL).then(() => "done"),
       new Promise((r) => setTimeout(() => r("stuck"), 12000)),
@@ -367,6 +377,42 @@ async function main() {
       fromPreferences({ sourcifyUrl: " https://s.example/ " }).sourcifyUrl === "https://s.example",
     );
   }
+
+  console.log("\n[overloaded functions (pure)]");
+  {
+    const abi = parseAbi(["function foo(uint256 n)", "function foo(address who)"]);
+    const data = encodeFunctionData({ abi, functionName: "foo", args: ["0x1111111111111111111111111111111111111111"] });
+    const call = decodeWithCustomAbi(data, abi);
+    check("overload is matched by selector", call?.signature === "foo(address)", call?.signature);
+    check("overload argument keeps its type", call?.args[0]?.type === "address", call?.args[0]?.type);
+  }
+
+  console.log("\n[overloaded events (pure)]");
+  {
+    const abi = parseAbi(["event Foo(uint256 a)", "event Foo(address a)"]);
+    const ev = matchEvent(abi, toEventSelector("Foo(address)"));
+    check("overloaded event is matched by topic", ev?.inputs[0]?.type === "address", ev?.inputs[0]?.type);
+  }
+
+  console.log("\n[CSV and export files (pure)]");
+  check("formula cells become text", csvCell("=1+1") === "'=1+1", csvCell("=1+1"));
+  check(
+    "formula cells with a comma stay one cell",
+    csvCell("=SUM(A1,A2)") === `"'=SUM(A1,A2)"`,
+    csvCell("=SUM(A1,A2)"),
+  );
+  check(
+    "other formula prefixes become text",
+    ["+1", "@a", "-a", " =1"].every((v) => csvCell(v) === `'${v}`),
+  );
+  check("negative numbers stay numbers", csvCell("-5") === "-5" && csvCell("-1.5") === "-1.5");
+  check("plain values are unchanged", csvCell("abc") === "abc");
+  check("quotes are escaped", csvCell('a"b') === '"a""b"');
+  check("a free file name is kept", uniqueFileName("a.csv", () => false) === "a.csv");
+  check(
+    "a taken file name isn't replaced",
+    uniqueFileName("a.csv", (n) => ["a.csv", "a (2).csv"].includes(n)) === "a (3).csv",
+  );
 
   console.log("\n[EIP-7702 delegation parsing (pure)]");
   const DELEGATE = "0x63c0c19a282a1B52b07dD5a65b58948A07DAE32B";

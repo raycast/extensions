@@ -353,7 +353,27 @@ type RawIx = {
   data?: string;
 };
 
-function collectTransfers(instrs: RawIx[]): SolTransfer[] {
+type TokenBalance = { accountIndex: number; mint: string; uiTokenAmount: { decimals: number } };
+type TokenInfo = { mint: string; decimals: number };
+
+// Plain SPL transfers omit the mint and decimals; the token balances have them.
+export function tokenInfoByAccount(keys: { pubkey: string }[], balances: TokenBalance[]): Map<string, TokenInfo> {
+  const info = new Map<string, TokenInfo>();
+  for (const b of balances) {
+    const key = keys[b.accountIndex]?.pubkey;
+    if (key) info.set(key, { mint: b.mint, decimals: b.uiTokenAmount.decimals });
+  }
+  return info;
+}
+
+function formatTokenAmount(raw: string, decimals: number): string {
+  const digits = raw.padStart(decimals + 1, "0");
+  const split = digits.length - decimals;
+  const fraction = digits.slice(split).replace(/0+$/, "");
+  return fraction ? `${digits.slice(0, split)}.${fraction}` : digits.slice(0, split);
+}
+
+export function collectTransfers(instrs: RawIx[], tokens: Map<string, TokenInfo>): SolTransfer[] {
   const out: SolTransfer[] = [];
   for (const ix of instrs) {
     if (!ix.parsed) continue;
@@ -373,12 +393,21 @@ function collectTransfers(instrs: RawIx[]): SolTransfer[] {
           kind: "SPL",
           from: String(info.source),
           to: String(info.destination),
-          amount: ta.uiAmountString ?? ta.amount,
+          amount: ta.uiAmountString ?? formatTokenAmount(ta.amount, ta.decimals),
           mint: String(info.mint),
           decimals: ta.decimals,
         });
       } else if (type === "transfer") {
-        out.push({ kind: "SPL", from: String(info.source), to: String(info.destination), amount: String(info.amount) });
+        const token = tokens.get(String(info.source)) ?? tokens.get(String(info.destination));
+        const raw = String(info.amount);
+        out.push({
+          kind: "SPL",
+          from: String(info.source),
+          to: String(info.destination),
+          amount: token ? formatTokenAmount(raw, token.decimals) : raw,
+          mint: token?.mint,
+          decimals: token?.decimals,
+        });
       }
     }
   }
@@ -394,20 +423,17 @@ type RawTx = {
     computeUnitsConsumed?: number;
     logMessages?: string[];
     innerInstructions?: { instructions: RawIx[] }[];
+    preTokenBalances?: TokenBalance[];
+    postTokenBalances?: TokenBalance[];
   } | null;
   transaction: { message: { instructions: RawIx[]; accountKeys: { pubkey: string; signer: boolean }[] } };
 };
 
 export async function analyzeSolanaTransaction(cfg: SvmConfig, signature: string): Promise<SolTxReport | null> {
-  let tx: RawTx | null;
-  try {
-    tx = await rpc<RawTx | null>(cfg.rpc, "getTransaction", [
-      signature,
-      { encoding: "jsonParsed", maxSupportedTransactionVersion: 1, commitment: "confirmed" },
-    ]);
-  } catch {
-    return null;
-  }
+  const tx = await rpc<RawTx | null>(cfg.rpc, "getTransaction", [
+    signature,
+    { encoding: "jsonParsed", maxSupportedTransactionVersion: 1, commitment: "confirmed" },
+  ]);
   if (!tx) return null;
 
   const meta = tx.meta;
@@ -415,7 +441,11 @@ export async function analyzeSolanaTransaction(cfg: SvmConfig, signature: string
   const top = message.instructions ?? [];
   const inner = (meta?.innerInstructions ?? []).flatMap((g) => g.instructions);
 
-  const transfers = collectTransfers([...top, ...inner]);
+  const tokens = tokenInfoByAccount(message.accountKeys, [
+    ...(meta?.preTokenBalances ?? []),
+    ...(meta?.postTokenBalances ?? []),
+  ]);
+  const transfers = collectTransfers([...top, ...inner], tokens);
 
   const instructions: SolInstruction[] = [];
   for (let i = 0; i < top.length; i++) {
@@ -445,7 +475,7 @@ export async function analyzeSolanaTransaction(cfg: SvmConfig, signature: string
     }
   }
 
-  const programIds = Array.from(new Set(top.map((ix) => ix.programId)));
+  const programIds = Array.from(new Set([...top, ...inner].map((ix) => ix.programId)));
   return {
     signature,
     status: meta?.err ? "failed" : "success",
@@ -468,21 +498,17 @@ export async function analyzeSolanaAddress(cfg: SvmConfig, address: string): Pro
   } catch {
     return null;
   }
-  try {
-    const info = await rpc<{ value: { lamports: number; owner: string; executable: boolean } | null }>(
-      cfg.rpc,
-      "getAccountInfo",
-      [address, { encoding: "base64" }],
-    );
-    if (!info?.value) return { address, lamports: "0", owner: "", executable: false, exists: false };
-    return {
-      address,
-      lamports: lamportsToSol(info.value.lamports),
-      owner: info.value.owner,
-      executable: info.value.executable,
-      exists: true,
-    };
-  } catch {
-    return null;
-  }
+  const info = await rpc<{ value: { lamports: number; owner: string; executable: boolean } | null }>(
+    cfg.rpc,
+    "getAccountInfo",
+    [address, { encoding: "base64" }],
+  );
+  if (!info?.value) return { address, lamports: "0", owner: "", executable: false, exists: false };
+  return {
+    address,
+    lamports: lamportsToSol(info.value.lamports),
+    owner: info.value.owner,
+    executable: info.value.executable,
+    exists: true,
+  };
 }

@@ -11,6 +11,8 @@ import {
   parseAbi,
   parseAbiItem,
   slice,
+  toEventSelector,
+  toFunctionSelector,
   zeroAddress,
   type Abi,
   type AbiEvent,
@@ -245,16 +247,14 @@ async function mapLimit<T, R>(
   return results;
 }
 
-function matchFunction(abi: Abi, name: string, argLen: number): AbiFunction | undefined {
-  const fns = abi.filter((i): i is AbiFunction => i.type === "function" && i.name === name);
-  if (fns.length <= 1) return fns[0];
-  return fns.find((f) => f.inputs.length === argLen) ?? fns[0];
+// Overloads share a name and can share an argument count, so match by selector.
+function matchFunction(abi: Abi, data: Hex): AbiFunction | undefined {
+  const selector = slice(data, 0, 4).toLowerCase();
+  return abi.find((i): i is AbiFunction => i.type === "function" && toFunctionSelector(i) === selector);
 }
 
-function matchEvent(abi: Abi, name: string, topicCount: number): AbiEvent | undefined {
-  const evs = abi.filter((i): i is AbiEvent => i.type === "event" && i.name === name);
-  if (evs.length <= 1) return evs[0];
-  return evs.find((e) => e.inputs.filter((p) => p.indexed).length === topicCount - 1) ?? evs[0];
+export function matchEvent(abi: Abi, topic0: Hex | undefined): AbiEvent | undefined {
+  return abi.find((i): i is AbiEvent => i.type === "event" && toEventSelector(i) === topic0);
 }
 
 function buildCall(
@@ -297,7 +297,8 @@ function readProxy(ctx: Ctx, address: Address): Promise<ProxyInfo | null> {
       }
     }
     return null;
-  })();
+    // An RPC failure means unknown, not a failed decode.
+  })().catch(() => null);
   ctx.proxy.set(key, p);
   return p;
 }
@@ -458,7 +459,7 @@ async function decodeCalldata(
       try {
         const { functionName, args } = decodeFunctionData({ abi: abiRes.abi, data });
         const list = (args ?? []) as readonly unknown[];
-        const fn = matchFunction(abiRes.abi, functionName, list.length);
+        const fn = matchFunction(abiRes.abi, data);
         const decodedArgs = await decodeArgs(ctx, fn?.inputs ?? [], list, to, depth);
         decoded = buildCall(data, fn, functionName, decodedArgs, abiRes.source, false);
       } catch {
@@ -471,7 +472,7 @@ async function decodeCalldata(
     try {
       const { functionName, args } = decodeFunctionData({ abi: COMMON_ABI, data });
       const list = (args ?? []) as readonly unknown[];
-      const fn = matchFunction(COMMON_ABI, functionName, list.length);
+      const fn = matchFunction(COMMON_ABI, data);
       const decodedArgs = await decodeArgs(ctx, fn?.inputs ?? [], list, to, depth);
       decoded = buildCall(data, fn, functionName, decodedArgs, "standard ABI", false);
     } catch {
@@ -546,7 +547,7 @@ async function decodeLog(ctx: Ctx, log: { address: Address; topics: readonly Hex
     try {
       const decoded = decodeEventLog({ abi: abiRes.abi, topics: log.topics as [Hex, ...Hex[]], data: log.data });
       const eventName = decoded.eventName ?? "";
-      const ev = matchEvent(abiRes.abi, eventName, log.topics.length);
+      const ev = matchEvent(abiRes.abi, log.topics[0]);
       return {
         ...base,
         eventName,
@@ -648,7 +649,7 @@ export function decodeWithCustomAbi(data: Hex, abi: Abi): DecodedCall | null {
   try {
     const { functionName, args } = decodeFunctionData({ abi, data });
     const list = (args ?? []) as readonly unknown[];
-    const fn = matchFunction(abi, functionName, list.length);
+    const fn = matchFunction(abi, data);
     const inputs = fn?.inputs ?? [];
     const decodedArgs: DecodedArg[] = list.map((v, i) => ({
       name: inputs[i]?.name || `arg${i}`,

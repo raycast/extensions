@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { fetchEvmTokens, filterEvmTokens, searchSolanaTokens, type Token } from "./lib/tokens";
@@ -25,15 +25,31 @@ function Command() {
   const wantsEvm = !opt.solana;
   const wantsSolana = !!opt.solana || chainSel === "all";
 
-  const { data: evm = [], isLoading: evmLoading } = useCachedPromise(fetchEvmTokens, [getSettings().tokenListUrl], {
+  const {
+    data: evm = [],
+    isLoading: evmLoading,
+    error: evmError,
+    revalidate: retryEvm,
+  } = useCachedPromise(fetchEvmTokens, [getSettings().tokenListUrl], {
     execute: wantsEvm,
   });
-  const { data: sol = [], isLoading: solLoading } = usePromise(searchSolanaTokens, [query, getSettings().jupiterUrl], {
+  const {
+    data: sol = [],
+    isLoading: solLoading,
+    error: solError,
+    revalidate: retrySol,
+  } = usePromise(searchSolanaTokens, [query, getSettings().jupiterUrl], {
     execute: wantsSolana && query.trim().length >= 2,
   });
 
   const evmResults = wantsEvm ? filterEvmTokens(evm, query, opt.chainId) : [];
   const results: Token[] = [...evmResults, ...(wantsSolana ? sol : [])];
+  const failure =
+    wantsEvm && evmError
+      ? { error: evmError, retry: retryEvm }
+      : wantsSolana && solError
+        ? { error: solError, retry: retrySol }
+        : null;
 
   return (
     <List
@@ -51,7 +67,19 @@ function Command() {
         </List.Dropdown>
       }
     >
-      {results.length === 0 ? (
+      {results.length === 0 && failure ? (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          title="Couldn't load tokens"
+          description={failure.error.message.split("\n")[0]}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={failure.retry} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      ) : results.length === 0 ? (
         <List.EmptyView
           icon={Icon.Coins}
           title={query ? "No tokens found" : "Search tokens"}
@@ -59,7 +87,12 @@ function Command() {
         />
       ) : (
         results.map((t, i) => (
-          <TokenItem key={`${t.chain}-${t.address}-${i}`} t={t} onToggleDetail={() => setShowDetail((v) => !v)} />
+          <TokenItem
+            key={`${t.chain}-${t.address}-${i}`}
+            t={t}
+            showDetail={showDetail}
+            onToggleDetail={() => setShowDetail((v) => !v)}
+          />
         ))
       )}
     </List>
@@ -70,7 +103,7 @@ function priceLabel(p: number): string {
   return `$${p < 1 ? p.toPrecision(3) : p.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
-function TokenItem({ t, onToggleDetail }: { t: Token; onToggleDetail: () => void }) {
+function TokenItem({ t, showDetail, onToggleDetail }: { t: Token; showDetail: boolean; onToggleDetail: () => void }) {
   const url = t.chainId
     ? explorerUrl(t.chainId, `token/${t.address}`)
     : solscanUrl("mainnet-beta", `token/${t.address}`);
@@ -80,17 +113,21 @@ function TokenItem({ t, onToggleDetail }: { t: Token; onToggleDetail: () => void
       icon={t.logoURI ? { source: t.logoURI, fallback: Icon.Coins } : Icon.Coins}
       title={t.symbol}
       subtitle={t.name}
-      accessories={[
-        ...(t.priceUsd ? [{ text: priceLabel(t.priceUsd) }] : []),
-        { tag: { value: `${t.decimals} dec`, color: Color.SecondaryText } },
-        { tag: { value: t.chain, color: chainColor } },
-        {
-          icon: t.verified
-            ? { source: Icon.CheckCircle, tintColor: Color.Green }
-            : { source: Icon.Warning, tintColor: Color.Orange },
-          tooltip: t.verified ? "Verified token" : "Unverified — not on the curated list",
-        },
-      ]}
+      accessories={
+        showDetail
+          ? undefined
+          : [
+              ...(t.priceUsd ? [{ text: priceLabel(t.priceUsd) }] : []),
+              { tag: { value: `${t.decimals} dec`, color: Color.SecondaryText } },
+              { tag: { value: t.chain, color: chainColor } },
+              {
+                icon: t.verified
+                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                  : { source: Icon.Warning, tintColor: Color.Orange },
+                tooltip: t.verified ? "Verified token" : "Unverified — not on the curated list",
+              },
+            ]
+      }
       detail={
         <List.Item.Detail
           markdown={`${t.logoURI ? `<img src="${t.logoURI}" alt="${t.symbol}" height="84" />\n\n` : ""}# ${t.symbol}\n\n${t.name}`}

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { lookupChains } from "./lib/chains";
 import { detect, type DetectedKind } from "./lib/detect";
 import { withSettings } from "./with-settings";
@@ -17,15 +18,15 @@ function pathFor(kind: DetectedKind, value: string): { path: string; label: stri
   }
 }
 
+const readClipboard = () => Clipboard.readText();
+
 function Command() {
   const [text, setText] = useState("");
-  const [seeded, setSeeded] = useState(false);
-
-  useEffect(() => {
-    Clipboard.readText()
-      .then((t) => t && setText(t.trim()))
-      .finally(() => setSeeded(true));
-  }, []);
+  const { isLoading } = usePromise(readClipboard, [], {
+    onData: (t) => {
+      if (t) setText(t.trim());
+    },
+  });
 
   const det = detect(text);
   const target = pathFor(det.kind, det.value);
@@ -36,7 +37,7 @@ function Command() {
       onSearchTextChange={setText}
       searchBarPlaceholder="Paste an address, tx hash, or block number"
       filtering={false}
-      isLoading={!seeded}
+      isLoading={isLoading}
     >
       {!target ? (
         <List.EmptyView

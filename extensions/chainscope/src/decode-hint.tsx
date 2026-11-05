@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Color, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type { DetectedKind } from "./lib/detect";
+import { openCommand } from "./lib/launch";
 
 const LABELS: Partial<Record<DetectedKind, string>> = {
   txHash: "transaction hash",
@@ -23,11 +24,7 @@ export function DecodeHint({ text, kind }: { text: string; kind: DetectedKind })
       accessories={[{ tag: { value: "↩ Decode", color: Color.Blue } }]}
       actions={
         <ActionPanel>
-          <Action
-            title="Decode"
-            icon={Icon.Wand}
-            onAction={() => launchCommand({ name: "decode", type: LaunchType.UserInitiated, context: { text } })}
-          />
+          <Action title="Decode" icon={Icon.Wand} onAction={() => openCommand("decode", "Decode", { text })} />
         </ActionPanel>
       }
     />

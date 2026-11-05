@@ -36,7 +36,7 @@ function auditSummary(a?: JupAsset["audit"]): string | undefined {
 
 export async function fetchEvmTokens(url = UNISWAP_LIST): Promise<Token[]> {
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`Token list returned ${res.status}`);
   const json = (await res.json()) as { tokens: UniToken[] };
   return json.tokens.map((t) => ({
     chain: getChain(t.chainId).name,
@@ -60,24 +60,20 @@ function safeChecksum(addr: string): string {
 
 export async function searchSolanaTokens(query: string, url = JUPITER_SEARCH): Promise<Token[]> {
   if (query.trim().length < 1) return [];
-  try {
-    const res = await fetch(`${url}?query=${encodeURIComponent(query.trim())}`, { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) return [];
-    const arr = (await res.json()) as JupAsset[];
-    return arr.map((a) => ({
-      chain: "Solana",
-      symbol: a.symbol,
-      name: a.name,
-      address: a.id,
-      decimals: a.decimals,
-      logoURI: a.icon,
-      verified: !!a.isVerified,
-      priceUsd: a.usdPrice,
-      audit: auditSummary(a.audit),
-    }));
-  } catch {
-    return [];
-  }
+  const res = await fetch(`${url}?query=${encodeURIComponent(query.trim())}`, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Token search returned ${res.status}`);
+  const arr = (await res.json()) as JupAsset[];
+  return arr.map((a) => ({
+    chain: "Solana",
+    symbol: a.symbol,
+    name: a.name,
+    address: a.id,
+    decimals: a.decimals,
+    logoURI: a.icon,
+    verified: !!a.isVerified,
+    priceUsd: a.usdPrice,
+    audit: auditSummary(a.audit),
+  }));
 }
 
 export function filterEvmTokens(tokens: Token[], query: string, chainId?: number): Token[] {

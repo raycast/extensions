@@ -68,19 +68,6 @@ Everything is optional, so the commands work without any setup. To change someth
 
 Per-network RPCs and your own networks are in **Manage Networks**, because Raycast's preferences page has no repeating rows. They're stored in Raycast's encrypted local storage. Your RPC is used everywhere for that chain, including ENS (Ethereum) and cross-chain lookups. Press `⌘T` to test a connection; it warns you if the RPC serves a different network. If your provider puts an API key in the URL (Alchemy, Infura, and so on), paste the whole URL.
 
-## Development
-
-```bash
-npm install
-npm run dev       # load into Raycast in development mode
-npm run build     # validate the manifest, typecheck, and bundle
-npm run lint      # eslint, prettier, and manifest/icon checks
-npm test          # EVM engine checks against live RPCs
-npm run test:svm  # Solana engine checks
-```
-
-The decode engines (`src/lib/evm.ts`, `src/lib/svm.ts`) don't import `@raycast/api`, so the `scripts/` smoke suites can run them directly against live mainnet. Solana support is written without `@solana/web3.js` or `@coral-xyz/anchor` (raw JSON-RPC, `@noble/curves`, and node builtins) to keep the bundle small, so please don't pull those back in. The commands themselves live in the `src/*.tsx` files.
-
 ## Privacy
 
 Decoding talks to a few third-party services: your RPCs or the public default RPCs, Etherscan (only if you set a key), Sourcify, Blockscout, and openchain.xyz. The addresses, hashes, and calldata you decode are sent to them. Sources you turn off receive nothing.
