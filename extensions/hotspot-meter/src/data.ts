@@ -5,17 +5,6 @@ import type { NetInfo } from "./sample.ts";
 import { MIN, WINDOWS, aggregate, counts, countOn, filterSamples, pickedIds, spikes } from "./stats.ts";
 import type { Agg, Filter } from "./stats.ts";
 
-export type Prefs = {
-  barMode: "total" | "sum" | "rate" | "icon";
-  window: string;
-  showUpload: boolean;
-  countOn: string;
-  wifiNames?: string;
-  spikeMB: string;
-  capture: string;
-  hotspotCapMB?: string;
-};
-
 export const dir = environment.supportPath;
 
 // LocalStorage is async, so the first paint of a command could not use it. Cache is synchronous and shared by
@@ -61,7 +50,7 @@ export async function pinWindow(m: number) {
   await LocalStorage.setItem("pinnedWindow", String(m));
 }
 
-export function filterFor(prefs: Prefs, stored: Set<string>, nets: Record<string, NetInfo>): Filter {
+export function filterFor(prefs: Preferences, stored: Set<string>, nets: Record<string, NetInfo>): Filter {
   return {
     mode: countOn(prefs.countOn),
     picked: pickedIds(stored, prefs.wifiNames, nets), // ticked networks + networks matching the typed names
@@ -72,24 +61,22 @@ export function filterFor(prefs: Prefs, stored: Set<string>, nets: Record<string
 // One sampling round with the user's preferences; returns the ticked networks it read on the way.
 export async function tick(minGapMs?: number): Promise<Set<string>> {
   const stored = await readPicked();
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const filter = filterFor(prefs, stored, readState(dir).nets);
   await sample(dir, { capture: prefs.capture, minGapMs, counts: (n) => counts(filter, n.id) });
   return stored;
 }
 
-// full: everything the open menu shows. Background ticks only need the title, icon and tooltip.
-export function load(pinned: number | undefined, full: boolean, stored: Set<string>) {
-  const prefs = getPreferenceValues<Prefs>();
+export function load(win: number, stored: Set<string>) {
+  const prefs = getPreferenceValues<Preferences>();
   const state = readState(dir);
   const now = Date.now();
-  const win = pinned ?? (Number(prefs.window) || 60);
   const spikeMB = Number(prefs.spikeMB) || 10;
   const filter = filterFor(prefs, stored, state.nets);
-  const raw = readSamples(dir, now - (full ? 240 : Math.max(win, 15)) * MIN);
+  const raw = readSamples(dir, now - 240 * MIN);
   const all = filterSamples(raw, filter); // history is re-filtered on every read, so changing the setting applies to it too
   const since = (m: number) => all.filter((s) => s.t >= now - m * MIN);
-  const aggs = Object.fromEntries((full ? WINDOWS : [win]).map((m) => [m, aggregate(since(m))])) as Record<number, Agg>;
+  const aggs = Object.fromEntries(WINDOWS.map((m) => [m, aggregate(since(m))])) as Record<number, Agg>;
   return {
     prefs,
     now,
@@ -102,9 +89,8 @@ export function load(pinned: number | undefined, full: boolean, stored: Set<stri
     stored,
     aggs,
     ...state,
-    full,
     last: [...raw].reverse().find((s) => !s.cap),
-    events: spikes(full ? since(240) : since(15), spikeMB * 1e6),
+    events: spikes(since(240), spikeMB * 1e6),
   };
 }
 export type View = ReturnType<typeof load>;

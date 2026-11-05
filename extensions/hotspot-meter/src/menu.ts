@@ -84,7 +84,7 @@ const day = (t: number) =>
 
 export type Bar = { title?: string; tooltip: string; hs: boolean; tint?: "red" | "orange" };
 
-export function buildBar(v: View): Bar {
+export function buildBar(v: View, mp: Preferences.Meter): Bar {
   const { prefs, now, raw, win, filter, aggs, hsToday, total, net, last, events } = v;
   const hs = last?.hs ?? false;
   const a = aggs[win];
@@ -94,10 +94,10 @@ export function buildBar(v: View): Bar {
   const [totIn, totOut] = sumTotal(total, filter);
 
   let title: string | undefined;
-  if (prefs.barMode === "total") title = prefs.showUpload ? `↓${fmt(a.inB)} ↑${fmt(a.outB)}` : `↓${fmt(a.inB)}`;
-  if (prefs.barMode === "sum" && total) title = `Σ ${fmt(totIn + totOut)}`;
-  if (prefs.barMode === "rate" && rate)
-    title = prefs.showUpload ? `↓${fmt(rate.inBps)}/s ↑${fmt(rate.outBps)}/s` : `↓${fmt(rate.inBps)}/s`;
+  if (mp.barMode === "total") title = mp.showUpload ? `↓${fmt(a.inB)} ↑${fmt(a.outB)}` : `↓${fmt(a.inB)}`;
+  if (mp.barMode === "sum" && total) title = `Σ ${fmt(totIn + totOut)}`;
+  if (mp.barMode === "rate" && rate)
+    title = mp.showUpload ? `↓${fmt(rate.inBps)}/s ↑${fmt(rate.outBps)}/s` : `↓${fmt(rate.inBps)}/s`;
   if (recentSpike && title !== undefined) title = `⚡ ${title}`;
   if (!counting && title !== undefined) title = `⏸ ${title}`;
 

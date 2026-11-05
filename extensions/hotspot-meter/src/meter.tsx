@@ -4,6 +4,7 @@ import {
   LaunchType,
   MenuBarExtra,
   environment,
+  getPreferenceValues,
   launchCommand,
   open,
   openCommandPreferences,
@@ -26,7 +27,7 @@ import {
 } from "./data.ts";
 import { buildBar, buildMenu } from "./menu.ts";
 import type { Bar, Do, Ic, Icon as NodeIcon, Node } from "./menu.ts";
-import { captureState, requestAction, requestCapture } from "./sample.ts";
+import { actionPending, captureState, requestAction, requestCapture } from "./sample.ts";
 import type { Action } from "./sample.ts";
 
 const FIRST_REFRESH_MS = 1500; // let the menu finish opening before any work happens
@@ -58,7 +59,8 @@ const HUD: Record<Action, string> = { reset: "Total reset", clear: "All history 
 async function act(a: Action) {
   requestAction(dir, a);
   await tick(0);
-  await showHUD(HUD[a]);
+  // a round that could not run (another one holds the lock, no network) leaves the request for the next one
+  await showHUD(actionPending(dir, a) ? "Queued: applies on the next refresh" : HUD[a]);
 }
 
 const RUN: { [K in Do["do"]]: (d: Extract<Do, { do: K }>, stored: Set<string>) => void | Promise<void> } = {
@@ -72,12 +74,17 @@ const RUN: { [K in Do["do"]]: (d: Extract<Do, { do: K }>, stored: Set<string>) =
     if (!next.delete(d.id)) next.add(d.id);
     return savePicked(next);
   },
-  details: (d) =>
-    launchCommand({
-      name: "details",
-      type: LaunchType.UserInitiated,
-      context: d.win ? { window: d.win } : undefined,
-    }),
+  details: async (d) => {
+    try {
+      await launchCommand({
+        name: "details",
+        type: LaunchType.UserInitiated,
+        context: d.win ? { window: d.win } : undefined,
+      });
+    } catch (e) {
+      await showHUD(`Could not open Network Usage Details: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  },
   prefs: () => openCommandPreferences(),
 };
 
@@ -117,18 +124,20 @@ function render(nodes: Node[], stored: Set<string>, path = ""): ReactElement[] {
 // Everything a render needs, computed outside React so the same frame is not rebuilt when nothing changed.
 type Frame = { sig: string; bar: Bar; nodes: Node[]; stored: Set<string> };
 
-function frame(pinned: number | undefined, full: boolean, stored: Set<string>): Frame {
-  const v = load(pinned, full, stored);
+// The menu is built on every run, background ones too: Raycast keeps the last one, so a click opens it at once.
+function frame(pinned: number | undefined, stored: Set<string>): Frame {
+  const mp = getPreferenceValues<Preferences.Meter>();
+  const v = load(pinned ?? (Number(mp.window) || 60), stored);
   rememberBarWindow(v.win);
-  const bar = buildBar(v);
-  const nodes = full ? buildMenu(v, captureState(dir)) : [];
+  const bar = buildBar(v, mp);
+  const nodes = buildMenu(v, captureState(dir));
   return { sig: JSON.stringify([bar, nodes, [...stored]]), bar, nodes, stored };
 }
 
 export default function Command() {
-  const full = environment.launchType === LaunchType.UserInitiated;
+  const interactive = environment.launchType === LaunchType.UserInitiated;
   // The last known numbers are on screen at once (title included); fresh ones follow after the menu has opened.
-  const [f, setF] = useState(() => frame(readPinnedSync(), full, readPickedSync()));
+  const [f, setF] = useState(() => frame(readPinnedSync(), readPickedSync()));
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
@@ -136,17 +145,17 @@ export default function Command() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const refresh = async () => {
       try {
-        const stored = await tick(full ? OPEN_GAP_MS : undefined);
-        const next = frame(await readPinned(), full, stored);
+        const stored = await tick(interactive ? OPEN_GAP_MS : undefined);
+        const next = frame(await readPinned(), stored);
         if (alive) setF((cur) => (cur.sig === next.sig ? cur : next));
       } catch (e) {
         console.error(e);
       } finally {
         if (alive) setBusy(false);
       }
-      if (alive && full) timer = setTimeout(refresh, REFRESH_MS);
+      if (alive && interactive) timer = setTimeout(refresh, REFRESH_MS);
     };
-    timer = setTimeout(refresh, full ? FIRST_REFRESH_MS : 0);
+    timer = setTimeout(refresh, interactive ? FIRST_REFRESH_MS : 0);
     return () => {
       alive = false;
       clearTimeout(timer);
@@ -159,7 +168,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      isLoading={busy && !full}
+      isLoading={busy && !interactive}
       icon={{ source: bar.hs ? Icon.Mobile : Icon.Network, tintColor: tint }}
       title={bar.title}
       tooltip={bar.tooltip}

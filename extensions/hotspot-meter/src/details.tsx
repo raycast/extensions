@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useRef, useState } from "react";
 import { SERVICES, SETTINGS, TC_LABEL } from "./apps.ts";
 import { load, readBarWindow, readPickedSync, tick, viewSig } from "./data.ts";
 import { chartMarkdown } from "./chart.ts";
@@ -27,27 +28,24 @@ const UNATTRIBUTED =
 export default function Command(props: LaunchProps<{ launchContext: { window?: number } }>) {
   const asked = props.launchContext?.window;
   const [win, setWin] = useState(() => (WINDOWS.some((m) => m === asked) ? asked! : (readBarWindow() ?? 60)));
-  const [v, setV] = useState(() => load(win, true, readPickedSync()));
+  const [first] = useState(() => load(win, readPickedSync())); // painted at once; the first refresh replaces it
+  const shown = useRef(first);
   const [sel, setSel] = useState("all"); // only the selected row gets a chart: building one per app would be 90+ SVGs
 
   // Same sampling as the menu bar command, so this stays live even if background refresh is off.
+  const { data, revalidate, isLoading } = usePromise(
+    async (m: number) => {
+      const next = load(m, await tick());
+      if (viewSig(shown.current) !== viewSig(next) || shown.current.win !== m) shown.current = next; // same data: same object, no redraw
+      return shown.current;
+    },
+    [win],
+  );
   useEffect(() => {
-    let alive = true;
-    const refresh = async () => {
-      try {
-        const nv = load(win, true, await tick());
-        if (alive) setV((cur) => (viewSig(cur) === viewSig(nv) ? cur : nv));
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    refresh();
-    const timer = setInterval(refresh, REFRESH_MS);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-    };
+    const timer = setInterval(revalidate, REFRESH_MS);
+    return () => clearInterval(timer);
   }, []);
+  const v = data ?? first;
 
   const agg = v.aggs[win];
   const inWin = v.all.filter((s) => s.t >= v.now - win * MIN);
@@ -59,6 +57,7 @@ export default function Command(props: LaunchProps<{ launchContext: { window?: n
 
   return (
     <List
+      isLoading={isLoading && !data}
       isShowingDetail
       searchBarPlaceholder="Filter apps"
       onSelectionChange={(id) => id && setSel(id)}

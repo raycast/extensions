@@ -12,7 +12,7 @@ import { alive, readJSON, sh, stopIfOurs, writeAtomic } from "./proc.ts";
 import { NET, TUNNEL, parseStream, remoteIp, resolveLabels } from "./nettop.ts";
 import { SSID_RETRY_MS, identify, parseArp, parsePort, parseSsid, startProbe } from "./network.ts";
 import { CHUNK_SAMPLES, HANDOVER_MS, MANUAL_SAMPLES, clockMs, drain, running, startChunk } from "./stream.ts";
-import { mergeNets, normTotal, parseRows, today } from "./store.ts";
+import { HOTSPOT_ID, mergeNets, normTotal, parseRows, today } from "./store.ts";
 import type { Chunk, Last, NetInfo, NetKind, Sample, Triple } from "./store.ts";
 
 export { HOTSPOT_ID, normTotal, readSamples, readState } from "./store.ts";
@@ -76,6 +76,9 @@ export function requestAction(dir: string, a: Action) {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, `${a}.req`), String(Date.now()));
 }
+
+// True while the request file is still there: the round that applies it deletes it after writing the state.
+export const actionPending = (dir: string, a: Action) => fs.existsSync(path.join(dir, `${a}.req`));
 
 export function captureState(dir: string): { running: boolean; until: number } {
   const now = Date.now();
@@ -177,6 +180,11 @@ async function round(dir: string, opts: Options): Promise<Sample | null> {
   for (const [k, v] of Object.entries(last?.pids ?? prev?.pids ?? {})) if (v.s && now - v.s < 15 * 60_000) pids[k] = v;
   const paths: Last["paths"] = { ...(prev?.paths ?? {}) };
 
+  const reqFile = path.join(dir, "capture.req");
+  const manual = fs.existsSync(reqFile);
+  const counted = opts.counts ? opts.counts({ id: ident.id, kind: ident.kind }) : true; // no stream while this network is not counted
+  const want = counted && (mode === "always" || (mode === "hotspot" && hs));
+
   // ---- stream: ingest finished samples of every chunk (per pid first, labels only for pids that matter)
   const streaming = !!last?.chunks.some((c) => running(c, now));
   let covered = last?.covered ?? 0;
@@ -184,8 +192,9 @@ async function round(dir: string, opts: Options): Promise<Sample | null> {
   const byPid = new Map<number, { name: string; v: Triple }>();
   let streamDt = 0;
   for (const c of [...(last?.chunks ?? [])].sort((a, b) => a.start - b.start)) {
-    const ended = !running(c, now);
-    // past its end but still there (e.g. the Mac slept through it): stop it, but only if the pid is still ours
+    // an automatic chunk nobody wants any more (setting changed, left a counted network) is stopped; a requested capture runs out
+    const ended = !running(c, now) || (!want && !c.manual);
+    // past its end or unwanted but still there (e.g. the Mac slept through it): stop it, but only if the pid is still ours
     if (ended) await stopIfOurs(c.pid, NET);
     for (const rows of drain(c, ended)) {
       const stamp = rows.find((r) => r.time)?.time;
@@ -358,23 +367,22 @@ async function round(dir: string, opts: Options): Promise<Sample | null> {
     }
   }
 
-  // this interval belongs to the new total, so the rows written below add up to it
+  // The interval since the last round belongs to the network that round saw: after a switch (or a night of sleep)
+  // it is not hotspot data just because the Mac woke up on a hotspot. The rows below use the same owner.
+  const owner = last?.net && last.net !== ident.id ? last.net : ident.id;
+  const ownerHs = owner === HOTSPOT_ID;
   if (last) {
-    const t = (total.nets[ident.id] ??= [0, 0]);
+    const t = (total.nets[owner] ??= [0, 0]);
     t[0] += inB;
     t[1] += outB;
-    if (hs) hsDay.b += inB + outB;
+    if (ownerHs) hsDay.b += inB + outB;
   }
 
-  const reqFile = path.join(dir, "capture.req");
-  const manual = fs.existsSync(reqFile);
-  const counted = opts.counts ? opts.counts({ id: ident.id, kind: ident.kind }) : true; // no stream while this network is not counted
-  const want = counted && (mode === "always" || (mode === "hotspot" && hs));
   const newest = chunks[chunks.length - 1];
   let startedCold = false;
   if (last && (want ? !newest || now > newest.until - HANDOVER_MS : manual && !newest)) {
     try {
-      chunks.push(await startChunk(dir, now, want ? CHUNK_SAMPLES : MANUAL_SAMPLES));
+      chunks.push(await startChunk(dir, now, want ? CHUNK_SAMPLES : MANUAL_SAMPLES, !want));
       startedCold = !newest;
     } catch {
       // could not start: retry next tick
@@ -421,13 +429,13 @@ async function round(dir: string, opts: Options): Promise<Sample | null> {
         dt: Math.round(streamDt),
         iface,
         gw,
-        hs,
+        hs: ownerHs,
         inB: 0,
         outB: 0,
         apps: streamApps,
         hosts: {},
         tc: {},
-        net: ident.id,
+        net: owner,
         cap: 1,
       });
     out = {
@@ -435,13 +443,13 @@ async function round(dir: string, opts: Options): Promise<Sample | null> {
       dt: now - last.t,
       iface,
       gw,
-      hs,
+      hs: ownerHs,
       inB,
       outB,
       apps,
       hosts,
       tc,
-      net: ident.id,
+      net: owner,
       ...(Object.keys(tun).length ? { tun } : {}),
     };
     lines.push(out);

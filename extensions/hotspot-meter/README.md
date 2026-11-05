@@ -61,18 +61,11 @@ stuff to know:
 - hotspot detection = iphone hotspot gateway (`172.20.10.1`), usb/bluetooth tethering, or macos flagging the link as expensive (`nettop -t expensive`).
 - the wifi name is read once when u join a network (takes ~10 s, it runs in the background), so name matching kicks in a few seconds after joining. if ur mac won't give up the name, tick the network in the `Networks` menu instead.
 
-## install
+## setup
 
 needs macos + raycast. tested on macos 27 / raycast 2.10, apple silicon.
 
-```sh
-git clone https://github.com/yigitkonur/hotspot-meter.git
-cd hotspot-meter
-npm install
-npm run dev
-```
-
-`npm run dev` imports it into raycast. u can ctrl+c it after, the extension stays. then open **network usage** once from raycast so background refresh kicks on, and ur good. it comes back on its own after reboots because raycast does (make sure raycast launches at login).
+install it from the raycast store, then open **network usage** once so the menu bar item shows up and background refresh kicks on, and ur good. no permissions to grant, no api keys. it comes back on its own after reboots because raycast does (make sure raycast launches at login).
 
 ## settings
 

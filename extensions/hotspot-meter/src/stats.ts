@@ -177,11 +177,11 @@ export function spikes(samples: Sample[], thresholdBytes: number): Spike[] {
     const b = buckets.get(k) ?? { bytes: 0, apps: new Map() };
     b.bytes += s.inB + s.outB;
     for (const [l, v] of Object.entries(s.apps)) b.apps.set(l, (b.apps.get(l) ?? 0) + v[0] + v[1]);
-    for (const [l, v] of Object.entries(s.tun ?? {})) b.apps.set(l, Math.max(0, (b.apps.get(l) ?? 0) - v[0] - v[1]));
+    for (const [l, v] of Object.entries(s.tun ?? {})) b.apps.set(l, (b.apps.get(l) ?? 0) - v[0] - v[1]); // may dip below 0 until the stream row of the same traffic (another minute) is merged
     buckets.set(k, b);
   }
   for (const b of buckets.values()) {
-    const att = [...b.apps.values()].reduce((n, v) => n + v, 0);
+    const att = [...b.apps.values()].reduce((n, v) => n + Math.max(0, v), 0);
     if (b.bytes > att) b.apps.set(UNATTR, b.bytes - att);
   }
   // a spike is a minute well above both the threshold and the window's usual minute
@@ -212,7 +212,7 @@ export function spikes(samples: Sample[], thresholdBytes: number): Spike[] {
 
 function done(c: Spike & { apps: Map<string, number> }): Spike {
   const top = [...c.apps.entries()].sort((a, b) => b[1] - a[1])[0];
-  return { start: c.start, end: c.end, bytes: c.bytes, app: top ? top[0] : UNATTR };
+  return { start: c.start, end: c.end, bytes: c.bytes, app: top && top[1] > 0 ? top[0] : UNATTR };
 }
 
 // Bytes per time slice across the window as [download, upload]; null where no sample exists (Mac asleep / not sampled).

@@ -19,7 +19,7 @@ export function running(c: Chunk, now: number) {
 
 // ---------- stream ----------
 
-export async function startChunk(dir: string, now: number, samples: number): Promise<Chunk> {
+export async function startChunk(dir: string, now: number, samples: number, manual = false): Promise<Chunk> {
   const fifo = path.join(dir, "stdin.fifo");
   let isFifo = false;
   try {
@@ -59,7 +59,14 @@ export async function startChunk(dir: string, now: number, samples: number): Pro
     child.on("error", () => {});
     child.unref();
     if (!child.pid) throw new Error("nettop did not start"); // never store pid 0: kill(0) would hit our own group
-    return { pid: child.pid, start: now, until: now + samples * STEP_S * 1000 + 2000, file, offset: 0 };
+    return {
+      pid: child.pid,
+      start: now,
+      until: now + samples * STEP_S * 1000 + 2000,
+      file,
+      offset: 0,
+      ...(manual ? { manual } : {}),
+    };
   } finally {
     if (inFd >= 0) fs.closeSync(inFd);
     if (outFd >= 0) fs.closeSync(outFd);

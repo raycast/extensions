@@ -46,6 +46,7 @@ export type Chunk = {
   file: string;
   offset: number;
   prevT?: number;
+  manual?: true; // started by a capture request, not by the Per-App Breakdown setting
   skew?: number; // clock offset between nettop's timestamps and ours (time zone changed while it ran)
 };
 
