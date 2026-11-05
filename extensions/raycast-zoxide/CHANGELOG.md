@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Boost on Every Open] - {PR_MERGE_DATE}
+## [Boost on Every Open] - 2026-11-05
 
 - [Changed] "Open With" now boosts the directory's score in zoxide, like the other open actions (score boosts on open require Raycast 2.11 or later)
 - [Changed] Opening a directory now uses Raycast's native open actions
