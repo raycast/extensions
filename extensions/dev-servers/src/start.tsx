@@ -487,15 +487,24 @@ function LoginRow({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
               />
             )}
-            {/* Kept for a missing folder too, so that row's ↵ copies the path
-                rather than landing on the toggle below. */}
+            {/* Kept for a missing folder too, and joined there by Copy Name,
+                so that row still has two harmless actions for ↵ and ⌘↵:
+                Raycast binds ⌘↵ to the second action whatever its section,
+                and the toggle below must never be one of them. */}
             <Action.CopyToClipboard
               title="Copy Path"
               content={project.cwd}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
+            {!exists && (
+              <Action.CopyToClipboard
+                title="Copy Name"
+                content={project.projectName}
+              />
+            )}
           </ActionPanel.Section>
-          {/* Last, so neither ↵ nor ⌘↵ can turn it off by accident. */}
+          {/* Last, and always third or later, so neither ↵ nor ⌘↵ can turn
+              it off by accident. */}
           <ActionPanel.Section>
             <Action
               title="Don't Start at Login"

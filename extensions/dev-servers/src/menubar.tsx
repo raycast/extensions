@@ -270,14 +270,20 @@ export default function Command() {
     // it is open, but a start at login has no dashboard watching, and an entry
     // left behind would turn into a failed row the first time the dashboard
     // opened after that server stopped, hours after it started fine.
+    //
+    // Re-read rather than reuse `pending`: the scan above takes a while, and
+    // the dashboard may have added a start or dismissed a row meanwhile.
+    // Nothing awaits between this read and the write, so only that change's
+    // own storage round trip is left exposed.
+    const latest = await readPendingStarts();
     let retired = false;
-    for (const [cwd, entry] of pending) {
+    for (const [cwd, entry] of latest) {
       if (resolvingServer(cwd, entry, next)) {
-        pending.delete(cwd);
+        latest.delete(cwd);
         retired = true;
       }
     }
-    if (retired) await writePendingStarts(pending).catch(() => {});
+    if (retired) await writePendingStarts(latest).catch(() => {});
     setServers(next);
     writeSnapshot(next);
     await updateCommandMetadata({ subtitle: metadataSubtitle(next.length) });
