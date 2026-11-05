@@ -1,0 +1,40 @@
+import { describe, expect, it } from "vitest";
+import { holdHUD, notificationsEnabled } from "./hud";
+
+const run = async (seconds: number) => {
+  const shown: string[] = [];
+  const pauses: number[] = [];
+  await holdHUD(
+    async (t) => void shown.push(t),
+    "hello",
+    seconds,
+    async (ms) => void pauses.push(ms),
+  );
+  return { shown, pauses };
+};
+
+describe("holdHUD", () => {
+  it("shows once for a short duration, with no pause", async () => {
+    expect(await run(1)).toEqual({ shown: ["hello"], pauses: [] });
+  });
+  it("refreshes every second, before the previous one starts to fade", async () => {
+    const { shown, pauses } = await run(6);
+    expect(shown).toHaveLength(6);
+    expect(pauses).toEqual([1000, 1000, 1000, 1000, 1000]);
+  });
+  it("never repeats for zero or negative time", async () => {
+    expect((await run(0)).shown).toHaveLength(1);
+    expect((await run(-3)).shown).toHaveLength(1);
+  });
+});
+
+describe("notificationsEnabled", () => {
+  it("is on by default, even when the preference has no value yet", () => {
+    expect(notificationsEnabled({})).toBe(true);
+    expect(notificationsEnabled({ notifications: undefined })).toBe(true);
+  });
+  it("follows the checkbox", () => {
+    expect(notificationsEnabled({ notifications: true })).toBe(true);
+    expect(notificationsEnabled({ notifications: false })).toBe(false);
+  });
+});
