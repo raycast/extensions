@@ -1,6 +1,6 @@
 # Vivaldi Changelog
 
-## [Fix Search With Special Characters] - {PR_MERGE_DATE}
+## [Fix Search With Special Characters] - 2026-11-05
 
 - Fix: searching history for text with an apostrophe failed with an SQL error
 - Fix: `%` and `_` in a search now match literally instead of acting as wildcards
