@@ -21,7 +21,9 @@ export function BriefingActions({
       <Action.CopyToClipboard
         title="Copy Briefing URL"
         content={b.url}
-        shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
+        shortcut={
+          detail ? undefined : { macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }
+        }
       />
       <ActionPanel.Section title="Local review state">
         <Action
