@@ -2,7 +2,7 @@
 
 **English** | [简体中文](CHANGELOG.zh-CN.md)
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-11-05
 
 - Find Claude Code and Codex sessions by title, project, or session ID, including past conversations.
 - Subscribe to the focused conversation from Raycast search or a global hotkey, or choose a session in All Sessions.
