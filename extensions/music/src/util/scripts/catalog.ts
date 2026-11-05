@@ -55,7 +55,3 @@ export function catalogVerifyScript(song: CatalogSong): string {
 }
 
 export const catalogPauseScript = 'tell application "Music" to pause';
-
-export function catalogNotificationScript(song: CatalogSong): string {
-  return `display notification ${literal(`${song.title} — ${song.artist}`)} with title "Music" subtitle "Playing"`;
-}

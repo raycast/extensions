@@ -4,12 +4,7 @@ import { runScript } from "./apple-script";
 import { withCatalogPlaybackLock } from "./catalog-lock";
 import { NativeCatalogError, startNativeCatalogSong } from "./catalog-native";
 import { CatalogSong } from "./models";
-import {
-  catalogNotificationScript,
-  catalogPauseScript,
-  catalogPlaybackUrl,
-  catalogVerifyScript,
-} from "./scripts/catalog";
+import { catalogPauseScript, catalogPlaybackUrl, catalogVerifyScript } from "./scripts/catalog";
 
 export const playCatalogSong = (song: CatalogSong): TE.TaskEither<Error, void> =>
   TE.tryCatch(async () => {
@@ -32,7 +27,5 @@ export const playCatalogSong = (song: CatalogSong): TE.TaskEither<Error, void> =
         }
         throw error;
       }
-      // Disabled notifications must not turn verified playback into an error.
-      await runScript(catalogNotificationScript(song))();
     });
   }, E.toError);

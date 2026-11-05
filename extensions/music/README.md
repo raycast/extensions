@@ -37,8 +37,8 @@ an error; success is never inferred from the launcher exit status. Concurrent
 catalog requests are rejected with a native macOS lock. The helper has a deadline
 and stops if its calling process or request directory disappears.
 
-A native macOS notification is requested only after playback verification.
-Its visibility depends on notification permissions and Focus settings.
+The extension does not send an additional catalog playback notification.
+Music's own track-change alerts and their settings are left untouched.
 **Open in Music** remains a separate, explicit action. Albums, playlists and
 library playback retain their existing behavior.
 

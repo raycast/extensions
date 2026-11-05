@@ -6,7 +6,7 @@
 - Just Play now falls back to the Apple Music catalog when no local library result exists.
 - Added AI tools for catalog search and verified song playback.
 - Validate the exact catalog identity and use a bundled native player instead of opening album links or skipping through tracks.
-- Preserve minimized Music windows, volume and shuffle; independently verify track metadata and advancing playback before requesting a native success notification.
+- Preserve minimized Music windows, volume and shuffle; independently verify track metadata and advancing playback without adding a duplicate notification to Music's own alerts.
 - Include helper sources, a universal build script, macOS authorization, timeouts and concurrency protection. Document the non-public macOS API and local-distribution limitations.
 
 ## [Album Art in Menu Bar] - 2026-10-17

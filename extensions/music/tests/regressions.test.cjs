@@ -76,11 +76,10 @@ test("catalog verification never opens a link or changes windows, volume or shuf
   assert.match(script, /currentPosition > firstPosition \+ 0.05/);
 });
 
-test("catalog verification and notification escape metadata", () => {
-  const { catalogVerifyScript, catalogNotificationScript } = loadSource("src/util/scripts/catalog.ts");
+test("catalog verification escapes metadata", () => {
+  const { catalogVerifyScript } = loadSource("src/util/scripts/catalog.ts");
   const song = { ...catalogSong, title: 'A "quoted" song' };
   assert.ok(catalogVerifyScript(song).includes('A \\"quoted\\" song'));
-  assert.ok(catalogNotificationScript(song).includes('A \\"quoted\\" song'));
 });
 
 test("native helper results must identify this song and an actual playback attempt", () => {
@@ -172,10 +171,7 @@ function playbackHarness(options = {}) {
       if (options.pauseError) throw options.pauseError;
       return "";
     }
-    assert.match(script, /^display notification/);
-    events.push("notify");
-    if (options.notifyError) throw options.notifyError;
-    return "";
+    assert.fail("Catalog playback must not send notifications or other unexpected scripts.");
   };
   const { playCatalogSong } = loadSource("src/util/catalog-playback.ts", run, {
     "./catalog-native": {
@@ -201,13 +197,12 @@ function playbackHarness(options = {}) {
   return { play: () => playCatalogSong(catalogSong)(), events, scripts, playCatalogSong };
 }
 
-test("catalog playback verifies native playback before notifying, without changing settings", async () => {
+test("catalog playback verifies native playback without duplicate notifications or setting changes", async () => {
   const h = playbackHarness();
   assert.equal((await h.play())._tag, "Right");
-  assert.deepEqual(h.events, ["lock", "native", "verify", "notify", "unlock"]);
-  assert.ok(h.scripts.every((script) => !/set sound volume|set shuffle|open -g/.test(script)));
-  const notifications = playbackHarness({ notifyError: new Error("Notifications disabled") });
-  assert.equal((await notifications.play())._tag, "Right");
+  assert.deepEqual(h.events, ["lock", "native", "verify", "unlock"]);
+  assert.equal(h.scripts.length, 1); // Only the playback verification, no extra notification.
+  assert.ok(h.scripts.every((script) => !/display notification|set sound volume|set shuffle|open -g/.test(script)));
 });
 
 test("unverified native playback is paused and never announced as successful", async () => {
@@ -324,7 +319,7 @@ test("Just Play keeps library playback independent of catalog sign-in and only f
   await justPlay({ arguments: { query: "DragonForce" } });
   assert.equal(authCalls, 1);
   assert.equal(catalogPlays, 1);
-  assert.equal(messages.length, 1); // Catalog success uses its native notification, not a second HUD.
+  assert.equal(messages.length, 1); // Catalog success leaves Music's own alerts untouched, without an extra HUD.
   searchFailure = new Error("Music is unavailable");
   await justPlay({ arguments: { query: "Other" } });
   assert.equal(catalogCalls, 1);
