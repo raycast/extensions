@@ -1,4 +1,4 @@
-# Time Zone Convert
+# Time Zone Converter
 
 A Raycast extension for converting times between time zones the way you convert units: type a query, get the answer.
 
