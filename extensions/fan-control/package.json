@@ -42,9 +42,9 @@
     {
       "name": "toggle-fans",
       "title": "Toggle Fan Speed",
-      "subtitle": "Fan Control",
-      "description": "Switch all fans between macOS control (auto) and full speed in one keystroke.",
+      "description": "Switch all fans between macOS control (auto) and full speed in one keystroke. Its subtitle shows the current state and what it will switch to.",
       "mode": "no-view",
+      "interval": "1m",
       "preferences": [
         {
           "name": "toggleProfile",
