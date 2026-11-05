@@ -8,10 +8,15 @@ import { TaskForm } from "./components/TaskForm";
 export default function Command() {
   return (
     <DeviceList
-      title="List iPhones"
       actions={(phone, _, enabled) => (
         <>
-          {enabled && <Action.Push title="Run Task" icon={Icon.Play} target={<TaskForm phoneId={phone.id} />} />}
+          {enabled && (
+            <Action.Push
+              title="Run Task"
+              icon={Icon.Play}
+              target={<TaskForm phoneId={phone.id} navigationTitle="Run iPhone Task" />}
+            />
+          )}
           <Action.Push
             title="View Screen"
             icon={Icon.Mobile}

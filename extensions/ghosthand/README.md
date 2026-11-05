@@ -1,7 +1,7 @@
 <div align="center">
     <br/>
     <br/>
-    <img src="./assets/extension-icon.png" alt="Ghosthand" width="100"/>
+    <img src="./media/extension-icon.png" alt="Ghosthand" width="100"/>
     <h3>Ghosthand</h3>
     <p>Control your iPhone and run AI tasks from Raycast</p>
     <br/>
@@ -77,18 +77,3 @@ Handled success, failure, and cancellation all attempt lease release. Cancellati
 | Login or plan requirement                       | Sign in through setup or review [Ghosthand plans](https://ghosthand.dev/docs/pricing). |
 | Task, connection, or input verification failure | Inspect a fresh preview before deciding whether to repeat the operation.               |
 | Lease invalid                                   | Return to device selection and refresh.                                                |
-
-## Development
-
-```sh
-npm install
-npm run dev
-npm test
-npm run build
-npx tsc --noEmit
-npm run lint
-```
-
-The API types are generated from the checked-in official OpenAPI snapshot; see [API provenance and regeneration](api/README.md). Tests use a real HTTP server bound to a temporary Unix socket and cover task streaming, cancellation/acquisition races, leases, malformed responses, JSON fallback, and input safety. They never connect to a real phone.
-
-The release includes the P0 commands and user-invoked Raycast AI tools. Task continuation, remote Macs/HTTPS tokens, menu bar status, recording, and full-resolution leased capture are not included. See [manual acceptance checks](docs/VALIDATION.md) for the hardware and Raycast checks required before publication.

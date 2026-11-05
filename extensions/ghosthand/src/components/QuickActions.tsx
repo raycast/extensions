@@ -10,6 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { errorMessage, isCancelled, recoveryHint } from "../lib/errors";
 import { client, validateTypedText } from "../lib/ghosthand-client";
@@ -29,6 +30,7 @@ function useQuickAction(phone: Phone) {
     active.current = controller;
     setBusy(true);
     setFailure(undefined);
+    let notice: string | undefined;
     try {
       if (["tap", "enter", "lock"].includes(action.kind)) {
         const message =
@@ -47,17 +49,26 @@ function useQuickAction(phone: Phone) {
         )
           return false;
       }
-      const result = await withLease(client, phone, title, controller.signal, (lease) =>
-        client.input(lease.id, action, controller.signal),
-      );
-      if (!controller.signal.aborted) await showToast({ style: Toast.Style.Success, title, message: result.message });
+      const result = await withLease(client, phone, title, controller.signal, (lease) => {
+        notice = lease.notice;
+        return client.input(lease.id, action, controller.signal);
+      });
+      if (!controller.signal.aborted) {
+        const message = [result.message, notice && `Ghosthand account notice: ${notice}`].filter(Boolean).join("\n\n");
+        await showToast({
+          style: Toast.Style.Success,
+          title,
+          message,
+        });
+      }
       return true;
     } catch (error) {
       if (!controller.signal.aborted) {
-        const message = `${errorMessage(error)}\n\n${recoveryHint(error)}`;
-        setFailure(message);
-        if (!isCancelled(error))
-          await showToast({ style: Toast.Style.Failure, title: "Action not confirmed", message: errorMessage(error) });
+        const detail = [errorMessage(error), notice && `Ghosthand account notice: ${notice}`]
+          .filter(Boolean)
+          .join("\n\n");
+        setFailure(`${detail}\n\n${recoveryHint(error)}`);
+        if (!isCancelled(error)) await showFailureToast(error, { title: "Action not confirmed", message: detail });
       }
       return false;
     } finally {
@@ -107,7 +118,6 @@ export function QuickActions({ phone }: { phone: Phone }) {
           key={item.title}
           title={item.title}
           icon={item.icon}
-          accessories={busy ? [{ text: "Working…" }] : []}
           actions={
             <ActionPanel>
               <Action title={item.title} icon={item.icon} onAction={() => perform(item.action, item.title)} />
@@ -149,31 +159,35 @@ export function QuickActions({ phone }: { phone: Phone }) {
 }
 
 function InputForm({ phone, kind }: { phone: Phone; kind: "type" | "tap" }) {
-  const [value, setValue] = useState("");
-  const [validation, setValidation] = useState<string>();
   const { perform, busy, failure } = useQuickAction(phone);
   const { pop } = useNavigation();
   const title = kind === "type" ? "Type Text" : "Tap Text";
-  async function submit() {
-    const error =
-      kind === "type" ? validateTypedText(value) : !value.trim() ? "Enter a visible text label." : undefined;
-    if (error) {
-      setValidation(error);
-      return;
-    }
-    if (await perform({ kind, text: value }, title)) {
-      setValue("");
-      pop();
-    }
-  }
+  const { handleSubmit, itemProps } = useForm({
+    initialValues: { text: "" },
+    validation: {
+      text: (text) =>
+        kind === "type" ? validateTypedText(text ?? "") : text?.trim() ? undefined : "Enter a visible text label.",
+    },
+    async onSubmit({ text }) {
+      if (await perform({ kind, text }, title)) pop();
+    },
+  });
   return (
     <Form
       navigationTitle={`${title} · ${phone.name}`}
       isLoading={busy}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={title} icon={Icon.Keyboard} onSubmit={submit} />
-          <Action.Push title="View Current Screen" target={<ScreenPreview phone={phone} allowControl={false} />} />
+          <Action.SubmitForm
+            title={title}
+            icon={kind === "type" ? Icon.Keyboard : Icon.BullsEye}
+            onSubmit={handleSubmit}
+          />
+          <Action.Push
+            title="View Current Screen"
+            icon={Icon.Mobile}
+            target={<ScreenPreview phone={phone} allowControl={false} />}
+          />
         </ActionPanel>
       }
     >
@@ -185,14 +199,9 @@ function InputForm({ phone, kind }: { phone: Phone; kind: "type" | "tap" }) {
         }
       />
       <Form.TextField
-        id="text"
+        {...itemProps.text}
         title={kind === "type" ? "Text" : "Visible Label"}
-        value={value}
-        onChange={(text) => {
-          setValue(text);
-          setValidation(undefined);
-        }}
-        error={validation}
+        placeholder={kind === "type" ? "Hello, world!" : "General"}
       />
       {failure && <Form.Description title="Action Not Confirmed" text={failure} />}
     </Form>

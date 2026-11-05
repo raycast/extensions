@@ -4,7 +4,6 @@ import { ScreenPreview } from "./components/ScreenPreview";
 export default function Command() {
   return (
     <DeviceList
-      title="View iPhone Screen"
       actions={(phone, _, enabled) => (
         <Action.Push
           title="View Screen"

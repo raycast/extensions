@@ -1,38 +1,39 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 import { isCancelled } from "../lib/errors";
 
 export function useResource<T>(load: (signal: AbortSignal) => Promise<T>) {
-  const [data, setData] = useState<T>();
-  const [error, setError] = useState<unknown>();
-  const [isLoading, setLoading] = useState(true);
-  const active = useRef<{ controller: AbortController; done: Promise<void> } | undefined>(undefined);
-  const refresh = useCallback(async () => {
-    const previous = active.current;
-    previous?.controller.abort();
-    const controller = new AbortController();
-    setLoading(true);
-    setError(undefined);
-    // A failed refresh must not leave old text or a screenshot looking current.
-    setData(undefined);
-    const done = (async () => {
-      try {
-        // OCR refresh must finish releasing its previous lease before acquiring another.
-        await previous?.done;
-        controller.signal.throwIfAborted();
-        const result = await load(controller.signal);
-        if (!controller.signal.aborted) setData(result);
-      } catch (failure) {
-        if (!controller.signal.aborted && !isCancelled(failure)) setError(failure);
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    })();
-    active.current = { controller, done };
-    await done;
-  }, [load]);
-  useEffect(() => {
-    void refresh();
-    return () => active.current?.controller.abort();
-  }, [refresh]);
-  return { data, error, isLoading, refresh };
+  const abortable = useRef<AbortController>(null);
+  const settled = useRef<Promise<void>>(undefined);
+  const { data, error, isLoading, revalidate } = usePromise(
+    async (loadResource: (signal: AbortSignal) => Promise<T>) => {
+      const signal = abortable.current?.signal ?? AbortSignal.abort();
+      const previous = settled.current;
+      const request = (async () => {
+        try {
+          // Aborting OCR still leaves its lease cleanup in flight.
+          await previous;
+          signal.throwIfAborted();
+          return await loadResource(signal);
+        } catch (failure) {
+          if (!isCancelled(failure)) throw failure;
+        }
+      })();
+      settled.current = request.then(
+        () => undefined,
+        () => undefined,
+      );
+      return request;
+    },
+    [load],
+    {
+      abortable,
+      onError() {
+        // The view renders ErrorView with recovery actions.
+      },
+    },
+  );
+
+  // Do not display old screen contents or errors during a refresh.
+  return { data: isLoading ? undefined : data, error: isLoading ? undefined : error, isLoading, refresh: revalidate };
 }

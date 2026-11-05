@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import type { ReactNode } from "react";
 import { useDevices } from "../hooks/use-devices";
 import type { Phone, PhoneOverview } from "../lib/types";
@@ -6,21 +6,14 @@ import { canControl, deviceStatus, lockStatus, markdownText, setupStep } from ".
 import { ErrorView, SetupActions } from "./Setup";
 
 export function DeviceList({
-  title,
   actions,
 }: {
-  title: string;
   actions: (phone: Phone, overview: PhoneOverview, enabled: boolean) => ReactNode;
 }) {
   const { data, error, isLoading, refresh } = useDevices();
   if (error) return <ErrorView error={error} retry={refresh} />;
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      navigationTitle={title}
-      searchBarPlaceholder="Search connected iPhones…"
-    >
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search connected iPhones…">
       <List.EmptyView
         title={isLoading ? "Looking for iPhones…" : "Connect an iPhone"}
         description="Connect a physical iPhone by USB, then run ghosthand setup in Terminal."
@@ -41,19 +34,12 @@ export function DeviceList({
             source: Icon.Mobile,
             tintColor: phone.lease ? Color.Orange : canControl(phone, data) ? Color.Green : Color.SecondaryText,
           }}
-          accessories={[
-            {
-              tag: {
-                value: deviceStatus(phone),
-                color: phone.lease ? Color.Orange : phone.step === "ready" ? Color.Green : Color.SecondaryText,
-              },
-            },
-          ]}
           detail={
             <List.Item.Detail
               markdown={`## ${markdownText(phone.name)}\n\n${markdownText(setupStep(phone))}${phone.xctest?.error ? `\n\n${markdownText(phone.xctest.error)}` : ""}${phone.lease ? `\n\n**In use by ${markdownText(phone.lease.label ?? "another client")}**\n\n${markdownText(phone.lease.reason)}` : ""}${data.account.state !== "signed-in" ? "\n\nSign in through `ghosthand setup` before controlling this iPhone." : ""}${data.camera !== "authorized" ? "\n\nAllow Camera access in Ghosthand setup to enable screen capture." : ""}`}
               metadata={
                 <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Status" text={deviceStatus(phone)} />
                   <List.Item.Detail.Metadata.Label title="Model" text={phone.modelName ?? phone.model ?? "Unknown"} />
                   <List.Item.Detail.Metadata.Label title="iOS" text={phone.iosVersion ?? "Unknown"} />
                   <List.Item.Detail.Metadata.Label title="Host Mac" text={data.macName} />
@@ -88,12 +74,7 @@ export function DeviceList({
           actions={
             <ActionPanel>
               {actions(phone, data, canControl(phone, data))}
-              <Action
-                title="Refresh Devices"
-                icon={Icon.ArrowClockwise}
-                onAction={refresh}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-              />
+              <Action title="Refresh Devices" icon={Icon.ArrowClockwise} onAction={refresh} />
               <SetupActions />
             </ActionPanel>
           }

@@ -38,6 +38,7 @@ const lease = {
   reason: "Test",
   idleTimeoutSeconds: 600,
   expiresAt: "2026-11-05T13:10:00Z",
+  notice: "Review the payment method on your Ghosthand account.",
 };
 const text = {
   width: 414,
@@ -550,6 +551,7 @@ test("AI screen reading marks content untrusted and releases the lease before re
   if (result.status === "completed") {
     assert.equal(result.text, "Settings\nGeneral");
     assert.equal(result.contentIsUntrusted, true);
+    assert.equal(result.notice, lease.notice);
   }
   assert.equal(requests.at(-1)?.method, "DELETE");
 });
@@ -558,6 +560,7 @@ test("AI task results are cloneable and sent once through the hosted task endpoi
   const { client, requests } = await daemon(t);
   const result = await runAiTask(client, phone.id, "Open Settings without changing settings");
   assert.equal(result.status, "completed");
+  assert.equal(result.notice, lease.notice);
   assert.deepEqual(structuredClone(result), result);
   assert.equal(requests.filter((request) => request.path.endsWith("/task")).length, 1);
   assert.equal(requests.at(-1)?.method, "DELETE");
@@ -574,6 +577,7 @@ test("AI task failure returns an explicit uncertain outcome and forbids automati
   if (result.status === "not-confirmed") {
     assert.equal(result.doNotRetryAutomatically, true);
     assert.equal(result.code, "task-failed");
+    assert.equal(result.notice, lease.notice);
   }
   assert.deepEqual(structuredClone(result), result);
   assert.equal(requests.at(-1)?.method, "DELETE");
@@ -583,6 +587,7 @@ test("AI tools reject a stale phone ID instead of choosing another phone", async
   const { client, requests } = await daemon(t);
   const result = await runAiTask(client, "unknown-phone", "Open Settings");
   assert.equal(result.status, "not-confirmed");
+  assert.equal(result.notice, undefined);
   assert.equal(requests.length, 1);
   assert.equal(requests[0].path, "/v1/phones");
 });
@@ -609,6 +614,7 @@ test("AI typing never submits, returns no typed content, and rejects control cha
   assert.equal(requests.length, 0);
   const result = await performAiAction(client, { phoneId: phone.id, action: "type-text", text: "Test input" });
   assert.equal(result.status, "completed");
+  assert.equal(result.notice, lease.notice);
   assert.deepEqual(requests.find((request) => request.path.endsWith("/type"))?.body, {
     text: "Test input",
     enter: false,

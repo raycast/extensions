@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard, showToast, Toast } from "@raycast/api";
 import { useCallback } from "react";
 import { useResource } from "../hooks/use-resource";
 import { client } from "../lib/ghosthand-client";
@@ -10,7 +10,16 @@ import { TaskForm } from "./TaskForm";
 export function ScreenTextView({ phone }: { phone: Phone }) {
   const load = useCallback(
     (signal: AbortSignal) =>
-      withLease(client, phone, "Read visible screen text", signal, (lease) => client.text(lease.id, signal)),
+      withLease(client, phone, "Read visible screen text", signal, (lease) => {
+        if (lease.notice) {
+          void showToast({
+            style: Toast.Style.Success,
+            title: "Ghosthand Account Notice",
+            message: lease.notice,
+          }).catch(() => undefined);
+        }
+        return client.text(lease.id, signal);
+      }),
     [phone],
   );
   const { data, error, isLoading, refresh } = useResource(load);
@@ -18,19 +27,13 @@ export function ScreenTextView({ phone }: { phone: Phone }) {
   const text = data?.lines.map((line) => line.text).join("\n") ?? "";
   const actions = (selected?: string) => (
     <ActionPanel>
-      {text && <Action.CopyToClipboard title="Copy All Text" content={text} />}
-      {selected && (
-        <Action.CopyToClipboard
-          title="Copy Selected Text"
-          content={selected}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-        />
-      )}
+      {text && <Action.CopyToClipboard title="Copy All Text" content={text} icon={Icon.Clipboard} />}
+      {selected && <Action.CopyToClipboard title="Copy Selected Text" content={selected} icon={Icon.Clipboard} />}
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
         onAction={refresh}
-        shortcut={Keyboard.Shortcut.Common.Refresh}
+        shortcut={selected && text ? Keyboard.Shortcut.Common.Refresh : undefined}
       />
       {text && (
         <Action.Push
@@ -39,6 +42,7 @@ export function ScreenTextView({ phone }: { phone: Phone }) {
           target={
             <TaskForm
               phoneId={phone.id}
+              navigationTitle="Run iPhone Task"
               initialPrompt={`Use this screen text as context for my instruction below:\n\n${text}\n\nMy instruction: `}
             />
           }

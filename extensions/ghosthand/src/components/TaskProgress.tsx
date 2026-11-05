@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useSyncExternalStore } from "react";
 import type { TaskRun } from "../lib/task-run";
 import { markdownText } from "../utils/device-status";
@@ -33,22 +33,16 @@ export function TaskProgress({ run }: { run: TaskRun }) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          {active && (
-            <Action
-              title="Stop Task"
-              icon={Icon.Stop}
-              onAction={run.cancel}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
-            />
-          )}
+          {active && <Action title="Stop Task" icon={Icon.Stop} onAction={run.cancel} />}
           <Action.Push
             title="Refresh Screen"
             icon={Icon.Mobile}
             target={<ScreenPreview phone={run.phone} allowControl={false} />}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           {!active && <Action title="Run Another Task" icon={Icon.ArrowClockwise} onAction={pop} />}
-          {!active && state.text && <Action.CopyToClipboard title="Copy Response" content={state.text} />}
+          {!active && state.text && (
+            <Action.CopyToClipboard title="Copy Response" content={state.text} icon={Icon.Clipboard} />
+          )}
         </ActionPanel>
       }
     />

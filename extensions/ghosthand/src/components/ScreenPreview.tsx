@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, showInFinder, showToast, Toast, Keyboard } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useCallback, useRef } from "react";
 import { pathToFileURL } from "node:url";
 import { useResource } from "../hooks/use-resource";
-import { errorMessage } from "../lib/errors";
 import { client } from "../lib/ghosthand-client";
 import { copyScreenshot, createPreviewImage, saveScreenshot } from "../lib/screenshots";
 import type { Phone } from "../lib/types";
@@ -34,10 +34,8 @@ export function ScreenPreview({ phone, allowControl = true }: { phone: Phone; al
         await showToast({ style: Toast.Style.Success, title: "Screenshot copied" });
       }
     } catch (failure) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(failure, {
         title: save ? "Could not save screenshot" : "Could not copy screenshot",
-        message: errorMessage(failure),
       });
     } finally {
       exporting.current = false;
@@ -61,20 +59,10 @@ export function ScreenPreview({ phone, allowControl = true }: { phone: Phone; al
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh Screenshot"
-            icon={Icon.ArrowClockwise}
-            onAction={refresh}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-          />
+          <Action title="Refresh Screenshot" icon={Icon.ArrowClockwise} onAction={refresh} />
           {data && (
             <>
-              <Action
-                title="Copy Screenshot"
-                icon={Icon.Clipboard}
-                onAction={() => exportImage(false)}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
+              <Action title="Copy Screenshot" icon={Icon.Clipboard} onAction={() => exportImage(false)} />
               <Action
                 title="Save Screenshot to Downloads"
                 icon={Icon.Download}
@@ -85,7 +73,11 @@ export function ScreenPreview({ phone, allowControl = true }: { phone: Phone; al
           )}
           {allowControl && (
             <>
-              <Action.Push title="Run Task" icon={Icon.Play} target={<TaskForm phoneId={phone.id} />} />
+              <Action.Push
+                title="Run Task"
+                icon={Icon.Play}
+                target={<TaskForm phoneId={phone.id} navigationTitle="Run iPhone Task" />}
+              />
               <Action.Push title="Read Screen Text" icon={Icon.Text} target={<ScreenTextView phone={phone} />} />
             </>
           )}

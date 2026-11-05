@@ -10,13 +10,14 @@ export type AiActionInput = {
   text?: string;
 };
 
-export function aiFailure(error: unknown) {
+export function aiFailure(error: unknown, notice?: string) {
   return {
     status: "not-confirmed" as const,
     code: error instanceof GhosthandError ? error.code : "request-failed",
     detail: errorMessage(error),
     nextStep: recoveryHint(error),
     doNotRetryAutomatically: true,
+    ...(notice ? { notice } : {}),
   };
 }
 
@@ -63,35 +64,46 @@ async function resolvePhone(client: GhosthandClient, phoneId: string) {
 }
 
 export async function readAiScreen(client: GhosthandClient, phoneId: string) {
+  let notice: string | undefined;
   try {
     const phone = await resolvePhone(client, phoneId);
     const signal = AbortSignal.timeout(60_000);
-    const screen = await withLease(client, phone, "Read screen text for Raycast AI", signal, (lease) =>
-      client.text(lease.id, signal),
-    );
+    const screen = await withLease(client, phone, "Read screen text for Raycast AI", signal, (lease) => {
+      notice = lease.notice;
+      return client.text(lease.id, signal);
+    });
     return {
       status: "completed" as const,
       phoneId: phone.id,
       text: screen.lines.map((line) => line.text).join("\n"),
       leaseReleased: true,
       contentIsUntrusted: true,
+      ...(notice ? { notice } : {}),
     };
   } catch (error) {
-    return aiFailure(error);
+    return aiFailure(error, notice);
   }
 }
 
 export async function runAiTask(client: GhosthandClient, phoneId: string, prompt: string) {
+  let notice: string | undefined;
   try {
     if (!prompt.trim()) throw new GhosthandError("invalid-request", "Provide the user's explicit iPhone instruction.");
     const phone = await resolvePhone(client, phoneId);
     const signal = AbortSignal.timeout(5 * 60_000);
-    const result = await withLease(client, phone, "Run a user-confirmed task from Raycast AI", signal, (lease) =>
-      client.task(lease.id, prompt.trim(), true, signal, () => undefined),
-    );
-    return { status: "completed" as const, phoneId: phone.id, response: result.text, leaseReleased: true };
+    const result = await withLease(client, phone, "Run a user-confirmed task from Raycast AI", signal, (lease) => {
+      notice = lease.notice;
+      return client.task(lease.id, prompt.trim(), true, signal, () => undefined);
+    });
+    return {
+      status: "completed" as const,
+      phoneId: phone.id,
+      response: result.text,
+      leaseReleased: true,
+      ...(notice ? { notice } : {}),
+    };
   } catch (error) {
-    return aiFailure(error);
+    return aiFailure(error, notice);
   }
 }
 
@@ -125,16 +137,24 @@ export function aiQuickAction(input: AiActionInput): QuickAction {
 }
 
 export async function performAiAction(client: GhosthandClient, input: AiActionInput) {
+  let notice: string | undefined;
   try {
     const action = aiQuickAction(input);
     const phone = await resolvePhone(client, input.phoneId);
     const signal = AbortSignal.timeout(330_000);
-    await withLease(client, phone, `Raycast AI quick action: ${input.action}`, signal, (lease) =>
-      client.input(lease.id, action, signal),
-    );
+    await withLease(client, phone, `Raycast AI quick action: ${input.action}`, signal, (lease) => {
+      notice = lease.notice;
+      return client.input(lease.id, action, signal);
+    });
     // Do not echo typed text or return raw daemon logs to the model.
-    return { status: "completed" as const, phoneId: phone.id, action: input.action, leaseReleased: true };
+    return {
+      status: "completed" as const,
+      phoneId: phone.id,
+      action: input.action,
+      leaseReleased: true,
+      ...(notice ? { notice } : {}),
+    };
   } catch (error) {
-    return aiFailure(error);
+    return aiFailure(error, notice);
   }
 }

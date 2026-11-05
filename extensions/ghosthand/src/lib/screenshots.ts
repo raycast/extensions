@@ -1,11 +1,7 @@
-import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
 
 const PREVIEW_PREFIX = "raycast-ghosthand-preview-";
 
@@ -54,18 +50,12 @@ export async function copyScreenshot(data: Buffer): Promise<void> {
   try {
     await writeFile(file, data, { mode: 0o600 });
     // Copy actual image bytes, not a file reference that would outlive the temporary file.
-    await execFileAsync(
-      "/usr/bin/osascript",
-      [
-        "-e",
-        "on run argv",
-        "-e",
-        "set the clipboard to (read (POSIX file (item 1 of argv)) as JPEG picture)",
-        "-e",
-        "end run",
-        file,
-      ],
-      { timeout: 10_000 },
+    const { runAppleScript } = await import("@raycast/utils");
+    await runAppleScript(
+      `on run argv
+        set the clipboard to (read (POSIX file (item 1 of argv)) as JPEG picture)
+      end run`,
+      [file],
     );
   } finally {
     await rm(directory, { recursive: true, force: true });
