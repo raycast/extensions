@@ -10,6 +10,9 @@
     "System"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "switch-space",
@@ -37,7 +40,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0"
+    "@raycast/api": "^2.11.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

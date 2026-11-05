@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, closeMainWindow } from "@raycast/api";
 import { loadSpaces, run } from "./spaces";
 
 export default function Command() {
@@ -8,6 +8,7 @@ export default function Command() {
       {spaces.map((s) => (
         <List.Item
           key={s.id}
+          icon={{ source: Icon.AppWindowGrid2x2, tintColor: s.color ?? Color.SecondaryText }}
           title={s.name}
           subtitle={s.note}
           accessories={s.number ? [{ text: `Desktop ${s.number}` }] : []}

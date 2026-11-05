@@ -1,4 +1,5 @@
-import { open, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { execFile } from "child_process";
 import { readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
@@ -42,10 +43,14 @@ export function loadSpaces(): SpaceEntry[] {
   return [];
 }
 
+// "open -g" hands the link to Spacepal without bringing it to the front, so the window that was in
+// front before Raycast opened stays the front window ("Move Window to Space" moves that one).
 export async function run(command: string) {
   try {
-    await open(`spacepal://${command}`);
+    await new Promise<void>((resolve, reject) =>
+      execFile("/usr/bin/open", ["-g", `spacepal://${command}`], (error) => (error ? reject(error) : resolve())),
+    );
   } catch {
-    await showHUD("Spacepal is not running");
+    await showHUD("Spacepal is not installed");
   }
 }
