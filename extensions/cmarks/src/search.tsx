@@ -1,27 +1,52 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { APP_STORE_URL, GITHUB_URL, isCmarksInstalled, launchCmarks, openInCmarks } from "./app";
-import { abbreviateHome, listMarkdownFiles, loadFilter, loadWorkspaces, MarkdownFile } from "./cmarks";
+import {
+  abbreviateHome,
+  listMarkdownFiles,
+  loadFilter,
+  loadWorkspaces,
+  MarkdownFile,
+  MAX_FILES_PER_WORKSPACE,
+  ScanResult,
+  Workspace,
+} from "./cmarks";
+
+const EMPTY_SCAN: ScanResult = { files: [], truncated: new Set(), unreadableRoots: [], skippedFolders: 0 };
 
 export default function Command() {
   const { data, isLoading } = usePromise(
     async () => {
       const installed = await isCmarksInstalled();
-      if (!installed) return { installed, workspaces: [], files: [] };
+      if (!installed) return { installed, workspaces: [] as Workspace[], scan: EMPTY_SCAN };
       const [workspaces, filter] = await Promise.all([loadWorkspaces(), loadFilter()]);
-      const files = await listMarkdownFiles(workspaces, filter);
-      return { installed, workspaces, files };
+      const scan = await listMarkdownFiles(workspaces, filter);
+      return { installed, workspaces, scan };
     },
     [],
-    { failureToastOptions: { title: "Couldn't read cmarks workspaces" } },
+    {
+      failureToastOptions: { title: "Couldn't read cmarks workspaces" },
+      // 읽지 못한 폴더는 빈 폴더처럼 보이지 않게 알린다(렌더 중이 아니라 데이터가 올 때 한 번).
+      onData: ({ scan }) => {
+        if (scan.skippedFolders > 0) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Some folders couldn't be read",
+            message: `${scan.skippedFolders} folder${scan.skippedFolders === 1 ? "" : "s"} skipped. Check Raycast's Files and Folders permission in System Settings.`,
+          });
+        }
+      },
+    },
   );
 
+  const scan = data?.scan ?? EMPTY_SCAN;
   const byWorkspace = new Map<string, MarkdownFile[]>();
-  for (const file of data?.files ?? []) {
+  for (const file of scan.files) {
     const list = byWorkspace.get(file.workspace.root) ?? [];
     list.push(file);
     byWorkspace.set(file.workspace.root, list);
   }
+  const unreadable = new Set(scan.unreadableRoots.map((w) => w.root));
 
   const notInstalled = data !== undefined && !data.installed;
   const noWorkspaces = !isLoading && !notInstalled && (data?.workspaces.length ?? 0) === 0;
@@ -43,10 +68,21 @@ export default function Command() {
         />
       ) : (
         (data?.workspaces ?? []).map((workspace) => (
-          <List.Section key={workspace.root} title={workspace.name} subtitle={abbreviateHome(workspace.root)}>
-            {(byWorkspace.get(workspace.root) ?? []).map((file) => (
-              <FileItem key={file.path} file={file} />
-            ))}
+          <List.Section
+            key={workspace.root}
+            title={workspace.name}
+            subtitle={
+              abbreviateHome(workspace.root) +
+              (scan.truncated.has(workspace.root)
+                ? ` · first ${MAX_FILES_PER_WORKSPACE.toLocaleString()} files only`
+                : "")
+            }
+          >
+            {unreadable.has(workspace.root) ? (
+              <UnreadableItem workspace={workspace} />
+            ) : (
+              (byWorkspace.get(workspace.root) ?? []).map((file) => <FileItem key={file.path} file={file} />)
+            )}
           </List.Section>
         ))
       )}
@@ -76,6 +112,27 @@ export function FileActions({ path }: { path: string }) {
       <Action.CopyToClipboard title="Copy Path" content={path} shortcut={Keyboard.Shortcut.Common.Copy} />
       <Action.OpenWith path={path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
     </ActionPanel>
+  );
+}
+
+/** 워크스페이스 폴더 자체를 읽지 못했을 때의 한 줄. 빈 폴더와 구분되게 보여 준다. */
+function UnreadableItem({ workspace }: { workspace: Workspace }) {
+  return (
+    <List.Item
+      title="Can't read this folder"
+      subtitle="Missing, or Raycast lacks permission (System Settings ▸ Privacy & Security ▸ Files and Folders)"
+      icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+      actions={
+        <ActionPanel>
+          <Action.ShowInFinder path={workspace.root} />
+          <Action.Open
+            title="Open Files and Folders Settings"
+            target="x-apple.systempreferences:com.apple.preference.security?Privacy_FilesAndFolders"
+            icon={Icon.Gear}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
 

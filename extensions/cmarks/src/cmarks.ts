@@ -35,7 +35,8 @@ const DEFAULT_IGNORED = [
   ".venv",
   "Pods",
 ];
-const MAX_FILES = 8000;
+/** 워크스페이스마다 따로 센다. 한 워크스페이스가 커도 다음 워크스페이스가 통째로 빠지지 않도록. */
+export const MAX_FILES_PER_WORKSPACE = 5000;
 const MAX_DEPTH = 12;
 
 export interface Workspace {
@@ -136,43 +137,75 @@ export async function loadFilter(): Promise<Filter> {
   };
 }
 
-/** 워크스페이스 폴더의 마크다운 파일을 모두 모은다(숨김 폴더·무시 폴더 제외, 심볼릭 링크는 따라가지 않음). */
-export async function listMarkdownFiles(workspaces: Workspace[], filter: Filter): Promise<MarkdownFile[]> {
-  const files: MarkdownFile[] = [];
-  for (const workspace of workspaces) {
-    await walk(workspace.root, 0);
-    if (files.length >= MAX_FILES) break;
+export interface ScanResult {
+  files: MarkdownFile[];
+  /** 파일 수·깊이 한도에 걸려 일부만 모은 워크스페이스의 root */
+  truncated: Set<string>;
+  /** 최상위 폴더 자체를 읽지 못한 워크스페이스(권한 없음·폴더 사라짐). 목록에서 빈 것처럼 보이지 않게 따로 알린다. */
+  unreadableRoots: Workspace[];
+  /** 읽지 못해 건너뛴 하위 폴더 수 */
+  skippedFolders: number;
+}
 
-    async function walk(dir: string, depth: number) {
-      if (depth > MAX_DEPTH || files.length >= MAX_FILES) return;
-      let entries: Dirent[];
-      try {
-        entries = await fs.readdir(dir, { withFileTypes: true });
-      } catch {
-        return;
-      }
-      entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+/** 워크스페이스 폴더의 마크다운 파일을 모두 모은다(숨김 폴더·무시 폴더 제외, 심볼릭 링크는 따라가지 않음).
+ *  한도에 걸리거나 읽지 못한 폴더는 조용히 넘기지 않고 결과에 표시한다. */
+export async function listMarkdownFiles(workspaces: Workspace[], filter: Filter): Promise<ScanResult> {
+  const result: ScanResult = { files: [], truncated: new Set(), unreadableRoots: [], skippedFolders: 0 };
+  for (const workspace of workspaces) {
+    let count = 0;
+    const rootEntries = await readDir(workspace.root);
+    if (rootEntries === null) {
+      result.unreadableRoots.push(workspace);
+      continue;
+    }
+    await walk(workspace.root, rootEntries, 0);
+
+    async function walk(dir: string, entries: Dirent[], depth: number) {
       for (const entry of entries) {
+        if (count >= MAX_FILES_PER_WORKSPACE) {
+          result.truncated.add(workspace.root);
+          return;
+        }
         if (entry.name.startsWith(".")) continue;
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) {
           if (filter.ignored.has(entry.name)) continue; // cmarks와 같이 이름 그대로 비교
-          await walk(full, depth + 1);
+          if (depth + 1 > MAX_DEPTH) {
+            result.truncated.add(workspace.root);
+            continue;
+          }
+          const children = await readDir(full);
+          if (children === null) {
+            result.skippedFolders += 1;
+            continue;
+          }
+          await walk(full, children, depth + 1);
         } else if (entry.isFile()) {
           const ext = path.extname(entry.name).slice(1).toLowerCase();
           if (!filter.extensions.has(ext)) continue;
-          files.push({
+          result.files.push({
             path: full,
             name: entry.name,
             relativeDir: path.relative(workspace.root, dir),
             workspace,
           });
-          if (files.length >= MAX_FILES) return;
+          count += 1;
         }
       }
     }
   }
-  return files;
+  return result;
+}
+
+/** 폴더 항목을 이름순으로. 읽지 못하면(권한·없음) null. */
+async function readDir(dir: string): Promise<Dirent[] | null> {
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+    return entries;
+  } catch {
+    return null;
+  }
 }
 
 /** 최근 파일(앞이 최근). 두 판의 목록을 합치고 없는 파일은 뺀다. */
