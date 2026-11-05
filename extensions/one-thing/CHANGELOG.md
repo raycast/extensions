@@ -1,5 +1,7 @@
 # One Thing Changelog
 
+## [Removed old contributor] - {PR_MERGE_DATE}
+
 ## [Update Credits] - 2025-05-21
 - Added Ek217 as contributor for the One Thing extension
 
