@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Homebrew options] - {PR_MERGE_DATE}
+## [Homebrew options] - 2026-11-05
 
 - Improved: the README explains how to set Homebrew options, such as where casks install, so installs from the extension use them too
 
