@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Fix Google API Requests] - {PR_MERGE_DATE}
+
+- Fixed Gmail requests failing with "r is not a function" by using native fetch for Google API calls
+
 ## [Fix Gmail browser URLs] - 2026-05-19
 
 - Fixed Gmail browser links using an email address in the account selector.

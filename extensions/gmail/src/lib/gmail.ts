@@ -1,4 +1,5 @@
-import { gmail as gmailclient, auth, gmail_v1 } from "@googleapis/gmail";
+import { gmail_v1 } from "@googleapis/gmail";
+import { createGmailClient } from "./google-clients";
 import { authorize, client, OAuthClientId } from "./oauth";
 
 let profile: { data: gmail_v1.Schema$Profile } | undefined;
@@ -7,16 +8,7 @@ export async function getAuthorizedGmailClient() {
   await authorize();
   const t = await client.getTokens();
 
-  const oAuth2Client = new auth.OAuth2(OAuthClientId());
-  oAuth2Client.setCredentials({
-    access_token: t?.accessToken,
-    refresh_token: t?.refreshToken,
-    id_token: t?.idToken,
-    scope: t?.scope,
-    expiry_date: t?.expiresIn,
-  });
-  const gm = gmailclient({ version: "v1", auth: oAuth2Client });
-  return gm;
+  return createGmailClient(OAuthClientId(), t);
 }
 
 export interface GMailMessage {
