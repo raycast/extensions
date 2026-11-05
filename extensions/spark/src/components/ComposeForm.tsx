@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { repeated } from "../lib/args";
-import { addressList } from "../lib/recipients";
+import { Person, addressList } from "../lib/recipients";
 import { sparkJSON } from "../lib/spark";
 import {
   AccountsResult,
@@ -17,7 +17,7 @@ import {
 } from "../lib/types";
 import { agentSettingsAction, heldToast, openInSpark, showSparkFailure } from "../lib/ui";
 import { actionIcon } from "../lib/sparkIcons";
-import { RecipientField, RecipientTags, useFrequentContacts } from "./Recipients";
+import { AddAddressAction, RecipientField, RecipientTags, useFrequentContacts } from "./Recipients";
 import { useSparkErrorHandler } from "./SparkSetup";
 
 export type ComposeMode = "new" | "reply" | "replyAll" | "forward";
@@ -39,6 +39,9 @@ interface Props {
   messageId?: string;
   /// Subject of that message, for the navigation title.
   subject?: string;
+  /// The form is a command's first screen, where Raycast shows the command
+  /// title instead of a navigation title.
+  root?: boolean;
   to?: string;
   draftValues?: Partial<ComposeValues>;
   enableDrafts?: boolean;
@@ -51,13 +54,17 @@ const TITLES: Record<ComposeMode, string> = {
   forward: "Forward",
 };
 
-export default function ComposeForm({ mode = "new", messageId, subject, to, draftValues, enableDrafts }: Props) {
+export default function ComposeForm({ mode = "new", messageId, subject, root, to, draftValues, enableDrafts }: Props) {
   const [template, setTemplate] = useState(draftValues?.template ?? "");
   // Drafts saved before recipients were chips hold them as a string.
   const [toList, setTo] = useState(() => addressList(draftValues?.to ?? to));
   const [ccList, setCc] = useState(() => addressList(draftValues?.cc));
   const [bccList, setBcc] = useState(() => addressList(draftValues?.bcc));
-  const people = useFrequentContacts();
+  const frequent = useFrequentContacts();
+  // Addresses added by hand (Add Address), so their chips keep the name.
+  const [added, setAdded] = useState<Person[]>([]);
+  const people = useMemo(() => [...added, ...frequent], [added, frequent]);
+  const [focused, setFocused] = useState("to");
   const onError = useSparkErrorHandler("Couldn't load your accounts");
   const { data: senders = [], isLoading: loadingAccounts } = useCachedPromise(loadSenders, [], { onError });
   const { data: templates = [], isLoading: loadingTemplates } = useCachedPromise(
@@ -81,7 +88,13 @@ export default function ComposeForm({ mode = "new", messageId, subject, to, draf
           { id: "bcc", title: "Bcc", value: bccList, onChange: setBcc },
         ]
       : []),
-  ];
+  ].map((field) => ({ ...field, onFocus: () => setFocused(field.id) }));
+
+  function addAddresses(fieldId: string, list: Person[]) {
+    setAdded((current) => [...list, ...current]);
+    const set = { to: setTo, cc: setCc, bcc: setBcc }[fieldId];
+    set?.((current) => addressList([...current, ...list.map((person) => person.email)]));
+  }
 
   async function submit(values: ComposeValues & Record<string, unknown>, send: boolean) {
     const recipients = needsRecipients ? toList : [];
@@ -182,7 +195,7 @@ export default function ComposeForm({ mode = "new", messageId, subject, to, draf
 
   return (
     <Form
-      navigationTitle={subject ? `${TITLES[mode]}: ${subject}` : TITLES[mode]}
+      navigationTitle={root ? undefined : subject ? `${TITLES[mode]}: ${subject}` : TITLES[mode]}
       isLoading={loadingAccounts || loadingTemplates}
       enableDrafts={enableDrafts}
       actions={
@@ -201,6 +214,7 @@ export default function ComposeForm({ mode = "new", messageId, subject, to, draf
             }}
             onSubmit={(v: ComposeValues & Record<string, unknown>) => submit(v, false)}
           />
+          <AddAddressAction fields={fields} initial={focused} onAdd={addAddresses} />
         </ActionPanel>
       }
     >
@@ -231,7 +245,14 @@ export default function ComposeForm({ mode = "new", messageId, subject, to, draf
       {fields.map((field) => (
         <RecipientTags key={field.id} field={field} people={people} />
       ))}
-      {mode === "new" && <Form.TextField id="subject" title="Subject" defaultValue={draftValues?.subject} />}
+      {mode === "new" && (
+        <Form.TextField
+          id="subject"
+          title="Subject"
+          placeholder="What's this email about?"
+          defaultValue={draftValues?.subject}
+        />
+      )}
       <Form.TextArea
         id="body"
         title="Message"

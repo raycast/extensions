@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cliDate } from "../lib/args";
 import { createEvent } from "../lib/calendar";
 import { sparkJSON } from "../lib/spark";
+import { Person, addressList } from "../lib/recipients";
 import { AccountsResult } from "../lib/types";
 import { actionIcon } from "../lib/sparkIcons";
-import { RecipientField, RecipientTags, useFrequentContacts } from "./Recipients";
+import { AddAddressAction, RecipientField, RecipientTags, useFrequentContacts } from "./Recipients";
 import { useSparkErrorHandler } from "./SparkSetup";
 
 interface Props {
@@ -28,7 +29,10 @@ interface Values {
 
 export default function EventForm({ start, end, attendees }: Props) {
   const [attendeeList, setAttendees] = useState(attendees ?? []);
-  const people = useFrequentContacts();
+  const frequent = useFrequentContacts();
+  // Addresses added by hand (Add Address), so their chips keep the name.
+  const [added, setAdded] = useState<Person[]>([]);
+  const people = useMemo(() => [...added, ...frequent], [added, frequent]);
   const field: RecipientField = { id: "attendees", title: "Attendees", value: attendeeList, onChange: setAttendees };
   // Creating an event needs Send access on the calendar's account.
   const onError = useSparkErrorHandler("Couldn't load your calendars");
@@ -70,6 +74,13 @@ export default function EventForm({ start, end, attendees }: Props) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Event" icon={actionIcon("AddNewEvent")} onSubmit={submit} />
+          <AddAddressAction
+            fields={[field]}
+            onAdd={(_, list) => {
+              setAdded((current) => [...list, ...current]);
+              setAttendees((current) => addressList([...current, ...list.map((person) => person.email)]));
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -91,8 +102,8 @@ export default function EventForm({ start, end, attendees }: Props) {
         <Form.Dropdown.Item value="zoom" title="Zoom" />
         <Form.Dropdown.Item value="teams" title="Microsoft Teams" />
       </Form.Dropdown>
-      <Form.TextField id="location" title="Location" />
-      <Form.TextArea id="description" title="Notes" />
+      <Form.TextField id="location" title="Location" placeholder="Room, address, or link" />
+      <Form.TextArea id="description" title="Notes" placeholder="Agenda or details for attendees" />
     </Form>
   );
 }

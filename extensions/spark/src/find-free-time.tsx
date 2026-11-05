@@ -31,16 +31,15 @@ function Command(props: LaunchProps<{ arguments: Arguments.FindFreeTime }>) {
   const range = RANGES.find((r) => r.id === rangeId) ?? RANGES[2];
   const { emails: attendees, partial } = parseAttendees(attendeesText);
 
-  // The word being typed is looked up in contacts, like a composer's To field.
+  // The word being typed is looked up in contacts. People already added are
+  // left out here, not in the lookup, so removing one brings them back.
   const { data: suggestions = [], isLoading: searching } = useCachedPromise(
-    async (query: string) =>
-      (await sparkJSON<ContactsResult>(["contacts", positional(query)])).contacts.filter(
-        (c) => !attendees.includes(c.email.toLowerCase()),
-      ),
+    async (query: string) => (await sparkJSON<ContactsResult>(["contacts", positional(query)])).contacts,
     [partial],
     { execute: partial.length >= 2, keepPreviousData: true, onError: () => undefined },
   );
-  const shownSuggestions = partial.length >= 2 ? suggestions.slice(0, 8) : [];
+  const shownSuggestions =
+    partial.length >= 2 ? suggestions.filter((c) => !attendees.includes(c.email.toLowerCase())).slice(0, 8) : [];
 
   // Each answer carries the question it answers. While a new one loads, the
   // list keeps the last answer - your own slots, say, after adding someone -
@@ -84,7 +83,6 @@ function Command(props: LaunchProps<{ arguments: Arguments.FindFreeTime }>) {
       onSearchTextChange={setAttendeesText}
       throttle
       searchBarPlaceholder="Add attendees by name or email — empty for just you"
-      navigationTitle={attendees.length ? `Free with ${attendees.join(", ")}` : "Your free time"}
       searchBarAccessory={
         <List.Dropdown tooltip="Range" value={range.id} onChange={setRangeId}>
           {RANGES.map((r) => (

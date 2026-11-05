@@ -35,7 +35,6 @@ function Command() {
     <EmailList
       cached
       args={args}
-      navigationTitle={`Spark — ${view.title}`}
       isInvitation={view.id === "invitations"}
       isNewSender={view.newSenders}
       emptyTitle={view.id === "inbox" ? "Inbox zero 🎉" : `No ${view.title.toLowerCase()} emails`}

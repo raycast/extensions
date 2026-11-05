@@ -41,7 +41,11 @@ export default function EmailList({
   header,
   cached = false,
 }: Props) {
-  const [removed, setRemoved] = useState<Set<string>>(new Set());
+  // Emails acted on (archived, accepted, ...) leave the list at once, for
+  // this list only: another view, say the Inbox after New Senders, starts with
+  // none hidden.
+  const view = args.join("\n");
+  const [removed, setRemoved] = useState({ view, ids: new Set<string>() });
 
   // `cached` is fixed for a list's lifetime, so the same hook runs on every
   // render.
@@ -62,8 +66,12 @@ export default function EmailList({
     { onError: () => undefined, ...(cached && { keepPreviousData: true }) },
   );
 
-  const emails = (data ?? []).filter((email) => !removed.has(String(email.id)));
-  const remove = useCallback((id: string) => setRemoved((current) => new Set(current).add(id)), []);
+  const hidden = removed.view === view ? removed.ids : undefined;
+  const emails = (data ?? []).filter((email) => !hidden?.has(String(email.id)));
+  const remove = useCallback(
+    (id: string) => setRemoved((current) => ({ view, ids: new Set(current.view === view ? current.ids : []).add(id) })),
+    [view],
+  );
   const { contacts, refresh } = useContacts(emails.map((email) => email.from[0]?.email ?? ""));
   const colors = useAccountColors();
   // Rows are memoized, so the callbacks they get must keep their identity.

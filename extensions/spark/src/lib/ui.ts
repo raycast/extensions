@@ -1,4 +1,5 @@
-import { Application, open, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
+import { Application, Keyboard, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 import { ActionResult, ContactActionResult, ThreadResult, actionOutcome, appLink, HeldReply, isHeld } from "./types";
 import { realpathSync } from "node:fs";
@@ -6,6 +7,13 @@ import { installedSparkApps, runningSparkApp, setupStep } from "./setup";
 import { SparkError, sparkJSON, sparkPath } from "./spark";
 
 export const DOWNLOAD_URL = "https://sparkmailapp.com/download";
+
+/// ⌘ on Mac and Ctrl on Windows, plus `key`. For actions whose Spark shortcut
+/// matches one of Raycast's common shortcuts (⌘R, ⌘E, ⌘D) but means something
+/// else, so the common one doesn't fit.
+export function cmdShortcut(key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
+  return { macOS: { modifiers: ["cmd"], key }, Windows: { modifiers: ["ctrl"], key } };
+}
 
 /// Spark Desktop's link to Settings → AI Agents, where the access levels are.
 const AGENT_SETTINGS_URL = "com.readdle.spark.utm.email.desktop://sparkmailapp.com/dpl/ai-agents";
@@ -137,21 +145,23 @@ export async function runEmailAction(
   }
 }
 
+/// Runs `spark contact-action` with a progress toast, so Raycast stays open
+/// for the next change. Resolves true when every contact was updated.
 export async function runContactAction(action: string, emails: string[], success: string): Promise<boolean> {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Updating Spark…" });
   try {
     const result = await sparkJSON<ContactActionResult>(["contact-action", action, ...emails]);
     const failed = result.contacts.filter((c) => c.status !== "done");
     if (failed.length) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't update contact",
-        message: failed.map((c) => c.email).join(", "),
-      });
+      await toast.hide();
+      await showFailureToast(new Error(failed.map((c) => c.email).join(", ")), { title: "Couldn't update contact" });
       return false;
     }
-    await showHUD(success);
+    toast.style = Toast.Style.Success;
+    toast.title = success;
     return true;
   } catch (error) {
+    await toast.hide();
     await showSparkFailure(error, "Couldn't update contact");
     return false;
   }

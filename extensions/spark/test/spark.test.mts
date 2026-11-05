@@ -462,6 +462,20 @@ test("recipients: labels carry the address", async () => {
   assert.equal(personLabel({ email: "a@b.co" }), "a@b.co");
 });
 
+test("recipients: Add Address takes addresses with or without a name", async () => {
+  const { parseAddresses } = await import("../src/lib/recipients.ts");
+  assert.deepEqual(parseAddresses(' new@co.com; "Anna Doe" <anna@co.com>, Bob <bob@co.com>\n'), {
+    people: [
+      { email: "new@co.com", name: undefined },
+      { email: "anna@co.com", name: "Anna Doe" },
+      { email: "bob@co.com", name: "Bob" },
+    ],
+    invalid: [],
+  });
+  assert.deepEqual(parseAddresses("anna, bob@co, Bob <bob>").invalid, ["anna", "bob@co", "Bob <bob>"]);
+  assert.deepEqual(parseAddresses("  ").people, []);
+});
+
 test("setup card: wraps the intro and lists the steps", async () => {
   const { setupCardSVG, wrap } = await import("../src/lib/setupCard.ts");
   assert.deepEqual(wrap("one two three", 60, 15), ["one two", "three"]);

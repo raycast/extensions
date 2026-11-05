@@ -4,7 +4,7 @@ import { cliDate } from "../lib/args";
 import { SPARK_APP_ICON, actionIcon, sparkIcon } from "../lib/sparkIcons";
 import { rsvp } from "../lib/calendar";
 import { ContactResult, EmailFlag } from "../lib/types";
-import { openThreadInSpark, runContactAction, runEmailAction, snoozePresets } from "../lib/ui";
+import { cmdShortcut, openThreadInSpark, runContactAction, runEmailAction, snoozePresets } from "../lib/ui";
 import ComposeForm from "./ComposeForm";
 import ContactActions from "./ContactActions";
 import ContactView from "./ContactView";
@@ -61,7 +61,7 @@ export default function EmailActions({
           <Action.Push
             title="Open Thread"
             icon={actionIcon("Envelope")}
-            target={<ThreadView messageId={email.id} onRemoved={onRemoved} />}
+            target={<ThreadView messageId={email.id} onRemoved={onRemoved} onChanged={onChanged} />}
           />
         )}
         <Action
@@ -125,7 +125,7 @@ export default function EmailActions({
         <Action.Push
           title="Reply"
           icon={actionIcon("Reply")}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
+          shortcut={cmdShortcut("r")}
           target={<ComposeForm mode="reply" messageId={email.id} subject={email.subject} />}
         />
         <Action.Push
@@ -152,7 +152,7 @@ export default function EmailActions({
         <Action
           title="Archive"
           icon={actionIcon("SystemFolderArchive")}
-          shortcut={Keyboard.Shortcut.Common.Edit}
+          shortcut={cmdShortcut("e")}
           onAction={() => act("archive", "Archived", true)}
         />
         <Action
@@ -175,10 +175,11 @@ export default function EmailActions({
             act(unread ? "markAsSeen" : "markAsUnseen", unread ? "Marked as read" : "Marked as unread", false)
           }
         />
-        <ActionPanel.Submenu title="Snooze" icon={actionIcon("Snooze")} shortcut={Keyboard.Shortcut.Common.Duplicate}>
+        <ActionPanel.Submenu title="Snooze" icon={actionIcon("Snooze")} shortcut={cmdShortcut("d")}>
           {snoozePresets().map((preset) => (
             <Action
               key={preset.title}
+              icon={actionIcon("Clock")}
               title={`${preset.title} (${preset.date.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" })})`}
               onAction={() =>
                 act("snooze", `Snoozed until ${preset.date.toLocaleString()}`, true, { date: cliDate(preset.date) })

@@ -123,9 +123,14 @@ export default function ContactActions({ email, contact, onChanged, title = "Con
           />
         ) : (
           <ActionPanel.Submenu title="Group Emails" icon={actionIcon("GroupEmails")}>
-            <Action title="By Category" onAction={() => run("groupEmailsFromContact", "Emails grouped by category")} />
+            <Action
+              title="By Category"
+              icon={actionIcon("GroupEmails")}
+              onAction={() => run("groupEmailsFromContact", "Emails grouped by category")}
+            />
             <Action
               title="In Inbox"
+              icon={actionIcon("SystemFolderInbox")}
               onAction={() => run("groupEmailsFromContactAndShowInInbox", "Emails grouped in Inbox")}
             />
           </ActionPanel.Submenu>

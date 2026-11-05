@@ -3,7 +3,7 @@ import ComposeForm, { ComposeValues } from "./components/ComposeForm";
 import { withSparkCLI } from "./components/SparkSetup";
 
 function Command(props: LaunchProps<{ draftValues: ComposeValues }>) {
-  return <ComposeForm enableDrafts draftValues={props.draftValues} />;
+  return <ComposeForm root enableDrafts draftValues={props.draftValues} />;
 }
 
 export default withSparkCLI(Command);

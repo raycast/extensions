@@ -11,7 +11,7 @@ import { avatarIcon, contactFor, useContacts } from "./lib/contacts";
 import { sparkJSON } from "./lib/spark";
 import { ContactResult, ContactsResult } from "./lib/types";
 import { actionIcon, sparkIcon } from "./lib/sparkIcons";
-import { useRefreshNotice } from "./lib/ui";
+import { cmdShortcut, useRefreshNotice } from "./lib/ui";
 import { withSparkCLI } from "./components/SparkSetup";
 
 function Command() {
@@ -67,7 +67,7 @@ function Command() {
                   <Action.Push
                     title="Show Emails"
                     icon={actionIcon("SystemFolderInbox")}
-                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    shortcut={cmdShortcut("e")}
                     target={
                       <EmailList
                         args={["search", "--filter", `from:${result.email}`]}

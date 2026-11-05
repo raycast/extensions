@@ -1,8 +1,12 @@
 // Recipients in the composer and the event form. Raycast forms have no text
 // field that autocompletes, so recipients are chips (a tag picker) over the
-// contacts the form knows: Spark's 1000 most-used ones and anyone filled in.
+// contacts the form knows: Spark's 1000 most-used ones, anyone filled in, and
+// anyone added by hand with Add Address, since a tag picker can't take a
+// typed value.
 //
 // No Raycast imports here: this file runs under `node --test` as-is.
+
+import { EMAIL } from "./attendees.ts";
 
 export interface Person {
   email: string;
@@ -43,4 +47,22 @@ export function addressList(value: string | string[] | undefined): string[] {
   return items
     .map((item) => item.trim())
     .filter((item) => item && !seen.has(item.toLowerCase()) && seen.add(item.toLowerCase()));
+}
+
+/// What was typed into Add Address: one or more entries separated by commas
+/// or semicolons, each an address or "Name <address>". Entries without a valid
+/// address come back in `invalid`, for the form to point out.
+export function parseAddresses(text: string): { people: Person[]; invalid: string[] } {
+  const people: Person[] = [];
+  const invalid: string[] = [];
+  for (const raw of text.split(/[,;\n]/)) {
+    const entry = raw.trim();
+    if (!entry) continue;
+    const named = entry.match(/^(.*?)\s*<([^<>]*)>$/);
+    const email = (named ? named[2] : entry).trim();
+    const name = named?.[1].replace(/^"|"$/g, "").trim() || undefined;
+    if (EMAIL.test(email)) people.push({ email, name });
+    else invalid.push(entry);
+  }
+  return { people, invalid };
 }

@@ -13,15 +13,21 @@ import { actionIcon } from "../lib/sparkIcons";
 interface Props {
   messageId: string;
   onRemoved?: (id: string) => void;
+  /// The email's flags changed (read, pinned): the list behind may refresh.
+  onChanged?: () => void;
 }
 
 export function loadThread(id: string): Promise<ThreadResult> {
   return sparkJSON<ThreadResult>(["thread", id]);
 }
 
-export default function ThreadView({ messageId, onRemoved }: Props) {
+export default function ThreadView({ messageId, onRemoved, onChanged }: Props) {
   const { pop } = useNavigation();
-  const { data: thread, isLoading } = usePromise(loadThread, [messageId], {
+  const {
+    data: thread,
+    isLoading,
+    revalidate,
+  } = usePromise(loadThread, [messageId], {
     onError: (error) => showSparkFailure(error, "Couldn't load thread"),
   });
 
@@ -55,6 +61,10 @@ export default function ThreadView({ messageId, onRemoved }: Props) {
             onRemoved={() => {
               onRemoved?.(messageId);
               pop();
+            }}
+            onChanged={() => {
+              revalidate();
+              onChanged?.();
             }}
             extra={
               <>
@@ -93,6 +103,7 @@ function AttachmentActions({ messages }: { messages: ThreadMessage[] }) {
       {attachments.map((a) => (
         <Action
           key={a.id}
+          icon={actionIcon("Attachment")}
           title={`${a.name} (${formatBytes(a.size)})`}
           onAction={async () => {
             try {

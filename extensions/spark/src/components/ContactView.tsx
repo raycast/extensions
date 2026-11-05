@@ -6,7 +6,7 @@ import { CachedContact, fetchContact } from "../lib/contacts";
 import { imageFile } from "../lib/files";
 import { heading } from "../lib/markdown";
 import { ContactResult } from "../lib/types";
-import { showSparkFailure } from "../lib/ui";
+import { cmdShortcut, showSparkFailure } from "../lib/ui";
 import ComposeForm from "./ComposeForm";
 import ContactActions from "./ContactActions";
 import EmailList from "./EmailList";
@@ -49,7 +49,7 @@ export default function ContactView({ email, onChanged }: { email: string; onCha
             <Action.Push
               title="Show Emails"
               icon={actionIcon("SystemFolderInbox")}
-              shortcut={Keyboard.Shortcut.Common.Edit}
+              shortcut={cmdShortcut("e")}
               target={
                 <EmailList
                   args={["search", "--filter", `from:${email}`]}

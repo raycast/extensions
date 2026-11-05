@@ -125,7 +125,6 @@ const CARDS: Record<SetupStep, Card> = {
 function SetupView({ step, onContinue }: { step: SetupStep; onContinue: () => void }) {
   return (
     <Detail
-      navigationTitle="Set Up Spark"
       markdown={setupCard(step)}
       actions={
         <ActionPanel>
