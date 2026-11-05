@@ -35,4 +35,4 @@ A finished or failed session keeps its mark until you open it. A program that ne
 ## Preferences
 
 - **Rex CLI Path** (optional): by default Rexcast looks for `rex` where the Rex app installs it.
-- **Show Notifications** (Session Activity command, on by default): the message shown for about 6 seconds when a session needs your input, finishes or fails. Turn it off if you only want the menu bar item, for example because Rex already notifies you.
+- **Show Notifications** (Session Activity command, off by default): a message shown when a session needs your input, finishes or fails. It is off by default because showing it closes the Raycast window if it is open, and Rex already sends its own notifications. **Notification Length** sets how long it stays up (2 or 6 seconds).

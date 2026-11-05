@@ -85,7 +85,12 @@ async function sessionActivity(
     const reading = readings[i];
     // A failed read is not "idle": keep the previous state instead of guessing.
     if (!reading) {
-      if (prevStore[key]) store[key] = prevStore[key];
+      // ...and the session still shows what that pane was last doing, so a blocked pane is not hidden.
+      const last = prevStore[key];
+      if (last) {
+        store[key] = last;
+        statuses.push({ status: statusOf(last), detail: "" });
+      }
       return;
     }
     const { stored, event } = step(prevStore[key], reading);

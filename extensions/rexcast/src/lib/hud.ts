@@ -16,8 +16,11 @@ export async function holdHUD(
   }
 }
 
-/** On unless explicitly turned off: Raycast can hand back an empty preference before the user touches it. */
-export const notificationsEnabled = (prefs: { notifications?: boolean }) => prefs.notifications !== false;
+/**
+ * Off unless the user turns it on: showing a HUD closes the Raycast window if it is open, so it should
+ * not surprise anyone who has not asked for it. Raycast can also hand back an empty preference.
+ */
+export const notificationsEnabled = (prefs: { notifications?: boolean }) => prefs.notifications === true;
 
 /** How long the notice stays up, from the dropdown preference ("2" or "6" seconds). */
 export function noticeSeconds(prefs: { noticeDuration?: string }): number {

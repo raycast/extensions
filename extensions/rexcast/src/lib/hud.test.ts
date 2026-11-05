@@ -29,9 +29,9 @@ describe("holdHUD", () => {
 });
 
 describe("notificationsEnabled", () => {
-  it("is on by default, even when the preference has no value yet", () => {
-    expect(notificationsEnabled({})).toBe(true);
-    expect(notificationsEnabled({ notifications: undefined })).toBe(true);
+  it("is off until the user turns it on: the message closes the Raycast window if it is open", () => {
+    expect(notificationsEnabled({})).toBe(false);
+    expect(notificationsEnabled({ notifications: undefined })).toBe(false);
   });
   it("follows the checkbox", () => {
     expect(notificationsEnabled({ notifications: true })).toBe(true);

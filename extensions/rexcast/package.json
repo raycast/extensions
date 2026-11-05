@@ -64,8 +64,8 @@
           "required": false,
           "title": "Notifications",
           "label": "Show Notifications",
-          "description": "Show a message when a session needs your input, finishes or fails. The menu bar item updates either way. The message closes the Raycast window if it is open.",
-          "default": true
+          "description": "Show a message when a session needs your input, finishes or fails. Off by default because the message closes the Raycast window if it is open. The menu bar item updates either way.",
+          "default": false
         },
         {
           "name": "noticeDuration",
