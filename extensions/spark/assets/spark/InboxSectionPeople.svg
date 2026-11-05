@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <g stroke="currentColor" stroke-width="1">
+        <path
+                stroke-linecap="round"
+                d="M12.5 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                clip-rule="evenodd"
+        />
+        <path
+                d="M8.425 17c-1.358 0 .68-3 4.075-3 3.396 0 5.433 3 4.075 3"
+        />
+    </g>
+</svg>
