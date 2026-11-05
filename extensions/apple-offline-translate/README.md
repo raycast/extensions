@@ -8,7 +8,7 @@ Translate selected, pasted, or typed text on your Mac using Apple's on-device Tr
 | --- | --- |
 | Apple Silicon Mac — M1 or later — running **macOS 26.4 or later** | Yes, when the required Apple language models are available and installed |
 | Apple Silicon Mac running macOS 26.3 or earlier | No — this extension uses Translation APIs introduced in macOS 26.4 |
-| Intel Mac, including Intel Macs with a recent macOS release | No — the included native helpers are built for Apple Silicon (`arm64`) |
+| Intel Mac, including Intel Macs with a recent macOS release | No — this extension requires Apple Silicon |
 | Windows or Linux | No |
 
 This includes compatible Apple Silicon MacBook Air, MacBook Pro, iMac, Mac mini, Mac Studio, and Mac Pro models. Both the processor and macOS version must meet the requirements. You can check them in **Apple menu → About This Mac**.
@@ -59,38 +59,9 @@ The limit is **20,000 UTF-16 code units per translation**; some emoji count as m
 
 ## Privacy
 
-There is no external translation API, analytics, or translation history in this extension. Source text and results are passed to the bundled native helper through standard input and output, not shell arguments or temporary text files. Only the selected language and mode are remembered locally. Copying uses the system clipboard and its normal history settings.
+There is no external translation API, analytics, or translation history in this extension. Source text and results are passed to the native helper built by Raycast through standard input and output, not shell arguments or temporary text files. Only the selected language and mode are remembered locally. Copying uses the system clipboard and its normal history settings.
 
 Apple's Translation framework controls model selection. This extension uses the installed-model session initializer and refuses a session that can request downloads.
-
-## Development and native helpers
-
-The small native helpers and their complete Swift sources are included. No Xcode installation is required to use the extension.
-
-```sh
-npm ci
-npm run dev
-```
-
-For a distribution build and checks:
-
-```sh
-npm run build
-npm run lint
-npm test
-```
-
-To rebuild the native helpers, use an Apple Silicon Mac with an SDK that includes the macOS 26.4 Translation APIs and Xcode Command Line Tools:
-
-```sh
-npm run build:native
-npm run test:engine
-npm run test:native
-```
-
-`scripts/build-native.mjs` compiles `native/Engine.swift` with the CLI and optional window entry points for `arm64-apple-macos26.4`, then applies an ad hoc signature. The build uses Apple's system frameworks and does not fetch third-party binaries. See `native/BUILD.md` for the exact build and integrity details.
-
-The native smoke test denies network access to the helper process. Apple's translation service runs separately, so this test alone is not a system-wide network-isolation test.
 
 ## Apple documentation
 

@@ -9,15 +9,15 @@ import {
   Icon,
   Keyboard,
   LocalStorage,
-  showToast,
-  Toast,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { setTimeout as delay } from "node:timers/promises";
+import { showFailureToast, useLocalStorage, usePromise } from "@raycast/utils";
 import { callNative } from "./native";
-import { translationDocument } from "./preview";
+import { encodeLegacySetting } from "./settings-value";
 import { openTranslationWindow } from "./launch-window";
-import { inputError, Language, SourceText, Translation } from "./protocol";
+import { inputError, Language, SourceText } from "./protocol";
 
 function plainMarkdown(text: string) {
   // A fenced block displays source text literally; links and images cannot load remotely.
@@ -30,114 +30,155 @@ function plainMarkdown(text: string) {
   return `${fence}\n${text}\n${fence}`;
 }
 
-export default function Translator() {
-  const [input, setInput] = useState<SourceText>({ text: "" });
-  const [mode, setMode] = useState("paired");
-  const [source, setSource] = useState("auto");
-  const [target, setTarget] = useState("ru");
-  const [languages, setLanguages] = useState<Language[]>([]);
-  const [ready, setReady] = useState(false);
-  const [setupError, setSetupError] = useState("");
-  const [attempt, setAttempt] = useState(0);
-  const [completed, setCompleted] = useState<{
-    key: string;
-    result?: Translation;
-    error?: string;
-  }>();
-  const { push } = useNavigation();
-  const key = JSON.stringify([input, mode, source, target, attempt]);
-  const current = completed?.key === key ? completed : undefined;
-  const result = current?.result;
-  const translation = result?.text ?? "";
-  const rich =
-    result && translation === result.text && result.html
-      ? { text: translation, html: result.html }
-      : translation;
-  const error = setupError || inputError(input.text) || current?.error;
-  const busy = !error && (!ready || (!!input.text.trim() && !current));
-
-  useEffect(() => {
-    const controller = new AbortController();
-    async function initialize() {
-      try {
-        const [reply, savedMode, savedSource, savedTarget, selected] =
-          await Promise.all([
-            callNative({ operation: "languages" }, controller.signal),
-            LocalStorage.getItem<string>("mode"),
-            LocalStorage.getItem<string>("source"),
-            LocalStorage.getItem<string>("target"),
-            getSelectedText().catch(() => ""),
-          ]);
-        if (controller.signal.aborted) return;
-        if (!("languages" in reply))
-          throw new Error("Could not load translation languages.");
-        setLanguages(reply.languages);
-        setMode(savedMode === "manual" ? "manual" : "paired");
-        setSource(
-          savedSource && reply.languages.some((item) => item.id === savedSource)
-            ? savedSource
-            : "auto",
-        );
-        setTarget(
-          savedTarget && reply.languages.some((item) => item.id === savedTarget)
-            ? savedTarget
-            : "ru",
-        );
-        setInput((existing) => (existing.text ? existing : { text: selected }));
-        setReady(true);
-      } catch (error) {
-        if (!controller.signal.aborted)
-          setSetupError(
-            error instanceof Error
-              ? error.message
-              : "Apple Translate is unavailable.",
-          );
+export default function Command() {
+  const migration = usePromise(
+    async () => {
+      for (const key of ["mode", "source", "target"]) {
+        const value = await LocalStorage.getItem<string>(key);
+        if (typeof value === "string") {
+          const encoded = encodeLegacySetting(value);
+          if (encoded !== value) await LocalStorage.setItem(key, encoded);
+        }
       }
-    }
-    void initialize();
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !input.text.trim() || inputError(input.text)) return;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      try {
-        const reply = await callNative(
-          {
-            operation: "translate",
-            ...input,
-            source,
-            target,
-            paired: mode === "paired",
-          },
-          controller.signal,
-        );
-        if (!("sourceLanguage" in reply) || !("targetLanguage" in reply))
-          throw new Error("The translation response was incomplete.");
-        if (!controller.signal.aborted) setCompleted({ key, result: reply });
-      } catch (error) {
-        if (!controller.signal.aborted)
-          setCompleted({
-            key,
-            error:
-              error instanceof Error ? error.message : "Translation failed.",
-          });
-      }
-    }, 400);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [key, ready, input, mode, source, target]);
-
-  function remember(name: string, value: string) {
-    void LocalStorage.setItem(name, value).catch(() =>
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Save Language",
-      }),
+      return true;
+    },
+    [],
+    { failureToastOptions: { title: "Could Not Load Saved Languages" } },
+  );
+  if (!migration.data)
+    return (
+      <Detail
+        isLoading={migration.isLoading}
+        markdown={migration.error ? plainMarkdown(migration.error.message) : ""}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              icon={Icon.ArrowClockwise}
+              onAction={migration.revalidate}
+            />
+          </ActionPanel>
+        }
+      />
     );
+  return <Translator />;
+}
+
+function Translator() {
+  const [input, setInput] = useState<SourceText>({ text: "" });
+  const {
+    value: mode = "paired",
+    setValue: setMode,
+    isLoading: modeLoading,
+  } = useLocalStorage<string>("mode", "paired");
+  const {
+    value: source = "auto",
+    setValue: setSource,
+    isLoading: sourceLoading,
+  } = useLocalStorage<string>("source", "auto");
+  const {
+    value: target = "ru",
+    setValue: setTarget,
+    isLoading: targetLoading,
+  } = useLocalStorage<string>("target", "ru");
+  const { push } = useNavigation();
+  const startupAbort = useRef<AbortController | null>(null);
+  const translationAbort = useRef<AbortController | null>(null);
+  const previewAbort = useRef<AbortController | null>(null);
+  const startup = usePromise(
+    async () => {
+      const [reply, selected] = await Promise.all([
+        callNative({ operation: "languages" }, startupAbort.current?.signal),
+        getSelectedText().catch(() => ""),
+      ]);
+      if (!("languages" in reply))
+        throw new Error("Could not load translation languages.");
+      return { languages: reply.languages, selected };
+    },
+    [],
+    {
+      abortable: startupAbort,
+      onData: (data) =>
+        setInput((previous) =>
+          previous.text ? previous : { text: data.selected },
+        ),
+      failureToastOptions: { title: "Could Not Initialize Apple Translate" },
+    },
+  );
+  const languages: Language[] = startup.data?.languages ?? [];
+  const ready =
+    !!startup.data && !modeLoading && !sourceLoading && !targetLoading;
+  const key = JSON.stringify([input, mode, source, target]);
+  const translated = usePromise(
+    async (
+      payload: SourceText,
+      direction: string,
+      from: string,
+      to: string,
+      requestKey: string,
+    ) => {
+      const signal = translationAbort.current?.signal;
+      await delay(400, undefined, { signal });
+      const reply = await callNative(
+        {
+          operation: "translate",
+          ...payload,
+          source: from,
+          target: to,
+          paired: direction === "paired",
+        },
+        signal,
+      );
+      if (!("sourceLanguage" in reply) || !("targetLanguage" in reply))
+        throw new Error("The translation response was incomplete.");
+      return { key: requestKey, result: reply };
+    },
+    [input, mode, source, target, key],
+    {
+      execute: ready && !!input.text.trim() && !inputError(input.text),
+      abortable: translationAbort,
+      failureToastOptions: { title: "Could Not Translate Text" },
+    },
+  );
+  const result =
+    translated.data?.key === key && !translated.error && !translated.isLoading
+      ? translated.data.result
+      : undefined;
+  const translation = result?.text ?? "";
+  const rich = result?.html
+    ? { text: translation, html: result.html }
+    : translation;
+  const error =
+    startup.error?.message ||
+    inputError(input.text) ||
+    translated.error?.message;
+  const busy =
+    !startup.error &&
+    (startup.isLoading ||
+      !ready ||
+      (ready &&
+        !!input.text.trim() &&
+        !inputError(input.text) &&
+        translated.isLoading));
+
+  async function chooseDirection(value: string) {
+    try {
+      if (value === "paired") await setMode("paired");
+      else
+        await Promise.all([
+          setMode("manual"),
+          setSource("auto"),
+          setTarget(value),
+        ]);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could Not Save Language" });
+    }
+  }
+
+  async function retry() {
+    if (!startup.data || startup.error) await startup.revalidate();
+    else if (preview.error) await preview.revalidate();
+    else if (input.text.trim()) await translated.revalidate();
   }
   function name(id: string) {
     return languages.find((language) => language.id === id)?.name ?? id;
@@ -148,24 +189,24 @@ export default function Translator() {
       if (!("text" in reply)) throw new Error("Could not read the clipboard.");
       setInput({ text: reply.text, rtf: reply.rtf });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Clipboard Unavailable",
-        message: error instanceof Error ? error.message : undefined,
-      });
+      await showFailureToast(error, { title: "Clipboard Unavailable" });
     }
   }
-  function swap() {
+  async function swap() {
     if (!result) return;
     setInput({
       text: translation,
       rtf: translation === result.text ? result.rtf : undefined,
     });
     if (mode === "manual") {
-      setSource(result.targetLanguage);
-      setTarget(result.sourceLanguage);
-      remember("source", result.targetLanguage);
-      remember("target", result.sourceLanguage);
+      try {
+        await Promise.all([
+          setSource(result.targetLanguage),
+          setTarget(result.sourceLanguage),
+        ]);
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Save Language" });
+      }
     }
   }
   const actions = (
@@ -210,7 +251,8 @@ export default function Translator() {
             title="Swap Languages"
             icon={Icon.Switch}
             onAction={swap}
-            shortcut={Keyboard.Shortcut.Common.Save}
+            // eslint-disable-next-line @raycast/prefer-common-shortcut -- Swapping languages is not a Save action.
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
         </ActionPanel.Section>
       )}
@@ -247,23 +289,13 @@ export default function Translator() {
         >
           <Action
             title="Russian ↔ English"
-            onAction={() => {
-              setMode("paired");
-              remember("mode", "paired");
-            }}
+            onAction={() => chooseDirection("paired")}
           />
           {languages.map((language) => (
             <Action
               key={language.id}
               title={language.name}
-              onAction={() => {
-                setMode("manual");
-                setSource("auto");
-                setTarget(language.id);
-                remember("mode", "manual");
-                remember("source", "auto");
-                remember("target", language.id);
-              }}
+              onAction={() => chooseDirection(language.id)}
             />
           ))}
         </ActionPanel.Submenu>
@@ -285,18 +317,15 @@ export default function Translator() {
           onAction={async () => {
             try {
               setInput({ text: await getSelectedText() });
-            } catch {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "No Selected Text",
-              });
+            } catch (error) {
+              await showFailureToast(error, { title: "No Selected Text" });
             }
           }}
         />
         <Action
           title="Retry Translation"
           icon={Icon.ArrowClockwise}
-          onAction={() => setAttempt((value) => value + 1)}
+          onAction={retry}
           shortcut={Keyboard.Shortcut.Common.Refresh}
         />
         <Action
@@ -310,17 +339,73 @@ export default function Translator() {
       </ActionPanel.Section>
     </ActionPanel>
   );
-  const document = translationDocument(
-    input.text || "Paste text: ⌘V\nOr enter text: ⌘E",
+  const displaySource = input.text || "Paste text: ⌘V\nOr enter text: ⌘E";
+  const displayTranslation =
     error ||
-      translation ||
-      (busy ? "Translating on Your Mac…" : "Your translation will appear here"),
-    result ? `SOURCE · ${name(result.sourceLanguage)}` : "SOURCE",
-    result ? `TRANSLATION · ${name(result.targetLanguage)}` : "TRANSLATION",
-    environment.theme === "dark",
+    translation ||
+    (busy ? "Translating on Your Mac…" : "Your translation will appear here");
+  const sourceLabel = result
+    ? `SOURCE · ${name(result.sourceLanguage)}`
+    : "SOURCE";
+  const targetLabel = result
+    ? `TRANSLATION · ${name(result.targetLanguage)}`
+    : "TRANSLATION";
+  const dark = environment.appearance === "dark";
+  const displayKey = JSON.stringify([
+    displaySource,
+    displayTranslation,
+    sourceLabel,
+    targetLabel,
+    dark,
+  ]);
+  const preview = usePromise(
+    async (
+      text: string,
+      translation: string,
+      sourceLabel: string,
+      targetLabel: string,
+      dark: boolean,
+      key: string,
+    ) => {
+      const reply = await callNative(
+        {
+          operation: "preview",
+          text,
+          translation,
+          sourceLabel,
+          targetLabel,
+          dark,
+        },
+        previewAbort.current?.signal,
+      );
+      if (!("document" in reply))
+        throw new Error("Could not render the translation.");
+      return { key, document: reply.document };
+    },
+    [
+      displaySource,
+      displayTranslation,
+      sourceLabel,
+      targetLabel,
+      dark,
+      displayKey,
+    ],
+    {
+      abortable: previewAbort,
+      failureToastOptions: { title: "Could Not Display Translation" },
+    },
   );
+  const markdown = preview.error
+    ? plainMarkdown(preview.error.message)
+    : preview.data?.key === displayKey
+      ? `![Source and translation](${preview.data.document})`
+      : "";
   return (
-    <Detail isLoading={busy} markdown={`![](${document})`} actions={actions} />
+    <Detail
+      isLoading={busy || preview.isLoading}
+      markdown={markdown}
+      actions={actions}
+    />
   );
 }
 

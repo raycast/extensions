@@ -16,25 +16,22 @@
     {
       "name": "translate-selection",
       "title": "Translate",
-      "subtitle": "Apple Translate",
       "description": "Translate selected text, or open an empty translator when nothing is selected. Runs locally on your Mac.",
       "mode": "view"
     }
   ],
   "scripts": {
-    "build:native": "node scripts/build-native.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "test:native": "node scripts/smoke-native.mjs",
-    "bundle": "npm run build:native && ray bundle --output ../Apple-Translate.rayext",
+    "bundle": "ray bundle --output ../Apple-Translate.rayext",
     "typecheck": "tsc --noEmit",
-    "test:engine": "node scripts/test-engine.mjs",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "2.11.1"
+    "@raycast/api": "2.11.1",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",

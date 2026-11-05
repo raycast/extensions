@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import Translation
+import RaycastSwiftMacros
 
 @MainActor final class TranslatorModel: ObservableObject {
     @Published var input = NSAttributedString(string: "")
@@ -16,6 +17,7 @@ import Translation
     @Published var expanded = false
     private var task: Task<Void, Never>?
     weak var window: NSWindow?
+    var onPaste: ((String) -> Void)?
 
     func start() {
         Task {
@@ -82,8 +84,8 @@ import Translation
         guard let result else { return }
         var reply: [String: Any] = ["action": "paste", "text": result.content.string]
         if let html = try? result.content.data(from: NSRange(location: 0, length: result.content.length), documentAttributes: [.documentType: NSAttributedString.DocumentType.html]), let string = String(data: html, encoding: .utf8) { reply["html"] = string }
-        sendReply(reply)
-        NSApp.terminate(nil)
+        onPaste?(encodedResponse(reply))
+        window?.close()
     }
 
     func expand() {
@@ -92,12 +94,6 @@ import Translation
         let size = NSSize(width: min(expanded ? 1280 : 920, screen.visibleFrame.width - 60), height: min(expanded ? 820 : 540, screen.visibleFrame.height - 60))
         window.setContentSize(size)
         window.center()
-    }
-}
-
-func sendReply(_ value: [String: Any]) {
-    if let data = try? JSONSerialization.data(withJSONObject: value) {
-        FileHandle.standardOutput.write(data + Data([10]))
     }
 }
 
@@ -266,7 +262,9 @@ struct TranslatorView: View {
 @MainActor final class WindowDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     let model = TranslatorModel()
     var window: NSWindow?
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    var reply = ""
+    var closed = false
+    func present() {
         let input = FileHandle.standardInput.readDataToEndOfFile()
         if input.count <= 3_000_000, let request = try? JSONDecoder().decode(Startup.self, from: input) {
             model.input = NSAttributedString(string: request.text, attributes: [.font: NSFont.systemFont(ofSize: 18), .foregroundColor: NSColor.labelColor])
@@ -277,7 +275,8 @@ struct TranslatorView: View {
         }
         let menu = NSMenu()
         let appItem = NSMenuItem(); let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Quit Apple Translate", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let quit = appMenu.addItem(withTitle: "Quit Apple Translate", action: #selector(closeWindow), keyEquivalent: "q")
+        quit.target = self
         appItem.submenu = appMenu; menu.addItem(appItem)
         let editItem = NSMenuItem(title: "Edit", action: nil, keyEquivalent: ""); let editMenu = NSMenu(title: "Edit")
         for (title, action, key) in [("Undo", "undo:", "z"), ("Cut", "cut:", "x"), ("Copy", "copy:", "c"), ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a")] { editMenu.addItem(withTitle: title, action: Selector(action), keyEquivalent: key) }
@@ -294,20 +293,33 @@ struct TranslatorView: View {
         window.center()
         self.window = window
         model.window = window
+        model.onPaste = { [weak self] reply in self?.reply = reply }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         model.start()
     }
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    @objc func closeWindow() { window?.close() }
+    func windowWillClose(_ notification: Notification) { closed = true }
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 }
 
 struct Startup: Decodable { let text: String; let rtf: String?; let paired: Bool?; let source: String?; let target: String? }
-@main struct WindowMain {
-    @MainActor static func main() {
-        let app = NSApplication.shared
-        app.setActivationPolicy(.regular)
-        let delegate = WindowDelegate()
-        app.delegate = delegate
-        withExtendedLifetime(delegate) { app.run() }
+@raycast @MainActor func showWindow() async -> String {
+    let app = NSApplication.shared
+    app.setActivationPolicy(.regular)
+    let delegate = WindowDelegate()
+    app.delegate = delegate
+    app.finishLaunching()
+    delegate.present()
+    // Yield between AppKit events so translation tasks can update the window on MainActor.
+    while !delegate.closed {
+        autoreleasepool {
+            if let event = app.nextEvent(matching: .any, until: Date(timeIntervalSinceNow: 0.01), inMode: .default, dequeue: true) {
+                app.sendEvent(event)
+            }
+            app.updateWindows()
+        }
+        try? await Task.sleep(for: .milliseconds(10))
     }
+    return delegate.reply
 }

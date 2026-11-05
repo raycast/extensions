@@ -1,37 +1,47 @@
-import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { join } from "node:path";
+import { helperPath } from "swift:../swift/AppleTranslate";
 import { parseReply, Request, Reply } from "./protocol";
 
-export function callNative(
-  request: Request,
+export async function runNative(
+  entry: "handleRequest" | "showWindow",
+  request: unknown,
   signal?: AbortSignal,
-): Promise<Reply> {
+): Promise<string> {
+  const binary = await helperPath();
+  signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     const child = execFile(
-      join(environment.assetsPath, "apple-translate"),
-      [],
-      { signal, timeout: 120_000, maxBuffer: 4_000_000 },
+      binary,
+      [entry],
+      {
+        signal,
+        timeout: entry === "showWindow" ? 0 : 120_000,
+        maxBuffer: 4_000_000,
+      },
       (error, stdout) => {
         if (error) {
-          reject(
-            new Error(
-              error.name === "AbortError"
-                ? "Cancelled"
-                : "Apple Translate could not run. Requires Apple Silicon, macOS 26.4+, and installed language models. Try again; the first translation may take longer.",
-            ),
-          );
+          reject(error);
           return;
         }
         try {
-          resolve(parseReply(stdout));
+          const output: unknown = JSON.parse(stdout);
+          if (typeof output !== "string")
+            throw new Error("Invalid response from Apple Translate.");
+          resolve(output);
         } catch (error) {
           reject(error);
         }
       },
     );
     child.stdin?.on("error", reject);
-    // Keep user text out of command arguments, shell expansion, and temporary files.
+    // The exported Swift function reads the payload from stdin, not argv.
     child.stdin?.end(JSON.stringify(request));
   });
+}
+
+export async function callNative(
+  request: Request,
+  signal?: AbortSignal,
+): Promise<Reply> {
+  return parseReply(await runNative("handleRequest", request, signal));
 }

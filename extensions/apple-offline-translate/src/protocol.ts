@@ -24,6 +24,14 @@ export type Translation = SourceText & {
 };
 export type Request =
   | { operation: "languages" | "clipboard" }
+  | {
+      operation: "preview";
+      text: string;
+      translation: string;
+      sourceLabel: string;
+      targetLabel: string;
+      dark: boolean;
+    }
   | ({
       operation: "translate";
       source: string;
@@ -32,6 +40,7 @@ export type Request =
     } & SourceText);
 export type Reply =
   | { ok: true; languages: Language[] }
+  | { ok: true; document: string }
   | ({ ok: true } & SourceText)
   | ({ ok: true } & Translation);
 
@@ -42,6 +51,11 @@ export function parseReply(output: string): Reply {
   if (value.ok === false && typeof value.message === "string")
     throw new Error(value.message);
   if (value.ok === true) {
+    if (
+      typeof value.document === "string" &&
+      value.document.startsWith("data:image/svg+xml;base64,")
+    )
+      return value as Reply;
     if (
       Array.isArray(value.languages) &&
       value.languages.length &&

@@ -1,7 +1,21 @@
 import AppKit
 
-@main struct EngineTests {
+@main struct NativeTests {
     static func main() async throws {
+        for text in [String(repeating: "漢字中文", count: 20), String(repeating: "👩‍💻", count: 40), String(repeating: "W", count: 120), String(repeating: "😀", count: 40)] {
+            let wrapped = wrapPreview(text)
+            precondition(wrapped.joined() == text, "Wrapping must preserve every grapheme")
+            precondition(wrapped.allSatisfy { measuredWidth($0) <= previewTextWidth }, "Every rendered line must fit its column")
+        }
+        let columns = pairedColumns("Short.\n\nLast source.", "A much longer translated paragraph that wraps across several visual lines.\n\nLast translation.")
+        precondition(columns.source.firstIndex(of: "Last source.") == columns.translation.firstIndex(of: "Last translation."))
+        let long = (1...40).map { "Line \($0)" }.joined(separator: "\n")
+        let document = translationDocument(source: long, translation: long, sourceLabel: "SOURCE", targetLabel: "TRANSLATION", dark: true)
+        let svg = String(decoding: Data(base64Encoded: String(document.split(separator: ",", maxSplits: 1)[1]))!, as: UTF8.self)
+        precondition(svg.contains("Line 40") && svg.components(separatedBy: "<rect ").count == 3)
+        let hostile = translationDocument(source: "<script>&\"", translation: "result", sourceLabel: "SOURCE", targetLabel: "TRANSLATION", dark: true)
+        let safe = String(decoding: Data(base64Encoded: String(hostile.split(separator: ",", maxSplits: 1)[1]))!, as: UTF8.self)
+        precondition(!safe.contains("<script>") && safe.contains("&lt;script&gt;"))
         let layout = "  Hello 👋\r\n\r\n- First item\n\t2. Second item  \n# Heading\n\n"
         let pieces = segments(NSAttributedString(string: layout))
         let joined = pieces.map { $0.prefix.string + $0.body.string + $0.suffix.string }.joined()
