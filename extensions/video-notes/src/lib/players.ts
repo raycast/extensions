@@ -52,7 +52,15 @@ function mpv(command: unknown[]): Promise<unknown> {
       buffer = lines.pop() ?? "";
       for (const line of lines) {
         if (!line.trim()) continue;
-        const message = JSON.parse(line);
+        let message;
+        try {
+          message = JSON.parse(line);
+        } catch {
+          clearTimeout(timer);
+          socket.destroy();
+          reject(new Error(strings.iinaNoAnswer));
+          return;
+        }
         // The socket also receives mpv events; skip them.
         if (message.request_id !== requestId) continue;
         clearTimeout(timer);

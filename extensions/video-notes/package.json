@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "make-note-for-video",
+  "name": "video-notes",
   "title": "Video Notes",
   "description": "Take notes with a timecode and frame from IINA or a browser video, and export them to an HTML table",
   "icon": "icon.png",

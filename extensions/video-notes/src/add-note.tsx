@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { useEffect, useState } from "react";
@@ -58,7 +59,7 @@ export default function Command() {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setState({ error: message });
-        await showToast({ style: Toast.Style.Failure, title: strings.failed, message });
+        await showFailureToast(error, { title: strings.failed });
       }
     })();
   }, []);
@@ -89,7 +90,7 @@ export default function Command() {
         hud = strings.noteAdded(timecode);
       }
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: strings.failed, message: String(error) });
+      await showFailureToast(error, { title: strings.failed });
       return;
     }
     // Do not overwrite a link the user has corrected in Build Video Notes HTML.
@@ -104,7 +105,6 @@ export default function Command() {
   return (
     <Form
       isLoading={!state}
-      navigationTitle={state ? `${strings.note} · ${timecode}` : strings.capturing}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={strings.add} icon={Icon.Plus} onSubmit={submit} />

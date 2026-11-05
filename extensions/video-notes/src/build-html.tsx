@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
-import { useForm, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, showInFinder } from "@raycast/api";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -37,15 +37,15 @@ export default function Command() {
       },
     },
     async onSubmit({ url }) {
-      const session = await activeSession();
-      const trimmed = url.trim() || undefined;
-      if (trimmed) await setRecordingUrl(session, trimmed);
       try {
+        const session = await activeSession();
+        const trimmed = url.trim() || undefined;
+        if (trimmed) await setRecordingUrl(session, trimmed);
         const zipPath = await build(session, trimmed);
         await showInFinder(zipPath);
         await showHUD(strings.built(session.name), { popToRootType: PopToRootType.Immediate });
       } catch (buildError) {
-        await showToast({ style: Toast.Style.Failure, title: strings.buildFailed, message: String(buildError) });
+        await showFailureToast(buildError, { title: strings.buildFailed });
       }
     },
   });

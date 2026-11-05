@@ -10,8 +10,6 @@ export const strings = {
   browserJsOff: "Enable View → Developer → Allow JavaScript from Apple Events in the browser",
   browserNoVideo: "No video on the tab",
   browserNoFrame: "The browser did not return the frame",
-  capturing: "Capturing frame…",
-  note: "Note",
   timecode: "Timecode",
   comment: "Comment",
   commentInfo: "Start with -- to add a general note without a timecode to the end of the file",
