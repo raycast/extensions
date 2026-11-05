@@ -13,6 +13,10 @@
 - **React**: Updated the extension runtime to React 19.3.1 and [React Developer Tools](./basics/debug-an-extension.md#react-developer-tools) to 8.0.0.
 - **TypeScript Definitions**: Updated `@types/node` to 26.6.5 and `@types/react` to 19.3.0 in the API and extension template.
 
+### 🐞 Fixes
+
+- **Pagination**: The `List` and `Grid` memory safeguard now estimates page costs per view, expires stale estimates, and rechecks blocked pagination so it can resume when memory is available. It checks again before loading a page and attempts garbage collection before refusing.
+
 ## 2.9.0 - 2026-10-21
 
 ### ✨ New

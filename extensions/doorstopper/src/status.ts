@@ -1,9 +1,13 @@
 import { updateCommandMetadata } from "@raycast/api";
-import { isDoorstopperEnabled } from "./util";
+import { getStatus } from "./lib/session";
+import { statusSubtitle } from "./lib/labels";
 
 export default async function Command() {
-  const isEnabled = isDoorstopperEnabled();
-  const subtitle = isEnabled ? "✔ Enabled" : "✖ Disabled";
-
-  updateCommandMetadata({ subtitle });
+  try {
+    const status = await getStatus();
+    await updateCommandMetadata({ subtitle: statusSubtitle(status, Date.now()) });
+  } catch (error) {
+    console.log("Failed to get status", error);
+    await updateCommandMetadata({ subtitle: "✖ Disabled" });
+  }
 }

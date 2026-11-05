@@ -174,7 +174,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "node --experimental-strip-types --test src/utils.test.mjs"
   },
   "platforms": [
     "macOS"

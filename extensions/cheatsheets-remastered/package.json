@@ -1,6 +1,5 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.2.0",
   "name": "cheatsheets-remastered",
   "title": "Cheatsheets Remastered",
   "description": "Browse bundled developer references, personal Markdown and synced GitHub cheatsheets offline. Search, favorite and organize your sheets.",
@@ -82,7 +81,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.10.1",
+    "@raycast/api": "^2.11.0",
     "@raycast/utils": "^2.3.3",
     "axios": "^1.6.0",
     "proper-lockfile": "^4.1.2",

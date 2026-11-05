@@ -51,10 +51,11 @@ export function fileSizeFor(note: Note) {
 }
 
 export function trimPathToMaxLength(path: string, maxLength: number) {
-  if (path.length > maxLength) {
-    return "..." + path.slice(path.length - maxLength).slice(1);
+  const trimmed = path.replace(/^[\\/]+/, "");
+  if (trimmed.length > maxLength) {
+    return "..." + trimmed.slice(trimmed.length - maxLength);
   } else {
-    return path.slice(1);
+    return trimmed;
   }
 }
 

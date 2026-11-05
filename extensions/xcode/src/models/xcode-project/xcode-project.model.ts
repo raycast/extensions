@@ -21,6 +21,10 @@ export interface XcodeProject {
    */
   filePath: string;
   /**
+   * The root directory path of the git repository (or worktree) containing the XcodeProject, if any
+   */
+  gitRootDirectoryPath?: string;
+  /**
    * The date when the project was last used or opened
    */
   lastUsed?: Date;

@@ -18,7 +18,7 @@ export interface ClaudeAccountIdentity {
 
 export interface ClaudeUsage {
   plan: string;
-  fiveHour: ClaudeRateWindow;
+  fiveHour: ClaudeRateWindow | null;
   sevenDay: ClaudeRateWindow | null;
   modelWindows: Record<string, ClaudeRateWindow>;
   extraUsage: ClaudeExtraUsage | null;

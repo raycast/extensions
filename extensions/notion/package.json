@@ -196,7 +196,7 @@
       "title": "Pages",
       "description": "Search Notion pages by title to mention in AI Chat, listing recently edited pages by default.",
       "functionalities": [
-        "AI attachment provider"
+        "AI mention search"
       ]
     },
     {
