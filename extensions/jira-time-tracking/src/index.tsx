@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { usePromise } from "@raycast/utils";
 import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { getIssue, getIssues, getProjects, postTimeLog, loadAllPages } from "./controllers";
 import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
@@ -30,10 +31,28 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
   const [issueSearch, setIssueSearch] = useState("");
   const [exactIssues, setExactIssues] = useState<Issue[]>([]);
   const exactIssueCache = useRef(new Map<string, Issue>());
-  const [lookupLoading, setLookupLoading] = useState(false);
-  const [lookupError, setLookupError] = useState<string>();
+  const [debouncedIssueKey, setDebouncedIssueKey] = useState("");
   const availableIssues = Array.from(new Map([...issues, ...exactIssues].map((issue) => [issue.key, issue])).values());
   const searchKey = issueSearch.trim().toUpperCase();
+  const cachedIssue = issues.find((issue) => issue.key === searchKey) ?? exactIssueCache.current.get(searchKey);
+  const needsLookup = /^[A-Z][A-Z0-9_]*-[0-9]+$/.test(searchKey) && !cachedIssue;
+  const lookupReady = needsLookup && debouncedIssueKey === searchKey;
+  const { isLoading: requestLoading, error: requestError } = usePromise(
+    async (key: string, project: string | undefined) => ({ key, project, issue: await getIssue(key) }),
+    [debouncedIssueKey, selectedProject],
+    {
+      execute: lookupReady,
+      onData: ({ key, issue }) => {
+        exactIssueCache.current.set(key, issue);
+        setExactIssues((current) => [...current.filter((item) => item.key !== issue.key), issue]);
+        setSelectedIssueKey(issue.key);
+      },
+      // The dropdown displays the hook's error inline instead of showing a toast while typing.
+      onError: () => {},
+    },
+  );
+  const lookupLoading = needsLookup && (!lookupReady || requestLoading);
+  const lookupError = lookupReady && !requestLoading ? requestError?.message : undefined;
   const exactMatchKey = exactIssueCache.current.get(searchKey)?.key ?? searchKey;
   const exactMatch =
     availableIssues.find((issue) => issue.key === exactMatchKey) ??
@@ -172,39 +191,14 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
   }, [selectedProject, userPrefs.customJQL, refreshTrigger]);
 
   useEffect(() => {
-    let active = true;
-    setLookupError(undefined);
-    const key = issueSearch.trim().toUpperCase();
-    if (!/^[A-Z][A-Z0-9_]*-[0-9]+$/.test(key)) {
-      setLookupLoading(false);
+    if (!needsLookup) {
+      setDebouncedIssueKey("");
+      if (cachedIssue) setSelectedIssueKey(cachedIssue.key);
       return;
     }
-    const cached = issues.find((issue) => issue.key === key) ?? exactIssueCache.current.get(key);
-    if (cached) {
-      setSelectedIssueKey(cached.key);
-      setLookupLoading(false);
-      return;
-    }
-    setLookupLoading(true);
-    const timer = setTimeout(async () => {
-      try {
-        const issue = await getIssue(key);
-        if (active) {
-          exactIssueCache.current.set(key, issue);
-          setExactIssues((current) => [...current.filter((item) => item.key !== issue.key), issue]);
-          setSelectedIssueKey(issue.key);
-        }
-      } catch (error) {
-        if (active) setLookupError(error instanceof Error ? error.message : String(error));
-      } finally {
-        if (active) setLookupLoading(false);
-      }
-    }, 300);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [issueSearch, issues, selectedProject]);
+    const timer = setTimeout(() => setDebouncedIssueKey(searchKey), 300);
+    return () => clearTimeout(timer);
+  }, [searchKey, needsLookup, cachedIssue, selectedProject]);
 
   const handleSelectProject = (project: string) => {
     if (project === selectedProject) return;
@@ -213,8 +207,7 @@ export default function Command({ initialDate, onSuccess }: LogTimeProps) {
     setIssueSearch("");
     setExactIssues([]);
     exactIssueCache.current.clear();
-    setLookupError(undefined);
-    setLookupLoading(false);
+    setDebouncedIssueKey("");
     setSelectedProject(project);
   };
 

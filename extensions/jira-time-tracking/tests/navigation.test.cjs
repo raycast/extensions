@@ -104,6 +104,21 @@ function fixtureUI(overrides = {}) {
     cache.set(name, module.exports);
     const requireFixture = (id) => {
       if (id === "@raycast/api") return api;
+      if (id === "@raycast/utils") {
+        // Run the installed hook implementation, mocking only its native Raycast boundary.
+        if (!cache.has(id)) {
+          const utilsModule = { exports: {} };
+          const utilsPath = require.resolve(id);
+          const utilsCode = fs.readFileSync(utilsPath, "utf8");
+          vm.runInThisContext(`(function(require,module,exports){${utilsCode}\n})`, { filename: utilsPath })(
+            (dependency) => (dependency === "@raycast/api" ? api : require(dependency)),
+            utilsModule,
+            utilsModule.exports,
+          );
+          cache.set(id, utilsModule.exports);
+        }
+        return cache.get(id);
+      }
       if (id === "react" || id === "react/jsx-runtime") return require(id);
       if (id === "./requests")
         return {
