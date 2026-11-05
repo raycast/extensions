@@ -64,16 +64,4 @@ This extension supports macOS. Device compatibility depends on the Luxafor compa
 
 Your User ID is masked in preferences and sent only in the HTTPS request body to the selected Luxafor host. Redirects are refused. Raw request bodies, responses and errors are not logged or exported. No analytics or AI tools are included. Existing preference keys and the original storage record are retained; old online/offline flags are not treated as device telemetry.
 
-## Development
-
-Use macOS, Raycast, npm and Node.js 26.12.1. The API CLI requires Node.js 22.22.2 or newer.
-
-```bash
-npm ci --ignore-scripts
-npm run check
-npm run dev
-```
-
-`npm run check` builds, typechecks and lints without launching Raycast. `npm run dev` registers the development extension in Raycast. Tests and other development tooling are maintained in the [personal repository](https://github.com/smcnab1/luxafor-controller).
-
 See the [changelog](CHANGELOG.md). [MIT licensed](LICENSE).
