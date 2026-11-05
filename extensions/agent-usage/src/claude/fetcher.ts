@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import type { ClaudeUsage, ClaudeError, ClaudeAccountIdentity } from "./types.ts";
+import type { ClaudeUsage, ClaudeError, ClaudeAccountIdentity, ClaudeRateWindow } from "./types.ts";
 
 const CLAUDE_CONFIG_DIR_ENV = "CLAUDE_CONFIG_DIR";
 const DEFAULT_CLAUDE_CONFIG_DIR = path.join(os.homedir(), ".claude");
@@ -73,11 +73,11 @@ interface OAuthLimit {
 }
 
 interface OAuthUsageResponse {
-  five_hour?: OAuthWindow;
-  seven_day?: OAuthWindow;
+  five_hour?: OAuthWindow | null;
+  seven_day?: OAuthWindow | null;
   extra_usage?: OAuthExtraUsage;
   limits?: OAuthLimit[];
-  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | undefined;
+  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | null | undefined;
 }
 
 interface OAuthRefreshResponse {
@@ -151,6 +151,14 @@ function formatResetsIn(isoTime?: string): string | null {
 function clampPercent(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function toRateWindow(window: OAuthWindow | null | undefined): ClaudeRateWindow | null {
+  if (!window || typeof window.utilization !== "number") return null;
+  return {
+    percentageRemaining: clampPercent(100 - window.utilization),
+    resetsIn: formatResetsIn(window.resets_at),
+  };
 }
 
 interface CredentialsParsed {
@@ -649,22 +657,12 @@ export async function fetchClaudeUsage(
     }
 
     const data = (await response.json()) as OAuthUsageResponse;
-    const fiveHour = data.five_hour;
-
-    if (!fiveHour || typeof fiveHour.utilization !== "number") {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "Missing five_hour usage in Claude response.",
-        },
-      };
-    }
-
-    const sevenDay = data.seven_day;
+    // Not every plan has every window: Max plans can come back without five_hour.
+    const fiveHour = toRateWindow(data.five_hour);
+    const sevenDay = toRateWindow(data.seven_day);
 
     // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
-    const modelWindows: Record<string, import("./types.ts").ClaudeRateWindow> = {};
+    const modelWindows: Record<string, ClaudeRateWindow> = {};
     const KNOWN_NON_MODEL_KEYS = new Set([
       "five_hour",
       "seven_day",
@@ -676,13 +674,9 @@ export async function fetchClaudeUsage(
     for (const [key, value] of Object.entries(data)) {
       if (KNOWN_NON_MODEL_KEYS.has(key)) continue;
       if (!key.startsWith("seven_day_")) continue;
-      const window = value as OAuthWindow | undefined;
-      if (window && typeof window.utilization === "number") {
-        const modelName = key.slice("seven_day_".length);
-        modelWindows[modelName] = {
-          percentageRemaining: clampPercent(100 - window.utilization),
-          resetsIn: formatResetsIn(window.resets_at),
-        };
+      const window = toRateWindow(value as OAuthWindow | null | undefined);
+      if (window) {
+        modelWindows[key.slice("seven_day_".length)] = window;
       }
     }
 
@@ -701,6 +695,16 @@ export async function fetchClaudeUsage(
       }
     }
 
+    if (!fiveHour && !sevenDay && Object.keys(modelWindows).length === 0) {
+      return {
+        usage: null,
+        error: {
+          type: "parse_error",
+          message: "No usage windows in Claude response.",
+        },
+      };
+    }
+
     const extra = data.extra_usage as OAuthExtraUsage | undefined;
     const extraUsage =
       extra?.is_enabled && typeof extra.monthly_limit === "number" && typeof extra.used_credits === "number"
@@ -713,17 +717,8 @@ export async function fetchClaudeUsage(
 
     const usage: ClaudeUsage = {
       plan: inferPlan(credentials.rateLimitTier, credentials.subscriptionType),
-      fiveHour: {
-        percentageRemaining: clampPercent(100 - fiveHour.utilization),
-        resetsIn: formatResetsIn(fiveHour.resets_at),
-      },
-      sevenDay:
-        sevenDay && typeof sevenDay.utilization === "number"
-          ? {
-              percentageRemaining: clampPercent(100 - sevenDay.utilization),
-              resetsIn: formatResetsIn(sevenDay.resets_at),
-            }
-          : null,
+      fiveHour,
+      sevenDay,
       modelWindows,
       extraUsage,
       identity,
