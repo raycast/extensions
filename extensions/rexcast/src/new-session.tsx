@@ -13,17 +13,27 @@ export default function Command() {
             title="Create and Show"
             icon={Icon.Plus}
             onSubmit={async (v: Values) => {
+              let sessionId: string;
               try {
                 const args = ["new", ...(v.label.trim() ? [v.label.trim()] : []), "--json"];
                 if (v.cwd[0]) args.push("-c", v.cwd[0]);
                 if (v.command.trim()) args.push("--", "sh", "-c", v.command);
-                const { session_id } = JSON.parse(await rex(...args));
-                await showSession(session_id);
-                await closeMainWindow();
-                await popToRoot();
+                sessionId = JSON.parse(await rex(...args)).session_id;
               } catch (e) {
-                showFailureToast(e, { title: "Could not create the session" });
+                await showFailureToast(e, { title: "Could not create the session" });
+                return false;
               }
+              // The session exists now: a failure to show it must not look like a failure to create it.
+              try {
+                await showSession(sessionId);
+              } catch (e) {
+                await showFailureToast(e, {
+                  title: "Session created, but Rex could not show it",
+                  message: "Turn on Remote Control in Rex's settings to switch sessions from Raycast.",
+                });
+              }
+              await closeMainWindow();
+              await popToRoot();
             }}
           />
         </ActionPanel>

@@ -4,6 +4,7 @@ import { homedir } from "node:os";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
 import { parseSession, parseSessions } from "./parsers";
+import { dropPartialFirstLine } from "./text";
 import type { Session, Win } from "./types";
 
 const run = promisify(execFile);
@@ -41,15 +42,51 @@ export const inspectSession = async (id: string, quiet = false): Promise<{ activ
   parseSession(await (quiet ? rexQuiet : rex)("session", "inspect", id, "--json"));
 
 /** Calls a method that a block provides (process, program_status, title…) and parses its JSON result. */
-export async function blockCall<T>(session: string, block: string, method: string, quiet = false): Promise<T> {
+export async function blockCall<T>(
+  session: string,
+  block: string,
+  method: string,
+  quiet = false,
+  args?: Record<string, unknown>,
+): Promise<T> {
   // `-s` is required: without it only blocks of the current session are found.
-  return JSON.parse(await (quiet ? rexQuiet : rex)("block", "call", "-s", session, "-b", block, method));
+  const argv = ["block", "call", "-s", session, "-b", block, method];
+  if (args) argv.push(JSON.stringify(args));
+  return JSON.parse(await (quiet ? rexQuiet : rex)(...argv));
 }
 
 /** Runs a client action (pane.split.right, client.tab.new…) on the connected Rex app. */
 export const doAction = (action: string, ...args: string[]) => rex("do", action, ...args);
 
-/** Current screen plus scrollback of a terminal block. */
+/**
+ * The end of a pane's screen plus scrollback, at most about `maxBytes`, never the whole history
+ * (a busy pane can hold tens of MiB). Starts on a whole line.
+ */
+export async function captureTail(session: string, block: string, maxBytes = 24_576): Promise<string> {
+  const first = await blockCall<{ content: string; id?: number; total?: number }>(session, block, "format", false, {
+    trim: true,
+    unwrap: true,
+    max_bytes: maxBytes,
+  });
+  if (first.id === undefined) return first.content; // it all fit
+
+  const start = Math.max(0, (first.total ?? 0) - maxBytes);
+  let offset = start;
+  let text = "";
+  for (let i = 0; i < 8; i++) {
+    const part = await blockCall<{ data: string; eof: boolean }>(session, block, "blob_read", false, {
+      id: first.id,
+      offset,
+      max_bytes: maxBytes,
+    });
+    text += part.data;
+    offset += Buffer.byteLength(part.data);
+    if (part.eof || !part.data) break;
+  }
+  return start > 0 ? dropPartialFirstLine(text) : text;
+}
+
+/** Current screen plus scrollback of a terminal block (whole history: prefer `captureTail`). */
 export const captureBlock = (session: string, block: string, quiet = false) =>
   (quiet ? rexQuiet : rex)("capture", "-s", session, "-b", block, "--trim", "--unwrap");
 

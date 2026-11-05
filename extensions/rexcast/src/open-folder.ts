@@ -16,13 +16,23 @@ export default async () => {
     return;
   }
 
+  const name = basename(dir) || dir;
+  let sessionId: string;
   try {
-    const name = basename(dir) || dir;
-    const { session_id } = JSON.parse(await rex("new", name, "-c", dir, "--json"));
-    await closeMainWindow();
-    await showSession(session_id);
-    await showHUD(`Rex: session “${name}”`);
+    sessionId = JSON.parse(await rex("new", name, "-c", dir, "--json")).session_id;
   } catch (e) {
     await showFailureToast(e, { title: "Could not open the folder in Rex" });
+    return;
+  }
+  await closeMainWindow();
+  // The session exists now: a failure to show it must not look like a failure to create it.
+  try {
+    await showSession(sessionId);
+    await showHUD(`Rex: session “${name}”`);
+  } catch (e) {
+    await showFailureToast(e, {
+      title: `Session “${name}” created, but Rex could not show it`,
+      message: "Turn on Remote Control in Rex's settings to switch sessions from Raycast.",
+    });
   }
 };

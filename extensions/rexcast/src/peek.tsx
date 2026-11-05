@@ -1,26 +1,38 @@
 import { Action, ActionPanel, Detail, Icon, LaunchProps, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { captureBlock, inspectSession, listSessions, showSession } from "./lib/rex";
+import { ErrorEmptyView } from "./components/error-view";
+import { openSession } from "./lib/open-session";
+import { captureTail, inspectSession, listSessions } from "./lib/rex";
+import { codeBlock, lastLines } from "./lib/text";
 
 const LINES = 40;
 
+type PaneView = { name: string; text?: string; error?: string };
+
 function Peek({ id, label, nested }: { id: string; label: string; nested: boolean }) {
   const { data, isLoading, revalidate } = useCachedPromise(
-    async (s: string) => {
+    async (s: string): Promise<PaneView[]> => {
       const blocks = (await inspectSession(s)).windows.flatMap((w) =>
         w.blocks.filter((b) => b.flavor?.startsWith("com.superlogical.terminal")),
       );
       return Promise.all(
-        blocks.map(async (b) => ({
-          name: b.label || b.block_id.slice(-8),
-          screen: (await captureBlock(s, b.block_id).catch(() => "")).split("\n").slice(-LINES).join("\n"),
-        })),
+        blocks.map(async (b): Promise<PaneView> => {
+          const name = b.label || b.block_id.slice(-8);
+          try {
+            // Only the end of the pane is read: a busy pane can hold tens of MiB of history.
+            return { name, text: lastLines(await captureTail(s, b.block_id), LINES) };
+          } catch (e) {
+            return { name, error: e instanceof Error ? e.message : String(e) };
+          }
+        }),
       );
     },
     [id],
   );
 
-  const markdown = (data ?? []).map((b) => `### ${b.name}\n\`\`\`\n${b.screen}\n\`\`\``).join("\n\n");
+  const markdown = (data ?? [])
+    .map((p) => `### ${p.name}\n${p.error ? `**Could not read this pane:** ${p.error}` : codeBlock(p.text ?? "")}`)
+    .join("\n\n");
   return (
     <Detail
       isLoading={isLoading}
@@ -33,7 +45,7 @@ function Peek({ id, label, nested }: { id: string; label: string; nested: boolea
           <Action
             title="Show in Rex"
             icon={Icon.ArrowRight}
-            onAction={() => showSession(id).catch((e) => showFailureToast(e, { title: "Could not show the session" }))}
+            onAction={() => openSession(id).catch((e) => showFailureToast(e, { title: "Could not show the session" }))}
           />
         </ActionPanel>
       }
@@ -42,14 +54,18 @@ function Peek({ id, label, nested }: { id: string; label: string; nested: boolea
 }
 
 function SessionList() {
-  const { data, isLoading } = useCachedPromise(() => listSessions());
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => listSessions());
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search sessions…">
-      <List.EmptyView
-        icon={Icon.Terminal}
-        title="No Sessions"
-        description="Rex has no open sessions, or the Rex server is not running."
-      />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Terminal}
+          title="No Sessions"
+          description="Rex is running but has no open sessions."
+        />
+      )}
       {data?.map((s) => (
         <List.Item
           key={s.session_id}
@@ -66,7 +82,7 @@ function SessionList() {
                 title="Show in Rex"
                 icon={Icon.ArrowRight}
                 onAction={() =>
-                  showSession(s.session_id).catch((e) => showFailureToast(e, { title: "Could not show the session" }))
+                  openSession(s.session_id).catch((e) => showFailureToast(e, { title: "Could not show the session" }))
                 }
               />
             </ActionPanel>

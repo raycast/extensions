@@ -12,23 +12,18 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { holdHUD, notificationsEnabled } from "./lib/hud";
-import { markSeen, poll, type Notice, type SessionActivity } from "./lib/activity";
+import { holdHUD, noticeSeconds, notificationsEnabled } from "./lib/hud";
+import { poll, type Notice, type SessionActivity } from "./lib/activity";
 import type { Status } from "./lib/block-state";
 import { HIDDEN_KEY } from "./lib/menu-bar-visibility";
-import { openRex, showSession } from "./lib/rex";
+import { openSession } from "./lib/open-session";
+import { openRex } from "./lib/rex";
 
-const NOTICE_SECONDS = 6;
+// A menu bar action that fails says so, instead of doing nothing.
+const report = (e: unknown, title: string) => showHUD(`${title}: ${e instanceof Error ? e.message : String(e)}`);
 
-const open = async (s: SessionActivity) => {
-  try {
-    await showSession(s.session_id);
-    await markSeen(s.session_id);
-  } catch {
-    // Remote Control off or no client connected: at least bring Rex to the front.
-    await openRex().catch(() => undefined);
-  }
-};
+const open = (s: SessionActivity) =>
+  openSession(s.session_id).catch((e) => report(e, "Could not show the session (is Remote Control on in Rex?)"));
 
 const copy = async (text: string) => {
   await Clipboard.copy(text);
@@ -57,14 +52,19 @@ const noticeText = (n: Notice) =>
       : `${n.label} finished`;
 
 export default function Command() {
-  const { data, isLoading } = usePromise(async () => {
-    const res = await poll();
-    // The menu bar always updates; the message only shows when notifications are on.
-    if (res.notices.length && notificationsEnabled(getPreferenceValues<Preferences.MenuBar>())) {
-      await holdHUD(showHUD, `Rex: ${res.notices.map(noticeText).join(" · ")}`, NOTICE_SECONDS);
-    }
-    return res;
-  });
+  // The menu data is published as soon as it is read; the notice is held afterwards, in its own step.
+  const { data, isLoading } = usePromise(() => poll());
+  const noticeKey = data?.notices.length ? JSON.stringify(data.notices) : "";
+  const { isLoading: showingNotice } = usePromise(
+    async (key: string) => {
+      const prefs = getPreferenceValues<Preferences.MenuBar>();
+      if (!notificationsEnabled(prefs)) return; // the menu bar always updates; only the message is optional
+      const notices = JSON.parse(key) as Notice[];
+      await holdHUD(showHUD, `Rex: ${notices.map(noticeText).join(" · ")}`, noticeSeconds(prefs));
+    },
+    [noticeKey],
+    { execute: noticeKey !== "" },
+  );
   const { data: storedHidden, isLoading: loadingHidden } = usePromise(
     async () => (await LocalStorage.getItem<string>(HIDDEN_KEY)) === "1",
   );
@@ -91,7 +91,7 @@ export default function Command() {
     <MenuBarExtra
       icon="menu-bar-icon.png"
       title={title}
-      isLoading={isLoading || loadingHidden}
+      isLoading={isLoading || loadingHidden || showingNotice}
       tooltip="Rex session activity"
     >
       <MenuBarExtra.Submenu
@@ -118,7 +118,11 @@ export default function Command() {
             )}
           </>
         )}
-        <MenuBarExtra.Item title="Open Rex" icon={Icon.AppWindow} onAction={() => openRex().catch(() => undefined)} />
+        <MenuBarExtra.Item
+          title="Open Rex"
+          icon={Icon.AppWindow}
+          onAction={() => openRex().catch((e) => report(e, "Could not open Rex"))}
+        />
       </MenuBarExtra.Submenu>
 
       {sessions.length > 0 && (
@@ -130,18 +134,22 @@ export default function Command() {
               <MenuBarExtra.Item
                 title="Peek at Screen"
                 icon={Icon.Eye}
-                onAction={() =>
-                  launchCommand({
-                    name: "peek",
-                    type: LaunchType.UserInitiated,
-                    context: { session: s.session_id, label: s.label },
-                  })
-                }
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "peek",
+                      type: LaunchType.UserInitiated,
+                      context: { session: s.session_id, label: s.label },
+                    });
+                  } catch (e) {
+                    await report(e, "Could not open Peek at Session (is the command enabled?)");
+                  }
+                }}
               />
               <MenuBarExtra.Section title="Tabs">
                 {s.windows.map((w) => (
                   <MenuBarExtra.Item
-                    key={w.label}
+                    key={w.window_id}
                     title={w.label}
                     subtitle={`${w.panes} ${w.panes === 1 ? "pane" : "panes"}${w.active ? " · active" : ""}`}
                     icon={w.active ? Icon.CircleFilled : Icon.Circle}

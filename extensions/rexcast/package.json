@@ -18,9 +18,8 @@
       "name": "rexPath",
       "title": "Rex CLI Path",
       "description": "Leave empty to use the rex binary installed with the Rex app.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"
+      "type": "file",
+      "required": false
     }
   ],
   "commands": [
@@ -65,8 +64,26 @@
           "required": false,
           "title": "Notifications",
           "label": "Show Notifications",
-          "description": "Show a message when a session needs your input, finishes or fails. The menu bar item updates either way.",
+          "description": "Show a message when a session needs your input, finishes or fails. The menu bar item updates either way. The message closes the Raycast window if it is open.",
           "default": true
+        },
+        {
+          "name": "noticeDuration",
+          "type": "dropdown",
+          "required": false,
+          "title": "Notification Length",
+          "description": "How long the message stays up. A longer message keeps closing the Raycast window while it is shown.",
+          "default": "6",
+          "data": [
+            {
+              "title": "Brief (2 seconds)",
+              "value": "2"
+            },
+            {
+              "title": "Normal (6 seconds)",
+              "value": "6"
+            }
+          ]
         }
       ]
     },

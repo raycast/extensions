@@ -18,3 +18,9 @@ export async function holdHUD(
 
 /** On unless explicitly turned off: Raycast can hand back an empty preference before the user touches it. */
 export const notificationsEnabled = (prefs: { notifications?: boolean }) => prefs.notifications !== false;
+
+/** How long the notice stays up, from the dropdown preference ("2" or "6" seconds). */
+export function noticeSeconds(prefs: { noticeDuration?: string }): number {
+  const n = Number(prefs.noticeDuration);
+  return n === 2 || n === 6 ? n : 6;
+}

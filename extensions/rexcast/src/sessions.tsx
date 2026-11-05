@@ -13,19 +13,35 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { captureBlock, inspectSession, listSessions, rex, showSession } from "./lib/rex";
+import { ErrorEmptyView } from "./components/error-view";
+import { openSession } from "./lib/open-session";
+import { captureTail, inspectSession, listSessions, rex } from "./lib/rex";
+import { codeBlock } from "./lib/text";
 
 const fail = (e: unknown) => showFailureToast(e, { title: "Rex error" });
 
 function Capture({ session, block }: { session: string; block: string }) {
-  const { data, isLoading } = useCachedPromise((s: string, b: string) => captureBlock(s, b), [session, block]);
-  return <Detail isLoading={isLoading} markdown={"```\n" + (data ?? "") + "\n```"} />;
+  const { data, isLoading, error } = useCachedPromise((s: string, b: string) => captureTail(s, b), [session, block]);
+  const markdown = error ? `**Could not read this pane.**\n\n${error.message}` : codeBlock(data ?? "");
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }
 
 function Windows({ id }: { id: string }) {
-  const { data, isLoading, revalidate } = useCachedPromise(inspectSession, [id]);
+  const { data, isLoading, error, revalidate } = useCachedPromise(inspectSession, [id]);
 
   const close = async (what: "block" | "window", target: string) => {
+    const label = what === "block" ? "pane" : "tab";
+    if (
+      !(await confirmAlert({
+        title: `Close this ${label}?`,
+        message: `The program running in it will be stopped.`,
+        primaryAction: {
+          title: `Close ${label[0].toUpperCase()}${label.slice(1)}`,
+          style: Alert.ActionStyle.Destructive,
+        },
+      }))
+    )
+      return;
     try {
       await rex(what, "close", "-s", id, target);
       revalidate();
@@ -36,7 +52,11 @@ function Windows({ id }: { id: string }) {
 
   return (
     <List isLoading={isLoading} navigationTitle="Tabs and Panes">
-      <List.EmptyView icon={Icon.Window} title="No Tabs" description="This session has no tabs or panes." />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView icon={Icon.Window} title="No Tabs" description="This session has no tabs or panes." />
+      )}
       {data?.windows.map((w) => (
         <List.Section key={w.window_id} title={w.label + (w.window_id === data.active ? " (active)" : "")}>
           {w.blocks.map((b) => (
@@ -107,14 +127,18 @@ function Rename({ id, label, done }: { id: string; label: string; done: () => vo
 }
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(() => listSessions());
+  const { data, isLoading, error, revalidate } = useCachedPromise(() => listSessions());
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search sessions…">
-      <List.EmptyView
-        icon={Icon.Terminal}
-        title="No Sessions"
-        description="Rex has no open sessions, or the Rex server is not running."
-      />
+      {error ? (
+        <ErrorEmptyView error={error} onRetry={revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Terminal}
+          title="No Sessions"
+          description="Rex is running but has no open sessions."
+        />
+      )}
       {data?.map((s) => (
         <List.Item
           key={s.session_id}
@@ -126,13 +150,13 @@ export default function Command() {
               <Action
                 title="Show in Rex"
                 icon={Icon.ArrowRight}
-                onAction={() => showSession(s.session_id).catch(fail)}
+                onAction={() => openSession(s.session_id).catch(fail)}
               />
               <Action.Push title="View Tabs and Panes…" icon={Icon.List} target={<Windows id={s.session_id} />} />
               <Action.Push
                 title="Rename…"
                 icon={Icon.Pencil}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<Rename id={s.session_id} label={s.label} done={revalidate} />}
               />
               <Action.CopyToClipboard title="Copy ID" icon={Icon.CopyClipboard} content={s.session_id} />

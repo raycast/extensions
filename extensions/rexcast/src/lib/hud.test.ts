@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { holdHUD, notificationsEnabled } from "./hud";
+import { holdHUD, noticeSeconds, notificationsEnabled } from "./hud";
 
 const run = async (seconds: number) => {
   const shown: string[] = [];
@@ -36,5 +36,16 @@ describe("notificationsEnabled", () => {
   it("follows the checkbox", () => {
     expect(notificationsEnabled({ notifications: true })).toBe(true);
     expect(notificationsEnabled({ notifications: false })).toBe(false);
+  });
+});
+
+describe("noticeSeconds", () => {
+  it("defaults to 6 seconds", () => {
+    expect(noticeSeconds({})).toBe(6);
+    expect(noticeSeconds({ noticeDuration: "oops" })).toBe(6);
+  });
+  it("reads the dropdown value", () => {
+    expect(noticeSeconds({ noticeDuration: "2" })).toBe(2);
+    expect(noticeSeconds({ noticeDuration: "6" })).toBe(6);
   });
 });

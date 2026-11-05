@@ -8,26 +8,26 @@ import {
   type ProcessInfo,
   type Reading,
   type Status,
-  type Stored,
   type StatusRecord,
 } from "./block-state";
 import { blockCall, inspectSession, listSessions, rexQuiet } from "./rex";
+import { nextStore, type Store } from "./store";
 
-export type Store = Record<string, Stored>;
+export type { Store };
 export type SessionActivity = {
   session_id: string;
   label: string;
   status: Status;
   /** What it is doing: the program's own status message, or the foreground process. */
   detail: string;
-  windows: { label: string; active: boolean; panes: number }[];
+  windows: { window_id: string; label: string; active: boolean; panes: number }[];
 };
 export type ServerInfo = { version: string; pid: number; startedAt: string; tailscale?: string };
 export type Notice = { label: string; event: Event; kind?: string };
 export type Poll = { sessions: SessionActivity[]; server: ServerInfo | null; notices: Notice[] };
 
 const STORE_KEY = "activity-store-v3";
-const CACHE_KEY = "activity-cache-v3";
+const CACHE_KEY = "activity-cache-v4";
 const MIN_GAP_MS = 8_000;
 
 type Cache = { ts: number; sessions: SessionActivity[]; server: ServerInfo | null };
@@ -101,7 +101,12 @@ async function sessionActivity(
     status,
     detail:
       statuses.find((x) => x.status === status && x.detail)?.detail ?? statuses.find((x) => x.detail)?.detail ?? "",
-    windows: windows.map((w) => ({ label: w.label, active: w.window_id === active, panes: w.blocks.length })),
+    windows: windows.map((w) => ({
+      window_id: w.window_id,
+      label: w.label,
+      active: w.window_id === active,
+      panes: w.blocks.length,
+    })),
   };
 }
 
@@ -111,23 +116,41 @@ export async function poll(now = Date.now()): Promise<Poll> {
   if (cache && now - cache.ts < MIN_GAP_MS) return { sessions: cache.sessions, server: cache.server, notices: [] };
 
   const prevStore = await readJson<Store>(STORE_KEY, {});
-  const store: Store = {};
+  const fresh: Store = {};
   const notices: Notice[] = [];
+  const failed: string[] = [];
+  let listed: string[] = [];
+  const cached = new Map((cache?.sessions ?? []).map((s) => [s.session_id, s]));
 
   // Everything in parallel: server status, sessions and every pane.
   const [server, sessions] = await Promise.all([
     serverInfo(),
     listSessions(true)
       .then(async (list) => {
-        // A session that closes mid-poll only drops itself, not the whole menu.
-        const all = await Promise.all(list.map((s) => sessionActivity(s, prevStore, store, notices).catch(() => null)));
+        listed = list.map((s) => s.session_id);
+        // A session that closes or fails mid-poll only affects itself: it keeps its last known state.
+        const all = await Promise.all(
+          list.map((s) =>
+            sessionActivity(s, prevStore, fresh, notices).catch(() => {
+              failed.push(s.session_id);
+              return cached.get(s.session_id) ?? null;
+            }),
+          ),
+        );
         return all.filter((s): s is SessionActivity => s !== null);
       })
-      // Server stopped (or rex missing): show an empty menu instead of an error icon.
-      .catch(() => [] as SessionActivity[]),
+      // null = the list itself failed (server stopped, rex missing, a hiccup).
+      .catch(() => null),
   ]);
 
-  await LocalStorage.setItem(STORE_KEY, JSON.stringify(store));
+  if (sessions === null) {
+    // Nothing was confirmed gone, so the saved activity stays as it is and recovery is not a "first reading".
+    const shown = server ? (cache?.sessions ?? []) : [];
+    await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ ts: now, sessions: shown, server } satisfies Cache));
+    return { sessions: shown, server, notices: [] };
+  }
+
+  await LocalStorage.setItem(STORE_KEY, JSON.stringify(nextStore(prevStore, fresh, listed, failed)));
   await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ ts: now, sessions, server } satisfies Cache));
   return { sessions, server, notices };
 }
