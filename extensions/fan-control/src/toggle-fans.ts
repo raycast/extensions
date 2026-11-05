@@ -2,12 +2,11 @@ import {
   Clipboard,
   LaunchProps,
   LaunchType,
-  Toast,
   getPreferenceValues,
   showHUD,
-  showToast,
   updateCommandMetadata,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   DaemonNotRunningError,
   INSTALL_DAEMON_COMMAND,
@@ -56,10 +55,8 @@ export default async function Command(props: LaunchProps): Promise<void> {
     await showHUD(`Fans: ${state.current} → ${state.next}`);
   } catch (error) {
     await updateCommandMetadata({ subtitle: UNAVAILABLE });
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(error, {
       title: "Failed to toggle fans",
-      message: error instanceof Error ? error.message : String(error),
       primaryAction:
         error instanceof DaemonNotRunningError
           ? {

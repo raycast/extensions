@@ -5,6 +5,9 @@
   "description": "View and control your Mac's fan RPM (Apple Silicon) via smctl.",
   "icon": "icon.png",
   "author": "samuelbelo",
+  "contributors": [
+    "0xAdriaTorralba"
+  ],
   "license": "MIT",
   "categories": [
     "System"

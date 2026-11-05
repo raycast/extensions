@@ -246,11 +246,15 @@ export function describeToggle(
   fans: readonly Fan[],
   manualProfile: ToggleTarget,
 ): ToggleState {
-  const manual = fans.filter((fan) => fan.mode === "manual");
-  const atMax =
-    manual.length > 0 &&
-    manual.every((fan) => fan.targetRPM >= fan.maximumRPM - 50);
-  const current = manual.length === 0 ? "Auto" : atMax ? "Max" : "Manual";
+  const manualCount = fans.filter((fan) => fan.mode === "manual").length;
+  // "Max" only when every fan is manual at its maximum; a mix of manual and
+  // auto fans (possible through the per-fan form) is "Manual".
+  const allAtMax =
+    fans.length > 0 &&
+    fans.every(
+      (fan) => fan.mode === "manual" && fan.targetRPM >= fan.maximumRPM - 50,
+    );
+  const current = manualCount === 0 ? "Auto" : allAtMax ? "Max" : "Manual";
   const next =
     current !== "Auto" ? "Auto" : manualProfile === "quiet" ? "Quiet" : "Max";
   const highest = fans.length
