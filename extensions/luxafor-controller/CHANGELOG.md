@@ -1,6 +1,6 @@
 # Luxafor Changelog
 
-## [Safer Requests and Quick Controls] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
 
 - Add Set Busy, Set Available, Turn off and Set Custom Color commands, plus five recent accepted colors.
 - Fix red-test cancellation and validate custom hex colors before sending.
