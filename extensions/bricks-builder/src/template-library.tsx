@@ -12,7 +12,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { ReactNode } from "react";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { SnippetForm } from "./components/snippet-form";
@@ -38,7 +38,6 @@ const TYPE_ORDER = ["section", "popup", "content", "header", "footer", "archive"
 const COMPONENTS = "components";
 
 const typeLabel = (type: string) => TYPE_LABELS[type] ?? elementTitle(type.replace(/_/g, "-"));
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 interface Source {
   kind: "template" | "component";
@@ -231,9 +230,7 @@ function LibraryActions(props: { site: Site; source: Source; extra: ReactNode })
       await toast.hide();
       return json;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Couldn't load ${source.name}`;
-      toast.message = errorMessage(error);
+      await showFailureToast(error, { title: `Couldn't load ${source.name}` });
       return undefined;
     }
   }

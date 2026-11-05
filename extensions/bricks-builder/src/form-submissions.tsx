@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
 import { ManageSitesAction, SwitchSiteSubmenu, useSelectedSite } from "./hooks/use-selected-site";
@@ -22,8 +22,6 @@ import { getSeen, setSeen } from "./lib/submissions-seen";
 
 const ALL = "";
 const PER_PAGE = 50;
-
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /** Opened from the menu bar with the site (and form) to show. */
 interface LaunchContext {
@@ -145,9 +143,7 @@ export default function Command(props: LaunchProps<{ launchContext: LaunchContex
       toast.title = `Deleted ${result.deleted} ${result.deleted === 1 ? "submission" : "submissions"}`;
       reload();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't delete";
-      toast.message = errorMessage(error);
+      await showFailureToast(error, { title: "Couldn't delete" });
     }
   }
 

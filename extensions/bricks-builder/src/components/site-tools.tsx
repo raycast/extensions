@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, open, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BUY_URL, ProLicenseError } from "../lib/license";
 import { Site } from "../lib/sites";
 import { MaintenanceMode, runTool, setMaintenanceMode, Tool } from "../lib/site-tools";
@@ -15,13 +16,15 @@ async function withToast(title: string, run: () => Promise<string | undefined>, 
     toast.title = message;
     onDone?.();
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't do that";
-    toast.message = error instanceof Error ? error.message : String(error);
-    if (error instanceof ProLicenseError) {
-      toast.title = `Bricks Raycast Pro needed on ${error.site.name}`;
-      toast.primaryAction = { title: "Buy Bricks Raycast Pro", onAction: () => open(BUY_URL) };
-    }
+    await showFailureToast(
+      error,
+      error instanceof ProLicenseError
+        ? {
+            title: `Bricks Raycast Pro needed on ${error.site.name}`,
+            primaryAction: { title: "Buy Bricks Raycast Pro", onAction: () => open(BUY_URL) },
+          }
+        : { title: "Couldn't do that" },
+    );
   }
 }
 

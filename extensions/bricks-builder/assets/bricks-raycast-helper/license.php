@@ -680,7 +680,7 @@ function render_settings_page(): void {
 	}
 
 	$free = [ 'Open in Bricks and creating pages and templates', 'Global classes, colors and variables', 'Dynamic data tags in the builder', 'Bricks Site Info and Bricks Site Health', 'Snippets, shortcuts and docs search' ];
-	$pro  = [ 'Site Audit, with images and alt text', 'Search Bricks Elements and Dynamic Data', 'Template Library across your sites', 'Form Submissions and the menu bar count', 'Maintenance mode, CSS, caches and code signatures', 'Helper plugin updates' ];
+	$pro  = [ 'Site Audit, with images and alt text', 'Search Bricks Elements and Dynamic Data', 'Template Library across your sites', 'Form Submissions and the menu bar count', 'Maintenance mode, CSS, caches and code signatures', 'Automatic helper plugin updates in WordPress' ];
 
 	add_thickbox();
 	$changelog_url = admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . PLUGIN_SLUG . '&TB_iframe=true&width=640&height=560' );
@@ -789,7 +789,7 @@ function render_settings_page(): void {
 						<?php if ( $active ) : ?>
 							Pro features are on for this site in Raycast, and plugin updates arrive under Dashboard › Updates.
 						<?php else : ?>
-							Site Audit, element and dynamic data search, Form Submissions, the Template Library and the site tools need a Pro license, and so do plugin updates. Everything else is free.
+							Site Audit, element and dynamic data search, Form Submissions, the Template Library and the site tools need a Pro license. Licensed sites also get helper plugin updates automatically under Dashboard › Updates; without one, update the plugin from Raycast (Bricks Site Health, ⌘⇧H). Everything else is free.
 						<?php endif; ?>
 					</p>
 

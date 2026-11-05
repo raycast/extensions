@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, open, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { randomUUID } from "node:crypto";
 import { getAnyBrowserTabUrl } from "../lib/browser";
 import { normalizeSiteUrl, Site, upsertSite, wpAdminUrl } from "../lib/sites";
@@ -75,18 +75,18 @@ export function SiteForm(props: { site?: Site; onSaved?: (site: Site) => void })
         props.onSaved?.(candidate);
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Couldn't connect";
-        toast.message = error instanceof Error ? error.message : String(error);
-        toast.primaryAction = {
-          title: "Save Anyway",
-          onAction: async (t) => {
-            await upsertSite(candidate);
-            await t.hide();
-            props.onSaved?.(candidate);
-            pop();
+        await showFailureToast(error, {
+          title: "Couldn't connect",
+          primaryAction: {
+            title: "Save Anyway",
+            onAction: async (t) => {
+              await upsertSite(candidate);
+              await t.hide();
+              props.onSaved?.(candidate);
+              pop();
+            },
           },
-        };
+        });
       }
     },
   });
@@ -105,11 +105,7 @@ export function SiteForm(props: { site?: Site; onSaved?: (site: Site) => void })
       setValue("url", siteUrl);
       if (!current.name.trim()) setValue("name", url.hostname.replace(/^www\./, ""));
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't read the browser tab",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Couldn't read the browser tab" });
     }
   }
 

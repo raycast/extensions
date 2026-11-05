@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { InstallHelperAction } from "./components/helper-install-action";
 import { LicenseActions, LicenseForm, licenseFailure } from "./components/license-form";
 import { SiteForm } from "./components/site-form";
@@ -15,6 +15,7 @@ import {
   licenseLabel,
   LicenseSummary,
   LICENSE_VERSION,
+  MANAGE_URL,
 } from "./lib/license";
 import { Site } from "./lib/sites";
 import { isMissingRoute, WordPressError } from "./lib/wordpress";
@@ -115,11 +116,15 @@ export default function Command() {
       }
     }
     await recheck();
-    toast.style = failed.length ? Toast.Style.Failure : Toast.Style.Success;
-    toast.title = failed.length
-      ? `Activated on ${waiting.length - failed.length} of ${waiting.length} sites`
-      : `Bricks Raycast Pro is active on ${waiting.length} ${waiting.length === 1 ? "site" : "sites"}`;
-    toast.message = failed.join("\n") || undefined;
+    if (failed.length) {
+      await showFailureToast(failed.join("\n"), {
+        title: `Activated on ${waiting.length - failed.length} of ${waiting.length} sites`,
+      });
+      return;
+    }
+    toast.style = Toast.Style.Success;
+    toast.title = `Bricks Raycast Pro is active on ${waiting.length} ${waiting.length === 1 ? "site" : "sites"}`;
+    toast.message = undefined;
   }
 
   async function forget() {
@@ -151,6 +156,7 @@ export default function Command() {
         />
       )}
       <Action.OpenInBrowser title="Buy Bricks Raycast Pro" icon={Icon.Cart} url={BUY_URL} />
+      {savedKey && <Action.OpenInBrowser title="Manage Subscription" icon={Icon.CreditCard} url={MANAGE_URL} />}
       {savedKey && (
         <Action title="Forget Saved License Key" icon={Icon.Trash} style={Action.Style.Destructive} onAction={forget} />
       )}

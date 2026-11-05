@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { ReactNode } from "react";
 import { ImageList } from "./components/image-audit";
 import { ErrorEmptyView, NoSitesView } from "./components/site-empty-view";
@@ -23,8 +23,6 @@ type SectionKey = "classes" | "trash" | "templates" | "code" | "images" | "large
 /** Element counts above these are worth a look (Bricks slows down in the builder first). */
 const HEAVY = 500;
 const BUSY = 250;
-
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 interface SectionSummary {
   key: SectionKey;
@@ -434,9 +432,7 @@ function ClassSections(props: {
         onAction: () => restore(ids),
       };
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't move them to the trash";
-      toast.message = errorMessage(error);
+      await showFailureToast(error, { title: "Couldn't move them to the trash" });
     }
   }
 
@@ -448,9 +444,7 @@ function ClassSections(props: {
       toast.style = Toast.Style.Success;
       toast.title = `Restored ${result.restored.map((c) => `.${c.name}`).join(", ")}`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't restore";
-      toast.message = errorMessage(error);
+      await showFailureToast(error, { title: "Couldn't restore" });
     }
   }
 

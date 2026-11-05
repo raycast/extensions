@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 /** Picks a JSON export and hands its path to `onImport`, which returns how many items it added or updated. */
 export function ImportForm(props: { title: string; description: string; onImport: (path: string) => Promise<string> }) {
@@ -15,11 +16,7 @@ export function ImportForm(props: { title: string; description: string; onImport
       await showToast({ style: Toast.Style.Success, title: message });
       pop();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't import",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Couldn't import" });
     }
   }
 

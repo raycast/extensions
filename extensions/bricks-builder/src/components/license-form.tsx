@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm, usePromise } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
 import {
   activateLicense,
   BUY_URL,
@@ -7,6 +7,7 @@ import {
   getSavedKey,
   keyHint,
   LICENSE_VERSION,
+  MANAGE_URL,
   saveKey,
 } from "../lib/license";
 import { Site } from "../lib/sites";
@@ -34,9 +35,7 @@ export async function activateOn(site: Site, key: string): Promise<boolean> {
         : undefined;
     return true;
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't activate the license";
-    toast.message = licenseFailure(site, error);
+    await showFailureToast(error, { title: "Couldn't activate the license", message: licenseFailure(site, error) });
     return false;
   }
 }
@@ -76,7 +75,7 @@ export function LicenseForm(props: { site?: Site; onSaved?: () => void }) {
         </ActionPanel>
       }
     >
-      <Form.Description text="Site Audit, element and dynamic data search, Form Submissions, the Template Library and site tools need a Bricks Raycast Pro license on the site. Each site you activate uses one of your license's activations." />
+      <Form.Description text="Site Audit, element and dynamic data search, Form Submissions, the Template Library and site tools need a Bricks Raycast Pro license on the site. Activate it on each site you want Pro on." />
       <Form.PasswordField
         {...itemProps.key}
         title="License Key"
@@ -103,18 +102,19 @@ export function LicenseActions(props: { site: Site; onChange?: () => void; hasLi
       const result = await deactivateLicense(props.site);
       if (result.warning) {
         // The key is gone from the site, but the license server hasn't freed the activation yet.
-        toast.style = Toast.Style.Failure;
-        toast.title = `License removed from ${props.site.name}, activation not freed yet`;
-        toast.message = result.warning;
+        await showFailureToast(result.warning, {
+          title: `License removed from ${props.site.name}, activation not freed yet`,
+        });
       } else {
         toast.style = Toast.Style.Success;
         toast.title = `License deactivated on ${props.site.name}`;
       }
       props.onChange?.();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't deactivate the license";
-      toast.message = licenseFailure(props.site, error);
+      await showFailureToast(error, {
+        title: "Couldn't deactivate the license",
+        message: licenseFailure(props.site, error),
+      });
     }
   }
 
@@ -136,6 +136,7 @@ export function LicenseActions(props: { site: Site; onChange?: () => void; hasLi
         target={<LicenseForm site={props.site} onSaved={props.onChange} />}
       />
       {!props.hasLicense && <Action.OpenInBrowser title="Buy Bricks Raycast Pro" icon={Icon.Cart} url={BUY_URL} />}
+      {props.hasLicense && <Action.OpenInBrowser title="Manage Subscription" icon={Icon.CreditCard} url={MANAGE_URL} />}
       {props.hasLicense !== false && (
         <Action title="Deactivate License" icon={Icon.XMarkCircle} style={Action.Style.Destructive} onAction={remove} />
       )}

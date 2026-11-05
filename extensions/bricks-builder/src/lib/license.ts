@@ -5,6 +5,9 @@ import { HELPER_NAMESPACE, wpRequest } from "./wordpress";
 /** Where to buy Pro: the product page on martej.com, with the plans. */
 export const BUY_URL = "https://martej.com/bricks-raycast";
 
+/** Creem's customer portal: sign in with the purchase email to manage or cancel a subscription. */
+export const MANAGE_URL = "https://creem.io/my-orders/login";
+
 /** Helper plugin version that added licenses. */
 export const LICENSE_VERSION = "1.6.0";
 

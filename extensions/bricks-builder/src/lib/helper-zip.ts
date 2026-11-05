@@ -4,7 +4,6 @@ import { deflateRawSync } from "node:zlib";
 
 // Builds the helper plugin's zip from its source in assets/, ready for Plugins › Add New › Upload
 // Plugin. The source ships instead of a zip because Raycast's extensions repository ignores zips.
-// scripts/helper-zip.js builds the same zip for releases.
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;

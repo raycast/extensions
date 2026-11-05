@@ -2,16 +2,36 @@
 
 Work with [Bricks Builder](https://bricksbuilder.io) sites from Raycast: open any page or template in the builder, press builder shortcuts, browse global classes, colors and variables, keep a snippet library, search the Bricks docs, and keep an eye on all your Bricks sites.
 
-## Free and Pro
+Bricks Builder for Raycast and Bricks Raycast Pro are made by [Martej](https://martej.com). They are not made, endorsed or supported by Bricks (bricksbuilder.io), and a Bricks Raycast Pro license is not part of a Bricks license.
 
-Most of the extension is free. **Bricks Raycast Pro** adds Site Audit (with the image and alt text audit), Search Bricks Elements, Search Dynamic Data, the Template Library, Form Submissions with the menu bar count, the site tools (maintenance mode, CSS files, caches, code signatures) and helper plugin updates. A license is per site, local sites included; plans and pricing are on [martej.com/bricks-raycast](https://martej.com/bricks-raycast). Commands that need Pro are marked **Pro** below.
+## Bricks Raycast Pro
+
+Most of the extension is free. These commands need a **Bricks Raycast Pro** license on the site you use them with:
+
+- Bricks Site Audit (with the image and alt text audit)
+- Search Bricks Elements
+- Search Dynamic Data
+- Bricks Template Library
+- Bricks Form Submissions, and its menu bar command New Bricks Form Submissions
+- The site tools: Toggle Bricks Maintenance Mode, Regenerate Bricks CSS Files, Clear Bricks Site Caches and Regenerate Bricks Code Signatures
+
+Bricks Raycast Pro is a separate license sold by Martej at [martej.com/bricks-raycast](https://martej.com/bricks-raycast). The plans and current prices are on that page. To manage or cancel a subscription, run **Bricks Raycast Pro** and choose Manage Subscription (⌘K), or use the link in your purchase email: both open Creem's customer portal, where you sign in with your purchase email. Licensed sites also get new versions of the helper plugin automatically in WordPress (Dashboard › Updates); without a license you update it yourself from Raycast with ⌘⇧H in Bricks Site Health.
+
+**What the license server receives.** The helper plugin talks to `license.martej.com` from your WordPress site, not from Raycast:
+
+- When you activate a license on a site: the license key and the site's URL.
+- Once a day, to check the license: the license key and that site's activation ID.
+- About every 12 hours, WordPress's update check asks for the latest helper plugin version. That request carries no license data, only WordPress's standard request header, which includes the site's URL. Downloading an update sends the license key and activation ID.
+- When you deactivate a license: the license key and the activation ID.
+
+Nothing else is sent: no content, users or form submissions. Payments are handled by Creem.
 
 ## Setup
 
 1. **Install the Bricks Raycast Helper plugin** on each site. The extension ships it: in **Bricks Site Health**, press ⌘⇧H on a site (Install, Update or Reinstall Helper Plugin) to put `bricks-raycast-helper.zip` in Downloads and open the site's Plugins › Add New › Upload Plugin page, then activate it. To update, do the same and pick "Replace current with uploaded". The plugin's source is in [`assets/bricks-raycast-helper`](assets/bricks-raycast-helper). It needs WordPress 6.0 and PHP 7.4 or newer, with Bricks active. The helper powers Bricks templates, global classes, colors and variables, dynamic data, element search, the site audit, the template library, site info and creating templates, and makes Open in Bricks load in a single request. Commands marked *Helper 1.3* or *Helper 1.4* need that version or newer; Bricks Site Health shows which sites need an update. Shortcuts, snippets and docs search work without it.
 2. **Create an application password** in WordPress under Users › Profile › Application Passwords. Your user needs to be able to edit posts. See [Application Passwords](https://wordpress.org/documentation/article/application-passwords/).
 3. **Add the site in Raycast.** Run **Manage Bricks Sites** and enter the site URL (⌘⇧B fills it from your browser tab, ⌘⇧P opens the site's Application Passwords page), your WordPress username and the application password. If the site lives at a different address (for example it redirects to `www`), it's saved under that address. Tick "Allow self-signed certificate" for Local, DDEV or Herd sites.
-4. **Bricks Raycast Pro** (optional): Site Audit, Search Bricks Elements, Search Dynamic Data, Form Submissions, the Template Library and the site tools (maintenance mode, regenerating CSS and code signatures, clearing caches) need a Pro license on the site, and so do plugin updates. Buy one, then run **Bricks Raycast Pro**: add the key once and activate it on one site or all of them (⌘⇧A). It's also offered wherever a command needs Pro, in Manage Bricks Sites and Bricks Site Health (⌘⇧L on a site), and in WordPress under Settings › Bricks Raycast. Each site uses one of the license's activations; deactivating the license or the plugin frees it. Everything else is free.
+4. **Bricks Raycast Pro** (optional): Site Audit, Search Bricks Elements, Search Dynamic Data, Form Submissions, the Template Library and the site tools (maintenance mode, regenerating CSS and code signatures, clearing caches) need a Pro license on the site. Buy one, then run **Bricks Raycast Pro**: add the key once and activate it on one site or all of them (⌘⇧A). It's also offered wherever a command needs Pro, in Manage Bricks Sites and Bricks Site Health (⌘⇧L on a site), and in WordPress under Settings › Bricks Raycast. Activate the license on each site you want Pro on; deactivating the license or the plugin takes it off again. Everything else is free.
 5. **For the builder commands**, keep Bricks open in your browser. Search Bricks Shortcuts, Edit Current Page in Bricks and pasting snippets act on the frontmost browser tab, so macOS may ask you to allow Raycast to control your browser and System Events.
 
 ## Commands
@@ -43,7 +63,3 @@ Most of the extension is free. **Bricks Raycast Pro** adds Site Audit (with the 
 Commands marked *off by default* are disabled on install; enable them in Raycast Settings → Extensions → Bricks Builder.
 
 Sites and snippets live in Raycast's encrypted local storage. Form submissions aren't cached on disk.
-
-## Develop
-
-See [DEVELOPMENT.md](DEVELOPMENT.md) for the helper plugin's endpoints, the license server and releasing.

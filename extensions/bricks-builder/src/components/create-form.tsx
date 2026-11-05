@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, open, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { NoSitesView } from "./site-empty-view";
 import { useSelectedSite } from "../hooks/use-selected-site";
 import { createContent } from "../lib/wordpress";
@@ -47,9 +47,7 @@ export function CreateForm() {
         await showHUD(`Created ${created.title} as a draft, opening Bricks`);
         await popToRoot();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Couldn't create it";
-        toast.message = error instanceof Error ? error.message : String(error);
+        await showFailureToast(error, { title: "Couldn't create it" });
       }
     },
   });

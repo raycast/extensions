@@ -14,7 +14,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import { ReactElement, useMemo, useRef, useState } from "react";
 import { ErrorEmptyView } from "./site-empty-view";
 import {
@@ -71,8 +71,6 @@ function previewSrc(url: string | null | undefined): string | undefined {
     return undefined;
   }
 }
-
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 export function formatBytes(bytes: number | null | undefined): string {
   if (!bytes) return "–";
@@ -508,9 +506,7 @@ async function saveAlt(site: Site, image: AuditImage, alt: string, decorative: b
     onSaved();
     return true;
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Couldn't save";
-    toast.message = errorMessage(error);
+    await showFailureToast(error, { title: "Couldn't save" });
     return false;
   }
 }
@@ -595,11 +591,7 @@ export function AltTextForm(props: { site: Site; queue: AuditImage[]; onSaved: (
                   const suggestion = await suggestAlt(image);
                   if (currentKey.current === requested) setAlt(suggestion);
                 } catch (error) {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Couldn't suggest",
-                    message: errorMessage(error),
-                  });
+                  await showFailureToast(error, { title: "Couldn't suggest" });
                 } finally {
                   setSuggesting(false);
                 }

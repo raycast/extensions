@@ -1,4 +1,5 @@
 import { Alert, confirmAlert, open, showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { BUY_URL, ProLicenseError } from "./license";
 import { getHealth, SiteHealth } from "./bricks-data";
 import { helperRequest, SCAN_TIMEOUT } from "./design";
@@ -97,12 +98,14 @@ export async function runOnSelectedSite(title: string, run: (site: Site) => Prom
     if (message) await showHUD(message);
     else await toast.hide();
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = `Couldn't do that on ${site.name}`;
-    toast.message = error instanceof Error ? error.message : String(error);
-    if (error instanceof ProLicenseError) {
-      toast.title = `Bricks Raycast Pro needed on ${site.name}`;
-      toast.primaryAction = { title: "Buy Bricks Raycast Pro", onAction: () => open(BUY_URL) };
-    }
+    await showFailureToast(
+      error,
+      error instanceof ProLicenseError
+        ? {
+            title: `Bricks Raycast Pro needed on ${site.name}`,
+            primaryAction: { title: "Buy Bricks Raycast Pro", onAction: () => open(BUY_URL) },
+          }
+        : { title: `Couldn't do that on ${site.name}` },
+    );
   }
 }
