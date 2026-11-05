@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pond",
   "title": "Pond",
-  "description": "Search your Pond library, save URLs, and switch libraries from Raycast.",
-  "icon": "pond-icon.png",
+  "description": "Search, save, and organize your local Pond library from Raycast.",
+  "icon": "icon.png",
   "author": "0xdhrv",
+  "contributors": [
+    "raphaelsalaja"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -15,17 +18,112 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-library",
-      "title": "Search Library",
+      "name": "search-saves",
+      "title": "Search Saves",
       "subtitle": "Pond",
-      "description": "Search saves in your active Pond library and open their original URLs.",
+      "description": "Search your library by keywords or meaning, then open, tag, file, or trash a save.",
+      "keywords": [
+        "library",
+        "bookmarks",
+        "find"
+      ],
       "mode": "view"
+    },
+    {
+      "name": "search-media",
+      "title": "Search Media",
+      "subtitle": "Pond",
+      "description": "Browse the images and videos in your library as a grid.",
+      "keywords": [
+        "images",
+        "videos",
+        "grid"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "columns",
+          "title": "Columns",
+          "description": "How many saves fit in each row.",
+          "type": "dropdown",
+          "required": false,
+          "default": "5",
+          "data": [
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-tags",
+      "title": "Search Tags",
+      "subtitle": "Pond",
+      "description": "Find a tag and see the saves that carry it.",
+      "keywords": [
+        "labels"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-folders",
+      "title": "Search Folders",
+      "subtitle": "Pond",
+      "description": "Find a folder and see the saves inside it.",
+      "keywords": [
+        "collections"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-views",
+      "title": "Search Saved Views",
+      "subtitle": "Pond",
+      "description": "Open a saved view or smart folder from your library.",
+      "keywords": [
+        "smart folders",
+        "filters"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "random-save",
+      "title": "Open Random Save",
+      "subtitle": "Pond",
+      "description": "Open a random save from your library in Pond.",
+      "keywords": [
+        "shuffle",
+        "surprise"
+      ],
+      "mode": "no-view"
     },
     {
       "name": "save-url",
       "title": "Save URL",
       "subtitle": "Pond",
-      "description": "Save a web URL to your active Pond library.",
+      "description": "Save a URL with tags and a folder, then watch Pond capture it.",
+      "keywords": [
+        "add",
+        "bookmark"
+      ],
       "mode": "view",
       "arguments": [
         {
@@ -37,96 +135,161 @@
       ]
     },
     {
-      "name": "save-clipboard",
-      "title": "Save Clipboard URL",
+      "name": "quick-save",
+      "title": "Quick Save",
       "subtitle": "Pond",
-      "description": "Save the web URL on your clipboard to Pond.",
-      "mode": "no-view"
+      "description": "Save a URL without opening a form. Uses your selection, browser tab, or clipboard when you leave it empty.",
+      "keywords": [
+        "add",
+        "bookmark"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "type": "text",
+          "placeholder": "Tags",
+          "required": false
+        }
+      ]
     },
     {
       "name": "save-current-tab",
-      "title": "Save Current Browser Tab",
+      "title": "Save Current Tab",
       "subtitle": "Pond",
-      "description": "Save the URL of your active browser tab to Pond.",
+      "description": "Save the page open in your browser.",
+      "keywords": [
+        "browser",
+        "safari",
+        "chrome",
+        "arc"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Clipboard URL",
+      "subtitle": "Pond",
+      "description": "Save the URL on your clipboard.",
+      "keywords": [
+        "paste"
+      ],
       "mode": "no-view"
     },
     {
       "name": "switch-library",
       "title": "Switch Library",
       "subtitle": "Pond",
-      "description": "Open or switch to a recent Pond library.",
+      "description": "Switch Pond to one of your recent libraries.",
       "mode": "view"
-    },
-    {
-      "name": "pond",
-      "title": "Open Library",
-      "subtitle": "Pond",
-      "description": "Open the active library in Pond.",
-      "mode": "no-view"
-    },
-    {
-      "name": "setup",
-      "title": "Set up Pond",
-      "subtitle": "Pond",
-      "description": "Connect Pond, check your API token, and see the active library and save count.",
-      "mode": "view"
-    }
-  ],
-  "tools": [
-    {
-      "name": "search-library",
-      "title": "Search Library",
-      "description": "Search saves by keywords, source, exact tag, and saved date. Returns metadata, original URLs, Pond links, library IDs, and a pagination cursor."
-    },
-    {
-      "name": "save-url",
-      "title": "Save URL",
-      "description": "Queue a web URL for archiving in the active Pond library, with optional tags. For existing URLs, supplied tags are added to their current tags.",
-      "type": "function"
-    },
-    {
-      "name": "get-save",
-      "title": "Get Save",
-      "description": "Read a save and its metadata using the exact save ID and library ID from search results."
-    },
-    {
-      "name": "get-library-info",
-      "title": "Get Library Info",
-      "description": "Read the active Pond library name, path, and number of saves."
-    },
-    {
-      "name": "list-libraries",
-      "title": "List Libraries",
-      "description": "List recent Pond libraries with their exact paths, active status, and availability."
-    },
-    {
-      "name": "switch-library",
-      "title": "Switch Library",
-      "description": "Switch to an available recent library using its exact path from List Libraries. Subsequent searches and saves use this library."
-    },
-    {
-      "name": "open-save",
-      "title": "Open Save",
-      "description": "Open an existing save in Pond using its save ID and library ID from search results."
     },
     {
       "name": "open-library",
       "title": "Open Library",
-      "description": "Bring Pond to the front and open its active library. Works without an API token."
+      "subtitle": "Pond",
+      "description": "Bring Pond to the front with your active library.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "Pond",
+      "description": "Show recent saves and capture progress in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-saves",
+      "title": "Search Saves",
+      "description": "Find saves by keywords, by meaning, or by source, tag, folder, and date. Returns short summaries with Pond links and a cursor for the next page."
+    },
+    {
+      "name": "get-save",
+      "title": "Get Save",
+      "description": "Read one save's details, including its tags, folders, note, and rating."
+    },
+    {
+      "name": "read-save-text",
+      "title": "Read Save Text",
+      "description": "Read the text Pond extracted from a save: its caption, text in images, transcript, and note."
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List the tags in the active library, most used first."
+    },
+    {
+      "name": "list-folders",
+      "title": "List Folders",
+      "description": "List the folders in the active library with their full paths and IDs."
+    },
+    {
+      "name": "list-libraries",
+      "title": "List Libraries",
+      "description": "List recent libraries with their exact paths and which one is active."
+    },
+    {
+      "name": "get-library-info",
+      "title": "Get Library Info",
+      "description": "Read the active library's name, path, save counts, and capture queue."
+    },
+    {
+      "name": "save-url",
+      "title": "Save URL",
+      "description": "Save a web URL to the active library, with optional tags and a folder."
+    },
+    {
+      "name": "edit-tags",
+      "title": "Edit Tags",
+      "description": "Add tags to saves or remove tags from them."
+    },
+    {
+      "name": "add-to-folder",
+      "title": "Add to Folder",
+      "description": "Add saves to a folder, or take them out of one."
+    },
+    {
+      "name": "trash-saves",
+      "title": "Move to Trash",
+      "description": "Move saves to the Trash. You can restore them in Pond."
+    },
+    {
+      "name": "switch-library",
+      "title": "Switch Library",
+      "description": "Switch Pond to a recent library using its exact path from List Libraries."
+    },
+    {
+      "name": "open-save",
+      "title": "Open Save",
+      "description": "Open a save in Pond, or open its original web page."
+    },
+    {
+      "name": "open-library",
+      "title": "Open Library",
+      "description": "Bring Pond to the front with its active library."
     }
   ],
   "preferences": [
     {
       "name": "token",
       "title": "Local API Token",
-      "description": "Copy the token from Pond Settings \u2192 General \u2192 Raycast. Required for search and save commands.",
+      "description": "In Pond, open Settings, then Preferences, and choose Copy Token under Raycast.",
       "type": "password",
-      "required": false
+      "required": true,
+      "placeholder": "Copy from Pond Settings → Preferences → Raycast"
     },
     {
       "name": "baseUrl",
       "title": "Local API URL",
-      "description": "Pond's local HTTP API address. Only localhost, 127.0.0.1, or [::1] is supported.",
+      "description": "Change this only if you changed the port in Pond.",
       "type": "textfield",
       "required": false,
       "default": "http://127.0.0.1:41610/api/v2"
@@ -134,27 +297,27 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.8.0",
-    "@raycast/utils": "^2.2.7",
-    "react": "19.0.0",
-    "zod": "^4.6.7"
+    "@raycast/utils": "^2.3.2",
+    "pond-api": "^0.2.1",
+    "react": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^10.5.0",
+    "eslint": "^10.10.0",
     "prettier": "^3.8.5",
-    "typescript": "^6.0.3",
-    "tsx": "^4.20.6"
+    "tsx": "^4.20.6",
+    "typescript": "6.0.3"
   },
   "scripts": {
     "build": "ray build",
-    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --test 'tests/*.test.ts'",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop"
   }
 }

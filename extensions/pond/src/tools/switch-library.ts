@@ -1,19 +1,22 @@
-import { pondClient } from "../api";
+import type { Tool } from "@raycast/api";
+import { pond } from "../api/client";
 
 type Input = {
-  /** Exact path returned by List Libraries. Do not invent a path or pick an ambiguous name. */
+  /** Exact path from List Libraries. Never guess a path or pick between similar names. */
   path: string;
 };
 
-export default async function SwitchLibrary({ path }: Input) {
-  return pondClient().selectLibrary(path);
+export default async function tool(input: Input) {
+  const libraries = await pond().libraries();
+  const library = libraries.find((item) => item.path === input.path);
+  if (!library) throw new Error("That path isn't in Pond's recent libraries. Call List Libraries for exact paths.");
+  if (library.active) return { name: library.name, path: library.path, alreadyActive: true };
+  if (!library.available) throw new Error(`Pond can't find ${library.name} on disk. Open it from Pond instead.`);
+  await pond().switchLibrary(library.path);
+  return { name: library.name, path: library.path, alreadyActive: false };
 }
 
-export function confirmation({ path }: Input) {
-  return {
-    info: [
-      { name: "Switch to Library", value: path },
-      { name: "Effect", value: "Subsequent searches and saves will use this library." },
-    ],
-  };
-}
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
+  message: "Pond switches libraries. Later searches and saves use the new one.",
+  info: [{ name: "Library", value: input.path }],
+});

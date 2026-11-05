@@ -1,156 +1,115 @@
-<div align="center">
-    <br/>
-    <br/>
-    <img src="./assets/pond-icon.png" alt="Pond" width="100"/>
-    <h3>Pond</h3>
-    <p>Search your library, save web pages, and switch libraries from Raycast</p>
-    <br/>
-</div>
+# Pond
 
-This extension connects Raycast to [Pond](https://github.com/raphaelsalaja/pond), the personal web archiver for macOS. It includes search with image previews, URL capture, tags, library switching, eight Raycast AI tools, and Pond's native MCP server.
+Search, save, and organize your [Pond](https://github.com/raphaelsalaja/pond) library from Raycast. Pond is a personal archiver for macOS that keeps the posts, links, images, and videos you save on your Mac. This extension talks to the Pond app over its local API, so nothing leaves your machine.
 
-## What comes from Pond?
+## Set up
 
-Pond already provides an authenticated local API, an MCP server, and [its own Raycast extension](https://github.com/raphaelsalaja/pond/tree/main/apps/raycast). This project is a standalone Raycast client built against that API. It adds a guided setup check, browser-tab capture, tag and date filters, tagged saves, and broader Raycast AI coverage. The MCP server is built into Pond; this extension registers it with Raycast.
+You need macOS, Raycast, and the latest version of Pond.
 
-You do not need to modify Pond or build its monorepo to use this extension. The app icon and API schemas come from Pond, with attribution in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+1. [Install Pond](https://github.com/raphaelsalaja/pond/releases/latest), open it, and pick a library.
+2. In Pond, open **Settings → Preferences**, then choose **Copy Token** under **Integrations → Raycast**.
+3. Run any Pond command in Raycast and paste the token into **Local API Token**.
 
-## Get started
+Keep Pond running while you use the extension. **Launch at Login** and **Launch in Background** in Pond Settings keep it ready without a window. If something's off, the extension tells you what happened and offers the one action that fixes it: open Pond, copy a new token, or update Pond.
 
-You need **macOS**, **Raycast**, and **Pond 1.0.1 or later**.
-
-1. [Install Pond](https://github.com/raphaelsalaja/pond/releases), open it, and choose a library.
-2. Import this extension for local development:
-
-   ```sh
-   npm install
-   npm run dev
-   ```
-
-3. Run **Set up Pond** in Raycast. Choose **Open Pond Settings**, then go to **General → Raycast → Copy Token**.
-4. Choose **Open Extension Preferences** and paste the token into **Local API Token**.
-5. Return to **Set up Pond** and press **⌘R**. A successful check shows your Pond version, active library, and save count.
-
-Keep Pond running when searching or saving. Pond's **Launch at Login** and **Launch in Background** settings can help. **Open Library** and the setup guide work before a token is configured.
-
-The default **Local API URL** is `http://127.0.0.1:41610/api/v2`. Change the port only if you changed it in Pond.
+Leave **Local API URL** at `http://127.0.0.1:41610/api/v2` unless you changed the port in Pond.
 
 ## Commands
 
-| Command                      | Use it to                                                                                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Search Library**           | Browse recent saves or search by keyword. Filter by source, exact tag, or saved date; preview images and metadata; open links or copy a saved file. |
-| **Save URL**                 | Archive a URL with optional comma-separated tags. You can also pass the URL as a command argument.                                                  |
-| **Save Clipboard URL**       | Archive the web URL on your clipboard.                                                                                                              |
-| **Save Current Browser Tab** | Archive the page in the front browser window.                                                                                                       |
-| **Switch Library**           | Choose a recent library. Active and unavailable libraries are marked.                                                                               |
-| **Open Library**             | Bring Pond to the front and open the active library.                                                                                                |
-| **Set up Pond**              | Follow the setup steps and check the connection, token, Pond version, and active library.                                                           |
+| Command                | What it does                                                                                       |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| **Search Saves**       | Search by keywords or by meaning, filter by source, folder, tag, saved view, or Trash, then act.   |
+| **Search Media**       | Browse your images and videos as a grid, with Quick Look.                                          |
+| **Search Tags**        | Find a tag, see its saves, or open it in Pond.                                                     |
+| **Search Folders**     | Find a folder by its full path and see what's inside.                                              |
+| **Search Saved Views** | Open a saved view or smart folder from Pond.                                                       |
+| **Open Random Save**   | Rediscover something you saved.                                                                    |
+| **Save URL**           | Save a URL with tags and a folder, then watch Pond capture it.                                     |
+| **Quick Save**         | Save without a form. Leave the URL empty to use your selection, browser tab, or clipboard.         |
+| **Save Current Tab**   | Save the page open in Safari, Chrome, Arc, Brave, Edge, Chromium, or Vivaldi.                      |
+| **Save Clipboard URL** | Save the URL on your clipboard.                                                                    |
+| **Switch Library**     | Switch Pond to one of your recent libraries.                                                       |
+| **Open Library**       | Bring Pond to the front.                                                                           |
+| **Menu Bar**           | Recent saves, capture progress, and quick actions. It hides itself while Pond is closed.          |
 
-### Search and organize
+### Search Saves
 
-Search uses Pond's own library search. The source dropdown narrows it to a platform such as X, Instagram, Pinterest, or Are.na. Open **Filter Saves** to add an exact tag and a **Saved Since** date. You can also select a tag in a save's metadata to filter by it. Results load as you scroll.
+Type to search titles, descriptions, authors, tags, notes, and URLs. Press **⌘⇧B** to search by meaning instead, for ideas you remember but can't quote. The dropdown filters by source, folder, tag, saved view, untagged saves, saves outside any folder, or the Trash, and Raycast remembers your choice. With an empty search, the saves you opened last sit at the top.
 
-| Shortcut | Action                                  |
-| -------- | --------------------------------------- |
-| Return   | Open the selected save in Pond          |
-| ⌘O       | Open its original web page              |
-| ⌘C       | Copy its original URL                   |
-| ⇧⌘C      | Copy its first saved file               |
-| ⇧⌘F      | Filter by tag and saved date            |
-| ⌘R       | Refresh results or check the connection |
+Each save has a full action panel:
 
-**Copy File** asks Pond to copy the original file reference, ready to paste into another app. Saves without a downloaded file show an error. If you change libraries or Pond updates the library while you're scrolling, refresh the search before continuing.
+| Shortcut | Action                          |
+| -------- | ------------------------------- |
+| ↵        | Open in Pond                    |
+| ⌘↵       | Open the original page          |
+| ⌘Y       | Quick Look                      |
+| ⌘⇧C      | Copy URL                        |
+| ⌘⇧L      | Copy Pond link                  |
+| ⌘⇧M      | Copy Markdown link              |
+| ⌘⇧F      | Copy the image or file          |
+| ⌘⇧T      | Copy the text Pond extracted    |
+| ⌘T       | Add or remove tags              |
+| ⌘L       | Add to or remove from a folder  |
+| ⌘E       | Add or edit a note              |
+| ⌃X       | Move to Trash                   |
+| ⌘⇧R      | Show related saves              |
+| ⌘⇧D      | Show or hide details            |
+| ⌘R       | Refresh                         |
 
-### Save a page
+Edits show right away and roll back if Pond can't apply them. Moving to the Trash asks first, and you can restore from the Trash filter.
 
-Use **Save URL** for a URL and optional tags such as `design, inspiration`. Pond merges supplied tags into an existing save, preserving its other tags. Without tags, saving an existing URL reports **Already in Pond**.
+### Save URL
 
-**Queued in Pond** means Pond accepted the URL for processing. It does not mean that archiving has finished. These commands send the URL and any tags; they do not send browser cookies or authenticated page content. Use Pond's browser extension when a capture needs that integration.
+The form fills the URL from your selection, the page in your browser, or your clipboard, in that order. Pick existing tags, type new ones, and choose a folder. Drafts survive closing Raycast. **Create Quicklink with These Tags** turns your tag and folder choice into a one-keystroke Quick Save.
 
-**Save Current Browser Tab** supports Safari, Chrome, Arc, Brave, Edge, Chromium, and Vivaldi. Run it with your browser in front. macOS may ask you to allow Raycast to control the browser under **System Settings → Privacy & Security → Automation**. For other browsers, use **Save Clipboard URL**.
+After you save, the extension follows the capture and shows when Pond has the thumbnail, caption, text in images, and transcript. Saving a URL that's already in Pond adds your tags and folder to the existing save.
+
+The first time you save the current tab, macOS may ask to let Raycast control your browser. Allow it in **System Settings → Privacy & Security → Automation**. With the Raycast browser extension installed, the extension reads the tab from there instead.
 
 ## Raycast AI
 
-Use `@pond` in Raycast AI to work with your library:
+Mention `@pond` in Raycast AI:
 
-- `@pond find my saved typography references`
-- `@pond find saves from X tagged inspiration saved since 2026-10-01`
+- `@pond find my typography references from Are.na`
+- `@pond that article about software that feels calm`
+- `@pond what does the transcript of that talk say about color?`
 - `@pond save https://example.com/article and tag it reading`
-- `@pond which library is active and how many saves does it have?`
+- `@pond put these in my Fonts folder`
 - `@pond switch to my Research library`
-- `@pond open that save in Pond`
 
-| Tool             | Capability                                                                       |
-| ---------------- | -------------------------------------------------------------------------------- |
-| Search Library   | Search by keywords, source, exact tag, and saved date; paginate through results. |
-| Get Save         | Read a specific save's current metadata using its save and library IDs.          |
-| Save URL         | Queue a URL or add requested tags to an existing saved URL.                      |
-| Get Library Info | Read the active library's name, path, and save count.                            |
-| List Libraries   | Find recent libraries and check their availability.                              |
-| Switch Library   | Switch to an available library resolved from the recent list.                    |
-| Open Save        | Open a resolved save in Pond.                                                    |
-| Open Library     | Bring the active Pond library to the front.                                      |
+| Tool             | What it does                                                               |
+| ---------------- | -------------------------------------------------------------------------- |
+| Search Saves     | Search by keywords or meaning, with source, tag, folder, type, and dates. |
+| Get Save         | Read one save's details.                                                   |
+| Read Save Text   | Read a save's caption, text in images, transcript, and note.               |
+| List Tags        | List your tags, most used first.                                           |
+| List Folders     | List folders with their full paths.                                        |
+| List Libraries   | List recent libraries.                                                     |
+| Get Library Info | Read the active library's counts and capture queue.                        |
+| Save URL         | Save a URL with tags and a folder.                                         |
+| Edit Tags        | Add or remove tags.                                                        |
+| Add to Folder    | Add saves to a folder or take them out.                                    |
+| Move to Trash    | Move saves to the Trash.                                                   |
+| Switch Library   | Switch Pond to another library.                                            |
+| Open Save        | Open a save in Pond or its original page.                                  |
+| Open Library     | Bring Pond to the front.                                                   |
 
-Saving and switching libraries show confirmation details. Switching affects subsequent searches and saves. Save lookups include the originating library ID, so a stale result does not silently refer to another library.
+Every change asks you first and names the saves it touches. Save IDs belong to one library, so after a switch, search again before changing saves.
 
-### Native MCP support
+The extension also registers Pond's built-in MCP server, which adds tools for exact text search, nested queries, and exports. Turn on the capabilities you want in **Pond Settings → Model Context Protocol**. If Pond isn't in `/Applications`, copy the path from **Pond Settings → Model Context Protocol → Advanced** into `ai.yaml`.
 
-The extension declares Pond's server directly in `ai.yaml`, using [Raycast's MCP configuration](https://developers.raycast.com/information/manifest#mcp-server):
+## Privacy
 
-```yaml
-mcp:
-  type: stdio
-  command: /Applications/Pond.app/Contents/MacOS/Pond
-  args: ["--mcp"]
-```
+Commands and tools connect to Pond over `127.0.0.1`. Your token stays in Raycast's password storage and never appears in AI results. Thumbnails and Quick Look files are cached in the extension's support folder and trimmed automatically.
 
-Raycast launches this local process and makes its tools available through **Ask Pond** and `@pond`, alongside the eight tools above. No separate MCP installation or Local API Token is needed for the native MCP tools. The commands and the eight declared tools still use the local API, except for opening the library.
-
-1. Install **Pond.app** in `/Applications` and open a library at least once.
-2. In **Pond Settings → Model Context Protocol**, enable the capabilities you want: **Search Saves**, **Open in Pond**, or **Export Files**.
-3. Open **Ask Pond** or mention `@pond` in Raycast AI.
-
-Pond's native tools can search captions, OCR, transcripts, and notes; read saved content; list folders; run nested queries or similarity searches; and apply filters in Pond. With **Export Files** enabled, they can inspect conversion formats and presets, export files, compress images, and track or cancel jobs. Image compression replaces originals and records an undo operation in Pond.
-
-Try `@pond search my saved transcripts for typography`, `@pond list the folders in my library`, or `@pond what export formats does Pond support?`.
-
-The MCP process uses the library selected when it starts. After switching libraries, reconnect the MCP server before using its tools. If Pond is installed elsewhere, copy the executable path from **Pond Settings → Model Context Protocol → Advanced**, update `mcp.command` in `ai.yaml`, and rebuild the extension.
-
-**Pond 1.0.1 limitation:** a live check initialized the installed server successfully, but `tools/list` failed with `Custom types cannot be represented in JSON Schema`. The process also emitted startup logs on stdout. Native MCP tools require a Pond build that fixes these server issues. The extension's regular commands use the separate local API; changing the API token does not fix MCP discovery.
-
-## Data and storage
-
-Commands and declared tools connect to Pond on your Mac through loopback HTTP. The extension stores the token in Raycast's password preference and never includes it in AI results. Native MCP tools communicate with Pond through a local stdio process. Search previews stay in the extension's local support directory, with up to 100 recent image files retained.
-
-When you use Raycast AI, tool results are made available to your configured AI service. These can include metadata, library paths, and stored content such as transcripts or OCR returned by MCP tools. Ordinary commands do not require Raycast AI.
+When you use Raycast AI, tool results go to the AI model you chose in Raycast. That can include titles, notes, and extracted text from your saves.
 
 ## Troubleshooting
 
-| Problem                         | What to do                                                                                                                        |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Cannot connect                  | Open Pond and a library, check the API port, then run **Set up Pond** and press ⌘R.                                               |
-| Token rejected                  | Copy a fresh token from Pond Settings and update the extension preferences.                                                       |
-| Endpoint unavailable            | Update Pond to 1.0.1 or later and check that the Local API URL ends in `/api/v2`.                                                 |
-| Library changed while searching | Press ⌘R. Pond invalidates pagination cursors when the library changes.                                                           |
-| Library unavailable             | Reconnect its disk or open the library in Pond, then refresh.                                                                     |
-| Browser capture fails           | Check macOS Automation permission and run the command from a supported browser.                                                   |
-| Save timed out                  | Check Pond before retrying. The URL may have been accepted before the response was lost.                                          |
-| MCP server cannot start         | Check that Pond is installed in `/Applications` and has a library. For another location, update `mcp.command` as described above. |
-| MCP capability is off           | Enable the matching capability in **Pond Settings → Model Context Protocol**.                                                     |
-| MCP shows a previous library    | Reconnect the MCP server after switching libraries. The setup connection check only checks the HTTP API.                          |
-
-## Development
-
-```sh
-npm run dev        # Import into Raycast and watch for changes
-npm run build      # Bundle commands and generate Raycast types
-npm run typecheck
-npm test
-npm run lint
-npx ray evals -I --exit-on-error
-```
-
-Run the build before the first type check. Tests cover the API contract, authentication, tagged saves, filters, library identity, file-copy previews, and errors. They use mocks and an ephemeral loopback server, without modifying a Pond library. AI evals use mocked tool results to check routing and arguments.
-
-For a live check, connect a Pond token, search an existing save, filter by its tag, and open or copy it. Save a test URL with tags, then repeat the save to check the existing-URL behavior. Switch libraries and confirm that searches use the new library. Actual archiving and clipboard file copying need a running Pond app.
+| What you see             | What to do                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| Pond isn't running       | Open Pond. Turn on Launch at Login to keep it ready.                                        |
+| Token not accepted       | Copy the token again from Pond Settings. Rotating it in Pond replaces the old one.          |
+| Pond needs an update     | Install the latest Pond. This extension needs Local API 2.1.                                |
+| Save Current Tab fails   | Allow Raycast under Automation in System Settings, or use Save Clipboard URL.               |
+| MCP tools are missing    | Turn on the capability in Pond Settings → Model Context Protocol, then reconnect in Raycast. |

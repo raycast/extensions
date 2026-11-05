@@ -1,5 +1,5 @@
-import { pondClient } from "../api";
+import { pond } from "../api/client";
 
-export default async function GetLibraryInfo() {
-  return pondClient().libraryInfo();
+export default async function tool() {
+  return pond().libraryInfo();
 }

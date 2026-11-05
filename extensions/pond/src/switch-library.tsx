@@ -1,91 +1,96 @@
-import { Action, ActionPanel, closeMainWindow, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useRef, useState } from "react";
-import { pondClient } from "./api";
-import type { PondLibrary } from "./api/schemas";
-import { ConnectionActions } from "./components/connection-actions";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  open,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import type { ApiLibrary } from "pond-api";
+import { pond } from "./api/client";
+import { toError } from "./api/problems";
+import { failToast, ProblemView } from "./components/problem";
+import { LIBRARY_LINK } from "./lib/links";
 
-async function listLibraries() {
-  return pondClient().libraries();
+async function loadLibraries() {
+  return pond().libraries();
 }
 
-export default function SwitchLibrary() {
-  const {
-    data: libraries,
-    error,
-    isLoading,
-    revalidate,
-  } = usePromise(listLibraries, [], {
-    failureToastOptions: { title: "Could Not Load Libraries" },
-  });
-  const pending = useRef(false);
-  const [switching, setSwitching] = useState(false);
-
-  async function selectLibrary(library: PondLibrary) {
-    if (pending.current) return;
-    pending.current = true;
-    setSwitching(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Opening Library", message: library.name });
-    try {
-      await pondClient().selectLibrary(library.path);
-      await open("pond://library");
-      toast.style = Toast.Style.Success;
-      toast.title = "Opened Library";
-      await closeMainWindow();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could Not Open Library";
-      toast.message = error instanceof Error ? error.message : "Open Pond and try again.";
-      await revalidate();
-    } finally {
-      pending.current = false;
-      setSwitching(false);
-    }
+async function switchTo(library: ApiLibrary) {
+  if (library.active) {
+    await open(LIBRARY_LINK);
+    return popToRoot({ clearSearchBar: true });
   }
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Switching Library", message: library.name });
+  try {
+    await pond().switchLibrary(library.path);
+    await toast.hide();
+    await showHUD(`Switched to ${library.name}`);
+    await popToRoot({ clearSearchBar: true });
+  } catch (error) {
+    failToast(toast, toError(error), "Couldn't switch libraries");
+  }
+}
+
+export default function Command() {
+  const libraries = useCachedPromise(loadLibraries, [], { keepPreviousData: true });
+  const data = [...(libraries.data ?? [])].sort(
+    (a, b) => Number(b.active) - Number(a.active) || b.lastOpened - a.lastOpened,
+  );
+  const failed = libraries.error && !data.length ? toError(libraries.error) : null;
 
   return (
-    <List
-      isLoading={isLoading || switching}
-      searchBarPlaceholder="Search recent libraries…"
-      actions={
-        <ActionPanel>
-          <ConnectionActions onRefresh={revalidate} />
-        </ActionPanel>
-      }
-    >
-      <List.EmptyView
-        icon={error ? Icon.ExclamationMark : Icon.Folder}
-        title={error ? "Could Not Load Libraries" : "No Recent Libraries"}
-        description={error?.message ?? "Open a library in Pond first, then refresh."}
-      />
-      {libraries?.map((library) => (
+    <List isLoading={libraries.isLoading} searchBarPlaceholder="Search libraries…">
+      {failed ? (
+        <ProblemView error={failed} onRetry={libraries.revalidate} />
+      ) : (
+        <List.EmptyView
+          icon={Icon.Folder}
+          title="No recent libraries"
+          description="Libraries you open in Pond show up here."
+        />
+      )}
+      {data.map((library) => (
         <List.Item
           key={library.path}
-          icon={Icon.Folder}
+          icon={library.icon ?? Icon.Folder}
           title={library.name}
-          subtitle={library.path}
+          subtitle={library.path.replace(/^\/Users\/[^/]+/, "~")}
           keywords={[library.path]}
           accessories={
             library.active
-              ? [{ tag: { value: "Active", color: Color.Green } }]
+              ? [{ tag: { value: "Open", color: library.accent ?? Color.Green } }]
               : library.available
-                ? []
-                : [{ tag: "Unavailable" }]
+                ? [{ date: new Date(library.lastOpened), tooltip: "Last opened" }]
+                : [{ tag: { value: "Missing", color: Color.Red }, tooltip: "Pond can't find this library on disk" }]
           }
           actions={
             <ActionPanel>
-              {library.available || library.active ? (
+              {library.available && (
                 <Action
                   title={library.active ? "Open in Pond" : "Switch Library"}
-                  icon={Icon.AppWindow}
-                  onAction={() => selectLibrary(library)}
+                  icon={library.active ? Icon.AppWindow : Icon.Switch}
+                  onAction={() => switchTo(library)}
                 />
-              ) : null}
-              {library.available ? <Action.ShowInFinder path={library.path} /> : null}
-              <Action.CopyToClipboard title="Copy Library Path" content={library.path} />
-              <ActionPanel.Section>
-                <ConnectionActions onRefresh={revalidate} />
-              </ActionPanel.Section>
+              )}
+              {library.available && <Action.ShowInFinder path={library.path} />}
+              <Action.CopyToClipboard
+                title="Copy Library Path"
+                content={library.path}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={libraries.revalidate}
+              />
             </ActionPanel>
           }
         />

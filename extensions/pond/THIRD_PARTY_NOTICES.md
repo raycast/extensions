@@ -1,10 +1,9 @@
 # Pond
 
-The local API response schemas in `src/api/schemas.ts` are adapted from and
-the icon in `assets/pond-icon.png` is copied from
-[raphaelsalaja/pond](https://github.com/raphaelsalaja/pond), version 1.0.1,
-commit `6c5f68e1c86d30d64b96bff276e1f186b1cb87c7`.
-The API protocol and source identifiers follow the same project.
+The icons in `assets/icon.png` and `assets/menu-bar.png` are copied from
+[raphaelsalaja/pond](https://github.com/raphaelsalaja/pond). The Local API
+client and its response schemas come from the `pond-api` package in the same
+project.
 
 MIT License
 
