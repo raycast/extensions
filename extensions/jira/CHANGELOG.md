@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Jira reliability fixes] - {PR_MERGE_DATE}
+## [Jira reliability fixes] - 2026-11-05
 
 - Load all accessible projects and saved filters, including when Jira returns smaller pages.
 - Keep the Active Sprints project selector available when a search finds no projects.
