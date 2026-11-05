@@ -1,6 +1,6 @@
 # Zero Wire Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-05
 
 - Search Zero Wire security briefings by title, CVE, or technology tag.
 - Read source guidance and evidence, copy attributed briefs and available assessment prompts, and open original briefings.
