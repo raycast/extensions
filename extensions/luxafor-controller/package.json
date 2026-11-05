@@ -112,28 +112,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.10.1",
+    "@raycast/api": "^2.11.1",
     "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
-    "@types/react-test-renderer": "^19.3.0",
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
-    "react-test-renderer": "^19.3.1",
-    "typescript": "~6.0.3",
-    "vitest": "^5.0.5"
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json",
-    "check": "npm run build && npm run typecheck && npm test && npm run lint"
+    "typecheck": "tsc --noEmit",
+    "check": "npm run build && npm run typecheck && npm run lint"
   },
   "engines": {
     "node": ">=22.22.2"

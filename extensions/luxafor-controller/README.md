@@ -4,7 +4,7 @@ Send color commands to your Luxafor from Raycast.
 
 > The extension displays request history, not live device status. An API-accepted request does not prove the light changed. Opening a command or refreshing history never changes the light.
 
-![Request history and color controls in Raycast](media/controller.png)
+![Request history and color controls in Raycast](media/controller.jpg)
 
 ## Setup
 
@@ -39,9 +39,9 @@ Assign aliases or hotkeys to Busy, Available and Off using Raycast's command set
 - **View Request Details** shows the full acceptance timestamp and recovery guidance without truncation.
 - Menu layout preferences retain the simple Busy/Available or full-color choice.
 
-![Custom color form with a hexadecimal color placeholder](media/custom-color.png)
+![Custom color form with a hexadecimal color placeholder](media/custom-color.jpg)
 
-![Request details, preferences and visible refresh shortcut](media/history-actions.png)
+![Request details, preferences and visible refresh shortcut](media/history-actions.jpg)
 
 ## Understanding history
 
