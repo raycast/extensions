@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { accessSync, constants } from "node:fs";
+import { accessSync, constants, existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -29,6 +29,14 @@ export class CliNotFoundError extends Error {
 }
 
 export const LOG_FILE = join(homedir(), "Library/Logs/roon-discord-presence/roon-discord-presence.log");
+/** Opens the service log in Console; rejects with a readable error if there is no log yet. */
+export async function openLog(): Promise<void> {
+  if (!existsSync(LOG_FILE)) {
+    throw new Error("No log yet — start the service first");
+  }
+  await open(LOG_FILE, "Console");
+}
+
 export const INSTALL_HINT = "uv tool install 'roon-discord-presence[s3]' && roon-discord-presence setup";
 
 function findCli(): string {

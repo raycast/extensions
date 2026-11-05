@@ -11,7 +11,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { CliNotFoundError, control, getStatus, INSTALL_HINT, LOG_FILE, summarize } from "./cli";
+import { CliNotFoundError, control, getStatus, INSTALL_HINT, openLog, summarize } from "./cli";
 import { isMenuBarHidden, setMenuBarHidden } from "./visibility";
 
 const MAX_LINE = 48; // characters per menu line; macOS menus don't wrap
@@ -141,7 +141,11 @@ export default function Command() {
         ) : (
           <MenuBarExtra.Item title="Start" icon={Icon.Play} onAction={() => run("start")} />
         )}
-        <MenuBarExtra.Item title="Open Log" icon={Icon.Document} onAction={() => open(LOG_FILE, "Console")} />
+        <MenuBarExtra.Item
+          title="Open Log"
+          icon={Icon.Document}
+          onAction={() => openLog().catch((e) => showHUD(`Couldn't open the log: ${(e as Error).message}`))}
+        />
       </MenuBarExtra.Section>
       {hideItem}
     </MenuBarExtra>

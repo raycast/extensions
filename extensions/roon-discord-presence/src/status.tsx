@@ -1,8 +1,12 @@
-import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, open, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { CliNotFoundError, control, getStatus, INSTALL_HINT, LOG_FILE, Status, summarize } from "./cli";
+import { CliNotFoundError, control, getStatus, INSTALL_HINT, openLog, Status, summarize } from "./cli";
 import { isMenuBarHidden, setMenuBarHidden } from "./visibility";
+
+function openLogWithToast() {
+  openLog().catch((e) => showFailureToast(e, { title: "Couldn't open the log" }));
+}
 
 interface MenuBarToggle {
   hidden: boolean;
@@ -24,9 +28,8 @@ function Controls({
       toast.title = await control(command);
       toast.style = Toast.Style.Success;
     } catch (e) {
-      toast.title = "Failed";
-      toast.message = (e as Error).message;
-      toast.style = Toast.Style.Failure;
+      await toast.hide();
+      await showFailureToast(e, { title: `Couldn't ${command}` });
     }
     revalidate();
   }
@@ -41,7 +44,7 @@ function Controls({
       ) : (
         <Action title="Start" icon={Icon.Play} onAction={() => run("start")} />
       )}
-      <Action title="Open Log" icon={Icon.Document} onAction={() => open(LOG_FILE, "Console")} />
+      <Action title="Open Log" icon={Icon.Document} onAction={openLogWithToast} />
       <Action
         title={menuBar.hidden ? "Show Menu Bar Icon" : "Hide Menu Bar Icon"}
         icon={menuBar.hidden ? Icon.Eye : Icon.EyeDisabled}
@@ -113,7 +116,7 @@ export default function Command() {
                 shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={revalidate}
               />
-              <Action title="Open Log" icon={Icon.Document} onAction={() => open(LOG_FILE, "Console")} />
+              <Action title="Open Log" icon={Icon.Document} onAction={openLogWithToast} />
             </ActionPanel>
           }
         />

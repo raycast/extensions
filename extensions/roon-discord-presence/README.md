@@ -28,11 +28,3 @@ roon-discord-presence setup
 
 The extension looks for it in `~/.local/bin`, `/opt/homebrew/bin` and `/usr/local/bin`; set
 _Path to CLI_ in the extension preferences if it lives elsewhere.
-
-## Development
-
-```sh
-npm install
-npm run dev     # imports the extension into Raycast and rebuilds on change
-npm run lint
-```
