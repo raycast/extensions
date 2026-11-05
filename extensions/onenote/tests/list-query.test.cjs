@@ -98,4 +98,7 @@ test("timestamp columns are cast to REAL so node:sqlite does not throw for Windo
   assert.ok(capturedSql.includes("CAST(LastModifiedTime AS REAL)"), "LastModifiedTime must be cast to REAL");
   assert.ok(capturedSql.includes("CAST(RecentTime AS REAL)"), "RecentTime must be cast to REAL");
   assert.ok(capturedSql.includes("CAST(PinTime AS REAL)"), "PinTime must be cast to REAL");
+  // ORDER BY must use the table-qualified column so SQLite can use the index
+  // rather than sorting the cast alias (which would force a full-table sort).
+  assert.ok(capturedSql.includes("Entities.RecentTime DESC"), "ORDER BY must be table-qualified to use the index");
 });

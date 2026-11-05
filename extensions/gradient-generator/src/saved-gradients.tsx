@@ -2,288 +2,165 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Form,
   Icon,
   Image,
-  Keyboard,
   List,
-  Toast,
+  LocalStorage,
   confirmAlert,
-  showToast,
-  useNavigation,
+  getPreferenceValues,
 } from '@raycast/api';
-import React, { useState } from 'react';
-import { useLocalStorage } from '@raycast/utils';
+import { showFailureToast } from '@raycast/utils';
+import React, { useMemo } from 'react';
 import PreviewGradient from './gradient-preview';
-import { Gradient } from './types';
+import CreateGradient from './create-gradient';
 import { pngDataUri, toCss, toSwiftUI, toTailwind } from './lib/grad';
+import { entryRef, STORAGE_KEY } from './lib/library';
+import { library, refreshLibrary, useLibrary } from './lib/use-library';
+import { saveGradient, shortcut } from './lib/actions';
+import LabelForm from './components/label-form';
 
 export default function SavedGradients() {
-  const {
-    value: saved = [],
-    setValue: setSaved,
-    isLoading,
-  } = useLocalStorage<Gradient[]>('saved-gradients', []);
-
-  const onDelete = async (index: number) => {
-    const next = saved.filter((_, i) => i !== index);
-    await setSaved(next);
-  };
-
-  const onRename = async (index: number, newLabel: string) => {
-    const trimmedLabel = newLabel.trim();
-    if (!trimmedLabel) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Label cannot be empty',
-      });
-      return;
-    }
-
-    // Check for name collisions
-    const existingIndex = saved.findIndex(
-      (g, i) => i !== index && g.label === trimmedLabel,
+  const { items, error, isLoading } = useLibrary();
+  const { tailwindOutputMode = 'utility' } = getPreferenceValues<Preferences>();
+  const rows = useMemo(
+    () =>
+      items.map((g, index) => ({
+        g,
+        ref: entryRef(g, index),
+        png: pngDataUri(g, 88, 56),
+      })),
+    [items],
+  );
+  const retry = (
+    <Action
+      title="Reload Library"
+      icon={Icon.ArrowClockwise}
+      onAction={refreshLibrary}
+    />
+  );
+  if (error)
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Saved Library Could Not Be Read"
+          description={`${error.message} Your stored data has not been changed.`}
+          actions={
+            <ActionPanel>
+              {retry}
+              <Action
+                title="Copy Original Library JSON"
+                icon={Icon.Clipboard}
+                onAction={async () => {
+                  try {
+                    const { Clipboard } = await import('@raycast/api');
+                    await Clipboard.copy(
+                      (await LocalStorage.getItem<string>(STORAGE_KEY)) ?? '[]',
+                    );
+                  } catch (reason) {
+                    await showFailureToast(reason, {
+                      title: 'Could Not Copy Library',
+                    });
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
     );
-    if (existingIndex !== -1) {
-      const ok = await confirmAlert({
-        title: 'Name Already Exists',
-        message: `A gradient with the label "${trimmedLabel}" already exists. Do you want to overwrite it?`,
-        primaryAction: {
-          title: 'Overwrite',
-          style: Alert.ActionStyle.Destructive,
-        },
-        dismissAction: { title: 'Cancel' },
-      });
-      if (!ok) return;
-
-      // Remove the existing gradient when overwriting
-      const next = [...saved];
-      next.splice(existingIndex, 1);
-      // Adjust the index if the removed item was before the current one
-      const adjustedIndex = existingIndex < index ? index - 1 : index;
-      next[adjustedIndex] = { ...next[adjustedIndex], label: trimmedLabel };
-      await setSaved(next);
-    } else {
-      // No collision, just rename
-      const next = [...saved];
-      next[index] = { ...next[index], label: trimmedLabel };
-      await setSaved(next);
-    }
-    await showToast({
-      style: Toast.Style.Success,
-      title: 'Gradient renamed',
-    });
-  };
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search saved gradients…">
-      <List.Section title="My Gradients" subtitle={`${saved.length}`}>
-        {saved.map((g, idx) => {
-          const icon = {
-            source: pngDataUri(g, 88, 56),
-            mask: Image.Mask.RoundedRectangle,
-          } as const;
-          const css = toCss(g);
-          const swift = toSwiftUI(g);
-          const tw = toTailwind(g);
-          return (
-            <List.Item
-              key={`${idx}-${g.type}-${g.angle ?? 0}`}
-              title={
-                g.label ??
-                (g.type === 'linear' ? `${g.type} (${g.angle ?? 90}°)` : g.type)
-              }
-              subtitle={
-                g.type === 'linear' ? `${g.type} • ${g.angle ?? 90}°` : g.type
-              }
-              icon={icon}
-              accessories={g.stops
-                .slice(0, 3)
-                .map((c) => ({ tag: { value: c, color: c } }))}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Open Preview"
-                    target={<PreviewGradient {...g} />}
+      <List.EmptyView
+        title="No Saved Gradients"
+        description="Create a gradient, then choose Save Gradient in Preview."
+        actions={
+          <ActionPanel>
+            <Action.Push title="Create Gradient" target={<CreateGradient />} />
+            {retry}
+          </ActionPanel>
+        }
+      />
+      {rows.map(({ g, ref, png }) => (
+        <List.Item
+          key={`${ref.index}-${ref.snapshot}`}
+          title={g.label || `${g.type} gradient`}
+          subtitle={
+            g.type === 'linear'
+              ? `${g.angle ?? 90}° · ${g.stops.length} stops`
+              : `${g.type} · ${g.stops.length} stops`
+          }
+          keywords={[g.type, ...g.stops]}
+          icon={{ source: png, mask: Image.Mask.RoundedRectangle }}
+          accessories={g.stops
+            .slice(0, 3)
+            .map((c) => ({ tag: { value: c, color: c } }))}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Open Preview"
+                target={<PreviewGradient {...g} savedRef={ref} />}
+              />
+              <Action.Push
+                title="Edit Label"
+                icon={Icon.Text}
+                shortcut={shortcut('r')}
+                target={
+                  <LabelForm
+                    initialLabel={g.label}
+                    onSubmit={async (label) =>
+                      Boolean(await saveGradient({ ...g, label }, ref))
+                    }
                   />
-                  <ActionPanel.Section title="Label">
-                    <Action.Push
-                      title="Quick Rename"
-                      icon={Icon.Text}
-                      shortcut={
-                        { modifiers: ['cmd'], key: 'r' } as Keyboard.Shortcut
-                      }
-                      target={
-                        <QuickRenameForm
-                          initialLabel={g.label}
-                          onSubmit={(label) => onRename(idx, label)}
-                        />
-                      }
-                    />
-                    <Action.Push
-                      title="Edit Label"
-                      icon={Icon.Text}
-                      target={
-                        <EditLabelForm
-                          initialLabel={g.label}
-                          onSubmit={async (label) => {
-                            const next = [...saved];
-                            next[idx] = {
-                              ...g,
-                              label: label.trim() || undefined,
-                            };
-                            await setSaved(next);
-                            await showToast({
-                              style: Toast.Style.Success,
-                              title: 'Label updated',
-                            });
-                          }}
-                        />
-                      }
-                    />
-                    {g.label ? (
-                      <Action
-                        title="Clear Label"
-                        icon={Icon.Xmark}
-                        onAction={async () => {
-                          const next = [...saved];
-                          next[idx] = { ...g, label: undefined };
-                          await setSaved(next);
-                          await showToast({
-                            style: Toast.Style.Success,
-                            title: 'Label cleared',
-                          });
-                        }}
-                      />
-                    ) : null}
-                  </ActionPanel.Section>
-                  <ActionPanel.Section title="Copy">
-                    <Action.CopyToClipboard
-                      title="Copy CSS"
-                      content={css}
-                      shortcut={
-                        {
-                          modifiers: ['cmd', 'shift'],
-                          key: 'c',
-                        } as Keyboard.Shortcut
-                      }
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy SwiftUI"
-                      content={swift}
-                      shortcut={
-                        {
-                          modifiers: ['cmd', 'shift'],
-                          key: 's',
-                        } as Keyboard.Shortcut
-                      }
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Tailwind"
-                      content={tw}
-                      shortcut={
-                        {
-                          modifiers: ['cmd', 'shift'],
-                          key: 't',
-                        } as Keyboard.Shortcut
-                      }
-                    />
-                  </ActionPanel.Section>
-                  <Action
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    title="Delete"
-                    onAction={async () => {
-                      const ok = await confirmAlert({
+                }
+              />
+              <Action.CopyToClipboard
+                title="Copy CSS"
+                content={toCss(g)}
+                shortcut={shortcut('c', ['shift'])}
+              />
+              <Action.CopyToClipboard
+                title="Copy SwiftUI"
+                content={toSwiftUI(g)}
+                shortcut={shortcut('s', ['shift'])}
+              />
+              <Action.CopyToClipboard
+                title="Copy Tailwind"
+                content={toTailwind(g, tailwindOutputMode)}
+                shortcut={shortcut('t', ['shift'])}
+              />
+              <Action
+                title="Delete Gradient"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  try {
+                    if (
+                      await confirmAlert({
                         title: 'Delete Gradient?',
-                        message: g.label ?? g.stops.join(' → '),
+                        message: g.label || g.stops.join(' → '),
                         primaryAction: {
                           title: 'Delete',
                           style: Alert.ActionStyle.Destructive,
                         },
                         dismissAction: { title: 'Cancel' },
-                      });
-                      if (ok) {
-                        await onDelete(idx);
-                      }
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+                      })
+                    ) {
+                      await library.remove(ref);
+                      refreshLibrary();
+                    }
+                  } catch (reason) {
+                    await showFailureToast(reason, {
+                      title: 'Could Not Delete Gradient',
+                    });
+                  }
+                }}
+              />
+              {retry}
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
-  );
-}
-
-type EditLabelFormProps = {
-  initialLabel?: string;
-  onSubmit: (label: string) => Promise<void>;
-};
-function EditLabelForm({ initialLabel, onSubmit }: EditLabelFormProps) {
-  const { pop } = useNavigation();
-  const [label, setLabel] = useState<string>(initialLabel ?? '');
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action
-            title="Save"
-            icon={Icon.Folder}
-            onAction={async () => {
-              await onSubmit(label);
-              pop();
-            }}
-          />
-          <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Set a label for this gradient (optional)." />
-      <Form.TextField
-        id="label"
-        title="Label"
-        value={label}
-        onChange={setLabel}
-        placeholder="e.g. Sunset, Brand Accent"
-      />
-    </Form>
-  );
-}
-
-type QuickRenameFormProps = {
-  initialLabel?: string;
-  onSubmit: (label: string) => Promise<void>;
-};
-function QuickRenameForm({ initialLabel, onSubmit }: QuickRenameFormProps) {
-  const { pop } = useNavigation();
-  const [label, setLabel] = useState<string>(initialLabel ?? '');
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action
-            title="Save"
-            icon={Icon.Folder}
-            onAction={async () => {
-              await onSubmit(label);
-              pop();
-            }}
-          />
-          <Action title="Cancel" icon={Icon.Xmark} onAction={pop} />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Set a label for this gradient (optional)." />
-      <Form.TextField
-        id="label"
-        title="Label"
-        value={label}
-        onChange={setLabel}
-        placeholder="e.g. Sunset, Brand Accent"
-      />
-    </Form>
   );
 }

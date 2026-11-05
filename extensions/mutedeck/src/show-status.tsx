@@ -2,6 +2,7 @@ import { Action, ActionPanel, Alert, Grid, Icon, Keyboard, confirmAlert, open } 
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import {
+  MuteDeckNotPaired,
   MuteDeckOffline,
   MuteDeckStatus,
   StateValue,
@@ -13,6 +14,7 @@ import {
   leaveMeeting,
   muteLabel,
   onOffLabel,
+  pairNow,
 } from "./mutedeck";
 import { confirmWhilePresenting, toggleAndWait } from "./run-toggle";
 import { tileIcon } from "./tiles";
@@ -35,6 +37,7 @@ export default function MeetingDeck() {
   }, [revalidate]);
 
   const offline = error instanceof MuteDeckOffline && !status;
+  const notPaired = error instanceof MuteDeckNotPaired;
   const inCall = status?.call === "active";
   const title = !status
     ? "MuteDeck"
@@ -93,6 +96,29 @@ export default function MeetingDeck() {
               <Action title="Open MuteDeck" icon={Icon.AppWindow} onAction={() => open("/Applications/MuteDeck.app")} />
               {/* eslint-disable-next-line @raycast/prefer-title-case -- MuteDeck is a brand name */}
               <Action.OpenInBrowser title="Get MuteDeck" url="https://mutedeck.com/downloads" />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </Grid>
+    );
+  }
+
+  if (notPaired) {
+    return (
+      <Grid navigationTitle="MuteDeck">
+        <Grid.EmptyView
+          icon={Icon.Lock}
+          title="Raycast isn't approved in MuteDeck"
+          description="Allow Raycast when MuteDeck asks, or manage it under Settings in MuteDeck."
+          actions={
+            <ActionPanel>
+              <Action
+                // eslint-disable-next-line @raycast/prefer-title-case -- MuteDeck is a brand name
+                title="Ask MuteDeck Again"
+                icon={Icon.Key}
+                onAction={() => run(pairNow, "Couldn't connect to MuteDeck")}
+              />
               <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
             </ActionPanel>
           }

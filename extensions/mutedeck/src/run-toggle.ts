@@ -1,5 +1,6 @@
 import { Alert, Icon, closeMainWindow, confirmAlert, showHUD } from "@raycast/api";
 import {
+  MuteDeckNotPaired,
   MuteDeckOffline,
   MuteDeckStatus,
   StateValue,
@@ -78,6 +79,8 @@ export async function toggleAndWait(what: Toggleable, before: StateValue): Promi
 /** Toggle a control and show a HUD with the state it actually ended up in. */
 export async function runToggle(what: Toggleable): Promise<void> {
   try {
+    // Read the status while the window is still open: the first run pairs with
+    // MuteDeck, and the "Approve Raycast in MuteDeck…" toast needs the window.
     const before = await getStatus();
     if (before[what] === "disabled" || before[what] === "") {
       await showHUD(UNAVAILABLE_HUD[what]);
@@ -95,6 +98,17 @@ export async function runToggle(what: Toggleable): Promise<void> {
       await showHUD(UNAVAILABLE_HUD[what]);
     }
   } catch (e) {
-    await showHUD(e instanceof MuteDeckOffline ? "⚠️ MuteDeck isn't running" : "⚠️ MuteDeck error");
+    await showHUD(errorHud(e));
   }
+}
+
+/** HUD text for a failed command. */
+export function errorHud(e: unknown): string {
+  if (e instanceof MuteDeckOffline) {
+    return "⚠️ MuteDeck isn't running";
+  }
+  if (e instanceof MuteDeckNotPaired) {
+    return "⚠️ Raycast isn't approved in MuteDeck";
+  }
+  return "⚠️ MuteDeck error";
 }

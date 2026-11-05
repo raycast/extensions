@@ -1,5 +1,10 @@
 # MXroute Changelog
 
+## [Show Disk Usage + More Clients] - 2026-10-28
+
+- Show total Disk Usage in apex view
+- Show email client option in "Email Accounts"
+
 ## [View and Update Domain Spam Settings] - 2026-08-24
 
 - Add links for more email clients

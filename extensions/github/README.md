@@ -2,6 +2,10 @@
 
 Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications.
 
+## Mentions in AI Chat
+
+Type `@` in the AI Chat composer and pick **GitHub** to mention an issue, pull request, or repository. Without a query, **Issues** and **Pull Requests** list open items you're involved in and **Repositories** lists your most recently pushed repositories. Paste `owner/repo#123` or a GitHub URL to jump to an exact issue or pull request. The mention gives AI the item's current details, including the description of issues and pull requests.
+
 ## Configuring a Personal Access Token
 
 You can use a personal access token instead of logging in through OAuth to authenticate your GitHub account:

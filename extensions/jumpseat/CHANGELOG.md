@@ -1,5 +1,9 @@
 # Changelog
 
+## [Dark Airline Logos] - 2026-11-01
+
+- Use dark airline logos in dark appearance, in both the flight lists and the menu bar.
+
 ## [Initial Version] - 2026-09-25
 
 - Add an upcoming-flights list and detail view.

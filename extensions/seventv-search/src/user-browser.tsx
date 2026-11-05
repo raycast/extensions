@@ -68,7 +68,7 @@ export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
     }
     setLoading(true);
     setError(undefined);
-    const timer = setTimeout(async () => {
+    void (async () => {
       try {
         const result = await searchSevenTVUsers(query, page, controller.signal);
         if (id !== requestId.current) return;
@@ -87,11 +87,8 @@ export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
       } finally {
         if (id === requestId.current) setLoading(false);
       }
-    }, 300);
-    return () => {
-      controller.abort();
-      clearTimeout(timer);
-    };
+    })();
+    return () => controller.abort();
   }, [query, page, retry]);
   const changeQuery = (text: string) => {
     if (text === query) return;
@@ -107,6 +104,7 @@ export default function UserBrowser({ mode }: { mode: UserEmoteMode }) {
   const displayedUsers = query.trim() ? users : recentUsers;
   return (
     <Grid
+      throttle
       navigationTitle={title}
       columns={5}
       fit={Grid.Fit.Contain}

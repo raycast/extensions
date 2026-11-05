@@ -1,3 +1,6 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
 /** Shape of one row returned by `orca terminal list --json`. */
 export type OrcaTerminal = {
   handle: string;
@@ -418,15 +421,82 @@ type OrcaEnvelope<T> = {
   error?: { code?: string; message?: string };
 };
 
+/** The oldest Orca whose CLI has every command and flag this extension calls. */
+export const MIN_ORCA_VERSION = "1.4.229";
+
+/**
+ * Orca rejects a command or flag it does not know in so many words, and that
+ * only happens when the app is older than this extension.
+ */
+function failure(message?: string): Error {
+  if (message && /^Unknown (command|flag)\b/.test(message)) {
+    return new Error(
+      `Your Orca is too old for this. Update Orca to ${MIN_ORCA_VERSION} or later.`,
+    );
+  }
+  return new Error(message ?? "Orca returned an unsuccessful response");
+}
+
 /** Every Orca command answers with the same envelope; unwrap it or throw what it reported. */
 export function unwrap<T>(stdout: string): T | undefined {
   const envelope = JSON.parse(stdout) as OrcaEnvelope<T>;
-  if (!envelope.ok) {
-    throw new Error(
-      envelope.error?.message ?? "Orca returned an unsuccessful response",
+  if (!envelope.ok) throw failure(envelope.error?.message);
+  return envelope.result;
+}
+
+/**
+ * What a failed CLI call should say. execFile rejects on a non-zero exit before
+ * the envelope is read, and its own message is the whole command line — the
+ * prompt included.
+ */
+export function orcaError(error: unknown): Error {
+  const { code, signal, path, stdout, stderr, message } = error as {
+    code?: number | string | null;
+    signal?: string | null;
+    path?: string;
+    stdout?: string;
+    stderr?: string;
+    message?: string;
+  };
+
+  if (code === "ENOENT") {
+    return new Error(
+      `No Orca CLI at ${path}. Install Orca, or fix the Orca CLI Path preference.`,
     );
   }
-  return envelope.result;
+
+  try {
+    const envelope = JSON.parse(stdout ?? "") as OrcaEnvelope<unknown>;
+    if (envelope.ok === false) return failure(envelope.error?.message);
+  } catch {
+    // Not Orca's envelope: fall through to whatever the process printed.
+  }
+
+  if (stderr?.trim()) return new Error(stderr.trim());
+  if (signal) return new Error(`Orca CLI was stopped by ${signal}`);
+  if (typeof code === "number") {
+    return new Error(`Orca CLI exited with code ${code}`);
+  }
+  // "Command failed: …" is the command line, prompt and all.
+  return new Error(
+    message && !message.startsWith("Command failed")
+      ? message
+      : "Orca CLI failed",
+  );
+}
+
+const execFileAsync = promisify(execFile);
+
+/** Runs the Orca CLI, failing with what Orca said rather than the raw command line. */
+export async function execOrca(
+  orcaPath: string,
+  args: string[],
+): Promise<{ stdout: string }> {
+  try {
+    return await execFileAsync(orcaPath, args);
+  } catch (error) {
+    throw orcaError(error);
+  }
 }
 
 /** Runs one Orca CLI command and unwraps its envelope. */

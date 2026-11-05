@@ -12,6 +12,7 @@ instructions: |
   Use post only when the user explicitly asks to publish a new post. It can attach local media paths, quote a post, add a two-to-four-option poll, and control who can reply. Polls cannot be combined with media or quote posts. Quote posting requires X Enterprise API access; report X's error if the account does not have it. Use post-thread for an explicit multi-post thread. Use reply-to-post only for an explicit public reply and include the numeric target post ID. Use delete-post only for an explicit request to permanently delete the authenticated user's own post.
   Use set-like, set-repost, set-bookmark, and set-reply-hidden only when the user explicitly asks for that interaction on one identified post. Set the boolean to false for unlike, undo-repost, remove-bookmark, and unhide requests. Never infer engagement or moderation from a general opinion or summary request, and never batch, repeat, schedule, or autonomously perform these interactions.
   Use send-dm only when the user explicitly asks to privately message specific recipients who have clearly indicated that they want to hear from the user, and numeric recipient user IDs are known. Never use it for unsolicited outreach, bulk messaging, recurring follow-ups, or infer a DM from a request to draft, summarize, or suggest text. It supports one media attachment and creates a group when given multiple recipients.
+  Use get-dm-conversations when the user asks who they have been messaging, wants a DM inbox overview, or needs the people in their DM conversations. It reads one page of up to 100 recent DM events, groups them by conversation, and returns each conversation's other participants with their profiles. X only returns DM events from roughly the last 30 days, so explain that older conversations may be missing. Use get-dm-messages to read one conversation, passing either a conversationId from get-dm-conversations or the other person's exact username, never both. Both reads are billed and return exactly one page; pass a returned nextToken only when the user explicitly asks for more, or when they explicitly asked to go over all of their DMs. DMs are private: only summarize or quote them for the user's own request. X profile_image_url values point to a small 48 by 48 image ending in _normal; replace _normal with _400x400 when a larger avatar is needed.
   Every write tool presents its exact side effect in Raycast's confirmation UI. Do not ask for an additional chat confirmation; call the tool and let its confirmation obtain approval. Never claim a write succeeded until the tool returns successfully.
   If post-thread returns posted false with postIds, those posts are already live. Report the partial result. Only retry when asked, using remainingPosts and replyToPostId; never resend the published prefix.
   Publishing through this extension is limited to 280 weighted characters per post, using twitter-text URL and Unicode weighting. Ask the user to shorten or split text that exceeds this publishing limit instead of silently truncating it. This limit does not apply to reading existing long posts.
@@ -464,3 +465,46 @@ evals:
             recipientUserIds:
               includes: "9876543210"
             text: "Thanks for the report"
+  - input: "@twitter Who have I been messaging in my DMs?"
+    mocks:
+      get-dm-conversations:
+        items:
+          - conversationId: "100-200"
+            type: "one_to_one"
+            participantIds: ["200"]
+            participants:
+              - id: "200"
+                name: "Casey"
+                username: "casey"
+                profile_image_url: "https://pbs.twimg.com/profile_images/1/casey_normal.jpg"
+            lastMessageAt: "2026-10-27T09:00:00.000Z"
+            lastMessageText: "See you Thursday"
+            lastMessageFromMe: false
+            eventsOnPage: 3
+        eventsRead: 3
+    expected:
+      - callsTool: "get-dm-conversations"
+      - includes: "Casey"
+  - input: "@twitter Show my recent DMs with @casey."
+    mocks:
+      get-dm-messages:
+        conversationId: "100-200"
+        participant:
+          id: "200"
+          name: "Casey"
+          username: "casey"
+        items:
+          - id: "dm-1"
+            conversationId: "100-200"
+            type: "MessageCreate"
+            text: "See you Thursday"
+            senderId: "200"
+            fromMe: false
+    expected:
+      - callsTool:
+          name: "get-dm-messages"
+          arguments:
+            username:
+              includes: "casey"
+      - not:
+          callsTool: "send-dm"

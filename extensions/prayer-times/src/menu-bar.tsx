@@ -122,10 +122,6 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
 
   const slots = getTimeline(now, settings.schedule);
   const prayed = prayedSet(history ?? {});
-  // A prayer marked missed is done with too, so it doesn't stay as "ended".
-  for (const [date, day] of Object.entries(history ?? {})) {
-    for (const [key, record] of Object.entries(day)) if (record?.saved === "missed") prayed.add(`${date}/${key}`);
-  }
   const state = menuBarState(slots, now, prayed, settings.windows, settings.menuBarAlways);
 
   if (!isLoading && !state && !error) return null;
@@ -180,8 +176,7 @@ function PrayerMenuBar({ settings }: { settings: Settings }) {
             icon={statusIcon(clockStatus(shown, now))}
             onAction={() => run(`${ltrName(shown.name)} marked prayed`, () => setPrayed(shown, settings, true))}
           />
-          {/* Once its time is over, Mark as Prayed records it made up; the other choice is missed. */}
-          {(state?.kind === "ended" ? (["missed"] as const) : markOptions(shown, undefined, now)).map((status) => (
+          {markOptions(shown, undefined, now).map((status) => (
             <MenuBarExtra.Item
               key={status}
               title={`Mark ${ltrName(shown.name)} ${MARK_TITLES[status]}`}

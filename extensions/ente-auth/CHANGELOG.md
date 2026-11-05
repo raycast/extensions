@@ -1,5 +1,10 @@
 # Ente Auth Changelog
 
+## [Respect TOTP account settings] - 2026-11-04
+
+- Generate codes using each imported account's algorithm, digit count, and period
+- Use the configured period for next-code generation and countdown progress
+
 ## [Fix import with null OTP parameters] - 2026-07-09
 
 - Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults

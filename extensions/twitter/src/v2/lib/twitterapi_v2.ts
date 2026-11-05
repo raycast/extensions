@@ -32,6 +32,25 @@ const READ_CACHE_TTL_MS = 2 * 60 * 1000;
 const MAX_RATE_LIMIT_BACKOFF_MS = 30 * 1000;
 const ANALYTICS_WINDOW_DAYS = 30;
 const MEDIA_CHUNK_SIZE = 4 * 1024 * 1024;
+const DM_PAGE_SIZE = 100;
+const MAX_USER_LOOKUP_IDS = 100;
+
+// twitter-api-v2 does not export its DM types from the package root, so derive them from the client signature.
+type DMEventParams = NonNullable<Parameters<TwitterApi["v2"]["listDmEvents"]>[0]>;
+type DMEventV2 = Awaited<ReturnType<TwitterApi["v2"]["listDmEvents"]>>["events"][number];
+type TDMEventV2Field = Extract<NonNullable<DMEventParams["dm_event.fields"]>, unknown[]>[number];
+type TDMEventV2Expansion = Extract<NonNullable<DMEventParams["expansions"]>, unknown[]>[number];
+
+const dmEventFields: TDMEventV2Field[] = [
+  "id",
+  "event_type",
+  "text",
+  "created_at",
+  "sender_id",
+  "dm_conversation_id",
+  "participant_ids",
+];
+const dmExpansions: TDMEventV2Expansion[] = ["sender_id", "participant_ids"];
 
 const defaultFields: TTweetv2TweetField[] = [
   "public_metrics",
@@ -162,6 +181,46 @@ export interface ConnectionSearchResult {
   reachedEnd: boolean;
   /** Connection searches inspect at most ten pages of 1,000 users for each searched relationship. */
   retrievalLimitPerRelationship: 10000;
+}
+
+export type DirectMessageEventType = "MessageCreate" | "ParticipantsJoin" | "ParticipantsLeave";
+
+export interface DirectMessage {
+  id: string;
+  conversationId?: string;
+  type: DirectMessageEventType;
+  text?: string;
+  createdAt?: string;
+  senderId?: string;
+  sender?: User;
+  fromMe: boolean;
+  participantIds?: string[];
+}
+
+export interface DirectMessageConversation {
+  conversationId: string;
+  type: "one_to_one" | "group";
+  /** Other participants seen in this conversation, excluding the authenticated user. */
+  participantIds: string[];
+  /** Profiles for participantIds that X could resolve. Suspended or deleted accounts can be missing. */
+  participants: User[];
+  lastMessageAt?: string;
+  lastMessageText?: string;
+  lastMessageFromMe?: boolean;
+  eventsOnPage: number;
+}
+
+export interface DirectMessageConversationsResult {
+  items: DirectMessageConversation[];
+  eventsRead: number;
+  nextToken?: string;
+}
+
+export interface DirectMessagesResult {
+  conversationId?: string;
+  participant?: User;
+  items: DirectMessage[];
+  nextToken?: string;
 }
 
 interface ConnectionSearchPage {
@@ -303,6 +362,9 @@ function normalizeTwitterError(error: ApiResponseError): TwitterAPIError {
   }
 }
 
+// Bumped on every clear so a read that already started cannot save its page afterward.
+let readCacheGeneration = 0;
+
 function getCached<T>(key: string): T | undefined {
   const cached = readCache.get(key);
   if (!cached) return undefined;
@@ -333,6 +395,18 @@ function requireNumericId(value: string, label: string): string {
   const normalized = value.trim();
   if (!/^\d{1,19}$/.test(normalized)) throw new Error(`A valid numeric ${label} is required.`);
   return normalized;
+}
+
+function requireConversationId(value: string): string {
+  const normalized = value.trim();
+  if (!/^\d{1,19}(-\d{1,19})?$/.test(normalized)) throw new Error("A valid X DM conversation ID is required.");
+  return normalized;
+}
+
+/** One-to-one conversation IDs are the two participant IDs joined by a hyphen; group IDs are a single number. */
+function oneToOneParticipantIds(conversationId: string): string[] | undefined {
+  const match = /^(\d{1,19})-(\d{1,19})$/.exec(conversationId);
+  return match ? [match[1], match[2]] : undefined;
 }
 
 function requireUsername(value: string): string {
@@ -488,12 +562,18 @@ export class ClientV2 {
     const cached = getCached<T>(key);
     if (cached !== undefined) return cached;
 
-    const value = await this.request(operation);
-    if ((await getOAuthTokens())?.accessToken === token) setCached(key, value);
+    let generation = readCacheGeneration;
+    const value = await this.request(async (api) => {
+      generation = readCacheGeneration;
+      return await operation(api);
+    });
+    const tokenUnchanged = (await getOAuthTokens())?.accessToken === token;
+    if (generation === readCacheGeneration && tokenUnchanged) setCached(key, value);
     return value;
   }
 
   clearCache(): void {
+    readCacheGeneration += 1;
     readCache.clear();
   }
 
@@ -1293,6 +1373,130 @@ export class ClientV2 {
     this.clearCache();
   }
 
+  /** Read one page of DM events across all conversations and group them by conversation, newest first. */
+  async directMessageConversations(nextToken?: string): Promise<DirectMessageConversationsResult> {
+    const me = await this.me();
+    const cacheKey = `dm-conversations:${nextToken ?? "first"}`;
+    return await this.cachedRead(cacheKey, async (api) => {
+      const page = await api.v2.listDmEvents({
+        max_results: DM_PAGE_SIZE,
+        pagination_token: nextToken,
+        "dm_event.fields": dmEventFields,
+        expansions: dmExpansions,
+        "user.fields": defaultUserFields,
+      });
+      const events = page.events;
+      const usersById = new Map<string, User>();
+      for (const user of page.includes.users) usersById.set(user.id, twitterUserToUser(user));
+
+      const conversations = new Map<string, DirectMessageConversation & { participantSet: Set<string> }>();
+      for (const event of events) {
+        const conversationId = event.dm_conversation_id;
+        if (!conversationId) continue;
+
+        let conversation = conversations.get(conversationId);
+        if (!conversation) {
+          const oneToOneIds = oneToOneParticipantIds(conversationId);
+          conversation = {
+            conversationId,
+            type: oneToOneIds ? "one_to_one" : "group",
+            participantIds: [],
+            participants: [],
+            eventsOnPage: 0,
+            participantSet: new Set(oneToOneIds ?? []),
+          };
+          conversations.set(conversationId, conversation);
+        }
+
+        conversation.eventsOnPage += 1;
+        if (event.sender_id) conversation.participantSet.add(event.sender_id);
+        for (const id of event.participant_ids ?? []) conversation.participantSet.add(id);
+        // X returns events newest first, so the first message seen is the latest one on this page.
+        if (event.event_type === "MessageCreate" && conversation.lastMessageAt === undefined) {
+          conversation.lastMessageAt = event.created_at;
+          conversation.lastMessageText = event.text;
+          conversation.lastMessageFromMe = event.sender_id === me.id;
+        }
+      }
+
+      for (const conversation of conversations.values()) conversation.participantSet.delete(me.id);
+
+      // A 1:1 participant who sent nothing on this page is not expanded, so resolve missing profiles in batches.
+      const missingIds = [
+        ...new Set([...conversations.values()].flatMap((conversation) => [...conversation.participantSet])),
+      ].filter((id) => !usersById.has(id));
+      for (let offset = 0; offset < missingIds.length; offset += MAX_USER_LOOKUP_IDS) {
+        const result = await api.v2.users(missingIds.slice(offset, offset + MAX_USER_LOOKUP_IDS), {
+          "user.fields": defaultUserFields,
+        });
+        for (const user of result.data ?? []) usersById.set(user.id, twitterUserToUser(user));
+      }
+
+      return {
+        items: [...conversations.values()].map(({ participantSet, ...conversation }) => {
+          const participantIds = [...participantSet];
+          return {
+            ...conversation,
+            participantIds,
+            participants: participantIds
+              .map((id) => usersById.get(id))
+              .filter((user): user is User => user !== undefined),
+          };
+        }),
+        eventsRead: events.length,
+        nextToken: page.meta.next_token,
+      };
+    });
+  }
+
+  /** Read one page of events from one DM conversation, identified by conversation ID or by the other participant. */
+  async directMessages(
+    target: { conversationId?: string; username?: string },
+    nextToken?: string,
+  ): Promise<DirectMessagesResult> {
+    const conversationId = target.conversationId?.trim() ? requireConversationId(target.conversationId) : undefined;
+    const username = target.username?.trim() ? requireUsername(target.username) : undefined;
+    if (!conversationId === !username) throw new Error("Pass exactly one of conversationId or username.");
+
+    const me = await this.me();
+    const participant = username ? await this.getUserByUsername(username) : undefined;
+    const cacheKey = `dm-messages:${conversationId ?? `with:${participant?.id}`}:${nextToken ?? "first"}`;
+    return await this.cachedRead(cacheKey, async (api) => {
+      const options = {
+        max_results: DM_PAGE_SIZE,
+        pagination_token: nextToken,
+        "dm_event.fields": dmEventFields,
+        expansions: dmExpansions,
+        "user.fields": defaultUserFields,
+      };
+      const page = participant
+        ? await api.v2.listDmEventsWithParticipant(participant.id, options)
+        : await api.v2.listDmEventsOfConversation(conversationId as string, options);
+
+      return {
+        conversationId: conversationId ?? page.events.find((event) => event.dm_conversation_id)?.dm_conversation_id,
+        participant,
+        items: page.events.map((event) => this.dmEventToDirectMessage(event, page.includes, me.id)),
+        nextToken: page.meta.next_token,
+      };
+    });
+  }
+
+  private dmEventToDirectMessage(event: DMEventV2, includes: TwitterV2IncludesHelper, myId: string): DirectMessage {
+    const sender = event.sender_id ? includes.userById(event.sender_id) : undefined;
+    return {
+      id: event.id,
+      conversationId: event.dm_conversation_id,
+      type: event.event_type,
+      text: event.event_type === "MessageCreate" ? event.text : undefined,
+      createdAt: event.created_at,
+      senderId: event.sender_id,
+      sender: sender ? twitterUserToUser(sender) : undefined,
+      fromMe: event.sender_id === myId,
+      participantIds: event.participant_ids,
+    };
+  }
+
   async sendDirectMessage(
     participantIds: string[],
     text: string,
@@ -1328,6 +1532,7 @@ export class ClientV2 {
         message,
       });
     });
+    this.clearCache();
 
     return { conversationId: result.dm_conversation_id, eventId: result.dm_event_id };
   }

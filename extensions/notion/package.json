@@ -189,7 +189,16 @@
       ]
     }
   ],
+  "resourceProvider": "read-resource",
   "tools": [
+    {
+      "name": "search-page-mentions",
+      "title": "Pages",
+      "description": "Search Notion pages by title to mention in AI Chat, listing recently edited pages by default.",
+      "functionalities": [
+        "AI mention search"
+      ]
+    },
     {
       "name": "search-pages",
       "title": "Search Pages",
@@ -351,7 +360,7 @@
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
     "@notionhq/client": "^5.9.0",
-    "@raycast/api": "^2.5.0",
+    "@raycast/api": "^2.10.1",
     "@raycast/utils": "^2.2.2",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^4.1.0",

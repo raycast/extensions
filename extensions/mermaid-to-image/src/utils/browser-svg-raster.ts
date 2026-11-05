@@ -18,6 +18,7 @@ export interface BrowserSvgRasterOptions {
   tmpDir?: string;
   factor?: number;
   maxEdge?: number;
+  timeoutMs?: number;
 }
 
 interface BrowserSvgRasterDependencies {
@@ -70,6 +71,7 @@ export async function renderSvgToRasterWithBrowser(
     tmpDir = os.tmpdir(),
     factor = DEFAULT_BROWSER_SVG_FACTOR,
     maxEdge = DEFAULT_BROWSER_SVG_MAX_EDGE,
+    timeoutMs,
   }: BrowserSvgRasterOptions,
   dependencies: Partial<BrowserSvgRasterDependencies> = {},
 ): Promise<SvgRasterizationResult> {
@@ -83,29 +85,40 @@ export async function renderSvgToRasterWithBrowser(
   const htmlPath = path.join(tmpDir, `${baseName}.html`);
   const outputPath = path.join(tmpDir, `${baseName}.png`);
 
-  resolvedDependencies.writeFile(svgPath, svgContent, "utf-8");
-  resolvedDependencies.writeFile(htmlPath, buildHtmlShell(svgPath, supersampled.width, supersampled.height), "utf-8");
+  const tempPaths = [svgPath, htmlPath, outputPath];
+  try {
+    resolvedDependencies.writeFile(svgPath, svgContent, "utf-8");
+    resolvedDependencies.writeFile(htmlPath, buildHtmlShell(svgPath, supersampled.width, supersampled.height), "utf-8");
 
-  await resolvedDependencies.execFile(browserExecutablePath, [
-    "--headless",
-    "--disable-gpu",
-    "--hide-scrollbars",
-    "--allow-file-access-from-files",
-    "--force-device-scale-factor=1",
-    "--default-background-color=00000000",
-    `--window-size=${supersampled.width},${supersampled.height}`,
-    `--screenshot=${outputPath}`,
-    "--run-all-compositor-stages-before-draw",
-    "--virtual-time-budget=1000",
-    pathToFileURL(htmlPath).toString(),
-  ]);
+    const args = [
+      "--headless",
+      "--disable-gpu",
+      "--hide-scrollbars",
+      "--allow-file-access-from-files",
+      "--force-device-scale-factor=1",
+      "--default-background-color=00000000",
+      `--window-size=${supersampled.width},${supersampled.height}`,
+      `--screenshot=${outputPath}`,
+      "--run-all-compositor-stages-before-draw",
+      "--virtual-time-budget=1000",
+      pathToFileURL(htmlPath).toString(),
+    ];
+    if (timeoutMs === undefined) {
+      await resolvedDependencies.execFile(browserExecutablePath, args);
+    } else {
+      await resolvedDependencies.execFile(browserExecutablePath, args, { timeout: timeoutMs, killSignal: "SIGKILL" });
+    }
 
-  if (!resolvedDependencies.fileExists(outputPath)) {
-    throw new Error("browser screenshot did not produce a PNG output file");
+    if (!resolvedDependencies.fileExists(outputPath)) {
+      throw new Error("browser screenshot did not produce a PNG output file");
+    }
+
+    return {
+      path: outputPath,
+      tempPaths,
+    };
+  } catch (error) {
+    for (const file of tempPaths) fs.rmSync(file, { force: true });
+    throw error;
   }
-
-  return {
-    path: outputPath,
-    tempPaths: [svgPath, htmlPath, outputPath],
-  };
 }

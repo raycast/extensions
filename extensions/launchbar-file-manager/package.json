@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launchbar-file-manager",
+  "title": "LaunchBar File Manager",
+  "description": "LaunchBar-style file browsing inside Raycast: drill with keyboard, preview, copy move rename trash.",
+  "icon": "icon.png",
+  "author": "imed",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "browse-files",
+      "title": "Browse Files",
+      "description": "Browse filesystem LaunchBar-style with quick file operations",
+      "mode": "view",
+      "keywords": [
+        "files",
+        "browse",
+        "finder",
+        "manager",
+        "folders"
+      ]
+    },
+    {
+      "name": "finder-selection",
+      "title": "Transfer Finder Selection",
+      "description": "Transfer the files currently selected in Finder via the folder tree",
+      "mode": "view",
+      "keywords": [
+        "finder",
+        "selection",
+        "transfer",
+        "move",
+        "copy"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "startingPath",
+      "title": "Starting Folder",
+      "description": "Folder to open when the command starts",
+      "type": "directory",
+      "required": false,
+      "default": "~"
+    },
+    {
+      "name": "startBehavior",
+      "title": "On Open",
+      "description": "Begin in the starting folder or the last opened folder",
+      "type": "dropdown",
+      "required": false,
+      "default": "start",
+      "data": [
+        {
+          "title": "Starting Folder",
+          "value": "start"
+        },
+        {
+          "title": "Last Opened Folder",
+          "value": "last"
+        }
+      ]
+    },
+    {
+      "name": "showHiddenDefault",
+      "title": "View Options",
+      "description": "Show hidden files by default",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Hidden Files",
+      "default": false
+    },
+    {
+      "name": "transferStart",
+      "title": "Transfer Start Folder",
+      "description": "Where the Tab transfer tree starts browsing",
+      "type": "dropdown",
+      "required": false,
+      "default": "home",
+      "data": [
+        {
+          "title": "Home Folder",
+          "value": "home"
+        },
+        {
+          "title": "Current Folder",
+          "value": "current"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.71.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

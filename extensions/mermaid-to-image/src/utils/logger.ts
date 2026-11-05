@@ -34,6 +34,16 @@ export function logOperationalEvent(event: string, metadata: Record<string, unkn
 }
 
 export function logOperationalError(event: string, error: unknown, metadata: Record<string, unknown> = {}): void {
+  if (metadata.renderer === "ondine") {
+    const safeMetadata = Object.fromEntries(
+      Object.entries(metadata).filter(([key]) => !["message", "reason", "snippet"].includes(key)),
+    );
+    console.error(
+      `[mermaid-to-image] ${event}`,
+      sanitizeOperationalMetadata({ ...safeMetadata, failureClass: "ondine-render-failed" }),
+    );
+    return;
+  }
   const message = error instanceof Error ? error.message : String(error);
   console.error(`[mermaid-to-image] ${event}`, sanitizeOperationalMetadata({ ...metadata, message }));
 }

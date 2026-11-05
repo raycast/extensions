@@ -19,3 +19,13 @@ test("sends tags and a note only when they have content", () => {
   expect(parseCaptureExtras({ notes: "   ", tags: " , " })).toEqual({});
   expect(parseCaptureExtras({})).toEqual({});
 });
+
+test("text that only starts with a URL links just that URL", async () => {
+  const { extractFirstHttpUrl } = await import("../lib/capture");
+  expect(extractFirstHttpUrl("https://example.com/a")).toBe(
+    "https://example.com/a",
+  );
+  expect(
+    extractFirstHttpUrl("https://github.com/teak/app is the repo\nwith notes"),
+  ).toBe("https://github.com/teak/app");
+});
