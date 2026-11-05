@@ -1,5 +1,4 @@
 import { Detail, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getIssue, Issue } from "../api/issues";
@@ -7,6 +6,7 @@ import { getAuthenticatedUri, getBaseUrl } from "../api/request";
 import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
 import { formatDate, getCustomFieldsForDetail, getMarkdownFromHtml, getStatusColor } from "../helpers/issues";
 import { replaceAsync } from "../helpers/string";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 import { useEpicIssues } from "../hooks/useIssues";
 
 import IssueActions from "./IssueActions";
@@ -52,7 +52,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     data: issue,
     isLoading,
     mutate,
-  } = useCachedPromise(
+  } = useJiraCachedPromise(
     async (issueId) => {
       const issue = await getIssue(issueId);
 

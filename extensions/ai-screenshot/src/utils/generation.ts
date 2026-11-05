@@ -18,7 +18,10 @@ export async function generateImage(client: OpenAI, prompt: string): Promise<str
     console.error("Failed to generate the modified image.", error);
     throw new Error("Failed to generate the modified image");
   }
-  const imageUrl = result.data[0].url as string;
+  const imageUrl = result.data?.[0]?.url;
+  if (!imageUrl) {
+    throw new Error("Failed to generate the modified image");
+  }
   return imageUrl;
 }
 

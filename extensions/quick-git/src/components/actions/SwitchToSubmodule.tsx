@@ -1,4 +1,4 @@
-import { Action, Icon, showToast } from "@raycast/api";
+import { Action, Icon, showToast, Keyboard } from "@raycast/api";
 import { useRepo } from "../../hooks/useRepo.js";
 import { join } from "node:path";
 import { useCheckStatus } from "../../hooks/useGitStatus.js";
@@ -29,7 +29,7 @@ export function SwitchToSubmodule({ submodulePath, updateRepo }: Props) {
       title="Switch to Submodule"
       icon={Icon.Reply}
       onAction={updateCurrentRepo}
-      shortcut={{ macOS: { key: "s", modifiers: ["cmd"] }, Windows: { key: "s", modifiers: ["ctrl"] } }}
+      shortcut={Keyboard.Shortcut.Common.Save}
     />
   );
 }

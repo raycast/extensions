@@ -146,7 +146,7 @@ export default function Command() {
 						accessories={[
 							{
 								icon: {
-									source: getProgressIcon(item.current_totp_time_remaining / 30),
+									source: getProgressIcon(item.current_totp_time_remaining / Number(item.period)),
 									tintColor: getProgressColor(item.current_totp_time_remaining),
 								},
 							},

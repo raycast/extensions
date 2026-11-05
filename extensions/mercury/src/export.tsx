@@ -111,6 +111,7 @@ export function ExportTransactionsSubmenu({ filenameBase, rows }: { filenameBase
     <ActionPanel.Submenu
       title={`Export ${rows.length} ${rows.length === 1 ? "Transaction" : "Transactions"}`}
       icon={Icon.Download}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
     >
       <Action
         title="Export as CSV"

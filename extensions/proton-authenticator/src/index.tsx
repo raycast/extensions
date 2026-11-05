@@ -116,8 +116,9 @@ export default function Command() {
 
   const loadAccounts = async () => {
     setIsLoading(true);
+    let mode: ImportMode | null = null;
     try {
-      const mode = await getImportMode();
+      mode = await getImportMode();
       setCurrentMode(mode);
       const result = await loadAccountsFromStorage();
       setMissingKeys(result.missingKeys);
@@ -135,7 +136,8 @@ export default function Command() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load accounts");
       setNeedsSetup(true);
-      setSetupStep("select");
+      // Database setup shows the error and how to fix it, the mode selector would hide it
+      setSetupStep(mode === "sqlite" ? "sqlite" : "select");
     } finally {
       setIsLoading(false);
     }

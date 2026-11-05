@@ -1,11 +1,11 @@
 import { Form, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { ForwardedRef, forwardRef, useState } from "react";
 
 import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocomplete } from "../api/request";
 import { User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 
 type FormUserDropdownProps = {
   autocompleteUrl?: string;
@@ -17,7 +17,7 @@ const FormUserDropdown = forwardRef(
 
     const [query, setQuery] = useState("");
 
-    const { data: users, isLoading: isLoadingUsers } = useCachedPromise(
+    const { data: users, isLoading: isLoadingUsers } = useJiraCachedPromise(
       async (autocompleteUrl, query) => {
         if (!autocompleteUrl) {
           return Promise.resolve([]);

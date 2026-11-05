@@ -18,6 +18,7 @@ import {
   openExtensionPreferences,
   showToast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import * as fs from "node:fs";
@@ -31,26 +32,29 @@ import {
   readPendingStarts,
   writePendingStarts,
 } from "./pendingStore";
-import {
-  recordSeen,
-  recordSeenBatch,
-  toRecent,
-  updateRecentFavicon,
-} from "./recents";
+import { recordRunning, recordSeen, updateRecentFavicon } from "./recents";
 import {
   EPHEMERAL_PORT_MIN,
   byRecency,
   fetchServers,
   killProcess,
   killServer,
+  restartReplay,
   openInBackground,
   reapProjectHelpersWhenDown,
   restartServer,
   spawnLogPath,
   startDevServer,
+  INSTALL_DONE_MARKER,
+  directoryExists,
+  INSTALL_FAILED_MARKER,
+  installPlanFor,
+  missingDependencies,
+  pickDevScript,
+  type InstallPlan,
 } from "./servers";
 import { pokeMenuBar, writeSnapshot } from "./snapshot";
-import { toolColor, toolLabel } from "./tool-display";
+import { runtimeColor, runtimeTag, toolColor, toolLabel } from "./tool-display";
 import { DevServer } from "./types";
 
 // Hand off to the Start Dev Server command. Used by the empty-state
@@ -100,7 +104,11 @@ function sameServers(a: DevServer[], b: DevServer[]): boolean {
     if (
       a[i].pid !== b[i].pid ||
       a[i].port !== b[i].port ||
-      a[i].branch !== b[i].branch
+      a[i].branch !== b[i].branch ||
+      // A supervisor that replaced a worker keeps its own pid and port, so
+      // without this the list kept the dead worker's pid and a kill or
+      // restart missed the live one, which went on holding the port.
+      (a[i].workerPids ?? []).join(",") !== (b[i].workerPids ?? []).join(",")
     )
       return false;
   }
@@ -243,14 +251,14 @@ function SpawnLogView({
             title="Copy Log Path"
             icon={Icon.Clipboard}
             content={logPath}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           {exists && <Action.ShowInFinder path={logPath} />}
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={revalidate}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }
@@ -357,6 +365,9 @@ function ServerItem({
     hasAlias && show.localUrl
       ? { tag: { value: `localhost:${server.port}` } }
       : undefined;
+  // Runtime badge text, or null when the tool tag already says it (see
+  // runtimeTag).
+  const runtime = runtimeTag(server);
 
   return (
     <List.Item
@@ -380,13 +391,15 @@ function ServerItem({
           : []),
         ...(localBadgeTag ? [localBadgeTag] : []),
         // Runtime tag is suppressed when it duplicates the tool tag (e.g.
-        // tool is already "bun"), and rendered only when the user has the
-        // tool tag visible; otherwise standalone "bun" would look orphaned.
-        ...(show.tool && server.runtime === "bun" && server.tool !== "bun"
+        // tool is already "bun", or "go" on a Go binary), when it is plain
+        // Node (the default, so not worth a tag), and rendered only when the
+        // user has the tool tag visible; otherwise a standalone "Python" would
+        // look orphaned.
+        ...(show.tool && runtime
           ? [
               {
-                tag: { value: "Bun", color: Color.Yellow },
-                tooltip: "Listening process is running on the Bun runtime",
+                tag: { value: runtime, color: runtimeColor(server.runtime) },
+                tooltip: `Listening process is running on ${runtime}`,
               },
             ]
           : []),
@@ -446,7 +459,7 @@ function ServerItem({
               <Action.CopyToClipboard
                 title="Copy Localhost URL"
                 content={server.localUrl}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             )}
             {/* Network URL is for testing on a phone or another machine on
@@ -456,6 +469,8 @@ function ServerItem({
               <Action.CopyToClipboard
                 title="Copy Network URL"
                 content={`http://${lanIp}:${server.port}`}
+                // Not Common.CopyName: this copies a URL, not a name.
+                // eslint-disable-next-line @raycast/prefer-common-shortcut
                 shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
             )}
@@ -472,7 +487,7 @@ function ServerItem({
                 icon={Icon.Code}
                 target={server.cwd}
                 application={editorApp}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
               />
             )}
             <Action.Open
@@ -489,7 +504,7 @@ function ServerItem({
             <Action
               title="Start Dev Server"
               icon={Icon.Play}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
               onAction={openStartCommand}
             />
             <Action
@@ -505,7 +520,7 @@ function ServerItem({
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={onRefresh}
             />
           </ActionPanel.Section>
@@ -647,7 +662,13 @@ type SpawnPhase =
       // being able to ask it after the cleanup effect has dropped the row.
       expecting: Map<
         string,
-        { name: string; logStart: number; ignorePids: readonly number[] }
+        {
+          name: string;
+          logStart: number;
+          ignorePids: readonly number[];
+          // When this target's row gives up; the watchdog waits for the last.
+          deadline: number;
+        }
       >;
     }
   | { phase: "done" };
@@ -656,6 +677,13 @@ type SpawnPhase =
 // failed. Also spelled into the undiagnosed failed-row title, so the number
 // the user reads always matches the wait they actually got.
 const SPAWN_TIMEOUT_MS = 15000;
+
+// The same watchdog for a start that installs dependencies first. A cold
+// install of a large project on a slow connection runs to minutes, and a
+// failed install ends the process early anyway, so the long window costs
+// nothing when things go wrong and keeps a slow install from being called a
+// failure while it is still downloading.
+const INSTALL_TIMEOUT_MS = 5 * 60 * 1000;
 
 // How long past its deadline a persisted pending row is still worth
 // rehydrating. Everything a failed row has to offer comes out of the spawn
@@ -672,14 +700,26 @@ const RESTART_WINDOW_S =
   RESTART_POLL_DELAYS.reduce((total, ms) => total + ms, 0) / 1000;
 
 // The failure's title becomes the failed row's title, and a nameable fix
-// becomes its Copy Fix Command action.
-const SPAWN_FAILURE: Record<SpawnFailure, { title: string; fix?: string }> = {
-  "port-conflict": { title: "Port already in use" },
+// becomes its Copy Fix Command action. `detail` is what the diagnosis named,
+// when it named something (the missing command).
+const SPAWN_FAILURE: Record<
+  SpawnFailure,
+  { title: (detail?: string) => string; fix?: string }
+> = {
+  "port-conflict": { title: () => "Port already in use" },
   "portless-proxy-down": {
-    title: "Portless proxy isn't running",
+    title: () => "Portless proxy isn't running",
     fix: "portless service install",
   },
+  "command-not-found": {
+    title: (detail) =>
+      detail ? `Command not found: ${detail}` : "Command not found",
+  },
+  "install-failed": { title: () => "Installing dependencies failed" },
 };
+
+// What a failed row knows about why. Spread straight onto the entry.
+type Diagnosis = Pick<PendingStart, "reason" | "detail">;
 
 // Size of the (append-mode) spawn log before an attempt writes to it. Taken
 // right before every spawn so the watchdog and the log view can scope
@@ -702,39 +742,26 @@ function spawnLogOffset(cwd: string): number {
 // opened append-only and never rotated, so it holds every run for this cwd
 // until the OS clears tmpdir. Seeking past `logStart` also bounds the read to
 // what one 15-second attempt managed to write.
-function diagnoseSpawnFailure(
-  cwd: string,
-  logStart: number,
-): SpawnFailure | null {
+// Whether an install-then-start has already reported a failed install in its
+// log. Cheap enough to ask every couple of seconds: it reads only this
+// attempt's bytes.
+function installFailed(cwd: string, logStart: number): boolean {
+  return readLogFrom(cwd, logStart).includes(INSTALL_FAILED_MARKER);
+}
+
+// This attempt's bytes of the append-only spawn log, or "" when there are none
+// (or the log is gone).
+function readLogFrom(cwd: string, logStart: number): string {
   let fd: number | undefined;
   try {
     fd = fs.openSync(spawnLogPath(cwd), "r");
     const length = fs.fstatSync(fd).size - logStart;
-    if (length <= 0) return null;
+    if (length <= 0) return "";
     const buf = Buffer.alloc(length);
     fs.readSync(fd, buf, 0, length, logStart);
-    const tail = buf.toString("utf8");
-    // Another process owns the port. The fix (kill the other server, or for
-    // Shopify themes let the auto-port pick a free one) is nothing like
-    // debugging a crashed build.
-    if (/EADDRINUSE|address already in use/i.test(tail)) return "port-conflict";
-    // A dev script wrapped in `portless run` needs the portless proxy up.
-    // When it isn't, portless tries to auto-start it, finds no TTY to run
-    // sudo on (always the case for our detached spawn) and exits before the
-    // framework ever boots. Starting the proxy by hand once per reboot works
-    // but is exactly the manual step the extension exists to remove; the
-    // startup service makes it permanent.
-    //
-    // Matched on portless's full sentence, "Proxy is not running and no TTY
-    // is available for sudo." Its shorter "Proxy is not running" lines come
-    // from `portless proxy stop` and `portless doctor`, which say nothing
-    // about a failed start, so the prefix alone would name this cause for a
-    // server that is merely slow to boot.
-    if (/proxy is not running and no tty/i.test(tail))
-      return "portless-proxy-down";
-    return null;
+    return buf.toString("utf8");
   } catch {
-    return null;
+    return "";
   } finally {
     if (fd !== undefined) {
       try {
@@ -744,6 +771,60 @@ function diagnoseSpawnFailure(
       }
     }
   }
+}
+
+function diagnoseSpawnFailure(
+  cwd: string,
+  logStart: number,
+  kind: PendingStart["kind"],
+): Diagnosis {
+  let tail = readLogFrom(cwd, logStart);
+  if (!tail) return { reason: null, detail: undefined };
+  // An install-then-start is two runs in one log. Until the success marker the
+  // log is the package manager's, and a failure there is the install's: named
+  // as such unless a missing command explains it better (the package manager
+  // itself, or a build tool a postinstall wanted). After the marker only the
+  // dev server's own output counts, so a harmless warning from the install
+  // cannot be blamed for a server that died later.
+  if (kind === "install") {
+    const done = tail.indexOf(INSTALL_DONE_MARKER);
+    if (done === -1) {
+      return commandNotFound(tail) ?? { reason: "install-failed" };
+    }
+    tail = tail.slice(done + INSTALL_DONE_MARKER.length);
+  }
+  // Another process owns the port. The fix (kill the other server, or for
+  // Shopify themes let the auto-port pick a free one) is nothing like
+  // debugging a crashed build.
+  if (/EADDRINUSE|address already in use/i.test(tail))
+    return { reason: "port-conflict" };
+  // A dev script wrapped in `portless run` needs the portless proxy up.
+  // When it isn't, portless tries to auto-start it, finds no TTY to run
+  // sudo on (always the case for our detached spawn) and exits before the
+  // framework ever boots. Starting the proxy by hand once per reboot works
+  // but is exactly the manual step the extension exists to remove; the
+  // startup service makes it permanent.
+  //
+  // Matched on portless's full sentence, "Proxy is not running and no TTY
+  // is available for sudo." Its shorter "Proxy is not running" lines come
+  // from `portless proxy stop` and `portless doctor`, which say nothing
+  // about a failed start, so the prefix alone would name this cause for a
+  // server that is merely slow to boot.
+  if (/proxy is not running and no tty/i.test(tail))
+    return { reason: "portless-proxy-down" };
+  return commandNotFound(tail) ?? { reason: null, detail: undefined };
+}
+
+// The shell could not find a program: zsh says "command not found: vite", sh
+// (which npm runs scripts under) says "vite: command not found". For a
+// script's own tool that almost always means the project's dependencies are
+// not installed, and the failed row offers to install them; for a global tool
+// (shopify, portless) the title names what is missing.
+function commandNotFound(log: string): Diagnosis | null {
+  const missing =
+    /command not found: ([^\s]+)/.exec(log) ??
+    /([^\s:]+): command not found/.exec(log);
+  return missing ? { reason: "command-not-found", detail: missing[1] } : null;
 }
 
 // Open a URL the user did not press a key for. Background is what we want, so
@@ -800,69 +881,25 @@ function pendingRowId(cwd: string): string {
   return `${PENDING_ID_PREFIX}${cwd}`;
 }
 
-// Spinner timing. Smoothness is the size of each step, not the frame rate, so
-// the two knobs pull apart: 18 frames over a revolution is a 20 degree step
-// against the 30 degrees a 12-frame turn moved, and holding the frame rate
-// steady spends that on a slower turn (810ms) rather than a choppier one.
-// Slower also lands nearer the animated toast's spinner, which the 600ms
-// version overshot.
-//
-// The frame rate itself is near its ceiling. Each frame costs one prop change
-// on one row, the frames are precomputed (see SPINNER_ICONS), and the interval
-// only runs while something is actually starting, so it is bounded by the 15s
-// watchdog. But every frame is still a render round trip to Raycast, and the
-// toast's own spinner is native and far smoother than anything reachable from
-// here. Buy smoothness with degrees per step first; raise the rate only after
-// that runs out.
-const SPINNER_FRAMES = 18;
-const SPINNER_FRAME_MS = 45;
-// Neutral gray, readable on both the light and the dark theme. Hardcoded
-// rather than tinted or drawn in currentColor: Raycast gives a data-URI SVG
-// no surrounding color context, so a currentColor-only icon renders as a
-// black square (the same trap isMonochromeSvg exists to dodge for favicons).
-const SPINNER_COLOR = "#8E8E93";
-const SPINNER_RADIUS = 5.5;
-// Quarter of the circle is the moving head; the rest is the gap that rides
-// around behind it.
-const SPINNER_ARC = 2 * Math.PI * SPINNER_RADIUS * 0.25;
-const SPINNER_GAP = 2 * Math.PI * SPINNER_RADIUS - SPINNER_ARC;
+// Icon for a row whose server is still on its way up. Static on purpose.
+// This used to be a hand-rolled spinner: eighteen SVG frames swapped on the
+// row every 45ms, since Raycast has no animated icons. Raycast 2 renders an
+// extension's tree with React in its own window, and that many icon changes a
+// second on one row drove its renderer past React's update-depth limit within
+// a few seconds of every start ("Minified React error #185"), which replaced
+// the dashboard with an error screen. The motion now comes from the list's
+// own loading bar (see `isLoading` on the List), which is native, smooth, and
+// costs nothing per frame.
+const PENDING_ICON: Image.ImageLike = {
+  source: Icon.CircleProgress50,
+  tintColor: Color.SecondaryText,
+};
 
-// One frame of a buffering spinner, as an SVG data URI. Raycast has no
-// animated icons and no per-row loading state, so the animation is frames we
-// swap ourselves: a faint full-circle track with a quarter-circle arc stepped
-// around it one frame at a time, which is the same shape a CSS spinner draws
-// with stroke-dasharray.
-function spinnerFrame(frame: number): string {
-  const angle = frame * (360 / SPINNER_FRAMES);
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">` +
-    `<g fill="none" stroke="${SPINNER_COLOR}" stroke-width="1.8" stroke-linecap="round">` +
-    `<circle cx="8" cy="8" r="${SPINNER_RADIUS}" opacity="0.22"/>` +
-    `<circle cx="8" cy="8" r="${SPINNER_RADIUS}"` +
-    ` stroke-dasharray="${SPINNER_ARC.toFixed(2)} ${SPINNER_GAP.toFixed(2)}"` +
-    ` transform="rotate(${angle} 8 8)"/>` +
-    `</g></svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
-// The frames are a fixed set, so build them once at module load instead of
-// re-encoding an SVG twenty times a second. Leaves the animation as an array
-// index, which is what keeps the frame rate cheap enough to raise.
-const SPINNER_ICONS: readonly string[] = Array.from(
-  { length: SPINNER_FRAMES },
-  (_, frame) => spinnerFrame(frame),
-);
-
-// The synthetic row for a pending start. While starting it spins; once the
-// watchdog gives up it turns red and carries the remedies. A row can do that
-// and a toast cannot: a toast's actions die with it, and it degrades to an
-// actionless HUD as soon as the Raycast window closes, which is exactly when
-// a 15-second failure lands.
-//
-// The spinner's frame counter lives here rather than in the dashboard so that
-// ten re-renders a second stay inside this one row. Hoisting it would re-run
-// the whole list, which is the churn sameServers and the polling cadence were
-// both written to avoid.
+// The synthetic row for a pending start. While starting it shows the pending
+// icon (and the list shows its loading bar); once the watchdog gives up it
+// turns red and carries the remedies. A row can do that and a toast cannot: a
+// toast's actions die with it, and it degrades to an actionless HUD as soon as
+// the Raycast window closes, which is exactly when a 15-second failure lands.
 function PendingItem({
   id,
   cwd,
@@ -873,6 +910,7 @@ function PendingItem({
   onDismiss,
   onDismissAll,
   onRefresh,
+  onInstall,
 }: {
   id: string;
   cwd: string;
@@ -886,18 +924,22 @@ function PendingItem({
   onDismiss: () => void;
   onDismissAll: () => void;
   onRefresh: () => void;
+  // Install the project's dependencies and start it again.
+  onInstall: () => void;
 }) {
   const { push } = useNavigation();
-  const [frame, setFrame] = useState(0);
   const spinning = entry.status === "starting";
-  useEffect(() => {
-    if (!spinning) return;
-    const id = setInterval(
-      () => setFrame((f) => (f + 1) % SPINNER_FRAMES),
-      SPINNER_FRAME_MS,
-    );
-    return () => clearInterval(id);
-  }, [spinning]);
+  // A failed row offers to install when installing is plausibly the fix: the
+  // project has no installed tree at all, or the failure was a missing
+  // command or a broken install in a project started through package.json
+  // (a dependency added since the last install leaves node_modules in place
+  // but its binary missing). Computed only for failed rows; a few stats.
+  const offerInstall =
+    !spinning &&
+    (missingDependencies(cwd) !== null ||
+      ((entry.reason === "command-not-found" ||
+        entry.reason === "install-failed") &&
+        pickDevScript(cwd) !== null));
 
   // The project actions, identical on both states and on the same chords
   // server rows use. A pending row is still a row about a folder: leaving it
@@ -912,7 +954,7 @@ function PendingItem({
           icon={Icon.Code}
           target={cwd}
           application={editorApp}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
         />
       )}
       <Action.Open
@@ -929,13 +971,13 @@ function PendingItem({
       <Action
         title="Start Dev Server"
         icon={Icon.Play}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={Keyboard.Shortcut.Common.New}
         onAction={openStartCommand}
       />
       <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={onRefresh}
       />
     </ActionPanel.Section>
@@ -945,11 +987,17 @@ function PendingItem({
     return (
       <List.Item
         id={id}
-        icon={SPINNER_ICONS[frame]}
+        icon={PENDING_ICON}
         // The section header is already the project name, so the row says
         // what is happening instead of repeating it. Server rows title on
         // their host and port; a row with no port yet has its state to give.
-        title={entry.kind === "restart" ? "Restarting…" : "Starting…"}
+        title={
+          entry.kind === "restart"
+            ? "Restarting…"
+            : entry.kind === "install"
+              ? "Installing dependencies, then starting…"
+              : "Starting…"
+        }
         // The project name lives in the section header, which Raycast's search
         // doesn't index, so without this typing a project's name filters its
         // own pending row out from under the user.
@@ -988,10 +1036,12 @@ function PendingItem({
       // toast: it is the one part that always survives. The section above
       // already says which project this is.
       title={
-        failure?.title ??
+        failure?.title(entry.detail) ??
         (entry.kind === "restart"
           ? `Didn't come back after ${RESTART_WINDOW_S}s`
-          : `Didn't start after ${SPAWN_TIMEOUT_MS / 1000}s`)
+          : entry.kind === "install"
+            ? `Didn't start within ${INSTALL_TIMEOUT_MS / 60000} min`
+            : `Didn't start after ${SPAWN_TIMEOUT_MS / 1000}s`)
       }
       // As above: the name is only in the section header, and a filtered-out
       // failed row takes its remedies with it.
@@ -999,8 +1049,15 @@ function PendingItem({
       accessories={[{ tag: { value: "Failed", color: Color.Red } }]}
       actions={
         <ActionPanel>
-          {/* What went wrong. */}
+          {/* What went wrong, led by the fix when there is one to run. */}
           <ActionPanel.Section>
+            {offerInstall && (
+              <Action
+                title="Install Dependencies & Start"
+                icon={Icon.Download}
+                onAction={onInstall}
+              />
+            )}
             <Action
               title="View Startup Log"
               icon={Icon.Terminal}
@@ -1202,7 +1259,12 @@ export default function Command(
       // Diagnosed up front rather than inside the updater: the read hits the
       // filesystem synchronously, and an updater must stay callable twice.
       const inherited = [...persisted]
-        .filter(([, entry]) => now <= entry.deadline + PENDING_MAX_AGE_MS)
+        // A row for a folder that has since been deleted (a removed worktree,
+        // a scratch project) has nothing left to retry or inspect.
+        .filter(
+          ([cwd, entry]) =>
+            now <= entry.deadline + PENDING_MAX_AGE_MS && directoryExists(cwd),
+        )
         .map(([cwd, entry]): [string, PendingStart] =>
           entry.status === "starting" && now > entry.deadline
             ? [
@@ -1210,7 +1272,7 @@ export default function Command(
                 {
                   ...entry,
                   status: "failed",
-                  reason: diagnoseSpawnFailure(cwd, entry.logStart),
+                  ...diagnoseSpawnFailure(cwd, entry.logStart, entry.kind),
                 },
               ]
             : [cwd, entry],
@@ -1352,6 +1414,43 @@ export default function Command(
         return;
       }
 
+      // 2b. Dependencies. A project with no node_modules (deleted to free
+      //     space, a fresh clone, an uninstalled worktree) cannot start: its
+      //     dev script dies on "vite: command not found". Asking here, before
+      //     any spawn, turns a vague failure 15 seconds later into one question
+      //     with the fix attached. Running targets are skipped, since a server
+      //     that is up has what it needs. The title is fixed so "Do not show
+      //     this again" means "always install" for every project, not one.
+      const installs = new Map<string, InstallPlan>();
+      for (const t of spawn.targets) {
+        if (runningTargets.some((rt) => rt.target.cwd === t.cwd)) continue;
+        const plan = missingDependencies(t.cwd);
+        if (plan) installs.set(t.cwd, plan);
+      }
+      let targets = spawn.targets;
+      if (installs.size > 0) {
+        const needing = spawn.targets.filter((t) => installs.has(t.cwd));
+        const managers = [...new Set([...installs.values()].map((p) => p.pm))];
+        const ok = await confirmAlert({
+          title: "Install dependencies first?",
+          message:
+            needing.length === 1
+              ? `${needing[0].name} has no node_modules folder, so its dev server can't run yet. Install its dependencies with ${managers[0]}, then start it?`
+              : `${joinNames(needing.map((t) => t.name))} have no node_modules folder, so their dev servers can't run yet. Install their dependencies with ${joinNames(managers)}, then start them?`,
+          primaryAction: { title: "Install & Start" },
+          rememberUserChoice: true,
+        });
+        if (!ok) {
+          // Declining drops only the projects that cannot run anyway; the
+          // rest of a batch still starts.
+          targets = spawn.targets.filter((t) => !installs.has(t.cwd));
+          if (targets.length === 0) {
+            setSpawnState({ phase: "done" });
+            return;
+          }
+        }
+      }
+
       // Targets being replaced get their "Restarting…" row up before the
       // kill, mirroring the dashboard's own restart(): the row stands in for
       // the old server row, which the optimistic update in step 4 removes in
@@ -1398,14 +1497,15 @@ export default function Command(
       //    is a replacement (the menu bar's Restart, or starting only
       //    already-running projects); mixed batches stay "Starting".
       const label =
-        spawn.targets.length === 1
-          ? spawn.targets[0].name
-          : `${spawn.targets.length} dev servers`;
+        targets.length === 1
+          ? targets[0].name
+          : `${targets.length} dev servers`;
       const verb =
-        runningTargets.length > 0 &&
-        runningTargets.length === spawn.targets.length
+        runningTargets.length > 0 && runningTargets.length === targets.length
           ? "Restarting"
-          : "Starting";
+          : targets.every((t) => installs.has(t.cwd))
+            ? "Installing and starting"
+            : "Starting";
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: `${verb} ${label}…`,
@@ -1426,9 +1526,33 @@ export default function Command(
       //    processes. The optimistic update drops the doomed rows from the
       //    list immediately, restart()-style, so each "Restarting…" row from
       //    above stands in for its server rather than sitting on top of it.
-      const doomedPids = new Set(runningTargets.map((rt) => rt.existing.pid));
+      // What each replacement will run is decided before the kill, and a
+      // target that cannot come back (a puma/gunicorn title with no dev
+      // script to plan from) is refused here rather than killed: see
+      // restartReplay. Its refusal joins the per-target failures in step 5.
+      const replayByCwd = new Map<string, string | undefined>();
+      const refused = new Map<string, Error>();
+      for (const rt of runningTargets) {
+        try {
+          replayByCwd.set(rt.target.cwd, restartReplay(rt.existing));
+        } catch (err) {
+          refused.set(
+            rt.target.cwd,
+            err instanceof Error ? err : new Error(String(err)),
+          );
+        }
+      }
+      const doomedPids = new Set(
+        runningTargets
+          .filter((rt) => !refused.has(rt.target.cwd))
+          .map((rt) => rt.existing.pid),
+      );
       await mutate(
-        Promise.all(runningTargets.map((rt) => killServer(rt.existing.pid))),
+        Promise.all(
+          runningTargets
+            .filter((rt) => !refused.has(rt.target.cwd))
+            .map((rt) => killServer(rt.existing.pid, rt.existing.workerPids)),
+        ),
         {
           optimisticUpdate: (current) =>
             (current ?? []).filter((s) => !doomedPids.has(s.pid)),
@@ -1442,7 +1566,7 @@ export default function Command(
       //    failure toast here and is dropped from the set we go on to watch —
       //    see step 6.
       const spawned = await Promise.all(
-        spawn.targets.map(async (t) => {
+        targets.map(async (t) => {
           // A replaced target's baseline was captured before the kill (the
           // optimistic update above has since dropped its old server from the
           // list, so it cannot be re-derived here). For the rest: whatever
@@ -1457,12 +1581,21 @@ export default function Command(
             pre?.ignorePids ??
             serversRef.current.filter((s) => s.cwd === t.cwd).map((s) => s.pid);
           try {
-            await startDevServer(t.cwd);
+            const refusal = refused.get(t.cwd);
+            if (refusal) throw refusal;
+            await startDevServer(t.cwd, replayByCwd.get(t.cwd), {
+              install: installs.get(t.cwd),
+            });
             await recordSeen({
               cwd: t.cwd,
               projectName: t.name,
             });
-            return { ...t, logStart, ignorePids };
+            // Fixed at spawn so the row, the sweep and the watchdog all hold
+            // the same deadline for this target.
+            const deadline =
+              Date.now() +
+              (installs.has(t.cwd) ? INSTALL_TIMEOUT_MS : SPAWN_TIMEOUT_MS);
+            return { ...t, logStart, ignorePids, deadline };
           } catch (err) {
             // A replaced target's "Restarting…" row went up before the kill;
             // the respawn never got off the ground, so there is nothing for
@@ -1511,10 +1644,10 @@ export default function Command(
               serversRef.current.find((s) => s.cwd === t.cwd)?.projectKey ??
               t.cwd,
             logStart: t.logStart,
-            deadline: Date.now() + SPAWN_TIMEOUT_MS,
+            deadline: t.deadline,
             status: "starting",
             reason: null,
-            kind: "start",
+            kind: installs.has(t.cwd) ? "install" : "start",
             ignorePids: t.ignorePids,
           });
         }
@@ -1535,7 +1668,12 @@ export default function Command(
         expecting: new Map(
           succeeded.map((t) => [
             t.cwd,
-            { name: t.name, logStart: t.logStart, ignorePids: t.ignorePids },
+            {
+              name: t.name,
+              logStart: t.logStart,
+              ignorePids: t.ignorePids,
+              deadline: t.deadline,
+            },
           ]),
         ),
       });
@@ -1593,10 +1731,36 @@ export default function Command(
     if (spawnState.phase !== "spawning") return;
     const expecting = spawnState.expecting;
     const landed = new Map<string, DevServer>();
+    const failed: string[] = [];
     for (const [cwd, target] of expecting) {
       const server = resolvingServer(cwd, target, servers);
-      if (!server) return;
-      landed.set(cwd, server);
+      if (server) {
+        landed.set(cwd, server);
+        continue;
+      }
+      // A row can fail before the watchdog fires: an install that broke in
+      // its first seconds, against a window of minutes. Counted as settled
+      // so the batch can finish now instead of leaving the toast spinning.
+      if (pendingStarts.get(cwd)?.status === "failed") {
+        failed.push(cwd);
+        continue;
+      }
+      return;
+    }
+
+    // Everything has settled and something failed. The rows carry the
+    // failures, so this only wraps up what the watchdog otherwise would: the
+    // cursor goes to the first failure, the toast goes, and any server that
+    // did come up still gets its tab.
+    if (failed.length > 0) {
+      setSelectedItemId(pendingRowId(failed[0]));
+      if (autoOpen) {
+        for (const s of landed.values()) openAutomatically(s.url);
+      }
+      toastRef.current?.hide().catch(() => {});
+      pokeMenuBar();
+      setSpawnState({ phase: "done" });
+      return;
     }
 
     // All expected servers detected. Move the cursor onto the newly started
@@ -1641,7 +1805,7 @@ export default function Command(
       }, 2500);
     }
     setSpawnState({ phase: "done" });
-  }, [servers, spawnState]);
+  }, [servers, spawnState, pendingStarts]);
 
   // Hard 15s timeout. Any expected server that still hasn't bound a port turns
   // its pending row red. A server that exits before binding is otherwise
@@ -1660,43 +1824,61 @@ export default function Command(
   useEffect(() => {
     if (spawnState.phase !== "spawning") return;
     const expecting = spawnState.expecting;
-    const timer = setTimeout(() => {
-      // The same predicate the rows resolve on, so a start is only failed here
-      // while its row is still spinning. A cwd whose entry has gone is either
-      // one the predicate has already resolved (so it is not in here anyway) or
-      // one the user dismissed, and a row thrown away is not ours to fail or to
-      // move the cursor onto.
-      const missing = [...expecting.entries()].filter(
-        ([cwd, target]) =>
-          pendingStartsRef.current.has(cwd) &&
-          !resolvingServer(cwd, target, serversRef.current),
-      );
-      if (missing.length > 0) {
-        const diagnosed = missing.map(
+    const timer = setTimeout(
+      () => {
+        // The same predicate the rows resolve on, so a start is only failed here
+        // while its row is still spinning. A cwd whose entry has gone is either
+        // one the predicate has already resolved (so it is not in here anyway) or
+        // one the user dismissed, and a row thrown away is not ours to fail or to
+        // move the cursor onto.
+        const missing = [...expecting.entries()].filter(
           ([cwd, target]) =>
-            [cwd, diagnoseSpawnFailure(cwd, target.logStart)] as const,
+            pendingStartsRef.current.has(cwd) &&
+            !resolvingServer(cwd, target, serversRef.current),
         );
-        setPendingStarts((prev) => {
-          const next = new Map(prev);
-          for (const [cwd, reason] of diagnosed) {
-            const entry = next.get(cwd);
-            if (entry) next.set(cwd, { ...entry, status: "failed", reason });
-          }
-          return next;
-        });
-        // Put the cursor on the first failed row so its remedies are one ↵
-        // away. Safe to pin: this row has been on screen since the spawn, so
-        // we are only re-pointing selection at an id the list already has.
-        setSelectedItemId(pendingRowId(missing[0][0]));
-      }
-      // The rows carry the failure now, and the success path has its own
-      // toast, so nothing is left for this one to say.
-      toastRef.current?.hide().catch(() => {});
-      // The pre-spawn kill may have taken servers down that never came back,
-      // so the count changed on a path that used to poke only on success.
-      pokeMenuBar();
-      setSpawnState({ phase: "done" });
-    }, SPAWN_TIMEOUT_MS);
+        if (missing.length > 0) {
+          const diagnosed = missing.map(
+            ([cwd, target]) =>
+              [
+                cwd,
+                diagnoseSpawnFailure(
+                  cwd,
+                  target.logStart,
+                  pendingStartsRef.current.get(cwd)?.kind ?? "start",
+                ),
+              ] as const,
+          );
+          setPendingStarts((prev) => {
+            const next = new Map(prev);
+            for (const [cwd, diagnosis] of diagnosed) {
+              const entry = next.get(cwd);
+              if (entry)
+                next.set(cwd, { ...entry, status: "failed", ...diagnosis });
+            }
+            return next;
+          });
+          // Put the cursor on the first failed row so its remedies are one ↵
+          // away. Safe to pin: this row has been on screen since the spawn, so
+          // we are only re-pointing selection at an id the list already has.
+          setSelectedItemId(pendingRowId(missing[0][0]));
+        }
+        // The rows carry the failure now, and the success path has its own
+        // toast, so nothing is left for this one to say.
+        toastRef.current?.hide().catch(() => {});
+        // The pre-spawn kill may have taken servers down that never came back,
+        // so the count changed on a path that used to poke only on success.
+        pokeMenuBar();
+        setSpawnState({ phase: "done" });
+        // Armed for the last deadline in the batch: an install-then-start gets
+        // minutes, a plain start 15 seconds, and each row's own deadline is
+        // enforced earlier by the row sweep below. This is the batch's wrap-up.
+      },
+      Math.max(
+        0,
+        Math.max(...[...expecting.values()].map((t) => t.deadline)) -
+          Date.now(),
+      ),
+    );
     return () => clearTimeout(timer);
   }, [spawnState.phase]);
 
@@ -1728,15 +1910,18 @@ export default function Command(
         if (overdue.length === 0) return;
         const diagnosed = overdue.map(
           ([cwd, entry]) =>
-            [cwd, diagnoseSpawnFailure(cwd, entry.logStart)] as const,
+            [
+              cwd,
+              diagnoseSpawnFailure(cwd, entry.logStart, entry.kind),
+            ] as const,
         );
         setPendingStarts((prev) => {
           const next = new Map(prev);
           let flipped = false;
-          for (const [cwd, reason] of diagnosed) {
+          for (const [cwd, diagnosis] of diagnosed) {
             const entry = next.get(cwd);
             if (entry?.status !== "starting" || entry.deadline > now) continue;
-            next.set(cwd, { ...entry, status: "failed", reason });
+            next.set(cwd, { ...entry, status: "failed", ...diagnosis });
             flipped = true;
           }
           // Handing back `prev` when nothing qualified keeps this effect from
@@ -1749,17 +1934,50 @@ export default function Command(
     return () => clearTimeout(timer);
   }, [pendingStarts]);
 
-  // Every observed server feeds the recents store, so the Start Recent
-  // Dev Server picker has an up-to-date list of projects without the user
-  // having to bookmark anything explicitly. Dedup by cwd within a single
-  // tick so multi-server projects don't write themselves multiple times.
+  // A failed install ends the shell within seconds, but an install row's
+  // deadline is minutes out, so without this the row would say "Installing…"
+  // long after there was nothing left to wait for. The install wrapper prints
+  // a marker when the package manager exits non-zero; while any install row
+  // is still starting, its log is checked for that marker every couple of
+  // seconds and the row fails the moment it appears.
+  const watchingInstalls = [...pendingStarts.values()].some(
+    (entry) => entry.kind === "install" && entry.status === "starting",
+  );
+  useEffect(() => {
+    if (!watchingInstalls) return;
+    const id = setInterval(() => {
+      const broken = [...pendingStartsRef.current].filter(
+        ([cwd, entry]) =>
+          entry.kind === "install" &&
+          entry.status === "starting" &&
+          installFailed(cwd, entry.logStart),
+      );
+      if (broken.length === 0) return;
+      const diagnosed = broken.map(
+        ([cwd, entry]) =>
+          [cwd, diagnoseSpawnFailure(cwd, entry.logStart, entry.kind)] as const,
+      );
+      setPendingStarts((prev) => {
+        const next = new Map(prev);
+        for (const [cwd, diagnosis] of diagnosed) {
+          const entry = next.get(cwd);
+          if (entry?.status !== "starting") continue;
+          next.set(cwd, { ...entry, status: "failed", ...diagnosis });
+        }
+        return next;
+      });
+      pokeMenuBar();
+    }, 2000);
+    return () => clearInterval(id);
+  }, [watchingInstalls]);
+
+  // Every observed server feeds the recents store, so the Start picker and
+  // the menu bar have an up-to-date list of projects without the user having
+  // to bookmark anything. recordRunning skips folders it could not start
+  // cold, and skips the write entirely when nothing has moved.
   useEffect(() => {
     if (servers.length === 0) return;
-    const byCwd = new Map<string, ReturnType<typeof toRecent>>();
-    for (const s of servers) {
-      if (!byCwd.has(s.cwd)) byCwd.set(s.cwd, toRecent(s));
-    }
-    recordSeenBatch([...byCwd.values()]).catch(() => {
+    recordRunning(servers).catch(() => {
       // Recents are a best-effort enhancement; a write failure must not
       // disrupt the dashboard, so swallow.
     });
@@ -1767,9 +1985,11 @@ export default function Command(
 
   async function kill(pid: number) {
     // Captured before the kill: afterwards this pid is gone from `servers`.
-    const cwd = servers.find((s) => s.pid === pid)?.cwd;
+    const victim = servers.find((s) => s.pid === pid);
+    const cwd = victim?.cwd;
+    const workers = victim?.workerPids ?? [];
     try {
-      await mutate(killProcess(pid), {
+      await mutate(killProcess(pid, workers), {
         optimisticUpdate: (current) =>
           (current ?? []).filter((s) => s.pid !== pid),
         rollbackOnError: true,
@@ -1803,7 +2023,9 @@ export default function Command(
     try {
       await mutate(
         (async () => {
-          await Promise.all(targets.map((s) => killProcess(s.pid)));
+          await Promise.all(
+            targets.map((s) => killProcess(s.pid, s.workerPids)),
+          );
           // Killing does not take the helpers with it, and SIGTERM returns
           // before the servers release their ports, so this waits for each
           // folder to go quiet before reaping it.
@@ -1838,7 +2060,9 @@ export default function Command(
     try {
       await mutate(
         (async () => {
-          await Promise.all(servers.map((s) => killProcess(s.pid)));
+          await Promise.all(
+            servers.map((s) => killProcess(s.pid, s.workerPids)),
+          );
           // Killing does not take the helpers with it, and SIGTERM returns
           // before the servers release their ports, so this waits for each
           // folder to go quiet before reaping it.
@@ -1853,6 +2077,60 @@ export default function Command(
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill all servers" });
     }
+  }
+
+  // Install a project's dependencies and start it, from a failed row. The
+  // spawn flow asks the same question up front for projects with no
+  // node_modules at all; this is the way back for everything it could not
+  // see coming (a dependency added since the last install, an install that
+  // broke on a flaky network). Runs the install even when node_modules exists,
+  // since a partial tree is exactly the case. The row turns back into an
+  // "Installing…" row in place and resolves like any start: the cleanup
+  // effect hands it to the server row when the port binds, and the row sweep
+  // fails it at its deadline.
+  async function installAndStart(cwd: string, name: string) {
+    const logStart = spawnLogOffset(cwd);
+    const ignorePids = serversRef.current
+      .filter((s) => s.cwd === cwd)
+      .map((s) => s.pid);
+    const deadline = Date.now() + INSTALL_TIMEOUT_MS;
+    setPendingStarts((prev) => {
+      const entry = prev.get(cwd);
+      return new Map(prev).set(cwd, {
+        name,
+        projectKey: entry?.projectKey ?? cwd,
+        logStart,
+        deadline,
+        status: "starting",
+        reason: null,
+        detail: undefined,
+        kind: "install",
+        ignorePids,
+      });
+    });
+    setSelectedItemId(pendingRowId(cwd));
+    try {
+      await startDevServer(cwd, undefined, { install: installPlanFor(cwd) });
+      await recordSeen({ cwd, projectName: name });
+    } catch (err) {
+      dismissPending(cwd);
+      await showFailureToast(err, { title: `Failed to start ${name}` });
+      return;
+    }
+    // Hand the rest to the same watcher every other start uses, so this one
+    // gets what they get: the toast, the cursor following the row to its
+    // server, and auto-open when the port binds. A batch already in flight
+    // owns that machinery; the row still resolves on its own then, only
+    // without the toast and the tab.
+    if (spawnState.phase !== "idle" && spawnState.phase !== "done") return;
+    toastRef.current = await showToast({
+      style: Toast.Style.Animated,
+      title: `Installing and starting ${name}…`,
+    });
+    setSpawnState({
+      phase: "spawning",
+      expecting: new Map([[cwd, { name, logStart, ignorePids, deadline }]]),
+    });
   }
 
   async function restart(server: DevServer) {
@@ -1937,7 +2215,7 @@ export default function Command(
         // past its own lifetime, and 10 seconds after a restart the Raycast
         // window is usually already gone.
         toast.hide().catch(() => {});
-        const reason = diagnoseSpawnFailure(server.cwd, logStart);
+        const diagnosis = diagnoseSpawnFailure(server.cwd, logStart, "restart");
         setPendingStarts((prev) => {
           // Defensive only. The poll and the cleanup effect now share one
           // predicate, so an entry already dropped means the restart landed,
@@ -1947,7 +2225,7 @@ export default function Command(
           return new Map(prev).set(server.cwd, {
             ...entry,
             status: "failed",
-            reason,
+            ...diagnosis,
           });
         });
         // The old server is dead and nothing replaced it: the menu bar's
@@ -2106,10 +2384,15 @@ export default function Command(
       ? resolvingServer(selectedPendingCwd, selectedPendingEntry, servers)
       : undefined;
   const effectiveSelectedItemId = landed ? String(landed.pid) : selectedItemId;
+  // The list's loading bar stands in for the old row spinner: it runs while
+  // any start or restart on screen is still waiting for its port.
+  const anyStarting = visiblePending.some(
+    ([, entry]) => entry.status === "starting",
+  );
 
   return (
     <List
-      isLoading={effectiveLoading}
+      isLoading={effectiveLoading || anyStarting}
       searchBarPlaceholder="Filter servers..."
       // Search still filters natively, but the Starting section stays put:
       // a start in flight is the thing the user is waiting on, so a query
@@ -2153,13 +2436,13 @@ export default function Command(
                 <Action
                   title="Start Dev Server"
                   icon={Icon.Play}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                   onAction={openStartCommand}
                 />
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refresh}
                 />
                 <Action
@@ -2200,6 +2483,7 @@ export default function Command(
               onDismiss={() => dismissPending(cwd)}
               onDismissAll={dismissAllFailed}
               onRefresh={refresh}
+              onInstall={() => installAndStart(cwd, entry.name)}
             />
           ))}
           {group.servers.map((server) => (

@@ -73,3 +73,4 @@ sixty minutes or until restart.
 ## Links
 
 - [Raccoon on GitHub](https://github.com/thousandflowers/Raccoon)
+- [Report an issue](https://github.com/thousandflowers/Raccoon/issues)

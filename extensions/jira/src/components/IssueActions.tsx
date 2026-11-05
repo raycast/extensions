@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, showToast, Toast, open } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { MutatePromise } from "@raycast/utils";
 import { useState } from "react";
 
 import {
@@ -29,6 +29,7 @@ import IssueChildIssues from "./IssueChildIssues";
 import IssueCommentForm from "./IssueCommentForm";
 import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
+import { useJiraCachedPromise } from "../hooks/useJiraCache";
 
 type IssueActionsProps = {
   issue: Issue | TIssueDetail;
@@ -309,7 +310,7 @@ type SubmenuProps = {
 function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
-  const { data: priorities, isLoading } = useCachedPromise(() => getIssuePriorities(), [], { execute: load });
+  const { data: priorities, isLoading } = useJiraCachedPromise(() => getIssuePriorities(), [], { execute: load });
 
   async function changePriority(priority: Priority) {
     try {
@@ -379,13 +380,17 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
   const [query, setQuery] = useState("");
   const { myself } = getJiraCredentials();
 
-  const { data, isLoading: isLoadingMetadata } = useCachedPromise((issue) => getIssueEditMetadata(issue.id), [issue], {
-    execute: load,
-  });
+  const { data, isLoading: isLoadingMetadata } = useJiraCachedPromise(
+    (issue) => getIssueEditMetadata(issue.id),
+    [issue],
+    {
+      execute: load,
+    },
+  );
   const autocompleteURL = data?.fields.assignee.autoCompleteUrl;
 
   // Find a way to display current users then search for users
-  const { data: users, isLoading: isLoadingUsers } = useCachedPromise(
+  const { data: users, isLoading: isLoadingUsers } = useJiraCachedPromise(
     (query) => {
       if (!autocompleteURL) {
         return Promise.resolve([]);
@@ -460,7 +465,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
 function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
-  const { data: transitions, isLoading } = useCachedPromise((issue) => getIssueTransitions(issue.id), [issue], {
+  const { data: transitions, isLoading } = useJiraCachedPromise((issue) => getIssueTransitions(issue.id), [issue], {
     execute: load,
   });
 

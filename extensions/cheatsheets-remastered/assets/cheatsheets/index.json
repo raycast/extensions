@@ -151,14 +151,7 @@
     "title": "Bash scripting",
     "tech": "bash",
     "status": "active",
-    "lastReviewed": "2025-09-05"
-  },
-  {
-    "path": "basic.md",
-    "title": "Basic test",
-    "tech": "basic",
-    "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "blessed.md",
@@ -1038,19 +1031,12 @@
     "title": "Jsdoc",
     "tech": "jsdoc",
     "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "jshint.md",
     "title": "Jshint",
     "tech": "jshint",
-    "status": "active",
-    "lastReviewed": "2025-09-05"
-  },
-  {
-    "path": "keywords_test.md",
-    "title": "Intro test",
-    "tech": "keywords_test",
     "status": "active",
     "lastReviewed": "2025-09-05"
   },
@@ -1213,7 +1199,7 @@
     "title": "Markdown",
     "tech": "markdown",
     "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "meow.md",
@@ -1427,13 +1413,6 @@
     "lastReviewed": "2025-09-05"
   },
   {
-    "path": "packs.md",
-    "title": "Packs (ruby)",
-    "tech": "packs",
-    "status": "active",
-    "lastReviewed": "2025-09-05"
-  },
-  {
     "path": "pacman.md",
     "title": "Pacman",
     "tech": "pacman",
@@ -1556,13 +1535,6 @@
     "lastReviewed": "2025-09-05"
   },
   {
-    "path": "polyfill.io.md",
-    "title": "Polyfill.io",
-    "tech": "polyfill.io",
-    "status": "active",
-    "lastReviewed": "2025-09-05"
-  },
-  {
     "path": "postgresql.md",
     "title": "PostgreSQL",
     "tech": "postgresql",
@@ -1609,7 +1581,7 @@
     "title": "Python",
     "tech": "python",
     "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "qjs.md",
@@ -2051,7 +2023,7 @@
     "title": "tar",
     "tech": "tar",
     "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "textile.md",
@@ -2163,7 +2135,7 @@
     "title": "Vim digraphs",
     "tech": "vim-digraphs",
     "status": "active",
-    "lastReviewed": "2025-09-05"
+    "sourceRevision": "bf059536c6403deadd404b25320df2dc4608537d"
   },
   {
     "path": "vim-easyalign.md",

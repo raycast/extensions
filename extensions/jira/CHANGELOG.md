@@ -1,5 +1,15 @@
 # Jira Changelog
 
+## [Jira reliability fixes] - 2026-11-05
+
+- Load all accessible projects and saved filters, including when Jira returns smaller pages.
+- Keep the Active Sprints project selector available when a search finds no projects.
+- Avoid empty issue searches before a saved filter is selected.
+- Honor the configured Jira site during OAuth sign-in and keep cached issues, teams, and project/filter selections separate by site and account.
+- Route Jira avatar and autocomplete URLs through the selected OAuth site. Send credentials only to trusted Jira destinations.
+- Limit concurrent issue icon downloads and retained icons to reduce request and memory pressure.
+- Trust system certificate authorities for company HTTPS inspection on supported runtimes.
+
 ## [Bug Triage Skill] - 2026-09-24
 
 - Update to Raycast API 2.5.0 for public bundled-skill support.
