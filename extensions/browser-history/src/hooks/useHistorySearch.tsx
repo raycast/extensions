@@ -4,13 +4,15 @@ import { HistoryEntry, HistoryQueryFunction, SearchResult, SupportedBrowsers } f
 import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util";
 import { NotInstalledError } from "../components";
 
+const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
+
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
   const urlTable = tableUrl || tableTitle;
   return (
     "(" +
-    terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ") +
+    terms.map((t) => `${tableTitle}.title LIKE '%${escapeLike(t)}%' ESCAPE '\\'`).join(" AND ") +
     ") OR (" +
-    terms.map((t) => `${urlTable}.url LIKE '%${t}%'`).join(" AND ") +
+    terms.map((t) => `${urlTable}.url LIKE '%${escapeLike(t)}%' ESCAPE '\\'`).join(" AND ") +
     ")"
   );
 };
