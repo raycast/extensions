@@ -169,6 +169,19 @@ export function formatRPM(rpm: number): string {
   return `${Math.round(rpm).toLocaleString("en-US")} RPM`;
 }
 
+/** Speed as a whole percentage of the fan's maximum RPM, clamped to 0–100. */
+export function percentOfMax(rpm: number, maximumRPM: number): number {
+  if (!Number.isFinite(rpm) || maximumRPM <= 0) {
+    return 0;
+  }
+  return Math.round(Math.min(Math.max(rpm / maximumRPM, 0), 1) * 100);
+}
+
+/** True when at least one fan is under manual control (not macOS). */
+export function isAnyFanManual(fans: readonly Fan[]): boolean {
+  return fans.some((fan) => fan.mode === "manual");
+}
+
 export interface RPMRange {
   readonly min: number;
   readonly max: number;
