@@ -5,7 +5,7 @@ const test = require("node:test");
 const vm = require("node:vm");
 const ts = require("typescript");
 
-function load(relative, modules) {
+function load(relative, modules, globals = {}) {
   const source = readFileSync(path.join(__dirname, "../src", relative), "utf8");
   const code = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
@@ -18,6 +18,7 @@ function load(relative, modules) {
       if (name in modules) return modules[name];
       throw new Error(`Unexpected import: ${name}`);
     },
+    ...globals,
   });
   return exports;
 }
@@ -170,6 +171,108 @@ test("legacy commands still fill an empty input from the selection", async () =>
   await new Promise(setImmediate);
   assert.equal(state.render(), "external selection");
   assert.equal(state.reads(), 1);
+});
+
+function debouncedValue(globals) {
+  const slots = [];
+  let cursor = 0;
+  let effects = [];
+  let current;
+  const React = {
+    useState(initial) {
+      const i = cursor++;
+      slots[i] ??= { value: initial };
+      return [
+        slots[i].value,
+        (value) => {
+          slots[i].value = typeof value === "function" ? value(slots[i].value) : value;
+        },
+      ];
+    },
+    useRef(initial) {
+      const i = cursor++;
+      slots[i] ??= { current: initial };
+      return slots[i];
+    },
+    useEffect(effect, deps) {
+      const i = cursor++;
+      const previous = slots[i];
+      if (!previous || deps.some((dep, index) => dep !== previous.deps[index])) {
+        effects.push(() => {
+          previous?.cleanup?.();
+          slots[i] = { deps, cleanup: effect() };
+        });
+      }
+    },
+  };
+  const hook = load(
+    "hooks.ts",
+    {
+      react: React,
+      "@raycast/api": {
+        getPreferenceValues: () => ({}),
+        getSelectedText: async () => "",
+      },
+      "@raycast/utils": {},
+      "./simple-translate": { AUTO_DETECT: "auto" },
+    },
+    globals,
+  ).useDebouncedValue;
+  const render = (value) => {
+    const flush = () => {
+      cursor = 0;
+      effects = [];
+      current = hook(value, 250);
+      const pending = effects;
+      effects = [];
+      pending.forEach((effect) => effect());
+      return current;
+    };
+    flush();
+    return flush();
+  };
+  return { render };
+}
+
+test("typing one character waits, including a character stored as two UTF-16 units", () => {
+  const timers = [];
+  const state = debouncedValue({
+    setTimeout(fn, delay) {
+      timers.push({ fn, delay });
+      return timers.length;
+    },
+    clearTimeout() {},
+  });
+
+  assert.equal(state.render("a"), "a");
+  assert.equal(timers.length, 0);
+
+  assert.equal(state.render("a𠮷"), "a");
+  assert.deepEqual(
+    timers.map((timer) => timer.delay),
+    [250],
+  );
+
+  timers[0].fn();
+  assert.equal(state.render("a𠮷"), "a𠮷");
+});
+
+test("deleting one supplementary character still waits, while a longer paste does not", () => {
+  const timers = [];
+  const state = debouncedValue({
+    setTimeout(fn, delay) {
+      timers.push({ fn, delay });
+      return timers.length;
+    },
+    clearTimeout() {},
+  });
+
+  state.render("a𠮷");
+  assert.equal(state.render("a"), "a𠮷");
+  assert.equal(timers.length, 1);
+
+  assert.equal(state.render("pasted sentence"), "pasted sentence");
+  assert.equal(timers.length, 1);
 });
 
 test("a slow legacy selection read cannot overwrite a newer launch context", async () => {
