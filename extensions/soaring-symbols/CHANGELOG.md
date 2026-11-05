@@ -1,6 +1,6 @@
 # Soaring Symbols Changelog
 
-## [New Livery] - {PR_MERGE_DATE}
+## [New Livery] - 2026-11-05
 
 - New extension icon: the Soaring Symbols split-flap mark, matching the website.
 - Fix the empty assets grid after the Soaring Symbols data update: tiles now come from the new `assets` field, and multi-color marks without a monochrome version no longer show a broken `-mono` tile.
