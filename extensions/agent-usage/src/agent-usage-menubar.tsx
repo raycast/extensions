@@ -10,9 +10,15 @@ import {
   Keyboard,
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { formatClock, latestTimestamp, withCredentialStatus } from "./agents/format.ts";
+import {
+  getClaudeMenuBarRateLimits,
+  getCodexMenuBarRateLimits,
+  getMenuBarRateLimitContent,
+} from "./agents/menubar-rate-limits.ts";
+import type { MenuBarRateLimits } from "./agents/menubar-rate-limits.ts";
 import {
   AGENT_ORDER_KEY,
   DEFAULT_AGENT_ORDER,
@@ -43,7 +49,7 @@ import {
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
 import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
-import { getThemeIcon } from "./agents/ui.tsx";
+import { getPercentageDisplayMode, getThemeIcon } from "./agents/ui.tsx";
 import { getAihubmixAccessory } from "./aihubmix/renderer.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
@@ -74,6 +80,8 @@ interface MenuBarAgent {
   accessory: Accessory;
   revalidate: () => Promise<void>;
   lastFetchedAt?: number;
+  rateLimits?: MenuBarRateLimits;
+  rateLimitError?: string | null;
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
 }
@@ -93,7 +101,11 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<AgentVisibilityPreferences>();
+  const percentageDisplayMode = getPercentageDisplayMode();
   const [agentOrder, setAgentOrder] = useState<readonly AgentId[]>(DEFAULT_AGENT_ORDER);
+  const refreshLock = useRef(false);
+  const [refreshingTarget, setRefreshingTarget] = useState<"claude" | "codex" | "all" | null>(null);
+  const [completedRefresh, setCompletedRefresh] = useState<"claude" | "codex" | null>(null);
 
   const loadAgentOrder = useCallback(async () => {
     const stored = await LocalStorage.getItem<string>(AGENT_ORDER_KEY);
@@ -407,6 +419,7 @@ export default function MenuBarCommand() {
           visible: true,
           isLoading: true,
           accessory: getClaudeAccessory(null, null, true),
+          rateLimits: getClaudeMenuBarRateLimits(null),
           revalidate: claudeState.revalidate,
         },
       ];
@@ -418,6 +431,8 @@ export default function MenuBarCommand() {
       visible: true,
       isLoading: account.isLoading,
       accessory: getClaudeAccessory(account.usage, account.error, account.isLoading),
+      rateLimits: getClaudeMenuBarRateLimits(account.usage),
+      rateLimitError: account.error?.message ?? null,
       revalidate: account.revalidate,
       lastFetchedAt: account.lastFetchedAt,
     }));
@@ -434,6 +449,7 @@ export default function MenuBarCommand() {
           visible: true,
           isLoading: true,
           accessory: getCodexAccessory(null, null, true),
+          rateLimits: getCodexMenuBarRateLimits(null),
           revalidate: codexState.revalidate,
         },
       ];
@@ -448,6 +464,8 @@ export default function MenuBarCommand() {
       visible: true,
       isLoading: account.isLoading,
       accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
+      rateLimits: getCodexMenuBarRateLimits(account.usage),
+      rateLimitError: account.error?.message ?? null,
       revalidate: account.revalidate,
       isOpenCodeActive: account.isOpenCodeActive,
       lastFetchedAt: account.lastFetchedAt,
@@ -594,10 +612,49 @@ export default function MenuBarCommand() {
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
+  // Provider hooks resolve API failures as account errors. Inspect the updated
+  // rows after React commits the refresh instead of treating resolution as success.
+  useEffect(() => {
+    if (!completedRefresh) return;
+    const agents = completedRefresh === "claude" ? claudeAgents : codexAgents;
+    const name = completedRefresh === "claude" ? "Claude" : "Codex";
+    const failed = agents.length === 0 || agents.some((agent) => agent.rateLimitError);
+    void showHUD(failed ? `${name} refresh failed — Open Details` : `${name} usage refreshed`);
+    setCompletedRefresh(null);
+  }, [completedRefresh, claudeAgents, codexAgents]);
+
+  const handleRateLimitRefresh = async (agent: MenuBarAgent, provider: "claude" | "codex"): Promise<void> => {
+    if (refreshLock.current) return;
+    refreshLock.current = true;
+    setRefreshingTarget(provider);
+    try {
+      await showHUD(`Refreshing ${provider === "claude" ? "Claude" : "Codex"} usage…`);
+      await agent.revalidate();
+      setCompletedRefresh(provider);
+    } catch (error) {
+      console.error("Failed to refresh rate limits", error);
+      await showHUD("Usage refresh failed — try again");
+    } finally {
+      refreshLock.current = false;
+      setRefreshingTarget(null);
+    }
+  };
+
   const handleRefresh = async () => {
-    await loadAgentOrder();
-    await Promise.all([...new Set(visibleAgents.map((agent) => agent.revalidate))].map((refresh) => refresh()));
-    await showHUD("Agent Usage Refreshed");
+    if (refreshLock.current) return;
+    refreshLock.current = true;
+    setRefreshingTarget("all");
+    try {
+      await loadAgentOrder();
+      await Promise.all([...new Set(visibleAgents.map((agent) => agent.revalidate))].map((refresh) => refresh()));
+      await showHUD("Agent Usage Refreshed");
+    } catch (error) {
+      console.error("Failed to refresh agent usage", error);
+      await showHUD("Usage refresh failed — try again");
+    } finally {
+      refreshLock.current = false;
+      setRefreshingTarget(null);
+    }
   };
 
   // Show the clock time of the most recent fetch. A clock time is a fact that
@@ -605,34 +662,77 @@ export default function MenuBarCommand() {
   // and idles until the next background refresh). Em-dash until the first fetch
   // lands or while a refresh is mid-flight.
   const latestFetchedAt = latestTimestamp(visibleAgents.map((agent) => agent.lastFetchedAt));
-  const updatedAt = !isLoading && latestFetchedAt ? formatClock(latestFetchedAt) : "—";
+  const updatedAt = !isLoading && !refreshingTarget && latestFetchedAt ? formatClock(latestFetchedAt) : "—";
   const refreshTitle = `Refresh All (Updated ${updatedAt})`;
 
   return (
-    <MenuBarExtra icon="extension-icon.png" isLoading={isLoading} tooltip="Agent Usage">
+    <MenuBarExtra icon="extension-icon.png" isLoading={isLoading || refreshingTarget !== null} tooltip="Agent Usage">
       <MenuBarExtra.Section>
-        {visibleAgents.map((agent) => (
-          <MenuBarExtra.Item
-            key={agent.id}
-            icon={agent.icon}
-            title={getMenuItemTitle(agent.name, agent.accessory.text, agent.isLoading, agent.isOpenCodeActive)}
-            tooltip={getMenuItemTooltip(agent.accessory.tooltip)}
-            onAction={() =>
-              launchCommand({
-                name: "agent-usage",
-                type: LaunchType.UserInitiated,
-                context: { selectedAgentId: agent.id },
-              })
-            }
-          />
-        ))}
+        {visibleAgents.map((agent) => {
+          const title = getMenuItemTitle(agent.name, agent.accessory.text, agent.isLoading, agent.isOpenCodeActive);
+          const openDetails = () =>
+            launchCommand({
+              name: "agent-usage",
+              type: LaunchType.UserInitiated,
+              context: { selectedAgentId: agent.id },
+            });
+
+          if (agent.rateLimits !== undefined) {
+            const provider = agent.id === "claude" || agent.id.startsWith("claude-") ? "claude" : "codex";
+            const refreshUsage = () => handleRateLimitRefresh(agent, provider);
+            const content = getMenuBarRateLimitContent(
+              agent.rateLimits,
+              percentageDisplayMode,
+              agent.isLoading || refreshingTarget === provider || refreshingTarget === "all",
+              agent.rateLimitError ?? null,
+            );
+            return (
+              <MenuBarExtra.Submenu key={agent.id} icon={agent.icon} title={title}>
+                <MenuBarExtra.Section title={content.title}>
+                  {content.rows.map((row) => (
+                    <MenuBarExtra.Item
+                      key={row}
+                      title={row}
+                      tooltip={
+                        content.status === "ready"
+                          ? "Click to refresh usage for all accounts of this provider"
+                          : undefined
+                      }
+                      onAction={content.status === "ready" && !refreshingTarget ? refreshUsage : undefined}
+                    />
+                  ))}
+                </MenuBarExtra.Section>
+                <MenuBarExtra.Section>
+                  {(content.status === "error" || content.status === "empty") && (
+                    <MenuBarExtra.Item
+                      title="Refresh Usage"
+                      icon={Icon.ArrowClockwise}
+                      onAction={!refreshingTarget ? refreshUsage : undefined}
+                    />
+                  )}
+                  <MenuBarExtra.Item title="Open Details" icon={Icon.List} onAction={openDetails} />
+                </MenuBarExtra.Section>
+              </MenuBarExtra.Submenu>
+            );
+          }
+
+          return (
+            <MenuBarExtra.Item
+              key={agent.id}
+              icon={agent.icon}
+              title={title}
+              tooltip={getMenuItemTooltip(agent.accessory.tooltip)}
+              onAction={openDetails}
+            />
+          );
+        })}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title={refreshTitle}
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={handleRefresh}
+          onAction={!refreshingTarget ? handleRefresh : undefined}
         />
         <MenuBarExtra.Item
           title="Open Agent Usage"

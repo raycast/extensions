@@ -1,5 +1,12 @@
 # Raycast Zoxide Changelog
 
+## [Boost on Every Open] - 2026-11-05
+
+- [Changed] "Open With" now boosts the directory's score in zoxide, like the other open actions (score boosts on open require Raycast 2.11 or later)
+- [Changed] Opening a directory now uses Raycast's native open actions
+- [Changed] Folder names and search text containing quotes or other special characters are now passed to zoxide and fzf directly instead of through a shell
+- [Changed] Updated to Raycast API 2.11 and refreshed dependencies to their latest compatible versions
+
 ## [Fix Opening Directories] - 2026-07-08
 
 - [Fixed] Opening a directory (most noticeably "Open in Finder") could land on a default or last-used location instead of the selected folder on recent Raycast versions; directories now open reliably at the correct location

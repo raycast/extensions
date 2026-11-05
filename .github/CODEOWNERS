@@ -39,7 +39,8 @@
 /extensions/agent-browser                                           @0xdhrv
 /extensions/agent-client-protocol                                   @Yukaii
 /extensions/agent-ecosystem-map                                     @spyrae
-/extensions/agent-usage                                             @natsustan @alexibuild @AdrianBonpin @GarrickZ2 @EDM115 @chingweih @natsustan @jakoss @Laughing0900 @ridemountainpig
+/extensions/agent-inbox                                             @0xFANGO
+/extensions/agent-usage                                             @natsustan @alexibuild @AdrianBonpin @GarrickZ2 @EDM115 @chingweih @natsustan @jakoss @Laughing0900 @ridemountainpig @BallerJay
 /extensions/agentcfg                                                @jorgenosberg
 /extensions/ai-agency                                               @Marcin-91
 /extensions/ai-by-vercel                                            @ridemountainpig
@@ -283,6 +284,7 @@
 /extensions/bj-share                                                @AlexandreMT
 /extensions/bklit-analytics                                         @uixmat @pernielsentikaer
 /extensions/blackr                                                  @ipunkid @0xdhrv
+/extensions/blazwitcher                                             @Julian0197 @Julian0197
 /extensions/blip-raycast                                            @astroboii47 @brunocbreis
 /extensions/blockchain-explorer-search                              @Namaskar-1F64F
 /extensions/blockchain-gas-tracker                                  @vonernue
@@ -628,7 +630,7 @@
 /extensions/cursor-agents                                           @thomaspaulmann @samuelkraft @pernielsentikaer @peduarte @ridemountainpig
 /extensions/cursor-costs                                            @shadeov @ridemountainpig
 /extensions/cursor-directory                                        @escwxyz @LitoMore
-/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz @LitoMore @michalzuch @NirRosh @alexibuild
+/extensions/cursor-recent-projects                                  @degouville @pernielsentikaer @escwxyz @LitoMore @michalzuch @NirRosh @alexibuild @iloveitaly
 /extensions/cursors                                                 @andreasstorm @pernielsentikaer @chrismessina
 /extensions/curto-io-url-shortener                                  @birobirobiro
 /extensions/custom-folder                                           @Ph-lo @ridemountainpig
@@ -786,7 +788,7 @@
 /extensions/dondori                                                 @ruslan-korneev
 /extensions/done-bear                                               @mblode
 /extensions/donut                                                   @Visual-Studio-Coder
-/extensions/doorstopper                                             @VladCuciureanu
+/extensions/doorstopper                                             @VladCuciureanu @o101k
 /extensions/doppler-share-secrets                                   @thomaspaulmann @ridemountainpig @xmok @Lp-Francois
 /extensions/dot-new                                                 @natterstefan @xmok @ViGeng
 /extensions/dot-underscore-files-cleaner                            @danulqua
@@ -800,7 +802,7 @@
 /extensions/doutu                                                   @gaoyang
 /extensions/dovetail                                                @patbarlow
 /extensions/downdetector                                            @MagnasiePro
-/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim @ridemountainpig @nagauta @nmder @clins1994 @0xdhrv @YourMCGeek @dhaydl @hugodemenez @danieltsam
+/extensions/downloads-manager                                       @thomaspaulmann @ron-myers @infused-kim @ridemountainpig @nagauta @nmder @clins1994 @0xdhrv @YourMCGeek @dhaydl @hugodemenez @danieltsam @0xdhrv
 /extensions/dpm-lol                                                 @ouichniaziz
 /extensions/dr-news                                                 @kenanbendz @pernielsentikaer
 /extensions/drafts                                                  @FlohGro-dev @wmorgano
@@ -3495,6 +3497,7 @@
 /extensions/zeplin-project-search                                   @dorukgunes @xmok
 /extensions/zerion                                                  @imqdee @zerts
 /extensions/zero                                                    @jlokos
+/extensions/zero-wire                                               @0xdhrv
 /extensions/zerodha-portfolio-kite-coin                             @SandeepBaskaran
 /extensions/zerossl                                                 @xmok
 /extensions/zipcodebase                                             @xmok
