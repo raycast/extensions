@@ -12,7 +12,7 @@ export interface Favorite {
   kind: FavoriteKind;
   /** nomineeId for people, organizationId for companies. */
   id: string;
-  /** Id that edit_list_item removes by (the list entry's nominee). */
+  /** Id that edit_list_entries removes by (the list entry's nominee). */
   entryId: string;
   name: string;
   imageUrl: string | null;
@@ -48,7 +48,6 @@ const DESCRIPTIONS: Record<FavoriteKind, string> = {
   people: "People starred from the Raycast extension.",
   organizations: "Companies starred from the Raycast extension.",
 };
-const REASON = "User manages favorites from the Raycast extension";
 
 type ListIds = Partial<Record<FavoriteKind, string>>;
 
@@ -72,7 +71,7 @@ async function findList(kind: FavoriteKind, create: boolean): Promise<string | u
   const ids = await readIds();
   if (ids[kind]) return ids[kind];
 
-  const lists = await callTool<ListSummary[]>("get_my_lists", { reason_for_call: REASON });
+  const lists = await callTool<ListSummary[]>("find_lists", { request: { action: "mine", args: {} } });
   let found = lists.find((l) => l.kind === kind && l.titleBody === TITLES[kind])?.listId;
   if (!found && create) {
     const made = await callTool<{ listId: string }>("create_list", {
@@ -80,7 +79,6 @@ async function findList(kind: FavoriteKind, create: boolean): Promise<string | u
       kind,
       visibility: "private",
       description: DESCRIPTIONS[kind],
-      reason_for_call: REASON,
     });
     found = made.listId;
   }
@@ -88,10 +86,24 @@ async function findList(kind: FavoriteKind, create: boolean): Promise<string | u
   return found;
 }
 
-async function readList(kind: FavoriteKind): Promise<Favorite[]> {
+/** Drop one kind's cached list id, keeping the other kind's. */
+async function forgetId(kind: FavoriteKind) {
+  const ids = await readIds();
+  delete ids[kind];
+  await LocalStorage.setItem(LISTS_KEY, JSON.stringify(ids));
+}
+
+async function readList(kind: FavoriteKind, retried = false): Promise<Favorite[]> {
   const id = await listId(kind, false);
   if (!id) return [];
-  const list = await callTool<ListDetail>("get_list", { listId: id, reason_for_call: REASON });
+  const list = await callTool<ListDetail | null>("read_list", {
+    request: { action: "entries", args: { listId: id } },
+  });
+  if (!list) {
+    // The cached list is gone (deleted on the web). Look it up again once; if it's still missing, it's empty.
+    await forgetId(kind);
+    return retried ? [] : readList(kind, true);
+  }
   return list.members.flatMap((m): Favorite[] => {
     const orgId = m.card?.kind === "organization" ? m.card.organizationId : undefined;
     const entityId = kind === "organizations" ? orgId : m.nominee.nomineeId;
@@ -148,10 +160,11 @@ export const addFavorite = (kind: FavoriteKind, id: string) =>
   write(async () => {
     const list = await listId(kind, true);
     if (!list) throw new Error("Couldn't find or create the favorites list.");
-    await callTool("add_list_item", {
-      listId: list,
-      target: kind === "people" ? { kind, nomineeId: id } : { kind, organizationId: id },
-      reason_for_call: REASON,
+    await callTool("edit_list_entries", {
+      request: {
+        action: "add",
+        args: { listId: list, target: kind === "people" ? { kind, nomineeId: id } : { kind, organizationId: id } },
+      },
     });
   });
 
@@ -159,10 +172,10 @@ export const removeFavorite = (favorite: Favorite) =>
   write(async () => {
     const list = await listId(favorite.kind, false);
     if (!list) return;
-    await callTool("edit_list_item", {
-      listId: list,
-      item: { kind: "member", nomineeId: favorite.entryId },
-      change: { operation: "remove" },
-      reason_for_call: REASON,
+    await callTool("edit_list_entries", {
+      request: {
+        action: "edit",
+        args: { listId: list, item: { kind: "member", nomineeId: favorite.entryId }, change: { operation: "remove" } },
+      },
     });
   });
