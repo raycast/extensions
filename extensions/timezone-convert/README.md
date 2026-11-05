@@ -1,15 +1,24 @@
-# Time Zone Converter
+<p align="center">
+  <img src="media/icon.png" width="128" height="128" alt="Time Zone Converter icon">
+</p>
 
-A Raycast extension for converting times between time zones the way you convert units: type a query, get the answer.
+<h1 align="center">Time Zone Converter</h1>
 
-```
-9am PST to CET
-now in Tokyo
-tomorrow 14:30 Europe/Rome to SF
-2026-12-24 18:00 Europe/Rome to America/New_York
-in 2 hours to NYC
-9:30pm PST → IST
-```
+<p align="center">
+  Convert times between time zones in Raycast, the way you convert units.
+</p>
+
+<p align="center">
+  <code>9am PST to CET</code> → <strong>6:00 PM in Paris</strong>
+</p>
+
+## Screenshots
+
+![Converting 9am PST to CET](media/screenshot-conversion.png)
+
+![World clock with pinned zones](media/screenshot-world-clock.png)
+
+![All zones at the converted moment](media/screenshot-all-zones.png)
 
 ## What it understands
 
