@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { execFileSync } from "child_process";
 import net from "net";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readlinkSync } from "fs";
 import { homedir } from "os";
 import path from "path";
 import { checkProxymanAppInstallation, getProxymanAppPath } from "./utils";
@@ -113,28 +113,20 @@ function getProcessCommand(pid: number): string {
   }
 }
 
-// A Chrome instance owns the default user data dir (the user's real profiles) unless it was
-// started with --user-data-dir pointing elsewhere, e.g. the /tmp/chrome-insecure instance that
-// the "New Profile" setup launches.
-function usesDefaultChromeDataDir(command: string): boolean {
-  const flag = "--user-data-dir=";
-  const index = command.indexOf(flag);
-  if (index === -1) {
-    return true;
+// Chrome's ProcessSingleton marks the owner of a user data dir with a `SingletonLock` symlink
+// pointing to "<hostname>-<pid>". Reading it identifies the instance holding the user's real
+// profiles without parsing `ps` output, which joins arguments with spaces and cannot tell where
+// a path containing spaces ends. Instances on other dirs (e.g. the /tmp/chrome-insecure one that
+// "New Profile" launches) are never matched. A stale lock left by a crash is ignored because its
+// PID is no longer a running Chrome process.
+function getDefaultProfileChromePid(): number | undefined {
+  try {
+    const target = readlinkSync(path.join(CHROME_DEFAULT_DATA_DIR, "SingletonLock"));
+    const pid = Number.parseInt(target.slice(target.lastIndexOf("-") + 1), 10);
+    return getChromeMainPids().includes(pid) ? pid : undefined;
+  } catch {
+    return undefined;
   }
-  // `ps` prints arguments unquoted and space-separated, and the path itself contains spaces, so
-  // the value cannot be split reliably. Instead require the exact default dir followed by the end
-  // of the line or a space (the next flag or a URL): "…/Google/Chrome-testing" is a separate
-  // browser session and must be left alone.
-  const value = command.slice(index + flag.length).replace(/^["']/, "");
-  if (!value.startsWith(CHROME_DEFAULT_DATA_DIR)) {
-    return false;
-  }
-  return /^\/?["']?(\s|$)/.test(value.slice(CHROME_DEFAULT_DATA_DIR.length));
-}
-
-function getDefaultProfileChromePids(): number[] {
-  return getChromeMainPids().filter((pid) => usesDefaultChromeDataDir(getProcessCommand(pid)));
 }
 
 // Send a regular Quit (same as ⌘Q) to one specific process. AppleScript's
@@ -154,20 +146,19 @@ async function requestQuit(pid: number): Promise<void> {
 
 // Chrome applies command-line flags only when it starts a fresh process for a user data dir:
 // launching while an instance already owns that dir just forwards the request to it and the
-// proxy flags are silently dropped. So every instance using the default dir must be fully
+// proxy flags are silently dropped. So the instance owning the default dir must be fully
 // gone before relaunching.
 async function quitDefaultProfileChrome(): Promise<boolean> {
-  const pids = getDefaultProfileChromePids();
-  if (pids.length === 0) {
+  const pid = getDefaultProfileChromePid();
+  if (pid === undefined) {
     return true;
   }
-  await Promise.all(pids.map(requestQuit));
+  await requestQuit(pid);
 
   const deadline = Date.now() + CHROME_QUIT_TIMEOUT_MS;
   while (Date.now() < deadline) {
     await waitMs(PROXY_POLL_INTERVAL_MS);
-    const alive = new Set(getChromeMainPids());
-    if (pids.every((pid) => !alive.has(pid))) {
+    if (!getChromeMainPids().includes(pid)) {
       return true;
     }
   }
@@ -180,10 +171,8 @@ async function waitForProxiedDefaultProfileChrome(proxyServer: string): Promise<
   const deadline = Date.now() + CHROME_LAUNCH_TIMEOUT_MS;
   while (Date.now() < deadline) {
     await waitMs(PROXY_POLL_INTERVAL_MS);
-    const proxied = getChromeMainPids().some((pid) => {
-      const command = getProcessCommand(pid);
-      return usesDefaultChromeDataDir(command) && command.split(/\s+/).includes(`--proxy-server=${proxyServer}`);
-    });
+    const pid = getDefaultProfileChromePid();
+    const proxied = pid !== undefined && getProcessCommand(pid).split(/\s+/).includes(`--proxy-server=${proxyServer}`);
     if (proxied) {
       return true;
     }
@@ -295,7 +284,7 @@ async function setupChrome(newProfile: boolean): Promise<void> {
     const port = await getReadyPort(paths);
     if (port === null) return;
 
-    if (!newProfile && getDefaultProfileChromePids().length > 0) {
+    if (!newProfile && getDefaultProfileChromePid() !== undefined) {
       await showToast({
         style: Toast.Style.Animated,
         title: "Closing Google Chrome...",
