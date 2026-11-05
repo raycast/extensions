@@ -6,8 +6,8 @@
 
 > Apple music extension
 
-![sc1](./assets/screnshot-1.png)
-![sc2](./assets/screnshot-2.png)
+![sc1](https://raw.githubusercontent.com/raycast/extensions/7c1e98f1600bc4444db866913a5896ef110fc7ae/extensions/music/assets/screnshot-1.png)
+![sc2](https://raw.githubusercontent.com/raycast/extensions/7c1e98f1600bc4444db866913a5896ef110fc7ae/extensions/music/assets/screnshot-2.png)
 
 ## Catalog playback
 
