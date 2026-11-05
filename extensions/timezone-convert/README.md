@@ -52,18 +52,3 @@ Abbreviations are ambiguous by nature: `CST` means US Central (type `shanghai` f
 - **Pinned Zones** — comma-separated zones shown under every result and in the world clock
   (default `Europe/Rome,America/New_York,Asia/Tokyo`).
 - **Time Format** — 24-hour or 12-hour. It can also be switched from the dropdown in the search bar.
-
-## Development
-
-```sh
-npm install
-npm run dev     # installs the extension in Raycast and watches for changes
-npm run lint
-npm run build
-```
-
-`node scripts/make-icon.mjs` regenerates `assets/extension-icon.png`.
-
-Times and DST come from the platform's `Intl` time zone database, so there is no zone table to keep
-up to date. Before publishing to the Raycast Store, make sure the `author` field in `package.json`
-is your Raycast handle.

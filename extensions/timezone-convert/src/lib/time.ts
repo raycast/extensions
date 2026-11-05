@@ -75,14 +75,36 @@ export function offsetMinutes(zone: TimeZone, instant: number): number {
   return Math.round((utcOf(zonedParts(zone, whole)) - whole) / MINUTE);
 }
 
-/** The instant at which `zone` shows the given wall-clock time. */
-export function instantFromParts(zone: TimeZone, parts: ClockParts): number {
+/** The instant at which `zone` shows the given wall-clock time, or `null` if DST skips it. */
+export function instantFromParts(zone: TimeZone, parts: ClockParts): number | null {
   const wallClock = utcOf(parts);
   if (zone.fixedOffsetMinutes !== undefined) return wallClock - zone.fixedOffsetMinutes * MINUTE;
   // First guess treats the wall clock as UTC, the second pass fixes DST edges.
   let instant = wallClock - offsetMinutes(zone, wallClock) * MINUTE;
   instant = wallClock - offsetMinutes(zone, instant) * MINUTE;
+
+  // A spring-forward gap has no instant that shows the requested wall clock.
+  const actual = zonedParts(zone, instant);
+  if (
+    actual.year !== parts.year ||
+    actual.month !== parts.month ||
+    actual.day !== parts.day ||
+    actual.hour !== parts.hour ||
+    actual.minute !== parts.minute ||
+    actual.second !== parts.second
+  ) {
+    return null;
+  }
   return instant;
+}
+
+/** `2026-12-24 18:00` as shown in `zone`, ready to be fed back into the parser. */
+export function formatQueryDateTime(zone: TimeZone, instant: number): string {
+  const parts = zonedParts(zone, instant);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const date = `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
+  const time = `${pad(parts.hour)}:${pad(parts.minute)}${parts.second ? `:${pad(parts.second)}` : ""}`;
+  return `${date} ${time}`;
 }
 
 export function formatClock(zone: TimeZone, instant: number, hour12: boolean): string {

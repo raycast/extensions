@@ -5,6 +5,9 @@
   "description": "Convert times between time zones with unit-conversion style queries.",
   "icon": "extension-icon.png",
   "author": "lettly",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -14,7 +17,6 @@
     {
       "name": "convert-time-zone",
       "title": "Convert Time Zone",
-      "subtitle": "Time Zone Convert",
       "description": "Convert a time between time zones, or see the current time in your pinned zones.",
       "mode": "view",
       "arguments": [
@@ -34,7 +36,8 @@
       "description": "Comma-separated time zones, city names, or abbreviations shown under every result and in the world clock.",
       "type": "textfield",
       "required": false,
-      "default": "Europe/Rome,America/New_York,Asia/Tokyo"
+      "default": "Europe/Rome,America/New_York,Asia/Tokyo",
+      "placeholder": "Europe/Rome,America/New_York,Asia/Tokyo"
     },
     {
       "name": "timeFormat",

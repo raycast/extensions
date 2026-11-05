@@ -91,21 +91,8 @@ export function allZoneIds(): string[] {
   return cachedIds;
 }
 
-const validity = new Map<string, boolean>();
-
-function isValidIanaId(id: string): boolean {
-  let valid = validity.get(id);
-  if (valid === undefined) {
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: id });
-      valid = true;
-    } catch {
-      valid = false;
-    }
-    validity.set(id, valid);
-  }
-  return valid;
-}
+/** Maps any accepted id (including links such as `US/Pacific`) to its canonical id. */
+const canonicalIds = new Map<string, string | null>();
 
 export function zoneLabel(id: string): string {
   if (id === "UTC" || id === "Etc/UTC" || id === "Etc/GMT") return "UTC";
@@ -114,8 +101,17 @@ export function zoneLabel(id: string): string {
 }
 
 function ianaZone(id: string): TimeZone | null {
-  if (!isValidIanaId(id)) return null;
-  return { id, label: zoneLabel(id) };
+  let canonical = canonicalIds.get(id);
+  if (canonical === undefined) {
+    try {
+      canonical = new Intl.DateTimeFormat("en-US", { timeZone: id }).resolvedOptions().timeZone;
+    } catch {
+      canonical = null;
+    }
+    canonicalIds.set(id, canonical);
+  }
+  if (!canonical) return null;
+  return { id: canonical, label: zoneLabel(canonical) };
 }
 
 export function formatOffsetLabel(minutes: number): string {
@@ -503,6 +499,13 @@ export function resolveZone(input: string, local: TimeZone): TimeZone | null {
 
   const abbreviation = ABBREVIATIONS[raw.toUpperCase().replace(/[.\s]/g, "")];
   if (abbreviation) return ianaZone(abbreviation);
+
+  // IANA links (US/Pacific) and Etc zones (Etc/UTC) are valid but missing from
+  // `Intl.supportedValuesOf`, so let Intl decide before giving up.
+  if (text.includes("/")) {
+    const linked = ianaZone(raw);
+    if (linked) return linked;
+  }
 
   // Last resort: a unique prefix of a known name, so "amster" finds Amsterdam.
   if (text.length >= 3) {

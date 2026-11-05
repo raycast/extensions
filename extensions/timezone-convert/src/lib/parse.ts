@@ -26,7 +26,10 @@ type DateSpec =
   | { kind: "offset"; days: number }
   | { kind: "weekday"; weekday: number; week: 0 | 1 | -1 };
 
-type LeftResult = { from: TimeZone; instant: number; explicit: boolean };
+type LeftResult =
+  | { kind: "ok"; from: TimeZone; instant: number; explicit: boolean }
+  | { kind: "invalid-date" }
+  | { kind: "nonexistent-time"; zone: TimeZone; parts: ClockParts };
 
 const MONTHS: Record<string, number> = {
   jan: 1,
@@ -264,7 +267,9 @@ function parseRelative(input: string, now: number): { instant: number; zoneText:
 
   const duration = parseDuration(text);
   if (duration === null) return null;
-  return { instant: now + sign * duration, zoneText: "" };
+  const instant = now + sign * duration;
+  if (!Number.isFinite(instant) || Math.abs(instant) > 8.64e15) return null;
+  return { instant, zoneText: "" };
 }
 
 function takeZonePrefix(input: string, local: TimeZone): { zone: TimeZone; rest: string } | null {
@@ -278,23 +283,23 @@ function takeZonePrefix(input: string, local: TimeZone): { zone: TimeZone; rest:
 
 function parseLeft(input: string, local: TimeZone, now: number): LeftResult | null {
   let s = input.trim().toLowerCase().replace(/\s+/g, " ");
-  if (!s) return { from: local, instant: now, explicit: false };
+  if (!s) return { kind: "ok", from: local, instant: now, explicit: false };
   s = s.replace(/^(?:at|on|by|from|starting)\s+/, "");
 
-  if (s === "now" || s === "right now") return { from: local, instant: now, explicit: false };
+  if (s === "now" || s === "right now") return { kind: "ok", from: local, instant: now, explicit: false };
   if (s.startsWith("now ")) {
     const zone = resolveZone(s.slice(4), local);
-    return zone ? { from: zone, instant: now, explicit: false } : null;
+    return zone ? { kind: "ok", from: zone, instant: now, explicit: false } : null;
   }
 
   const relative = parseRelative(s, now);
   if (relative) {
     const zone = relative.zoneText ? resolveZone(relative.zoneText, local) : local;
-    return zone ? { from: zone, instant: relative.instant, explicit: true } : null;
+    return zone ? { kind: "ok", from: zone, instant: relative.instant, explicit: true } : null;
   }
 
   const zoneOnly = resolveZone(s, local);
-  if (zoneOnly) return { from: zoneOnly, instant: now, explicit: false };
+  if (zoneOnly) return { kind: "ok", from: zoneOnly, instant: now, explicit: false };
 
   let date: DateSpec | null = null;
   let time: TimeSpec | null = null;
@@ -343,13 +348,26 @@ function parseLeft(input: string, local: TimeZone, now: number): LeftResult | nu
   if (!date && !time) return null;
 
   const dateParts = resolveDate(date, from, now);
+  if (!isRealDate(dateParts)) return { kind: "invalid-date" };
+
   const clock = time ?? { hour: 0, minute: 0, second: 0 };
-  return { from, instant: instantFromParts(from, { ...dateParts, ...clock }), explicit: true };
+  const parts = { ...dateParts, ...clock };
+  const instant = instantFromParts(from, parts);
+  if (instant === null) return { kind: "nonexistent-time", zone: from, parts };
+  return { kind: "ok", from, instant, explicit: true };
 }
 
 function addDays(parts: ClockParts, days: number): { year: number; month: number; day: number } {
   const shifted = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days));
   return { year: shifted.getUTCFullYear(), month: shifted.getUTCMonth() + 1, day: shifted.getUTCDate() };
+}
+
+function isRealDate(parts: { year: number; month: number; day: number }): boolean {
+  if (parts.month < 1 || parts.month > 12 || parts.day < 1 || parts.day > 31) return false;
+  const probe = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+  return (
+    probe.getUTCFullYear() === parts.year && probe.getUTCMonth() === parts.month - 1 && probe.getUTCDate() === parts.day
+  );
 }
 
 function resolveDate(spec: DateSpec | null, from: TimeZone, now: number): { year: number; month: number; day: number } {
@@ -382,6 +400,16 @@ export function parseQuery(raw: string, local: TimeZone, now: number = Date.now(
   if (split?.kind === "target") {
     const left = parseLeft(split.left, local, now);
     if (!left) return { kind: "error", message: `I couldn't read "${split.left}" as a time.`, hint: HINT };
+    if (left.kind === "invalid-date") {
+      return { kind: "error", message: "That date doesn't exist.", hint: 'Check the day and month, e.g. "feb 28".' };
+    }
+    if (left.kind === "nonexistent-time") {
+      return {
+        kind: "error",
+        message: `That time doesn't exist in ${left.zone.label}: clocks skip it when daylight saving time starts.`,
+        hint: "Pick a time after the jump, usually one hour later.",
+      };
+    }
     return {
       kind: "conversion",
       conversion: { from: left.from, to: split.to, instant: left.instant, explicit: left.explicit },

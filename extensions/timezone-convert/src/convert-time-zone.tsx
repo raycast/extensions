@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, getPreferenceValues, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  LaunchProps,
+  List,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { Conversion, parseQuery } from "./lib/parse";
 import { TimeZone, localTimeZone, resolveZone } from "./lib/zones";
@@ -11,19 +21,9 @@ import {
   formatDateShort,
   formatOffset,
   formatOffsetDifference,
+  formatQueryDateTime,
   offsetMinutes,
 } from "./lib/time";
-
-type Preferences = {
-  pinnedZones?: string;
-  timeFormat?: string;
-};
-
-type CommandProps = {
-  arguments: {
-    query?: string;
-  };
-};
 
 const LOCAL = localTimeZone();
 const DEFAULT_PINNED = ["Europe/Rome", "America/New_York", "Asia/Tokyo"];
@@ -145,11 +145,7 @@ function ZoneRow({ zone, instant, reference, hour12, onQuery, icon = Icon.Globe 
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Time" content={clock} />
-          <Action.CopyToClipboard
-            title="Copy Time with Zone"
-            content={`${clock} ${abbr}`}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <Action.CopyToClipboard title="Copy Time with Zone" content={`${clock} ${abbr}`} />
           <Action
             title={`Show ${zone.label} Time`}
             icon={Icon.ArrowRight}
@@ -158,7 +154,7 @@ function ZoneRow({ zone, instant, reference, hour12, onQuery, icon = Icon.Globe 
           <Action
             title={`Convert from ${zone.label}`}
             icon={Icon.ArrowLeft}
-            onAction={() => onQuery(`${clock} ${zone.id} to ${LOCAL.id}`)}
+            onAction={() => onQuery(`${formatQueryDateTime(zone, instant)} ${zone.id} to ${LOCAL.id}`)}
           />
         </ActionPanel>
       }
@@ -221,8 +217,8 @@ function ResultRow({ conversion, now, hour12, onQuery }: ResultRowProps) {
           <Action
             title="Swap Zones"
             icon={Icon.Switch}
-            shortcut={Keyboard.Shortcut.Common.Duplicate}
-            onAction={() => onQuery(`${clock} ${to.id} to ${from.id}`)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            onAction={() => onQuery(`${formatQueryDateTime(to, instant)} ${to.id} to ${from.id}`)}
           />
           <ActionPanel.Section>
             <Action
@@ -287,7 +283,7 @@ function AllZones({ conversion, hour12 }: { conversion: Conversion; hour12: bool
   );
 }
 
-export default function Command(props: CommandProps) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ConvertTimeZone }>) {
   const preferences = getPreferenceValues<Preferences>();
   const pinned = useMemo(() => pinnedZones(preferences.pinnedZones), [preferences.pinnedZones]);
   const [hour12, setHour12] = useState(preferences.timeFormat === "12-hour");
