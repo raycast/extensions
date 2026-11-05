@@ -8,7 +8,7 @@
   "author": "MaxLeiter",
   "owner": "vercel",
   "access": "public",
-  "version": "2.20.0",
+  "version": "2.21.0",
   "contributors": [
     "matt",
     "dgrcode",
@@ -18,7 +18,8 @@
     "sebdanielsson",
     "1weiho",
     "thomas-forbes",
-    "0xdhrv"
+    "0xdhrv",
+    "Undolog"
   ],
   "commands": [
     {
@@ -35,8 +36,8 @@
     },
     {
       "name": "menu-bar-deployments",
-      "title": "Menu Bar Deployments",
-      "description": "View recent deployments in the menu bar",
+      "title": "Deploy & Status",
+      "description": "View recent deployments and Vercel's service status in the menu bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -126,6 +127,12 @@
       "title": "AI Gateway Playground",
       "description": "Send a prompt through Vercel AI Gateway",
       "mode": "view"
+    },
+    {
+      "name": "service-status",
+      "title": "Service Status",
+      "description": "Check the status of Vercel services, active incidents and scheduled maintenance",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -173,6 +180,11 @@
       "name": "check-domain-availability",
       "title": "Check Domain Availability",
       "description": "Check if a domain is available"
+    },
+    {
+      "name": "get-service-status",
+      "title": "Get Service Status",
+      "description": "Get the current status of Vercel services, including active incidents, scheduled maintenance and degraded components"
     }
   ],
   "ai": {
@@ -427,6 +439,44 @@
                 "domain": "raycast.com"
               },
               "name": "check-domain-availability"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@vercast is Vercel down right now?",
+        "mocks": {
+          "get-service-status": {
+            "overall": "Partially Degraded Service",
+            "indicator": "minor",
+            "activeIncidents": [
+              {
+                "name": "Build delays and degraded Vercel Dashboard performance",
+                "status": "monitoring",
+                "impact": "minor",
+                "affectedComponents": [
+                  "Dashboard",
+                  "Builds"
+                ]
+              }
+            ],
+            "scheduledMaintenance": [],
+            "affectedComponents": [
+              {
+                "name": "Dashboard",
+                "status": "Degraded Performance"
+              },
+              {
+                "name": "Build & Deploy › Builds",
+                "status": "Degraded Performance"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-service-status"
             }
           }
         ]

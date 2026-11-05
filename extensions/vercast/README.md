@@ -17,6 +17,7 @@ Not affiliated with Vercel.
 - Edit, add, and delete environment variables
 - Inspect deployment files
 - View and search domains
+- Check Vercel service status and active incidents, in a list or in the menu bar with your recent deployments
 
 ## Roadmap (in no particular order):
 
