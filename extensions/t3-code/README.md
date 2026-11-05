@@ -92,5 +92,3 @@ list of its own. Provider names, custom models and starred models are read from
 npm install
 npm run dev
 ```
-
-Run `npm test` for thread-link compatibility and URL-encoding tests (Node.js 22.13+).
