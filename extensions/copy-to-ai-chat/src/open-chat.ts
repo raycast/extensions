@@ -68,6 +68,8 @@ export async function openChat(
           ? "Existing draft kept — press ⌘V to add your clipboard"
           : "Existing draft kept — retry your query in a new chat",
       );
+    } else if (result === "clipboard-changed") {
+      await showHUD("Clipboard changed — run the command again");
     } else {
       await showHUD(
         useClipboard

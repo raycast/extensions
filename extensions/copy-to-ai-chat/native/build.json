@@ -1,6 +1,6 @@
 {
-  "sourceSha256": "755996d1853705e52891a9f37bcc8db8dec354bb81b9d872938e3abc878f0e8f",
-  "binarySha256": "b0357ef77ce2017dcb3c502bf0c7cf0a917ba093ce3a8757bbd5b34044c3af70",
+  "sourceSha256": "308d6ceda53710e77f3aaa1849aafec1541238521e4f516bd830fbcac3d24131",
+  "binarySha256": "75f55407fc8f23bfaa386769cbc3fb92a9fb7a9d7850b20d3fea73808776cf54",
   "architectures": [
     "arm64",
     "x86_64"

@@ -139,13 +139,14 @@
   ],
   "scripts": {
     "build:native": "bash scripts/build-native.sh",
-    "build": "ray build -e dist",
+    "build": "npm run verify:native && ray build -e dist",
+    "postinstall": "node scripts/verify-native.cjs",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "typecheck": "tsc --noEmit",
     "publish": "npm run verify:native && npx @raycast/api@latest publish",
-    "test": "node --test scripts/test-commands.cjs",
+    "test": "node --test scripts/test-*.cjs",
     "verify:native": "node scripts/verify-native.cjs"
   },
   "dependencies": {

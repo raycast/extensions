@@ -141,8 +141,15 @@ func pasteMenuItem(_ element: AXUIElement, depth: Int = 0) -> AXUIElement? {
 if normalized(textAttribute(field, kAXValueAttribute)) != normalized(expectedText) {
     var settable = DarwinBoolean(false)
     if AXUIElementIsAttributeSettable(field, kAXValueAttribute as CFString, &settable) == .success && settable.boolValue {
-        guard AXUIElementSetAttributeValue(field, kAXValueAttribute as CFString, expectedText as CFString) == .success else {
-            finish("input-unavailable")
+        // The user or site may have created a draft since the polling loop.
+        // Re-read it after the capability check, immediately before writing.
+        guard composerStillFocused() else { finish("focus-changed") }
+        let current = normalized(textAttribute(field, kAXValueAttribute))
+        guard current.isEmpty || current == placeholder || current == normalized(expectedText) else { finish("draft") }
+        if current != normalized(expectedText) {
+            guard AXUIElementSetAttributeValue(field, kAXValueAttribute as CFString, expectedText as CFString) == .success else {
+                finish("input-unavailable")
+            }
         }
     } else {
         // Invoke Chrome's Paste menu action, avoiding keyboard-layout assumptions
@@ -150,6 +157,7 @@ if normalized(textAttribute(field, kAXValueAttribute)) != normalized(expectedTex
         guard let menuBar = elementAttribute(browser, kAXMenuBarAttribute),
               let pasteAction = pasteMenuItem(menuBar) else { finish("input-unavailable") }
         let pasteboard = NSPasteboard.general
+        let originalChangeCount = pasteboard.changeCount
         let originalItems = (pasteboard.pasteboardItems ?? []).map { item -> NSPasteboardItem in
             let copy = NSPasteboardItem()
             for type in item.types {
@@ -168,6 +176,12 @@ if normalized(textAttribute(field, kAXValueAttribute)) != normalized(expectedTex
         pasteItem.setData(Data(), forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
         pasteItem.setData(Data(), forType: NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType"))
         clipboardLock.lock()
+        // Check the count captured before reading the snapshot, so a copy made
+        // during snapshotting or focus checks is never replaced by that snapshot.
+        guard pasteboard.changeCount == originalChangeCount else {
+            clipboardLock.unlock()
+            finish("clipboard-changed")
+        }
         pasteboard.prepareForNewContents(with: .currentHostOnly)
         let written = pasteboard.writeObjects([pasteItem])
         let changeCount = pasteboard.changeCount

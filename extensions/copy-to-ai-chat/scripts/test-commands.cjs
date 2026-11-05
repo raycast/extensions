@@ -116,6 +116,17 @@ test("helper failures show a recovery message without exposing the prompt", asyn
   assert(!message.includes("Private query"));
 });
 
+test("a changed clipboard asks for a retry without suggesting a paste of unrelated content", async () => {
+  for (const options of [{ query: "Original typed prompt" }, { useClipboard: true }]) {
+    const { openChat, calls } = harness({ status: "clipboard-changed" });
+    await openChat("claude", options);
+    const messages = calls.filter(([type]) => type === "hud").map(([, message]) => message);
+    assert.deepEqual(messages, ["Clipboard changed — run the command again"]);
+    assert(!calls.some(([type]) => type === "paste"));
+    assert.equal(calls.filter(([type]) => type === "exec").length, 1);
+  }
+});
+
 test("a reformatted paste asks for review rather than another paste", async () => {
   const { openChat, calls } = harness({ status: "pasted-unverified" });
   await openChat("claude", { useClipboard: true });
