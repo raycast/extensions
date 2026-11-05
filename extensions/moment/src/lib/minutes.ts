@@ -3,6 +3,9 @@
 /** The timer's maximum, as Moment and Siri hold it. */
 export const MAXIMUM_MINUTES = 90;
 
+/** What Add Time adds without minutes: Moment's "Another 5 minutes" step (ScriptTimerCommands.defaultMinutesToAdd). */
+export const MINUTES_ADDED_BY_DEFAULT = 5;
+
 export const NOT_WHOLE_MINUTES = "Moment takes whole minutes from 1 to 90.";
 /** Siri's line (VoiceTimerDialog.reachedTheMaximum). */
 export const OVER_THE_MAXIMUM = "The timer can run for 90 minutes at most.";

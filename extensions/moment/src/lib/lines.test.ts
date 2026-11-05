@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   ACTIONS,
+  addTimeConfirmation,
   failureFor,
   lengthLabel,
   NOT_INSTALLED,
+  pauseConfirmation,
+  resumeConfirmation,
   spokenDuration,
   startConfirmation,
   successLine,
@@ -276,5 +279,37 @@ for (const [minutes, length] of [
 for (const minutes of [0, 91, 120, 45.5, "abc"]) {
   test(`startConfirmation_${JSON.stringify(minutes)}_isSkippedSoTheToolRefusesAtOnce`, () => {
     assert.equal(startConfirmation(minutes), undefined);
+  });
+}
+
+// FF-1318: every tool that changes the timer confirms, naming the action and
+// the session it acts on, in Stop's words (the manifest's tool descriptions).
+
+test("pauseConfirmation_namesPausingTheSessionInProgress", () => {
+  assert.deepEqual(pauseConfirmation(), { message: "Pause the focus session or break in progress?" });
+});
+
+test("resumeConfirmation_namesResumingThePausedSession", () => {
+  assert.deepEqual(resumeConfirmation(), { message: "Resume the paused focus session or break?" });
+});
+
+for (const [minutes, added] of [
+  [undefined, "5 minutes"],
+  [null, "5 minutes"],
+  [1, "1 minute"],
+  [10, "10 minutes"],
+  [90, "90 minutes"],
+  ["15", "15 minutes"],
+] as const) {
+  test(`addTimeConfirmation_${JSON.stringify(minutes) ?? "undefined"}_namesTheMinutesThatWillBeAdded`, () => {
+    assert.deepEqual(addTimeConfirmation(minutes), {
+      message: `Add ${added} to the focus session or break in progress?`,
+    });
+  });
+}
+
+for (const minutes of [0, 91, 120, 45.5, "abc"]) {
+  test(`addTimeConfirmation_${JSON.stringify(minutes)}_isSkippedSoTheToolRefusesAtOnce`, () => {
+    assert.equal(addTimeConfirmation(minutes), undefined);
   });
 }

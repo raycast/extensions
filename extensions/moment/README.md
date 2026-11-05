@@ -24,7 +24,7 @@ Start Focus doesn't replace a focus session or break in progress. Its message na
 
 ## Raycast AI
 
-Mention `@moment` in Raycast AI to start, pause, resume, add time to or stop the session in progress, or to ask how long is left. Raycast asks for confirmation before it starts or stops a session. Raycast AI needs a Raycast Pro plan.
+Mention `@moment` in Raycast AI to start, pause, resume, add time to or stop the session in progress, or to ask how long is left. Raycast asks for confirmation before it starts, pauses, resumes, adds time to or stops a session. Raycast AI needs a Raycast Pro plan.
 
 ## Privacy
 

@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { ACTIONS } from "./lines.ts";
+import { MINUTES_ADDED_BY_DEFAULT } from "./minutes.ts";
 import { EVENT_CODES, RECORD_PROPERTY_CODES, takesMinutes } from "./scripts.ts";
 import { COMMAND_TITLES, COMMANDS, MOMENT_BUNDLE_IDS, MOMENT_ERROR, SYSTEM_ERROR, type Command } from "./timer.ts";
 
@@ -16,7 +17,8 @@ const ERRORS = join(REPO, "MomentCore", "Sources", "MomentCore", "Types", "Scrip
 const LINKS = join(REPO, "MomentCore", "Sources", "MomentCore", "Types", "AppStoreLinks.swift");
 const SHORTCUTS = join(REPO, "Moment", "Intents", "StartTimer.swift");
 const PROJECT = join(REPO, "Moment.xcodeproj", "project.pbxproj");
-const outsideMoment = [SDEF, ERRORS, LINKS, SHORTCUTS, PROJECT].some((path) => !existsSync(path));
+const SCRIPT_COMMANDS = join(REPO, "MomentCore", "Sources", "MomentCore", "Services", "ScriptTimerCommands.swift");
+const outsideMoment = [SDEF, ERRORS, LINKS, SHORTCUTS, PROJECT, SCRIPT_COMMANDS].some((path) => !existsSync(path));
 
 const TERMS: Record<Command, string> = {
   startFocus: "start focus",
@@ -86,3 +88,9 @@ for (const bundleId of MOMENT_BUNDLE_IDS) {
     assert.match(readFileSync(PROJECT, "utf8"), setting);
   });
 }
+
+// FF-1318: Add Time's confirmation says how much Moment adds without minutes.
+test("contract_minutesAddedByDefault_isWhatMomentAddsWithoutMinutes", { skip: outsideMoment }, () => {
+  const swift = readFileSync(SCRIPT_COMMANDS, "utf8");
+  assert.match(swift, new RegExp(`static let defaultMinutesToAdd = ${MINUTES_ADDED_BY_DEFAULT}\\n`));
+});

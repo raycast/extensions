@@ -5,7 +5,7 @@
 // stops included. The setup failures and start's refusal are this extension's
 // own (FF-1281, US English only).
 
-import { NOT_WHOLE_MINUTES, OVER_THE_MAXIMUM, toolMinutes } from "./minutes.ts";
+import { MINUTES_ADDED_BY_DEFAULT, NOT_WHOLE_MINUTES, OVER_THE_MAXIMUM, toolMinutes } from "./minutes.ts";
 import {
   isSetapp,
   MOMENT_ERROR,
@@ -190,18 +190,40 @@ export function lengthLabel(minutes: number | undefined): string {
   return minutes === undefined ? "The timer's length" : counted(minutes, "minute");
 }
 
+/** What a tool's confirmation asks the person: the action and its target, and what it will ask Moment for. */
+export type ToolConfirmation = { message: string; info?: { name: string; value: string }[] };
+
 /**
  * Start Focus's confirmation, with the length that will be asked for. None
  * when the minutes would be refused: the tool then says why at once, without
  * asking Moment, rather than after the person confirms.
  */
-export function startConfirmation(
-  minutes: unknown,
-): { message: string; info: { name: string; value: string }[] } | undefined {
+export function startConfirmation(minutes: unknown): ToolConfirmation | undefined {
   const argument = toolMinutes(minutes);
   if (!argument.ok) return undefined;
   return {
     message: "Start a focus session in Moment?",
     info: [{ name: "Length", value: lengthLabel(argument.minutes) }],
   };
+}
+
+/** Pause Timer's confirmation, in Stop's words (the tool's description). */
+export function pauseConfirmation(): ToolConfirmation {
+  return { message: "Pause the focus session or break in progress?" };
+}
+
+/** Resume Timer's confirmation, in Stop's words (the tool's description). */
+export function resumeConfirmation(): ToolConfirmation {
+  return { message: "Resume the paused focus session or break?" };
+}
+
+/**
+ * Add Time's confirmation, with the minutes that will be added: those asked
+ * for, or Moment's own 5. None when the minutes would be refused, as Start's.
+ */
+export function addTimeConfirmation(minutes: unknown): ToolConfirmation | undefined {
+  const argument = toolMinutes(minutes);
+  if (!argument.ok) return undefined;
+  const added = counted(argument.minutes ?? MINUTES_ADDED_BY_DEFAULT, "minute");
+  return { message: `Add ${added} to the focus session or break in progress?` };
 }

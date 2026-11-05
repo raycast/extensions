@@ -173,6 +173,6 @@ test("build_everyToolsOutput_isOnlyStateKindTimeLeftAndLength", { skip: !existsS
   for (const tool of built.tools) {
     const output = tool.output as { properties: Record<string, unknown>; required: string[] };
     assert.deepEqual(Object.keys(output.properties).sort(), ["durationSeconds", "kind", "state", "timeLeftSeconds"]);
-    assert.equal(tool.confirmation, tool.name === "start-focus" || tool.name === "stop-timer", tool.name);
+    assert.equal(tool.confirmation, tool.name !== "time-left", tool.name);
   }
 });

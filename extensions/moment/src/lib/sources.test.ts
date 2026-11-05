@@ -41,13 +41,16 @@ test("sources_exactlyTheSixCommandsAndTools", () => {
   assert.deepEqual(modules(TOOLS).sort(), names);
 });
 
-test("tools_onlyStartFocusAndStopTimer_confirm", () => {
+// FF-1318 (the Store's review): a tool that changes something asks first.
+test("tools_everyToolThatChangesTheTimer_confirmsAndTimeLeftDoesnt", () => {
   const confirming = modules(TOOLS).filter((name) => read(join(TOOLS, name)).includes("export const confirmation"));
-  assert.deepEqual(confirming.sort(), ["start-focus.ts", "stop-timer.ts"]);
+  const changing = COMMANDS.filter((command) => command !== "checkTimer").map((command) => `${FILE_NAMES[command]}.ts`);
+  assert.deepEqual(confirming.sort(), changing.sort());
 });
 
-test("tools_stopTimer_confirmsAsDestructive", () => {
-  assert.ok(read(join(TOOLS, "stop-timer.ts")).includes("Action.Style.Destructive"));
+test("tools_onlyStopTimer_confirmsAsDestructive", () => {
+  const destructive = modules(TOOLS).filter((name) => read(join(TOOLS, name)).includes("Action.Style.Destructive"));
+  assert.deepEqual(destructive, ["stop-timer.ts"]);
 });
 
 test("lib_noModule_importsRaycastOrRunsAProcess", () => {
@@ -101,3 +104,22 @@ test("tools_startFocus_confirmsWithTheMinutesTheToolWillAsk", () => {
     /confirmation: Tool\.Confirmation<Input> = async \(input\) => startConfirmation\(input\.minutes\);/,
   );
 });
+
+test("tools_addTime_confirmsWithTheMinutesTheToolWillAsk", () => {
+  assert.match(
+    read(join(TOOLS, "add-time.ts")),
+    /confirmation: Tool\.Confirmation<Input> = async \(input\) => addTimeConfirmation\(input\.minutes\);/,
+  );
+});
+
+for (const [file, line] of [
+  ["pause-timer.ts", "pauseConfirmation"],
+  ["resume-timer.ts", "resumeConfirmation"],
+] as const) {
+  test(`tools_${file.replace(".ts", "")}_confirmsWithItsLine`, () => {
+    assert.match(
+      read(join(TOOLS, file)),
+      new RegExp(`confirmation: Tool\\.Confirmation<Record<string, never>> = async \\(\\) => ${line}\\(\\);`),
+    );
+  });
+}

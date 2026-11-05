@@ -1,3 +1,5 @@
+import type { Tool } from "@raycast/api";
+import { addTimeConfirmation } from "../lib/lines.ts";
 import { runTool } from "../moment.ts";
 
 type Input = {
@@ -7,6 +9,9 @@ type Input = {
    */
   minutes?: number;
 };
+
+/** Skipped when the minutes would be refused, so the refusal comes before the person confirms. */
+export const confirmation: Tool.Confirmation<Input> = async (input) => addTimeConfirmation(input.minutes);
 
 /**
  * Adds minutes to the focus session or break in progress. A session runs for
