@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Fix Google API Requests] - {PR_MERGE_DATE}
+
+- Fixed YouTube requests failing with "r is not a function" by using native fetch for Google API calls
+
 ## [Add Ask AI Raycast Command] - 2026-10-28
 
 - Added Ask YouTube support for finding videos, channels, live streams, and popular videos through Raycast AI

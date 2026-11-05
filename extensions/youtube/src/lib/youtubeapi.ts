@@ -1,13 +1,14 @@
-import { youtube, youtube_v3 } from "@googleapis/youtube";
+import { youtube_v3 } from "@googleapis/youtube";
 import { getPreferenceValues } from "@raycast/api";
 import { convertYouTubeDuration } from "duration-iso-8601";
 import { useEffect, useState } from "react";
+import { createYoutubeClient } from "./google-clients";
 import { Preferences } from "./types";
 import { getErrorMessage } from "./utils";
 
 function createClient(): youtube_v3.Youtube {
   const { apikey } = getPreferenceValues<Preferences>();
-  return youtube({ version: "v3", auth: apikey });
+  return createYoutubeClient(apikey);
 }
 
 export const youtubeClient = createClient();
