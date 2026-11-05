@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Fix preview freezes] - {PR_MERGE_DATE}
+## [Fix preview freezes] - 2026-11-05
 
 - Removed inline image previews that could freeze Manage Downloads or cause render timeouts on macOS. Use Quick Look with `⌘Y` or the Action Panel to preview images and other files.
 - Kept text previews and file metadata in the detail pane, and stopped loading previews while the detail pane is hidden.
