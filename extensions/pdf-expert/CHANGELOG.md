@@ -1,6 +1,6 @@
 # PDF Expert Changelog
 
-## [Screenshot Current Page] - {PR_MERGE_DATE}
+## [Screenshot Current Page] - 2026-11-05
 
 - Screenshot Current Page: copy the page currently shown in PDF Expert to the clipboard as a clean PNG (resolution configurable)
 - Fix: Recent Documents showed an empty list (bookmark resolution crashed osascript)
