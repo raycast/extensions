@@ -1,5 +1,18 @@
 # Cosign Changelog
 
+## [Inbox] - {PR_MERGE_DATE}
+
+- Read your Cosign conversations, and accept or archive connection requests
+- See unread messages and pending requests in the menu bar
+- Message people on Cosign from their profile, and see site icons beside websites, LinkedIn and sources
+- Clearer errors when Cosign can't be reached
+- Updated for Cosign's new tools, so search, profiles, favorites and the inbox work again
+- Funding History now loads every page of recorded rounds, not just the first, and groups them by year
+- Open Roles groups roles by team, with a dropdown to filter by team
+- Profiles link to the person's X account
+- Search People, Search Companies and Find Companies by Topic take an optional search term, so you can search straight from Raycast's root
+- Clearer message when Cosign sends an invalid response, with the details under Copy Error
+
 ## [Initial Version] - 2026-11-03
 
 - Search Cosign for people by name or handle, and for companies by name or by topic

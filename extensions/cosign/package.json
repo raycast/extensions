@@ -20,21 +20,45 @@
       "title": "Search People",
       "subtitle": "Cosign",
       "description": "Search Cosign for people by name or handle",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Name or handle",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "search-companies",
       "title": "Search Companies",
       "subtitle": "Cosign",
       "description": "Search Cosign for companies and firms by name",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Company name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "find-companies",
       "title": "Find Companies by Topic",
       "subtitle": "Cosign",
       "description": "Discover companies on Cosign by what they do",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Topic",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "favorites",
@@ -42,9 +66,25 @@
       "subtitle": "Cosign",
       "description": "People and companies you starred from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Cosign Inbox",
+      "subtitle": "Cosign",
+      "description": "Read your Cosign conversations and triage connection requests",
+      "mode": "view"
+    },
+    {
+      "name": "inbox-menu-bar",
+      "title": "Cosign Inbox Menu Bar",
+      "subtitle": "Cosign",
+      "description": "Unread Cosign messages and pending connection requests",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "dependencies": {
+    "@chrismessina/raycast-kit": "^0.3.0",
     "@chrismessina/raycast-logger": "^1.5.0",
     "@raycast/api": "^2.10.1",
     "@raycast/utils": "^2.2.7"
