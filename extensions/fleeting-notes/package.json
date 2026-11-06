@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fleeting-notes",
+  "title": "Fleeting Notes",
+  "description": "An instantly editable scratchpad that saves as you type and resumes where you left off.",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "scratchpad",
+      "title": "Open Scratchpad",
+      "subtitle": "Fleeting Notes",
+      "description": "Type freely in a local scratchpad, close it, and resume the same note later.",
+      "keywords": [
+        "temporary",
+        "note",
+        "scratch",
+        "resume"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Scratchpad Menu Bar",
+      "subtitle": "Fleeting Notes",
+      "description": "Keep a menu-bar shortcut to open or copy your scratchpad.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    },
+    {
+      "name": "quick-add",
+      "title": "Add to Scratchpad",
+      "description": "Append a line to your scratchpad straight from the Raycast search bar.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Note",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "append-selection",
+      "title": "Append Selected Text to Scratchpad",
+      "description": "Append the text selected in the frontmost app to your scratchpad.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "markdown",
+      "title": "Markdown Highlighting",
+      "description": "Highlight Markdown and enable the TextArea formatting shortcuts.",
+      "type": "checkbox",
+      "label": "Enable Markdown highlighting",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}
