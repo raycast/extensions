@@ -1,8 +1,12 @@
 # Model Context Protocol Registry Changelog
 
-## [Add ChefBear MCP Server] - 2026-11-06
+## [Add ChefBear MCP Server] - {PR_MERGE_DATE}
 
 - Add ChefBear to the official registry: save, find, read and share your ChefBear restaurant menus and pick dishes that suit your tastes. 12 tools. Hosted Streamable HTTP server at https://chef-bear.com/api/menu-sharing/mcp through `mcp-remote`, with OAuth 2.1 sign-in (dynamic client registration and PKCE) and each new connection approved in the ChefBear iPhone app.
+
+## [Add deAPI MCP Server] - 2026-11-06
+
+- Add deAPI to the official registry: image, video, audio and transcription tools on open-source models, each with a matching price tool, plus balance, model list and job status. 39 tools. Hosted Streamable HTTP server at https://mcp.deapi.ai/mcp through `mcp-remote`, with the deAPI API key sent as an `Authorization: Bearer` header.
 
 ## [Add Kilobat CLI MCP Server] - 2026-11-06
 
