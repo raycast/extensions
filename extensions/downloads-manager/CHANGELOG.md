@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Fix render timeout for large Downloads folders] - 2026-11-06
+
+- Fixed a render timeout when loading large Downloads folders by making all file I/O (directory scans, stat calls) asynchronous so Raycast's UI thread is not blocked.
+
 ## [Fix preview freezes] - 2026-11-05
 
 - Removed inline image previews that could freeze Manage Downloads or cause render timeouts on macOS. Use Quick Look with `⌘Y` or the Action Panel to preview images and other files.
