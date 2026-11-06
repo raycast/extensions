@@ -1,6 +1,6 @@
 # R2 Uploader Changelog
 
-## [Batch Uploads and Search Improvements] - {PR_MERGE_DATE}
+## [Batch Uploads and Search Improvements] - 2026-11-06
 
 - Support batch Finder uploads, streamed uploads, and checked public links.
 - Protect original files during image conversion and prevent temporary cleanup errors from interrupting batch uploads.
