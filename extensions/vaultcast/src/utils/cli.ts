@@ -124,7 +124,8 @@ export async function runCli(
       }
     }
 
-    return stdout.trim();
+    // Not trimmed: values such as passwords may start or end with meaningful whitespace.
+    return stdout;
   } catch (error) {
     if (error instanceof CliError) {
       throw error;

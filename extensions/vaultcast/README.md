@@ -25,26 +25,16 @@ The extension is built around a pluggable **adapter system**: built-in adapters 
 | Manager                                    | Type     | Notes                                       |
 | ------------------------------------------ | -------- | ------------------------------------------- |
 | [Proton Pass](https://proton.me/pass)      | Built-in | Uses `pass-cli`, supports session PIN       |
-| _Your manager_                             | External | Write an adapter — see [Adapters](#adapters) |
+| _Your manager_                             | External | Write an adapter — see [External adapters](#external-adapters) |
 
 ## Requirements
 
 - [Raycast](https://raycast.com) on macOS or Windows
-- Node.js 22+ and npm
 - The CLI of your password manager (e.g. `pass-cli` for Proton Pass)
 
 ## Installation
 
-Install **Vaultcast** from the [Raycast Store](https://www.raycast.com/SemL/vaultcast), or build it from source:
-
-```bash
-git clone https://github.com/Lorenzo-Se/raycast_pwm.git
-cd raycast_pwm
-npm install
-npm run dev
-```
-
-Then open Raycast and run **Search Passwords**.
+Install **Vaultcast** from the [Raycast Store](https://www.raycast.com/SemL/vaultcast), then open Raycast and run **Search Passwords**.
 
 ## Usage
 
@@ -70,74 +60,23 @@ Use the dropdown in the search bar to switch between managers or to search **all
 | Close window after copying           | Close Raycast after copying a credential (default: on)                                                                              |
 | Auto-copy TOTP after password action | Copy the TOTP code 5 seconds after copying or pasting a password (default: off)                                                     |
 | Enable extension session             | Keep master password / PIN in the session helper's memory and re-unlock managers silently until timeout or Raycast quits (default: on) |
-| Session timeout (minutes)            | Lock after 1–1440 minutes of inactivity (default: 15). With an extension session, resume via Touch ID; otherwise unlock the manager again |
+| Session Timeout (Minutes)            | Lock after 1–1440 minutes of inactivity (default: 15). With an extension session, resume via Touch ID; otherwise unlock the manager again |
 
 ## Security
 
-- **No plaintext on disk.** Credentials for the extension session are held only in the memory of a detached session helper (`assets/session-helper.mjs`). Nothing is written to `/tmp`.
+- **No plaintext on disk.** Credentials for the extension session are held only in the memory of a detached session helper. Nothing is written to `/tmp`.
+- **Authenticated helper.** The extension and the session helper encrypt and authenticate every message with a random per-helper key, kept in Raycast's encrypted extension storage. Other local processes cannot query the helper, and a locked session releases credentials only after Touch ID or device authentication.
 - **Bound to Raycast.** The session helper survives extension remounts but exits automatically when Raycast quits.
 - **Short-lived clipboard.** Copied credentials are marked as concealed, so Raycast's clipboard history and other clipboard managers skip them, and the clipboard is cleared after 2 minutes unless you've copied something else since.
 - **Idle lock.** Sessions lock after the configured timeout; resuming requires biometric or device authentication.
 - **No Keychain.** Credentials are never stored in the macOS Keychain. After Raycast quits, you unlock with your master password or PIN again.
 - **Biometrics via LocalAuthentication.** Touch ID only confirms your presence to resume a locked session. It is implemented in Swift (`swift/`) using Raycast's Swift integration.
 
-## Adapters
-
-### Built-in adapters
-
-1. Create `src/adapters/<manager>.ts` implementing `PasswordManagerAdapter`
-2. Register it in `src/adapters/index.ts`
-3. Optionally set a CLI path override in the extension preferences
-
-### External adapters
+## External adapters
 
 External adapters are standalone scripts that talk to the extension over stdio. Each adapter lives in its own folder with a `pwm-adapter.json` manifest and a script.
 
-```bash
-mkdir -p ~/.config/vaultcast/adapters
-cp -R examples/external-adapter/protonpass ~/.config/vaultcast/adapters/protonpass
-```
+Put each adapter folder into `~/.config/vaultcast/adapters`. This is the default **External Adapters Directory**, so the adapter shows up without further configuration.
 
-This is the default **External Adapters Directory**, so the adapter shows up without further configuration.
-
-- Protocol and authentication: [src/adapters/README.md](src/adapters/README.md)
-- Reference adapter: [Proton Pass](examples/external-adapter/protonpass/README.md)
-
-## Project structure
-
-```
-src/
-├── search-passwords.tsx         # Main command (UI)
-├── unlock-form.tsx              # Master password / PIN + Touch ID
-├── types.ts                     # Adapter interface
-├── registry.ts                  # Adapter registry
-├── registry/                    # External adapter loading
-├── adapters/                    # Built-in adapters + external protocol
-├── session-helper/              # Session helper IPC protocol
-├── hooks/                       # React hooks
-└── utils/                       # CLI, biometrics, credential vault, helpers
-
-assets/session-helper.mjs        # Session helper (RAM-only, IPC)
-swift/                           # Touch ID presence check (macOS, Raycast Swift package)
-examples/external-adapter/       # Reference adapter (Proton Pass)
-scripts/                         # Dev scripts (sync Default Manager dropdown)
-```
-
-## Development
-
-```bash
-npm run dev        # Start Raycast dev mode
-npm run build      # Production build into dist/
-npm run lint       # Lint
-npm run fix-lint   # Lint and auto-fix
-```
-
-Building from source requires Xcode 16.3 or later on macOS, because Raycast compiles the Swift package in `swift/`. After adding a built-in adapter, run `npm run sync-preferences` to update the **Default Manager** dropdown.
-
-## Contributing
-
-Issues and pull requests are welcome. New password manager support is best added as an external adapter first — see [src/adapters/README.md](src/adapters/README.md).
-
-## License
-
-Released under the [MIT License](LICENSE).
+- Protocol and authentication: [adapter documentation](https://github.com/Lorenzo-Se/raycast_pwm/blob/main/src/adapters/README.md)
+- Reference adapter: [Proton Pass](https://github.com/Lorenzo-Se/raycast_pwm/blob/main/examples/external-adapter/protonpass/README.md)

@@ -12,7 +12,7 @@ import {
   Toast,
   type Image,
 } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -160,8 +160,8 @@ function ItemAction({
   );
 }
 
-async function showActionError(title: string, message?: string): Promise<void> {
-  await showToast({ style: Toast.Style.Failure, title, message });
+async function showActionError(title: string): Promise<void> {
+  await showToast({ style: Toast.Style.Failure, title });
 }
 
 function actionErrorMessage(error: unknown): string {
@@ -215,11 +215,7 @@ async function scheduleTotpCopy(adapter: PasswordManagerAdapter, item: VaultItem
     await copySecret(totp);
     await showToast({ style: Toast.Style.Success, title: "TOTP copied", message: CLIPBOARD_CLEAR_MESSAGE });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to copy TOTP",
-      message: error instanceof Error ? error.message : String(error),
-    });
+    await showFailureToast(error, { title: "Failed to copy TOTP" });
   }
 }
 
@@ -354,7 +350,7 @@ function ItemActions({
             await open(url);
             await closeMainWindow();
           } catch (error) {
-            await showActionError("Failed to open in browser", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to open in browser" });
           }
         }}
       />
@@ -377,7 +373,7 @@ function ItemActions({
 
             await pasteCredential("Email", email);
           } catch (error) {
-            await showActionError("Failed to paste email", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to paste email" });
           }
         }}
       />
@@ -401,7 +397,7 @@ function ItemActions({
 
             await pasteCredential("Password", password, passwordTotpOptions);
           } catch (error) {
-            await showActionError("Failed to paste password", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to paste password" });
           }
         }}
       />
@@ -425,7 +421,7 @@ function ItemActions({
 
             await copyCredential("Email", email, closeAfterCopy);
           } catch (error) {
-            await showActionError("Failed to copy email", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to copy email" });
           }
         }}
       />
@@ -449,7 +445,7 @@ function ItemActions({
 
             await copyCredential("Password", password, closeAfterCopy, passwordTotpOptions);
           } catch (error) {
-            await showActionError("Failed to copy password", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to copy password" });
           }
         }}
       />
@@ -473,7 +469,7 @@ function ItemActions({
 
             await copyCredential("TOTP", totp, closeAfterCopy);
           } catch (error) {
-            await showActionError("Failed to copy TOTP", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to copy TOTP" });
           }
         }}
       />
@@ -496,7 +492,7 @@ function ItemActions({
 
             await copyCredential("Username", username, closeAfterCopy);
           } catch (error) {
-            await showActionError("Failed to copy username", actionErrorMessage(error));
+            await showFailureToast(error, { title: "Failed to copy username" });
           }
         }}
       />
@@ -510,7 +506,7 @@ function ItemActions({
               await adapter.openInManager!(item);
               await closeMainWindow();
             } catch (error) {
-              await showActionError("Failed to open in password manager", actionErrorMessage(error));
+              await showFailureToast(error, { title: "Failed to open in password manager" });
             }
           }}
         />
@@ -521,7 +517,7 @@ function ItemActions({
 }
 
 export default function SearchPasswords() {
-  const preferences = getPreferenceValues<Preferences & { sessionTimeoutMinutes?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const closeAfterCopy = preferences.closeAfterCopy ?? true;
   const autoCopyTotpAfterPassword = preferences.autoCopyTotpAfterPassword ?? false;
 
@@ -660,6 +656,24 @@ export default function SearchPasswords() {
     await Promise.all(managerIds.map((id) => disposeSession(id)));
   }
 
+  /** Locks the managers' own sessions (e.g. pass-cli) before treating them as locked, then refreshes their status. */
+  async function lockManagers(managerIds: string[]): Promise<void> {
+    const results = await Promise.allSettled(
+      allAdapters.filter((adapter) => managerIds.includes(adapter.id)).map((adapter) => adapter.lockSession?.()),
+    );
+    await releaseManagers(managerIds);
+    void revalidateAdapterStatuses();
+
+    const failure = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+    if (failure) {
+      throw failure.reason;
+    }
+  }
+
+  function lockManagersInBackground(managerIds: string[]): void {
+    void lockManagers(managerIds).catch((error) => showFailureToast(error, { title: "Failed to lock session" }));
+  }
+
   useEffect(() => {
     const previous = previousManagerIdRef.current;
     previousManagerIdRef.current = activeManagerId;
@@ -679,7 +693,7 @@ export default function SearchPasswords() {
     const tick = (): void => {
       if (isExtensionSessionEnabled()) {
         if (lockExtensionSessionIfExpired()) {
-          void releaseManagers(managerIdsInSelection(activeManagerId));
+          lockManagersInBackground(managerIdsInSelection(activeManagerId));
           bumpSessionEpoch();
         }
         return;
@@ -690,7 +704,7 @@ export default function SearchPasswords() {
       }
 
       lastActivityRef.current = Date.now();
-      void releaseManagers(managerIdsInSelection(activeManagerId));
+      lockManagersInBackground(managerIdsInSelection(activeManagerId));
     };
 
     tick();
@@ -731,6 +745,7 @@ export default function SearchPasswords() {
   const scopeEntries = (adapterStatuses ?? []).filter(
     (entry) => (isAllSelected || entry.adapter.id === activeManagerId) && canLoadItemsFrom(entry.adapter, entry.status),
   );
+  const scopeAdapters = new Map(scopeEntries.map((entry) => [entry.adapter.id, entry.adapter]));
   const localManagerIds = scopeEntries.filter((entry) => entry.adapter.listItems).map((entry) => entry.adapter.id);
   const remoteManagerIds = scopeEntries.filter((entry) => !entry.adapter.listItems).map((entry) => entry.adapter.id);
   const hasLocalManagers = localManagerIds.length > 0;
@@ -787,36 +802,36 @@ export default function SearchPasswords() {
     },
   );
 
+  const scopeKey = [...scopeAdapters.keys()].join(",");
   const items = useMemo(() => {
     const localResults = hasLocalManagers && allItems ? filterVaultItems(allItems, searchText) : undefined;
     const remoteResults = hasRemoteManagers ? remoteItems : undefined;
-    if (!localResults || !remoteResults) {
-      return localResults ?? remoteResults;
-    }
-
-    return sortVaultItems([...localResults, ...remoteResults]);
-  }, [allItems, remoteItems, searchText, hasLocalManagers, hasRemoteManagers]);
+    const merged =
+      localResults && remoteResults
+        ? sortVaultItems([...localResults, ...remoteResults])
+        : (localResults ?? remoteResults);
+    // keepPreviousData retains the last manager's items while the next one loads; never show (or act on) those.
+    return merged?.filter((item) => scopeAdapters.has(item.managerId));
+  }, [allItems, remoteItems, searchText, hasLocalManagers, hasRemoteManagers, scopeKey]);
 
   const isLoadingItems = (hasLocalManagers && isLoadingLocalItems) || (hasRemoteManagers && isLoadingRemoteItems);
   const searchError =
     (hasLocalManagers ? localItemsError : undefined) ?? (hasRemoteManagers ? remoteItemsError : undefined);
 
-  async function revalidateItems(): Promise<void> {
-    await Promise.all([hasLocalManagers && revalidateLocalItems(), hasRemoteManagers && revalidateRemoteItems()]);
-  }
-
   async function reloadItems(): Promise<void> {
     markActivity();
-    try {
-      await revalidateItems();
-      await showToast({ style: Toast.Style.Success, title: "Items reloaded" });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to reload items",
-        message: error instanceof Error ? error.message : String(error),
-      });
+    // revalidate() is typed as void but resolves with the error instead of rejecting when loading fails.
+    const results: unknown[] = await Promise.all([
+      hasLocalManagers ? revalidateLocalItems() : undefined,
+      hasRemoteManagers ? revalidateRemoteItems() : undefined,
+    ]);
+    const failure = results.find((result) => result instanceof Error);
+    if (failure) {
+      await showFailureToast(failure, { title: "Failed to reload items" });
+      return;
     }
+
+    await showToast({ style: Toast.Style.Success, title: "Items reloaded" });
   }
 
   function applyManagerSelection(managerId: string): void {
@@ -835,8 +850,12 @@ export default function SearchPasswords() {
       lockExtensionSession();
       bumpSessionEpoch();
     }
-    await releaseManagers(managerIdsInSelection(activeManagerId));
-    void revalidateAdapterStatuses();
+
+    try {
+      await lockManagers(managerIdsInSelection(activeManagerId));
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to lock session" });
+    }
   }
 
   function handleListManagerChange(managerId: string): void {
@@ -861,7 +880,7 @@ export default function SearchPasswords() {
   };
 
   if (isLoadingVault || isLoadingLastManager || isLoadingAdapters) {
-    return <List isLoading navigationTitle="Vaultcast" {...searchBarProps} />;
+    return <List isLoading {...searchBarProps} />;
   }
 
   if (!isLoadingAdapters && selectableAdapters.length === 0) {
@@ -921,7 +940,6 @@ export default function SearchPasswords() {
 
   return (
     <List
-      navigationTitle={isAllSelected ? "All Password Managers" : (selectedAdapter?.name ?? "Vaultcast")}
       {...searchBarProps}
       isLoading={isLoadingAdapters || isLoadingVault || isLoadingLastManager || isLoadingItems}
       actions={
@@ -990,12 +1008,11 @@ export default function SearchPasswords() {
           description="Select a password manager in the dropdown to unlock it"
         />
       )}
-      {!searchError && scopeEntries.length > 0 && items?.length === 0 && (
+      {!searchError && !isLoadingItems && scopeEntries.length > 0 && items?.length === 0 && (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No items found" description="Try a different search term" />
       )}
       {items?.map((item) => {
-        const itemAdapter =
-          scopeEntries.find((entry) => entry.adapter.id === item.managerId)?.adapter ?? selectedAdapter;
+        const itemAdapter = scopeAdapters.get(item.managerId);
         return (
           <List.Item
             key={`${item.managerId}:${item.id}`}

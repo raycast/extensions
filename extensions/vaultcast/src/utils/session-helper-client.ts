@@ -1,15 +1,17 @@
-import { environment } from "@raycast/api";
+import { LocalStorage, environment } from "@raycast/api";
 import { spawn } from "child_process";
+import { randomBytes, randomUUID } from "crypto";
 import { existsSync } from "fs";
 import net from "net";
 import { join } from "path";
 
 import {
+  SESSION_HELPER_KEY_BYTES,
   SESSION_HELPER_PROTOCOL_VERSION,
-  type SessionHelperHasRememberedResult,
+  openSessionHelperMessage,
+  sealSessionHelperMessage,
   type SessionHelperLockIfExpiredResult,
   type SessionHelperMethod,
-  type SessionHelperPeekResult,
   type SessionHelperRequest,
   type SessionHelperResponse,
   type SessionHelperSnapshot,
@@ -19,11 +21,17 @@ import { getRaycastProcessId } from "./raycast-process";
 
 const CONNECT_TIMEOUT_MS = 2_000;
 const REQUEST_TIMEOUT_MS = 5_000;
-const SPAWN_RETRY_COUNT = 3;
-const SPAWN_RETRY_DELAY_MS = 150;
+const SPAWN_READY_ATTEMPTS = 10;
+const SPAWN_READY_DELAY_MS = 100;
+// Raycast's LocalStorage is encrypted and scoped to this extension, so other local processes cannot read the key.
+const ENDPOINT_STORAGE_KEY = "sessionHelperEndpoint";
 
-let nextRequestId = 1;
-let spawnPromise: Promise<void> | undefined;
+interface HelperEndpoint {
+  key: Buffer;
+  socketPath: string;
+}
+
+let spawnPromise: Promise<HelperEndpoint> | undefined;
 
 function helperScriptPath(): string | undefined {
   const candidates = [
@@ -33,17 +41,30 @@ function helperScriptPath(): string | undefined {
   return candidates.find((candidate) => existsSync(candidate));
 }
 
-function scopePid(): number {
-  return getRaycastProcessId();
+async function loadEndpoint(): Promise<HelperEndpoint | undefined> {
+  const raw = await LocalStorage.getItem<string>(ENDPOINT_STORAGE_KEY);
+  if (typeof raw !== "string") {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as { key?: unknown; instanceId?: unknown };
+    if (typeof parsed.key !== "string" || typeof parsed.instanceId !== "string") {
+      return undefined;
+    }
+
+    const key = Buffer.from(parsed.key, "hex");
+    if (key.length !== SESSION_HELPER_KEY_BYTES) {
+      return undefined;
+    }
+
+    return { key, socketPath: sessionHelperSocketPath(parsed.instanceId) };
+  } catch {
+    return undefined;
+  }
 }
 
-function socketPath(): string {
-  return sessionHelperSocketPath(scopePid());
-}
-
-function connectToHelper(): Promise<net.Socket> {
-  const path = socketPath();
-
+function connectToHelper(path: string): Promise<net.Socket> {
   return new Promise((resolve, reject) => {
     const socket = net.connect({ path });
     let settled = false;
@@ -76,167 +97,150 @@ function connectToHelper(): Promise<net.Socket> {
   });
 }
 
-async function spawnHelper(): Promise<void> {
-  if (spawnPromise) {
-    return spawnPromise;
-  }
-
-  spawnPromise = (async () => {
-    const script = helperScriptPath();
-    if (!script) {
-      throw new Error("session-helper.mjs is not available");
-    }
-
-    const pid = scopePid();
-    const child = spawn(process.execPath, [script], {
-      detached: true,
-      stdio: "ignore",
-      env: {
-        ...process.env,
-        VAULTCAST_SCOPE_PID: String(pid),
-        VAULTCAST_SOCKET: socketPath(),
-      },
-    });
-    child.unref();
-  })().finally(() => {
-    spawnPromise = undefined;
-  });
-
-  return spawnPromise;
-}
-
-async function ensureHelperRunning(): Promise<void> {
-  for (let attempt = 0; attempt < SPAWN_RETRY_COUNT; attempt++) {
-    try {
-      const socket = await connectToHelper();
-      socket.destroy();
-      return;
-    } catch {
-      if (attempt === 0) {
-        await spawnHelper();
-      }
-      await new Promise((resolve) => setTimeout(resolve, SPAWN_RETRY_DELAY_MS));
-    }
-  }
-
-  const socket = await connectToHelper();
-  socket.destroy();
-}
-
-function invokeOnce<T>(method: SessionHelperMethod, params: Record<string, unknown> = {}): Promise<T> {
-  return new Promise((resolve, reject) => {
-    void (async () => {
-      let socket: net.Socket | undefined;
-
-      try {
-        socket = await connectToHelper();
-      } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error)));
-        return;
-      }
-
-      const id = String(nextRequestId++);
-      let buffer = "";
-      let settled = false;
-
-      const request: SessionHelperRequest = {
-        protocolVersion: SESSION_HELPER_PROTOCOL_VERSION,
-        id,
-        method,
-        params,
-      };
-
-      const timeout = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          socket?.destroy();
-          reject(new Error(`Session helper timed out after ${REQUEST_TIMEOUT_MS}ms`));
-        }
-      }, REQUEST_TIMEOUT_MS);
-
-      const cleanup = () => {
-        clearTimeout(timeout);
-        socket?.off("data", onData);
-        socket?.off("error", onError);
-        socket?.destroy();
-      };
-
-      const onError = (error: Error) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        cleanup();
-        reject(error);
-      };
-
-      const onData = (chunk: Buffer | string) => {
-        buffer += chunk.toString();
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        for (const line of lines) {
-          if (!line.trim()) {
-            continue;
-          }
-
-          try {
-            const response = JSON.parse(line) as SessionHelperResponse;
-            if (response.id !== id) {
-              continue;
-            }
-
-            if (settled) {
-              return;
-            }
-            settled = true;
-            cleanup();
-
-            if (!response.ok) {
-              reject(new Error(response.error.message));
-              return;
-            }
-
-            resolve(response.result as T);
-          } catch (error) {
-            if (settled) {
-              return;
-            }
-            settled = true;
-            cleanup();
-            reject(error instanceof Error ? error : new Error(String(error)));
-          }
-        }
-      };
-
-      socket.on("data", onData);
-      socket.once("error", onError);
-      socket.write(`${JSON.stringify(request)}\n`);
-    })();
-  });
-}
-
-export async function invokeSessionHelper<T>(
+async function invokeOnce<T>(
+  endpoint: HelperEndpoint,
   method: SessionHelperMethod,
   params: Record<string, unknown> = {},
 ): Promise<T> {
-  await ensureHelperRunning();
+  const socket = await connectToHelper(endpoint.socketPath);
+  const id = randomUUID();
+  const request: SessionHelperRequest = {
+    protocolVersion: SESSION_HELPER_PROTOCOL_VERSION,
+    id,
+    issuedAt: Date.now(),
+    method,
+    params,
+  };
 
-  try {
-    return await invokeOnce<T>(method, params);
-  } catch {
-    await ensureHelperRunning();
-    return invokeOnce<T>(method, params);
-  }
+  return new Promise<T>((resolve, reject) => {
+    let buffer = "";
+    let settled = false;
+
+    const settle = (outcome: () => void) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      socket.off("data", onData);
+      socket.off("error", onError);
+      socket.off("close", onClose);
+      socket.destroy();
+      outcome();
+    };
+
+    const timeout = setTimeout(() => {
+      settle(() => reject(new Error(`Session helper timed out after ${REQUEST_TIMEOUT_MS}ms`)));
+    }, REQUEST_TIMEOUT_MS);
+
+    const onError = (error: Error) => settle(() => reject(error));
+    const onClose = () => settle(() => reject(new Error("Session helper closed the connection")));
+
+    const onData = (chunk: Buffer | string) => {
+      buffer += chunk.toString();
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+
+        let response: SessionHelperResponse;
+        try {
+          // Fails for anything not sealed with our key, e.g. a process squatting on the socket path.
+          response = openSessionHelperMessage(endpoint.key, "response", line) as SessionHelperResponse;
+        } catch {
+          settle(() => reject(new Error("Session helper response failed authentication")));
+          return;
+        }
+
+        if (response.id !== id) {
+          continue;
+        }
+
+        settle(() => {
+          if (response.ok) {
+            resolve(response.result as T);
+          } else {
+            reject(new Error(response.error.message));
+          }
+        });
+        return;
+      }
+    };
+
+    socket.on("data", onData);
+    socket.once("error", onError);
+    socket.once("close", onClose);
+    socket.write(`${sealSessionHelperMessage(endpoint.key, "request", request)}\n`);
+  });
 }
 
-export async function pingSessionHelper(): Promise<boolean> {
+async function isEndpointReady(endpoint: HelperEndpoint): Promise<boolean> {
   try {
-    await invokeSessionHelper<{ ok: true }>("ping");
+    await invokeOnce(endpoint, "ping");
     return true;
   } catch {
     return false;
   }
+}
+
+async function spawnHelper(): Promise<HelperEndpoint> {
+  const script = helperScriptPath();
+  if (!script) {
+    throw new Error("session-helper.mjs is not available");
+  }
+
+  const key = randomBytes(SESSION_HELPER_KEY_BYTES);
+  const instanceId = randomBytes(16).toString("hex");
+  const endpoint: HelperEndpoint = { key, socketPath: sessionHelperSocketPath(instanceId) };
+
+  const child = spawn(process.execPath, [script], {
+    detached: true,
+    // The key goes over stdin: argv and the environment are visible to other processes of the same user.
+    stdio: ["pipe", "ignore", "ignore"],
+    env: {
+      ...process.env,
+      VAULTCAST_SCOPE_PID: String(getRaycastProcessId()),
+      VAULTCAST_SOCKET: endpoint.socketPath,
+    },
+  });
+  child.once("error", () => undefined);
+  child.stdin.once("error", () => undefined);
+  child.stdin.end(`${key.toString("hex")}\n`);
+  child.unref();
+
+  await LocalStorage.setItem(ENDPOINT_STORAGE_KEY, JSON.stringify({ key: key.toString("hex"), instanceId }));
+
+  for (let attempt = 0; attempt < SPAWN_READY_ATTEMPTS; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, SPAWN_READY_DELAY_MS));
+    if (await isEndpointReady(endpoint)) {
+      return endpoint;
+    }
+  }
+
+  throw new Error("Session helper did not start");
+}
+
+async function ensureHelperEndpoint(): Promise<HelperEndpoint> {
+  if (spawnPromise) {
+    return spawnPromise;
+  }
+
+  const stored = await loadEndpoint();
+  if (stored && (await isEndpointReady(stored))) {
+    return stored;
+  }
+
+  spawnPromise ??= spawnHelper().finally(() => {
+    spawnPromise = undefined;
+  });
+  return spawnPromise;
+}
+
+async function invokeSessionHelper<T>(method: SessionHelperMethod, params: Record<string, unknown> = {}): Promise<T> {
+  return invokeOnce<T>(await ensureHelperEndpoint(), method, params);
 }
 
 export async function getSessionHelperSnapshot(params: {
@@ -255,22 +259,13 @@ export async function rememberInSessionHelper(params: {
   await invokeSessionHelper("remember", params);
 }
 
-export async function peekInSessionHelper(adapterId: string): Promise<Record<string, string> | undefined> {
-  const result = await invokeSessionHelper<SessionHelperPeekResult>("peek", { adapterId });
-  return result.credentials;
-}
-
-export async function hasRememberedInSessionHelper(adapterId: string): Promise<boolean> {
-  const result = await invokeSessionHelper<SessionHelperHasRememberedResult>("hasRemembered", { adapterId });
-  return result.value;
-}
-
 export async function lockSessionHelper(): Promise<void> {
   await invokeSessionHelper("lock");
 }
 
-export async function unlockAfterPresenceInSessionHelper(): Promise<void> {
-  await invokeSessionHelper("unlockAfterPresence");
+/** Call only after the user confirmed their presence; returns the snapshot including the released credentials. */
+export async function unlockAfterPresenceInSessionHelper(): Promise<SessionHelperSnapshot> {
+  return invokeSessionHelper<SessionHelperSnapshot>("unlockAfterPresence");
 }
 
 export async function clearSessionHelper(adapterId?: string): Promise<void> {

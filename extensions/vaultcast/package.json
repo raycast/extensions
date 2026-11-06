@@ -13,7 +13,6 @@
     {
       "name": "search-passwords",
       "title": "Search Passwords",
-      "subtitle": "Vaultcast",
       "icon": "icon.png",
       "description": "Search and copy credentials from configured password manager CLIs",
       "mode": "view"
@@ -91,7 +90,7 @@
       "name": "sessionTimeoutMinutes",
       "type": "textfield",
       "required": false,
-      "title": "Session timeout (minutes)",
+      "title": "Session Timeout (Minutes)",
       "description": "Lock after this many minutes of inactivity (1–1440). With extension session: unlock with Touch ID (macOS) to resume. Without: unlock the password manager again.",
       "default": "15",
       "placeholder": "15"
@@ -110,7 +109,6 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "sync-preferences": "node scripts/sync-preferences.mjs",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

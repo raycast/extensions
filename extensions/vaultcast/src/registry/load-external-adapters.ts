@@ -130,7 +130,7 @@ function loadExternalAdapterFromDirectory(directoryPath: string): PasswordManage
 }
 
 function getExternalAdaptersDirectory(): string | undefined {
-  const preferences = getPreferenceValues<{ externalAdaptersDirectory?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const expanded = expandHomePath(preferences.externalAdaptersDirectory ?? "");
   return expanded || undefined;
 }

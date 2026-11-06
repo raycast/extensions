@@ -61,7 +61,7 @@ export function parseCliPathOverrides(raw: string | undefined): CliPathOverrides
 }
 
 export function getCliPathOverride(adapterId: string): string | undefined {
-  const preferences = getPreferenceValues<{ cliPathOverrides?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const overrides = parseCliPathOverrides(preferences.cliPathOverrides);
   return overrides[adapterId];
 }
@@ -132,7 +132,7 @@ export function resolveManagerId(
 }
 
 export function getDefaultManagerId(availableIds: string[], preferredId?: string): string | undefined {
-  const preferences = getPreferenceValues<{ defaultManagerId?: string; defaultManagerOverride?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const override = preferences.defaultManagerOverride?.trim();
   const preferred = override || preferredId || preferences.defaultManagerId;
   const allAdapters = getAdapters();

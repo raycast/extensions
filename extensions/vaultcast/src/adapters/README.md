@@ -88,7 +88,7 @@ Falls die CLI nicht im Standard-PATH liegt, in den Extension-Einstellungen unter
 
 In den Extension-Einstellungen **Default Manager** wählen (z. B. `Proton Pass`). Bei **Auto** wird der erste verfügbare Adapter genutzt.
 
-Beim Hinzufügen eines neuen Adapters `npm run sync-preferences` ausführen, damit das Dropdown aktualisiert wird.
+Beim Hinzufügen eines neuen Adapters den Eintrag im `data`-Array der Preference `defaultManagerId` in `package.json` ergänzen, damit das Dropdown ihn anbietet.
 
 ## Interface-Übersicht
 

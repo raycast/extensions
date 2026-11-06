@@ -26,7 +26,7 @@ let scheduledDispose: ReturnType<typeof setTimeout> | undefined;
 let biometricUnlockInProgress = false;
 
 export function getSessionIdleTimeoutMs(): number {
-  const preferences = getPreferenceValues<{ sessionTimeoutMinutes?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   return parseSessionTimeoutMinutes(preferences.sessionTimeoutMinutes) * 60_000;
 }
 
@@ -184,6 +184,9 @@ export class ExternalAdapterSession {
       child.once("spawn", onSpawn);
       child.once("error", onError);
 
+      // Diagnostics are not part of the protocol, but the pipe must be drained or a chatty adapter blocks on write.
+      child.stderr.resume();
+
       child.stdout.on("data", (chunk: Buffer | string) => {
         this.stdoutBuffer += chunk.toString();
         if (this.stdoutBuffer.length > EXTERNAL_ADAPTER_MAX_BUFFER) {
@@ -233,10 +236,10 @@ export class ExternalAdapterSession {
 
   private handleMessage(line: string): void {
     const response = parseExternalMessage(line);
-    const pending =
-      (response.id !== undefined ? this.pending.get(response.id) : undefined) ??
-      (this.pending.size === 1 ? [...this.pending.values()][0] : undefined);
+    // An unknown ID is a late answer to a request that already timed out; never hand it to another request.
+    // Only responses that omit their ID fall back to the single outstanding request.
     const pendingId = response.id ?? (this.pending.size === 1 ? [...this.pending.keys()][0] : undefined);
+    const pending = pendingId !== undefined ? this.pending.get(pendingId) : undefined;
 
     if (!pending || pendingId === undefined) {
       return;

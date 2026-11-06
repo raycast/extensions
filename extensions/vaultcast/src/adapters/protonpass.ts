@@ -11,6 +11,7 @@ import {
   passCliSessionHasLock,
   runPassCliCommand,
   unlockPassCliSession,
+  WRONG_PIN_MESSAGE,
 } from "./protonpass-session";
 
 const ITEM_ID_SEPARATOR = "::";
@@ -98,7 +99,9 @@ function toSecretUri(shareId: string, itemId: string, field: string): string {
 }
 
 async function viewField(shareId: string, itemId: string, field: string): Promise<string | undefined> {
-  const value = await runPassCli(["item", "view", toSecretUri(shareId, itemId, field)]);
+  const stdout = await runPassCli(["item", "view", toSecretUri(shareId, itemId, field)]);
+  // pass-cli terminates the value with a newline; everything before it belongs to the value.
+  const value = stdout.replace(/\r?\n$/, "");
   return value || undefined;
 }
 
@@ -121,16 +124,11 @@ async function listItemsInVault(shareId: string): Promise<ItemSummary[]> {
 
   try {
     const stdout = await runPassCli([...baseArgs, "--show-secrets"]);
-    const data = parseJson<ItemListJson>(stdout);
-    return data.items ?? [];
+    return parseJson<ItemListJson>(stdout).items ?? [];
   } catch {
-    try {
-      const stdout = await runPassCli(baseArgs);
-      const data = parseJson<ItemListJson>(stdout);
-      return data.items ?? [];
-    } catch {
-      return [];
-    }
+    // Older pass-cli versions do not know --show-secrets; retry without it and let that failure propagate.
+    const stdout = await runPassCli(baseArgs);
+    return parseJson<ItemListJson>(stdout).items ?? [];
   }
 }
 
@@ -247,7 +245,7 @@ async function checkProtonPassAvailability(): Promise<AdapterStatus> {
   if (passCliSessionHasLock(info) && (await isPassCliSessionLocked(binary))) {
     return {
       ok: false,
-      reason: "Session gesperrt. Bitte 6-stellige PIN eingeben.",
+      reason: "Session locked. Enter your 6-digit PIN.",
       needsAuth: true,
     };
   }
@@ -302,7 +300,7 @@ export const protonPassAdapter: PasswordManagerAdapter = {
 
     const pin = credentials.pin ?? "";
     if (!isValidProtonPassPin(pin)) {
-      return { ok: false, reason: "PIN muss 6 Ziffern haben.", needsAuth: true };
+      return { ok: false, reason: "PIN must be 6 digits.", needsAuth: true };
     }
 
     try {
@@ -313,14 +311,14 @@ export const protonPassAdapter: PasswordManagerAdapter = {
       }
 
       const message = error instanceof CliError ? error.message : String(error);
-      if (message === "PIN falsch." || isWrongPinError(message)) {
-        return { ok: false, reason: "PIN falsch.", needsAuth: true };
+      if (message === WRONG_PIN_MESSAGE || isWrongPinError(message)) {
+        return { ok: false, reason: WRONG_PIN_MESSAGE, needsAuth: true };
       }
 
       if (isLockCodePromptError(message)) {
         return {
           ok: false,
-          reason: "PIN-Eingabe nicht möglich. Entsperre die Session im Terminal mit: pass-cli session unlock",
+          reason: "Could not enter the PIN. Unlock the session in a terminal with: pass-cli session unlock",
           needsAuth: true,
         };
       }
@@ -329,6 +327,26 @@ export const protonPassAdapter: PasswordManagerAdapter = {
     }
 
     return { ok: true };
+  },
+
+  async lockSession(): Promise<void> {
+    const binary = await getBinary();
+    if (!binary) {
+      return;
+    }
+
+    let info;
+    try {
+      info = await getPassCliInfo(binary);
+    } catch {
+      // Not logged in: there is no session to lock.
+      return;
+    }
+
+    // `session lock` needs a session PIN; sessions without one (or PAT logins) cannot be locked.
+    if (passCliSessionHasLock(info)) {
+      await runPassCliCommand(binary, ["session", "lock"]);
+    }
   },
 
   async listItems(): Promise<VaultItem[]> {

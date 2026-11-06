@@ -9,6 +9,8 @@ const LOCK_CODE_READ_ERROR_PATTERN =
 const UNLOCK_PROMPT_DELAY_MS = 1_000;
 const SESSION_FRESH_WINDOW_MS = 60_000;
 
+export const WRONG_PIN_MESSAGE = "Wrong PIN.";
+
 let sessionFreshUntil = 0;
 let sessionProbe: Promise<void> | undefined;
 
@@ -97,13 +99,13 @@ export async function isPassCliSessionLocked(binary: string): Promise<boolean> {
 export async function unlockPassCliSession(binary: string, pin: string): Promise<void> {
   const normalizedPin = pin.trim();
   if (!isValidProtonPassPin(normalizedPin)) {
-    throw new CliError("PIN muss 6 Ziffern haben.");
+    throw new CliError("PIN must be 6 digits.");
   }
 
   await runUnlockCommand(binary, normalizedPin);
 
   if (await isPassCliSessionLocked(binary)) {
-    throw new CliError("PIN falsch.");
+    throw new CliError(WRONG_PIN_MESSAGE);
   }
 }
 
@@ -122,9 +124,7 @@ async function runUnlockCommand(binary: string, pin: string): Promise<void> {
     return;
   }
 
-  throw new CliError(
-    "PIN-Entsperrung ist auf dieser Plattform nicht automatisiert. Führe im Terminal aus: pass-cli session unlock",
-  );
+  throw new CliError("PIN unlock is not automated on this platform. Run this in a terminal: pass-cli session unlock");
 }
 
 async function runShellCommand(command: string, env: Record<string, string>, timeoutMs = 30_000): Promise<string> {

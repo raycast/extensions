@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { parseSessionTimeoutMinutes } from "../session-helper/protocol";
+import { parseSessionTimeoutMinutes, type SessionHelperSnapshot } from "../session-helper/protocol";
 import {
   clearSessionHelper,
   getSessionHelperSnapshot,
@@ -17,23 +17,20 @@ export { parseSessionTimeoutMinutes } from "../session-helper/protocol";
 
 const GLOBAL_VAULT_KEY = "__vaultcastExtensionSession";
 
-type SessionPreferences = {
-  enableExtensionSession?: boolean;
-  sessionTimeoutMinutes?: string;
-};
-
 type SessionListener = () => void;
 
 interface VaultRuntime {
+  /** Held only while the session is unlocked; cleared on lock and re-fetched after a presence check. */
   credentialsByAdapter: Map<string, Record<string, string>>;
+  rememberedAdapterIds: Set<string>;
   listeners: Set<SessionListener>;
   locked: boolean;
   lastActivityAt: number;
   hydratedFromHelper: boolean;
 }
 
-function preferences(): SessionPreferences {
-  return getPreferenceValues<SessionPreferences>();
+function preferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 function helperConfig(): { timeoutMinutes: number; enabled: boolean } {
@@ -48,6 +45,7 @@ function runtime(): VaultRuntime {
   if (!globalState[GLOBAL_VAULT_KEY]) {
     globalState[GLOBAL_VAULT_KEY] = {
       credentialsByAdapter: new Map(),
+      rememberedAdapterIds: new Set(),
       listeners: new Set(),
       locked: false,
       lastActivityAt: 0,
@@ -68,15 +66,15 @@ function notifySessionListeners(): void {
   }
 }
 
-function applySnapshot(snapshot: {
-  credentialsByAdapter: Record<string, Record<string, string>>;
-  locked: boolean;
-  lastActivityAt: number;
-}): void {
+function applySnapshot(snapshot: SessionHelperSnapshot): void {
   const state = runtime();
   state.credentialsByAdapter = new Map(
     Object.entries(snapshot.credentialsByAdapter ?? {}).filter(([, value]) => value && typeof value === "object"),
   );
+  state.rememberedAdapterIds = new Set([
+    ...(Array.isArray(snapshot.rememberedAdapterIds) ? snapshot.rememberedAdapterIds : []),
+    ...state.credentialsByAdapter.keys(),
+  ]);
   state.locked = snapshot.locked === true;
   state.lastActivityAt = typeof snapshot.lastActivityAt === "number" ? snapshot.lastActivityAt : 0;
 }
@@ -126,6 +124,7 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
 
   const state = runtime();
   state.credentialsByAdapter.set(adapterId, cloneCredentials(credentials));
+  state.rememberedAdapterIds.add(adapterId);
   state.locked = false;
   state.lastActivityAt = Date.now();
   notifySessionListeners();
@@ -140,7 +139,7 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
 }
 
 export function hasRememberedCredentials(adapterId: string): boolean {
-  return runtime().credentialsByAdapter.has(adapterId);
+  return runtime().rememberedAdapterIds.has(adapterId);
 }
 
 export function peekCredentials(adapterId: string): Record<string, string> | undefined {
@@ -154,36 +153,37 @@ export function peekCredentials(adapterId: string): Record<string, string> | und
 
 export function lockExtensionSession(): void {
   const state = runtime();
-  if (!isExtensionSessionEnabled() || state.credentialsByAdapter.size === 0 || state.locked) {
+  if (!isExtensionSessionEnabled() || state.rememberedAdapterIds.size === 0 || state.locked) {
     return;
   }
 
   state.locked = true;
+  state.credentialsByAdapter.clear();
   notifySessionListeners();
   void lockSessionHelper().catch(() => undefined);
 }
 
-export function unlockExtensionSessionAfterPresence(): void {
-  const state = runtime();
-  if (state.credentialsByAdapter.size === 0) {
+/** Call only after `confirmPresence()` succeeded: the helper releases the locked credentials in response. */
+export async function unlockExtensionSessionAfterPresence(): Promise<void> {
+  if (runtime().rememberedAdapterIds.size === 0) {
     return;
   }
 
-  state.locked = false;
-  state.lastActivityAt = Date.now();
+  applySnapshot(await unlockAfterPresenceInSessionHelper());
   notifySessionListeners();
-  void unlockAfterPresenceInSessionHelper().catch(() => undefined);
 }
 
 export function clearRememberedCredentials(adapterId?: string): void {
   const state = runtime();
   if (adapterId) {
     state.credentialsByAdapter.delete(adapterId);
+    state.rememberedAdapterIds.delete(adapterId);
   } else {
     state.credentialsByAdapter.clear();
+    state.rememberedAdapterIds.clear();
   }
 
-  if (state.credentialsByAdapter.size === 0) {
+  if (state.rememberedAdapterIds.size === 0) {
     state.locked = false;
     state.lastActivityAt = 0;
   }
@@ -198,7 +198,7 @@ export function markSessionActivity(): void {
   }
 
   const state = runtime();
-  if (!isExtensionSessionEnabled() || state.locked || state.credentialsByAdapter.size === 0) {
+  if (!isExtensionSessionEnabled() || state.locked || state.rememberedAdapterIds.size === 0) {
     return;
   }
 
@@ -211,7 +211,7 @@ export function isExtensionSessionExpired(): boolean {
   if (
     !isExtensionSessionEnabled() ||
     state.locked ||
-    state.credentialsByAdapter.size === 0 ||
+    state.rememberedAdapterIds.size === 0 ||
     state.lastActivityAt === 0
   ) {
     return false;
@@ -235,7 +235,7 @@ export function getExtensionSessionState(): ExtensionSessionState {
   }
 
   const state = runtime();
-  if (state.credentialsByAdapter.size === 0) {
+  if (state.rememberedAdapterIds.size === 0) {
     return "empty";
   }
 

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
 import { isBiometricUnlockInProgress, setBiometricUnlockInProgress } from "./adapters/external-session";
@@ -20,10 +20,6 @@ const FALLBACK_REQUIREMENTS: AuthRequirements = {
   fields: [{ id: "password", label: "Password", type: "password" }],
 };
 
-type SessionPreferences = {
-  enableExtensionSession?: boolean;
-};
-
 export function UnlockForm({
   adapter,
   adapterStatuses,
@@ -41,7 +37,7 @@ export function UnlockForm({
   onUnlocked: () => void;
   onActivity: () => void;
 }) {
-  const preferences = getPreferenceValues<SessionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const sessionEnabled = preferences.enableExtensionSession !== false;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setSessionEpoch] = useState(0);
@@ -144,7 +140,7 @@ export function UnlockForm({
         return;
       }
 
-      unlockExtensionSessionAfterPresence();
+      await unlockExtensionSessionAfterPresence();
       setSessionEpoch((value) => value + 1);
 
       const credentials = peekCredentials(adapter.id);
@@ -165,11 +161,7 @@ export function UnlockForm({
         message: status.reason,
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unlock failed",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Unlock failed" });
     } finally {
       setBiometricUnlockInProgress(false);
       setIsSubmitting(false);
@@ -199,11 +191,7 @@ export function UnlockForm({
     try {
       await authenticateWithCredentials(credentials);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unlock failed",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Unlock failed" });
     } finally {
       setIsSubmitting(false);
     }
@@ -211,7 +199,6 @@ export function UnlockForm({
 
   return (
     <Form
-      navigationTitle={adapter.name}
       isLoading={isLoadingRequirements || isLoadingTouchId || isSubmitting}
       actions={
         <ActionPanel>

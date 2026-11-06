@@ -73,6 +73,8 @@ export interface PasswordManagerAdapter {
 
   getAuthRequirements?(): AuthRequirements | Promise<AuthRequirements>;
   authenticate?(credentials: Record<string, string>): Promise<AdapterStatus>;
+  /** Locks the manager's own session (e.g. the CLI's) so it needs to be unlocked again. */
+  lockSession?(): Promise<void>;
 }
 
 export interface CliRunOptions {

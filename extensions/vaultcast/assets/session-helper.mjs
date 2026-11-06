@@ -1,21 +1,25 @@
 #!/usr/bin/env node
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { chmodSync, existsSync, unlinkSync } from "fs";
 import net from "net";
-import { tmpdir } from "os";
-import { join } from "path";
 
-const PROTOCOL_VERSION = 1;
+// Keep the wire format in sync with src/session-helper/protocol.ts.
+const PROTOCOL_VERSION = 2;
+const KEY_BYTES = 32;
+const IV_BYTES = 12;
+const CIPHER = "aes-256-gcm";
+const REQUEST_MAX_AGE_MS = 30_000;
 const PARENT_POLL_MS = 5_000;
 const DEFAULT_TIMEOUT_MINUTES = 15;
 const MIN_TIMEOUT_MINUTES = 1;
 const MAX_TIMEOUT_MINUTES = 1440;
 
 const scopePid = Number.parseInt(process.env.VAULTCAST_SCOPE_PID ?? "", 10);
-const socketPath =
-  process.env.VAULTCAST_SOCKET ??
-  (process.platform === "win32"
-    ? `\\\\.\\pipe\\vaultcast-${scopePid}`
-    : join(tmpdir(), `vaultcast-helper-${scopePid}.sock`));
+const socketPath = process.env.VAULTCAST_SOCKET ?? "";
+/** @type {Buffer} */
+let key;
+/** Request IDs seen within REQUEST_MAX_AGE_MS, to reject replayed requests. */
+const seenRequestIds = new Map();
 
 /** @type {Map<string, Record<string, string>>} */
 const credentialsByAdapter = new Map();
@@ -109,19 +113,70 @@ function getSessionState() {
   return "active";
 }
 
+/** Credentials leave the helper only while the session is active, never while it is locked. */
 function snapshotForClient() {
-  lockIfExpired();
+  const active = getSessionState() === "active";
   return {
-    credentialsByAdapter: Object.fromEntries(
-      [...credentialsByAdapter.entries()].map(([adapterId, credentials]) => [adapterId, cloneCredentials(credentials)]),
-    ),
+    credentialsByAdapter: active
+      ? Object.fromEntries(
+          [...credentialsByAdapter.entries()].map(([adapterId, credentials]) => [
+            adapterId,
+            cloneCredentials(credentials),
+          ]),
+        )
+      : {},
+    rememberedAdapterIds: [...credentialsByAdapter.keys()],
     locked,
     lastActivityAt,
   };
 }
 
+function seal(direction, payload) {
+  const iv = randomBytes(IV_BYTES);
+  const cipher = createCipheriv(CIPHER, key, iv);
+  cipher.setAAD(Buffer.from(direction));
+  const data = Buffer.concat([cipher.update(JSON.stringify(payload), "utf8"), cipher.final()]);
+  return JSON.stringify({
+    iv: iv.toString("base64"),
+    tag: cipher.getAuthTag().toString("base64"),
+    data: data.toString("base64"),
+  });
+}
+
+/** Throws unless the line was sealed with the key handed over by the extension. */
+function open(direction, line) {
+  const envelope = JSON.parse(line);
+  if (typeof envelope?.iv !== "string" || typeof envelope.tag !== "string" || typeof envelope.data !== "string") {
+    throw new Error("Malformed message");
+  }
+  const decipher = createDecipheriv(CIPHER, key, Buffer.from(envelope.iv, "base64"));
+  decipher.setAAD(Buffer.from(direction));
+  decipher.setAuthTag(Buffer.from(envelope.tag, "base64"));
+  const plain = Buffer.concat([decipher.update(Buffer.from(envelope.data, "base64")), decipher.final()]);
+  return JSON.parse(plain.toString("utf8"));
+}
+
+/** Rejects stale or replayed requests so a captured sealed request cannot be reused later. */
+function isFreshRequest(request) {
+  const now = Date.now();
+  for (const [id, seenAt] of seenRequestIds) {
+    if (now - seenAt > REQUEST_MAX_AGE_MS) {
+      seenRequestIds.delete(id);
+    }
+  }
+
+  if (typeof request.id !== "string" || typeof request.issuedAt !== "number") {
+    return false;
+  }
+  if (Math.abs(now - request.issuedAt) > REQUEST_MAX_AGE_MS || seenRequestIds.has(request.id)) {
+    return false;
+  }
+  seenRequestIds.set(request.id, now);
+  return true;
+}
+
 function emit(socket, payload) {
-  socket.write(`${JSON.stringify(payload)}\n`);
+  socket.write(`${seal("response", payload)}\n`);
 }
 
 function respond(socket, id, result) {
@@ -139,6 +194,11 @@ function handleRequest(socket, request) {
 
   if (request.protocolVersion !== PROTOCOL_VERSION) {
     respondError(socket, id, "Unsupported protocol version");
+    return;
+  }
+
+  if (!isFreshRequest(request)) {
+    respondError(socket, id, "Stale or replayed request");
     return;
   }
 
@@ -199,14 +259,13 @@ function handleRequest(socket, request) {
       return;
     }
     case "unlockAfterPresence": {
-      if (credentialsByAdapter.size === 0) {
-        respond(socket, id, { ok: true });
-        return;
+      // Only an authenticated client can reach this; the extension calls it after Touch ID / device auth succeeded.
+      if (credentialsByAdapter.size > 0) {
+        locked = false;
+        lastActivityAt = Date.now();
+        scheduleExpiryTimer();
       }
-      locked = false;
-      lastActivityAt = Date.now();
-      scheduleExpiryTimer();
-      respond(socket, id, { ok: true });
+      respond(socket, id, snapshotForClient());
       return;
     }
     case "clear": {
@@ -276,8 +335,22 @@ function shutdown() {
   process.exit(0);
 }
 
-if (!Number.isFinite(scopePid) || scopePid <= 0) {
-  process.stderr.write("VAULTCAST_SCOPE_PID is required\n");
+if (!Number.isFinite(scopePid) || scopePid <= 0 || !socketPath) {
+  process.stderr.write("VAULTCAST_SCOPE_PID and VAULTCAST_SOCKET are required\n");
+  process.exit(1);
+}
+
+async function readKeyFromStdin() {
+  let raw = "";
+  for await (const chunk of process.stdin) {
+    raw += chunk.toString();
+  }
+  return Buffer.from(raw.trim(), "hex");
+}
+
+key = await readKeyFromStdin();
+if (key.length !== KEY_BYTES) {
+  process.stderr.write("A session key is required on stdin\n");
   process.exit(1);
 }
 
@@ -294,11 +367,19 @@ const server = net.createServer((socket) => {
         continue;
       }
 
+      let request;
       try {
-        const request = JSON.parse(line);
+        request = open("request", line);
+      } catch {
+        // Not sealed with our key: the peer is not the extension. Answer nothing and drop it.
+        socket.destroy();
+        return;
+      }
+
+      try {
         handleRequest(socket, request);
       } catch (error) {
-        respondError(socket, "0", error instanceof Error ? error.message : String(error));
+        respondError(socket, typeof request?.id === "string" ? request.id : "0", error instanceof Error ? error.message : String(error));
       }
     }
   });
