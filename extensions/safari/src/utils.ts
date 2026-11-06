@@ -5,6 +5,7 @@ import osascript from "osascript-tag";
 import { URL } from "url";
 import { langAdaptor } from "./lang-adaptor";
 import { HistoryItem, LooseTab } from "./types";
+import { getDisplayTitle } from "./profile";
 
 export const { safariAppIdentifier, enableFuzzySearch }: Preferences = getPreferenceValues();
 
@@ -64,7 +65,7 @@ export const formatDate = (date: string) =>
     day: "numeric",
   });
 
-export const getTitle = (tab: LooseTab) => _.truncate(tab.title, { length: 75 });
+export const getTitle = (tab: LooseTab) => _.truncate(getDisplayTitle(tab), { length: 75 });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? "s" : ""}`;
 

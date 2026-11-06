@@ -9,6 +9,8 @@
   ],
   "icon": "safari-icon.png",
   "author": "loris",
+  "owner": "yatp-tony",
+  "access": "public",
   "contributors": [
     "thomas",
     "HelloImSteven",

@@ -15,6 +15,7 @@ const SEARCH_KEYS = [
   { name: "title", weight: 3 },
   { name: "title_formatted", weight: 2 },
   { name: "url", weight: 1 },
+  { name: "profileName", weight: 1 },
 ];
 
 export default function Command() {

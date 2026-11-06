@@ -54,6 +54,7 @@ export interface LooseTab {
   uuid: string;
   title: string;
   url: string;
+  profileName?: string;
 }
 
 // Tabs
