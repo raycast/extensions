@@ -69,7 +69,7 @@ export default function Command() {
 
     // 通用获取指定年份数据的异步函数（含去重锁）
     async function fetchYearHolidays(targetYear: number, isPreload = false): Promise<HolidayMap> {
-      if (inFlightRequests[targetYear]) {
+      if (targetYear in inFlightRequests) {
         return inFlightRequests[targetYear];
       }
 
