@@ -23,6 +23,8 @@ export type StreamInfo = {
   videoWidth?: number;
   videoHeight?: number;
   videoFps?: number;
+  /** Display rotation of the video stream in degrees (0, 90, 180 or 270). */
+  videoRotation?: number;
   audioCodec?: string;
   audioSampleRate?: number;
   audioChannels?: number;
@@ -80,13 +82,20 @@ export function parseStreamInfo(stderr: string): StreamInfo {
   // processes them in portrait orientation (1080x1920).  Swap W/H so the scale
   // filter targets the correct display dimensions.
   // FFmpeg 7+ prints "Display Matrix: rotation of 90.00 degrees", older
-  // versions "displaymatrix: rotation of -90.00 degrees".
-  const dispMatrixMatch = stderr.match(/display\s?matrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/i);
-  const rotateTagMatch = stderr.match(/rotate\s*:\s*(-?\d+)/);
-  const rawDeg = dispMatrixMatch ? Number(dispMatrixMatch[1]) : rotateTagMatch ? Number(rotateTagMatch[1]) : 0;
-  const normDeg = ((rawDeg % 360) + 360) % 360;
-  if ((normDeg === 90 || normDeg === 270) && info.videoWidth != null && info.videoHeight != null) {
-    [info.videoWidth, info.videoHeight] = [info.videoHeight, info.videoWidth];
+  // versions "displaymatrix: rotation of -90.00 degrees" or a "rotate" tag.
+  // Only read the block of the video stream the dimensions came from.
+  if (vMatch && vMatch.index != null) {
+    const rest = stderr.slice(vMatch.index + vMatch[0].length);
+    const nextStream = rest.search(/\n\s*Stream #/);
+    const block = nextStream === -1 ? rest : rest.slice(0, nextStream);
+    const dispMatrixMatch = block.match(/display\s?matrix: rotation of\s*(-?\d+(?:\.\d+)?)\s*degrees/i);
+    const rotateTagMatch = block.match(/rotate\s*:\s*(-?\d+)/);
+    const rawDeg = dispMatrixMatch ? Number(dispMatrixMatch[1]) : rotateTagMatch ? Number(rotateTagMatch[1]) : 0;
+    const normDeg = Math.round(((rawDeg % 360) + 360) % 360);
+    info.videoRotation = normDeg;
+    if (normDeg === 90 || normDeg === 270) {
+      [info.videoWidth, info.videoHeight] = [info.videoHeight, info.videoWidth];
+    }
   }
 
   // Audio line: "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s"
@@ -120,6 +129,9 @@ export function canStreamCopy(streams: StreamInfo[]): boolean {
       if (!s.videoWidth || s.videoWidth !== first.videoWidth) return false;
       if (!s.videoHeight || s.videoHeight !== first.videoHeight) return false;
       if (!s.videoFps || Math.abs(s.videoFps - (first.videoFps ?? 0)) > 0.1) return false;
+      // Stream copy keeps each file's rotation, so the same display size can
+      // still mean different stored frames.
+      if ((s.videoRotation ?? 0) !== (first.videoRotation ?? 0)) return false;
     } else if (s.videoCodec) {
       // First input has no video but this one does — incompatible.
       return false;

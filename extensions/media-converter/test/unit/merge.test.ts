@@ -78,6 +78,17 @@ describe("parseStreamInfo", () => {
     assert.equal(info.videoHeight, 1920);
   });
 
+  it("ignores the rotation of a later video stream", () => {
+    const stderr = `  Stream #0:0[0x1](und): Video: h264 (High), yuv420p(progressive), 1920x1080, 30 fps, 30 tbr
+  Stream #0:1[0x2](und): Video: h264 (High), yuv420p(progressive), 1280x720, 30 fps, 30 tbr
+    Side data:
+      Display Matrix: rotation of 90.00 degrees`;
+    const info = parseStreamInfo(stderr);
+    assert.equal(info.videoWidth, 1920);
+    assert.equal(info.videoHeight, 1080);
+    assert.equal(info.videoRotation, 0);
+  });
+
   it("does not swap dimensions for a 180-degree rotation", () => {
     const stderr = `  Stream #0:0: Video: h264, yuv420p, 1920x1080, 30 fps
     Side data:
@@ -89,6 +100,17 @@ describe("parseStreamInfo", () => {
 });
 
 describe("canStreamCopy", () => {
+  it("rejects clips with the same display size but different rotation", () => {
+    const portrait = parseStreamInfo(
+      `  Stream #0:0: Video: h264 (High), yuv420p(progressive), 720x1280, 30 fps\n  Stream #0:1: Audio: aac (LC), 44100 Hz, mono, fltp`,
+    );
+    const rotated = parseStreamInfo(
+      `  Stream #0:0: Video: h264 (High), yuv420p(progressive), 1280x720, 30 fps\n    Side data:\n      Display Matrix: rotation of 90.00 degrees\n  Stream #0:1: Audio: aac (LC), 44100 Hz, mono, fltp`,
+    );
+    assert.deepEqual([rotated.videoWidth, rotated.videoHeight], [portrait.videoWidth, portrait.videoHeight]);
+    assert.equal(canStreamCopy([portrait, rotated]), false);
+  });
+
   const A: StreamInfo = {
     videoCodec: "h264",
     videoWidth: 1920,
