@@ -1,14 +1,5 @@
-import Init from "./setup/init";
-import { errorUtils } from "./utils/errors.utils";
+import { runPreset } from "./preset";
 
-const Slowed = async () => {
-  const converterName = "slowed";
-
-  try {
-    await Init(converterName);
-  } catch (error) {
-    await errorUtils.showToastError(error);
-  }
-};
-
-export default Slowed;
+export default function Command() {
+  return runPreset("slowed");
+}
