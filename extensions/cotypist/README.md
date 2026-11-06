@@ -23,17 +23,3 @@ The helper reuses an identified settings window or opens the [documented Shortcu
 For a closed-window baseline, the helper checks Accessibility evidence against public window metadata belonging only to Cotypist. It reads numeric window identifiers, layers and bounds; it does not capture images, inspect other apps' titles, or request Screen Recording access.
 
 This implementation targets Cotypist's English interface. App updates that alter its native controls can require an extension update; missing or ambiguous state is an error, not assumed success. It does not use private preferences, browser cookies, an invented scripting dictionary, or hard-coded keyboard macros.
-
-## Develop
-
-```sh
-npm ci
-npm test
-npm run lint
-npm run typecheck
-npm run build
-npm run dev
-```
-
-The included Swift source can be compiled independently with Apple's Swift compiler. Do not run native control tests against personal documents; use disposable text and restore the original completion setting afterwards.
-

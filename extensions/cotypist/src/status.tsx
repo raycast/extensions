@@ -10,13 +10,17 @@ import {
 } from "@raycast/api";
 import { control } from "./lib/control";
 import { Operation } from "./lib/response";
-import { useLoad } from "./lib/use-load";
+import { showFailureToast, usePromise } from "@raycast/utils";
 
 export default function Status() {
-  const { data, error, isLoading, refresh } = useLoad(
-    () => control("status"),
-    "status",
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    revalidate: refresh,
+  } = usePromise(() => control("status"), [], {
+    failureToastOptions: { title: "Could Not Read Cotypist" },
+  });
   async function change(operation: Operation) {
     try {
       const state = await control(operation);
@@ -25,20 +29,13 @@ export default function Status() {
         title: `Default completions ${state.defaultEnabled ? "enabled" : "disabled"}`,
         message: state.warnings.join(" ") || undefined,
       });
-      await refresh();
+      refresh();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Change Cotypist",
-        message:
-          error instanceof Error
-            ? error.message
-            : "The native setting could not be verified.",
-      });
+      await showFailureToast(error, { title: "Could Not Change Cotypist" });
     }
   }
   const markdown = error
-    ? `# Cotypist Could Not Be Read\n\n${error}`
+    ? `# Cotypist Could Not Be Read\n\n${error.message}`
     : data
       ? `# Default completions are ${data.defaultEnabled ? "enabled" : "disabled"}\n\nThis is Cotypist's native default setting. Apps with their own completion setting keep their individual overrides.\n\n${data.downloadProgress !== undefined ? `The local model is downloading: ${Math.round(data.downloadProgress * 100)}%.` : "Check Cotypist's Setup pane for model readiness and required permissions."}\n\n${data.warnings.join("\n\n")}`
       : "Reading Cotypist's native setting…";

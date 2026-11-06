@@ -1,4 +1,5 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { control } from "./control";
 import { Operation } from "./response";
 
@@ -16,13 +17,6 @@ export async function runCommand(operation: Operation) {
         message: state.warnings.join(" "),
       });
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could Not Control Cotypist",
-      message:
-        error instanceof Error
-          ? error.message
-          : "The native setting could not be verified.",
-    });
+    await showFailureToast(error, { title: "Could Not Control Cotypist" });
   }
 }
