@@ -69,7 +69,11 @@ export function parseTime(input: string, unit: TimestampUnit = "auto"): ParseRes
       if (offsetHours > 23 || offsetMinutes > 59) return { error: "时区偏移无效。" };
       offset = (offsetHours * 60 + offsetMinutes) * (zone[0] === "+" ? 1 : -1);
     }
-    return { date: new Date(calendar.getTime() - offset * 60000), source: "带时区日期字符串" };
+    const date = new Date(calendar.getTime() - offset * 60000);
+    if (!Number.isFinite(date.getTime())) {
+      return { error: "应用时区偏移后的日期超出支持范围。" };
+    }
+    return { date, source: "带时区日期字符串" };
   }
   const date = new Date(0);
   date.setFullYear(year, month - 1, day);

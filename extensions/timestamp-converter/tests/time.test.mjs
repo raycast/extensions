@@ -106,3 +106,26 @@ test("expanded ISO dates validate the year sign", () => {
   assert.equal(parsed("+010000-01-01T00:00:00Z").getUTCFullYear(), 10000);
   assert.ok("error" in parseTime("-000000-01-01T00:00:00Z"));
 });
+
+test("offsets outside the supported date range return an error instead of a render crash", () => {
+  for (const input of ["+275760-09-13T00:00:00-00:01", "-271821-04-20T00:00:00+00:01"]) {
+    const result = parseTime(input);
+    assert.doesNotThrow(() => {
+      if ("date" in result) getTimeValues(result.date);
+    }, input);
+    assert.ok("error" in result, input);
+  }
+});
+
+test("date range boundaries and inward offsets remain valid", () => {
+  for (const [input, expected] of [
+    ["+275760-09-13T00:00:00Z", 8640000000000000],
+    ["-271821-04-20T00:00:00Z", -8640000000000000],
+    ["+275760-09-13T00:00:00+00:01", 8639999999940000],
+    ["-271821-04-20T00:00:00-00:01", -8639999999940000],
+  ]) {
+    const date = parsed(input);
+    assert.equal(date.getTime(), expected);
+    assert.doesNotThrow(() => getTimeValues(date));
+  }
+});
