@@ -27,16 +27,3 @@ Only `alter://action/action-id` callbacks with one optional `input` parameter ar
 The handoff explicitly targets Alter’s bundle identifier `com.wearedevx.alter`. Opening the URL does not report whether the action finished. Read the result in Alter. The action can have whatever effects you configured there, including access to its connected tools or AI providers.
 
 If local saved data is malformed, the extension stops using it. You can copy the data for recovery or explicitly reset it. It never silently clears unreadable configurations.
-
-## Development
-
-```sh
-npm ci
-npm run test
-npm run typecheck
-npm run lint
-npm run build
-npm run dev
-```
-
-The automated adapter tests validate callback destinations, exact input encoding, bounded input, storage parsing and edits, preview text fences, missing applications, and failed OS handoffs.

@@ -19,7 +19,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { randomUUID } from "node:crypto";
-import { useEffect, useState } from "react";
+import { showFailureToast, useForm, usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { dispatchAction } from "./dispatch";
 import {
   MAX_INPUT_LENGTH,
@@ -45,6 +46,15 @@ function errorMessage(error: unknown): string {
     : "An unexpected error occurred.";
 }
 
+function validationError(check: () => unknown): string | undefined {
+  try {
+    check();
+    return undefined;
+  } catch (error) {
+    return errorMessage(error);
+  }
+}
+
 function ActionEditor({
   existing,
   actions,
@@ -55,53 +65,42 @@ function ActionEditor({
   onSave: (actions: SavedAction[]) => Promise<void>;
 }) {
   const { pop } = useNavigation();
-  const [name, setName] = useState(existing?.name ?? "");
-  const [callback, setCallback] = useState(existing?.callbackUrl ?? "");
-  const [nameError, setNameError] = useState<string>();
-  const [callbackError, setCallbackError] = useState<string>();
   const [busy, setBusy] = useState(false);
-
-  async function save() {
-    let checkedName: string;
-    let checkedCallback: string;
-    try {
-      checkedName = validateName(name);
-      setNameError(undefined);
-    } catch (error) {
-      setNameError(errorMessage(error));
-      return;
-    }
-    try {
-      checkedCallback = normalizeCallback(callback);
-      setCallbackError(undefined);
-    } catch (error) {
-      setCallbackError(errorMessage(error));
-      return;
-    }
-    setBusy(true);
-    try {
-      await onSave(
-        upsertAction(actions, {
-          id: existing?.id ?? randomUUID(),
-          name: checkedName,
-          callbackUrl: checkedCallback,
-        }),
-      );
-      await showToast({
-        style: Toast.Style.Success,
-        title: existing ? "Action Updated" : "Action Saved",
-      });
-      pop();
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Save Action",
-        message: errorMessage(error),
-      });
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<{
+    name: string;
+    callbackUrl: string;
+  }>({
+    initialValues: {
+      name: existing?.name ?? "",
+      callbackUrl: existing?.callbackUrl ?? "",
+    },
+    validation: {
+      name: (value) => validationError(() => validateName(value ?? "")),
+      callbackUrl: (value) =>
+        validationError(() => normalizeCallback(value ?? "")),
+    },
+    async onSubmit(values) {
+      setBusy(true);
+      try {
+        await onSave(
+          upsertAction(actions, {
+            id: existing?.id ?? randomUUID(),
+            name: validateName(values.name),
+            callbackUrl: normalizeCallback(values.callbackUrl),
+          }),
+        );
+        await showToast({
+          style: Toast.Style.Success,
+          title: existing ? "Action Updated" : "Action Saved",
+        });
+        pop();
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Save Action" });
+      } finally {
+        setBusy(false);
+      }
+    },
+  });
 
   return (
     <Form
@@ -112,7 +111,7 @@ function ActionEditor({
           <Action.SubmitForm
             title="Save Action"
             icon={Icon.Checkmark}
-            onSubmit={save}
+            onSubmit={handleSubmit}
           />
           <Action.OpenInBrowser
             title="Open Alter Callback Guide"
@@ -123,20 +122,14 @@ function ActionEditor({
     >
       <Form.Description text="In Alter, open Action Editor → choose an action → General → URL Callback, then copy its URL. Give it a memorable name here. Saving does not run the action." />
       <Form.TextField
-        id="name"
         title="Action Name"
         placeholder="Summarize Text"
-        value={name}
-        onChange={setName}
-        error={nameError}
+        {...itemProps.name}
       />
       <Form.TextField
-        id="callbackUrl"
         title="URL Callback"
         placeholder="alter://action/your-action-id"
-        value={callback}
-        onChange={setCallback}
-        error={callbackError}
+        {...itemProps.callbackUrl}
         info="Only documented Alter action URLs are accepted. Existing example input is removed; you review fresh input before each run."
       />
     </Form>
@@ -175,11 +168,7 @@ function ActionPreview({
       });
       await closeMainWindow();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Open Action",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Could Not Open Action" });
     } finally {
       setSending(false);
     }
@@ -262,11 +251,7 @@ function PrepareAction({ action }: { action: SavedAction }) {
     } catch (error) {
       const message = errorMessage(error);
       if (source === "custom") setInputError(message);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Prepare Input",
-        message,
-      });
+      await showFailureToast(message, { title: "Could Not Prepare Input" });
     } finally {
       setBusy(false);
     }
@@ -339,42 +324,36 @@ function PrepareAction({ action }: { action: SavedAction }) {
 }
 
 export default function Command() {
-  const [actions, setActions] = useState<SavedAction[]>([]);
-  const [raw, setRaw] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [storageError, setStorageError] = useState<string>();
-
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      try {
-        const stored = await LocalStorage.getItem(STORAGE_KEY);
-        if (mounted)
-          setRaw(
-            typeof stored === "string"
-              ? stored
-              : (JSON.stringify(stored) ?? ""),
-          );
-        if (stored !== undefined && typeof stored !== "string")
-          throw new Error("Saved action data must be stored as text.");
-        const parsed = parseStore(stored);
-        if (mounted) setActions(parsed.actions);
-      } catch (error) {
-        if (mounted) setStorageError(errorMessage(error));
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const {
+    data: stored,
+    isLoading: loading,
+    mutate,
+  } = usePromise(async () => {
+    const value = await LocalStorage.getItem(STORAGE_KEY);
+    const raw =
+      typeof value === "string" ? value : (JSON.stringify(value) ?? "");
+    try {
+      if (value !== undefined && typeof value !== "string")
+        throw new Error("Saved action data must be stored as text.");
+      return { raw, actions: parseStore(value).actions, error: undefined };
+    } catch (error) {
+      return { raw, actions: [] as SavedAction[], error: errorMessage(error) };
+    }
+  });
+  const actions = stored?.actions ?? [];
+  const raw = stored?.raw ?? "";
+  const storageError = stored?.error;
 
   async function persist(next: SavedAction[]) {
     const serialized = serializeActions(next);
-    await LocalStorage.setItem(STORAGE_KEY, serialized);
-    setActions(next);
-    setRaw(serialized);
+    await mutate(LocalStorage.setItem(STORAGE_KEY, serialized), {
+      optimisticUpdate: () => ({
+        raw: serialized,
+        actions: next,
+        error: undefined,
+      }),
+      shouldRevalidateAfter: false,
+    });
   }
 
   async function reset() {
@@ -391,20 +370,16 @@ export default function Command() {
     )
       return;
     try {
-      await LocalStorage.removeItem(STORAGE_KEY);
-      setActions([]);
-      setRaw("");
-      setStorageError(undefined);
+      await mutate(LocalStorage.removeItem(STORAGE_KEY), {
+        optimisticUpdate: () => ({ raw: "", actions: [], error: undefined }),
+        shouldRevalidateAfter: false,
+      });
       await showToast({
         style: Toast.Style.Success,
         title: "Saved Actions Reset",
       });
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could Not Reset Actions",
-        message: errorMessage(error),
-      });
+      await showFailureToast(error, { title: "Could Not Reset Actions" });
     }
   }
 
@@ -439,11 +414,7 @@ export default function Command() {
     />
   );
   return (
-    <List
-      isLoading={loading}
-      searchBarPlaceholder="Search saved Alter actions"
-      navigationTitle="Alter Actions"
-    >
+    <List isLoading={loading} searchBarPlaceholder="Search saved Alter actions">
       <List.EmptyView
         icon={Icon.Bolt}
         title={
@@ -518,10 +489,8 @@ export default function Command() {
                       title: "Action Deleted",
                     });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
+                    await showFailureToast(error, {
                       title: "Could Not Delete Action",
-                      message: errorMessage(error),
                     });
                   }
                 }}

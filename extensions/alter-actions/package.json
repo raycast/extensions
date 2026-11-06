@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "alter-actions",
   "title": "Alter Actions",
-  "description": "Run your saved Alter actions with selected text, clipboard text, or a custom prompt after reviewing the input.",
+  "description": "Run your saved Alter actions with selected text, clipboard text, or a custom prompt after reviewing the input. Requires the Alter app and a configured account.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",
@@ -22,7 +22,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "2.7.3"
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
