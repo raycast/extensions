@@ -160,7 +160,9 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
         failures.push(`${path.basename(inputFilePath)}: ${error instanceof Error ? error.message : String(error)}`);
       } finally {
         if (uploadPath !== inputFilePath) {
-          await rm(path.dirname(uploadPath), { recursive: true, force: true });
+          await rm(path.dirname(uploadPath), { recursive: true, force: true }).catch(() => {
+            console.warn("Could not remove a temporary conversion folder");
+          });
         }
       }
     }
