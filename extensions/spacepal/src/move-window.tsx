@@ -1,10 +1,20 @@
 import { Action, ActionPanel, Color, Icon, List, closeMainWindow } from "@raycast/api";
+import { MissingSpacepal } from "./missing-spacepal";
 import { loadSpaces, run } from "./spaces";
 
 export default function Command() {
-  const spaces = loadSpaces().filter((s) => !s.isFullscreen && !s.isActive);
+  const all = loadSpaces();
+  const spaces = (all ?? []).filter((s) => !s.isFullscreen && !s.isActive);
   return (
     <List searchBarPlaceholder="Send the front window to…">
+      {all === null && <MissingSpacepal />}
+      {all !== null && spaces.length === 0 && (
+        <List.EmptyView
+          icon={Icon.Window}
+          title="No other desktop to move to"
+          description="Add a desktop in Mission Control, then try again."
+        />
+      )}
       {spaces.map((s) => (
         <List.Item
           key={s.id}

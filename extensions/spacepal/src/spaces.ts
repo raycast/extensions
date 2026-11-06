@@ -31,16 +31,17 @@ const STATE_PATHS = [
   ),
 ];
 
-export function loadSpaces(): SpaceEntry[] {
+/** The Space list Spacepal writes, or null when no readable list exists (Spacepal not installed or never run). */
+export function loadSpaces(): SpaceEntry[] | null {
   for (const path of STATE_PATHS) {
     try {
       const state = JSON.parse(readFileSync(path, "utf8"));
-      return state.spaces as SpaceEntry[];
+      if (Array.isArray(state.spaces)) return state.spaces as SpaceEntry[];
     } catch {
       // try the next location
     }
   }
-  return [];
+  return null;
 }
 
 // "open -g" hands the link to Spacepal without bringing it to the front, so the window that was in

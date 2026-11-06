@@ -1,19 +1,18 @@
 import { Action, ActionPanel, Color, Icon, List, closeMainWindow } from "@raycast/api";
+import { MissingSpacepal } from "./missing-spacepal";
 import { loadSpaces, run } from "./spaces";
 
 export default function Command() {
   const spaces = loadSpaces();
   return (
     <List searchBarPlaceholder="Search Spaces, notes and apps">
-      {spaces.length === 0 && (
-        <List.EmptyView title="Spacepal is not running" description="Open Spacepal, then try again." />
-      )}
-      {spaces.map((s) => (
+      {spaces === null && <MissingSpacepal />}
+      {(spaces ?? []).map((s) => (
         <List.Item
           key={s.id}
           title={s.name}
           subtitle={s.note}
-          keywords={[...s.apps, s.number ? String(s.number) : ""]}
+          keywords={[...s.apps, ...(s.note?.split(/\s+/) ?? []), s.number ? String(s.number) : ""]}
           icon={{
             source: Icon.AppWindowGrid2x2,
             tintColor: s.color ?? Color.SecondaryText,
