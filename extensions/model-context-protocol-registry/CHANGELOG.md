@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Arca Life Sciences MCP Server] - {PR_MERGE_DATE}
+
+- Add Arca Life Sciences to the official registry: free search of PubMed literature (with citation counts), FDA drug and device records, ClinicalTrials.gov, VAERS and EU/PMDA device vigilance, with a source URL on every result. 4 read-only tools. Hosted Streamable HTTP server at https://app.arca.inc/api/public/mcp with no authentication, a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
+
 ## [Add WolfSMS MCP Server] - 2026-11-04
 
 - Add WolfSMS to the official registry: read the SMS on your own Android phone (recent messages, filter by sender or time, synced devices). 3 tools. Hosted Streamable HTTP server at https://usewolfsms.com/mcp with OAuth 2.1 sign-in (dynamic client registration and PKCE), a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients.
