@@ -1,28 +1,53 @@
-import { Clipboard, closeMainWindow, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  getFrontmostApplication,
+  getSelectedText,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { transform as runModel } from "swift:../swift/writing-tools";
 
-const RULES =
-  "Keep the original language of the text. Output only the resulting text, with no preamble, quotes or explanations.";
+const OUTPUT_RULES = "Output only the resulting text, with no preamble, quotes or explanations.";
 
-// Reads the selection, runs it through the on-device model, pastes the result over it.
-export async function transform(instructions: string) {
-  let text: string;
+async function selectionTarget() {
+  const [app, text] = await Promise.all([getFrontmostApplication(), getSelectedText()]);
+  return { bundleId: app.bundleId, text };
+}
+
+/**
+ * Reads the selection, runs it through the on-device model, pastes the result over it.
+ * `keepLanguage: false` lets the instruction ask for another language (e.g. translation).
+ */
+export async function transform(instructions: string, { keepLanguage = true } = {}) {
+  let before: Awaited<ReturnType<typeof selectionTarget>>;
   try {
-    text = await getSelectedText();
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "No text selected" });
+    before = await selectionTarget();
+  } catch (error) {
+    await showFailureToast(error, { title: "No text selected" });
     return;
   }
   await closeMainWindow();
   const toast = await showToast({ style: Toast.Style.Animated, title: "Apple Intelligence…" });
+  let result: string;
   try {
-    const result = await runModel(`${instructions} ${RULES}`, text);
-    await Clipboard.paste(result);
+    result = await runModel(`${instructions} ${OUTPUT_RULES}`, before.text, keepLanguage);
+  } catch (error) {
     await toast.hide();
+    await showFailureToast(error, { title: "Apple Intelligence failed" });
+    return;
+  }
+  await toast.hide();
+
+  // The model takes seconds: paste only if the user is still on the same app and selection.
+  const after = await selectionTarget().catch(() => undefined);
+  if (after && after.bundleId === before.bundleId && after.text === before.text) {
+    await Clipboard.paste(result);
     await showHUD("Done");
-  } catch (e) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed";
-    toast.message = e instanceof Error ? e.message : String(e);
+  } else {
+    await Clipboard.copy(result);
+    await showHUD("Selection changed. Result copied to clipboard");
   }
 }

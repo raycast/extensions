@@ -21,8 +21,5 @@ Runs the on-device Apple Intelligence model directly through Apple's Foundation 
 | Make List / Make Table | Reformats the text as a list or a Markdown table |
 | Edit with Instruction | Applies your own instruction, e.g. "translate to English" |
 
-The output stays in the language of the selected text. Undo with ⌘Z if you want the original back.
+The output stays in the language of the selected text, unless your Edit with Instruction asks for another one. Undo with ⌘Z if you want the original back.
 
-## Development
-
-Native code lives in the Swift package at `swift/writing-tools` and is exposed to TypeScript with `@raycast` through [Swift for Raycast Extensions](https://github.com/raycast/extensions-swift-tools). `npm run dev` and `npm run build` compile it; Xcode 16.3 or later is required.

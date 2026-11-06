@@ -12,7 +12,8 @@ enum WritingToolsError: Error, CustomStringConvertible {
 }
 
 /// Runs `text` through the on-device Apple Intelligence model with `instructions`.
-@raycast func transform(instructions: String, text: String) async throws -> String {
+/// `keepLanguage: false` lets the instructions ask for another language (e.g. translation).
+@raycast func transform(instructions: String, text: String, keepLanguage: Bool) async throws -> String {
   let model = SystemLanguageModel.default
   guard case .available = model.availability else {
     throw WritingToolsError.unavailable(String(describing: model.availability))
@@ -22,7 +23,9 @@ enum WritingToolsError: Error, CustomStringConvertible {
   var instructions = instructions
   if let code = NLLanguageRecognizer.dominantLanguage(for: text)?.rawValue,
      let name = Locale(identifier: "en").localizedString(forLanguageCode: code) {
-    instructions += " The text is in \(name). Write your answer in \(name), never in another language."
+    instructions += keepLanguage
+      ? " The text is in \(name). Write your answer in \(name), never in another language."
+      : " The text is in \(name). Answer in \(name) unless the instruction asks for a different language."
   }
 
   let session = LanguageModelSession(model: model, instructions: instructions)
