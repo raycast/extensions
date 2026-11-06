@@ -7,7 +7,6 @@ import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-a
 import { useZoxide } from "@hooks/use-zoxide";
 import { useFzf } from "@hooks/use-fzf";
 import { makeFriendly, makeUnfriendly, base64Encode } from "@utils/path-helpers";
-import { base64ShellSanitize } from "@utils/misc";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -17,24 +16,23 @@ export default function Command() {
   const pure = mode === "zoxide";
 
   // Pure mode re-queries zoxide per keystroke (an empty query lists everything by
-  // score; otherwise the decoded terms become zoxide keywords). Fuzzy mode always
-  // loads the full list once and lets fzf do the filtering.
+  // score; otherwise each whitespace-separated term becomes a zoxide keyword).
+  // Fuzzy mode always loads the full list once and lets fzf do the filtering.
   const trimmed = searchText.trim();
-  const terms = base64ShellSanitize(makeUnfriendly(trimmed));
-  const zoxideCommand = pure && trimmed ? `query -ls -- ${terms}` : "query -ls";
+  const keywords = pure && trimmed ? makeUnfriendly(trimmed).split(/\s+/) : [];
 
   const {
     isLoading,
     data,
     error,
     revalidate: queryZoxide,
-  } = useZoxide(zoxideCommand, {
+  } = useZoxide(keywords, {
     keepPreviousData: true,
     execute: pure,
     failureToastOptions: { title: "Error querying zoxide" },
   });
 
-  // The shell returns "command not found" (exit 127) when the binary is missing.
+  // Spawning a missing binary fails with ENOENT.
   const zoxideNotFound = !!error && /command not found|not found|ENOENT/i.test(error.message);
 
   // Reset removed keys on load; in fuzzy mode also trigger the one-time full query.

@@ -1,20 +1,8 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  open,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  Application,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
-import { useZoxide } from "@hooks/use-zoxide";
 import { basename, dirname } from "path";
-import { base64ShellSanitize } from "@utils/misc";
+import { addToZoxide, removeFromZoxide } from "@utils/zoxide";
 
 export const SearchResult = ({
   searchResult,
@@ -33,16 +21,6 @@ export const SearchResult = ({
   const terminal = prefs["open-in-terminal"]!;
   const editor = prefs["open-in-editor"]!;
 
-  const { revalidate: addQuery } = useZoxide(`add "${base64ShellSanitize(searchResult.originalPath)}"`, {
-    keepPreviousData: false,
-    execute: false,
-  });
-
-  const { revalidate: removeQuery } = useZoxide(`remove "${base64ShellSanitize(searchResult.originalPath)}"`, {
-    keepPreviousData: false,
-    execute: false,
-  });
-
   const folder = basename(searchResult.path);
   const parent = dirname(searchResult.path) === "." ? "/" : dirname(searchResult.path);
 
@@ -57,22 +35,18 @@ export const SearchResult = ({
   const showTerminal = terminal.bundleId !== openIn.bundleId;
   const showEditor = editor.bundleId !== openIn.bundleId && editor.bundleId !== terminal.bundleId;
 
-  // Bump the score first (while mounted), then open with the full Application
-  // object — a bundle-id string drops the folder target on recent Raycast versions.
-  const openIn_ = async (app: Application, failureTitle: string) => {
+  // Bump the score once the target opens (shared by every open action).
+  const bumpScore = () => {
     try {
-      await addQuery();
-      await open(searchResult.originalPath, app);
+      addToZoxide(searchResult.originalPath);
     } catch (error) {
-      showFailureToast(error, { title: failureTitle });
+      showFailureToast(error, { title: "Failed to boost score" });
     }
   };
 
-  const openResult = () => openIn_(openIn, "Failed to open folder");
-
-  const boostResult = async () => {
+  const boostResult = () => {
     try {
-      await addQuery();
+      addToZoxide(searchResult.originalPath);
       showToast({
         style: Toast.Style.Success,
         title: "Boosted in Zoxide",
@@ -86,7 +60,7 @@ export const SearchResult = ({
 
   const removeResult = async () => {
     try {
-      await removeQuery();
+      await removeFromZoxide(searchResult.originalPath);
       setRemovedKeys((prev) => prev.concat([searchResult.key]));
       showToast({
         style: Toast.Style.Success,
@@ -108,25 +82,39 @@ export const SearchResult = ({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={openTitle} icon={openIcon} onAction={openResult} />
+            <Action.Open
+              title={openTitle}
+              icon={openIcon}
+              target={searchResult.originalPath}
+              application={openIn}
+              onOpen={bumpScore}
+            />
             {showTerminal && (
-              <Action
+              <Action.Open
                 title={`Open in ${terminal.name}`}
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
-                onAction={() => openIn_(terminal, "Failed to open in terminal")}
+                target={searchResult.originalPath}
+                application={terminal}
+                onOpen={bumpScore}
               />
             )}
             {showEditor && (
-              <Action
+              <Action.Open
                 title={`Open in ${editor.name}`}
                 icon={Icon.Code}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-                onAction={() => openIn_(editor, "Failed to open in editor")}
+                target={searchResult.originalPath}
+                application={editor}
+                onOpen={bumpScore}
               />
             )}
             <Action.ShowInFinder path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-            <Action.OpenWith path={searchResult.originalPath} shortcut={Keyboard.Shortcut.Common.Open} />
+            <Action.OpenWith
+              path={searchResult.originalPath}
+              shortcut={Keyboard.Shortcut.Common.Open}
+              onOpen={bumpScore}
+            />
             <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>

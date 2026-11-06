@@ -1,6 +1,20 @@
 import { LocalStorage } from "@raycast/api";
+import { EPHEMERAL_PORT_MIN } from "./servers";
+import { DevServer } from "./types";
 
 const PENDING_KEY = "pending-starts";
+
+// How long a spawned server gets to bind a port before the watchdog calls it
+// failed. Also spelled into the undiagnosed failed-row title, so the number
+// the user reads always matches the wait they actually got.
+export const SPAWN_TIMEOUT_MS = 15000;
+
+// The same watchdog for a start that installs dependencies first. A cold
+// install of a large project on a slow connection runs to minutes, and a
+// failed install ends the process early anyway, so the long window costs
+// nothing when things go wrong and keeps a slow install from being called a
+// failure while it is still downloading.
+export const INSTALL_TIMEOUT_MS = 5 * 60 * 1000;
 
 // Spawn failures worth naming on a failed row. Both read as "the extension
 // broke" while the real cause, and the fix, sit outside the extension
@@ -110,4 +124,32 @@ export async function writePendingStarts(
   pending: Map<string, PendingStart>,
 ): Promise<void> {
   await LocalStorage.setItem(PENDING_KEY, JSON.stringify([...pending]));
+}
+
+// The one question every part of the pending-row machinery asks: has the
+// server this row was waiting for arrived? In the dashboard, visibility, state cleanup, the
+// selection handoff, the success watcher, the watchdog and the restart poll
+// all route through here, so they can never disagree about whether a row has
+// resolved. The menu bar asks it too, to retire entries nobody is watching.
+//
+// Two conditions, and both are about not mistaking something else for the
+// arrival:
+//
+//   1. A deliberate port. An OS-assigned one is plumbing, the same call
+//      suppressHelperRows makes, and while a start is in flight its mid-start
+//      rule keeps those rows out of the fetch entirely. A workerd helper
+//      resolving the row would therefore retire the spinner in favour of a row
+//      the list is not even drawing, and the failure would never be diagnosed.
+//   2. A pid the row was not already looking at, per `ignorePids`.
+export function resolvingServer(
+  cwd: string,
+  entry: Pick<PendingStart, "ignorePids">,
+  servers: DevServer[],
+): DevServer | undefined {
+  return servers.find(
+    (s) =>
+      s.cwd === cwd &&
+      parseInt(s.port, 10) < EPHEMERAL_PORT_MIN &&
+      !entry.ignorePids.includes(s.pid),
+  );
 }
