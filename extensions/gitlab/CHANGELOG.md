@@ -4,7 +4,7 @@
 
 - Pin projects in `Search Projects` with the `Pin Project` action; pinned projects are shown in a "Pinned" section at the top of the list
 - Add a "Pinned" scope to `Search Projects` that lists only pinned projects
-- Reorder pinned projects and groups with the `Move Up` and `Move Down` actions
+- Reorder pinned projects and groups with the `Move Up in Pinned` and `Move Down in Pinned` actions
 - Show pinned projects in a "Pinned" section of the project dropdown in merge request commands
 - Pin groups in `Search Groups` and `My Groups`; pinned groups are shown in a "Pinned" section at the top of the list
 

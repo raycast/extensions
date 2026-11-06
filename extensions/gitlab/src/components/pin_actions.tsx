@@ -34,7 +34,7 @@ export function PinActions<T extends { id: number }>(props: {
       />
       {index > 0 && (
         <Action
-          title="Move Up"
+          title="Move Up in Pinned"
           icon={Icon.ArrowUp}
           shortcut={Keyboard.Shortcut.Common.MoveUp}
           onAction={() => moveBy(-1)}
@@ -42,7 +42,7 @@ export function PinActions<T extends { id: number }>(props: {
       )}
       {index < props.pinnedItems.length - 1 && (
         <Action
-          title="Move Down"
+          title="Move Down in Pinned"
           icon={Icon.ArrowDown}
           shortcut={Keyboard.Shortcut.Common.MoveDown}
           onAction={() => moveBy(1)}
