@@ -93,8 +93,19 @@ export function SavesList({ filter: pinned, navigationTitle, searchText: initial
   const quickLook = useQuickLook(selected);
 
   const inTrash = filter.kind === "trash";
-  const editor = useMemo(() => saveEditor(saves.mutate, { inTrash }), [saves.mutate, inTrash]);
-  const recentEditor = useMemo(() => saveEditor(recents.mutate), [recents.mutate]);
+  const editor = useMemo(
+    () =>
+      saveEditor(
+        async (update, options) => {
+          const mutations = [saves.mutate(update, options)];
+          if (showRecents) mutations.push(recents.mutate(update, options));
+          const [result] = await Promise.all(mutations);
+          return result;
+        },
+        { inTrash },
+      ),
+    [saves.mutate, recents.mutate, showRecents, inTrash],
+  );
 
   function refresh() {
     saves.revalidate();
@@ -148,7 +159,7 @@ export function SavesList({ filter: pinned, navigationTitle, searchText: initial
         key={id}
         id={id}
         save={save}
-        editor={recent ? recentEditor : editor}
+        editor={editor}
         lookups={lookups}
         icons={icons}
         preview={isSelected ? previews.get(thumbnailKey(save)) : undefined}

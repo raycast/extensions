@@ -16,21 +16,21 @@ Leave **Local API URL** at `http://127.0.0.1:41610/api/v2` unless you changed th
 
 ## Commands
 
-| Command                | What it does                                                                                       |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
-| **Search Saves**       | Search by keywords or by meaning, filter by source, folder, tag, saved view, or Trash, then act.   |
-| **Search Media**       | Browse your images and videos as a grid, with Quick Look.                                          |
-| **Search Tags**        | Find a tag, see its saves, or open it in Pond.                                                     |
-| **Search Folders**     | Find a folder by its full path and see what's inside.                                              |
-| **Search Saved Views** | Open a saved view or smart folder from Pond.                                                       |
-| **Open Random Save**   | Rediscover something you saved.                                                                    |
-| **Save URL**           | Save a URL with tags and a folder, then watch Pond capture it.                                     |
-| **Quick Save**         | Save without a form. Leave the URL empty to use your selection, browser tab, or clipboard.         |
-| **Save Current Tab**   | Save the page open in Safari, Chrome, Arc, Brave, Edge, Chromium, or Vivaldi.                      |
-| **Save Clipboard URL** | Save the URL on your clipboard.                                                                    |
-| **Switch Library**     | Switch Pond to one of your recent libraries.                                                       |
-| **Open Library**       | Bring Pond to the front.                                                                           |
-| **Menu Bar**           | Recent saves, capture progress, and quick actions. It hides itself while Pond is closed.          |
+| Command                | What it does                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| **Search Saves**       | Search by keywords or by meaning, filter by source, folder, tag, saved view, or Trash, then act. |
+| **Search Media**       | Browse your images and videos as a grid, with Quick Look.                                        |
+| **Search Tags**        | Find a tag, see its saves, or open it in Pond.                                                   |
+| **Search Folders**     | Find a folder by its full path and see what's inside.                                            |
+| **Search Saved Views** | Open a saved view or smart folder from Pond.                                                     |
+| **Open Random Save**   | Rediscover something you saved.                                                                  |
+| **Save URL**           | Save a URL with tags and a folder, then watch Pond capture it.                                   |
+| **Quick Save**         | Save without a form. Leave the URL empty to use your selection, browser tab, or clipboard.       |
+| **Save Current Tab**   | Save the page open in Safari, Chrome, Arc, Brave, Edge, Chromium, or Vivaldi.                    |
+| **Save Clipboard URL** | Save the URL on your clipboard.                                                                  |
+| **Switch Library**     | Switch Pond to one of your recent libraries.                                                     |
+| **Open Library**       | Bring Pond to the front.                                                                         |
+| **Menu Bar**           | Recent saves, capture progress, and quick actions. It hides itself while Pond is closed.         |
 
 ### Search Saves
 
@@ -38,23 +38,23 @@ Type to search titles, descriptions, authors, tags, notes, and URLs. Press **⌘
 
 Each save has a full action panel:
 
-| Shortcut | Action                          |
-| -------- | ------------------------------- |
-| ↵        | Open in Pond                    |
-| ⌘↵       | Open the original page          |
-| ⌘Y       | Quick Look                      |
-| ⌘⇧C      | Copy URL                        |
-| ⌘⇧L      | Copy Pond link                  |
-| ⌘⇧M      | Copy Markdown link              |
-| ⌘⇧F      | Copy the image or file          |
-| ⌘⇧T      | Copy the text Pond extracted    |
-| ⌘T       | Add or remove tags              |
-| ⌘L       | Add to or remove from a folder  |
-| ⌘E       | Add or edit a note              |
-| ⌃X       | Move to Trash                   |
-| ⌘⇧R      | Show related saves              |
-| ⌘⇧D      | Show or hide details            |
-| ⌘R       | Refresh                         |
+| Shortcut | Action                         |
+| -------- | ------------------------------ |
+| ↵        | Open in Pond                   |
+| ⌘↵       | Open the original page         |
+| ⌘Y       | Quick Look                     |
+| ⌘⇧C      | Copy URL                       |
+| ⌘⇧L      | Copy Pond link                 |
+| ⌘⇧M      | Copy Markdown link             |
+| ⌘⇧F      | Copy the image or file         |
+| ⌘⇧T      | Copy the text Pond extracted   |
+| ⌘T       | Add or remove tags             |
+| ⌘L       | Add to or remove from a folder |
+| ⌘E       | Add or edit a note             |
+| ⌃X       | Move to Trash                  |
+| ⌘⇧R      | Show related saves             |
+| ⌘⇧D      | Show or hide details           |
+| ⌘R       | Refresh                        |
 
 Edits show right away and roll back if Pond can't apply them. Moving to the Trash asks first, and you can restore from the Trash filter.
 
@@ -77,22 +77,22 @@ Mention `@pond` in Raycast AI:
 - `@pond put these in my Fonts folder`
 - `@pond switch to my Research library`
 
-| Tool             | What it does                                                               |
-| ---------------- | -------------------------------------------------------------------------- |
+| Tool             | What it does                                                              |
+| ---------------- | ------------------------------------------------------------------------- |
 | Search Saves     | Search by keywords or meaning, with source, tag, folder, type, and dates. |
-| Get Save         | Read one save's details.                                                   |
-| Read Save Text   | Read a save's caption, text in images, transcript, and note.               |
-| List Tags        | List your tags, most used first.                                           |
-| List Folders     | List folders with their full paths.                                        |
-| List Libraries   | List recent libraries.                                                     |
-| Get Library Info | Read the active library's counts and capture queue.                        |
-| Save URL         | Save a URL with tags and a folder.                                         |
-| Edit Tags        | Add or remove tags.                                                        |
-| Add to Folder    | Add saves to a folder or take them out.                                    |
-| Move to Trash    | Move saves to the Trash.                                                   |
-| Switch Library   | Switch Pond to another library.                                            |
-| Open Save        | Open a save in Pond or its original page.                                  |
-| Open Library     | Bring Pond to the front.                                                   |
+| Get Save         | Read one save's details.                                                  |
+| Read Save Text   | Read a save's caption, text in images, transcript, and note.              |
+| List Tags        | List your tags, most used first.                                          |
+| List Folders     | List folders with their full paths.                                       |
+| List Libraries   | List recent libraries.                                                    |
+| Get Library Info | Read the active library's counts and capture queue.                       |
+| Save URL         | Save a URL with tags and a folder.                                        |
+| Edit Tags        | Add or remove tags.                                                       |
+| Add to Folder    | Add saves to a folder or take them out.                                   |
+| Move to Trash    | Move saves to the Trash.                                                  |
+| Switch Library   | Switch Pond to another library.                                           |
+| Open Save        | Open a save in Pond or its original page.                                 |
+| Open Library     | Bring Pond to the front.                                                  |
 
 Every change asks you first and names the saves it touches. Save IDs belong to one library, so after a switch, search again before changing saves.
 
@@ -106,10 +106,10 @@ When you use Raycast AI, tool results go to the AI model you chose in Raycast. T
 
 ## Troubleshooting
 
-| What you see             | What to do                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| Pond isn't running       | Open Pond. Turn on Launch at Login to keep it ready.                                        |
-| Token not accepted       | Copy the token again from Pond Settings. Rotating it in Pond replaces the old one.          |
-| Pond needs an update     | Install the latest Pond. This extension needs Local API 2.1.                                |
-| Save Current Tab fails   | Allow Raycast under Automation in System Settings, or use Save Clipboard URL.               |
-| MCP tools are missing    | Turn on the capability in Pond Settings → Model Context Protocol, then reconnect in Raycast. |
+| What you see           | What to do                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| Pond isn't running     | Open Pond. Turn on Launch at Login to keep it ready.                                         |
+| Token not accepted     | Copy the token again from Pond Settings. Rotating it in Pond replaces the old one.           |
+| Pond needs an update   | Install the latest Pond. This extension needs Local API 2.1.                                 |
+| Save Current Tab fails | Allow Raycast under Automation in System Settings, or use Save Clipboard URL.                |
+| MCP tools are missing  | Turn on the capability in Pond Settings → Model Context Protocol, then reconnect in Raycast. |

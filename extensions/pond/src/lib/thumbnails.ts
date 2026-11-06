@@ -16,8 +16,17 @@ const EXTENSIONS = new Map([
 const LIMITS = { small: 2000, medium: 400, large: 100, original: 50 } satisfies Record<ApiThumbnailSize, number>;
 const CONCURRENCY = 6;
 const SAFE_ID = /^[\w-]+$/;
+const CACHE_TTL_MS = 5 * 60_000;
 
 type Keyed = Pick<ApiSave, "id" | "libraryId" | "thumbnail">;
+
+interface CachedThumbnail {
+  path: string;
+  modified: number;
+}
+
+const caches = new Map<ApiThumbnailSize, Promise<Map<string, CachedThumbnail>>>();
+const downloads = new Map<string, Promise<string | null>>();
 
 function directory(size: ApiThumbnailSize): string {
   return join(environment.supportPath, "thumbnails", size);
@@ -27,7 +36,7 @@ export function thumbnailKey(save: Pick<ApiSave, "id" | "libraryId">): string {
   return `${save.libraryId}-${save.id}`;
 }
 
-async function cached(size: ApiThumbnailSize): Promise<Map<string, string>> {
+async function readCache(size: ApiThumbnailSize): Promise<Map<string, CachedThumbnail>> {
   const folder = directory(size);
   await mkdir(folder, { recursive: true });
   const files = await Promise.all(
@@ -38,20 +47,57 @@ async function cached(size: ApiThumbnailSize): Promise<Map<string, string>> {
   );
   files.sort((a, b) => b.modified - a.modified);
   await Promise.all(files.slice(LIMITS[size]).map((file) => rm(file.path, { force: true })));
-  return new Map(files.slice(0, LIMITS[size]).map((file) => [file.name.replace(/\.[^.]+$/, ""), file.path]));
+  return new Map(files.slice(0, LIMITS[size]).map((file) => [file.name.replace(/\.[^.]+$/, ""), file]));
 }
 
-export async function downloadThumbnail(save: Keyed, size: ApiThumbnailSize): Promise<string | null> {
-  if (!save.thumbnail || !SAFE_ID.test(save.id) || !SAFE_ID.test(save.libraryId)) return null;
+function cached(size: ApiThumbnailSize): Promise<Map<string, CachedThumbnail>> {
+  let cache = caches.get(size);
+  if (!cache) {
+    cache = readCache(size).catch((error) => {
+      caches.delete(size);
+      throw error;
+    });
+    caches.set(size, cache);
+  }
+  return cache;
+}
+
+function isFresh(thumbnail: CachedThumbnail): boolean {
+  return Date.now() - thumbnail.modified < CACHE_TTL_MS;
+}
+
+async function loadThumbnail(save: Keyed, size: ApiThumbnailSize): Promise<string | null> {
+  const cache = await cached(size);
+  const key = thumbnailKey(save);
+  const existing = cache.get(key);
+  if (existing && isFresh(existing)) return existing.path;
+
   const thumbnail = await pond().thumbnail(save.id, size);
   if (!thumbnail) return null;
   const extension = EXTENSIONS.get(thumbnail.type.replace(/;.*$/, ""));
   if (!extension) return null;
-  const folder = directory(size);
-  await mkdir(folder, { recursive: true });
-  const path = join(folder, `${thumbnailKey(save)}.${extension}`);
+  const path = join(directory(size), `${key}.${extension}`);
   await writeFile(path, thumbnail.bytes);
+  cache.set(key, { path, modified: Date.now() });
+  if (existing && existing.path !== path) await rm(existing.path, { force: true });
+
+  if (cache.size > LIMITS[size]) {
+    const oldest = [...cache].sort(([, a], [, b]) => a.modified - b.modified).slice(0, cache.size - LIMITS[size]);
+    for (const [key] of oldest) cache.delete(key);
+    await Promise.all(oldest.map(([, file]) => rm(file.path, { force: true })));
+  }
   return path;
+}
+
+export async function downloadThumbnail(save: Keyed, size: ApiThumbnailSize): Promise<string | null> {
+  if (!save.thumbnail || !SAFE_ID.test(save.id) || !SAFE_ID.test(save.libraryId)) return null;
+  const key = `${size}:${thumbnailKey(save)}`;
+  let download = downloads.get(key);
+  if (!download) {
+    download = loadThumbnail(save, size).finally(() => downloads.delete(key));
+    downloads.set(key, download);
+  }
+  return download;
 }
 
 /** Maps thumbnail keys to a cached path, `null` for no image, or nothing while loading. */
@@ -62,9 +108,10 @@ export function useThumbnails(saves: readonly Keyed[], size: ApiThumbnailSize): 
   useEffect(() => {
     let active = true;
     void cached(size)
-      .catch(() => new Map<string, string>())
+      .catch(() => new Map<string, CachedThumbnail>())
       .then((found) => {
-        if (active) setPaths(found);
+        if (active)
+          setPaths(new Map([...found].filter(([, file]) => isFresh(file)).map(([key, file]) => [key, file.path])));
       });
     return () => {
       active = false;

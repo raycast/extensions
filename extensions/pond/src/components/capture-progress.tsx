@@ -55,7 +55,7 @@ export function CaptureProgress({ result, url, title }: { result: EnqueueResult;
   return (
     <Detail
       navigationTitle={title}
-      isLoading={!state || (state.pendingTasks > 0 && state.status !== "failed" && !timedOut)}
+      isLoading={!timedOut && (!state || (state.pendingTasks > 0 && state.status !== "failed"))}
       markdown={`## ${title}\n\n${escapeMarkdown(url)}`}
       metadata={
         <Detail.Metadata>

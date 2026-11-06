@@ -3,7 +3,7 @@ import { createDeeplink } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { toError } from "./api/problems";
 import { CaptureProgress } from "./components/capture-progress";
-import { failToast } from "./components/problem";
+import { showFailure } from "./components/problem";
 import { enqueue, findUrl, savedTitle, type UrlOrigin } from "./lib/capture";
 import { useLookups } from "./lib/library";
 import { cleanTags, parseTags, parseWebUrl } from "./lib/urls";
@@ -48,6 +48,7 @@ export default function Command(
   const [folderId, setFolderId] = useState(draft?.folderId ?? context?.folderId ?? NO_FOLDER);
   const [finding, setFinding] = useState(!url);
   const edited = useRef(Boolean(url));
+  const pending = useRef(false);
 
   useEffect(() => {
     if (edited.current) return;
@@ -75,17 +76,21 @@ export default function Command(
   }
 
   async function submit() {
+    if (pending.current) return;
     const target = parseWebUrl(url);
     if (!target) return setUrlError("Enter a full web address that starts with http:// or https://.");
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Pond" });
+    pending.current = true;
     try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Pond" });
       const options = { tags: allTags(), folderId: folderId || undefined };
       const result = await enqueue(target, options);
       const title = savedTitle(result, options);
       await toast.hide();
       push(<CaptureProgress result={result} url={target} title={title} />);
     } catch (error) {
-      failToast(toast, toError(error), "Couldn't save the URL");
+      await showFailure(toError(error), "Couldn't save the URL");
+    } finally {
+      pending.current = false;
     }
   }
 
