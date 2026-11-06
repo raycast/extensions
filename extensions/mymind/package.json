@@ -359,8 +359,8 @@
       "type": "checkbox",
       "required": false,
       "title": "Context Detection",
-      "label": "Prefill from the active browser tab and selected text",
-      "description": "Off by default. When enabled, Save to mymind prefills from what you are looking at: selected text becomes a note, and the active browser tab's URL becomes a link. Reading the browser tab asks macOS for permission to control that browser the first time. macOS only.",
+      "label": "Prefill Save to mymind from what you're doing",
+      "description": "Off by default, which opens Save to mymind empty. When on, it prefills from, in order: selected text, the active browser tab, files selected in Finder, then the latest clipboard item. Switch between detected sources from the From dropdown. Reading the browser tab asks macOS for permission the first time. macOS only.",
       "default": false
     },
     {

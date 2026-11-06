@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   BrowserExtension,
+  Cache,
   Clipboard,
   Form,
   getFrontmostApplication,
@@ -9,6 +10,7 @@ import {
   getSelectedText,
   getPreferenceValues,
   Icon,
+  Keyboard,
   LaunchProps,
   open,
   openExtensionPreferences,
@@ -20,7 +22,7 @@ import {
 import { runAppleScript, showFailureToast, useCachedPromise } from "@raycast/utils";
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addObjectToSpaces,
   createObject,
@@ -42,6 +44,20 @@ import {
   isProbablyUrl,
   SaveInput,
 } from "./save-input";
+import {
+  DEFAULT_SAVE_KIND,
+  getSaveKindForInput,
+  getSaveSourceTitle,
+  isFinderBundleId,
+  parseSaveKind,
+  SAVE_SOURCE_PRIORITY,
+  SaveKind,
+  SaveSource,
+  SaveSourceId,
+  shouldReadSelectedText,
+  sortSaveSources,
+  toDetectedInput,
+} from "./save-sources";
 import { isUserTag } from "./tag-utils";
 import {
   buildActiveTabAppleScript,
@@ -58,7 +74,7 @@ import {
 
 /** Only the fields still read from the submitted form; title, URL and body are controlled state. */
 type SaveValues = {
-  kind: "url" | "note" | "file";
+  kind: SaveKind;
   existingTags: string[];
   files: string[];
   spaceId: string;
@@ -72,7 +88,7 @@ type SaveLaunchContext = {
 };
 
 type InitialState = {
-  kind: SaveValues["kind"];
+  kind: SaveKind;
   content: string;
   files: string[];
   title: string;
@@ -80,12 +96,23 @@ type InitialState = {
 };
 
 const EMPTY_INITIAL_STATE: InitialState = {
-  kind: "note",
+  kind: DEFAULT_SAVE_KIND,
   content: "",
   files: [],
   title: "",
   url: "",
 };
+
+const saveCache = new Cache({ namespace: "save-to-mymind" });
+const LAST_KIND_CACHE_KEY = "last-kind";
+
+function getRememberedKind(): SaveKind {
+  return parseSaveKind(saveCache.get(LAST_KIND_CACHE_KEY)) ?? DEFAULT_SAVE_KIND;
+}
+
+function rememberKind(kind: SaveKind) {
+  saveCache.set(LAST_KIND_CACHE_KEY, kind);
+}
 
 function getInitialStateFromInput(input: SaveInput): InitialState | undefined {
   if (input.kind === "files") {
@@ -103,49 +130,36 @@ function getInitialStateFromInput(input: SaveInput): InitialState | undefined {
   return undefined;
 }
 
-async function getClipboardInitialState(): Promise<InitialState | undefined> {
-  for (let offset = 0; offset <= 5; offset++) {
-    try {
-      const initialState = getInitialStateFromInput(classifyClipboardContent(await Clipboard.read({ offset })));
+/**
+ * Input handed over on purpose — from another command, a deeplink, or text typed after the
+ * command name in root search. It always wins and never involves detection.
+ */
+function getExplicitInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): InitialState | undefined {
+  const launchContextFiles = classifyFilePaths([
+    ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
+    ...(launchContext?.file ? [launchContext.file] : []),
+  ]);
 
-      if (initialState) {
-        return initialState;
-      }
-    } catch {
-      // Continue through the available clipboard history when an item can't be read.
-    }
+  if (launchContextFiles.kind === "files") {
+    return { ...EMPTY_INITIAL_STATE, kind: "file", files: launchContextFiles.value };
   }
 
-  return undefined;
+  if (launchContext?.url) {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
+  }
+
+  if (launchContext?.content) {
+    return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+  }
+
+  return getInitialStateFromInput(classifyTextInput(fallbackText));
 }
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// A single short retry: the first read succeeds when there is a selection, so extra
-// attempts mostly add dead time to the common "no selection, just save the page" case.
-const SELECTED_TEXT_RETRY_DELAYS_MS = [0, 90];
-
-async function getSelectedTextInitialState(): Promise<InitialState | undefined> {
-  for (const retryDelayMs of SELECTED_TEXT_RETRY_DELAYS_MS) {
-    if (retryDelayMs > 0) {
-      await delay(retryDelayMs);
-    }
-
-    try {
-      const selected = await getSelectedText();
-      return getInitialStateFromInput(classifyTextInput(selected));
-    } catch {
-      // Accessibility text-selection reads are known to be flaky against web content
-      // (e.g. Safari); retry a couple of times before giving up on this layer.
-    }
-  }
-
-  return undefined;
-}
-
-const BROWSER_TABS_RETRY_DELAYS_MS = [0, 150, 350];
+const BROWSER_TABS_RETRY_DELAYS_MS = [0, 150];
 const APPLESCRIPT_TIMEOUT_MS = 3000;
 
 type ScriptingDefinition = {
@@ -312,147 +326,156 @@ async function getActiveTabUrlViaBrowserExtension(): Promise<string | undefined>
   return undefined;
 }
 
-async function getBrowserInitialState(browser: FrontmostBrowser): Promise<InitialState | undefined> {
-  // Independent reads — running them together keeps the command's open latency close to
-  // the slower of the two rather than their sum.
-  const [activeTabUrlFromScript, selectedTextInitialState] = await Promise.all([
-    getActiveTabUrlViaAppleScript(browser),
-    getSelectedTextInitialState(),
-  ]);
+type FrontmostApplication = Awaited<ReturnType<typeof getFrontmostApplication>>;
 
-  // A selection is an explicit act, so it wins over whatever page happens to be open.
-  if (selectedTextInitialState) {
-    return selectedTextInitialState;
+async function readClipboardSource(): Promise<SaveSource | undefined> {
+  try {
+    // Latest item only: walking back through history is how stale prefills used to sneak in.
+    const input = toDetectedInput(classifyClipboardContent(await Clipboard.read()));
+    return input ? { id: "clipboard", input } : undefined;
+  } catch {
+    return undefined;
   }
+}
 
-  if (activeTabUrlFromScript && isProbablyUrl(activeTabUrlFromScript)) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: activeTabUrlFromScript };
+async function readSelectionSource(): Promise<SaveSource | undefined> {
+  try {
+    const input = toDetectedInput(classifyTextInput(await getSelectedText()));
+    return input ? { id: "selection", input } : undefined;
+  } catch {
+    // No selection, or the frontmost app doesn't expose one.
+    return undefined;
+  }
+}
+
+async function readTabSource(application: FrontmostApplication): Promise<SaveSource | undefined> {
+  const browser = resolveFrontmostBrowser(application);
+
+  if (!browser) {
+    return undefined;
   }
 
   // The Browser Extension reports whichever browser it's installed in, which isn't
   // necessarily the frontmost one — trusting it for a scriptable browser surfaces a URL
-  // from a completely different app. Only fall back to it when the frontmost browser
-  // can't be scripted at all (Firefox), where there's no better option.
-  if (browser.flavor) {
+  // from a different app. Only use it when the browser can't be scripted (Firefox, Zen).
+  const url = browser.flavor
+    ? await getActiveTabUrlViaAppleScript(browser)
+    : await getActiveTabUrlViaBrowserExtension();
+
+  if (!url || !isProbablyUrl(url)) {
     return undefined;
   }
 
-  const activeTabUrl = await getActiveTabUrlViaBrowserExtension();
+  return { id: "tab", input: { kind: "url", value: url }, appName: application.name };
+}
 
-  if (activeTabUrl) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: activeTabUrl };
+async function readFinderSource(): Promise<SaveSource | undefined> {
+  try {
+    const selection = await getSelectedFinderItems();
+    const input = toDetectedInput(classifyFilePaths(selection.map((item) => item.path)));
+    return input ? { id: "finder", input } : undefined;
+  } catch {
+    // Nothing selected in Finder.
+    return undefined;
   }
+}
 
-  return undefined;
+type Detection = {
+  /** Resolves once every higher-priority source has settled, so a slow read only blocks when it would win. */
+  defaultSource: Promise<SaveSource | undefined>;
+  /** Every source that found something, in priority order. */
+  allSources: Promise<SaveSource[]>;
+};
+
+function startDetection(): Detection {
+  const frontmostApplication = getFrontmostApplication().catch(() => undefined);
+  // Read the clipboard first: `getSelectedText()` can go through the system clipboard, and
+  // reading both at once risks picking up the selection as clipboard content.
+  const clipboard = readClipboardSource();
+
+  const selection = (async () => {
+    const application = await frontmostApplication;
+    await clipboard;
+    return shouldReadSelectedText(application?.bundleId) ? readSelectionSource() : undefined;
+  })();
+
+  const tab = (async () => {
+    const application = await frontmostApplication;
+    return application ? readTabSource(application) : undefined;
+  })();
+
+  const finder = (async () => {
+    const application = await frontmostApplication;
+    return isFinderBundleId(application?.bundleId) ? readFinderSource() : undefined;
+  })();
+
+  const reads: Record<SaveSourceId, Promise<SaveSource | undefined>> = { selection, tab, finder, clipboard };
+  const orderedReads = SAVE_SOURCE_PRIORITY.map((id) => reads[id]);
+
+  return {
+    defaultSource: (async () => {
+      for (const read of orderedReads) {
+        const source = await read;
+
+        if (source) {
+          return source;
+        }
+      }
+
+      return undefined;
+    })(),
+    allSources: Promise.all(orderedReads).then(sortSaveSources),
+  };
 }
 
 /**
  * Detection runs at most once per command launch.
  *
- * `getSelectedText()` is a global, stateful operation (Raycast reads the selection through
- * the system clipboard), so two concurrent calls interfere: one wins and the other fails,
- * which made results flip between the selection, the tab URL and stale clipboard history.
- * React's development double-mount triggers exactly that, so callers share one promise.
- * Each command launch is a fresh process, so this cache lives exactly as long as it should.
+ * `getSelectedText()` is a global, stateful operation, so two concurrent calls interfere.
+ * React's development double-mount triggers exactly that, so callers share one detection.
+ * Each command launch is a fresh process, so this lives exactly as long as it should.
  */
-let inFlightInitialState: Promise<InitialState> | undefined;
+let detection: Detection | undefined;
 
-function resolveInitialStateOnce(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
-  inFlightInitialState ??= resolveInitialState(fallbackText, launchContext);
-  return inFlightInitialState;
+function startDetectionOnce(): Detection {
+  detection ??= startDetection();
+  return detection;
 }
 
-async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
-  const launchContextFiles = classifyFilePaths([
-    ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
-    ...(launchContext?.file ? [launchContext.file] : []),
-  ]);
-
-  if (launchContextFiles.kind === "files") {
-    return { ...EMPTY_INITIAL_STATE, kind: "file", files: launchContextFiles.value };
+function getSourceShortcut(index: number): Keyboard.Shortcut | undefined {
+  if (index > 8) {
+    return undefined;
   }
 
-  if (launchContext?.url) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: launchContext.url };
-  }
-
-  if (launchContext?.content) {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
-  }
-
-  // Opt-in: with the preference off, detection stays exactly as it has always been —
-  // clipboard first, then Finder — and the browser is never queried, so macOS never
-  // asks for Automation permission.
-  const { detectContext } = getPreferenceValues<Preferences>();
-
-  if (detectContext) {
-    let frontmostApplication: Awaited<ReturnType<typeof getFrontmostApplication>> | undefined;
-
-    try {
-      frontmostApplication = await getFrontmostApplication();
-    } catch {
-      // Frontmost application couldn't be determined; fall through to app-agnostic detection.
-    }
-
-    const frontmostBrowser = frontmostApplication ? resolveFrontmostBrowser(frontmostApplication) : undefined;
-
-    if (frontmostBrowser) {
-      const browserInitialState = await getBrowserInitialState(frontmostBrowser);
-
-      if (browserInitialState) {
-        return browserInitialState;
-      }
-    } else {
-      const selectedTextInitialState = await getSelectedTextInitialState();
-
-      if (selectedTextInitialState) {
-        return selectedTextInitialState;
-      }
-    }
-  }
-
-  const clipboardInitialState = await getClipboardInitialState();
-
-  if (clipboardInitialState) {
-    return clipboardInitialState;
-  }
-
-  try {
-    const finderSelection = await getSelectedFinderItems();
-    const selectedFiles = classifyFilePaths(finderSelection.map((item) => item.path));
-
-    if (selectedFiles.kind === "files") {
-      return { ...EMPTY_INITIAL_STATE, kind: "file", files: selectedFiles.value };
-    }
-  } catch {
-    // Ignore missing Finder context and fall back to text detection.
-  }
-
-  const fallbackInput = classifyTextInput(fallbackText);
-
-  if (fallbackInput.kind === "url") {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: fallbackInput.value };
-  }
-
-  if (fallbackInput.kind === "note") {
-    return { ...EMPTY_INITIAL_STATE, kind: "note", content: fallbackInput.value };
-  }
-
-  return EMPTY_INITIAL_STATE;
+  const key = String(index + 1) as Keyboard.KeyEquivalent;
+  return { macOS: { modifiers: ["cmd"], key }, Windows: { modifiers: ["ctrl"], key } };
 }
+
+const MANUAL_SOURCE_VALUE = "manual";
 
 export default function SaveToMymindCommand(props: LaunchProps) {
   const { push } = useNavigation();
-  const { accessKeyId, accessKeySecret, accessLevel } = getPreferenceValues<Preferences>();
+  const { accessKeyId, accessKeySecret, accessLevel, detectContext } = getPreferenceValues<Preferences>();
   const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
-  const [kind, setKind] = useState<SaveValues["kind"]>("note");
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [url, setUrl] = useState("");
-  const [isInitializing, setIsInitializing] = useState(true);
+  // Explicit input wins outright. Otherwise the form opens straight away with the last-used
+  // type, and only detects context when the preference asks for it.
+  const [initialPlan] = useState(() => {
+    const explicitState = getExplicitInitialState(props.fallbackText, launchContext);
+    return explicitState
+      ? { state: explicitState, detect: false }
+      : { state: { ...EMPTY_INITIAL_STATE, kind: getRememberedKind() }, detect: Boolean(detectContext) };
+  });
+  const [kind, setKind] = useState<SaveKind>(initialPlan.state.kind);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>(initialPlan.state.files);
+  const [title, setTitle] = useState(initialPlan.state.title);
+  const [content, setContent] = useState(initialPlan.state.content);
+  const [url, setUrl] = useState(initialPlan.state.url);
+  const [sources, setSources] = useState<SaveSource[]>([]);
+  const [sourceId, setSourceId] = useState<SaveSourceId | typeof MANUAL_SOURCE_VALUE>(MANUAL_SOURCE_VALUE);
+  const [isInitializing, setIsInitializing] = useState(initialPlan.detect);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasTypedRef = useRef(false);
   const effectiveAccessLevel = useEffectiveAccessLevel(accessLevel, accessKeyScope);
   const canWrite = useWriteAccess(accessLevel, accessKeyScope);
   const { data: spaces = [], error: spacesError } = useCachedPromise(() => listSpaces(), [], {
@@ -475,35 +498,65 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   );
   const unsupportedSelectedFiles = useMemo(() => getUnsupportedUploadFiles(selectedFiles), [selectedFiles]);
 
+  function applySource(source: SaveSource) {
+    const state = getInitialStateFromInput(source.input);
+
+    if (!state) {
+      return;
+    }
+
+    setSourceId(source.id);
+    setKind(getSaveKindForInput(source.input));
+    setSelectedFiles(state.files);
+    setTitle(state.title);
+    setContent(state.content);
+    setUrl(state.url);
+  }
+
+  function typed<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      hasTypedRef.current = true;
+      setter(value);
+    };
+  }
+
   useEffect(() => {
+    if (!initialPlan.detect) {
+      return;
+    }
+
     let cancelled = false;
+    const { defaultSource, allSources } = startDetectionOnce();
 
-    async function loadInitialState() {
-      try {
-        const nextState = await resolveInitialStateOnce(props.fallbackText, launchContext);
-
-        if (cancelled) {
+    void defaultSource
+      .then((source) => {
+        if (cancelled || !source) {
           return;
         }
 
-        setKind(nextState.kind);
-        setSelectedFiles(nextState.files);
-        setTitle(nextState.title);
-        setContent(nextState.content);
-        setUrl(nextState.url);
-      } finally {
+        setSources([source]);
+
+        // Don't clobber anything typed while detection was still running.
+        if (!hasTypedRef.current) {
+          applySource(source);
+        }
+      })
+      .finally(() => {
         if (!cancelled) {
           setIsInitializing(false);
         }
-      }
-    }
+      });
 
-    void loadInitialState();
+    void allSources.then((detectedSources) => {
+      if (!cancelled) {
+        setSources(detectedSources);
+      }
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [launchContext, props.fallbackText]);
+  }, [initialPlan]);
 
   if (!canWrite) {
     return (
@@ -557,6 +610,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       }
     }
 
+    rememberKind(kind);
     setIsSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to mymind…" });
 
@@ -685,16 +739,56 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save to mymind" onSubmit={handleSubmit} />
+          {sources.length > 1 ? (
+            <ActionPanel.Section title="Switch Source">
+              {sources.map((source, index) => (
+                <Action
+                  key={source.id}
+                  title={`Use ${getSaveSourceTitle(source)}`}
+                  icon={Icon.ArrowRightCircle}
+                  shortcut={getSourceShortcut(index)}
+                  onAction={() => applySource(source)}
+                />
+              ))}
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveValues["kind"])}>
+      {sources.length > 0 ? (
+        <Form.Dropdown
+          id="source"
+          title="From"
+          value={sourceId}
+          onChange={(value) => {
+            const source = sources.find((candidate) => candidate.id === value);
+
+            if (source && value !== sourceId) {
+              applySource(source);
+            }
+          }}
+        >
+          {sourceId === MANUAL_SOURCE_VALUE ? (
+            <Form.Dropdown.Item value={MANUAL_SOURCE_VALUE} title="Typed Manually" />
+          ) : null}
+          {sources.map((source) => (
+            <Form.Dropdown.Item key={source.id} value={source.id} title={getSaveSourceTitle(source)} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+      <Form.Dropdown id="kind" title="Type" value={kind} onChange={(value) => setKind(value as SaveKind)}>
         <Form.Dropdown.Item value="url" title="Link" />
         <Form.Dropdown.Item value="note" title="Note" />
         <Form.Dropdown.Item value="file" title="File" />
       </Form.Dropdown>
       {kind === "note" ? (
-        <Form.TextField id="title" title="Title" placeholder="Optional title" value={title} onChange={setTitle} />
+        <Form.TextField
+          id="title"
+          title="Title"
+          placeholder="Optional title"
+          value={title}
+          onChange={typed(setTitle)}
+        />
       ) : null}
       {kind === "file" ? (
         <>
@@ -719,14 +813,20 @@ export default function SaveToMymindCommand(props: LaunchProps) {
             title="Note"
             placeholder="Optional note to attach to each uploaded file"
             value={content}
-            onChange={setContent}
+            onChange={typed(setContent)}
           />
         </>
       ) : null}
       {kind === "url" ? (
         <>
-          <Form.TextField id="url" title="URL" placeholder="https://example.com" value={url} onChange={setUrl} />
-          <Form.TextArea id="content" title="Body" placeholder="Optional note" value={content} onChange={setContent} />
+          <Form.TextField id="url" title="URL" placeholder="https://example.com" value={url} onChange={typed(setUrl)} />
+          <Form.TextArea
+            id="content"
+            title="Body"
+            placeholder="Optional note"
+            value={content}
+            onChange={typed(setContent)}
+          />
         </>
       ) : kind === "note" ? (
         <Form.TextArea
@@ -734,7 +834,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           title="Body"
           placeholder="Write your note here…"
           value={content}
-          onChange={setContent}
+          onChange={typed(setContent)}
         />
       ) : null}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>
