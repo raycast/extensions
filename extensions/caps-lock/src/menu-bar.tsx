@@ -1,28 +1,31 @@
 import { Color, Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { getCapsLock, setCapsLock } from "swift:../swift/caps-lock";
 
 export default function CapsLockMenuBar() {
-  const { hideWhenOff } = getPreferenceValues<{ hideWhenOff?: boolean }>();
-  const [state, setState] = useState<boolean>();
-  const [isLoading, setIsLoading] = useState(true);
+  const { hideWhenOff } = getPreferenceValues<Preferences.MenuBar>();
+  const {
+    data: state,
+    isLoading,
+    mutate,
+  } = usePromise(getCapsLock, [], { failureToastOptions: { title: "Couldn't read Caps Lock" } });
+  const [isChanging, setIsChanging] = useState(false);
 
-  useEffect(() => {
-    getCapsLock()
-      .then(setState)
-      .catch(() => setState(undefined))
-      .finally(() => setIsLoading(false));
-  }, []);
-
-  if (!isLoading && hideWhenOff && state === false) return null;
+  if (!isLoading && !isChanging && hideWhenOff && state === false) return null;
 
   async function change(on: boolean) {
-    setState(await setCapsLock(on));
+    setIsChanging(true);
+    try {
+      await mutate(setCapsLock(on), { shouldRevalidateAfter: false });
+    } finally {
+      setIsChanging(false);
+    }
   }
 
   return (
     <MenuBarExtra
-      isLoading={isLoading}
+      isLoading={isLoading || isChanging}
       icon={{
         source: state ? Icon.ArrowUpCircleFilled : Icon.ArrowUpCircle,
         tintColor: state ? Color.Orange : undefined,

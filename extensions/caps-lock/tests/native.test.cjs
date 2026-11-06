@@ -40,7 +40,17 @@ before(() => {
     `
     import Darwin
     import Foundation
-    do { print(try toggleCapsLock() ? "on" : "off") }
+    let command = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "toggle"
+    do {
+      let state: Bool
+      switch command {
+      case "on": state = try setCapsLock(on: true)
+      case "off": state = try setCapsLock(on: false)
+      case "get": state = try getCapsLock()
+      default: state = try toggleCapsLock()
+      }
+      print(state ? "on" : "off")
+    }
     catch { FileHandle.standardError.write(Data((error.localizedDescription + "\\n").utf8)); exit(1) }
   `,
   );
@@ -95,6 +105,35 @@ test("overlapping processes preserve every toggle and return alternating confirm
   assert.equal(results.filter(({ stdout }) => stdout === "off\n").length, 6);
   assert.equal(readFileSync(state, "utf8"), "0");
   assert.equal((await invoke("toggle")).stdout, "on\n");
+});
+
+test("setCapsLock reaches both requested states and confirms them", async (t) => {
+  const { invoke, state } = fixture(t);
+  assert.equal((await invoke("on")).stdout, "on\n");
+  assert.equal(readFileSync(state, "utf8"), "1");
+  assert.equal((await invoke("off")).stdout, "off\n");
+  assert.equal(readFileSync(state, "utf8"), "0");
+});
+
+test("setCapsLock skips the write when the keyboard already has the requested state", async (t) => {
+  const { invoke, state } = fixture(t);
+  // A write would fail here, so success proves the no-write path.
+  assert.equal((await invoke("off", { CAPS_LOCK_TEST_FAILURE: "write" })).stdout, "off\n");
+  writeFileSync(state, "1");
+  assert.equal((await invoke("on", { CAPS_LOCK_TEST_FAILURE: "write" })).stdout, "on\n");
+  assert.equal(readFileSync(state, "utf8"), "1");
+  await assert.rejects(invoke("off", { CAPS_LOCK_TEST_FAILURE: "write" }));
+  assert.equal(readFileSync(state, "utf8"), "1");
+});
+
+test("getCapsLock reads the state without changing the keyboard", async (t) => {
+  const { invoke, state } = fixture(t);
+  assert.equal((await invoke("get", { CAPS_LOCK_TEST_FAILURE: "write" })).stdout, "off\n");
+  writeFileSync(state, "1");
+  assert.equal((await invoke("get", { CAPS_LOCK_TEST_FAILURE: "write" })).stdout, "on\n");
+  assert.equal(readFileSync(state, "utf8"), "1");
+  await assert.rejects(invoke("get", { CAPS_LOCK_TEST_FAILURE: "read" }));
+  assert.equal(readFileSync(state, "utf8"), "1");
 });
 
 test("process death releases the lock for a blocked helper", async (t) => {

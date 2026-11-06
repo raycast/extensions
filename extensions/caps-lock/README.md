@@ -1,12 +1,12 @@
 # Caps Lock
 
-One command: **Toggle Caps Lock**.
+Four commands:
 
-## What's new
+- **Toggle Caps Lock** flips Caps Lock on or off.
+- **Turn Caps Lock On** and **Turn Caps Lock Off** set an exact state and do nothing if it is already set (handy for hotkeys and Quicklinks).
+- **Caps Lock Indicator** shows Caps Lock in the menu bar, with a one-click change. By default it only appears while Caps Lock is on.
 
-- **Turn Caps Lock On** / **Turn Caps Lock Off** commands that set an exact state (great for hotkeys and Quicklinks).
-- **Caps Lock Indicator** menu bar item that appears while Caps Lock is on, with a one-click toggle.
-- The HUD now shows ⇪ so the state is obvious at a glance.
+The HUD shows ⇪ with the confirmed state.
 
 Keep access to Caps Lock after remapping its physical key to Hyper, Escape, Control, or another key. Run the command from Raycast or assign it a hotkey. A brief confirmation shows **Caps Lock On** or **Caps Lock Off**, then you can keep typing in your previous app.
 
@@ -19,7 +19,7 @@ The command changes the macOS modifier lock directly. It does not simulate press
 
 ## Native implementation
 
-The [Swift Package](swift/caps-lock/Package.swift) exports `toggleCapsLock()` through Raycast's `@raycast` bridge. [CapsLock.swift](swift/caps-lock/Sources/CapsLock.swift) calls Apple's IOKit `IOHIDGetModifierLockState` and `IOHIDSetModifierLockState` APIs. It reads the current state, changes it, and verifies the new state before reporting success. Concurrent invocations for the same user are serialized with a file lock, so overlapping commands do not lose toggles. A five-second watchdog terminates a stalled native process, releasing its lock so later commands can recover. If a timeout occurs, the state may already have changed; check Caps Lock before trying again. Closing the descriptor, including on process exit, releases the lock. It does not record keystrokes, access the network, or alter keyboard mappings.
+The [Swift Package](swift/caps-lock/Package.swift) exports `toggleCapsLock()`, `setCapsLock(on:)` and `getCapsLock()` through Raycast's `@raycast` bridge. [CapsLock.swift](swift/caps-lock/Sources/CapsLock.swift) calls Apple's IOKit `IOHIDGetModifierLockState` and `IOHIDSetModifierLockState` APIs. It reads the current state, changes it, and verifies the new state before reporting success. Concurrent invocations for the same user are serialized with a file lock, so overlapping commands do not lose toggles. A five-second watchdog terminates a stalled native process, releasing its lock so later commands can recover. If a timeout occurs, the state may already have changed; check Caps Lock before trying again. Closing the descriptor, including on process exit, releases the lock. It does not record keystrokes, access the network, or alter keyboard mappings.
 
 `npm run build` uses `ray build` to compile the Swift source and generate the TypeScript interface, following Raycast's [Swift tools](https://github.com/raycast/extensions-swift-tools) and the Color Picker extension. No prebuilt executable or custom native build script is checked in. Developing and building the Swift bridge through Raycast requires full Xcode; Command Line Tools alone are insufficient. Users receive the compiled extension and do not need these tools.
 
