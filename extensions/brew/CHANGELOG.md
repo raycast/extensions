@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Adopt Apps reads brew.env] - {PR_MERGE_DATE}
+
+- Fixed: Adopt Apps now looks in the install folder set in `brew.env`, `/Applications` and `~/Applications`
+- Improved: the README says Raycast doesn't get `XDG_CONFIG_HOME`, and which `brew.env` file to use
+
 ## [Homebrew options] - 2026-11-05
 
 - Improved: the README explains how to set Homebrew options, such as where casks install, so installs from the extension use them too
