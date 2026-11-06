@@ -10,8 +10,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { join } from "node:path";
-import { CleftPreferences } from "./preferences";
 import { CaptureAction, captureActions, runCapture } from "./shortcuts";
 
 export async function captureCommand(action: CaptureAction) {
@@ -23,7 +23,7 @@ export async function captureCommand(action: CaptureAction) {
       throw new Error(
         "Install Cleft for Mac before using its capture commands.",
       );
-    const preferences = getPreferenceValues<CleftPreferences>();
+    const preferences = getPreferenceValues<Preferences>();
     const name = {
       start: preferences.startShortcut,
       stop: preferences.stopShortcut,
@@ -44,7 +44,14 @@ export async function captureCommand(action: CaptureAction) {
     toast.primaryAction = {
       title: "Set Up Integration",
       onAction: async () => {
-        await launchCommand({ name: "setup", type: LaunchType.UserInitiated });
+        try {
+          await launchCommand({
+            name: "setup",
+            type: LaunchType.UserInitiated,
+          });
+        } catch (error) {
+          await showFailureToast(error, { title: "Could Not Open Setup" });
+        }
       },
     };
     toast.secondaryAction = {

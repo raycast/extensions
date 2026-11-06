@@ -39,7 +39,6 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail && matches.length > 0}
-      navigationTitle={`Cleft Notes · ${subtitle}`}
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}
@@ -83,16 +82,19 @@ export default function Command() {
           "This Month",
           "Older",
         ] as DateGroup[]
-      ).map((group, groupIndex) => {
-        const shown = matches
-          .slice(0, 200)
-          .filter((note) => dateGroup(note.created) === group);
-        if (!shown.length) return null;
-        return (
+      )
+        .map((group) => ({
+          group,
+          shown: matches
+            .slice(0, 200)
+            .filter((note) => dateGroup(note.created) === group),
+        }))
+        .filter(({ shown }) => shown.length)
+        .map(({ group, shown }, index) => (
           <List.Section
             key={group}
             title={group}
-            subtitle={groupIndex === 0 || !query ? undefined : subtitle}
+            subtitle={index === 0 ? subtitle : undefined}
           >
             {shown.map((note) => (
               <NoteItem
@@ -105,8 +107,7 @@ export default function Command() {
               />
             ))}
           </List.Section>
-        );
-      })}
+        ))}
     </List>
   );
 }

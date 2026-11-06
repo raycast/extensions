@@ -70,6 +70,7 @@
       "required": false,
       "title": "Start Recording Shortcut",
       "default": "Raycast Cleft Start Recording",
+      "placeholder": "Raycast Cleft Start Recording",
       "description": "Name of the Apple Shortcut containing Cleft's Start Recording action."
     },
     {
@@ -78,6 +79,7 @@
       "required": false,
       "title": "Stop Recording Shortcut",
       "default": "Raycast Cleft Stop Recording",
+      "placeholder": "Raycast Cleft Stop Recording",
       "description": "Name of the Apple Shortcut containing Cleft's Stop Recording action."
     },
     {
@@ -86,11 +88,13 @@
       "required": false,
       "title": "Continue Note Shortcut",
       "default": "Raycast Cleft Continue Last Note",
+      "placeholder": "Raycast Cleft Continue Last Note",
       "description": "Name of the Apple Shortcut containing Cleft's Continue Last Note action."
     }
   ],
   "dependencies": {
     "@raycast/api": "^2.7.3",
+    "@raycast/utils": "^2.3.3",
     "js-yaml": "^4.3.2"
   },
   "devDependencies": {

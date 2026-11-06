@@ -7,13 +7,18 @@ export function NoteActions({ note }: { note: CleftNote }) {
       <Action.Push
         title="Read Summary"
         icon={Icon.Document}
-        target={<NoteDetail note={note} />}
+        target={<NoteDetail note={note} navigationTitle="Cleft Summary" />}
       />
       <Action.Push
         title="Read Transcript"
         icon={Icon.Text}
-        target={<NoteDetail note={note} transcript />}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        target={
+          <NoteDetail
+            note={note}
+            transcript
+            navigationTitle="Cleft Transcript"
+          />
+        }
       />
       <Action.CopyToClipboard title="Copy Summary" content={note.summary} />
       {note.transcript && (
@@ -43,9 +48,12 @@ export function NoteActions({ note }: { note: CleftNote }) {
 export function NoteDetail({
   note,
   transcript = false,
+  navigationTitle,
 }: {
   note: CleftNote;
   transcript?: boolean;
+  /** Only set when pushed; a command's root view keeps Raycast's title. */
+  navigationTitle?: string;
 }) {
   const body = transcript
     ? (note.transcript || "No transcript was exported for this note.").replace(
@@ -55,7 +63,7 @@ export function NoteDetail({
     : note.summary;
   return (
     <Detail
-      navigationTitle={transcript ? "Cleft Transcript" : "Cleft Summary"}
+      navigationTitle={navigationTitle}
       markdown={body || "This note has an empty summary."}
       metadata={
         <Detail.Metadata>

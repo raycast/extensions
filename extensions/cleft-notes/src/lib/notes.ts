@@ -191,7 +191,10 @@ export async function readLibrary(folder: string): Promise<NoteLibrary> {
           await handle?.close();
         }
       }
-      if (filesVisited > MAX_NOTES || bytesRead >= MAX_TOTAL_BYTES) return;
+      if (filesVisited > MAX_NOTES || bytesRead >= MAX_TOTAL_BYTES) {
+        library.limited = true;
+        return;
+      }
     }
   }
   await walk(root, 0);
@@ -203,18 +206,30 @@ function normalize(value: string): string {
   return value.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase();
 }
 
+// Normalized search text is built once per loaded note, not on every keystroke.
+const searchText = new WeakMap<CleftNote, string>();
+function haystack(note: CleftNote): string {
+  let text = searchText.get(note);
+  if (text === undefined) {
+    text = normalize(
+      [note.title, note.summary, note.transcript, ...note.tags].join("\n"),
+    );
+    searchText.set(note, text);
+  }
+  return text;
+}
+
 export function searchNotes(
   notes: CleftNote[],
   query: string,
   tag?: string,
 ): CleftNote[] {
   const terms = normalize(query).split(/\s+/).filter(Boolean);
-  return notes.filter((note) => {
-    if (tag && !note.tags.includes(tag)) return false;
-    const haystack = normalize(
-      [note.title, note.summary, note.transcript, ...note.tags].join("\n"),
-    );
-    return terms.every((term) => haystack.includes(term));
+  const tagged = tag ? notes.filter((note) => note.tags.includes(tag)) : notes;
+  if (!terms.length) return tagged;
+  return tagged.filter((note) => {
+    const text = haystack(note);
+    return terms.every((term) => text.includes(term));
   });
 }
 
@@ -224,15 +239,26 @@ export function matchSnippet(
   query: string,
   radius = 90,
 ): string | undefined {
-  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = normalize(query).split(/\s+/).filter(Boolean);
   if (!terms.length || !text) return undefined;
-  const lower = text.toLowerCase();
-  let index = -1;
-  for (const term of terms) {
-    const found = lower.indexOf(term);
-    if (found !== -1 && (index === -1 || found < index)) index = found;
+  // Normalize per character, remembering where each normalized character came
+  // from, so matches use searchNotes' rules but excerpts keep the original text.
+  let normalized = "";
+  const origin: number[] = [];
+  for (let i = 0; i < text.length;) {
+    const char = String.fromCodePoint(text.codePointAt(i)!);
+    const folded = normalize(char);
+    normalized += folded;
+    for (let j = 0; j < folded.length; j++) origin.push(i);
+    i += char.length;
   }
-  if (index === -1) return undefined;
+  let found = -1;
+  for (const term of terms) {
+    const at = normalized.indexOf(term);
+    if (at !== -1 && (found === -1 || at < found)) found = at;
+  }
+  if (found === -1) return undefined;
+  const index = origin[found];
   const start = Math.max(0, index - radius);
   const end = Math.min(text.length, index + radius);
   return `${start > 0 ? "…" : ""}${text.slice(start, end).replace(/\s+/g, " ").trim()}${end < text.length ? "…" : ""}`;
@@ -242,15 +268,13 @@ export type DateGroup =
   "Today" | "Yesterday" | "This Week" | "This Month" | "Older";
 
 export function dateGroup(date: Date, now = new Date()): DateGroup {
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  ).getTime();
+  // Calendar dates, not fixed 24-hour offsets, so daylight-saving days work.
+  const daysAgo = (days: number) =>
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() - days).getTime();
   const time = date.getTime();
-  if (time >= startOfToday) return "Today";
-  if (time >= startOfToday - 86_400_000) return "Yesterday";
-  if (time >= startOfToday - 6 * 86_400_000) return "This Week";
-  if (time >= startOfToday - 30 * 86_400_000) return "This Month";
+  if (time >= daysAgo(0)) return "Today";
+  if (time >= daysAgo(1)) return "Yesterday";
+  if (time >= daysAgo(6)) return "This Week";
+  if (time >= daysAgo(30)) return "This Month";
   return "Older";
 }
