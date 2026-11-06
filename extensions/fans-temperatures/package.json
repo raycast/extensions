@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "ougi",
+  "name": "fans-temperatures",
   "title": "Fans & Temperatures",
   "description": "Monitor every Mac temperature sensor and fan speed, and control the fans with overheat protection",
   "icon": "icon.png",
