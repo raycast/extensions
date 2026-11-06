@@ -1,0 +1,5357 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ghosthand daemon API",
+    "version": "1.0.0",
+    "description": "Control iPhones connected to a Mac. Screenshots come over USB (QuickTime\nscreen capture). Taps, swipes and keys go through a Bluetooth HID mouse and\nkeyboard that the Mac serves; the iPhone shows it as an AssistiveTouch pointer.\n\n## Transport\n\nThe daemon always listens on a unix socket, `~/.ghosthand/daemon.sock`:\n\n    curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/devices\n\nThe unix socket needs no token: its file permissions allow only the owner.\n\nFrom another computer, call the same routes through the Mac's tunnel. The daemon keeps a\nconnection to ghosthand.dev while the Mac is signed in, so it needs no open port:\n\n    ghosthand tunnel url --new-token            # on the Mac: prints export lines for GHOSTHAND_URL and GHOSTHAND_TOKEN\n    # on the other computer, after pasting them:\n    curl -H \"Authorization: Bearer $GHOSTHAND_TOKEN\" $GHOSTHAND_URL/v1/devices\n\nThe URL is `https://ghosthand.dev/macs/<mac>` and the token is an API token of the\naccount. `GET https://ghosthand.dev/macs` lists the Macs. Through the tunnel a request\nbody is at most 20 MB, and only the routes under `/v1/` are served.\n\nOn a Mac signed in to the account, the unix socket also reaches the other Macs:\n`GET /v1/devices` lists their iPhones too (each with its `mac`), `POST /v1/leases` with\nsuch a `device` takes it on its Mac and returns a lease like `studio:42`, and every\nroute under `/v1/leases/studio:42/` goes to that Mac through ghosthand.dev.\n\nThe CLI sends `User-Agent: ghosthand-cli/<version>`. When npm has a newer ghosthand,\nunix socket responses to it carry `ghosthand-latest-version: <version>`, and the CLI\nprints an update notice.\n\n## Coordinates\n\n`x` and `y` are pixels of the image from `GET /v1/leases/{lease}/screenshot`.\n\n## Long requests and progress\n\nInput operations (tap, swipe, scroll, key, type) can wait up to 300 s while the\niPhone pairs over Bluetooth. Send `Accept: text/event-stream` to get\nprogress as server-sent events on the same request:\n\n    event: log\n    data: {\"message\":\"checking Bluetooth device 1A2B3C4D by moving its pointer\"}\n\n    event: result\n    data: {\"message\":\"tapped 414,896\",\"logs\":[...]}\n\nA failure ends the stream with `event: error` and a `Problem` as data.\nIn stream mode the HTTP status is always 200; read the last event.\nThe stream also carries `: ping` comment lines every second. When the\nclient disconnects, the daemon stops the operation before its next\nBluetooth action. Without that header the response is one JSON body after\nthe operation ends, and a disconnect does not stop the operation.\n\nErrors are always `application/problem+json`, whatever `Accept` says.\n\n## Result of an input in the same call\n\nInput routes take `waitText`, `screenshot` and `screentext` query parameters. They run\nafter the input, on the same lease, and the result carries the image and OCR text:\n\n    POST /v1/leases/42/tap?screenshot=png&screentext=true   {\"text\":\"General\"}\n\nAn error in these steps says the input was sent; never repeat the input blindly.\n\n## MCP\n\nThe same operations are MCP tools at `https://ghosthand.dev/mcp` (OAuth with the\nghosthand.dev account). It reaches every signed-in Mac of the account through its\ntunnel; it is not part of this document.\n\n## Leases\n\nScreenshots and input run on a lease, so two agents never drive one iPhone at the\nsame time. `POST /v1/leases` takes an iPhone and returns the lease id; every route\nunder `/v1/leases/{lease}/` then runs on that iPhone:\n\n    curl --unix-socket ~/.ghosthand/daemon.sock -H 'content-type: application/json' \\\n      -d '{\"device\":\"default\",\"reason\":\"reply to Anna in Messages\"}' \\\n      http://localhost/v1/leases                                  # {\"id\":\"studio:42\",...}\n    curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/text\n\nA lease ends by itself after `idleTimeoutSeconds` (default 600) without a call.\nIDs increase in state.db, including across daemon restarts, expiry and release.\n`label` is only display text, not a way to resume a lease. Lease IDs are not remote\nauthentication: the tunnel requires an API token. A lease carries the slug of the Mac\nthat holds it, e.g. `studio:42`, so it works from every Mac of the account; only a Mac\nthat is signed out returns `42`. The plain `42` also works on the Mac that holds it.\n\nAcquiring a lease turns AssistiveTouch on when it is off. Releasing the lease (or its\nexpiry) turns it off again, only when ghosthand turned it on.\n\n## XCTest mode\n\nAn iPhone can use XCTest instead of Bluetooth (`PUT /v1/leases/{lease}/control`). Then\ninput and screenshots go through WebDriverAgent, an XCUITest runner the daemon builds\nand starts with Xcode. The routes stay the same; the few that XCTest cannot do fail\nwith `unsupported-in-mode`. Recording and previews still use USB screen capture.\n"
+  },
+  "servers": [
+    {
+      "url": "https://ghosthand.dev/macs/{mac}",
+      "description": "The Mac's tunnel, from any computer. Needs an API token from `ghosthand tunnel url --new-token`.",
+      "variables": {
+        "mac": {
+          "default": "studio",
+          "description": "The Mac's slug, from `ghosthand tunnel url` or `GET https://ghosthand.dev/macs`"
+        }
+      }
+    },
+    {
+      "url": "http://localhost",
+      "description": "Unix socket `~/.ghosthand/daemon.sock` (`curl --unix-socket`; the host part is ignored). No token."
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {}
+  ],
+  "tags": [
+    {
+      "name": "Devices",
+      "description": "iPhones on USB and their setup state. These routes need no lease."
+    },
+    {
+      "name": "Leases",
+      "description": "Exclusive use of one iPhone by one client. Every route below runs on a lease."
+    },
+    {
+      "name": "Screen",
+      "description": "Screenshots and on-device OCR of the current screen, over USB."
+    },
+    {
+      "name": "Input",
+      "description": "Taps, swipes, wheel scrolls and keys, sent as a Bluetooth HID mouse and keyboard."
+    },
+    {
+      "name": "Tasks",
+      "description": "Tasks in plain words, done by an agent on ghosthand.dev that drives the iPhone."
+    },
+    {
+      "name": "Lock screen",
+      "description": "Wake, unlock and lock the iPhone."
+    },
+    {
+      "name": "Recording",
+      "description": "Screen and sound recording to a video file on the Mac."
+    },
+    {
+      "name": "Settings",
+      "description": "iPhone settings written over USB lockdown, and the Mac's Bluetooth bond."
+    },
+    {
+      "name": "Files",
+      "description": "Files, photos and app documents on the iPhone over USB (AFC). No Developer Mode."
+    },
+    {
+      "name": "Apps",
+      "description": "Installed apps, install and uninstall over USB."
+    },
+    {
+      "name": "Device",
+      "description": "Device info, system log, restart and shutdown over USB."
+    },
+    {
+      "name": "Random",
+      "description": "Random account details (names, usernames, birthdates, passwords), saved on the Mac so none is lost."
+    },
+    {
+      "name": "Setup",
+      "description": "Connect a new iPhone (the setup app)."
+    },
+    {
+      "name": "Account",
+      "description": "The ghosthand.dev account this Mac is signed in with, and its plan."
+    },
+    {
+      "name": "Daemon",
+      "description": "The daemon process itself."
+    }
+  ],
+  "paths": {
+    "/v1/devices": {
+      "get": {
+        "operationId": "listDevices",
+        "tags": ["Devices"],
+        "summary": "List devices",
+        "description": "iPhones that USB screen capture shows, with their model, lock state, Bluetooth link\nand lease. Waits up to 25 s for a trusted USB iPhone to appear after a daemon start;\nfails in about 0.1 s when USB has no trusted iPhone. With none, returns a `no-device`\nproblem that says what USB lockdown sees (not on USB, not trusted, locked).\nOn the unix socket of a signed-in Mac, the list also has the iPhones of the account's\nother online Macs (`mac` says where); a Mac that cannot answer adds a warning.\n",
+        "x-holocron": {
+          "href": "/api/list-devices",
+          "metadata": {
+            "sidebarTitle": "List devices",
+            "title": "List connected iPhones"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand list"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/devices"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connected iPhones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceList"
+                },
+                "example": {
+                  "devices": [
+                    {
+                      "id": "7EF219AD-69B4-423E-B8C4-4F4A6140822F",
+                      "name": "Tommy's iPhone",
+                      "model": "iPhone11,8",
+                      "modelName": "iPhone XR",
+                      "iosVersion": "17.6.1",
+                      "locked": false,
+                      "assistiveTouch": true,
+                      "bluetooth": {
+                        "address": "A4:83:E7:12:34:56",
+                        "state": "connected",
+                        "pointer": "absolute"
+                      },
+                      "lease": {
+                        "label": "ses_123",
+                        "reason": "reply to Anna in Messages",
+                        "acquiredAt": "2026-10-07T09:00:00.000Z",
+                        "lastUsedAt": "2026-10-07T09:04:12.000Z",
+                        "lastCommand": "tap",
+                        "expiresAt": "2026-10-07T09:14:12.000Z"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones": {
+      "get": {
+        "operationId": "listPhones",
+        "tags": ["Devices"],
+        "summary": "List phones",
+        "description": "For the ghosthand app (setup window and control plane). Unlike `/v1/devices` it answers\nat once, from USB lockdown, and also lists iPhones that screen capture does not show yet:\nnot trusted, or locked. Each iPhone has one `step`, the next thing a person must do\n(`ready` when agents can use it), so a client needs no logic of its own. `phones` is\nsorted by `id`, so the order is stable. `macName` is the name the iPhone lists under\nSettings > Bluetooth.\n",
+        "x-holocron": {
+          "href": "/api/list-phones",
+          "metadata": {
+            "sidebarTitle": "List phones",
+            "title": "List iPhones with their setup step"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/phones"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "iPhones on USB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneOverview"
+                },
+                "example": {
+                  "macName": "Tommy's MacBook Pro",
+                  "camera": "authorized",
+                  "bluetooth": {
+                    "state": "on"
+                  },
+                  "phones": [
+                    {
+                      "id": "00008020-001A2B3C4D5E002E",
+                      "captureId": "7EF219AD-69B4-423E-B8C4-4F4A6140822F",
+                      "name": "Tommy's iPhone",
+                      "model": "iPhone11,8",
+                      "modelName": "iPhone XR",
+                      "iosVersion": "17.6.1",
+                      "step": "ready",
+                      "assistiveTouch": true,
+                      "bluetooth": {
+                        "address": "A4:83:E7:12:34:56",
+                        "state": "connected"
+                      },
+                      "waiting": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/preview": {
+      "get": {
+        "operationId": "getPhonePreview",
+        "tags": ["Devices"],
+        "summary": "Get preview",
+        "description": "A small read-only JPEG of the screen, for the control plane: it shows what an agent is\ndoing. It needs no lease and does not touch one (no idle reset, no `lastCommand`). It\nopens USB screen capture like a screenshot does, but never requests Camera permission.\nMissing access needs the setup app's Allow Camera button. A locked iPhone fails at once with `device-locked`. Without a frame it can\nwait up to about 10 s. With capture running it returns the newest frame at once, so the\ncontrol plane polls it at 30 fps; the capture stays open 60 s after the last call.\n",
+        "x-holocron": {
+          "href": "/api/get-phone-preview",
+          "metadata": {
+            "sidebarTitle": "Get preview",
+            "title": "Preview a screen without a lease"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -o preview.jpg \\\n  'http://localhost/v1/phones/00008020-001A2B3C4D5E002E/preview?width=240'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "description": "`id` (USB UDID) from `GET /v1/phones`.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "examples": ["00008020-001A2B3C4D5E002E"]
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "description": "Image width in pixels; the height keeps the screen's aspect ratio.",
+            "schema": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 600,
+              "default": 240
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screen image",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/control": {
+      "put": {
+        "operationId": "setPhoneControl",
+        "tags": ["Setup"],
+        "summary": "Set control mode from setup",
+        "description": "For the setup app only, after a user click. Saves the mode and, for `xctest`, builds\nand starts WebDriverAgent in the background; `GET /v1/phones` shows its progress in\n`xctest`. Fails with `device-leased` while an agent holds the iPhone. Agents use\n`PUT /v1/leases/{lease}/control` instead.\n",
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "description": "`id` (USB UDID) from `GET /v1/phones`.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Saved; the runner starts in the background",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/key": {
+      "post": {
+        "operationId": "pressPhoneKey",
+        "tags": ["Input"],
+        "summary": "Press key from the control plane",
+        "description": "For the control plane's Take Control only: a person presses a key on the iPhone. No lease:\nit works also while an agent holds the iPhone, between the agent's commands, and does\nnot touch that lease. Only on the unix socket. Agents use `POST /v1/leases/{lease}/key`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Phone"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Key pressed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/type": {
+      "post": {
+        "operationId": "typePhoneText",
+        "tags": ["Input"],
+        "summary": "Type text from the control plane",
+        "description": "For the control plane's Take Control only: a person types text on the iPhone. No lease, like\n`POST /v1/phones/{phone}/key`. Only on the unix socket. Agents use `POST /v1/leases/{lease}/type`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Phone"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Text typed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/tap": {
+      "post": {
+        "operationId": "tapPhone",
+        "tags": ["Input"],
+        "summary": "Tap from the control plane",
+        "description": "For the control plane's Take Control only: a person clicks the live screen and the iPhone\ngets a tap there. `x` and `y` are fractions of the screen (0...1), so the app needs no\nscreen size. No lease, like `POST /v1/phones/{phone}/key`. In Bluetooth mode it turns\nAssistiveTouch on when off; `POST /v1/phones/{phone}/release` turns it off again if no\nlease holds the iPhone, else it goes off 60 s after the person's last input. Only on the unix socket. Agents use `POST /v1/leases/{lease}/tap`.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Phone"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenFraction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tapped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/swipe": {
+      "post": {
+        "operationId": "swipePhone",
+        "tags": ["Input"],
+        "summary": "Swipe from the control plane",
+        "description": "For the control plane's Take Control only: a person drags on the live screen and the\niPhone gets a swipe with the same start, end and duration. Like `POST /v1/leases/{lease}/swipe`\nit is a human-like flick, lifted while still moving. No lease, and AssistiveTouch like\n`POST /v1/phones/{phone}/tap`. Only on the unix socket.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Phone"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneSwipeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Swiped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/phones/{phone}/release": {
+      "post": {
+        "operationId": "releasePhone",
+        "tags": ["Input"],
+        "summary": "Release control from the control plane",
+        "description": "For the control plane's Release Control: the person stops tapping and typing. AssistiveTouch\nthat a tap or swipe turned on goes off at once if no lease holds the iPhone. Without this\ncall it goes off 60 s after the last input. Only on the unix socket.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Phone"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Released",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases": {
+      "post": {
+        "operationId": "acquireLease",
+        "tags": ["Leases"],
+        "summary": "Acquire lease",
+        "description": "Returns a new lease id for the routes under `/v1/leases/{lease}/`. Fails at once\nwith `device-leased` while another lease holds the iPhone. The problem detail\nshows its label, reason, when it was acquired and when it was last used, so the\nclient can decide to give up instead of retrying. `force` ends that lease\ninstead (after its running operation); its next call gets `lease-invalid`.\n`waitSeconds` waits for the other lease to end instead. Send\n`Accept: text/event-stream` with it, so a closed connection stops the wait\n(events `log`, then `result` with the Lease, or `error`).\nOn the unix socket, a `device` that is on another Mac of the account (or the only\niPhone of the account, when this Mac has none) is taken on that Mac; the id is then\n`<mac>:<number>`.\nEvery acquire asks ghosthand.dev if the plan covers this iPhone on this Mac (free:\none iPhone; Pro: every iPhone on each paid Mac). Not covered: `subscription-required`\nwith the subscribe and dashboard links. ghosthand.dev unreachable: only an iPhone\nallowed in a recent check is leased; any other gets `tunnel-offline`.\n",
+        "x-holocron": {
+          "href": "/api/acquire-lease",
+          "metadata": {
+            "sidebarTitle": "Acquire lease",
+            "title": "Take exclusive use of one iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand acquire --label ses_123 --reason \"reply to Anna in Messages\""
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases \\\n  -H 'content-type: application/json' \\\n  -d '{\"device\":\"default\",\"label\":\"ses_123\",\"reason\":\"reply to Anna in Messages\"}'\n"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcquireLeaseRequest"
+              },
+              "examples": {
+                "Default iPhone": {
+                  "value": {
+                    "reason": "reply to Anna in Messages",
+                    "label": "ses_123"
+                  }
+                },
+                "Wait for another lease": {
+                  "value": {
+                    "device": "7EF219AD-69B4-423E-B8C4-4F4A6140822F",
+                    "reason": "reply to Anna in Messages",
+                    "waitSeconds": 600
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lease taken. JSON by default, server-sent events with `Accept text/event-stream`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lease"
+                },
+                "example": {
+                  "id": "42",
+                  "device": "7EF219AD-69B4-423E-B8C4-4F4A6140822F",
+                  "deviceName": "Tommy's iPhone",
+                  "label": "ses_123",
+                  "reason": "reply to Anna in Messages",
+                  "idleTimeoutSeconds": 600,
+                  "expiresAt": "2026-10-07T09:10:00.000Z"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "Events `log` (LogEvent), then `result` (Lease) or `error` (Problem)."
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}": {
+      "delete": {
+        "operationId": "releaseLease",
+        "tags": ["Leases"],
+        "summary": "Release lease",
+        "description": "Waits for a running operation of the lease, then frees the iPhone for the next `POST /v1/leases`.\nTurns AssistiveTouch off, also when it was on before the lease, unless `keepAssistiveTouch`.\nA lease that ends by its idle timeout turns it off too, a few seconds later.\n",
+        "x-holocron": {
+          "href": "/api/release-lease",
+          "metadata": {
+            "sidebarTitle": "Release lease",
+            "title": "End a lease and free the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand release -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X DELETE http://localhost/v1/leases/42"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "keepAssistiveTouch",
+            "in": "query",
+            "description": "Leave AssistiveTouch on after the release.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lease ended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "message": "released lease 42"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/screenshot": {
+      "get": {
+        "operationId": "getScreenshot",
+        "tags": ["Screen"],
+        "summary": "Take screenshot",
+        "description": "The current screen as PNG or JPEG, in about 0.3 s. The capture stops 1 s after the\nlast frame to save CPU, and restarting it adds about 0.2 s. The image is in screen points by default (see\n`scale`): its pixels are the coordinates that `tap`, `swipe` and `scroll` take.\n",
+        "x-holocron": {
+          "href": "/api/screenshot",
+          "metadata": {
+            "sidebarTitle": "Take screenshot",
+            "title": "Take a screenshot of the iPhone screen"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand screenshot -l 42 -o home.png"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -o home.png \\\n  'http://localhost/v1/leases/42/screenshot?settle=true'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "name": "settle",
+            "in": "query",
+            "description": "Wait until two frames 150 ms apart match (up to 2 s), so an animation after an action is finished.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "native",
+            "in": "query",
+            "description": "Take a real iOS screenshot instead (cmd+shift+3 on the Bluetooth keyboard), read it\nover USB, then delete it from Photos. About 2 s. It shows system dialogs that USB\nscreen capture leaves out. The iPhone must be unlocked and paired over Bluetooth.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Image format of the response body.",
+            "schema": {
+              "type": "string",
+              "enum": ["png", "jpeg"],
+              "default": "png"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Screen image",
+            "headers": {
+              "X-Image-Width": {
+                "description": "Image width in pixels",
+                "required": true,
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Image-Height": {
+                "description": "Image height in pixels",
+                "required": true,
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-Note": {
+                "description": "With `native`, what happened to the screenshot file on the iPhone (deleted, or kept and why)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/text": {
+      "get": {
+        "operationId": "getScreenText",
+        "tags": ["Screen"],
+        "summary": "Read screen text",
+        "description": "On-device text recognition (Vision, accurate level, English plus an optional language) of a\nfresh frame. Boxes use a top-left origin in the same space as the screenshot\nand `tap` (screen points by default, see `scale`). About 0.1 s for the frame\nplus 0.05-0.25 s for OCR.\n",
+        "x-holocron": {
+          "href": "/api/screen-text",
+          "metadata": {
+            "sidebarTitle": "Read screen text",
+            "title": "Read the text on screen with OCR"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand screentext -l 42 --language it-IT --json"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock 'http://localhost/v1/leases/42/text?language=it-IT'"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "name": "settle",
+            "in": "query",
+            "description": "Wait until two frames 150 ms apart match (up to 2 s) before OCR.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recognized text lines, top to bottom",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreenText"
+                },
+                "example": {
+                  "width": 414,
+                  "height": 896,
+                  "lines": [
+                    {
+                      "text": "Settings",
+                      "x": 20,
+                      "y": 96,
+                      "width": 124,
+                      "height": 34,
+                      "confidence": 1
+                    },
+                    {
+                      "text": "General",
+                      "x": 66,
+                      "y": 433,
+                      "width": 64,
+                      "height": 20,
+                      "confidence": 1
+                    },
+                    {
+                      "text": "Accessibility",
+                      "x": 66,
+                      "y": 477,
+                      "width": 102,
+                      "height": 20,
+                      "confidence": 0.98
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/tap": {
+      "post": {
+        "operationId": "tap",
+        "tags": ["Input"],
+        "summary": "Tap",
+        "description": "Tap at a point with a 220...260 ms press, or at text found by OCR. With `text`, OCR reads the screen (native\npixels, `language`) and taps the center of the matching line: a line equal to `text`\n(case-insensitive) wins over lines that only contain it. Several matches fail with a\nnumbered list, top to bottom; pick one with `index`.\n",
+        "x-holocron": {
+          "href": "/api/tap",
+          "metadata": {
+            "sidebarTitle": "Tap",
+            "title": "Tap at a point or on text"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand tap -l 42 207 448 --screenshot after.png\nghosthand tap -l 42 --text General --wait-text About\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock \\\n  'http://localhost/v1/leases/42/tap?waitText=About&screentext=true' \\\n  -H 'content-type: application/json' -d '{\"text\":\"General\"}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TapRequest"
+              },
+              "examples": {
+                "Point": {
+                  "value": {
+                    "x": 207,
+                    "y": 448
+                  }
+                },
+                "Text": {
+                  "value": {
+                    "text": "General"
+                  }
+                },
+                "Second match": {
+                  "value": {
+                    "text": "Wi-Fi",
+                    "index": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/double-tap": {
+      "post": {
+        "operationId": "doubleTap",
+        "tags": ["Input"],
+        "summary": "Double tap",
+        "description": "Two mouse clicks at one point, with 220...260 ms presses and a 100...150 ms\nrelease-to-press gap. Select a word or zoom supported content. App behavior\nvaries; this is not a VoiceOver gesture or a side-button confirmation.\nWith text, resolve the matching OCR line once before both clicks.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/triple-tap": {
+      "post": {
+        "operationId": "tripleTap",
+        "tags": ["Input"],
+        "summary": "Triple tap",
+        "description": "Three mouse clicks at one point, timed like `double-tap`. Selects a paragraph or\nline in text views that support it. With text, resolve the OCR line once before the clicks.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/hold": {
+      "post": {
+        "operationId": "hold",
+        "tags": ["Input"],
+        "summary": "Hold",
+        "description": "Press and hold at a point, or at text found by OCR (like `tap`), for `durationMs`\nwithout moving, then release. A long press: context menus, Home Screen icon menus,\nlink previews. No reports are sent while held: iOS reads repeated reports as movement.\n",
+        "x-holocron": {
+          "href": "/api/hold",
+          "metadata": {
+            "sidebarTitle": "Hold",
+            "title": "Press and hold (long press)"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand hold -l 42 60 120 --screenshot after.png\nghosthand hold -l 42 --text Safari --duration 1500\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/hold \\\n  -H 'content-type: application/json' -d '{\"x\":60,\"y\":120,\"durationMs\":1000}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldRequest"
+              },
+              "examples": {
+                "Point": {
+                  "value": {
+                    "x": 60,
+                    "y": 120
+                  }
+                },
+                "Text": {
+                  "value": {
+                    "text": "Safari",
+                    "durationMs": 1500
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/swipe": {
+      "post": {
+        "operationId": "swipe",
+        "tags": ["Input"],
+        "summary": "Swipe",
+        "description": "A quick human-like finger swipe from `from` to `to`: fast start, lifted while still\nmoving, so feeds like TikTok and lists keep going. Speed, easing and a slight sideways\nbow are random on every call; `durationMs` fixes the speed. Use it for Home Screen\npages, feeds, carousels, pickers and sliders. For exact drag and drop use `hold-drag`.\n",
+        "x-holocron": {
+          "href": "/api/swipe",
+          "metadata": {
+            "sidebarTitle": "Swipe",
+            "title": "Swipe like a finger"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand swipe -l 42 207 300 207 600"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/swipe \\\n  -H 'content-type: application/json' \\\n  -d '{\"from\":{\"x\":207,\"y\":300},\"to\":{\"x\":207,\"y\":600},\"durationMs\":400}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwipeRequest"
+              },
+              "example": {
+                "from": {
+                  "x": 207,
+                  "y": 300
+                },
+                "to": {
+                  "x": 207,
+                  "y": 600
+                },
+                "durationMs": 400
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/hold-drag": {
+      "post": {
+        "operationId": "holdDrag",
+        "tags": ["Input"],
+        "summary": "Hold and drag",
+        "description": "Press at `from`, stay still for `holdMs` (a long press), then drag to `to` with the\nbutton still held and release. Moves items that start dragging after a long press,\nlike Home Screen icons. From the normal Home Screen, icons need `holdMs` 2500\n(iOS enters edit mode while held).\n",
+        "x-holocron": {
+          "href": "/api/hold-drag",
+          "metadata": {
+            "sidebarTitle": "Hold and drag",
+            "title": "Long press, then drag"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand hold-drag -l 42 60 120 300 400"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/hold-drag \\\n  -H 'content-type: application/json' \\\n  -d '{\"from\":{\"x\":60,\"y\":120},\"to\":{\"x\":300,\"y\":400},\"holdMs\":1000,\"durationMs\":1000}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldDragRequest"
+              },
+              "example": {
+                "from": {
+                  "x": 60,
+                  "y": 120
+                },
+                "to": {
+                  "x": 300,
+                  "y": 400
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/scroll": {
+      "post": {
+        "operationId": "scroll",
+        "tags": ["Input"],
+        "summary": "Scroll",
+        "description": "Moves the pointer to `at` (default: screen center), then sends wheel ticks there.\nScrolls lists that a drag cannot scroll (a drag on a UITableView row is a tap).\n",
+        "x-holocron": {
+          "href": "/api/scroll",
+          "metadata": {
+            "sidebarTitle": "Scroll",
+            "title": "Scroll with the mouse wheel"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand scroll -l 42 down 5 --screentext"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock 'http://localhost/v1/leases/42/scroll?screentext=true' \\\n  -H 'content-type: application/json' -d '{\"direction\":\"down\",\"ticks\":5}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrollRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/key": {
+      "post": {
+        "operationId": "pressKey",
+        "tags": ["Input"],
+        "summary": "Press key",
+        "description": "Press a key, a key combination or a media key on the Bluetooth keyboard. `home` goes\nto the Home Screen. For mute use `POST /v1/leases/{lease}/mute`: the Mute key is a\ntoggle and `key` refuses it.\n",
+        "x-holocron": {
+          "href": "/api/press-key",
+          "metadata": {
+            "sidebarTitle": "Press key",
+            "title": "Press a key or key combination"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand key -l 42 home --screenshot s.png\nghosthand key -l 42 cmd+space\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/key \\\n  -H 'content-type: application/json' -d '{\"key\":\"home\"}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/type": {
+      "post": {
+        "operationId": "typeText",
+        "tags": ["Input"],
+        "summary": "Type text",
+        "description": "Types US-ASCII text on the Bluetooth keyboard into the focused field. Tap the field\nfirst. For secrets, send the text in the body only; it is not logged.\n",
+        "x-holocron": {
+          "href": "/api/type",
+          "metadata": {
+            "sidebarTitle": "Type text",
+            "title": "Type text with the Bluetooth keyboard"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand type -l 42 \"ciao\" --enter\nsecret-provider | ghosthand type -l 42 --stdin\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/type \\\n  -H 'content-type: application/json' -d '{\"text\":\"ciao\",\"enter\":true}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/task": {
+      "post": {
+        "operationId": "runTask",
+        "tags": ["Tasks"],
+        "summary": "Run a task",
+        "description": "Do a task in plain words (\"open the TikTok likes tab\") on the lease's iPhone. An agent on\nghosthand.dev (a fast model, Claude Haiku 5.5) reads the screen with OCR and sends\nthe taps, swipes and keys through this Mac's tunnel, then answers in one or two\nsentences. One call is one turn; the task keeps its history, so `task` sends a\nfollow-up to the same task. A follow-up while a turn runs stops that turn first. The task ends one day after its last turn. The agent gets\nthe iPhone's name, model, iOS version, language and region (as `info` reads them).\n\nWith `Accept: text/event-stream` the response is the turn's AI SDK UI message stream,\nunchanged: `data: <chunk JSON>` events (`start`, `tool-input-available`,\n`tool-output-available`, `text-delta`, `finish`, ...), then `data: [DONE]`. A failure\nis an `error` chunk. Closing the stream stops the task. Without that header the\nresponse is one JSON body after the turn ends.\n\nNeeds a signed-in Mac with its tunnel connected. The task uses the lease; do not send\nother input to the iPhone while it runs.\n",
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand task -l 42 \"open Settings > General > About and tell me the iOS version\"\nghosthand task -l 42 --resume tsk_8f2k3x \"now go back to the Home Screen\"\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl -N --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/task \\\n  -H 'accept: text/event-stream' -H 'content-type: application/json' \\\n  -d '{\"prompt\":\"open the TikTok likes tab\"}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The turn ended (JSON) or streams (SSE)",
+            "headers": {
+              "Ghosthand-Task": {
+                "description": "The task id; pass it as `task` to send a follow-up",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResult"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "AI SDK UI message stream: `data: <UIMessageChunk>` events, then `data: [DONE]`"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/mute": {
+      "post": {
+        "operationId": "setMuted",
+        "tags": ["Input"],
+        "summary": "Set mute",
+        "description": "Presses the Bluetooth keyboard Mute key (consumer 0xE2), which toggles iOS full\nmute: all output, media in every app too. The ringer switch is separate. Each press\nis confirmed by SpringBoard's system log line over USB. If the first press toggled\nthe wrong way (the iPhone was already in the asked state), it presses once more.\nWithout a confirmation it fails with `mute-unconfirmed` and never presses again.\n",
+        "x-holocron": {
+          "href": "/api/mute",
+          "metadata": {
+            "sidebarTitle": "Set mute",
+            "title": "Mute or unmute all iPhone sound"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand mute -l 42\nghosthand unmute -l 42\n"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/mute \\\n  -H 'content-type: application/json' -d '{\"muted\":true}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/wake": {
+      "post": {
+        "operationId": "wakeScreen",
+        "tags": ["Lock screen"],
+        "summary": "Wake screen",
+        "description": "Clicks at the top center (the status bar), then waits for a USB frame. Needs a paired iPhone. A locked iPhone fails with `device-locked`; `unlock` also wakes it.",
+        "x-holocron": {
+          "href": "/api/wake",
+          "metadata": {
+            "sidebarTitle": "Wake screen",
+            "title": "Turn the display on with a Bluetooth click"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand wake -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X POST http://localhost/v1/leases/42/wake"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/unlock": {
+      "post": {
+        "operationId": "unlock",
+        "tags": ["Lock screen"],
+        "summary": "Unlock",
+        "description": "Bluetooth keyboard only: Enter wakes the screen, Enter opens the passcode screen,\nthen the passcode is typed once (about 3 s). Locked-screen USB capture is unavailable, so the screen cannot be checked.\nSuccess is checked with the lock state over USB. A wrong passcode is not retried (`unlock-failed`),\nbecause failed tries count toward the iPhone lockout. An unlocked iPhone\nis left as it is. The passcode is not stored.\n",
+        "x-holocron": {
+          "href": "/api/unlock",
+          "metadata": {
+            "sidebarTitle": "Unlock",
+            "title": "Wake a locked iPhone and type its passcode"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "secret-provider | ghosthand unlock -l 42 --stdin"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/Scale"
+          },
+          {
+            "$ref": "#/components/parameters/Language"
+          },
+          {
+            "$ref": "#/components/parameters/WaitText"
+          },
+          {
+            "$ref": "#/components/parameters/TimeoutMs"
+          },
+          {
+            "$ref": "#/components/parameters/Screenshot"
+          },
+          {
+            "$ref": "#/components/parameters/Screentext"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/lock": {
+      "post": {
+        "operationId": "lockScreen",
+        "tags": ["Lock screen"],
+        "summary": "Lock",
+        "description": "Sends Control-Command-Q through the paired keyboard, then checks the lock state over USB (`lock-failed` when it did not lock).",
+        "x-holocron": {
+          "href": "/api/lock",
+          "metadata": {
+            "sidebarTitle": "Lock",
+            "title": "Lock the iPhone over Bluetooth"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand lock -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X POST http://localhost/v1/leases/42/lock"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/recording/start": {
+      "post": {
+        "operationId": "startRecording",
+        "tags": ["Recording"],
+        "summary": "Start recording",
+        "description": "Records the iPhone screen (H.264) and its sound (AAC) from the same USB capture as\nscreenshots, so screenshots and input keep working while it records. The file is\nwritten on the daemon's Mac. It stops by itself after `maxDurationSeconds`, when the\nlease ends (release, idle timeout, `force`), or when the daemon stops; the file is\ncomplete in each case. One recording per iPhone at a time (`recording-active`).\nA locked iPhone fails with `device-locked`.\n",
+        "x-holocron": {
+          "href": "/api/start-recording",
+          "metadata": {
+            "sidebarTitle": "Start recording",
+            "title": "Start a screen recording to a video file"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand record start -l 42 /tmp/demo.mp4 --fps 30 --max-duration 60"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/recording/start \\\n  -H 'content-type: application/json' -d '{\"path\":\"/tmp/demo.mp4\",\"fps\":30,\"maxDurationSeconds\":60}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingStartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recording started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recording"
+                },
+                "example": {
+                  "path": "/tmp/demo.mp4",
+                  "startedAt": "2026-10-07T09:00:00.000Z",
+                  "stopsAt": "2026-10-07T09:01:00.000Z",
+                  "fps": 30,
+                  "audio": true
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/recording/stop": {
+      "post": {
+        "operationId": "stopRecording",
+        "tags": ["Recording"],
+        "summary": "Stop recording",
+        "description": "Returns when the file is complete. After an automatic stop (max duration) it returns\nthat recording's result once. `no-recording` when nothing was recorded since the last\nstop. `recording-failed` when the video writer failed (for example a full disk).\n",
+        "x-holocron": {
+          "href": "/api/stop-recording",
+          "metadata": {
+            "sidebarTitle": "Stop recording",
+            "title": "Stop the screen recording and finish the file"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand record stop -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X POST http://localhost/v1/leases/42/recording/stop"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The finished recording",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingResult"
+                },
+                "example": {
+                  "path": "/tmp/demo.mp4",
+                  "durationSeconds": 12.4,
+                  "bytes": 4381022,
+                  "width": 828,
+                  "height": 1792,
+                  "frames": 372,
+                  "droppedFrames": 0,
+                  "audio": true,
+                  "stoppedBy": "request"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/assistive-touch": {
+      "get": {
+        "operationId": "getAssistiveTouch",
+        "tags": ["Settings"],
+        "summary": "Get AssistiveTouch",
+        "description": "Read over USB lockdown in about 35 ms, also while the iPhone is locked.",
+        "x-holocron": {
+          "href": "/api/get-assistive-touch",
+          "metadata": {
+            "sidebarTitle": "Get AssistiveTouch",
+            "title": "Read whether AssistiveTouch is on"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand assistivetouch -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/leases/42/assistive-touch"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AssistiveTouch setting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistiveTouch"
+                },
+                "example": {
+                  "enabled": true
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "put": {
+        "operationId": "setAssistiveTouch",
+        "tags": ["Settings"],
+        "summary": "Set AssistiveTouch",
+        "description": "Writes the setting over USB lockdown (about 40 ms, also while locked), with no\ntouch on the iPhone. Without AssistiveTouch the iPhone shows no pointer and drops\nclicks, so acquire, tap, swipe and wake turn it on by themselves. Release\nturns it off again when ghosthand turned it on; the Bluetooth link stays connected.\n",
+        "x-holocron": {
+          "href": "/api/set-assistive-touch",
+          "metadata": {
+            "sidebarTitle": "Set AssistiveTouch",
+            "title": "Turn AssistiveTouch on or off over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand assistivetouch -l 42 off"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X PUT http://localhost/v1/leases/42/assistive-touch \\\n  -H 'content-type: application/json' -d '{\"enabled\":false}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistiveTouch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The setting after the change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistiveTouch"
+                },
+                "example": {
+                  "enabled": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/control": {
+      "get": {
+        "operationId": "getControl",
+        "tags": ["Settings"],
+        "summary": "Get control mode",
+        "description": "How the daemon sends input to the iPhone (Bluetooth or XCTest), and the XCTest runner state.",
+        "x-holocron": {
+          "href": "/api/get-control",
+          "metadata": {
+            "sidebarTitle": "Get control mode",
+            "title": "Read whether input goes over Bluetooth or XCTest"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand control -l 42"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Control mode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlState"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "put": {
+        "operationId": "setControl",
+        "tags": ["Settings"],
+        "summary": "Set control mode",
+        "description": "`xctest` builds WebDriverAgent for this iPhone when needed (1-3 min the first time),\nstarts it and waits until it answers; calling it again restarts the runner. Needs\nXcode signed in to an Apple account, Developer Mode, the developer trusted on the\niPhone and UI Automation on; errors say which step is missing. `bluetooth` stops the\nrunner. Stream with `Accept: text/event-stream` to see the build steps.\n",
+        "x-holocron": {
+          "href": "/api/set-control",
+          "metadata": {
+            "sidebarTitle": "Set control mode",
+            "title": "Switch input between Bluetooth and XCTest"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand control -l 42 xctest"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Action"
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/name": {
+      "put": {
+        "operationId": "renameDevice",
+        "tags": ["Settings"],
+        "summary": "Rename device",
+        "description": "Writes the name over USB lockdown (Settings > General > About > Name), with no\ntouch on the iPhone. Screen capture keeps the old name until the cable is plugged\nin again; the device id does not change.\n",
+        "x-holocron": {
+          "href": "/api/rename-device",
+          "metadata": {
+            "sidebarTitle": "Rename device",
+            "title": "Rename the iPhone over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand rename -l 42 \"Test iPhone\""
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X PUT http://localhost/v1/leases/42/name \\\n  -H 'content-type: application/json' -d '{\"name\":\"Test iPhone\"}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Renamed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "message": "renamed to Test iPhone"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/bluetooth": {
+      "delete": {
+        "operationId": "forgetBluetooth",
+        "tags": ["Settings"],
+        "summary": "Forget Bluetooth",
+        "description": "Removes this Mac's Bluetooth bond with the iPhone. The fix when pairing fails because\none side kept an old bond. Also forget the Mac on the iPhone, then pair again from its\nSettings > Bluetooth. Clears the saved pointer mode too.\n",
+        "x-holocron": {
+          "href": "/api/forget-bluetooth",
+          "metadata": {
+            "sidebarTitle": "Forget Bluetooth",
+            "title": "Remove the Mac's Bluetooth bond with the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand forget -l 42"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X DELETE http://localhost/v1/leases/42/bluetooth"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bond removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/files": {
+      "get": {
+        "operationId": "listFiles",
+        "tags": ["Files"],
+        "summary": "List files",
+        "description": "Lists a folder on the iPhone over USB (AFC). Without `app` the root is the media\nfolder, /var/mobile/Media: DCIM (Camera Roll files), Downloads, Books, PublicStaging.\nWith `app` the root is that app's Documents, only for apps with file sharing\n(`fileSharing` in `GET apps`). Works while the iPhone is locked, after its first\nunlock since boot. No Developer Mode.\n",
+        "x-holocron": {
+          "href": "/api/list-files",
+          "metadata": {
+            "sidebarTitle": "List files",
+            "title": "List files on the iPhone over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand file list -l 42 /DCIM --recursive"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock 'http://localhost/v1/leases/42/files?path=/DCIM&recursive=true'"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/FilePath"
+          },
+          {
+            "$ref": "#/components/parameters/FileApp"
+          },
+          {
+            "name": "recursive",
+            "in": "query",
+            "description": "Also list everything in subfolders. Folders iOS does not allow are skipped.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries of the folder; a file path gives that one file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileList"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeFile",
+        "tags": ["Files"],
+        "summary": "Remove file",
+        "description": "Removes a file, or a folder with everything in it. Refuses /DCIM: a Camera Roll file\nremoved over AFC stays as a broken photo in Photos; use `POST photos/delete`.\n",
+        "x-holocron": {
+          "href": "/api/remove-file",
+          "metadata": {
+            "sidebarTitle": "Remove file",
+            "title": "Remove a file on the iPhone over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand file remove -l 42 /Downloads/report.pdf"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/FilePath"
+          },
+          {
+            "$ref": "#/components/parameters/FileApp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/files/content": {
+      "get": {
+        "operationId": "pullFile",
+        "tags": ["Files"],
+        "summary": "Download file",
+        "description": "The bytes of an iPhone file. A folder comes as a zip of the folder\n(`Content-Type: application/zip`).\n",
+        "x-holocron": {
+          "href": "/api/pull-file",
+          "metadata": {
+            "sidebarTitle": "Download file",
+            "title": "Copy a file from the iPhone over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand file pull -l 42 /DCIM/100APPLE/IMG_0002.PNG native.png"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -o native.png 'http://localhost/v1/leases/42/files/content?path=/DCIM/100APPLE/IMG_0002.PNG'"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/FilePath"
+          },
+          {
+            "$ref": "#/components/parameters/FileApp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content",
+            "headers": {
+              "X-File-Name": {
+                "description": "Name of the file, or of the folder with `.zip` added",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "binary"
+                }
+              },
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "put": {
+        "operationId": "pushFile",
+        "tags": ["Files"],
+        "summary": "Upload file",
+        "description": "Writes the request body to a file on the iPhone, replacing it, and makes missing\nfolders. Files in the media folder are not in any app: a photo copied to /DCIM does\nnot appear in Photos (see the README for ways to add photos).\n",
+        "x-holocron": {
+          "href": "/api/push-file",
+          "metadata": {
+            "sidebarTitle": "Upload file",
+            "title": "Copy a file to the iPhone over USB"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand file push -l 42 report.pdf /Downloads/report.pdf"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X PUT --data-binary @report.pdf \\\n  -H 'content-type: application/octet-stream' 'http://localhost/v1/leases/42/files/content?path=/Downloads/report.pdf'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "$ref": "#/components/parameters/FilePath"
+          },
+          {
+            "$ref": "#/components/parameters/FileApp"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "contentEncoding": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Written",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/uploads": {
+      "post": {
+        "operationId": "uploadFile",
+        "tags": ["Files"],
+        "summary": "Upload for Safari",
+        "description": "Uploads the request body to ghosthand.dev with this Mac's account and returns a\nshort link that lasts 1 day. Open it in Safari on the iPhone and tap Save: the share\nsheet then offers Save Video or Save Image, which adds the file to Photos. No lease:\nnothing runs on the iPhone. At most 100 MB.\n",
+        "x-holocron": {
+          "href": "/api/upload-file",
+          "metadata": {
+            "sidebarTitle": "Upload for Safari",
+            "title": "Upload a file for the iPhone to save to Photos"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand upload clip.mp4"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock --data-binary @clip.mp4 \\\n  -H 'content-type: application/octet-stream' 'http://localhost/v1/uploads?name=clip.mp4'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "File name with its extension; Photos needs the extension to know the type, e.g. clip.mp4",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "contentEncoding": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Upload"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/photos": {
+      "get": {
+        "operationId": "listPhotos",
+        "tags": ["Files"],
+        "summary": "List photos",
+        "description": "Camera Roll files (photos, videos, screenshots) under /DCIM, newest first.",
+        "x-holocron": {
+          "href": "/api/list-photos",
+          "metadata": {
+            "sidebarTitle": "List photos",
+            "title": "List the newest photos on the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand photo list -l 42 --limit 5"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Newest files to return, 1-10000",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileList"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/photos/delete": {
+      "post": {
+        "operationId": "deletePhotos",
+        "tags": ["Files"],
+        "summary": "Delete photos",
+        "description": "Deletes Camera Roll files by name through ImageCaptureCore, like Image Capture.app,\nso the Photos library forgets them too. Permanent: they skip Recently Deleted. The\niPhone must be unlocked.\n",
+        "x-holocron": {
+          "href": "/api/delete-photos",
+          "metadata": {
+            "sidebarTitle": "Delete photos",
+            "title": "Delete photos from the iPhone library"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand photo delete -l 42 IMG_0004.PNG"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeletePhotosRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/apps": {
+      "get": {
+        "operationId": "listApps",
+        "tags": ["Apps"],
+        "summary": "List apps",
+        "description": "Installed apps over USB (installation_proxy), with their Home Screen place\n(springboardservices). `installing` marks App Store downloads that are not done yet.\n",
+        "x-holocron": {
+          "href": "/api/list-apps",
+          "metadata": {
+            "sidebarTitle": "List apps",
+            "title": "List the apps on the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand app list -l 42"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "system",
+            "in": "query",
+            "description": "Also list Apple's built-in apps",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apps, user apps first, by name",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppList"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "post": {
+        "operationId": "installApp",
+        "tags": ["Apps"],
+        "summary": "Install app",
+        "description": "Installs the .ipa in the request body. iOS checks the signature: only IPAs signed\nfor this iPhone install (ad hoc, enterprise, or development with this iPhone in the\nprofile). App Store apps come from the App Store app.\n",
+        "x-holocron": {
+          "href": "/api/install-app",
+          "metadata": {
+            "sidebarTitle": "Install app",
+            "title": "Install an IPA on the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand app install -l 42 MyApp.ipa"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "File name of the IPA, for messages",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "contentEncoding": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Installed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/apps/{bundle}": {
+      "delete": {
+        "operationId": "uninstallApp",
+        "tags": ["Apps"],
+        "summary": "Uninstall app",
+        "description": "Removes the app and its data, like Remove App > Delete App on the iPhone.",
+        "x-holocron": {
+          "href": "/api/uninstall-app",
+          "metadata": {
+            "sidebarTitle": "Uninstall app",
+            "title": "Uninstall an app from the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand app uninstall -l 42 com.example.app"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "bundle",
+            "in": "path",
+            "required": true,
+            "description": "Bundle id from `GET apps`, e.g. com.burbn.instagram",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Uninstalled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/info": {
+      "get": {
+        "operationId": "getDeviceInfo",
+        "tags": ["Device"],
+        "summary": "Device info",
+        "description": "Model, iOS build, serial number, battery, storage, language and time zone over USB lockdown. Works while locked.",
+        "x-holocron": {
+          "href": "/api/device-info",
+          "metadata": {
+            "sidebarTitle": "Device info",
+            "title": "Read battery, storage and iOS version"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand info -l 42"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Device info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceInfo"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/logs": {
+      "get": {
+        "operationId": "getLogs",
+        "tags": ["Device"],
+        "summary": "Read system log",
+        "description": "Lines of the iPhone system log (syslog_relay) during the next `seconds`. iOS keeps\nno history for this stream: start it, then do what you want to watch.\n",
+        "x-holocron": {
+          "href": "/api/logs",
+          "metadata": {
+            "sidebarTitle": "Read system log",
+            "title": "Read the iPhone system log"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand logs -l 42 --process appstored --seconds 10"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          },
+          {
+            "name": "seconds",
+            "in": "query",
+            "description": "How long to read, 1-120",
+            "schema": {
+              "type": "number",
+              "default": 5
+            }
+          },
+          {
+            "name": "grep",
+            "in": "query",
+            "description": "Keep lines that contain this (case-insensitive)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "process",
+            "in": "query",
+            "description": "Keep lines of this process, e.g. SpringBoard or appstored",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Stop after this many lines, 1-10000",
+            "schema": {
+              "type": "integer",
+              "default": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Log lines",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogLines"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/power": {
+      "post": {
+        "operationId": "setPower",
+        "tags": ["Device"],
+        "summary": "Restart or shut down",
+        "description": "Restarts or shuts down the iPhone over USB (diagnostics_relay). After a restart iOS\nignores the Bluetooth keyboard until a person types the passcode once.\n",
+        "x-holocron": {
+          "href": "/api/power",
+          "metadata": {
+            "sidebarTitle": "Restart or shut down",
+            "title": "Restart or shut down the iPhone"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand restart -l 42"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Requested",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/leases/{lease}/random": {
+      "post": {
+        "operationId": "generateRandom",
+        "tags": ["Random"],
+        "summary": "Make a random value",
+        "description": "Makes a random name, last name, username, 18+ birthdate or password for a new account,\nand saves it in state.db with the lease's reason, label and iPhone. `username` is built\nfrom the newest name and last name made on this lease, else from random ones. Values\nare never deleted: `GET /v1/random` lists them after the lease ends.\n",
+        "x-holocron": {
+          "href": "/api/generate-random",
+          "metadata": {
+            "sidebarTitle": "Make random value",
+            "title": "Make and save a random account detail"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand random -l 42 password"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X POST http://localhost/v1/leases/42/random \\\n  -H 'content-type: application/json' -d '{\"kind\":\"password\"}'\n"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Lease"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RandomRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Value made and saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RandomValue"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/random": {
+      "get": {
+        "operationId": "listRandom",
+        "tags": ["Random"],
+        "summary": "List random values",
+        "description": "Every saved random value, newest first. Needs no lease, so values stay readable after their lease ends.",
+        "x-holocron": {
+          "href": "/api/list-random",
+          "metadata": {
+            "sidebarTitle": "List random values",
+            "title": "List saved random account details"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand random list"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/random"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lease",
+            "in": "query",
+            "required": false,
+            "description": "Only the values made on this lease",
+            "schema": {
+              "$ref": "#/components/schemas/LeaseId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved values, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RandomValueList"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/setup/status": {
+      "get": {
+        "operationId": "getSetupStatus",
+        "tags": ["Setup"],
+        "summary": "Check setup readiness",
+        "description": "Poll every 2 seconds after opening setup. Works before permissions, USB trust or\nBluetooth pairing are complete. Never requests permissions, opens windows, sends\ninput or acquires a lease. Continue when ready is true. If several phones are\nconnected, select the intended phone with device; do not use another ready phone.\n",
+        "parameters": [
+          {
+            "name": "device",
+            "in": "query",
+            "description": "USB id, capture id or exact phone name. Omit only for a single phone.",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current readiness and setup steps, including incomplete setup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/setup/pairing": {
+      "post": {
+        "operationId": "startPairing",
+        "tags": ["Setup"],
+        "summary": "Start pairing",
+        "description": "The Mac shows under Settings > Bluetooth on the iPhone for 30 s. Call again to extend; it stops by itself when calls stop. Call it only while a phone's `step` is `pair`.",
+        "x-holocron": {
+          "href": "/api/start-pairing",
+          "metadata": {
+            "sidebarTitle": "Start pairing",
+            "title": "Make the Mac discoverable for Bluetooth pairing"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock -X POST http://localhost/v1/setup/pairing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Discoverable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "message": "Mac discoverable for 30 s"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/setup/permissions": {
+      "post": {
+        "operationId": "requestMacPermission",
+        "tags": ["Setup"],
+        "summary": "Request a macOS permission",
+        "description": "Called by the setup app only after a user clicks an Allow button. Normal commands\nnever request permissions. Agents run `ghosthand setup` once, then poll setup status\nuntil ready while the user follows the app. Already allowed or denied permissions do not show another prompt;\ndenied permissions need the setup app's Open Settings button.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MacPermission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Permission request started; read GET /v1/phones for its result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/account": {
+      "get": {
+        "operationId": "getAccount",
+        "tags": ["Account"],
+        "summary": "Get account",
+        "description": "The Mac's sign-in state and, when signed in, the plan from ghosthand.dev (one\nrequest to the server). Every lease needs a signed-in account: free covers one\niPhone, Pro covers every iPhone on each paid Mac. `GET /v1/phones` carries the same\nsign-in state without the plan and without a server request.\n",
+        "x-holocron": {
+          "href": "/api/get-account",
+          "metadata": {
+            "sidebarTitle": "Get account",
+            "title": "Read the sign-in state and plan"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sign-in state, and the plan when signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                },
+                "example": {
+                  "state": "signed-in",
+                  "server": "https://ghosthand.dev",
+                  "email": "tommy@example.com",
+                  "plan": "pro",
+                  "paidMacs": 2,
+                  "sourceAccess": true,
+                  "subscribeUrl": "https://ghosthand.dev/subscribe",
+                  "dashboardUrl": "https://ghosthand.dev/dashboard"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "logout",
+        "tags": ["Account"],
+        "summary": "Sign out",
+        "description": "Removes the session from this Mac and revokes it on ghosthand.dev. Unix socket only.",
+        "x-holocron": {
+          "href": "/api/logout",
+          "metadata": {
+            "sidebarTitle": "Sign out",
+            "title": "Sign this Mac out of ghosthand.dev"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/tunnel/tokens": {
+      "post": {
+        "operationId": "createTunnelToken",
+        "tags": ["Account"],
+        "summary": "Create an API token",
+        "description": "Creates an API token for scripts that call this API from another computer through\n`https://ghosthand.dev/macs/<mac>`. The token works for every Mac of the account and\nis shown once. Unix socket only: a token must not be able to create more tokens.\n",
+        "x-holocron": {
+          "href": "/api/create-tunnel-token",
+          "metadata": {
+            "sidebarTitle": "Create an API token",
+            "title": "Create an API token for scripts"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand tunnel url --new-token --name ci"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "description": "A label to recognise the token, e.g. `ci` or `my-script`"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The token. It is not shown again",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TunnelToken"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/tunnel/tokens/{id}": {
+      "delete": {
+        "operationId": "revokeTunnelToken",
+        "tags": ["Account"],
+        "summary": "Revoke an API token",
+        "description": "Revokes a token created with `POST /v1/tunnel/tokens`. Scripts that use it get 401 at once. Unix socket only.",
+        "x-holocron": {
+          "href": "/api/revoke-tunnel-token",
+          "metadata": {
+            "sidebarTitle": "Revoke an API token",
+            "title": "Revoke an API token"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand tunnel revoke 01K7Q2"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The token id from `ghosthand tunnel url --new-token`"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/account/login": {
+      "post": {
+        "operationId": "login",
+        "tags": ["Account"],
+        "summary": "Start sign-in",
+        "description": "Starts a browser sign-in (OAuth device flow) and returns `verificationUrl` to open.\nThe daemon polls ghosthand.dev by itself until the user approves, denies, or the\nlink expires; read the result from `GET /v1/phones` or `GET /v1/account`. Calling it\nagain while a sign-in runs returns the same link. Unix socket only: the setup app\nand `ghosthand account login` call it, agents do not.\n",
+        "x-holocron": {
+          "href": "/api/login",
+          "metadata": {
+            "sidebarTitle": "Start sign-in",
+            "title": "Sign this Mac in to ghosthand.dev"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sign-in started, or already running, or already signed in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/daemon": {
+      "get": {
+        "operationId": "getDaemon",
+        "tags": ["Daemon"],
+        "summary": "Get status",
+        "description": "Version, pid, build id, listeners and Bluetooth state of the running daemon.",
+        "x-holocron": {
+          "href": "/api/daemon-status",
+          "metadata": {
+            "sidebarTitle": "Get status",
+            "title": "Read the daemon status"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand daemon status"
+          },
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/daemon"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daemon state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DaemonInfo"
+                },
+                "example": {
+                  "version": "0.9.0",
+                  "pid": 51234,
+                  "executable": "/usr/local/bin/ghosthand",
+                  "buildId": "3f9a1c2e",
+                  "startedAt": "2026-10-07T08:55:00.000Z",
+                  "bluetooth": {
+                    "state": "on"
+                  },
+                  "listen": {
+                    "unix": "/Users/tommy/.ghosthand/daemon.sock"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/daemon/stop": {
+      "post": {
+        "operationId": "stopDaemon",
+        "tags": ["Daemon"],
+        "summary": "Stop daemon",
+        "description": "Requests in progress get up to 2 s to finish, then the daemon exits.",
+        "x-holocron": {
+          "href": "/api/stop-daemon",
+          "metadata": {
+            "sidebarTitle": "Stop daemon",
+            "title": "Stop the daemon"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand daemon stop"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The daemon is stopping",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "message": "daemon stopping"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/daemon/restart": {
+      "post": {
+        "operationId": "restartDaemon",
+        "tags": ["Daemon"],
+        "summary": "Restart daemon",
+        "description": "The daemon stops like `POST /v1/daemon/stop`, then runs the binary on disk\nagain (or `executable`) with the same arguments and environment. Use it after\na rebuild or an update. The pid stays the same; `startedAt` changes.\nLeases live in state.db and stay valid.\n",
+        "x-holocron": {
+          "href": "/api/restart-daemon",
+          "metadata": {
+            "sidebarTitle": "Restart daemon",
+            "title": "Restart the daemon with the same arguments"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand daemon restart"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestartDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The daemon is restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                },
+                "example": {
+                  "message": "daemon restarting"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/daemon/update": {
+      "post": {
+        "operationId": "updateDaemon",
+        "tags": ["Daemon"],
+        "summary": "Update now, or turn auto-update on or off",
+        "description": "Without a body: reads the latest release from ghosthand.dev now and installs it in\n~/Applications/Ghosthand.app when it is a newer build, even with auto-update off. It\ninstalls only while no lease is active, and the daemon restarts on it once idle.\nWith `auto`: only saves the setting. Only over the unix socket; tunnel clients get 403.\n",
+        "x-holocron": {
+          "href": "/api/update-daemon",
+          "metadata": {
+            "sidebarTitle": "Update daemon",
+            "title": "Update the daemon or turn auto-update off"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "CLI",
+            "source": "ghosthand daemon update"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDaemonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update state after the check",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateStatus"
+                },
+                "example": {
+                  "auto": true,
+                  "latest": "0.13.2+20261028101500",
+                  "checkedAt": "2026-10-28T10:20:00.000Z",
+                  "message": "0.13.2+20261028101500 installed; the daemon restarts on it once no lease is active"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/v1/openapi.yaml": {
+      "get": {
+        "operationId": "getOpenAPI",
+        "tags": ["Daemon"],
+        "summary": "Get OpenAPI",
+        "description": "The OpenAPI document the daemon was built from, so a client can check the exact routes it serves.",
+        "x-holocron": {
+          "href": "/api/openapi",
+          "metadata": {
+            "sidebarTitle": "Get OpenAPI",
+            "title": "Download this OpenAPI document"
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "Socket",
+            "source": "curl --unix-socket ~/.ghosthand/daemon.sock http://localhost/v1/openapi.yaml"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The spec the daemon was built from",
+            "content": {
+              "application/yaml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Required on the tunnel. An API token of the account, from `ghosthand tunnel url --new-token`. The unix socket needs no token"
+      }
+    },
+    "parameters": {
+      "Phone": {
+        "name": "phone",
+        "in": "path",
+        "required": true,
+        "description": "`id` (USB UDID) from `GET /v1/phones`.",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "Scale": {
+        "name": "scale",
+        "in": "query",
+        "description": "Coordinate space of images and points, as a fraction of the native screen pixels.\nDefault: screen points (1/2 on @2x iPhones, 1/3 on @3x), e.g. 414x896 on an iPhone XR\ninstead of 828x1792. Points keep UI text readable for vision models at about a third\nof the tokens, and stay under every model's resize limit, so coordinates the model\nreads from the image are the ones to send. Use 1 for native pixels.\n",
+        "schema": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "examples": [1]
+        }
+      },
+      "Language": {
+        "name": "language",
+        "in": "query",
+        "description": "OCR language, a BCP 47 tag (e.g. it-IT). English en-US is always included.",
+        "schema": {
+          "type": "string",
+          "minLength": 2,
+          "examples": ["it-IT"]
+        }
+      },
+      "WaitText": {
+        "name": "waitText",
+        "in": "query",
+        "description": "After the input, read the screen with OCR every 150 ms until a line contains this\ntext (case-insensitive). On timeout it fails with `wait-text-timeout`: the input was\nsent and is never repeated.\n",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "examples": ["About"]
+        }
+      },
+      "TimeoutMs": {
+        "name": "timeoutMs",
+        "in": "query",
+        "description": "Deadline of `waitText`, counted from the end of the input. Needs `waitText`.",
+        "schema": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 60000,
+          "default": 5000
+        }
+      },
+      "Screenshot": {
+        "name": "screenshot",
+        "in": "query",
+        "description": "After the input (and `waitText`), wait until the screen is still, then return its image\nin `screenshot` of the result, in the `scale` space.\n",
+        "schema": {
+          "$ref": "#/components/schemas/ImageFormat"
+        }
+      },
+      "Screentext": {
+        "name": "screentext",
+        "in": "query",
+        "description": "After the input (and `waitText`), wait until the screen is still, then return its OCR\ntext in `screen` of the result. OCR runs on the native frame, boxes are in the `scale`\nspace. With `screenshot`, both come from the same frame.\n",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "FilePath": {
+        "name": "path",
+        "in": "query",
+        "required": true,
+        "description": "Absolute iPhone path, e.g. /DCIM/100APPLE/IMG_0002.PNG (no `..`)",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "FileApp": {
+        "name": "app",
+        "in": "query",
+        "description": "Bundle id of an app with file sharing; the path is then inside its container, e.g. /Documents/a.pdf",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Lease": {
+        "name": "lease",
+        "in": "path",
+        "required": true,
+        "example": "42",
+        "description": "Lease id from `POST /v1/leases`. Unknown, expired, released or taken with `force` gives `lease-invalid`.",
+        "schema": {
+          "$ref": "#/components/schemas/LeaseId"
+        }
+      }
+    },
+    "responses": {
+      "Action": {
+        "description": "Input sent. JSON by default, server-sent events with `Accept text/event-stream`.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ActionResult"
+            },
+            "example": {
+              "message": "tapped 98,443",
+              "logs": ["found \"General\" at 98,443"],
+              "screen": {
+                "width": 414,
+                "height": 896,
+                "lines": [
+                  {
+                    "text": "General",
+                    "x": 158,
+                    "y": 56,
+                    "width": 98,
+                    "height": 22,
+                    "confidence": 1
+                  },
+                  {
+                    "text": "About",
+                    "x": 66,
+                    "y": 145,
+                    "width": 50,
+                    "height": 20,
+                    "confidence": 1
+                  }
+                ]
+              }
+            }
+          },
+          "text/event-stream": {
+            "schema": {
+              "type": "string",
+              "description": "Events `log` (LogEvent), then `result` (ActionResult) or `error` (Problem)."
+            }
+          }
+        }
+      },
+      "Problem": {
+        "description": "Error (RFC 9457 problem details). `code` is stable; switch on it, not on `title` or `detail`.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "example": {
+              "code": "device-leased",
+              "title": "iPhone leased by another client",
+              "status": 409,
+              "detail": "Tommy's iPhone is in use by another lease:\n  ses_456 (book a table on OpenTable), acquired 2 min ago, last used 10 s ago (tap)\nDecide first: if that task is still active, give up or tell the user the iPhone is busy."
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "LeaseId": {
+        "type": "string",
+        "pattern": "^([a-z0-9-]+:)?[1-9][0-9]*$",
+        "description": "Lease id: the slug of the Mac that holds it and a decimal number that only increases,\ne.g. `studio:42` (`42` when that Mac is signed out). Pass it back exactly as returned.\nWhoever has it can use the iPhone.\n",
+        "examples": ["42", "studio:42"]
+      },
+      "Message": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "What the daemon did, for people and logs"
+          }
+        }
+      },
+      "Upload": {
+        "type": "object",
+        "required": ["url", "name", "size", "expiresAt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Share page for Safari on the iPhone. Anyone with the link can download the file until it expires.",
+            "examples": ["https://ghosthand.dev/u/3fK9xQ2mZr7T"]
+          },
+          "name": {
+            "type": "string",
+            "examples": ["clip.mp4"]
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bytes"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The link answers 404 after this, 1 day after the upload"
+          }
+        }
+      },
+      "UpdateDaemonRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "auto": {
+            "type": "boolean",
+            "description": "Turn auto-update on or off. Saved in the macOS defaults `com.remorses.ghosthand AutoUpdate`."
+          }
+        }
+      },
+      "UpdateStatus": {
+        "type": "object",
+        "required": ["auto", "message"],
+        "properties": {
+          "auto": {
+            "type": "boolean",
+            "description": "The daemon installs new releases by itself (default on)"
+          },
+          "latest": {
+            "type": "string",
+            "description": "Build id of the latest release on ghosthand.dev. Absent before the first answer."
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the latest release was last asked for"
+          },
+          "message": {
+            "type": "string",
+            "description": "The update state in one line, e.g. up to date, downloaded, installed, or why it failed"
+          }
+        }
+      },
+      "RestartDaemonRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "executable": {
+            "type": "string",
+            "description": "Absolute path of another ghosthand binary to run, e.g. a newer version the\nCLI was installed as. Only over the unix socket; tunnel clients get 403.\n",
+            "examples": ["/usr/local/bin/ghosthand"]
+          },
+          "ifIdle": {
+            "type": "boolean",
+            "description": "Restart only when no lease is active; otherwise 409 `daemon-busy` and the\ndaemon keeps running. macOS screen capture needs seconds to a minute after a\nrestart, so an agent holding a lease would lose its screen. The CLI sets it\nwhen it restarts the daemon by itself.\n"
+          }
+        }
+      },
+      "DaemonInfo": {
+        "type": "object",
+        "required": ["version", "pid", "executable", "buildId", "startedAt", "bluetooth", "listen"],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Version of the daemon binary, same as the npm package"
+          },
+          "pid": {
+            "type": "integer",
+            "description": "Process id. It stays the same across `POST /v1/daemon/restart`."
+          },
+          "executable": {
+            "type": "string",
+            "description": "CLI binary that Ghosthand.app was installed from. Restart installs this path again, unless it gets `executable`."
+          },
+          "safeRestart": {
+            "type": "boolean",
+            "description": "Supports executable selection and ifIdle lease protection. Missing or false means the CLI must not automatically restart this daemon."
+          },
+          "buildId": {
+            "type": "string",
+            "description": "Changes when `executable` is rebuilt. Compare it with the CLI to find a stale daemon."
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the daemon (or its last restart) started"
+          },
+          "bluetooth": {
+            "$ref": "#/components/schemas/BluetoothState"
+          },
+          "listen": {
+            "$ref": "#/components/schemas/Listen"
+          },
+          "update": {
+            "$ref": "#/components/schemas/UpdateStatus"
+          }
+        }
+      },
+      "BluetoothState": {
+        "type": "object",
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "not-started",
+              "starting",
+              "on",
+              "permission-missing",
+              "permission-denied",
+              "permission-restricted",
+              "powered-off",
+              "unsupported",
+              "error"
+            ],
+            "description": "`not-started`: allowed, but no USB iPhone uses Bluetooth mode yet; starts on the first\nBluetooth command or when list or setup sees one. `starting`: waiting for\nBluetooth or HID publication. `on`: the HID service is published. Permission states\nare checked before hardware state. Missing or denied permission tells the agent to\nrun setup and poll setup status until ready. Only the setup app's buttons request permissions\nor open privacy settings. `powered-off`: turn Bluetooth on.\n`unsupported`: authorized, but Classic is unavailable. `error`: service failure.\n"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why Bluetooth is not available, e.g. it is off or not allowed for the daemon"
+          }
+        }
+      },
+      "TunnelToken": {
+        "type": "object",
+        "required": ["id", "name", "token"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pass it to `DELETE /v1/tunnel/tokens/{id}` to revoke the token"
+          },
+          "name": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "Send as `Authorization: Bearer <token>`. Shown once; store it like a password."
+          },
+          "url": {
+            "type": "string",
+            "description": "Base URL of this Mac through the tunnel. Absent while the Mac is not connected."
+          }
+        }
+      },
+      "Listen": {
+        "type": "object",
+        "required": ["unix"],
+        "description": "Where the daemon accepts requests",
+        "properties": {
+          "unix": {
+            "type": "string",
+            "description": "Path of the unix socket"
+          },
+          "tunnel": {
+            "type": "object",
+            "description": "The connection to ghosthand.dev that serves remote MCP (https://ghosthand.dev/mcp)\nand this API from other computers. It runs while the Mac is signed in.\n",
+            "required": ["connected"],
+            "properties": {
+              "connected": {
+                "type": "boolean",
+                "description": "False while signed out, or while the daemon connects or reconnects"
+              },
+              "mac": {
+                "type": "string",
+                "description": "This Mac's slug in the account, e.g. `studio`. MCP leases on it look like `studio:42`."
+              },
+              "url": {
+                "type": "string",
+                "description": "Base URL of this API through the tunnel, e.g. `https://ghosthand.dev/macs/studio`. Absent until connected."
+              }
+            }
+          }
+        }
+      },
+      "DeviceList": {
+        "type": "object",
+        "required": ["devices"],
+        "properties": {
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Bluetooth problems, and capture devices that cannot be matched to a USB iPhone yet (what to do)."
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Device"
+            }
+          }
+        }
+      },
+      "Control": {
+        "type": "string",
+        "enum": ["bluetooth", "xctest"],
+        "description": "How input reaches the iPhone. `bluetooth` (default): the Mac is a Bluetooth mouse and\nkeyboard; screenshots come from USB screen capture. `xctest`: WebDriverAgent, an XCUITest\nrunner, taps, types and takes screenshots (they show dialogs that USB capture hides).\nNeeds Xcode, Developer Mode and UI Automation. No passcode unlock, mute or keyboard shortcuts.\n"
+      },
+      "XCTestRunner": {
+        "type": "object",
+        "required": ["team", "state"],
+        "description": "WebDriverAgent on this iPhone. Present only in XCTest mode.",
+        "properties": {
+          "team": {
+            "type": "string",
+            "description": "Apple team id that signs the runner, e.g. `92MF9DG2LR`"
+          },
+          "state": {
+            "type": "string",
+            "enum": ["stopped", "building", "starting", "running", "failed"],
+            "description": "`stopped`: not started since the daemon started; the next command starts it (about\n15 s). `building`: Xcode builds it (1-3 min the first time). `starting`: launched,\nwaiting for its HTTP server. `running`: input works. `failed`: see `error`.\n"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the last start failed and what to do"
+          }
+        }
+      },
+      "ControlRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["control"],
+        "properties": {
+          "control": {
+            "$ref": "#/components/schemas/Control"
+          },
+          "team": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{10}$",
+            "description": "Apple team id that signs WebDriverAgent. Default the only Apple Development certificate in the keychain."
+          },
+          "rebuild": {
+            "type": "boolean",
+            "default": false,
+            "description": "Build WebDriverAgent again (e.g. after the free team's 7-day signature expired)"
+          }
+        }
+      },
+      "ControlState": {
+        "type": "object",
+        "required": ["control"],
+        "properties": {
+          "control": {
+            "$ref": "#/components/schemas/Control"
+          },
+          "xctest": {
+            "$ref": "#/components/schemas/XCTestRunner"
+          }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "required": ["id", "name", "control"],
+        "properties": {
+          "control": {
+            "$ref": "#/components/schemas/Control"
+          },
+          "xctest": {
+            "$ref": "#/components/schemas/XCTestRunner"
+          },
+          "id": {
+            "type": "string",
+            "description": "USB capture device id. Pass it as `device` to `POST /v1/leases`."
+          },
+          "mac": {
+            "type": "string",
+            "description": "Slug of the Mac the iPhone is plugged into, e.g. `studio`. Absent while this Mac is\nsigned out or not connected to ghosthand.dev.\n"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the iPhone, from Settings > General > About > Name"
+          },
+          "model": {
+            "type": "string",
+            "description": "Product type read over USB lockdown, e.g. `iPhone8,1`"
+          },
+          "modelName": {
+            "type": "string",
+            "description": "Marketing name for `model`, e.g. `iPhone 6s`. Absent for product types ghosthand does not know yet"
+          },
+          "iosVersion": {
+            "type": "string",
+            "description": "iOS version read over USB lockdown, e.g. `15.8.3`"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the SIM, read over USB lockdown (`PhoneNumber`), e.g. `+39 333 123 4567`. Absent without a SIM, or when the carrier did not write the number to it."
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "True while the iPhone needs its passcode, read over USB (lockdown `PasswordProtected`). Absent when unknown, e.g. two iPhones with the same name."
+          },
+          "assistiveTouch": {
+            "type": "boolean",
+            "description": "True while AssistiveTouch is on, read over USB. acquire turns it on by itself. Absent when unknown."
+          },
+          "bluetooth": {
+            "$ref": "#/components/schemas/BluetoothLink"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/LeaseInfo"
+          }
+        }
+      },
+      "PhoneOverview": {
+        "type": "object",
+        "required": ["macName", "account", "bluetooth", "camera", "phones"],
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "Sign-in state only; no plan fields and no server request"
+          },
+          "macName": {
+            "type": "string",
+            "description": "The name this Mac shows under Settings > Bluetooth on the iPhone"
+          },
+          "camera": {
+            "type": "string",
+            "enum": ["authorized", "notDetermined", "denied", "restricted"],
+            "description": "macOS Camera permission of the daemon, needed for screen capture. Until it is\n`authorized`, phones have no `captureId`. `notDetermined`: the user clicks Allow\nCamera in setup. `denied`: the user opens Camera privacy settings from setup.\n`restricted`: blocked by macOS policy. Commands and previews never ask by themselves.\n"
+          },
+          "bluetooth": {
+            "$ref": "#/components/schemas/BluetoothState"
+          },
+          "photos": {
+            "type": "string",
+            "enum": ["authorized", "notDetermined", "denied"],
+            "description": "Optional macOS removable volumes access, used only to delete photos on the iPhone\n(`photo delete`, `screenshot --native`). The user clicks Allow Photos in setup.\n"
+          },
+          "phones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhoneStatus"
+            }
+          },
+          "remotePhones": {
+            "type": "array",
+            "description": "Only on the unix socket: iPhones of the account's other online Macs, each with\n`mac` and `macName`, for the control plane. Each Mac pushes its list through\nghosthand.dev when it changes, so the response makes no request. Lease times\n(`lastUsedAt`, `lastCommand`, `expiresAt`) can be old. Absent when there are none.\n",
+            "items": {
+              "$ref": "#/components/schemas/PhoneStatus"
+            }
+          }
+        }
+      },
+      "PhoneStatus": {
+        "type": "object",
+        "required": ["id", "name", "step", "control", "waiting"],
+        "properties": {
+          "control": {
+            "$ref": "#/components/schemas/Control"
+          },
+          "xctest": {
+            "$ref": "#/components/schemas/XCTestRunner"
+          },
+          "developerMode": {
+            "type": "boolean",
+            "description": "Settings > Privacy & Security > Developer Mode, read over USB. XCTest mode needs it. Absent on iOS 15 and when unknown."
+          },
+          "id": {
+            "type": "string",
+            "description": "USB lockdown id (UDID). Not the id of `/v1/devices`; that is `captureId`."
+          },
+          "captureId": {
+            "type": "string",
+            "description": "Screen capture id, the one `list` prints and `acquire -d` takes. Absent until screen capture shows the iPhone and it is matched to its USB device."
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string",
+            "description": "Product type, e.g. `iPhone11,8`"
+          },
+          "modelName": {
+            "type": "string",
+            "description": "Marketing name, e.g. `iPhone XR`. Absent for unknown product types"
+          },
+          "iosVersion": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the SIM, e.g. `+39 333 123 4567`. Absent without a SIM, when the carrier did not write it, or when the iPhone is not trusted."
+          },
+          "step": {
+            "type": "string",
+            "enum": [
+              "trust",
+              "unlock",
+              "usbUnreadable",
+              "bluetoothUnavailable",
+              "pair",
+              "connecting",
+              "developerMode",
+              "xctestStarting",
+              "xctestFailed",
+              "ready"
+            ],
+            "description": "The next thing a person must do, in this order:\n`trust`: unlock the iPhone and tap Trust. `unlock`: trusted, needs its passcode.\n`usbUnreadable`: trusted, but the lock state or Bluetooth address could not be read over USB.\nBluetooth mode: `bluetoothUnavailable`: Bluetooth is not ready on this Mac (see `bluetooth`).\n`pair`: pair the Mac from iPhone Settings > Bluetooth; if the Mac is not listed,\nturn Bluetooth off and on again on the iPhone. `connecting`: paired, the link\nis down; the Mac reconnects.\nXCTest mode: `developerMode`: turn on Developer Mode on the iPhone. `xctestStarting`:\nWebDriverAgent builds or starts. `xctestFailed`: its start failed (`xctest.error`).\n`ready`: agents can use it.\n"
+          },
+          "assistiveTouch": {
+            "type": "boolean",
+            "description": "True while AssistiveTouch is on, read over USB. Absent when unknown."
+          },
+          "bluetooth": {
+            "$ref": "#/components/schemas/BluetoothLink"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/LeaseInfo"
+          },
+          "waiting": {
+            "type": "array",
+            "description": "Clients running `ghosthand wait` for this iPhone, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/Waiter"
+            }
+          },
+          "mac": {
+            "type": "string",
+            "description": "Only in `remotePhones`. Slug of the Mac the iPhone is plugged into, e.g. `studio`"
+          },
+          "macName": {
+            "type": "string",
+            "description": "Only in `remotePhones`. Name of that Mac, e.g. `Tommy's Mac Studio`"
+          }
+        }
+      },
+      "SetupStatus": {
+        "type": "object",
+        "required": ["ready", "next", "overview"],
+        "properties": {
+          "ready": {
+            "type": "boolean",
+            "description": "True only when this Mac is signed in (`overview.account.state` is `signed-in`) and one selected phone has Camera access, USB capture, is unlocked and has connected Bluetooth."
+          },
+          "next": {
+            "type": "string",
+            "description": "The one thing the user must do next, in words an agent can pass on (the step the setup window shows), e.g. `Plug the iPhone into Tommy's Mac with a USB data cable, then unlock it.` When ready, says so."
+          },
+          "device": {
+            "type": "string",
+            "description": "Selected USB id. Absent if no phone matches or selection is ambiguous."
+          },
+          "overview": {
+            "$ref": "#/components/schemas/PhoneOverview"
+          }
+        }
+      },
+      "MacPermission": {
+        "type": "string",
+        "enum": ["camera", "bluetooth", "photos"],
+        "description": "`photos`: macOS removable volumes access, so photo delete and native screenshots can delete photos (optional)"
+      },
+      "Waiter": {
+        "type": "object",
+        "required": ["reason", "since"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Display text the client gave, e.g. an agent session id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The task the client waits to do"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it started waiting"
+          }
+        }
+      },
+      "LeaseInfo": {
+        "type": "object",
+        "description": "Who holds the iPhone. Present while a lease is active. Never has the lease id.",
+        "required": ["reason", "acquiredAt", "lastUsedAt", "expiresAt"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Display text the holder gave, e.g. an agent session id"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The task the iPhone is used for"
+          },
+          "acquiredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last call on the lease (or acquiredAt before the first)"
+          },
+          "lastCommand": {
+            "type": "string",
+            "description": "CLI name of the last call on the lease, e.g. `tap` or `screenshot`. Absent before the first"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the lease ends if no call uses it before"
+          }
+        }
+      },
+      "AcquireLeaseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reason"],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The task the iPhone is used for, shown to others in `GET /v1/devices` and `device-leased` errors, so they can decide to wait or give up",
+            "examples": ["reply to Anna in Messages"]
+          },
+          "device": {
+            "type": "string",
+            "minLength": 1,
+            "default": "default",
+            "description": "USB id or name from `GET /v1/devices`, or `default` when exactly one iPhone is connected"
+          },
+          "mac": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Slug of the Mac the iPhone is on (`mac` from `GET /v1/devices`). On the unix socket,\nanother Mac's slug sends the acquire straight to that Mac, without listing every Mac\nfirst. Through the tunnel it must be this Mac's slug or omitted.\n",
+            "examples": ["studio"]
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional display text shown to others in `GET /v1/devices` and `device-leased` errors, e.g. an agent session id. Not checked and not unique",
+            "examples": ["ses_123"]
+          },
+          "idleTimeoutSeconds": {
+            "type": "number",
+            "default": 600,
+            "minimum": 1,
+            "maximum": 86400,
+            "description": "The lease ends this long after its last call"
+          },
+          "force": {
+            "type": "boolean",
+            "default": false,
+            "description": "End another lease on the iPhone and take it. Only for a stale lease whose holder is gone."
+          },
+          "waitSeconds": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 3600,
+            "description": "While another lease holds the iPhone, retry every second for up to this long\ninstead of failing with `device-leased`. While it waits, `GET /v1/phones` lists\nthe client under `waiting`. Cannot be combined with `force`.\n"
+          }
+        }
+      },
+      "Lease": {
+        "type": "object",
+        "required": ["id", "device", "deviceName", "reason", "idleTimeoutSeconds", "expiresAt"],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/LeaseId"
+          },
+          "device": {
+            "type": "string",
+            "description": "USB capture device id"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "idleTimeoutSeconds": {
+            "type": "number"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the lease ends if no call uses it before. Each call moves it."
+          },
+          "replaced": {
+            "$ref": "#/components/schemas/LeaseInfo",
+            "description": "The lease that `force` ended, if any"
+          },
+          "notice": {
+            "type": "string",
+            "description": "A note from ghosthand.dev about the plan, e.g. a failed payment. Show it to the user."
+          }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "required": ["state", "server"],
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": ["signed-out", "signing-in", "signed-in"],
+            "description": "`signed-out`: no account on this Mac; every lease fails with `login-required`.\n`signing-in`: a browser sign-in runs; open `verificationUrl`. `signed-in`: each\nacquire checks the iPhone and this Mac against the plan.\n"
+          },
+          "server": {
+            "type": "string",
+            "description": "The ghosthand.dev server the daemon uses (env GHOSTHAND_SERVER at daemon start)"
+          },
+          "email": {
+            "type": "string",
+            "description": "Signed-in user"
+          },
+          "userCode": {
+            "type": "string",
+            "description": "While signing in, the code the browser page shows, to compare"
+          },
+          "verificationUrl": {
+            "type": "string",
+            "description": "While signing in, the page to open in a browser"
+          },
+          "lastError": {
+            "type": "string",
+            "description": "Why the last sign-in did not finish (denied or expired), until the next one starts"
+          },
+          "plan": {
+            "type": "string",
+            "enum": ["free", "pro"],
+            "description": "Only from `GET /v1/account`. `free`: one iPhone, on any Mac. `pro`: every iPhone\non each paid Mac, plus the free iPhone anywhere. Acquire on another iPhone fails\nwith `subscription-required`.\n"
+          },
+          "paidMacs": {
+            "type": "integer",
+            "description": "Only from `GET /v1/account`. Macs the Pro subscription pays for; 0 on free"
+          },
+          "sourceAccess": {
+            "type": "boolean",
+            "description": "Only from `GET /v1/account`. True when the account can read the daemon source on GitHub"
+          },
+          "notice": {
+            "type": "string",
+            "description": "Note about the plan to show the user"
+          },
+          "subscribeUrl": {
+            "type": "string",
+            "description": "Checkout, or the billing portal when subscribed"
+          },
+          "dashboardUrl": {
+            "type": "string"
+          },
+          "serverError": {
+            "type": "string",
+            "description": "Only from `GET /v1/account`, when ghosthand.dev could not be reached"
+          }
+        }
+      },
+      "BluetoothLink": {
+        "type": "object",
+        "required": ["address", "state"],
+        "properties": {
+          "address": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{2}(:[0-9A-F]{2}){5}$",
+            "description": "The iPhone's Bluetooth address, read over USB. Its HID link to the Mac uses the same address.",
+            "examples": ["A4:83:E7:12:34:56"]
+          },
+          "state": {
+            "type": "string",
+            "enum": ["connected", "disconnected", "notPaired"],
+            "description": "`connected`: input works. `disconnected`: paired, the Mac is reconnecting; Bluetooth is off\non the iPhone or it is out of range if this lasts. `notPaired`: pair from iPhone Settings > Bluetooth\n(the next input command waits for it).\n"
+          },
+          "pointer": {
+            "type": "string",
+            "enum": ["absolute", "relative"],
+            "description": "How taps move the pointer, once known. `absolute` (iOS 17+) goes straight to the spot. `relative` (iOS 15, which ignores absolute positions) pushes the pointer into the top-left corner, then moves it in measured steps"
+          }
+        }
+      },
+      "AssistiveTouch": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["enabled"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "True while AssistiveTouch is on"
+          }
+        }
+      },
+      "RenameRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "New name of the iPhone, as in Settings > General > About > Name",
+            "examples": ["Test iPhone"]
+          }
+        }
+      },
+      "RandomKind": {
+        "type": "string",
+        "enum": ["name", "lastname", "username", "birthdate", "password"],
+        "description": "`name`, `lastname`: common US first or last name. `username`: lowercase letters and 4\ndigits, at most 15 chars, also an email username. `birthdate`: YYYY-MM-DD, age 19 to 45.\n`password`: 16 chars with uppercase, lowercase, digits and symbols `!@#$%*`, starts uppercase.\n"
+      },
+      "RandomRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind"],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/RandomKind"
+          }
+        }
+      },
+      "RandomValue": {
+        "type": "object",
+        "required": ["id", "kind", "value", "createdAt", "lease", "reason", "device"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Row id in state.db, increasing"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RandomKind"
+          },
+          "value": {
+            "type": "string",
+            "examples": ["Kq7m#Xp2vR9t$bWn"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lease": {
+            "$ref": "#/components/schemas/LeaseId"
+          },
+          "reason": {
+            "type": "string",
+            "description": "The lease's task when the value was made"
+          },
+          "label": {
+            "type": "string",
+            "description": "The lease's label when the value was made"
+          },
+          "device": {
+            "type": "string",
+            "description": "Screen capture id of the lease's iPhone (the id in `GET /v1/devices`)"
+          },
+          "deviceName": {
+            "type": "string",
+            "description": "The iPhone's name when the value was made, if it was on USB"
+          }
+        }
+      },
+      "RandomValueList": {
+        "type": "object",
+        "required": ["values"],
+        "properties": {
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RandomValue"
+            }
+          }
+        }
+      },
+      "ScreenText": {
+        "type": "object",
+        "required": ["width", "height", "lines"],
+        "properties": {
+          "width": {
+            "type": "integer",
+            "description": "Screenshot width in the request's `scale` space"
+          },
+          "height": {
+            "type": "integer",
+            "description": "Screenshot height in the request's `scale` space"
+          },
+          "lines": {
+            "type": "array",
+            "description": "Recognized lines, top to bottom",
+            "items": {
+              "$ref": "#/components/schemas/TextLine"
+            }
+          }
+        }
+      },
+      "TextLine": {
+        "type": "object",
+        "required": ["text", "x", "y", "width", "height", "confidence"],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "x": {
+            "type": "integer",
+            "description": "Left edge, in the request's `scale` space"
+          },
+          "y": {
+            "type": "integer",
+            "description": "Top edge, in the request's `scale` space"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "OCR confidence, 0...1"
+          }
+        }
+      },
+      "Point": {
+        "type": "object",
+        "title": "Point",
+        "description": "A point of the screenshot",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": {
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Distance from the left edge, in the request's `scale` space (screen points by default)",
+            "examples": [207]
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Distance from the top edge, in the request's `scale` space (screen points by default)",
+            "examples": [448]
+          }
+        }
+      },
+      "TapRequest": {
+        "description": "Either a point (`x` and `y`) or a `text` to find with OCR. Other combinations are rejected.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/Point"
+          },
+          {
+            "$ref": "#/components/schemas/TapText"
+          }
+        ]
+      },
+      "PhoneSwipeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "durationMs"],
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/ScreenFraction",
+            "description": "Where the drag starts"
+          },
+          "to": {
+            "$ref": "#/components/schemas/ScreenFraction",
+            "description": "Where the drag ends"
+          },
+          "durationMs": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 10000,
+            "description": "How long the drag took",
+            "examples": [180]
+          }
+        }
+      },
+      "ScreenFraction": {
+        "type": "object",
+        "description": "A point as fractions of the screen, from the top left corner",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": {
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Distance from the left edge, as a fraction of the screen width",
+            "examples": [0.5]
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Distance from the top edge, as a fraction of the screen height",
+            "examples": [0.25]
+          }
+        }
+      },
+      "TapText": {
+        "type": "object",
+        "title": "Text",
+        "description": "Tap the center of an OCR line",
+        "additionalProperties": false,
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Tap the center of the OCR line that equals or contains this (case-insensitive)",
+            "examples": ["General"]
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The nth match, top to bottom (1-based). Needed when several lines match."
+          }
+        }
+      },
+      "SwipeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Point",
+            "description": "Where the drag starts"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Point",
+            "description": "Where the drag ends"
+          },
+          "durationMs": {
+            "type": "number",
+            "minimum": 16,
+            "maximum": 10000,
+            "description": "Default is random and human-like, 80-180 ms growing with the distance. It starts fast and lifts while still moving, so feeds keep going. Set it to fix the speed."
+          }
+        }
+      },
+      "HoldRequest": {
+        "description": "Either a point (`x` and `y`) or a `text` to find with OCR, plus an optional `durationMs`.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HoldPoint"
+          },
+          {
+            "$ref": "#/components/schemas/HoldText"
+          }
+        ]
+      },
+      "HoldPoint": {
+        "type": "object",
+        "title": "Point",
+        "description": "Hold at a point of the screenshot",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": {
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Distance from the left edge, in the request's `scale` space (screen points by default)"
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Distance from the top edge, in the request's `scale` space (screen points by default)"
+          },
+          "durationMs": {
+            "$ref": "#/components/schemas/HoldDuration"
+          }
+        }
+      },
+      "HoldText": {
+        "type": "object",
+        "title": "Text",
+        "description": "Hold the center of an OCR line",
+        "additionalProperties": false,
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Hold the center of the OCR line that equals or contains this (case-insensitive)"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The nth match, top to bottom (1-based). Needed when several lines match."
+          },
+          "durationMs": {
+            "$ref": "#/components/schemas/HoldDuration"
+          }
+        }
+      },
+      "HoldDuration": {
+        "type": "number",
+        "default": 1000,
+        "minimum": 100,
+        "maximum": 10000,
+        "description": "How long the button stays down without moving"
+      },
+      "HoldDragRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Point",
+            "description": "Where the long press happens and the drag starts"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Point",
+            "description": "Where the drag ends and the button is released"
+          },
+          "holdMs": {
+            "$ref": "#/components/schemas/HoldDuration"
+          },
+          "durationMs": {
+            "type": "number",
+            "default": 1000,
+            "minimum": 16,
+            "maximum": 10000,
+            "description": "Drag duration after the hold. Slow drags (1000+ ms) let iOS follow the item."
+          }
+        }
+      },
+      "ScrollRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["direction", "ticks"],
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": ["up", "down", "left", "right"],
+            "description": "`down` shows content further down the page (like swiping a finger up); `right` shows content further right"
+          },
+          "ticks": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Number of wheel ticks. See `ghosthand scroll --help` for the distance of one tick.",
+            "examples": [5]
+          },
+          "at": {
+            "$ref": "#/components/schemas/Point",
+            "description": "Where the pointer scrolls. Default the screen center."
+          }
+        }
+      },
+      "KeyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A combination like `cmd+space` or `shift+tab` (modifiers `cmd`, `ctrl`, `alt`,\n`shift`), a named key (`enter`, `esc`, `backspace`, `tab`, `space`, `up`, `down`,\n`left`, `right`, `pageup`, `pagedown`, `end`, `forwarddelete`), `home`, or a media key\n(`volumeup`, `volumedown`, `playpause`). For mute use `/mute`.\n",
+            "examples": ["home", "enter", "cmd+space", "volumeup"]
+          }
+        }
+      },
+      "MuteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["muted"],
+        "properties": {
+          "muted": {
+            "type": "boolean",
+            "description": "`true` mutes all sound, `false` unmutes"
+          }
+        }
+      },
+      "TypeRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "US-ASCII text. `\\n` presses Enter and `\\t` presses Tab.",
+            "examples": ["ciao"]
+          },
+          "enter": {
+            "type": "boolean",
+            "default": false,
+            "description": "Press Enter after the text (sends a message in Messages)"
+          }
+        }
+      },
+      "TaskRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What to do, in plain words. Without it, `task` must be running and the call follows its turn.",
+            "examples": ["open the TikTok likes tab"]
+          },
+          "task": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,64}$",
+            "description": "Id of an earlier task (`Ghosthand-Task`), to continue it with its history"
+          }
+        }
+      },
+      "TaskResult": {
+        "type": "object",
+        "required": ["task", "text"],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "The task id; pass it as `task` to send a follow-up"
+          },
+          "text": {
+            "type": "string",
+            "description": "The agent's last answer"
+          }
+        }
+      },
+      "UnlockRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["passcode"],
+        "properties": {
+          "passcode": {
+            "type": "string",
+            "minLength": 1,
+            "description": "US-ASCII passcode, digits or alphanumeric. Never logged or stored."
+          }
+        }
+      },
+      "ActionResult": {
+        "type": "object",
+        "required": ["message", "logs"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "What was sent, e.g. `tapped 207,448`"
+          },
+          "logs": {
+            "type": "array",
+            "description": "Progress lines written while the operation ran",
+            "items": {
+              "type": "string"
+            }
+          },
+          "screenshot": {
+            "$ref": "#/components/schemas/Image"
+          },
+          "screen": {
+            "$ref": "#/components/schemas/ScreenText",
+            "description": "The screen text after the input, present when `screentext` was asked"
+          }
+        }
+      },
+      "ImageFormat": {
+        "type": "string",
+        "enum": ["png", "jpeg"]
+      },
+      "Image": {
+        "type": "object",
+        "description": "The screen after the input, present when `screenshot` was asked",
+        "required": ["format", "width", "height", "data"],
+        "properties": {
+          "format": {
+            "$ref": "#/components/schemas/ImageFormat"
+          },
+          "width": {
+            "type": "integer",
+            "description": "Image width in the request's `scale` space"
+          },
+          "height": {
+            "type": "integer",
+            "description": "Image height in the request's `scale` space"
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64 image bytes"
+          }
+        }
+      },
+      "RecordingStartRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^/.*\\.(mov|mp4)$",
+            "description": "Absolute path of a new .mov or .mp4 file on the daemon's Mac. Its folder must exist; the file must not.",
+            "examples": ["/tmp/demo.mp4"]
+          },
+          "fps": {
+            "type": "number",
+            "description": "Frame rate cap, 1 up to the iPhone's rate (usually 60). Default no cap.",
+            "minimum": 1
+          },
+          "maxDurationSeconds": {
+            "type": "number",
+            "description": "Stop by itself after this many seconds, 1...3600.",
+            "minimum": 1,
+            "maximum": 3600,
+            "default": 300
+          },
+          "audio": {
+            "type": "boolean",
+            "description": "Record the iPhone's sound too.",
+            "default": true
+          }
+        }
+      },
+      "Recording": {
+        "type": "object",
+        "required": ["path", "startedAt", "stopsAt", "audio"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The video file being written"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stopsAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it stops by itself (maxDurationSeconds)"
+          },
+          "fps": {
+            "type": "number",
+            "description": "The frame rate cap, if one was asked"
+          },
+          "audio": {
+            "type": "boolean",
+            "description": "The recording has a sound track"
+          }
+        }
+      },
+      "RecordingResult": {
+        "type": "object",
+        "required": [
+          "path",
+          "durationSeconds",
+          "bytes",
+          "width",
+          "height",
+          "frames",
+          "droppedFrames",
+          "audio",
+          "stoppedBy"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "description": "Time from the first to the last video frame"
+          },
+          "bytes": {
+            "type": "integer",
+            "description": "File size"
+          },
+          "width": {
+            "type": "integer",
+            "description": "Video width in pixels (native screen pixels)"
+          },
+          "height": {
+            "type": "integer",
+            "description": "Video height in pixels (native screen pixels)"
+          },
+          "frames": {
+            "type": "integer",
+            "description": "Video frames written"
+          },
+          "droppedFrames": {
+            "type": "integer",
+            "description": "Frames the encoder was not ready for. Frames removed by the fps cap are not counted."
+          },
+          "audio": {
+            "type": "boolean",
+            "description": "The file has a sound track"
+          },
+          "stoppedBy": {
+            "type": "string",
+            "enum": ["request", "maxDuration", "leaseEnded", "daemonStopped", "disconnected"],
+            "description": "Why the recording stopped: `request` (record stop), `maxDuration`, `leaseEnded`\n(release, idle timeout or `force`), `daemonStopped`, or `disconnected` (the iPhone\nleft USB).\n"
+          }
+        }
+      },
+      "FileEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "type", "size", "modified"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Absolute iPhone path"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["file", "directory"]
+          },
+          "size": {
+            "type": "integer",
+            "description": "Bytes"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FileList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["entries"],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileEntry"
+            }
+          }
+        }
+      },
+      "DeletePhotosRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["names"],
+        "properties": {
+          "names": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "File names from `GET photos`, e.g. IMG_0004.PNG"
+          }
+        }
+      },
+      "App": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bundleId", "name"],
+        "properties": {
+          "bundleId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "system": {
+            "type": "boolean",
+            "description": "Apple's built-in app"
+          },
+          "installing": {
+            "type": "boolean",
+            "description": "Still downloading or installing (an App Store placeholder)"
+          },
+          "fileSharing": {
+            "type": "boolean",
+            "description": "Shares its Documents folder; `app` in the files routes reaches it"
+          },
+          "homeScreen": {
+            "type": "string",
+            "description": "Where its icon is, e.g. `dock`, `page 2`, `page 1, folder Social`. Absent - only in the App Library"
+          }
+        }
+      },
+      "AppList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["apps"],
+        "properties": {
+          "apps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/App"
+            }
+          }
+        }
+      },
+      "DeviceInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["udid", "name"],
+        "properties": {
+          "udid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string",
+            "description": "ProductType, e.g. iPhone12,8"
+          },
+          "modelName": {
+            "type": "string"
+          },
+          "iosVersion": {
+            "type": "string"
+          },
+          "build": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "batteryPercent": {
+            "type": "integer"
+          },
+          "charging": {
+            "type": "boolean"
+          },
+          "externalPower": {
+            "type": "boolean"
+          },
+          "storageTotalBytes": {
+            "type": "integer",
+            "description": "Capacity of the data partition"
+          },
+          "storageFreeBytes": {
+            "type": "integer"
+          },
+          "language": {
+            "type": "string",
+            "description": "e.g. en-IT"
+          },
+          "locale": {
+            "type": "string",
+            "description": "e.g. en_IT"
+          },
+          "timeZone": {
+            "type": "string",
+            "description": "e.g. Europe/Rome"
+          },
+          "wifiAddress": {
+            "type": "string"
+          },
+          "sim": {
+            "$ref": "#/components/schemas/SIMInfo"
+          }
+        }
+      },
+      "SIMInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "SIM state from USB lockdown. A field is absent when the iPhone does not report it (unknown), so never read a missing field as \"no SIM\". A missing phone number does not mean no SIM either.\n",
+        "properties": {
+          "telephony": {
+            "type": "boolean",
+            "description": "The iPhone has a cellular modem (`TelephonyCapability`)."
+          },
+          "tray": {
+            "type": "string",
+            "enum": ["sim", "empty", "absent", "unknown"],
+            "description": "Physical SIM tray (`SIMTrayStatus`): `sim` a SIM card is in the tray, `empty` the tray is in without a card, `absent` no tray, `unknown` iOS does not know. An eSIM does not use the tray: check `lines`.\n"
+          },
+          "lines": {
+            "type": "array",
+            "description": "Carrier settings of each SIM iOS reads, physical or eSIM (`CarrierBundleInfoArray`). Empty: no SIM is read. A line here does not prove cellular service works (PIN, activation, plan): check Settings > Cellular.\n",
+            "items": {
+              "$ref": "#/components/schemas/SIMLine"
+            }
+          }
+        }
+      },
+      "SIMLine": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "integer",
+            "description": "SIM slot",
+            "1 or 2": null
+          },
+          "embedded": {
+            "type": "boolean",
+            "description": "true: eSIM, false: physical SIM card"
+          },
+          "carrier": {
+            "type": "string",
+            "description": "iOS carrier bundle, e.g. Vodafone_Ho_it"
+          },
+          "mcc": {
+            "type": "string",
+            "description": "Mobile country code",
+            "e.g. 222": null
+          },
+          "mnc": {
+            "type": "string",
+            "description": "Mobile network code",
+            "e.g. 10": null
+          }
+        }
+      },
+      "LogLines": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lines"],
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PowerRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["restart", "shutdown"]
+          }
+        }
+      },
+      "LogEvent": {
+        "type": "object",
+        "required": ["message"],
+        "description": "Data of a `log` server-sent event",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "required": ["code", "title", "status", "detail"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable error code. Switch on it; `title` and `detail` are for people.",
+            "enum": [
+              "invalid-request",
+              "unauthorized",
+              "not-found",
+              "device-not-found",
+              "no-device",
+              "multiple-devices",
+              "permission-denied",
+              "bluetooth-unavailable",
+              "bluetooth-disconnected",
+              "no-frame",
+              "device-locked",
+              "lock-failed",
+              "pairing-timeout",
+              "pointer-not-found",
+              "lock-state-unavailable",
+              "lockdown-unavailable",
+              "unlock-failed",
+              "mute-unconfirmed",
+              "text-not-found",
+              "wait-text-timeout",
+              "cancelled",
+              "lease-invalid",
+              "device-leased",
+              "recording-active",
+              "no-recording",
+              "recording-failed",
+              "daemon-busy",
+              "tunnel-offline",
+              "login-required",
+              "subscription-required",
+              "unsupported-in-mode",
+              "xctest-unavailable",
+              "task-failed",
+              "internal-error"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "Short summary of the code, the same for every error with this code"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status of the error. In stream mode the response status stays 200."
+          },
+          "detail": {
+            "type": "string",
+            "description": "What happened and what to do next. Agents should read it."
+          }
+        }
+      }
+    }
+  }
+}

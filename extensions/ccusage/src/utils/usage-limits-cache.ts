@@ -1,5 +1,5 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { UsageLimitData } from "../types/usage-types";
+import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
 import type { UsageLimitsResult } from "./claude-api-client";
@@ -35,7 +35,8 @@ const restoredData = ((): UsageLimitData | null => {
   const cached = raycastCache.get(LIMITS_CACHE_KEY);
   if (!cached) return null;
   try {
-    return JSON.parse(cached) as UsageLimitData;
+    const result = UsageLimitDataSchema.safeParse(JSON.parse(cached));
+    return result.success ? result.data : null;
   } catch {
     return null;
   }

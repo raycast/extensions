@@ -1,13 +1,14 @@
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getFlagEmoji } from "./utils";
+import { previewUrl } from "./utils/airlines";
 import { fetchAirlines } from "./utils/fetch";
 import AirlineAssets from "./components/assets";
 import SearchBar from "./components/searchbar";
 
 export default function BrowseAirlines() {
-  const { isLoading, data = [] } = usePromise(fetchAirlines);
+  const { isLoading, data = [] } = useCachedPromise(fetchAirlines);
   const [alliance, setAlliance] = useState("All");
 
   const filteredAirlines = useMemo(() => {
@@ -27,9 +28,7 @@ export default function BrowseAirlines() {
         {filteredAirlines.map((airline) => (
           <Grid.Item
             key={airline.slug}
-            content={{
-              source: `https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/logo.svg`,
-            }}
+            content={{ source: previewUrl(airline, "logo") ?? "", fallback: Icon.AirplaneFilled }}
             title={airline.name}
             subtitle={airline.iata}
             keywords={[airline.name, airline.iata, airline.icao, airline.slug].filter(Boolean)}

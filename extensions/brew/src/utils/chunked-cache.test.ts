@@ -58,10 +58,21 @@ interface RawFormula {
 }
 
 /**
- * Formulae whose real records carry a non-empty `requirements[]` (captured
- * 2026-09-14). Several, because any one of them can leave the catalog.
+ * Each non-empty `key` array in the file the build reads, by record id. A list
+ * of names goes stale as packages gain and lose the key. Compare whole arrays:
+ * the stream filter passes a nested `name` on its own, so a build that drops
+ * `requirements` from `valid_keys` keeps each requirement's `name` and loses
+ * its `contexts`.
  */
-const WITH_REQUIREMENTS = ["acl", "age-plugin-se", "amdatu-bootstrap", "anyzig"];
+async function nonEmptyInSource(file: string, idKey: string, key: string): Promise<Map<string, unknown[]>> {
+  const records = JSON.parse(await readFile(file, "utf8")) as Record<string, unknown>[];
+  const found = new Map<string, unknown[]>();
+  for (const record of records) {
+    const value = record[key];
+    if (Array.isArray(value) && value.length > 0) found.set(String(record[idKey]), value);
+  }
+  return found;
+}
 
 const extractIndex = (item: RawFormula, chunkNumber: number, indexInChunk: number): IndexEntry => ({
   id: item.name,
@@ -79,9 +90,6 @@ interface RawCask {
   artifacts?: CaskArtifact[];
   has_symlink_artifacts?: boolean;
 }
-
-/** Casks whose real records carry a non-empty `languages[]` (captured 2026-09-14). */
-const WITH_LANGUAGES = ["firefox", "battle-net", "clibor"];
 
 /**
  * Committed fixtures: 3 real formula records and 3 real cask records, so the
@@ -110,7 +118,9 @@ describe("buildChunkedCache (committed fixtures)", () => {
 
       const formulae = await loadItemsFromChunks<RawFormula>(formulaConfig, formulaIndex.entries);
       const byName = new Map(formulae.map((f) => [f.name, f]));
-      expect(byName.get("abi-dumper")?.requirements?.length).toBeGreaterThan(0);
+      const sourceRequirements = await nonEmptyInSource(FIXTURE_FORMULA, "name", "requirements");
+      expect(sourceRequirements.has("abi-dumper")).toBe(true);
+      expect(byName.get("abi-dumper")?.requirements).toEqual(sourceRequirements.get("abi-dumper"));
       expect(byName.get("aescrypt-packetizer")?.disabled).toBe(true);
       expect(byName.get("wget")?.disabled).toBe(false);
 
@@ -142,7 +152,9 @@ describe("buildChunkedCache (committed fixtures)", () => {
 
       const casks = await loadItemsFromChunks<RawCaskFull>(caskConfig, caskIndex.entries);
       const byToken = new Map(casks.map((c) => [c.token, c]));
-      expect(byToken.get("battle-net")?.languages?.length).toBeGreaterThan(0);
+      const sourceLanguages = await nonEmptyInSource(FIXTURE_CASK, "token", "languages");
+      expect(sourceLanguages.has("battle-net")).toBe(true);
+      expect(byToken.get("battle-net")?.languages).toEqual(sourceLanguages.get("battle-net"));
       // `artifacts` reaches the build — it has to, to be read — but is reduced
       // to one boolean before it is written. 1password-cli is the fixture that
       // HAS a `binary` stanza and 0-ad is the one that does not, so both halves
@@ -321,11 +333,14 @@ describe("buildChunkedCache", () => {
       // invisible until the marker silently stops appearing.
       expect(loaded.every((item) => typeof item.disabled === "boolean")).toBe(true);
 
-      const constrained = index.entries.filter((entry) => WITH_REQUIREMENTS.includes(entry.id));
-      expect(constrained.length).toBeGreaterThan(0);
+      const sourceRequirements = await nonEmptyInSource(SOURCE, "name", "requirements");
+      expect(sourceRequirements.size).toBeGreaterThan(0);
+      const constrained = index.entries.filter((entry) => sourceRequirements.has(entry.id));
+      expect(constrained.length).toBe(sourceRequirements.size);
       const withRequirements = await loadItemsFromChunks<RawFormula>(config, constrained);
+      expect(withRequirements.length).toBe(constrained.length);
       withRequirements.forEach((item) => {
-        expect(item.requirements?.length ?? 0).toBeGreaterThan(0);
+        expect(item.requirements).toEqual(sourceRequirements.get(item.name));
       });
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -368,12 +383,15 @@ describe("buildChunkedCache", () => {
       );
 
       const index = await loadIndex(config);
-      const entries = index.entries.filter((entry) => WITH_LANGUAGES.includes(entry.id));
-      expect(entries.length).toBeGreaterThan(0);
+      const sourceLanguages = await nonEmptyInSource(CASK_SOURCE, "token", "languages");
+      expect(sourceLanguages.size).toBeGreaterThan(0);
+      const entries = index.entries.filter((entry) => sourceLanguages.has(entry.id));
+      expect(entries.length).toBe(sourceLanguages.size);
 
       const loaded = await loadItemsFromChunks<RawCask>(config, entries);
+      expect(loaded.length).toBe(entries.length);
       loaded.forEach((item) => {
-        expect(item.languages?.length ?? 0).toBeGreaterThan(0);
+        expect(item.languages).toEqual(sourceLanguages.get(item.token));
         expect(item.artifacts).toBeUndefined();
         expect(typeof item.has_symlink_artifacts).toBe("boolean");
       });

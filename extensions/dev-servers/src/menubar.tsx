@@ -11,12 +11,16 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { useFrecencySorting, useLocalStorage } from "@raycast/utils";
-import * as os from "node:os";
 import * as path from "node:path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
-import { readPendingStarts } from "./pendingStore";
-import { RecentProject, STORAGE_KEY } from "./recents";
+import { startLoginProjectsAfterBoot } from "./loginStarts";
+import {
+  readPendingStarts,
+  resolvingServer,
+  writePendingStarts,
+} from "./pendingStore";
+import { RecentProject, STORAGE_KEY, recordRunning } from "./recents";
 import {
   byRecency,
   canonicalCwd,
@@ -24,6 +28,7 @@ import {
   fetchServers,
   killServer,
   reapProjectHelpersWhenDown,
+  tildePath,
 } from "./servers";
 import { svgFaviconTint } from "./favicons";
 import { readSnapshot, writeSnapshot } from "./snapshot";
@@ -207,15 +212,20 @@ async function launchRecent(recent: RecentProject): Promise<void> {
   });
 }
 
+// One empty list for the whole module. A `= []` default in the destructure
+// below made a new array on every render while storage was still loading,
+// which changed every memo keyed on it each time.
+const NO_RECENTS: RecentProject[] = [];
+
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.Menubar>();
   const [servers, setServers] = useState<DevServer[]>(
     () => readSnapshot() ?? [],
   );
   const [isLoading, setIsLoading] = useState(true);
-  const { value: recents = [] } = useLocalStorage<RecentProject[]>(
+  const { value: recents = NO_RECENTS } = useLocalStorage<RecentProject[]>(
     STORAGE_KEY,
-    [],
+    NO_RECENTS,
   );
 
   // Raycast unloads a menu bar command shortly after its menu closes, and
@@ -247,22 +257,49 @@ export default function Command() {
     // deadline are ignored, so a dashboard that was unloaded mid-start leaves
     // behind an entry that hides rows for its own window and no longer.
     const now = Date.now();
+    const pending = await readPendingStarts();
     const settling = new Set(
-      [...(await readPendingStarts())]
+      [...pending]
         .filter(
           ([, entry]) => entry.status === "starting" && entry.deadline > now,
         )
         .map(([cwd]) => cwd),
     );
     const next = await fetchServers(settling);
+    // Retire entries whose server has arrived. The dashboard does this while
+    // it is open, but a start at login has no dashboard watching, and an entry
+    // left behind would turn into a failed row the first time the dashboard
+    // opened after that server stopped, hours after it started fine.
+    //
+    // Re-read rather than reuse `pending`: the scan above takes a while, and
+    // the dashboard may have added a start or dismissed a row meanwhile.
+    // Nothing awaits between this read and the write, so only that change's
+    // own storage round trip is left exposed.
+    const latest = await readPendingStarts();
+    let retired = false;
+    for (const [cwd, entry] of latest) {
+      if (resolvingServer(cwd, entry, next)) {
+        latest.delete(cwd);
+        retired = true;
+      }
+    }
+    if (retired) await writePendingStarts(latest).catch(() => {});
     setServers(next);
     writeSnapshot(next);
     await updateCommandMetadata({ subtitle: metadataSubtitle(next.length) });
+    // This refresh also runs in the background every minute, which makes the
+    // menu bar the one surface that sees projects started from a terminal
+    // while the dashboard is closed. Best-effort, like every recents write.
+    await recordRunning(next).catch(() => {});
     return next;
   }, []);
 
   useEffect(() => {
     refresh()
+      // The first refresh after a restart starts the projects marked to start
+      // at login (once per boot; see loginStarts). Inside the loading window
+      // because a background launch lives only while isLoading holds.
+      .then((next) => startLoginProjectsAfterBoot(next))
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [refresh]);
@@ -314,7 +351,9 @@ export default function Command() {
     [recents, runningCwds],
   );
 
-  const { data: sortedRecents, visitItem } = useFrecencySorting(
+  // Start-click history, kept whichever order is chosen below, so switching
+  // to "Most started" later ranks by real history instead of starting cold.
+  const { data: byFrequency, visitItem } = useFrecencySorting(
     startableRecents,
     {
       namespace: "project-starts",
@@ -323,12 +362,20 @@ export default function Command() {
     },
   );
 
-  // The six rows the Start section will actually render; the subtitle rule
-  // below judges ambiguity against these, not the full recents list — a
-  // twin that fell off the end of the list can't confuse anyone.
+  // The six rows the Start section will actually render, in the order the
+  // user picked. "recent" (the default) is the projects that ran most
+  // recently, newest first: it surfaces what you were just working on,
+  // including a project started from a terminal. "frequent" ranks by how
+  // often and how lately each was started from this menu, which keeps
+  // regulars pinned but lets a project that only ever runs from a terminal
+  // fall off the end; that is why it is not the default. The subtitle rule
+  // below judges ambiguity against these rows, not the full recents list, so
+  // a twin that fell off the end of the list can't confuse anyone.
+  const startOrder = prefs.startOrder ?? "recent";
   const visibleRecents = useMemo(
-    () => sortedRecents.slice(0, 6),
-    [sortedRecents],
+    () =>
+      (startOrder === "frequent" ? byFrequency : startableRecents).slice(0, 6),
+    [startOrder, byFrequency, startableRecents],
   );
   // Subtitle per Start row, set only when the project name alone is
   // ambiguous. Same-named rows are usually worktrees of one repo, so the
@@ -346,11 +393,10 @@ export default function Command() {
       group.push(r);
       byName.set(r.projectName, group);
     }
-    const home = os.homedir();
     const candidates: Array<(r: RecentProject) => string> = [
       (r) => r.branch ?? "",
       (r) => path.basename(path.dirname(r.cwd)),
-      (r) => (r.cwd.startsWith(home) ? `~${r.cwd.slice(home.length)}` : r.cwd),
+      (r) => tildePath(r.cwd),
     ];
     const subtitles = new Map<string, string>();
     for (const group of byName.values()) {
@@ -440,7 +486,10 @@ export default function Command() {
                         // until the next interval. The HUD is still truthful
                         // at this moment: a SIGKILL that the syscall accepted
                         // cannot be refused, only briefly outlived.
-                        const killed = killServer(server.pid);
+                        const killed = killServer(
+                          server.pid,
+                          server.workerPids,
+                        );
                         await showHUD(`Killed ${server.projectName}`);
                         await killed;
                         // Refresh before the reap so the menu bar count drops
@@ -513,7 +562,9 @@ export default function Command() {
                       // for the ordering lesson — and refresh runs before the
                       // reap so the count drops promptly.
                       const killed = Promise.allSettled(
-                        projectServers.map((server) => killServer(server.pid)),
+                        projectServers.map((server) =>
+                          killServer(server.pid, server.workerPids),
+                        ),
                       );
                       await showHUD(
                         projectServers.length === 2

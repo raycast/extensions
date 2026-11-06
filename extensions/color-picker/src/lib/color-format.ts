@@ -46,7 +46,8 @@ export function formatColor(_color: HistoryColor, format?: ColorFormatType) {
     case "lch": {
       const lchColor = color.to("lch");
       const [l, c, h] = lchColor.coords;
-      return `lch(${l.toFixed(2)}% ${c} ${h})`;
+      const lightness = l === null ? "none" : `${l.toFixed(2)}%`;
+      return `lch(${lightness} ${c} ${h})`;
     }
     case "p3": {
       return color.to("p3").toString({ format: "p3" });
