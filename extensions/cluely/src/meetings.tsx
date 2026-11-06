@@ -4,11 +4,10 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  showToast,
-  Toast,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { MeetingDetail } from "./components/meeting-detail";
 import { Setup } from "./components/setup";
 import {
@@ -16,7 +15,6 @@ import {
   filterMeetings,
   findCli,
   loadMeetings,
-  Meeting,
   mergeMeetings,
   readableError,
   SessionState,
@@ -24,87 +22,64 @@ import {
 } from "./lib/cluely";
 
 export default function Meetings() {
-  const preferred = getPreferenceValues<{ cliPath?: string }>().cliPath;
-  const [cliPath, setCliPath] = useState<string>();
-  const [items, setItems] = useState<Meeting[]>([]);
-  const [cursor, setCursor] = useState<string>();
-  const [total, setTotal] = useState<number>();
+  const preferred = getPreferenceValues<Preferences>().cliPath;
   const [filters, setFilters] = useState("all:7d");
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [revision, setRevision] = useState(0);
-  const currentRead = useRef<AbortController | undefined>(undefined);
+  const [total, setTotal] = useState<number>();
+  const abortable = useRef<AbortController>(null);
   const [state, since] = filters.split(":") as [SessionState | "all", Since];
-  useEffect(() => {
-    const abort = new AbortController();
-    currentRead.current?.abort();
-    currentRead.current = abort;
-    setLoading(true);
-    setError(undefined);
-    setCliPath(undefined);
-    setItems([]);
-    setCursor(undefined);
-    setTotal(undefined);
-    findCli(preferred)
-      .then(async (path) => {
-        if (abort.signal.aborted) return;
-        setCliPath(path);
+  const cli = usePromise(findCli, [preferred], { onError: () => undefined });
+  const cliPath = cli.data;
+  const meetings = usePromise(
+    (path: string, state: SessionState | "all", since: Since) =>
+      async ({ cursor }: { page: number; cursor?: string }) => {
         const result = await loadMeetings(
           path,
-          { state: state === "all" ? "" : state, since },
-          abort.signal,
+          { state: state === "all" ? "" : state, since, cursor },
+          abortable.current?.signal,
         );
-        if (!abort.signal.aborted) {
-          setItems(result.items);
-          setCursor(result.nextCursor);
-          setTotal(result.total);
-        }
-      })
-      .catch((err) => {
-        if (!abort.signal.aborted) setError(readableError(err));
-      })
-      .finally(() => {
-        if (!abort.signal.aborted) setLoading(false);
-      });
-    return () => {
-      currentRead.current?.abort();
-    };
-  }, [preferred, state, since, revision]);
-  async function loadMore() {
-    if (!cliPath || !cursor || loading) return;
-    const abort = new AbortController();
-    currentRead.current = abort;
-    setLoading(true);
-    try {
-      const result = await loadMeetings(
-        cliPath,
-        { state: state === "all" ? "" : state, since, cursor },
-        abort.signal,
-      );
-      if (!abort.signal.aborted) {
-        setItems((current) => mergeMeetings(current, result.items));
-        setCursor(result.nextCursor);
         setTotal(result.total);
-      }
-    } catch (err) {
-      if (!abort.signal.aborted)
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Could Not Load More Meetings",
-          message: readableError(err),
-        });
-    } finally {
-      if (!abort.signal.aborted) setLoading(false);
-    }
-  }
-  const refresh = () => setRevision((value) => value + 1);
-  if (error)
-    return <Setup message={error} cliPath={cliPath} refresh={refresh} />;
+        return {
+          data: result.items,
+          hasMore: Boolean(result.nextCursor),
+          cursor: result.nextCursor,
+        };
+      },
+    [cliPath ?? "", state, since],
+    {
+      execute: Boolean(cliPath),
+      abortable,
+      onError: async (error) => {
+        // The first page shows the setup screen; later pages only toast.
+        if (meetings.data?.length)
+          await showFailureToast(readableError(error), {
+            title: "Could Not Load More Meetings",
+          });
+      },
+    },
+  );
+  const items = mergeMeetings([], meetings.data ?? []);
+  const loading = cli.isLoading || meetings.isLoading;
+  const hasMore = meetings.pagination?.hasMore ?? false;
+  const loadMore = () => meetings.pagination?.onLoadMore();
+  const refresh = () => {
+    if (cli.error) cli.revalidate();
+    else meetings.revalidate();
+  };
+  const failure = cli.error ?? (items.length ? undefined : meetings.error);
+  if (failure)
+    return (
+      <Setup
+        message={readableError(failure)}
+        cliPath={cliPath}
+        refresh={refresh}
+      />
+    );
   const visible = filterMeetings(items, query);
   return (
     <List
       isLoading={loading}
+      pagination={meetings.pagination}
       filtering={false}
       searchText={query}
       onSearchTextChange={setQuery}
@@ -179,7 +154,7 @@ export default function Meetings() {
                   onAction={refresh}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
-                {cursor && (
+                {hasMore && (
                   <Action
                     title="Load More Meetings"
                     icon={Icon.Plus}
@@ -195,7 +170,7 @@ export default function Meetings() {
           />
         ))}
       </List.Section>
-      {cursor && (
+      {hasMore && (
         <List.Section title="More Results">
           <List.Item
             id="load-more"

@@ -1,49 +1,40 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 import { Setup } from "./components/setup";
 import { findCli, loadMeetings, readableError, runCli } from "./lib/cluely";
 
+async function check(preferred: string | undefined, signal?: AbortSignal) {
+  const cli = await findCli(preferred);
+  try {
+    await runCli(cli, ["auth", "status"], signal);
+    const page = await loadMeetings(cli, { since: "7d" }, signal);
+    return {
+      path: cli,
+      connected: true,
+      message: `Connected. A read from Cluely succeeded (${page.items.length} meetings returned for the past 7 days). Browse Meetings can now show summaries and transcripts.`,
+    };
+  } catch (error) {
+    return { path: cli, connected: false, message: readableError(error) };
+  }
+}
+
 export default function Connection() {
-  const preferred = getPreferenceValues<{ cliPath?: string }>().cliPath;
-  const [path, setPath] = useState<string>();
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [revision, setRevision] = useState(0);
-  const [connected, setConnected] = useState(false);
-  useEffect(() => {
-    const abort = new AbortController();
-    setLoading(true);
-    setPath(undefined);
-    setConnected(false);
-    findCli(preferred)
-      .then(async (cli) => {
-        if (abort.signal.aborted) return;
-        setPath(cli);
-        await runCli(cli, ["auth", "status"], abort.signal);
-        const page = await loadMeetings(cli, { since: "7d" }, abort.signal);
-        if (!abort.signal.aborted) {
-          setConnected(true);
-          setMessage(
-            `Connected. A read from Cluely succeeded (${page.items.length} meetings returned for the past 7 days). Browse Meetings can now show summaries and transcripts.`,
-          );
-        }
-      })
-      .catch((error) => {
-        if (!abort.signal.aborted) setMessage(readableError(error));
-      })
-      .finally(() => {
-        if (!abort.signal.aborted) setLoading(false);
-      });
-    return () => abort.abort();
-  }, [preferred, revision]);
-  return loading ? (
+  const preferred = getPreferenceValues<Preferences>().cliPath;
+  const abortable = useRef<AbortController>(null);
+  const { data, error, isLoading, revalidate } = usePromise(
+    (preferred?: string) => check(preferred, abortable.current?.signal),
+    [preferred],
+    { abortable, onError: () => undefined },
+  );
+  return isLoading ? (
     <Detail isLoading markdown="# Checking Cluely connection…" />
   ) : (
     <Setup
-      message={message}
-      cliPath={path}
-      connected={connected}
-      refresh={() => setRevision((value) => value + 1)}
+      message={data?.message ?? readableError(error)}
+      cliPath={data?.path}
+      connected={data?.connected ?? false}
+      refresh={revalidate}
     />
   );
 }

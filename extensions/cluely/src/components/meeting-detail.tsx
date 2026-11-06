@@ -1,18 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import {
   CLUELY_DASHBOARD,
   loadMeeting,
   Meeting,
-  MeetingDetail as Data,
   readableError,
   transcriptText,
 } from "../lib/cluely";
@@ -27,36 +19,27 @@ export function MeetingDetail({
   meeting: Meeting;
   cliPath: string;
 }) {
-  const [data, setData] = useState<Data>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
   const [view, setView] = useState<"summary" | "transcript">("summary");
-  const [revision, setRevision] = useState(0);
-  useEffect(() => {
-    const abort = new AbortController();
-    setLoading(true);
-    setError(undefined);
-    setData(undefined);
-    loadMeeting(cliPath, meeting.id, abort.signal)
-      .then((result) => {
-        if (!abort.signal.aborted) setData(result);
-      })
-      .catch((err) => {
-        if (!abort.signal.aborted) {
-          const message = readableError(err);
-          setError(message);
-          void showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Read Meeting",
-            message,
-          });
-        }
-      })
-      .finally(() => {
-        if (!abort.signal.aborted) setLoading(false);
-      });
-    return () => abort.abort();
-  }, [cliPath, meeting.id, revision]);
+  const abortable = useRef<AbortController>(null);
+  const {
+    data,
+    error: failure,
+    isLoading: loading,
+    revalidate,
+  } = usePromise(
+    (path: string, id: string) =>
+      loadMeeting(path, id, abortable.current?.signal),
+    [cliPath, meeting.id],
+    {
+      abortable,
+      onError: async (err) => {
+        await showFailureToast(readableError(err), {
+          title: "Could Not Read Meeting",
+        });
+      },
+    },
+  );
+  const error = failure ? readableError(failure) : undefined;
   const transcript = data ? transcriptText(data.transcript) : "";
   const content =
     view === "summary"
@@ -130,7 +113,7 @@ export function MeetingDetail({
           <Action
             title="Refresh Meeting"
             icon={Icon.ArrowClockwise}
-            onAction={() => setRevision((value) => value + 1)}
+            onAction={revalidate}
             shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action.OpenInBrowser

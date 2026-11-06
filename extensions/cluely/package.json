@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cluely",
   "title": "Cluely",
-  "description": "Browse Cluely meetings, filter recent sessions, and copy summaries and transcripts through the official CLI",
+  "description": "Browse Cluely meetings and copy summaries and transcripts. Requires the official Cluely CLI and a signed-in Cluely account.",
   "icon": "icon.png",
   "author": "itsdanielsultan",
   "license": "MIT",
@@ -30,14 +30,15 @@
   "preferences": [
     {
       "name": "cliPath",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "title": "Cluely CLI Path",
       "description": "Optional absolute path to the official cluely executable. By default, common Homebrew and local install paths are checked."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11"
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

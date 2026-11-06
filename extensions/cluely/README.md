@@ -25,17 +25,3 @@ Common Homebrew and local installation paths are detected. If you used a manual 
 ## Search scope
 
 Date/state filters run through Cluely's service. Text search matches titles and tags only in meetings already loaded into the current view. Use **Load More Meetings** to include older pages. Transcript text is fetched only after selecting a meeting; it is not used in list search.
-
-## Development
-
-```sh
-npm install
-npm run typecheck
-npm test
-npm run lint
-npm run build
-npm run dev
-```
-
-Source references: [official CLI README](https://github.com/cluely/cluely-cli), [list response and filters](https://github.com/cluely/cluely-cli/blob/main/cmd/sessions_list.go), [detail response](https://github.com/cluely/cluely-cli/blob/main/cmd/sessions_get.go), [official dashboard origin](https://github.com/cluely/cluely-cli/blob/main/internal/config/config.go).
-
