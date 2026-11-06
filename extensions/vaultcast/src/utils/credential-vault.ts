@@ -27,6 +27,8 @@ interface VaultRuntime {
   locked: boolean;
   lastActivityAt: number;
   hydratedFromHelper: boolean;
+  /** Bumped on every local lock, clear, or unlock so late helper replies can't overwrite a newer session state. */
+  sessionEpoch: number;
 }
 
 function preferences(): Preferences {
@@ -50,6 +52,7 @@ function runtime(): VaultRuntime {
       locked: false,
       lastActivityAt: 0,
       hydratedFromHelper: false,
+      sessionEpoch: 0,
     };
   }
 
@@ -64,6 +67,20 @@ function notifySessionListeners(): void {
   for (const listener of runtime().listeners) {
     listener();
   }
+}
+
+function beginSessionChange(): number {
+  return ++runtime().sessionEpoch;
+}
+
+/** Applies a helper snapshot only if no lock, clear, or newer unlock happened since `epoch` was taken. */
+function applySnapshotIfCurrent(epoch: number, snapshot: SessionHelperSnapshot): boolean {
+  if (runtime().sessionEpoch !== epoch) {
+    return false;
+  }
+
+  applySnapshot(snapshot);
+  return true;
 }
 
 function applySnapshot(snapshot: SessionHelperSnapshot): void {
@@ -98,9 +115,9 @@ export async function hydrateCredentialVault(): Promise<void> {
     return;
   }
 
+  const epoch = state.sessionEpoch;
   try {
-    const snapshot = await getSessionHelperSnapshot(helperConfig());
-    applySnapshot(snapshot);
+    applySnapshotIfCurrent(epoch, await getSessionHelperSnapshot(helperConfig()));
   } catch {
     // Fall back to an empty local session if the helper is unavailable.
   }
@@ -124,6 +141,7 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
 
   const state = runtime();
   const wasLocked = state.locked;
+  const epoch = beginSessionChange();
   state.credentialsByAdapter.set(adapterId, cloneCredentials(credentials));
   state.rememberedAdapterIds.add(adapterId);
   state.locked = false;
@@ -141,8 +159,9 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
       }
       // Remembering unlocks the whole shared session in the helper, but locking cleared every manager's
       // credentials locally; pull them back so the other managers can unlock silently again.
-      applySnapshot(await getSessionHelperSnapshot(helperConfig()));
-      notifySessionListeners();
+      if (applySnapshotIfCurrent(epoch, await getSessionHelperSnapshot(helperConfig()))) {
+        notifySessionListeners();
+      }
     })
     .catch(() => {
       // Helper sync is best-effort; local cache still works within this process.
@@ -168,6 +187,7 @@ export function lockExtensionSession(): void {
     return;
   }
 
+  beginSessionChange();
   state.locked = true;
   state.credentialsByAdapter.clear();
   notifySessionListeners();
@@ -180,12 +200,15 @@ export async function unlockExtensionSessionAfterPresence(): Promise<void> {
     return;
   }
 
-  applySnapshot(await unlockAfterPresenceInSessionHelper());
-  notifySessionListeners();
+  const epoch = beginSessionChange();
+  if (applySnapshotIfCurrent(epoch, await unlockAfterPresenceInSessionHelper())) {
+    notifySessionListeners();
+  }
 }
 
 export function clearRememberedCredentials(adapterId?: string): void {
   const state = runtime();
+  beginSessionChange();
   if (adapterId) {
     state.credentialsByAdapter.delete(adapterId);
     state.rememberedAdapterIds.delete(adapterId);
