@@ -81,7 +81,7 @@ export default function Command() {
       // 如果是当前正在看的年份，且有缓存，先渲染保证秒开
       if (!isPreload && cachedWrapper && cachedWrapper.holidays && isMounted) {
         console.log(`${prefix} Rendering UI using local cache`);
-        setHolidays(cachedWrapper.holidays);
+        setHolidays((prev) => ({ ...prev, ...cachedWrapper!.holidays }));
       }
 
       const realNow = new Date();
@@ -114,7 +114,7 @@ export default function Command() {
 
       if (!needsFetch) {
         console.log(`${prefix} Conclusion: Valid cache exists or within 24h retry limit, skipping network request.`);
-        return;
+        return cachedWrapper ? cachedWrapper.holidays : {};
       }
 
       console.log(
@@ -128,7 +128,7 @@ export default function Command() {
         const response = await fetch(`https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`);
         if (!response.ok) {
           console.log(`${prefix} Holiday data not published yet (HTTP ${response.status}), skip this time.`);
-          return;
+          return cachedWrapper ? cachedWrapper.holidays : {};
         }
         const json = (await response.json()) as {
           year?: number;
@@ -161,18 +161,39 @@ export default function Command() {
 
           // 如果是当前正在看的年份，更新状态
           if (!isPreload && isMounted) {
-            setHolidays(normalized);
+            setHolidays((prev) => ({ ...prev, ...normalized }));
           }
+          return normalized;
         } else {
           console.log(`${prefix} Official holiday data not yet published or empty.`);
         }
       } catch (error) {
         console.error(`${prefix} Network error fetching holiday data:`, error);
       }
+      return cachedWrapper ? cachedWrapper.holidays : {};
     }
 
-    // A. 加载当前选中的年份数据
-    fetchYearHolidays(year, false);
+    // A. 加载当前选中的年份数据，同时根据月份自动顺带加载相邻年份（解决跨月显示问题）
+    async function loadAllRequiredYears() {
+      const currentHolidays = await fetchYearHolidays(year, false);
+
+      // 如果当前是 1 月，顺便把前一年的数据拉取合并（防止月初跨上个月时丢失）
+      if (month === 1) {
+        const prevHolidays = await fetchYearHolidays(year - 1, true);
+        if (isMounted) {
+          setHolidays((prev) => ({ ...prev, ...prevHolidays, ...currentHolidays }));
+        }
+      }
+      // 如果当前是 12 月，顺便把后一年的数据拉取合并（防止月末跨下个月时丢失，如元旦）
+      else if (month === 12) {
+        const nextHolidays = await fetchYearHolidays(year + 1, true);
+        if (isMounted) {
+          setHolidays((prev) => ({ ...prev, ...currentHolidays, ...nextHolidays }));
+        }
+      }
+    }
+
+    loadAllRequiredYears();
 
     // B. 如果当前真实时间是 11 月或 12 月，在后台静默预热加载下一年
     const realNow = new Date();
@@ -185,7 +206,7 @@ export default function Command() {
     return () => {
       isMounted = false;
     };
-  }, [year]);
+  }, [year, month]);
 
   // 2. 构建当月日历数据
   const calendarData = useMemo(() => {
