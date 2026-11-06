@@ -481,6 +481,7 @@
 /extensions/cloudflare-warp                                         @anandubajith @ezzylan
 /extensions/cloudinary                                              @colbyfayock @xmok
 /extensions/cloudstash                                              @bohdanbirdie
+/extensions/cmarks                                                  @yuchanghyun
 /extensions/cmux                                                    @stevenocchipinti
 /extensions/cnpj-lookup                                             @xilopaint
 /extensions/coast                                                   @jerichosequitin
@@ -1816,7 +1817,7 @@
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares @el-schneider @TheFRedFox
 /extensions/modbus-toolkit                                          @TwoMental
-/extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta @pernielsentikaer @porenes
+/extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta @pernielsentikaer @porenes @seifip
 /extensions/modelflare                                              @magnus-minor
 /extensions/models-dev                                              @carlesandres
 /extensions/modify-hash                                             @tisfeng @0xdhrv
@@ -2790,7 +2791,7 @@
 /extensions/sleep-timer                                             @dtmzr @ThatNerdSquared @pernielsentikaer @ridemountainpig
 /extensions/sleevy                                                  @Onnokh
 /extensions/slides2pdf                                              @Root-Bert
-/extensions/slowed-reverb                                           @neontomo
+/extensions/slowed-reverb                                           @0xdhrv @0xdhrv
 /extensions/slugify                                                 @unreadablename @xmok @teziovsky
 /extensions/slugify-file-folder-names                               @tarikkavaz
 /extensions/slurm                                                   @p-koenig
