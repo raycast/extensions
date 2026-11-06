@@ -1,5 +1,10 @@
 # Media Converter Changelog
 
+## [Fix WebP and AVIF with FFmpeg builds missing encoders] - {PR_MERGE_DATE}
+
+- AVIF images now use libsvtav1 when FFmpeg has no libaom-av1, as in Homebrew's `ffmpeg` formula, instead of failing
+- WebP conversion with an FFmpeg build that has no libwebp now explains which encoder is missing and how to point the extension at a build that has it, instead of showing the raw FFmpeg error
+
 ## Video Editing Controls - 2026-09-24
 
 - Extend Edit Media playback speeds from 0.25×–4× to 0.25×–40× with synchronized audio.
