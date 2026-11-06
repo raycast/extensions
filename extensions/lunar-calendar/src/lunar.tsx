@@ -15,6 +15,13 @@ interface HolidayMap {
   [dateStr: string]: HolidayItem; // Key 格式: YYYY-MM-DD
 }
 
+// holiday-cn 接口返回的节假日类型定义
+interface HolidayCNItem {
+  name: string;
+  date: string; // 格式: YYYY-MM-DD
+  isOffDay: boolean; // true 为放假，false 为调休上班
+}
+
 interface CalendarCell {
   day: number;
   isCurrentMonth: boolean;
@@ -110,28 +117,35 @@ export default function Command() {
         return;
       }
 
-      console.log(`${prefix} Conclusion: Fetching from API -> https://timor.tech/api/holiday/year/${targetYear}/`);
+      console.log(
+        `${prefix} Conclusion: Fetching from API -> https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`
+      );
 
       // 记录本次尝试请求的时间戳（无论成功与否，24小时内不再频繁重试）
       await LocalStorage.setItem(attemptKey, now.toString());
 
       try {
-        const response = await fetch(`https://timor.tech/api/holiday/year/${targetYear}/`);
+        const response = await fetch(`https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/${targetYear}.json`);
+        if (!response.ok) {
+          console.log(`${prefix} Holiday data not published yet (HTTP ${response.status}), skip this time.`);
+          return;
+        }
         const json = (await response.json()) as {
-          code: number;
-          holiday?: Record<string, HolidayItem>;
+          year?: number;
+          days?: HolidayCNItem[];
         };
 
-        console.log(`${prefix} API Response status code: ${json.code}`);
+        console.log(`${prefix} API Response year: ${json.year}, days count: ${json.days?.length ?? 0}`);
 
-        // 严格校验：必须 code 为 0 且 holiday 确实有内容
-        if (json.code === 0 && json.holiday && Object.keys(json.holiday).length > 0) {
+        // 严格校验：必须 days 为数组且确实有内容
+        if (Array.isArray(json.days) && json.days.length > 0) {
           const normalized: HolidayMap = {};
-          for (const [key, item] of Object.entries(json.holiday)) {
-            const dateStr = key.length === 5 ? `${targetYear}-${key}` : item.date || key;
-            normalized[dateStr] = {
-              ...item,
-              date: dateStr,
+          for (const item of json.days) {
+            if (!item.date) continue;
+            normalized[item.date] = {
+              holiday: item.isOffDay,
+              name: item.name,
+              date: item.date,
             };
           }
 
@@ -200,7 +214,7 @@ export default function Command() {
         isCurrentMonth: false,
         solar,
         dateStr,
-        lunarText: getLunarText(solar, holidays[dateStr]),
+        lunarText: getLunarText(solar),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
         isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -218,7 +232,7 @@ export default function Command() {
         isCurrentMonth: true,
         solar,
         dateStr,
-        lunarText: getLunarText(solar, holidays[dateStr]),
+        lunarText: getLunarText(solar),
         holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
         isToday: dateStr === todayStr,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -240,7 +254,7 @@ export default function Command() {
           isCurrentMonth: false,
           solar,
           dateStr,
-          lunarText: getLunarText(solar, holidays[dateStr]),
+          lunarText: getLunarText(solar),
           holidayStatus: getHolidayStatus(solar, holidays[dateStr]),
           isToday: dateStr === todayStr,
           isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -325,12 +339,8 @@ function getHolidayStatus(solar: Solar, holidayItem?: HolidayItem): { isHoliday?
   return { isHoliday: false, isWork: false };
 }
 
-// 获取农历或节日文本
-function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
-  if (holidayItem && holidayItem.holiday && holidayItem.name) {
-    return holidayItem.name;
-  }
-
+// 获取农历或节日文本（完全基于农历库与传统节日，不再受 API 文本覆盖）
+function getLunarText(solar: Solar): string {
   const mainSolarFestivals = [
     "元旦",
     "妇女节",

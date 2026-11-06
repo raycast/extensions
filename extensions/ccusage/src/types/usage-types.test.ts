@@ -249,4 +249,38 @@ describe("UsageLimitDataSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  it.each<{ name: string; input: Record<string, unknown>; fiveHour: unknown; sevenDay: unknown }>([
+    { name: "five_hour null", input: { ...windows, five_hour: null }, fiveHour: null, sevenDay: windows.seven_day },
+    {
+      name: "five_hour absent",
+      input: { seven_day: windows.seven_day },
+      fiveHour: undefined,
+      sevenDay: windows.seven_day,
+    },
+    { name: "seven_day null", input: { ...windows, seven_day: null }, fiveHour: windows.five_hour, sevenDay: null },
+    {
+      name: "malformed five_hour",
+      input: { ...windows, five_hour: { percent: 4 } },
+      fiveHour: null,
+      sevenDay: windows.seven_day,
+    },
+  ])("degrades a missing or malformed window to null: $name", ({ input, fiveHour, sevenDay }) => {
+    const result = UsageLimitDataSchema.parse(input);
+
+    expect(result.five_hour).toEqual(fiveHour);
+    expect(result.seven_day).toEqual(sevenDay);
+  });
+
+  it("drops an unreadable `limits` entry and keeps the rest", () => {
+    const result = UsageLimitDataSchema.parse({
+      ...windows,
+      limits: [
+        { kind: "weekly_all", group: "weekly", percent: 4, resets_at: null },
+        { kind: "weekly_scoped", percent: "high" },
+      ],
+    });
+
+    expect(result.limits?.map((entry) => entry.kind)).toEqual(["weekly_all"]);
+  });
 });

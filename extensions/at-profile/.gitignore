@@ -13,3 +13,7 @@ compiled_raycast_rust
 # misc
 .DS_Store
 .github/.private
+
+# Local agent files (never published)
+CLAUDE.md
+.claude/

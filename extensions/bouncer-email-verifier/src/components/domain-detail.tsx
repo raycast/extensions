@@ -3,6 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { BouncerError, verifyDomain, type DomainRecord } from "../lib/bouncer";
 import { getDomainSignals, renderSignalLines } from "../lib/verdict";
+import { SignalGuide } from "./signal-guide";
 
 const BOUNCER_APP_URL = "https://app.usebouncer.com";
 
@@ -17,13 +18,13 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
       onData: (record) => onChecked?.(record),
       onError: async (failure) => {
         const outOfCredits = failure instanceof BouncerError && failure.outOfCredits;
-        const unauthorized = failure instanceof BouncerError && failure.statusCode === 401;
+        const needsKey = failure instanceof BouncerError && failure.needsKey;
 
         await showToast({
           style: Toast.Style.Failure,
-          title: outOfCredits ? "Out of Credits" : "Domain Check Failed",
+          title: outOfCredits ? "Out of Credits" : needsKey ? "API Key Needed" : "Domain Check Failed",
           message: failure.message,
-          primaryAction: unauthorized
+          primaryAction: needsKey
             ? { title: "Open Preferences", onAction: () => openExtensionPreferences() }
             : undefined,
         });
@@ -34,12 +35,12 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
   if (error) {
     const outOfCredits = error instanceof BouncerError && error.outOfCredits;
     // The toast offers this too, but the view the user is left looking at must also lead somewhere.
-    const unauthorized = error instanceof BouncerError && error.statusCode === 401;
+    const needsKey = error instanceof BouncerError && error.needsKey;
     return (
       <Detail
         navigationTitle={domain}
         markdown={[
-          `# ${outOfCredits ? "Out of Credits" : "Domain Check Failed"}`,
+          `# ${outOfCredits ? "Out of Credits" : needsKey ? "API Key Needed" : "Domain Check Failed"}`,
           "",
           `\`${domain}\``,
           "",
@@ -50,7 +51,7 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
             {outOfCredits ? (
               <Action.OpenInBrowser title="Top up Credits" url={BOUNCER_APP_URL} icon={Icon.Coins} />
             ) : null}
-            {unauthorized ? (
+            {needsKey ? (
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             ) : null}
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
@@ -104,6 +105,7 @@ export function DomainRecordDetail({ record, onRetry }: { record: DomainRecord; 
               icon={Icon.Clipboard}
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
+            <Action.Push title="What the Signals Mean" icon={Icon.QuestionMarkCircle} target={<SignalGuide />} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action

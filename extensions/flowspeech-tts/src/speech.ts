@@ -6,7 +6,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { generateSpeech } from "./api";
 import { toWav } from "./audio";
-import { errorJobId, recoveryText, saveRecovery, type RecoveryRecord } from "./recovery";
+import { errorJobId, recoveryText, saveRecovery, updateRecovery, type RecoveryRecord } from "./recovery";
 
 const execFileAsync = promisify(execFile);
 const MAX_TEXT_LENGTH = 10_000;
@@ -70,7 +70,7 @@ export async function speakText(
     const generatedAudio = await generateSpeech(text, preferences.voiceName, apiKey, record.requestId, operationSignal);
     record = { ...record, jobId: generatedAudio.jobId };
     // The pre-submission record remains recoverable if this optional update fails.
-    await saveRecovery(record).catch(() => undefined);
+    await updateRecovery(record).catch(() => undefined);
     const wav = toWav(generatedAudio);
     operationSignal.throwIfAborted();
     await file.writeFile(wav, { signal: operationSignal });
@@ -92,12 +92,12 @@ export async function speakText(
     operationSignal.throwIfAborted();
     await execFileAsync("/usr/bin/afplay", [audioPath], { signal: operationSignal });
     record = { ...record, state: "completed" };
-    await saveRecovery(record).catch(() => undefined);
+    await updateRecovery(record).catch(() => undefined);
     onFeedback?.({ title: "Speech finished", message: recoveryText(record), requestId: copyId, phase: "finished" });
   } catch (error) {
     if (record && persisted) {
       record = { ...record, jobId: record.jobId ?? errorJobId(error), state: "interrupted" };
-      await saveRecovery(record).catch(() => undefined);
+      await updateRecovery(record).catch(() => undefined);
     }
     let message = operationSignal.aborted
       ? "Local operation stopped; the server job was not cancelled."

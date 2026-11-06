@@ -1,0 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# build output (`npm run build` → `ray build -e dist`)
+/dist
+
+# misc
+.DS_Store
+raycast-env.d.ts
+
+# superpowers brainstorming + planning docs (kept locally at ~/Documents/Personal/the-downloader-planning/)
+.superpowers/
+docs/superpowers/
+
+# Claude Code per-session worktree state
+.claude/

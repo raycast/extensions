@@ -1,4 +1,9 @@
-import { type DiagramFormat, type ResolvedEngine, type SvgRasterStrategy } from "../renderers/types";
+import {
+  type DiagramFormat,
+  type ResolvedEngine,
+  type SvgRasterStrategy,
+  type RendererMetadata,
+} from "../renderers/types";
 import { type BrowserSetupContext, type ManualGenerationState } from "./manual-command-service";
 
 export interface ManualCommandState {
@@ -10,6 +15,7 @@ export interface ManualCommandState {
   engineUsed: ResolvedEngine | null;
   svgRasterStrategy: SvgRasterStrategy | null;
   mermaidCode: string | null;
+  rendererMetadata?: RendererMetadata;
 }
 
 export function createInitialManualCommandState(defaultFormat: DiagramFormat): ManualCommandState {
@@ -22,6 +28,7 @@ export function createInitialManualCommandState(defaultFormat: DiagramFormat): M
     engineUsed: null,
     svgRasterStrategy: null,
     mermaidCode: null,
+    rendererMetadata: undefined,
   };
 }
 
@@ -42,6 +49,7 @@ export function createPendingManualCommandState(previous: ManualCommandState): M
     engineUsed: null,
     svgRasterStrategy: null,
     mermaidCode: null,
+    rendererMetadata: undefined,
   };
 }
 
@@ -55,6 +63,7 @@ export function createFatalManualCommandState(previous: ManualCommandState, mess
     engineUsed: null,
     svgRasterStrategy: null,
     mermaidCode: null,
+    rendererMetadata: undefined,
   };
 }
 
@@ -72,6 +81,7 @@ export function mapManualGenerationStateToCommandState(
       engineUsed: null,
       svgRasterStrategy: null,
       mermaidCode: null,
+      rendererMetadata: undefined,
     };
   }
 
@@ -85,6 +95,7 @@ export function mapManualGenerationStateToCommandState(
       engineUsed: null,
       svgRasterStrategy: null,
       mermaidCode: null,
+      rendererMetadata: undefined,
     };
   }
 
@@ -98,5 +109,6 @@ export function mapManualGenerationStateToCommandState(
     engineUsed: result.result.engine,
     svgRasterStrategy: result.result.svgRasterStrategy ?? null,
     mermaidCode: result.mermaidCode,
+    rendererMetadata: result.result.rendererMetadata,
   };
 }

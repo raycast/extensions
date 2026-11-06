@@ -24,7 +24,6 @@ import {
   defaultDownloadsLayout,
   downloadsFolder,
   getDownloads,
-  getQuickLookPreviewDataUrl,
   getTextFilePreview,
   isImageFile,
   isTextFile,
@@ -36,36 +35,13 @@ import {
   moveToTrash,
 } from "./utils";
 
-function FilePreviewDetail({ download, isSelected }: { download: Download; isSelected: boolean }) {
-  const isDarwin = process.platform === "darwin";
-  const isHiddenFile = download.file.startsWith(".");
-  const isText = !download.isDirectory && isTextFile(download.file);
-  const shouldShowImagePreview =
-    isDarwin && showPreview && !download.isDirectory && isSelected && !isHiddenFile && !isText;
-  const shouldShowTextPreview = showPreview && !download.isDirectory && isSelected && !isHiddenFile && isText;
-
-  const { data, isLoading } = usePromise(
-    async (path: string) => {
-      return await getQuickLookPreviewDataUrl(path);
-    },
-    [download.path],
-    { execute: shouldShowImagePreview },
-  );
-
-  if (!isSelected) {
-    return null;
-  }
-
-  let markdown: string | null = null;
-  if (shouldShowTextPreview) {
-    markdown = getTextFilePreview(download.path);
-  } else if (shouldShowImagePreview) {
-    markdown = isLoading ? "*Loading preview...*" : data ? `![Preview](${data})` : "*No preview available*";
-  }
+function FilePreviewDetail({ download }: { download: Download }) {
+  const shouldShowTextPreview =
+    showPreview && !download.isDirectory && !download.file.startsWith(".") && isTextFile(download.file);
+  const markdown = shouldShowTextPreview ? getTextFilePreview(download.path) : null;
 
   return (
     <List.Item.Detail
-      isLoading={shouldShowImagePreview && isLoading}
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
@@ -473,7 +449,9 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
           id={download.path}
           {...getItemProps(download)}
           icon={{ fileIcon: download.path }}
-          detail={<FilePreviewDetail download={download} isSelected={selectedItemId === download.path} />}
+          detail={
+            isShowingDetail && selectedItemId === download.path ? <FilePreviewDetail download={download} /> : undefined
+          }
         />
       ))}
     </List>

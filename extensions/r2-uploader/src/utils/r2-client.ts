@@ -1,6 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { S3Client } from "@aws-sdk/client-s3";
 
+let cachedClient: { client: S3Client; accountId: string; accessKeyId: string; secretAccessKey: string } | undefined;
+
 export function createR2Client(): { client: S3Client; bucketName: string; endpoint: string; customDomain?: string } {
   const preferences = getPreferenceValues();
   const {
@@ -13,15 +15,25 @@ export function createR2Client(): { client: S3Client; bucketName: string; endpoi
 
   const endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
 
-  const client = new S3Client({
-    region: "auto",
-    endpoint,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-    forcePathStyle: true,
-  });
+  if (
+    !cachedClient ||
+    cachedClient.accountId !== accountId ||
+    cachedClient.accessKeyId !== accessKeyId ||
+    cachedClient.secretAccessKey !== secretAccessKey
+  ) {
+    cachedClient?.client.destroy();
+    const client = new S3Client({
+      region: "auto",
+      endpoint,
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+      forcePathStyle: true,
+    });
+    cachedClient = { client, accountId, accessKeyId, secretAccessKey };
+  }
 
-  return { client, bucketName, endpoint, customDomain: customDomain || undefined };
+  return { client: cachedClient.client, bucketName, endpoint, customDomain: customDomain || undefined };
 }

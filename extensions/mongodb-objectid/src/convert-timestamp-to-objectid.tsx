@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, List, LaunchProps, showToast, Toast } from "@raycast/api";
-import { ObjectId } from "mongodb";
+import { ObjectId } from "bson";
 
 interface ConvertTimestampToObjectIdArguments {
   timestamp: string;

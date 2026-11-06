@@ -1,16 +1,14 @@
 /**
     {
         "api":1,
-        "name":"Collapse lines",
-        "description":"Removes all linebreaks from your text",
-        "author":"Dennis",
+        "name":"Collapse Whitespace",
+        "description":"Collapses consecutive whitespace into a single space",
+        "author":"Boop Community",
         "icon":"collapse",
-        "tags":"strip,remove,collapse,join"
+        "tags":"collapse,whitespace,clean"
     }
 **/
 
 export function main(input) {
-  let split = input.text.split(/\r\n|\r|\n/);
-  input.postInfo(`${split.length} lines collapsed`);
-  input.text = split.join();
+  input.text = input.text.replace(/\s+/gu, " ").trim();
 }

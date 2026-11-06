@@ -14,7 +14,7 @@
       "name": "quick-add-task",
       "title": "Quick Add Task",
       "subtitle": "Hule",
-      "description": "Create a task from a single line, straight into your default list.",
+      "description": "Create a task from a single line, straight into your Quick capture list.",
       "mode": "no-view",
       "arguments": [
         {
@@ -64,15 +64,6 @@
       "required": false,
       "placeholder": "https://api.hule-do.com/api",
       "default": "https://api.hule-do.com/api"
-    },
-    {
-      "name": "defaultList",
-      "title": "Default List",
-      "description": "List that Quick Add Task writes to, as “List” or “Workspace / List”. Leave empty to use your first list.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "Inbox or Workspace / Inbox",
-      "default": ""
     }
   ],
   "dependencies": {

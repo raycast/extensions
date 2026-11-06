@@ -8,6 +8,7 @@ export interface Reviewer {
 }
 
 interface RawParticipant {
+  role?: string;
   state?: string | null;
   user?: { nickname?: string; uuid?: string };
 }
@@ -24,6 +25,14 @@ export function extractReviewers(participants: unknown[] | undefined | null): Re
       state: p.state as "approved" | "changes_requested",
       uuid: p.user?.uuid,
     }));
+}
+
+// Reviewers who were asked to review but haven't acted yet (no approval / change request).
+export function extractPendingReviewerUuids(participants: unknown[] | undefined | null): string[] {
+  return ((participants as RawParticipant[] | undefined) ?? [])
+    .filter((p) => p.role === "REVIEWER" && p.state !== "approved" && p.state !== "changes_requested")
+    .map((p) => p.user?.uuid)
+    .filter((uuid): uuid is string => typeof uuid === "string");
 }
 
 // Finds the current viewer's own review state among the real (server-persisted)

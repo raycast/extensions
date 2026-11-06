@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "local-content-search",
+  "title": "Local Content Search",
+  "description": "Search documents, photos, audio, and video locally with EmbeddingGemma 2 and independent background indexing.",
+  "version": "0.1.0",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "semantic search",
+    "offline",
+    "files",
+    "documents",
+    "photos",
+    "audio",
+    "video",
+    "EmbeddingGemma 2"
+  ],
+  "icon": "icon.png",
+  "author": "sushil",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search File Contents",
+      "subtitle": "Local Content Search",
+      "description": "Describe what you remember to find matching documents, images, audio, and video on your Mac",
+      "keywords": [
+        "content",
+        "semantic",
+        "file search"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "manage",
+      "title": "Manage Content Index",
+      "subtitle": "Local Content Search",
+      "description": "Choose folders, follow background indexing, and control pause, exclusions, power, and memory limits",
+      "keywords": [
+        "indexing",
+        "folders",
+        "pause"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Install Local Content Search",
+      "subtitle": "Local Content Search",
+      "description": "Set up the local EmbeddingGemma 2 model and independent macOS login service",
+      "keywords": [
+        "install",
+        "model",
+        "setup"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "helperPath",
+      "title": "Helper Path",
+      "description": "Optional extracted helper release directory containing bin/ and licenses/. Leave empty to download the verified release. Only select a helper you trust.",
+      "type": "directory",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build --exit-on-error",
+    "lint": "ray lint --exit-on-error",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "2.7.3",
+    "@raycast/utils": "^2.3.3",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

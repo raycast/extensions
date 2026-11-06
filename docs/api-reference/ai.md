@@ -240,10 +240,10 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_GPT-6_Sol | OpenAI's GPT-6 model for complex coding and agentic workflows. |
 | OpenAI_GPT-6.1_Sol | OpenAI's GPT-6.1 model for complex coding and agentic workflows. |
+| OpenAI_GPT-6.1_Terra | OpenAI's balanced GPT-6.1 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-6_Luna | OpenAI's efficient GPT-6 model for focused, high-volume tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
-| Anthropic_Claude_Haiku_4.5 | Anthropic's offering focusing on being the best combination of performance and speed. |
 | Anthropic_Claude_Haiku_5.5 | Anthropic's fastest model for high-volume and latency-sensitive tasks, with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Sonnet_4.6 | Anthropic's previous generation Sonnet model with high intelligence across most tasks. |
 | Anthropic_Claude_Sonnet_5 | Anthropic's best combination of speed and intelligence, with combined reasoning and non-reasoning capabilities. |
@@ -255,14 +255,12 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
 | Vercel_Muse_Spark_1.3 | Meta's flagship agentic reasoning model with multimodal understanding and zero-shot tool/MCP use. |
 | Vercel_Muse_Wonder_1.0 | Meta's frontier model for complex coding and long-running agentic work, with multimodal understanding and reliable tool use. |
-| Mistral_Nemo | Small, Apache-licensed model built with NVIDIA. |
 | Mistral_Large | Top-tier reasoning model with strong multilingual support. |
 | Mistral_Medium | A powerful, cost-effective, frontier-class multimodal model. |
 | Mistral_Small | Latest enterprise-grade small model with improved reasoning. |
 | Mistral_Codestral | Specialized model for code-related tasks and testing. |
 | Google_Gemini_4_Argon | Google's flagship reasoning model for complex software engineering, math and science, and long-running agentic work. |
 | Google_Gemini_3.8_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
-| Google_Gemini_3.7_Flash | Balances speed with intelligence for agentic and multimodal tasks. |
 | Google_Gemini_3.5_Flash_Lite | Fast, cost-effective model for high-throughput agentic workflows and data processing. |
 | Google_Gemini_3.1_Pro | Next generation thinking model for complex problem solving. |
 | xAI_Grok-4.7 | xAI's latest flagship Grok model, delivering frontier reasoning, stronger coding, and multimodal understanding. |
@@ -272,6 +270,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-6
 | Vercel_GLM-5.3_Flash | Z.AI's native multimodal coding model with hybrid attention, visual coding, and agentic tool use. |
 | Vercel_Kimi_K2.7_Code | Moonshot AI's code-optimized trillion-parameter multimodal model with enhanced coding capabilities and agentic tool-calling. |
 | Vercel_Kimi_K3 | Moonshot AI's trillion-parameter multimodal model with strong reasoning and agentic tool-calling. |
+| Vercel_Kimi_K3.1_Pro | Moonshot AI's frontier multimodal model for complex reasoning, coding, and long-horizon agentic work. |
 | Vercel_Gemma_4_31B | Google's open-weight dense model with vision and 140+ language support, tuned for output quality over throughput. |
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |

@@ -2,7 +2,7 @@ instructions: |
   Use the lock-keyboard tool when the user asks to lock the keyboard for cleaning.
   If no duration is given, use the 30-second default. Use 0 seconds only when the user asks for forever.
   Convert requested durations to whole seconds before calling the tool.
-  For questions about how to unlock the keyboard, answer without locking it. Press Ctrl+U to unlock at any time.
+  For questions about unlocking, answer without locking. Normally Ctrl+U unlocks immediately. With Lock Mouse Clicks enabled on macOS, Ctrl+U or three Command taps opens Touch ID; holding both Command keys for eight seconds forces release. Follow the tool confirmation for the active preference.
 evals:
   - input: "@clean-keyboard Lock my keyboard for 30 seconds so I can clean it."
     mocks:

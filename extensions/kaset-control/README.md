@@ -1,73 +1,51 @@
-# Kaset Raycast Extension
+# Kaset Control
 
-Control [Kaset](https://github.com/sozercan/kaset) - YouTube Music client for macOS - directly from Raycast.
+Control [Kaset](https://github.com/sozercan/kaset) — the YouTube Music client for
+macOS — from Raycast.
 
-## Features
-
-- **Menu Bar Player** - Shows current track in macOS menu bar with full playback controls
-- **Now Playing** - View current track with artwork, progress, and controls
-- **Toggle Play/Pause** - Quick playback control
-- **Next/Previous Track** - Skip tracks
-- **Volume Control** - Set volume from 0-100%
-- **Toggle Shuffle** - Enable/disable shuffle mode
-- **Cycle Repeat** - Cycle through repeat modes (off → all → one)
-- **Toggle Mute** - Mute/unmute audio
-- **Like/Dislike** - Rate the current track
+Kaset is a separate app: this extension drives it over AppleScript, so Kaset has
+to be installed and running.
 
 ## Requirements
 
-- [Kaset](https://github.com/sozercan/kaset) with AppleScript support
-- macOS 14.0 or later
+- **Kaset 0.14.2 or newer.** The queue commands and the merged YouTube Music and
+  YouTube search need 0.14.2 or later.
+- macOS.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| Show Menu Bar | Show current track in menu bar with controls |
-| Now Playing | View current track with artwork and controls |
-| Toggle Play/Pause | Play or pause |
-| Next Track | Skip to next |
-| Previous Track | Go back |
-| Set Volume | Choose volume level |
-| Toggle Shuffle | Toggle shuffle mode |
-| Cycle Repeat | Cycle repeat modes |
-| Toggle Mute | Mute/unmute |
-| Like Track | Like or unlike current track |
-| Dislike Track | Dislike or remove dislike |
+| Command | What it does |
+| --- | --- |
+| **Now Playing** | The current track with live progress, the queue, and recently played. Full playback controls, queue actions, and rating. |
+| **Play Song** | Search YouTube Music and YouTube together and play, queue, or play next. |
+| **Toggle Play/Pause**, **Next Track**, **Previous Track** | Playback control, no window. |
+| **Set Volume** | Pick a volume level. |
+| **Toggle Shuffle**, **Cycle Repeat**, **Toggle Mute** | Playback modes. |
+| **Like Track**, **Dislike Track** | Rate the current track. |
+| **Show Menu Bar** | Keep the current track and artwork in the menu bar with controls. |
+| **Record Player State** | Records history in the background. See below. |
 
-## Menu Bar
+## Preferences
 
-The menu bar player shows the current track and provides quick access to all controls:
+- **Play Song Source** — whether Play Song searches YouTube Music, YouTube, or
+  both (the default). You can also narrow this inside the search itself.
+- **Menu Bar Style** / **Menu Bar Icon** / **Hide When Idle** — control the menu
+  bar item.
 
-- **Show**: Run "Show Menu Bar" from Raycast
-- **Hide**: Click "Hide Menu Bar" in the menu bar dropdown
+## Recently Played
 
-### Settings
+History is recorded without the menu bar. Open **Record Player State** once, or
+turn on its background refresh in Raycast's extension settings, so it can keep
+recording while the Now Playing window is closed.
 
-Configure the menu bar display style in Raycast extension preferences:
+A track is added to Recently Played only once it has stopped playing, so the
+track you are listening to never appears in both Now Playing and Recently
+Played.
 
-- **Icon only** - Just the music icon
-- **Short** - Track name truncated to 20 characters
-- **Medium** - Track name truncated to 35 characters
-- **Long** - Track name truncated to 50 characters
+## Notes
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run in development mode
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint
-npm run lint
-npm run fix-lint
-```
-
-## License
-
-MIT
+- **Seeking is display-only.** Kaset exposes no AppleScript command to seek, so
+  the progress ring tracks playback but cannot scrub.
+- **Album** is resolved by searching YouTube Music, because Kaset's player
+  payload does not carry album names. This costs one search per track change.
+- The menu bar item is optional and off unless you enable it.

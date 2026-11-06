@@ -12,7 +12,8 @@
     "litomore",
     "yusifaliyevpro",
     "shivraj-roy",
-    "alexi.build"
+    "alexi.build",
+    "nawal"
   ],
   "platforms": [
     "macOS",
@@ -120,5 +121,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "lockMouse",
+      "title": "Lock Mouse Clicks",
+      "description": "Also block clicks and dragging while scrolling stays available. Unlock with Touch ID or hold both Command keys for 8 seconds. Requires Touch ID on macOS; ignored on Windows.",
+      "type": "checkbox",
+      "label": "Also lock mouse clicks (macOS, requires Touch ID)",
+      "default": false,
+      "required": false
+    }
+  ]
 }

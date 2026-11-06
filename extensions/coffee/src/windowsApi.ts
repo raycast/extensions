@@ -1,5 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
-import { is_caffeinate_running, list_processes, start_caffeinate, stop_caffeinate } from "rust:../rust";
+import {
+  get_caffeinate_state,
+  list_processes,
+  start_caffeinate,
+  stop_caffeinate,
+  stop_caffeinate_if_matches,
+} from "rust:../rust";
+import type { CaffeinationState } from "./caffeination";
+import { parseCaffeinateTimeout } from "./duration";
 
 interface ParsedCaffeinateArgs {
   durationSeconds: number | null;
@@ -8,14 +16,11 @@ interface ParsedCaffeinateArgs {
 }
 
 function parseArgs(additionalArgs?: string): ParsedCaffeinateArgs {
-  let durationSeconds: number | null = null;
+  const durationSeconds = parseCaffeinateTimeout(additionalArgs?.trim().split(/\s+/).filter(Boolean) ?? []);
   let pid: number | null = null;
   let windowHandle: number | null = null;
 
   if (additionalArgs) {
-    const duration = /-t\s+(\d+)/.exec(additionalArgs);
-    if (duration) durationSeconds = parseInt(duration[1], 10);
-
     const targetPid = /-w\s+(\d+)/.exec(additionalArgs);
     if (targetPid) pid = parseInt(targetPid[1], 10);
 
@@ -26,11 +31,11 @@ function parseArgs(additionalArgs?: string): ParsedCaffeinateArgs {
   return { durationSeconds, pid, windowHandle };
 }
 
-export async function windowsStartCaffeinate(additionalArgs?: string): Promise<void> {
+export async function windowsStartCaffeinate(additionalArgs?: string): Promise<string> {
   const { durationSeconds, pid, windowHandle } = parseArgs(additionalArgs);
   const preferences = getPreferenceValues<Preferences>();
 
-  await start_caffeinate({
+  return await start_caffeinate({
     preventDisplay: preferences.preventDisplay,
     preventSystem: preferences.preventSystem,
     durationSeconds,
@@ -43,13 +48,24 @@ export async function windowsStopCaffeinate(): Promise<boolean> {
   return await stop_caffeinate();
 }
 
-export async function windowsIsCaffeinateRunning(): Promise<boolean> {
-  const info = await is_caffeinate_running();
-  return info.running;
+export async function windowsStopCaffeinateIfMatches(expectedSessionId: string): Promise<boolean> {
+  return await stop_caffeinate_if_matches(expectedSessionId);
+}
+
+export async function windowsGetCaffeinationState(): Promise<CaffeinationState> {
+  const info = await get_caffeinate_state();
+  return {
+    isRunning: info.running,
+    isManaged: info.running,
+    sessionId: info.running ? (info.sessionId ?? null) : null,
+    externalCount: null,
+    totalSeconds: info.durationSeconds ?? null,
+    startTime: info.startTime == null ? null : info.startTime * 1000,
+  };
 }
 
 export async function windowsListProcesses(): Promise<WindowsProcessInfo[]> {
-  return await list_processes();
+  return (await list_processes()).map((info) => ({ ...info, path: info.path ?? null }));
 }
 
 interface WindowsProcessInfo {

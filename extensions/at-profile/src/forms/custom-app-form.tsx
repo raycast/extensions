@@ -1,64 +1,32 @@
-import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
 import { useState } from "react";
-import { addCustomApp, updateCustomApp } from "../helpers/custom-app-utils";
-import { safeAsyncOperation } from "../utils/errors";
-import { CustomAppFormProps, CustomAppInput } from "../types";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { addCustomApp, updateCustomApp } from "../helpers/apps";
+import { validateUrlTemplate } from "../helpers/url";
+import { AppEntry } from "../types";
 
-export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
+interface CustomAppFormProps {
+  app?: AppEntry;
+}
+
+export default function CustomAppForm({ app }: CustomAppFormProps) {
   const { pop } = useNavigation();
-  const [nameError, setNameError] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
 
-  const isEditing = !!app;
-
-  const validateUrlTemplate = (urlTemplate: string): string | undefined => {
-    if (!urlTemplate.trim()) {
-      return undefined; // Don't show error for empty field
-    }
-
-    if (!urlTemplate.includes("{profile}")) {
-      return "URL template must contain {profile} placeholder";
-    }
-
+  const handleSubmit = async (values: { name: string; url: string }) => {
+    const input = { name: values.name, urlTemplate: values.url };
     try {
-      const testUrl = urlTemplate.replace(/{profile}/g, "testuser");
-      const parsedUrl = new URL(testUrl);
-
-      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-        return "URL template must use http:// or https:// protocol";
+      if (app) {
+        const updated = await updateCustomApp(app.value, input);
+        await showToast({ style: Toast.Style.Success, title: "App Updated", message: updated.name });
+      } else {
+        const added = await addCustomApp(input);
+        await showToast({ style: Toast.Style.Success, title: "App Added", message: added.name });
       }
-    } catch {
-      return "URL template must be a valid URL format (e.g., https://example.com/{profile})";
+      pop();
+    } catch (error) {
+      await showError(error, { title: app ? "Couldn't Update App" : "Couldn't Add App" });
     }
-
-    return undefined;
-  };
-
-  const handleSubmit = async (values: { name: string; url: string; visible: boolean }) => {
-    const input: CustomAppInput = {
-      name: values.name,
-      urlTemplate: values.url,
-      visible: values.visible,
-    };
-
-    await safeAsyncOperation(
-      async () => {
-        let result;
-
-        if (isEditing && app) {
-          result = await updateCustomApp(app.id, input);
-        } else {
-          result = await addCustomApp(input);
-        }
-
-        if (result?.success) {
-          onSave?.();
-          pop();
-        }
-      },
-      "Custom app form submission",
-      { showToastOnError: false }, // addCustomApp/updateCustomApp handle their own error toasts
-    );
   };
 
   return (
@@ -66,31 +34,21 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isEditing ? "Update App" : "Add App"}
-            icon={isEditing ? Icon.Pencil : Icon.Plus}
+            title={app ? "Update App" : "Add App"}
+            icon={app ? Icon.Pencil : Icon.Plus}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="e.g., Custom Social Network"
-        defaultValue={app?.name || ""}
-        error={nameError}
-        onChange={() => setNameError(undefined)}
-      />
+      <Form.TextField id="name" title="Name" placeholder="e.g., Custom Social Network" defaultValue={app?.name ?? ""} />
       <Form.TextField
         id="url"
         title="URL Template"
         placeholder="https://example.com/{profile}"
-        defaultValue={app?.urlTemplate || ""}
+        defaultValue={app?.urlTemplate ?? ""}
         error={urlError}
-        onChange={(newValue) => {
-          const error = validateUrlTemplate(newValue);
-          setUrlError(error);
-        }}
+        onChange={(newValue) => setUrlError(newValue.trim() ? validateUrlTemplate(newValue) : undefined)}
       />
       <Form.Description text="Use {profile} as the placeholder for the username." />
     </Form>

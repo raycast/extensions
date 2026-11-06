@@ -3,7 +3,14 @@ import { usePromise } from "@raycast/utils";
 import { ReactElement, useState } from "react";
 import { LanguageDropdown } from "./QuickTranslate/LanguageDropdown";
 import { QuickTranslateListItem } from "./QuickTranslate/QuickTranslateListItem";
-import { useDebouncedValue, usePreferences, useSourceLanguage, useTargetLanguages, useTextState } from "./hooks";
+import {
+  TRANSLATE_DEBOUNCE_MS,
+  useDebouncedValue,
+  usePreferences,
+  useSourceLanguage,
+  useTargetLanguages,
+  useTextState,
+} from "./hooks";
 import { multiTranslate } from "./simple-translate";
 
 type QuickTranslateContext = { text: string; requestId: string };
@@ -14,7 +21,7 @@ export default function QuickTranslate(props: LaunchProps<{ launchContext: Quick
   const { proxy, prioritizeCrossLanguage } = usePreferences();
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const [text, setText] = useTextState(props.launchContext);
-  const debouncedText = useDebouncedValue(text, 500).trim();
+  const debouncedText = useDebouncedValue(text, TRANSLATE_DEBOUNCE_MS).trim();
 
   const { data: results, isLoading } = usePromise(
     async (txt, src, targets) => {
