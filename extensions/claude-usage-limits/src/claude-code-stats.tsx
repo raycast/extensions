@@ -18,20 +18,20 @@ const DAILY_PLACEHOLDERS = [
 const MONTHLY_PLACEHOLDERS = ["{monthlyCost}", "{monthlyTokens}", "{monthlyRatio}"] as const;
 const LIMIT_PLACEHOLDERS = ["{usageLimit}"] as const;
 
-const buildCommand = (subcommand: string): { command: string; args: string } => {
+const buildCommand = (subcommand: string): { command: string; args: string[] } => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
   const npxCommand = getCustomNpxPath() ?? "npx";
 
   if (useDirectCommand) {
-    return { command: "ccusage", args: `${subcommand} --json` };
+    return { command: "ccusage", args: [subcommand, "--json"] };
   }
-  return { command: npxCommand, args: `ccusage@latest ${subcommand} --json` };
+  return { command: npxCommand, args: ["ccusage@latest", subcommand, "--json"] };
 };
 
 const fetchDailyData = async () => {
   try {
     const { command, args } = buildCommand("daily");
-    const { stdout } = await execAsync(`${command} ${args}`, getExecOptions());
+    const { stdout } = await execAsync(command, args, getExecOptions());
 
     if (!stdout) return null;
 
@@ -57,7 +57,7 @@ const fetchDailyData = async () => {
 const fetchMonthlyData = async () => {
   try {
     const { command, args } = buildCommand("monthly");
-    const { stdout } = await execAsync(`${command} ${args}`, getExecOptions());
+    const { stdout } = await execAsync(command, args, getExecOptions());
 
     if (!stdout) return null;
 

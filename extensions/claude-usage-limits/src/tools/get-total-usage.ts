@@ -30,7 +30,7 @@ export default async function getTotalUsage(): Promise<{
   const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
-  const { stdout } = await execAsync(`${npxCommand} ccusage@latest --json`, execOptions);
+  const { stdout } = await execAsync(npxCommand, ["ccusage@latest", "--json"], execOptions);
 
   if (!stdout) {
     throw new Error("No output received from ccusage command");

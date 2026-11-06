@@ -1,7 +1,6 @@
 import { MenuBarExtra, Icon, LaunchType, launchCommand, open, openCommandPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { Image } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
 import { useDailyUsage } from "./hooks/useDailyUsage";
 import { useWeeklyUsage } from "./hooks/useWeeklyUsage";
 import { useMonthlyUsage } from "./hooks/useMonthlyUsage";
@@ -59,34 +58,21 @@ const MOCK_LIMITS_DATA = {
   ],
 };
 
-const openUsage = () =>
-  launchCommand({ name: "ccusage", type: LaunchType.UserInitiated }).catch((error) =>
-    showFailureToast(error, { title: "Could Not Open Claude Usage Limits" }),
-  );
+const openUsage = async () => {
+  try {
+    await launchCommand({ name: "ccusage", type: LaunchType.UserInitiated });
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Open Claude Usage Limits" });
+  }
+};
 
 export default function MenuBarccusage() {
-  const [, forceRender] = useState(0);
   const { data: todayUsage, previousDayData, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
   const { data: weeklyUsage, previousWeekData, isLoading: weeklyLoading, error: weeklyError } = useWeeklyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
-  const {
-    data: limitsData,
-    error: limitsError,
-    isLoading: limitsLoading,
-    isRateLimited: limitsRateLimited,
-    isUsageLimitsAvailable,
-    rateLimitedUntil,
-    nextRefreshAt,
-    revalidate,
-  } = useClaudeUsageLimits();
+  const { data: limitsData, error: limitsError, isLoading: limitsLoading, revalidate } = useClaudeUsageLimits();
   const workingTime = useWorkingTime();
-  const tickRef = useRef(() => forceRender((n) => n + 1));
-  useEffect(() => {
-    if (!limitsRateLimited && nextRefreshAt === null) return;
-    const id = setInterval(tickRef.current, 1000);
-    return () => clearInterval(id);
-  }, [limitsRateLimited, nextRefreshAt]);
 
   const effectiveLimitsData = MOCK_LIMITS_ENABLED ? MOCK_LIMITS_DATA : limitsData;
 
@@ -225,7 +211,14 @@ export default function MenuBarccusage() {
   })();
 
   return (
-    <MenuBarExtra icon={{ source: menuBarIcon }} title={menuBarTitle} tooltip={getTooltip()}>
+    <MenuBarExtra
+      icon={{ source: menuBarIcon }}
+      title={menuBarTitle}
+      tooltip={getTooltip()}
+      isLoading={
+        dailyLoading || weeklyLoading || monthlyLoading || totalLoading || limitsLoading || workingTime.isLoading
+      }
+    >
       {hasError && (
         <MenuBarExtra.Section title="Error">
           <MenuBarExtra.Item
@@ -251,16 +244,9 @@ export default function MenuBarccusage() {
 
       {!hasError && (
         <>
-          {sections.rateLimits && isUsageLimitsAvailable && (
+          {sections.rateLimits && (
             <MenuBarExtra.Section title={rateLimitsSectionTitle}>
-              {limitsRateLimited && !limitsData && (
-                <MenuBarExtra.Item
-                  title={`Rate limited — retry in ${rateLimitedUntil ? formatDuration(Math.max(0, rateLimitedUntil - Date.now())) : "…"}`}
-                  icon={Icon.Clock}
-                  onAction={revalidate}
-                />
-              )}
-              {limitsError && !limitsData && !limitsRateLimited && (
+              {limitsError && !limitsData && (
                 <MenuBarExtra.Item
                   title="Unable to fetch limits"
                   subtitle="Open for details"
@@ -280,19 +266,10 @@ export default function MenuBarccusage() {
                       onAction={revalidate}
                     />
                   ))}
-                  {!limitsRateLimited && (
-                    <MenuBarExtra.Item
-                      title="Refresh"
-                      subtitle={
-                        nextRefreshAt ? `next in ${formatDuration(Math.max(0, nextRefreshAt - Date.now()))}` : undefined
-                      }
-                      icon={Icon.ArrowClockwise}
-                      onAction={revalidate}
-                    />
-                  )}
+                  <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
                 </>
               )}
-              {!limitsData && !limitsError && !limitsRateLimited && limitsLoading && (
+              {!limitsData && !limitsError && limitsLoading && (
                 <MenuBarExtra.Item title="Loading limits..." icon={Icon.Clock} />
               )}
             </MenuBarExtra.Section>

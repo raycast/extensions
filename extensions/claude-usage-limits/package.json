@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-usage-limits",
   "title": "Claude Usage Limits",
-  "description": "See Claude Code usage limits, reset times and cost at a glance. Reads from the free Brim app, so it never uses up your Anthropic rate limit.",
+  "description": "See usage limits for every AI agent connected to Brim, plus reset times, tokens and cost. Reads from the free Brim app, so it never uses up your rate limits.",
   "categories": [
     "Developer Tools"
   ],
@@ -14,7 +14,7 @@
       "name": "ccusage",
       "title": "Claude Code Usage",
       "subtitle": "Brim",
-      "description": "Usage limits, reset times, tokens and cost for Claude Code",
+      "description": "Usage limits for every agent connected to Brim, plus tokens and cost",
       "mode": "view",
       "preferences": [
         {
@@ -22,7 +22,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Usage Limits",
-          "description": "5-hour, weekly and per-model limits from Brim.",
+          "description": "Limits for every agent connected to Brim.",
           "default": true
         },
         {
@@ -79,6 +79,7 @@
         "ccusage",
         "claude",
         "claude code",
+        "codex",
         "usage",
         "limits",
         "rate limit",
@@ -598,6 +599,26 @@
         "expected": [
           {
             "callsTool": "get-total-usage"
+          }
+        ]
+      },
+      {
+        "input": "@claude-usage-limits What are my usage limits?",
+        "mocks": {
+          "get-usage-limits": {
+            "fiveHour": {
+              "utilization": 42,
+              "resetsAt": "3:00 PM"
+            },
+            "sevenDay": {
+              "utilization": 18,
+              "resetsAt": "Monday 9:00 AM"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-usage-limits"
           }
         ]
       }

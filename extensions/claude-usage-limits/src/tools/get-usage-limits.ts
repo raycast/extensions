@@ -27,9 +27,6 @@ export default async function getUsageLimits(input?: Input): Promise<{
 }> {
   const result = await fetchClaudeUsageLimits();
 
-  if (result.status === "rate_limited") {
-    throw new Error("Rate limited by Anthropic API. Please try again later.");
-  }
   if (result.status === "error") {
     throw new Error(result.message);
   }

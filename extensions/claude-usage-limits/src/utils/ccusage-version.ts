@@ -10,16 +10,16 @@ import { getCustomNpxPath, preferences } from "../preferences";
 let cachedVersion: string | undefined;
 let captureStarted = false;
 
-const versionCommand = (): string => {
-  if (preferences.useDirectCcusageCommand) return "ccusage --version";
-  const npxCommand = getCustomNpxPath() ?? "npx";
-  return `${npxCommand} ccusage@latest --version`;
-};
+const versionCommand = (): [string, string[]] =>
+  preferences.useDirectCcusageCommand
+    ? ["ccusage", ["--version"]]
+    : [getCustomNpxPath() ?? "npx", ["ccusage@latest", "--version"]];
 
 export const captureCcusageVersion = async (): Promise<string | undefined> => {
   captureStarted = true;
   try {
-    const { stdout } = await execAsync(versionCommand(), getExecOptions());
+    const [command, args] = versionCommand();
+    const { stdout } = await execAsync(command, args, getExecOptions());
     const version = stdout.toString().trim();
     if (version) cachedVersion = version;
   } catch {

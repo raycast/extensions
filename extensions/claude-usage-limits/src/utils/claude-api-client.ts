@@ -3,16 +3,13 @@ import { homedir } from "os";
 import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
 import { getLimitRows } from "./limit-rows";
 
-export type UsageLimitsResult =
-  | { status: "ok"; data: UsageLimitData }
-  | { status: "rate_limited"; retryAfterMs: number | null }
-  | { status: "error"; message: string };
+export type UsageLimitsResult = { status: "ok"; data: UsageLimitData } | { status: "error"; message: string };
 
 type BrimResource = { unit?: string; used?: number; resetsAt?: string | null };
 type BrimAccount = { stale?: boolean; fetchedAt?: string; resources?: Record<string, BrimResource> };
 type BrimOutput = { providers?: Record<string, BrimAccount> };
 
-const HELPER_PATHS = [
+export const HELPER_PATHS = [
   "/usr/local/bin/brim",
   `${homedir()}/Applications/Brim.app/Contents/Helpers/brim`,
   "/Applications/Brim.app/Contents/Helpers/brim",
@@ -20,9 +17,9 @@ const HELPER_PATHS = [
 
 const OPEN_BRIM = "Open Brim and add your Claude account.";
 
-const runHelper = (path: string) =>
+export const runHelper = (path: string, args = ["claude"]) =>
   new Promise<{ code: number | string | null; stdout: string }>((resolve) => {
-    execFile(path, ["claude"], { timeout: 5000 }, (error, stdout) =>
+    execFile(path, args, { timeout: 5000 }, (error, stdout) =>
       resolve({ code: error ? (error.code ?? 1) : 0, stdout }),
     );
   });

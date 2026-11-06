@@ -8,7 +8,7 @@ import {
   ReportKind,
 } from "../utils/usage-report";
 
-export function useCCUsageReport<T>(kind: ReportKind, load: (force?: boolean) => Promise<T>) {
+export function useCCUsageReport<T>(kind: ReportKind, load: (force?: boolean) => Promise<T>, execute = true) {
   // All consumers subscribe to the same persistent cache entry. A refresh from
   // any consumer updates the others, and changing visibility retains the cache.
   const [cached] = useCachedState<CachedReport<T> | undefined>(kind, undefined, {
@@ -21,6 +21,7 @@ export function useCCUsageReport<T>(kind: ReportKind, load: (force?: boolean) =>
     return load(force);
   }, [load]);
   const result = usePromise(invoke, [], {
+    execute,
     failureToastOptions: {
       title: "Failed to fetch usage data",
       primaryAction: {
@@ -40,11 +41,11 @@ export function useCCUsageReport<T>(kind: ReportKind, load: (force?: boolean) =>
   useEffect(() => {
     // Only mounted (visible) consumers poll. Fresh cached results wait until
     // their expiry; failed requests back off for one complete refresh interval.
-    if (result.isLoading) return;
+    if (!execute || result.isLoading) return;
     const delay = result.error ? getReportRefreshInterval() : getReportRefreshDelay(kind);
     const id = setTimeout(() => void result.revalidate(), delay);
     return () => clearTimeout(id);
-  }, [kind, cached, result.isLoading, result.error, result.revalidate]);
+  }, [execute, kind, cached, result.isLoading, result.error, result.revalidate]);
 
   return { ...result, data: cached?.data ?? result.data, revalidate };
 }

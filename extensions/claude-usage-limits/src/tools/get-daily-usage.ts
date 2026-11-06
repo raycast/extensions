@@ -35,28 +35,28 @@ export default async function getDailyUsage(input?: Input): Promise<{
   const npxCommand = getCustomNpxPath() ?? "npx";
   const execOptions = getExecOptions();
 
-  // Build command with optional parameters
-  let command = `${npxCommand} ccusage@latest daily --json`;
+  // Build arguments with optional parameters
+  const args = ["ccusage@latest", "daily", "--json"];
 
   if (input?.since) {
     validateDateFormat(input.since, "Since");
-    command += ` --since ${input.since}`;
+    args.push("--since", input.since);
   }
 
   if (input?.until) {
     validateDateFormat(input.until, "Until");
-    command += ` --until ${input.until}`;
+    args.push("--until", input.until);
   }
 
   if (input?.order) {
-    command += ` --order ${input.order}`;
+    args.push("--order", input.order);
   }
 
   if (input?.breakdown) {
-    command += ` --breakdown`;
+    args.push("--breakdown");
   }
 
-  const { stdout } = await execAsync(command, execOptions);
+  const { stdout } = await execAsync(npxCommand, args, execOptions);
 
   if (!stdout) {
     throw new Error("No output received from ccusage daily command");

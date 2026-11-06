@@ -6,6 +6,10 @@ import { SessionUsage } from "./components/SessionUsage";
 import { CostAnalysis } from "./components/CostAnalysis";
 import { ModelBreakdown } from "./components/ModelBreakdown";
 import { UsageLimits } from "./components/UsageLimits";
+import { useCachedPromise } from "@raycast/utils";
+import { useCCUsageReport } from "./hooks/useCCUsageReport";
+import { fetchBrimAgents } from "./utils/brim-agents";
+import { getSessionReport, getSummaryReport } from "./utils/usage-report";
 import { getUsageCommandConfiguration } from "./preferences";
 
 const sections = {
@@ -20,9 +24,21 @@ const sections = {
 
 export default function CCUsage() {
   const configuration = getUsageCommandConfiguration();
+  const visible = new Set<string>(configuration.sections.map(({ view }) => view));
+  const summary = useCCUsageReport("summary", getSummaryReport, configuration.summarySections.length > 0);
+  const sessions = useCCUsageReport(
+    "sessions",
+    getSessionReport,
+    visible.has("session") || visible.has("model") || visible.has("cost"),
+  );
+  const limits = useCachedPromise(fetchBrimAgents, [], { execute: visible.has("usage-limits") });
 
   return (
-    <List selectedItemId={configuration.selectedItemId} isShowingDetail={configuration.sections.length > 0}>
+    <List
+      isLoading={summary.isLoading || sessions.isLoading || limits.isLoading}
+      selectedItemId={configuration.selectedItemId}
+      isShowingDetail={configuration.sections.length > 0}
+    >
       {configuration.sections.map(({ view }) => {
         const Section = sections[view];
         return <Section key={view} />;

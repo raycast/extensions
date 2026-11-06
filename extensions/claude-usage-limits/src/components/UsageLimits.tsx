@@ -1,117 +1,74 @@
 import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
-import { useClaudeUsageLimits } from "../hooks/useClaudeUsageLimits";
-import { formatResetTime, formatRelativeTime, calculateEstimatedUsage } from "../utils/usage-limits-formatter";
-import { formatDuration } from "../utils/data-formatter";
-import { getLimitRows } from "../utils/limit-rows";
-import { showRemainingUsage } from "../preferences";
+import { getProgressIcon, useCachedPromise, useCachedState } from "@raycast/utils";
+import { Fragment, ReactNode } from "react";
+import { applyAgentOrder, fetchBrimAgents, moveAgent } from "../utils/brim-agents";
+import { calculateEstimatedUsage, formatResetTime } from "../utils/usage-limits-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
-import { Fragment, ReactNode } from "react";
-import { capitalize } from "es-toolkit";
 
-const rowName = (label: string, period: string | null): string => (period ? `${label} ${capitalize(period)}` : label);
+const levelColor = (percent: number) => (percent >= 90 ? Color.Red : percent >= 70 ? Color.Orange : Color.Green);
 
 export function UsageLimits() {
-  const {
-    data,
-    isLoading,
-    error,
-    isStale,
-    isRateLimited,
-    rateLimitedUntil,
-    lastFetched,
-    revalidate,
-    isUsageLimitsAvailable,
-  } = useClaudeUsageLimits();
-
-  const rateLimitRetryIn =
-    rateLimitedUntil && rateLimitedUntil > Date.now() ? formatDuration(rateLimitedUntil - Date.now()) : null;
-
-  if (!isUsageLimitsAvailable) {
-    return null;
-  }
-
-  const rows = getLimitRows(data);
-  const [primaryRow] = rows;
-  const preferRemaining = showRemainingUsage();
+  const { data, isLoading, error, revalidate } = useCachedPromise(fetchBrimAgents);
+  const [order, setOrder] = useCachedState<string[]>("agent-order", []);
+  const agents = applyAgentOrder(data ?? [], order);
+  const ids = agents.map((agent) => agent.id);
 
   const accessories: List.Item.Accessory[] =
     error && !data
       ? STANDARD_ACCESSORIES.ERROR
-      : isRateLimited && !data
-        ? [
-            {
-              icon: Icon.Clock,
-              text: rateLimitRetryIn ? `Rate limited · retry in ${rateLimitRetryIn}` : "Rate limited",
-            },
-          ]
-        : !data
-          ? STANDARD_ACCESSORIES.LOADING
-          : isStale && !isLoading
-            ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
-            : !primaryRow
-              ? STANDARD_ACCESSORIES.NO_DATA
-              : [
-                  {
-                    text: `${(preferRemaining ? 100 - primaryRow.utilization : primaryRow.utilization).toFixed(0)}%`,
-                    tooltip: `${`${rowName(primaryRow.label, primaryRow.period)} Limit`} · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
-                  },
-                ];
+      : !data
+        ? STANDARD_ACCESSORIES.LOADING
+        : agents.length === 0
+          ? STANDARD_ACCESSORIES.NO_DATA
+          : [{ text: `${agents.length} ${agents.length === 1 ? "Agent" : "Agents"}` }];
 
   const renderDetailMetadata = (): ReactNode => {
-    if (error && !data) {
-      return <ErrorMetadata noDataMessage="Unable to fetch usage limits" noDataSubMessage={error.message} />;
-    }
-
-    if (isRateLimited && !data) {
+    if (agents.length === 0) {
       return (
         <ErrorMetadata
-          noDataMessage={rateLimitRetryIn ? `Rate limited — retry in ${rateLimitRetryIn}` : "Rate limited"}
-          noDataSubMessage="Click Refresh to try now"
+          error={error}
+          isLoading={isLoading}
+          noDataMessage="No agents connected"
+          noDataSubMessage="Add an account in Brim"
         />
       );
     }
-
-    if (!data) {
-      return <ErrorMetadata noDataMessage="Loading usage limits..." noDataSubMessage="Reading from Brim" />;
-    }
-
     return (
       <List.Item.Detail.Metadata>
-        {rows.map((row) => {
-          const estimate =
-            row.windowHours === null ? null : calculateEstimatedUsage(row.utilization, row.resets_at, row.windowHours);
-          const name = rowName(row.label, row.period);
-          const level = row.utilization >= 90 ? Color.Red : row.utilization >= 70 ? Color.Orange : Color.Green;
-          return (
-            <Fragment key={name}>
-              <List.Item.Detail.Metadata.Label
-                title={`${name} Limit`}
-                icon={getProgressIcon(Math.min(row.utilization, 100) / 100, level)}
-                text={`${row.utilization.toFixed(0)}% Used`}
-              />
-              {row.resets_at ? (
-                <List.Item.Detail.Metadata.Label title="Resets By" text={formatResetTime(row.resets_at)} />
-              ) : null}
-              {estimate === null ? null : (
-                <List.Item.Detail.Metadata.TagList title="On Pace For">
-                  <List.Item.Detail.Metadata.TagList.Item
-                    text={`${estimate.toFixed(0)}%`}
-                    color={estimate >= 90 ? Color.Red : estimate >= 70 ? Color.Orange : Color.Green}
+        {agents.map((agent) => (
+          <Fragment key={agent.id}>
+            <List.Item.Detail.Metadata.Label
+              title={agent.name}
+              text={agent.stale ? "May Be Stale" : (agent.plan ?? undefined)}
+            />
+            {agent.limits.map((limit) => {
+              const percent = limit.utilization;
+              const estimate =
+                percent === null || limit.windowHours === null
+                  ? null
+                  : calculateEstimatedUsage(percent, limit.resetsAt, limit.windowHours);
+              return (
+                <Fragment key={limit.key}>
+                  <List.Item.Detail.Metadata.Label
+                    title={limit.label}
+                    icon={
+                      percent === null ? undefined : getProgressIcon(Math.min(percent, 100) / 100, levelColor(percent))
+                    }
+                    text={percent === null ? (limit.value ?? "") : `${percent.toFixed(0)}% Used`}
                   />
-                </List.Item.Detail.Metadata.TagList>
-              )}
-              <List.Item.Detail.Metadata.Separator />
-            </Fragment>
-          );
-        })}
-        {lastFetched ? (
-          <List.Item.Detail.Metadata.Label
-            title="Updated"
-            text={`${formatRelativeTime(lastFetched)}${isStale ? " · May Be Stale" : ""}`}
-          />
-        ) : null}
+                  {limit.resetsAt ? (
+                    <List.Item.Detail.Metadata.Label title="Resets By" text={formatResetTime(limit.resetsAt)} />
+                  ) : null}
+                  {estimate === null ? null : (
+                    <List.Item.Detail.Metadata.Label title="On Pace For" text={`${estimate.toFixed(0)}%`} />
+                  )}
+                </Fragment>
+              );
+            })}
+            <List.Item.Detail.Metadata.Separator />
+          </Fragment>
+        ))}
       </List.Item.Detail.Metadata>
     );
   };
@@ -126,6 +83,20 @@ export function UsageLimits() {
       actions={
         <ActionPanel>
           <Action title="Refresh Usage Limits" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          {agents.length > 1 ? (
+            <>
+              <ActionPanel.Submenu title="Move Agent up" icon={Icon.ArrowUp}>
+                {agents.map((agent) => (
+                  <Action key={agent.id} title={agent.name} onAction={() => setOrder(moveAgent(ids, agent.id, -1))} />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu title="Move Agent Down" icon={Icon.ArrowDown}>
+                {agents.map((agent) => (
+                  <Action key={agent.id} title={agent.name} onAction={() => setOrder(moveAgent(ids, agent.id, 1))} />
+                ))}
+              </ActionPanel.Submenu>
+            </>
+          ) : null}
         </ActionPanel>
       }
     />
