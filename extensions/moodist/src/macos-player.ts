@@ -11,6 +11,7 @@ export type Mix = {
   timer?: SleepTimer;
   preset?: string;
   playbackGeneration?: number;
+  soundGenerations?: Record<string, number>;
 };
 export type MixInput = { soundId: string; volume: number }[];
 
@@ -138,6 +139,14 @@ function parseMix(raw: unknown): Mix {
   }
   if (typeof raw.preset === "string") mix.preset = raw.preset;
   if (typeof raw.playbackGeneration === "number") mix.playbackGeneration = raw.playbackGeneration;
+  if (isRecord(raw.soundGenerations)) {
+    mix.soundGenerations = {};
+    for (const [id, generation] of Object.entries(raw.soundGenerations)) {
+      if (findSound(id) && typeof generation === "number" && Number.isSafeInteger(generation)) {
+        mix.soundGenerations[id] = generation;
+      }
+    }
+  }
   return mix;
 }
 
@@ -303,15 +312,25 @@ function start(mix: Mix, id: string, file: string) {
   if (!child.pid) throw new Error(`Could not start ${requireSound(id).label}`);
   entry.pid = child.pid;
 }
-export async function play(id: string, volume?: number, generation = getMix().playbackGeneration ?? 0) {
+export function soundGeneration(mix: Mix, id: string): number {
+  return mix.soundGenerations?.[id] ?? 0;
+}
+
+export async function play(id: string, volume?: number, before = getMix()) {
   const file = await ensureDownloaded(requireSound(id));
   updateMix((mix) => {
+    if (soundGeneration(mix, id) !== soundGeneration(before, id)) {
+      throw new Error("Playback was cancelled by Stop");
+    }
     mix.sounds[id] = { ...mix.sounds[id], volume: clampVolume(volume ?? mix.sounds[id]?.volume ?? defaultVolume()) };
     start(mix, id, file);
-  }, generation);
+  }, before.playbackGeneration ?? 0);
 }
 export function stop(id: string) {
   updateMix((mix) => {
+    if (findSound(id)) {
+      (mix.soundGenerations ??= {})[id] = soundGeneration(mix, id) + 1;
+    }
     const entry = mix.sounds[id];
     if (!entry) return;
     if (entry.pid) kill(entry.pid);
@@ -331,7 +350,7 @@ export async function resume(): Promise<number> {
   return updateMix((mix) => {
     let started = 0;
     for (const id of ids) {
-      if (!mix.sounds[id] || mix.sounds[id].pid) continue;
+      if (!mix.sounds[id] || mix.sounds[id].pid || soundGeneration(mix, id) !== soundGeneration(before, id)) continue;
       start(mix, id, files[id]);
       started++;
     }
@@ -382,16 +401,18 @@ export async function setMaster(volume: number) {
 export async function loadMix(sounds: MixInput, master?: number, presetId?: string) {
   const valid = sounds.filter((s) => findSound(s.soundId));
   if (valid.length === 0) throw new Error("This mix has no playable sounds");
-  const generation = getMix().playbackGeneration ?? 0;
+  const before = getMix();
   const files = await downloadAll(valid.map((s) => s.soundId));
   updateMix((mix) => {
+    const remaining = valid.filter(({ soundId }) => soundGeneration(mix, soundId) === soundGeneration(before, soundId));
+    if (!remaining.length) throw new Error("Playback was cancelled by Stop");
     pauseSounds(mix);
     if (master !== undefined) mix.master = clampVolume(master);
-    mix.sounds = Object.fromEntries(valid.map((s) => [s.soundId, { volume: clampVolume(s.volume) }]));
+    mix.sounds = Object.fromEntries(remaining.map((s) => [s.soundId, { volume: clampVolume(s.volume) }]));
     if (presetId) mix.preset = presetId;
     else delete mix.preset;
-    for (const s of valid) start(mix, s.soundId, files[s.soundId]);
-  }, generation);
+    for (const s of remaining) start(mix, s.soundId, files[s.soundId]);
+  }, before.playbackGeneration ?? 0);
 }
 
 // This separate process must use the same locking, ownership checks, and state format as the command.

@@ -22,9 +22,9 @@ export async function getMix(): Promise<Mix> {
   return windows ? (await request({ type: "get" })).mix : mac.getMix();
 }
 
-export async function play(id: string, volume?: number, generation?: number) {
-  if (!windows) return mac.play(id, volume, generation);
-  const playbackGeneration = generation ?? (await getMix()).playbackGeneration;
+export async function play(id: string, volume?: number, before?: Mix) {
+  if (!windows) return mac.play(id, volume, before);
+  const mix = before ?? (await getMix());
   const file = await download(id);
   await request({
     type: "play",
@@ -32,7 +32,8 @@ export async function play(id: string, volume?: number, generation?: number) {
     file,
     volume: volume === undefined ? undefined : mac.clampVolume(volume),
     defaultVolume: mac.defaultVolume(),
-    playbackGeneration,
+    playbackGeneration: mix.playbackGeneration,
+    soundGeneration: mac.soundGeneration(mix, id),
   });
 }
 
@@ -48,8 +49,10 @@ export async function pause(): Promise<number> {
 export async function resume(): Promise<number> {
   if (!windows) return mac.resume();
   const mix = await getMix();
-  await Promise.all(Object.keys(mix.sounds).map(download));
-  return (await request({ type: "resume", playbackGeneration: mix.playbackGeneration })).count;
+  const ids = Object.keys(mix.sounds);
+  await Promise.all(ids.map(download));
+  const soundGenerations = Object.fromEntries(ids.map((id) => [id, mac.soundGeneration(mix, id)]));
+  return (await request({ type: "resume", playbackGeneration: mix.playbackGeneration, soundGenerations })).count;
 }
 
 export async function togglePlayback(): Promise<ToggleResult> {
@@ -84,6 +87,7 @@ export async function loadMix(sounds: MixInput, master?: number, presetId?: stri
       id: sound.soundId,
       file: await download(sound.soundId),
       volume: mac.clampVolume(sound.volume),
+      soundGeneration: mac.soundGeneration(mix, sound.soundId),
     })),
   );
   await request({

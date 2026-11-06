@@ -277,6 +277,8 @@ struct Mix {
     sounds: BTreeMap<String, Sound>,
     #[serde(default)]
     playback_generation: u64,
+    #[serde(default)]
+    sound_generations: BTreeMap<String, u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     timer: Option<Timer>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -288,9 +290,22 @@ impl Default for Mix {
             master: 1.0,
             sounds: BTreeMap::new(),
             playback_generation: 0,
+            sound_generations: BTreeMap::new(),
             timer: None,
             preset: None,
         }
+    }
+}
+
+impl Mix {
+    fn sound_generation(&self, id: &str) -> u64 {
+        self.sound_generations.get(id).copied().unwrap_or_default()
+    }
+
+    fn sound_was_stopped(&self, id: &str, generation: &Value) -> bool {
+        generation
+            .as_u64()
+            .is_some_and(|value| value != self.sound_generation(id))
     }
 }
 
@@ -472,12 +487,19 @@ impl PendingPlayback {
                 PlaybackChange::Play
             }
             Some("resume") => {
+                let generations = action["soundGenerations"].as_object();
                 sounds.extend(
                     mixer
                         .mix
                         .sounds
                         .iter()
                         .filter(|(id, _)| !mixer.players.contains_key(*id))
+                        .filter(|(id, _)| {
+                            generations.is_none_or(|generations| {
+                                generations.get(*id).and_then(Value::as_u64)
+                                    == Some(mixer.mix.sound_generation(id))
+                            })
+                        })
                         .map(|(id, sound)| (id.clone(), sound.clone())),
                 );
                 PlaybackChange::Resume
@@ -646,6 +668,7 @@ impl Mixer {
             "get" => {}
             "stop" => {
                 let id = text(action, "id")?;
+                *self.mix.sound_generations.entry(id.into()).or_default() += 1;
                 self.players.remove(id);
                 self.mix.sounds.remove(id);
             }
@@ -766,7 +789,7 @@ fn handle_request(
     root: &Path,
     mixer: &mut Mixer,
     queue: &mut PlaybackQueue,
-    envelope: Envelope,
+    mut envelope: Envelope,
 ) -> Result<(), String> {
     reconcile_state(root, mixer, queue)?;
     if envelope.deadline <= now() {
@@ -790,6 +813,19 @@ fn handle_request(
         );
     }
     match envelope.action["type"].as_str() {
+        Some("play")
+            if envelope.action["id"].as_str().is_some_and(|id| {
+                mixer
+                    .mix
+                    .sound_was_stopped(id, &envelope.action["soundGeneration"])
+            }) =>
+        {
+            return reply(
+                root,
+                envelope.id,
+                Err("Playback was cancelled by Stop".into()),
+            );
+        }
         Some("play" | "resume" | "volume" | "master") => {
             queue.waiting.push_back(envelope);
             return Ok(());
@@ -801,7 +837,31 @@ fn handle_request(
             };
             cancel_sound(root, queue, id)?;
         }
-        Some("load" | "stopAll" | "pause") => {
+        Some("load") => {
+            if let Some(sounds) = envelope.action["sounds"]
+                .as_array_mut()
+                .filter(|sounds| !sounds.is_empty())
+            {
+                sounds.retain(|sound| {
+                    !sound["id"].as_str().is_some_and(|id| {
+                        mixer.mix.sound_was_stopped(id, &sound["soundGeneration"])
+                    })
+                });
+                if sounds.is_empty() {
+                    return reply(
+                        root,
+                        envelope.id,
+                        Err("Playback was cancelled by Stop".into()),
+                    );
+                }
+            }
+            cancel_playback(
+                root,
+                queue,
+                "Playback preparation was cancelled by another command",
+            )?;
+        }
+        Some("stopAll" | "pause") => {
             cancel_playback(
                 root,
                 queue,
