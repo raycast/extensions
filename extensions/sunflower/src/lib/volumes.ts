@@ -1,4 +1,4 @@
-import { readdir, statfs } from "node:fs/promises";
+import { readdir, stat, statfs } from "node:fs/promises";
 import { join } from "node:path";
 
 export interface VolumeUsage {
@@ -8,6 +8,8 @@ export interface VolumeUsage {
   free: number;
   used: number;
   fraction: number;
+  /** Filesystem identity (st_dev), used to drop aliases such as /Volumes/Macintosh HD. */
+  device: number;
 }
 
 async function usage(
@@ -15,7 +17,7 @@ async function usage(
   path: string,
 ): Promise<VolumeUsage | undefined> {
   try {
-    const info = await statfs(path);
+    const [info, identity] = await Promise.all([statfs(path), stat(path)]);
     const total = info.blocks * info.bsize;
     const free = info.bavail * info.bsize;
     if (!total) return undefined;
@@ -26,13 +28,14 @@ async function usage(
       free,
       used: total - free,
       fraction: (total - free) / total,
+      device: identity.dev,
     };
   } catch {
     return undefined;
   }
 }
 
-/** The startup disk plus every mounted volume under /Volumes (deduplicated by size). */
+/** The startup disk plus every mounted volume under /Volumes (deduplicated by filesystem). */
 export async function listVolumes(): Promise<VolumeUsage[]> {
   const entries = await readdir("/Volumes").catch(() => [] as string[]);
   const results = await Promise.all([
@@ -41,13 +44,12 @@ export async function listVolumes(): Promise<VolumeUsage[]> {
       .filter((name) => !name.startsWith("."))
       .map((name) => usage(name, join("/Volumes", name))),
   ]);
-  const seen = new Set<string>();
+  const seen = new Set<number>();
   return results.filter((volume): volume is VolumeUsage => {
     if (!volume) return false;
     // /Volumes/Macintosh HD is a link to / — skip duplicates.
-    const key = `${volume.total}:${volume.free}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
+    if (seen.has(volume.device)) return false;
+    seen.add(volume.device);
     return true;
   });
 }

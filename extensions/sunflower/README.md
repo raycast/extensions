@@ -30,18 +30,3 @@ This extension controls the supported menus introduced in [Sunflower 1.2](https:
 Deletion, uninstalling applications, reclaiming storage, and granting administrator scanning rights remain in Sunflower's interface. The extension has no deletion commands. It makes no network requests and does not read files from your scan.
 
 Raycast already includes app launching and Search Menu Bar Items. This package adds direct Sunflower view and rescan commands plus a focused control list, rather than a general disk scanner.
-
-## Development
-
-```sh
-npm install
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npm run dev
-```
-
-Author: **itsdanielsultan**. This is an independent Raycast integration; Sunflower and its app icon belong to its developer.
-
-The extension source is licensed under MIT. The Sunflower app icon is a third-party identification asset and is not relicensed by the extension's MIT license.

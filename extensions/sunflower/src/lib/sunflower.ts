@@ -5,9 +5,8 @@ import {
   open,
   PopToRootType,
   showHUD,
-  showToast,
-  Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -67,10 +66,8 @@ export async function runCommand(id: string): Promise<void> {
   try {
     await performAction(getAction(id));
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
+    await showFailureToast(errorMessage(error), {
       title: "Could not control Sunflower",
-      message: errorMessage(error),
     });
   }
 }

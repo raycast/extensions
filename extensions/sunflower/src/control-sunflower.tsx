@@ -1,14 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { formatBytes, listVolumes, VolumeUsage } from "./lib/volumes";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { formatBytes, listVolumes } from "./lib/volumes";
 import { actions, MenuAction } from "./lib/actions";
 import { errorMessage, performAction } from "./lib/sunflower";
 
@@ -22,10 +15,13 @@ const categoryIcons = {
 
 export default function Command() {
   const [busy, setBusy] = useState(false);
-  const [volumes, setVolumes] = useState<VolumeUsage[]>([]);
-  useEffect(() => {
-    void listVolumes().then(setVolumes);
-  }, []);
+  const {
+    data: volumes = [],
+    isLoading: loadingVolumes,
+    revalidate: refreshVolumes,
+  } = usePromise(listVolumes, [], {
+    failureToastOptions: { title: "Could not read disk usage" },
+  });
 
   async function run(action: MenuAction) {
     if (busy) return;
@@ -33,10 +29,8 @@ export default function Command() {
     try {
       await performAction(action);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
+      await showFailureToast(errorMessage(error), {
         title: "Could not control Sunflower",
-        message: errorMessage(error),
       });
     } finally {
       setBusy(false);
@@ -45,7 +39,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={busy}
+      isLoading={busy || loadingVolumes}
       searchBarPlaceholder="Switch views, navigate, or rescan…"
     >
       {volumes.length ? (
@@ -71,7 +65,7 @@ export default function Command() {
                     <Action
                       title="Refresh Disk Usage"
                       icon={Icon.ArrowClockwise}
-                      onAction={() => void listVolumes().then(setVolumes)}
+                      onAction={refreshVolumes}
                     />
                   </ActionPanel>
                 }
