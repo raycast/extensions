@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "extensiondash",
+    title: "ExtensionDash",
+    description:
+      "Search Chrome and Firefox extension catalogs and inspect store visibility from your AI assistant. Signed-in users can track their extensions, keywords and competitors. Hosted Streamable HTTP server with OAuth sign-in; an ExtensionDash account is required for tracking.",
+    icon: "https://extensiondash.com/icon.png",
+    homepage: "https://extensiondash.com/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://extensiondash.com/mcp"],
+    },
+    remoteUrl: "https://extensiondash.com/mcp",
+  },
+  {
     name: "sofya",
     title: "Sofya",
     description:
