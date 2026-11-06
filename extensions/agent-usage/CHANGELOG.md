@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix Cursor "not configured" for non-JWT access tokens] - {PR_MERGE_DATE}
+## [Fix Cursor "not configured" for non-JWT access tokens] - 2026-11-06
 
 ### Bug Fixes
 
