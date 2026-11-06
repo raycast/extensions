@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sunflower",
+  "title": "Sunflower",
+  "description": "Control Sunflower's disk analysis views, rescan the current disk, and navigate a completed scan from Raycast",
+  "icon": "icon.png",
+  "author": "itsdanielsultan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "control-sunflower",
+      "title": "Control Sunflower",
+      "description": "Switch disk analysis views, rescan, and navigate the current Sunflower scan using its native menus",
+      "mode": "view"
+    },
+    {
+      "name": "show-largest-files",
+      "title": "Show Largest Files",
+      "description": "Show Sunflower's Largest view for the folder currently selected in its disk scan",
+      "mode": "no-view"
+    },
+    {
+      "name": "rescan-disk",
+      "title": "Rescan Disk",
+      "description": "Request a new scan of the disk currently selected in Sunflower",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.4",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}
