@@ -26,7 +26,6 @@
       "mode": "view"
     }
   ],
-  "tools": [],
   "dependencies": {
     "@raycast/api": "^2.11.0",
     "proper-lockfile": "^4.1.2"
