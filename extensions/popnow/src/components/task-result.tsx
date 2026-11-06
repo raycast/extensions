@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, showHUD, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { createWriteStream } from "node:fs";
 import { homedir } from "node:os";
@@ -10,44 +10,32 @@ import { getTask, isFinished, TaskAsset, TaskRecord } from "../api";
 
 const FIRST_POLL_MS = 3000;
 const MAX_POLL_MS = 15000;
+const MAX_POLL_FAILURES = 3;
 
 export function TaskResult({ initial, prompt }: { initial: TaskRecord; prompt: string }) {
   const [task, setTask] = useState<TaskRecord>(initial);
-  const [pollError, setPollError] = useState<string | undefined>();
-  const alive = useRef(true);
+  const [failures, setFailures] = useState(0);
+  const delay = useRef(FIRST_POLL_MS);
+  const { error, isLoading, revalidate } = usePromise(getTask, [initial.taskId], {
+    execute: !isFinished(initial),
+    onData: setTask,
+    // Failed polls are retried here and reported in the view after the last attempt.
+    onError: () => undefined,
+  });
 
   useEffect(() => {
-    alive.current = true;
-    let timer: NodeJS.Timeout | undefined;
-    let delay = FIRST_POLL_MS;
-    let failures = 0;
+    if (isLoading || isFinished(task)) return;
+    const failed = error ? failures + 1 : 0;
+    setFailures(failed);
+    if (failed >= MAX_POLL_FAILURES) return;
+    const timer = setTimeout(() => {
+      delay.current = Math.min(delay.current * 1.5, MAX_POLL_MS);
+      revalidate();
+    }, delay.current);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
-    async function poll() {
-      try {
-        const next = await getTask(initial.taskId);
-        if (!alive.current) return;
-        failures = 0;
-        setPollError(undefined);
-        setTask(next);
-        if (isFinished(next)) return;
-      } catch (error) {
-        failures += 1;
-        if (failures >= 3) {
-          setPollError(error instanceof Error ? error.message : String(error));
-          return;
-        }
-      }
-      delay = Math.min(delay * 1.5, MAX_POLL_MS);
-      timer = setTimeout(poll, delay);
-    }
-
-    if (!isFinished(initial)) timer = setTimeout(poll, FIRST_POLL_MS);
-    return () => {
-      alive.current = false;
-      if (timer) clearTimeout(timer);
-    };
-  }, [initial.taskId]);
-
+  const pollError = failures >= MAX_POLL_FAILURES ? error?.message : undefined;
   const done = isFinished(task);
   const assets = (task.output?.assets ?? []).filter((asset) => asset.url && !asset.unavailable);
   const failed = done && task.state !== "succeeded";

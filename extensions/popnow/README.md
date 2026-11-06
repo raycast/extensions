@@ -2,6 +2,8 @@
 
 Generate AI images and videos from Raycast with [PopNow](https://popnow.ai): Nano Banana, GPT Image, Seedream, FLUX, Kling, Seedance, MiniMax H3, Veo and more through one API key.
 
+Requires a PopNow account and paid API credits.
+
 ## Setup
 
 1. Create an API key at [popnow.ai/api/console/keys](https://popnow.ai/api/console/keys) and add funds to your API balance.

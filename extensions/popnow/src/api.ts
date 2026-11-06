@@ -139,7 +139,12 @@ export function quote(model: string, input: Record<string, unknown>) {
  * Starts a paid task. The quoted maximum is sent as `expectedCostUsd`, so a price change
  * fails the call instead of charging more. The idempotency key makes a retry return the same task.
  */
-export function createTask(model: string, input: Record<string, unknown>, q: Quote, idempotencyKey = randomUUID()) {
+export function createTask(
+  model: string,
+  input: Record<string, unknown>,
+  q: Quote,
+  idempotencyKey: string = randomUUID(),
+) {
   return request<TaskRecord>("/jobs/createTask?wait=30", {
     method: "POST",
     headers: { "Idempotency-Key": idempotencyKey },

@@ -1,20 +1,18 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { formatPrice, listModels, Modality, modelTitle } from "./api";
+import { formatPrice, KEYS_URL, listModels, Modality, modelTitle } from "./api";
 
 const MODALITY_ICON: Record<string, Icon> = { image: Icon.Image, video: Icon.FilmStrip, audio: Icon.Music };
 
 export default function Command() {
   const [modality, setModality] = useState<Modality | "all">("all");
-  const { data, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (value: Modality | "all") => listModels({ modality: value === "all" ? undefined : value }),
     [modality],
     {
       keepPreviousData: true,
-      onError: (error) => {
-        showFailureToast(error, { title: "Could not load models" });
-      },
+      failureToastOptions: { title: "Could not load models" },
     },
   );
 
@@ -31,6 +29,20 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {error && !data?.length && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load models"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser title="Manage API Keys" url={KEYS_URL} />
+            </ActionPanel>
+          }
+        />
+      )}
       {data?.map((item) => (
         <List.Item
           key={item.model}
