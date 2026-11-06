@@ -1,16 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Form,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import { randomUUID } from "node:crypto";
 import { applyToAccounts } from "./accounts";
@@ -216,14 +204,7 @@ export default function StatusForm({
             icon={isClear ? Icon.Eraser : Icon.CheckCircle}
             onSubmit={() => submit(false)}
           />
-          {editable && (
-            <Action.SubmitForm
-              title="Save Preset"
-              icon={Icon.Plus}
-              onSubmit={() => submit(true)}
-              shortcut={Keyboard.Shortcut.Common.Save}
-            />
-          )}
+          {editable && <Action.SubmitForm title="Save Preset" icon={Icon.Plus} onSubmit={() => submit(true)} />}
         </ActionPanel>
       }
     >
