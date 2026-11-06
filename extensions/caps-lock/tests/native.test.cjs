@@ -31,7 +31,7 @@ before(() => {
   // The C symbols below replace the keyboard APIs, so no real state is changed.
   const source = readFileSync(join(root, "swift/caps-lock/Sources/CapsLock.swift"), "utf8")
     .replace("import RaycastSwiftMacros\n", "")
-    .replace("@raycast ", "");
+    .replaceAll("@raycast ", "");
   const nativeSource = join(buildDirectory, "CapsLock.swift");
   writeFileSync(nativeSource, source);
   const main = join(buildDirectory, "main.swift");

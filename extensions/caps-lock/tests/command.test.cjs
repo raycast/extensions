@@ -5,10 +5,14 @@ const { test } = require("node:test");
 const vm = require("node:vm");
 const ts = require("typescript");
 
-const source = readFileSync(path.join(__dirname, "../src/toggle-caps-lock.ts"), "utf8");
-const compiled = ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText;
+function compile(file) {
+  const source = readFileSync(path.join(__dirname, "../src", file), "utf8");
+  return ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+}
+const compiled = compile("toggle-caps-lock.ts");
+const compiledReport = compile("report.ts");
 
 function fixture({ state = true, helperError, hudError, toastError } = {}) {
   const calls = [];
@@ -32,6 +36,20 @@ function fixture({ state = true, helperError, hudError, toastError } = {}) {
       },
     },
   };
+  const load = (code, filename) => {
+    const context = {
+      exports: {},
+      Error,
+      console: { error: (...args) => calls.push(["log", ...args]) },
+      require: (name) => {
+        assert.ok(Object.hasOwn(mocks, name), `Unexpected dependency: ${name}`);
+        return mocks[name];
+      },
+    };
+    vm.runInNewContext(code, context, { filename });
+    return context.exports;
+  };
+  mocks["./report"] = load(compiledReport, "report.js");
   const context = {
     exports: {},
     Error,
@@ -55,7 +73,7 @@ test("confirmed on and off states produce the matching HUD after one toggle", as
     assert.equal(calls.filter(([name]) => name === "toggle").length, 1);
     assert.deepEqual(
       calls.find(([name]) => name === "hud"),
-      ["hud", `Caps Lock ${label}`],
+      ["hud", `⇪ Caps Lock ${label}`],
     );
     assert.equal(calls.filter(([name]) => name === "toast").length, 0);
   }
@@ -83,7 +101,7 @@ test("HUD failure preserves the successful state report and never retries the to
     assert.equal(calls.filter(([name]) => name === "toggle").length, 1);
     const toast = calls.find(([name]) => name === "toast")[1];
     assert.equal(toast.style, "success");
-    assert.equal(toast.title, `Caps Lock ${label}`);
+    assert.equal(toast.title, `⇪ Caps Lock ${label}`);
     assert.match(toast.message, /Caps Lock changed/);
     assert.equal(calls.filter(([name]) => name === "log").length, 1);
   }

@@ -2,6 +2,12 @@
 
 One command: **Toggle Caps Lock**.
 
+## What's new
+
+- **Turn Caps Lock On** / **Turn Caps Lock Off** commands that set an exact state (great for hotkeys and Quicklinks).
+- **Caps Lock Indicator** menu bar item that appears while Caps Lock is on, with a one-click toggle.
+- The HUD now shows ⇪ so the state is obvious at a glance.
+
 Keep access to Caps Lock after remapping its physical key to Hyper, Escape, Control, or another key. Run the command from Raycast or assign it a hotkey. A brief confirmation shows **Caps Lock On** or **Caps Lock Off**, then you can keep typing in your previous app.
 
 The command changes the macOS modifier lock directly. It does not simulate pressing Caps Lock or change your keyboard mappings. This also lets you clear Caps Lock when your remapped key cannot turn it off.
