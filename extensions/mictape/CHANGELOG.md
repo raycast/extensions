@@ -1,6 +1,6 @@
 # MicTape Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-11-06
 
 - Start recording into a destination folder, with an optional label for the file name
 - Stop recording from Raycast or the menu bar
