@@ -23,12 +23,6 @@ The inspector reads document metadata. Text copying reads the main document stor
 
 A new document remains unsaved. Existing documents are preserved. The extension uses Microsoft’s shipped Word scripting dictionary, with no menu clicking or VBA macro installation.
 
-## Development
-
-Run `npm ci`, `npm test`, `npm run lint`, `npm run typecheck`, and `npm run build`. The default tests use simulated native responses and do not open Word.
-
-`npm run test:live -- --exclusive-slot` is the separate live integration test. Run it only after a fresh exclusive test slot is assigned and Word is already open. It creates a disposable unsaved document, verifies text/selection/metadata/tracking and saved-state preservation, closes the exact unchanged fixture, and checks the previous active document and count. It refuses to launch Word automatically. If creation is interrupted or its identity cannot be verified, inspect Word before retrying; do not guess which document to close.
-
 ## Sources and scope
 
 - [Raycast AppleScript utility](https://developers.raycast.com/utilities/functions/runapplescript)

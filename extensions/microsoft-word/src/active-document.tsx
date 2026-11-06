@@ -23,13 +23,17 @@ export default function Command() {
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const { data: doc, error, isLoading, revalidate } = usePromise(readActiveDocument);
-  const { data: body } = usePromise(
+  const { data: body, revalidate: revalidateBody } = usePromise(
     async (identity?: string) => (identity ? readText(identity) : undefined),
     [doc?.identity],
     {
       onError: () => undefined,
     },
   );
+  async function refresh() {
+    revalidate();
+    revalidateBody();
+  }
   const stats = body !== undefined ? textStats(body) : undefined;
   async function copyText(selection: boolean) {
     if (!doc || busyRef.current) return;
@@ -117,7 +121,7 @@ export default function Command() {
           <Action
             title="Refresh Document"
             icon={Icon.ArrowClockwise}
-            onAction={revalidate}
+            onAction={refresh}
             shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
