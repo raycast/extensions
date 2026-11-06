@@ -798,7 +798,7 @@ export default function SearchPasswords() {
     [remoteManagerIds, searchText],
     {
       execute: hasRemoteManagers,
-      keepPreviousData: false,
+      keepPreviousData: true,
     },
   );
 
@@ -810,7 +810,8 @@ export default function SearchPasswords() {
       localResults && remoteResults
         ? sortVaultItems([...localResults, ...remoteResults])
         : (localResults ?? remoteResults);
-    // keepPreviousData retains the last manager's items while the next one loads; never show (or act on) those.
+    // keepPreviousData keeps results visible while the next query loads, but it also retains the previous
+    // managers' items after a scope change; never show (or act on) those.
     return merged?.filter((item) => scopeAdapters.has(item.managerId));
   }, [allItems, remoteItems, searchText, hasLocalManagers, hasRemoteManagers, scopeKey]);
 

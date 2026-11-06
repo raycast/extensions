@@ -123,6 +123,7 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
   }
 
   const state = runtime();
+  const wasLocked = state.locked;
   state.credentialsByAdapter.set(adapterId, cloneCredentials(credentials));
   state.rememberedAdapterIds.add(adapterId);
   state.locked = false;
@@ -133,9 +134,19 @@ export function rememberCredentials(adapterId: string, credentials: Record<strin
     adapterId,
     credentials: cloneCredentials(credentials),
     ...helperConfig(),
-  }).catch(() => {
-    // Helper sync is best-effort; local cache still works within this process.
-  });
+  })
+    .then(async () => {
+      if (!wasLocked) {
+        return;
+      }
+      // Remembering unlocks the whole shared session in the helper, but locking cleared every manager's
+      // credentials locally; pull them back so the other managers can unlock silently again.
+      applySnapshot(await getSessionHelperSnapshot(helperConfig()));
+      notifySessionListeners();
+    })
+    .catch(() => {
+      // Helper sync is best-effort; local cache still works within this process.
+    });
 }
 
 export function hasRememberedCredentials(adapterId: string): boolean {

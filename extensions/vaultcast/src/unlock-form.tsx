@@ -250,9 +250,9 @@ export function UnlockForm({
       ) : null}
       {fields.map((field) =>
         field.type === "text" ? (
-          <Form.TextField key={field.id} id={field.id} title={field.label} />
+          <Form.TextField key={field.id} id={field.id} title={field.label} placeholder={`Enter ${field.label}`} />
         ) : (
-          <Form.PasswordField key={field.id} id={field.id} title={field.label} />
+          <Form.PasswordField key={field.id} id={field.id} title={field.label} placeholder={`Enter ${field.label}`} />
         ),
       )}
     </Form>
