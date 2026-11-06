@@ -1,6 +1,6 @@
 # Chinese Lunar Calendar Changelog
 
-## [Changed] - {PR_MERGE_DATE}
+## [Changed] - 2026-11-06
 - Refactor calendar header title to Chinese format
 - Fix missing holidays/workdays for cross-month dates
 - Fix non-current month contrast and theme cache
