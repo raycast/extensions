@@ -82,11 +82,11 @@ export function SavesList({ filter: pinned, navigationTitle, searchText: initial
   const data = useMemo(() => uniqueById(saves.data ?? NONE), [saves.data]);
 
   const all = useMemo(() => [...recentSaves, ...data], [recentSaves, data]);
-  const icons = useThumbnails(all, "small");
+  const { paths: icons, retry: retryIcons } = useThumbnails(all, "small");
   const selected = selectedId?.startsWith(RECENT_PREFIX)
     ? recentSaves.find((save) => `${RECENT_PREFIX}${save.id}` === selectedId)
     : (data.find((save) => save.id === selectedId) ?? data[0]);
-  const previews = useThumbnails(
+  const { paths: previews, retry: retryPreviews } = useThumbnails(
     useMemo(() => (selected ? [selected] : []), [selected]),
     "medium",
   );
@@ -108,6 +108,8 @@ export function SavesList({ filter: pinned, navigationTitle, searchText: initial
   );
 
   function refresh() {
+    retryIcons();
+    retryPreviews();
     saves.revalidate();
     if (showRecents) recents.revalidate();
     lookups.revalidate();

@@ -15,10 +15,6 @@ import { useLookups } from "./lib/library";
 import { uniqueById } from "./lib/pages";
 import { thumbnailKey, useThumbnails } from "./lib/thumbnails";
 
-interface MediaPreferences {
-  columns?: string;
-}
-
 const PAGE_SIZE = 60;
 const NONE: ApiSave[] = [];
 
@@ -37,7 +33,7 @@ function loadMedia(input: ApiLibraryQueryInput | null) {
 }
 
 export default function Command(props: LaunchProps) {
-  const columns = Number(getPreferenceValues<MediaPreferences>().columns) || 5;
+  const columns = Number(getPreferenceValues<Preferences.SearchMedia>().columns) || 5;
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const [stored, setStored] = useCachedState("media-filter", encodeFilter({ kind: "media", types: TYPES[0].types }));
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -48,11 +44,16 @@ export default function Command(props: LaunchProps) {
   const input = queryFor(filter, searchText, []);
   const media = useCachedPromise(loadMedia, [input], { keepPreviousData: true });
   const data = useMemo(() => uniqueById(media.data ?? NONE), [media.data]);
-  const thumbnails = useThumbnails(data, "medium");
+  const { paths: thumbnails, retry: retryThumbnails } = useThumbnails(data, "medium");
   const selected = data.find((save) => save.id === selectedId) ?? data[0];
   const quickLook = useQuickLook(selected);
   const editor = useMemo(() => saveEditor(media.mutate), [media.mutate]);
   const failed = media.error && !data.length ? toError(media.error) : null;
+
+  function refresh() {
+    retryThumbnails();
+    media.revalidate();
+  }
 
   return (
     <Grid
@@ -80,7 +81,7 @@ export default function Command(props: LaunchProps) {
       }
     >
       {failed ? (
-        <ProblemView grid error={failed} onRetry={media.revalidate} />
+        <ProblemView grid error={failed} onRetry={refresh} />
       ) : (
         <Grid.EmptyView
           icon={Icon.Image}
@@ -104,7 +105,7 @@ export default function Command(props: LaunchProps) {
                 editor={editor}
                 tags={lookups.tags}
                 folders={lookups.folders}
-                onRefresh={media.revalidate}
+                onRefresh={refresh}
                 quickLook={selected?.id === save.id ? quickLook?.path : undefined}
               />
             }

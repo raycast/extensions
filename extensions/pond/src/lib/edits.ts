@@ -23,9 +23,9 @@ interface Edit {
 
 export interface SaveEditor {
   toggleTag(save: ApiSave, tag: string): Promise<void>;
-  addTags(save: ApiSave, tags: string[]): Promise<void>;
+  addTags(save: ApiSave, tags: string[]): Promise<boolean>;
   toggleFolder(save: ApiSave, folder: { id: string; name: string }): Promise<void>;
-  setNote(save: ApiSave, note: string): Promise<void>;
+  setNote(save: ApiSave, note: string): Promise<boolean>;
   setRating(save: ApiSave, rating: number): Promise<void>;
   trash(save: ApiSave): Promise<void>;
   restore(save: ApiSave): Promise<void>;
@@ -42,8 +42,10 @@ export function saveEditor(mutate: SavesMutate, options: { inTrash?: boolean } =
       });
       toast.style = Toast.Style.Success;
       toast.title = edit.done;
+      return true;
     } catch (error) {
       failToast(toast, toError(error), edit.failed);
+      return false;
     }
   }
 
@@ -62,16 +64,16 @@ export function saveEditor(mutate: SavesMutate, options: { inTrash?: boolean } =
   }
 
   return {
-    toggleTag(save, tag) {
+    async toggleTag(save, tag) {
       const has = save.tags.some((item) => item.toLowerCase() === tag.toLowerCase());
-      return has ? editTags(save, [], [tag]) : editTags(save, [tag], []);
+      await (has ? editTags(save, [], [tag]) : editTags(save, [tag], []));
     },
     addTags(save, tags) {
       return editTags(save, tags, []);
     },
-    toggleFolder(save, folder) {
+    async toggleFolder(save, folder) {
       const has = save.folderIds.includes(folder.id);
-      return apply({
+      await apply({
         save,
         busy: has ? "Removing from Folder" : "Adding to Folder",
         done: has ? `Removed from ${folder.name}` : `Added to ${folder.name}`,
@@ -100,8 +102,8 @@ export function saveEditor(mutate: SavesMutate, options: { inTrash?: boolean } =
         change: (item) => ({ ...item, note: value }),
       });
     },
-    setRating(save, rating) {
-      return apply({
+    async setRating(save, rating) {
+      await apply({
         save,
         busy: "Rating",
         done: rating ? `Rated ${rating} of 5` : "Cleared Rating",
@@ -118,7 +120,7 @@ export function saveEditor(mutate: SavesMutate, options: { inTrash?: boolean } =
         primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
       });
       if (!confirmed) return;
-      return apply({
+      await apply({
         save,
         busy: "Moving to Trash",
         done: "Moved to Trash",
@@ -127,8 +129,8 @@ export function saveEditor(mutate: SavesMutate, options: { inTrash?: boolean } =
         change: () => null,
       });
     },
-    restore(save) {
-      return apply({
+    async restore(save) {
+      await apply({
         save,
         busy: "Restoring",
         done: "Restored",

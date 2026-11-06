@@ -2,11 +2,6 @@ import { getApplications, getPreferenceValues } from "@raycast/api";
 import { PondApi, PondApiError } from "pond-api";
 import { PondProblem, supportsApi } from "./problems";
 
-interface Preferences {
-  token: string;
-  baseUrl?: string;
-}
-
 const DEFAULT_BASE_URL = "http://127.0.0.1:41610/api/v2";
 const BUNDLE_ID = "so.pond.desktop";
 const TIMEOUT = 60_000;

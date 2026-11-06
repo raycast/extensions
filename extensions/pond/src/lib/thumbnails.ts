@@ -2,7 +2,7 @@ import { mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { environment } from "@raycast/api";
 import type { ApiSave, ApiThumbnailSize } from "pond-api";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { pond } from "../api/client";
 
 const EXTENSIONS = new Map([
@@ -95,10 +95,13 @@ export async function downloadThumbnail(save: Keyed, size: ApiThumbnailSize): Pr
   return download;
 }
 
-/** Maps thumbnail keys to a cached path, `null` for no image, or nothing while loading. */
-export function useThumbnails(saves: readonly Keyed[], size: ApiThumbnailSize): ReadonlyMap<string, string | null> {
+/** Cached paths and a refresh action for missing images. Missing keys are still loading. */
+export function useThumbnails(saves: readonly Keyed[], size: ApiThumbnailSize) {
   const [paths, setPaths] = useState<ReadonlyMap<string, string | null> | null>(null);
   const requested = useRef(new Set<string>());
+  const retry = useCallback(() => {
+    setPaths((current) => (current ? new Map([...current].filter(([, path]) => path !== null)) : null));
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -125,11 +128,12 @@ export function useThumbnails(saves: readonly Keyed[], size: ApiThumbnailSize): 
       for (let save = queue.shift(); save !== undefined; save = queue.shift()) {
         const target = save;
         const path = await downloadThumbnail(target, size).catch(() => null);
+        requested.current.delete(thumbnailKey(target));
         setPaths((current) => new Map(current ?? []).set(thumbnailKey(target), path));
       }
     }
     for (let worker = 0; worker < CONCURRENCY; worker += 1) void work();
   }, [saves, paths, size]);
 
-  return paths ?? new Map();
+  return { paths: paths ?? new Map<string, string | null>(), retry };
 }

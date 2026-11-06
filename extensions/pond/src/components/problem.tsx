@@ -8,9 +8,9 @@ import {
   List,
   open,
   openExtensionPreferences,
-  showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { type PondProblem, type ProblemKind, problemCopy, problemOf } from "../api/problems";
 import { DOWNLOAD_URL, LIBRARY_LINK, TOKEN_SETTINGS_LINK } from "../lib/links";
 
@@ -123,6 +123,11 @@ function toastAction(kind: ProblemKind): Toast.ActionOptions | undefined {
 }
 
 export async function showFailure(error: Error, title: string): Promise<void> {
-  const toast = await showToast({ style: Toast.Style.Failure, title });
-  failToast(toast, error, title);
+  const problem = problemOf(error);
+  const copy = problemCopy(problem);
+  await showFailureToast(error, {
+    title: problem.kind === "failed" ? title : copy.title,
+    message: copy.description,
+    primaryAction: toastAction(problem.kind),
+  });
 }

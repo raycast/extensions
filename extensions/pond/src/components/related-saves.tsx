@@ -25,15 +25,21 @@ export function RelatedSaves({ save }: { save: ApiSave }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const lookups = useLookups();
   const data = related.data ?? NONE;
-  const icons = useThumbnails(data, "small");
+  const { paths: icons, retry: retryIcons } = useThumbnails(data, "small");
   const selected = data.find((item) => item.id === selectedId) ?? data[0];
-  const previews = useThumbnails(
+  const { paths: previews, retry: retryPreviews } = useThumbnails(
     useMemo(() => (selected ? [selected] : []), [selected]),
     "medium",
   );
   const quickLook = useQuickLook(selected);
   const editor = useMemo(() => saveEditor(related.mutate), [related.mutate]);
   const failed = related.error && !data.length ? toError(related.error) : null;
+
+  function refresh() {
+    retryIcons();
+    retryPreviews();
+    related.revalidate();
+  }
 
   return (
     <List
@@ -44,7 +50,7 @@ export function RelatedSaves({ save }: { save: ApiSave }) {
       onSelectionChange={setSelectedId}
     >
       {failed ? (
-        <ProblemView error={failed} onRetry={related.revalidate} />
+        <ProblemView error={failed} onRetry={refresh} />
       ) : (
         <List.EmptyView
           icon={Icon.Stars}
@@ -63,7 +69,7 @@ export function RelatedSaves({ save }: { save: ApiSave }) {
           quickLook={selected?.id === item.id ? quickLook : undefined}
           showingDetail={showingDetail}
           onToggleDetail={() => setShowingDetail(!showingDetail)}
-          onRefresh={related.revalidate}
+          onRefresh={refresh}
         />
       ))}
     </List>

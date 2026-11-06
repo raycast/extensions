@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, type LaunchProps, showToast, Toast, useNavigation } from "@raycast/api";
-import { createDeeplink } from "@raycast/utils";
+import { createDeeplink, useForm } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { toError } from "./api/problems";
 import { CaptureProgress } from "./components/capture-progress";
@@ -7,10 +7,6 @@ import { showFailure } from "./components/problem";
 import { enqueue, findUrl, savedTitle, type UrlOrigin } from "./lib/capture";
 import { useLookups } from "./lib/library";
 import { cleanTags, parseTags, parseWebUrl } from "./lib/urls";
-
-interface SaveUrlArguments {
-  url?: string;
-}
 
 interface SaveUrlContext {
   tags?: string[];
@@ -34,32 +30,49 @@ const ORIGINS = {
 } satisfies Record<UrlOrigin, string>;
 
 export default function Command(
-  props: LaunchProps<{ arguments: SaveUrlArguments; draftValues: SaveUrlValues; launchContext: SaveUrlContext }>,
+  props: LaunchProps<{ arguments: Arguments.SaveUrl; draftValues: SaveUrlValues; launchContext: SaveUrlContext }>,
 ) {
   const { push } = useNavigation();
   const lookups = useLookups();
   const draft = props.draftValues;
   const context = props.launchContext;
-  const [url, setUrl] = useState(props.arguments.url?.trim() || draft?.url || "");
+  const initialUrl = props.arguments.url?.trim() || draft?.url || "";
   const [origin, setOrigin] = useState<UrlOrigin | null>(null);
-  const [urlError, setUrlError] = useState<string>();
-  const [tags, setTags] = useState<string[]>(draft?.tags ?? context?.tags ?? []);
-  const [newTags, setNewTags] = useState(draft?.newTags ?? "");
-  const [folderId, setFolderId] = useState(draft?.folderId ?? context?.folderId ?? NO_FOLDER);
-  const [finding, setFinding] = useState(!url);
-  const edited = useRef(Boolean(url));
+  const [finding, setFinding] = useState(!initialUrl);
+  const edited = useRef(Boolean(initialUrl));
   const pending = useRef(false);
+  const { handleSubmit, itemProps, values, setValue } = useForm<SaveUrlValues>({
+    initialValues: {
+      url: initialUrl,
+      tags: draft?.tags ?? context?.tags ?? [],
+      newTags: draft?.newTags ?? "",
+      folderId: draft?.folderId ?? context?.folderId ?? NO_FOLDER,
+    },
+    validation: {
+      url: (value) =>
+        parseWebUrl(value) ? undefined : "Enter a full web address that starts with http:// or https://.",
+      newTags: (value) => {
+        try {
+          cleanTags([...values.tags, ...parseTags(value)]);
+        } catch (error) {
+          return toError(error).message;
+        }
+      },
+    },
+    onSubmit: submit,
+  });
+  const { tags, newTags, folderId } = values;
 
   useEffect(() => {
     if (edited.current) return;
     void findUrl()
       .then((found) => {
         if (!found || edited.current) return;
-        setUrl(found.url);
+        setValue("url", found.url);
         setOrigin(found.origin);
       })
       .finally(() => setFinding(false));
-  }, []);
+  }, [setValue]);
 
   const choices = [
     ...new Set([
@@ -75,20 +88,24 @@ export default function Command(
     return cleanTags([...tags, ...parseTags(newTags)]);
   }
 
-  async function submit() {
-    if (pending.current) return;
-    const target = parseWebUrl(url);
-    if (!target) return setUrlError("Enter a full web address that starts with http:// or https://.");
+  async function submit(submitted: SaveUrlValues) {
+    if (pending.current) return false;
+    const target = parseWebUrl(submitted.url);
+    if (!target) return false;
     pending.current = true;
     try {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Pond" });
-      const options = { tags: allTags(), folderId: folderId || undefined };
+      const options = {
+        tags: cleanTags([...submitted.tags, ...parseTags(submitted.newTags)]),
+        folderId: submitted.folderId || undefined,
+      };
       const result = await enqueue(target, options);
       const title = savedTitle(result, options);
       await toast.hide();
       push(<CaptureProgress result={result} url={target} title={title} />);
     } catch (error) {
       await showFailure(toError(error), "Couldn't save the URL");
+      return false;
     } finally {
       pending.current = false;
     }
@@ -108,7 +125,7 @@ export default function Command(
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save to Pond" icon={Icon.SaveDocument} onSubmit={submit} />
+          <Action.SubmitForm title="Save to Pond" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
           <Action.CreateQuicklink
             title="Create Quicklink with These Tags"
             quicklink={{
@@ -124,38 +141,28 @@ export default function Command(
       }
     >
       <Form.TextField
-        id="url"
+        {...itemProps.url}
         title="URL"
         placeholder="https://"
-        value={url}
-        error={urlError}
         info={origin ? ORIGINS[origin] : undefined}
         onChange={(value) => {
           edited.current = true;
-          setUrl(value);
+          itemProps.url.onChange?.(value);
           setOrigin(null);
-          setUrlError(undefined);
-        }}
-        onBlur={(event) => {
-          const value = event.target.value?.trim();
-          if (value && !parseWebUrl(value))
-            setUrlError("Enter a full web address that starts with http:// or https://.");
         }}
       />
-      <Form.TagPicker id="tags" title="Tags" value={tags} onChange={setTags} placeholder="Pick tags">
+      <Form.TagPicker {...itemProps.tags} title="Tags" placeholder="Pick tags">
         {choices.map((tag) => (
           <Form.TagPicker.Item key={tag} value={tag} title={tag} icon={Icon.Tag} />
         ))}
       </Form.TagPicker>
       <Form.TextField
-        id="newTags"
+        {...itemProps.newTags}
         title="New Tags"
         placeholder="design, reference"
         info="Separate tags with commas."
-        value={newTags}
-        onChange={setNewTags}
       />
-      <Form.Dropdown id="folderId" title="Folder" value={folderId} onChange={setFolderId}>
+      <Form.Dropdown {...itemProps.folderId} title="Folder">
         <Form.Dropdown.Item value={NO_FOLDER} title="No Folder" icon={Icon.Tray} />
         {folderId && !lookups.folderById.has(folderId) && (
           <Form.Dropdown.Item value={folderId} title="Folder" icon={Icon.Folder} />

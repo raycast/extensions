@@ -9,7 +9,7 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { pond } from "./api/client";
 import { problemCopy, problemOf, toError } from "./api/problems";
 import { kindIcon } from "./components/save-item";
@@ -30,7 +30,13 @@ async function loadSummary() {
 }
 
 function run(name: string) {
-  return () => launchCommand({ name, type: LaunchType.UserInitiated });
+  return async () => {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated });
+    } catch (error) {
+      await showFailureToast(error, { title: "Couldn't open the command" });
+    }
+  };
 }
 
 export default function Command() {

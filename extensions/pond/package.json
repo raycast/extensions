@@ -292,6 +292,7 @@
       "description": "Change this only if you changed the port in Pond.",
       "type": "textfield",
       "required": false,
+      "placeholder": "http://127.0.0.1:41610/api/v2",
       "default": "http://127.0.0.1:41610/api/v2"
     }
   ],
