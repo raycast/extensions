@@ -405,12 +405,12 @@ function generateFullCalendarSvg(calendarData: CalendarCell[], isDark: boolean) 
 
     // 公历数字文本
     currentMonthText: isDark ? "#FFFFFF" : "#1a202c",
-    otherMonthText: isDark ? "#4A5568" : "#a0aec0",
+    otherMonthText: isDark ? "#4A5568" : "rgba(0, 0, 0, 0.35)",
     weekendText: isDark ? "#FF4D4F" : "#EB3434",
 
     // 农历文本
     currentMonthLunar: isDark ? "#A0AEC0" : "#718096",
-    otherMonthLunar: isDark ? "#4A5568" : "#cbd5e0",
+    otherMonthLunar: isDark ? "#4A5568" : "rgba(0, 0, 0, 0.25)",
     weekendLunar: isDark ? "#FF4D4F" : "#EB3434",
 
     // 调休（班）日文本
@@ -542,7 +542,7 @@ function generateFullCalendarSvg(calendarData: CalendarCell[], isDark: boolean) 
     })
     .join("");
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" data-theme="${isDark ? "dark" : "light"}">
     ${headerSvg}
     ${cellsSvg}
   </svg>`;
