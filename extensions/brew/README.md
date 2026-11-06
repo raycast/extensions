@@ -32,6 +32,25 @@ Search and manage your brew casks and formulae from [Raycast](https://raycast.co
 
 For more details, see the [Homebrew 6.0 release notes](https://brew.sh/2026/06/11/homebrew-6.0.0/).
 
+## Homebrew Options
+
+The extension runs `brew` without your shell's environment, so `HOMEBREW_*` variables set in
+`~/.zshrc` don't reach it. Set them in `~/.homebrew/brew.env` instead. For example, to install casks
+into `~/Applications`:
+
+```sh
+mkdir -p ~/.homebrew
+echo 'HOMEBREW_CASK_OPTS=--appdir=~/Applications' >> ~/.homebrew/brew.env
+```
+
+If your shell sets `XDG_CONFIG_HOME`, Terminal's `brew` reads `$XDG_CONFIG_HOME/homebrew/brew.env`
+instead. Raycast doesn't get `XDG_CONFIG_HOME` from your shell, so the extension's `brew` still reads
+`~/.homebrew/brew.env`. To use one file for both, move your options to
+`$(brew --prefix)/etc/homebrew/brew.env`, after creating its folder with
+`mkdir -p "$(brew --prefix)/etc/homebrew"`.
+
+Adopt Apps looks for apps in your cask install folder, `/Applications` and `~/Applications`.
+
 ## Performance
 
 This extension uses several optimizations to provide a fast experience:

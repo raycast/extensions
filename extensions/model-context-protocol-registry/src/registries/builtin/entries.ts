@@ -7,6 +7,19 @@ const METABRAIN_DB_PATH = join(homedir(), ".metabrain.db");
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "video-dept-ai",
+    title: "Video Dept. AI",
+    description:
+      "Plan a corporate or event video with VIDEO DEPT., a Fort Lauderdale studio: see posted prices, draft a script, send a brief and your brand guidelines, and book a free call with Nikita.",
+    icon: "https://agents.videodepartment.org/favicon.png",
+    homepage: "https://videodepartment.org/ai-assistant",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://agents.videodepartment.org/mcp"],
+    },
+    remoteUrl: "https://agents.videodepartment.org/mcp",
+  },
+  {
     name: "sofya",
     title: "Sofya",
     description:
@@ -212,6 +225,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://www.affix-io.com/mcp/"],
     },
     remoteUrl: "https://www.affix-io.com/mcp/",
+  },
+  {
+    name: "agent-outbox",
+    title: "Agent Outbox",
+    description:
+      "Let your AI assistant post to your Telegram private chat, groups and channels through the Agent Outbox bot: summaries, alerts, drafts and job-done notifications from chats, routines and coding agents. Pick a destination by name or use your default; Markdown is converted to Telegram formatting and long text is split into up to 10 messages. Posting rights are re-checked before every send, and message text is relayed, not stored. 3 tools (send_to_telegram, list_destinations, get_usage). Hosted remote Streamable HTTP server at https://outbox.roxinbox.io/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in (dynamic client registration and PKCE) with a 6-digit code from @agentoutbox_bot, no bot token or API key. Free plan: 50 messages a day. Not affiliated with Telegram.",
+    icon: "https://outbox.roxinbox.io/icon.png",
+    homepage: "https://outbox.roxinbox.io",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://outbox.roxinbox.io/mcp"],
+    },
+    remoteUrl: "https://outbox.roxinbox.io/mcp",
   },
   {
     name: "agenticwebscore",
@@ -930,6 +956,19 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "mcp-remote", "https://www.edgechat.ai/mcp"],
     },
+  },
+  {
+    name: "embers",
+    title: "Embers",
+    description:
+      "Work the warm leads Embers finds in LinkedIn engagement (your posts and comments, profiles you watch and keywords you track) from your AI agent: today's queue, lead search and full lead details, opener drafts grounded in what the person wrote, status, notes and follow-up dates, ICP changes with a preview and undo, watched profiles and tracked keywords, post performance, and sending leads to Slack, HubSpot, Salesforce, Pipedrive, Attio, Notion, Google Sheets or a connected outreach tool. Embers never posts, messages or connects on LinkedIn, and every action that spends credits or affects other leads asks first. 19 tools. Hosted remote Streamable HTTP server at https://mcp.useembers.com/mcp with a direct HTTP connection in Raycast and an `mcp-remote` fallback for other clients; OAuth 2.1 sign-in with dynamic client registration and PKCE, no API key to paste. Needs a paid Embers plan.",
+    icon: "https://useembers.com/web-app-manifest-512x512.png",
+    homepage: "https://useembers.com/help/integrations/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.useembers.com/mcp"],
+    },
+    remoteUrl: "https://mcp.useembers.com/mcp",
   },
   {
     name: "eventsend",

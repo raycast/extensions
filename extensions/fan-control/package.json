@@ -5,6 +5,9 @@
   "description": "View and control your Mac's fan RPM (Apple Silicon) via smctl.",
   "icon": "icon.png",
   "author": "samuelbelo",
+  "contributors": [
+    "0xAdriaTorralba"
+  ],
   "license": "MIT",
   "categories": [
     "System"
@@ -38,6 +41,33 @@
       "subtitle": "Fan Control",
       "description": "Return fan control to macOS (automatic mode).",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-fans",
+      "title": "Toggle Fan Speed",
+      "description": "Switch all fans between macOS control (auto) and full speed in one keystroke. Its subtitle shows the current state and what it will switch to.",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "toggleProfile",
+          "type": "dropdown",
+          "title": "Manual Profile",
+          "description": "Profile used when the toggle leaves auto mode.",
+          "required": false,
+          "default": "full",
+          "data": [
+            {
+              "title": "Full Speed",
+              "value": "full"
+            },
+            {
+              "title": "Quiet",
+              "value": "quiet"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [

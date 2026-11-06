@@ -1,9 +1,10 @@
+import { failToast } from "@chrismessina/raycast-kit";
 import { useRef, useState } from "react";
-import { Action, ActionPanel, Clipboard, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { fetchInvestments } from "../lib/api";
 import { day, money } from "../lib/format";
-import { host } from "../lib/meta";
+import { favicon, host } from "../lib/meta";
 import type { Investment, InvestmentsQuery } from "../lib/types";
 import { OrganizationView, PersonView } from "./entities";
 import { ErrorEmptyView } from "./error-view";
@@ -16,7 +17,7 @@ const ROLES: Record<string, string> = {
   deal_lead: "Deal lead",
 };
 
-const humanize = (value: string) => {
+export const humanize = (value: string) => {
   const text = value.replace(/_plus$/, "+").replace(/_/g, " ");
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
@@ -75,15 +76,7 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
           if (run.current === mine) toast.hide().catch((error) => console.error("toast.hide failed", error));
           return { data: rows, hasMore: next != null, cursor: next ?? undefined };
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          toast.style = Toast.Style.Failure;
-          toast.title = `Couldn't load ${noun.toLowerCase()}`;
-          toast.message = message;
-          toast.primaryAction = {
-            title: "Copy Error",
-            shortcut: Keyboard.Shortcut.Common.Copy,
-            onAction: () => Clipboard.copy(message),
-          };
+          failToast(toast, error, { title: `Couldn't load ${noun.toLowerCase()}` });
           throw error;
         }
       },
@@ -189,7 +182,7 @@ export function InvestmentsView({ query, name }: { query: InvestmentsQuery; name
             {inv.sourceUrls.length ? (
               <ActionPanel.Submenu title="Sources" icon={Icon.Link}>
                 {inv.sourceUrls.map((u) => (
-                  <Action.OpenInBrowser key={u} title={host(u)} url={u} />
+                  <Action.OpenInBrowser key={u} title={host(u)} url={u} icon={favicon(u)} />
                 ))}
               </ActionPanel.Submenu>
             ) : null}
