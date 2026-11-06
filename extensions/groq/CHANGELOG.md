@@ -1,5 +1,10 @@
 # Groq Changelog
 
+## [Fix Streaming Responses] - 2026-11-04
+
+- Buffer streaming updates to prevent long responses from freezing text commands and AI Chat.
+- Cancel requests when leaving a view and preserve partial answers when a request fails.
+
 ## [Fix Empty and Failed Responses] - 2026-11-03
 
 - Fix every command failing with "Unexpected error" when Response Streaming is enabled

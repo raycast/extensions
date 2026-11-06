@@ -164,19 +164,28 @@ export const LimitEntrySchema = z.object({
     .nullish(),
 });
 
+// Plans gain and lose limit windows over time, so a window that is absent or
+// malformed degrades to null instead of failing the whole response.
+const OptionalLimitWindowSchema = LimitWindowSchema.nullish().catch(null);
+
 export const UsageLimitDataSchema = z.object({
-  five_hour: LimitWindowSchema,
-  seven_day: LimitWindowSchema,
-  seven_day_sonnet: LimitWindowSchema.nullish(),
-  seven_day_opus: LimitWindowSchema.nullish(),
-  limits: z.array(LimitEntrySchema).nullish(),
+  five_hour: OptionalLimitWindowSchema,
+  seven_day: OptionalLimitWindowSchema,
+  seven_day_sonnet: OptionalLimitWindowSchema,
+  seven_day_opus: OptionalLimitWindowSchema,
+  limits: z
+    .array(LimitEntrySchema.nullable().catch(null))
+    .transform((entries) => entries.filter((entry): entry is z.infer<typeof LimitEntrySchema> => entry !== null))
+    .nullish()
+    .catch(null),
   extra_usage: z
     .object({
       is_enabled: z.boolean(),
       used_credits: z.number().nullable(),
       monthly_limit: z.number().nullable(),
     })
-    .nullish(),
+    .nullish()
+    .catch(null),
 });
 
 export const BlockSchema = z.object({

@@ -1,7 +1,19 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  confirmAlert,
+  Icon,
+  List,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { createR2Client } from "./utils/r2-client";
-import { buildPublicUrl } from "./utils/r2-url";
+import { formatPublicLinks, getPublicBaseUrl } from "./utils/r2-url";
 import {
   deleteR2Object,
   deleteR2Objects,
@@ -13,7 +25,6 @@ import {
 } from "./utils/r2-objects";
 import { getMimeType, isImageMimeType } from "./utils/mime-types";
 import { getPreviewUrl } from "./utils/r2-preview";
-import { escapeMarkdownAlt } from "./utils/text-escaping";
 
 function FilePreviewDetail({ fileKey }: { fileKey: string }) {
   const contentType = getMimeType(fileKey);
@@ -41,9 +52,24 @@ function FilePreviewDetail({ fileKey }: { fileKey: string }) {
 
 function FolderView({ prefix }: { prefix: string }) {
   const { push } = useNavigation();
+  const { customDomain } = createR2Client();
   const { data, isLoading, revalidate } = usePromise(listR2Entries, [prefix]);
   const entries = data?.entries ?? [];
-  const { endpoint, bucketName, customDomain } = createR2Client();
+
+  async function copyLink(entry: FileEntry, format: "url" | "markdown" | "html") {
+    let publicBaseUrl: string;
+    try {
+      publicBaseUrl = getPublicBaseUrl(customDomain);
+    } catch (error) {
+      await showFailureToast(error, {
+        title: "Public Base URL required",
+        primaryAction: { title: "Open Preferences", onAction: openExtensionPreferences },
+      });
+      return;
+    }
+    await Clipboard.copy(formatPublicLinks(entry.key, publicBaseUrl)[format]);
+    await showToast({ style: Toast.Style.Success, title: "Copied to clipboard" });
+  }
 
   async function handleDelete(entry: FileEntry) {
     const confirmed = await confirmAlert({
@@ -73,15 +99,19 @@ function FolderView({ prefix }: { prefix: string }) {
     try {
       keys = await listAllKeysUnderPrefix(entry.prefix);
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to list folder contents" });
+      countingToast.style = Toast.Style.Failure;
+      countingToast.title = "Failed to list folder contents";
+      countingToast.message = error instanceof Error ? error.message : String(error);
+      return;
+    }
+
+    if (keys.length === 0) {
+      countingToast.style = Toast.Style.Success;
+      countingToast.title = "Folder is empty";
+      countingToast.message = "Nothing to delete";
       return;
     }
     await countingToast.hide();
-
-    if (keys.length === 0) {
-      await showToast({ style: Toast.Style.Failure, title: "Folder is empty", message: "Nothing to delete" });
-      return;
-    }
 
     const fileWord = keys.length === 1 ? "file" : "files";
     const confirmed = await confirmAlert({
@@ -150,15 +180,14 @@ function FolderView({ prefix }: { prefix: string }) {
             detail={<FilePreviewDetail fileKey={entry.key} />}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy URL"
-                  content={buildPublicUrl(entry.key, { endpoint, bucketName, customDomain })}
-                />
-                <Action.CopyToClipboard
+                <Action title="Copy URL" icon={Icon.Link} onAction={() => copyLink(entry, "url")} />
+                <Action
                   title="Copy Markdown"
-                  content={`![${escapeMarkdownAlt(entry.name)}](${buildPublicUrl(entry.key, { endpoint, bucketName, customDomain })})`}
+                  icon={Icon.TextDocument}
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  onAction={() => copyLink(entry, "markdown")}
                 />
+                <Action title="Copy HTML" icon={Icon.Code} onAction={() => copyLink(entry, "html")} />
                 <Action
                   title="Delete File"
                   icon={Icon.Trash}
