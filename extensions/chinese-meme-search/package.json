@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-meme-search",
   "title": "Meme Search",
-  "description": "搜索腾讯／搜狗输入法表情，支持 Raycast 后备搜索和回车复制。",
+  "description": "通过自定义 JSON 数据源搜索表情包，在 Raycast 中预览并回车复制图片。",
   "icon": "meme-icon-transparent.png",
   "author": "uncaughtape",
   "license": "MIT",
@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Memes",
+      "title": "Meme Search",
       "description": "搜索中文表情包并复制图片",
       "mode": "view",
       "keywords": [
@@ -38,7 +38,6 @@
     "dev": "ray develop",
     "build": "ray build",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "publish": "ray publish",
     "lint": "ray lint"
   },
@@ -60,7 +59,7 @@
       "type": "textfield",
       "required": false,
       "title": "Custom Source JSON",
-      "description": "留空使用腾讯／搜狗；配置格式见 README。不要在此填写密钥。"
+      "description": "配置获准接入的 GET JSON 图片接口，格式见 README。不要在此填写密钥。"
     }
   ]
 }

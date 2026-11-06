@@ -9,19 +9,14 @@ import {
   environment,
   showToast,
   getPreferenceValues,
+  openExtensionPreferences,
   type LaunchProps,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import {
-  downloadImage,
-  searchPage,
-  searchUrl,
-  type Meme,
-  type SearchPage,
-} from "./source";
+import { downloadImage, type Meme, type SearchPage } from "./source";
 
 async function copyImage(item: Meme) {
   const toast = await showToast({
@@ -55,27 +50,18 @@ export default function Command(
 
 function Results({ keyword }: { keyword: string }) {
   const { customSource } = getPreferenceValues<Preferences>();
-  const sourceName = customSource?.trim() ? "自定义源" : "腾讯／搜狗";
-  const [pages, setPages] = useState<string[]>([]);
+  const configured = Boolean(customSource?.trim());
+  const [page, setPage] = useState(1);
   const [result, setResult] = useState<SearchPage>({ items: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const url = pages.at(-1) || (keyword.trim() ? searchUrl(keyword) : "");
   useEffect(() => {
     const controller = new AbortController();
     setResult({ items: [] });
     setError("");
-    setLoading(Boolean(url));
-    if (url) {
-      (customSource?.trim()
-        ? searchCustom(
-            customSource,
-            keyword,
-            pages.length || 1,
-            controller.signal,
-          )
-        : searchPage(url, controller.signal)
-      )
+    setLoading(configured && Boolean(keyword));
+    if (configured && keyword) {
+      searchCustom(customSource!, keyword, page, controller.signal)
         .then((data) => {
           if (!controller.signal.aborted) setResult(data);
         })
@@ -88,26 +74,24 @@ function Results({ keyword }: { keyword: string }) {
         });
     }
     return () => controller.abort();
-  }, [url, customSource, keyword, pages.length]);
+  }, [customSource, configured, keyword, page]);
 
   const navigation = (
-    <ActionPanel.Section title={`${sourceName} · 第 ${pages.length || 1} 页`}>
+    <ActionPanel.Section title={`自定义源 · 第 ${page} 页`}>
       {result.next && (
         <Action
           title="下一页"
           icon={Icon.ArrowRight}
           shortcut={{ modifiers: ["cmd"], key: "]" }}
-          onAction={() =>
-            setPages([...(pages.length ? pages : [url]), result.next!])
-          }
+          onAction={() => setPage(page + 1)}
         />
       )}
-      {pages.length > 1 && (
+      {page > 1 && (
         <Action
           title="上一页"
           icon={Icon.ArrowLeft}
           shortcut={{ modifiers: ["cmd"], key: "[" }}
-          onAction={() => setPages(pages.slice(0, -1))}
+          onAction={() => setPage(page - 1)}
         />
       )}
     </ActionPanel.Section>
@@ -121,44 +105,61 @@ function Results({ keyword }: { keyword: string }) {
       filtering={false}
       searchText=""
       onSearchTextChange={() => {}}
-      navigationTitle={`${keyword} · ${sourceName} · 第 ${pages.length || 1} 页`}
       searchBarPlaceholder="方向键选图，回车复制；Esc 返回 Raycast 搜索"
     >
       <Grid.EmptyView
         title={
-          error
-            ? "搜索失败"
-            : keyword.trim()
-              ? "没有找到表情包"
-              : "搜索中文表情包"
+          !configured
+            ? "请先配置表情包源"
+            : error
+              ? "搜索失败"
+              : keyword.trim()
+                ? "没有找到表情包"
+                : "搜索中文表情包"
         }
         description={
-          error ||
-          (keyword.trim()
-            ? "按 Esc 返回 Raycast，换一个关键词搜索"
-            : "输入关键词开始搜索 · 图片来自 腾讯／搜狗")
+          !configured
+            ? "在扩展设置中填写获准使用的 Custom Source JSON，格式见扩展说明"
+            : error ||
+              (keyword.trim()
+                ? "按 Esc 返回 Raycast，换一个关键词搜索"
+                : "输入关键词开始搜索")
         }
-        actions={<ActionPanel>{navigation}</ActionPanel>}
+        actions={
+          <ActionPanel>
+            <Action
+              title="配置表情包源"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+            />
+            {navigation}
+          </ActionPanel>
+        }
       />
-      {result.items.map((item) => (
-        <Grid.Item
-          key={item.url}
-          content={item.url}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <Action
-                title="复制图片"
-                icon={Icon.Clipboard}
-                onAction={() => copyImage(item)}
-              />
-              <Action.CopyToClipboard title="复制图片链接" content={item.url} />
-              <Action.OpenInBrowser title="查看原图" url={item.pageUrl} />
-              {navigation}
-            </ActionPanel>
-          }
-        />
-      ))}
+      <Grid.Section title={keyword} subtitle={`自定义源 · 第 ${page} 页`}>
+        {result.items.map((item) => (
+          <Grid.Item
+            key={item.url}
+            content={item.url}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="复制图片"
+                  icon={Icon.Clipboard}
+                  onAction={() => copyImage(item)}
+                />
+                <Action.CopyToClipboard
+                  title="复制图片链接"
+                  content={item.url}
+                />
+                <Action.OpenInBrowser title="查看原图" url={item.pageUrl} />
+                {navigation}
+              </ActionPanel>
+            }
+          />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }
