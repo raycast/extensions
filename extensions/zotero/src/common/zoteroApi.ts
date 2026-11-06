@@ -14,17 +14,6 @@ import { loadInteractions } from "./interactions";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
-export interface Preferences {
-  zotero_path: string;
-  use_bibtex?: boolean;
-  bibtex_search?: boolean;
-  bibtex_path?: string;
-  csl_style?: string;
-  cache_period?: string;
-  quote_pdf_path?: boolean;
-  order_by_opens?: boolean;
-}
-
 // citekey is populated (and thus searchable) when the user either exports
 // BibTeX or explicitly opts into bibtex-key search.
 function bibtexEnabled(p: Preferences): boolean {

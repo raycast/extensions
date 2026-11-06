@@ -73,6 +73,18 @@ Preferences related to these features are:
 
 ![A screenshot of searching Zotero via Raycast](./metadata/zotero-5.png)
 
+### Custom CSL styles and note output
+
+The default **CSL Source** is **Installed Style**, using the existing **CSL Format** selection. To use another style, select **Custom File** and set **Custom CSL File** to the path of an independent `.csl` file. Paths beginning with `~/` are supported. A dependent style that links to a parent style is not sufficient; use the independent parent file. Files are read locally and are not modified or downloaded.
+
+**Reference Output** defaults to **Bibliography**, including when you select a note-based style. Choose **Note** explicitly to copy or paste the style's citation/note text instead. This requires a note-based CSL style, such as Chicago (full note). Both settings apply to **Copy Reference to Clipboard** and **Paste Reference to App**; BibTeX and citation-key actions are unchanged.
+
+Note output is a standalone first citation. It does not insert a document footnote, track previous notes, or generate ibid./subsequent-note forms. Use your document's footnote command to insert the copied text.
+
+Custom styles honor their own `default-locale` and inline locale overrides. Simplified Chinese (`zh-CN`) and Japanese (`ja-JP`) locale files from the [Citation Style Language project](https://citationstyles.org/) are bundled for custom styles, supplying localized dates and terms such as et-al, volume and issue. Installed styles retain their existing English locale behavior. This does not add full support for every CSL locale or the CSL-M extensions.
+
+For example, a custom style using a text date, short volume/issue labels and an et-al author list can render Chinese text such as `张三等; 13卷; 2期; 2026年10月28日` or Japanese volume/date text such as `13巻; 2号; 2026年10月28日`, according to the style's layout. Existing term or date definitions in the custom style take precedence. See [the locale attribution](assets/locales/README.md) for sources and license details.
+
 ## Features
 
 On launching the application, the most recent references are shown, and results update as you
