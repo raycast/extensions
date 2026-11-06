@@ -6,7 +6,8 @@
   "icon": "spokenly.png",
   "author": "mattiacolombomc",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "itsdanielsultan"
   ],
   "platforms": [
     "macOS"
@@ -85,6 +86,38 @@
       "subtitle": "Spokenly",
       "description": "Trigger one of your Spokenly quick commands",
       "mode": "view"
+    },
+    {
+      "name": "manage-word-replacements",
+      "title": "Manage Word Replacements",
+      "description": "Search your word replacements, add or remove a rule, and copy a JSON backup.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "cliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Spokenly CLI Path",
+          "description": "Optional absolute path to the official Spokenly CLI. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked.",
+          "placeholder": "/usr/local/bin/spokenly"
+        }
+      ]
+    },
+    {
+      "name": "add-word-replacement",
+      "title": "Add Word Replacement",
+      "description": "Add a literal or regular-expression correction (pre-filled from selected text) and verify it was saved.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "cliPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Spokenly CLI Path",
+          "description": "Optional absolute path to the official Spokenly CLI. Otherwise /usr/local/bin/spokenly and /opt/homebrew/bin/spokenly are checked.",
+          "placeholder": "/usr/local/bin/spokenly"
+        }
+      ]
     }
   ],
   "preferences": [
