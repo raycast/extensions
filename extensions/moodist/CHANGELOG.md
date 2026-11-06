@@ -1,6 +1,6 @@
 # Moodist Changelog
 
-## [Windows Support and Grid View] - {PR_MERGE_DATE}
+## [Windows Support and Grid View] - 2026-11-06
 
 - Windows Support: Native background playback with sound mixing, individual and master volume, pause and resume, presets, sleep timers, and AI tools
 - Switch between list and grid layouts with Toggle Layout (`⌘` `L` on macOS, `Ctrl` `L` on Windows), with your layout remembered automatically
